@@ -11,6 +11,7 @@
  */
 package workbench.sql.preparedstatement;
 
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -33,6 +34,14 @@ public class ParameterDefinition
 	private int dataType;
 	private int parameterIndex;
 	private String parameterName;
+
+	/**
+	 * Parameter mode according to 
+	 * ParameterMetaData.parameterModeOut
+	 * ParameterMetaData.parameterModeIn
+	 * ParameterMetaData.parameterModeInOut;
+	 */
+	private int parameterMode = ParameterMetaData.parameterModeUnknown;
 
 	private boolean valueValid = false;
 	private Object value = null;
@@ -118,6 +127,28 @@ public class ParameterDefinition
 
 	public String toString()
 	{
-		return this.parameterName + "=" + this.value;
+		return this.parameterName + "=" + this.value + "(" + parameterIndex + ")";
+	}
+
+	public boolean isOutParameter()
+	{
+		return parameterMode == ParameterMetaData.parameterModeOut || parameterMode == ParameterMetaData.parameterModeInOut;
+	}
+
+	public int getParameterMode()
+	{
+		return parameterMode;
+	}
+	
+	public void setParameterMode(int mode)
+	{
+		if (mode != ParameterMetaData.parameterModeOut && 
+			  mode != ParameterMetaData.parameterModeIn &&
+				mode != ParameterMetaData.parameterModeInOut && 
+				mode != ParameterMetaData.parameterModeUnknown)
+		{
+			throw new IllegalArgumentException("Incorrect parameter mode specified!");
+		}
+		this.parameterMode = mode;
 	}
 }

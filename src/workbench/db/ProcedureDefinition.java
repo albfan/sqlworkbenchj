@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class ProcedureDefinition
 	{
 		return oracleOverloadIndex;
 	}
-	
+
 	public ProcedureDefinition(String name, int type)
 	{
 		procName = name;
@@ -116,7 +117,7 @@ public class ProcedureDefinition
 	{
 		return dbmsProcType;
 	}
-	
+
 	public void setDisplayName(String name)
 	{
 		displayName = name;
@@ -127,7 +128,7 @@ public class ProcedureDefinition
 		if (displayName == null) return procName;
 		return displayName;
 	}
-	
+
 	public String getComment()
 	{
 		return comment;
@@ -143,7 +144,6 @@ public class ProcedureDefinition
 		if (parameterTypes == null)
 		{
 			ProcedureReader reader = con.getMetadata().getProcedureReader();
-			DbMetadata meta = con.getMetadata();
 			try
 			{
 				DataStore ds = reader.getProcedureColumns(this);
@@ -193,7 +193,7 @@ public class ProcedureDefinition
 			return catalog;
 		}
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
-		if (!needParameters) 
+		if (!needParameters)
 		{
 			return getObjectExpression(con);
 		}
@@ -383,7 +383,7 @@ public class ProcedureDefinition
 		StringBuilder call = new StringBuilder(150);
 		CommandTester c = new CommandTester();
 
-		
+
 		StringBuilder paramNames = new StringBuilder(50);
 
 		call.append(c.formatVerb(WbCall.VERB));
@@ -393,7 +393,7 @@ public class ProcedureDefinition
 
 		int numParams = 0;
 		int rows = params.getRowCount();
-		
+
 		for (int i = 0; i < rows; i++)
 		{
 			String type = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
@@ -480,6 +480,16 @@ public class ProcedureDefinition
 		return refTypes.contains(type);
 	}
 
+	public boolean hasOutParameter(DataStore params)
+	{
+		for (int i=0; i < params.getRowCount(); i++)
+		{
+			String resultMode = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			if (resultMode.endsWith("OUT")) return true;
+		}
+		return false;
+	}
+	
 	public static boolean returnsRefCursor(WbConnection conn, DataStore params)
 	{
 		// A function in Postgres that returns a refcursor
@@ -494,6 +504,21 @@ public class ProcedureDefinition
 		return false;
 	}
 
+	public boolean isFunction()
+	{
+		return resultType == DatabaseMetaData.procedureReturnsResult;
+	}
+
+	public boolean isFunction(DataStore params)
+	{
+		for (int i=0; i < params.getRowCount(); i++)
+		{
+			String resultMode = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			if ("RETURN".equals(resultMode)) return true;
+		}
+		return false;
+	}
+	
 	private static enum OracleType
 	{
 		packageType,

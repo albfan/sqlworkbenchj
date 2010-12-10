@@ -48,6 +48,7 @@ public class WbCallOraTest
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
+
 		String tableSql =
 			"create table address (id integer primary key, person_id integer, address_info varchar(100)); \n " +
 			"create table person (id integer primary key, person_name varchar(100)); \n " +
@@ -91,6 +92,29 @@ public class WbCallOraTest
 			"END GET_MAGIC;  \n" +
 			"/";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		sql =
+			"create or replace function get_status(process_status out varchar, error_flag out number, some_value integer) \n" +
+			"return number \n" +
+			"is \n" +
+			"begin \n" +
+			"  process_status := 'FINISHED'; \n" +
+			"  error_flag := -1; \n" +
+			"  return 42; \n" +
+			"end get_status; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		sql =
+			"create or replace function get_answer \n" +
+			"return number \n" +
+			"is \n" +
+			"begin \n" +
+			"  return 42; \n" +
+			"end; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
 }
 
 	@AfterClass
@@ -173,10 +197,91 @@ public class WbCallOraTest
 		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
 		assertEquals(1, procs.size());
 
-		ProcedureDefinition magic = procs.get(0);
-		assertNotNull(magic);
-		String magicSql = magic.createSql(con);
-		System.out.println(magicSql);
+//		ProcedureDefinition magic = procs.get(0);
+//		assertNotNull(magic);
+//		String magicSql = magic.createSql(con);
+//		System.out.println(magicSql);
+	}
 
+	@Test
+	public void testFunctionWithOutParameter()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STATUS");
+		assertEquals(1, procs.size());
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+
+		String cmd = "wbcall get_status(?, ?, 42)";
+		StatementRunnerResult result = call.execute(cmd);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+		DataStore ds = results.get(0);
+		assertNotNull(ds);
+		assertEquals(3, ds.getRowCount());
+		for (int row = 0; row < ds.getRowCount(); row ++)
+		{
+			String name = ds.getValueAsString(row, 0);
+			if ("RETURN".equals(name))
+			{
+				int value = ds.getValueAsInt(row, 1, -1);
+				assertEquals(42,value);
+			}
+			if ("PROCESS_STATUS".equals(name))
+			{
+				String value = ds.getValueAsString(row, 1);
+				assertEquals("FINISHED", value);
+			}
+			if ("ERROR_FLAG".equals(name))
+			{
+				int value = ds.getValueAsInt(row, 1, -1);
+				assertEquals(-1, value);
+			}
+		}
+	}
+
+	@Test
+	public void testRegularFunction()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
+		assertEquals(1, procs.size());
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+
+		String cmd = "wbcall get_answer()";
+		StatementRunnerResult result = call.execute(cmd);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+		DataStore ds = results.get(0);
+		assertNotNull(ds);
+		assertEquals(1, ds.getRowCount());
+		for (int row = 0; row < ds.getRowCount(); row ++)
+		{
+			String name = ds.getValueAsString(row, 0);
+			if ("RETURN".equals(name))
+			{
+				int value = ds.getValueAsInt(row, 1, -1);
+				assertEquals(42,value);
+			}
+		}
 	}
 }

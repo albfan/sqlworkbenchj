@@ -269,6 +269,7 @@ public class WbCall
 					else
 					{
 						int row = resultData.addRow();
+						int index = def.getIndex();
 						resultData.setValue(row, 0, def.getParameterName());
 						resultData.setValue(row, 1, parmValue == null ? "NULL" : parmValue.toString());
 					}
@@ -429,7 +430,14 @@ public class WbCall
 
 		DataStore params = meta.getProcedureReader().getProcedureColumns(procDef);
 
+		int parameterIndexOffset = 0;
 		boolean needFuncCall = ProcedureDefinition.returnsRefCursor(currentConnection, params);
+		if (!needFuncCall && procDef.isFunction())
+		{
+			needFuncCall = true;
+			parameterIndexOffset = 1;
+		}
+
 		sqlUsed = getSqlToPrepare(sql, needFuncCall);
 
 		if (meta.isOracle() && !needFuncCall && !hasPlaceHolder(sqlParams))
@@ -459,15 +467,19 @@ public class WbCall
 
 		if (definedParamCount != sqlParams.size())
 		{
-			sqlParams = null;
+			if (procDef.isFunction() && definedParamCount -1 != sqlParams.size())
+			{
+				sqlParams = null;
+			}
 		}
 
 		if (definedParamCount > 0)
 		{
-			int realParamIndex = 1;
+			int realParamIndex = 1 + parameterIndexOffset;
+			int inputIndex = 0;
 
 			parameterNames = new ArrayList<ParameterDefinition>(definedParamCount);
-			for (int i = 0; i < params.getRowCount(); i++)
+			for (int i = 0; i < definedParamCount; i++)
 			{
 				int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
 
@@ -475,8 +487,13 @@ public class WbCall
 				String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 				String paramName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 
-				ParameterDefinition def = new ParameterDefinition(realParamIndex, dataType);
-				def.setParameterName(paramName);
+				int indexToUse = realParamIndex;
+				if (resultType.equals("RETURN"))
+				{
+					indexToUse = 1;
+				}
+				ParameterDefinition def = new ParameterDefinition(indexToUse, dataType);
+				def.setParameterName(paramName == null ? resultType : paramName);
 
 				boolean needsInput = resultType.equals("IN");
 				boolean isRefCursorParam = ProcedureDefinition.isRefCursor(currentConnection, typeName);
@@ -493,7 +510,7 @@ public class WbCall
 					{
 						// only add the parameter as an input parameter
 						// if a place holder was specified
-						if (sqlParams.get(i).equals("?"))
+						if (sqlParams.get(inputIndex).equals("?"))
 						{
 							inputParameters.add(def);
 							realParamIndex ++;
@@ -527,8 +544,21 @@ public class WbCall
 					{
 						parameterNames.add(def);
 					}
-					cstmt.registerOutParameter(realParamIndex, dataType);
-					realParamIndex++;
+					
+					if (needFuncCall && StringUtil.equalString(resultType, "RETURN") && parameterIndexOffset == 1)
+					{
+						cstmt.registerOutParameter(parameterIndexOffset, dataType);
+					}
+					else
+					{
+						cstmt.registerOutParameter(realParamIndex, dataType);
+						realParamIndex++;
+					}
+				}
+
+				if (!resultType.equals("RETURN"))
+				{
+					inputIndex ++;
 				}
 			}
 		}

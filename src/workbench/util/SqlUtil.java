@@ -668,6 +668,12 @@ public class SqlUtil
 		return result;
 	}
 
+	/**
+	 * Return parameter literals in the passed sql.
+	 *
+	 * @param sql the function call that could contain parameter literals
+	 * @return all provided parameter literals
+	 */
 	public static List<String> getFunctionParameters(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return Collections.emptyList();
