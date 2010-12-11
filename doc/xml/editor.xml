@@ -41,7 +41,8 @@
 			statement ( the <literal>|</literal> indicating the position of the caret):
 		</para>
 		<programlisting>SELECT p.|, p.firstname, a.zip, a.city
-FROM person p, address a;</programlisting>
+FROM person p
+  JOIN address a ON p.id = a.person_id;</programlisting>
 		<para>
 			then pressing the <keycap>Ctrl-Space</keycap> key will show a list of columns available
 			in the <literal>PERSON</literal> table (because the cursor is located after the <literal>p.</literal>
@@ -75,7 +76,33 @@ FROM person p, address a;</programlisting>
 		</para>
 	</section>
 
-	<section id="editor-custom-keywords">
+	<section id="command-completion">
+		<title>JOIN completion</title>
+    <para>
+      When using ANSI JOIN syntax to create table joins with tables linked by foreign keys in the database,
+      the command <literal>JOIN completion</literal> can be used to automatically generate the necessary
+      join condition. Consider the following statement
+    </para>
+    <programlisting>
+SELECT ord.amount, ord.order_date, prod.name
+FROM orders ord
+  JOIN product prod ON</programlisting>
+    <para>
+      When the cursor is located behind the <literal>ON</literal>keyword, and you select
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>JOIN completion</guimenuitem></menuchoice>, &wb-productname; will
+      retrieve the foreign key and corresponding primary key definitions between the tables <literal>orders</literal> and
+      <literal>product</literal>. If such constraints exist, the corresponding condition will be generated and
+      written into the editor. After executing <guimenuitem>JOIN completion</guimenuitem>, the SQL statement will look like this:
+    </para>
+    <programlisting>SELECT ord.amount, ord.order_date, prod.name
+FROM orders ord
+  JOIN product prod ON prod.id = ord.product_id</programlisting>
+    <para>
+      This feature depends on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
+    </para>
+  </section>
+
+  <section id="editor-custom-keywords">
 		<title>Customizing keyword highlighting</title>
 		<para>
 			The keywords that the editor can highlight are based on an internal list of keywords
