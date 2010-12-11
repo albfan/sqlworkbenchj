@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -39,9 +39,26 @@ public class FKHandler
 	 * indicating the column name of the target table (as tablename.columnname)
 	 */
 	public static final int COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME = 2;
+
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column where the delete rule is stored
+	 */
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
+
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column where the update rule is stored
+	 */
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
+
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column where the deferrable option is stored
+	 */
 	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
+
+
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
 	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 8;

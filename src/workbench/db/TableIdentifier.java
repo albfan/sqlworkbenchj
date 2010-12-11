@@ -20,7 +20,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
 /**
- *
+ * A class that represents a table (or view) in the database.
+ * 
  * @author  Thomas Kellerer
  */
 public class TableIdentifier
@@ -34,8 +35,8 @@ public class TableIdentifier
 	private boolean isNewTable;
 	private boolean tableWasQuoted;
 	private boolean serverWasQuoted;
-	private boolean catalogWasQuoted; 
-	private boolean schemaWasQuoted; 
+	private boolean catalogWasQuoted;
+	private boolean schemaWasQuoted;
 	private String pkName;
 	private String type;
 	private boolean neverAdjustCase;
@@ -44,14 +45,14 @@ public class TableIdentifier
 	private String tableComment;
 	private boolean commentWasInitialized;
 	private boolean retrieveFkSource;
-	
+
 	public TableIdentifier(String aName)
 	{
 		this.expression = null;
 		this.isNewTable = false;
 		this.setTable(aName);
 	}
-	
+
 	public TableIdentifier(String aName, WbConnection conn)
 	{
 		this.expression = null;
@@ -130,28 +131,28 @@ public class TableIdentifier
 	{
 		return getTableExpression(conn);
 	}
-	
+
 	public String getObjectType()
 	{
 		if (type == null) return "TABLE";
 		return type.toUpperCase();
 	}
-	
+
 	public String getObjectName()
 	{
 		return getTableName();
 	}
-	
+
 	public void setPreserveQuotes(boolean flag)
 	{
 		this.preserveQuotes = flag;
 	}
-	
-	public boolean getNeverAdjustCase() 
+
+	public boolean getNeverAdjustCase()
 	{
 		return this.neverAdjustCase;
 	}
-	
+
 	public void setNeverAdjustCase(boolean flag)
 	{
 		this.neverAdjustCase = flag;
@@ -166,7 +167,7 @@ public class TableIdentifier
 		this.tableWasQuoted = !meta.isDefaultCase(this.tablename);
 		this.preserveQuotes = (this.schemaWasQuoted || this.catalogWasQuoted || this.tableWasQuoted );
 	}
-	
+
 	public TableIdentifier createCopy()
 	{
 		TableIdentifier copy = new TableIdentifier();
@@ -190,7 +191,7 @@ public class TableIdentifier
 		copy.tableComment = this.tableComment;
 		return copy;
 	}
-	
+
 	public String getTableExpression()
 	{
 		if (this.expression == null) this.initExpression();
@@ -201,7 +202,7 @@ public class TableIdentifier
 	{
 		return getTableExpression().hashCode();
 	}
-	
+
 	public String getTableExpression(WbConnection conn)
 	{
 		return this.buildTableExpression(conn);
@@ -211,7 +212,7 @@ public class TableIdentifier
 	{
 		this.expression = this.buildTableExpression(null);
 	}
-	
+
 	private String buildTableExpression(WbConnection conn)
 	{
 		if (this.isNewTable && this.tablename == null)
@@ -249,7 +250,7 @@ public class TableIdentifier
 				result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
 				result.append('.');
 			}
-			
+
 			String schemaToUse = getSchemaToUse(conn);
 			if (StringUtil.isNonBlank(schemaToUse))
 			{
@@ -280,7 +281,7 @@ public class TableIdentifier
 		}
 		return null;
 	}
-	
+
 	public String getCatalogToUse(WbConnection conn)
 	{
 		DbMetadata meta = conn.getMetadata();
@@ -304,15 +305,15 @@ public class TableIdentifier
 		if (this.neverAdjustCase) return;
 		if (conn == null) return;
 		DbMetadata meta = conn.getMetadata();
-		
+
 		if (this.tablename != null && !tableWasQuoted) this.tablename = meta.adjustObjectnameCase(this.tablename);
 		if (this.schema != null && !schemaWasQuoted) this.schema = meta.adjustSchemaNameCase(this.schema);
 		if (this.catalog != null && !catalogWasQuoted) this.catalog = meta.adjustObjectnameCase(this.catalog);
 		this.expression = null;
 	}
-	
+
 	/**
-	 * Return the fully qualified name of the table 
+	 * Return the fully qualified name of the table
 	 * (including catalog and schema) but not quoted
 	 * even if it needed quotes
 	 */
@@ -337,16 +338,16 @@ public class TableIdentifier
 		result.append(this.tablename);
 		return result.toString();
 	}
-	
+
 	String getRawCatalog() { return this.catalog; }
 	String getRawTableName() { return this.tablename; }
 	String getRawSchema() { return this.schema; }
-	
-	public String getTableName() 
-	{ 
+
+	public String getTableName()
+	{
 		if (tablename == null) return null;
-		if (!tableWasQuoted || !preserveQuotes) return this.tablename; 
-		
+		if (!tableWasQuoted || !preserveQuotes) return this.tablename;
+
 		StringBuilder result = new StringBuilder(tablename.length() + 2);
 		result.append('\"');
 		result.append(tablename);
@@ -359,9 +360,9 @@ public class TableIdentifier
 	 * in order to support DBMS who don't even care about the most simple standards.
 	 *
 	 * This will only re-add the correct quotes later, if getTableExpression(WbConnection) is used!
-	 * 
+	 *
 	 * @param meta the DbMetadata object used for checking if a name component is quoted
-	 * @see workbench.db.DbMetadata#isQuoted(java.lang.String) 
+	 * @see workbench.db.DbMetadata#isQuoted(java.lang.String)
 	 */
 	public void checkIsQuoted(DbMetadata meta)
 	{
@@ -410,7 +411,7 @@ public class TableIdentifier
 		{
 			elements.add(tok.nextToken());
 		}
-		
+
 		if (elements.size() == 1)
 		{
 			setTablename(aTable);
@@ -448,7 +449,7 @@ public class TableIdentifier
 	{
 		return server;
 	}
-	
+
 	public void setServerPart(String name)
 	{
 		if (StringUtil.isBlank(name))
@@ -460,26 +461,26 @@ public class TableIdentifier
 			server = name.trim();
 		}
 	}
-	
+
 	private void setTablename(String name)
 	{
 		if (name == null) return;
 		tableWasQuoted = name.trim().startsWith("\"");
 		this.tablename = StringUtil.trimQuotes(name).trim();
 	}
-	
-	public String getSchema() 
-	{ 
+
+	public String getSchema()
+	{
 		if (schema == null) return null;
 		if (!schemaWasQuoted || !preserveQuotes) return schema;
-		
+
 		StringBuilder result = new StringBuilder(schema.length() + 2);
 		result.append('\"');
 		result.append(schema);
 		result.append('\"');
 		return result.toString();
 	}
-	
+
 	public void setSchema(String aSchema)
 	{
 		if (this.isNewTable) return;
@@ -496,18 +497,18 @@ public class TableIdentifier
 		this.expression = null;
 	}
 
-	public String getCatalog() 
-	{ 
+	public String getCatalog()
+	{
 		if (catalog == null) return null;
-		if (!catalogWasQuoted || !preserveQuotes) return this.catalog; 
-		
+		if (!catalogWasQuoted || !preserveQuotes) return this.catalog;
+
 		StringBuilder result = new StringBuilder(catalog.length() + 2);
 		result.append('\"');
 		result.append(catalog);
 		result.append('\"');
 		return result.toString();
 	}
-	
+
 	public void setCatalog(String aCatalog)
 	{
 		if (this.isNewTable) return;
@@ -558,12 +559,12 @@ public class TableIdentifier
 	{
 		this.showOnlyTableName = flag;
 	}
-	
+
 	public int compareTo(TableIdentifier other)
 	{
 		return this.getTableExpression().compareTo(other.getTableExpression());
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableIdentifier)
@@ -623,7 +624,7 @@ public class TableIdentifier
 	{
 		return this.pkName;
 	}
-	
+
 	public void setPrimaryKeyName(String name)
 	{
 		this.pkName = name;
@@ -676,7 +677,7 @@ public class TableIdentifier
 
 	/**
 	 * Controls if getSource() will return the source for the FK constraints as well.
-	 * 
+	 *
 	 * @param flag true, getSource() will include FK source, false: FK source will not be included
 	 */
 	public void setRetrieveFkSource(boolean flag)
@@ -688,11 +689,11 @@ public class TableIdentifier
 	{
 		return findTableByName(tables, new TableIdentifier(toFind));
 	}
-	
+
 	public static TableIdentifier findTableByName(List<TableIdentifier> tables, TableIdentifier toFind)
 	{
 		if (tables == null) return null;
-		
+
 		for (TableIdentifier table : tables)
 		{
 			if (table.getTableName().equalsIgnoreCase(toFind.getTableName())) return table;
@@ -716,7 +717,7 @@ public class TableIdentifier
 		{
 			tbl1.setCatalog(con.getCurrentCatalog());
 		}
-		
+
 		TableIdentifier tbl2 = other.createCopy();
 		if (tbl2.getSchema() == null)
 		{

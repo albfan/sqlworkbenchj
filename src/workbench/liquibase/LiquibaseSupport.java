@@ -1,11 +1,11 @@
 /*
  * LiquibaseSupport
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
- *  Copyright 2002-2009, Thomas Kellerer
+ *
+ *  Copyright Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.liquibase;
@@ -19,7 +19,8 @@ import workbench.sql.ScriptParser;
 import workbench.util.WbFile;
 
 /**
- *
+ * A class to extract SQL from a Liquibase changeset.
+ * 
  * @author Thomas Kellerer
  */
 public class LiquibaseSupport
@@ -32,7 +33,7 @@ public class LiquibaseSupport
 	{
 		this(xmlFile, null);
 	}
-	
+
 	public LiquibaseSupport(WbFile xmlFile, String encoding)
 	{
 		this.changeLog = xmlFile;
@@ -43,16 +44,16 @@ public class LiquibaseSupport
 	{
 		alternateDelimiter = delimiter;
 	}
-	
+
 	public List<String> getSQLFromChangeSet(ChangeSetIdentifier ... ids)
 	{
 		return getSQLFromChangeSet(ids == null ? null : Arrays.asList(ids));
 	}
-	
+
 	/**
 	 * Return the statements stored in a <sql> or <createProcedure> tag
 	 * of a Liquibase Changeset
-	 * 
+	 *
 	 * @param changeSetId
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */

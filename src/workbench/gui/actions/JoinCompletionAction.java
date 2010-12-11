@@ -30,7 +30,7 @@ import workbench.util.StringUtil;
 
 /**
  * Action do an automatic completion of a join in a SQL statement.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class JoinCompletionAction
@@ -51,7 +51,7 @@ public class JoinCompletionAction
 	{
 		WbConnection conn = client.getConnection();
 		if (conn == null) return;
-		
+
 		ScriptParser parser = client.createScriptParser();
 
 		EditorPanel editor = client.getEditor();
@@ -71,13 +71,13 @@ public class JoinCompletionAction
 		StatusBar statusbar = client.getStatusBar();
 
 		String verb = SqlUtil.getSqlVerb(sql);
-		if ("SELECT".equals(verb))
+		if (!"SELECT".equalsIgnoreCase(verb))
 		{
 			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
 			statusbar.setStatusMessage(msg, 2500);
 			return;
 		}
-		
+
 		try
 		{
 			statusbar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
@@ -100,5 +100,5 @@ public class JoinCompletionAction
 		}
 	}
 
-	
+
 }

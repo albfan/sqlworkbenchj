@@ -23,6 +23,10 @@ public class Alias
 	private String alias;
 	private String display;
 
+	/**
+	 * Create a new Alias
+	 * @param value  the SQL part that should be parsed
+	 */
 	public Alias(String value)
 	{
 		if (StringUtil.isEmptyString(value)) throw new IllegalArgumentException("Identifier must not be empty");
@@ -54,16 +58,33 @@ public class Alias
 		objectName = name.toString();
 	}
 
+	/**
+	 * Returned the alias defined for the object.
+	 * Might be null
+	 *
+	 * @see #getAlias()
+	 */
 	public final String getAlias()
 	{
 		return this.alias;
 	}
 
+	/**
+	 * Returns the object name that is aliased.
+	 * @see #getAlias()
+	 */
 	public final String getObjectName()
 	{
 		return objectName;
 	}
 
+	/**
+	 * Returns the name that has to be used inside the SQL statement.
+	 * If an alias is defined, this will be the alias. The object name otherwise
+	 *
+	 * @see #getAlias()
+	 * @see #getObjectName()
+	 */
 	public final String getNameToUse()
 	{
 		if (alias == null) return objectName;

@@ -3,7 +3,7 @@
  *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2009, Thomas Kellerer
+ *  Copyright Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
  *
  *  To contact the author please send an email to: support@sql-workbench.net
@@ -102,15 +102,15 @@ public class LiquibaseParser
 
 			boolean idsEqual = StringUtil.equalString(toCheck.getId(), id.getId());
 			if (id.getAuthor() == null && idsEqual) return true;
-			
+
 			boolean authorsEqual = StringUtil.equalString(toCheck.getAuthor(), id.getAuthor());
 			if (idsEqual && authorsEqual) return true;
-			
+
 			if (authorsEqual && id.getId().equals("*")) return true;
 		}
 		return false;
 	}
-	
+
 	public void startElement(String namespaceURI, String sName, String tagName, Attributes attrs)
 		throws SAXException
 	{

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -20,6 +20,7 @@ import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
+ * A class to retrieve the FK dependencies of a given table.
  *
  * @author  Thomas Kellerer
  */
@@ -43,6 +44,13 @@ public class TableDependency
 		this.theTable = this.wbMetadata.findTable(tbl, false);
 	}
 
+	/**
+	 * Control the retrieval of grand-children.
+	 * If this is set to true only directly linked tables will be retrieved.
+	 * If set to false, tables indirectly linked to this table are also retrieved (i.e. the full tree)
+	 *
+	 * @param flag
+	 */
 	public void setRetrieveDirectChildrenOnly(boolean flag)
 	{
 		this.directChildrenOnly = flag;
@@ -70,11 +78,23 @@ public class TableDependency
 		return null;
 	}
 
+	/**
+	 * Read the hierarchy of tables referencing this one.
+	 * This is equivalent to calling <tt>readDependencyTree(true)</tt>
+	 *
+	 * @see #readDependencyTree(boolean)
+	 */
 	public void readTreeForChildren()
 	{
 		readDependencyTree(true);
 	}
 
+	/**
+	 * Read the hierarchy of tables that this table references.
+	 * This is equivalent to calling <tt>readDependencyTree(false)</tt>
+	 *
+	 * @see #readDependencyTree(boolean)
+	 */
 	public void readTreeForParents()
 	{
 		readDependencyTree(false);
