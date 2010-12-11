@@ -76,7 +76,7 @@ FROM person p
 		</para>
 	</section>
 
-	<section id="command-completion">
+	<section id="command-join-completion">
 		<title>JOIN completion</title>
     <para>
       When using ANSI JOIN syntax to create table joins with tables linked by foreign keys in the database,
