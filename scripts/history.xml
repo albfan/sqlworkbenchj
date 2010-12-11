@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-11-16">
+  <release build="-1" date="2010-12-11">
     <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
     <entry dev-build="8" type="enh">The join condition inside a JOIN part of a SELECT statement can now be generated automatically (if the tables involved are using foreign keys) using SQL -&gt; JOIN completion</entry>
     <entry dev-build="8" type="enh">Primary key columns are now shown in bold face in the auto-completion popup window. If comments are defined for columns, tables or view, these will be shown as a tooltip for the entry in the popup</entry>
@@ -21,7 +21,7 @@
     <entry dev-build="8" type="fix">When using a query as the source for WbCopy that used column aliases between databases that store object names in different case a wrong isnert or update statement was created</entry>
     <entry dev-build="8" type="fix">When changing the current database, the object cache was not updated correctly</entry>
     <entry dev-build="8" type="fix">"Filter by selected value" did not work for boolean columns</entry>
-    <entry dev-build="8" type="fix">For PostgreSQL, columns defined as bit(x) with x > 1 where not displayed correctly.</entry>
+    <entry dev-build="8" type="fix">For PostgreSQL, columns defined as bit(x) with x &gt; 1 where not displayed correctly.</entry>
     <entry dev-build="8" type="fix">When running a statement there was a built-in limit on 15 warnings that would be displayed by SQL Workbench. That limited the output of messages with RAISe NOTICE to 15 as well in PostgreSQL.</entry>
     <entry dev-build="8" type="fix">The datatype for parameters in Oracle stored procedures was not always displayed correctly.</entry>
     <entry dev-build="7" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
