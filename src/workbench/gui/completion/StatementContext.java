@@ -38,6 +38,11 @@ public class StatementContext
 
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
+		this(conn, sql, pos, true);
+	}
+
+	public StatementContext(WbConnection conn, String sql, int pos, boolean retrieve)
+	{
 		String verb = SqlUtil.getSqlVerb(sql);
 
 		BaseAnalyzer subSelectAnalyzer = checkSubselect(conn, sql, pos);
@@ -103,7 +108,7 @@ public class StatementContext
 			}
 		}
 
-		if (analyzer != null)
+		if (analyzer != null && retrieve)
 		{
 			analyzer.retrieveObjects();
 		}

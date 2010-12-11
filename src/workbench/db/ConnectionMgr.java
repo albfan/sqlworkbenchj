@@ -113,10 +113,8 @@ public class ConnectionMgr
 		String dbVersion = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
 
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" +
-			conn.getMetadata().getProductName() + "], Database version: ["
-			+ dbVersion + "], Driver version: [" +
-			driverVersion + "], JDBC Version: [" +
-			jdbcVersion + "], ID: ["  + anId + "]"
+			conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" +
+			driverVersion + "], JDBC Version: [" + jdbcVersion + "], ID: ["  + anId + "]"
 		);
 
 		this.activeConnections.put(anId, conn);

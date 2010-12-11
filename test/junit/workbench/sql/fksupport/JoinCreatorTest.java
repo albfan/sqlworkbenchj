@@ -82,5 +82,17 @@ public class JoinCreatorTest
 		creator.setCursorPosition(pos + 1);
 		condition = creator.getJoinCondition();
 		assertEquals("a.type_id = adt.adr_type_id", condition);
+
+		// Test for sub-selects
+		sql = "select * from person where id in (select person_id from address ad join address_type adt on )";
+		pos = sql.indexOf("adt on") + "adt on".length() + 1;
+		creator = new JoinCreator(sql, pos, conn);
+		join = creator.getJoinTable();
+		assertEquals("address", join.getObjectName());
+		assertEquals("ad", join.getAlias());
+
+		joined = creator.getJoinedTable();
+		assertEquals("address_type", joined.getObjectName());
+		assertEquals("adt", joined.getAlias());
 	}
 }

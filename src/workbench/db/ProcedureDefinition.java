@@ -12,7 +12,6 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
-import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -373,7 +372,11 @@ public class ProcedureDefinition
 
 		if (isFunction && !returnsRefCursor && !hasOutParameters)
 		{
-			return buildFunctionCall(con, params);
+			String sql = buildFunctionCall(con, params);
+			if (sql != null)
+			{
+				return sql;
+			}
 		}
 		return createWbCallStatement(params);
 	}
@@ -416,6 +419,9 @@ public class ProcedureDefinition
 					paramNames.append(", ");
 				}
 				paramNames.append(param);
+				paramNames.append(" (");
+				paramNames.append(type);
+				paramNames.append(')');
 				call.append('?');
 				numParams ++;
 			}
@@ -433,6 +439,10 @@ public class ProcedureDefinition
 	private String buildFunctionCall(WbConnection conn, DataStore params)
 	{
 		String template = conn.getDbSettings().getSelectForFunctionSQL();
+		if (template == null)
+		{
+			return null;
+		}
 
 		StringBuilder call = new StringBuilder(150);
 		call.append(oracleType != null ? catalog + "." + procName : procName);
@@ -489,7 +499,7 @@ public class ProcedureDefinition
 		}
 		return false;
 	}
-	
+
 	public static boolean returnsRefCursor(WbConnection conn, DataStore params)
 	{
 		// A function in Postgres that returns a refcursor
@@ -518,7 +528,7 @@ public class ProcedureDefinition
 		}
 		return false;
 	}
-	
+
 	private static enum OracleType
 	{
 		packageType,

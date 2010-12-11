@@ -25,6 +25,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.ScriptParser;
 import workbench.sql.fksupport.JoinCreator;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -68,6 +69,14 @@ public class JoinCompletionAction
 		}
 
 		StatusBar statusbar = client.getStatusBar();
+
+		String verb = SqlUtil.getSqlVerb(sql);
+		if ("SELECT".equals(verb))
+		{
+			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
+			statusbar.setStatusMessage(msg, 2500);
+			return;
+		}
 		
 		try
 		{

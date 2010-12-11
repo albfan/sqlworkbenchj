@@ -36,6 +36,8 @@ public class WbCallOraTest
 	extends WbTestCase
 {
 
+	private boolean prompterCalled;
+
 	public WbCallOraTest()
 	{
 		super("TestWbCallOra");
@@ -173,7 +175,7 @@ public class WbCallOraTest
 		assertEquals("Arthur's Address", address.getValue(0, 2));
 
 		String callSql = procs.get(0).createSql(con);
-		assertEquals("-- Parameters: PID, PERSON_RESULT, ADDR_RESULT\nWbCall REF_CURSOR_EXAMPLE(?,?,?);", callSql);
+		assertEquals("-- Parameters: PID (IN), PERSON_RESULT (OUT), ADDR_RESULT (OUT)\nWbCall REF_CURSOR_EXAMPLE(?,?,?);", callSql);
 
 		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STUFF");
 		assertEquals(1, procs.size());
@@ -182,7 +184,7 @@ public class WbCallOraTest
 		assertNotNull(getStuff);
 
 		String sql = getStuff.createSql(con);
-		assertEquals("-- Parameters: P_ID\nWbCall GET_STUFF(?);", sql);
+		assertEquals("-- Parameters: P_ID (IN)\nWbCall GET_STUFF(?);", sql);
 
 		result = call.execute("WbCall GET_STUFF(?)");
 		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
@@ -193,18 +195,36 @@ public class WbCallOraTest
 
 		DataStore person2 = results.get(0);
 		assertEquals(1, person2.getRowCount());
-
-		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
-		assertEquals(1, procs.size());
-
-//		ProcedureDefinition magic = procs.get(0);
-//		assertNotNull(magic);
-//		String magicSql = magic.createSql(con);
-//		System.out.println(magicSql);
 	}
 
 	@Test
-	public void testFunctionWithOutParameter()
+	public void testWbCallGeneration()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
+		assertEquals(1, procs.size());
+
+		ProcedureDefinition magic = procs.get(0);
+		assertNotNull(magic);
+		String generated = magic.createSql(con);
+		String expected = "-- Parameters: ERRORCODE (OUT), APP_ID (IN), P_CUR (INOUT)\nWbCall GET_MAGIC(?,?,?);";
+		assertEquals(expected, generated);
+
+		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STATUS");
+		assertEquals(1, procs.size());
+
+		ProcedureDefinition status = procs.get(0);
+		assertNotNull(status);
+		String answerSql = status.createSql(con);
+		expected = "-- Parameters: PROCESS_STATUS (OUT), ERROR_FLAG (OUT), SOME_VALUE (IN)\nWbCall GET_STATUS(?,?,?);";
+		assertEquals(expected, answerSql);
+	}
+
+	@Test
+	public void testFunctionWithOutputParameter()
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
@@ -259,14 +279,27 @@ public class WbCallOraTest
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());
 
+		StatementParameterPrompter prompter = new StatementParameterPrompter()
+		{
+			@Override
+			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+			{
+				prompterCalled = true;
+				return true;
+			}
+		};
+
 		WbCall call = new WbCall();
+		prompterCalled = false;
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(con);
 		call.setStatementRunner(runner);
 		call.setConnection(con);
+		call.setParameterPrompter(prompter);
 
 		String cmd = "wbcall get_answer()";
 		StatementRunnerResult result = call.execute(cmd);
+		assertFalse(prompterCalled);
 		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();

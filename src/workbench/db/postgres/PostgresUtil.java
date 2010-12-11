@@ -11,7 +11,6 @@
 package workbench.db.postgres;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
@@ -39,11 +38,11 @@ public class PostgresUtil
 				Statement stmt = null;
 				try
 				{
-					// SET application_name seems requires autocommit to be turned off
+					// SET application_name seems to require autocommit to be turned off
 					// as the autocommit setting that the user specified in the connection profile
-					// will be set afterwards, this should not do any harm
+					// will be set after this call, setting it to false should not do any harm
 					con.setAutoCommit(false);
-					stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+					stmt = con.createStatement();
 					stmt.execute("SET application_name = '" + appName + "'");
 					// make sure the transaction is ended
 					// as this is absolutely the first thing we did, commit() should be safe
@@ -53,7 +52,7 @@ public class PostgresUtil
 				{
 					// Make sure the transaction is ended properly
 					try { con.rollback(); } catch (Exception ex) {}
-					LogMgr.logWarning("DbDriver.setClientInfo()", "Could not set client info", e);
+					LogMgr.logWarning("DbDriver.setApplicationName()", "Could not set client info", e);
 				}
 				finally
 				{

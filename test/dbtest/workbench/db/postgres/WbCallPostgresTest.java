@@ -22,6 +22,7 @@ import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.WbCall;
@@ -78,6 +79,19 @@ public class WbCallPostgresTest
 		{
 			SqlUtil.closeStatement(stmt);
 		}
+		TestUtil.executeScript(con,
+			"create or replace function get_answer() \n" +
+			" returns integer \n" +
+			 "  LANGUAGE plpgsql \n" +
+			 "AS \n" +
+			 "$body$ \n" +
+			 " BEGIN  \n" +
+			 "    RETURN 42;  \n" +
+			 " END \n" +
+			 "$body$\n" +
+			 "/",
+			 DelimiterDefinition.DEFAULT_ORA_DELIMITER
+			);
 	}
 
 	@AfterClass
@@ -121,6 +135,28 @@ public class WbCallPostgresTest
 		DataStore params = con.getMetadata().getProcedureReader().getProcedureColumns(proc);
 		assertEquals(1, params.getRowCount());
 		assertTrue(ProcedureDefinition.returnsRefCursor(con, params));
+	}
+
+	@Test
+	public void testRegularFunctionCall()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		String cmd = "WbCall get_answer()";
+		StatementRunnerResult result = call.execute(cmd);
+		assertEquals("{? =  call get_answer()}", call.getSqlUsed());
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		DataStore ds = result.getDataStores().get(0);
+		assertEquals(1, ds.getRowCount());
+		assertEquals(42, ds.getValueAsInt(0, 1, -1));
 	}
 
 }

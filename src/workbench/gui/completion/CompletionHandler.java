@@ -252,19 +252,9 @@ public class CompletionHandler
 
 	private void showFailedMessage(String sql)
 	{
-		final String verb = SqlUtil.getSqlVerb(sql);
-		WbThread t = new WbThread("Notification")
-		{
-			public void run()
-			{
-				String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
-				statusBar.setStatusMessage(msg);
-				WbThread.sleepSilently(2500);
-				String m = statusBar.getText();
-				if (msg.equals(m)) statusBar.clearStatusMessage();
-			}
-		};
-		t.start();
+		String verb = SqlUtil.getSqlVerb(sql);
+		String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
+		statusBar.setStatusMessage(msg, 2500);
 	}
 
 	private void fireDataChanged()

@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import workbench.db.WbConnection;
+import workbench.gui.completion.BaseAnalyzer;
+import workbench.gui.completion.StatementContext;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
@@ -46,9 +48,9 @@ public class JoinCreator
 	
 	public JoinCreator(String statement, int positionInStatement, WbConnection dbConn)
 	{
-		this.sql = statement;
 		this.connection = dbConn;
-		setCursorPosition(positionInStatement);
+		int realPos = setSql(statement, positionInStatement);
+		setCursorPosition(realPos);
 	}
 
 	public void setCursorPosition(int position)
@@ -56,6 +58,28 @@ public class JoinCreator
 		cursorPos = position;
 		retrieveTablePositions();
 	}
+
+	/**
+	 * Parse the given SQL for potential sub-selects
+	 * @param sqlToUse the sql from the editor
+	 * @param position the position of the cursor in the passed statement
+	 * @return the positioin of the cursor in the statement that is used for analysis
+	 */
+	private int setSql(String sqlToUse, int position)
+	{
+		StatementContext context = new StatementContext(connection, sqlToUse, position, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		if (analyzer == null)
+		{
+			// for some reason the StatementContext could not handle the statement
+			// so try the basic statement anyway
+			this.sql = sqlToUse;
+			return position;
+		}
+		this.sql = analyzer.getAnalyzedSql();
+		return analyzer.getCursorPosition();
+	}
+
 	public String getJoinCondition()
 		throws SQLException
 	{

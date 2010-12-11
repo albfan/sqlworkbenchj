@@ -467,6 +467,8 @@ public class WbCall
 
 		if (definedParamCount != sqlParams.size())
 		{
+			// if this is a function call (using {? = call()} then an additional
+			// Parameter is needed which is not part of the provided parameters
 			if (procDef.isFunction() && definedParamCount -1 != sqlParams.size())
 			{
 				sqlParams = null;
@@ -490,6 +492,7 @@ public class WbCall
 				int indexToUse = realParamIndex;
 				if (resultType.equals("RETURN"))
 				{
+					// the result is always the first parameter because of the {? = call(?,?)} syntax
 					indexToUse = 1;
 				}
 				ParameterDefinition def = new ParameterDefinition(indexToUse, dataType);
@@ -497,7 +500,7 @@ public class WbCall
 
 				boolean needsInput = resultType.equals("IN");
 				boolean isRefCursorParam = ProcedureDefinition.isRefCursor(currentConnection, typeName);
-				
+
 				if (resultType.equals("INOUT"))
 				{
 					needsInput = !isRefCursorParam;
@@ -544,7 +547,7 @@ public class WbCall
 					{
 						parameterNames.add(def);
 					}
-					
+
 					if (needFuncCall && StringUtil.equalString(resultType, "RETURN") && parameterIndexOffset == 1)
 					{
 						cstmt.registerOutParameter(parameterIndexOffset, dataType);
@@ -582,5 +585,13 @@ public class WbCall
 	public void setParameterPrompter(StatementParameterPrompter prompter)
 	{
 		parameterPrompter = prompter;
+	}
+
+	/**
+	 * For testing purposes
+	 */
+	public String getSqlUsed()
+	{
+		return sqlUsed;
 	}
 }

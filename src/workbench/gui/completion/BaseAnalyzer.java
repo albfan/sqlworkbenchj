@@ -101,6 +101,16 @@ public abstract class BaseAnalyzer
 		this.cursorPos = cursorPos;
 	}
 
+	public String getAnalyzedSql()
+	{
+		return this.sql;
+	}
+
+	public int getCursorPosition()
+	{
+		return this.cursorPos;
+	}
+	
 	public char quoteCharForValue(String value)
 	{
 		return 0;

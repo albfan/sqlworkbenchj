@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import workbench.db.exporter.RowDataConverter;
 import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -322,7 +323,7 @@ public class DbSettings
 
 	public String getSelectForFunctionSQL()
 	{
-		return Settings.getInstance().getProperty(prefix + "function.select", "SELECT %function%");
+		return Settings.getInstance().getProperty(prefix + "function.select", null);
 	}
 
 	/**
