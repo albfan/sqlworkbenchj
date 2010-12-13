@@ -1,11 +1,11 @@
 /*
  * OracleProcedureReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -96,6 +96,15 @@ public class WbCallOraTest
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		sql =
+			"CREATE OR REPLACE PROCEDURE process_data(some_value out number, some_id in number)  \n" +
+			"IS \n" +
+			"BEGIN \n" +
+			"  some_value := some_id * 2;  \n" +
+			"END process_data;  \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		sql =
 			"create or replace function get_status(process_status out varchar, error_flag out number, some_value integer) \n" +
 			"return number \n" +
 			"is \n" +
@@ -153,7 +162,7 @@ public class WbCallOraTest
 		call.setStatementRunner(runner);
 		call.setConnection(con);
 		call.setParameterPrompter(prompter);
-		
+
 		String cmd = "wbcall ref_cursor_example(?, ?, ?)";
 		StatementRunnerResult result = call.execute(cmd);
 		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
@@ -203,7 +212,7 @@ public class WbCallOraTest
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
 		assertEquals(1, procs.size());
 
@@ -267,6 +276,52 @@ public class WbCallOraTest
 				assertEquals(-1, value);
 			}
 		}
+	}
+
+	@Test
+	public void testRegularProcedure()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "PROCESS_DATA");
+		assertEquals(1, procs.size());
+		String sql = procs.get(0).createSql(con);
+		assertEquals("-- Parameters: SOME_VALUE (OUT), SOME_ID (IN)\nWbCall PROCESS_DATA(?,?);", sql);
+
+		StatementParameterPrompter prompter = new StatementParameterPrompter()
+		{
+			@Override
+			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+			{
+				prompterCalled = true;
+				return true;
+			}
+		};
+
+		WbCall call = new WbCall();
+		prompterCalled = false;
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		call.setParameterPrompter(prompter);
+
+		String cmd = "wbcall process_data(?, 21)";
+		StatementRunnerResult result = call.execute(cmd);
+		assertFalse(prompterCalled);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+		DataStore ds = results.get(0);
+		assertNotNull(ds);
+		assertEquals(1, ds.getRowCount());
+		String name = ds.getValueAsString(0, 0);
+		int value = ds.getValueAsInt(0, 1, -1);
+		assertEquals("SOME_VALUE", name);
+		assertEquals(42, value);
 	}
 
 	@Test
