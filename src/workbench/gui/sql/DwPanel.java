@@ -12,7 +12,6 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -21,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.CellEditor;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -71,7 +71,6 @@ import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
-import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -120,6 +119,7 @@ public class DwPanel
 	private StatementRunner stmtRunner;
 	private GenericRowMonitor genericRowMonitor;
 	private ReferenceTableNavigator referenceNavigator;
+	private ImageIcon warningIcon;
 
 	public DwPanel()
 	{
@@ -773,10 +773,37 @@ public class DwPanel
 		return null;
 	}
 
+	public boolean maxRowsReached()
+	{
+		int maxRows = getMaxRows();
+		int rowCount = getTable().getRowCount();
+
+		// Some drivers return one more row than defined by maxRows...
+		boolean maxReached = maxRows > 0 && (maxRows == rowCount || maxRows == rowCount - 1);
+		return maxReached;
+	}
+	
+	private void clearWarningIcon()
+	{
+		JTabbedPane tab = getTabParent();
+		if (tab == null) return;
+
+		int index = tab.indexOfComponent(this);
+		if (index == -1)
+		{
+			index = tab.indexOfComponent(this.getParent());
+		}
+		if (warningIcon != null) 
+		{
+			warningIcon.getImage().flush();
+		}
+		tab.setIconAt(index, null);
+	}
+	
 	public void checkLimitReachedDisplay()
 	{
 		if (!GuiSettings.getShowMaxRowsReached()) return;
-
+		
 		JTabbedPane tab = getTabParent();
 		if (tab == null) return;
 
@@ -788,44 +815,37 @@ public class DwPanel
 
 		if (index > -1)
 		{
-			int maxRows = getMaxRows();
-			boolean isWindowsClassic = WbManager.getInstance().isWindowsClassic();
-			int rowCount = getTable().getRowCount();
-
-			// Some drivers return one more row than defined by maxRows...
-			boolean maxReached = maxRows > 0 && (maxRows == rowCount || maxRows == rowCount - 1);
-
+			boolean maxReached = maxRowsReached();
+			
 			if (maxReached)
 			{
-				Color c = GuiSettings.getMaxRowsWarningColor();
-				if (isWindowsClassic)
+				tab.setIconAt(index, getWarningIcon());
+				String tooltip = tab.getToolTipTextAt(index);
+				String msg = ResourceMgr.getString("MsgRetrieveAbort");
+				if (tooltip == null) 
 				{
-					tab.setBackgroundAt(index, c);
+					tab.setToolTipTextAt(index, msg);
 				}
 				else
 				{
-					String color = HtmlUtil.getHtmlColor(c);
-					String title = tab.getTitleAt(index);
-					tab.putClientProperty("$wb$_title_" + index, title);
-					tab.setTitleAt(index, "<html><b style=\"color:#" + color + "\">" + title + "</b></html>");
+					msg += "\n" + StringUtil.padRight("", msg.length() - 2, '*');
+					tab.setToolTipTextAt(index, msg + "\n\n" + tooltip);
 				}
 			}
 			else
 			{
-				if (isWindowsClassic)
-				{
-					tab.setBackgroundAt(index, null);
-				}
-				else
-				{
-					String oldTitle = (String)tab.getClientProperty("$wb$_title_" + index);
-					if (oldTitle != null)
-					{
-						tab.setTitleAt(index, oldTitle);
-					}
-				}
+				clearWarningIcon();
 			}
 		}
+	}
+
+	private ImageIcon getWarningIcon()
+	{
+		if (warningIcon == null)
+		{
+			warningIcon = ResourceMgr.getPng("stop_red");
+		}
+		return warningIcon;
 	}
 
 	public void readColumnComments()
@@ -1141,7 +1161,7 @@ public class DwPanel
 	public void clearContent()
 	{
 		dataTable.reset();
-		checkLimitReachedDisplay();
+		clearWarningIcon();
 		statusBar.removeSelectionIndicator(dataTable);
 		hasResultSet = false;
 		lastMessage = null;
