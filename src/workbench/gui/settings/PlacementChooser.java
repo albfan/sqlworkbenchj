@@ -24,7 +24,7 @@ import workbench.resource.Settings;
 public class PlacementChooser
 	extends JComboBox
 {
-	private String placementProperty = "workbench.gui.dbobjects.tabletabs";
+	public static final String PLACEMENT_PROPERTY = "workbench.gui.dbobjects.tabletabs";
 	public PlacementChooser()
 	{
 		super();
@@ -37,10 +37,9 @@ public class PlacementChooser
 		setModel(new DefaultComboBoxModel(locations));
 	}
 
-	public void setProperty(String property)
+	public void showPlacement()
 	{
-		placementProperty = property;
-		String placement = Settings.getInstance().getProperty(placementProperty, "bottom");
+		String placement = Settings.getInstance().getProperty(PLACEMENT_PROPERTY, "top");
 		if ("top".equals(placement))
 		{
 			setSelectedIndex(0);
@@ -59,9 +58,9 @@ public class PlacementChooser
 		}
 	}
 
-	public static int getLocationProperty(String property)
+	public static int getPlacementLocation()
 	{
-		String tabLocation = Settings.getInstance().getProperty(property, "bottom");
+		String tabLocation = Settings.getInstance().getProperty(PLACEMENT_PROPERTY, "bottom");
 		int location = JTabbedPane.BOTTOM;
 		if (tabLocation.equalsIgnoreCase("top"))
 		{
@@ -81,7 +80,7 @@ public class PlacementChooser
 	public void saveSelection()
 	{
 		String placement = getPlacement();
-		Settings.getInstance().setProperty(placementProperty, placement);
+		Settings.getInstance().setProperty(PLACEMENT_PROPERTY, placement);
 	}
 	
 	private String getPlacement()

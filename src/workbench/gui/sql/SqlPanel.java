@@ -3130,7 +3130,7 @@ public class SqlPanel
 		startExecution(comment + "\n" + sql, 0, -1, false, true);
 	}
 
-	private int addResultTab(DwPanel data, String sql)
+	private int addResultTab(DwPanel data)
 	{
 		int newIndex = this.resultTab.getTabCount() - 1;
 		WbTable tbl = data.getTable();
@@ -3144,7 +3144,8 @@ public class SqlPanel
 		{
 			tbl.setPrintHeader(resultName);
 		}
-		this.resultTab.insertTab(resultName, null, data, sql, newIndex);
+		this.resultTab.insertTab(resultName, null, data, null, newIndex);
+		data.showGeneratingSQLAsTooltip();
 		data.setName("dwresult" + newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{
@@ -3202,7 +3203,7 @@ public class SqlPanel
 							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
 							DwPanel p = createDwPanel();
 							p.showData(ds, gen, time);
-							addResultTab(p, gen);
+							addResultTab(p);
 							newPanels.add(p);
 						}
 					}
@@ -3237,7 +3238,7 @@ public class SqlPanel
 						{
 							DwPanel p = createDwPanel();
 							p.showData(rs, sql, time);
-							addResultTab(p, sql);
+							addResultTab(p);
 						}
 					}
 					catch (Exception e)

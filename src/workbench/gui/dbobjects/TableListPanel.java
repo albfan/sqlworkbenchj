@@ -206,7 +206,7 @@ public class TableListPanel
 		this.parentWindow = aParent;
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
+		int location = PlacementChooser.getPlacementLocation();
 		displayTab = new WbTabbedPane(location);
 		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		displayTab.setName("displaytab");

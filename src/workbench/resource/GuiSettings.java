@@ -46,7 +46,7 @@ public class GuiSettings
 
 	public static boolean getShowMaxRowsReached()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.warning.show");
+		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.warning.show", true);
 	}
 
 	public static void setShowMaxRowsReached(boolean flag)

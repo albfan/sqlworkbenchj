@@ -130,7 +130,7 @@ public class ProcedureListPanel
 		if (initialized) return;
 
 		this.displayTab = new WbTabbedPane();
-		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
+		int location = PlacementChooser.getPlacementLocation();
 		this.displayTab.setTabPlacement(location);
 
 		this.procColumns = new DbObjectTable();

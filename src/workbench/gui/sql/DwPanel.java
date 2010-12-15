@@ -120,6 +120,7 @@ public class DwPanel
 	private GenericRowMonitor genericRowMonitor;
 	private ReferenceTableNavigator referenceNavigator;
 	private ImageIcon warningIcon;
+	private boolean showSQLAsTooltip;
 
 	public DwPanel()
 	{
@@ -773,6 +774,18 @@ public class DwPanel
 		return null;
 	}
 
+	private int getTabIndex(JTabbedPane tab) 
+	{
+		if (tab == null) return -1;
+
+		int index = tab.indexOfComponent(this);
+		if (index == -1)
+		{
+			index = tab.indexOfComponent(this.getParent());
+		}
+		return index;
+	}
+	
 	public boolean maxRowsReached()
 	{
 		int maxRows = getMaxRows();
@@ -782,59 +795,63 @@ public class DwPanel
 		boolean maxReached = maxRows > 0 && (maxRows == rowCount || maxRows == rowCount - 1);
 		return maxReached;
 	}
-	
+
 	private void clearWarningIcon()
 	{
-		JTabbedPane tab = getTabParent();
-		if (tab == null) return;
-
-		int index = tab.indexOfComponent(this);
-		if (index == -1)
-		{
-			index = tab.indexOfComponent(this.getParent());
-		}
-		if (warningIcon != null) 
+		if (warningIcon != null)
 		{
 			warningIcon.getImage().flush();
 		}
-		tab.setIconAt(index, null);
+		JTabbedPane tab = getTabParent();
+		int index = getTabIndex(tab);
+		if (index > -1)
+		{
+			tab.setIconAt(index, null);
+		}
 	}
-	
+
+	public void showGeneratingSQLAsTooltip()
+	{
+		JTabbedPane tab = getTabParent();
+		int index = getTabIndex(tab);
+		if (index == -1) return;
+		
+		String tip = "<html><pre>" + sql.trim() + "</pre></html>";
+		tab.setToolTipTextAt(index, tip);
+		showSQLAsTooltip = true;
+	}
+
 	public void checkLimitReachedDisplay()
 	{
 		if (!GuiSettings.getShowMaxRowsReached()) return;
-		
-		JTabbedPane tab = getTabParent();
-		if (tab == null) return;
 
-		int index = tab.indexOfComponent(this);
-		if (index == -1)
-		{
-			index = tab.indexOfComponent(this.getParent());
-		}
+		JTabbedPane tab = getTabParent();
+		int index = getTabIndex(tab);
 
 		if (index > -1)
 		{
-			boolean maxReached = maxRowsReached();
-			
-			if (maxReached)
+			String tooltip = tab.getToolTipTextAt(index);
+			if (maxRowsReached())
 			{
 				tab.setIconAt(index, getWarningIcon());
-				String tooltip = tab.getToolTipTextAt(index);
 				String msg = ResourceMgr.getString("MsgRetrieveAbort");
-				if (tooltip == null) 
+				if (tooltip == null)
 				{
 					tab.setToolTipTextAt(index, msg);
 				}
 				else
 				{
-					msg += "\n" + StringUtil.padRight("", msg.length() - 2, '*');
-					tab.setToolTipTextAt(index, msg + "\n\n" + tooltip);
+					String tip = "<html><b style=\"font-size:105%\">" + msg + "</b><pre>" + sql.trim() + "</pre></html>";
+					tab.setToolTipTextAt(index, tip);
 				}
 			}
 			else
 			{
 				clearWarningIcon();
+				if (showSQLAsTooltip)
+				{
+					showGeneratingSQLAsTooltip();
+				}
 			}
 		}
 	}

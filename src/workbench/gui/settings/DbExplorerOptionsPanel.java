@@ -57,7 +57,7 @@ public class DbExplorerOptionsPanel
 		defTableType.setText(set.getDefaultExplorerObjectType());
 		rememberColOrder.setSelected(set.getRememberColumnOrder());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
-		((PlacementChooser)tabPlacement).setProperty("workbench.gui.dbobjects.tabletabs");
+		((PlacementChooser)tabPlacement).showPlacement();
 	}
 	
 	/** This method is called from within the constructor to
