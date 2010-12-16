@@ -214,7 +214,8 @@ public class TableSearchPanel
 		}
 	}
 
-	public synchronized void tableSearched(final TableIdentifier table, final DataStore result)
+	@Override
+	public void tableSearched(final TableIdentifier table, final DataStore result)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -271,15 +272,24 @@ public class TableSearchPanel
 		});
 	}
 
-	public synchronized void error(String msg)
+	@Override
+	public void error(final String msg)
 	{
-		this.sqlDisplay.appendLine(msg);
-		this.sqlDisplay.appendLine("\n\n");
+		EventQueue.invokeLater(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				sqlDisplay.appendLine(msg);
+				sqlDisplay.appendLine("\n\n");
+			}
+		});
 	}
 
 	/**
 	 *	Call back function from the table searcher...
 	 */
+	@Override
 	public synchronized void setCurrentTable(String table, String sql)
 	{
 		if (sql == null)
@@ -295,6 +305,7 @@ public class TableSearchPanel
 		this.sqlDisplay.appendLine("\n\n");
 	}
 
+	@Override
 	public void setStatusText(String aStatustext)
 	{
 		this.statusInfo.setText(aStatustext);
@@ -382,7 +393,7 @@ public class TableSearchPanel
 		searcher.setExcludeLobColumns(excludeLobs.isSelected());
 		searcher.setTableNames(searchTables);
 		fireDbExecStart();
-		searcher.startBackgroundSearch(); // starts the background thread
+		searcher.startBackgroundSearch(); 
 	}
 
 	private String getWorkspacePrefix(int index)
@@ -463,13 +474,13 @@ public class TableSearchPanel
 	{
 		fireDbExecEnd();
 
-		// insert a dummy panel at the end which will move
-		// all tables in the pane to the upper border
-		// e.g. when there is only one table
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
+				// insert a dummy panel at the end which will move
+				// all tables in the panel to the upper border
+				// e.g. when there is only one table
 				GridBagConstraints constraints = new GridBagConstraints();
 				constraints.gridx = 0;
 				constraints.weighty = 1.0;
@@ -486,6 +497,7 @@ public class TableSearchPanel
 		});
 	}
 
+	@Override
 	public void searchStarted()
 	{
 		getCriteriaPanel().disableControls();
@@ -493,6 +505,7 @@ public class TableSearchPanel
 		startButton.setText(ResourceMgr.getString("LblCancelPlain"));
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (initialized)
@@ -501,6 +514,7 @@ public class TableSearchPanel
 		}
 	}
 
+	@Override
 	public void keyPressed(java.awt.event.KeyEvent e)
 	{
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
@@ -516,10 +530,12 @@ public class TableSearchPanel
 		}
 	}
 
+	@Override
 	public void keyReleased(java.awt.event.KeyEvent e)
 	{
 	}
 
+	@Override
 	public void keyTyped(java.awt.event.KeyEvent e)
 	{
 	}
@@ -543,12 +559,14 @@ public class TableSearchPanel
 		}
 	}
 
+	@Override
 	public synchronized void addDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 
+	@Override
 	public synchronized void removeDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) return;
