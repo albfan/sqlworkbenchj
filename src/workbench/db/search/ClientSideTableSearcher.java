@@ -140,6 +140,11 @@ public class ClientSideTableSearcher
 		ResultSet rs = null;
 		try
 		{
+			if (connection.getDbSettings().useSavePointForDML())
+			{
+				sp = connection.setSavepoint();
+			}
+
 			TableSelectBuilder builder = new TableSelectBuilder(connection);
 			builder.setExcludeLobColumns(excludeLobs);
 			String sql = builder.getSelectForTable(table);
@@ -154,14 +159,6 @@ public class ClientSideTableSearcher
 				consumer.setCurrentTable(table.getTableName(), sql);
 			}
 			searchQuery = connection.createStatementForQuery();
-
-			if (cancelSearch) return;
-
-
-			if (connection.getDbSettings().useSavePointForDML())
-			{
-				sp = connection.setSavepoint();
-			}
 
 			rs = searchQuery.executeQuery(sql);
 

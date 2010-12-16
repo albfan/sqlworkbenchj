@@ -153,11 +153,10 @@ public class TableSearchPanel
 		tables.getSelectionModel().addListSelectionListener(this);
 		this.startButton.setEnabled(false);
 
-		Border eb = new EmptyBorder(0,2,0,0);
-		CompoundBorder b2 = new CompoundBorder(this.statusInfo.getBorder(), eb);
-		this.statusInfo.setBorder(b2);
-		CompoundBorder b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(2,0,3,0));
-		entryPanel.setBorder(b);
+		CompoundBorder infoBorder = new CompoundBorder(this.statusInfo.getBorder(), new EmptyBorder(0,2,0,0));
+		this.statusInfo.setBorder(infoBorder);
+		CompoundBorder entryBorder = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(2,0,3,0));
+		entryPanel.setBorder(entryBorder);
 		initCriteriaPanel();
 		initialized = true;
 
@@ -217,7 +216,7 @@ public class TableSearchPanel
 
 	public synchronized void tableSearched(final TableIdentifier table, final DataStore result)
 	{
-		WbSwingUtilities.invoke(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -268,7 +267,6 @@ public class TableSearchPanel
 				{
 					LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
 				}
-
 			}
 		});
 	}
