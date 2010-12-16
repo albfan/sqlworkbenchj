@@ -236,12 +236,17 @@ public class SqlUtil
 			{
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return null;
-				if (name.getContents().equals("IF NOT EXISTS") || name.getContents().equals("IF EXISTS"))
+				String content = name.getContents();
+				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS") || content.equals("#"))
 				{
 					name = lexer.getNextToken(false, false);
 					if (name == null) return null;
 				}
 				info.objectName = name.getContents();
+				if (content.equals("#"))
+				{
+					info.objectName = "#" + info.objectName;
+				}
 			}
 			return info;
 		}
@@ -1421,7 +1426,7 @@ public class SqlUtil
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
 			boolean hasWarnings = warn != null;
 			int count = 0;
-			int maxLoops = Settings.getInstance().getIntProperty("workbench.db.warnings.max", 2500);
+			int maxLoops = con.getDbSettings().getMaxWarnings();
 			while (warn != null)
 			{
 				count ++;

@@ -196,6 +196,16 @@ public class DbSettings
 		return this.reportsRealSizeAsDisplaySize;
 	}
 
+	public int getMaxWarnings()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "maxwarnings", 5000);
+	}
+	
+	public int getMaxResults()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "maxresults", 50000);
+	}
+	
 	/**
 	 * Returns true if the DBMS supports transactional DDL and thus
 	 * needs a COMMIT after any DDL statement.

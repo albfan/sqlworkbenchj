@@ -337,6 +337,10 @@ public class SqlUtilTest
 		assertEquals("old_table", info.objectName);
 		assertEquals("TABLE", info.objectType);
 
+		sql = "create table #someTemp(some_col integer);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("#someTemp", info.objectName);
+		assertEquals("TABLE", info.objectType);
 	}
 
 	@Test

@@ -379,6 +379,8 @@ public class SqlCommand
 		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : false);
 
 		int counter = 0;
+		int maxLoops = currentConnection.getDbSettings().getMaxResults();
+		
 		while (moreResults || updateCount > -1)
 		{
 
@@ -494,7 +496,7 @@ public class SqlCommand
 
 			// some JDBC drivers do not implement getMoreResults() and getUpdateCount()
 			// correctly, so this is a safety to prevent an endless loop
-			if (counter > 50) break;
+			if (maxLoops > 0 && counter > maxLoops) break;
 		}
 
 		this.currentRetrievalData = null;
