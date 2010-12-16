@@ -206,24 +206,13 @@ public class TableSearchPanel
 	{
 		if (searcher != null && this.searcher.isRunning())
 		{
-			setStartButtonEnabled(false);
+			startButton.setEnabled(false);
 			this.searcher.cancelSearch();
 		}
 		else
 		{
 			this.searchData();
 		}
-	}
-
-	private void setStartButtonEnabled(final boolean flag)
-	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				startButton.setEnabled(flag);
-			}
-		});
 	}
 
 	public synchronized void tableSearched(final TableIdentifier table, final DataStore result)
@@ -479,7 +468,7 @@ public class TableSearchPanel
 		// insert a dummy panel at the end which will move
 		// all tables in the pane to the upper border
 		// e.g. when there is only one table
-		WbSwingUtilities.invoke(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
