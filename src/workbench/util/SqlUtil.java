@@ -37,7 +37,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
@@ -1434,10 +1433,18 @@ public class SqlUtil
 				if (s != null && s.length() > 0)
 				{
 					msg = append(msg, s);
-					if (!s.endsWith("\n")) msg.append('\n');
+					if (s.charAt(s.length() - 1) != '\n') msg.append('\n');
 					added.add(s);
 				}
-				if (count > maxLoops) break; // prevent endless loop
+				
+				 // prevent endless loop
+				if (maxLoops > 0 && count > maxLoops) 
+				{
+					LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
+					break;
+				}
+				
+				 // prevent endless loop
 				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
@@ -1456,7 +1463,14 @@ public class SqlUtil
 					msg = append(msg, s);
 					if (!s.endsWith("\n")) msg.append('\n');
 				}
-				if (count > maxLoops) break; // prevent endless loop
+				// prevent endless loop
+				if (maxLoops > 0 && count > maxLoops) 
+				{
+					LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
+					break;
+				} 
+				
+				 // prevent endless loop
 				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
