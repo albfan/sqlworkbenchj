@@ -64,6 +64,7 @@ import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
+import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
@@ -75,6 +76,7 @@ import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
+import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
@@ -261,6 +263,7 @@ public class DbMetadata
 			}
 			columnEnhancer = new SqlServerColumnEnhancer();
 			objectListEnhancer = new SqlServerObjectListEnhancer();
+			dataTypeResolver = new SqlServerDataTypeResolver();
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -311,6 +314,10 @@ public class DbMetadata
 			if (pos == -1) pos = this.productName.length() - 1;
 			productName = this.productName.substring(0, pos).trim();
 			sequenceReader = new McKoiSequenceReader(this.dbConnection.getSqlConnection());
+		}
+		else if (productLower.indexOf("sqlite") > -1)
+		{
+			dataTypeResolver = new SQLiteDataTypeResolver();
 		}
 		else if (productLower.indexOf("firstsql") > -1)
 		{

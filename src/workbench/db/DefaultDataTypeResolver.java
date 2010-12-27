@@ -18,11 +18,29 @@ public class DefaultDataTypeResolver
 	implements DataTypeResolver
 {
 
+	@Override
+	public String getColumnClassName(int type, String dbmsType)
+	{
+		return null;
+	}
+
+	/**
+	 * Returns the correct display for the given data type.
+	 *
+	 * @see workbench.util.SqlUtil#getSqlTypeDisplay(java.lang.String, int, int, int)
+	 */
+	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
+	/**
+	 * Default implementation, does not change the datatype
+	 * @param type the java.sql.Types as returned from the driver
+	 * @param dbmsType the DBMS data type as returned from the driver
+	 * @return the passed type
+	 */
 	@Override
 	public int fixColumnType(int type, String dbmsType)
 	{

@@ -1589,8 +1589,7 @@ public class DataStore
 		{
 			if (inCommit)
 			{
-				String msg = ResourceMgr.getString("ErrCommit");
-				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrCommit", ExceptionUtil.getDisplay(e));
 				if (errorHandler != null)
 				{
 					errorHandler.fatalError(msg);

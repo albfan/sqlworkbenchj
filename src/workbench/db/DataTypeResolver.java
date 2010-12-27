@@ -34,4 +34,14 @@ public interface DataTypeResolver
 	 * @return the JDBC data type to be used instead
 	 */
 	int fixColumnType(int type, String dbmsType);
+
+	/**
+	 * Return the Java class to be used for the passed datatype.
+	 * If null is returned, the information from the driver is used (ResultSetMetaData.getColumnClassName())
+	 *
+	 * @param type the JDBC data type
+	 * @param dbmsType the DBMS data type name
+	 * @return null if the driver default should be used, a fully qualified classname otherwise
+	 */
+	String getColumnClassName(int type, String dbmsType);
 }

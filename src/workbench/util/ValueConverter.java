@@ -86,7 +86,7 @@ public class ValueConverter
 	private final Long LONG_FALSE = Long.valueOf(0);
 	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
 	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
-	
+
 	private static final String FORMAT_MILLIS = "millis";
 	private boolean checkBuiltInFormats = true;
 
@@ -122,7 +122,7 @@ public class ValueConverter
 	{
 		this.checkBuiltInFormats = flag;
 	}
-	
+
 	public void setDefaultDateFormat(String aFormat)
 		throws IllegalArgumentException
 	{
@@ -187,7 +187,7 @@ public class ValueConverter
 	 */
 	public void setBooleanLiterals(Collection<String> trueValues, Collection<String> falseValues)
 	{
-		if (trueValues == null || falseValues == null || trueValues.size() == 0 || falseValues.size() == 0)
+		if (trueValues == null || falseValues == null || trueValues.isEmpty() || falseValues.isEmpty())
 		{
 			LogMgr.logWarning("ValueConverter.setBooleanLiterals()", "Ignoring call as at least one collection is empty or null");
 			this.booleanFalseValues = null;
@@ -199,7 +199,7 @@ public class ValueConverter
 			this.booleanTrueValues = new HashSet<String>(trueValues);
 		}
 	}
-	
+
 	private Number getNumberFromString(String value, boolean useInt)
 	{
 		if (value == null) return null;
@@ -555,7 +555,7 @@ public class ValueConverter
 		if (result == null && checkBuiltInFormats)
 		{
 			int usedPattern = -1;
-			
+
 			synchronized (this.formatter)
 			{
 				for (int i = 0; i < dateFormats.length; i++)
@@ -660,7 +660,7 @@ public class ValueConverter
 						this.formatter.applyPattern(dateFormats[i]);
 						result = this.formatter.parse(aDate);
 						LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + aDate + "] using the format: " + dateFormats[i]);
-						
+
 						// use this format from now on...
 						synchronized (dateFormatter)
 						{

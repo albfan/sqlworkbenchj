@@ -104,6 +104,7 @@
    </object>
   </void>
 
+  <!--
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -137,6 +138,7 @@
     </void>
    </object>
   </void>
+  -->
 
   <void method="add">
    <object class="workbench.db.DbDriver">
@@ -428,7 +430,6 @@
     </void>
    </object>
   </void>
-  -->
 
   <void method="add">
    <object class="workbench.db.DbDriver">
@@ -460,6 +461,24 @@
     </void>
     <void property="sampleUrl">
      <string>jdbc:daffodilDB://&lt;hostname&gt;:&lt;port&gt;/Databasename;create=true</string>
+    </void>
+   </object>
+  </void>
+  -->
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.teradata.jdbc.TeraDriver</string>
+    </void>
+    <void property="library">
+     <string>terajdbc4.jar</string>
+    </void>
+    <void property="name">
+     <string>Teradata</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:teradata://DatabaseServerName/Param1,Param2</string>
     </void>
    </object>
   </void>

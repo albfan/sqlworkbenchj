@@ -79,6 +79,7 @@ public class EditorOptionsPanel
 		tabSize.setText(Settings.getInstance().getProperty("workbench.editor.tabwidth", "2"));
 		hiliteCurrent.setSelected(Settings.getInstance().getHighlightCurrentStatement());
 		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
+		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -122,6 +123,7 @@ public class EditorOptionsPanel
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
 		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
 		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
+		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -159,6 +161,7 @@ public class EditorOptionsPanel
     jLabel1 = new JLabel();
     defaultDir = new WbFilePicker();
     alwaysAllowExecSel = new JCheckBox();
+    allowEditDuringExec = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -166,7 +169,7 @@ public class EditorOptionsPanel
     editorTabSizeLabel.setToolTipText(ResourceMgr.getString("d_LblTabWidth")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(editorTabSizeLabel, gridBagConstraints);
@@ -175,7 +178,7 @@ public class EditorOptionsPanel
     tabSize.setHorizontalAlignment(JTextField.LEFT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
@@ -185,7 +188,7 @@ public class EditorOptionsPanel
     altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(8, 12, 0, 0);
     add(altDelimLabel, gridBagConstraints);
@@ -194,7 +197,7 @@ public class EditorOptionsPanel
     historySizeLabel.setToolTipText(ResourceMgr.getString("d_LblHistorySize")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(historySizeLabel, gridBagConstraints);
@@ -202,7 +205,7 @@ public class EditorOptionsPanel
     historySizeField.setColumns(6);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
@@ -212,7 +215,7 @@ public class EditorOptionsPanel
     electricScrollLabel.setToolTipText(ResourceMgr.getString("d_LblSettingElectricScroll")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(electricScrollLabel, gridBagConstraints);
@@ -220,7 +223,7 @@ public class EditorOptionsPanel
     electricScroll.setColumns(6);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
@@ -230,7 +233,7 @@ public class EditorOptionsPanel
     internalLineEndingLabel.setToolTipText(ResourceMgr.getString("d_LblIntLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(10, 12, 0, 0);
@@ -239,7 +242,7 @@ public class EditorOptionsPanel
     internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -250,7 +253,7 @@ public class EditorOptionsPanel
     externalLineEndingLabel.setToolTipText(ResourceMgr.getString("d_LblExtLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 12, 0, 0);
@@ -259,7 +262,7 @@ public class EditorOptionsPanel
     externalLineEnding.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -274,14 +277,14 @@ public class EditorOptionsPanel
     includeFilesInHistory.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 0, 0, 11);
     add(includeFilesInHistory, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -292,7 +295,7 @@ public class EditorOptionsPanel
     noWordSepLabel.setToolTipText(ResourceMgr.getString("d_LblNoWordSep")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(noWordSepLabel, gridBagConstraints);
@@ -302,7 +305,7 @@ public class EditorOptionsPanel
     useTabs.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 0, 0, 10);
     add(useTabs, gridBagConstraints);
@@ -312,7 +315,7 @@ public class EditorOptionsPanel
     noWordSep.setName("nowordsep"); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
@@ -326,10 +329,10 @@ public class EditorOptionsPanel
     autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 13, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 13, 0, 0);
     add(autoAdvance, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
@@ -348,6 +351,7 @@ public class EditorOptionsPanel
     hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setBorder(null);
+    hiliteCurrent.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -356,7 +360,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -371,10 +375,10 @@ public class EditorOptionsPanel
     rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 11);
+    gridBagConstraints.insets = new Insets(9, 13, 0, 11);
     add(rightClickMovesCursor, gridBagConstraints);
 
     jPanel1.setLayout(new GridBagLayout());
@@ -410,13 +414,13 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(13, 12, 0, 15);
+    gridBagConstraints.insets = new Insets(10, 13, 0, 15);
     add(jPanel1, gridBagConstraints);
 
     alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly")); // NOI18N
@@ -426,11 +430,23 @@ public class EditorOptionsPanel
     alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 13, 0, 0);
     add(alwaysAllowExecSel, gridBagConstraints);
+
+    allowEditDuringExec.setText(ResourceMgr.getString("LblAllowEditExecSQL")); // NOI18N
+    allowEditDuringExec.setToolTipText(ResourceMgr.getString("d_LblAllowEditExecSQL")); // NOI18N
+    allowEditDuringExec.setBorder(null);
+    allowEditDuringExec.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(9, 13, 0, 11);
+    add(allowEditDuringExec, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -439,6 +455,12 @@ public class EditorOptionsPanel
     if (evt.getSource() == followCurrentDir) {
       EditorOptionsPanel.this.followCurrentDirActionPerformed(evt);
     }
+    else if (evt.getSource() == hiliteCurrent) {
+      EditorOptionsPanel.this.hiliteCurrentActionPerformed(evt);
+    }
+    else if (evt.getSource() == allowEditDuringExec) {
+      EditorOptionsPanel.this.allowEditDuringExecActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
 
 	private void followCurrentDirActionPerformed(ActionEvent evt)//GEN-FIRST:event_followCurrentDirActionPerformed
@@ -446,8 +468,25 @@ public class EditorOptionsPanel
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 	}//GEN-LAST:event_followCurrentDirActionPerformed
 
+	private void hiliteCurrentActionPerformed(ActionEvent evt)//GEN-FIRST:event_hiliteCurrentActionPerformed
+	{//GEN-HEADEREND:event_hiliteCurrentActionPerformed
+		if (hiliteCurrent.isSelected())
+		{
+			allowEditDuringExec.setSelected(false);
+		}
+	}//GEN-LAST:event_hiliteCurrentActionPerformed
+
+	private void allowEditDuringExecActionPerformed(ActionEvent evt)//GEN-FIRST:event_allowEditDuringExecActionPerformed
+	{//GEN-HEADEREND:event_allowEditDuringExecActionPerformed
+		if (allowEditDuringExec.isSelected())
+		{
+			hiliteCurrent.setSelected(false);
+		}
+	}//GEN-LAST:event_allowEditDuringExecActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JCheckBox allowEditDuringExec;
   private JLabel altDelimLabel;
   private DelimiterDefinitionPanel alternateDelim;
   private JCheckBox alwaysAllowExecSel;

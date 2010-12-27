@@ -23,6 +23,10 @@ import org.junit.Test;
 public class StructConverterTest
 {
 
+	private final String timestampValue = "1980-01-02 03:04:05";
+	private final String dateValue = "2010-09-08";
+	private final String timeValue = "14:15:16";
+	
 	@Test
 	public void testStructDisplay()
 		throws Exception
@@ -39,7 +43,7 @@ public class StructConverterTest
 			public Object[] getAttributes()
 				throws SQLException
 			{
-				return new Object[] {new Integer(42), "Test", new java.sql.Date(1) };
+				return new Object[] {new Integer(42), "Test", java.sql.Date.valueOf(dateValue) };
 			}
 
 			@Override
@@ -62,7 +66,7 @@ public class StructConverterTest
 			public Object[] getAttributes()
 				throws SQLException
 			{
-				return new Object[] {"Arthur", "Dent", new java.sql.Timestamp(1), new java.sql.Time(1), embedded };
+				return new Object[] {"Arthur", "Dent", java.sql.Timestamp.valueOf(timestampValue), java.sql.Time.valueOf(timeValue), embedded };
 			}
 
 			@Override
@@ -74,6 +78,9 @@ public class StructConverterTest
 		};
 
 		String display = StructConverter.getInstance().getStructDisplay(data);
-		assertEquals("SOME_TYPE('Arthur', 'Dent', TIMESTAMP '1970-01-01 01:00:00', TIME '01:00:00', NESTED_TYPE(42, 'Test', DATE '1970-01-01'))", display);
+		String nestedExpected = "NESTED_TYPE(42, 'Test', DATE '"  + dateValue + "')";
+		String expected = "SOME_TYPE('Arthur', 'Dent', TIMESTAMP '" + timestampValue + "', TIME '" + timeValue + "', " + nestedExpected + ")";
+		assertEquals(expected, display);
 	}
+
 }

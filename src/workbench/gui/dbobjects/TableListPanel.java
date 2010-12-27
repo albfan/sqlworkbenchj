@@ -1572,9 +1572,12 @@ public class TableListPanel
 
 	private void endTransaction()
 	{
-		if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
+		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
 		{
-			try { this.dbConnection.commit(); } catch (Throwable th) {}
+			if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
+			{
+				try { this.dbConnection.commit(); } catch (Throwable th) {}
+			}
 		}
 	}
 

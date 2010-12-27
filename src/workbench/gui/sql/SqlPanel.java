@@ -251,7 +251,7 @@ public class SqlPanel
 	protected SqlPanelReloadAction reloadAction;
 	protected ShowObjectInfoAction showObjectInfoAction;
 	protected JoinCompletionAction joinCompletion;
-	
+
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
 	protected CommitAction commitAction;
@@ -850,7 +850,7 @@ public class SqlPanel
 
 		this.joinCompletion = new JoinCompletionAction(this);
 		this.actions.add(joinCompletion);
-		
+
 		this.clearCompletionCache = new ClearCompletionCacheAction();
 		this.actions.add(this.clearCompletionCache);
 		this.actions.add(showObjectInfoAction);
@@ -1206,7 +1206,7 @@ public class SqlPanel
 	{
 		return statusBar;
 	}
-	
+
 	/**
 	 *	Display a message in the status bar of the DwPanel.
 	 */
@@ -2741,7 +2741,6 @@ public class SqlPanel
 				restoreSelection = shouldRestoreSelection;
 			}
 
-			long startTime = System.currentTimeMillis();
 			statusBar.executionStart();
 			long stmtTotal = 0;
 			int executedCount = 0;
@@ -3346,6 +3345,15 @@ public class SqlPanel
 		});
 	}
 
+	/**
+	 * Returns true if the editor should be disabled when running a query.
+	 * @return
+	 */
+	private boolean disableEditor()
+	{
+		return true;
+	}
+	
 	public void setBusy(final boolean busy)
 	{
 		synchronized (this)
@@ -3353,7 +3361,10 @@ public class SqlPanel
 			threadBusy = busy;
 			iconHandler.showBusyIcon(busy);
 			setExecuteActionStates(!busy);
-			editor.setEditable(!busy);
+			if (disableEditor())
+			{
+				editor.setEditable(!busy);
+			}
 			sqlHistory.setEnabled(!busy);
 		}
 	}

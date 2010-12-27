@@ -467,8 +467,8 @@ public class SqlCommand
 			}
 			catch (Throwable th)
 			{
-				// Some older Postgres drivers throw a NPE when getMoreResults() is called multiple
-				// times. This exception is simply ignored, so that processing can proceed normally
+				// Some drivers do not support getMoreResults() properly.
+				// So, this exception is simply ignored, so that processing can proceed normally
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", th);
 				break;
 			}

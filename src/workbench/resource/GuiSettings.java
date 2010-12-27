@@ -28,7 +28,17 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 	public static final String PROPERTY_EXEC_SEL_ONLY = "workbench.gui.editor.execute.onlyselected";
-	
+
+	public static boolean getDisableEditorDuringExecution()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.exec.disable", true);
+	}
+
+	public static void setDisableEditorDuringExecution(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.exec.disable", flag);
+	}
+
 	public static boolean getUseRegexInQuickFilter()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.quickfilter.useregex", true);

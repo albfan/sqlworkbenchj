@@ -1336,10 +1336,15 @@ public class SqlUtil
 				// Postgres' text datatype does not have a size parameter
 				if ("text".equals(typeName)) return "text";
 
+				// Some drivers already include the column size in the data type;
+				
+				if (display.indexOf('(') > -1) return display;
+
 				if (size > 0)
 				{
 					display = typeName + "(" + size + ")";
 				}
+
 				break;
 
 			case Types.DOUBLE:

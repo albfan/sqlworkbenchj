@@ -201,6 +201,13 @@ public class OracleMetadata
 		return value;
 	}
 
+	@Override
+	public String getColumnClassName(int type, String dbmsType)
+	{
+		return null;
+	}
+
+	@Override
 	public int fixColumnType(int type, String dbmsType)
 	{
 		if (type == Types.DATE && getMapDateToTimestamp()) return Types.TIMESTAMP;
@@ -220,6 +227,7 @@ public class OracleMetadata
 		return type;
 	}
 
+	@Override
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, List<String> primaryKeyColumns, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{

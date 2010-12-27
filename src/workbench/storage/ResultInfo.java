@@ -24,7 +24,6 @@ import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -248,19 +247,18 @@ public class ResultInfo
 
 			try
 			{
-				if (dbMeta != null && dbMeta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay() && type == Types.BINARY && "timestamp".equals(typename))
-				{
-					// hack for SQL Server
-					// RowData#readRow() will convert the byte[] into a hex String
-					col.setColumnClassName("java.lang.String");
-				}
-				else if (useGetStringForBit && type == Types.BIT)
+				if (useGetStringForBit && type == Types.BIT)
 				{
 					col.setColumnClassName("java.lang.String");
 				}
 				else
 				{
-					String cls = metaData.getColumnClassName(i + 1);
+					String cls = null;
+					if (dbMeta != null) 
+					{
+						cls = dbMeta.getDataTypeResolver().getColumnClassName(col.getDataType(), col.getDbmsType());
+					}
+					if (cls == null) cls = metaData.getColumnClassName(i + 1);
 					col.setColumnClassName(cls);
 				}
 			}
