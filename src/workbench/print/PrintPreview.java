@@ -76,7 +76,7 @@ public class PrintPreview
 	private JButton pageUp;
 	private boolean hasHorizontalPages;
 	private JScrollPane scroll;
-	protected PreviewContainer preview;
+	private PreviewContainer preview;
 	private PagePreview pageDisplay;
 	private int currentPage = 0;
 

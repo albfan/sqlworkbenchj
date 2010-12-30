@@ -47,7 +47,7 @@ TablePrinter printer = new TablePrinter(theTable, format, printerFont);
 printer.startPrint();
 </pre>
  *  The printout will be started in a separate thread on the default printer.
- * 
+ *
  * @author support@sql-workbench.et
  */
 public class TablePrinter
@@ -85,7 +85,7 @@ public class TablePrinter
 		}
 		calculatePages();
 	}
-	
+
 	public void setHeaderText(String aText)
 	{
 		this.headerText = aText;
@@ -101,7 +101,7 @@ public class TablePrinter
 
 	public void startPrint()
 	{
-		final PrinterJob pj=PrinterJob.getPrinterJob();
+		final PrinterJob pj = PrinterJob.getPrinterJob();
 		if (this.format == null)
 		{
 			this.setPageFormat(pj.defaultPage());
@@ -214,7 +214,7 @@ public class TablePrinter
 	private void calculatePages()
 	{
 		if (this.format == null) return;
-		
+
 		int pageWidth = (int)format.getImageableWidth();
 		int pageHeight = (int)format.getImageableHeight();
 
@@ -250,7 +250,7 @@ public class TablePrinter
 		// the value will be the column were that page starts
 		Map<Integer, Integer> horizontalBrakeColumns = new HashMap<Integer, Integer>();
 
-		// First page always starts at column 0 
+		// First page always starts at column 0
 		horizontalBrakeColumns.put(Integer.valueOf(0), Integer.valueOf(0));
 
 		String[] colHeaders = new String[colCount];
@@ -273,8 +273,8 @@ public class TablePrinter
 			paintViewR.width = width[col];
 			paintViewR.height = lineHeight;
 
-			paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
-			paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
+			paintIconR.setBounds(0, 0, 0, 0);
+			paintTextR.setBounds(0, 0, 0, 0);
 
 			colHeaders[col] =
 					SwingUtilities.layoutCompoundLabel(fm,title,(Icon)null
@@ -360,7 +360,7 @@ public class TablePrinter
 		StringBuilder footer = new StringBuilder(100);
 		if (pagesAcross > 1)
 		{
-			footer.append(ResourceMgr.getFormattedString("TxtPageFooterHor", 
+			footer.append(ResourceMgr.getFormattedString("TxtPageFooterHor",
 				currentPage.getPageNumberAcross(), this.pagesAcross,
 				currentPage.getPageNumberDown(), this.pagesDown
 			));

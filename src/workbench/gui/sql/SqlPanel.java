@@ -1545,7 +1545,7 @@ public class SqlPanel
 					msg = e.getMessage();
 					WbSwingUtilities.showErrorMessage(this, msg);
 				}
-				this.currentData.rowCountChanged();
+				currentData.rowCountChanged();
 				WbSwingUtilities.repaintLater(this);
 			}
 			else
@@ -2253,7 +2253,9 @@ public class SqlPanel
 
 		if (newIndex == this.resultTab.getTabCount() - 1)
 		{
-			this.currentData = null;
+			currentData = null;
+			// this means the message panel is displayed, so remove the rowcount display from the status bar
+			statusBar.clearRowcount();
 		}
 		else
 		{
@@ -3353,7 +3355,7 @@ public class SqlPanel
 	{
 		return true;
 	}
-	
+
 	public void setBusy(final boolean busy)
 	{
 		synchronized (this)

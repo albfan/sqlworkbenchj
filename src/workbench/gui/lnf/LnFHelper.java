@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  * Initialize some gui elements during startup.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class LnFHelper
@@ -100,7 +100,7 @@ public class LnFHelper
 			def.put("Table.gridColor", c);
 		}
 	}
-	
+
 	public static boolean isJGoodies()
 	{
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
@@ -166,6 +166,7 @@ public class LnFHelper
 			// should not ahppen
 		}
 	}
+	
 	private void checkWindowsClassic(String clsname)
 	{
 		try

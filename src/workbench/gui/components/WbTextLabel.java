@@ -26,9 +26,9 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 
 /**
- *  Displays a Label left or right aligned with no further overhead in painting
- *  (Faster then JLabel) this is used to in DwStatusBar to speed
- *  up processes that do give a lot of feedback (e.g. import)
+ * Displays a Label left or right aligned with no further overhead in painting
+ * (Faster then JLabel) this is used in DwStatusBar to speed up processes that
+ * give a lot of feedback through the status bar (e.g. WbImport)
  *
  * @author Thomas Kellerer
  */
@@ -105,8 +105,7 @@ public class WbTextLabel
 			int w = (fm != null ? fm.stringWidth(this.text) : 15);
 			textX = this.getWidth() - w - 4;
 		}
-		invalidate();
-		repaint();
+		validate();
 	}
 
 	public void forcePaint()

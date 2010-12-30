@@ -278,17 +278,28 @@ public class DwStatusBar
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
-		execTime.setText(durationFormatter.formatDuration(time, false));
+		setExecTimeText(durationFormatter.formatDuration(time, false));
 	}
 
 	public void setExecutionTime(long millis)
 	{
 		if (timerRunning) executionEnd();
 		boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
-		execTime.setText(durationFormatter.formatDuration(millis, includeFraction));
-		execTime.repaint();
+		setExecTimeText(durationFormatter.formatDuration(millis, includeFraction));
 	}
 
+	private void setExecTimeText(final String text)
+	{
+		EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					execTime.setText(text);
+				}
+			}
+		);
+	}
 	public void setRowcount(int start, int end, int count)
 	{
 		final StringBuilder s = new StringBuilder(20);
@@ -303,33 +314,31 @@ public class DwStatusBar
 			s.append('/');
 			s.append(NumberStringCache.getNumberString(count));
 		}
-		tfRowCount.setText(s.toString());
-		refresh();
+		setRowcountText(s.toString());
 	}
 
-	private Runnable refresher = new Runnable()
+	private void setRowcountText(final String text)
 	{
-		public void run()
-		{
-			validate();
-			repaint();
-		}
-	};
-
-	protected void refresh()
-	{
-		EventQueue.invokeLater(refresher);
+		EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					tfRowCount.setText(text);
+					validate();
+				}
+			}
+		);
 	}
 
 	public void clearRowcount()
 	{
-		tfRowCount.setText("");
-		refresh();
+		setRowcountText("");
 	}
 
 	public String getText()
 	{
-		return this.tfStatus.getText();
+		return tfStatus.getText();
 	}
 
 	@Override
@@ -349,12 +358,8 @@ public class DwStatusBar
 	}
 
 	/**
-	 *	Show a message in the status panel.
+	 *	Display the status message
 	 *
-	 *	This method might be called from within a background thread, so we
-	 *  need to make sure the actual setText() stuff is called on the AWT
-	 *  thread in order to update the GUI correctly.
-	 *  @see DwStatusBar#setStatusMessage(String)
 	 */
 	public void setStatusMessage(final String aMsg)
 	{

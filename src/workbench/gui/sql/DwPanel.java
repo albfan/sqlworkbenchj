@@ -774,7 +774,7 @@ public class DwPanel
 		return null;
 	}
 
-	private int getTabIndex(JTabbedPane tab) 
+	private int getTabIndex(JTabbedPane tab)
 	{
 		if (tab == null) return -1;
 
@@ -785,7 +785,7 @@ public class DwPanel
 		}
 		return index;
 	}
-	
+
 	public boolean maxRowsReached()
 	{
 		int maxRows = getMaxRows();
@@ -812,7 +812,7 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip()
 	{
-		if (sql == null) 
+		if (sql == null)
 		{
 			LogMgr.logDebug("DwPanel.showGeneratingSQLAsTooltip()", "No generating SQL defined!");
 			return;
@@ -820,7 +820,7 @@ public class DwPanel
 		JTabbedPane tab = getTabParent();
 		int index = getTabIndex(tab);
 		if (index == -1) return;
-		
+
 		String tip = "<html><pre>" + sql.trim() + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
@@ -918,13 +918,16 @@ public class DwPanel
 	 */
 	public void rowCountChanged()
 	{
-		int startRow = 0;
-		int endRow = 0;
-		int count = 0;
-		startRow = this.dataTable.getFirstVisibleRow();
-		endRow = this.dataTable.getLastVisibleRow();
-		count = this.dataTable.getRowCount();
-		statusBar.setRowcount(startRow + 1, endRow + 1, count);
+		if (this.isVisible())
+		{
+			int startRow = 0;
+			int endRow = 0;
+			int count = 0;
+			startRow = this.dataTable.getFirstVisibleRow();
+			endRow = this.dataTable.getLastVisibleRow();
+			count = this.dataTable.getRowCount();
+			statusBar.setRowcount(startRow + 1, endRow + 1, count);
+		}
 	}
 
 	public int duplicateRow()
@@ -1121,10 +1124,13 @@ public class DwPanel
 
 	public void updateStatusBar()
 	{
-		rowCountChanged();
-		if (GuiSettings.getShowSelectionSummary() && this.statusBar != null)
+		if (this.isVisible())
 		{
-			statusBar.showSelectionIndicator(this.dataTable);
+			rowCountChanged();
+			if (GuiSettings.getShowSelectionSummary() && this.statusBar != null)
+			{
+				statusBar.showSelectionIndicator(this.dataTable);
+			}
 		}
 	}
 
