@@ -52,7 +52,7 @@ public class HsqlSequenceReader
 						"start_with " +
 						"FROM ";
 
-		if (JdbcUtils.hasMinimumServerVersion(conn, "1.9"))
+		if (JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
 		{
 			query += "information_schema.sequences";
 			query = query.replace("dtd_identifier as data_type", "data_type");
@@ -71,13 +71,31 @@ public class HsqlSequenceReader
 		def.setSource(s);
 	}
 
-	public DataStore getRawSequenceDefinition(String catalog, String owner, String namePattern)
+	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		String query = baseQuery;
+		StringBuilder query = new StringBuilder(baseQuery.length() + 20);
+		query.append(baseQuery);
+		boolean whereAdded = false;
 
 		if (StringUtil.isNonBlank(namePattern))
 		{
-			query += " WHERE sequence_name LIKE '" + StringUtil.trimQuotes(namePattern) + "' ";
+			whereAdded = true;
+			query.append(" WHERE sequence_name LIKE '");
+			query.append(StringUtil.trimQuotes(namePattern));
+			query.append("' ");
+		}
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			if (!whereAdded)
+			{
+				query.append(" WHERE ");
+			}
+			else
+			{
+				query.append(" AND ");
+			}
+			SqlUtil.appendExpression(query, "sequence_schema", StringUtil.trimQuotes(schema));
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -90,7 +108,7 @@ public class HsqlSequenceReader
 		DataStore result = null;
 		try
 		{
-			stmt = this.dbConn.prepareStatement(query);
+			stmt = this.dbConn.prepareStatement(query.toString());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
 		}

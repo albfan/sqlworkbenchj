@@ -1,17 +1,15 @@
 /*
  * HsqlConstraintReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.hsqldb;
 
-import java.util.List;
-import workbench.db.TableConstraint;
 import java.util.List;
 import workbench.db.TableConstraint;
 import org.junit.AfterClass;
@@ -65,10 +63,11 @@ public class HsqlConstraintReaderTest
 		List<TableConstraint> constraints = reader.getTableConstraints(conn, tbl);
 		assertEquals(2, constraints.size());
 		TableConstraint minValue = constraints.get(0);
-		assertEquals("(CONS_TEST.ID>42)", minValue.getExpression());
+		// HSQLDB 2.0 includes the table's schema
+		assertEquals("(PUBLIC.CONS_TEST.ID>42)", minValue.getExpression());
 
 		TableConstraint maxValue = constraints.get(1);
-		assertEquals("(CONS_TEST.NR<100)", maxValue.getExpression());
+		assertEquals("(PUBLIC.CONS_TEST.NR<100)", maxValue.getExpression());
 		assertTrue(hsqlReader.isSystemConstraintName(maxValue.getConstraintName()));
 	}
 

@@ -52,7 +52,7 @@ public class HsqlSequenceReaderTest
 			"create sequence bbb_sequence start with 12 increment by 5;\n");
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertTrue(reader instanceof HsqlSequenceReader);
-		List<SequenceDefinition> sequences = reader.getSequences(null, null, null);
+		List<SequenceDefinition> sequences = reader.getSequences(null, "PUBLIC", null);
 		assertNotNull(sequences);
 		assertEquals(2, sequences.size());
 
@@ -68,6 +68,11 @@ public class HsqlSequenceReaderTest
 		assertTrue(sql.indexOf("AS BIGINT") == -1);
 		assertTrue(sql.indexOf("START WITH 12") > -1);
 		assertTrue(sql.indexOf("INCREMENT BY 5") > -1);
+
+		// Since 2.0 there is a system sequence in the schema "SYSTEM_LOBS", so without a schema
+		// we expect three sequences in the list.
+		sequences = reader.getSequences(null, null, null);
+		assertEquals(3, sequences.size());
 	}
 
 }
