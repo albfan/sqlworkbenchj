@@ -4,7 +4,7 @@
 	<section id="configure-drivers">
 		<title>Configuring JDBC drivers</title>
 		<para>
-      <indexterm><primary>Configuration</primary><secondary>JDBC driver</secondary></indexterm> 
+      <indexterm><primary>Configuration</primary><secondary>JDBC driver</secondary></indexterm>
 			Before you can connect to a DBMS you have to configure the JDBC driver to be used.
       The driver configuration is available in the connection
 			dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
@@ -35,13 +35,13 @@
         (note the capital D for Driver)
       </para>
     </caution>
-    
+
 		<para>
 			The name of the library has to contain the full path to the driver&apos;s jar file, so that
 			&wb-productname; can find it. Some drivers are distributed in several jar files. In that case,
 			select all necessary files in the file open dialog, or enter all the
-			filenames separated by a semicolon (or a colon on Unix style operating systems). 
-			This is also true for drivers that require a license file that is contained in a jar file. 
+			filenames separated by a semicolon (or a colon on Unix style operating systems).
+			This is also true for drivers that require a license file that is contained in a jar file.
 			In this case you have to include the license jar in the list of files. Basically this list defines
 			the classpath for the classloader that is used to load and instantiate the driver.
 		</para>
@@ -78,7 +78,7 @@
 			&wb-productname; comes with some sample URLs pre-configured.
 			Some of these sample URLs use brackets to indicate a parameters that need
 			to be replaced with the actual value for your connection: (servername)
-			In this case the entire sequence including the brackets need to be replaced with the 
+			In this case the entire sequence including the brackets need to be replaced with the
 			actual value.
 		</para>
 
@@ -89,7 +89,7 @@
     <indexterm><primary>ODBC</primary><secondary>driver</secondary></indexterm>
     <indexterm><primary>ODBC</primary><secondary>datasource</secondary></indexterm>
     <indexterm><primary>ODBC</primary><secondary>jdbc url</secondary></indexterm>
-    
+
     <para>
       To connect to a database using an ODBC driver, you must first setup an ODBC datasource
       with the tools of your operating system (e.g. the control panel in Windows&reg;)
@@ -121,7 +121,7 @@
 		<title>Popular JDBC drivers</title>
 
 		<para>
-			Here is an overview of common JDBC drivers, and the classname that need 
+			Here is an overview of common JDBC drivers, and the classname that need
 			to be used. &wb-productname; contains predefined JDBC drivers with sample URLs
       for connecting to the database.
 		</para>
@@ -155,7 +155,7 @@
 						</simplelist>
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>Firebird SQL</entry>
 						<entry>org.firebirdsql.jdbc.FBDriver</entry>
@@ -229,6 +229,17 @@
 							<simplelist columns="1">
 								<member>derby.jar</member>
 								<member><ulink url="http://db.apache.org/derby/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>Teradata</entry>
+						<entry>com.teradata.jdbc.TeraDriver</entry>
+						<entry>
+							<simplelist columns="1">
+							  <member>terajdbc4.jar</member>
+								<member><ulink url="http://www.teradata.com/DownloadCenter/Forum158-1.aspx"/></member>
 							</simplelist>
 						</entry>
 					</row>

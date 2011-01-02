@@ -1727,7 +1727,7 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 
-		if (GuiSettings.getConfirmDiscardResultSetChanges()  && !appendResult && isDataModified())
+		if (GuiSettings.getConfirmDiscardResultSetChanges() && !appendResult && isDataModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
@@ -1769,6 +1769,7 @@ public class SqlPanel
 
 		this.storeStatementInHistory();
 		cancelExecution = false;
+
 		setBusy(true);
 
 		// the dbStart should be fired *after* updating the
@@ -2755,6 +2756,7 @@ public class SqlPanel
 			long totalRows = 0;
 			lastScriptExecTime = 0;
 			stmtRunner.setMaxRows(maxRows);
+			long scriptStart = System.currentTimeMillis();
 
 			ignoreStateChange = true;
 			for (int i=startIndex; i < endIndex; i++)
@@ -2771,7 +2773,7 @@ public class SqlPanel
 				Thread.yield();
 				if (cancelExecution) break;
 
-				if (highlightCurrent)
+				if (highlightCurrent && scriptStart > editor.getLastModifiedTime())
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
@@ -2869,7 +2871,10 @@ public class SqlPanel
 						// dialog is displayed, otherwise Swing uses too much CPU
 						iconHandler.showBusyIcon(false);
 
-						if (!macroRun) this.highlightError(scriptParser, commandWithError, selectionOffset);
+						if (!macroRun && scriptStart > editor.getLastModifiedTime())
+						{
+							this.highlightError(scriptParser, commandWithError, selectionOffset);
+						}
 
 						// force a refresh in order to display the selection
 						WbSwingUtilities.repaintLater(this);
@@ -2903,6 +2908,10 @@ public class SqlPanel
 			// this will also automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);
 			statusBar.clearStatusMessage();
+
+			boolean editorWasModified = scriptStart > editor.getLastModifiedTime();
+			highlightCurrent = highlightCurrent && editorWasModified;
+			highlightOnError = highlightOnError && editorWasModified;
 
 			if (commandWithError > -1 && highlightOnError && !macroRun)
 			{
@@ -2951,8 +2960,7 @@ public class SqlPanel
 				this.appendToLog(s);
 			}
 
-			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight();
-
+			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight() && !editorWasModified;
 
 			if (!(highlightCurrent && GuiSettings.getKeepCurrentSqlHighlight()))
 			{
@@ -2979,6 +2987,7 @@ public class SqlPanel
 					}
 				}
 
+				// Only jump to next statement if no error occurred
 				if (commandWithError == -1 && jumpToNext)
 				{
 					int nextCommand = startIndex + 1;
@@ -3349,11 +3358,12 @@ public class SqlPanel
 
 	/**
 	 * Returns true if the editor should be disabled when running a query.
-	 * @return
+	 * 
+	 * @see GuiSettings#getDisableEditorDuringExecution()
 	 */
 	private boolean disableEditor()
 	{
-		return true;
+		return GuiSettings.getDisableEditorDuringExecution();
 	}
 
 	public void setBusy(final boolean busy)

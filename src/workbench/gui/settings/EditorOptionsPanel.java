@@ -351,7 +351,6 @@ public class EditorOptionsPanel
     hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setBorder(null);
-    hiliteCurrent.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -439,7 +438,6 @@ public class EditorOptionsPanel
     allowEditDuringExec.setText(ResourceMgr.getString("LblAllowEditExecSQL")); // NOI18N
     allowEditDuringExec.setToolTipText(ResourceMgr.getString("d_LblAllowEditExecSQL")); // NOI18N
     allowEditDuringExec.setBorder(null);
-    allowEditDuringExec.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 11;
@@ -455,34 +453,12 @@ public class EditorOptionsPanel
     if (evt.getSource() == followCurrentDir) {
       EditorOptionsPanel.this.followCurrentDirActionPerformed(evt);
     }
-    else if (evt.getSource() == hiliteCurrent) {
-      EditorOptionsPanel.this.hiliteCurrentActionPerformed(evt);
-    }
-    else if (evt.getSource() == allowEditDuringExec) {
-      EditorOptionsPanel.this.allowEditDuringExecActionPerformed(evt);
-    }
   }// </editor-fold>//GEN-END:initComponents
 
 	private void followCurrentDirActionPerformed(ActionEvent evt)//GEN-FIRST:event_followCurrentDirActionPerformed
 	{//GEN-HEADEREND:event_followCurrentDirActionPerformed
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 	}//GEN-LAST:event_followCurrentDirActionPerformed
-
-	private void hiliteCurrentActionPerformed(ActionEvent evt)//GEN-FIRST:event_hiliteCurrentActionPerformed
-	{//GEN-HEADEREND:event_hiliteCurrentActionPerformed
-		if (hiliteCurrent.isSelected())
-		{
-			allowEditDuringExec.setSelected(false);
-		}
-	}//GEN-LAST:event_hiliteCurrentActionPerformed
-
-	private void allowEditDuringExecActionPerformed(ActionEvent evt)//GEN-FIRST:event_allowEditDuringExecActionPerformed
-	{//GEN-HEADEREND:event_allowEditDuringExecActionPerformed
-		if (allowEditDuringExec.isSelected())
-		{
-			hiliteCurrent.setSelected(false);
-		}
-	}//GEN-LAST:event_allowEditDuringExecActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

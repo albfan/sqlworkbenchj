@@ -122,8 +122,12 @@ import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.editor.actions.DecreaseFontSize;
+import workbench.gui.editor.actions.IncreaseFontSize;
+import workbench.gui.editor.actions.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.menu.RecentWorkspaceManager;
+import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
@@ -539,30 +543,43 @@ public class MainWindow
 			menu.setVisible(true);
 		}
 
-		menu = menus.get(ResourceMgr.MNU_TXT_FILE);
-		menu.addSeparator();
-		menu.add(new ManageDriversAction());
-		menu.addSeparator();
+		final JMenu filemenu = menus.get(ResourceMgr.MNU_TXT_FILE);
+		filemenu.addSeparator();
+		filemenu.add(new ManageDriversAction());
+		filemenu.addSeparator();
 
 		action = new FileExitAction();
-		menu.add(action);
+		filemenu.add(action);
 
-		menu = menus.get(workbench.resource.ResourceMgr.MNU_TXT_VIEW);
+		final JMenu viewMenu = menus.get(workbench.resource.ResourceMgr.MNU_TXT_VIEW);
 		AddTabAction add = new AddTabAction(this);
-		menu.addSeparator();
-		menu.add(add);
+		viewMenu.addSeparator();
+		viewMenu.add(add);
 		InsertTabAction insert = new InsertTabAction(this);
-		menu.add(insert);
+		viewMenu.add(insert);
 
 		RemoveTabAction rem = new RemoveTabAction(this);
-		menu.add(rem);
-		menu.add(new RenameTabAction(this));
-		menu.addSeparator();
+		viewMenu.add(rem);
+		viewMenu.add(new RenameTabAction(this));
+		viewMenu.addSeparator();
 		ViewLineNumbers v = new ViewLineNumbers();
-		v.addToMenu(menu);
+		v.addToMenu(viewMenu);
 
 		WbAction vTb = new ViewToolbarAction();
-		vTb.addToMenu (menu);
+		vTb.addToMenu(viewMenu);
+
+
+		if (aPanel instanceof SqlPanel)
+		{
+			JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
+			SqlPanel panel = (SqlPanel)aPanel;
+			EditorPanel editor = panel.getEditor();
+			zoom.add(new JMenuItem(new IncreaseFontSize(editor)));
+			zoom.add(new JMenuItem(new DecreaseFontSize(editor)));
+			zoom.addSeparator();
+			zoom.add(new JMenuItem(new ResetFontSize(editor)));
+			viewMenu.add(zoom);
+		}
 
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());

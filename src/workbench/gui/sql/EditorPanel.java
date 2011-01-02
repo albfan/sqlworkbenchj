@@ -243,7 +243,7 @@ public class EditorPanel
 			{
 				commentChar = "#";
 			}
-			
+
 			// Support Microsoft's broken object quoting using square brackets (e.g. [wrong_table])
 			token.setIsMicrosoft(aConnection.getMetadata().isSqlServer());
 		}
@@ -585,11 +585,7 @@ public class EditorPanel
 			// these is also done later when calling setDocument()
 			// but that would mean, that the old and the new document would
 			// be in memory at the same time.
-			if (this.document != null)
-			{
-				this.document.removeDocumentListener(documentHandler);
-				this.document.reset();
-			}
+			clearCurrentDocument();
 
 			String filename = aFile.getAbsolutePath();
 			File f = new File(filename);
@@ -786,7 +782,7 @@ public class EditorPanel
 			int pos = filename.indexOf('.');
 			if (pos < 0)
 			{
-				filename = filename + ".sql";
+				filename += ".sql";
 				aFile = new File(filename);
 			}
 
@@ -803,7 +799,7 @@ public class EditorPanel
 					writer.write(line, 0, len);
 					writer.write(lineEnding);
 				}
-				else if (i < count - 1) 
+				else if (i < count - 1)
 				{
 					// do not append an empty line at the end
 					writer.write(lineEnding);

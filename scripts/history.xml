@@ -3,7 +3,9 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-12-12">
     <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
-    <entry dev-build="9" type="enh">When the option "Show Max. Rows warning" is enabled, the warning is now shown using an icon in the tab header (instead of changing the color).</entry>
+    <entry dev-build="10" type="enh">The font size of the editor can now be changed dynamically using Ctrl-Numpad Plus/Ctrl-Numpad Minus or via the scroll wheel of the mouse (holding down the Ctrl Key).</entry>
+    <entry dev-build="10" type="enh">It is now (optionally) possible to modify the text in the editor while a statement is running. Statement and error highlighting will not be available if the editor contents was modified during execution.</entry>
+    <entry dev-build="10" type="enh">When the option "Show Max. Rows warning" is enabled, the warning is now shown using an icon in the tab header (instead of changing the color).</entry>
     <entry dev-build="8" type="enh">The join condition inside a JOIN part of a SELECT statement can now be generated automatically (if the tables involved are using foreign keys) using SQL -&gt; JOIN completion</entry>
     <entry dev-build="8" type="enh">Primary key columns are now shown in bold face in the auto-completion popup window. If comments are defined for columns, tables or view, these will be shown as a tooltip for the entry in the popup</entry>
     <entry dev-build="7" type="enh">A new parameter -skipTargetCheck is available for WbCopy to disable checking of the target table. This is useful if the target table is not visible by the JDBC driver (e.g. temporary tables for Informix)</entry>
@@ -18,6 +20,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="10" type="fix">The rowcount in the statusbar was not always showing the correct values when more than one result was present</entry>
     <entry dev-build="9" type="fix">JOIN completion did not work</entry>
     <entry dev-build="8" type="fix">WbCall did not work for functions that were using OUT parameters</entry>
     <entry dev-build="8" type="fix">When using a query as the source for WbCopy that used column aliases between databases that store object names in different case a wrong isnert or update statement was created</entry>

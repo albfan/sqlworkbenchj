@@ -158,7 +158,7 @@ public class JEditTextArea
 
 	protected InputHandler inputHandler;
 	protected SyntaxDocument document;
-	protected DocumentHandler documentHandler;
+	private DocumentHandler documentHandler;
 
 	protected Segment lineSegment;
 
@@ -175,8 +175,8 @@ public class JEditTextArea
 	protected int magicCaret;
 	protected boolean overwrite;
 	protected boolean rectSelect;
-	protected boolean modified;
 
+	private long lastModified;
 	private int invalidationInterval = 10;
 
 
@@ -196,7 +196,9 @@ public class JEditTextArea
 		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
 		lineSegment = new Segment();
-		bracketLine = bracketPosition = -1;
+		bracketLine = -1;
+		bracketPosition = -1;
+		lastModified = 0;
 		blink = true;
 
 		setLayout(new ScrollLayout());
@@ -959,6 +961,18 @@ public class JEditTextArea
 	}
 
 	/**
+	 * Calls SyntaxDocument.reset() and removes the documentListener from the current document.
+	 */
+	protected void clearCurrentDocument()
+	{
+		if (this.document != null)
+		{
+			this.document.removeDocumentListener(documentHandler);
+			this.document.reset();
+		}
+	}
+
+	/**
 	 * Sets the document this text area is editing.
 	 * @param newDocument The document
 	 */
@@ -966,12 +980,7 @@ public class JEditTextArea
 	{
 		if (this.document == newDocument) return;
 
-		if (this.document != null)
-		{
-			this.document.removeDocumentListener(documentHandler);
-			this.document.reset();
-			if (this.currentTokenMarker != null) currentTokenMarker.reset();
-		}
+		clearCurrentDocument();
 
 		document = newDocument;
 
@@ -1283,7 +1292,8 @@ public class JEditTextArea
 		catch(BadLocationException bl)
 		{
 			LogMgr.logError("JEditTextArea.getText()", "Error setting text", bl);
-			segment.offset = segment.count = 0;
+			segment.offset = 0;
+			segment.count = 0;
 		}
 	}
 
@@ -2244,7 +2254,8 @@ public class JEditTextArea
 	{
 		if (newCaretPosition == 0)
 		{
-			bracketPosition = bracketLine = -1;
+			bracketPosition = -1;
+			bracketLine = -1;
 			return;
 		}
 
@@ -2263,7 +2274,8 @@ public class JEditTextArea
 			LogMgr.logError("JEditTextArea.updateBracketHighlight()", "Error setting text", bl);
 		}
 
-		bracketLine = bracketPosition = -1;
+		bracketLine = -1;
+		bracketPosition = -1;
 	}
 
 	protected void documentChanged(DocumentEvent evt)
@@ -2292,8 +2304,8 @@ public class JEditTextArea
 			painter.invalidateLineRange(line,(firstLine < 0 ? 0 : firstLine) + visibleLines);
 		}
 
-		boolean wasModified = this.modified;
-		this.modified = true;
+		boolean wasModified = isModified();
+		setModified();
 
 		// only fire event if modified status is changed
 		if (!wasModified)
@@ -2340,15 +2352,25 @@ public class JEditTextArea
 		popup.show(painter, p.x, p.y);
 	}
 
+	public long getLastModifiedTime()
+	{
+		return lastModified;
+	}
+
+	public void setModified()
+	{
+		lastModified = System.currentTimeMillis();
+	}
+
 	public boolean isModified()
 	{
-		return this.modified;
+		return lastModified > 0;
 	}
 
 	public void resetModified()
 	{
-		boolean wasModified = this.modified;
-		this.modified = false;
+		boolean wasModified = isModified();
+		lastModified = 0;
 		if (wasModified)
 		{
 			this.fireTextStatusChanged(false);
@@ -2363,8 +2385,22 @@ public class JEditTextArea
 	{
 		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
 		{
-			int totalScrollAmount = e.getUnitsToScroll() * vertical.getUnitIncrement();
-			vertical.setValue(vertical.getValue() + totalScrollAmount);
+			if (WbAction.isCtrlPressed(e.getModifiers()))
+			{
+				if (e.getWheelRotation() > 0)
+				{
+					painter.decreaseFontSize();
+				}
+				else
+				{
+					painter.increaseFontSize();
+				}
+			}
+			else
+			{
+				int totalScrollAmount = e.getUnitsToScroll() * vertical.getUnitIncrement();
+				vertical.setValue(vertical.getValue() + totalScrollAmount);
+			}
 		}
 	}
 

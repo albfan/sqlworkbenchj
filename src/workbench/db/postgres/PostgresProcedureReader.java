@@ -253,10 +253,10 @@ public class PostgresProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		PGProcName pgName = new PGProcName(def.getDisplayName(), getTypeLookup());
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
+			PGProcName pgName = new PGProcName(def.getDisplayName(), getTypeLookup());
 			return getColumns(def.getCatalog(), def.getSchema(), pgName);
 		}
 		else
@@ -280,51 +280,52 @@ public class PostgresProcedureReader
 		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
 
 		String sql = "SELECT p.prosrc, \n" +
-								"        l.lanname as lang_name, \n";
+								"       l.lanname as lang_name, \n";
 
 		if (JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
-			sql += "        pg_get_function_result(p.oid) as formatted_return_type, \n";
+			sql += "       pg_get_function_result(p.oid) as formatted_return_type, \n";
 		}
 		else
 		{
-			sql += "        null::text as formatted_return_type, \n";
+			sql += "       null::text as formatted_return_type, \n";
 		}
-		sql +=	"        p.prorettype as return_type_oid, \n" +
-						"        coalesce(array_to_string(p.proallargtypes, ';'), " +
+		sql +=	"       p.prorettype as return_type_oid, \n" +
+						"       coalesce(array_to_string(p.proallargtypes, ';'), " +
 						"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
-						"        array_to_string(p.proargnames, ';') as argnames, \n" +
-						"        array_to_string(p.proargmodes, ';') as argmodes, \n " +
-						"        p.prosecdef, " +
-						"        p.proretset, " +
-						"        p.provolatile, " +
-						"        p.proisstrict, " +
-						"        p.proisagg ";
+						"       array_to_string(p.proargnames, ';') as argnames, \n" +
+						"       array_to_string(p.proargmodes, ';') as argmodes, \n" +
+						"       p.prosecdef, \n" +
+						"       p.proretset, \n" +
+						"       p.provolatile, \n" +
+						"       p.proisstrict, \n" +
+						"       p.proisagg ";
 
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
 		if (hasCost)
 		{
-			sql += ", p.procost, p.prorows ";
+			sql += ",\n        p.procost ,\n        p.prorows ";
 		}
-		sql +=  "\nFROM pg_proc p, pg_language l, pg_namespace n \n" +
-								" where p.prolang = l.oid \n" +
-								" and p.pronamespace = n.oid ";
+		sql +=
+			"\nFROM pg_proc p \n" +
+			"   JOIN pg_language l ON p.prolang = l.oid \n" +
+			"   JOIN pg_namespace n ON p.pronamespace = n.oid \n";
 
-		sql += " and p.proname = '" + name.getName() + "' ";
+		sql += "WHERE p.proname = '" + name.getName() + "' ";
 		if (StringUtil.isNonBlank(def.getSchema()))
 		{
-			sql += " and n.nspname = '" + def.getSchema() + "' ";
+			sql += "  AND n.nspname = '" + def.getSchema() + "' \n";
 		}
 
 		String oids = name.getOIDs();
 		if (StringUtil.isNonBlank(oids))
 		{
-			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector)";
+			sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector) \n";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=" + sql);
+			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=\n" + sql);
 		}
 
 		StringBuilder source = new StringBuilder(500);
@@ -654,19 +655,18 @@ public class PostgresProcedureReader
 	private DataStore getColumns(String catalog, String schema, PGProcName procname)
 		throws SQLException
 	{
-		String sql = "SELECT format_type(p.prorettype, NULL) as formatted_type, \n" +
-			       "       t.typname as pg_type, \n" +
-						 "       coalesce(array_to_string(proallargtypes, ';'), array_to_string(proargtypes, ';')) as argtypes, \n" +
-             "       array_to_string(p.proargnames, ';') as argnames, \n" +
-						 "       array_to_string(p.proargmodes, ';') as modes, \n" +
-						 "       t.typtype " +
-             "FROM pg_catalog.pg_proc p, \n" +
-             "     pg_catalog.pg_namespace n, \n " +
-						 "     pg_catalog.pg_type t " +
-             "WHERE p.pronamespace = n.oid \n" +
-             "AND   n.nspname = ? \n " +
-						 "AND   p.prorettype = t.oid \n" +
-             "AND   p.proname = ? ";
+		String sql =
+				"SELECT format_type(p.prorettype, NULL) as formatted_type, \n" +
+				"       t.typname as pg_type, \n" +
+				"       coalesce(array_to_string(proallargtypes, ';'), array_to_string(proargtypes, ';')) as argtypes, \n" +
+				"       array_to_string(p.proargnames, ';') as argnames, \n" +
+				"       array_to_string(p.proargmodes, ';') as modes, \n" +
+				"       t.typtype \n" +
+				"FROM pg_catalog.pg_proc p \n" +
+				"   JOIN pg_catalog.pg_namespace n ON p.pronamespace = n.oid \n" +
+				"   JOIN pg_catalog.pg_type t ON p.prorettype = t.oid \n" +
+				"WHERE n.nspname = ? \n" +
+				"  AND p.proname = ? \n";
 
 		DataStore result = createProcColsDataStore();
 
@@ -680,12 +680,18 @@ public class PostgresProcedureReader
 			String oids = procname.getOIDs();
 			if (StringUtil.isNonBlank(oids))
 			{
-				sql += " AND p.proargtypes = cast('" + oids + "' as oidvector)";
+				sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector)";
 			}
 
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
 			stmt.setString(2, procname.getName());
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				// Postgres JDBC statements implement toString() such that parameters are visible..
+				LogMgr.logDebug("PostgresProcedureReader.getColumns()", "Using SQL:\n" + stmt.toString());
+			}
 
 			rs = stmt.executeQuery();
 			if (rs.next())

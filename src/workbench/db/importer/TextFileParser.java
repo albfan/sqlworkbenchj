@@ -196,7 +196,7 @@ public class TextFileParser
 	{
 		this.alwaysQuoted = flag;
 	}
-	
+
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
 		this.quoteEscape = type;
@@ -299,24 +299,55 @@ public class TextFileParser
 		setColumns(columnList, null);
 	}
 
+
+	/**
+	 * Defines the mapping from input to target columns in case no target table is available.
+	 *
+	 * This is used when importing from the clipboard (as the target is a datastore not a table)
+	 *
+	 * @param fileColumns the columns in the order as they appear in the file
+	 * @param targetColumns the columns in the order as they appear in the target.
+	 */
+	public void setColumnMap(List<ColumnIdentifier> fileColumns, List<ColumnIdentifier> targetColumns)
+	{
+		importColumns = ImportFileColumn.createList();
+		for (ColumnIdentifier sourceCol : fileColumns)
+		{
+			int index = targetColumns.indexOf(sourceCol);
+			if (index > -1)
+			{
+				ColumnIdentifier col = targetColumns.get(index);
+				ImportFileColumn importCol = new ImportFileColumn(col);
+				importCol.setTargetIndex(index);
+				importColumns.add(importCol);
+			}
+			else
+			{
+				importColumns.add(ImportFileColumn.SKIP_COLUMN);
+			}
+		}
+	}
+
 	/**
 	 * Define the columns in the input file.
 	 * If a column name equals RowDataProducer.SKIP_INDICATOR
 	 * then the column will not be imported.
 	 * @param columnList the list of columns present in the input file
+	 * @param toImport the list of columns to import, if null all columns are imported
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
 	public void setColumns(List<ColumnIdentifier> columnList, List<ColumnIdentifier> toImport)
 		throws SQLException
 	{
-		// When using the TextFileParser to import into a DataStore
-		// no target table is defined, so this is an expected situation
 		TableDefinition target = getTargetTable();
 		List<ColumnIdentifier> tableCols = null;
+
+		// When using the TextFileParser to import into a DataStore
+		// no target table is defined, so this is an expected situation
 		if (target != null)
 		{
-		 tableCols = target.getColumns();
+			tableCols = target.getColumns();
 		}
 
 		importColumns = ImportFileColumn.createList();
@@ -366,6 +397,8 @@ public class TextFileParser
 				{
 					ColumnIdentifier col = (tableCols != null ? tableCols.get(index) : sourceCol);
 					ImportFileColumn importCol = new ImportFileColumn(col);
+
+					// TODO: this should be index, not colCount, but for some reason using index is not working in all cases
 					importCol.setTargetIndex(colCount);
 					importColumns.add(importCol);
 					colCount ++;

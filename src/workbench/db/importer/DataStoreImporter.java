@@ -13,7 +13,7 @@ package workbench.db.importer;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -129,23 +129,28 @@ public class DataStoreImporter
 		factory.setGeneralOptions(generalOptions);
 		factory.setXmlOptions(xmlOptions);
 		factory.setType(type);
-		ResultInfo info = this.target.getResultInfo();
 
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(info.getColumnCount());
-		for (int i = 0; i < info.getColumnCount(); i++)
-		{
-			cols.add(info.getColumn(i));
-		}
+		this.source = factory.getProducer();
+
+		ResultInfo info = target.getResultInfo();
 
 		try
 		{
-			factory.setImportColumns(cols);
+			List<ColumnIdentifier> targetColumns = Arrays.asList(info.getColumns());
+			if (source instanceof TextFileParser)
+			{
+				List<ColumnIdentifier> fileColumns = factory.getFileColumns();
+				((TextFileParser)source).setColumnMap(fileColumns, targetColumns);
+			}
+			else
+			{
+				factory.setImportColumns(targetColumns);
+			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataStoreImporter.setImportOptions()", "Error setting import columns", e);
 		}
-		this.source = factory.getProducer();
 		this.source.setReceiver(this);
 		this.source.setAbortOnError(false);
 		this.source.setErrorHandler(this.errorHandler);
@@ -194,9 +199,9 @@ public class DataStoreImporter
 	public void tableImportFinished()
 		throws SQLException
 	{
-		
+
 	}
-	
+
 	public void importFinished()
 	{
 	}

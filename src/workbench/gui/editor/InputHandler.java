@@ -36,12 +36,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import workbench.gui.actions.WbAction;
+import workbench.gui.editor.actions.DecreaseFontSize;
 import workbench.gui.editor.actions.DelPrevWord;
 import workbench.gui.editor.actions.DeleteChar;
 import workbench.gui.editor.actions.DeleteWord;
 import workbench.gui.editor.actions.DocumentEnd;
 import workbench.gui.editor.actions.DocumentHome;
 import workbench.gui.editor.actions.EditorAction;
+import workbench.gui.editor.actions.IncreaseFontSize;
 import workbench.gui.editor.actions.LineEnd;
 import workbench.gui.editor.actions.LineStart;
 import workbench.gui.editor.actions.NextChar;
@@ -52,6 +54,7 @@ import workbench.gui.editor.actions.PrevWord;
 import workbench.gui.editor.actions.PreviousChar;
 import workbench.gui.editor.actions.PreviousLine;
 import workbench.gui.editor.actions.PreviousPage;
+import workbench.gui.editor.actions.ResetFontSize;
 import workbench.gui.editor.actions.SelectDocumentEnd;
 import workbench.gui.editor.actions.SelectDocumentHome;
 import workbench.gui.editor.actions.SelectLineEnd;
@@ -136,6 +139,10 @@ public class InputHandler
 	public static final EditorAction SELECT_PREV_LINE = new SelectPreviousLine();
 	public static final EditorAction PREV_LINE = new PreviousLine();
 
+	public static final EditorAction INCREASE_FONT = new IncreaseFontSize();
+	public static final EditorAction DECREASE_FONT = new DecreaseFontSize();
+	public static final EditorAction RESET_FONT = new ResetFontSize();
+
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
@@ -204,6 +211,10 @@ public class InputHandler
 
 		addKeyBinding(NEXT_LINE);
 		addKeyBinding(SELECT_NEXT_LINE);
+
+		addKeyBinding(INCREASE_FONT);
+		addKeyBinding(DECREASE_FONT);
+		addKeyBinding(RESET_FONT);
 	}
 
 	@SuppressWarnings("unchecked")

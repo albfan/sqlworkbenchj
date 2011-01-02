@@ -1,3 +1,4 @@
+TxtZoom
 TxtFileFilterSqlInsDel
 LblCancelCopy
 LblCascadeConstraints

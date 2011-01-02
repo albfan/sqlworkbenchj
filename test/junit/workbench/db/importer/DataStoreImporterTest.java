@@ -26,11 +26,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class DataStoreImporterTest 
+public class DataStoreImporterTest
 	extends WbTestCase
 {
 	private TestUtil util;
-	
+
 	public DataStoreImporterTest()
 		throws Exception
 	{
@@ -55,24 +55,24 @@ public class DataStoreImporterTest
 		{
 			String content = "id\tfirstname\tlastname\n1\tHarry\tHandsome\n2\tMary\tMoviestart\n3\tArthur\tDent";
 			File f = new File(util.getBaseDir(), "ds_import.txt");
-			
+
 			FileWriter w = new FileWriter(f);
 			w.write(content);
 			w.close();
-			
+
 			DataStore ds = prepareDataStore();
 			DataStoreImporter importer = new DataStoreImporter(ds, null, null);
-			
+
 			TextImportOptions to = new DefaultTextImportOptions("\t", "\"");
 			ImportOptions o = new DefaultImportOptions();
-			
+
 			importer.setImportOptions(f,ProducerFactory.ImportType.Text, o, to, null);
 			importer.startImport();
 			assertEquals("Wrong number of rows imported", 3, ds.getRowCount());
-			
+
 			String name = ds.getValueAsString(0, 1);
 			assertEquals("Wrong firstname", "Harry", name);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -80,7 +80,7 @@ public class DataStoreImporterTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testImportString()
 	{
@@ -92,10 +92,9 @@ public class DataStoreImporterTest
 			importer.importString(content);
 			importer.startImport();
 			assertEquals("Wrong number of rows imported", 3, ds.getRowCount());
-			
+
 			String name = ds.getValueAsString(0, 1);
 			assertEquals("Wrong firstname", "Harry", name);
-			
 		}
 		catch (Exception e)
 		{
@@ -104,5 +103,27 @@ public class DataStoreImporterTest
 		}
 	}
 
-	
+	@Test
+	public void testImportWrongColOrder()
+	{
+		try
+		{
+			String content = "id\tlastname\tfirstname\n1\tHandsome\tHarry\n2\tMoviestar\tMary\n3\tDent\tArthur";
+			DataStore ds = prepareDataStore();
+			DataStoreImporter importer = new DataStoreImporter(ds, null, null);
+			importer.importString(content);
+			importer.startImport();
+			assertEquals("Wrong number of rows imported", 3, ds.getRowCount());
+
+			String name = ds.getValueAsString(0, 1);
+			assertEquals("Wrong firstname", "Harry", name);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+
 }
