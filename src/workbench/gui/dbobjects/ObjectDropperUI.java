@@ -13,10 +13,13 @@ package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import workbench.db.DbObject;
@@ -39,8 +42,8 @@ import workbench.util.WbThread;
  * @author  Thomas Kellerer
  */
 public class ObjectDropperUI
-	extends javax.swing.JPanel
-	implements RowActionMonitor
+	extends JPanel
+	implements RowActionMonitor, WindowListener
 {
 
 	protected JDialog dialog;
@@ -67,7 +70,10 @@ public class ObjectDropperUI
 
 	protected void doDrop()
 	{
-		if (this.running) return;
+		if (this.running)
+		{
+			return;
+		}
 
 		try
 		{
@@ -77,8 +83,8 @@ public class ObjectDropperUI
 		}
 		catch (Throwable ex)
 		{
-			String msg = ex.getMessage();
-			WbSwingUtilities.showErrorMessage(this.dialog, msg);
+			final String msg = ex.getMessage();
+			WbSwingUtilities.showErrorMessage(dialog, msg);
 		}
 		finally
 		{
@@ -88,7 +94,6 @@ public class ObjectDropperUI
 
 		EventQueue.invokeLater(new Runnable()
 		{
-
 			public void run()
 			{
 				if (cancelled)
@@ -103,7 +108,6 @@ public class ObjectDropperUI
 				}
 			}
 		});
-
 	}
 
 	public boolean dialogWasCancelled()
@@ -146,7 +150,8 @@ public class ObjectDropperUI
 		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);
 		try
 		{
-			this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			this.dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+			this.dialog.addWindowListener(this);
 			this.dialog.getContentPane().add(this);
 			this.dialog.pack();
 			if (this.dialog.getWidth() < 200)
@@ -165,6 +170,79 @@ public class ObjectDropperUI
 				this.dialog = null;
 			}
 		}
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e)
+	{
+		cancel();
+		dialog.setVisible(false);
+		dialog.dispose();
+		dialog = null;
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+
+	private void cancel()
+	{
+		if (!this.running) return;
+
+		this.cancelled = true;
+		try
+		{
+			statusLabel.setText(ResourceMgr.getString("MsgCancelling"));
+			dropper.cancel();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ObjectDropperUI", "Error when cancelling drop", e);
+		}
+		finally
+		{
+			statusLabel.setText("");
+		}
+
+		if (dropThread != null)
+		{
+			try
+			{
+				dropThread.interrupt();
+				dropThread.join(1500);
+			}
+			catch (Exception e)
+			{
+				// ignore
+			}
+		}
+		dropButton.setEnabled(true);
 	}
 
 	/** This method is called from within the constructor to
@@ -315,28 +393,7 @@ public class ObjectDropperUI
 		this.cancelled = true;
 		if (this.running)
 		{
-			try
-			{
-				dropper.cancel();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectDropperUI", "Error when cancelling drop", e);
-			}
-
-			if (dropThread != null)
-			{
-				try
-				{
-					dropThread.interrupt();
-					dropThread.join(500);
-				}
-				catch (Exception e)
-				{
-					// ignore
-				}
-			}
-			dropButton.setEnabled(true);
+			cancel();
 		}
 		else
 		{
@@ -376,6 +433,7 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 		this.checkThread = null;
 		EventQueue.invokeLater(new Runnable()
 		{
+
 			public void run()
 			{
 				statusLabel.setText("");
@@ -392,7 +450,10 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFKButtonActionPerformed
 
 	final WbConnection conn = dropper.getConnection();
-	if (conn == null || conn.isBusy()) return;
+	if (conn == null || conn.isBusy())
+	{
+		return;
+	}
 
 	this.dropButton.setEnabled(false);
 	this.cancelButton.setEnabled(false);
@@ -420,7 +481,7 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 				{
 					if (dbo instanceof TableIdentifier)
 					{
-						tables.add((TableIdentifier)dbo);
+						tables.add((TableIdentifier) dbo);
 					}
 				}
 				sorted = sorter.sortForDelete(tables, addMissingTables.isSelected());
@@ -440,7 +501,6 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 	};
 	checkThread.start();
 }//GEN-LAST:event_checkFKButtonActionPerformed
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JCheckBox addMissingTables;
   protected javax.swing.JPanel buttonPanel;
@@ -488,4 +548,5 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 	public void jobFinished()
 	{
 	}
+
 }

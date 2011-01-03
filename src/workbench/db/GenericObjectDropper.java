@@ -110,7 +110,7 @@ public class GenericObjectDropper
 	public CharSequence getScript()
 	{
 		if (this.connection == null) throw new NullPointerException("No connection!");
-		if (this.objects == null || this.objects.size() == 0) return null;
+		if (this.objects == null || this.objects.isEmpty()) return null;
 
 		boolean needCommit = this.connection.shouldCommitDDL();
 		int count = this.objects.size();
@@ -156,7 +156,7 @@ public class GenericObjectDropper
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
 			if (this.connection.isBusy()) return;
-			if (this.objects == null || this.objects.size() == 0) return;
+			if (this.objects == null || this.objects.isEmpty()) return;
 			int count = this.objects.size();
 			this.connection.setBusy(true);
 
@@ -183,7 +183,7 @@ public class GenericObjectDropper
 		{
 			if (connection.shouldCommitDDL())
 			{
-				try { this.connection.rollback(); } catch (Throwable th) {}
+				this.connection.rollbackSilently();
 			}
 			throw e;
 		}
@@ -200,10 +200,16 @@ public class GenericObjectDropper
 	{
 		if (this.currentStatement == null) return;
 		cancel = true;
-		this.currentStatement.cancel();
-		if (this.connection.shouldCommitDDL())
+		try
 		{
-			try { this.connection.rollback(); } catch (Throwable th) {}
+			this.currentStatement.cancel();
+		}
+		finally
+		{
+			if (this.connection.shouldCommitDDL())
+			{
+				this.connection.rollbackSilently();
+			}
 		}
 	}
 

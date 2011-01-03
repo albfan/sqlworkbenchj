@@ -493,12 +493,9 @@ public class WbConnection
 
 	public void rollbackSilently()
 	{
-		if (sqlConnection == null) return;
-		if (!getDbSettings().supportsTransactions()) return;
-
 		try
 		{
-			this.sqlConnection.rollback();
+			rollback();
 		}
 		catch (Exception e)
 		{

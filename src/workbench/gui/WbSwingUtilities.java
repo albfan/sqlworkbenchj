@@ -342,7 +342,14 @@ public class WbSwingUtilities
 			caller = getWindowAncestor(aCaller);
 		}
 
-		JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
+		invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
+			}
+		});
 	}
 
 	public static void showMultiLineError(final Component caller, final String message)
@@ -352,6 +359,7 @@ public class WbSwingUtilities
 			LogMgr.logError("showMultiLineError()", message, null);
 			return;
 		}
+
 		final Component realCaller;
 
 		if (caller == null)
@@ -363,14 +371,21 @@ public class WbSwingUtilities
 			realCaller = getWindowAncestor(caller);
 		}
 
-		JTextArea msg = new JTextArea(message);
+		final JTextArea msg = new JTextArea(message);
 		msg.setFont(Settings.getInstance().getEditorFont());
-		JScrollPane pane = new JScrollPane(msg);
+		final JScrollPane pane = new JScrollPane(msg);
 		pane.setMaximumSize(new Dimension(640, 480));
 		pane.setPreferredSize(new Dimension(400, 250));
-		JOptionPane.showMessageDialog(realCaller, pane, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+		invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				JOptionPane.showMessageDialog(realCaller, pane, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+			}
+		});
 	}
-	
+
 	public static void showMessage(final Component aCaller, final Object aMessage)
 	{
 		invoke(new Runnable()
@@ -408,7 +423,7 @@ public class WbSwingUtilities
 	{
 		return getYesNo(null, aCaller, aMessage);
 	}
-	
+
 	public static boolean getYesNo(String windowTitle, Component aCaller, String aMessage)
 	{
 		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, (windowTitle == null ? ResourceMgr.TXT_PRODUCT_NAME : windowTitle), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -427,7 +442,7 @@ public class WbSwingUtilities
 		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return result;
 	}
-	
+
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
 	public static final int EXECUTE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 2;
 
@@ -470,7 +485,7 @@ public class WbSwingUtilities
 		{
 			ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")
 		};
-		
+
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -640,7 +655,7 @@ public class WbSwingUtilities
 		Commit,
 		Rollback
 	}
-	
+
 	public static TransactionEnd getCommitRollbackQuestion(Component aCaller, String aMessage)
 	{
 		String[] options = new String[]
@@ -660,7 +675,7 @@ public class WbSwingUtilities
 			th.printStackTrace();
 			w = 300;
 		}
-		
+
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
 		{
@@ -683,7 +698,7 @@ public class WbSwingUtilities
 			dialog.dispose();
 		}
 	}
-	
+
 	public static String getUserInput(Component caller, String title, String initialValue)
 	{
 		return getUserInput(caller, title, initialValue, false, 40);
@@ -693,7 +708,7 @@ public class WbSwingUtilities
 	{
 		return getUserInput(caller, title, initialValue, hideInput, 40);
 	}
-	
+
 	public static String getUserInput(Component caller, String title, String initialValue, boolean hideInput, int textSize)
 	{
 		Window parent = getWindowAncestor(caller);

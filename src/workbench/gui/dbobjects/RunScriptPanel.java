@@ -34,6 +34,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.sql.SqlEditor;
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -77,7 +78,7 @@ public class RunScriptPanel
 	{
 		return wasRun;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -99,7 +100,7 @@ public class RunScriptPanel
 	{
 		openWindow(comp, title, null);
 	}
-	
+
 	public void openWindow(Component comp, String title, String highlight)
 	{
 		Window w = SwingUtilities.getWindowAncestor(comp);
@@ -110,7 +111,7 @@ public class RunScriptPanel
 		}
 		openWindow(parent, title, highlight);
 	}
-	
+
 	public void openWindow(final Frame owner, final String title, final String highlight)
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -158,7 +159,7 @@ public class RunScriptPanel
 		}
 		editor.requestFocusInWindow();
 	}
-	
+
 	protected void closeWindow()
 	{
 		if (runner != null) return;
@@ -216,6 +217,24 @@ public class RunScriptPanel
 			runner.setRowMonitor(((SimpleStatusBar)statusbar).getMonitor());
 			runner.setAbortOnError(true);
 			runner.setStoreErrors(true);
+			
+			// Make sure nothing is written to system.out
+			runner.setResultLogger(new ResultLogger() {
+				@Override
+				public void clearLog()
+				{
+				}
+
+				@Override
+				public void appendToLog(String msg)
+				{
+				}
+
+				@Override
+				public void showLogMessage(String msg)
+				{
+				}
+			});
 			startButton.setEnabled(false);
 			cancelButton.setEnabled(true);
 			closeButton.setEnabled(false);
@@ -231,7 +250,7 @@ public class RunScriptPanel
 			{
 				statusMsg = ResourceMgr.getString("MsgBatchStatementError");
 			}
-			
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -278,7 +297,7 @@ public class RunScriptPanel
 	{
 		return success;
 	}
-	
+
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
