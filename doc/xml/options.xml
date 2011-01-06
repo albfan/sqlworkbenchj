@@ -1,5 +1,5 @@
 <section id="options">
-	
+
 	<title>Options dialog</title>
 
 	<para>
@@ -11,7 +11,7 @@
 
 	<section id="options-general">
 		<title>General options</title>
-		
+
 		<section id="options-gui-language">
 			<title>Language</title>
 			<para>
@@ -48,7 +48,7 @@
       </para>
 		</section>
 
-	
+
 		<section id="options-show-connect">
 			<title>Show connect dialog</title>
 			<para>
@@ -167,46 +167,13 @@
 			<title>Configuration file information</title>
 			<para>
 				At the bottom of the "General options" page, the full filename of the configuration
-				file and the logfile are listed. 
+				file and the logfile are listed.
 			</para>
 		</section>
 	</section>
 
 	<section id="options-editor">
 		<title>Editor options</title>
-
-		<section id="options-completion-paste-case">
-			<title>Paste completion in</title>
-			<para>
-				With this option you can select how the selected object name
-				from the code completion popup is pasted into the editor. <literal>As is</literal>
-				means, that the values will be inserted into the editor as it was
-				retrieved from the database. This option will also be used when SQL statements
-				are generated internally (e.g. for updating the result set or when you
-				export/copy data as SQL statements)
-			</para>
-		</section>
-
-		<section id="options-close-search">
-			<title>Close completion with search</title>
-			<para>
-				When using the quicksearch feature in the <link linkend="command-completion">code completion</link>
-				this option controls the behaviour when hitting the ESC key. If this option
-				is enabled, the ESC key will also close the popup window with the available
-				choices. If this option is disabled, the ESC key will only close the quicksearch
-				<emphasis>input</emphasis> field.
-			</para>
-		</section>
-
-		<section id="options-sort-completion-by">
-			<title>Sort pasted columns by</title>
-			<para>
-        When selecting to paste all (or several columns) from the popup window,
-        you can select with this option, in which order the columns should be written
-        into the editor.
-			</para>
-		</section>
-
 
 		<section id="options-internal-lineending">
 			<title>Line ending for DBMS</title>
@@ -261,16 +228,6 @@
 			</para>
 		</section>
 
-		<section id="settings-right-clickmove">
-			<title>Right click behaviour in the editor</title>
-			<para>
-				Normally a right click in the SQL editor does not change the location
-				of the cursor (caret). If this option is checked, then a right
-				click will also change the caret's location (to where the mouse cursor
-				is located)
-			</para>
-		</section>
-
 		<section id="settings-editor-electric-srcoll">
 			<title>Electric scroll</title>
 			<para>Electric scrolling is the automatic scrolling of the editor
@@ -305,6 +262,28 @@
 			</para>
 		</section>
 
+		<section id="options-always-execute-selected">
+			<title>Always allow "Execute Selected"</title>
+			<para>
+        If this option is turned off, then <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute Selected</guimenuitem></menuchoice> will
+        only work if text is selected in the editor. If this option is turned on and no text is selected, the complete content of the
+        editor will be executed.
+			</para>
+		</section>
+
+		<section id="options-empty-line-delimiter">
+			<title>Allow empty lines as statement delimiter</title>
+			<para>
+				When analysing statements in the editor, it is assumed that individual statements
+				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
+        setting will be used to detect the current statement for auto-completion and when using "Execute Current" inside
+        the editor.
+			</para>
+			<note><para>
+				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
+			</para></note>
+		</section>
+
 		<section id="options-autojump-statement">
 			<title>Auto advance to next statement</title>
 			<para>
@@ -315,6 +294,41 @@
 			</para>
 			<para>For more information on how you can execute statements
 				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
+			</para>
+		</section>
+
+		<section id="options-hilite-current">
+			<title>Highlight current statement</title>
+			<para>
+        When running several statements (e.g. by using "Execute all") this option will highlight the current statement. The editor
+        will be scrolled to make sure the currently executed statement is visible.
+			</para>
+		</section>
+
+		<section id="options-hilite-current-retain">
+			<title>Retain current statement highlight</title>
+			<para>
+        If "Highlight current statement" is enabled and this option is turned on, the highlighting will be kept
+        once execution has finished.
+			</para>
+		</section>
+
+		<section id="options-allow-editing">
+			<title>Allow editing while executing</title>
+			<para>
+        When running a statement, the editor is set to read-only in order to allow a consistent statement highlighting.
+        When this option is turned on, the text in the editor may be modified even if a statement is running. If the
+        text in the editor is modified during execution, statement and error highlighting will not be done any more.
+			</para>
+		</section>
+
+		<section id="settings-right-clickmove">
+			<title>Right click moves cursor</title>
+			<para>
+				Normally a right click in the SQL editor does not change the location
+				of the cursor (caret). If this option is checked, then a right
+				click will also change the caret's location (to where the mouse cursor
+				is located)
 			</para>
 		</section>
 
@@ -369,7 +383,7 @@
 
 	<section id="options-fonts">
 		<title>Font settings</title>
-		
+
 		<section id="options-editor-font">
 			<title>Editor font</title>
 			<para>
@@ -403,6 +417,65 @@
 
 	</section>
 
+	<section id="options-completion">
+		<title>Auto-completion options</title>
+
+		<section id="options-completion-paste-case">
+			<title>Paste completion in</title>
+			<para>
+				With this option you can select how the selected object name
+				from the code completion popup is pasted into the editor. <literal>As is</literal>
+				means, that the values will be inserted into the editor as it was
+				retrieved from the database. This option will also be used when SQL statements
+				are generated internally (e.g. for updating the result set or when you
+				export/copy data as SQL statements)
+			</para>
+		</section>
+
+		<section id="options-sort-completion-by">
+			<title>Sort pasted columns by</title>
+			<para>
+        When selecting to paste all (or several columns) from the popup window,
+        you can select with this option, in which order the columns should be written
+        into the editor.
+			</para>
+		</section>
+
+		<section id="options-close-search">
+			<title>Close completion with search</title>
+			<para>
+				When using the quicksearch feature in the <link linkend="command-completion">code completion</link>
+				this option controls the behaviour when hitting the ESC key. If this option
+				is enabled, the ESC key will also close the popup window with the available
+				choices. If this option is disabled, the ESC key will only close the quicksearch
+				<emphasis>input</emphasis> field.
+			</para>
+		</section>
+
+		<section id="options-sort-popup">
+			<title>Sort entries in popup</title>
+			<para>
+        If this is enabled, columns are sorted alphabetically in the popup.
+        If not, they are listed in the order as they are returned by the the database.
+			</para>
+		</section>
+
+		<section id="options-completion-match-anywhere">
+			<title>Quick search matches anywhere</title>
+			<para>
+        If this option is enabled, the typed characters match anywhere in the object name.
+        If this optioin is disabled, the object name must start with the entered search value.
+			</para>
+		</section>
+
+		<section id="options-completion-filter">
+			<title>Filter by quicksearch</title>
+			<para>
+        When this option is enabled, only those entries are shown in the popup that match the entered values in the quick search.
+			</para>
+		</section>
+
+  </section>
 
 	<section id="options-workspace">
 		<title>Workspace options</title>
@@ -492,11 +565,11 @@
 					</tbody>
 				</tgroup>
 			</informaltable>
-			
+
 		</section>
 
 	</section>
-	
+
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
 
@@ -523,7 +596,7 @@
 				while selecting with the mouse), the statusbar will display the sum of the selected values.
 			</para>
     </section>
-		
+
 		<section id="options-multiline">
 			<title>Displaying multi-line values</title>
 			<para>
@@ -596,9 +669,9 @@
 					width.
 				</para>
 			</simplesect>
-			
+
 		</section>
-		
+
 		<section id="row-height-settings">
 			<title>Row height settings</title>
 			<simplesect id="options-auto-optimize-row-height">
@@ -630,10 +703,10 @@
 				<title>Max. number of lines</title>
 				<para>
 					When calculating the optimimal height for each row, the number of lines defined
-					with this option will never be exceeded. 
+					with this option will never be exceeded.
 				</para>
 			</simplesect>
-			
+
 		</section>
 
 		<section id="options-alternating-row-colors">
@@ -759,7 +832,7 @@
 			<title>Confirm discarding changed results</title>
 			<para>
 				When running a statement that would replace a result that has changes
-				that are not saved to the database, you will be prompted whether 
+				that are not saved to the database, you will be prompted whether
 				you want to cancel the current operation that would discard those changes.
 			</para>
 			<para>
@@ -1225,9 +1298,9 @@ WHERE id = 42;</programlisting>
 		<para>
 			On this page, you can define external tools (programs). Currently the only
 			place where this is used, is in the <link linkend="update-blob-editmode">BLOB info dialog</link>,
-			to open the BLOB data with one of the defined external tools. 
+			to open the BLOB data with one of the defined external tools.
 		</para>
-		
+
 		<para>
 			This could be a program to display images, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
 			office documents or a text editor to display text files.

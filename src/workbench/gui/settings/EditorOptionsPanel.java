@@ -80,6 +80,7 @@ public class EditorOptionsPanel
 		hiliteCurrent.setSelected(Settings.getInstance().getHighlightCurrentStatement());
 		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
+		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -119,6 +120,7 @@ public class EditorOptionsPanel
 		set.setExternalEditorLineEnding(value);
 		set.setEditorUseTabCharacter(useTabs.isSelected());
 		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
+		set.setEmptyLineIsDelimiter(emptyLineDelimiter.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
 		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
@@ -162,6 +164,7 @@ public class EditorOptionsPanel
     defaultDir = new WbFilePicker();
     alwaysAllowExecSel = new JCheckBox();
     allowEditDuringExec = new JCheckBox();
+    emptyLineDelimiter = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -329,7 +332,7 @@ public class EditorOptionsPanel
     autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(9, 13, 0, 0);
@@ -359,7 +362,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -374,7 +377,7 @@ public class EditorOptionsPanel
     rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(9, 13, 0, 11);
@@ -413,7 +416,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -440,11 +443,24 @@ public class EditorOptionsPanel
     allowEditDuringExec.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(9, 13, 0, 11);
     add(allowEditDuringExec, gridBagConstraints);
+
+    emptyLineDelimiter.setText(ResourceMgr.getString("LblEmptyLineDelimiter")); // NOI18N
+    emptyLineDelimiter.setToolTipText(ResourceMgr.getString("d_LblEmptyLineDelimiter")); // NOI18N
+    emptyLineDelimiter.setBorder(null);
+    emptyLineDelimiter.setHorizontalAlignment(SwingConstants.LEFT);
+    emptyLineDelimiter.setHorizontalTextPosition(SwingConstants.RIGHT);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 13, 0, 0);
+    add(emptyLineDelimiter, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -471,6 +487,7 @@ public class EditorOptionsPanel
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
   private JLabel electricScrollLabel;
+  private JCheckBox emptyLineDelimiter;
   private JComboBox externalLineEnding;
   private JLabel externalLineEndingLabel;
   private JCheckBox followCurrentDir;

@@ -27,6 +27,7 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
@@ -374,8 +375,8 @@ public class TextAreaPainter
 
 		Rectangle clipRect = gfx.getClipBounds();
 
-		int cw = getWidth() - gutterWidth;
-		int ch = getHeight();
+		int editorWidth = getWidth() - gutterWidth;
+		int editorHeight = getHeight();
 
 		if (clipRect != null)
 		{
@@ -405,6 +406,7 @@ public class TextAreaPainter
 
 		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
 		if (lastInvalid > lastLine) lastInvalid = lastLine;
+		else lastInvalid++;
 
 		try
 		{
@@ -417,11 +419,10 @@ public class TextAreaPainter
 			int gutterX = this.gutterWidth - GUTTER_MARGIN;
 
 			final int caretLine = textArea.getCaretLine();
-			final int fmHeight = fm.getLeading() + fm.getMaxDescent();
 
 			for (int line = firstVisible; line <= endLine; line++)
 			{
-				int y = textArea.lineToY(line);
+				final int y = textArea.lineToY(line);
 
 				if (this.showLineNumbers)
 				{
@@ -431,14 +432,14 @@ public class TextAreaPainter
 					// the editor gets redrawn a small amount of memory is lost
 					// To workaround this, I'm caching (some of) the values
 					// that are needed here.
-					String s = NumberStringCache.getNumberString(line);
+					final String s = NumberStringCache.getNumberString(line);
 
 					// As we are only allowing fixed-width fonts, this should be ok
 					// otherwise fm.stringWidth(str) needs to be used
-					int w = s.length() * this.gutterCharWidth;
+					final int w = s.length() * this.gutterCharWidth;
 
 					// make sure the line numbers do not show up outside the gutter
-					gfx.setClip(0, 0, gutterWidth, ch);
+					gfx.setClip(0, 0, gutterWidth, editorHeight);
 
 					gfx.setColor(GUTTER_COLOR);
 					gfx.drawString(s, gutterX - w, y);
@@ -448,14 +449,14 @@ public class TextAreaPainter
 				{
 					if (this.showLineNumbers)
 					{
-						gfx.setClip(this.gutterWidth, 0, cw, ch);
+						gfx.setClip(this.gutterWidth, 0, editorWidth, editorHeight);
 						gfx.translate(this.gutterWidth,0);
 					}
 
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
-						gfx.fillRect(0, y + fmHeight, cw, fheight);
+						gfx.fillRect(0, y + fheight, editorWidth, fheight);
 						gfx.setColor(getBackground());
 					}
 
@@ -471,7 +472,7 @@ public class TextAreaPainter
 		}
 		catch (Exception e)
 		{
-			System.err.println("Error repainting line range {" + firstInvalid + "," + lastInvalid + "}:" + e.getMessage());
+			LogMgr.logError("TextAreaPainter.paint()", "Error repainting line range {" + firstInvalid + "," + lastInvalid + "}", e);
 		}
 	}
 

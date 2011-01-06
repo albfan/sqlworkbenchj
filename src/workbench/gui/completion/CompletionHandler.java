@@ -125,7 +125,7 @@ public class CompletionHandler
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script);
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		parser.setEmptyLineIsDelimiter(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
+		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection));
 		int cursorPos = this.editor.getCaretPosition();

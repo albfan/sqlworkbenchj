@@ -1020,11 +1020,14 @@ public class Settings
 		this.props.setProperty(baseKey + ".size", size);
 		String value = null;
 		if ((style & Font.BOLD) == Font.BOLD)
+		{
 			value = "BOLD";
+		}
+
 		if ((style & Font.ITALIC) == Font.ITALIC)
 		{
 			if (value == null) value = "ITALIC";
-			else value = value + ",ITALIC";
+			else value += ",ITALIC";
 		}
 		if (value == null) value = "PLAIN";
 		this.props.setProperty(baseKey + ".style", value);
@@ -1676,9 +1679,14 @@ public class Settings
 		setProperty("workbench.editor.autocompletion.closewithsearch", flag);
 	}
 
-	public boolean getAutoCompletionEmptyLineIsSeparator()
+	public boolean getEmptyLineIsDelimiter()
 	{
-		return getBoolProperty("workbench.editor.autocompletion.sql.emptylineseparator", false);
+		return getBoolProperty("workbench.editor.sql.emptyline.delimiter", false);
+	}
+
+	public void setEmptyLineIsDelimiter(boolean flag)
+	{
+		setProperty("workbench.editor.sql.emptyline.delimiter", flag);
 	}
 
 	public boolean getAutoSaveWorkspace()
@@ -2700,6 +2708,7 @@ public class Settings
 		renameProperty("workbench.sql.searchsearch.lastvalue", "workbench.sql.search.lastvalue");
 		renameProperty("workbench.datasearch.history", "workbench.data.search.history");
 		renameProperty("workbench.datasearch.lastvalue", "workbench.data.search.lastvalue");
+		renameProperty("workbench.editor.autocompletion.sql.emptylineseparator", "workbench.editor.sql.emptyline.delimiter");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

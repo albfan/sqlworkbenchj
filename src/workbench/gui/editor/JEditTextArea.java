@@ -2352,9 +2352,9 @@ public class JEditTextArea
 		popup.show(painter, p.x, p.y);
 	}
 
-	public long getLastModifiedTime()
+	public boolean isModifiedAfter(long timeInMillis)
 	{
-		return lastModified;
+		return (lastModified > 0) && (lastModified > timeInMillis);
 	}
 
 	public void setModified()

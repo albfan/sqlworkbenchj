@@ -1,6 +1,6 @@
 <section id="settings">
   <title>Advanced configuration options</title>
-		 
+
   <para>
 		This section describes the additional options for &wb-productname; which
     are not (yet) available in the options dialog.
@@ -9,8 +9,8 @@
 	<para>
 		The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
 		which is located in the <link linkend="config-dir">configuration directory</link>. Not all
-		listed properties will be present in <literal>workbench.settings</literal>. In this case, 
-		simply create a new line with the property name and the value as described here. 
+		listed properties will be present in <literal>workbench.settings</literal>. In this case,
+		simply create a new line with the property name and the value as described here.
 		The position where you add this entry does not matter.
 	</para>
 
@@ -18,52 +18,52 @@
     <para>
       Every property can also be specified on the commandline when starting &wb-productname; by setting a system
       property with that name using the <literal>-Dworkbench.property=value</literal> switch. When using one of the Windows launchers (.exe)
-      you have to use <literal>-J-Dworkbench.property=value</literal>. See the section about 
+      you have to use <literal>-J-Dworkbench.property=value</literal>. See the section about
       <link linkend="launcher-parameters">Java options</link> in the description of the Windows launcher.
     </para>
   </note>
-	
+
   <section id="dbms-identifier">
     <title>Database Identifier</title>
-		
+
 		<para>
-			Some parameters are used such that a list of "Database Identifiers" is expected. 
+			Some parameters are used such that a list of "Database Identifiers" is expected.
 			The identifier that needs to be put there can be obtained by hovering the mouse over the connection
 			URL information in the main window, or from the log file.
 			After a successful connect to a database, there will be an entry in the log file similar to this:
 		</para>
-		
+
     <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-		
+
     <para>
-			If the description for a property in this chapter refers to 
+			If the description for a property in this chapter refers to
 			a "Database Identifier", the text between (but not including) the square brackets has to be used.
     </para>
-		
+
   </section>
-        
+
   <section id="dbid">
     <title>DBID</title>
-		
+
 		<para>
 			For some settings, where the ID is part of the property's key, a "clean" version of
-			the Database Identifer, called the DBID, is used. This DBID is displayed in the connection 
+			the Database Identifer, called the DBID, is used. This DBID is displayed in the connection
 			info dialog (right click on the connection URL in the main window, then choose "Connection Info").
 		</para>
-		
+
 		<para>
 			The DBID is also reported in the log file:
 		</para>
-		
+
 		<programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
-		
-		<para> 
+
+		<para>
 			If the description for a property in this chapter refers to the "DBID", then this value has to be used.
 		</para>
 		<para>
 			If the DBID is part of a property key this will be referred to as <literal>[dbid]</literal> in this chapter.
 		</para>
-		
+
 	</section>
 
   <section id="gui-settings">
@@ -74,18 +74,18 @@
 			<title>Controlling display of multiline values</title>
       <para>Property: <literal>workbench.gui.display.multilinethreshold</literal></para>
 			<para>
-				&wb-productname; uses a special renderer for the contents 
-				of <literal>CLOB</literal> columns that is capable of displaying 
+				&wb-productname; uses a special renderer for the contents
+				of <literal>CLOB</literal> columns that is capable of displaying
 				multiple lines. This multi-line renderer is usually not applied for
-				<literal>VARCHAR</literal> columns. If your database stores text 
+				<literal>VARCHAR</literal> columns. If your database stores text
 				in VARCHAR columns that contains line breaks, you can define a threshold
 				for the length of the column. Any column that is defined with a higher value
-				will be displayed with a multiline renderer. 
+				will be displayed with a multiline renderer.
 			</para>
 			<para>
 				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
 				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
-				will be displayed in a single line. 
+				will be displayed in a single line.
 			</para>
 			<para>
 				Using the multiline renderer has some minor drawbacks when editing the data,
@@ -112,7 +112,7 @@
       <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				When printing the contents of a table, this settings controls the type
-				of print dialog to be used. The default setting will open the 
+				of print dialog to be used. The default setting will open the
 				native print dialog of the operating system. If you experience problems
 				when trying to print, set this property to false. &wb-productname; will
 				then open a cross-platform print dialog.
@@ -140,64 +140,48 @@
 			</para>
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
-		
-		<simplesect id="auto-completion-empty-line">
-			<title>Empty line to terminate SQL statements</title>
-			<para>Property: <literal>workbench.editor.autocompletion.sql.emptylineseparator</literal></para>
-			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-			<para>
-				When analysing statements in the editor, it is assumed that individual statements
-				separated with a semicolon. When using auto completion, &wb-productname; can be configured
-				to accept an empty line as the separator between two statements. 
-			</para>
-			<note><para>
-				This does not influence the behaviour when running scripts or for the "execute current"
-				command.
-			</para></note>
-			<para>Default value: <literal>false</literal></para>
-		</simplesect>
 
    <simplesect id="editor-rect-selection">
       <title>Set the modifier key for rectangular selections in the edior</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
       <para>
 				These properties control the modifier key that needs to be pressed to enable
-				rectangular selections in the editor. Possible values are <literal>alt</literal> for 
+				rectangular selections in the editor. Possible values are <literal>alt</literal> for
 				setting the <keycap>Alt</keycap> key as the modifier, or <literal>ctrl</literal>
 				for setting the <keycap>Ctrl</keycap> key as the modifier.
-      </para> 
+      </para>
 			<para>Default value: <literal>alt</literal></para>
     </simplesect>
-	
+
 		<simplesect id="default-file-encoding">
 			<title>Default file encoding</title>
 			<para>Property: <literal>workbench.file.encoding</literal></para>
 			<para>
 				Several internal commands use an encoding when writing external text files
-				(e.g. <link linkend="command-export">WbExport</link>). If no encoding is 
-				specified for those commands, the default platform encoding as reported 
+				(e.g. <link linkend="command-export">WbExport</link>). If no encoding is
+				specified for those commands, the default platform encoding as reported
 				by the Java runtime system is used. You can overwrite the default encoding
 				that Java assumes by setting this property.
 			</para>
 			<para>Default value: empty, the Java runtime default is used</para>
 		</simplesect>
-		
+
 		<simplesect id="editor-history-text-size">
 			<title>Limitting size of the text put into the history</title>
 			<para>Property: <literal>workbench.sql.history.maxtextlength</literal></para>
 			<para>
 				When you execute a SQL statement in the editor, the current content of the
-				editor is put into the history buffer. If you are editing large scripts, this 
-				can lead to memory problems. This property controls the max. size of the 
-				editor text that is put into the history. 
+				editor is put into the history buffer. If you are editing large scripts, this
+				can lead to memory problems. This property controls the max. size of the
+				editor text that is put into the history.
 			</para>
 			<para>
 				If the current editor text is bigger than the size defined in this property
-				the text is not put into the history. 
+				the text is not put into the history.
 			</para>
 			<para>Default value: 10485760 (10MB)</para>
 		</simplesect>
-		
+
     <simplesect id="manual-setting-snippet-no-newline">
 			<title>Controlling newlines in code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.includenewline</literal></para>
@@ -228,13 +212,13 @@
 			<para>Property: <literal>workbench.clipcreate.codeprefix</literal></para>
 			<para>
 				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
-				this is prefixed with <literal>String sql = </literal>. With this property you can 
+				this is prefixed with <literal>String sql = </literal>. With this property you can
 				adjust this prefix.
 			</para>
 			<para>Default: <literal>String sql =</literal></para>
     </simplesect>
-		
-		
+
+
 	</section>
 
 	<section id="db-explorer-settings">
@@ -263,7 +247,7 @@
 			<title>Customizing the SELECT to be used for the data tab</title>
 			<para>
 				You can customize the generated SELECT that is used to display the table
-				data depending on the column type. Please refer to the 
+				data depending on the column type. Please refer to the
 				<link linkend="customize-dbexplorer-retrieval">DbExplorer chapter</link> for details.
 			</para>
 		</simplesect>
@@ -313,7 +297,7 @@
       </para>
       <para>Default value: <literal>false</literal></para>
     </simplesect>
-    
+
 		<simplesect id="dbexplorer-ms-remarks">
 			<title>Retrieving remarks for Microsoft SQL Server</title>
 			<para>Property:
@@ -339,20 +323,20 @@
 
     <title>Controlling sorting of data</title>
 		<para>
-			When you sort data in the result set (by clicking on the column header) this 
+			When you sort data in the result set (by clicking on the column header) this
 			is performed using Java built-in comparisons. For performance reasons the sorting
 			of character values (Strings) is done based on the ASCII value of the characters which
-			results in a case-sensitive sorting. Another disadvantage of this method is, that 
-			non-ascii characters might not be sorted correctly either. 
-		</para>  
+			results in a case-sensitive sorting. Another disadvantage of this method is, that
+			non-ascii characters might not be sorted correctly either.
+		</para>
 		<para>
 			The sorting of character values can be influenced with three different settings
 			in <literal>workbench.settings</literal> that control the collation to be used.
-			The first property enables the usage of a country and language aware collation 
-			sequence, the other two properties control the language and the country to 
-			be used for the collator. 
-		</para>  
-	
+			The first property enables the usage of a country and language aware collation
+			sequence, the other two properties control the language and the country to
+			be used for the collator.
+		</para>
+
 		<simplesect id="sorting-use-collator">
       <title>Using language aware collations for sorting</title>
       <para>Property: <literal>workbench.sort.usecollator</literal></para>
@@ -360,11 +344,11 @@
       	When you sort the result set, characters values will be sorted case-sensitiv by default.
       	This is caused by the <literal>compareTo()</literal> method available in the Java
       	environment which puts lower case characters in front of upper case characters when sorting.
-				When setting <literal>workbench.sort.usecollator</literal> to <literal>true</literal> a 
+				When setting <literal>workbench.sort.usecollator</literal> to <literal>true</literal> a
 				language sensitive comparison is used to sort character values, that will treat lowercase
-				and uppercase letters the same during sorting. As the policy on how special characters 
+				and uppercase letters the same during sorting. As the policy on how special characters
 				are sorted is different for each language, you can also define the language and country
-				that should be used when initializing these sorting rules. 
+				that should be used when initializing these sorting rules.
       </para>
       <para>Default value: false</para>
     </simplesect>
@@ -373,7 +357,7 @@
       <title>Sort language</title>
       <para>Property: <literal>workbench.sort.language</literal></para>
       <para>
-        If you want to use a language/country specific collation sequence, 
+        If you want to use a language/country specific collation sequence,
         this property defines the sort language to be used.
       </para>
       <para>Default value: en</para>
@@ -383,19 +367,19 @@
       <title>Sort country</title>
       <para>Property: <literal>workbench.sort.country</literal></para>
       <para>
-        If you want to use a language/country specific collation sequence, 
-        this property defines the sort country to be used when setting up 
+        If you want to use a language/country specific collation sequence,
+        this property defines the sort country to be used when setting up
         the collation sequence.
       </para>
       <para>Default value: The country defined by your operating system</para>
     </simplesect>
-    
+
   </section>
 	-->
-  
+
   <section id="settings-db">
     <title>Database related settings</title>
-		
+
     <simplesect id="manual-setting-datapumper-autoconnect">
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
@@ -416,7 +400,7 @@
       </para>
       <para>Default: <literal>false</literal></para>
     </simplesect>
-          
+
     <simplesect id="db-settings-commit">
       <title>COMMIT/ROLLBACK behaviour</title>
       <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.usejdbccommit</literal></para>
@@ -457,16 +441,16 @@
       </para>
       <para>Default: <literal>false</literal></para>
     </simplesect>
-		
+
     <simplesect id="db-settings-updatingcommands">
       <title>Definining SQL commands that may change the database</title>
       <para>Property: <literal>workbench.db.updatingcommands</literal> for general SQL statements</para>
       <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatingcommands</literal> for DBMS specific update statements</para>
       <para>
 				When enabling the <link linkend="profile-readonly">read only</link> or <link linkend="profile-confirm-updates">confirm update</link>
-				option in a connection profile, &wb-productname; assumes a default set of SQL commands that 
-				will change the database. With this property you can add additional keywords that 
-				should be considered as "updating commands". This is a comma separated list of keywords. 
+				option in a connection profile, &wb-productname; assumes a default set of SQL commands that
+				will change the database. With this property you can add additional keywords that
+				should be considered as "updating commands". This is a comma separated list of keywords.
 				The keywords may not contain whitespace.
       </para>
       <para>No default</para>
@@ -476,10 +460,10 @@
       <title>Database switch in DbExplorer</title>
       <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
       <para>
-				When connected to a DBMS that supports multiple databases (catalogs) for the 
-				same connection, the DbExplorer displays a dropdown list with the available 
-				databases. Switching the selected catalog in the dropdown will trigger a switch 
-				of the current catalog/database if the DbExplorer uses 
+				When connected to a DBMS that supports multiple databases (catalogs) for the
+				same connection, the DbExplorer displays a dropdown list with the available
+				databases. Switching the selected catalog in the dropdown will trigger a switch
+				of the current catalog/database if the DbExplorer uses
 				its <link linkend="profile-separate-connection">own connection</link>.
 				If you do not want to switch the database, but merely apply the new
 				selection as a filter (which is always done, if the DbExplorer shares the connection
@@ -492,9 +476,9 @@
 			<title>Filtering tables</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.tables</literal></para>
 			<para>
-				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer, 
+				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer,
 				auto completion, <link linkend="command-schema-report">WbSchemaReport</link>)
-				certain tables can be filtered out by supplying a regular expression in 
+				certain tables can be filtered out by supplying a regular expression in
 				this property. The default setting will filter Oracle tables that reside
 				in the "Recycle bin". This setting can be applied on a per DBMS basis
 			</para>
@@ -519,11 +503,11 @@
 			<title>Filtering synonyms</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.synonyms</literal></para>
 			<para>
-				The <link linkend="dbexplorer">database explorer</link> and the 
-				<link linkend="command-completion">auto completion</link> can display (Oracle public) synonyms. 
+				The <link linkend="dbexplorer">database explorer</link> and the
+				<link linkend="command-completion">auto completion</link> can display (Oracle public) synonyms.
 				Some of these are usually not of interest to the end user. Therefor the
 				list of displayed synonyms can be controlled. This property defines
-				a regular expression. Each synonym that matches this regular expression, 
+				a regular expression. Each synonym that matches this regular expression,
 				will be excluded from the list presented in the GUI.
 			</para>
 			<para>Default value (for Oracle): <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
@@ -534,10 +518,10 @@
 			<title>Support for Oracle materialized views (snapshots)</title>
 			<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
 			<para>
-				When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link> 
+				When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link>
 				Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
 				To identify a specific "table" as a materialized view, a second request to the database
-				is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this 
+				is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this
 				request can slow down the retrieval performance, this feature can be turned off. If for
 				any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
 				will be turned off until you re-connect to the database.
@@ -552,9 +536,9 @@
 			  The Oracle driver does not report the size of VARCHAR2 columns correctly
 			  if the character semantic has been set to "char". The JDBC driver always returns
 			  the length in bytes.
-			  When this property is set to true, the length for those columns will 
+			  When this property is set to true, the length for those columns will
 			  be displayed correctly in the DbExplorer. As this means &wb-productname;
-			  is using it's own query to retrieve the table definition, this might not 
+			  is using it's own query to retrieve the table definition, this might not
 			  always yield the same results as the original statement from the Oracle driver.
 			  If your table definitions are not displayed correcly, set this value
 			  to <literal>false</literal> so that the original driver methods are used.
@@ -570,41 +554,41 @@
 		  <para>Property: <literal>workbench.db.oracle.fixnvarchartype</literal></para>
 		  <para>
 			  The Oracle driver does not report the type of NVARCHAR2 columns correctly. They
-				are returned as Types.OTHER. If this property is enabled, than &wb-productname; 
+				are returned as Types.OTHER. If this property is enabled, than &wb-productname;
 				is also using it's own SELECT statement to retrieve the table definition.
 		  </para>
 		  <para>Default value: <literal>true</literal></para>
 		</simplesect>
-		
+
 		<simplesect id="settings-libdir">
 		  <title>Defining a base directory for JDBC libraries</title>
 		  <para>Property: <literal>workbench.libdir</literal></para>
 		  <para>
-				A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>. 
-				The value of this property can be referenced using <literal>%LibDir%</literal> 
+				A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>.
+				The value of this property can be referenced using <literal>%LibDir%</literal>
 				in the driver's definition. The value for this can also be specified
 				<link linkend="cmdline-parameter-libdir">on the commandline</link>.
 		  </para>
 		  <para>No default</para>
 		</simplesect>
-		
+
 		<simplesect id="settings-date-keywords">
 			<title>Defining keywords for date or timestamp input</title>
 			<para>Property: <literal>workbench.db.keyword.current_date</literal></para>
 			<para>
-				The "literals" that are accepted for DATE columns to identify 
+				The "literals" that are accepted for DATE columns to identify
 				the current date. Default values are <literal>current_date, today</literal>
 			</para>
 
 			<para>Property: <literal>workbench.db.keyword.current_timestamp</literal></para>
 			<para>
-				The "literals" that are accepted for TIMESTAMP columns to identify 
+				The "literals" that are accepted for TIMESTAMP columns to identify
 				the current date/time. Default values are <literal>current_timestamp,sysdate,systimestamp</literal>
 			</para>
-			
+
 			<para>Property: <literal>workbench.db.keyword.current_time</literal></para>
 			<para>
-				The "literals" that are accepted for TIME columns to identify 
+				The "literals" that are accepted for TIME columns to identify
 				the current time. Default values are <literal>current_time, now</literal>
 			</para>
 		</simplesect>
@@ -634,7 +618,7 @@
 				when an error occurs. A script with multiple DDL statements can therefor
 				not run completely if one statement fails, even if you choose to ignore
 				the error.
-				If this property is set to true, &wb-productname; will set a savepoint 
+				If this property is set to true, &wb-productname; will set a savepoint
 				before executing a DDL statement. In case of an error the savepoint
 				will be rolled back and the transaction can continue.
 			</para>
@@ -649,8 +633,8 @@
 				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
 				when an error occurs. When running WbImport in <literal>update,insert</literal>
 				or <literal>insert,update</literal> mode, the first of the two statements
-				needs to be rolled back in order to be able to continue the import. 
-				If this property is set to true, &wb-productname; will set a savepoint 
+				needs to be rolled back in order to be able to continue the import.
+				If this property is set to true, &wb-productname; will set a savepoint
 				before executing the first (insert or update) statement. In case of an error the savepoint
 				will be rolledback and WbImport will try to execute the second statement.
 			</para>
@@ -662,8 +646,8 @@
 			<para>Property: <literal>workbench.db.ignore.readerror</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
-				When retrieving data (e.g. using a <literal>SELECT</literal> statement) 
-				errors that are reported by the driver will be displayed to the user. 
+				When retrieving data (e.g. using a <literal>SELECT</literal> statement)
+				errors that are reported by the driver will be displayed to the user.
 				The retrieval will be terminated. If you want to ignore errors and replace
 				the data that could not be retrieved with a <literal>NULL</literal> value,
 				set this property to <literal>true</literal>.
@@ -732,9 +716,9 @@
 				</itemizedlist>
 			</para>
 		</simplesect>
-		
+
   </section>
-			
+
   <section id="sql-execution-settings">
     <title>SQL Execution related settings</title>
     <simplesect id="options-max-script-size">
@@ -765,13 +749,13 @@
       </para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
     </simplesect>
-	
+
 		<simplesect id="options-enable-shortinclude">
 			<title>Enabling short WbInclude</title>
 			<para>Property: <literal>workbench.db.supportshortinclude</literal></para>
 			<para>
 				By default the <link linkend="command-wbinclude">WbInclude</link> command
-				can be shortened using the @ sign. This behaviour is disabled for MS SQL to 
+				can be shortened using the @ sign. This behaviour is disabled for MS SQL to
 				avoid conflicts with parameter definitions in stored procedures. This property
 				contains a list of <link linkend="dbid"><literal>DBID</literal>s</link> for which
 				this should be enabled. To enable this for all DBMS, simply use * as the value for
@@ -784,7 +768,7 @@
 			<title>Check for single line commands without delimiter</title>
 			<para>Property: <literal>workbench.db.checksinglelinecmd</literal></para>
 			<para>
-				When parsing a SQL script, &wb-productname; supports statements that 
+				When parsing a SQL script, &wb-productname; supports statements that
 				are put into a single line without a delimiter. This is primarily intended
 				for compatibility with Oracle's SQL*Plus and is not enabled for other
 				database systems.
@@ -793,7 +777,7 @@
 		</simplesect>
 
   </section>
-	
+
 	<section id="import-export-default">
 		<title>Default settings for Export/Import</title>
 
@@ -802,17 +786,17 @@
 			the default values used by &wb-productname; in case you do not provide  the parameter.
 			The default values mentioned in this chapter apply, if no property is defined
 			in the <literal>workbench.settings</literal> file. The current default for
-			these properties is displayed in the help message when you run the 
+			these properties is displayed in the help message when you run the
 			corresponding command without any parameters.
 		</para>
-		
+
 		<simplesect id="export-text-header-default">
 			<title>Controlling header lines in text exports</title>
 			<para>Property: <literal>workbench.export.text.default.header</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls whether default value for the <literal>-header</literal>
-				parameter of the <link linkend="command-export">WbExport</link> command. 
+				parameter of the <link linkend="command-export">WbExport</link> command.
 			</para>
 			<para>Default: <literal>false</literal></para>
 		</simplesect>
@@ -822,20 +806,20 @@
 			<para>Property: <literal>workbench.export.xml.default.verbose</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
-				This property controls whether XML exports are done using verbose XML or 
-				short tags and only basic formatting. This property sets the default 
-				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command. 
+				This property controls whether XML exports are done using verbose XML or
+				short tags and only basic formatting. This property sets the default
+				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command.
 			</para>
 			<para>Default: <literal>true</literal></para>
 		</simplesect>
-		
+
 		<simplesect id="import-continue-default">
 			<title>Setting default for WbImport's -continueOnError parameter</title>
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-continueOnError</literal>
-				of the <link linkend="command-import">WbImport</link> command. 
+				of the <link linkend="command-import">WbImport</link> command.
 			</para>
 			<para>Default: <literal>false</literal></para>
 		</simplesect>
@@ -846,18 +830,18 @@
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-header</literal>
-				of the <link linkend="command-import">WbImport</link> command. 
+				of the <link linkend="command-import">WbImport</link> command.
 			</para>
 			<para>Default: <literal>true</literal></para>
 		</simplesect>
-		
+
 		<simplesect id="import-text-multiline">
 			<title>Setting a default for WbImport's -multiLine parameter</title>
 			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-multiLine</literal>
-				of the <link linkend="command-import">WbImport</link> command. 
+				of the <link linkend="command-import">WbImport</link> command.
 			</para>
 			<para>Default: <literal>false</literal></para>
 		</simplesect>
@@ -868,16 +852,16 @@
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-trimValues</literal>
-				of the <link linkend="command-import">WbImport</link> command. 
+				of the <link linkend="command-import">WbImport</link> command.
 			</para>
 			<para>Default: <literal>false</literal></para>
 		</simplesect>
-		
+
 	</section>
-	
+
   <section id="log-setting">
     <title>Controlling the log file</title>
-    
+
     <para>
       When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
       define the logfile relative to the configuration or the installation directory:
@@ -888,7 +872,7 @@
       These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
       the directory name.
     </para>
-    
+
     <section id="wb-log">
       <title>Configure internal logging</title>
 
@@ -900,7 +884,7 @@
           into the <link linkend="config-dir">configuration directory</link>.
         </para>
       </simplesect>
-      
+
       <simplesect id="settings-log-level">
         <title>Log level</title>
         <para>Property: <literal>workbench.log.level</literal></para>
@@ -965,7 +949,7 @@
         <para>Default: <literal>false</literal></para>
       </simplesect>
     </section>
-    
+
   </section>
 
   <section id="settings-log4j">
@@ -988,7 +972,7 @@
 				If you specify a configuration file, this will be "passed" to Log4j by setting the system property
 				<literal>log4j.configuration</literal> to contain the correct "file URL" needed by Log4j.
 			</para>
-      
+
       <para>
         When passing a configuration file through this property, you can use a system property as part of the filename
         (e.g. <literal>${user.home}/sqlworkbench.log</literal>). If the filename denotes a relative filename
@@ -1006,12 +990,12 @@
       <para>
         If the Log4J classes are not found, the built-in logging will be used (see above)
       </para>
-      
+
       <para>
         When Log4J logging is enabled, none of the logging properties described in the previous section will be used.
         You have to configure everything through <literal>log4j.xml</literal>.
       </para>
-      
+
       <para>
         When using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice> with Log4J enabled,
         and you have configured Log4J to write to multiple files, only the first file will be shown.
@@ -1027,7 +1011,7 @@
         These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
         the directory name in <literal>log4j.xml</literal>
       </para>
-      
+
       <para>
         A sample <literal>log4j.xml</literal> can be found in the <literal>scripts</literal> directory of the
         &wb-productname; distribution.
@@ -1039,12 +1023,12 @@
       </para>
 
     </section>
-    
+
   </section>
 
   <section id="setting-sql-generation">
     <title>Settings related to SQL statement generation</title>
-		      
+
     <simplesect id="settings-db-ignoreschema">
 			<title>Controlling schema usage in generated SQL statements</title>
 			<para>Property: <literal>workbench.sql.ignoreschema.<link linkend="dbid">[dbid]</link>=schema1,...</literal></para>
@@ -1058,7 +1042,7 @@
 				The values specified in this property are case sensitiv.
 			</para>
 			<para>
-				Note that for Oracle, tables that are owned by the current user will never 
+				Note that for Oracle, tables that are owned by the current user will never
 				be prefixed with the owner.
 			</para>
 			<para>
@@ -1075,11 +1059,11 @@
 			<title>Defining CREATE TABLE templates for WbCopy</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.create.table.[typename]</literal></para>
 			<para>
-        This defines a complete <literal>CREATE TABLE</literal> statement that is used by 
+        This defines a complete <literal>CREATE TABLE</literal> statement that is used by
         <link linkend="copy-create-type"><literal>WbCopy</literal></link> to create the target table.
         The <literal>typename</literal> value is the value that has to be used for the
         <literal>-tableType</literal> parameter of the <literal>WbCopy</literal> command.
-      </para> 
+      </para>
       <para>
        The following placeholders are supported in the template
 				<simplelist columns="1">
@@ -1106,7 +1090,7 @@
           <member><literal>.informix_dynamic_server.create.table.temp_nolog=CREATE TEMP TABLE %fq_table_name% ( %columnlist% %pk_definition% ) WITH NO LOG</literal></member>
 				</simplelist>
 			</para>
-      
+
     </simplesect>
 
     <simplesect id="manual-setting-system-names">
@@ -1115,8 +1099,8 @@
 			<para>
 				Defines a regular expression to identify system generated constraint names.
 				If a constraint name is identified as beeing system generated, it is treated
-				as if no name was defined, when e.g. creating the SQL for a table. 
-				Whether or not &wb-productname; then generates a name for the constraint can 
+				as if no name was defined, when e.g. creating the SQL for a table.
+				Whether or not &wb-productname; then generates a name for the constraint can
 				be controlled in the options for the <link linkend="dbexp-options-gen-pk">DbExplorer</link>.
 			</para>
       <para>Default values:
@@ -1132,13 +1116,13 @@
 			<para>Property: <literal>workbench.sql.sync.chunksize</literal></para>
 			<para>
 				Controls the number of rows that are retrieved from the target table
-				when running <link linkend="command-data-diff"><literal>WbDataDiff</literal></link> 
-				or <link linkend="copy-sync-delete"><literal>WbCopy</literal></link> with the 
+				when running <link linkend="command-data-diff"><literal>WbDataDiff</literal></link>
+				or <link linkend="copy-sync-delete"><literal>WbCopy</literal></link> with the
 				<literal>-syncDelete=true</literal> parameter.
 			</para>
 			<para>Default value: <literal>25</literal></para>
     </simplesect>
-		
+
   </section>
 
   <section id="settings-table-source-retrieval">
@@ -1188,10 +1172,10 @@ workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
       source generation.
     </para>
   </section>
-	
+
 	<section id="filter-settings">
 		<title>Filter settings</title>
-		
+
 		<simplesect id="filter-picklist-size">
 			<title>Controlling the number of items in the pick list</title>
 			<para>Property: <literal>workbench.gui.filter.mru.maxsize</literal></para>
@@ -1202,7 +1186,7 @@ workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
 			</para>
 			<para>Default value: <literal>15</literal></para>
 		</simplesect>
-		
+
 	</section>
 
 

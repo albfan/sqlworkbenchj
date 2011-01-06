@@ -1,10 +1,10 @@
 <section id="editor" xreflabel="Editing SQL Statements">
 
 	<title>Editing SQL Statements</title>
-	
+
 	<section id="editing-files">
 		<title>Editing files</title>
-		
+
 		<para>You can load and save the editor's content into external files (e.g. for re-using)
 			them in other SQL tools.
 		</para>
@@ -15,7 +15,7 @@
 		</para>
 		<para>
 			The association between an editor tab and the external file will be saved
-			in the workspace that is used for the current connection. When opening the 
+			in the workspace that is used for the current connection. When opening the
 			workspace (e.g. by connecting using a profile that is linked to that workspace) the
 			external file will be loaded as well.
 		</para>
@@ -26,7 +26,7 @@
 			will not load the script into memory, thus you can even run scripts that would not fit into memory.
 		</para></note>
 	</section>
-    
+
 	<section id="command-completion">
 		<title>Command completion</title>
 		<para>
@@ -56,21 +56,22 @@ FROM person p
 			When editing the list of tables in the <literal>FROM</literal> part of the statement,
 			pressing the <keycap>Ctrl-Space</keycap> will pop up a list of available tables.
 		</para>
-			
+
 		<para>
-			Usually a semicolon is used to separate statements in the editor. However
-			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
-			to also	accept an empty line as a separator.
+			The editor assumes that the standard semicolon is used to separate statements when doing auto-completion
+      or using the "Execute current" function. This can be changed to a non-standard behaviour through
+      the <link linkend="options-empty-line-delimiter">options dialog </link> so that the editor also recognizes empty
+      lines as a statement delimiter.
 		</para>
 
 		<para>
 			Parameters for &wb-productname; specific commands are also supported by the command completion.
-			The parameters will only be shown, if you have already typed the leading dash, e.g. 
+			The parameters will only be shown, if you have already typed the leading dash, e.g.
 			<literal>WbImport -</literal>. If you press the shortcut for the command completion while
-			the cursor is located after the dash, a list of available options for the current comand is 
-			shown. Once the parameter has been added, you can display a list of possible values 
-			for the parameter if the cursor is located after the equals sign. 
-			for <literal>WbImport -mode=</literal> will display a list of allowed values for the 
+			the cursor is located after the dash, a list of available options for the current comand is
+			shown. Once the parameter has been added, you can display a list of possible values
+			for the parameter if the cursor is located after the equals sign.
+			for <literal>WbImport -mode=</literal> will display a list of allowed values for the
 			<literal>-mode</literal> parameter. For parameters where table names can be supplied
 			the usual table list will be shown.
 		</para>
@@ -116,7 +117,7 @@ FROM orders ord
 			<literal>functions.wb</literal> and <literal>operators.wb</literal>.
 		</para>
 		<para>
-			The files contain one keyword per line. Case does not matter (<literal>SELECT</literal> 
+			The files contain one keyword per line. Case does not matter (<literal>SELECT</literal>
 			and <literal>select</literal> are treated identically).
 			If you want to add a specific word to the list of global keywords, simply create a plain
 			text file <literal>keywords.wb</literal> in the <link linkend="config-dir">config directory</link>
@@ -140,7 +141,7 @@ ALTER</programlisting>
 			The color for each type of keyword can be changed in the options dialog.
 		</para>
 	</section>
-    
+
 	<section id="editor-reformat-sql" xreflabel="SQL Formatter">
 		<title>Reformat SQL</title>
 		<para>When you analyze statements from e.g. a log file, they are not necessarily formatted in a way that
@@ -148,12 +149,12 @@ ALTER</programlisting>
 			into a format that's easier to read and understand for a human being. This feature is often called pretty-printing.
 			Suppose you have the following statement (pasted from a log file)
 		</para>
-				
-		<programlisting>select user.* from user, user_profile, user_data 
-where user.user_id = user_profile.user_id and 
-user_profile.user_id = uprof.user_id and user_data.user_role = 1 
-and user_data.delete_flag = 'F' and not exists 
-(select 1 from data_detail where data_detail.id = user_data.id and 
+
+		<programlisting>select user.* from user, user_profile, user_data
+where user.user_id = user_profile.user_id and
+user_profile.user_id = uprof.user_id and user_data.user_role = 1
+and user_data.delete_flag = 'F' and not exists
+(select 1 from data_detail where data_detail.id = user_data.id and
 data_detail.flag = 'X' and data_detail.value > 42)</programlisting>
 		<para>this will be reformatted to look like this:</para>
 		<programlisting>SELECT user.*
@@ -173,10 +174,10 @@ AND   NOT EXISTS (SELECT 1
 		<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but
 			put into one single line. The default for this threshold is 80 characters. Meaning that any
 			subselect that is shorter than 80 characters will not be reformatted as the sub-<literal>SELECT</literal>
-			in the above example. Please refer to <link linkend="options-sql-formatting">Formatting options</link> for details. 
+			in the above example. Please refer to <link linkend="options-sql-formatting">Formatting options</link> for details.
 		</para>
 	</section>
-      
+
 	<section id="editor-make-in-list">
 		<title>Create SQL value lists</title>
 		<para>
@@ -260,7 +261,7 @@ String sql="SELECT p.name, \n" +
 				in you <literal>workbench.settings</literal> file.
 				See <link linkend="manual-setting-snippet-no-newline">Manual settings</link>
 				for details. You can also customize the <link linkend="manual-setting-snippet-prefix">prefix</link> (<literal>String sql =</literal>) and
-				the <link linkend="manual-setting-snippet-concat">concatenation character</link> that is used, 
+				the <link linkend="manual-setting-snippet-concat">concatenation character</link> that is used,
 				in order to support the programming language that you use.
 			</para>
 		</section>
@@ -289,7 +290,7 @@ String sql="SELECT p.name, \n" +
 "WHERE p.person_id = a.person_id; \n"</programlisting>
 
 			<para>will be converted to:</para>
-			
+
 			<programlisting>SELECT p.name,
        p.firstname,
        a.street,

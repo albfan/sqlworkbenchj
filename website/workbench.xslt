@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xslt [
     <!ENTITY space "&#32;">
     <!ENTITY nbsp "&#160;">
@@ -11,7 +11,7 @@
                 extension-element-prefixes="redirect"
                 >
 
-  <xsl:output encoding="iso-8859-1"
+  <xsl:output encoding="utf-8"
           method="html"
           omit-xml-declaration="yes"
           indent="no"
@@ -514,7 +514,7 @@
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
-  
+
   <xsl:template match="div">
     <xsl:copy>
       <xsl:apply-templates select="@*"/>

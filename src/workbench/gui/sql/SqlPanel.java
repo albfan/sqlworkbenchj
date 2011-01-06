@@ -2526,6 +2526,7 @@ public class SqlPanel
 
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 
 		if (this.dbConnection != null)
 		{
@@ -2652,6 +2653,7 @@ public class SqlPanel
 		int maxRows = this.statusBar.getMaxRows();
 		int timeout = this.statusBar.getQueryTimeout();
 		int firstResultIndex = 0;
+		final long scriptStart = System.currentTimeMillis();
 
 		StatementRunnerResult statementResult = null;
 
@@ -2756,7 +2758,6 @@ public class SqlPanel
 			long totalRows = 0;
 			lastScriptExecTime = 0;
 			stmtRunner.setMaxRows(maxRows);
-			long scriptStart = System.currentTimeMillis();
 
 			ignoreStateChange = true;
 			for (int i=startIndex; i < endIndex; i++)
@@ -2773,7 +2774,7 @@ public class SqlPanel
 				Thread.yield();
 				if (cancelExecution) break;
 
-				if (highlightCurrent && scriptStart > editor.getLastModifiedTime())
+				if (highlightCurrent && !editor.isModifiedAfter(scriptStart))
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
@@ -2871,7 +2872,7 @@ public class SqlPanel
 						// dialog is displayed, otherwise Swing uses too much CPU
 						iconHandler.showBusyIcon(false);
 
-						if (!macroRun && scriptStart > editor.getLastModifiedTime())
+						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
 							this.highlightError(scriptParser, commandWithError, selectionOffset);
 						}
@@ -2909,9 +2910,9 @@ public class SqlPanel
 			statusBar.setExecutionTime(stmtTotal);
 			statusBar.clearStatusMessage();
 
-			boolean editorWasModified = scriptStart > editor.getLastModifiedTime();
-			highlightCurrent = highlightCurrent && editorWasModified;
-			highlightOnError = highlightOnError && editorWasModified;
+			boolean editorWasModified = editor.isModifiedAfter(scriptStart);
+			highlightCurrent = highlightCurrent && !editorWasModified;
+			highlightOnError = highlightOnError && !editorWasModified;
 
 			if (commandWithError > -1 && highlightOnError && !macroRun)
 			{
@@ -3358,7 +3359,7 @@ public class SqlPanel
 
 	/**
 	 * Returns true if the editor should be disabled when running a query.
-	 * 
+	 *
 	 * @see GuiSettings#getDisableEditorDuringExecution()
 	 */
 	private boolean disableEditor()

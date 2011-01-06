@@ -68,10 +68,10 @@ public class ReaderFactory
 		{
 			return new MySqlProcedureReader(meta.getWbConnection());
 		}
-		
+
 		return new JdbcProcedureReader(meta.getWbConnection());
 	}
-	
+
 	public static IndexReader getIndexReader(DbMetadata meta)
 	{
 		if (meta.isOracle())
@@ -88,7 +88,7 @@ public class ReaderFactory
 		}
 		return new JdbcIndexReader(meta);
 	}
-	
+
 	public static ConstraintReader getConstraintReader(DbMetadata meta)
 	{
 		String dbid = meta.getDbId();
@@ -122,7 +122,7 @@ public class ReaderFactory
 		}
 		if (dbid.startsWith("adaptive_server"))
 		{
-			return new ASAConstraintReader();
+			return new SybaseConstraintReader();
 		}
 		if (meta.isApacheDerby())
 		{
@@ -132,7 +132,7 @@ public class ReaderFactory
 		{
 			return new FirstSqlConstraintReader();
 		}
-		
+
 		return null;
 	}
 }
