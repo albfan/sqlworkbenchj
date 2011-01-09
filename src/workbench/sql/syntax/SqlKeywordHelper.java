@@ -19,23 +19,22 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
  * Manage SQL keywords to support built-in keywords and user-defined keywords.
- * By default the files 
+ * By default the files
  * <ul>
  *   <li>keywords.wb (general SQL keywords)</li>
  *   <li>datatypes.wb (SQL datatypes)</li>
  *   <li>functions.wb (SQL functions)</li>
  *   <li>operators.wb (SQL operators)</li>
  * </ul>
- * are read from this package. 
+ * are read from this package.
  * If any of those files exist in the config directory, their contents
  * is read as well and merged with the predefined keywords.
  * <br/>
@@ -45,10 +44,9 @@ import workbench.util.StringUtil;
  * The DBMS specific keywords will be added to the global ones.
  * @author Thomas Kellerer
  */
-public class SqlKeywordHelper 
+public class SqlKeywordHelper
 {
 	private String dbId;
-	private CaseInsensitiveComparator comparator = new CaseInsensitiveComparator();
 	private Set<String> keywords;
 	private Set<String> operators;
 	private Set<String> functions;
@@ -87,7 +85,7 @@ public class SqlKeywordHelper
 		}
 		return keywords;
 	}
-	
+
 	public Set<String> getDataTypes()
 	{
 		if (datatypes == null)
@@ -96,7 +94,7 @@ public class SqlKeywordHelper
 		}
 		return datatypes;
 	}
-	
+
 	public Set<String> getOperators()
 	{
 		if (operators == null)
@@ -105,7 +103,7 @@ public class SqlKeywordHelper
 		}
 		return operators;
 	}
-	
+
 	public Set<String> getSqlFunctions()
 	{
 		if (functions == null)
@@ -150,14 +148,14 @@ public class SqlKeywordHelper
 	{
 		// First read the built-in functions
 		InputStream s = SqlKeywordHelper.class.getResourceAsStream(filename);
-		Set<String> result = new TreeSet<String>(comparator);
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		if (s != null)
 		{
 			BufferedReader in = new BufferedReader(new InputStreamReader(s));
 			Collection<String> builtin = FileUtil.getLines(in, true);
 			result.addAll(builtin);
 		}
-		
+
 		// Try to read the file in the current directory.
 		File f = new File(filename);
 		if (!f.exists())

@@ -18,7 +18,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,10 +50,9 @@ public class ArgumentParser
 
 	public ArgumentParser()
 	{
-		Comparator<String> c = new CaseInsensitiveComparator();
-		arguments = new TreeMap<String, Object>(c);
-		argTypes = new TreeMap<String, ArgumentType>(c);
-		allowedValues = new TreeMap<String, Collection<ArgumentValue>>(c);
+		arguments = new TreeMap<String, Object>(CaseInsensitiveComparator.INSTANCE);
+		argTypes = new TreeMap<String, ArgumentType>(CaseInsensitiveComparator.INSTANCE);
+		allowedValues = new TreeMap<String, Collection<ArgumentValue>>(CaseInsensitiveComparator.INSTANCE);
 	}
 
 	public ArgumentParser(boolean parameterSwitchNeeded)
@@ -74,7 +72,7 @@ public class ArgumentParser
 		Collection<ArgumentValue> allowed = getAllowedValues(key);
 		return allowed.contains(argValue);
 	}
-	
+
 	public Collection<ArgumentValue> getAllowedValues(String key)
 	{
 		return allowedValues.get(key);

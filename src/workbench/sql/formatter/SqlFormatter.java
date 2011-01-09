@@ -99,7 +99,7 @@ public class SqlFormatter
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
 		maxSubselectLength = maxLength;
-		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
+		dbFunctions = CollectionUtil.caseInsensitiveSet();
 		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
 		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
@@ -118,7 +118,7 @@ public class SqlFormatter
 
 	public void setDbDataTypes(Set<String> types)
 	{
-		this.dataTypes = new TreeSet<String>(new CaseInsensitiveComparator());
+		this.dataTypes = CollectionUtil.caseInsensitiveSet();
 		if (types != null)
 		{
 			dataTypes.addAll(types);
@@ -129,10 +129,10 @@ public class SqlFormatter
 	{
 		addSpaceAfterComma = flag;
 	}
-	
+
 	public void setDBFunctions(Set<String> functionNames)
 	{
-		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
+		this.dbFunctions = CollectionUtil.caseInsensitiveSet();
 		if (functionNames != null)
 		{
 			this.dbFunctions.addAll(functionNames);
@@ -284,7 +284,7 @@ public class SqlFormatter
 			result.append(' ');
 		}
 	}
-	
+
 	private void indent(StringBuilder text)
 	{
 		this.result.append(text);
@@ -340,7 +340,7 @@ public class SqlFormatter
 
 		if (lastV.endsWith("'") && currentV.equals("''")) return false;
 		if (lastV.equals("''") && currentV.startsWith("'")) return false;
-		
+
 		if (isCurrentOpenBracket && last.isIdentifier()) return false;
 		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
 		if (isCurrentOpenBracket && isDatatype(lastV)) return false;
@@ -1228,7 +1228,7 @@ public class SqlFormatter
 						this.appendNewline();
 						if (t == null) return t;
 						appendText(t.getContents());
-						
+
 						// check if multiple CTEs are defined
 						t = skipComments();
 						if (t == null) return t;

@@ -19,7 +19,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -36,7 +35,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
@@ -171,7 +169,7 @@ public class TableDataDiff
 			this.columnsToIgnore = null;
 			return;
 		}
-		this.columnsToIgnore = new TreeSet<String>(new CaseInsensitiveComparator());
+		this.columnsToIgnore = CollectionUtil.caseInsensitiveSet();
 		this.columnsToIgnore.addAll(columnNames);
 	}
 

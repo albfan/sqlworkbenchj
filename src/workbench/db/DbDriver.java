@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -357,13 +357,13 @@ public class DbDriver
 
 			// The system property for the Firebird driver is only needed when the connection is created
 			// so after the connect was successful, we can clean up the system properties
-			if (adjustProgramName() && url.startsWith("jdbc:firebirdsql:"))
+			if (doSetAppName() && url.startsWith("jdbc:firebirdsql:"))
 			{
 				System.clearProperty("org.firebirdsql.jdbc.processName");
 			}
 
 			// PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
-			if (adjustProgramName() && url.startsWith("jdbc:postgresql"))
+			if (doSetAppName() && url.startsWith("jdbc:postgresql"))
 			{
 				PostgresUtil.setApplicationName(c, getProgramName() + " (" + id + ")");
 			}
@@ -394,13 +394,14 @@ public class DbDriver
 		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
 	}
 
-	private boolean adjustProgramName()
+	private boolean doSetAppName()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
 	}
 
 	/**
-	 * Pust the application name and connection information into the passed connection properties
+	 * Pust the application name and connection information into the passed connection properties.
+	 *
 	 * @param props the properties to be used when establishing the connection
 	 * @param url the JDBC url (needed to identify the DBMS)
 	 * @param id the internal connection id
@@ -410,7 +411,7 @@ public class DbDriver
 	private void setAppInfo(Properties props, String url, String id, String user)
 		throws UnknownHostException
 	{
-		if (!adjustProgramName()) return;
+		if (!doSetAppName()) return;
 
 		// identify the program name when connecting
 		// this is different for each DBMS.

@@ -30,21 +30,21 @@ import workbench.util.StringUtil;
 public class WbCommandAnalyzer
 	extends BaseAnalyzer
 {
-	// True if the the parameters are put into the 
+	// True if the the parameters are put into the
 	// elements list. This is used by the CompletionPopup
 	// to check if the selected value should be enhanced with - and =
 	private boolean isParameter;
-	
+
 	public WbCommandAnalyzer(WbConnection conn, String statement, int cursorPos)
-	{	
+	{
 		super(conn, statement, cursorPos);
 	}
-	
+
 	public boolean isWbParam()
 	{
 		return this.isParameter;
 	}
-	
+
 	public char quoteCharForValue(String value)
 	{
 		if (this.isParameter) return 0;
@@ -55,7 +55,7 @@ public class WbCommandAnalyzer
 		}
 		return 0;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void checkContext()
 	{
@@ -78,7 +78,7 @@ public class WbCommandAnalyzer
 			this.elements = null;
 			return;
 		}
-		
+
 		ArgumentParser p = cmd.getArgumentParser();
 		if (p == null)
 		{
@@ -86,12 +86,12 @@ public class WbCommandAnalyzer
 			this.elements = null;
 			return;
 		}
-		
+
 		context = CONTEXT_WB_PARAMS;
-		
+
 		String parameter = getCurrentParameter();
 		this.isParameter = false;
-		
+
 		if (p.isRegistered(parameter))
 		{
 			ArgumentType type = p.getArgumentType(parameter);
@@ -127,19 +127,19 @@ public class WbCommandAnalyzer
 			p.parse(params);
 			List argsPresent = p.getArgumentsOnCommandLine();
 			this.elements.removeAll(argsPresent);
-			Collections.sort(this.elements, new CaseInsensitiveComparator());
+			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = p.needsSwitch();
 		}
 	}
-	
+
 	/**
 	 * Returns the name of the parameter where the cursor is currently located.
-	 * If the previous non-whitespace character left of the cursor is the equal 
-	 * sign, then this is assumed to be the "current parameter" and the 
-	 * corresponding string is returned. 
-	 * Otherwise it is assumed that the cursor is "between" two parameters 
+	 * If the previous non-whitespace character left of the cursor is the equal
+	 * sign, then this is assumed to be the "current parameter" and the
+	 * corresponding string is returned.
+	 * Otherwise it is assumed that the cursor is "between" two parameters
 	 * and the list of available parameters should be displayed.
-	 * 
+	 *
 	 * @return the value of the current parameter or null if no parameter was found
 	 */
 	protected String getCurrentParameter()
@@ -149,7 +149,7 @@ public class WbCommandAnalyzer
 			char c = this.sql.charAt(cursorPos - 1);
 			if (Character.isWhitespace(c)) return null;
 		}
-		
+
 		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
 		if (word == null) return null;
 		if (word.charAt(0) == '-' && word.length() > 2)
@@ -163,5 +163,5 @@ public class WbCommandAnalyzer
 		}
 		return null;
 	}
-	
+
 }

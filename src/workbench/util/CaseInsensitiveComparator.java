@@ -14,9 +14,9 @@ package workbench.util;
 import java.util.Comparator;
 
 /**
- * A case-insensitive Comparator for String which 
+ * A case-insensitive Comparator for String which
  * can handle null values as well (as opposed to String.CASE_INSENSITIVE_ORDER)
- * 
+ *
  * @author Thomas Kellerer
  */
 public class CaseInsensitiveComparator
@@ -30,7 +30,7 @@ public class CaseInsensitiveComparator
 	 * null values are "sorted" after non-null values.
 	 * i.e. compare(null, "something") returns -1
 	 * and compare("something", null) returns 1
-	 * 
+	 *
 	 * @param value1 the first String, maybe null
 	 * @param value2 the second String, maybe null
 	 * @return 0 if both are null or compareToIgnoreCase() returns 0
@@ -38,7 +38,10 @@ public class CaseInsensitiveComparator
 	 */
 	public int compare(String value1, String value2)
 	{
-		return StringUtil.compareStrings(value1, value2, true);
+		if (value1 == null && value2 == null) return 0;
+		if (value1 == null) return -1;
+		if (value2 == null) return 1;
+		return value1.compareToIgnoreCase(value2);
 	}
 }
 

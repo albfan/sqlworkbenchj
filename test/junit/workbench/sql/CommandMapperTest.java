@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -13,7 +13,6 @@ package workbench.sql;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.TestUtil;
 import workbench.resource.Settings;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -44,46 +43,46 @@ public class CommandMapperTest
 			String sql = "select * from table";
 			Matcher m = pg.matcher(sql);
 			assertFalse(m.find());
-			
+
 			sql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
 			m = pg.matcher(sql);
-			assertFalse(m.find());			
+			assertFalse(m.find());
 
 			sql = "select col1, col2, col3 INTO new_table FROM existing_table";
 			m = pg.matcher(sql);
-			assertTrue(m.find());			
-			
+			assertTrue(m.find());
+
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
+
 		try
 		{
 			String informixPattern = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.selectinto.pattern", null);
 			assertNotNull(informixPattern);
-			
+
 			Pattern ifx = Pattern.compile(informixPattern, Pattern.CASE_INSENSITIVE);
 			String sql = "select * from table";
 			Matcher m = ifx.matcher(sql);
 			assertFalse(m.find());
-			
+
 			sql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
 			m = ifx.matcher(sql);
-			assertFalse(m.find());			
+			assertFalse(m.find());
 
 			sql = "select col1, col2, col3 FROM existing_table INTO new_table";
 			m = ifx.matcher(sql);
-			assertTrue(m.find());			
-			
+			assertTrue(m.find());
+
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
+
 	}
 }

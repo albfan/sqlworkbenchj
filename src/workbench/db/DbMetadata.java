@@ -94,7 +94,7 @@ public class DbMetadata
 {
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
-	
+
 	private String schemaTerm;
 	private String catalogTerm;
 	private String productName;
@@ -135,7 +135,7 @@ public class DbMetadata
 	private boolean isH2;
 
 	private String quoteCharacter;
-	private final Set<String> keywords = new TreeSet<String>(new CaseInsensitiveComparator());
+	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet();
 
 	private Pattern selectIntoPattern;
 
@@ -453,14 +453,14 @@ public class DbMetadata
 	{
 		return tableTypesList.toArray(EMPTY_STRING_ARRAY);
 	}
-	
+
 	public String[] getTablesAndViewTypes()
 	{
 		List<String> types = new ArrayList<String>(tableTypesList);
 		types.add(getViewTypeName());
 		return types.toArray(EMPTY_STRING_ARRAY);
 	}
-	
+
 	public List<String> getTableTypes()
 	{
 		return new ArrayList<String>(tableTypesList);
@@ -724,7 +724,7 @@ public class DbMetadata
 	{
 		schemasToIgnore = null;
 	}
-	
+
 	/**
 	 * Check if the given {@link TableIdentifier} requires
 	 * the usage of the schema for a DML or DDL statement

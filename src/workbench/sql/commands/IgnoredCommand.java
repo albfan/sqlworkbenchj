@@ -34,14 +34,14 @@ public class IgnoredCommand
 	public IgnoredCommand(String aVerb)
 	{
 		super();
-		this.verb = aVerb;
+		this.verb = aVerb.toUpperCase();
 	}
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String msg = ResourceMgr.getString("MsgCommandIgnored").replace("%verb%", this.verb);
+		String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", this.verb);
 		result.addMessage(msg);
 		result.setSuccess();
 		this.done();

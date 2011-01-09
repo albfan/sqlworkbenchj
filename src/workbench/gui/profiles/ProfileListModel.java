@@ -32,12 +32,12 @@ import workbench.util.StringUtil;
  *
  * @author  Thomas Kellerer
  */
-class ProfileListModel 
+class ProfileListModel
 	extends DefaultTreeModel
 {
 	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private List<ConnectionProfile> profiles;
-	
+
 	public ProfileListModel()
 	{
 		super(null, true);
@@ -56,7 +56,7 @@ class ProfileListModel
 		if (toSort == null) return;
 		Collections.sort(toSort, ConnectionProfile.getNameComparator());
 	}
-	
+
 	public void profileChanged(ConnectionProfile profile)
 	{
 		TreePath path = getPath(profile);
@@ -87,7 +87,7 @@ class ProfileListModel
 			DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
 			if (n == null) continue;
 			String name = (String)n.getUserObject();
-			if (name.equals(group)) 
+			if (name.equals(group))
 			{
 				return n;
 			}
@@ -95,7 +95,7 @@ class ProfileListModel
 
 		return null;
 	}
-	
+
 	public TreePath[] getGroupNodes()
 	{
 		if (this.rootNode == null) return null;
@@ -109,7 +109,7 @@ class ProfileListModel
 		}
 		return nodes;
 	}
-	
+
 	public List<String> getGroups()
 	{
 		if (this.rootNode == null) return null;
@@ -124,7 +124,7 @@ class ProfileListModel
 		}
 		return result;
 	}
-	
+
 	public void deleteGroup(String group)
 	{
 		if (group == null) return;
@@ -147,13 +147,13 @@ class ProfileListModel
 		}
 		node.removeAllChildren();
 	}
-	
+
 	public void deleteProfile(ConnectionProfile prof)
 	{
 		TreePath path = getPath(prof);
 		MutableTreeNode node = (MutableTreeNode)path.getLastPathComponent();
 		if (!node.isLeaf()) return;
-			
+
 		profiles.remove(prof);
 		this.removeNodeFromParent(node);
 	}
@@ -164,7 +164,7 @@ class ProfileListModel
 		Object profile = defGroup.getChildAt(0);
 		return new TreePath( new Object[] { rootNode, defGroup, profile });
 	}
-	
+
 	public TreePath getPath(ProfileKey def)
 	{
 		if (def == null) return null;
@@ -175,7 +175,7 @@ class ProfileListModel
 		}
 		return null;
 	}
-	
+
 	public TreePath getPath(ConnectionProfile prof)
 	{
 		if (prof == null) return null;
@@ -194,7 +194,7 @@ class ProfileListModel
 				DefaultMutableTreeNode n = (DefaultMutableTreeNode)getChild(rootNode, i);
 				if (n == null) continue;
 				String g = (String)n.getUserObject();
-				if (pGroup.equals(g)) 
+				if (pGroup.equals(g))
 				{
 					groupNode = n;
 					break;
@@ -202,7 +202,7 @@ class ProfileListModel
 			}
 		}
 		if (groupNode == null) return null;
-		
+
 		int children = this.getChildCount(groupNode);
 		Object profileNode = null;
 		for (int i = 0; i < children; i++)
@@ -217,7 +217,7 @@ class ProfileListModel
 		if (profileNode == null) return null;
 		return new TreePath(new Object[] { rootNode, groupNode, profileNode } );
 	}
-	
+
 
 	/**
 	 *	Returns true if any of the profile definitions has changed.
@@ -236,12 +236,12 @@ class ProfileListModel
 		return false;
 	}
 
-	
+
 	public int getSize()
 	{
 		return this.profiles.size();
 	}
-	
+
 	public TreePath addGroup(String name)
 	{
 		if (name == null) return null;
@@ -270,7 +270,7 @@ class ProfileListModel
 		ConnectionMgr.getInstance().saveProfiles();
 		resetChanged();
 	}
-	
+
 	public void resetChanged()
 	{
 		for (ConnectionProfile profile : profiles)
@@ -278,27 +278,27 @@ class ProfileListModel
 			profile.reset();
 		}
 	}
-	
+
 	public void applyProfiles()
 	{
 		ConnectionMgr.getInstance().applyProfiles(this.profiles);
 	}
-	
+
 	private void buildTree()
 	{
 		ProfileGroupMap groupMap = new ProfileGroupMap(profiles);
-		
+
 		// Make sure the default group is added as the first item!
 		List<String> groups = new ArrayList<String>();
 		groups.addAll(groupMap.keySet());
-		Collections.sort(groups, new CaseInsensitiveComparator());
-		
+		Collections.sort(groups, CaseInsensitiveComparator.INSTANCE);
+
 		for (String group : groups)
 		{
 			DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode(group, true);
 			rootNode.add(groupNode);
 			List<ConnectionProfile> groupProfiles = groupMap.get(group);
-			
+
 			this.sortList(groupProfiles);
 			Iterator p = groupProfiles.iterator();
 			while (p.hasNext())
@@ -324,16 +324,16 @@ class ProfileListModel
 		}
 		moveProfilesToGroup(nodes, target);
 	}
-	
-	
+
+
 	public void moveProfilesToGroup(DefaultMutableTreeNode[] profileNodes, DefaultMutableTreeNode groupNode)
 	{
 		if (profileNodes == null) return;
 		if (profileNodes.length == 0) return;
 		if (groupNode == null) return;
-		
+
 		String groupName = (String)groupNode.getUserObject();
-			
+
 		for (int i = 0; i < profileNodes.length; i++)
 		{
 			Object o = profileNodes[i].getUserObject();
@@ -355,9 +355,9 @@ class ProfileListModel
 		if (profileNodes == null) return;
 		if (profileNodes.length == 0) return;
 		if (groupNode == null) return;
-		
+
 		String groupName = (String)groupNode.getUserObject();
-			
+
 		for (int i = 0; i < profileNodes.length; i++)
 		{
 			Object o = profileNodes[i].getUserObject();
@@ -375,5 +375,5 @@ class ProfileListModel
 			insertNodeInto(newNode, groupNode, groupNode.getChildCount());
 		}
 	}
-	
+
 }

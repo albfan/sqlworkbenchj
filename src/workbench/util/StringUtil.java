@@ -494,7 +494,7 @@ public class StringUtil
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Return the position of the first non-whitespace character in the String
 	 * @param line
@@ -944,7 +944,7 @@ public class StringUtil
 		}
 	}
 
-	
+
 	public static String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
 	{
 		try
@@ -1229,7 +1229,7 @@ public class StringUtil
 		result.append(nr);
 		return result;
 	}
-	
+
 	public static String formatNumber(int value, int length, boolean fillRight)
 	{
 		String s = NumberStringCache.getNumberString(value);
@@ -1315,7 +1315,7 @@ public class StringUtil
 		result.append(hex);
 		return result.toString();
 	}
-	
+
 	public static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];

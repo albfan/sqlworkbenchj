@@ -42,10 +42,10 @@ public class MacroStorage
 
 	private boolean modified = false;
 	private List<MacroChangeListener> changeListeners = null;
-	
+
 	public MacroStorage()
 	{
-		allMacros = new TreeMap<String, MacroDefinition>(new CaseInsensitiveComparator());
+		allMacros = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
 		groups = new ArrayList<MacroGroup>();
 	}
 
@@ -177,7 +177,7 @@ public class MacroStorage
 	 * <tt>.old</tt> appended.
 	 *
 	 * @param source
-	 * @see workbench.util.WbPersistence#readObject() 
+	 * @see workbench.util.WbPersistence#readObject()
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized void loadMacros(File source)

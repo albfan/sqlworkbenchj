@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -89,7 +88,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
@@ -223,8 +222,8 @@ public class EditorPanel
 
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
-		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
-		dbDatatypes = new TreeSet<String>(new CaseInsensitiveComparator());
+		dbFunctions = CollectionUtil.caseInsensitiveSet();
+		dbDatatypes = CollectionUtil.caseInsensitiveSet();
 
 		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);
 

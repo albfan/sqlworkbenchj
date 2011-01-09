@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -12,12 +12,11 @@
 package workbench.sql;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -72,6 +71,8 @@ import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.sql.wbcommands.console.WbAbout;
+import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -82,14 +83,14 @@ public class CommandMapper
 {
 	private Map<String, SqlCommand> cmdDispatch;
 	private List<String> dbSpecificCommands;
-	private Set<String> passThrough = new HashSet<String>();
+	private Set<String> passThrough = CollectionUtil.caseInsensitiveSet();
 	private boolean supportsSelectInto;
 	private DbMetadata metaData;
 	private boolean allowAbbreviated;
 
 	public CommandMapper()
 	{
-		cmdDispatch = new HashMap<String, SqlCommand>();
+		cmdDispatch = new TreeMap<String, SqlCommand>(CaseInsensitiveComparator.INSTANCE);
 		cmdDispatch.put("*", new SqlCommand());
 
 		// Workbench specific commands
@@ -248,7 +249,6 @@ public class CommandMapper
 		for (String verb : verbs)
 		{
 			if (verb == null) continue;
-			verb = verb.toUpperCase();
 			IgnoredCommand cmd = new IgnoredCommand(verb);
 			this.cmdDispatch.put(verb, cmd);
 			this.dbSpecificCommands.add(verb);
@@ -260,7 +260,7 @@ public class CommandMapper
 		{
 			for (String v : passVerbs)
 			{
-				passThrough.add(v.toUpperCase());
+				passThrough.add(v);
 			}
 
 		}

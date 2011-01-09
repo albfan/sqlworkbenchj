@@ -21,7 +21,7 @@ import java.util.TreeSet;
 
 /**
  * Utility functions for Collection handling.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class CollectionUtil
@@ -30,12 +30,12 @@ public class CollectionUtil
 	{
 		return (c != null && c.size() > 0);
 	}
-	
+
 	public static boolean isEmpty(Collection c)
 	{
 		return (c == null || c.isEmpty());
 	}
-	
+
 	public static <E> Set<E> treeSet(E... add)
 	{
 		Set<E> result = new TreeSet<E>();
@@ -51,7 +51,7 @@ public class CollectionUtil
 	}
 	public static Set<String> caseInsensitiveSet()
 	{
-		return new TreeSet<String>(new CaseInsensitiveComparator());
+		return new TreeSet<String>(CaseInsensitiveComparator.INSTANCE);
 	}
 
 	public static Set<String> caseInsensitiveSet(String... a)

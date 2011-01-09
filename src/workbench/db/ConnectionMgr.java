@@ -135,14 +135,9 @@ public class ConnectionMgr
 	WbConnection connect(ConnectionProfile profile, String anId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
-
 		String drvClass = profile.getDriverclass();
 		String drvName = profile.getDriverName();
-		//long start, end;
-		//start = System.currentTimeMillis();
 		DbDriver drv = this.findDriverByName(drvClass, drvName);
-		//end = System.currentTimeMillis();
-		//LogMgr.logDebug("ConnectionMgr.connect()", "FindDriver took " + (end - start) + " ms");
 		if (drv == null)
 		{
 			throw new SQLException("Driver class not registered");
@@ -400,7 +395,7 @@ public class ConnectionMgr
 		{
 			result.add(profile.getKey().toString());
 		}
-		Collections.sort(result, new CaseInsensitiveComparator());
+		Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
 		return result;
 	}
 

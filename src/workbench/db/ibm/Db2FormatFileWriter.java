@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -40,7 +40,7 @@ public class Db2FormatFileWriter
 
 	public Db2FormatFileWriter()
 	{
-		codePageMap = new TreeMap<String, String>(new CaseInsensitiveComparator());
+		codePageMap = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 		codePageMap.put("UTF-8", "1208");
 		codePageMap.put("UTF-16", "1200");
 		codePageMap.put("UTF-16BE", "1200");
@@ -133,7 +133,7 @@ public class Db2FormatFileWriter
 		{
 			FileUtil.closeQuietely(out);
 		}
-		
+
 	}
 
 	private DbSettings getDbSettings(DataExporter exporter)
@@ -151,7 +151,7 @@ public class Db2FormatFileWriter
 		if (delim.equals("\"")) return "\"\"";
 		if (delim.equals("'")) return "''";
 		char d = delim.charAt(0);
-		
+
 		if (d < 32)
 		{
 			String hex = Integer.toHexString(d);

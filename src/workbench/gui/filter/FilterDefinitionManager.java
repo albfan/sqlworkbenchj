@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -25,7 +25,7 @@ import workbench.util.WbPersistence;
 
 /**
  * Provide a MRU lookup for filter definitions saved to a file.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class FilterDefinitionManager
@@ -33,10 +33,10 @@ public class FilterDefinitionManager
 	private List<PropertyChangeListener> listeners;
 	private FixedSizeList<WbFile> filterFiles;
 	private static final int DEFAULT_MAX_SIZE = 15;
-	
-	private static FilterDefinitionManager instance;	
 
-	public synchronized static FilterDefinitionManager getInstance() 
+	private static FilterDefinitionManager instance;
+
+	public synchronized static FilterDefinitionManager getInstance()
 	{
 		if (instance == null)
 		{
@@ -44,7 +44,7 @@ public class FilterDefinitionManager
 		}
 		return instance;
 	}
-	
+
 	private FilterDefinitionManager()
 	{
 		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
@@ -73,7 +73,7 @@ public class FilterDefinitionManager
 			}
 		}
 	}
-	
+
 	private void removeOldSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -83,11 +83,11 @@ public class FilterDefinitionManager
 			s.removeProperty("workbench.gui.filter.mru.entry." + i);
 		}
 	}
-	
+
 	public void saveMRUList()
 	{
 		removeOldSettings();
-		
+
 		Settings s = Settings.getInstance();
 		int index = 0;
 		for (WbFile f : filterFiles.getEntries())
@@ -97,19 +97,19 @@ public class FilterDefinitionManager
 		}
 		s.setProperty("workbench.gui.filter.mru.size", index);
 	}
-	
+
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new LinkedList<PropertyChangeListener>();
 		this.listeners.add(l);
 	}
-	
-	public synchronized void filterSaved(WbFile filename)
+
+	public synchronized void filterUsed(WbFile filename)
 	{
 		filterFiles.addEntry(filename);
 		firePropertyChanged();
 	}
-	
+
 	private synchronized void firePropertyChanged()
 	{
 		if (this.listeners == null) return;
@@ -120,20 +120,20 @@ public class FilterDefinitionManager
 			l.propertyChange(evt);
 		}
 	}
-	
+
 	public List<WbFile> getEntries()
 	{
 		return filterFiles.getEntries();
 	}
-	
+
 	public void saveFilter(FilterExpression filter, WbFile file)
 		throws IOException
 	{
 		WbPersistence p = new WbPersistence(file.getFullPath());
 		p.writeObject(filter);
-		filterSaved(file);
+		filterUsed(file);
 	}
-	
+
 	public FilterExpression loadFilter(String filename)
 		throws Exception
 	{
@@ -143,7 +143,8 @@ public class FilterDefinitionManager
 		if (o instanceof FilterExpression)
 		{
 			result = (FilterExpression)o;
-		} 
+			filterUsed(new WbFile(filename));
+		}
 		return result;
 	}
 }

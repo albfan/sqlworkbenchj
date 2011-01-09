@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import workbench.db.exporter.RowDataConverter;
 import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
@@ -26,7 +25,7 @@ import workbench.resource.Settings;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
-import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -113,7 +112,7 @@ public class DbSettings
 		if (StringUtil.isEmptyString(verb)) return false;
 		if (this.updatingCommands == null)
 		{
-			this.updatingCommands = new TreeSet<String>(new CaseInsensitiveComparator());
+			this.updatingCommands = CollectionUtil.caseInsensitiveSet();
 
 			String l = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
 			List<String> commands = StringUtil.stringToList(l, ",", true, true);
@@ -200,12 +199,12 @@ public class DbSettings
 	{
 		return Settings.getInstance().getIntProperty(prefix + "maxwarnings", 5000);
 	}
-	
+
 	public int getMaxResults()
 	{
 		return Settings.getInstance().getIntProperty(prefix + "maxresults", 50000);
 	}
-	
+
 	/**
 	 * Returns true if the DBMS supports transactional DDL and thus
 	 * needs a COMMIT after any DDL statement.

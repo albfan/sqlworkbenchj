@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -67,7 +67,7 @@ public class FilterPickerAction
 			{
 				FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
 				this.client.applyFilter(f);
-				
+
 				String tooltip = "<html>" + ResourceMgr.getDescription("MnuTxtPickFilter");
 				tooltip += "<br>(" + file + ")</html>";
 				dropDownButton.setToolTipText(tooltip);
@@ -135,7 +135,7 @@ public class FilterPickerAction
 	private void buildPopup()
 	{
 		List<WbFile> entries = FilterDefinitionManager.getInstance().getEntries();
-		if (entries == null || entries.size() == 0) return;
+		if (entries == null || entries.isEmpty()) return;
 
 		JMenu menu = new JMenu("filters");
 		for (WbFile f : entries)

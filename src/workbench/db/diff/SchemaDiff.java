@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
@@ -36,7 +35,6 @@ import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
-import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
@@ -101,7 +99,7 @@ public class SchemaDiff
 	private boolean cancel = false;
 	private String referenceSchema;
 	private String targetSchema;
-	private Set<String> tablesToIgnore = new TreeSet<String>(new CaseInsensitiveComparator());
+	private Set<String> tablesToIgnore = CollectionUtil.caseInsensitiveSet();
 
 	public SchemaDiff()
 	{
@@ -363,11 +361,11 @@ public class SchemaDiff
 
 	/**
 	 * Define the reference and target schema without an automatic retrieval of all objects.
-	 * 
-	 * This should be used when only specific tables should be compared, but stored procedures 
+	 *
+	 * This should be used when only specific tables should be compared, but stored procedures
 	 * and sequences as well. In this case, setting reference and target schema will limit
 	 * the list of procedures and sequences processed.
-	 * 
+	 *
 	 * @param rSchema the name of the references schema
 	 * @param tSchema the name of the target schema
 	 */
@@ -377,7 +375,7 @@ public class SchemaDiff
 		targetSchema = tSchema;
 	}
 
-	
+
 	/**
 	 *	Setup this SchemaDiff object to compare all tables that the user
 	 *  can access in the reference connection with all matching (=same name)
@@ -413,7 +411,7 @@ public class SchemaDiff
 		{
 			types = this.referenceDb.getMetadata().getTableTypesArray();
 		}
-		
+
 		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(this.referenceSchema, types);
 		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(this.targetSchema, types);
 
@@ -741,7 +739,7 @@ public class SchemaDiff
 		{
 			buildSequenceList();
 		}
-		
+
 		if (objectsToCompare == null) return;
 
 		StrBuffer indent = new StrBuffer("  ");
@@ -990,9 +988,9 @@ public class SchemaDiff
 	{
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer indent2 = new StrBuffer("    ");
-		
+
 		TagWriter.writeWorkbenchVersion(out, indent);
-		
+
 		writeTag(out, indent, TAG_REF_CONN, true);
 		StrBuffer info = this.referenceDb.getDatabaseInfoAsXml(indent2);
 		info.writeTo(out);
