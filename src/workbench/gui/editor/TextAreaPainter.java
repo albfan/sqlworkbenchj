@@ -401,6 +401,7 @@ public class TextAreaPainter
 		final int firstVisible = textArea.getFirstLine();
 
 		int fheight = fm.getHeight();
+		final int fmHeight = fm.getLeading() + fm.getMaxDescent();
 		int firstInvalid = firstVisible + (clipRect.y / fheight);
 		if (firstInvalid > 1) firstInvalid --;
 
@@ -456,7 +457,7 @@ public class TextAreaPainter
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
-						gfx.fillRect(0, y + fheight, editorWidth, fheight);
+						gfx.fillRect(0, y + fmHeight, editorWidth, fheight);
 						gfx.setColor(getBackground());
 					}
 
