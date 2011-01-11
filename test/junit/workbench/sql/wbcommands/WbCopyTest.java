@@ -24,7 +24,6 @@ import workbench.db.WbConnection;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
-import workbench.util.WbFile;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import workbench.db.MetaDataSqlManager;
@@ -1067,6 +1066,7 @@ public class WbCopyTest
 
 			String sql = "wbcopy -createTarget=true " +
 				"-sourceQuery='select nr as person_id, \"Lastname\" as last_name, firstname as first_name from person' " +
+				"-" + CommonArgs.ARG_TRANS_CONTROL + "=false " +
 				"-targetTable=participants " +
 				"-tableType=junit_type " +
 				"-skipTargetCheck=true " +
@@ -1085,28 +1085,29 @@ public class WbCopyTest
 			long participants = copyCmd.getAffectedRows();
 			assertEquals(4, participants);
 
-//			participants = 0;
-//			Statement targetStmt = target.createStatement();
-//			ResultSet rs = targetStmt.executeQuery("select person_id, last_name, first_name from participants");
-//			while (rs.next())
-//			{
-//				participants ++;
-//				int nr = rs.getInt(1);
-//				String ln = rs.getString(2);
-//				String fn = rs.getString(3);
-//				if (nr == 1)
-//				{
-//					assertEquals("Incorrect data copied", "Dent", ln);
-//					assertEquals("Incorrect data copied", "Arthur", fn);
-//				}
-//				else if (nr == 2)
-//				{
-//					assertEquals("Incorrect data copied", "Beeblebrox", ln);
-//					assertEquals("Incorrect data copied", "Zaphod", fn);
-//				}
-//			}
-//			SqlUtil.closeResult(rs);
-//			assertEquals(4, participants);
+			participants = 0;
+			Statement targetStmt = target.createStatement();
+			ResultSet rs = targetStmt.executeQuery("select person_id, last_name, first_name from participants");
+			while (rs.next())
+			{
+				participants ++;
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+			assertEquals(4, participants);
+			target.commit();
 
 			sql = "wbcopy -sourceQuery='select nr as person_id, \"Lastname\" as last_name, firstname as first_name from person' " +
 				"-targetTable=person_2 " +
