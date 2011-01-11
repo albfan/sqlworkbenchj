@@ -153,8 +153,6 @@
    </object> 
   </void> 
 
-  <!-- Alternative retrieval for PostgreSQL using the "pretty print" feature of pg_get_viewdef.
-       But the output for complicated views (especially ones with UNIONs isn't really that pretty
   <void method="put">
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -174,8 +172,8 @@ WHERE c.relkind = 'v'::char
     </void>
    </object>
   </void>
-  -->
-
+  
+  <!--
   <void method="put"> 
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -187,6 +185,7 @@ WHERE c.relkind = 'v'::char
     </void> 
    </object> 
   </void> 
+  -->
   
   <void method="put"> 
    <string>ThinkSQL Relational Database Management System</string> 
