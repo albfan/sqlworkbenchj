@@ -184,6 +184,19 @@ public class TestUtil
 		return con;
 	}
 
+	public WbConnection getHSQLConnection(File db, String dbName)
+		throws SQLException, ClassNotFoundException
+	{
+		ArgumentParser parser = new AppArguments();
+		parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
+		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+		prof.setName(dbName);
+		ConnectionMgr.getInstance().addProfile(prof);
+		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
+		dropAll(con, false);
+		return con;
+	}
+	
 	/**
 	 * Return a connection to an H2 (in-memory) Database with the name of this TestUtil
 	 * @see TestUtil#TestUtil(String)

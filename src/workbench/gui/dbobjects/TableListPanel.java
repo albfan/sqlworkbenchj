@@ -1197,7 +1197,7 @@ public class TableListPanel
 		}
 
 		this.tableData.reset();
-		this.tableData.setReadOnly(!isTableType(this.selectedTable.getType()));
+		this.tableData.setReadOnly(dbConnection.getMetadata().isTableType(this.selectedTable.getType()));
 		this.tableData.setTable(this.selectedTable);
 
 		this.setShowDataMenuStatus(hasData);
@@ -1208,12 +1208,6 @@ public class TableListPanel
 	private void setShowDataMenuStatus(boolean flag)
 	{
 		if (this.showDataMenu != null) this.showDataMenu.setEnabled(flag);
-	}
-
-	private boolean isTableType(String type)
-	{
-		if (type == null) return false;
-		return (type.indexOf("TABLE") > -1 || type.indexOf("table") > -1 || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
 	}
 
 	private boolean isSynonym(TableIdentifier table)
@@ -1230,12 +1224,12 @@ public class TableListPanel
 		DbMetadata meta = this.dbConnection.getMetadata();
 		DbSettings dbs = this.dbConnection.getDbSettings();
 		String type = selectedTable.getType();
-		if (isTableType(type)) return true;
+		if (meta.isTableType(type)) return true;
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
 			TableIdentifier rt = getObjectTable();
 			if (rt == null) return false;
-			return isTableType(realTable.getType());
+			return meta.isTableType(realTable.getType());
 		}
 		return false;
 	}
@@ -1305,7 +1299,7 @@ public class TableListPanel
 					}
 				}
 			}
-			else if (isTableType(type))
+			else if (meta.isTableType(type))
 			{
 				sql = builder.getTableSource(selectedTable, true, true);
 			}

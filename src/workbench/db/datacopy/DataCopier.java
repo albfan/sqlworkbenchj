@@ -493,15 +493,17 @@ public class DataCopier
 		return this.importer.isSuccess();
 	}
 
-	public void startCopy()
+	public long startCopy()
 		throws Exception
 	{
+		long totalRows = 0;
 		try
 		{
 			// this will call start() or sourceData.start()
 			// depending on which source we set for the importer
 			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
 			this.importer.startImport();
+			totalRows = importer.getAffectedRows();
 
 			if (this.doSyncDelete)
 			{
@@ -522,6 +524,7 @@ public class DataCopier
 			this.importer.tableImportError();
 			throw e;
 		}
+		return totalRows;
 	}
 
 	public String getRowsUpdatedMessage()

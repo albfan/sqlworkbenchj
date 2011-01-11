@@ -70,6 +70,9 @@ public class WbCopy
 
 	private CopyTask copier;
 
+	// for testing purposes
+	private long lastCopyCount; 
+	
 	public WbCopy()
 	{
 		super();
@@ -106,7 +109,15 @@ public class WbCopy
 		cmdLine.addArgumentWithValues(PARAM_TABLE_TYPE, DbSettings.getCreateTableTypes());
 	}
 
-	public String getVerb() { return VERB; }
+	long getAffectedRows()
+	{
+		return lastCopyCount;
+	}
+	
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	protected boolean isConnectionRequired() { return false; }
 
@@ -226,7 +237,7 @@ public class WbCopy
 				return result;
 			}
 
-			copier.copyData();
+			this.lastCopyCount = copier.copyData();
 			if (copier.isSuccess())
 			{
 				result.setSuccess();

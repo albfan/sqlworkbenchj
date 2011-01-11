@@ -40,12 +40,14 @@ class TableCopy
 {
 	private DataCopier copier;
 
-	public void copyData()
+	@Override
+	public long copyData()
 		throws SQLException, Exception
 	{
-		this.copier.startCopy();
+		return this.copier.startCopy();
 	}
 
+	@Override
 	public boolean init(WbConnection sourceConnection, WbConnection targetConnection, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
 	{

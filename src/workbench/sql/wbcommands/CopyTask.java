@@ -27,7 +27,7 @@ public interface CopyTask
 	boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException;
 	
-	void copyData()
+	long copyData()
 		throws SQLException, Exception;
 	
 	boolean isSuccess();

@@ -68,9 +68,11 @@ class SchemaCopy
 		this.sourceTables = tables;
 	}
 
-	public void copyData()
+	@Override
+	public long copyData()
 		throws SQLException, Exception
 	{
+		long totalRows = 0;
 		cancel = false;
 
 		if (this.checkDependencies)
@@ -109,7 +111,7 @@ class SchemaCopy
 
 				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 				copier.setUseSavepoint(useSavepoint);
-				copier.startCopy();
+				totalRows += copier.startCopy();
 
 				this.messages.append(copier.getMessageBuffer());
 			}
@@ -141,7 +143,7 @@ class SchemaCopy
 				throw e;
 			}
 		}
-
+		return totalRows;
 	}
 
 	private void mapTables()
@@ -150,12 +152,27 @@ class SchemaCopy
 
 		for (TableIdentifier table : sourceTables)
 		{
-			TableIdentifier targetTable = new TableIdentifier(table.getTableName());
-			targetTable.setSchema(this.targetConnection.getMetadata().getSchemaToUse());
-
+			TableIdentifier targetTable = table.createCopy();
+			
 			if (!createTargetTable())
 			{
 				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
+				if (targetTable == null && (table.getSchema() == null || table.getCatalog() == null))
+				{
+					// if the table was not found using the schema/catalog as specified in the source 
+					// table, try the default schema and catalog.
+					targetTable = new TableIdentifier(table.getTableName());
+					if (table.getSchema() == null)
+					{
+						targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
+					}
+					if (table.getCatalog() == null)
+					{
+						targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
+					}
+					targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
+				}
+				
 				// check if the target table exists. DataCopier will throw an exception if
 				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
 				if (targetTable == null)
@@ -337,7 +354,7 @@ class SchemaCopy
 			// by the importer before starting the copy process.
 			copier.setTableList(targetTables);
 		}
-		return true;
+		return tableMap.size() > 0;
 	}
 
 	private boolean createTargetTable()
