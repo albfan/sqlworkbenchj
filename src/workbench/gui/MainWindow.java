@@ -1335,8 +1335,15 @@ public class MainWindow
 
 		try
 		{
-			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error);
-			WbSwingUtilities.showErrorMessage(this, msg);
+			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
+			if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0)
+			{
+				WbSwingUtilities.showMultiLineError(this, msg);
+			}
+			else
+			{
+				WbSwingUtilities.showErrorMessage(this, msg);
+			}
 		}
 		catch (Throwable th)
 		{

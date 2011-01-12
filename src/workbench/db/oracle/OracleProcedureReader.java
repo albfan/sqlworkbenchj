@@ -232,7 +232,7 @@ public class OracleProcedureReader
 	private boolean useCustomSql()
 	{
 		if (connection == null) return false;
-		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
+		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", false);
 	}
 
 	@Override
@@ -271,11 +271,15 @@ public class OracleProcedureReader
              "       aa.object_name as procedure_name, \n" +
              "       aa.overload as overload_index, \n" +
              "       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
-             "       decode(aa.in_out, 'IN', 1, 'OUT', 2, 0) as PROCEDURE_TYPE \n" +
+						 "       case  \n" +
+             "         when aa.in_out = 'OUT' and argument_name is null then 2 \n" +
+             "         when aa.in_out = 'OUT' and argument_name is not null then 1 \n" +
+             "         when aa.in_out = 'IN' then 1 \n" +
+             "         else 0 \n" +
+             "       end  as PROCEDURE_TYPE \n" +
              "from all_arguments aa \n" +
              "  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
-             "where aa.owner = ao.owner \n" +
-             "and aa.package_name IS NOT NULL \n" +
+             "where aa.package_name IS NOT NULL \n" +
              "and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
              "      OR (aa.position = 1 and aa.sequence = 1) \n" +
              "      OR (aa.position = 1 and aa.sequence = 0) \n" +

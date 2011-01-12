@@ -372,6 +372,7 @@ public class WbSwingUtilities
 		}
 
 		final JTextArea msg = new JTextArea(message);
+		msg.setEditable(false);
 		msg.setFont(Settings.getInstance().getEditorFont());
 		final JScrollPane pane = new JScrollPane(msg);
 		pane.setMaximumSize(new Dimension(640, 480));

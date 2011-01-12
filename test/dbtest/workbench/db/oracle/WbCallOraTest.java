@@ -125,6 +125,25 @@ public class WbCallOraTest
 			"end; \n" +
 			"/";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		
+		sql = 
+			"CREATE PACKAGE proc_pckg  \n" +
+			"AS  \n" +
+			"  PROCEDURE process_pkg_data(some_value out number, some_id in number); \n" +
+			"END proc_pckg;  \n" +
+			"/ \n" +
+			" \n" +
+			"CREATE PACKAGE BODY proc_pckg \n" +
+			"AS \n" +
+			"  PROCEDURE process_pkg_data(some_value out number, some_id in number) \n" +
+			"  IS  \n" +
+			"  BEGIN  \n" +
+			"    some_value := some_id * 2;   \n" +
+			"  END process_pkg_data;   \n" +
+			" \n" +
+			"END proc_pckg; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);		
 
 }
 
@@ -278,6 +297,52 @@ public class WbCallOraTest
 		}
 	}
 
+	@Test
+	public void testPackageProcedure()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "PROCESS_PKG_DATA");
+		assertEquals(1, procs.size());
+		String sql = procs.get(0).createSql(con);
+		assertEquals("-- Parameters: SOME_VALUE (OUT), SOME_ID (IN)\nWbCall PROC_PCKG.PROCESS_PKG_DATA(?,?);", sql);
+
+		StatementParameterPrompter prompter = new StatementParameterPrompter()
+		{
+			@Override
+			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+			{
+				prompterCalled = true;
+				return true;
+			}
+		};
+
+		WbCall call = new WbCall();
+		prompterCalled = false;
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		call.setParameterPrompter(prompter);
+
+		String cmd = "wbcall PROC_PCKG.PROCESS_PKG_DATA(?, 21)";
+		StatementRunnerResult result = call.execute(cmd);
+		assertFalse(prompterCalled);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+		DataStore ds = results.get(0);
+		assertNotNull(ds);
+		assertEquals(1, ds.getRowCount());
+		String name = ds.getValueAsString(0, 0);
+		int value = ds.getValueAsInt(0, 1, -1);
+		assertEquals("SOME_VALUE", name);
+		assertEquals(42, value);
+	}
+	
 	@Test
 	public void testRegularProcedure()
 		throws Exception
