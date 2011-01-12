@@ -272,7 +272,6 @@ public class TableDeleteSync
 					this.monitor.setCurrentObject(msg, -1, -1);
 				}
 			}
-			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
 			while (rs.next())
@@ -280,7 +279,7 @@ public class TableDeleteSync
 				if (cancelExecution) break;
 
 				rowNumber ++;
-				RowData row = new RowData(cols);
+				RowData row = RowDataFactory.createRowData(info, toDelete);
 				if (this.monitor != null && (rowNumber % progressInterval == 0))
 				{
 					monitor.setCurrentRow(rowNumber, -1);
@@ -343,7 +342,7 @@ public class TableDeleteSync
 			while (rs.next())
 			{
 				if (cancelExecution) break;
-				RowData r = RowDataFactory.createRowData(ri, this.reference);
+				RowData r = RowDataFactory.createRowData(ri, reference);
 				r.read(rs, ri);
 				checkRows.add(r);
 			}

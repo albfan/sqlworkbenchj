@@ -818,8 +818,10 @@ public class WbCopyTest
 			assertEquals(msg, true, result.isSuccess());
 
 			ResultSet rs = tstmt.executeQuery("select nr, lastname, firstname from person");
+			int personCount = 0;
 			while (rs.next())
 			{
+				personCount ++;
 				int nr = rs.getInt(1);
 				String ln = rs.getString(2);
 				String fn = rs.getString(3);
@@ -835,12 +837,10 @@ public class WbCopyTest
 				}
 			}
 			SqlUtil.closeResult(rs);
-
-			rs = tstmt.executeQuery("select count(*) from address");
-			if (rs.next())
-			{
-				assertEquals("Wrong number of rows copied to address table", 4, rs.getInt(1));
-			}
+			assertEquals(4, personCount);
+			
+			Number addressCount = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from address");
+			assertEquals("Wrong number of rows copied to address table", 4, addressCount.intValue());
 			SqlUtil.closeResult(rs);
 
 

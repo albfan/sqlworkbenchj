@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ class SchemaCopy
 	private boolean skipTargetCheck;
 
 	private List<TableIdentifier> sourceTables;
-	private Map<String, TableIdentifier> tableMap;
+	private Map<TableIdentifier, TableIdentifier> targetToSourceMap;
 
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
@@ -75,13 +76,18 @@ class SchemaCopy
 		long totalRows = 0;
 		cancel = false;
 
+		Collection<TableIdentifier> toCopy = null;
 		if (this.checkDependencies)
 		{
-			this.sortTablesForInsert();
+			toCopy = sortTablesForInsert();
+		}
+		else
+		{
+			toCopy = targetToSourceMap.keySet();
 		}
 
 		int currentTable = 0;
-		int count = sourceTables.size();
+		int count = toCopy.size();
 
 		RowDataReceiver receiver = this.copier.getReceiver();
 		receiver.setTableCount(count);
@@ -90,7 +96,7 @@ class SchemaCopy
 		{
 			copier.beginMultiTableCopy(targetConnection);
 
-			for (TableIdentifier table : sourceTables)
+			for (TableIdentifier targetTable : toCopy)
 			{
 				if (this.cancel)
 				{
@@ -102,14 +108,14 @@ class SchemaCopy
 				copier.setMode(cmdLineMode);
 				receiver.setCurrentTable(currentTable);
 
-				TableIdentifier targetTable = tableMap.get(table.getTableName());
-				if (targetTable == null) continue;
+				TableIdentifier sourceTable = getSourceTable(targetTable);
+				if (sourceTable == null) continue;
 
 				if (messages.getLength() > 0) messages.appendNewLine();
-				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
+				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", sourceTable.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
+				copier.copyFromTable(sourceConnection, targetConnection, sourceTable, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 				copier.setUseSavepoint(useSavepoint);
 				totalRows += copier.startCopy();
 
@@ -148,69 +154,74 @@ class SchemaCopy
 
 	private void mapTables()
 	{
-		tableMap = new HashMap<String, TableIdentifier>(sourceTables.size());
+		targetToSourceMap = new HashMap<TableIdentifier, TableIdentifier>(sourceTables.size());
 
-		for (TableIdentifier table : sourceTables)
+		for (TableIdentifier sourceTable : sourceTables)
 		{
-			TableIdentifier targetTable = table.createCopy();
-			
+			TableIdentifier targetTable = sourceTable.createCopy();
+
 			if (!createTargetTable())
 			{
 				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
-				if (targetTable == null && (table.getSchema() == null || table.getCatalog() == null))
+				if (targetTable == null && (sourceTable.getSchema() == null || sourceTable.getCatalog() == null))
 				{
-					// if the table was not found using the schema/catalog as specified in the source 
+					// if the table was not found using the schema/catalog as specified in the source
 					// table, try the default schema and catalog.
-					targetTable = new TableIdentifier(table.getTableName());
-					if (table.getSchema() == null)
+					targetTable = new TableIdentifier(sourceTable.getTableName());
+					if (sourceTable.getSchema() == null)
 					{
 						targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
 					}
-					if (table.getCatalog() == null)
+					if (sourceTable.getCatalog() == null)
 					{
 						targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
 					}
 					targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
 				}
-				
+
 				// check if the target table exists. DataCopier will throw an exception if
 				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
 				if (targetTable == null)
 				{
 					if (skipTargetCheck)
 					{
-						targetTable = table.createCopy();
-						LogMgr.logWarning("SchemaCopy.mapTables()", "Table " + table.getFullyQualifiedName(sourceConnection) + " not found in target. Assuming same structure and name");
+						targetTable = sourceTable.createCopy();
+						LogMgr.logWarning("SchemaCopy.mapTables()", "Table " + sourceTable.getFullyQualifiedName(sourceConnection) + " not found in target. Assuming same structure and name");
 					}
 					else
 					{
-						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
+						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", sourceTable.getTableName()));
 						this.messages.appendNewLine();
 						continue;
 					}
 				}
 			}
-			tableMap.put(table.getTableName(), targetTable);
+			targetToSourceMap.put(targetTable, sourceTable);
 		}
 	}
 
 	private void deleteRows()
 		throws SQLException, IOException
 	{
+		Collection<TableIdentifier> toDelete = null;
 		if (checkDependencies)
 		{
-			sortTablesForDelete();
+			toDelete = sortTablesForDelete();
+		}
+		else
+		{
+			toDelete = targetToSourceMap.keySet();
 		}
 
-		for (TableIdentifier sourceTable : sourceTables)
+		for (TableIdentifier targetTable : toDelete)
 		{
 			if (this.cancel)
 			{
 				break;
 			}
 
-			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()), false);
-			if (targetTable == null) continue;
+			TableIdentifier sourceTable = getSourceTable(targetTable);
+			if (sourceTable == null) continue;
 
 			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
 			sync.setTableName(sourceTable, targetTable);
@@ -223,17 +234,22 @@ class SchemaCopy
 		}
 	}
 
-	private void sortTablesForDelete()
+	private TableIdentifier getSourceTable(TableIdentifier target)
 	{
-		sortTables(false);
+		return targetToSourceMap.get(target);
 	}
 
-	private void sortTablesForInsert()
+	private List<TableIdentifier> sortTablesForDelete()
 	{
-		sortTables(true);
+		return sortTables(false);
 	}
 
-	private void sortTables(boolean forInsert)
+	private List<TableIdentifier> sortTablesForInsert()
+	{
+		return sortTables(true);
+	}
+
+	private List<TableIdentifier> sortTables(boolean forInsert)
 	{
 		try
 		{
@@ -243,55 +259,24 @@ class SchemaCopy
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgFkDeps"), -1, -1);
 			}
 
-			// When copying between databases, the schema in which the
-			// tables reside can be different. The tables from the commandline
-			// are retrieved from the source database and will contain the schema
-			// information from that one.
-			// when sorting the tables, it is necessary to retrieve the table information
-			// from the target database. So we need to replace schema information
-			String targetSchema = this.targetConnection.getMetadata().getSchemaToUse();
-			final String nullSchemaMarker = "-$NULL-SCHEMA$-";
-
-			Map<String, String> tableSchemas = new HashMap<String, String>(this.sourceTables.size());
-			for (TableIdentifier tbl : sourceTables)
-			{
-				String schema = tbl.getSchema();
-				if (schema == null) schema = nullSchemaMarker;
-				tableSchemas.put(tbl.getTableName(), schema);
-				tbl.setSchema(targetSchema);
-			}
-
+			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(targetToSourceMap.keySet());
 			TableDependencySorter sorter = new TableDependencySorter(targetConnection);
 			List<TableIdentifier> sorted = null;
 			if (forInsert)
 			{
-				sorted = sorter.sortForInsert(sourceTables);
+				sorted = sorter.sortForInsert(tables);
 			}
 			else
 			{
-				sorted = sorter.sortForDelete(sourceTables, false);
+				sorted = sorter.sortForDelete(tables, false);
 			}
-			if (sorted != null)
-			{
-				this.sourceTables = sorted;
-				for (TableIdentifier tbl : sourceTables)
-				{
-					String schema = tableSchemas.get(tbl.getTableName());
-					if (nullSchemaMarker.equals(schema))
-					{
-						tbl.setSchema(null);
-					}
-					else
-					{
-						tbl.setSchema(schema);
-					}
-				}
-			}
+			return sorted;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("SchemaCopy.sortTables()", "Error when checking FK dependencies", e);
 		}
+		return null;
 	}
 
 	public boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
@@ -347,14 +332,14 @@ class SchemaCopy
 
 		if (checkDependencies && !doSyncDelete)
 		{
-			List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>(tableMap.values());
+			List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>(targetToSourceMap.keySet());
 
 			// The table list is needed if the -deleteTarget=true was specified
 			// and checkDependencies. In that case, all target tables must be deleted
 			// by the importer before starting the copy process.
 			copier.setTableList(targetTables);
 		}
-		return tableMap.size() > 0;
+		return targetToSourceMap.size() > 0;
 	}
 
 	private boolean createTargetTable()

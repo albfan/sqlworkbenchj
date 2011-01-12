@@ -108,6 +108,7 @@ public class WbCopyPostgresTest
 		}
 	}
 
+	@Test
 	public void testCopyFromH2()
 		throws Exception
 	{
