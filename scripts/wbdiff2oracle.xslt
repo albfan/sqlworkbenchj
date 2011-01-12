@@ -391,7 +391,7 @@
       </xsl:variable>
       <xsl:variable name="defaultvalue">
         <xsl:if test="string-length(default-value) &gt; 0">
-          <xsl:text> DEFAULT</xsl:text>
+          <xsl:text> DEFAULT </xsl:text>
           <xsl:value-of select="default-value"/>
         </xsl:if>
       </xsl:variable>
