@@ -180,13 +180,13 @@
      <string>com.microsoft.sqlserver.jdbc.SQLServerDriver</string>
     </void>
     <void property="library">
-     <string>sqljdbc.jar</string>
+     <string>sqljdbc4.jar</string>
     </void>
     <void property="name">
      <string>SQL Server 2005</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:sqlserver://serverName;instanceName:portNumber;property=value[;property=value]</string>
+     <string>jdbc:sqlserver://serverName[\instanceName][:portNumber];property=value;property=value</string>
     </void>
    </object>
   </void>
