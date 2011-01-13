@@ -653,6 +653,7 @@ public class TableListPanel
 		{
 			public void run()
 			{
+				tableList.cancelEditing();
 				if (displayTab.getTabCount() > 0)
 				{
 					try
