@@ -11,6 +11,7 @@
  */
 package workbench.gui.settings;
 
+import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
@@ -23,7 +24,7 @@ import workbench.util.StringUtil;
  */
 public class FormatterOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ActionListener
 {
 	public FormatterOptionsPanel()
 	{
@@ -38,6 +39,9 @@ public class FormatterOptionsPanel
 		updateColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInUpdate()));
 		keywordsUpper.setSelected(Settings.getInstance().getFormatterUpperCaseKeywords());
 		spaceAfterComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterComma());
+		commaAfterLineBreak.setSelected(Settings.getInstance().getFormatterSetCommaAfterLineBreak());
+		addSpaceAfterLineBreakComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma());
+		addSpaceAfterLineBreakComma.setEnabled(commaAfterLineBreak.isSelected());
 	}
 
 	public void saveSettings()
@@ -52,6 +56,8 @@ public class FormatterOptionsPanel
 		set.setFormatterMaxColumnsInUpdate(StringUtil.getIntValue(updateColumns.getText(),1));
 		set.setFormatterUpperCaseKeywords(keywordsUpper.isSelected());
 		set.setFormatterAddSpaceAfterComma(spaceAfterComma.isSelected());
+		set.setFormatterSetCommaAfterLineBreak(commaAfterLineBreak.isSelected());
+		set.setFormatterAddSpaceAfterLineBreakComma(addSpaceAfterLineBreakComma.isSelected());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -77,6 +83,8 @@ public class FormatterOptionsPanel
     updateColumnsLabel = new javax.swing.JLabel();
     keywordsUpper = new javax.swing.JCheckBox();
     spaceAfterComma = new javax.swing.JCheckBox();
+    addSpaceAfterLineBreakComma = new javax.swing.JCheckBox();
+    commaAfterLineBreak = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -227,13 +235,51 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(spaceAfterComma, gridBagConstraints);
+
+    addSpaceAfterLineBreakComma.setText(ResourceMgr.getString("LblSpaceAfterLineBreakComma")); // NOI18N
+    addSpaceAfterLineBreakComma.setToolTipText(ResourceMgr.getString("d_LblSpaceAfterLineBreakComma")); // NOI18N
+    addSpaceAfterLineBreakComma.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+    add(addSpaceAfterLineBreakComma, gridBagConstraints);
+
+    commaAfterLineBreak.setText(ResourceMgr.getString("LblCommaAfterLineBreak")); // NOI18N
+    commaAfterLineBreak.setToolTipText(ResourceMgr.getString("d_LblCommaAfterLineBreak")); // NOI18N
+    commaAfterLineBreak.setBorder(null);
+    commaAfterLineBreak.addActionListener(this);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+    add(commaAfterLineBreak, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == commaAfterLineBreak) {
+      FormatterOptionsPanel.this.commaAfterLineBreakActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+	private void commaAfterLineBreakActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_commaAfterLineBreakActionPerformed
+	{//GEN-HEADEREND:event_commaAfterLineBreakActionPerformed
+		addSpaceAfterLineBreakComma.setEnabled(commaAfterLineBreak.isSelected());
+	}//GEN-LAST:event_commaAfterLineBreakActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox addSpaceAfterLineBreakComma;
+  private javax.swing.JCheckBox commaAfterLineBreak;
   private javax.swing.JCheckBox funcsLower;
   private javax.swing.JTextField insertColumns;
   private javax.swing.JLabel insertColumnsLabel;

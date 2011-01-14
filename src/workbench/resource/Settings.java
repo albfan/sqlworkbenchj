@@ -761,6 +761,26 @@ public class Settings
 		setProperty("workbench.sql.formatter.comma.spaceafter", flag);
 	}
 
+	public boolean getFormatterSetCommaAfterLineBreak()
+	{
+	    return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);
+	}
+	
+	public void setFormatterSetCommaAfterLineBreak(boolean flag)
+	{
+	    setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
+	}
+	
+	public boolean getFormatterAddSpaceAfterLineBreakComma()
+	{
+	    return getBoolProperty("workbench.sql.formatter.comma.spaceAfterLineBreakComma", false);
+	}
+	
+	public void setFormatterAddSpaceAfterLineBreakComma(boolean flag)
+	{
+	    setProperty("workbench.sql.formatter.comma.spaceAfterLineBreakComma", flag);
+	}
+
 	public int getFormatterMaxSubselectLength()
 	{
 		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);

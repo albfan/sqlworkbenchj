@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-import workbench.util.CaseInsensitiveComparator;
 import workbench.resource.Settings;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
@@ -76,6 +74,8 @@ public class SqlFormatter
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
 	private boolean addSpaceAfterComma;
+	private boolean commaAfterLineBreak;
+	private boolean addSpaceAfterLineBreakComma;
 
 	public SqlFormatter(CharSequence aScript)
 	{
@@ -103,6 +103,8 @@ public class SqlFormatter
 		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
 		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
+		commaAfterLineBreak = Settings.getInstance().getFormatterSetCommaAfterLineBreak();
+		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		addStandardFunctions(dbFunctions);
 	}
 
@@ -527,13 +529,24 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
-				this.appendText(',');
+				if (!commaAfterLineBreak)
+				{
+					this.appendText(',');
+				}
 				currentColumnCount++;
 				if (columnsPerLine > -1 && currentColumnCount >= columnsPerLine)
 				{
 					currentColumnCount = 0;
 					this.appendNewline();
 					this.indent(b);
+					if (commaAfterLineBreak)
+					{
+						this.appendText(',');
+						if (addSpaceAfterLineBreakComma)
+						{
+							this.appendText(' ');
+						}
+					}
 				}
 				else
 				{
