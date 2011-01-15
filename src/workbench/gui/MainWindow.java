@@ -119,13 +119,13 @@ import workbench.gui.actions.ShowMacroPopupAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
-import workbench.gui.components.FontZoomer;
+import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.editor.actions.DecreaseFontSize;
-import workbench.gui.editor.actions.IncreaseFontSize;
-import workbench.gui.editor.actions.ResetFontSize;
+import workbench.gui.fontzoom.DecreaseFontSize;
+import workbench.gui.fontzoom.IncreaseFontSize;
+import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.menu.RecentWorkspaceManager;
 import workbench.gui.sql.EditorPanel;
@@ -576,10 +576,15 @@ public class MainWindow
 			SqlPanel panel = (SqlPanel)aPanel;
 			EditorPanel editor = panel.getEditor();
 			FontZoomer zoomer = editor.getFontZoomer();
-			zoom.add(new JMenuItem(new IncreaseFontSize(zoomer)));
-			zoom.add(new JMenuItem(new DecreaseFontSize(zoomer)));
+
+			IncreaseFontSize inc = new IncreaseFontSize(zoomer);
+			DecreaseFontSize dec = new DecreaseFontSize(zoomer);
+			ResetFontSize reset = new ResetFontSize(zoomer);
+
+			zoom.add(new JMenuItem(inc));
+			zoom.add(new JMenuItem(dec));
 			zoom.addSeparator();
-			zoom.add(new JMenuItem(new ResetFontSize(zoomer)));
+			zoom.add(new JMenuItem(reset));
 			viewMenu.add(zoom);
 		}
 

@@ -69,7 +69,8 @@ import workbench.gui.actions.ScrollDownAction;
 import workbench.gui.actions.ScrollUpAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.components.FontZoomer;
+import workbench.gui.fontzoom.FontZoomProvider;
+import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.EditorStatusbar;
@@ -114,7 +115,7 @@ import workbench.util.StringUtil;
  */
 public class JEditTextArea
 	extends JComponent
-	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener, LineScroller
+	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener, LineScroller, FontZoomProvider
 {
 	protected boolean rightClickMovesCursor = false;
 
@@ -267,6 +268,7 @@ public class JEditTextArea
 		}
 	}
 
+	@Override
 	public FontZoomer getFontZoomer()
 	{
 		return fontZoomer;

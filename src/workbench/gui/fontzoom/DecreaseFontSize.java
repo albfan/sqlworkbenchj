@@ -9,13 +9,9 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.editor.actions;
+package workbench.gui.fontzoom;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import workbench.gui.components.FontZoomer;
-import workbench.gui.editor.InputHandler;
-import workbench.gui.editor.JEditTextArea;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -23,40 +19,28 @@ import workbench.resource.ResourceMgr;
  * @author Thomas Kellerer
  */
 public class DecreaseFontSize
-	extends EditorAction
+	extends FontSizeAction
 {
-	private FontZoomer zoomer;
-
 	public DecreaseFontSize()
 	{
 		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK);
-		setTooltip(ResourceMgr.getDescription("TxtEdFntDecr"));
 	}
 
 	public DecreaseFontSize(FontZoomer fontZoomer)
 	{
 		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK);
 		setTooltip(ResourceMgr.getDescription("TxtEdFntDecr"));
-		zoomer = fontZoomer;
+		setZoomer(fontZoomer);
 	}
 
 	public DecreaseFontSize(String key, FontZoomer fontZoomer)
 	{
-		super();
-		setAccelerator(null);
-		setMenuTextByKey(key);
-		setTooltip(ResourceMgr.getDescription(key));
-		zoomer = fontZoomer;
+		super(key, fontZoomer);
 	}
 
-	public void actionPerformed(ActionEvent evt)
+	@Override
+	public void doFontChange(FontZoomer fontZoomer)
 	{
-		FontZoomer toUse = zoomer;
-		if (toUse == null)
-		{
-			JEditTextArea text = InputHandler.getTextArea(evt);
-			toUse = text.getFontZoomer();
-		}
-		toUse.decreaseFontSize();
+		fontZoomer.decreaseFontSize();
 	}
 }

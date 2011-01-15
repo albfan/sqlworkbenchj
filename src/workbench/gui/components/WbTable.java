@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import workbench.gui.fontzoom.FontZoomer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -98,9 +99,10 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.editor.actions.DecreaseFontSize;
-import workbench.gui.editor.actions.IncreaseFontSize;
-import workbench.gui.editor.actions.ResetFontSize;
+import workbench.gui.fontzoom.DecreaseFontSize;
+import workbench.gui.fontzoom.FontZoomProvider;
+import workbench.gui.fontzoom.IncreaseFontSize;
+import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -130,7 +132,8 @@ import workbench.util.SqlUtil;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           FontChangedListener, ListSelectionListener, PropertyChangeListener, Resettable
+	           FontChangedListener, ListSelectionListener, PropertyChangeListener, Resettable,
+						 FontZoomProvider
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected JPopupMenu popup;
@@ -331,6 +334,20 @@ public class WbTable
 		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getActionMap().put("wbtable-stop-editing", a);
 		zoomer = new FontZoomer(this);
+		IncreaseFontSize inc = new IncreaseFontSize(zoomer);
+		inc.addToInputMap(im, am);
+
+		DecreaseFontSize dec = new DecreaseFontSize(zoomer);
+		dec.addToInputMap(im, am);
+
+		ResetFontSize reset = new ResetFontSize(zoomer);
+		reset.addToInputMap(im, am);
+	}
+
+	@Override
+	public FontZoomer getFontZoomer()
+	{
+		return zoomer;
 	}
 
 	public void setReadOnly(boolean flag)
@@ -471,14 +488,13 @@ public class WbTable
 
 		// Depending on the stage of initialization
 		// not all calls work the same, so we need
-		// to take care that no exceptioin gets thrown
-		// in here
+		// to take care that no exception gets thrown in here
 		FontMetrics fm = null;
 		if (g != null)
 		{
 			try
 			{
-				fm = g.getFontMetrics(getFont());
+				fm = g.getFontMetrics(f);
 			}
 			catch (Throwable e)
 			{
@@ -487,8 +503,9 @@ public class WbTable
 		}
 		else
 		{
-			fm = getFontMetrics(getFont());
+			fm = getFontMetrics(f);
 		}
+		
 		if (fm != null)
 		{
 			setRowHeight(fm.getHeight() + 2);

@@ -8,7 +8,7 @@
  * 
  *  To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.gui.components;
+package workbench.gui.fontzoom;
 
 import java.awt.Font;
 import java.awt.event.MouseWheelEvent;
