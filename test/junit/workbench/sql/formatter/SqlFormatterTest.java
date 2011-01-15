@@ -32,6 +32,57 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testCommaAtStart()
+		throws Exception
+	{
+		int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
+		try
+		{
+			String sql = "select col1, col2, col3, col4, col5 from some_table;";
+			SqlFormatter f = new SqlFormatter(sql);
+			f.setCommaAfterLineBreak(true);
+			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
+			String formatted = f.getFormattedSql().toString();
+			String expected =
+				"SELECT col1\n" +
+				"       ,col2\n" +
+				"       ,col3\n" +
+				"       ,col4\n" +
+				"       ,col5\n" +
+				"FROM some_table;";
+			assertEquals(expected, formatted);
+
+			f = new SqlFormatter(sql);
+			f.setCommaAfterLineBreak(true);
+			f.setAddSpaceAfterLineBreakComma(true);
+			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
+			formatted = f.getFormattedSql().toString();
+			expected =
+				"SELECT col1\n" +
+				"       , col2\n" +
+				"       , col3\n" +
+				"       , col4\n" +
+				"       , col5\n" +
+				"FROM some_table;";
+			assertEquals(expected, formatted);
+
+			Settings.getInstance().setFormatterMaxColumnsInSelect(3);
+			f = new SqlFormatter(sql);
+			f.setCommaAfterLineBreak(true);
+			formatted = f.getFormattedSql().toString();
+			expected =
+				"SELECT col1, col2, col3\n" +
+				"       ,col4, col5\n" +
+				"FROM some_table;";
+			assertEquals(expected, formatted);
+		}
+		finally
+		{
+			Settings.getInstance().setFormatterMaxColumnsInSelect(cols);
+		}
+	}
+	
+	@Test
 	public void testNestedSubselect()
 		throws Exception
 	{

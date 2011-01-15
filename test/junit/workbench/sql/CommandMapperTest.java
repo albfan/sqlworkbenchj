@@ -33,56 +33,39 @@ public class CommandMapperTest
 
 	@Test
 	public void testSelectIntoPattern()
+		throws Exception
 	{
-		try
-		{
-			String pgPattern = Settings.getInstance().getProperty("workbench.db.postgresql.selectinto.pattern", null);
-			assertNotNull(pgPattern);
+		String pgPattern = Settings.getInstance().getProperty("workbench.db.postgresql.selectinto.pattern", null);
+		assertNotNull(pgPattern);
 
-			Pattern pg = Pattern.compile(pgPattern, Pattern.CASE_INSENSITIVE);
-			String sql = "select * from table";
-			Matcher m = pg.matcher(sql);
-			assertFalse(m.find());
+		Pattern pg = Pattern.compile(pgPattern, Pattern.CASE_INSENSITIVE);
+		String sql = "select * from table";
+		Matcher m = pg.matcher(sql);
+		assertFalse(m.find());
 
-			sql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
-			m = pg.matcher(sql);
-			assertFalse(m.find());
+		sql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
+		m = pg.matcher(sql);
+		assertFalse(m.find());
 
-			sql = "select col1, col2, col3 INTO new_table FROM existing_table";
-			m = pg.matcher(sql);
-			assertTrue(m.find());
+		sql = "select col1, col2, col3 INTO new_table FROM existing_table";
+		m = pg.matcher(sql);
+		assertTrue(m.find());
 
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String informixPattern = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.selectinto.pattern", null);
+		assertNotNull(informixPattern);
 
-		try
-		{
-			String informixPattern = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.selectinto.pattern", null);
-			assertNotNull(informixPattern);
+		Pattern ifx = Pattern.compile(informixPattern, Pattern.CASE_INSENSITIVE);
+		String ifxsql = "select * from table";
+		m = ifx.matcher(ifxsql);
+		assertFalse(m.find());
 
-			Pattern ifx = Pattern.compile(informixPattern, Pattern.CASE_INSENSITIVE);
-			String sql = "select * from table";
-			Matcher m = ifx.matcher(sql);
-			assertFalse(m.find());
+		ifxsql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
+		m = ifx.matcher(ifxsql);
+		assertFalse(m.find());
 
-			sql = "wbselectblob blob_column into c:/temp/pic.jpg from mytable";
-			m = ifx.matcher(sql);
-			assertFalse(m.find());
-
-			sql = "select col1, col2, col3 FROM existing_table INTO new_table";
-			m = ifx.matcher(sql);
-			assertTrue(m.find());
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		ifxsql = "select col1, col2, col3 FROM existing_table INTO new_table";
+		m = ifx.matcher(ifxsql);
+		assertTrue(m.find());
 
 	}
 }

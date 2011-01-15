@@ -132,6 +132,16 @@ public class SqlFormatter
 		addSpaceAfterComma = flag;
 	}
 
+	public void setCommaAfterLineBreak(boolean flag)
+	{
+		this.commaAfterLineBreak = flag;
+	}
+
+	public void setAddSpaceAfterLineBreakComma(boolean flag)
+	{
+		addSpaceAfterLineBreakComma = flag;
+	}
+	
 	public void setDBFunctions(Set<String> functionNames)
 	{
 		this.dbFunctions = CollectionUtil.caseInsensitiveSet();
@@ -529,12 +539,12 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
-				if (!commaAfterLineBreak)
+				currentColumnCount++;
+				if (!commaAfterLineBreak || !needLineBreak(columnsPerLine, currentColumnCount))
 				{
 					this.appendText(',');
 				}
-				currentColumnCount++;
-				if (columnsPerLine > -1 && currentColumnCount >= columnsPerLine)
+				if (needLineBreak(columnsPerLine, currentColumnCount))
 				{
 					currentColumnCount = 0;
 					this.appendNewline();
@@ -566,6 +576,11 @@ public class SqlFormatter
 			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
+	}
+
+	private boolean needLineBreak(int columnsPerLine, int currentColumnCount)
+	{
+		return columnsPerLine > -1 && currentColumnCount >= columnsPerLine;
 	}
 
 	private SQLToken processSubSelect(boolean addSelectKeyword)
