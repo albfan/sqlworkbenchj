@@ -3,8 +3,9 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-12-12">
     <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
+    <entry dev-build="10" type="enh">Two new options for the SQL Formatter are available that control the placement of the comma when line breaks are inserted. Thanks to Andreas for this patch.</entry>
     <entry dev-build="10" type="enh">The option "Allow empty line as statement delimiter" has been moved into the settings dialog and is now also being used when detecting the current statement in the editor.</entry>
-    <entry dev-build="10" type="enh">The font size of the editor can now be changed dynamically using Ctrl-Numpad Plus/Ctrl-Numpad Minus or via the scroll wheel of the mouse (holding down the Ctrl Key).</entry>
+    <entry dev-build="10" type="enh">The font size of the editor can now be changed dynamically using Ctrl-Numpad Plus/Ctrl-Numpad Minus or via the scroll wheel of the mouse (holding down the Ctrl Key). The font size of a result table can be changed using the scroll wheel or through the context menu in the table header.</entry>
     <entry dev-build="10" type="enh">It is now (optionally) possible to modify the text in the editor while a statement is running. Statement and error highlighting will not be available if the editor contents was modified during execution.</entry>
     <entry dev-build="10" type="enh">When the option "Show Max. Rows warning" is enabled, the warning is now shown using an icon in the tab header (instead of changing the color).</entry>
     <entry dev-build="8" type="enh">The join condition inside a JOIN part of a SELECT statement can now be generated automatically (if the tables involved are using foreign keys) using SQL -&gt; JOIN completion</entry>
