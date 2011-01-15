@@ -12,7 +12,6 @@
 package workbench.gui.fontzoom;
 
 import java.awt.event.KeyEvent;
-import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -23,19 +22,17 @@ public class DecreaseFontSize
 {
 	public DecreaseFontSize()
 	{
-		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK);
+		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK, null);
 	}
 
 	public DecreaseFontSize(FontZoomer fontZoomer)
 	{
-		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK);
-		setTooltip(ResourceMgr.getDescription("TxtEdFntDecr"));
-		setZoomer(fontZoomer);
+		super("TxtEdFntDecr", KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK, fontZoomer);
 	}
 
 	public DecreaseFontSize(String key, FontZoomer fontZoomer)
 	{
-		super(key, fontZoomer);
+		super(key, KeyEvent.VK_SUBTRACT, KeyEvent.CTRL_MASK, fontZoomer);
 	}
 
 	@Override

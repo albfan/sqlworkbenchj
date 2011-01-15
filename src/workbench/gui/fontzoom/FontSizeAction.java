@@ -27,31 +27,18 @@ public abstract class FontSizeAction
 
 	private FontZoomer zoomer;
 
-	protected FontSizeAction()
+	protected FontSizeAction(String resourceKey, int keyCode, int keyMask)
 	{
-		super();
+		this(resourceKey, keyCode, keyMask, null);
 	}
 
-	protected FontSizeAction(String key, int keyCode, int keyMask)
+	protected FontSizeAction(String resourceKey, int keyCode, int keyMask, FontZoomer fontZoomer)
 	{
 		super();
-		setMenuTextByKey(key);
-		setTooltip(ResourceMgr.getDescription(key));
+		setMenuTextByKey(resourceKey);
+		setTooltip(ResourceMgr.getDescription(resourceKey));
 		setDefaultAccelerator(KeyStroke.getKeyStroke(keyCode, keyMask));
 		initializeShortcut();
-	}
-
-	public FontSizeAction(String key, FontZoomer fontZoomer)
-	{
-		super();
-		setAccelerator(null);
-		setMenuTextByKey(key);
-		setTooltip(ResourceMgr.getDescription(key));
-		zoomer = fontZoomer;
-	}
-
-	protected void setZoomer(FontZoomer fontZoomer)
-	{
 		zoomer = fontZoomer;
 	}
 

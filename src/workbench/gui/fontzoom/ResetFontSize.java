@@ -12,7 +12,6 @@
 package workbench.gui.fontzoom;
 
 import java.awt.event.KeyEvent;
-import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -23,22 +22,19 @@ public class ResetFontSize
 {
 	public ResetFontSize()
 	{
-		super("TxtEdFntReset", KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK);
-		setTooltip(ResourceMgr.getDescription("TxtEdFntReset"));
+		super("TxtEdFntReset", KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK, null);
 	}
 
 	public ResetFontSize(FontZoomer fontZoomer)
 	{
-		super("TxtEdFntReset", KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK);
-		setTooltip(ResourceMgr.getDescription("TxtEdFntReset"));
-		setZoomer(fontZoomer);
-	}
-	
-	public ResetFontSize(String key, FontZoomer fontZoomer)
-	{
-		super(key, fontZoomer);
+		super("TxtEdFntReset", KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK, fontZoomer);
 	}
 
+	public ResetFontSize(String key, FontZoomer fontZoomer)
+	{
+		super(key, KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK, fontZoomer);
+	}
+	
 	@Override
 	public void doFontChange(FontZoomer fontZoomer)
 	{
