@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright 2002-2011, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -27,13 +27,13 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 /**
- * This is a wrapper to kick-off the actual WbManager class. It should run 
+ * This is a wrapper to kick-off the actual WbManager class. It should run
  * with any JDK >= 1.3 as it does not reference any other classes.
  * <br/>
- * This class is compiled separately in build.xml to allow for a different 
+ * This class is compiled separately in build.xml to allow for a different
  * class file version between this class and the rest of the application.
  * Thus a check for the correct JDK version can be done inside the Java code.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbStarter
@@ -49,12 +49,12 @@ public class WbStarter
 		{
 			version = System.getProperty("java.runtime.version");
 		}
-		
+
 		boolean versionIsOk = false;
 		final int minMinorVersion = 6;
-		
+
 		int minorversion = -1;
-		
+
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
@@ -72,7 +72,7 @@ public class WbStarter
 				"If you do have Java 6 installed, please point JAVA_HOME to the location of your Java 6 installation.\n" +
 				"When using Windows you can also use the -jdk switch.\n" +
 				"Please refer to the manual for details on how to specify the Java runtime to be used.";
-			
+
 			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
 			try
@@ -80,7 +80,7 @@ public class WbStarter
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
 				// The dummy Frame is needed for pre Java 5 because otherwise
-				// the dialog will not appear in the Windows task bar 
+				// the dialog will not appear in the Windows task bar
 				Frame dummy = new Frame("SQL Workbench/J - Wrong Java version");
 				dummy.setBounds(-2000, -2000, 0, 0);
 				dummy.setVisible(true);
