@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
@@ -393,10 +394,7 @@ public class InputHandler
 
 			if (keys != null)
 			{
-				for (KeyStroke key : keys)
-				{
-					allKeys.add(key);
-				}
+				allKeys.addAll(Arrays.asList(keys));
 			}
 		}
 		return allKeys;

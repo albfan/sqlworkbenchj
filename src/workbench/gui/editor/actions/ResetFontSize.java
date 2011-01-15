@@ -13,9 +13,9 @@ package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import workbench.gui.components.FontZoomer;
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
-import workbench.gui.editor.TextAreaPainter;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -25,7 +25,7 @@ import workbench.resource.ResourceMgr;
 public class ResetFontSize
 	extends EditorAction
 {
-	private JEditTextArea textArea;
+	private FontZoomer zoomer;
 
 	public ResetFontSize()
 	{
@@ -33,20 +33,30 @@ public class ResetFontSize
 		setTooltip(ResourceMgr.getDescription("TxtEdFntReset"));
 	}
 
-	public ResetFontSize(JEditTextArea area)
+	public ResetFontSize(FontZoomer fontZoomer)
+	{
+		super("TxtEdFntReset", KeyEvent.VK_NUMPAD0, KeyEvent.CTRL_MASK);
+		setTooltip(ResourceMgr.getDescription("TxtEdFntReset"));
+		zoomer = fontZoomer;
+	}
+	
+	public ResetFontSize(String key, FontZoomer fontZoomer)
 	{
 		this();
-		textArea = area;
+		setAccelerator(null);
+		setMenuTextByKey(key);
+		setTooltip(ResourceMgr.getDescription(key));
+		zoomer = fontZoomer;
 	}
 
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea toUse = textArea;
+		FontZoomer toUse = zoomer;
 		if (toUse == null)
 		{
-			toUse = InputHandler.getTextArea(evt);
+			JEditTextArea text = InputHandler.getTextArea(evt);
+			toUse = text.getFontZoomer();
 		}
-		TextAreaPainter painter = toUse.getPainter();
-		painter.resetFontZoom();
+		toUse.resetFontZoom();
 	}
 }

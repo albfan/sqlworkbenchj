@@ -69,6 +69,7 @@ import workbench.gui.actions.ScrollDownAction;
 import workbench.gui.actions.ScrollUpAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.FontZoomer;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.EditorStatusbar;
@@ -108,7 +109,8 @@ import workbench.util.StringUtil;
  *     + "    }\n"
  *     + "}");</pre>
  *
- * @author Slava Pestov
+ * @author Slava Pestov (Initial development)
+ * @author Thomas Kellerer (bugfixes and enhancements)
  */
 public class JEditTextArea
 	extends JComponent
@@ -179,6 +181,7 @@ public class JEditTextArea
 	private long lastModified;
 	private int invalidationInterval = 10;
 
+	private FontZoomer fontZoomer;
 
 	/**
 	 * Creates a new JEditTextArea with the default settings.
@@ -249,16 +252,26 @@ public class JEditTextArea
 		this.addKeyBinding(new ScrollUpAction(this));
 
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
+		this.fontZoomer = new FontZoomer(painter, this);
 	}
 
 	public int getHScrollBarHeight()
 	{
 		if (horizontal != null && horizontal.isVisible())
-			return (int)horizontal.getPreferredSize().getHeight();
+		{
+			return (int) horizontal.getPreferredSize().getHeight();
+		}
 		else
+		{
 			return 0;
+		}
 	}
 
+	public FontZoomer getFontZoomer()
+	{
+		return fontZoomer;
+	}
+	
 	public Point getCursorLocation()
 	{
 		int line = getCaretLine();
@@ -2385,18 +2398,7 @@ public class JEditTextArea
 	{
 		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
 		{
-			if (WbAction.isCtrlPressed(e.getModifiers()))
-			{
-				if (e.getWheelRotation() > 0)
-				{
-					painter.decreaseFontSize();
-				}
-				else
-				{
-					painter.increaseFontSize();
-				}
-			}
-			else
+			if (!WbAction.isCtrlPressed(e.getModifiers()))
 			{
 				int totalScrollAmount = e.getUnitsToScroll() * vertical.getUnitIncrement();
 				vertical.setValue(vertical.getValue() + totalScrollAmount);

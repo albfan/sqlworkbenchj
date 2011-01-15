@@ -119,6 +119,7 @@ import workbench.gui.actions.ShowMacroPopupAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.components.FontZoomer;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.dbobjects.DbExplorerWindow;
@@ -574,10 +575,11 @@ public class MainWindow
 			JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
 			SqlPanel panel = (SqlPanel)aPanel;
 			EditorPanel editor = panel.getEditor();
-			zoom.add(new JMenuItem(new IncreaseFontSize(editor)));
-			zoom.add(new JMenuItem(new DecreaseFontSize(editor)));
+			FontZoomer zoomer = editor.getFontZoomer();
+			zoom.add(new JMenuItem(new IncreaseFontSize(zoomer)));
+			zoom.add(new JMenuItem(new DecreaseFontSize(zoomer)));
 			zoom.addSeparator();
-			zoom.add(new JMenuItem(new ResetFontSize(editor)));
+			zoom.add(new JMenuItem(new ResetFontSize(zoomer)));
 			viewMenu.add(zoom);
 		}
 

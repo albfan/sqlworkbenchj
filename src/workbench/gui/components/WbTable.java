@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -45,6 +45,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -97,6 +98,9 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.editor.actions.DecreaseFontSize;
+import workbench.gui.editor.actions.IncreaseFontSize;
+import workbench.gui.editor.actions.ResetFontSize;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -196,6 +200,7 @@ public class WbTable
 	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
 	private boolean readOnly;
+	private FontZoomer zoomer;
 
 	// </editor-fold>
 
@@ -325,6 +330,7 @@ public class WbTable
 		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getActionMap().put("wbtable-stop-editing", a);
+		zoomer = new FontZoomer(this);
 	}
 
 	public void setReadOnly(boolean flag)
@@ -423,7 +429,24 @@ public class WbTable
 	public void setFont(Font f)
 	{
 		super.setFont(f);
-		adjustRowHeight();
+		if (tableHeader != null)
+		{
+			tableHeader.setFont(f);
+		}
+		if (defaultEditor != null)
+		{
+			defaultEditor.setFont(f);
+		}
+		if (multiLineEditor != null)
+		{
+			multiLineEditor.setFont(f);
+		}
+
+		if (defaultNumberEditor != null)
+		{
+			defaultNumberEditor.setFont(f);
+		}
+		adjustRowsAndColumns();
 	}
 
 	public void adjustRowHeight()
@@ -469,6 +492,11 @@ public class WbTable
 		if (fm != null)
 		{
 			setRowHeight(fm.getHeight() + 2);
+			final TableRowHeader header = TableRowHeader.getRowHeader(this);
+			if (header != null)
+			{
+				header.rowHeightChanged();
+			}
 		}
 	}
 
@@ -491,8 +519,15 @@ public class WbTable
 		}
 	}
 
-	public FilterDataAction getFilterAction() { return this.filterAction; }
-	public ResetFilterAction getResetFilterAction() { return this.resetFilterAction; }
+	public FilterDataAction getFilterAction()
+	{
+		return this.filterAction;
+	}
+
+	public ResetFilterAction getResetFilterAction()
+	{
+		return this.resetFilterAction;
+	}
 
 	public void populateCopySelectedMenu(WbMenu copyMenu)
 	{
@@ -1312,7 +1347,7 @@ public class WbTable
 			public void run()
 			{
 				adjustRowHeight();
-				
+
 				if (GuiSettings.getAutomaticOptimalWidth() && GuiSettings.getIncludeHeaderInOptimalWidth())
 				{
 					ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(WbTable.this);
@@ -1760,6 +1795,35 @@ public class WbTable
 		this.scrollRectToVisible(rect);
 	}
 
+	protected JPopupMenu getHeaderPopup()
+	{
+		JPopupMenu headerPopup = new JPopupMenu();
+		headerPopup.add(sortAscending.getMenuItem());
+		headerPopup.add(sortDescending.getMenuItem());
+		headerPopup.addSeparator();
+		headerPopup.add(optimizeCol.getMenuItem());
+		headerPopup.add(optimizeAllCol.getMenuItem());
+		headerPopup.add(setColWidth.getMenuItem());
+		headerPopup.add(new CopyColumnNameAction(WbTable.this));
+		headerPopup.addSeparator();
+		headerPopup.add(new ScrollToColumnAction(WbTable.this));
+		headerPopup.addSeparator();
+		headerPopup.add(new OptimizeRowHeightAction(WbTable.this));
+		if (allowColumnOrderSaving)
+		{
+			headerPopup.addSeparator();
+			headerPopup.add(new ResetColOrderAction(WbTable.this));
+			headerPopup.add(new SaveColOrderAction(WbTable.this));
+		}
+		JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
+		zoom.add(new JMenuItem(new IncreaseFontSize("TxtFntInc", zoomer)));
+		zoom.add(new JMenuItem(new DecreaseFontSize("TxtFntDecr", zoomer)));
+		zoom.addSeparator();
+		zoom.add(new JMenuItem(new ResetFontSize("TxtFntReset", zoomer)));
+
+		headerPopup.add(zoom);
+		return headerPopup;
+	}
 	/**
 	 * Start sorting if the column header has been clicked.
 	 * @param e the MouseEvent triggering the click
@@ -1775,24 +1839,7 @@ public class WbTable
 				{
 					public void run()
 					{
-						JPopupMenu headerPopup = new JPopupMenu();
-						headerPopup.add(sortAscending.getMenuItem());
-						headerPopup.add(sortDescending.getMenuItem());
-						headerPopup.addSeparator();
-						headerPopup.add(optimizeCol.getMenuItem());
-						headerPopup.add(optimizeAllCol.getMenuItem());
-						headerPopup.add(setColWidth.getMenuItem());
-						headerPopup.add(new CopyColumnNameAction(WbTable.this));
-						headerPopup.addSeparator();
-						headerPopup.add(new ScrollToColumnAction(WbTable.this));
-						headerPopup.addSeparator();
-						headerPopup.add(new OptimizeRowHeightAction(WbTable.this));
-						if (allowColumnOrderSaving)
-						{
-							headerPopup.addSeparator();
-							headerPopup.add(new ResetColOrderAction(WbTable.this));
-							headerPopup.add(new SaveColOrderAction(WbTable.this));
-						}
+						JPopupMenu headerPopup = getHeaderPopup();
 						headerPopup.show(getTableHeader(), e.getX(), e.getY());
 					}
 				});

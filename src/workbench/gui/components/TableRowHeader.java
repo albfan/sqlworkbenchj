@@ -3,15 +3,17 @@
  *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2009, Thomas Kellerer
+ *  Copyright Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
  *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.gui.components;
 
+import java.beans.PropertyChangeEvent;
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.gui.WbSwingUtilities;
@@ -22,7 +24,7 @@ import workbench.gui.WbSwingUtilities;
  */
 public class TableRowHeader
 	extends JTable
-	implements ChangeListener
+	implements ChangeListener, PropertyChangeListener
 {
 	private TableRowHeaderModel rowModel;
 	private RowHeaderRenderer renderer;
@@ -43,8 +45,19 @@ public class TableRowHeader
 		setRowSelectionAllowed(false);
 		setAutoscrolls(false);
 		setFocusable(false);
+		clientTable.addPropertyChangeListener("font", this);
 	}
 
+	@Override
+	public void setFont(Font f)
+	{
+		super.setFont(f);
+		if (renderer != null)
+		{
+			renderer.setFont(f);
+		}
+	}
+	
 	@Override
 	public void addNotify()
 	{
@@ -158,5 +171,15 @@ public class TableRowHeader
 		JScrollBar bar = scrollPane.getVerticalScrollBar();
 		if (bar == null) return;
 		bar.setValue(viewport.getViewPosition().y);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getSource() == clientTable && "font".equals(evt.getPropertyName()))
+		{
+			Font f = clientTable.getFont();
+			setFont(f);
+		}
 	}
 }

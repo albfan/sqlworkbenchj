@@ -75,9 +75,6 @@ public class TextAreaPainter
 
 	private Map renderingHints;
 
-	// used when Zooming the font size
-	private Font originalFont;
-
 	public TextAreaPainter(JEditTextArea textArea)
 	{
 		super();
@@ -290,38 +287,6 @@ public class TextAreaPainter
 		this.fm = getFontMetrics(font);
 		calculateTabSize();
 		calculateGutterWidth();
-	}
-
-	public void resetFontZoom()
-	{
-		if (originalFont != null)
-		{
-			setFont(originalFont);
-		}
-		originalFont = null;
-	}
-
-	public void increaseFontSize()
-	{
-		applyFontScale(1.1d);
-	}
-
-	public void decreaseFontSize()
-	{
-		applyFontScale(0.9d);
-	}
-
-	private void applyFontScale(double scale)
-	{
-		Font f = getFont();
-		if (f == null) return;
-
-		if (originalFont == null)
-		{
-			originalFont = f;
-		}
-		Font newFont = f.deriveFont((float)(f.getSize() * scale));
-		setFont(newFont);
 	}
 
 	private void calculateGutterWidth()

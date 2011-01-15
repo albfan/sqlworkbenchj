@@ -1430,11 +1430,30 @@ public class DwPanel
 		return updateable;
 	}
 
-	public InsertRowAction getInsertRowAction() { return this.insertRow; }
-	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
-	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
-	public DeleteDependentRowsAction getDeleteDependentRowsAction() { return this.deleteDependentRow; }
-	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
+	public InsertRowAction getInsertRowAction()
+	{
+		return this.insertRow;
+	}
+
+	public CopyRowAction getCopyRowAction()
+	{
+		return this.duplicateRow;
+	}
+
+	public DeleteRowAction getDeleteRowAction()
+	{
+		return this.deleteRow;
+	}
+
+	public DeleteDependentRowsAction getDeleteDependentRowsAction()
+	{
+		return this.deleteDependentRow;
+	}
+
+	public UpdateDatabaseAction getUpdateDatabaseAction()
+	{
+		return this.updateAction;
+	}
 
 	/**
 	 *	Turns on the batchUpdate mode.
