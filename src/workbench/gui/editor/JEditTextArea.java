@@ -273,7 +273,7 @@ public class JEditTextArea
 	{
 		return fontZoomer;
 	}
-	
+
 	public Point getCursorLocation()
 	{
 		int line = getCaretLine();
@@ -1250,9 +1250,9 @@ public class JEditTextArea
 			{
 				public void run()
 				{
+					invalidate();
 					updateScrollBars();
 					painter.invalidateLineRange(0, getLineCount());
-					repaint();
 				}
 			});
 		}

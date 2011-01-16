@@ -16,7 +16,7 @@ import workbench.util.StringUtil;
 
 /**
  * A single entry for {@link workbench.gui.sql.SqlHistory}
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SqlHistoryEntry
@@ -65,11 +65,14 @@ public class SqlHistoryEntry
 		try
 		{
 			editor.setText(this.text);
-			editor.setCaretPosition(0);
-			if (this.cursorPos > -1) 
+			if (this.cursorPos > -1)
 			{
 				editor.setCaretPosition(this.cursorPos);
 				editor.scrollToCaret();
+			}
+			else
+			{
+				editor.setCaretPosition(0);
 			}
 			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionEnd < editor.getDocumentLength())
 			{
@@ -106,11 +109,11 @@ public class SqlHistoryEntry
 
 	private void setText(String value)
 	{
-		if (value == null) 
+		if (value == null)
 		{
 			this.text = "";
 		}
-		else 
+		else
 		{
 			this.text = value;
 		}

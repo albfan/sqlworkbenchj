@@ -60,6 +60,7 @@ public class ConnectionInfoPanel
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "</div>\n");
+			content.append("<b>Isolation Level:</b> " + conn.getIsolationLevel() + "<br>\n");
 			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\n");
 			String term = wbmeta.getSchemaTerm();
 			String s = StringUtil.capitalize(term);
@@ -85,7 +86,7 @@ public class ConnectionInfoPanel
 			infotext.setCaretPosition(0);
 			new TextComponentMouseListener(infotext);
 			FontMetrics fm = infotext.getFontMetrics(infotext.getFont());
-			int height = fm.getHeight() * 11 + 32;
+			int height = fm.getHeight() * 12 + 32;
 			Dimension d = new Dimension(450, height);
 			jScrollPane1.setSize(d);
 			jScrollPane1.setPreferredSize(d);

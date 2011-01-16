@@ -74,7 +74,7 @@ public class PanelWorkspaceHandler
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				LogMgr.logError("PanelWorkspaceHandler.readFromWorkspace()", "Error when showing current history entry", e);
 			}
 		}
 		else
@@ -97,7 +97,6 @@ public class PanelWorkspaceHandler
 		client.updateAppendAction();
 		client.editor.clearUndoBuffer();
 		client.editor.resetModified();
-
 	}
 
 

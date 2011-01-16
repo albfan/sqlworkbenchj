@@ -145,6 +145,39 @@ public class WbConnection
 		initKeepAlive();
 	}
 
+	/**
+	 * Returns the current isolation level as a readable string
+	 * @return
+	 */
+	public String getIsolationLevel()
+	{
+		if (this.sqlConnection == null) return "";
+		try
+		{
+			int level = sqlConnection.getTransactionIsolation();
+			switch (level)
+			{
+				case Connection.TRANSACTION_READ_COMMITTED:
+					return "READ COMMITTED";
+				case Connection.TRANSACTION_READ_UNCOMMITTED:
+					return "READ UNCOMMITTED";
+				case Connection.TRANSACTION_REPEATABLE_READ:
+					return "REPEATABLE READ";
+				case Connection.TRANSACTION_SERIALIZABLE:
+					return "SERIALIZABLE";
+				case Connection.TRANSACTION_NONE:
+					return "NONE";
+				default:
+					return "unknown";
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("WbConnection.getIsolationLevel()", "Error retrieving isolation level", e);
+		}
+		return "n/a";
+	}
+	
 	public PreparedStatementPool getPreparedStatementPool()
 	{
 		if (this.preparedStatementPool == null)

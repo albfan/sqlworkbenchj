@@ -1485,6 +1485,7 @@ public class MainWindow
 						}
 						MainPanel p = getSqlPanel(i);
 						p.readFromWorkspace(w, i);
+						((JComponent)p).invalidate();
 					}
 
 					currentWorkspaceFile = realFilename;
@@ -1533,13 +1534,6 @@ public class MainWindow
 					updateRecentWorkspaces();
 				}
 			});
-		}
-
-		// Fix the repainting problems with the editor
-		final SqlPanel sql = getCurrentSqlPanel();
-		if (sql != null)
-		{
-			WbSwingUtilities.repaintLater(sql.getEditor());
 		}
 
 		return resultForWorkspaceClose;

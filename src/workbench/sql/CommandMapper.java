@@ -63,6 +63,7 @@ import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbGrepData;
+import workbench.sql.wbcommands.WbIsolationLevel;
 import workbench.sql.wbcommands.WbRunLB;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbMode;
@@ -134,7 +135,8 @@ public class CommandMapper
 		addCommand(new WbFetchSize());
 		addCommand(new WbAbout());
 		addCommand(new WbRunLB());
-
+		addCommand(new WbIsolationLevel());
+		
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);
