@@ -1157,8 +1157,8 @@ public class Settings
 		while (tok.hasMoreTokens())
 		{
 			String t = tok.nextToken();
-			if ("bold".equalsIgnoreCase(t)) style = style | Font.BOLD;
-			if ("italic".equalsIgnoreCase(type)) style = style | Font.ITALIC;
+			if ("bold".equalsIgnoreCase(t)) style |= Font.BOLD;
+			if ("italic".equalsIgnoreCase(type)) style |= Font.ITALIC;
 		}
 
 		try

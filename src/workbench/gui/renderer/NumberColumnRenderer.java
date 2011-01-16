@@ -66,7 +66,7 @@ public class NumberColumnRenderer
 	{
 		synchronized (this.decimalFormatter)
 		{
-			if (digits <= 0) this.maxDigits = 10;
+			if (digits <= 0) this.maxDigits = 50;
 			else this.maxDigits = digits;
 			decimalFormatter.setMaximumFractionDigits(maxDigits);
 		}
