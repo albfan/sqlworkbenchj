@@ -105,7 +105,8 @@ public class WbTextLabel
 			int w = (fm != null ? fm.stringWidth(this.text) : 15);
 			textX = this.getWidth() - w - 4;
 		}
-		validate();
+		invalidate();
+		repaint();
 	}
 
 	public void forcePaint()
