@@ -232,7 +232,7 @@ public class OracleProcedureReader
 	private boolean useCustomSql()
 	{
 		if (connection == null) return false;
-		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", false);
+		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
 	}
 
 	@Override
