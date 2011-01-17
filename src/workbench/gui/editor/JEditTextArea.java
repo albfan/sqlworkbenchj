@@ -253,7 +253,8 @@ public class JEditTextArea
 		this.addKeyBinding(new ScrollUpAction(this));
 
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
-		this.fontZoomer = new FontZoomer(painter, this);
+		this.fontZoomer = new FontZoomer(painter);
+		this.addMouseWheelListener(fontZoomer);
 	}
 
 	public int getHScrollBarHeight()

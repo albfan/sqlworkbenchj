@@ -781,6 +781,12 @@ public class WbTable
 			showFocusBorder();
 		}
 		this.checkMouseListener();
+		if (zoomer != null)
+		{
+			// The font zoomer must be attached to the scroll pane
+			// it cannot be attached to the table!
+			scrollPane.addMouseWheelListener(zoomer);
+		}
 	}
 
 	private void checkMouseListener()

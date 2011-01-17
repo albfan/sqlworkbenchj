@@ -29,20 +29,7 @@ public class FontZoomer
 
 	public FontZoomer(JComponent toZoom)
 	{
-		this(toZoom, null);
-	}
-
-	public FontZoomer(JComponent toZoom, JComponent mouseComponent)
-	{
 		client = toZoom;
-		if (mouseComponent != null)
-		{
-			mouseComponent.addMouseWheelListener(this);
-		}
-		else
-		{
-			client.addMouseWheelListener(this);
-		}
 	}
 
 	public void resetFontZoom()
@@ -94,6 +81,5 @@ public class FontZoomer
 				increaseFontSize();
 			}
 		}
-
 	}
 }
