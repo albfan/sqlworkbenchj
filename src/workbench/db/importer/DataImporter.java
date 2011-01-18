@@ -155,10 +155,12 @@ public class DataImporter
 	 * Indicates multiple imports run with this instance oft DataImporter.
 	 * Set via {@link #beginMultiTable() }
 	 */
-	private boolean multiTable = false;
+	private boolean multiTable;
 
-	private boolean batchRunning = false;
 	private TableStatements tableStatements;
+
+	private int errorCount;
+	private boolean errorLimitAdded;
 
 	public DataImporter()
 	{
@@ -634,7 +636,6 @@ public class DataImporter
 	{
 		if (this.source == null) return;
 		this.isRunning = true;
-		this.batchRunning = false;
 
 		if (this.useBatch)
 		{
@@ -733,13 +734,35 @@ public class DataImporter
 		this.messages.appendNewLine();
 	}
 
-	public boolean isRunning() { return this.isRunning; }
-	public boolean isSuccess() { return !hasErrors; }
-	public boolean hasWarnings() { return this.hasWarnings; }
-	public long getAffectedRows() { return this.totalRows; }
+	public boolean isRunning()
+	{
+		return this.isRunning;
+	}
 
-	public long getInsertedRows() { return this.insertedRows; }
-	public long getUpdatedRows() { return this.updatedRows; }
+	public boolean isSuccess()
+	{
+		return !hasErrors;
+	}
+
+	public boolean hasWarnings()
+	{
+		return this.hasWarnings;
+	}
+
+	public long getAffectedRows()
+	{
+		return this.totalRows;
+	}
+
+	public long getInsertedRows()
+	{
+		return this.insertedRows;
+	}
+
+	public long getUpdatedRows()
+	{
+		return this.updatedRows;
+	}
 
 	/**
 	 *	This method is called if cancelExecution() is called
@@ -752,27 +775,27 @@ public class DataImporter
 
 	public void cancelExecution()
 	{
-		this.isRunning = false;
 		if (this.tableDeleter != null)
 		{
 			this.tableDeleter.cancel();
 		}
-
-		if (this.batchRunning)
-		{
-			try
-			{
-				if (this.insertStatement != null) this.insertStatement.cancel();
-			}
-			catch (Throwable th)
-			{
-
-			}
-		}
+		
 		this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 	}
 
+	private void cancelStatement(BatchedStatement stmt) 
+	{
+		if (stmt == null) return;
+		try 
+		{
+			stmt.cancel();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logDebug("DataImporter.cancelStatement()", "Error when cancelling statement", e);
+		}
+	}
 	public void setTableCount(int total)
 	{
 		this.totalTables = total;
@@ -782,9 +805,6 @@ public class DataImporter
 	{
 		this.currentTable = current;
 	}
-
-	private int errorCount = 0;
-	private boolean errorLimitAdded = false;
 
 	private void addError(String msg)
 	{
@@ -1997,7 +2017,10 @@ public class DataImporter
 	{
 		try
 		{
-			this.closeStatements();
+			cancelStatement(insertStatement);
+			cancelStatement(updateStatement);
+			closeStatements();
+			
 			if (this.transactionControl && !this.dbConn.getAutoCommit())
 			{
 				LogMgr.logInfo("DataImporter.cleanupRollback()", "Rollback changes");
@@ -2035,7 +2058,6 @@ public class DataImporter
 		cleanupRollback();
 		this.hasErrors = this.hasErrors || this.source.hasErrors();
 		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
-
 	}
 
 	private void closeStatements()

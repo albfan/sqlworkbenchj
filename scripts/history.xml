@@ -22,6 +22,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="11" type="fix">Cancelling an import did not rollback the changes.</entry>
     <entry dev-build="10" type="fix">When reloading the table list in the DbExplorer while "editing" mode was active, the table list was not retrieved correctly.</entry>
     <entry dev-build="10" type="fix">Using WbCopy with schema qualified table names did not work properly when the target connection was using a different default schema.</entry>
     <entry dev-build="10" type="fix">The rowcount in the statusbar was not always showing the correct values when more than one result was present</entry>

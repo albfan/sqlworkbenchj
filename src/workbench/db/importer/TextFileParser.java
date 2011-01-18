@@ -997,12 +997,19 @@ public class TextFileParser
 				}
 				catch (Exception e)
 				{
-					hasErrors = true;
-					cancelImport = true;
-					// processRow() will only throw an exception if abortOnError is true
-					// so we can always re-throw the exception here.
-					LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow, e);
-					throw e;
+					if (cancelImport)
+					{
+						LogMgr.logDebug("TextFileParser.processOneFile()", "Error sending line " + importRow, e);
+					}
+					else
+					{
+						hasErrors = true;
+						cancelImport = true;
+						// processRow() will only throw an exception if abortOnError is true
+						// so we can always re-throw the exception here.
+						LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow, e);
+						throw e;
+					}
 				}
 
 				try
@@ -1015,8 +1022,12 @@ public class TextFileParser
 					currentLine = null;
 				}
 			}
+			
 			filesProcessed.add(inputFile);
-			receiver.tableImportFinished();
+			if (!cancelImport)
+			{
+				receiver.tableImportFinished();
+			}
 		}
 		finally
 		{
