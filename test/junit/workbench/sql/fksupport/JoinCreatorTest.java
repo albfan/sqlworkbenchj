@@ -77,11 +77,11 @@ public class JoinCreatorTest
 		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
 		creator.setCursorPosition(pos);
 		condition = creator.getJoinCondition();
-		assertEquals(" a.type_id = adt.adr_type_id", condition);
+		assertEquals("a.adr_type_id = adt.type_id", condition);
 
 		creator.setCursorPosition(pos + 1);
 		condition = creator.getJoinCondition();
-		assertEquals("a.type_id = adt.adr_type_id", condition);
+		assertEquals("a.adr_type_id = adt.type_id ", condition);
 
 		// Test for sub-selects
 		sql = "select * from person where id in (select person_id from address ad join address_type adt on )";
@@ -90,9 +90,24 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
+		
+		sql = "select person_id from address ad join address_type adt on ";
+		pos = sql.length() - 1;
+		creator = new JoinCreator(sql, pos, conn);
+		join = creator.getJoinTable();
+		assertEquals("address", join.getObjectName());
+		assertEquals("ad", join.getAlias());
+		assertEquals("ON ad.adr_type_id = adt.type_id", creator.getJoinCondition());
 
-		joined = creator.getJoinedTable();
-		assertEquals("address_type", joined.getObjectName());
-		assertEquals("adt", joined.getAlias());
+//		joined = creator.getJoinedTable();
+//		assertEquals("address_type", joined.getObjectName());
+//		assertEquals("adt", joined.getAlias());
+		
+//		sql = "select * from address a join person p on ";
+//		pos = sql.length() -1;
+//		creator = new JoinCreator(sql, pos, conn);
+//		join = creator.getJoinTable();
+//		System.out.println("jointable: " + join.getObjectName());
+//		System.out.println("condition: " + creator.getJoinCondition());
 	}
 }

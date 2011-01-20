@@ -88,20 +88,20 @@ public class JoinColumnsDetector
 			return Collections.emptyMap();
 		}
 
-		Map<String, String> columns = getJoinColumns(realJoinTable, realJoinedTable);
+		Map<String, String> columns = getJoinColumns(realJoinTable, joinTable, realJoinedTable, joinedTable);
 		if (columns.isEmpty())
 		{
-			columns = getJoinColumns(realJoinedTable, realJoinTable);
+			columns = getJoinColumns(realJoinedTable, joinedTable, realJoinTable, joinTable);
 		}
 		return columns;
 	}
 
-	private Map<String, String> getJoinColumns(TableIdentifier table1, TableIdentifier table2)
+	private Map<String, String> getJoinColumns(TableIdentifier table1, TableAlias alias1, TableIdentifier table2, TableAlias alias2)
 		throws SQLException
 	{
 		Map<String, String> columns = new HashMap<String, String>(2);
 		FKHandler fkHandler = new FKHandler(connection);
-		DataStore ds = fkHandler.getImportedKeys(table1);
+		DataStore ds = fkHandler.getImportedKeys(table2);
 		int count = ds.getRowCount();
 		for (int row = 0; row < count; row ++)
 		{
@@ -111,13 +111,13 @@ public class JoinColumnsDetector
 			String pkTableName = ds.getValueAsString(row, 2);
 			TableIdentifier pkTable = new TableIdentifier(pkTableCat, pkTableSchema, pkTableName);
 
-			if (pkTable.equals(table2))
+			if (pkTable.equals(table1))
 			{
 				String pkColName = ds.getValueAsString(row, 3);
-				String pkColumnExpr = joinTable.getNameToUse() + "." + getColumnName(pkColName);
+				String pkColumnExpr = alias1.getNameToUse() + "." + getColumnName(pkColName);
 
 				String fkColName = ds.getValueAsString(row, 7);
-				String fkColExpr = joinedTable.getNameToUse() + "." + getColumnName(fkColName);
+				String fkColExpr = alias2.getNameToUse() + "." + getColumnName(fkColName);
 				columns.put(pkColumnExpr, fkColExpr);
 			}
 		}

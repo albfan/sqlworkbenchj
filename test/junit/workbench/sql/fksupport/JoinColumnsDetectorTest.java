@@ -48,14 +48,32 @@ public class JoinColumnsDetectorTest
 		WbConnection conn = util.getConnection();
 		TestUtil.executeScript(conn,
 			"create table person (per_id integer not null, tenant_id integer not null, person_name varchar(10), primary key (per_id, tenant_id));\n" +
-			"create table address (adr_id integer primary key, address varchar(50), person_id integer, person_tenant_id integer, foreign key (person_id, person_tenant_id) references person(per_id, tenant_id));\n" +
-			"create table address_history (ahi_id integer primary key, old_address varchar(50), address_id integer, foreign key (address_id) references address(adr_id));\n" +
+			"create table address_type (type_id integer primary key, type_name varchar(50));\n" +
+			"create table address \n" +
+			"( \n" + 
+			"   adr_id integer primary key, \n" + 
+			"   address varchar(50), \n " + 
+			"   person_id integer, \n "+
+			"   person_tenant_id integer, \n" + 
+			"   adr_type_id integer, \n" +
+			"   foreign key (person_id, person_tenant_id) \n" + 
+			"      references person(per_id, tenant_id), \n" +
+			"  foreign key (adr_type_id) references address_type (type_id) \n" +
+			");\n" +
+			"create table address_history " +
+			 "( \n " +
+			"    ahi_id integer primary key, \n  " + 
+			"    old_address varchar(50), \n " + 
+			"    address_id integer, \n " +
+			"    foreign key (address_id) references address(adr_id)\n" + 
+			");\n" +
 			"commit;"
 		);
 
 		TableAlias person = new TableAlias("person p");
 		TableAlias address = new TableAlias("address a");
 		TableAlias history = new TableAlias("address_history ah");
+		TableAlias adt = new TableAlias("address_type adt");
 		JoinColumnsDetector detector = new JoinColumnsDetector(conn, person, address);
 		Settings.getInstance().setAutoCompletionPasteCase("lower");
 		String join = detector.getJoinCondition();
@@ -64,5 +82,9 @@ public class JoinColumnsDetectorTest
 		detector = new JoinColumnsDetector(conn, address, history);
 		join = detector.getJoinCondition();
 		assertEquals("a.adr_id = ah.address_id", join.trim());
+		
+		detector = new JoinColumnsDetector(conn, address, adt);
+		join = detector.getJoinCondition();
+		System.out.println("*** " + join);
 	}
 }
