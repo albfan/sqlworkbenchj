@@ -3,7 +3,7 @@
  * 
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * 
- *  Copyright 2002-2009, Thomas Kellerer
+ *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
  * 
  *  To contact the author please send an email to: support@sql-workbench.net
@@ -77,11 +77,11 @@ public class JoinCreatorTest
 		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
 		creator.setCursorPosition(pos);
 		condition = creator.getJoinCondition();
-		assertEquals("a.adr_type_id = adt.type_id", condition);
+		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
 
 		creator.setCursorPosition(pos + 1);
 		condition = creator.getJoinCondition();
-		assertEquals("a.adr_type_id = adt.type_id ", condition);
+		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
 
 		// Test for sub-selects
 		sql = "select * from person where id in (select person_id from address ad join address_type adt on )";
@@ -97,17 +97,17 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
-		assertEquals("ON ad.adr_type_id = adt.type_id", creator.getJoinCondition());
+		assertEquals("adt.type_id = ad.adr_type_id", creator.getJoinCondition().trim());
 
-//		joined = creator.getJoinedTable();
-//		assertEquals("address_type", joined.getObjectName());
-//		assertEquals("adt", joined.getAlias());
+		joined = creator.getJoinedTable();
+		assertEquals("address_type", joined.getObjectName());
+		assertEquals("adt", joined.getAlias());
 		
-//		sql = "select * from address a join person p on ";
-//		pos = sql.length() -1;
-//		creator = new JoinCreator(sql, pos, conn);
-//		join = creator.getJoinTable();
-//		System.out.println("jointable: " + join.getObjectName());
-//		System.out.println("condition: " + creator.getJoinCondition());
+		sql = "select * from address a join person p on ";
+		pos = sql.length() -1;
+		creator = new JoinCreator(sql, pos, conn);
+		join = creator.getJoinTable();
+		System.out.println("jointable: " + join.getObjectName());
+		System.out.println("condition: " + creator.getJoinCondition().trim());
 	}
 }
