@@ -152,7 +152,7 @@ public class SqlHistory
 
 	public void showLastStatement()
 	{
-		if (this.history.size() == 0) return;
+		if (this.history.isEmpty()) return;
 		this.currentEntry = this.history.size() - 1;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
@@ -161,7 +161,7 @@ public class SqlHistory
 
 	public void showFirstStatement()
 	{
-		if (this.history.size() == 0) return;
+		if (this.history.isEmpty()) return;
 		this.currentEntry = 0;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
