@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-12-12">
+  <release build="-1" date="2011-01-15">
     <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
+    <entry dev-build="11" type="enh">The possibility to influence the generated INSERT statement for WbImport is now available as a commandline parameter (previously this was only possible through a property in workbench.settings).</entry>
     <entry dev-build="10" type="enh">Two new options for the SQL Formatter are available that control the placement of the comma when line breaks are inserted. Thanks to Andreas for this patch.</entry>
     <entry dev-build="10" type="enh">The option "Allow empty line as statement delimiter" has been moved into the settings dialog and is now also being used when detecting the current statement in the editor.</entry>
     <entry dev-build="10" type="enh">The font size of the editor can now be changed dynamically using Ctrl-Numpad Plus/Ctrl-Numpad Minus or via the scroll wheel of the mouse (holding down the Ctrl Key). The font size of a result table can be changed using the scroll wheel or through the context menu in the table header.</entry>
@@ -22,6 +23,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="11" type="fix">The JOIN completion did not always detect the FKs correctly.</entry>
     <entry dev-build="11" type="fix">Cancelling an import did not rollback the changes.</entry>
     <entry dev-build="10" type="fix">When reloading the table list in the DbExplorer while "editing" mode was active, the table list was not retrieved correctly.</entry>
     <entry dev-build="10" type="fix">Using WbCopy with schema qualified table names did not work properly when the target connection was using a different default schema.</entry>

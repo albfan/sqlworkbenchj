@@ -179,6 +179,7 @@
           target="1.2"
           source="1.2"
           encoding="ISO-8859-1"
+          includeantruntime="false"
           includes="workbench/WbStarter.java"/>
 
     <!-- the rest of the application is compiled to the needed class file version -->
@@ -188,6 +189,7 @@
            srcdir="${src}"
            target="1.6"
            source="1.6"
+           includeantruntime="false"
            encoding="ISO-8859-1">
       <exclude name="workbench/WbStarter.java"/>
       <classpath>
@@ -763,7 +765,7 @@
   </path>
 
   <target name="compile-tests" depends="prepare-test, compile">
-    <javac debug="on" destdir="${build.test}" optimize="off" srcdir="${unittest}" target="1.6" source="1.6" encoding="ISO-8859-1">
+    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${unittest}" target="1.6" source="1.6" encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>

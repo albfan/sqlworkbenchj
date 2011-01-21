@@ -553,6 +553,28 @@
 						</entry>
 					</row>
 
+					<row>
+						<entry>-insertSQL</entry>
+						<entry>
+							<para>
+                Define the statement to be used for inserting rows.
+              </para>
+              <para>
+                This can be used to use hints or customize the
+                generated INSERT statement. The parameter may only contain the <literal>INSERT INTO</literal> part
+                of the statement (i.e. <literal>INSERT INTO</literal> is the default if nothing is specified).
+                This can be used to pass special hints to the database, e.g. to specify an append hint for Oracle:
+             </para>
+              <para>
+                <note>
+                  You have to quote the parameter value using single quotes, otherwise comments will be removed
+                  from the SQL statement!
+                </note>
+              </para>
+              <programlisting>-insertSQL='INSERT /*+ append */ INTO'</programlisting>
+						</entry>
+					</row>
+
           &table-statements;
 
 					&progress-parameter;
@@ -1285,8 +1307,8 @@
 
 		<para>
 			To use insert/update or update/insert with PostgreSQL, make sure you have
-			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import.
+			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import (which is enabled by default).
 		</para>
 	</section>
 
-  </section>
+</section>
