@@ -83,6 +83,7 @@ public class WbImport
 	public static final String ARG_IGNORE_OWNER = "ignoreOwner";
 	public static final String ARG_EXCLUDE_FILES = "excludeFiles";
 	public static final String ARG_USE_SAVEPOINT = "useSavepoint";
+	public static final String ARG_INSERT_START = "insertSQL";
 
 	private DataImporter imp;
 
@@ -138,6 +139,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_QUOTE_ALWAYS);
+		cmdLine.addArgument(ARG_INSERT_START);
 		ModifierArguments.addArguments(cmdLine);
 	}
 
@@ -189,7 +191,7 @@ public class WbImport
 		throws SQLException
 	{
 		imp = new DataImporter();
-		this.imp.setConnection(currentConnection);
+		imp.setConnection(currentConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
 		String options = getCommandLine(sqlCommand);
@@ -522,6 +524,8 @@ public class WbImport
 			imp.setProducer(xmlParser);
 		}
 
+		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
+		
 		ImportFileLister sorter = getFileNameSorter(cmdLine, defaultExtension);
 		if (sorter != null)
 		{

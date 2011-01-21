@@ -150,6 +150,7 @@ public class DataImporter
 	private int maxErrorCount = 1000;
 
 	private boolean verifyTargetTable = true;
+	private String insertSqlStart;
 
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
@@ -200,6 +201,18 @@ public class DataImporter
 	}
 
 
+	public void setInsertStart(String sql)
+	{
+		if (StringUtil.isBlank(sql))
+		{
+			insertSqlStart = null;
+		}
+		else
+		{
+			insertSqlStart = sql;
+		}
+	}
+	
 	private boolean supportsBatch()
 	{
 		if (this.dbConn == null) return true;
@@ -1624,7 +1637,7 @@ public class DataImporter
 		StringBuilder text = new StringBuilder(this.targetColumns.size() * 50);
 		StringBuilder parms = new StringBuilder(targetColumns.size() * 20);
 
-		String sql = dbConn.getDbSettings().getInsertForImport();
+		String sql = (insertSqlStart != null ? insertSqlStart : dbConn.getDbSettings().getInsertForImport());
 		if (StringUtil.isNonBlank(sql))
 		{
 			text.append(sql);
