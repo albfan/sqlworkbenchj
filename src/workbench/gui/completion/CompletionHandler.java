@@ -141,7 +141,7 @@ public class CompletionHandler
 			return false;
 		}
 
-		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
+		this.currentWord = editor.getWordLeftOfCursor(BaseAnalyzer.SELECT_WORD_DELIM);
 
 		try
 		{

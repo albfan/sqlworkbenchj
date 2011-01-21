@@ -1313,13 +1313,26 @@ public class JEditTextArea
 		}
 	}
 
+	public String getWordAtCursor()
+	{
+		int currentLine = getCaretLine();
+		String line = this.getLineText(currentLine);
+		int pos = this.getCaretPositionInLine(currentLine);
+		int start = TextUtilities.findWordStart(line, pos);
+		int end = TextUtilities.findWordEnd(line, pos);
+		if (start < end && start >= 0) 
+		{
+			return line.substring(start, end);
+		}
+		return null;
+	}
 	/**
 	 * Returns the word that is left of the cursor.
 	 * If the character left of the cursor is a whitespace
 	 * this method returns null.
 	 * @param wordBoundaries additional word boundary characters (whitespace is always a word boundary)
 	 */
-	public String getWordAtCursor(String wordBoundaries)
+	public String getWordLeftOfCursor(String wordBoundaries)
 	{
 		int currentLine = getCaretLine();
 		String line = this.getLineText(currentLine);
