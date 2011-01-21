@@ -14,10 +14,48 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (109.11) released</title>
+      <description>        <![CDATA[<p>Changes from build 109.10 to build 109.11</p><p>Enhancements</p><ul>
+<li>The possibility to influence the generated INSERT statement for WbImport is now available as a commandline parameter (previously this was only possible through a property in workbench.settings).</li>
+</ul><p>Bug Fixes</p><ul>
+<li>The JOIN completion did not always detect the FKs correctly.</li>
+<li>Cancelling an import did not rollback the changes.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-109.11</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 21 Jan 2011 23:11:07 +0200</pubDate>
+    </item>
+    <item>
+      <title>New development build (109.10) released</title>
+      <description>        <![CDATA[<p>Changes from build 109.9 to build 109.10</p><p>Enhancements</p><ul>
+<li>Two new options for the SQL Formatter are available that control the placement of the comma when line breaks are inserted. Thanks to Andreas for this patch.</li>
+<li>The option "Allow empty line as statement delimiter" has been moved into the settings dialog and is now also being used when detecting the current statement in the editor.</li>
+<li>The font size of the editor can now be changed dynamically using Ctrl-Numpad Plus/Ctrl-Numpad Minus or via the scroll wheel of the mouse (holding down the Ctrl Key). The font size of a result table can be changed using the scroll wheel or through the context menu in the table header.</li>
+<li>It is now (optionally) possible to modify the text in the editor while a statement is running. Statement and error highlighting will not be available if the editor contents was modified during execution.</li>
+<li>When the option "Show Max. Rows warning" is enabled, the warning is now shown using an icon in the tab header (instead of changing the color).</li>
+</ul><p>Bug Fixes</p><ul>
+<li>When reloading the table list in the DbExplorer while "editing" mode was active, the table list was not retrieved correctly.</li>
+<li>Using WbCopy with schema qualified table names did not work properly when the target connection was using a different default schema.</li>
+<li>The rowcount in the statusbar was not always showing the correct values when more than one result was present</li>
+</ul>
+
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-109.10</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 15 Jan 2011 16:32:44 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (109.9) released</title>
       <description>        <![CDATA[<p>Changes from build 109.8 to build 109.9</p><p>Bug Fixes</p><ul>
 <li>JOIN completion did not work</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -41,6 +79,8 @@
 </ul>
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -56,6 +96,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</li>
 </ul>
+
+
 
 
 
@@ -76,6 +118,8 @@
 <li>Postgres DOMAINs where not displayed if the DOMAIN was created in a schema that is not in the schema search_path</li>
 <li>A selection of '*' in the DbExplorer's schema selector was not restored if "Remember DbExplorer schema" was enabled for the workspace</li>
 </ul>
+
+
 
 
 
@@ -110,6 +154,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -127,6 +173,8 @@
 <li>The generated XML content was not valid for ODS or OpenXML export if the generating SQL contained characters that needed escaping in XML.</li>
 <li>Statements where not closed properly when retrieving Oracle Object type information.</li>
 </ul>
+
+
 
 
 
@@ -159,6 +207,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -178,6 +228,8 @@
 <li>When using the new lobsPerDirectory parameter for WbExport, the directory numbering did not restart with a new table.</li>
 <li>WbSchemaReport created invalid SQL if column names contained characters that needed a replacement with an XML entity.</li>
 </ul>
+
+
 
 
 
@@ -261,6 +313,8 @@
 <li>For Oracle object TYPEs, member variables declared with the data type "NUMBER" where not displayed correctly</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -286,6 +340,8 @@
 <li>The width of the column&amp;s header was not evaluated correctly for all look and feels when optimizing width</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -301,6 +357,8 @@
 <li>When initiating editing a column that is rendered as multiline column by using the DELETE key, a non-printable character was inserted into the text field</li>
 <li>When exporting text columns from PostgreSQL, they are now properly recognized as CLOB columns (e.g. for the -clobAsFile parameter)</li>
 </ul>
+
+
 
 
 
@@ -330,6 +388,8 @@
 <li>Fixed some initialization problems with the DbExplorer which caused errors when using SQL Server with the Microsoft Driver</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -345,6 +405,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The generated WbCopy command in the DataPumper was wrong, if * was selected as the schema</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -364,6 +426,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>Values of TIME columns were exported (incl. copy to clipboard) as dates</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -385,6 +449,8 @@
 <li>For Oracle, WbCall did not work for stored procedures with ref cursors that were accessible only through a synonym</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -397,6 +463,8 @@
       <description>        <![CDATA[<p>Changes from build 108.3 to build 108.4</p><p>Enhancements</p><ul>
 <li>WbSchemaDiff now detects renamed foreign keys</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -418,6 +486,8 @@
 </ul>
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -437,6 +507,8 @@
 <li>The display of trigger functions in Postgres that did not have a comment was not working</li>
 <li>Specifying a config directory using -configDir that needed quoting did not work</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -456,6 +528,8 @@
 <li>The "Object Info" function did not display information about TYPEs (e.g. Oracle, Postgres)</li>
 <li>For Oracle object TYPEs, member variables declared with the data type "NUMBER" where not displayed correctly</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -518,6 +592,8 @@
 <li>When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -531,6 +607,8 @@
 <li>The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</li>
 <li>A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -549,6 +627,8 @@
 <li>Fixed some more corner cases where the new row number display was not in sync with the result.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -563,6 +643,8 @@
 <li>Defined schema or catalog filters in the connection profile were not displayed correctly (even though they were stored correctly).</li>
 <li>Exporting only some of the columns of a result using "Save As" did not work.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -582,6 +664,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The current schema and database of the DbExplorer were not always saved correctly in the workspace.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -604,6 +688,8 @@
 <li>Stored procedures that used a REF CURSOR as an INOUT parameter could not be executed using WbCall</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -618,6 +704,8 @@
 <li>The option to display row numbers for results was not saved from within the options dialog</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -631,6 +719,8 @@
 <li>For results the row numbers can now also be displayed (similar to the line numbers in the editor)</li>
 <li>Oracle object type columns are now displayed correctly. As this is a generic solution to display JDBC "Struct" values, it should work for any driver that returns the correct type.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -654,6 +744,8 @@
 <li>When copying the data of a result set into the clipboard, the column headers were not copied when the keyboard shortcut was used.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -674,6 +766,8 @@
 <li>Setting the editor color for datatypes changed the color for the cursor (and vice versa)</li>
 <li>When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -743,6 +837,8 @@
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -761,6 +857,8 @@
 <li>Log4J logging can also be turned on by supplying a configuration file as a parameter for workbench.log.log4j so that log4j.xml does not need to be in the directory where sqlworkbench.jar is located.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -778,6 +876,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When copying a column name from the header's popup, the wrong name was copied when the columns where re-arranged using drag&amp;drop.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -799,6 +899,8 @@
 <li>Using WbCall with a fully qualified procedure that returned a REF CURSOR did not work.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -812,6 +914,8 @@
 <li>SQL Workbench/J now requires Java 6.</li>
 <li>When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new editor tab.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -831,6 +935,8 @@
 <li>Retrieving columns with type "timestamp" did not work for SQL Server.</li>
 <li>When adding a new column in the DbExplorer, column comments were not included.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -857,6 +963,8 @@
 <li>When using "Highlight Current statement" and executing the statement at the cursor (Execute Current), the statement was not highlighted when an error occurred.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -873,6 +981,8 @@
 <li>"Execute current" was not working any longer.</li>
 <li>The editor color for datatypes selected in the options dialog was not used.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -904,6 +1014,8 @@
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -928,6 +1040,8 @@
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -940,6 +1054,8 @@
       <description>        <![CDATA[<p>Changes from build 105 to build 106</p><p>Bug Fixes</p><ul>
 <li>Connections to DB2 were no longer working</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -996,6 +1112,8 @@
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1012,6 +1130,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>Exporting a table's data from within the table list in the DbExplorer was no longer working.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1030,6 +1150,8 @@
 <li>The default fetch size of a connection profile could not be reset (empty).</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1047,6 +1169,8 @@
 <li>Fixed the autocompletion if a table was specified using schema.something.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1062,6 +1186,8 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1082,6 +1208,8 @@
 <li>When using WbImport with -header=false but no column definitions, the import would fail if the table had more columns than the import file. The additional columns of the table are now ignored as in previous versions.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1099,6 +1227,8 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1119,6 +1249,8 @@
 <li>When loading a new file into the editor while an error selection was present, the selection was still shown after the new file was loaded.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1137,6 +1269,8 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1200,6 +1334,8 @@
 <li>When MySQL was not set to ANSI mode, primary key columns that needed quoting were not detected properly due to MySQL's non-standard quoting character (in non-ANSI mode)</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1219,6 +1355,8 @@
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1233,6 +1371,8 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1250,6 +1390,8 @@
 <li>If a profile did not have a name, SQL Workbench failed to display the connection dialog.</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1266,6 +1408,8 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1285,6 +1429,8 @@
 <li>Sequences were no longer displayed for DB2 on Windows/Linux</li>
 </ul>
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1300,6 +1446,8 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -1317,6 +1465,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>User defined PK mappings were not remembered</li>
 </ul>
+
+
 
 ]]>
 </description>
