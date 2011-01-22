@@ -183,6 +183,20 @@ public class ProducerFactory
 		return this.inputColumns;
 	}
 
+	public void setColumnMap(List<ColumnIdentifier> sourceColumns, List<ColumnIdentifier> targetColumns)
+		throws Exception
+	{
+		// A column mapping is only possible for text imports where the source contains a header row
+		if (this.importType == ImportType.Text && this.textOptions.getContainsHeader())
+		{
+			((TextFileParser)producer).setColumnMap(sourceColumns, targetColumns);
+		}
+		else
+		{
+			setImportColumns(targetColumns);
+		}
+	}
+	
 	public void setImportColumns(List<ColumnIdentifier> cols)
 		throws Exception
 	{

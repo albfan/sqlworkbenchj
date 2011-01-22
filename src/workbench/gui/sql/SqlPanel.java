@@ -47,6 +47,8 @@ import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
+import workbench.db.importer.DefaultImportOptions;
+import workbench.db.importer.DefaultTextImportOptions;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
@@ -2065,7 +2067,8 @@ public class SqlPanel
 
 		ImportStringVerifier v = new ImportStringVerifier(content, ds.getResultInfo());
 		DataStoreImporter importer = new DataStoreImporter(ds, currentData.getRowMonitor(), this);
-		if (showOptions || !v.checkData())
+		boolean dataOK = v.checkData();
+		if (showOptions || !dataOK)
 		{
 			boolean checked = false;
 			while (!checked)
@@ -2080,7 +2083,18 @@ public class SqlPanel
 		}
 		else
 		{
-			importer.importString(content);
+			if (!v.columnNamesMatched())
+			{
+				// assume the clipboard does not contain a header
+				TextImportOptions textOptions = new DefaultTextImportOptions("\t", "\"");
+				textOptions.setContainsHeader(false);
+				ImportOptions options = new DefaultImportOptions();
+				importer.importString(content, options, textOptions);
+			}
+			else
+			{
+				importer.importString(content);
+			}
 		}
 		if (!this.currentData.startEdit()) return;
 

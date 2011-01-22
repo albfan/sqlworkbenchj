@@ -26,13 +26,13 @@ public class TextOptionsPanel
 	extends JPanel
 	implements TextImportOptions
 {
-	private QuoteSettingVerifier verifier;
 	
 	public TextOptionsPanel()
 	{
 		super();
 		initComponents();
-		verifier = new QuoteSettingVerifier(quoteEscape, quoteAlways);
+		// The verifier will register itself with the two checkboxes
+		new QuoteSettingVerifier(quoteEscape, quoteAlways);
 	}
 
 	public void saveSettings()
@@ -141,6 +141,7 @@ public class TextOptionsPanel
 		if (StringUtil.isBlank(s)) return ".";
 		return s.trim();
 	}
+
 	public void setDecimalChar(String s)
 	{
 		this.decimalCharTextField.setText(s);

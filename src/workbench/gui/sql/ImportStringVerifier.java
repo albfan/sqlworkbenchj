@@ -95,7 +95,8 @@ public class ImportStringVerifier
 		int matchingColumns = 0;
 		for (ColumnIdentifier col : cols)
 		{
-			if (target.findColumn(col.getColumnName()) > -1)
+			int index = target.findColumn(col.getColumnName());
+			if (index > -1)
 			{
 				matchingColumns ++;
 			}
@@ -104,6 +105,12 @@ public class ImportStringVerifier
 		this.columnCountMatched = (cols.size() == target.getColumnCount());
 		this.columnNamesMatched = (matchingColumns > 0);
 		return (columnCountMatched || columnNamesMatched);
+	}
+
+
+	public boolean columnNamesMatched()
+	{
+		return this.columnNamesMatched;
 	}
 
 	private void createOptionsPanel()
