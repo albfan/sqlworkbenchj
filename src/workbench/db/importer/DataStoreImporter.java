@@ -137,7 +137,7 @@ public class DataStoreImporter
 		try
 		{
 			List<ColumnIdentifier> targetColumns = Arrays.asList(info.getColumns());
-			if (source instanceof TextFileParser)
+			if (source instanceof TextFileParser && textOptions.getContainsHeader())
 			{
 				List<ColumnIdentifier> fileColumns = factory.getFileColumns();
 				((TextFileParser)source).setColumnMap(fileColumns, targetColumns);

@@ -19,50 +19,84 @@ import workbench.util.QuoteEscapeType;
  * @author Thomas Kellerer
  */
 public class DefaultTextImportOptions
-	implements TextImportOptions 
+	implements TextImportOptions
 {
+
 	private String delimiter;
 	private String quoteChar;
-	
+	private boolean containsHeader = true;
+
 	public DefaultTextImportOptions(String delim, String quote)
 	{
 		this.delimiter = delim;
 		this.quoteChar = quote;
 	}
-	@Override
-	public String getTextDelimiter() { return delimiter; }
 
 	@Override
-	public boolean getContainsHeader() {  return true; }
+	public String getTextDelimiter()
+	{
+		return delimiter;
+	}
 
 	@Override
-	public boolean getQuoteAlways() { return false; }
+	public boolean getContainsHeader()
+	{
+		return containsHeader;
+	}
 
 	@Override
-	public String getTextQuoteChar() { return quoteChar;	}
+	public boolean getQuoteAlways()
+	{
+		return false;
+	}
 
 	@Override
-	public QuoteEscapeType getQuoteEscaping() { return QuoteEscapeType.none; }
+	public String getTextQuoteChar()
+	{
+		return quoteChar;
+	}
 
 	@Override
-	public boolean getDecode() { return false; }
+	public QuoteEscapeType getQuoteEscaping()
+	{
+		return QuoteEscapeType.none;
+	}
 
 	@Override
-	public String getDecimalChar() { return Settings.getInstance().getDecimalSymbol();	}
+	public boolean getDecode()
+	{
+		return false;
+	}
 
 	@Override
-	public void setTextDelimiter(String delim) { 	}
+	public String getDecimalChar()
+	{
+		return Settings.getInstance().getDecimalSymbol();
+	}
 
 	@Override
-	public void setContainsHeader(boolean flag) { }
+	public void setTextDelimiter(String delim)
+	{
+	}
 
 	@Override
-	public void setTextQuoteChar(String quote) { }
+	public void setContainsHeader(boolean flag)
+	{
+		containsHeader = flag;
+	}
 
 	@Override
-	public void setDecode(boolean flag) { }
-	
-	@Override
-	public void setDecimalChar(String s) { }
+	public void setTextQuoteChar(String quote)
+	{
+	}
 
+	@Override
+	public void setDecode(boolean flag)
+	{
+	}
+
+	@Override
+	public void setDecimalChar(String s)
+	{
+	}
 }
