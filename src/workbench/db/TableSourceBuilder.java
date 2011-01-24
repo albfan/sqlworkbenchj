@@ -118,7 +118,7 @@ public class TableSourceBuilder
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
-		if (!this.createInlineConstraints && includeFk)
+		if (!this.createInlineConstraints && includeFk && dbConnection.getDbSettings().getGenerateTableFKSource())
 		{
 			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
 			if (StringUtil.isNonBlank(fk))
