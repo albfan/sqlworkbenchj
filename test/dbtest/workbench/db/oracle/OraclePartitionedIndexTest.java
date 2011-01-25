@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2010, Thomas Kellerer
+ * Copyright 2002-2011, Thomas Kellerer
  * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -21,9 +21,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.db.IndexDefinition;
-import workbench.db.oracle.OraclePartitionDefinition;
-import workbench.db.oracle.OraclePartitionedIndex;
-import workbench.db.oracle.OracleTestUtil;
 import static org.junit.Assert.*;
 
 /**
