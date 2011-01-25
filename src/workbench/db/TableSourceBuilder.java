@@ -167,11 +167,11 @@ public class TableSourceBuilder
 			}
 		}
 
-		CharSequence extendedObjects = getAdditionalTableSql(table, columns);
-		if (extendedObjects != null)
+		CharSequence extendedSQL = getAdditionalTableSql(table, columns);
+		if (extendedSQL != null)
 		{
 			result.append(lineEnding);
-			result.append(extendedObjects);
+			result.append(extendedSQL);
 		}
 		return result.toString();
 	}

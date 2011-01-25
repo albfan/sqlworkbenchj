@@ -22,6 +22,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -1620,5 +1621,41 @@ public class SqlUtil
 	public static String cleanupIdentifier(String identifier)
 	{
 		return identifier.replaceAll("[^A-Za-z0-9_]+", "");
+	}
+	
+	public static String replaceParameters(String sql, Object ... values)
+	{
+		if (values == null) return sql;
+		List<Object> vals = Arrays.asList(values);
+		int valuePos = 0;
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken t = lexer.getNextToken(true, true);
+		StringBuilder result = new StringBuilder(sql.length() + vals.size() * 5);
+		
+		while (t != null)
+		{
+			if (t.getText().equals("?") && valuePos < vals.size())
+			{
+				Object v = vals.get(valuePos);
+				if (v instanceof String)
+				{
+					result.append('\'');
+					result.append(v.toString());
+					result.append('\'');
+				}
+				else
+				{
+					result.append(vals.get(valuePos).toString());
+				}
+				
+				valuePos ++;
+			}
+			else
+			{
+				result.append(t.getText());
+			}
+			t = lexer.getNextToken(true, true);
+		}
+		return result.toString();
 	}
 }

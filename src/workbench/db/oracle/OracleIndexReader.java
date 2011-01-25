@@ -23,6 +23,7 @@ import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
@@ -122,6 +123,19 @@ public class OracleIndexReader
 		return rs;
 	}
 
+	public CharSequence getExtendedIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse)
+	{
+		CharSequence baseSource = super.getIndexSource(table, definition, tableNameToUse);
+		CharSequence partitionSource = getPartitionDefinition(definition);
+		if (partitionSource == null) return baseSource;
+		StringBuilder sql = new StringBuilder(baseSource.length() + partitionSource.length() + 5);
+		sql.append(SqlUtil.trimSemicolon(baseSource.toString()));
+		sql.append('\n');
+		sql.append(partitionSource);
+		sql.append(";\n");
+		return sql;
+	}
+	
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse)
 	{
@@ -131,7 +145,7 @@ public class OracleIndexReader
 
 		if (!alwaysUseDbmsMeta && !"DOMAIN".equals(definition.getIndexType()))
 		{
-			return super.getIndexSource(table, definition, tableNameToUse);
+			return getExtendedIndexSource(table, definition, tableNameToUse);
 		}
 
 		PreparedStatement stmt = null;
@@ -276,6 +290,24 @@ public class OracleIndexReader
 		for (IndexDefinition def : indexes)
 		{
 			if (def.getName().equals(indexName)) return def;
+		}
+		return null;
+	}
+	
+	public CharSequence getPartitionDefinition(IndexDefinition def)
+	{
+		WbConnection conn = this.metaData.getWbConnection();
+		try
+		{
+			OraclePartitionedIndex partIndex = new OraclePartitionedIndex(def, conn);
+			if (partIndex.isPartitioned())
+			{
+				return partIndex.getSource();
+			}
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("OracleIndexReader.getPartitionedIndexSource()", "Error reading partition definition", sql);
 		}
 		return null;
 	}

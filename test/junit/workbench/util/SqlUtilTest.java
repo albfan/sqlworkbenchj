@@ -809,4 +809,13 @@ public class SqlUtilTest
 		}
 
 	}
+	
+	@Test
+	public void testReplaceParameters()
+		throws Exception
+	{
+		String sql = "select * from t where x = ? and y = ?";
+		String newSql = SqlUtil.replaceParameters(sql, Integer.valueOf(42), "two");
+		assertEquals("select * from t where x = 42 and y = 'two'", newSql);
+	}
 }
