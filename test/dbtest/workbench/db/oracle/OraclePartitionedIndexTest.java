@@ -14,22 +14,29 @@ package workbench.db.oracle;
 
 import java.util.List;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.db.IndexDefinition;
+import workbench.db.oracle.OraclePartitionDefinition;
+import workbench.db.oracle.OraclePartitionedIndex;
+import workbench.db.oracle.OracleTestUtil;
 import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class OraclePartitionedIndexTest {
-
-    public OraclePartitionedIndexTest() {
-    }
+public class OraclePartitionedIndexTest
+	extends WbTestCase
+{
+	public OraclePartitionedIndexTest()
+	{
+		super("OraclePartitionedIndexTest");
+	}
 
 	@BeforeClass
 	public static void setUpClass()
