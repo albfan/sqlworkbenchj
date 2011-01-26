@@ -11,200 +11,127 @@
  */
 package workbench.db.oracle;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 
 /**
- * A class to read information about a partitioned tables in Oracle
- * 
+ * A class to read information about a partitioned table in Oracle
+ *
  * @author Thomas Kellerer
  */
 public class OracleTablePartition
+	extends AbstractOraclePartition
 {
-	private String type;
-	private List<String> columns;
-	private List<OraclePartitionDefinition> partitions;
 
-	private final String retrieveColumnsSql = 
+	public OracleTablePartition(WbConnection conn)
+		throws SQLException
+	{
+		super(conn, true);
+		useLocality = false;
+	}
+
+	protected OracleTablePartition(WbConnection conn, boolean retrieveCompression)
+		throws SQLException
+	{
+		super(conn, retrieveCompression);
+		useLocality = false;
+	}
+
+	@Override
+	protected String getRetrieveColumnsSql()
+	{
+		return
+			"select column_name, \n" +
+			"       column_position \n" +
+			"from all_part_key_columns \n" +
+			"where object_type = 'TABLE' \n" +
+			"  and owner = ? \n" +
+			"  and name = ? \n" +
+			"order by column_position \n";	
+	}
+
+	@Override
+	protected String getRetrievePartitionDefinitionSql()
+	{
+		return 
 			"select pt.owner,  \n" +
 			"       pt.table_name, \n" +
 			"       pt.partitioning_type,  \n" +
 			"       pt.partition_count, \n" +
 			"       pt.partitioning_key_count, \n" +
-			"       pc.column_name, \n" +
-			"       pc.column_position \n" +
+			"       pt.subpartitioning_type, \n" +
+			"       pt.subpartitioning_key_count, \n" +
+			"       pt.def_subpartition_count \n" +
 			"from all_part_tables pt \n" +
-			"  join all_part_key_columns pc on pc.name = pt.table_name and pc.owner = pt.owner \n" +
 			"where pt.owner = ? \n" +
-			"  and pt.table_name = ? \n" +
-			"order by pc.column_position \n";
+			"  and pt.table_name = ? ";			
+	}
 
-	private final String retrievePartitionSQL = 
+	@Override
+	protected String getRetrievePartitionsSql()
+	{
+		if (useCompression)
+		{
+			return
+					"SELECT partition_name,  \n" +
+					"       high_value,  \n" +
+					"       partition_position, \n" +
+					"       subpartition_count, \n" +
+					"       compression \n" +
+					"FROM all_tab_partitions \n" +
+					"WHERE table_owner = ?  \n" +
+					"  AND table_name = ? \n" +
+					"ORDER BY partition_position";			
+		}
+		return
 			"SELECT partition_name,  \n" +
 			"       high_value,  \n" +
-			"       partition_position \n" +
+			"       partition_position, \n" +
+		  "       subpartition_count \n" +
 			"FROM all_tab_partitions \n" +
 			"WHERE table_owner = ?  \n" +
 			"  AND table_name = ? \n" +
-			"ORDER BY partition_position";	
-	
-	public OracleTablePartition(TableIdentifier table, WbConnection conn)
-		throws SQLException
+			"ORDER BY partition_position";	}
+
+	@Override
+	protected String getRetrieveSubColumnsSql()
 	{
-		boolean hasPartitions = retrieveColumns(table, conn);
-		if (hasPartitions) 
-		{
-			retrievePartitions(table, conn);
-		}
+		return
+		"select name, \n" +
+		"       object_type, \n" +
+		"       column_name, \n" +
+		"       column_position \n" +
+		"from all_subpart_key_columns \n" +
+		"where owner = ? \n" +
+		"  and name = ? \n" + 
+		"order by column_position";	
 	}
 
-	public List<OraclePartitionDefinition> getPartitions()
+	@Override
+	protected String getRetrieveSubPartitionsSql()
 	{
-		if (!isPartitioned()) return Collections.emptyList();
-		return Collections.unmodifiableList(partitions);
+		if (useCompression)
+		{
+		return 
+			"select partition_name,  \n" +
+			"       subpartition_name,  \n" +
+			"       high_value, \n" +
+			"       subpartition_position, \n" +
+			"       compression \n" +
+			"from all_tab_subpartitions \n" +
+			"where table_owner = ?  \n" +
+			"  and table_name = ?  \n" +
+			"order by subpartition_position";			
+		}
+		return 
+			"select partition_name,  \n" +
+			"       subpartition_name,  \n" +
+			"       high_value, \n" +
+			"       subpartition_position \n" +
+			"from all_tab_subpartitions \n" +
+			"where table_owner = ?  \n" +
+			"  and table_name = ?  \n" +
+			"order by subpartition_position";			
 	}
 	
-	public boolean isPartitioned()
-	{
-		return columns != null && !columns.isEmpty();
-	}
-	
-	public List<String> getColumns() 
-	{
-		if (columns == null) return Collections.emptyList();
-		return Collections.unmodifiableList(columns);
-	}
-	
-	public String getPartitionType()
-	{
-		return type;
-	}
-	
-	public String getSource()
-	{
-		if (!this.isPartitioned()) return null;
-		StringBuilder result = new StringBuilder(partitions.size() * 15);
-		result.append("PARTITION BY ");
-		result.append(type);
-		result.append(' ');
-		if (columns != null) 
-		{
-			result.append('(');
-			for (int i=0; i < columns.size(); i++) 
-			{
-				if (i > 0) result.append(", ");
-				result.append(columns.get(i));
-			}
-			result.append(')');
-		}
-		result.append("\n(\n");
-		for (int i=0; i < partitions.size(); i++)
-		{
-			if (i > 0) result.append(",\n");
-			result.append("  PARTITION ");
-			result.append(partitions.get(i).getName());
-			String value = partitions.get(i).getPartitionValue();
-			if (value != null) 
-			{
-				if ("RANGE".equals(type))
-				{
-					result.append(" VALUES LESS THAN (");
-					result.append(value);
-					result.append(')');
-				}
-				else
-				{
-					result.append(" VALUES (");
-					result.append(value);
-					result.append(')');
-				}
-			}
-		}
-		result.append("\n)");
-		return result.toString();
-	}
-	
-	private boolean retrieveColumns(TableIdentifier table, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrieveColumnsSql);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" + 
-					SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getTableName()));
-			}
-			
-			pstmt.setString(1, SqlUtil.removeQuoting(table.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(table.getTableName()));
-			rs = pstmt.executeQuery();
-			
-			if (rs.next())
-			{
-				type = rs.getString("PARTITIONING_TYPE");
-				int colCount = rs.getInt("PARTITIONING_KEY_COUNT");
-				columns = new ArrayList<String>(colCount);
-				int partCount = rs.getInt("PARTITION_COUNT");
-				partitions = new ArrayList<OraclePartitionDefinition>(partCount);
-				columns.add(rs.getString("COLUMN_NAME"));
-				while (rs.next())
-				{
-					columns.add(rs.getString("COLUMN_NAME"));
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return columns != null && !columns.isEmpty();
-	}
-
-	private void retrievePartitions(TableIdentifier table, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionSQL);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" + 
-					SqlUtil.replaceParameters(retrievePartitionSQL, table.getSchema(), table.getTableName()));
-			}
-			
-			pstmt.setString(1, SqlUtil.removeQuoting(table.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(table.getTableName()));
-			rs = pstmt.executeQuery();
-			
-			partitions = new ArrayList<OraclePartitionDefinition>();
-			
-			while (rs.next())
-			{
-				String name = rs.getString("PARTITION_NAME");
-				String value = rs.getString("HIGH_VALUE");
-				int position = rs.getInt("PARTITION_POSITION");
-				OraclePartitionDefinition def = new OraclePartitionDefinition(name, position);
-				def.setPartitionValue(value);
-				partitions.add(def);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-	}
 }

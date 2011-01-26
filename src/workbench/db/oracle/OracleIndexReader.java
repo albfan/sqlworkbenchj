@@ -299,7 +299,8 @@ public class OracleIndexReader
 		WbConnection conn = this.metaData.getWbConnection();
 		try
 		{
-			OraclePartitionedIndex partIndex = new OraclePartitionedIndex(def, conn);
+			OracleIndexPartition partIndex = new OracleIndexPartition(conn);
+			partIndex.retrieve(def, conn);
 			if (partIndex.isPartitioned())
 			{
 				return partIndex.getSource();

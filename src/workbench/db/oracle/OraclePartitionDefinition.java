@@ -11,6 +11,11 @@
  */
 package workbench.db.oracle;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -18,25 +23,79 @@ package workbench.db.oracle;
 public class OraclePartitionDefinition
 {
 
+	private String type;
+	
 	/**
 	 * The name of the partition
 	 */
 	private String name;
-	
+
 	/**
 	 * Stores the value for LIST partitions
 	 */
 	private String partitionValue;
-	
+
 	/**
-	 * The position of this partition 
+	 * The position of this partition
 	 */
 	private int position;
+
+	private String compressOption;
+
+	private List<OraclePartitionDefinition> subPartitions;
 	
-	public OraclePartitionDefinition(String partitionName, int partitionPosition)
+	private boolean isSubpartition;
+
+	public OraclePartitionDefinition(String partitionName, String partitionType, int partitionPosition)
 	{
 		name = partitionName;
 		position = partitionPosition;
+		type = partitionType;
+	}
+
+	public boolean isIsSubpartition()
+	{
+		return isSubpartition;
+	}
+
+	public void setIsSubpartition(boolean isSubpartition)
+	{
+		this.isSubpartition = isSubpartition;
+	}
+	
+	public List<OraclePartitionDefinition> getSubPartitions()
+	{
+		if (subPartitions == null) return Collections.emptyList();
+		return Collections.unmodifiableList(subPartitions);
+	}
+
+	public void addSubPartition(OraclePartitionDefinition subPartition)
+	{
+		if (this.subPartitions == null)
+		{
+			this.subPartitions = new ArrayList<OraclePartitionDefinition>();
+		}
+		subPartitions.add(subPartition);
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
+	}
+	
+	public String getCompressOption()
+	{
+		return compressOption;
+	}
+
+	public void setCompressOption(String compressOption)
+	{
+		this.compressOption = compressOption;
 	}
 
 	public String getName()
@@ -62,7 +121,69 @@ public class OraclePartitionDefinition
 	{
 		return position;
 	}
-	
-	
-	
+
+	public CharSequence getSource(int nameLength)
+	{
+		StringBuilder result = new StringBuilder((partitionValue == null ? 15 : partitionValue.length()) + 20);
+		if (isSubpartition)
+		{
+			result.append("  SUBPARTITION ");
+		}
+		else
+		{
+			result.append("  PARTITION ");
+		}
+		
+		result.append(StringUtil.padRight(name, nameLength));
+		if (partitionValue != null)
+		{
+			if ("RANGE".equals(type))
+			{
+				result.append(" VALUES LESS THAN (");
+				result.append(partitionValue);
+				result.append(')');
+			}
+			else
+			{
+				result.append(" VALUES (");
+				result.append(partitionValue);
+				result.append(')');
+			}
+		}
+
+		if (compressOption != null && partitionValue != null && partitionValue.indexOf('\'') > -1)
+		{
+			if ("DISABLED".equals(compressOption))
+			{
+				result.append(" NOCOMPRESS");
+			}
+			if ("ENABLED".equals(compressOption))
+			{
+				result.append(" COMPRESS");
+			}
+		}
+		
+		if (subPartitions != null && !subPartitions.isEmpty())
+		{
+			int maxLength = 0;
+			for (OraclePartitionDefinition def : subPartitions)
+			{
+				if (def.getName().length() > maxLength)
+				{
+					maxLength = def.getName().length();
+				}
+			}
+			result.append("\n  (\n");
+			for (int i=0; i < subPartitions.size(); i++)
+			{
+				if (i > 0) result.append(",\n");
+				result.append("  ");
+				result.append(subPartitions.get(i).getSource(maxLength));
+			}
+			result.append("\n  )");
+		}
+		return result;
+	}
+
+
 }

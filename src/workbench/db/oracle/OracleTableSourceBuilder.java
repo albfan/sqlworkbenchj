@@ -41,7 +41,8 @@ public class OracleTableSourceBuilder
 		{
 			try
 			{
-				OracleTablePartition reader = new OracleTablePartition(table, this.dbConnection);
+				OracleTablePartition reader = new OracleTablePartition(this.dbConnection);
+				reader.retrieve(table, dbConnection);
 				return reader.getSource();
 			}
 			catch (SQLException sql) 

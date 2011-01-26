@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 public class OracleTablePartitionTest
 	extends WbTestCase
 {
+	// More examples: http://psoug.org/reference/partitions.html
 	public OracleTablePartitionTest()
 	{
 		super("OraclePartitionReaderTest");
@@ -70,6 +71,44 @@ public class OracleTablePartitionTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		TestUtil.executeScript(con, sql);
+		
+		sql = 
+			"CREATE TABLE RANGE_SUB_PART_HASH \n" +
+			"( \n" +
+			"  invoice_no    NUMBER NOT NULL, \n" +
+			"  invoice_date  DATE   NOT NULL \n" +
+			") \n" +
+			"PARTITION BY RANGE (invoice_date) \n" +
+			"SUBPARTITION BY HASH (invoice_no) \n" +
+			"SUBPARTITIONS 8 \n" +
+			"( \n" +
+			"  PARTITION invoices_q1 VALUES LESS THAN (DATE '2010-01-01'), \n" +
+			"  PARTITION invoices_q2 VALUES LESS THAN (DATE '2010-04-01'), \n" +
+			"  PARTITION invoices_q3 VALUES LESS THAN (DATE '2010-09-01'), \n" +
+			"  PARTITION invoices_q4 VALUES LESS THAN (DATE '2011-01-01') \n" +
+			");\n" +
+			" \n" +
+			"CREATE TABLE RANGE_SUB_PART_LIST \n" +
+			"( \n" +
+			"  CREATE_DATE  DATE, \n" +
+			"  OBJ_CAT      CHAR(1), \n" +
+			"  NODE_ID      NUMBER \n" +
+			" ) \n" +
+			"PARTITION BY RANGE (CREATE_DATE) \n" +
+			"SUBPARTITION BY LIST (OBJ_CAT) \n" +
+			"(   \n" +
+			"  PARTITION RSP_1 VALUES LESS THAN (TIMESTAMP '2010-01-30 21:00:00') \n" +
+			"  (  \n" +
+			"    SUBPARTITION RSP_1_SUB_1 VALUES ('N'), \n" +
+			"    SUBPARTITION RSP_1_SUB_2 VALUES ('L')  \n" +
+			"  ),   \n" +
+			"  PARTITION RSP_2 VALUES LESS THAN (TIMESTAMP '2010-01-30 21:15:00') \n" +
+			"  (  \n" +
+			"    SUBPARTITION RSP_2_SUB_1 VALUES ('N') , \n" +
+			"    SUBPARTITION RSP_2_SUB_2 VALUES ('L')  \n" +
+			"  ) \n" +
+			");";		
+		TestUtil.executeScript(con, sql);
 	}
 
 	@AfterClass
@@ -88,7 +127,9 @@ public class OracleTablePartitionTest
 		
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_LIST_PARTITION_TEST"));
 		assertNotNull(tbl);
-		OracleTablePartition reader = new OracleTablePartition(tbl, con);
+		OracleTablePartition reader = new OracleTablePartition(con, false);
+		reader.retrieve(tbl, con);
+		
 		assertTrue(reader.isPartitioned());
 		assertEquals("LIST", reader.getPartitionType());
 		List<String> columns = reader.getColumns();
@@ -123,7 +164,9 @@ public class OracleTablePartitionTest
 		
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_HASH_PARTITION_TEST"));
 		assertNotNull(tbl);
-		OracleTablePartition reader = new OracleTablePartition(tbl, con);
+		OracleTablePartition reader = new OracleTablePartition(con, false);
+		reader.retrieve(tbl, con);
+		
 		assertTrue(reader.isPartitioned());
 		assertEquals("HASH", reader.getPartitionType());
 		List<String> columns = reader.getColumns();
@@ -136,7 +179,7 @@ public class OracleTablePartitionTest
 			assertEquals(i + 1, partitions.get(i).getPosition());
 			assertNull(partitions.get(i).getPartitionValue());
 		}
-		String expected =	"PARTITION BY HASH (TENANT_ID, REGION_ID)\n" +
+		String expected =	"PARTITION BY HASH (TENANT_ID,REGION_ID)\n" +
 			"(\n" +
 			"  PARTITION WB_HASH_PART_1,\n" +
 			"  PARTITION WB_HASH_PART_2,\n" +
@@ -146,4 +189,41 @@ public class OracleTablePartitionTest
 			")";
 		assertEquals(expected, reader.getSource().trim());		
 	}	
+	
+	@Test
+	public void testRetrieveDefaultSubPartition()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("RANGE_SUB_PART_HASH"));
+		assertNotNull(tbl);
+		OracleTablePartition reader = new OracleTablePartition(con, false);
+		reader.retrieve(tbl, con);
+		
+		assertTrue(reader.isPartitioned());
+		assertEquals("RANGE", reader.getPartitionType());
+		List<String> columns = reader.getColumns();
+		assertEquals(1, columns.size());
+		List<OraclePartitionDefinition> partitions = reader.getPartitions();
+		assertEquals(4, partitions.size());
+		for (int i=0; i < 4; i++)
+		{
+			assertEquals("INVOICES_Q" + Integer.toString(i+1), partitions.get(i).getName());
+			assertEquals(i + 1, partitions.get(i).getPosition());
+			assertNotNull(partitions.get(i).getPartitionValue());
+		}
+		String expected = 
+			"PARTITION BY RANGE (INVOICE_DATE)\n" +
+			"SUBPARTITION BY HASH (INVOICE_NO)\n" +
+			"SUBPARTITIONS 8\n" +
+			"(\n" +
+			"  PARTITION INVOICES_Q1 VALUES LESS THAN (TO_DATE(' 2010-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),\n" +
+			"  PARTITION INVOICES_Q2 VALUES LESS THAN (TO_DATE(' 2010-04-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),\n" +
+			"  PARTITION INVOICES_Q3 VALUES LESS THAN (TO_DATE(' 2010-09-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),\n" +
+			"  PARTITION INVOICES_Q4 VALUES LESS THAN (TO_DATE(' 2011-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))\n" +
+			")";
+		assertEquals(expected, reader.getSource().trim());		
+	}		
 }

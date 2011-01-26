@@ -1,5 +1,5 @@
 /*
- * OraclePartitionedIndexTest.java
+ * OracleIndexPartitionTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -27,10 +27,10 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class OraclePartitionedIndexTest
+public class OracleIndexPartitionTest
 	extends WbTestCase
 {
-	public OraclePartitionedIndexTest()
+	public OracleIndexPartitionTest()
 	{
 		super("OraclePartitionedIndexTest");
 	}
@@ -96,7 +96,8 @@ public class OraclePartitionedIndexTest
 		if (con == null) return;
 		
 		IndexDefinition def = new IndexDefinition(new TableIdentifier(OracleTestUtil.SCHEMA_NAME, "WB_LIST_PARTITION_TEST"), "PART_LIST_IDX");
-		OraclePartitionedIndex reader = new OraclePartitionedIndex(def, con);
+		OracleIndexPartition reader = new OracleIndexPartition(con);
+		reader.retrieve(def, con);
 		assertTrue(reader.isPartitioned());
 		List<String> cols = reader.getColumns();
 		assertEquals(1, cols.size());
