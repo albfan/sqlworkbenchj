@@ -35,7 +35,6 @@ public class JoinColumnsDetectorTest
 
 	@AfterClass
 	public static void tearDownClass()
-		throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();
 	}
@@ -50,22 +49,22 @@ public class JoinColumnsDetectorTest
 			"create table person (per_id integer not null, tenant_id integer not null, person_name varchar(10), primary key (per_id, tenant_id));\n" +
 			"create table address_type (type_id integer primary key, type_name varchar(50));\n" +
 			"create table address \n" +
-			"( \n" + 
-			"   adr_id integer primary key, \n" + 
-			"   address varchar(50), \n " + 
+			"( \n" +
+			"   adr_id integer primary key, \n" +
+			"   address varchar(50), \n " +
 			"   person_id integer, \n "+
-			"   person_tenant_id integer, \n" + 
+			"   person_tenant_id integer, \n" +
 			"   adr_type_id integer, \n" +
-			"   foreign key (person_id, person_tenant_id) \n" + 
+			"   foreign key (person_id, person_tenant_id) \n" +
 			"      references person(per_id, tenant_id), \n" +
 			"  foreign key (adr_type_id) references address_type (type_id) \n" +
 			");\n" +
 			"create table address_history " +
 			 "( \n " +
-			"    ahi_id integer primary key, \n  " + 
-			"    old_address varchar(50), \n " + 
+			"    ahi_id integer primary key, \n  " +
+			"    old_address varchar(50), \n " +
 			"    address_id integer, \n " +
-			"    foreign key (address_id) references address(adr_id)\n" + 
+			"    foreign key (address_id) references address(adr_id)\n" +
 			");\n" +
 			"commit;"
 		);
@@ -78,11 +77,11 @@ public class JoinColumnsDetectorTest
 		Settings.getInstance().setAutoCompletionPasteCase("lower");
 		String join = detector.getJoinCondition();
 		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", join.trim());
-		
+
 		detector = new JoinColumnsDetector(conn, address, history);
 		join = detector.getJoinCondition();
 		assertEquals("a.adr_id = ah.address_id", join.trim());
-		
+
 		detector = new JoinColumnsDetector(conn, address, adt);
 		join = detector.getJoinCondition();
 		assertEquals("adt.type_id = a.adr_type_id", join.trim());

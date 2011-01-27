@@ -479,7 +479,7 @@ public class TableSourceBuilder
 	 * @param pkName
 	 * @return an SQL statement to add a PK constraint on the given table.
 	 */
-	public CharSequence getPkSource(TableIdentifier table, List pkCols, String pkName)
+	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
 		String template = meta.metaSqlMgr.getPrimaryKeyTemplate();

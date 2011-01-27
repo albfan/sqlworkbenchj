@@ -12,13 +12,12 @@
 package workbench.db;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 /**
  * An interface to read column and table constraints from the database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface ConstraintReader
@@ -29,8 +28,8 @@ public interface ConstraintReader
 	 *	to the column definition inside a CREATE TABLE statement.
 	 */
 	Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable);
-	
-	
+
+
 	/**
 	 * Returns the (check) constraint definitions for the given table
 	 */
@@ -38,7 +37,7 @@ public interface ConstraintReader
 
 	/**
 	 * Rebuild the source of the given constraints
-	 * 
+	 *
 	 * @param constraints
 	 * @param indent
 	 */

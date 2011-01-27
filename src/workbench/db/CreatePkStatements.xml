@@ -13,6 +13,11 @@
    <string>ALTER TABLE %table_name%
    ADD CONSTRAINT PRIMARY KEY (%columnlist%) CONSTRAINT %pk_name%</string>
   </void>
-  
+
+  <void method="put">
+   <string>Oracle</string>
+   <string>ALTER TABLE %table_name%
+   ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%) %pk_index_usage%</string>
+  </void>
  </object>
 </java>

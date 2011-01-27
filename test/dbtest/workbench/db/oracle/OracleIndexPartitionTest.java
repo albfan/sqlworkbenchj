@@ -12,6 +12,7 @@
 
 package workbench.db.oracle;
 
+import java.sql.SQLException;
 import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -30,6 +31,8 @@ import static org.junit.Assert.*;
 public class OracleIndexPartitionTest
 	extends WbTestCase
 {
+	private static boolean partitioningAvailable;
+
 	public OracleIndexPartitionTest()
 	{
 		super("OraclePartitionedIndexTest");
@@ -78,7 +81,18 @@ public class OracleIndexPartitionTest
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		TestUtil.executeScript(con, sql);		
+		try
+		{
+			TestUtil.executeScript(con, sql, false);
+			partitioningAvailable = true;
+		}
+		catch (SQLException e)
+		{
+			if (e.getErrorCode() == 439)
+			{
+				partitioningAvailable = false;
+			}
+		}
 	}
 
 	@AfterClass
@@ -92,6 +106,7 @@ public class OracleIndexPartitionTest
 	public void testRetrieveListPartition()
 		throws Exception
 	{
+		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		

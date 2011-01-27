@@ -429,10 +429,22 @@ public class TestUtil
 	public static void executeScript(WbConnection con, String script)
 		throws SQLException
 	{
-		executeScript(con, script, null);
+		executeScript(con, script, null, false);
+	}
+
+	public static void executeScript(WbConnection con, String script, boolean printError)
+		throws SQLException
+	{
+		executeScript(con, script, null, printError);
 	}
 
 	public static void executeScript(WbConnection con, String script, DelimiterDefinition alternateDelimiter)
+		throws SQLException
+	{
+		executeScript(con, script, alternateDelimiter, true);
+	}
+	
+	public static void executeScript(WbConnection con, String script, DelimiterDefinition alternateDelimiter, boolean printError)
 		throws SQLException
 	{
 		if (con == null) return;
@@ -455,7 +467,7 @@ public class TestUtil
 			}
 			catch (SQLException e)
 			{
-				System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
+				if (printError) System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
 				throw e;
 			}
 			finally

@@ -10,6 +10,9 @@
  */
 package workbench.db.oracle;
 
+import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +22,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.db.DbObjectComparator;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
 
@@ -95,6 +101,31 @@ public class OracleIndexReaderTest
 		assertTrue(sql.contains("BBB_ID"));
 		assertTrue(sql.contains("PCTFREE"));
 		assertTrue(sql.contains("REVERSE"));
+	}
+
+	@Test
+	public void testAlternatePKIndex()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		String sql =
+			"CREATE TABLE index_test (id integer not null);\n" +
+			"ALTER TABLE index_test ADD CONSTRAINT pk_t PRIMARY KEY (id) USING INDEX (CREATE UNIQUE INDEX UNIQUE_ID ON index_test (id));";
+		TestUtil.executeScript(con, sql);
+
+		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("INDEX_TEST"));
+		Collection<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
+		assertEquals(1, idx.size());
+		IndexDefinition def = idx.iterator().next();
+		assertTrue(def.isPrimaryKeyIndex());
+		assertEquals("UNIQUE_ID", def.getName());
+		assertEquals("PK_T", tbl.getTable().getPrimaryKeyName());
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta.index", false);
+		String pkSource = builder.getPkSource(tbl.getTable(), CollectionUtil.arrayList("ID"), "PK_T").toString();
+		assertTrue(pkSource.indexOf("USING INDEX") > -1);
+		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX " + OracleTestUtil.SCHEMA_NAME + ".UNIQUE_ID") > -1);
 	}
 
 }

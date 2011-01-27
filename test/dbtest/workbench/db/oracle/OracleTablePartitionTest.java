@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.SQLException;
 import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -28,6 +29,8 @@ import static org.junit.Assert.*;
 public class OracleTablePartitionTest
 	extends WbTestCase
 {
+	private static boolean partitioningAvailable;
+	
 	// More examples: http://psoug.org/reference/partitions.html
 	public OracleTablePartitionTest()
 	{
@@ -70,8 +73,20 @@ public class OracleTablePartitionTest
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		TestUtil.executeScript(con, sql);
-		
+		try
+		{
+			TestUtil.executeScript(con, sql, false);
+			partitioningAvailable = true;
+		}
+		catch (SQLException e)
+		{
+			if (e.getErrorCode() == 439)
+			{
+				partitioningAvailable = false;
+				return;
+			}
+		}
+
 		sql = 
 			"CREATE TABLE RANGE_SUB_PART_HASH \n" +
 			"( \n" +
@@ -107,8 +122,21 @@ public class OracleTablePartitionTest
 			"    SUBPARTITION RSP_2_SUB_1 VALUES ('N') , \n" +
 			"    SUBPARTITION RSP_2_SUB_2 VALUES ('L')  \n" +
 			"  ) \n" +
-			");";		
-		TestUtil.executeScript(con, sql);
+			");";
+
+		try
+		{
+			TestUtil.executeScript(con, sql, false);
+			partitioningAvailable = true;
+		}
+		catch (SQLException e)
+		{
+			if (e.getErrorCode() == 439)
+			{
+				partitioningAvailable = false;
+				return;
+			}
+		}
 	}
 
 	@AfterClass
@@ -122,6 +150,8 @@ public class OracleTablePartitionTest
 	public void testRetrieveListPartition()
 		throws Exception
 	{
+		if (!partitioningAvailable) return;
+		
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		
@@ -159,6 +189,7 @@ public class OracleTablePartitionTest
 	public void testRetrieveHashPartition()
 		throws Exception
 	{
+		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		
@@ -194,6 +225,7 @@ public class OracleTablePartitionTest
 	public void testRetrieveDefaultSubPartition()
 		throws Exception
 	{
+		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		

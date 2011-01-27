@@ -131,7 +131,7 @@ public class JdbcIndexReader
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them
-			if (definition != null && !table.getPrimaryKeyName().equals(definition.getObjectName()))
+			if (definition != null && !definition.isPrimaryKeyIndex())
 			{
 				CharSequence idx = getIndexSource(table, definition, tableNameToUse);
 				if (idx != null)

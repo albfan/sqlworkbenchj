@@ -109,15 +109,6 @@ public interface IndexReader
 	String getPrimaryKeyIndex(TableIdentifier table);
 
 	/**
-	 * For non-standard index type, return the source for this index
-	 *
-	 * @param table
-	 * @param definition
-	 * @return the CREATE INDEX statement
-	 */
-	//String getIndexSourceForType(TableIdentifier table, IndexDefinition definition);
-
-	/**
 	 * Return any addition option that should be appended to a CREATE INDEX statement
 	 * @param index
 	 * @return
