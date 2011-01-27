@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -296,7 +297,7 @@ public class JdbcIndexReader
 	 * Returns a list of indexes defined for the given table
 	 * @param table the table to get the indexes for
 	 */
-	public Collection<IndexDefinition> getTableIndexList(TableIdentifier table)
+	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
 	{
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
@@ -359,7 +360,7 @@ public class JdbcIndexReader
 			SqlUtil.closeResult(idxRs);
 			indexInfoProcessed();
 		}
-		return defs.values();
+		return new ArrayList<IndexDefinition>(defs.values());
 	}
 
 }

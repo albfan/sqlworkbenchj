@@ -124,10 +124,8 @@ public class OracleMetadataTest
 		assertTrue(r instanceof OracleIndexReader);
 		OracleIndexReader reader = (OracleIndexReader)r;
 
-		Collection<IndexDefinition> list = reader.getTableIndexList(person);
-		assertEquals(3, list.size());
-
-		List<IndexDefinition> indexes = new ArrayList<IndexDefinition>(list);
+		List<IndexDefinition> indexes = reader.getTableIndexList(person);
+		assertEquals(3, indexes.size());
 
 		Collections.sort(indexes, new DbObjectComparator());
 

@@ -96,7 +96,7 @@ public class OracleTableSourceBuilder
 
 	private IndexDefinition getIndexDefinition(TableIdentifier table, String indexName)
 	{
-		Collection<IndexDefinition> indexes = dbConnection.getMetadata().getIndexReader().getTableIndexList(table);
+		List<IndexDefinition> indexes = dbConnection.getMetadata().getIndexReader().getTableIndexList(table);
 		if (indexes == null || indexes.isEmpty())
 		{
 			return null;

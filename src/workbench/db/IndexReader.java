@@ -101,7 +101,7 @@ public interface IndexReader
 	 * Returns a list of indexes defined for the given table
 	 * @param table the table to get the indexes for
 	 */
-	Collection<IndexDefinition> getTableIndexList(TableIdentifier table);
+	List<IndexDefinition> getTableIndexList(TableIdentifier table);
 
 	/**
 	 * Returns the name of the index that supports the Primary Key

@@ -11,7 +11,7 @@
 package workbench.db.postgres;
 
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,7 +77,7 @@ public class PostgresIndexReaderTest
 			"commit;\n");
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
-		Collection<IndexDefinition> indexes = reader.getTableIndexList(table);
+		List<IndexDefinition> indexes = reader.getTableIndexList(table);
 		if (indexes.isEmpty())
 		{
 			System.err.println("No indexes returned. If you are running PostgreSQL 9.0.0 please upgrade to 9.0.1");
@@ -85,7 +85,7 @@ public class PostgresIndexReaderTest
 		assertFalse(indexes.isEmpty());
 
 		
-		IndexDefinition index = indexes.iterator().next();
+		IndexDefinition index = indexes.get(0);
 		assertEquals("idx_person_id", index.getObjectName());
 		String sql = index.getSource(conn).toString();
 		String type = SqlUtil.getCreateType(sql);

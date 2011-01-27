@@ -67,40 +67,48 @@ public class OracleIndexReaderTest
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		TableIdentifier tbl = new TableIdentifier("SOME_TABLE");
-		List<IndexDefinition> indexes = new ArrayList<IndexDefinition>(con.getMetadata().getIndexReader().getTableIndexList(tbl));
-		
-		// Make sure aaa_upper is the first index
-		Collections.sort(indexes, new DbObjectComparator());
+		try
+		{
+			TableIdentifier tbl = new TableIdentifier("SOME_TABLE");
+			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getTableIndexList(tbl);
 
-		// Make sure the built-in templates are used
-		con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", false);
+			// Make sure aaa_upper is the first index
+			Collections.sort(indexes, new DbObjectComparator());
 
-		assertEquals(2, indexes.size());
-		IndexDefinition upper = indexes.get(0);
-		String sql = upper.getSource(con).toString();
-		assertTrue(sql.startsWith("CREATE INDEX AAA_UPPER"));
-		assertTrue(sql.contains("UPPER(\"SOME_DATA"));
+			// Make sure the built-in templates are used
+			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", false);
 
-		IndexDefinition reverse = indexes.get(1);
-		sql = reverse.getSource(con).toString();
-		assertTrue(sql.startsWith("CREATE INDEX BBB_ID"));
-		assertTrue(sql.contains("SOME_TABLE (ID"));
-		assertTrue(sql.contains("REVERSE"));
+			assertEquals(2, indexes.size());
+			IndexDefinition upper = indexes.get(0);
+			String sql = upper.getSource(con).toString();
+			assertTrue(sql.startsWith("CREATE INDEX AAA_UPPER"));
+			assertTrue(sql.contains("UPPER(\"SOME_DATA"));
 
-		// Now use dbms_meta
-		con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", true);
+			IndexDefinition reverse = indexes.get(1);
+			sql = reverse.getSource(con).toString();
+			assertTrue(sql.startsWith("CREATE INDEX BBB_ID"));
+			assertTrue(sql.contains("SOME_TABLE (ID"));
+			assertTrue(sql.contains("REVERSE"));
 
-		sql = upper.getSource(con).toString();
-		assertNotNull(sql);
-		assertTrue(sql.contains("AAA_UPPER"));
-		assertTrue(sql.contains("PCTFREE"));
+			// Now use dbms_meta
+			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", true);
 
-		sql = reverse.getSource(con).toString();
-		assertNotNull(sql);
-		assertTrue(sql.contains("BBB_ID"));
-		assertTrue(sql.contains("PCTFREE"));
-		assertTrue(sql.contains("REVERSE"));
+			sql = upper.getSource(con).toString();
+			assertNotNull(sql);
+			assertTrue(sql.contains("AAA_UPPER"));
+			assertTrue(sql.contains("PCTFREE"));
+
+			sql = reverse.getSource(con).toString();
+			assertNotNull(sql);
+			assertTrue(sql.contains("BBB_ID"));
+			assertTrue(sql.contains("PCTFREE"));
+			assertTrue(sql.contains("REVERSE"));
+		}
+		finally
+		{
+			// Reset the index retrieval
+			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", false);
+		}
 	}
 
 	@Test
@@ -115,14 +123,14 @@ public class OracleIndexReaderTest
 		TestUtil.executeScript(con, sql);
 
 		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("INDEX_TEST"));
-		Collection<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
+		List<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
 		assertEquals(1, idx.size());
-		IndexDefinition def = idx.iterator().next();
+		IndexDefinition def = idx.get(0);
 		assertTrue(def.isPrimaryKeyIndex());
 		assertEquals("UNIQUE_ID", def.getName());
 		assertEquals("PK_T", tbl.getTable().getPrimaryKeyName());
+
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta.index", false);
 		String pkSource = builder.getPkSource(tbl.getTable(), CollectionUtil.arrayList("ID"), "PK_T").toString();
 		assertTrue(pkSource.indexOf("USING INDEX") > -1);
 		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX " + OracleTestUtil.SCHEMA_NAME + ".UNIQUE_ID") > -1);
