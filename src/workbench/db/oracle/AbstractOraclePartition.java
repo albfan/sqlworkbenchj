@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;

@@ -43,10 +43,12 @@ public class OracleIndexReader
 	extends JdbcIndexReader
 {
 	private PreparedStatement indexStatement;
-
+	private boolean useJDBCRetrieval;
+	
 	public OracleIndexReader(DbMetadata meta)
 	{
 		super(meta);
+		useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.usejdbc", false);
 	}
 
 	public void indexInfoProcessed()
@@ -68,6 +70,11 @@ public class OracleIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
+		if (useJDBCRetrieval)
+		{
+			return super.getIndexInfo(table, unique);
+		}
+		
 		if (this.indexStatement != null)
 		{
 			LogMgr.logWarning("OracleIndexReader.getIndexInfo()", "getIndexInfo() called with pending results!");
@@ -312,4 +319,23 @@ public class OracleIndexReader
 		}
 		return null;
 	}
+
+	// TODO: replace getPkIndexName() 
+	// with our own statement:
+	//SELECT null as table_cat, 
+	//       i.owner as table_schem, 
+	//       i.table_name, 
+	//       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, 
+	//       null as index_qualifier, 
+	//       i.index_name, 
+	//       i.index_type as type, 
+	//       i.distinct_keys as cardinality, 
+	//       i.leaf_blocks as pages, 
+	//       null as filter_condition, 
+	//       i.index_type, 
+	//       ac.constraint_name
+	//FROM all_indexes i
+	//  LEFT JOIN all_constraints ac ON ac.index_name = i.index_name AND ac.constraint_type = 'P'
+	//WHERE i.table_name in ('T084_STORE_DELIVERY', 'T085_ITEMSALE_DAY')
+	//and i.owner = user;	
 }

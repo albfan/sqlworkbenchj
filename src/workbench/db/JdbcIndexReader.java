@@ -70,7 +70,7 @@ public class JdbcIndexReader
 		{
 			return null;
 		}
-		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
+		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, true);
 	}
 
 	/**
