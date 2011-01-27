@@ -98,7 +98,7 @@ public class TableSourceBuilderTest
 		{
 			TableIdentifier tbl = new TableIdentifier("OTHER.PERSON");
 			TableSourceBuilder builder = new TableSourceBuilder(con);
-			List<ColumnIdentifier> cols = CollectionUtil.arrayList(new ColumnIdentifier("ID"));
+			List<String> cols = CollectionUtil.arrayList("ID");
 			String sql = builder.getPkSource(tbl, cols, null).toString();
 			assertTrue(sql.indexOf("ADD CONSTRAINT pk_person") > -1);
 		}
