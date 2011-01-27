@@ -774,7 +774,7 @@
   </target>
 
   <target name="compile-gui-tests" depends="prepare-test, compile-tests">
-    <javac debug="on" destdir="${build.test}" optimize="off" srcdir="${guitest}" target="1.6" source="1.6" encoding="ISO-8859-1">
+    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${guitest}" target="1.6" source="1.6" encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>
@@ -783,7 +783,7 @@
   </target>
 
   <target name="compile-db-tests" depends="prepare-test, compile-tests">
-    <javac debug="on" destdir="${build.test}" optimize="off" srcdir="${dbtest}" target="1.6" source="1.6" encoding="ISO-8859-1">
+    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${dbtest}" target="1.6" source="1.6" encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>

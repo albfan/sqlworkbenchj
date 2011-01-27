@@ -3,6 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-01-21">
     <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
+    <entry dev-build="12" type="enh">The DbExplorer now includes information about partitioned tables and indexes for Oracle in the generated source.</entry>
     <entry dev-build="11" type="enh">The possibility to influence the generated INSERT statement for WbImport is now available as a commandline parameter (previously this was only possible through a property in workbench.settings).</entry>
     <entry dev-build="10" type="enh">Two new options for the SQL Formatter are available that control the placement of the comma when line breaks are inserted. Thanks to Andreas for this patch.</entry>
     <entry dev-build="10" type="enh">The option "Allow empty line as statement delimiter" has been moved into the settings dialog and is now also being used when detecting the current statement in the editor.</entry>
