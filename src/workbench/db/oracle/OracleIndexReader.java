@@ -320,22 +320,66 @@ public class OracleIndexReader
 		return null;
 	}
 
-	// TODO: replace getPkIndexName() 
-	// with our own statement:
-	//SELECT null as table_cat, 
-	//       i.owner as table_schem, 
-	//       i.table_name, 
-	//       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, 
-	//       null as index_qualifier, 
-	//       i.index_name, 
-	//       i.index_type as type, 
-	//       i.distinct_keys as cardinality, 
-	//       i.leaf_blocks as pages, 
-	//       null as filter_condition, 
-	//       i.index_type, 
-	//       ac.constraint_name
-	//FROM all_indexes i
-	//  LEFT JOIN all_constraints ac ON ac.index_name = i.index_name AND ac.constraint_type = 'P'
-	//WHERE i.table_name in ('T084_STORE_DELIVERY', 'T085_ITEMSALE_DAY')
-	//and i.owner = user;	
+	/**
+	 * This method retrieves the name of the PK index used for that table.
+	 * 
+	 * As there is no such function in JDBC api JdbcIndexReader uses getPrimaryKeys() to retrieve the name 
+	 * of the index as in most cases the PK name is the same as the supporting index. 
+	 * 
+	 * But in Oracle one can create a PK that is supported by an existing index and thus those two names
+	 * do not need to be identical.
+	 * 
+	 * @param tbl - the table to check.
+	 * 
+	 * @return the name of the index supporting the primary key
+	 */
+	@Override
+	public String getPrimaryKeyIndex(TableIdentifier tbl)
+	{
+		if (metaData.getDbSettings().isViewType(tbl.getType())) return StringUtil.EMPTY_STRING;
+		
+		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
+		if (useJDBC)
+		{
+			return super.getPrimaryKeyIndex(tbl);
+		}
+		
+		String pkName = StringUtil.EMPTY_STRING;
+		String sql = 
+			"select nvl(index_name, constraint_name)  \n" +
+			"  from all_constraints \n" +
+			"where owner = ? \n" +
+			"  and table_name = ? \n" +
+			"  and constraint_type = 'P'";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyIndex()", "Using SQL=" + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+		}
+		
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = metaData.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, tbl.getSchema());
+			stmt.setString(2, tbl.getTableName());
+			rs = stmt.executeQuery();
+			if (rs.next())
+			{
+				pkName = rs.getString(1);
+			}
+		}
+		catch (SQLException sqle)
+		{
+			LogMgr.logError("OracleIndexReader.getPrimaryKeyIndex()", "Could not read PK index name", sqle);
+			return super.getPrimaryKeyIndex(tbl);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return pkName;
+	}
+
 }

@@ -98,7 +98,7 @@ public class JdbcIndexReader
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Error retrieving PK information", e);
+				LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Error retrieving PK information", e);
 				pkName = "";
 			}
 			finally
@@ -130,8 +130,8 @@ public class JdbcIndexReader
 			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
-			// to re-create a CREATE INDEX statement for them.
-			if (definition != null && !definition.isPrimaryKeyIndex())
+			// to re-create a CREATE INDEX statement for them
+			if (definition != null && !table.getPrimaryKeyName().equals(definition.getObjectName()))
 			{
 				CharSequence idx = getIndexSource(table, definition, tableNameToUse);
 				if (idx != null)
