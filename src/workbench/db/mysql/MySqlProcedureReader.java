@@ -18,6 +18,7 @@ import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -39,14 +40,15 @@ public class MySqlProcedureReader
 	{
 		StringBuilder source = new StringBuilder(150);
 		
-		String sql = "SELECT routine_type, dtd_identifier " +
-             "FROM information_schema.routines " +
-		         " WHERE routine_schema like ? " +
-		         "  and  routine_name = ? ";
+		String sql = 
+			"SELECT routine_type, dtd_identifier \n" +
+			"FROM information_schema.routines \n" +
+			" WHERE routine_schema like ? \n" +
+			"  and  routine_name = ? \n";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" + sql);
+			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" + SqlUtil.replaceParameters(sql, (aSchema == null ? "%" : aSchema), aProcname));
 		}
 						 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -69,7 +71,9 @@ public class MySqlProcedureReader
 			source.append(proctype);
 			source.append(' ');
 			source.append(aProcname);
-			source.append(';');
+			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection);
+			source.append(nl);
+			source.append(delim.toString());
 			source.append(nl);
 			source.append(nl);
 			source.append("CREATE ");

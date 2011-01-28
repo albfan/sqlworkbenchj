@@ -935,6 +935,11 @@
     </junit>
   </target>
 
+  <target name="test-mysql">
+    <property name="test.db" value="mysql"/>
+    <antcall target="db-test"/>
+  </target>
+
   <target name="test-db2">
     <property name="test.db" value="ibm"/>
     <property file="db2.test.properties"/>
