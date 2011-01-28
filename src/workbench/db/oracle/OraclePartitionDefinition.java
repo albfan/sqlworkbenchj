@@ -122,7 +122,7 @@ public class OraclePartitionDefinition
 		return position;
 	}
 
-	public CharSequence getSource(int nameLength)
+	public CharSequence getSource(boolean forTable, int nameLength)
 	{
 		StringBuilder result = new StringBuilder((partitionValue == null ? 15 : partitionValue.length()) + 20);
 		if (isSubpartition)
@@ -135,7 +135,7 @@ public class OraclePartitionDefinition
 		}
 		
 		result.append(StringUtil.padRight(name, nameLength));
-		if (partitionValue != null)
+		if (partitionValue != null && forTable)
 		{
 			if ("RANGE".equals(type))
 			{
@@ -178,7 +178,7 @@ public class OraclePartitionDefinition
 			{
 				if (i > 0) result.append(",\n");
 				result.append("  ");
-				result.append(subPartitions.get(i).getSource(maxLength));
+				result.append(subPartitions.get(i).getSource(forTable, maxLength));
 			}
 			result.append("\n  )");
 		}

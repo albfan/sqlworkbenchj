@@ -119,7 +119,15 @@ public class OracleIndexPartitionTest
 		List<OraclePartitionDefinition> parts = reader.getPartitions();
 		assertEquals(4, parts.size());
 		assertEquals("LOCAL", reader.getLocality());
-//		System.out.println(reader.getSource());
+		String expected = "LOCAL\n" +
+             "PARTITION BY LIST (TENANT_ID)\n" +
+             "(\n" +
+             "  PARTITION WB_LIST_PART_1,\n" +
+             "  PARTITION WB_LIST_PART_2,\n" +
+             "  PARTITION WB_LIST_PART_3,\n" +
+             "  PARTITION WB_LIST_PART_4\n" +
+             ")";		
+		assertEquals(expected, reader.getSourceForIndexDefinition().trim());
 	}
 
 }

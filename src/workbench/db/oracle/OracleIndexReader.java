@@ -310,7 +310,7 @@ public class OracleIndexReader
 			partIndex.retrieve(def, conn);
 			if (partIndex.isPartitioned())
 			{
-				return partIndex.getSource();
+				return partIndex.getSourceForIndexDefinition();
 			}
 		}
 		catch (SQLException sql)

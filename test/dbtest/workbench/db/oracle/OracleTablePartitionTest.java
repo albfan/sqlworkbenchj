@@ -182,7 +182,7 @@ public class OracleTablePartitionTest
 			"  PARTITION WB_LIST_PART_3 VALUES (8),\n" +
 			"  PARTITION WB_LIST_PART_4 VALUES (16)\n" +
 			")";
-		assertEquals(expected, reader.getSource().trim());
+		assertEquals(expected, reader.getSourceForTableDefinition().trim());
 	}
 	
 	@Test
@@ -218,7 +218,7 @@ public class OracleTablePartitionTest
 			"  PARTITION WB_HASH_PART_4,\n" +
 			"  PARTITION WB_HASH_PART_5\n" +
 			")";
-		assertEquals(expected, reader.getSource().trim());		
+		assertEquals(expected, reader.getSourceForTableDefinition().trim());		
 	}	
 	
 	@Test
@@ -256,6 +256,6 @@ public class OracleTablePartitionTest
 			"  PARTITION INVOICES_Q3 VALUES LESS THAN (TO_DATE(' 2010-09-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),\n" +
 			"  PARTITION INVOICES_Q4 VALUES LESS THAN (TO_DATE(' 2011-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))\n" +
 			")";
-		assertEquals(expected, reader.getSource().trim());		
+		assertEquals(expected, reader.getSourceForTableDefinition().trim());		
 	}		
 }

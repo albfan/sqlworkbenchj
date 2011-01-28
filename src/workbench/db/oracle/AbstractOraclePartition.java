@@ -93,7 +93,17 @@ public abstract class AbstractOraclePartition
 		return type;
 	}
 
-	public String getSource()
+	public String getSourceForTableDefinition()
+	{
+		return getSource(true);
+	}
+	
+	public String getSourceForIndexDefinition()
+	{
+		return getSource(false);
+	}
+	
+	private String getSource(boolean forTable)
 	{
 		if (!this.isPartitioned()) return null;
 		StringBuilder result = new StringBuilder(partitions.size() * 15);
@@ -125,11 +135,11 @@ public abstract class AbstractOraclePartition
 			}
 		}
 		result.append("\n(\n");
-		int maxLength = getMaxPartitionNameLength();
+		int maxLength = forTable ? getMaxPartitionNameLength(): 0;
 		for (int i=0; i < partitions.size(); i++)
 		{
 			if (i > 0) result.append(",\n");
-			result.append(partitions.get(i).getSource(maxLength));
+			result.append(partitions.get(i).getSource(forTable, maxLength));
 		}
 		result.append("\n)");
 		return result.toString();

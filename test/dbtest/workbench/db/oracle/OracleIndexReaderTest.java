@@ -10,10 +10,8 @@
  */
 package workbench.db.oracle;
 
-import workbench.resource.Settings;
+import workbench.WbTestCase;
 import workbench.util.CollectionUtil;
-import java.util.Collection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import workbench.db.IndexDefinition;
@@ -34,10 +32,12 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class OracleIndexReaderTest
+	extends WbTestCase
 {
 
 	public OracleIndexReaderTest()
 	{
+		super("OracleIndexReaderTest");
 	}
 
 	@BeforeClass

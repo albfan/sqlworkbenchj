@@ -12,7 +12,6 @@
 package workbench.db.oracle;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.IndexDefinition;
@@ -49,7 +48,7 @@ public class OracleTableSourceBuilder
 			{
 				OracleTablePartition reader = new OracleTablePartition(this.dbConnection);
 				reader.retrieve(table, dbConnection);
-				return reader.getSource();
+				return reader.getSourceForTableDefinition();
 			}
 			catch (SQLException sql)
 			{
