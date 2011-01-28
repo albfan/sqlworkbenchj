@@ -3,7 +3,7 @@
  *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2009, Thomas Kellerer
+ *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
  *
  *  To contact the author please send an email to: support@sql-workbench.net
@@ -19,6 +19,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
 import static org.junit.Assert.*;
@@ -148,5 +149,67 @@ public class OracleProcedureReaderTest
 		assertTrue(proc.isFunction());
 		cols = con.getMetadata().getProcedureReader().getProcedureColumns(proc);
 		assertEquals(1, cols.getRowCount());		
+	}
+
+	@Test
+	public void testInvalidProcedure()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		String sql =
+			"CREATE OR REPLACE FUNCTION my_invalid \n" +
+			"RETURN integer \n" +
+			"IS \n" +
+			"BEGIN \n" +
+			" return 42 \n" +  // this error is intended to generate an invalid procedure
+			"END my_invalid; \n" +
+			"/\n";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		Settings.getInstance().setProperty("workbench.db.oracle.procedures.custom_sql", true);
+		DataStore ds = con.getMetadata().getProcedureReader().getProcedures(null, OracleTestUtil.SCHEMA_NAME, "MY_INVALID");
+		assertEquals(1, ds.getRowCount());
+		String procName1 = ds.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+		assertEquals("MY_INVALID", procName1);
+
+		String status = ds.getValueAsString(0, OracleProcedureReader.COLUMN_IDX_PROC_LIST_ORA_STATUS);
+		assertEquals("INVALID", status);
+
+		sql =
+			"CREATE PACKAGE proc_pckg2  \n" +
+			"AS  \n" +
+			"  PROCEDURE process_pkg_data2(some_value out number, some_id in number); \n" +
+			"  FUNCTION get_answer2 RETURN INTEGER; \n" +
+			"END proc_pckg2;  \n" +
+			"/ \n" +
+			" \n" +
+			"CREATE PACKAGE BODY proc_pckg2 \n" +
+			"AS \n" +
+			"  PROCEDURE process_pkg_data2(some_value out number, some_id in number) \n" +
+			"  IS  \n" +
+			"  BEGIN  \n" +
+			"    some_value = some_id * 2;   \n" + // force an invalid procedure
+			"  END process_pkg_data2;   \n" +
+			" \n" +
+			"  FUNCTION get_answer2 \n" +
+			"    RETURN INTEGER \n" +
+			"  IS \n" +
+			"  BEGIN \n" +
+			"    return 42; \n" +
+			"  END get_answer2;\n" +
+			"END proc_pckg2; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		DataStore ds2 = con.getMetadata().getProcedureReader().getProcedures(null, OracleTestUtil.SCHEMA_NAME, "PROCESS_PKG_DATA2");
+
+		assertEquals(1, ds2.getRowCount());
+		String procName2 = ds2.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+		assertEquals("PROCESS_PKG_DATA2", procName2);
+		String status2 = ds2.getValueAsString(0, OracleProcedureReader.COLUMN_IDX_PROC_LIST_ORA_STATUS);
+		assertEquals("INVALID", status2);
+		
 	}
 }
