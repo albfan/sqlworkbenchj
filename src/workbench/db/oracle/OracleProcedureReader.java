@@ -155,8 +155,24 @@ public class OracleProcedureReader
 	@Override
 	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
 	{
-		DataStore ds = super.buildProcedureListDataStore(meta, addSpecificName);
-		ds.getResultInfo().getColumn(COLUMN_IDX_PROC_LIST_CATALOG).setColumnName("PACKAGE");
+		String[] cols  = null;
+		int[] types = null;
+		int[] sizes = null;
+
+		if (addSpecificName)
+		{
+			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "SPECIFIC_NAME", "STATUS"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {30,12,10,10,20,50,20};
+		}
+		else
+		{
+			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {30,12,10,10,20,20};
+		}
+
+		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
 	}
 
@@ -244,15 +260,17 @@ public class OracleProcedureReader
 			return super.getProcedures(catalog, schema, name);
 		}
 
-		String standardProcs = "select null as package_name,  \n" +
-             "       ap.owner as procedure_owner,  \n" +
-             "       ap.object_name as procedure_name, \n" +
-						 "       null as overload_index, \n" +
-             "       null as remarks, \n" +
-             "       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE \n" +
-             "from all_procedures ap \n" +
-             "  join all_objects ao on ao.object_name = ap.object_name and ao.owner = ap.owner  \n" +
-             "where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
+		String standardProcs = 
+				"select null as package_name,  \n" +
+				"       ap.owner as procedure_owner,  \n" +
+				"       ap.object_name as procedure_name, \n" +
+				"       null as overload_index, \n" +
+				"       null as remarks, \n" +
+				"       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE, \n" +
+			  "       ao.status \n" +
+				"from all_procedures ap \n" +
+				"  join all_objects ao on ao.object_name = ap.object_name and ao.owner = ap.owner  \n" +
+				"where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
 
 		if (StringUtil.isNonBlank(schema))
 		{
@@ -266,24 +284,26 @@ public class OracleProcedureReader
 
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
-		String pkgProcs = "select aa.package_name, \n" +
-             "       ao.owner as procedure_owner, \n" +
-             "       aa.object_name as procedure_name, \n" +
-             "       aa.overload as overload_index, \n" +
-             "       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
-						 "       case  \n" +
-             "         when aa.in_out = 'OUT' and argument_name is null then 2 \n" +
-             "         when aa.in_out = 'OUT' and argument_name is not null then 1 \n" +
-             "         when aa.in_out = 'IN' then 1 \n" +
-             "         else 0 \n" +
-             "       end  as PROCEDURE_TYPE \n" +
-             "from all_arguments aa \n" +
-             "  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
-             "where aa.package_name IS NOT NULL \n" +
-             "and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
-             "      OR (aa.position = 1 and aa.sequence = 1) \n" +
-             "      OR (aa.position = 1 and aa.sequence = 0) \n" +
-             "    )";
+		String pkgProcs = 
+				"select aa.package_name, \n" +
+				"       ao.owner as procedure_owner, \n" +
+				"       aa.object_name as procedure_name, \n" +
+				"       aa.overload as overload_index, \n" +
+				"       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
+				"       case  \n" +
+				"         when aa.in_out = 'OUT' and argument_name is null then 2 \n" +
+				"         when aa.in_out = 'OUT' and argument_name is not null then 1 \n" +
+				"         when aa.in_out = 'IN' then 1 \n" +
+				"         else 0 \n" +
+				"       end  as PROCEDURE_TYPE, \n" +
+			  "       ao.status \n" +
+				"from all_arguments aa \n" +
+				"  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
+				"where aa.package_name IS NOT NULL \n" +
+				"and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
+				"      OR (aa.position = 1 and aa.sequence = 1) \n" +
+				"      OR (aa.position = 1 and aa.sequence = 0) \n" +
+				"    )";
 
 		if (StringUtil.isNonBlank(schema))
 		{
@@ -320,6 +340,7 @@ public class OracleProcedureReader
 				String remark = rs.getString("REMARKS");
 				String overloadIndicator = rs.getString("OVERLOAD_INDEX");
 				int type = rs.getInt("PROCEDURE_TYPE");
+				String status = rs.getString("STATUS");
 
 				Integer iType;
 				if (rs.wasNull())
@@ -338,6 +359,7 @@ public class OracleProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, procedureName);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS + 1, status);
 				ds.getRow(row).setUserObject(def);
 			}
 			ds.resetStatus();
