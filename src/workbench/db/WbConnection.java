@@ -13,12 +13,10 @@ package workbench.db;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -37,7 +35,6 @@ import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.PreparedStatementPool;
-import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -177,7 +174,7 @@ public class WbConnection
 		}
 		return "n/a";
 	}
-	
+
 	public PreparedStatementPool getPreparedStatementPool()
 	{
 		if (this.preparedStatementPool == null)
@@ -613,12 +610,13 @@ public class WbConnection
 	}
 
 	/**
-	 *	Disconnect this connection. This is delegated to the Connection Manager
-	 *	because for certain DBMS some cleanup works needs to be done.
-	 *  And the ConnectionMgr is the only one who knows if there are more connections
-	 *  around, which might influence what needs to be cleaned up
-	 *	<br/>
-	 *  (Currently this is only HSQLDB, but who knows...)
+	 * Disconnect this connection. 
+	 * This is delegated to the Connection Manager because for certain DBMS some cleanup works needs to be done.
+	 * The ConnectionMgr is the only one who knows if there are more connections
+	 * around, which might influence what needs to be cleaned up
+	 * <br/>
+	 * (Currently this is only HSQLDB, but who knows...)
+	 * This will also fire a connectionStateChanged event.
 	 */
 	public void disconnect()
 	{
@@ -627,7 +625,8 @@ public class WbConnection
 	}
 
 	/**
-	 * This will actually close the connection to the DBMS.
+	 * This will physically close the connection to the DBMS.
+	 * <br/>
 	 * It will also free an resources from the DbMetadata object and
 	 * shutdown the keep alive thread.
 	 * <br/>
@@ -637,7 +636,8 @@ public class WbConnection
 	 * package (basically for the shutdown hooks)
 	 *
 	 * This will <b>not</b> notify the ConnectionMgr that this connection has been closed.
-	 *
+	 * a connectionStateChanged event will <b>not</b> be fired.
+	 * @see #disconnect()
 	 */
 	public void shutdown()
 	{
@@ -691,12 +691,6 @@ public class WbConnection
 		}
 
 		LogMgr.logDebug("WbConnection.close()", "Connection " + this.getId() + " closed.");
-
-		if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
-		{
-			PrintWriter pw = DriverManager.getLogWriter();
-			FileUtil.closeQuietely(pw);
-		}
 	}
 
 	public boolean isClosed()
@@ -725,7 +719,8 @@ public class WbConnection
 	 * <br/>
 	 * If a fetch size has been defined using {@link #setFetchSize(int)) that size
 	 * is used, otherwise the fetch size defined on the connection profile is used.
-	 * @return
+	 * 
+	 * @return the defined fetch size, or -1 if no fetch size was defined
 	 */
 	public int getFetchSize()
 	{
@@ -750,7 +745,7 @@ public class WbConnection
 	 *
 	 * @throws java.sql.SQLException
 	 * @see #getFetchSize()
-  */
+	 */
 	public Statement createStatementForQuery()
 		throws SQLException
 	{
@@ -779,9 +774,14 @@ public class WbConnection
 	/**
 	 * Create a new statement object.
 	 * <br/>
-	 * This is just a wrapper for java.sql.Connection.createStatement()
+	 * This is just a wrapper for java.sql.Connection.createStatement().
+	 * 
+	 * If a default fetch size was defined in the connection profile, this is applied to
+	 * the created statement.
+	 * 
 	 * @return a Statement object
-  */
+	 * @see #getFetchSize()
+	 */
 	public Statement createStatement()
 		throws SQLException
 	{
@@ -1121,7 +1121,9 @@ public class WbConnection
 	 * This is called whenever the current catalog was changed.
 	 *
 	 * It will fire a connectionStateChanged event and will clear the object cache
-	 * as the cache is schema based.
+	 * as the cache is schema based. Changing the catalog means changing the
+	 * database in MySQL or SQL Server. If the new database has the same schemas
+	 * as the old, the object cache would show invalid data.
 	 *
 	 * @param oldCatalog
 	 * @param newCatalog

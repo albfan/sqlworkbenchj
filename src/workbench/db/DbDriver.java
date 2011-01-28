@@ -11,10 +11,7 @@
  */
 package workbench.db;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -273,20 +270,6 @@ public class DbDriver
 				catch (Throwable th)
 				{
 					LogMgr.logError("DbDriver.loadDriverClass()", "Error registering driver instance with DriverManager", th);
-				}
-			}
-
-			String dbLog = Settings.getInstance().getProperty("workbench.db.driver.log", null);
-			if (!StringUtil.isEmptyString(dbLog))
-			{
-				try
-				{
-					PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(dbLog)));
-					DriverManager.setLogWriter(pw);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("DbDriver.loadDriverClass()", "Error setting driverManager logWriter", e);
 				}
 			}
 		}
