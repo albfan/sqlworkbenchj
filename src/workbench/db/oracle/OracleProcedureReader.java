@@ -47,6 +47,8 @@ import workbench.util.StringUtil;
 public class OracleProcedureReader
 	extends JdbcProcedureReader
 {
+	public static final int COLUMN_IDX_PROC_LIST_ORA_STATUS = 5;
+
 	private OracleTypeReader typeReader = new OracleTypeReader();
 
 	public OracleProcedureReader(WbConnection conn)
@@ -63,11 +65,12 @@ public class OracleProcedureReader
 
 	public CharSequence getPackageSource(String owner, String packageName)
 	{
-		final String sql = "SELECT text \n" +
+		final String sql =
+			"SELECT text \n" +
 			"FROM all_source \n" +
 			"WHERE name = ? \n" +
-			"AND   owner = ? \n" +
-			"AND   type = ? \n" +
+			"  AND owner = ? \n" +
+			"  AND type = ? \n" +
 			"ORDER BY line";
 
 		StringBuilder result = new StringBuilder(1000);
@@ -79,7 +82,7 @@ public class OracleProcedureReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleProcedureReader.getPackageSource()", "Using SQL to retrieve package source:\n" + sql.toString());
+			LogMgr.logDebug("OracleProcedureReader.getPackageSource()", "Using SQL to retrieve package source:\n" + SqlUtil.replaceParameters(sql, packageName, owner));
 		}
 
 		try
@@ -155,25 +158,20 @@ public class OracleProcedureReader
 	@Override
 	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
 	{
-		String[] cols  = null;
-		int[] types = null;
-		int[] sizes = null;
-
-		if (addSpecificName)
+		if (useCustomSql())
 		{
-			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "SPECIFIC_NAME", "STATUS"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {30,12,10,10,20,50,20};
+			String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
+			int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			int[] sizes = new int[] {30,12,10,10,20,20};
+			DataStore ds = new DataStore(cols, types, sizes);
+			return ds;
 		}
 		else
 		{
-			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {30,12,10,10,20,20};
+			DataStore ds = super.buildProcedureListDataStore(meta, addSpecificName);
+			ds.getResultInfo().getColumn(COLUMN_IDX_PROC_LIST_CATALOG).setColumnName("PACKAGE");
+			return ds;
 		}
-
-		DataStore ds = new DataStore(cols, types, sizes);
-		return ds;
 	}
 
 	public ProcedureDefinition resolveSynonym(String catalog, String schema, String procname)
@@ -260,16 +258,18 @@ public class OracleProcedureReader
 			return super.getProcedures(catalog, schema, name);
 		}
 
+		// ALL_PROCEDURES does not return invalid procedures
+		// so an outer join against ALL_OBJECTS is necessary
 		String standardProcs = 
-				"select null as package_name,  \n" +
-				"       ap.owner as procedure_owner,  \n" +
-				"       ap.object_name as procedure_name, \n" +
-				"       null as overload_index, \n" +
-				"       null as remarks, \n" +
-				"       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE, \n" +
-			  "       ao.status \n" +
-				"from all_procedures ap \n" +
-				"  join all_objects ao on ao.object_name = ap.object_name and ao.owner = ap.owner  \n" +
+				"select null as package_name,   \n" +
+				"       ao.owner as procedure_owner,   \n" +
+				"       ao.object_name as procedure_name,  \n" +
+				"       null as overload_index,  \n" +
+				"       null as remarks,  \n" +
+				"       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE,  \n" +
+				"       ao.status  \n" +
+				"from all_objects ao  \n" +
+				"  left join all_procedures ap on ao.object_name = ap.object_name and ao.owner = ap.owner   \n" +
 				"where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
 
 		if (StringUtil.isNonBlank(schema))
@@ -298,7 +298,7 @@ public class OracleProcedureReader
 				"       end  as PROCEDURE_TYPE, \n" +
 			  "       ao.status \n" +
 				"from all_arguments aa \n" +
-				"  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
+				"  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE') \n" +
 				"where aa.package_name IS NOT NULL \n" +
 				"and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
 				"      OR (aa.position = 1 and aa.sequence = 1) \n" +
@@ -321,7 +321,7 @@ public class OracleProcedureReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleProcedureReader.getProcedures()", "Using SQL to retrieve procedures:\n" + sql.toString());
+			LogMgr.logDebug("OracleProcedureReader.getProcedures()", "Using SQL to retrieve procedures:\n" + sql);
 		}
 
 		Statement stmt = null;
