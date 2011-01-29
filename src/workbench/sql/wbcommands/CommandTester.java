@@ -96,6 +96,7 @@ public class CommandTester
 		commands.add(WbAbout.VERB);
 		commands.add(WbRunLB.VERB);
 		commands.add(WbIsolationLevel.VERB);
+		commands.add(WbConnInfo.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -133,6 +134,7 @@ public class CommandTester
 			formattedWords.put(WbFetchSize.VERB, "WbFetchSize");
 			formattedWords.put(WbRunLB.VERB, "WbRunLB");
 			formattedWords.put(WbIsolationLevel.VERB, "WbIsolationLevel");
+			formattedWords.put(WbConnInfo.VERB, "WbConnInfo");
 		}
 		return formattedWords;
 	}

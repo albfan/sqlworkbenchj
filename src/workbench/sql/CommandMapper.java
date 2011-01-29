@@ -33,6 +33,7 @@ import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
+import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbConnect;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDataDiff;
@@ -136,7 +137,8 @@ public class CommandMapper
 		addCommand(new WbAbout());
 		addCommand(new WbRunLB());
 		addCommand(new WbIsolationLevel());
-		
+		addCommand(new WbConnInfo());
+
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

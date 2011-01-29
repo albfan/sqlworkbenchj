@@ -23,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
+import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbInclude;
@@ -48,7 +49,7 @@ import workbench.util.WbFile;
  *
  * @see jline.ConsoleReader
  * @see workbench.console.ConsoleReaderFactory
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SQLConsole
@@ -166,7 +167,7 @@ public class SQLConsole
 				{
 					// nothing to log, already done by the runner
 				}
-				
+
 				if (runner.isConnected() && !runner.getVerboseLogging())
 				{
 					WbConnection conn = runner.getConnection();
@@ -205,6 +206,7 @@ public class SQLConsole
 			abbreviations.put("\\dt", WbDescribeObject.VERB);
 			abbreviations.put("\\df", WbListProcedures.VERB);
 			abbreviations.put("\\dn", WbListSchemas.VERB);
+			abbreviations.put("\\conninfo", WbConnInfo.VERB);
 
 			while (true)
 			{

@@ -22,6 +22,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.text.Document;
 import workbench.WbManager;
+import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -47,42 +48,12 @@ public class ConnectionInfoPanel
 
 		try
 		{
-			StringBuilder content = new StringBuilder(500);
-			content.append("<html>");
+			ConnectionInfoBuilder info = new ConnectionInfoBuilder();
 
-			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
-			DbMetadata wbmeta = conn.getMetadata();
-
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + wbmeta.getProductName() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "</div>\n");
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "</div>\n");
-			content.append("<b>Isolation Level:</b> " + conn.getIsolationLevel() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\n");
-			String term = wbmeta.getSchemaTerm();
-			String s = StringUtil.capitalize(term);
-			if (!"schema".equalsIgnoreCase(term))
-			{
-				s += " (" + ResourceMgr.getString("LblSchema") + ")";
-			}
-			content.append("<b>" + s + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
-
-			term = wbmeta.getCatalogTerm();
-			s = StringUtil.capitalize(term);
-			if (!"catalog".equalsIgnoreCase(term))
-			{
-				s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
-			}
-			content.append("<b>" + s + ":</b> " + getDisplayValue(conn.getCurrentCatalog()) + "<br>\n");
-			content.append("<b>Workbench DBID:</b> " + wbmeta.getDbId() + " \n");
-			content.append("</html>");
 			infotext.setContentType("text/html");
 			infotext.setFont(Settings.getInstance().getEditorFont());
 			infotext.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-			infotext.setText(content.toString());
+			infotext.setText(info.getHtmlDisplay(conn));
 			infotext.setCaretPosition(0);
 			new TextComponentMouseListener(infotext);
 			FontMetrics fm = infotext.getFontMetrics(infotext.getFont());
@@ -96,12 +67,6 @@ public class ConnectionInfoPanel
 		{
 			LogMgr.logError("ConnectionInfoPanel", "Could not read connection properties", e);
 		}
-	}
-
-	private String getDisplayValue(String value)
-	{
-		if (value == null) return "";
-		return value;
 	}
 
 	public static void showConnectionInfo(WbConnection con)
