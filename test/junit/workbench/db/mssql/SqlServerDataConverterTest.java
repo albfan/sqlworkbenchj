@@ -12,7 +12,6 @@
 package workbench.db.mssql;
 
 import java.sql.Types;
-import junit.framework.TestCase;
 import org.junit.Test;
 import static org.junit.Assert.*;
 /**
