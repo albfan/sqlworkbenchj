@@ -31,7 +31,7 @@ import workbench.util.StringUtil;
 
 /**
  * This class offeres Search & Replace for a TextContainer
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SearchAndReplace
@@ -42,14 +42,14 @@ public class SearchAndReplace
 	private Pattern lastSearchPattern;
 	private int lastSearchPos;
 	private ReplacePanel replacePanel;
-	
+
 	private TextContainer editor;
 	private Container parent;
-	
+
 	private FindAction findAction;
 	private FindAgainAction findAgainAction;
 	private ReplaceAction replaceAction;
-	
+
 	/**
 	 * Create a new SearchAndReplace support.
 	 * @param parentContainer the parent of the textcontainer, needed for displaying dialogs
@@ -66,7 +66,7 @@ public class SearchAndReplace
 		this.replaceAction = new ReplaceAction(this);
 		this.replaceAction.setEnabled(true);
 	}
-	
+
 	public ReplaceAction getReplaceAction() { return this.replaceAction; }
 	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
 	public FindAction getFindAction() { return this.findAction; }
@@ -74,20 +74,20 @@ public class SearchAndReplace
 	private String getText() { return editor.getText(); }
 	private String getSelectedText() { return editor.getSelectedText();  }
 	private int getCaretPosition() { return editor.getCaretPosition(); }
-	
+
 	/**
 	 * Show the find dialog and start searching.
-	 * @return -1 if nothing was found, 
+	 * @return -1 if nothing was found,
 	 *            the position of the found text otherwise
 	 */
 	public int find()
 	{
 		boolean showDialog = true;
 		String crit = this.getSelectedText();
-		
+
 		// Do not use multi-line selections as the default search criteria
 		if (crit != null && crit.indexOf('\n') > -1) crit = null;
-		
+
 		if (crit == null) crit = this.lastSearchCriteria;
 		SearchCriteriaPanel p = new SearchCriteriaPanel(crit);
 
@@ -189,25 +189,25 @@ public class SearchAndReplace
 		int selEnd = this.editor.getSelectionEnd();
 		return (selStart > -1 && selEnd > selStart);
 	}
-	
+
 	/**
 	 * Replace special characters in the input string so that it can be used
 	 * as a replacement using regular expressions.
 	 */
-	public static final String fixSpecialReplacementChars(String input, boolean useRegex)
+	public static String fixSpecialReplacementChars(String input, boolean useRegex)
 	{
 		if (!useRegex)
 		{
 			return StringUtil.quoteRegexMeta(input);
 		}
-		
+
 		String fixed = input.replaceAll("\\\\n", "\n");
 		fixed = fixed.replaceAll("\\\\r", "\r");
 		fixed = fixed.replaceAll("\\\\t", "\t");
 		fixed = StringUtil.quoteRegexMeta(fixed);
 		return fixed;
 	}
-	
+
 	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String old = null;
@@ -225,11 +225,11 @@ public class SearchAndReplace
 		int newLen = -1;
 		String regex = getSearchExpression(value, ignoreCase, wholeWord, useRegex);
 		replacement = fixSpecialReplacementChars(replacement, useRegex);
-		
+
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(old);
 		String newText = m.replaceAll(replacement);
-		
+
 		if (selectedText)
 		{
 			this.editor.setSelectedText(newText);
@@ -282,17 +282,17 @@ public class SearchAndReplace
 		return this.findText(anExpression, ignoreCase, false, true);
 	}
 
-	public static final String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
+	public static String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		StringBuilder result = new StringBuilder(anExpression.length() + 10);
 
 		final String ignoreModifier = "(?i)";
-		
+
 		if (ignoreCase)
 		{
 			result.append(ignoreModifier);
 		}
-		
+
 		if (!useRegex)
 		{
 			result.append('(');
@@ -312,9 +312,13 @@ public class SearchAndReplace
 			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
 			{
 				if (ignoreCase)
+				{
 					result.insert(ignoreModifier.length(), "\\b");
+				}
 				else
+				{
 					result.insert(0, "\\b");
+				}
 			}
 			c = anExpression.charAt(anExpression.length() - 1);
 			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
@@ -367,5 +371,5 @@ public class SearchAndReplace
 		Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
 		return m.matches();
 	}
-	
+
 }

@@ -841,28 +841,17 @@ public class StringUtil
 	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
 
 	/**
-	 * 	Quote the characters in a String that have a special meaning
-	 *  in regular expression.
+	 * Quote the characters in a String that have a special meaning
+	 * in regular expression.
+	 * This is simply forwarding to Pattern.quote()
+	 *
+	 * @see Pattern#quote(java.lang.String)
 	 */
 	public static String quoteRegexMeta(String str)
 	{
 		if (str == null) return null;
-		if (str.length() == 0)
-		{
-			return "";
-		}
-		int len = str.length();
-		StringBuilder buf = new StringBuilder(len + 5);
-		for (int i = 0; i < len; i++)
-		{
-			char c = str.charAt(i);
-			if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
-			{
-				buf.append('\\');
-			}
-			buf.append(c);
-		}
-		return buf.toString();
+		if (str.length() == 0) return str;
+		return Pattern.quote(str);
 	}
 
 	public static int findPreviousWhitespace(String data, int pos)
@@ -1280,9 +1269,9 @@ public class StringUtil
 		{
 			final int start = m.start();
 			final int end = m.end();
-			final String var = input.substring(start, end);
-			final String propName = input.substring(start + 2, end - 1);
-			final String propValue = props.getProperty(propName, null);
+			String var = input.substring(start, end);
+			String propName = input.substring(start + 2, end - 1);
+			String propValue = props.getProperty(propName, null);
 			if (propValue != null)
 			{
 				input = input.replace(var, propValue);

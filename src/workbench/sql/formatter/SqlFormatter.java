@@ -141,7 +141,7 @@ public class SqlFormatter
 	{
 		addSpaceAfterLineBreakComma = flag;
 	}
-	
+
 	public void setDBFunctions(Set<String> functionNames)
 	{
 		this.dbFunctions = CollectionUtil.caseInsensitiveSet();
@@ -762,7 +762,7 @@ public class SqlFormatter
 						t = this.lexer.getNextToken(true, false);
 					}
 				}
-				this.appendNewline();
+//				this.appendNewline();
 				return t;
 			}
 			else if (t.isComment())
@@ -1216,8 +1216,6 @@ public class SqlFormatter
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
 		}
-//		this.appendNewline();
-//		this.appendNewline();
 	}
 
 	private SQLToken processCTE(SQLToken previousToken)

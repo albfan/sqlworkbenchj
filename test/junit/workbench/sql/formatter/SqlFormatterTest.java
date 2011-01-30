@@ -32,6 +32,35 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testCaseWithComma()
+		throws Exception
+	{
+		String sql = "select case when a is null then b else c end as some_col, other_col from foo";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(false);
+		String expected =
+			"SELECT CASE\n" +
+			"         WHEN a IS NULL THEN b\n" +
+			"         ELSE c\n" +
+			"       END AS some_col,\n" +
+			"       other_col\n" +
+			"FROM foo";
+		String formatted = f.getFormattedSql().toString();
+		assertEquals(expected, formatted);
+		f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(true);
+		formatted = f.getFormattedSql().toString();
+		expected =
+			"SELECT CASE\n" +
+			"         WHEN a IS NULL THEN b\n" +
+			"         ELSE c\n" +
+			"       END AS some_col\n" +
+			"       ,other_col\n" +
+			"FROM foo";
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testCommaAtStart()
 		throws Exception
 	{
@@ -81,7 +110,7 @@ public class SqlFormatterTest
 			Settings.getInstance().setFormatterMaxColumnsInSelect(cols);
 		}
 	}
-	
+
 	@Test
 	public void testNestedSubselect()
 		throws Exception

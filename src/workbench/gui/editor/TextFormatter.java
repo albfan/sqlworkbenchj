@@ -38,6 +38,8 @@ public class TextFormatter
 
 		String delimit = parser.getDelimiterString();
 
+		boolean addDelimiter = sql.trim().endsWith(delimit);
+
 		int count = parser.getSize();
 		if (count < 1) return;
 
@@ -62,7 +64,11 @@ public class TextFormatter
 			{
 				String formattedSql = f.getFormattedSql().toString();
 				newSql.append(formattedSql);
-				if (!command.trim().endsWith(delimit))
+
+				// if this is a script that is formatted, make sure each statement is
+				// terminated correctly. If only a single statement was formatted
+				// then this is not necessary
+				if (count > 1 && addDelimiter)
 				{
 					newSql.append(delimit);
 				}
