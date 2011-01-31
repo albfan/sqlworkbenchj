@@ -29,6 +29,8 @@ public class TextFormatter
 
 	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, Set<String> dbFunctions, Set<String> dbDatatypes, String lineComment)
 	{
+		if (!editor.isEditable()) return;
+
 		String sql = editor.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(alternateDelimiter);
