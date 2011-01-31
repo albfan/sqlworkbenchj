@@ -90,6 +90,16 @@ public class SqlHistoryEntry
 		return "{" + StringUtil.getMaxSubstring(this.text, 40) + ", Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
 	}
 
+	@Override
+	public int hashCode()
+	{
+		int hash = 3;
+		hash = 97 * hash + (this.text != null ? this.text.hashCode() : 0);
+		hash = 97 * hash + this.cursorPos;
+		hash = 97 * hash + this.selectionStart;
+		hash = 97 * hash + this.selectionEnd;
+		return hash;
+	}
 
 	public boolean equals(Object o)
 	{

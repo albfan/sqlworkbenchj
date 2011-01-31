@@ -153,6 +153,7 @@ public class SqlHistory
 	public void showLastStatement()
 	{
 		if (this.history.isEmpty()) return;
+		if (!editor.isEditable()) return;
 		this.currentEntry = this.history.size() - 1;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
@@ -162,6 +163,7 @@ public class SqlHistory
 	public void showFirstStatement()
 	{
 		if (this.history.isEmpty()) return;
+		if (!editor.isEditable()) return;
 		this.currentEntry = 0;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
@@ -171,6 +173,7 @@ public class SqlHistory
 	public void showCurrent()
 	{
 		if (this.currentEntry >= this.history.size()) return;
+		if (!editor.isEditable()) return;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 		checkActions();
@@ -179,6 +182,7 @@ public class SqlHistory
 	public void showPreviousStatement()
 	{
 		if (!this.hasPrevious()) return;
+		if (!editor.isEditable()) return;
 		SqlHistoryEntry entry = this.getPreviousEntry();
 		entry.applyTo(editor);
 		checkActions();

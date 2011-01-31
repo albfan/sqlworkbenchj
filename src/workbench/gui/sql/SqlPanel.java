@@ -1135,12 +1135,6 @@ public class SqlPanel
 		return this.actions;
 	}
 
-	public void makeReadOnly()
-	{
-		if (this.currentData == null) return;
-		this.currentData.endEdit();
-	}
-
 	/**
 	 *	Show a message in the log panel. This will also switch
 	 *	the display to the log panel (away from the result panel)
@@ -1411,8 +1405,11 @@ public class SqlPanel
 			{
 				this.setConnection(null);
 			}
+			if (this.currentData != null)
+			{
+				currentData.endEdit();
+			}
 			clearResultTabs();
-			makeReadOnly();
 			setLogText("");
 		}
 	}
