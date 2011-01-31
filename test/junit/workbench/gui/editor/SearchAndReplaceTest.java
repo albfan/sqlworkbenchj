@@ -25,13 +25,13 @@ public class SearchAndReplaceTest
 	{
 		String input = "thetext";
 		String expression = SearchAndReplace.getSearchExpression(input, false, false, false);
-		assertEquals("Wrong expression", "(\\Q" + input + "\\E)", expression);
+		assertEquals("Wrong expression", "(" + input + ")", expression);
 
 		expression = SearchAndReplace.getSearchExpression(input, false, true, false);
-		assertEquals("Wrong expression", "\\b(\\Q" + input + "\\E)\\b", expression);
+		assertEquals("Wrong expression", "\\b(" + input + ")\\b", expression);
 
 		expression = SearchAndReplace.getSearchExpression(input, true, true, false);
-		assertEquals("Wrong expression", "(?i)\\b(\\Q" + input + "\\E)\\b", expression);
+		assertEquals("Wrong expression", "(?i)\\b(" + input + ")\\b", expression);
 
 		expression = SearchAndReplace.getSearchExpression(input, true, true, true);
 		assertEquals("Wrong expression", "(?i)\\b" + input + "\\b", expression);

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2011, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -841,17 +841,28 @@ public class StringUtil
 	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
 
 	/**
-	 * Quote the characters in a String that have a special meaning
-	 * in regular expression.
-	 * This is simply forwarding to Pattern.quote()
-	 *
-	 * @see Pattern#quote(java.lang.String)
+	 * 	Quote the characters in a String that have a special meaning
+	 *  in regular expression.
 	 */
 	public static String quoteRegexMeta(String str)
 	{
 		if (str == null) return null;
-		if (str.length() == 0) return str;
-		return Pattern.quote(str);
+		if (str.length() == 0)
+		{
+			return "";
+		}
+		int len = str.length();
+		StringBuilder buf = new StringBuilder(len + 5);
+		for (int i = 0; i < len; i++)
+		{
+			char c = str.charAt(i);
+			if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
+			{
+				buf.append('\\');
+			}
+			buf.append(c);
+		}
+		return buf.toString();
 	}
 
 	public static int findPreviousWhitespace(String data, int pos)
@@ -1269,9 +1280,9 @@ public class StringUtil
 		{
 			final int start = m.start();
 			final int end = m.end();
-			String var = input.substring(start, end);
-			String propName = input.substring(start + 2, end - 1);
-			String propValue = props.getProperty(propName, null);
+			final String var = input.substring(start, end);
+			final String propName = input.substring(start + 2, end - 1);
+			final String propValue = props.getProperty(propName, null);
 			if (propValue != null)
 			{
 				input = input.replace(var, propValue);
