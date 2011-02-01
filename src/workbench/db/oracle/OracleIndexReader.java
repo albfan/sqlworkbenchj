@@ -150,11 +150,23 @@ public class OracleIndexReader
 
 		boolean alwaysUseDbmsMeta = this.metaData.getDbSettings().getUseOracleDBMSMeta("index");
 
-		if (!alwaysUseDbmsMeta && !"DOMAIN".equals(definition.getIndexType()))
+		if (alwaysUseDbmsMeta || "DOMAIN".equals(definition.getIndexType()))
 		{
-			return getExtendedIndexSource(table, definition, tableNameToUse);
+			try
+			{
+				return getSourceFromDBMSMeta(definition);
+			}
+			catch (SQLException e)
+			{
+				return getExtendedIndexSource(table, definition, tableNameToUse);
+			}
 		}
-
+		return getExtendedIndexSource(table, definition, tableNameToUse);
+	}
+	
+	private String getSourceFromDBMSMeta(IndexDefinition definition)
+		throws SQLException
+	{
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String source = null;
@@ -176,10 +188,10 @@ public class OracleIndexReader
 				source += ";\n";
 			}
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
-			LogMgr.logError("OracleIndexReader", "Error retrieving index via DBMS_DDL", e);
-			source = ExceptionUtil.getDisplay(e);
+			LogMgr.logError("OracleIndexReader", "Error retrieving index via DBMS_METADATA", e);
+			throw e;
 		}
 		finally
 		{
