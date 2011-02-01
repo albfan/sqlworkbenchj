@@ -100,7 +100,8 @@ public class OracleIndexReader
 			"       i.leaf_blocks as pages, \n" +
 			"       null as filter_condition, \n" +
 			"       i.index_type \n" +
-			"FROM all_indexes i, all_ind_columns c \n" +
+			"FROM all_indexes i" +
+			"  JOIN all_ind_columns c ON i.index_name = c.index_name AND i.table_owner = c.table_owner AND i.table_name = c.table_name AND i.owner = c.index_owner \n" +
 			"WHERE i.table_name = ? \n");
 
 		if (tbl.getSchema() != null)
@@ -109,12 +110,13 @@ public class OracleIndexReader
 		}
 		if (unique)
 		{
-			sql.append("  and i.uniqueness = 'UNIQUE'\n");
+			sql.append("  AND i.uniqueness = 'UNIQUE'\n");
 		}
-		sql.append("  and i.index_name = c.index_name \n" +
-			"  and i.table_owner = c.table_owner \n" +
-			"  and i.table_name = c.table_name \n" +
-			"  and i.owner = c.index_owner \n");
+		
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.filtersnapindex", true))
+		{
+			sql.append("  AND i.index_name NOT LIKE 'I_SNAP$%' \n");
+		}
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
 
 		if (Settings.getInstance().getDebugMetadataSql())

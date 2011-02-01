@@ -36,7 +36,6 @@ import workbench.db.TableDefinitionReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
@@ -218,7 +217,7 @@ public class OracleMetadata
 		if (type == -101 || type == -102) return Types.TIMESTAMP;
 
 		// The Oracle driver stupidly reports TIMESTAMP(n) columns as Types.OTHER
-		if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP(")) 
+		if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP("))
 		{
 			LogMgr.logDebug("OracleMetaData.fixColumnType()", "Got Types.OTHER but expected Types.TIMESTAMP!");
 			return Types.TIMESTAMP;
@@ -603,54 +602,6 @@ public class OracleMetadata
 			// for snapshots
 			this.retrieveSnapshots = false;
 			result = Collections.emptySet();
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
-
-	public String getSnapshotSource(TableIdentifier tbl)
-	{
-		if (!retrieveSnapshots)
-		{
-			return StringUtil.EMPTY_STRING;
-		}
-		String result = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String sql = "SELECT query FROM all_mviews WHERE owner = ? and mview_name = ?";
-
-		try
-		{
-			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tbl.getSchema());
-			stmt.setString(2, tbl.getTableName());
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				result = rs.getString(1);
-				if (rs.wasNull())
-				{
-					result = "";
-				}
-				else
-				{
-					result = result.trim();
-				}
-
-				if (!result.endsWith(";"))
-				{
-					result += ";";
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logWarning("OracleMetadata.getSnapshotSource()", "Error accessing all_mviews", e);
-			this.retrieveSnapshots = false;
-			result = ExceptionUtil.getDisplay(e);
 		}
 		finally
 		{

@@ -23,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -55,12 +56,12 @@ public class TableSourceBuilder
 		this.createInlineConstraints = Settings.getInstance().getServersWithInlineConstraints().contains(productName);
 	}
 
-	private ViewReader getViewReader()
+	protected ViewReader getViewReader()
 	{
 		return dbConnection.getMetadata().getViewReader();
 	}
 
-	private IndexReader getIndexReader()
+	protected IndexReader getIndexReader()
 	{
 		return dbConnection.getMetadata().getIndexReader();
 	}
@@ -185,7 +186,7 @@ public class TableSourceBuilder
 	 * Generate the pure CREATE TABLE statement for the passed table definition.
 	 *
 	 * Any table constraints will be retrieved if needed.
-	 * 
+	 *
 	 * @param table the table name
 	 * @param columns the columns of the table
 	 * @param indexDefinition defined indexes for the table (may be null)
@@ -204,11 +205,6 @@ public class TableSourceBuilder
 		if (nativeSql != null) return nativeSql;
 
 		if (CollectionUtil.isEmpty(columns)) return StringUtil.EMPTY_STRING;
-
-		if ("MVIEW_NAME".equals(table.getType()))
-		{
-			return dbConnection.getMetadata().getMViewSource(table, columns, indexDefinition, includeDrop);
-		}
 
 		StringBuilder result = new StringBuilder(250);
 		DbMetadata meta = dbConnection.getMetadata();

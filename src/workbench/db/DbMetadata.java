@@ -71,6 +71,7 @@ import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.oracle.OracleTypeReader;
+import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -222,6 +223,7 @@ public class DbMetadata
 			dataTypeResolver = oracleMetaData;
 			definitionReader = oracleMetaData;
 			extenders.add(new OracleTypeReader());
+			viewReader = new OracleViewReader(this.dbConnection);
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{

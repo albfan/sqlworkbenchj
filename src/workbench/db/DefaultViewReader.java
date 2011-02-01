@@ -69,23 +69,25 @@ public class DefaultViewReader
 	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
 		throws SQLException
 	{
-		GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
-		if (sql == null)
+		TableIdentifier viewTable = view.getTable();
+		CharSequence source = null;
+		try
+		{
+			source = this.getViewSource(viewTable);
+		}
+		catch (NoConfigException no)
 		{
 			SourceStatementsHelp help = new SourceStatementsHelp();
 			return help.explainMissingViewSourceSql(this.connection.getMetadata().getProductName());
 		}
 
 		List<ColumnIdentifier> columns = view.getColumns();
-		TableIdentifier viewTable = view.getTable();
 
 		if (CollectionUtil.isEmpty(columns))
 		{
 			view = this.connection.getMetadata().getTableDefinition(view.getTable());
 			columns = view.getColumns();
 		}
-
-		CharSequence source = this.getViewSource(viewTable);
 
 		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
 
@@ -120,24 +122,21 @@ public class DefaultViewReader
 
 		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableExpression(connection)));
 
-		if (!DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewTable.getType()))
+		result.append(lineEnding + "(" + lineEnding);
+		int colCount = columns.size();
+		for (int i=0; i < colCount; i++)
 		{
-			result.append(lineEnding + "(" + lineEnding);
-			int colCount = columns.size();
-			for (int i=0; i < colCount; i++)
-			{
 
-				String colName = columns.get(i).getColumnName();
-				result.append("  ");
-				result.append(connection.getMetadata().quoteObjectname(colName));
-				if (i < colCount - 1)
-				{
-					result.append(',');
-					result.append(lineEnding);
-				}
+			String colName = columns.get(i).getColumnName();
+			result.append("  ");
+			result.append(connection.getMetadata().quoteObjectname(colName));
+			if (i < colCount - 1)
+			{
+				result.append(',');
+				result.append(lineEnding);
 			}
-			result.append(lineEnding + ")");
 		}
+		result.append(lineEnding + ")");
 
 		result.append(lineEnding + "AS " + lineEnding);
 		result.append(source);
@@ -193,13 +192,9 @@ public class DefaultViewReader
 	 *	@return the view source as stored in the database.
 	 */
 	public CharSequence getViewSource(TableIdentifier viewId)
+		throws NoConfigException
 	{
 		if (viewId == null) return null;
-
-		if (connection.getMetadata().isOracle() && DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
-		{
-			return connection.getMetadata().getOracleMeta().getSnapshotSource(viewId);
-		}
 
 		StringBuilder source = new StringBuilder(500);
 		Statement stmt = null;
@@ -207,7 +202,7 @@ public class DefaultViewReader
 		try
 		{
 			GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
-			if (sql == null) return StringUtil.EMPTY_STRING;
+			if (sql == null) throw new NoConfigException("No SQL to retrieve the VIEW source");
 			TableIdentifier tbl = viewId.createCopy();
 			tbl.adjustCase(connection);
 			sql.setSchema(tbl.getSchema());
@@ -228,7 +223,7 @@ public class DefaultViewReader
 					source.append(line);
 				}
 			}
-			
+
 			if (source.length() > 0)
 			{
 				StringUtil.trimTrailingWhitespace(source);

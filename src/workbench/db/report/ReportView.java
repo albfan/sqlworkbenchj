@@ -23,14 +23,15 @@ import workbench.db.WbConnection;
 import workbench.util.StrBuffer;
 import java.util.Collections;
 import workbench.db.IndexDefinition;
+import workbench.db.NoConfigException;
 import workbench.db.TableCommentReader;
 import workbench.util.StringUtil;
 
 /**
- * A class to hold information about a database view that 
- * will eventually be stored in an XML report. 
- * It uses a {@link workbench.db.TableIdentifier} to store the 
- * view's name, and {@link workbench.db.ColumnIdentifier} to 
+ * A class to hold information about a database view that
+ * will eventually be stored in an XML report.
+ * It uses a {@link workbench.db.TableIdentifier} to store the
+ * view's name, and {@link workbench.db.ColumnIdentifier} to
  * store the view's columns.
  *
  * @author  Thomas Kellerer
@@ -49,20 +50,20 @@ public class ReportView
 	private String viewComment;
 	private TagWriter tagWriter = new TagWriter();
 	private IndexReporter index;
-	
+
 	/** The schema name to be used in the generated XML */
 	private String schemaNameToUse = null;
-	
+
 	private CharSequence viewSource;
-	
+
 	public ReportView(TableIdentifier tbl)
 	{
 		this.view = tbl;
 	}
-	
+
 	/**
 	 * Initialize this ReportView.
-	 * This will read the following information for the table: 
+	 * This will read the following information for the table:
 	 * <ul>
 	 *	<li>columns for the table using {@link workbench.db.DbMetadata#getTableColumns(workbench.db.TableIdentifier) }</li>
 	 *  <li>the comments for the view using {@link workbench.db.TableCommentReader#getTableComment(workbench.db.WbConnection, workbench.db.TableIdentifier)  }</li>
@@ -73,11 +74,11 @@ public class ReportView
 		throws SQLException
 	{
 		this.view = tbl;
-		
+
 		if (tbl.getSchema() == null)
 		{
-			// This is important for e.g. Oracle. Otherwise the table definition 
-			// will contain multiple columns if a table exists more then once in 
+			// This is important for e.g. Oracle. Otherwise the table definition
+			// will contain multiple columns if a table exists more then once in
 			// different schemas with the same name
 			tbl.setSchema(conn.getMetadata().getSchemaToUse());
 		}
@@ -92,8 +93,14 @@ public class ReportView
 			schema = conn.getMetadata().getSchemaToUse();
 			if (schema != null) this.view.setSchema(schema);
 		}
-		this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
-		if (viewSource == null) viewSource = StringUtil.EMPTY_STRING;
+		try
+		{
+			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
+		}
+		catch (NoConfigException no)
+		{
+			viewSource = StringUtil.EMPTY_STRING;
+		}
 		this.setColumns(cols);
 		if (includeIndex)
 		{
@@ -110,7 +117,7 @@ public class ReportView
 		if (this.index == null) return null;
 		return this.index.getIndexList();
 	}
-	
+
 	/**
 	 * Define the columns that belong to this view
 	 */
@@ -132,23 +139,23 @@ public class ReportView
 	{
 		this.schemaNameToUse = name;
 	}
-	
+
 	public void writeXml(Writer out)
 		throws IOException
 	{
 		StrBuffer line = this.getXml();
 		line.writeTo(out);
 	}
-	
+
 	public StrBuffer getXml()
 	{
 		return getXml(new StrBuffer("  "));
 	}
-	
+
 	public TableIdentifier getView() { return this.view; }
 	public String getViewComment() { return this.viewComment; }
 	public CharSequence getViewSource() { return this.viewSource; }
-	
+
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_CATALOG, this.view.getCatalog());
@@ -160,7 +167,7 @@ public class ReportView
 	{
 		return getXml(indent, true);
 	}
-	
+
 	/**
 	 * Return an XML representation of this view information.
 	 * The columns will be listed alphabetically not in the order
@@ -187,7 +194,7 @@ public class ReportView
 		return line;
 	}
 
-	public static final void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
+	public static void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
 	{
 		if (source == null) return;
 		tagWriter.appendOpenTag(target, indent, TAG_VIEW_SOURCE);
@@ -196,7 +203,7 @@ public class ReportView
 		target.append(TagWriter.CDATA_END);
 		target.append('\n');
 		tagWriter.appendCloseTag(target, indent, TAG_VIEW_SOURCE);
-		
+
 	}
 
 }
