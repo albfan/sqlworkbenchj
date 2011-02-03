@@ -65,7 +65,7 @@ public class OracleMViewReader
 
 		if (!retrieved)
 		{
-			String sql = generateMViewSource(dbConnection, table);
+			String sql = retrieveMViewQuery(dbConnection, table);
 			result.append("CREATE MATERIALIZED VIEW " + table.getTableExpression(dbConnection));
 			String options = getMViewOptions(dbConnection, table);
 			if (options != null)
@@ -138,11 +138,10 @@ public class OracleMViewReader
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
-				String rewrite = rs.getString("REWRITE_ENABLED");
-				if ("Y".equals(rewrite))
-				{
-					result.append("\n  ENABLE QUERY REWRITE");
-				}
+				String immediate = rs.getString("BUILD_MODE");
+				result.append("\n  BUILD ");
+				result.append(immediate);
+
 				String method = rs.getString("REFRESH_METHOD");
 				result.append("\n  REFRESH ");
 				result.append(method);
@@ -160,10 +159,16 @@ public class OracleMViewReader
 				{
 					result.append(" WITH ROWID");
 				}
-				String immediate = rs.getString("BUILD_MODE");
-				result.append("\n  BUILD ");
-				result.append(immediate);
 
+				String rewrite = rs.getString("REWRITE_ENABLED");
+				if ("Y".equals(rewrite))
+				{
+					result.append("\n  ENABLE QUERY REWRITE");
+				}
+				else
+				{
+					result.append("\n  DISABLE QUERY REWRITE");
+				}
 				pkIndex = rs.getString("INDEX_NAME");
 			}
 		}
@@ -178,13 +183,18 @@ public class OracleMViewReader
 		}
 		return result.toString();
 	}
-	private String generateMViewSource(WbConnection dbConnection, TableIdentifier mview)
+
+	private String retrieveMViewQuery(WbConnection dbConnection, TableIdentifier mview)
 	{
 		String result = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String sql = "SELECT query FROM all_mviews WHERE owner = ? and mview_name = ?";
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleMViewReader.generateMViewSource()", SqlUtil.replaceParameters(sql, mview.getSchema(), mview.getTableName()));
+		}
 		try
 		{
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
