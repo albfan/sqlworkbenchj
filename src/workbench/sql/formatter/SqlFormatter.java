@@ -429,11 +429,23 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
-				this.appendText(",");
-				if (!inJoin)
+				if (!commaAfterLineBreak)
+				{
+					this.appendText(',');
+				}
+				if (!inJoin && bracketCount == 0)
 				{
 					this.appendNewline();
 					this.indent(5);
+
+					if (commaAfterLineBreak)
+					{
+						this.appendText(',');
+						if (addSpaceAfterLineBreakComma)
+						{
+							appendText(' ');
+						}
+					}
 				}
 			}
 			else

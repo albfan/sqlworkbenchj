@@ -32,6 +32,46 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testOldStyleJoin()
+		throws Exception
+	{
+		String sql = "select * from table1, table2 where table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(false);
+		String expected =
+				"SELECT *\n"+
+				"FROM table1,\n" +
+				"     table2\n"+
+				"WHERE table1.col1 = table2.col1\n"+
+				"AND   table1.col3 IN (1,2,3,4,5)";
+		String formatted = f.getFormattedSql().toString().trim();
+		assertEquals(expected, formatted);
+		f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(true);
+		formatted = f.getFormattedSql().toString().trim();
+		expected =
+				"SELECT *\n"+
+				"FROM table1\n" +
+				"     ,table2\n"+
+				"WHERE table1.col1 = table2.col1\n"+
+				"AND   table1.col3 IN (1,2,3,4,5)";
+//		System.out.println(formatted);
+		assertEquals(expected, formatted);
+		f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(true);
+		f.setAddSpaceAfterLineBreakComma(true);
+		formatted = f.getFormattedSql().toString().trim();
+		expected =
+				"SELECT *\n"+
+				"FROM table1\n" +
+				"     , table2\n"+
+				"WHERE table1.col1 = table2.col1\n"+
+				"AND   table1.col3 IN (1,2,3,4,5)";
+		System.out.println(formatted);
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testInListWithJoin()
 		throws Exception
 	{
