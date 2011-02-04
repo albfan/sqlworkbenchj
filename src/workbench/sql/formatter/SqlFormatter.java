@@ -364,14 +364,10 @@ public class SqlFormatter
 
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
-		//if (last.isLiteral() && current.isLiteral()) return false;
-
 		if (currChar == '?') return true;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
 		if (lastChar == '[') return false;
-//		if (currChar == '[' && lastChar == '$') return false;
-//		if (lastChar == '&' && Character.isLetter(currChar) ) return false;
 
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
@@ -445,6 +441,13 @@ public class SqlFormatter
 						{
 							appendText(' ');
 						}
+					}
+				}
+				else if (bracketCount > 0)
+				{
+					if (addSpaceAfterComma)
+					{
+						appendText(' ');
 					}
 				}
 			}

@@ -210,57 +210,6 @@ VALUES
     </content>
   </page>
 
-  <!-- ======================== Kwown bugs ========================== -->
-  <page name="issues" title="Known bugs" toc="main">
-    <title>Known issues</title>
-    <content>
-
-      <p>
-      <a name="issues_108"></a><h3>Known issues in build 108</h3>
-      </p>
-      <ul>
-        <li>
-            In the DbExplorer's "Procedure" tab, functions defined in Oracle packages are no longer listed. (fixed in 108.1)
-        </li>
-        <li>
-            The display of triggers in PostgreSQL is no longer working if the trigger does not have a comment.<br/>
-            As a quickfix, please download <a href="TriggerSourceStatements.xml">this XML file</a> and copy it to your
-            <a href="http://www.sql-workbench.net/manual/install.html#config-dir">Configuration directory</a>. (fixed in 108.2)
-        </li>
-        <li>
-            When exporting TIME columns (including copying to the clipboard) the value was converted to a date, not a time (fixed in 108.2)
-        </li>
-      </ul>
-
-      <p>
-      <a name="issues_107"></a><h3>Known issues in build 107</h3>
-      </p>
-      <ul>
-        <li>
-            When upgrading from an earlier build to 107, the internal properties for the DDL generation (in DbExplorer)
-            are not always migrated properly. Please start SQL Workbench/J with the parameter -Dworkbench.db.resetdefaults=true to reset the
-            properties and fix the problem. Use -J-Dworkbench.db.resetdefaults=true when using the Windows launcher (fixed in 107.1)
-        </li>
-        <li>
-            When moving the DbExplorer to a position other than the last, the tabs will not be
-            restored correctly when the workspace is loaded the next time  (fixed in 107.1)
-        </li>
-        <li>
-          When editing the data of columns with the data type <tt>inet</tt>, <tt>macaddr</tt> or <tt>cidr</tt> in PostgreSQL,
-          wrong update statements are generated when the changes are saved to the database  (fixed in 107.1)
-        </li>
-        <li>
-          On MacOS starting SQL Workbench through the application icon does not work if Java 5 and Java 6 are installed together
-          The stub that starts the Java virtual machine seems to pick the wrong Java installation (fixed in 108)
-          <br/><br/>
-          To fix this problem, copy the stub from the Java 6 application into the SQL Workbench/J directory using the following command (on a single line)
-          <br/>
-          <tt>cp /System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub /Applications/SQLWorkbench/SQLWorkbenchJ.app/Contents/MacOS/</tt>
-        </li>
-      </ul>
-    </content>
-  </page>
-
   <!-- ======================== XSLT Files ========================== -->
   <page name="xslt" title="XSLT" toc="main">
     <title>Sample XSL transformations</title>

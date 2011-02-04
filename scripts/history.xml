@@ -2,8 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-01-29">
-    <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
-    <entry dev-build="12" type="enh">The DbExplorer will now show the status of stored procedures.</entry>
+    <entry dev-build="13" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry>
+    <entry dev-build="12" type="enh">The DbExplorer will now show the status of Oracle stored procedures.</entry>
     <entry dev-build="12" type="enh">The DbExplorer now includes information about partitioned tables and indexes for Oracle in the generated source.</entry>
     <entry dev-build="11" type="enh">The possibility to influence the generated INSERT statement for WbImport is now available as a commandline parameter (previously this was only possible through a property in workbench.settings).</entry>
     <entry dev-build="10" type="enh">Two new options for the SQL Formatter are available that control the placement of the comma when line breaks are inserted. Thanks to Andreas for this patch.</entry>
@@ -19,11 +19,11 @@
     <entry dev-build="5" type="enh">The escaping of embedded quotes can now also be selected when using "Save Data as" or "Import file".</entry>
     <entry dev-build="5" type="enh">When connected to an Excel Spreadsheet, [] are now also recognized as quote characters (to allow a semicolon in a "table" name).</entry>
     <entry dev-build="4" type="enh">The JDBC driver templates can now be loaded from an external a file named "DriverTemplates.xml" that has to be stored in the directory where the jar file is located.</entry>
-    <entry dev-build="4" type="enh">Starting the console mode without specifying a password or when using a profile without a password, the application now prompts to enter a password</entry>
+    <entry dev-build="4" type="enh">When starting the console mode without specifying a password or when using a profile without a password, the application now prompts to enter a password</entry>
     <entry dev-build="4" type="enh">A new option "Connection Timeout" has been added to the connectioin profiles.</entry>
     <entry dev-build="3" type="enh">A new option to log all executed SQL statements to the logfile has been added (Tools -&gt; Options -&gt; General -&gt; Log all SQL statements).</entry>
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
-    <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
+    <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a space after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
     <entry dev-build="12" type="fix">Oracle Procedures with the status "INVALID" where not shown in the DbExplorer</entry>
     <entry dev-build="11" type="fix">The JOIN completion did not always detect the FKs correctly.</entry>

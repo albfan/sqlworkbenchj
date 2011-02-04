@@ -55,7 +55,6 @@ public class SqlFormatterTest
 				"     ,table2\n"+
 				"WHERE table1.col1 = table2.col1\n"+
 				"AND   table1.col3 IN (1,2,3,4,5)";
-//		System.out.println(formatted);
 		assertEquals(expected, formatted);
 		f = new SqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
@@ -67,7 +66,6 @@ public class SqlFormatterTest
 				"     , table2\n"+
 				"WHERE table1.col1 = table2.col1\n"+
 				"AND   table1.col3 IN (1,2,3,4,5)";
-		System.out.println(formatted);
 		assertEquals(expected, formatted);
 	}
 
@@ -989,6 +987,16 @@ public class SqlFormatterTest
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a\nFROM b\nWHERE c IN (1, 2, 3);";
 //		System.out.println("*****************\n" + formatted + "\n*************\n" + expected + "\n------------------");
+		assertEquals(expected, formatted);
+
+		sql = "select * from table1 join table2 on table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
+		f = new SqlFormatter(sql);
+		f.setAddSpaceAfterCommInList(true);
+		expected =
+			"SELECT *\n" +
+			"FROM table1 \n"+
+			"  JOIN table2 ON table1.col1 = table2.col1 AND table1.col3 IN (1, 2, 3, 4, 5)";
+		formatted = f.getFormattedSql().toString().trim();
 		assertEquals(expected, formatted);
 	}
 
