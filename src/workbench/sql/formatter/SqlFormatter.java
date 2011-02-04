@@ -392,9 +392,15 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		int bracketCount = 0;
+		boolean inJoin = false;
+
 		while (t != null)
 		{
 			String text = t.getContents();
+			if (!inJoin)
+			{
+				inJoin = SqlUtil.getJoinKeyWords().contains(text);
+			}
 
 			if (t.isReservedWord() && FROM_TERMINAL.contains(text.toUpperCase()))
 			{
@@ -424,8 +430,11 @@ public class SqlFormatter
 			else if (t.isSeparator() && text.equals(","))
 			{
 				this.appendText(",");
-				this.appendNewline();
-				this.indent(5);
+				if (!inJoin)
+				{
+					this.appendNewline();
+					this.indent(5);
+				}
 			}
 			else
 			{
