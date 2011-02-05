@@ -33,8 +33,6 @@ import workbench.util.SqlUtil;
 public class StatementContext
 {
 	private BaseAnalyzer analyzer;
-	private CommandTester wbTester = new CommandTester();
-	private final Set<String> unionKeywords = CollectionUtil.treeSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
 
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
@@ -47,6 +45,8 @@ public class StatementContext
 
 		BaseAnalyzer subSelectAnalyzer = checkSubselect(conn, sql, pos);
 		BaseAnalyzer verbAnalyzer = null;
+
+		CommandTester wbTester = new CommandTester();
 
 		if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))
 		{
@@ -123,6 +123,8 @@ public class StatementContext
 
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
+		Set<String> unionKeywords = CollectionUtil.treeSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
+
 		try
 		{
 			SQLLexer lexer = new SQLLexer(sql);

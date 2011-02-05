@@ -11,6 +11,7 @@
 package workbench.gui.completion;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -74,8 +75,15 @@ public class MySQLExplainAnalyzer
 				}
 				t = lexer.getNextToken(false, false);
 			}
-			allOptions.removeAll(usedOptions);
-			this.elements = new ArrayList<String>(allOptions);
+			if (usedOptions.isEmpty())
+			{
+				this.elements = new ArrayList<String>(allOptions);
+			}
+			else
+			{
+				// only one option allowed
+				this.elements = Collections.emptyList();
+			}
 			this.context = CONTEXT_SYNTAX_COMPLETION;
 		}
 		catch (Exception e)
