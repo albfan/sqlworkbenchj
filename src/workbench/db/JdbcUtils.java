@@ -26,6 +26,7 @@ public class JdbcUtils
 
 	public static boolean hasMinimumServerVersion(WbConnection con, String targetVersion)
 	{
+		if (con == null) return false;
 		return hasMinimumServerVersion(con.getSqlConnection(), targetVersion);
 	}
 

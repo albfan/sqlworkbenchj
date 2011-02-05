@@ -28,6 +28,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
@@ -77,6 +78,8 @@ public abstract class BaseAnalyzer
 	 */
 	protected static final int CONTEXT_WB_COMMANDS = 7;
 
+	protected static final int CONTEXT_SYNTAX_COMPLETION = 8;
+
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
 	protected String keywordFile;
@@ -110,7 +113,7 @@ public abstract class BaseAnalyzer
 	{
 		return this.cursorPos;
 	}
-	
+
 	public char quoteCharForValue(String value)
 	{
 		return 0;
@@ -231,7 +234,12 @@ public abstract class BaseAnalyzer
 		return (toTest > start && toTest < end);
 	}
 
-	private String contextToString()
+	public int getContext()
+	{
+		return context;
+	}
+
+	protected String contextToString()
 	{
 		switch (context)
 		{
@@ -249,6 +257,8 @@ public abstract class BaseAnalyzer
 				return "CONTEXT_WB_COMMANDS";
 			case CONTEXT_WB_PARAMS:
 				return "CONTEXT_WB_PARAMS";
+			case CONTEXT_SYNTAX_COMPLETION:
+				return "CONTEXT_SYNTAX_COMPLETION";
 		}
 		return Integer.toString(context);
 	}
@@ -302,16 +312,10 @@ public abstract class BaseAnalyzer
 		{
 			this.title = ResourceMgr.getString("LblCompletionListWbCmd");
 		}
-//		else if (context == CONTEXT_INDEX_LIST)
-//		{
-//			this.title = ResourceMgr.getString("LblCompletionListIndex");
-//			IndexDefinition[] idx = this.dbConnection.getMetadata().getIndexList(this.schemaForTableList);
-//			this.elements = new ArrayList();
-//			for (int i = 0; i < idx.length; i++)
-//			{
-//				this.elements.add(idx[i].getName());
-//			}
-//		}
+		else if (context == CONTEXT_SYNTAX_COMPLETION)
+		{
+			this.title = SqlUtil.getSqlVerb(sql);
+		}
 		else
 		{
 			// no proper sql found
@@ -319,6 +323,7 @@ public abstract class BaseAnalyzer
 			this.title = null;
 			Toolkit.getDefaultToolkit().beep();
 		}
+
 		if (this.addAllMarker && this.elements != null)
 		{
 			this.elements.add(0, this.allColumnsMarker);

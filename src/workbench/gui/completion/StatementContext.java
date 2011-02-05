@@ -84,6 +84,11 @@ public class StatementContext
 		{
 			verbAnalyzer = new WbCommandAnalyzer(conn, sql, pos);
 		}
+		else if ("EXPLAIN".equalsIgnoreCase(verb))
+		{
+			ExplainAnalyzerFactory factory = new ExplainAnalyzerFactory();
+			verbAnalyzer = factory.getAnalyzer(conn, sql, pos);
+		}
 
 		if (subSelectAnalyzer != null)
 		{
@@ -241,7 +246,6 @@ public class StatementContext
 
 		return null;
 	}
-
 
 	public boolean isStatementSupported()
 	{

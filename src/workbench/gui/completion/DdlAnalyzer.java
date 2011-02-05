@@ -79,6 +79,15 @@ public class DdlAnalyzer
 				context = CONTEXT_TABLE_LIST;
 				setTableTypeFilter(CollectionUtil.arrayList(this.dbConnection.getMetadata().getViewTypeName()));
 			}
+//			else if ("INDEX".equals(type) && cursorPos >= typeToken.getCharEnd())
+//			{
+//			IndexDefinition[] idx = this.dbConnection.getMetadata().getIndexList(this.schemaForTableList);
+//			this.elements = new ArrayList();
+//			for (int i = 0; i < idx.length; i++)
+//			{
+//				this.elements.add(idx[i].getName());
+//			}
+//			}
 		}
 		else
 		{
