@@ -45,27 +45,10 @@ public class MySQLExplainAnalyzerTest
 		analyzer.checkContext();
 		options = analyzer.getData();
 		assertNotNull(options);
-		assertEquals(1, options.size());
-		assertEquals("PARTITIONS", options.get(0));
+		assertEquals(0, options.size());
 
 		sql = "explain extended ";
 		analyzer = new MySQLExplainAnalyzer(null, sql, 8);
-		analyzer.checkContext();
-		options = analyzer.getData();
-		assertNotNull(options);
-		assertEquals(1, options.size());
-		assertEquals("PARTITIONS", options.get(0));
-
-		sql = "explain partitions ";
-		analyzer = new MySQLExplainAnalyzer(null, sql, 8);
-		analyzer.checkContext();
-		options = analyzer.getData();
-		assertNotNull(options);
-		assertEquals(1, options.size());
-		assertEquals("EXTENDED", options.get(0));
-
-		sql = "explain extended partitions ";
-		analyzer = new MySQLExplainAnalyzer(null, sql, 2);
 		analyzer.checkContext();
 		options = analyzer.getData();
 		assertNotNull(options);

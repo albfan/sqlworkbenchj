@@ -22,10 +22,8 @@ import java.util.Set;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -267,10 +265,6 @@ public abstract class BaseAnalyzer
 	protected void buildResult()
 	{
 
-		if (Settings.getInstance().getDebugCompletionSearch())
-		{
-			LogMgr.logDebug("BaseAnalyzer.buildResult()", "Context is: " + contextToString());
-		}
 		if (context == CONTEXT_TABLE_OR_COLUMN_LIST && tableForColumnList != null)
 		{
 			if (!retrieveColumns())
@@ -350,10 +344,6 @@ public abstract class BaseAnalyzer
 	private void retrieveTables()
 	{
 		Set<TableIdentifier> tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
-		if (Settings.getInstance().getDebugCompletionSearch())
-		{
-			LogMgr.logDebug("BaseAnalyzer.retrieveTables()", "Retrieving tables for schema: " + schemaForTableList);
-		}
 		if (schemaForTableList == null)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListTables");
@@ -370,10 +360,6 @@ public abstract class BaseAnalyzer
 	private boolean retrieveColumns()
 	{
 		if (tableForColumnList == null) return false;
-		if (Settings.getInstance().getDebugCompletionSearch())
-		{
-			LogMgr.logDebug("BaseAnalyzer.retrieveColumns()", "Using table for columnlist: " + tableForColumnList.getTableExpression());
-		}
 
 		String s = tableForColumnList.getSchema();
 		if (s == null)

@@ -42,6 +42,7 @@ public class CollectionUtil
 		result.addAll(Arrays.asList(add));
 		return result;
 	}
+
 	public static <E> Set<E> treeSet(Set<E> base, E... add)
 	{
 		Set<E> result = new TreeSet<E>();
@@ -49,6 +50,7 @@ public class CollectionUtil
 		result.addAll(Arrays.asList(add));
 		return result;
 	}
+	
 	public static Set<String> caseInsensitiveSet()
 	{
 		return new TreeSet<String>(CaseInsensitiveComparator.INSTANCE);

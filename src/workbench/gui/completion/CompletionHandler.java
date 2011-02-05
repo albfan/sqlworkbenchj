@@ -167,10 +167,6 @@ public class CompletionHandler
 				}
 				else
 				{
-					if (Settings.getInstance().getDebugCompletionSearch())
-					{
-						LogMgr.logDebug("CompletionHandler.updateSelectionList()", "Analyzer did not return any data");
-					}
 					showNoObjectsFoundMessage();
 				}
 			}

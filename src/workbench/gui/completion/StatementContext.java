@@ -101,18 +101,6 @@ public class StatementContext
 			this.analyzer.setParent(null);
 		}
 
-		if (Settings.getInstance().getDebugCompletionSearch())
-		{
-			if (analyzer == null)
-			{
-				LogMgr.logDebug("StatementContext.<init>", "No analyzer found for verb: " + verb);
-			}
-			else
-			{
-				LogMgr.logDebug("StatementContext.<init>", "Using analyzer: " + analyzer.getClass().getName() + " for verb: " + verb);
-			}
-		}
-
 		if (analyzer != null && retrieve)
 		{
 			analyzer.retrieveObjects();

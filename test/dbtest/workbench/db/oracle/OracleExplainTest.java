@@ -10,6 +10,8 @@
  */
 package workbench.db.oracle;
 
+import workbench.db.ColumnIdentifier;
+import workbench.gui.completion.SelectAllMarker;
 import workbench.db.TableIdentifier;
 import java.util.List;
 import org.junit.AfterClass;
@@ -20,6 +22,7 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.OracleExplainAnalyzer;
+import workbench.gui.completion.SelectAnalyzer;
 import workbench.gui.completion.StatementContext;
 import static org.junit.Assert.*;
 
@@ -71,5 +74,27 @@ public class OracleExplainTest
 		assertEquals(1, tables.size());
 		TableIdentifier tbl = (TableIdentifier)tables.get(0);
 		assertEquals("SOME_TABLE", tbl.getTableName());
+
+		sql = "explain plan for select  from some_table";
+		context = new StatementContext(con, sql, sql.indexOf("select") + 7);
+		analyzer = context.getAnalyzer();
+		assertTrue(analyzer instanceof SelectAnalyzer);
+		List columns = analyzer.getData();
+		assertNotNull(columns);
+		assertEquals(3, columns.size());
+
+		assertTrue(columns.get(0) instanceof SelectAllMarker);
+		ColumnIdentifier id = (ColumnIdentifier)columns.get(1);
+		assertEquals("ID", id.getColumnName());
+		ColumnIdentifier name = (ColumnIdentifier)columns.get(2);
+		assertEquals("SOME_DATA", name.getColumnName());
+
+		// The cursor position used by the nested SELECT analyzer for the explain
+		// must be the same as the position for a "regular" analyzer
+		sql = "select  from some_table";
+		context = new StatementContext(con, sql, sql.indexOf("select") + 7);
+		BaseAnalyzer select = context.getAnalyzer();
+		assertEquals(analyzer.getCursorPosition(), select.getCursorPosition());
 	}
+
 }

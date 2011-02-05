@@ -645,11 +645,6 @@ public class Settings
 		return getBoolProperty("workbench.connection.debug", false);
 	}
 
-	public boolean getDebugCompletionSearch()
-	{
-		return getBoolProperty("workbench.db.completion.debug", false);
-	}
-
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
@@ -765,17 +760,17 @@ public class Settings
 	{
 	    return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);
 	}
-	
+
 	public void setFormatterSetCommaAfterLineBreak(boolean flag)
 	{
 	    setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
 	}
-	
+
 	public boolean getFormatterAddSpaceAfterLineBreakComma()
 	{
 	    return getBoolProperty("workbench.sql.formatter.comma.spaceAfterLineBreakComma", false);
 	}
-	
+
 	public void setFormatterAddSpaceAfterLineBreakComma(boolean flag)
 	{
 	    setProperty("workbench.sql.formatter.comma.spaceAfterLineBreakComma", flag);
