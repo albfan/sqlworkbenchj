@@ -77,6 +77,7 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_WB_COMMANDS = 7;
 
 	protected static final int CONTEXT_SYNTAX_COMPLETION = 8;
+	protected static final int CONTEXT_STATEMENT_PARAMETER = 9;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
@@ -161,7 +162,7 @@ public abstract class BaseAnalyzer
 
 	public boolean isKeywordList()
 	{
-		return this.context == CONTEXT_KW_LIST;
+		return this.context == CONTEXT_KW_LIST || this.context == CONTEXT_SYNTAX_COMPLETION;
 	}
 
 	public boolean getOverwriteCurrentWord()
@@ -257,6 +258,8 @@ public abstract class BaseAnalyzer
 				return "CONTEXT_WB_PARAMS";
 			case CONTEXT_SYNTAX_COMPLETION:
 				return "CONTEXT_SYNTAX_COMPLETION";
+			case CONTEXT_STATEMENT_PARAMETER:
+				return "CONTEXT_STATEMENT_PARAMETER";
 		}
 		return Integer.toString(context);
 	}
@@ -306,7 +309,7 @@ public abstract class BaseAnalyzer
 		{
 			this.title = ResourceMgr.getString("LblCompletionListWbCmd");
 		}
-		else if (context == CONTEXT_SYNTAX_COMPLETION)
+		else if (context == CONTEXT_SYNTAX_COMPLETION || context == CONTEXT_STATEMENT_PARAMETER)
 		{
 			this.title = SqlUtil.getSqlVerb(sql);
 		}

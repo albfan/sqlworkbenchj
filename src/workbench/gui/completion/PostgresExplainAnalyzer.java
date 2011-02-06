@@ -98,7 +98,7 @@ public class PostgresExplainAnalyzer
 				if (options90.containsKey(word))
 				{
 					elements = options90.get(word);
-					context = CONTEXT_SYNTAX_COMPLETION;
+					context = CONTEXT_STATEMENT_PARAMETER;
 				}
 				else
 				{
