@@ -3,6 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-01-29">
     <entry dev-build="13" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry>
+    <entry dev-build="13" type="enh">EXPLAIN is now supported for auto-completion (PostgreSQL, Oracle, MySQL)</entry>
     <entry dev-build="12" type="enh">The DbExplorer will now show the status of Oracle stored procedures.</entry>
     <entry dev-build="12" type="enh">The DbExplorer now includes information about partitioned tables and indexes for Oracle in the generated source.</entry>
     <entry dev-build="11" type="enh">The possibility to influence the generated INSERT statement for WbImport is now available as a commandline parameter (previously this was only possible through a property in workbench.settings).</entry>
