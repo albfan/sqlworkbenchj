@@ -26,6 +26,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a space after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="13" type="fix">Changing the font size in the editor would corrupt the display of the caret</entry>
     <entry dev-build="13" type="fix">When exporting data, two tabs could not be defined as a separator (only a single tab)</entry>
     <entry dev-build="12" type="fix">Oracle Procedures with the status "INVALID" where not shown in the DbExplorer</entry>
     <entry dev-build="11" type="fix">The JOIN completion did not always detect the FKs correctly.</entry>

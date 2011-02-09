@@ -812,9 +812,6 @@ public class JEditTextArea
 	{
 		TokenMarker tokenMarker = getTokenMarker();
 
-		/* Use painter's cached info for speed */
-		FontMetrics fm = painter.getFontMetrics();
-
 		getLineText(line, lineSegment);
 
 		int segmentOffset = lineSegment.offset;
@@ -824,6 +821,7 @@ public class JEditTextArea
 		if (tokenMarker == null)
 		{
 			lineSegment.count = offset;
+			FontMetrics fm = painter.getFontMetrics();
 			return x + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
 		}
 		else
@@ -832,32 +830,20 @@ public class JEditTextArea
 			// tokens can vary in width
 			Token tokens = tokenMarker.markTokens(lineSegment, line);
 
-			Font defaultFont = painter.getFont();
-			SyntaxStyle[] styles = painter.getStyles();
-
 			while (tokens != null)
 			{
-				byte id = tokens.id;
-
-				if (id == Token.NULL)
-				{
-					fm = painter.getFontMetrics();
-				}
-				else
-				{
-					fm = styles[id].getFontMetrics(defaultFont);
-				}
+				FontMetrics styledMetrics = painter.getStyleFontMetrics(tokens.id);
 				int length = tokens.length;
 
 				if (offset + segmentOffset < lineSegment.offset + length)
 				{
 					lineSegment.count = offset - (lineSegment.offset - segmentOffset);
-					return x + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
+					return x + Utilities.getTabbedTextWidth(lineSegment, styledMetrics, x, painter, 0);
 				}
 				else
 				{
 					lineSegment.count = length;
-					x += Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
+					x += Utilities.getTabbedTextWidth(lineSegment, styledMetrics, x, painter, 0);
 					lineSegment.offset += length;
 				}
 				tokens = tokens.next;
@@ -875,9 +861,6 @@ public class JEditTextArea
 	{
 		TokenMarker tokenMarker = getTokenMarker();
 
-		/* Use painter's cached info for speed */
-		FontMetrics fm = painter.getFontMetrics();
-
 		getLineText(line,lineSegment);
 
 		char[] segmentArray = lineSegment.array;
@@ -886,8 +869,10 @@ public class JEditTextArea
 
 		int width = horizontalOffset;
 
-		if(tokenMarker == null)
+		if (tokenMarker == null)
 		{
+			FontMetrics fm = painter.getFontMetrics();
+
 			for (int i = 0; i < segmentCount; i++)
 			{
 				char c = segmentArray[i + segmentOffset];
@@ -915,28 +900,17 @@ public class JEditTextArea
 			Token tokens = tokenMarker.markTokens(lineSegment, line);
 
 			int offset = 0;
-			Font defaultFont = painter.getFont();
-			SyntaxStyle[] styles = painter.getStyles();
 
 			while (tokens != null)
 			{
-				byte id = tokens.id;
-
-				if (id == Token.NULL)
-				{
-					fm = painter.getFontMetrics();
-				}
-				else
-				{
-					fm = styles[id].getFontMetrics(defaultFont);
-				}
+				FontMetrics styledMetrics = painter.getStyleFontMetrics(tokens.id);
 
 				int length = tokens.length;
 
 				for (int i = 0; i < length; i++)
 				{
 					char c = segmentArray[segmentOffset + offset + i];
-					int charWidth = fm.charWidth(c);
+					int charWidth = styledMetrics.charWidth(c);
 
 					if (c == '\t')
 					{

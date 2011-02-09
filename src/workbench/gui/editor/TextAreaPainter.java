@@ -67,6 +67,8 @@ public class TextAreaPainter
 	public static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
+	private final Object stylesLockMonitor = new Object();
+	
 	private static final Set<String> COLOR_PROPS = CollectionUtil.treeSet(
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
@@ -86,7 +88,7 @@ public class TextAreaPainter
 		currentLine = new Segment();
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		setFont(Settings.getInstance().getEditorFont());
+		super.setFont(Settings.getInstance().getEditorFont());
 
 		setForeground(Settings.getInstance().getEditorTextColor());
 		setBackground(Settings.getInstance().getEditorBackgroundColor());
@@ -164,9 +166,21 @@ public class TextAreaPainter
 	 * Tab key. This returns false.
 	 */
 	@SuppressWarnings("deprecation")
-	public final boolean isManagingFocus()
+	public boolean isManagingFocus()
 	{
 		return false;
+	}
+
+	public FontMetrics getStyleFontMetrics(byte tokenId)
+	{
+		if (tokenId == Token.NULL || styles == null || tokenId < 0 || tokenId >= styles.length)
+		{
+			return getFontMetrics();
+		}
+		else
+		{
+			return styles[tokenId].getFontMetrics(getFont(), this);
+		}
 	}
 
 	/**
@@ -174,9 +188,12 @@ public class TextAreaPainter
 	 * will be used to paint tokens with id = <i>n</i>.
 	 * @see Token
 	 */
-	public final SyntaxStyle[] getStyles()
+	public SyntaxStyle[] getStyles()
 	{
-		return styles;
+		synchronized (stylesLockMonitor)
+		{
+			return styles;
+		}
 	}
 
 	/**
@@ -185,9 +202,12 @@ public class TextAreaPainter
 	 * @param styles The syntax styles
 	 * @see Token
 	 */
-	public final void setStyles(SyntaxStyle[] styles)
+	public void setStyles(SyntaxStyle[] styles)
 	{
-		this.styles = styles;
+		synchronized (stylesLockMonitor)
+		{
+			this.styles = styles;
+		}
 		repaint();
 	}
 
@@ -284,7 +304,21 @@ public class TextAreaPainter
 	public void setFont(Font font)
 	{
 		super.setFont(font);
+		currentLineTokens = null;
 		this.fm = getFontMetrics(font);
+		synchronized (stylesLockMonitor)
+		{
+			if (styles != null)
+			{
+				for (SyntaxStyle style : styles)
+				{
+					if (style != null)
+					{
+						style.clearFontCache();
+					}
+				}
+			}
+		}
 		calculateTabSize();
 		calculateGutterWidth();
 	}
@@ -317,7 +351,7 @@ public class TextAreaPainter
 		this.tabSize = -1;
 		if (this.textArea == null) return;
 		if (this.textArea.getDocument() == null) return;
-		FontMetrics cfm = this.getFontMetrics();
+		FontMetrics cfm = getFontMetrics();
 		if (cfm == null) return;
 
 		Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
@@ -631,7 +665,7 @@ public class TextAreaPainter
 		if (textArea.isCaretVisible())
 		{
 			int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
-			int caretX = textArea._offsetToX(line,offset);// + this.gutterWidth;
+			int caretX = textArea._offsetToX(line, offset);
 			int caretWidth = (textArea.isOverwriteEnabled() ? fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();
