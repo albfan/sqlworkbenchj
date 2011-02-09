@@ -274,9 +274,9 @@ public class TextRowDataConverter
 	{
 		if (StringUtil.isBlank(delimit)) return;
 
-		if (delimit.equals("\\t"))
+		if (delimit.contains("\\t"))
 		{
-			this.delimiter = "\t";
+			this.delimiter = delimit.replace("\\t", "\t");
 		}
 		else
 		{

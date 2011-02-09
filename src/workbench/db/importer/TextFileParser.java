@@ -503,9 +503,9 @@ public class TextFileParser
 	{
 		if (delimit == null) return;
 		this.delimiter = delimit;
-		if ("\\t".equals(this.delimiter))
+		if (this.delimiter.contains("\\t"))
 		{
-			this.delimiter = "\t";
+			this.delimiter = delimiter.replace("\\t", "\t");
 		}
 	}
 
