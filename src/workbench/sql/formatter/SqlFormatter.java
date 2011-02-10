@@ -46,7 +46,7 @@ public class SqlFormatter
 	// keywords terminating a WHERE clause
 	public static final Set<String> WHERE_TERMINAL = CollectionUtil.treeSet(
 	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
-		"MINUS", ";");
+		"MINUS", "WINDOW", ";");
 
 	// keywords terminating the FROM part
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.treeSet(WHERE_TERMINAL,
@@ -176,11 +176,11 @@ public class SqlFormatter
 		this.sql = this.sql.toString().trim();
 	}
 
-	public CharSequence getFormattedSql()
+	public String getFormattedSql()
 		throws Exception
 	{
 		saveLeadingWhitespace();
-		if (this.sql.length() == 0) return sql;
+		if (this.sql.length() == 0) return "";
 
 		this.formatSql();
 		StringUtil.trimTrailingWhitespace(result);
@@ -663,7 +663,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
-		String s = f.getFormattedSql().toString();
+		String s = f.getFormattedSql();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
@@ -1718,7 +1718,7 @@ public class SqlFormatter
 			{
 				CharSequence select = this.sql.subSequence(t.getCharBegin(), sql.length());
 				SqlFormatter f = new SqlFormatter(select);
-				CharSequence formattedSelect = f.getFormattedSql();
+				String formattedSelect = f.getFormattedSql();
 				appendText(formattedSelect.toString());
 				return null;
 			}

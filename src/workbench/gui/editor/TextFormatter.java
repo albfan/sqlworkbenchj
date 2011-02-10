@@ -64,7 +64,7 @@ public class TextFormatter
 
 			try
 			{
-				String formattedSql = f.getFormattedSql().toString();
+				String formattedSql = f.getFormattedSql();
 				newSql.append(formattedSql);
 
 				// if this is a script that is formatted, make sure each statement is
