@@ -266,7 +266,7 @@ public class DeleteScriptGenerator
 
 	public String getScript()
 	{
-		if (this.statements.size() == 0)
+		if (this.statements.isEmpty())
 		{
 			this.generateScript();
 		}
