@@ -16,9 +16,7 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
-import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.TextSelectionListener;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
@@ -77,7 +75,7 @@ public class ShowObjectInfoAction
 			display.setBusy(true);
 			display.fireDbExecStart();
 			setEnabled(false);
-			
+
 			ObjectInfo info = new ObjectInfo();
 			WbConnection conn = display.getConnection();
 			String text = display.getSelectedText();
@@ -131,7 +129,7 @@ public class ShowObjectInfoAction
 			checkEnabled();
 		}
 	}
-	
+
 	public void checkEnabled()
 	{
 		setEnabled(display != null && display.isConnected());
