@@ -570,6 +570,7 @@ keyword=(
 "WBVARDELETE"|
 "WBVARLIST"|
 "WBXSLT"|
+"WINDOW"|
 "WHEN"|
 "WHENEVER"|
 "WHERE"|
