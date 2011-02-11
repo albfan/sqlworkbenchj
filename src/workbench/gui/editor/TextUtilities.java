@@ -24,7 +24,7 @@ public class TextUtilities
 	 * Returns the offset of the bracket matching the one at the
 	 * specified offset of the document, or -1 if the bracket is
 	 * unmatched (or if the character is not a bracket).
-	 * 
+	 *
 	 * @param doc The document
 	 * @param offset The offset
 	 * @exception BadLocationException If an out-of-bounds access
@@ -34,7 +34,7 @@ public class TextUtilities
 		throws BadLocationException
 	{
 		if (doc.getLength() == 0) return -1;
-		
+
 		char c = doc.getText(offset,1).charAt(0);
 		char cprime; // corresponding character
 		boolean backwards; // true = back, false = forward
@@ -154,6 +154,8 @@ public class TextUtilities
 	 */
 	public static int findWordStart(String line, int pos)
 	{
+		if (pos >= line.length()) return 0;
+
 		char ch = line.charAt(pos - 1);
 
 		String noWordSep = Settings.getInstance().getEditorNoWordSep();
@@ -181,6 +183,7 @@ public class TextUtilities
 	 */
 	public static int findWordEnd(String line, int pos)
 	{
+		if(pos >= line.length()) return line.length();
 		char ch = line.charAt(pos);
 
 		String noWordSep = Settings.getInstance().getEditorNoWordSep();
