@@ -9,10 +9,13 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.exporter;
+package workbench.db.postgres;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.FormatFileWriter;
+import workbench.db.exporter.RowDataConverter;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.util.FileUtil;

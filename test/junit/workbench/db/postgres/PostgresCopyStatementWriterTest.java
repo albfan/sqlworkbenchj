@@ -8,8 +8,10 @@
  *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.exporter;
+package workbench.db.postgres;
 
+import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.RowDataConverter;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import java.sql.Types;
@@ -72,7 +74,7 @@ public class PostgresCopyStatementWriterTest
 
 		ColumnIdentifier id = new ColumnIdentifier("id" ,Types.INTEGER, true);
 		ColumnIdentifier firstname = new ColumnIdentifier("firstname", Types.VARCHAR);
-		ColumnIdentifier lastname = new ColumnIdentifier("firstname", Types.VARCHAR);
+		ColumnIdentifier lastname = new ColumnIdentifier("lastname", Types.VARCHAR);
 		final TableIdentifier table = new TableIdentifier("person");
 
 		final ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, firstname, lastname } );
@@ -116,7 +118,7 @@ public class PostgresCopyStatementWriterTest
 			List<String> contents = TestUtil.readLines(formatFile);
 			assertNotNull(contents);
 			assertEquals(1, contents.size());
-			assertTrue(contents.get(0).startsWith("\\copy person (id, firstname, firstname)  from "));
+			assertTrue(contents.get(0).startsWith("\\copy person (id, firstname, lastname)  from "));
 			assertTrue(contents.get(0).contains("delimiter as '\\t'"));
 			assertTrue(contents.get(0).contains("csv header"));
 			assertTrue(contents.get(0).contains("quote as '\"'"));

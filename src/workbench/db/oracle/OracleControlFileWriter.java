@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.exporter;
+package workbench.db.oracle;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -18,6 +18,9 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.FormatFileWriter;
+import workbench.db.exporter.RowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
@@ -33,13 +36,13 @@ import workbench.util.WbFile;
  * The format of the control file matches the exported flat file.
  * The exported file(s) can be loaded directly with SQL*Loader and
  * the control files created by this class.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class OracleControlFileWriter
 	implements FormatFileWriter
 {
-	
+
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();
@@ -91,7 +94,6 @@ public class OracleControlFileWriter
 			if (format == null)
 			{
 				format = Settings.getInstance().getDefaultTimestampFormat();
-			//if (format == null) format = exporter.getDateFormat();
 			}
 			String oraFormat = convertJavaDateFormatToOracle(format);
 			List<String> blobColumns = new LinkedList<String>();
@@ -101,7 +103,7 @@ public class OracleControlFileWriter
 				String col = resultInfo.getColumnName(i);
 				int type = resultInfo.getColumnType(i);
 				String dbmsType = resultInfo.getDbmsTypeName(i);
-				
+
 				out.print("  ");
 				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, dbmsType, exporter.getConnection().getDbSettings())))
 				{

@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import workbench.db.mssql.SqlServerFormatFileWriter;
+import workbench.db.postgres.PostgresCopyStatementWriter;
+import workbench.db.oracle.OracleControlFileWriter;
 import workbench.db.ibm.Db2FormatFileWriter;
 import workbench.util.StringUtil;
 
