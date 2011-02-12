@@ -114,8 +114,12 @@ public class FirebirdDomainReader
 			{
 				String name = rs.getString("domain_name");
 				DomainIdentifier domain = new DomainIdentifier(null, null, name);
-				domain.setCheckConstraint(rs.getString("constraint_definition"));
-				domain.setDataType(rs.getString("data_type"));
+				String check = rs.getString("constraint_definition");
+				if (check != null) check = check.trim();
+				domain.setCheckConstraint(check);
+				String type = rs.getString("data_type");
+				if (type != null) type = type.trim();
+				domain.setDataType(type);
 				int nullFlag = rs.getInt("nullable");
 				domain.setNullable(nullFlag == 0);
 				domain.setDefaultValue(rs.getString("default_value"));
@@ -152,15 +156,16 @@ public class FirebirdDomainReader
 		result.append(domain.getDataType());
 		if (domain.getDefaultValue() != null)
 		{
-			result.append("\n   ");
+			result.append("\n  ");
 			result.append(domain.getDefaultValue());
 		}
 		if (StringUtil.isNonBlank(domain.getCheckConstraint()) || !domain.isNullable())
 		{
-			result.append("\n   ");
-			if (!domain.isNullable()) result.append("NOT NULL ");
+			result.append("\n  ");
+			if (!domain.isNullable()) result.append("NOT NULL");
 			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
 			{
+				if (!domain.isNullable()) result.append(' ');
 				result.append(domain.getCheckConstraint());
 			}
 		}
@@ -174,7 +179,7 @@ public class FirebirdDomainReader
 
 		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
 		if (domains.isEmpty()) return false;
-		
+
 		for (DomainIdentifier domain : domains)
 		{
 			int row = result.addRow();
@@ -217,7 +222,7 @@ public class FirebirdDomainReader
 		DataStore result = new DataStore(columns, types, sizes);
 		result.addRow();
 		result.setValue(0, 0, domain.getObjectName());
-		result.setValue(0, 1, domain.getDataType());
+		result.setValue(0, 1, domain.getDataType().trim());
 		result.setValue(0, 2, domain.isNullable());
 		result.setValue(0, 3, domain.getCheckConstraint());
 		result.setValue(0, 4, domain.getComment());

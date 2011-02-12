@@ -692,6 +692,26 @@ public class DbMetadata
 	}
 
 	/**
+	 * Clears the cached list of catalogs to ignore.
+	 * Intended for testing purposes.
+	 * The list is re-read from the global settings if needed
+	 */
+	public void clearIgnoredCatalogs()
+	{
+		catalogsToIgnore = null;
+	}
+
+	/**
+	 * Clears the cached list of schemas to ignore.
+	 * Intended for testing purposes.
+	 * The list is re-read from the global settings if needed
+	 */
+	public void clearIgnoredSchemas()
+	{
+		schemasToIgnore = null;
+	}
+
+	/**
 	 * Returns true if the given schema name can be ignored for the current DBMS.
 	 * <br/>
 	 * The information which schema names can be ignored for the current DBMS is

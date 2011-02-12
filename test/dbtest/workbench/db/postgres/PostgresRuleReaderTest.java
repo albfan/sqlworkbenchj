@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
@@ -65,6 +66,11 @@ public class PostgresRuleReaderTest
 		assertEquals("RULE", tbl.getObjectType());
 		String sql = tbl.getSource(con).toString();
 		assertEquals("CREATE RULE \"_INSERT\" AS ON INSERT TO person DO INSTEAD NOTHING;", sql);
+		DbObject rule = con.getMetadata().getObjectDefinition(tbl);
+		String drop = rule.getDropStatement(con, true);
+		assertEquals("DROP RULE \"_INSERT\" ON person CASCADE", drop);
+		drop = rule.getDropStatement(con, false);
+		assertEquals("DROP RULE \"_INSERT\" ON person", drop);
 	}
 
 }

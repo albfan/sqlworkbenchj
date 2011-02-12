@@ -169,8 +169,8 @@ public class CommonDiffParametersTest
 		result = params.getTables(source, target);
 		assertEquals(2, result.referenceTables.size());
 		assertEquals(2, result.targetTables.size());
-		assertTrue("Wrong tables", result.referenceTables.get(0).equals(result.targetTables.get(0)));
-		assertTrue("Wrong tables", result.referenceTables.get(1).equals(result.targetTables.get(1)));
+		assertEquals(result.referenceTables.get(0).getTableName(), result.targetTables.get(0).getTableName());
+		assertEquals(result.referenceTables.get(1).getTableName(), result.targetTables.get(1).getTableName());
 	}
 
 }

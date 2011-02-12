@@ -82,7 +82,8 @@ public class SourceTableArgument
 
 		if (StringUtil.isNonBlank(excludeTables))
 		{
-			tables.removeAll(parseArgument(excludeTables, schema, false, null, dbConn));
+			List<TableIdentifier> toRemove = parseArgument(excludeTables, schema, false, null, dbConn);
+			tables.removeAll(toRemove);
 		}
 	}
 
@@ -118,7 +119,7 @@ public class SourceTableArgument
 			{
 				if (checkWildcard) this.wildcardsPresent = true;
 				TableIdentifier tbl = new TableIdentifier(t);
-				if (tbl.getSchema() == null)
+				if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%")))
 				{
 					tbl.setSchema(schemaToUse);
 				}
@@ -128,12 +129,18 @@ public class SourceTableArgument
 			}
 			else
 			{
-				TableIdentifier toRemove = new TableIdentifier(t);
-				if (toRemove.getSchema() == null)
+				String catalog = dbConn.getCurrentCatalog();
+				TableIdentifier tbl = new TableIdentifier(t);
+					if (tbl.getSchema() == null)
 				{
-					toRemove.setSchema(schemaToUse);
+					tbl.setSchema(schemaToUse);
 				}
-				result.add(toRemove);
+				if (tbl.getCatalog() == null && !dbConn.getMetadata().ignoreCatalog(catalog))
+				{
+					tbl.setCatalog(catalog);
+				}
+				tbl.adjustCase(dbConn);
+				result.add(tbl);
 			}
 		}
 		return result;

@@ -167,9 +167,10 @@ public class PostgresDomainReader
 			{
 				result.append(domain.getConstraintName() + " ");
 			}
-			if (!domain.isNullable()) result.append("NOT NULL ");
+			if (!domain.isNullable()) result.append("NOT NULL");
 			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
 			{
+				if (!domain.isNullable()) result.append(' ');
 				result.append(domain.getCheckConstraint());
 			}
 		}

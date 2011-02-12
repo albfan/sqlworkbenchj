@@ -26,7 +26,7 @@ public class HsqlViewGrantReader
 
 	public HsqlViewGrantReader(WbConnection con)
 	{
-		if (JdbcUtils.hasMinimumServerVersion(con, "1.9"))
+		if (JdbcUtils.hasMinimumServerVersion(con, "2.0"))
 		{
 			sql = "select grantee, privilege_type, is_grantable  \n" +
             "from information_schema.TABLE_PRIVILEGES \n" +

@@ -19,6 +19,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
+import workbench.sql.DelimiterDefinition;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 
@@ -30,7 +31,7 @@ public class OracleTestUtil
 {
 	private static boolean isAvailable = true;
 	public static final String SCHEMA_NAME = "WBJUNIT";
-	
+
 	/**
 	 * Return a connection to a locally running Oracle database
 	 * @return null if Oracle is not available
@@ -46,6 +47,7 @@ public class OracleTestUtil
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:oracle:thin:@localhost:1521:oradb' -username=wbjunit -password=wbjunit -driver=oracle.jdbc.OracleDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+			prof.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 			prof.setName("WBJUnitOracle");
 			prof.addConnectionProperty("oracle.jdbc.remarksReporting", "true");
 			ConnectionMgr.getInstance().addProfile(prof);
