@@ -1,6 +1,4 @@
-#Sat, 29 Jan 2011 12:32:49 +0100
-#Sat Jan 15 16:32:44 CET 2011
-release.build.date=2010-08-15
-dev.build.date=2011-01-29
-release.build.number=109
-dev.build.number=109.12
+#Sun, 13 Feb 2011 11:53:00 +0100
+
+release.build.number=110
+release.build.date=2011-02-13

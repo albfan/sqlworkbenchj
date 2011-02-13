@@ -333,6 +333,13 @@ VALUES
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 109<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build109.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build109-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build109.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 108<br/>
           <ul>
             <li><a href="archive/Workbench-Build108.zip">All Platforms</a></li>
