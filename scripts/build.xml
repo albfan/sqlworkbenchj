@@ -800,12 +800,14 @@
     <cobertura-instrument datafile="${junitdir}/cobertura.ser" todir="${instrumented.dir}">
       <fileset dir="${build}">
         <include name="workbench/**/*.class" />
+        <exclude name="workbench/WbStarter"/>
         <exclude name="workbench/sql/wbcommands/MissingWidthDefinition.class"/> <!-- exception -->
         <exclude name="workbench/db/SourceStatementsHelp.class"/>
         <exclude name="workbench/db/KeepAliveDaemon.class"/>
         <exclude name="workbench/db/ASAConstraintReader.class"/>
         <exclude name="workbench/db/search/TableDataSearcher"/> <!-- interface -->
         <exclude name="workbench/**/*Exception*.class" />
+        <exclude name="workbench/storage/filter/ComparatorFactory"/> <!-- doesn't work with coberture -->
         <exclude name="workbench/**/*$*.class" />
         <exclude name="workbench/sql/wbcommands/console/**" />
         <exclude name="workbench/gui/lnf/**" />
@@ -841,6 +843,7 @@
         <formatter type="plain"/>
         <fileset dir="${unittest}">
           <include name="**/*Test.java"/>
+          <exclude name="workbench/storage/filter/ComparatorFactoryTest.java"/>
         </fileset>
       </batchtest>
 
