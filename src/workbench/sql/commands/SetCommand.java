@@ -12,16 +12,17 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.Set;
 
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -48,6 +49,7 @@ public class SetCommand extends SqlCommand
 	{
 		StatementRunnerResult result = null; 
 
+		Savepoint sp = null;
 		try
 		{
 			String command = null;
@@ -73,9 +75,11 @@ public class SetCommand extends SqlCommand
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
 			}
+			
 			boolean execSql = true;
+			boolean checkSchema = false;
 
 			if (command != null)
 			{
@@ -135,13 +139,28 @@ public class SetCommand extends SqlCommand
 						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
 					}
 				}
+				else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
+				{
+					checkSchema = true;
+				}
 			}
+
 
 			if (execSql)
 			{
+				String oldSchema = null;
+				if (checkSchema)
+				{
+					oldSchema = currentConnection.getCurrentSchema();
+				}
 				result = new StatementRunnerResult();
 				aSql = getSqlToExecute(aSql);
+				if (currentConnection.getDbSettings().useSavePointForDML())
+				{
+					sp = currentConnection.setSavepoint();
+				}
 				this.currentStatement = currentConnection.createStatement();
+
 				// Using a generic execute ensures that servers that
 				// can process more than one statement with a single SQL
 				// are treated correctly. E.g. when sending a SET and a SELECT
@@ -150,10 +169,21 @@ public class SetCommand extends SqlCommand
 				processMoreResults(aSql, result, hasResult);
 				result.setSuccess();
 				appendSuccessMessage(result);
+
+				currentConnection.releaseSavepoint(sp);
+
+				if (checkSchema)
+				{
+					LogMgr.logDebug("SetCommand.execute()", "Updating current schema");
+					String newSchema = currentConnection.getCurrentSchema();
+					currentConnection.schemaChanged(oldSchema, newSchema);
+				}
 			}
+
 		}
 		catch (Exception e)
 		{
+			currentConnection.rollback(sp);
 			result = new StatementRunnerResult();
 			result.clear();
 			if (currentConnection.getMetadata().isOracle())
@@ -173,7 +203,7 @@ public class SetCommand extends SqlCommand
 		}
 		finally
 		{
-			SqlUtil.closeStatement(this.currentStatement);
+			// done() will close the currentStatement
 			this.done();
 		}
 

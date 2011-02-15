@@ -415,6 +415,7 @@ public class DbMetadata
 				this.selectIntoPattern = null;
 			}
 		}
+
 	}
 
 	public ProcedureReader getProcedureReader()
@@ -726,19 +727,31 @@ public class DbMetadata
 		if (StringUtil.isEmptyString(schema)) return true;
 		if (schemasToIgnore == null)
 		{
-			String ids = Settings.getInstance().getProperty("workbench.sql.ignoreschema." + this.getDbId(), null);
-			if (ids != null)
-			{
-				schemasToIgnore = new TreeSet<String>(StringUtil.stringToList(ids, ","));
-			}
-			else
-			{
-				 schemasToIgnore = Collections.emptySet();
-			}
+			schemasToIgnore = readIgnored("schema");
+		}
+		if (schemasToIgnore.contains("$current"))
+		{
+			String current = getCurrentSchema();
+			if (current != null && schema.equals(current)) return true;
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 
+	private Set<String> readIgnored(String type)
+	{
+		Set<String> result = null;
+		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), null);
+		if (ids != null)
+		{
+			result = new TreeSet<String>(StringUtil.stringToList(ids, ","));
+		}
+		else
+		{
+			 result = Collections.emptySet();
+		}
+		return result;
+	}
+	
 	/**
 	 * For testing purposes only
 	 */
@@ -845,19 +858,14 @@ public class DbMetadata
 	public boolean ignoreCatalog(String catalog)
 	{
 		if (catalog == null) return true;
-		String c = getCurrentCatalog();
-		if (c != null && c.equalsIgnoreCase(catalog)) return true;
 		if (catalogsToIgnore == null)
 		{
-			String cats = Settings.getInstance().getProperty("workbench.sql.ignorecatalog." + this.getDbId(), null);
-			if (cats != null)
-			{
-				catalogsToIgnore = new TreeSet<String>(StringUtil.stringToList(cats, ","));
-			}
-			else
-			{
-				 catalogsToIgnore = Collections.emptySet();
-			}
+			catalogsToIgnore = readIgnored("catalog");
+		}
+		if (catalogsToIgnore.contains("$current"))
+		{
+			String current = getCurrentCatalog();
+			if (current != null && catalog.equals(current)) return true;
 		}
 		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);
 	}

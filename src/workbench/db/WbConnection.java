@@ -1130,15 +1130,23 @@ public class WbConnection
 	 */
 	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
+		boolean changed = currentCatalog != null && !currentSchema.equals(newCatalog);
 		this.currentCatalog = newCatalog;
 		this.getObjectCache().clear();
-		this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
+		if (changed)
+		{
+			this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
+		}
 	}
 
 	public void schemaChanged(String oldSchema, String newSchema)
 	{
+		boolean changed = currentSchema != null && !currentSchema.equals(newSchema);
 		this.currentSchema = newSchema;
-		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
+		if (changed)
+		{
+			this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
+		}
 	}
 
 	private void initKeepAlive()
