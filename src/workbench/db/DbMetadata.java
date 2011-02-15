@@ -727,7 +727,7 @@ public class DbMetadata
 		if (StringUtil.isEmptyString(schema)) return true;
 		if (schemasToIgnore == null)
 		{
-			schemasToIgnore = readIgnored("schema");
+			schemasToIgnore = readIgnored("schema", null);
 		}
 		if (schemasToIgnore.contains("$current"))
 		{
@@ -737,10 +737,10 @@ public class DbMetadata
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 
-	private Set<String> readIgnored(String type)
+	private Set<String> readIgnored(String type, String defaultList)
 	{
 		Set<String> result = null;
-		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), null);
+		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), defaultList);
 		if (ids != null)
 		{
 			result = new TreeSet<String>(StringUtil.stringToList(ids, ","));
@@ -860,7 +860,7 @@ public class DbMetadata
 		if (catalog == null) return true;
 		if (catalogsToIgnore == null)
 		{
-			catalogsToIgnore = readIgnored("catalog");
+			catalogsToIgnore = readIgnored("catalog", "$current");
 		}
 		if (catalogsToIgnore.contains("$current"))
 		{
