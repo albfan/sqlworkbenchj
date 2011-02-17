@@ -199,7 +199,7 @@ public abstract class AbstractConstraintReader
 					constraint = constraint.trim();
 
 					Matcher m = p.matcher(constraint);
-					if (constraint.charAt(0) != '(' && !m.matches())
+					if (constraint.charAt(0) != '(' && !m.matches() && !constraint.startsWith("EXCLUDE"))
 					{
 						constraint = "(" + constraint + ")";
 					}

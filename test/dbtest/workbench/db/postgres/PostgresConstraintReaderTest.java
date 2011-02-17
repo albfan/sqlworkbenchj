@@ -44,7 +44,13 @@ public class PostgresConstraintReaderTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		String sql = "CREATE TABLE check_test (id integer, constraint positive_id check (id > 42));\n"+
+		String sql =
+			"CREATE TABLE check_test " +
+			"(\n" +
+			"   id integer, \n" +
+			"   constraint aaa_check_id check (id > 42), \n" +
+			"   constraint bbb_exclusion exclude (id WITH = )\n" +
+			");\n"+
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 	}
@@ -65,12 +71,19 @@ public class PostgresConstraintReaderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("check_test"));
 		List<TableConstraint> cons = con.getMetadata().getTableConstraints(tbl);
 		assertNotNull(cons);
-		assertEquals(1, cons.size());
-		TableConstraint constraint = cons.get(0);
-		assertEquals("positive_id", constraint.getConstraintName());
-		assertEquals("(id > 42)", constraint.getExpression());
-		assertEquals("check", constraint.getType());
-		assertEquals("CONSTRAINT positive_id CHECK (id > 42)", constraint.getSql());
+		assertEquals(2, cons.size());
+		TableConstraint check = cons.get(0);
+		assertEquals("aaa_check_id", check.getConstraintName());
+		assertEquals("(id > 42)", check.getExpression());
+		assertEquals("check", check.getType());
+		assertEquals("CONSTRAINT aaa_check_id CHECK (id > 42)", check.getSql());
+
+		TableConstraint exclusion = cons.get(1);
+		assertEquals("bbb_exclusion", exclusion.getConstraintName());
+		assertEquals("EXCLUDE USING btree (id WITH =)", exclusion.getExpression());
+		assertEquals("exclusion", exclusion.getType());
+		assertEquals("CONSTRAINT bbb_exclusion EXCLUDE USING btree (id WITH =)", exclusion.getSql());
+
 	}
 
 }

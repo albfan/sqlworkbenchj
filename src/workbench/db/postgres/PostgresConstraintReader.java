@@ -23,11 +23,16 @@ public class PostgresConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL =
-					 "select rel.conname, rel.consrc, obj_description(t.oid) as remarks \n" +
-           "from pg_class t, pg_constraint rel \n" +
-           "where t.relname = ? \n" +
-           "and   t.oid = rel.conrelid " +
-		       "and   rel.contype = 'c'";
+				"select rel.conname,  \n" +
+				"       case  \n" +
+				"         when rel.consrc is null then pg_get_constraintdef(rel.oid) \n" +
+				"         else rel.consrc \n" +
+				"       end as src, \n" +
+				"       obj_description(t.oid) as remarks  \n" +
+				"from pg_class t \n" +
+				"  join pg_constraint rel on t.oid = rel.conrelid   \n" +
+				"where rel.contype in ('c', 'x') \n" +
+				" and t.relname = ? ";
 
 	public String getColumnConstraintSql()
 	{

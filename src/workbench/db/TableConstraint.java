@@ -15,7 +15,7 @@ import workbench.util.StringUtil;
 
 /**
  * Represents a single table (check) constraint
- * 
+ *
  * @author Thomas Kellerer
  */
 public class TableConstraint
@@ -25,7 +25,7 @@ public class TableConstraint
 	private String expression;
 	private boolean isSystemName;
 	private String comment;
-	
+
 	public TableConstraint(String cName, String expr)
 	{
 		name = cName;
@@ -56,7 +56,7 @@ public class TableConstraint
 	{
 		return comment;
 	}
-	
+
 	public String getExpression()
 	{
 		return expression;
@@ -90,7 +90,7 @@ public class TableConstraint
 		if (other == null) return false;
 		return StringUtil.equalString(expression, other.expression);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableConstraint)
@@ -101,13 +101,16 @@ public class TableConstraint
 	}
 
 	/**
-	 * Returns the type of this table constraint. 
-	 * Currently only check constraints are implemented.
-	 * 
+	 * Returns the type of this table constraint.
+	 *
 	 * @return "check"
 	 */
 	public String getType()
 	{
+		if (expression.toLowerCase().startsWith("exclude"))
+		{
+			return "exclusion";
+		}
 		return "check";
 	}
 
@@ -115,18 +118,25 @@ public class TableConstraint
 	{
 		return getSql();
 	}
-	
+
 	public String getSql()
 	{
 		StringBuilder result = new StringBuilder(50);
+
 		if (StringUtil.isNonBlank(name) && !isSystemName())
 		{
 			result.append("CONSTRAINT ");
 			result.append(name);
 			result.append(' ');
 		}
-		
-		if (!expression.toLowerCase().startsWith("check")) result.append("CHECK ");
+
+		// Check if the returned expression already includes the CHECK keyword
+		// PostgreSQL 9.0 supports "exclusion constraint which start with EXCLUDE
+		// in that case the keyword CHECK may not be added as well.
+		if (!expression.toLowerCase().startsWith("check") && !expression.toLowerCase().startsWith("exclude"))
+		{
+			result.append("CHECK ");
+		}
 		result.append(expression);
 		return result.toString();
 	}
