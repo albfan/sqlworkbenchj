@@ -71,6 +71,10 @@ public class TextUtilitiesTest
 
 		start = TextUtilities.findWordStart("test", 5);
 		assertEquals(0, start);
+
+		start = TextUtilities.findWordStart(line, 14);
+		assertEquals(10, start);
+
 	}
 
 	@Test
@@ -85,6 +89,9 @@ public class TextUtilitiesTest
 
 		end = TextUtilities.findWordEnd(line, 5);
 		assertEquals(7, end);
+
+		end = TextUtilities.findWordEnd(line, 10);
+		assertEquals(14, end);
 
 	}
 }

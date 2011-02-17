@@ -154,7 +154,10 @@ public class TextUtilities
 	 */
 	public static int findWordStart(String line, int pos)
 	{
-		if (pos >= line.length()) return 0;
+		if (pos >= line.length())
+		{
+			pos = line.length();
+		}
 
 		char ch = line.charAt(pos - 1);
 
