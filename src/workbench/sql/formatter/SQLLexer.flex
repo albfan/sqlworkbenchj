@@ -290,6 +290,7 @@ keyword=(
 "EVERY"|
 "EXCEPT"|
 "EXCEPTION"|
+"EXCLUDE"|
 "EXCLUSIVE"|
 "EXEC"|
 "EXECUTE"|

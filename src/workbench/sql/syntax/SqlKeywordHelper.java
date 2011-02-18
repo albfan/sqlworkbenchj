@@ -38,19 +38,16 @@ import workbench.util.StringUtil;
  * If any of those files exist in the config directory, their contents
  * is read as well and merged with the predefined keywords.
  * <br/>
- * For DBS specific keywords, this class looks for the above filenames with the
+ * For DBMS specific keywords, this class looks for the above filenames with the
  * corresponding dbid as a prefix (e.g. postgresql.functions.wb)
  * <br/>
  * The DBMS specific keywords will be added to the global ones.
+ *
  * @author Thomas Kellerer
  */
 public class SqlKeywordHelper
 {
 	private String dbId;
-	private Set<String> keywords;
-	private Set<String> operators;
-	private Set<String> functions;
-	private Set<String> datatypes;
 
 	/**
 	 * Read dbms-independent keywords.
@@ -72,62 +69,38 @@ public class SqlKeywordHelper
 
 	public Set<String> getKeywords()
 	{
-		if (keywords == null)
+		Set<String> keywords = loadKeywordsFromFile("keywords.wb");
+		if (this.dbId != null)
 		{
-			keywords = loadKeywordsFromFile("keywords.wb");
-			if (this.dbId != null)
-			{
-				// old way of customizing DB specific keywords
-				String key = "workbench.db." + dbId + ".syntax.keywords";
-				List<String> addwords = StringUtil.stringToList(Settings.getInstance().getProperty(key, ""), ",", true, true);
-				keywords.addAll(addwords);
-			}
+			// old way of customizing DB specific keywords
+			String key = "workbench.db." + dbId + ".syntax.keywords";
+			List<String> addwords = StringUtil.stringToList(Settings.getInstance().getProperty(key, ""), ",", true, true);
+			keywords.addAll(addwords);
 		}
 		return keywords;
 	}
 
 	public Set<String> getDataTypes()
 	{
-		if (datatypes == null)
-		{
-			datatypes = loadKeywordsFromFile("datatypes.wb");
-		}
-		return datatypes;
+		return loadKeywordsFromFile("datatypes.wb");
 	}
 
 	public Set<String> getOperators()
 	{
-		if (operators == null)
-		{
-			operators = loadKeywordsFromFile("operators.wb");
-		}
-		return operators;
+		return loadKeywordsFromFile("operators.wb");
 	}
 
 	public Set<String> getSqlFunctions()
 	{
-		if (functions == null)
+		Set<String> functions = loadKeywordsFromFile("functions.wb");
+		if (this.dbId != null)
 		{
-			functions = loadKeywordsFromFile("functions.wb");
-			if (this.dbId != null)
-			{
-				// old way of customizing DB specific functions
-				String key = "workbench.db." + dbId + ".syntax.functions";
-				List<String> addfuncs = StringUtil.stringToList(Settings.getInstance().getProperty(key, ""), ",", true, true);
-				functions.addAll(addfuncs );
-			}
+			// old way of customizing DB specific functions
+			String key = "workbench.db." + dbId + ".syntax.functions";
+			List<String> addfuncs = StringUtil.stringToList(Settings.getInstance().getProperty(key, ""), ",", true, true);
+			functions.addAll(addfuncs );
 		}
 		return functions;
-	}
-
-	public boolean isFunction(String func)
-	{
-		return getSqlFunctions().contains(func);
-	}
-
-	public boolean isKeyword(String word)
-	{
-		return getKeywords().contains(word);
 	}
 
 	private Set<String> loadKeywordsFromFile(String filename)

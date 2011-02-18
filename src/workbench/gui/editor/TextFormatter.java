@@ -59,7 +59,7 @@ public class TextFormatter
 			}
 
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
-			f.setDBFunctions(dbFunctions);
+			f.addDBFunctions(dbFunctions);
 			f.setDbDataTypes(dbDatatypes);
 
 			try

@@ -365,7 +365,7 @@ public class SqlFormatterTest
 		String sql = "SELECT right(name,5) FROM person";
 		SqlFormatter f = new SqlFormatter(sql);
 		f.setUseLowerCaseFunctions(true);
-		f.setDBFunctions(CollectionUtil.treeSet("RIGHT", "LEFT"));
+		f.addDBFunctions(CollectionUtil.treeSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql();
 //		System.out.println("*******\n" + formatted + "\n**********");
 		String expected = "SELECT right(name,5)\nFROM person";
@@ -481,6 +481,7 @@ public class SqlFormatterTest
 							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
 							"FROM tmp";
 		f = new SqlFormatter(sql);
+		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		formatted = f.getFormattedSql();
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
@@ -566,6 +567,17 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testRownumber()
+		throws Exception
+	{
+		String sql = "select row_number() over (order by id) from table";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected = "SELECT row_number() OVER (ORDER BY id)\nFROM TABLE";
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testUnknown()
 		throws Exception
 	{
@@ -592,6 +604,7 @@ public class SqlFormatterTest
 			"         e.empno";
 
 		SqlFormatter f = new SqlFormatter(sql);
+		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		String formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals(expected, formatted);
@@ -749,7 +762,8 @@ public class SqlFormatterTest
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		lines = TestUtil.getLines(formatted);
-		assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+//		System.out.println("***\n" + formatted + "\n***");
+		assertEquals("  id1         INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2),", lines.get(7));
 		assertEquals("  FOREIGN KEY (id3) REFERENCES othertable (id)", lines.get(8));
 
@@ -763,8 +777,33 @@ public class SqlFormatterTest
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		lines = TestUtil.getLines(formatted);
-		assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
+		assertEquals("  id1         INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
+
+		sql = "create table person (id1 integer not null, constraint xyz exclude (id1 with =))";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		String expected =
+				"CREATE TABLE person \n"+
+				"(\n"+
+				"  id1   INTEGER NOT NULL,\n"+
+				"  CONSTRAINT xyz EXCLUDE (id1 WITH = )\n"+
+				")";
+		assertEquals(expected, formatted.trim());
+
+		sql = "create table person (id1 integer not null primary key, some_data varchar (100), constraint xyz exclude (some_data with =))";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+//		System.out.println("++++\n" + formatted + "\n-----");
+		expected =
+				"CREATE TABLE person \n"+
+				"(\n"+
+				"  id1         INTEGER NOT NULL PRIMARY KEY,\n"+
+				"  some_data   VARCHAR(100),\n"+
+				"  CONSTRAINT xyz EXCLUDE (some_data WITH = )\n"+
+				")";
+		assertEquals(expected, formatted.trim());
+
 	}
 
 	@Test
@@ -887,7 +926,7 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "alter table epg_value add constraint fk_value_attr foreign key (id_attribute) references attribute(id);";
-			String expected = "ALTER TABLE epg_value ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute(id);";
+			String expected = "ALTER TABLE epg_value ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute (id);";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
 			assertEquals("ALTER TABLE not correctly formatted", expected, formatted.toString().trim());

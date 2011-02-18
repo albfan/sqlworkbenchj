@@ -19,8 +19,6 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -59,6 +57,28 @@ public class SqlKeywordHelperTest
 		assertTrue(keywords.contains("ABORT"));
 		assertTrue(keywords.contains("IDENTIFIED"));
 		assertTrue(keywords.contains("EXCEPTION"));
+		Set<String> functions = helper.getSqlFunctions();
+		assertTrue(functions.contains("nvl"));
+		assertTrue(functions.contains("decode"));
+		assertTrue(functions.contains("dense_rank"));
+	}
+
+	@Test
+	public void testPostgresKeywords()
+	{
+		SqlKeywordHelper helper = new SqlKeywordHelper("postgresql");
+		Collection<String> keywords = helper.getKeywords();
+		assertTrue(keywords.contains("EXCEPT"));
+		Set<String> functions = helper.getSqlFunctions();
+		assertTrue(functions.contains("coalesce"));
+		assertTrue(functions.contains("dense_rank"));
+		assertTrue(functions.contains("row_number"));
+		assertTrue(functions.contains("REGEXP_MATCHES"));
+		assertTrue(functions.contains("REGEXP_REPLACE"));
+		assertTrue(functions.contains("REGEXP_SPLIT_TO_ARRAY"));
+		assertTrue(functions.contains("string_agg"));
+		assertTrue(functions.contains("UNNEST"));
+		assertTrue(functions.contains("generate_series"));
 	}
 
 	@Test
@@ -91,6 +111,8 @@ public class SqlKeywordHelperTest
 		SqlKeywordHelper helper = new SqlKeywordHelper();
 		Set<String> result = helper.getSqlFunctions();
 		assertTrue(result.size() > 0);
+		assertTrue(result.contains("row_number"));
+		assertTrue(result.contains("coalesce"));
 	}
 
 	@Test

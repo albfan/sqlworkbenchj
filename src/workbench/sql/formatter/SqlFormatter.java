@@ -13,7 +13,6 @@ package workbench.sql.formatter;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import workbench.resource.Settings;
@@ -56,10 +55,13 @@ public class SqlFormatter
 	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.treeSet(WHERE_TERMINAL,
 		"SELECT", "UPDATE", "DELETE", "INSERT", "CREATE", "CREATE OR REPLACE");
 
+	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.treeSet(
+		"UNIQUE", "CONSTRAINT", "FOREIGN KEY", "PRIMARY KEY");
+
 	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.treeSet(";");
 
-	public static final Set<String> SELECT_TERMINAL = CollectionUtil.treeSet("FROM");
-	private final Set<String> SET_TERMINAL = CollectionUtil.treeSet("FROM", "WHERE");
+	public static final Set<String> SELECT_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM");
+	private final Set<String> SET_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM", "WHERE");
 
 	private CharSequence sql;
 	private SQLLexer lexer;
@@ -68,8 +70,8 @@ public class SqlFormatter
 	private StringBuilder leadingWhiteSpace = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
-	private Set<String> dbFunctions = Collections.emptySet();
-	private Set<String> dataTypes = Collections.emptySet();
+	private Set<String> dbFunctions = CollectionUtil.caseInsensitiveSet();
+	private Set<String> dataTypes = CollectionUtil.caseInsensitiveSet();
 	private static final String NL = "\n";
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
@@ -105,7 +107,7 @@ public class SqlFormatter
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		commaAfterLineBreak = Settings.getInstance().getFormatterSetCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
-		addStandardFunctions(dbFunctions);
+		initTypesAndFunctions();
 	}
 
 	public void setUseLowerCaseFunctions(boolean flag)
@@ -142,20 +144,34 @@ public class SqlFormatter
 		addSpaceAfterLineBreakComma = flag;
 	}
 
-	public void setDBFunctions(Set<String> functionNames)
+	/**
+	 * Adds the passed set of DBMS specific functions to the list
+	 * of already existing database functions.
+	 * Duplicates will be removed.
+	 */
+	public void addDBFunctions(Set<String> functionNames)
 	{
-		this.dbFunctions = CollectionUtil.caseInsensitiveSet();
 		if (functionNames != null)
 		{
 			this.dbFunctions.addAll(functionNames);
 		}
-		addStandardFunctions(dbFunctions);
 	}
 
-	private void addStandardFunctions(Set<String> functions)
+	public void addDBMSFunctions(String dbid)
+	{
+		SqlKeywordHelper keyWords = new SqlKeywordHelper(dbid);
+		if (dbFunctions == null)
+		{
+			dbFunctions = CollectionUtil.caseInsensitiveSet();
+		}
+		dbFunctions.addAll(keyWords.getSqlFunctions());
+	}
+
+	private void initTypesAndFunctions()
 	{
 		SqlKeywordHelper keyWords = new SqlKeywordHelper();
-		functions.addAll(keyWords.getSqlFunctions());
+		dbFunctions = keyWords.getSqlFunctions();
+		dataTypes = keyWords.getDataTypes();
 	}
 
 	private void saveLeadingWhitespace()
@@ -315,17 +331,12 @@ public class SqlFormatter
 			SqlKeywordHelper keyWords = new SqlKeywordHelper();
 			dbFunctions = keyWords.getSqlFunctions();
 		}
-		return this.dbFunctions.contains(key.toUpperCase());
+		return this.dbFunctions.contains(key);
 	}
 
 	private boolean isDatatype(String key)
 	{
-		if (dataTypes == null)
-		{
-			SqlKeywordHelper keyWords = new SqlKeywordHelper();
-			dataTypes = keyWords.getDataTypes();
-		}
-		return this.dataTypes.contains(key.toUpperCase());
+		return this.dataTypes.contains(key);
 	}
 
 	private boolean needsWhitespace(SQLToken last, SQLToken current)
@@ -341,26 +352,26 @@ public class SqlFormatter
 		if (last == null) return false;
 		if (current.isWhiteSpace()) return false;
 		if (last.isWhiteSpace()) return false;
-		String lastV = last.getContents();
-		String currentV = current.getContents();
-		char lastChar = lastV.charAt(0);
-		char currChar = currentV.charAt(0);
+		String lastText = last.getContents();
+		String currentText = current.getContents();
+		char lastChar = lastText.charAt(0);
+		char currChar = currentText.charAt(0);
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		boolean isCurrentOpenBracket = "(".equals(currentV);
-		boolean isLastOpenBracket = "(".equals(lastV);
-		boolean isLastCloseBracket = ")".equals(lastV);
+		boolean isCurrentOpenBracket = "(".equals(currentText);
+		boolean isLastOpenBracket = "(".equals(lastText);
+		boolean isLastCloseBracket = ")".equals(lastText);
 
-		if (lastV.endsWith("'") && currentV.equals("''")) return false;
-		if (lastV.equals("''") && currentV.startsWith("'")) return false;
+		if (lastText.endsWith("'") && currentText.equals("''")) return false;
+		if (lastText.equals("''") && currentText.startsWith("'")) return false;
 
-		if (isCurrentOpenBracket && last.isIdentifier()) return false;
-		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
-		if (isCurrentOpenBracket && isDatatype(lastV)) return false;
+		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
+		if (isCurrentOpenBracket && isDatatype(currentText)) return false;
 		if (isCurrentOpenBracket && last.isReservedWord()) return true;
+		if (isCurrentOpenBracket && last.isIdentifier()) return true;
 		if (isLastCloseBracket && currChar == ',') return false;
 		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
 
-		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentV)) return false;
+		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentText)) return false;
 
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
@@ -1560,6 +1571,10 @@ public class SqlFormatter
 		while (t != null)
 		{
 			String w = t.getContents();
+			if (last != null && last.getText().equals(",") && CREATE_TABLE_TERMINAL.contains(w))
+			{
+				break;
+			}
 
 			if ("(".equals(w))
 			{
