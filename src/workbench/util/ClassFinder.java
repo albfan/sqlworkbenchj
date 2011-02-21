@@ -18,8 +18,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -28,18 +30,31 @@ import java.util.jar.JarFile;
  *
  * @see workbench.gui.profiles.DriverEditorPanel
  * @see workbench.gui.settings.LnFDefinitionPanel
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ClassFinder
 {
 	private Class toFind;
+	private Set<String> excludedClasses = Collections.emptySet();;
 
 	public ClassFinder(Class clz)
 	{
 		toFind = clz;
 	}
 
+	/**
+	 * Define a list of classnames that should be ignored during scanning.
+	 * 
+	 * @param classNames
+	 */
+	public void setExcludedClasses(String... classNames)
+	{
+		if (classNames != null)
+		{
+			excludedClasses = CollectionUtil.treeSet(classNames);
+		}
+	}
 	/**
 	 * Search all files for an implementation of java.sql.Driver.
 	 * <br/>
@@ -91,6 +106,11 @@ public class ClassFinder
 				// somepackage.classprefix.SomeClass could exist
 				String clsName = name.replace(".class", "").replace("/", ".");
 
+				if (excludedClasses.contains(clsName))
+				{
+					continue;
+				}
+
 				try
 				{
 					Class clz = loader.loadClass(clsName);
@@ -131,7 +151,7 @@ public class ClassFinder
 	}
 
 	// Taken from http://snippets.dzone.com/posts/show/4831
-	
+
 	/**
 	 * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
 	 *

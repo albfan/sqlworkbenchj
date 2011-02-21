@@ -53,6 +53,7 @@ public class DriverEditorPanel
 		libraryPath.addPropertyChangeListener("filename", this);
 		libraryPath.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				selectClass();
@@ -60,6 +61,7 @@ public class DriverEditorPanel
 		});
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (ignoreChange) return;
@@ -69,6 +71,10 @@ public class DriverEditorPanel
 	protected void selectClass()
 	{
 		ClassFinder finder = new ClassFinder(Driver.class);
+
+		// Remove the deprecated Oracle driver from the list
+		finder.setExcludedClasses("oracle.jdbc.driver.OracleDriver");
+
 		List<String> libs = DbDriver.splitLibraryList(libraryPath.getFilename());
 
 		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
