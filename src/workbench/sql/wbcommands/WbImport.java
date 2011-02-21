@@ -84,6 +84,7 @@ public class WbImport
 	public static final String ARG_EXCLUDE_FILES = "excludeFiles";
 	public static final String ARG_USE_SAVEPOINT = "useSavepoint";
 	public static final String ARG_INSERT_START = "insertSQL";
+	public static final String ARG_ILLEGAL_DATE_NULL = "illegalDateIsNull";
 
 	private DataImporter imp;
 
@@ -123,6 +124,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_DIRECTORY);
 		cmdLine.addArgument(ARG_TARGET_SCHEMA);
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_ILLEGAL_DATE_NULL, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
@@ -366,6 +368,7 @@ public class WbImport
 			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
+			textParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
@@ -525,7 +528,7 @@ public class WbImport
 		}
 
 		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
-		
+
 		ImportFileLister sorter = getFileNameSorter(cmdLine, defaultExtension);
 		if (sorter != null)
 		{

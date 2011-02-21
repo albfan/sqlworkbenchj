@@ -42,19 +42,19 @@ public class ValueConverterTest
 			converter.setBooleanLiterals(StringUtil.stringToList("true,1,-1", ","), StringUtil.stringToList("false,0", ","));
 			Object o = converter.convertValue("true", Types.BOOLEAN);
 			assertEquals(Boolean.TRUE, o);
-			
+
 			o = converter.convertValue("1", Types.BOOLEAN);
 			assertEquals(Boolean.TRUE, o);
-			
+
 			o = converter.convertValue("-1", Types.BOOLEAN);
 			assertEquals(Boolean.TRUE, o);
-			
+
 			o = converter.convertValue("false", Types.BOOLEAN);
 			assertEquals(Boolean.FALSE, o);
-			
+
 			o = converter.convertValue("0", Types.BOOLEAN);
 			assertEquals(Boolean.FALSE, o);
-			
+
 			boolean hadError = false;
 			try
 			{
@@ -76,7 +76,7 @@ public class ValueConverterTest
 				hadError = true;
 			}
 			assertEquals("No error thrown", true, hadError);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -95,17 +95,17 @@ public class ValueConverterTest
 		{
 			Object i = converter.convertValue("42", Types.INTEGER);
 			assertEquals("Wrong value returned", new Integer(42), i);
-			
+
 			i = converter.convertValue("32168", Types.BIGINT);
 			assertEquals("Wrong value returned", new Long(32168), i);
-			
+
 			i = converter.convertValue("4.2E+1", Types.INTEGER);
 			assertEquals("Wrong value returned", new Integer(42), i);
 
 			converter.setDecimalCharacter(',');
 			i = converter.convertValue("4,2E+1", Types.INTEGER);
 			assertEquals("Wrong value returned", new Integer(42), i);
-			
+
 			converter.setDecimalCharacter('.');
 			i = converter.convertValue("3.2168E+4", Types.BIGINT);
 			assertEquals("Wrong value returned", new Long(32168), i);
@@ -127,7 +127,7 @@ public class ValueConverterTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testBooleanConvert()
 		throws Exception
@@ -146,7 +146,7 @@ public class ValueConverterTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
+
 		boolean exception = false;
 		try
 		{
@@ -169,7 +169,7 @@ public class ValueConverterTest
 			exception = true;
 		}
 		assertEquals("Not exception thrown", true, exception);
-		
+
 	}
 
 	@Test
@@ -180,26 +180,26 @@ public class ValueConverterTest
 		converter.setDecimalCharacter('.');
 		Object data = converter.convertValue("42", Types.INTEGER);
 		assertEquals("Number not converted", new Integer(42), data);
-		
+
 		data = converter.convertValue("42", Types.BIGINT);
 		assertEquals("Number not converted", new Long(42), data);
-		
+
 		data = converter.convertValue("3.14152", Types.DECIMAL);
 		BigDecimal d = (BigDecimal)data;
 		assertEquals("Wrong value", 3.14152, d.doubleValue(), 0.001);
 	}
-	
+
 	@Test
 	public void testConvertStrings() throws Exception
 	{
 		ValueConverter converter = new ValueConverter();
 		Object data = converter.convertValue("Test", Types.VARCHAR);
 		assertEquals("Test", data);
-		
+
 		data = converter.convertValue(new StringBuilder("Test"), Types.VARCHAR);
 		assertEquals("Test", data);
 	}
-	
+
 	@Test
 	public void testConvertDateLiterals() throws Exception
 	{
@@ -210,12 +210,12 @@ public class ValueConverterTest
 		c.set(2007, 3, 1);
 		Date expResult = new java.sql.Date(c.getTime().getTime());
 		Date result = converter.parseDate(aDate);
-		
+
 		assertEquals(expResult, result);
-		
+
 		Object data = converter.convertValue(aDate, Types.DATE);
 		assertEquals(expResult, data);
-		
+
 		c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.HOUR, 0);
@@ -225,18 +225,30 @@ public class ValueConverterTest
 		java.sql.Date now = new java.sql.Date(c.getTime().getTime());
 		data = converter.convertValue("today", Types.DATE);
 		assertEquals(0, now.compareTo((java.sql.Date)data));
-		
+
 		data = converter.convertValue("now", Types.TIME);
 		assertTrue(data instanceof java.sql.Time);
-		
+
 		long justnow = System.currentTimeMillis();
 		data = converter.convertValue("current_timestamp", Types.TIMESTAMP);
 		assertTrue(data instanceof java.sql.Timestamp);
 		java.sql.Timestamp sql = (java.sql.Timestamp)data;
-		
+
 		// I cannot compare for equality, but the whole call should not take longer
 		// than 250ms so the difference should not be greater than that.
 		assertEquals("Not really 'now': ", true, (sql.getTime() - justnow) < 250);
+
+
+		try
+		{
+			converter.setIllegalDateIsNull(true);
+			data = converter.convertValue("2011-02-31", Types.DATE);
+			assertNull(data);
+		}
+		catch (ConverterException ex)
+		{
+			fail("No exception should have been thrown");
+		}
 	}
-	
+
 }

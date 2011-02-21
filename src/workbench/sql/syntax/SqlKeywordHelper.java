@@ -120,7 +120,7 @@ public class SqlKeywordHelper
 	private Set<String> readFile(String filename)
 	{
 		// First read the built-in functions
-		InputStream s = SqlKeywordHelper.class.getResourceAsStream(filename);
+		InputStream s = getClass().getResourceAsStream(filename);
 		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		if (s != null)
 		{

@@ -83,6 +83,7 @@ public class TextFileParser
 	private boolean emptyStringIsNull;
 	private boolean alwaysQuoted;
 	private boolean trimValues;
+	private boolean illegalDateIsNull;
 
 	private RowDataReceiver receiver;
 	private boolean abortOnError;
@@ -262,6 +263,11 @@ public class TextFileParser
 			this.hasWarnings = true;
 			importColumns.get(index).setColumnFilter(null);
 		}
+	}
+
+	public void setIllegalDateIsNull(boolean flag)
+	{
+		this.illegalDateIsNull = flag;
 	}
 
 	public void setBlobMode(BlobMode mode)
@@ -797,6 +803,8 @@ public class TextFileParser
 			tok = csv;
 		}
 
+		converter.setIllegalDateIsNull(illegalDateIsNull);
+
 		tok.setTrimValues(this.trimValues);
 		int sourceCount = importColumns.size();
 
@@ -1022,7 +1030,7 @@ public class TextFileParser
 					currentLine = null;
 				}
 			}
-			
+
 			filesProcessed.add(inputFile);
 			if (!cancelImport)
 			{
