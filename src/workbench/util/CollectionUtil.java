@@ -50,7 +50,7 @@ public class CollectionUtil
 		result.addAll(Arrays.asList(add));
 		return result;
 	}
-	
+
 	public static Set<String> caseInsensitiveSet()
 	{
 		return new TreeSet<String>(CaseInsensitiveComparator.INSTANCE);

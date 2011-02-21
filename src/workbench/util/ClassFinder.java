@@ -18,10 +18,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -45,16 +47,17 @@ public class ClassFinder
 
 	/**
 	 * Define a list of classnames that should be ignored during scanning.
-	 * 
+	 *
 	 * @param classNames
 	 */
-	public void setExcludedClasses(String... classNames)
+	public void setExcludedClasses(Collection<String> classNames)
 	{
 		if (classNames != null)
 		{
-			excludedClasses = CollectionUtil.treeSet(classNames);
+			excludedClasses = new TreeSet<String>(classNames);
 		}
 	}
+	
 	/**
 	 * Search all files for an implementation of java.sql.Driver.
 	 * <br/>

@@ -23,6 +23,7 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.ClassFinder;
 import workbench.util.StringUtil;
 
@@ -72,8 +73,9 @@ public class DriverEditorPanel
 	{
 		ClassFinder finder = new ClassFinder(Driver.class);
 
-		// Remove the deprecated Oracle driver from the list
-		finder.setExcludedClasses("oracle.jdbc.driver.OracleDriver");
+		// Ignore deprecated drivers
+		List<String> classes = Settings.getInstance().getListProperty("workbench.db.drivers.deprecated", false);
+		finder.setExcludedClasses(classes);
 
 		List<String> libs = DbDriver.splitLibraryList(libraryPath.getFilename());
 
