@@ -11,6 +11,7 @@
  */
 package workbench.db.diff;
 
+import java.io.File;
 import org.junit.Test;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,7 +62,6 @@ public class SchemaDiffTest
 		String xml = diff.getMigrateTargetXml();
 //		TestUtil util = new TestUtil("testBaseDiff");
 //		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
-//		Thread.yield();
 //		System.out.println("---------------\n" + xml + "\n---------------");
 
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
@@ -133,128 +133,107 @@ public class SchemaDiffTest
 
 	@Test
 	public void testGrantDiff()
+		throws Exception
 	{
-		try
-		{
-			setupGrantTestDb();
-			SchemaDiff diff = new SchemaDiff(source, target);
-			diff.setIncludeForeignKeys(false);
-			diff.setIncludeIndex(false);
-			diff.setIncludePrimaryKeys(false);
-			diff.setIncludeProcedures(false);
-			diff.setIncludeTableGrants(true);
-			diff.setIncludeTableConstraints(false);
-			diff.setIncludeViews(false);
-			diff.compareAll();
-			String xml = diff.getMigrateTargetXml();
+		setupGrantTestDb();
+		SchemaDiff diff = new SchemaDiff(source, target);
+		diff.setIncludeForeignKeys(false);
+		diff.setIncludeIndex(false);
+		diff.setIncludePrimaryKeys(false);
+		diff.setIncludeProcedures(false);
+		diff.setIncludeTableGrants(true);
+		diff.setIncludeTableConstraints(false);
+		diff.setIncludeViews(false);
+		diff.compareAll();
+		String xml = diff.getMigrateTargetXml();
 //			TestUtil util = new TestUtil("testGrantDiff");
 //			TestUtil.writeFile(new File(util.getBaseDir(), "grantdiff.xml"), xml);
 
-			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
-			assertEquals("Grantee not correct", "UNIT_TEST", value);
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
+		assertEquals("Grantee not correct", "UNIT_TEST", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/privilege");
-			assertEquals("Privilege not correct", "SELECT", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/privilege");
+		assertEquals("Privilege not correct", "SELECT", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/revoke-grants/grant[1]/privilege");
-			assertEquals("DELETE not revoked", "DELETE", value);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/revoke-grants/grant[1]/privilege");
+		assertEquals("DELETE not revoked", "DELETE", value);
 	}
+
 	/**
 	 * Check if an index change is detected even though nothing else has changed
 	 */
 	@Test
 	public void testIndexChangeOnly()
+		throws Exception
 	{
-		try
-		{
-			setupIndexDiffTestDb();
-			SchemaDiff diff = new SchemaDiff(source, target);
-			diff.setIncludeForeignKeys(true);
-			diff.setIncludeIndex(true);
-			diff.setIncludePrimaryKeys(true);
-			diff.setIncludeProcedures(false);
-			diff.setIncludeTableGrants(false);
-			diff.setIncludeTableConstraints(true);
-			diff.setIncludeViews(false);
-			diff.compareAll();
-			String xml = diff.getMigrateTargetXml();
+		setupIndexDiffTestDb();
+		SchemaDiff diff = new SchemaDiff(source, target);
+		diff.setIncludeForeignKeys(true);
+		diff.setIncludeIndex(true);
+		diff.setIncludePrimaryKeys(true);
+		diff.setIncludeProcedures(false);
+		diff.setIncludeTableGrants(false);
+		diff.setIncludeTableConstraints(true);
+		diff.setIncludeViews(false);
+		diff.compareAll();
+		String xml = diff.getMigrateTargetXml();
 //			TestUtil util = new TestUtil("testIndexChangeOnly");
 //			TestUtil.writeFile(new File(util.getBaseDir(), "indexdiff.xml"), xml);
-			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
-			assertEquals("Incorrect number of tables listed", "3", count);
+		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
+		assertEquals("Incorrect number of tables listed", "3", count);
 
-			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-index/index-def/index-expression");
-			assertEquals("Index for address_id not added", "LASTNAME ASC", value);
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-index/index-def/index-expression");
+		assertEquals("Index for address_id not added", "LASTNAME ASC", value);
 
-			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/drop-index");
-			assertEquals("Wrong index dropped", "INDEX_TO_BE_DELETED", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/drop-index");
+		assertEquals("Wrong index dropped", "INDEX_TO_BE_DELETED", value);
 
-			diff.setIncludeIndex(false);
-			xml = diff.getMigrateTargetXml();
+		diff.setIncludeIndex(false);
+		xml = diff.getMigrateTargetXml();
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
-			assertEquals("Incorrect number of tables listed", "3", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
+		assertEquals("Incorrect number of tables listed", "3", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/add-index)");
-			assertEquals("Add index present", "0", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/add-index)");
+		assertEquals("Add index present", "0", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/drop-index)");
-			assertEquals("Add index present", "0", count);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/drop-index)");
+		assertEquals("Add index present", "0", count);
 	}
 
 	@Test
 	public void testCheckConstraint()
+		throws Exception
 	{
-		try
-		{
-			setupCheckTest();
-			SchemaDiff diff = new SchemaDiff(source, target);
-			diff.setIncludeForeignKeys(false);
-			diff.setIncludeIndex(false);
-			diff.setIncludePrimaryKeys(false);
-			diff.setIncludeProcedures(false);
-			diff.setIncludeTableGrants(false);
-			diff.setIncludeTableConstraints(true);
-			diff.setCompareConstraintsByName(true);
-			diff.setIncludeViews(false);
-			diff.compareAll();
-			String xml = diff.getMigrateTargetXml();
+		setupCheckTest();
+		SchemaDiff diff = new SchemaDiff(source, target);
+		diff.setIncludeForeignKeys(false);
+		diff.setIncludeIndex(false);
+		diff.setIncludePrimaryKeys(false);
+		diff.setIncludeProcedures(false);
+		diff.setIncludeTableGrants(false);
+		diff.setIncludeTableConstraints(true);
+		diff.setCompareConstraintsByName(true);
+		diff.setIncludeViews(false);
+		diff.compareAll();
+		String xml = diff.getMigrateTargetXml();
 //			System.out.println("**********\n" + xml + "\n*****************");
-			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
-			assertEquals("1", count);
+		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
+		assertEquals("1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/modify-constraint/constraint-definition[@name='POSITIVE_ID'])");
-			assertEquals("1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/modify-constraint/constraint-definition[@name='POSITIVE_ID'])");
+		assertEquals("1", count);
 
-			diff.setCompareConstraintsByName(false);
-			xml = diff.getMigrateTargetXml();
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
-			assertEquals("1", count);
+		diff.setCompareConstraintsByName(false);
+		xml = diff.getMigrateTargetXml();
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
+		assertEquals("1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='POSITIVE_ID'])");
-			assertEquals("1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='POSITIVE_ID'])");
+		assertEquals("1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/drop-constraint/constraint-definition[@name='POSITIVE_ID'])");
-			assertEquals("1", count);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/drop-constraint/constraint-definition[@name='POSITIVE_ID'])");
+		assertEquals("1", count);
 	}
 
 	private void setupCheckTest()
@@ -284,7 +263,7 @@ public class SchemaDiffTest
 			")");
 
 	}
-	
+
 	private void setupGrantTestDb()
 		throws SQLException, ClassNotFoundException
 	{
@@ -355,7 +334,7 @@ public class SchemaDiffTest
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
 
-		TestUtil.executeScript(source, 
+		TestUtil.executeScript(source,
 			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n"+
 			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n"+
 			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n"+

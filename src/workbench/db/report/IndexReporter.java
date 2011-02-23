@@ -113,6 +113,8 @@ public class IndexReporter
 
 	private void writeDbmsOptions(StrBuffer output, StrBuffer indent, IndexDefinition index)
 	{
+		if (indexOptions == null) return;
+
 		List<ObjectOption> options = indexOptions.get(index);
 		if (CollectionUtil.isEmpty(options)) return;
 

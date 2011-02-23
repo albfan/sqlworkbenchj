@@ -475,6 +475,7 @@ public class ReportTable
 	private void writeDBMSOptions(StrBuffer output, StrBuffer indent)
 	{
 		if (CollectionUtil.isEmpty(dbmsOptions)) return;
+		
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
 		output.append(myindent);
