@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-02-13">
+    <entry dev-build="1" type="enh">For Oracle, WbSchemaReport now includes the definition for partitioned tables and indexes</entry>
     <entry dev-build="1" type="fix">Retrieving of column comments for queries did not work when the tables had an alias</entry>
   </release>
   <release build="110" date="2011-02-13">
