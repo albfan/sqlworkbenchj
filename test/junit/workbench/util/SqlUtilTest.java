@@ -108,7 +108,7 @@ public class SqlUtilTest
 		SqlUtil.appendAndCondition(sql, "some_col", null);
 		assertEquals("select * from sometable AND some_col = 'some_condition'", sql.toString());
 	}
-	
+
 	@Test
 	public void testGetFunctionParams()
 		throws Exception
@@ -722,12 +722,19 @@ public class SqlUtilTest
 		sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";
 		l = SqlUtil.getTables(sql, false);
 		assertEquals(l.size(), 1);
-		assertEquals(l.get(0), "\"Dumb Named Schema\".\"Problematically Named Table\"");
+		assertEquals( "\"Dumb Named Schema\".\"Problematically Named Table\"", l.get(0));
 
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(l.size(), 1);
-		assertEquals(l.get(0), "\"Dumb Named Schema\".\"Problematically Named Table\" x");
+		assertEquals( "\"Dumb Named Schema\".\"Problematically Named Table\" x", l.get(0));
 
+		l = SqlUtil.getTables("select * from some_table limit 100;");
+		assertEquals(l.size(), 1);
+		assertEquals("some_table", l.get(0));
+
+		l = SqlUtil.getTables("select * from some_table as something;");
+		assertEquals(l.size(), 1);
+		assertEquals("some_table", l.get(0));
 	}
 
 	@Test
@@ -779,7 +786,7 @@ public class SqlUtilTest
 		try
 		{
 			WbConnection con = util.getConnection();
-			TestUtil.executeScript(con, 
+			TestUtil.executeScript(con,
 				"CREATE TABLE person (id integer, firstname varchar(100), lastname varchar(100));\n" +
 				"COMMIT;\n");
 
@@ -809,7 +816,7 @@ public class SqlUtilTest
 		}
 
 	}
-	
+
 	@Test
 	public void testReplaceParameters()
 		throws Exception

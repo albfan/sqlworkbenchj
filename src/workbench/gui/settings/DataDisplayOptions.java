@@ -44,6 +44,7 @@ public class DataDisplayOptions
 		initComponents();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		rowHeightResize.setSelected(GuiSettings.getAllowRowHeightResizing());
@@ -179,7 +180,7 @@ public class DataDisplayOptions
 			localeDropDown.setSelectedIndex(currentIndex);
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

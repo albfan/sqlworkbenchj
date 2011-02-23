@@ -83,7 +83,6 @@ public class ResultColumnMetaDataTest
 			meta.retrieveColumnRemarks(info);
 			for (int i=0; i < info.getColumnCount(); i++)
 			{
-//				System.out.println(info.getColumn(i).getComment());
 				if (i == 0)
 				{
 					assertEquals("Primary key", info.getColumn(i).getComment());
@@ -126,6 +125,46 @@ public class ResultColumnMetaDataTest
 					assertEquals("The last name", info.getColumn(i).getComment());
 				}
 			}
+
+			sql = "select * from person as p";
+			rs = stmt.executeQuery(sql);
+			info = new ResultInfo(rs.getMetaData(), con);
+			meta = new ResultColumnMetaData(sql, con);
+			meta.retrieveColumnRemarks(info);
+			for (int i=0; i < info.getColumnCount(); i++)
+			{
+				if (i == 0)
+				{
+					assertEquals("Primary key", info.getColumn(i).getComment());
+				}
+				if (i == 1)
+				{
+					assertEquals("The first name", info.getColumn(i).getComment());
+				}
+				if (i == 2)
+				{
+					assertEquals("The last name", info.getColumn(i).getComment());
+				}
+			}
+
+
+			sql = "select id, first_name from person p limit 1";
+			rs = stmt.executeQuery(sql);
+			info = new ResultInfo(rs.getMetaData(), con);
+			meta = new ResultColumnMetaData(sql, con);
+			meta.retrieveColumnRemarks(info);
+			for (int i=0; i < info.getColumnCount(); i++)
+			{
+				if (i == 0)
+				{
+					assertEquals("Primary key", info.getColumn(i).getComment());
+				}
+				if (i == 1)
+				{
+					assertEquals("The first name", info.getColumn(i).getComment());
+				}
+			}
+
 
 			sql = "select p.*, a.* " +
 				" from person p join address a on p.id = a.person_id";

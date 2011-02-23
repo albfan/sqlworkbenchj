@@ -81,7 +81,8 @@ public class ResultColumnMetaData
 			String table = c.getColumnTable();
 			if (table == null)
 			{
-				table = tables.get(0);
+				TableAlias alias = new TableAlias(tables.get(0));
+				table = alias.getNameToUse();
 			}
 			if (table == null) continue;
 
