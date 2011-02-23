@@ -36,21 +36,25 @@ public class IndexDefinition
 		this.baseTable = table;
 	}
 
+	@Override
 	public String getComment()
 	{
 		return comment;
 	}
 
+	@Override
 	public void setComment(String c)
 	{
 		comment = c;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return baseTable.getSchema();
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return null;
@@ -73,11 +77,13 @@ public class IndexDefinition
 		}
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
@@ -89,21 +95,25 @@ public class IndexDefinition
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(indexName);
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return "INDEX";
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return getName();
@@ -116,6 +126,7 @@ public class IndexDefinition
 
 	public String getIndexType() { return this.indexType; }
 
+	@Override
 	public String toString()
 	{
 		return getExpression();
@@ -139,13 +150,14 @@ public class IndexDefinition
 	public void setUnique(boolean flag) { this.isUnique = flag; }
 	public boolean isUnique() { return this.isUnique; }
 
+	@Override
   public int hashCode()
   {
     int hash = 71 * 7 + (this.indexName != null ? this.indexName.hashCode() : 0);
     return hash;
   }
 
-
+	@Override
 	public boolean equals(Object o)
 	{
 		if (o instanceof IndexDefinition)
@@ -184,6 +196,7 @@ public class IndexDefinition
 		return false;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 	{
 		if (con == null) return null;

@@ -37,7 +37,9 @@ import workbench.db.TableConstraint;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
+import workbench.db.oracle.OracleTablePartition;
 import workbench.log.LogMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -77,6 +79,7 @@ public class ReportTable
 	private List<TableConstraint> tableConstraints;
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
+	private List<ObjectOption> dbmsOptions;
 
 	public ReportTable(TableIdentifier tbl)
 	{
@@ -107,7 +110,7 @@ public class ReportTable
 
 		// By using getTableDefinition() the TableIdentifier is completely initialized
 		// (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
-		// was created using getTableList() 
+		// was created using getTableList()
 		TableDefinition def = conn.getMetadata().getTableDefinition(tbl);
 		this.table = def.getTable();
 		this.table.checkQuotesNeeded(conn);
@@ -169,6 +172,22 @@ public class ReportTable
 				triggers = null;
 			}
 		}
+		retrieveOptions(conn);
+	}
+
+	private void retrieveOptions(WbConnection conn)
+		throws SQLException
+	{
+		if (!conn.getMetadata().isOracle()) return;
+		OracleTablePartition partition = new OracleTablePartition(conn);
+		partition.retrieve(this.table, conn);
+		if (partition.isPartitioned())
+		{
+			String source = partition.getSourceForTableDefinition();
+			dbmsOptions = new ArrayList<ObjectOption>();
+			ObjectOption option = new ObjectOption("partition", source);
+			dbmsOptions.add(option);
+		}
 	}
 
 	public List<TriggerDefinition> getTriggers()
@@ -215,7 +234,7 @@ public class ReportTable
 		if (!includePrimaryKey) return null;
 		if (this.reporter == null) return null;
 		List pk = this.getPrimaryKeyColumns();
-		if (pk.size() == 0) return null;
+		if (pk.isEmpty()) return null;
 		Collection<IndexDefinition> idxList = this.reporter.getIndexList();
 		for (IndexDefinition idx : idxList)
 		{
@@ -230,7 +249,7 @@ public class ReportTable
 	/**
 	 * Define the columns that belong to this table
 	 */
-	public void setColumns(List<ColumnIdentifier> cols)
+	public final void setColumns(List<ColumnIdentifier> cols)
 	{
 		if (cols == null) return;
 		int numCols = cols.size();
@@ -292,7 +311,7 @@ public class ReportTable
 	{
 		return foreignKeys;
 	}
-	
+
 	/**
 	 * Find a column witht the given name.
 	 */
@@ -326,6 +345,7 @@ public class ReportTable
 	{
 		Comparator<ReportColumn> comp = new Comparator<ReportColumn>()
 		{
+			@Override
 			public int compare(ReportColumn o1, ReportColumn o2)
 			{
 				int pos1 = o1.getColumn().getPosition();
@@ -366,6 +386,7 @@ public class ReportTable
 		return getXml(new StrBuffer("  "));
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.table.toString();
@@ -400,13 +421,8 @@ public class ReportTable
 
 		if (!"TABLE".equalsIgnoreCase(type))
 		{
-			String[] att = new String[2];
-			String[] val = new String[2];
-
-			att[0] = "name";
-			val[0] = StringUtil.trimQuotes(this.table.getTableName());
-			att[1] = "type";
-			val[1] = type;
+			String[] att = new String[] {"name", "type"};
+			String[] val = new String[] { StringUtil.trimQuotes(this.table.getTableName()), type };
 			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, att, val);
 		}
 		else
@@ -451,8 +467,27 @@ public class ReportTable
 				line.append(rtrig.getXml());
 			}
 		}
+		writeDBMSOptions(line, indent);
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		return line;
+	}
+
+	private void writeDBMSOptions(StrBuffer output, StrBuffer indent)
+	{
+		if (CollectionUtil.isEmpty(dbmsOptions)) return;
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		output.append(myindent);
+		output.append("<table-options>\n");
+		StrBuffer nextindent = new StrBuffer(myindent);
+		nextindent.append("  ");
+		for (ObjectOption option : dbmsOptions)
+		{
+			StrBuffer result = option.getXml(nextindent);
+			output.append(result);
+		}
+		output.append(myindent);
+		output.append("</table-options>\n");
 	}
 
 	public static void writeConstraints(List<TableConstraint> constraints, TagWriter tagWriter, StrBuffer line, StrBuffer indent)
@@ -503,6 +538,7 @@ public class ReportTable
 		return hash;
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof ReportTable)
