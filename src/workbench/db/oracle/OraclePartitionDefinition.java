@@ -24,7 +24,7 @@ public class OraclePartitionDefinition
 {
 
 	private String type;
-	
+
 	/**
 	 * The name of the partition
 	 */
@@ -43,7 +43,7 @@ public class OraclePartitionDefinition
 	private String compressOption;
 
 	private List<OraclePartitionDefinition> subPartitions;
-	
+
 	private boolean isSubpartition;
 
 	public OraclePartitionDefinition(String partitionName, String partitionType, int partitionPosition)
@@ -53,7 +53,7 @@ public class OraclePartitionDefinition
 		type = partitionType;
 	}
 
-	public boolean isIsSubpartition()
+	public boolean isSubpartition()
 	{
 		return isSubpartition;
 	}
@@ -62,7 +62,7 @@ public class OraclePartitionDefinition
 	{
 		this.isSubpartition = isSubpartition;
 	}
-	
+
 	public List<OraclePartitionDefinition> getSubPartitions()
 	{
 		if (subPartitions == null) return Collections.emptyList();
@@ -87,7 +87,7 @@ public class OraclePartitionDefinition
 	{
 		this.type = type;
 	}
-	
+
 	public String getCompressOption()
 	{
 		return compressOption;
@@ -133,7 +133,7 @@ public class OraclePartitionDefinition
 		{
 			result.append("  PARTITION ");
 		}
-		
+
 		result.append(StringUtil.padRight(name, nameLength));
 		if (partitionValue != null && forTable)
 		{
@@ -162,7 +162,7 @@ public class OraclePartitionDefinition
 				result.append(" COMPRESS");
 			}
 		}
-		
+
 		if (subPartitions != null && !subPartitions.isEmpty())
 		{
 			int maxLength = 0;

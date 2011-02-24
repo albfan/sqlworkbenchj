@@ -13,12 +13,14 @@
 package workbench.db.report;
 
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * A class to store generic options for database objects such as tables or indexes
  * @author Thomas Kellerer
  */
 public class ObjectOption
+	implements Comparable<ObjectOption>
 {
 	private String type;
 	private String optionSource;
@@ -61,9 +63,39 @@ public class ObjectOption
 		return result;
 	}
 
-	public static void main(String[] args)
+	@Override
+	public boolean equals(Object obj)
 	{
-		String source = "line 1\nline 2\nline 3";
-		System.out.println(source.replace("\n", "\n   "));
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final ObjectOption other = (ObjectOption) obj;
+		return compareTo(other) == 0;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 47 * hash + (this.type != null ? this.type.hashCode() : 0);
+		hash = 47 * hash + (this.optionSource != null ? this.optionSource.hashCode() : 0);
+		return hash;
+	}
+
+	@Override
+	public int compareTo(ObjectOption other)
+	{
+		int result = StringUtil.compareStrings(this.type, other.type, false);
+		if (result != 0)
+		{
+			return result;
+		}
+		return StringUtil.compareStrings(this.optionSource, other.optionSource, false);
+	}
+
 }

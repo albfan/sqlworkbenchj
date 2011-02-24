@@ -16,12 +16,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import workbench.db.IndexDefinition;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.report.ForeignKeyDefinition;
+import workbench.db.report.ObjectOption;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportTableGrants;
@@ -173,10 +173,11 @@ public class TableDiff
 		boolean grantDifferent = grantDiff != null && grantDiff.length() > 0;
 
 		boolean indexDifferent = indexDiff != null && indexDiff.length() > 0;
+		boolean optionsAreDifferent = optionsAreDifferent();
 
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.isEmpty()
 			  && colsToBeRemoved.isEmpty() && refPk.equals(tPk) && constraintsAreEqual && fksAreEqual
-				&& !indexDifferent && !grantDifferent && !triggersDifferent)
+				&& !indexDifferent && !grantDifferent && !triggersDifferent && !optionsAreDifferent)
 		{
 			return result;
 		}
@@ -255,7 +256,7 @@ public class TableDiff
 			writeFKs(fkToDelete, result, "drop-foreign-keys", myindent);
 			writeFKs(missingFK, result, "add-foreign-keys", myindent);
 		}
-		
+
 		if (indexDifferent)
 		{
 			result.append(indexDiff);
@@ -270,9 +271,65 @@ public class TableDiff
 		{
 			result.append(grantDiff);
 		}
-
+		writeOptionsDiff(result, myindent);
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
 		return result;
+	}
+
+	private void writeOptionsDiff(StrBuffer result, StrBuffer indent)
+	{
+		List<ObjectOption> refOptions = referenceTable.getDbmsOptions();
+		List<ObjectOption> targetOptions = targetTable.getDbmsOptions();
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		boolean firstOption = true;
+		boolean optionWritten = false;
+		for (ObjectOption refOption : refOptions)
+		{
+			if (!targetOptions.contains(refOption))
+			{
+				if (firstOption)
+				{
+					writer.appendOpenTag(result, indent, "add-options");
+					result.append('\n');
+					firstOption = false;
+				}
+				optionWritten = true;
+				result.append(refOption.getXml(myindent));
+			}
+		}
+		if (optionWritten)
+		{
+			writer.appendCloseTag(result, indent, "add-options");
+		}
+
+		firstOption = false;
+		optionWritten = false;
+		for (ObjectOption targetOption : targetOptions)
+		{
+			if (!refOptions.contains(targetOptions))
+			{
+				if (firstOption)
+				{
+					writer.appendOpenTag(result, indent, "remove-options");
+					result.append('\n');
+					firstOption = false;
+				}
+				optionWritten = true;
+				result.append(targetOption.getXml(myindent));
+			}
+		}
+		if (optionWritten)
+		{
+			writer.appendCloseTag(result, indent, "remove-options");
+		}
+	}
+
+	private boolean optionsAreDifferent()
+	{
+		List<ObjectOption> refOptions = referenceTable.getDbmsOptions();
+		List<ObjectOption> targetOptions = targetTable.getDbmsOptions();
+		return refOptions.equals(targetOptions);
 	}
 
 	private ForeignKeyDefinition findFKByDefinition(Collection<ForeignKeyDefinition> fkDefs, ForeignKeyDefinition toFind)
@@ -283,7 +340,7 @@ public class TableDiff
 		}
 		return null;
 	}
-	
+
 	private List<ForeignKeyDefinition> getMissingForeignKeys()
 	{
 		if (!diff.getIncludeForeignKeys()) Collections.emptyList();
@@ -301,25 +358,6 @@ public class TableDiff
 		}
 		return missing;
 	}
-
-//	private	List<ForeignKeyDefinition> getModifiedForeignKeys()
-//	{
-//		if (!diff.getIncludeForeignKeys()) Collections.emptyList();
-//		Map<String, ForeignKeyDefinition> refFK = referenceTable.getForeignKeys();
-//		Map<String, ForeignKeyDefinition> targetFK = targetTable.getForeignKeys();
-//
-//		List<ForeignKeyDefinition> modified = new ArrayList<ForeignKeyDefinition>();
-//		for (Map.Entry<String, ForeignKeyDefinition> entry : refFK.entrySet())
-//		{
-//			ForeignKeyDefinition rFK = entry.getValue();
-//			ForeignKeyDefinition other = targetFK.get(entry.getKey());
-//			if (other != null && !other.isDefinitionEqual(rFK))
-//			{
-//				modified.add(rFK);
-//			}
-//		}
-//		return modified;
-//	}
 
 	private List<ForeignKeyDefinition> getFKsToDelete()
 	{

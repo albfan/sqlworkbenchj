@@ -175,6 +175,15 @@ public class ReportTable
 		retrieveOptions(conn);
 	}
 
+	public List<ObjectOption> getDbmsOptions()
+	{
+		if (dbmsOptions == null)
+		{
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(dbmsOptions);
+	}
+
 	private void retrieveOptions(WbConnection conn)
 		throws SQLException
 	{
@@ -475,7 +484,7 @@ public class ReportTable
 	private void writeDBMSOptions(StrBuffer output, StrBuffer indent)
 	{
 		if (CollectionUtil.isEmpty(dbmsOptions)) return;
-		
+
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
 		output.append(myindent);
