@@ -329,7 +329,7 @@ public class TableDiff
 	{
 		List<ObjectOption> refOptions = referenceTable.getDbmsOptions();
 		List<ObjectOption> targetOptions = targetTable.getDbmsOptions();
-		return refOptions.equals(targetOptions);
+		return !refOptions.equals(targetOptions);
 	}
 
 	private ForeignKeyDefinition findFKByDefinition(Collection<ForeignKeyDefinition> fkDefs, ForeignKeyDefinition toFind)
