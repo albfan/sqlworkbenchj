@@ -303,7 +303,7 @@ public class TableDiff
 			writer.appendCloseTag(result, indent, "add-options");
 		}
 
-		firstOption = false;
+		firstOption = true;
 		optionWritten = false;
 		for (ObjectOption targetOption : targetOptions)
 		{
