@@ -2,8 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-02-13">
-    <entry dev-build="1" type="enh">For Oracle, WbSchemaReport now includes the definition for partitioned tables and indexes</entry>
-    <entry dev-build="1" type="fix">Retrieving of column comments for queries did not work when the tables had an alias</entry>
+    <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
+    <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exlusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="1" type="fix">Retrieving of column comments for queries did not work when the table had an alias</entry>
   </release>
   <release build="110" date="2011-02-13">
     <entry dev-build="13" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry>
