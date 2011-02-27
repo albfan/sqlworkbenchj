@@ -33,7 +33,16 @@ public class OracleTestUtil
 	public static final String SCHEMA_NAME = "WBJUNIT";
 
 	/**
-	 * Return a connection to a locally running Oracle database
+	 * Return a connection to a locally running Oracle database.
+	 *
+	 * The user WBJUNIT should have the password WBJUNIT and the following privileges:
+	 * <ul>
+	 * <li>create synonym</li>
+	 * <li>create materialized view</li>
+	 * <li>create sequence</li>
+	 * <li>create type</li>
+	 * <li>create view</li>
+	 * </ul>
 	 * @return null if Oracle is not available
 	 */
 	public static WbConnection getOracleConnection()

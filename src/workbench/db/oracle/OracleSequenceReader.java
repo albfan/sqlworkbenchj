@@ -165,7 +165,7 @@ public class OracleSequenceReader
 			result.append(nl + "      NOMINVALUE");
 		}
 
-		if (maxValue != null && !maxValue.toString().equals("999999999999999999999999999"))
+		if (maxValue != null && !maxValue.toString().startsWith("999999999999999999999999999"))
 		{
 			result.append(nl + "      MAXVALUE ");
 			result.append(maxValue);
