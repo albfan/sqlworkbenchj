@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-02-13">
+  <release build="-1" date="2011-02-28">
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exlusion constraints from PostgreSQL 9.0</entry>
     <entry dev-build="1" type="fix">Retrieving of column comments for queries did not work when the table had an alias</entry>
