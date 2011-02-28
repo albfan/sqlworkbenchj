@@ -3059,12 +3059,16 @@ public class SqlPanel
 				result.appendMessages(this);
 				this.appendToLog("\n");
 			}
+			else
+			{
+				LogMgr.logError("SqlPanel.showResultMessage()", "Not enough memory to show all messages!", null);
+			}
 		}
 		catch (OutOfMemoryError oome)
 		{
 			result.clearMessageBuffer();
 			clearLog();
-			System.gc();
+			System.gc(); // as we have just freed some memory the gc() does make sense here.
 			WbManager.getInstance().setOutOfMemoryOcurred();
 			final boolean success = result.isSuccess();
 			EventQueue.invokeLater(new Runnable()

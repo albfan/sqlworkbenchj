@@ -41,7 +41,7 @@ public class MemoryWatcher
 		return (free < MIN_FREE_MEMORY);
 	}
 
-	public static final long getFreeMemory()
+	public static long getFreeMemory()
 	{
 		long free = Runtime.getRuntime().freeMemory();
 		long total = Runtime.getRuntime().totalMemory();
@@ -50,7 +50,6 @@ public class MemoryWatcher
 		// in the totalMemory. But the total memory can actually
 		// expand to maxMemory. So we need to add the difference
 		// between max and total to the currently free memory
-		free = free + (MAX_MEMORY - total);
-		return free;
+		return free + (MAX_MEMORY - total);
 	}
 }
