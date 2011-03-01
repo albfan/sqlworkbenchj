@@ -47,6 +47,7 @@ public class JdbcIndexReader
 	 *
 	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean)
 	 */
+	@Override
 	public void indexInfoProcessed()
 	{
 		// nothing to do, as we are using the driver's call
@@ -64,6 +65,7 @@ public class JdbcIndexReader
 	 * @throws java.sql.SQLException
 	 * @see DbSettings#supportsIndexedViews()
   */
+	@Override
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
@@ -78,6 +80,7 @@ public class JdbcIndexReader
 	 * Return the name of the index supporting the primary key.
 	 * @param tbl
 	 */
+	@Override
 	public String getPrimaryKeyIndex(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
@@ -118,6 +121,7 @@ public class JdbcIndexReader
 	 * @param tableNameToUse
 	 * @return SQL Script to create indexes
 	 */
+	@Override
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return null;
@@ -145,6 +149,7 @@ public class JdbcIndexReader
 		return result;
 	}
 
+	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return null;
@@ -221,6 +226,7 @@ public class JdbcIndexReader
 	 *
 	 *  @return the SQL statement to create the index
 	 */
+	@Override
 	public String buildCreateIndexSql(TableIdentifier aTable, String indexName, boolean unique, List<IndexColumn> columnList)
 	{
 		if (columnList == null) return StringUtil.EMPTY_STRING;
@@ -257,6 +263,7 @@ public class JdbcIndexReader
 	 * @param table
 	 * @param indexDefinitions
 	 */
+	@Override
 	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions)
 	{
 		// Nothing implemented
@@ -270,6 +277,7 @@ public class JdbcIndexReader
 	 * @param table the table to get the indexes for
 	 * @see #getTableIndexList(TableIdentifier)
 	 */
+	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
 		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
@@ -297,6 +305,7 @@ public class JdbcIndexReader
 	 * Returns a list of indexes defined for the given table
 	 * @param table the table to get the indexes for
 	 */
+	@Override
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
 	{
 		ResultSet idxRs = null;
@@ -306,50 +315,14 @@ public class JdbcIndexReader
 		// This will map an indexname to an IndexDefinition object
 		// getIndexInfo() returns one row for each column
 		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
+		List<IndexDefinition> result = null;
 
 		try
 		{
 			String pkName = getPrimaryKeyIndex(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
-			boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
-
-			while (idxRs != null && idxRs.next())
-			{
-				boolean unique = idxRs.getBoolean("NON_UNIQUE");
-				String indexName = idxRs.getString("INDEX_NAME");
-				if (idxRs.wasNull()) continue;
-				if (indexName == null) continue;
-				String colName = idxRs.getString("COLUMN_NAME");
-				String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
-
-				IndexDefinition def = defs.get(indexName);
-				if (def == null)
-				{
-					def = new IndexDefinition(tbl, indexName);
-					def.setUnique(!unique);
-					if (metaData.getDbSettings().pkIndexHasTableName())
-					{
-						def.setPrimaryKeyIndex(indexName.equals(table.getTableName()));
-					}
-					else
-					{
-						def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
-					}
-					defs.put(indexName, def);
-
-					// The ResultSet produced by getIndexInfo() might not be 100%
-					// compliant with the JDBC API as e.g. our own OracleIndexReader
-					// directly returns the index type as a string not as a number
-					// So the value of the type column is retrieved as an object
-					// mapIndexType() will deal with that.
-					Object type = idxRs.getObject("TYPE");
-					def.setIndexType(metaData.getDbSettings().mapIndexType(type));
-				}
-				def.addColumn(colName, dir);
-			}
-
-			processIndexList(tbl, defs.values());
+			result = processIndexResult(idxRs, pkName, tbl);
 		}
 		catch (Exception e)
 		{
@@ -360,7 +333,55 @@ public class JdbcIndexReader
 			SqlUtil.closeResult(idxRs);
 			indexInfoProcessed();
 		}
-		return new ArrayList<IndexDefinition>(defs.values());
+		return result;
 	}
 
+	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, String pkName, TableIdentifier tbl)
+		throws SQLException
+	{
+		// This will map an indexname to an IndexDefinition object
+		// getIndexInfo() returns one row for each column
+		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
+
+		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
+
+		while (idxRs != null && idxRs.next())
+		{
+			boolean unique = idxRs.getBoolean("NON_UNIQUE");
+			String indexName = idxRs.getString("INDEX_NAME");
+			if (idxRs.wasNull()) continue;
+			if (indexName == null) continue;
+			String colName = idxRs.getString("COLUMN_NAME");
+			String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
+
+			IndexDefinition def = defs.get(indexName);
+			if (def == null)
+			{
+				def = new IndexDefinition(tbl, indexName);
+				def.setUnique(!unique);
+				if (metaData.getDbSettings().pkIndexHasTableName())
+				{
+					def.setPrimaryKeyIndex(indexName.equals(tbl.getTableName()));
+				}
+				else
+				{
+					def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
+				}
+				defs.put(indexName, def);
+
+				// The ResultSet produced by getIndexInfo() might not be 100%
+				// compliant with the JDBC API as e.g. our own OracleIndexReader
+				// directly returns the index type as a string not as a number
+				// So the value of the type column is retrieved as an object
+				// mapIndexType() will deal with that.
+				Object type = idxRs.getObject("TYPE");
+				def.setIndexType(metaData.getDbSettings().mapIndexType(type));
+			}
+			def.addColumn(colName, dir);
+		}
+
+		Collection<IndexDefinition> indexes = defs.values();
+		processIndexList(tbl, indexes);
+		return new ArrayList<IndexDefinition>(indexes);
+	}
 }

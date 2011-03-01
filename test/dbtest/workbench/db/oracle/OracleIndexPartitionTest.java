@@ -42,13 +42,13 @@ public class OracleIndexPartitionTest
 	public static void setUpClass()
 		throws Exception
 	{
-		String sql = 
+		String sql =
 			"CREATE TABLE wb_list_partition_test \n" +
 			"( \n" +
-			"  test_id integer not null primary key, \n" +
+			"  test_id integer not null, \n" +
 			"  tenant_id integer not null \n" +
 			") \n" +
-			"PARTITION BY LIST (tenant_id)  \n" +
+			"PARTITION BY LIST (test_id)  \n" +
 			"( \n" +
 			"  PARTITION wb_list_part_1  VALUES (1),  \n" +
 			"  PARTITION wb_list_part_2  VALUES (4),  \n" +
@@ -77,7 +77,20 @@ public class OracleIndexPartitionTest
 			 "  PARTITION wb_list_part_2,\n" +
 			 "  PARTITION wb_list_part_3,\n" +
 			 "  PARTITION wb_list_part_4 \n" +
-			 ")";		
+			 ")";
+
+		// todo
+		String pkIndex =
+			"ALTER TABLE PART_TABLE \n" +
+			"   ADD CONSTRAINT PK_T084_STORE_DELIVERY PRIMARY KEY (C084_STOREID, C084_ITEMID, C084_RECEIPTDATE)  \n" +
+			"   USING INDEX ( \n" +
+			"     CREATE INDEX \"WFMADM\".\"IDX_T084_STORE_DELIVERY\" ON \"WFMADM\".\"T084_STORE_DELIVERY\" (\"C084_STOREID\", \"C084_ITEMID\", \"C084_RECEIPTDATE\", \"C084_SUM_QTY_PIECE\") REVERSE  \n" +
+			"    PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS COMPRESS 2  \n" +
+			"    STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645 \n" +
+			"    PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT) \n" +
+			"    TABLESPACE \"WFM_IDX\" \n" +
+			"   )";
+
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
@@ -109,7 +122,7 @@ public class OracleIndexPartitionTest
 		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		IndexDefinition def = new IndexDefinition(new TableIdentifier(OracleTestUtil.SCHEMA_NAME, "WB_LIST_PARTITION_TEST"), "PART_LIST_IDX");
 		OracleIndexPartition reader = new OracleIndexPartition(con);
 		reader.retrieve(def, con);
@@ -120,13 +133,13 @@ public class OracleIndexPartitionTest
 		assertEquals(4, parts.size());
 		assertEquals("LOCAL", reader.getLocality());
 		String expected = "LOCAL\n" +
-             "PARTITION BY LIST (TENANT_ID)\n" +
+             "PARTITION BY LIST (TEST_ID)\n" +
              "(\n" +
              "  PARTITION WB_LIST_PART_1,\n" +
              "  PARTITION WB_LIST_PART_2,\n" +
              "  PARTITION WB_LIST_PART_3,\n" +
              "  PARTITION WB_LIST_PART_4\n" +
-             ")";		
+             ")";
 		assertEquals(expected, reader.getSourceForIndexDefinition().trim());
 	}
 

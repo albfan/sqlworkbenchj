@@ -43,13 +43,14 @@ public class OracleIndexReader
 {
 	private PreparedStatement indexStatement;
 	private boolean useJDBCRetrieval;
-	
+
 	public OracleIndexReader(DbMetadata meta)
 	{
 		super(meta);
 		useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.usejdbc", false);
 	}
 
+	@Override
 	public void indexInfoProcessed()
 	{
 		SqlUtil.closeStatement(this.indexStatement);
@@ -66,6 +67,7 @@ public class OracleIndexReader
 	 * Additionally, function based indexes are not returned correctly by the Oracle driver
 	 * which is also fixed with this method
 	 */
+	@Override
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
@@ -73,7 +75,12 @@ public class OracleIndexReader
 		{
 			return super.getIndexInfo(table, unique);
 		}
-		
+		return getIndexInfo(table, null, null, unique);
+	}
+
+	public ResultSet getIndexInfo(TableIdentifier table, String indexName, String indexSchema, boolean unique)
+		throws SQLException
+	{
 		if (this.indexStatement != null)
 		{
 			LogMgr.logWarning("OracleIndexReader.getIndexInfo()", "getIndexInfo() called with pending results!");
@@ -112,7 +119,21 @@ public class OracleIndexReader
 		{
 			sql.append("  AND i.uniqueness = 'UNIQUE'\n");
 		}
-		
+
+		if (StringUtil.isNonBlank(indexName))
+		{
+			sql.append("  AND i.index_name = '");
+			sql.append(indexName);
+			sql.append("'\n");
+		}
+
+		if (StringUtil.isNonBlank(indexSchema))
+		{
+			sql.append("  AND i.owner = '");
+			sql.append(indexSchema);
+			sql.append("'\n");
+		}
+
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.filtersnapindex", true))
 		{
 			sql.append("  AND i.index_name NOT LIKE 'I_SNAP$%' \n");
@@ -131,10 +152,38 @@ public class OracleIndexReader
 		return rs;
 	}
 
-	public CharSequence getExtendedIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse)
+	public IndexDefinition getIndexDefinition(TableIdentifier table, String indexName, String indexSchema)
+		throws SQLException
+	{
+		ResultSet rs = null;
+		IndexDefinition index = null;
+		try
+		{
+			rs = getIndexInfo(table, indexName, indexSchema, false);
+			String pkName = getPrimaryKeyIndex(table);
+			List<IndexDefinition> result = processIndexResult(rs, pkName, table);
+			if (result.isEmpty())
+			{
+				return null;
+			}
+			if (result.size() > 1)
+			{
+				LogMgr.logError("OracleIndexReader.getIndexDefinition()", "Got more than one index for indexName= " + indexName + " and table=" + table.toString(), null);
+			}
+			index = result.get(0);
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+			indexInfoProcessed(); // close the statement
+		}
+		return index;
+	}
+
+	public CharSequence getExtendedIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse, String indent)
 	{
 		CharSequence baseSource = super.getIndexSource(table, definition, tableNameToUse);
-		CharSequence partitionSource = getPartitionDefinition(definition);
+		CharSequence partitionSource = getPartitionDefinition(definition, indent);
 		if (partitionSource == null) return baseSource;
 		StringBuilder sql = new StringBuilder(baseSource.length() + partitionSource.length() + 5);
 		sql.append(SqlUtil.trimSemicolon(baseSource.toString()));
@@ -143,7 +192,7 @@ public class OracleIndexReader
 		sql.append(";\n");
 		return sql;
 	}
-	
+
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse)
 	{
@@ -159,12 +208,12 @@ public class OracleIndexReader
 			}
 			catch (SQLException e)
 			{
-				return getExtendedIndexSource(table, definition, tableNameToUse);
+				return getExtendedIndexSource(table, definition, tableNameToUse, "");
 			}
 		}
-		return getExtendedIndexSource(table, definition, tableNameToUse);
+		return getExtendedIndexSource(table, definition, tableNameToUse, "");
 	}
-	
+
 	private String getSourceFromDBMSMeta(IndexDefinition definition)
 		throws SQLException
 	{
@@ -232,7 +281,9 @@ public class OracleIndexReader
 
 		if (schema != null && schema.length() > 0)
 		{
-			sql.append(" AND i.owner = '" + schema + "' ");
+			sql.append(" AND i.owner = '");
+			sql.append(schema);
+			sql.append("'\n");
 		}
 		boolean found = false;
 
@@ -313,8 +364,8 @@ public class OracleIndexReader
 		}
 		return null;
 	}
-	
-	public CharSequence getPartitionDefinition(IndexDefinition def)
+
+	public CharSequence getPartitionDefinition(IndexDefinition def, String indent)
 	{
 		WbConnection conn = this.metaData.getWbConnection();
 		try
@@ -323,7 +374,7 @@ public class OracleIndexReader
 			partIndex.retrieve(def, conn);
 			if (partIndex.isPartitioned())
 			{
-				return partIndex.getSourceForIndexDefinition();
+				return partIndex.getSourceForIndexDefinition(indent);
 			}
 		}
 		catch (SQLException sql)
@@ -335,30 +386,30 @@ public class OracleIndexReader
 
 	/**
 	 * This method retrieves the name of the PK index used for that table.
-	 * 
-	 * As there is no such function in JDBC api JdbcIndexReader uses getPrimaryKeys() to retrieve the name 
-	 * of the index as in most cases the PK name is the same as the supporting index. 
-	 * 
+	 *
+	 * As there is no such function in JDBC api JdbcIndexReader uses getPrimaryKeys() to retrieve the name
+	 * of the index as in most cases the PK name is the same as the supporting index.
+	 *
 	 * But in Oracle one can create a PK that is supported by an existing index and thus those two names
 	 * do not need to be identical.
-	 * 
+	 *
 	 * @param tbl - the table to check.
-	 * 
+	 *
 	 * @return the name of the index supporting the primary key
 	 */
 	@Override
 	public String getPrimaryKeyIndex(TableIdentifier tbl)
 	{
 		if (metaData.getDbSettings().isViewType(tbl.getType())) return StringUtil.EMPTY_STRING;
-		
+
 		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
 		if (useJDBC)
 		{
 			return super.getPrimaryKeyIndex(tbl);
 		}
-		
+
 		String pkName = StringUtil.EMPTY_STRING;
-		String sql = 
+		String sql =
 			"select nvl(index_name, constraint_name)  \n" +
 			"  from all_constraints \n" +
 			"where owner = ? \n" +
@@ -369,7 +420,7 @@ public class OracleIndexReader
 		{
 			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyIndex()", "Using SQL=" + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
 		}
-		
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try

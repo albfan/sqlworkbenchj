@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.IndexDefinition;
-import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -73,17 +72,30 @@ public class OracleTableSourceBuilder
 	@Override
 	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
 	{
-		IndexReader reader = dbConnection.getMetadata().getIndexReader();
+		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
 		String pkIndex = reader.getPrimaryKeyIndex(table);
 		String sql = super.getPkSource(table, pkCols, pkName).toString();
-		if (pkIndex.equals(pkName))
+		IndexDefinition idx = getIndexDefinition(table, pkIndex);
+		boolean isPartitioned = false;
+
+		try
+		{
+			OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
+			partIndex.retrieve(idx, dbConnection);
+			isPartitioned = partIndex.isPartitioned();
+		}
+		catch (SQLException ex)
+		{
+			isPartitioned = false;
+		}
+
+		if (pkIndex.equals(pkName) && !isPartitioned)
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, "");
 		}
 		else
 		{
-			IndexDefinition idx = getIndexDefinition(table, pkIndex);
-			String indexSql = reader.getIndexSource(table, idx, null).toString();
+			String indexSql = reader.getExtendedIndexSource(table, idx, null, "    ").toString();
 			StringBuilder using = new StringBuilder(indexSql.length() + 20);
 			using.append("\n   USING INDEX (\n     ");
 			using.append(SqlUtil.trimSemicolon(indexSql).trim().replace("\n", "\n  "));
@@ -95,17 +107,15 @@ public class OracleTableSourceBuilder
 
 	private IndexDefinition getIndexDefinition(TableIdentifier table, String indexName)
 	{
-		List<IndexDefinition> indexes = dbConnection.getMetadata().getIndexReader().getTableIndexList(table);
-		if (indexes == null || indexes.isEmpty())
+		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
+		try
 		{
-			return null;
+			IndexDefinition index = reader.getIndexDefinition(table, indexName, null);
+			return index;
 		}
-		for (IndexDefinition def : indexes)
+		catch (SQLException sql)
 		{
-			if (def.getName().equals(indexName))
-			{
-				return def;
-			}
+			LogMgr.logError("OracleTableSourceBuilder.getIndexDefinition()", "Could not retrieve index", sql);
 		}
 		return null;
 	}

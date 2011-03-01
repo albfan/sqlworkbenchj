@@ -95,23 +95,35 @@ public abstract class AbstractOraclePartition
 
 	public String getSourceForTableDefinition()
 	{
-		return getSource(true);
+		return getSource(true, "");
 	}
-	
+
+	public String getSourceForTableDefinition(String indent)
+	{
+		return getSource(true, indent);
+	}
+
+	public String getSourceForIndexDefinition(String indent)
+	{
+		return getSource(false, indent);
+	}
+
 	public String getSourceForIndexDefinition()
 	{
-		return getSource(false);
+		return getSource(false, "");
 	}
-	
-	private String getSource(boolean forTable)
+
+	private String getSource(boolean forTable, String indent)
 	{
 		if (!this.isPartitioned()) return null;
 		StringBuilder result = new StringBuilder(partitions.size() * 15);
 		if (locality != null)
 		{
+			result.append(indent);
 			result.append(locality);
 			result.append('\n');
 		}
+		result.append(indent);
 		result.append("PARTITION BY ");
 		result.append(type);
 		result.append(' ');
@@ -123,25 +135,38 @@ public abstract class AbstractOraclePartition
 		}
 		if (!"NONE".equals(subType))
 		{
-			result.append("\nSUBPARTITION BY ");
+			result.append('\n');
+			result.append(indent);
+			result.append("SUBPARTITION BY ");
 			result.append(subType);
 			result.append(" (");
 			result.append(StringUtil.listToString(subColumns, ','));
 			result.append(')');
 			if (defaultSubpartitionCount > 1)
 			{
-				result.append("\nSUBPARTITIONS ");
+				result.append('\n');
+				result.append(indent);
+				result.append("SUBPARTITIONS ");
 				result.append(defaultSubpartitionCount);
 			}
 		}
-		result.append("\n(\n");
+		result.append('\n');
+		result.append(indent);
+		result.append("(\n");
 		int maxLength = forTable ? getMaxPartitionNameLength(): 0;
 		for (int i=0; i < partitions.size(); i++)
 		{
-			if (i > 0) result.append(",\n");
-			result.append(partitions.get(i).getSource(forTable, maxLength));
+			if (i > 0)
+			{
+				result.append(',');
+				result.append(indent);
+				result.append('\n');
+			}
+			result.append(partitions.get(i).getSource(forTable, maxLength, indent));
 		}
-		result.append("\n)");
+		result.append("\n");
+		result.append(indent);
+		result.append(')');
 		return result.toString();
 	}
 

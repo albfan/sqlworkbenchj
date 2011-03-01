@@ -122,9 +122,10 @@ public class OraclePartitionDefinition
 		return position;
 	}
 
-	public CharSequence getSource(boolean forTable, int nameLength)
+	public CharSequence getSource(boolean forTable, int nameLength, String indent)
 	{
 		StringBuilder result = new StringBuilder((partitionValue == null ? 15 : partitionValue.length()) + 20);
+		result.append(indent);
 		if (isSubpartition)
 		{
 			result.append("  SUBPARTITION ");
@@ -173,14 +174,22 @@ public class OraclePartitionDefinition
 					maxLength = def.getName().length();
 				}
 			}
-			result.append("\n  (\n");
+			result.append("\n  ");
+			result.append(indent);
+			result.append("(\n");
 			for (int i=0; i < subPartitions.size(); i++)
 			{
-				if (i > 0) result.append(",\n");
+				if (i > 0)
+				{
+					result.append(",\n");
+				}
 				result.append("  ");
-				result.append(subPartitions.get(i).getSource(forTable, maxLength));
+				result.append(indent);
+				result.append(subPartitions.get(i).getSource(forTable, maxLength, indent + "  "));
 			}
-			result.append("\n  )");
+			result.append("\n  ");
+			result.append(indent);
+			result.append(")");
 		}
 		return result;
 	}
