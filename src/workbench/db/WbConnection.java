@@ -610,7 +610,7 @@ public class WbConnection
 	}
 
 	/**
-	 * Disconnect this connection. 
+	 * Disconnect this connection.
 	 * This is delegated to the Connection Manager because for certain DBMS some cleanup works needs to be done.
 	 * The ConnectionMgr is the only one who knows if there are more connections
 	 * around, which might influence what needs to be cleaned up
@@ -719,7 +719,7 @@ public class WbConnection
 	 * <br/>
 	 * If a fetch size has been defined using {@link #setFetchSize(int)) that size
 	 * is used, otherwise the fetch size defined on the connection profile is used.
-	 * 
+	 *
 	 * @return the defined fetch size, or -1 if no fetch size was defined
 	 */
 	public int getFetchSize()
@@ -775,10 +775,10 @@ public class WbConnection
 	 * Create a new statement object.
 	 * <br/>
 	 * This is just a wrapper for java.sql.Connection.createStatement().
-	 * 
+	 *
 	 * If a default fetch size was defined in the connection profile, this is applied to
 	 * the created statement.
-	 * 
+	 *
 	 * @return a Statement object
 	 * @see #getFetchSize()
 	 */
@@ -1130,7 +1130,7 @@ public class WbConnection
 	 */
 	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
-		boolean changed = currentCatalog != null && !currentSchema.equals(newCatalog);
+		boolean changed = currentCatalog != null && !currentCatalog.equals(newCatalog);
 		this.currentCatalog = newCatalog;
 		this.getObjectCache().clear();
 		if (changed)
