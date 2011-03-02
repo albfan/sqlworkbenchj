@@ -92,7 +92,7 @@ public class TextUtilities
 				// two opening brackets to complete the
 				// match.
 				char x = text.charAt(i);
-				if(x == c)
+				if (x == c)
 					count++;
 
 				// If text[i] == cprime, we have found a
@@ -100,7 +100,7 @@ public class TextUtilities
 				// --count == 0
 				else if(x == cprime)
 				{
-					if(--count == 0)
+					if (--count == 0)
 						return i;
 				}
 			}
@@ -137,7 +137,7 @@ public class TextUtilities
 				// --count == 0
 				else if(x == cprime)
 				{
-					if(--count == 0)
+					if (--count == 0)
 						return i + offset;
 				}
 			}

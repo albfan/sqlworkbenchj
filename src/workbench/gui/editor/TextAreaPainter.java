@@ -68,7 +68,7 @@ public class TextAreaPainter
 	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
 	private final Object stylesLockMonitor = new Object();
-	
+
 	private static final Set<String> COLOR_PROPS = CollectionUtil.treeSet(
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
@@ -127,6 +127,7 @@ public class TextAreaPainter
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
@@ -150,6 +151,7 @@ public class TextAreaPainter
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				setForeground(Settings.getInstance().getEditorTextColor());
@@ -166,6 +168,7 @@ public class TextAreaPainter
 	 * Tab key. This returns false.
 	 */
 	@SuppressWarnings("deprecation")
+	@Override
 	public boolean isManagingFocus()
 	{
 		return false;
@@ -301,6 +304,7 @@ public class TextAreaPainter
 	 * cached font metrics and to recalculate which lines are visible.
 	 * @param font The font
 	 */
+	@Override
 	public void setFont(Font font)
 	{
 		super.setFont(font);
@@ -368,6 +372,7 @@ public class TextAreaPainter
 		this.tabSize = cfm.charWidth(' ') * t;
 	}
 
+	@Override
 	public void paint(Graphics gfx)
 	{
 		calculateGutterWidth();
@@ -515,6 +520,7 @@ public class TextAreaPainter
 	 * @param tabOffset Ignored
 	 * @return The next tab stop after <i>x</i>
 	 */
+	@Override
 	public float nextTabStop(float x, int tabOffset)
 	{
 		if (tabSize == -1)
@@ -533,25 +539,25 @@ public class TextAreaPainter
 
 		if (tokenMarker == null)
 		{
-			paintPlainLine(gfx,line,defaultFont,defaultColor,x,y);
+			paintPlainLine(gfx, line, defaultFont, defaultColor, x, y);
 		}
 		else
 		{
-			paintSyntaxLine(gfx,tokenMarker,line,defaultFont,defaultColor,x,y);
+			paintSyntaxLine(gfx, tokenMarker, line, defaultFont, defaultColor, x, y);
 		}
 	}
 
 	protected void paintPlainLine(Graphics gfx, int line, Font defaultFont, Color defaultColor, int x, int y)
 	{
-		textArea.getLineText(line,currentLine);
+		textArea.getLineText(line, currentLine);
 
-		paintHighlight(gfx,line,y);
+		paintHighlight(gfx, line, y);
 
 		gfx.setFont(defaultFont);
 		gfx.setColor(defaultColor);
 
 		y += fm.getHeight();
-		Utilities.drawTabbedText(currentLine,x,y,gfx,this,0);
+		Utilities.drawTabbedText(currentLine, x, y, gfx, this, 0);
 	}
 
 	protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker,
@@ -640,7 +646,6 @@ public class TextAreaPainter
 			x2 = getWidth();
 		}
 
-
 		// "inlined" min/max()
 		gfx.fillRect(x1 > x2 ? x2 : x1,y,x1 > x2 ? (x1 - x2) : (x2 - x1),height);
 
@@ -649,15 +654,17 @@ public class TextAreaPainter
 	protected void paintBracketHighlight(Graphics gfx, int line, int y)
 	{
 		int position = textArea.getBracketPosition();
-		if(position == -1) return;
+		if (position == -1) return;
 
-		y += fm.getLeading() + fm.getMaxDescent();
-		int x = textArea._offsetToX(line,position);// + this.gutterWidth;
+		y += fm.getLeading() + fm.getMaxDescent() - 1;
+		int x = textArea._offsetToX(line, position) - 1;
 		gfx.setColor(caretColor);
+
 		// Hack!!! Since there is no fast way to get the character
 		// from the bracket matching routine, we use "(" since all
 		// brackets probably have the same width anyway
-		gfx.drawRect(x,y,fm.charWidth('(') - 1,	fm.getHeight() - 1);
+		//gfx.drawRect(x,y,fm.charWidth('(') + 1,	fm.getHeight());
+		gfx.drawRect(x,y,fm.charWidth('(') + 1,	fm.getHeight());
 	}
 
 	protected void paintCaret(Graphics gfx, int line, int y)
@@ -672,7 +679,7 @@ public class TextAreaPainter
 
 			gfx.setColor(caretColor);
 
-			if(textArea.isOverwriteEnabled())
+			if (textArea.isOverwriteEnabled())
 			{
 				gfx.fillRect(caretX,y + height - 1,	caretWidth,1);
 			}
