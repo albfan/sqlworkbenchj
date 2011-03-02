@@ -58,6 +58,7 @@ public class OracleProcedureReader
 
 	private final StringBuilder PROC_HEADER = new StringBuilder("CREATE OR REPLACE ");
 
+	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
@@ -146,7 +147,7 @@ public class OracleProcedureReader
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("OracleProcedureReader.getPackageSource()", "Could not retrieve package source", e);
 		}
 		finally
 		{
@@ -260,7 +261,7 @@ public class OracleProcedureReader
 
 		// ALL_PROCEDURES does not return invalid procedures
 		// so an outer join against ALL_OBJECTS is necessary
-		String standardProcs = 
+		String standardProcs =
 				"select null as package_name,   \n" +
 				"       ao.owner as procedure_owner,   \n" +
 				"       ao.object_name as procedure_name,  \n" +
@@ -284,7 +285,7 @@ public class OracleProcedureReader
 
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
-		String pkgProcs = 
+		String pkgProcs =
 				"select aa.package_name, \n" +
 				"       ao.owner as procedure_owner, \n" +
 				"       aa.object_name as procedure_name, \n" +
@@ -375,6 +376,7 @@ public class OracleProcedureReader
 		return ds;
 	}
 
+	@Override
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{

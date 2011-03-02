@@ -342,7 +342,7 @@ public class JEditTextArea
 		}
 	}
 
-	public void addKeyBinding(WbAction anAction)
+	public final void addKeyBinding(WbAction anAction)
 	{
 		this.inputHandler.addKeyBinding(anAction);
 	}
@@ -359,6 +359,7 @@ public class JEditTextArea
 	 * @return always true
 	 */
 	@SuppressWarnings("deprecation")
+	@Override
 	public final boolean isManagingFocus()
 	{
 		return true;
@@ -397,6 +398,7 @@ public class JEditTextArea
 		caretTimer = new Timer(blinkInterval,
 		 new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent evt)
 				{
 					blinkCaret();
@@ -455,12 +457,14 @@ public class JEditTextArea
 		painter.invalidateSelectedLines();
 	}
 
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 		inputHandler.resetStatus();
 		setCaretVisible(true);
 	}
 
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		inputHandler.resetStatus();
@@ -619,6 +623,7 @@ public class JEditTextArea
 		painter.repaint();
 	}
 
+	@Override
 	public boolean canScrollDown()
 	{
 		int startLine = getFirstLine();
@@ -626,6 +631,7 @@ public class JEditTextArea
 		return (lastLine < getLineCount());
 	}
 
+	@Override
 	public void scrollDown()
 	{
 		if (canScrollDown())
@@ -634,11 +640,13 @@ public class JEditTextArea
 		}
 	}
 
+	@Override
 	public boolean canScrollUp()
 	{
 		return (getFirstLine() > 0);
 	}
 
+	@Override
 	public void scrollUp()
 	{
 		if (canScrollUp())
@@ -718,6 +726,7 @@ public class JEditTextArea
 				// we can't do any proper scrolling, so we'll try again later
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						scrollTo(line, offset);
@@ -966,7 +975,7 @@ public class JEditTextArea
 	 * Sets the document this text area is editing.
 	 * @param newDocument The document
 	 */
-	public void setDocument(SyntaxDocument newDocument)
+	public final void setDocument(SyntaxDocument newDocument)
 	{
 		if (this.document == newDocument) return;
 
@@ -989,6 +998,7 @@ public class JEditTextArea
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					validate();
@@ -1009,6 +1019,7 @@ public class JEditTextArea
 		super.validate();
 	}
 
+	@Override
 	public void setFont(Font aNewFont)
 	{
 		super.setFont(aNewFont);
@@ -1137,7 +1148,7 @@ public class JEditTextArea
 	/**
 	 *	Set the tab size to be used in characters.
 	 */
-	public void setTabSize(int aSize)
+	public final void setTabSize(int aSize)
 	{
 		document.putProperty(PlainDocument.tabSizeAttribute, Integer.valueOf(aSize));
 	}
@@ -1223,6 +1234,7 @@ public class JEditTextArea
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					invalidate();
@@ -1294,7 +1306,7 @@ public class JEditTextArea
 		int pos = this.getCaretPositionInLine(currentLine);
 		int start = TextUtilities.findWordStart(line, pos);
 		int end = TextUtilities.findWordEnd(line, pos);
-		if (start < end && start >= 0) 
+		if (start < end && start >= 0)
 		{
 			return line.substring(start, end);
 		}
@@ -1512,6 +1524,7 @@ public class JEditTextArea
 	/**
 	 * Selects all text in the document.
 	 */
+	@Override
 	public final void selectAll()
 	{
 		select(0,getDocumentLength());
@@ -1530,6 +1543,7 @@ public class JEditTextArea
 		this.document.clearUndoBuffer();
 	}
 
+	@Override
 	public void undo()
 	{
 		this.document.undo();
@@ -1541,6 +1555,7 @@ public class JEditTextArea
 		}
 	}
 
+	@Override
 	public void redo()
 	{
 		this.document.redo();
@@ -2060,6 +2075,7 @@ public class JEditTextArea
 	 * Deletes the selected text from the text area and places it
 	 * into the clipboard.
 	 */
+	@Override
 	public void cut()
 	{
 		if (editable)
@@ -2072,6 +2088,7 @@ public class JEditTextArea
 	/**
 	 *	Deletes the selected text from the text area
 	 **/
+	@Override
 	public void clear()
 	{
 		if (editable)
@@ -2083,6 +2100,7 @@ public class JEditTextArea
 	/**
 	 * Places the selected text into the clipboard.
 	 */
+	@Override
 	public void copy()
 	{
 		if (selectionStart != selectionEnd)
@@ -2098,6 +2116,7 @@ public class JEditTextArea
 	/**
 	 * Inserts the clipboard contents into the text.
 	 */
+	@Override
 	public void paste()
 	{
 		if (editable)
@@ -2152,6 +2171,7 @@ public class JEditTextArea
 	 * This is slightly faster than using a KeyListener
 	 * because some Swing overhead is avoided.
 	 */
+	@Override
 	public void processKeyEvent(KeyEvent evt)
 	{
 		if (evt.isConsumed()) return;
@@ -2264,7 +2284,7 @@ public class JEditTextArea
 
 		try
 		{
-			int offset = TextUtilities.findMatchingBracket(document,newCaretPosition - 1);
+			int offset = TextUtilities.findMatchingBracket(document, newCaretPosition - 1);
 			if (offset != -1)
 			{
 				bracketLine = getLineOfOffset(offset);
@@ -2384,6 +2404,7 @@ public class JEditTextArea
 	 * @see MouseWheelEvent
 	 *
 	 */
+	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
@@ -2398,6 +2419,7 @@ public class JEditTextArea
 
 	class ScrollLayout implements LayoutManager
 	{
+		@Override
 		public void addLayoutComponent(String name, Component comp)
 		{
 			if (name.equals(CENTER))
@@ -2414,6 +2436,7 @@ public class JEditTextArea
 			}
 		}
 
+		@Override
 		public void removeLayoutComponent(Component comp)
 		{
 			if (center == comp)
@@ -2434,6 +2457,7 @@ public class JEditTextArea
 			}
 		}
 
+		@Override
 		public Dimension preferredLayoutSize(Container parent)
 		{
 			Dimension dim = new Dimension();
@@ -2457,6 +2481,7 @@ public class JEditTextArea
 			return dim;
 		}
 
+		@Override
 		public Dimension minimumLayoutSize(Container parent)
 		{
 			Dimension dim = new Dimension();
@@ -2481,6 +2506,7 @@ public class JEditTextArea
 			return dim;
 		}
 
+		@Override
 		public void layoutContainer(Container parent)
 		{
 			Dimension size = parent.getSize();
@@ -2530,11 +2556,13 @@ public class JEditTextArea
 			super(JEditTextArea.this);
 		}
 
+		@Override
 		public int getDot()
 		{
 			return getCaretPosition();
 		}
 
+		@Override
 		public int getMark()
 		{
 			return getMarkPosition();
@@ -2543,6 +2571,7 @@ public class JEditTextArea
 
 	class AdjustHandler implements AdjustmentListener
 	{
+		@Override
 		public void adjustmentValueChanged(final AdjustmentEvent evt)
 		{
 			if(!scrollBarsInitialized)
@@ -2553,6 +2582,7 @@ public class JEditTextArea
 			// the mouse is released
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if(evt.getAdjustable() == vertical)
@@ -2566,6 +2596,7 @@ public class JEditTextArea
 
 	class ComponentHandler extends ComponentAdapter
 	{
+		@Override
 		public void componentResized(ComponentEvent evt)
 		{
 			recalculateVisibleLines();
@@ -2575,6 +2606,7 @@ public class JEditTextArea
 
 	class DocumentHandler implements DocumentListener
 	{
+		@Override
 		public void insertUpdate(DocumentEvent evt)
 		{
 			documentChanged(evt);
@@ -2598,6 +2630,7 @@ public class JEditTextArea
 			select(newStart,newEnd);
 		}
 
+		@Override
 		public void removeUpdate(DocumentEvent evt)
 		{
 			documentChanged(evt);
@@ -2631,6 +2664,7 @@ public class JEditTextArea
 			select(newStart,newEnd);
 		}
 
+		@Override
 		public void changedUpdate(DocumentEvent evt)
 		{
 		}
@@ -2638,6 +2672,7 @@ public class JEditTextArea
 
 	class DragHandler implements MouseMotionListener
 	{
+		@Override
 		public void mouseDragged(MouseEvent evt)
 		{
 			if(popup != null && popup.isVisible()) return;
@@ -2649,11 +2684,13 @@ public class JEditTextArea
 			select(getMarkPosition(),xyToOffset(x,y));
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent evt) {}
 	}
 
 	class MouseHandler extends MouseAdapter
 	{
+		@Override
 		public void mousePressed(MouseEvent evt)
 		{
 			requestFocus();
@@ -2702,7 +2739,7 @@ public class JEditTextArea
 
 		protected void doSingleClick(MouseEvent evt, int line,int offset, int dot)
 		{
-			if((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0)
+			if ((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0)
 			{
 				rectSelect = (evt.getModifiers() & Settings.getInstance().getRectSelectionModifier()) != 0;
 				select(getMarkPosition(),dot);
@@ -2717,7 +2754,7 @@ public class JEditTextArea
 			throws BadLocationException
 		{
 			// Ignore empty lines
-			if(getLineLength(line) == 0) return;
+			if (getLineLength(line) == 0) return;
 
 			try
 			{
@@ -2737,7 +2774,7 @@ public class JEditTextArea
 			}
 			catch(BadLocationException bl)
 			{
-				bl.printStackTrace();
+				LogMgr.logError("JEditTextArea.doDoubleClick()", "Error", bl);
 			}
 
 			// Ok, it's not a bracket... select the word
@@ -2797,30 +2834,37 @@ public class JEditTextArea
 			this.end = end;
 		}
 
+		@Override
 		public boolean isSignificant()
 		{
 			return false;
 		}
 
+		@Override
 		public String getPresentationName()
 		{
 			return "caret move";
 		}
 
-		public void undo() throws CannotUndoException
+		@Override
+		public void undo()
+			throws CannotUndoException
 		{
 			super.undo();
 
 			select(start,end);
 		}
 
-		public void redo() throws CannotRedoException
+		@Override
+		public void redo()
+			throws CannotRedoException
 		{
 			super.redo();
 
 			select(start,end);
 		}
 
+		@Override
 		public boolean addEdit(UndoableEdit edit)
 		{
 			if(edit instanceof CaretUndo)

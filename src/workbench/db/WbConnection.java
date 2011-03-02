@@ -305,7 +305,10 @@ public class WbConnection
 					LogMgr.logDebug("WbConnection.runConnectScript()", "  Executed statement: " + stmtSql);
 					if (!result.isSuccess())
 					{
-						messages.append("\n  " + ResourceMgr.getString("TxtError") + ": "+ result.getMessageBuffer().toString());
+						messages.append("\n  ");
+						messages.append(ResourceMgr.getString("TxtError"));
+						messages.append(": ");
+						messages.append(result.getMessageBuffer().toString());
 					}
 					messages.append("\n");
 				}
@@ -319,10 +322,11 @@ public class WbConnection
 		catch (Throwable e)
 		{
 			LogMgr.logError("WbConnection.runConnectScript()", "Error executing " + type + " script", e);
-			messages = new StringBuilder();
+			messages = new StringBuilder(50);
 			messages.append(ResourceMgr.getString("MsgBatchStatementError"));
 			messages.append(": ");
-			messages.append(command + "\n");
+			messages.append(command);
+			messages.append('\n');
 			messages.append(e.getMessage());
 		}
 		finally
@@ -332,7 +336,7 @@ public class WbConnection
 		this.scriptError = messages;
 	}
 
-	void setSqlConnection(Connection aConn)
+	private void setSqlConnection(Connection aConn)
 		throws SQLException
 	{
 		this.sqlConnection = aConn;
@@ -842,6 +846,7 @@ public class WbConnection
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return getId() + ", " + getCurrentUser() + "@" + getUrl();
@@ -952,11 +957,13 @@ public class WbConnection
 		return this.metaData.getOutputMessages();
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return id.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object o)
 	{
 		if (o instanceof WbConnection)
@@ -1180,6 +1187,7 @@ public class WbConnection
 		}
 	}
 
+	@Override
 	public void executionStart(WbConnection conn, Object source)
 	{
 		if (conn == this)
@@ -1191,6 +1199,7 @@ public class WbConnection
 	/*
 	 *	Fired by the SqlPanel if DB access finished
 	 */
+	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		if (conn == this)

@@ -176,6 +176,7 @@ public class WbProperties
 		bw.flush();
 	}
 
+	@Override
 	public int getIntProperty(String property, int defaultValue)
 	{
 		String value = this.getProperty(property, null);
@@ -183,6 +184,7 @@ public class WbProperties
 		return StringUtil.getIntValue(value, defaultValue);
 	}
 
+	@Override
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String value = this.getProperty(property, null);
@@ -191,11 +193,13 @@ public class WbProperties
 		return Boolean.valueOf(value);
 	}
 
+	@Override
 	public void setProperty(String property, int value)
 	{
 		this.setProperty(property, Integer.toString(value));
 	}
 
+	@Override
 	public void setProperty(String property, boolean value)
 	{
 		this.setProperty(property, Boolean.toString(value));
@@ -258,7 +262,7 @@ public class WbProperties
 	private void firePropertyChanged(String name, String oldValue, String newValue)
 	{
 		List<PropertyChangeListener> listeners = this.changeListeners.get(name);
-		if (listeners == null || listeners.size() == 0) return;
+		if (listeners == null || listeners.isEmpty()) return;
 
 		// Making a shallow copy of the list prevents a ConcurrentModificationException
 		List<PropertyChangeListener> l2 = new ArrayList<PropertyChangeListener>(listeners);
@@ -299,6 +303,7 @@ public class WbProperties
 		return result;
 	}
 
+	@Override
 	public Object setProperty(String name, String value)
 	{
     return setProperty(name, value, true);

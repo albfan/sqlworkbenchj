@@ -92,6 +92,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = "workbench.editor.bracket.hilite.color";
 	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
@@ -139,6 +140,7 @@ public class Settings
 		removeObsolete();
 	}
 
+	@Override
 	public Set<String> getKeys()
 	{
 		return props.getKeys();
@@ -1008,7 +1010,10 @@ public class Settings
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l, String property, String ... properties)
 	{
 		this.props.addPropertyChangeListener(l, property);
-		if (properties.length > 0) this.props.addPropertyChangeListener(l, properties);
+		if (properties.length > 0)
+		{
+			this.props.addPropertyChangeListener(l, properties);
+		}
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l)
@@ -1587,6 +1592,11 @@ public class Settings
 	public Color getEditorCurrentLineColor()
 	{
 		return getColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, null);
+	}
+
+	public Color getEditorBracketHighlightColor()
+	{
+		return getColor(PROPERTY_EDITOR_BRACKET_HILITE_COLOR, null);
 	}
 
 	public void setEditorCurrentLineColor(Color c)
@@ -2400,6 +2410,7 @@ public class Settings
 		return getBoolProperty(property, false);
 	}
 
+	@Override
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String sysValue = System.getProperty(property, null);
@@ -2410,21 +2421,25 @@ public class Settings
 		return this.props.getBoolProperty(property, defaultValue);
 	}
 
+	@Override
 	public void setProperty(String property, boolean value)
 	{
 		this.props.setProperty(property, value);
 	}
 
+	@Override
 	public Object setProperty(String aProperty, String aValue)
 	{
 		return this.props.setProperty(aProperty, aValue);
 	}
 
+	@Override
 	public void setProperty(String aProperty, int aValue)
 	{
 		this.props.setProperty(aProperty, Integer.toString(aValue));
 	}
 
+	@Override
 	public String getProperty(String aProperty, String aDefault)
 	{
 		return System.getProperty(aProperty, this.props.getProperty(aProperty, aDefault));
@@ -2611,6 +2626,7 @@ public class Settings
 			result = true;
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					target.setLocation(new Point(x, y));
@@ -2921,6 +2937,7 @@ public class Settings
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return "[Settings]";

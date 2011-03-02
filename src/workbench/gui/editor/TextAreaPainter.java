@@ -53,6 +53,7 @@ public class TextAreaPainter
 	protected Color caretColor;
 	protected Color selectionColor;
 	protected Color currentLineColor;
+	protected Color bracketHighlightColor;
 
 	protected boolean bracketHighlight;
 
@@ -73,7 +74,8 @@ public class TextAreaPainter
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
-		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR);
+		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+		Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR);
 
 	private Map renderingHints;
 
@@ -99,6 +101,7 @@ public class TextAreaPainter
 
 		bracketHighlight = true;
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
+		bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_TAB_WIDTH,
@@ -107,6 +110,7 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
 			"workbench.editor.color.comment1",
 			"workbench.editor.color.comment2",
 			"workbench.editor.color.keyword1",
@@ -141,6 +145,7 @@ public class TextAreaPainter
 		}
 		else if (COLOR_PROPS.contains(evt.getPropertyName()))
 		{
+			System.out.println("colors changed");
 			setColors();
 			invalidate();
 			WbSwingUtilities.repaintLater(this);
@@ -159,6 +164,7 @@ public class TextAreaPainter
 				setCaretColor(Settings.getInstance().getEditorCursorColor());
 				setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
+				bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
 			}
 		});
 	}
@@ -584,7 +590,7 @@ public class TextAreaPainter
 
 		if (bracketHighlight && line == textArea.getBracketLine())
 		{
-			paintBracketHighlight(gfx,line,y);
+			paintBracketHighlight(gfx, line, y, textArea.getBracketPosition());
 		}
 
 		if (line == textArea.getCaretLine())
@@ -621,9 +627,9 @@ public class TextAreaPainter
 		if (textArea.isSelectionRectangular())
 		{
 			int lineLen = textArea.getLineLength(line);
-			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine)));// + this.gutterWidth;
-			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine)));// + this.gutterWidth;
-			if(x1 == x2) x2++;
+			x1 = textArea._offsetToX(line,Math.min(lineLen,selectionStart - textArea.getLineStartOffset(selectionStartLine)));
+			x2 = textArea._offsetToX(line,Math.min(lineLen,selectionEnd - textArea.getLineStartOffset(selectionEndLine)));
+			if (x1 == x2) x2++;
 		}
 		else if (selectionStartLine == selectionEndLine)
 		{
@@ -651,28 +657,44 @@ public class TextAreaPainter
 
 	}
 
-	protected void paintBracketHighlight(Graphics gfx, int line, int y)
+	protected void paintBracketHighlight(Graphics gfx, int line, int y, int position)
 	{
-		int position = textArea.getBracketPosition();
 		if (position == -1) return;
 
-		y += fm.getLeading() + fm.getMaxDescent() - 1;
-		int x = textArea._offsetToX(line, position) - 1;
-		gfx.setColor(caretColor);
+		y += fm.getLeading() + fm.getMaxDescent();
+		int x = textArea._offsetToX(line, position);
+		if (x > 0)
+		{
+			x--;
+		}
 
-		// Hack!!! Since there is no fast way to get the character
-		// from the bracket matching routine, we use "(" since all
-		// brackets probably have the same width anyway
-		//gfx.drawRect(x,y,fm.charWidth('(') + 1,	fm.getHeight());
-		gfx.drawRect(x,y,fm.charWidth('(') + 1,	fm.getHeight());
+		int height = fm.getHeight() - 2;
+		// as only fixed width fonts are allowed for the editor
+		// the width can be calculated using a single character
+		int width = fm.charWidth('(') + 1;
+
+		if (bracketHighlightColor != null)
+		{
+			gfx.setColor(bracketHighlightColor);
+			gfx.fillRect(x, y, width, height);
+		}
+		gfx.setColor(getForeground());
+		gfx.drawRect(x, y, width,	height);
+
 	}
 
 	protected void paintCaret(Graphics gfx, int line, int y)
 	{
+		int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
+		if (bracketHighlight && textArea.getBracketPosition() > -1)
+		{
+			paintBracketHighlight(gfx, line, y, offset - 1);
+		}
+
 		if (textArea.isCaretVisible())
 		{
-			int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
 			int caretX = textArea._offsetToX(line, offset);
+
 			int caretWidth = (textArea.isOverwriteEnabled() ? fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();
