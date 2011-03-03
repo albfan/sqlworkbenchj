@@ -109,6 +109,7 @@ public class BracketHighlightPanel
     add(bracketHilite, gridBagConstraints);
 
     enableHilite.setText(ResourceMgr.getString("LblBracketHilite")); // NOI18N
+    enableHilite.setToolTipText(ResourceMgr.getString("d_LblBracketHilite")); // NOI18N
     enableHilite.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -134,6 +135,7 @@ public class BracketHighlightPanel
 
     matchType.add(matchLeft);
     matchLeft.setText(ResourceMgr.getString("LblBracketLeftOfCursor")); // NOI18N
+    matchLeft.setToolTipText(ResourceMgr.getString("d_LblBracketLeftOfCursor")); // NOI18N
     matchLeft.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -145,6 +147,7 @@ public class BracketHighlightPanel
 
     matchType.add(matchRight);
     matchRight.setText(ResourceMgr.getString("LblBracketRightOfCursor")); // NOI18N
+    matchRight.setToolTipText(ResourceMgr.getString("d_LblBracketRightOfCursor")); // NOI18N
     matchRight.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
