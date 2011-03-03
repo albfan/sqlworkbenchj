@@ -663,12 +663,12 @@ public class TextAreaPainter
 
 		y += fm.getLeading() + fm.getMaxDescent();
 		int x = textArea._offsetToX(line, position);
-		if (x > 0)
+		if (x > 1)
 		{
 			x--;
 		}
 
-		int height = fm.getHeight() - 2;
+		int height = fm.getHeight() - fm.getDescent() + 1;
 		// as only fixed width fonts are allowed for the editor
 		// the width can be calculated using a single character
 		int width = fm.charWidth('(') + 1;
@@ -703,11 +703,11 @@ public class TextAreaPainter
 
 			if (textArea.isOverwriteEnabled())
 			{
-				gfx.fillRect(caretX,y + height - 1,	caretWidth,1);
+				gfx.fillRect(caretX, y + height - 1,	caretWidth, 1);
 			}
 			else
 			{
-				gfx.drawRect(caretX,y,caretWidth - 1,height - 1);
+				gfx.drawRect(caretX, y, caretWidth - 1, height - 1);
 			}
 		}
 	}
