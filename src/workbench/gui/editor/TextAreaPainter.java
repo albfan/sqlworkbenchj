@@ -56,6 +56,7 @@ public class TextAreaPainter
 	protected Color bracketHighlightColor;
 
 	protected boolean bracketHighlight;
+	protected boolean matchBeforeCaret;
 
 	protected int tabSize = -1;
 	protected FontMetrics fm;
@@ -100,6 +101,7 @@ public class TextAreaPainter
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 
 		bracketHighlight = true;
+		matchBeforeCaret = Settings.getInstance().getBracketHighlightBefore();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 		bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
 
@@ -111,6 +113,7 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE_BEFORE,
 			"workbench.editor.color.comment1",
 			"workbench.editor.color.comment2",
 			"workbench.editor.color.keyword1",
@@ -141,6 +144,11 @@ public class TextAreaPainter
 		else if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
 		{
 			this.showLineNumbers = Settings.getInstance().getShowLineNumbers();
+			invalidate();
+		}
+		else if (Settings.PROPERTY_EDITOR_BRACKET_HILITE_BEFORE.equals(evt.getPropertyName()))
+		{
+			this.matchBeforeCaret = Settings.getInstance().getBracketHighlightBefore();
 			invalidate();
 		}
 		else if (COLOR_PROPS.contains(evt.getPropertyName()))
@@ -688,7 +696,9 @@ public class TextAreaPainter
 		int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
 		if (bracketHighlight && textArea.getBracketPosition() > -1)
 		{
-			paintBracketHighlight(gfx, line, y, offset - 1);
+			boolean matchBefore = Settings.getInstance().getBracketHighlightBefore();
+			int charOffset = matchBefore ? 0 : -1;
+			paintBracketHighlight(gfx, line, y, offset + charOffset);
 		}
 
 		if (textArea.isCaretVisible())

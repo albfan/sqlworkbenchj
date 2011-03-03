@@ -93,6 +93,8 @@ public class Settings
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = "workbench.editor.bracket.hilite.color";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BEFORE = "workbench.editor.bracket.hilite.after";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE = "workbench.editor.bracket.hilite.enable";
 	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
@@ -1592,6 +1594,32 @@ public class Settings
 	public Color getEditorCurrentLineColor()
 	{
 		return getColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, null);
+	}
+
+
+	public boolean getBracketHighlight()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE, true);
+	}
+
+	public void setBracketHighlight(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_BRACKET_HILITE, flag);
+	}
+
+	/**
+	 * Returns true if the matching bracket should be highlighted depening on the
+	 * character left of the caret. If false the character to the right of
+	 * the caret is taken as the "base" character
+	 */
+	public boolean getBracketHighlightBefore()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE_BEFORE, true);
+	}
+
+	public void setBracketHighlightBefore(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_BRACKET_HILITE_BEFORE, flag);
 	}
 
 	public Color getEditorBracketHighlightColor()

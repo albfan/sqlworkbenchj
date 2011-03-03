@@ -49,6 +49,7 @@ public class EditorOptionsPanel
 		defaultDir.setSelectDirectoryOnly(true);
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 
@@ -103,6 +104,7 @@ public class EditorOptionsPanel
 		return 0;
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -308,7 +310,7 @@ public class EditorOptionsPanel
     useTabs.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 0, 0, 10);
     add(useTabs, gridBagConstraints);
