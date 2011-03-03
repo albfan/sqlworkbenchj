@@ -73,6 +73,7 @@ public class SettingsPanel
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
+		pages.add(new OptionPanelPage("BracketHighlightPanel", "LblBracketOptions"));
 		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
 		pages.add(new OptionPanelPage("CompletionOptionsPanel", "LblCompletionOptions"));
 		pages.add(new OptionPanelPage("WorkspaceOptions", "LblSettingsWorkspace"));

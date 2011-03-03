@@ -57,6 +57,8 @@ public class TextAreaPainter
 
 	protected boolean bracketHighlight;
 	protected boolean matchBeforeCaret;
+	protected boolean bracketHighlightRec;
+	protected boolean bracketHighlightBoth;
 
 	protected int tabSize = -1;
 	protected FontMetrics fm;
@@ -96,14 +98,12 @@ public class TextAreaPainter
 		setForeground(Settings.getInstance().getEditorTextColor());
 		setBackground(Settings.getInstance().getEditorBackgroundColor());
 
+		readBracketSettings();
+
 		caretColor = Settings.getInstance().getEditorCursorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-
-		bracketHighlight = true;
-		matchBeforeCaret = Settings.getInstance().getBracketHighlightBefore();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
-		bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_TAB_WIDTH,
@@ -112,8 +112,11 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
-			Settings.PROPERTY_EDITOR_BRACKET_HILITE_BEFORE,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE_LEFT,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE_REC,
+			Settings.PROPERTY_EDITOR_BRACKET_HILITE_BOTH,
 			"workbench.editor.color.comment1",
 			"workbench.editor.color.comment2",
 			"workbench.editor.color.keyword1",
@@ -139,25 +142,34 @@ public class TextAreaPainter
 	{
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
 		{
-			this.calculateTabSize();
+			calculateTabSize();
 		}
 		else if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
 		{
-			this.showLineNumbers = Settings.getInstance().getShowLineNumbers();
+			showLineNumbers = Settings.getInstance().getShowLineNumbers();
 			invalidate();
 		}
-		else if (Settings.PROPERTY_EDITOR_BRACKET_HILITE_BEFORE.equals(evt.getPropertyName()))
+		else if (evt.getPropertyName().startsWith(Settings.PROPERTY_EDITOR_BRACKET_HILITE_BASE))
 		{
-			this.matchBeforeCaret = Settings.getInstance().getBracketHighlightBefore();
+			readBracketSettings();
+			textArea.invalidateBracketLine();
 			invalidate();
 		}
 		else if (COLOR_PROPS.contains(evt.getPropertyName()))
 		{
-			System.out.println("colors changed");
 			setColors();
 			invalidate();
 			WbSwingUtilities.repaintLater(this);
 		}
+	}
+
+	private void readBracketSettings()
+	{
+		bracketHighlight = Settings.getInstance().isBracketHighlightEnabled();
+		matchBeforeCaret = Settings.getInstance().getBracketHighlightLeft();
+		bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
+		bracketHighlightRec = Settings.getInstance().getBracketHighlightRectangle();
+		bracketHighlightBoth = bracketHighlight && Settings.getInstance().getBracketHighlightBoth();
 	}
 
 	private void setColors()
@@ -419,7 +431,6 @@ public class TextAreaPainter
 		final int firstVisible = textArea.getFirstLine();
 
 		int fheight = fm.getHeight();
-		final int fmHeight = fm.getLeading() + fm.getMaxDescent();
 		int firstInvalid = firstVisible + (clipRect.y / fheight);
 		if (firstInvalid > 1) firstInvalid --;
 
@@ -475,7 +486,7 @@ public class TextAreaPainter
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
-						gfx.fillRect(0, y + fmHeight, editorWidth, fheight);
+						gfx.fillRect(0, y + fm.getLeading() + fm.getMaxDescent(), editorWidth, fheight);
 						gfx.setColor(getBackground());
 					}
 
@@ -570,40 +581,42 @@ public class TextAreaPainter
 		gfx.setFont(defaultFont);
 		gfx.setColor(defaultColor);
 
-		y += fm.getHeight();
+		y += fm.getHeight() + fm.getDescent();
 		Utilities.drawTabbedText(currentLine, x, y, gfx, this, 0);
 	}
 
-	protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker,
-		int line, Font defaultFont, Color defaultColor, int x, int y)
+	protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker, int line, Font defaultFont, Color defaultColor, int x, int y)
 	{
 		textArea.getLineText(line,currentLine);
 
 		currentLineTokens = tokenMarker.markTokens(currentLine,	line);
 
-		paintHighlight(gfx,line,y);
+		paintHighlight(gfx, line, y);
 
 		gfx.setFont(defaultFont);
 		gfx.setColor(defaultColor);
 		y += fm.getHeight();
-		SyntaxUtilities.paintSyntaxLine(currentLine,currentLineTokens,styles,this,gfx,x,y,0);
+		SyntaxUtilities.paintSyntaxLine(currentLine, currentLineTokens, styles, this, gfx, x, y, 0);
 	}
 
 	protected void paintHighlight(Graphics gfx, int line, int y)
 	{
 		if (line >= textArea.getSelectionStartLine()	&& line <= textArea.getSelectionEndLine())
 		{
-			paintLineHighlight(gfx,line,y);
+			paintLineHighlight(gfx, line, y);
 		}
+
+		y += fm.getLeading() + fm.getMaxDescent() + 1;
+		int height = fm.getHeight() - 2;
 
 		if (bracketHighlight && line == textArea.getBracketLine())
 		{
-			paintBracketHighlight(gfx, line, y, textArea.getBracketPosition());
+			paintBracketHighlight(gfx, line, y, height, textArea.getBracketPosition());
 		}
 
 		if (line == textArea.getCaretLine())
 		{
-			paintCaret(gfx,line,y);
+			paintCaret(gfx, line, y, height);
 		}
 	}
 
@@ -665,18 +678,16 @@ public class TextAreaPainter
 
 	}
 
-	protected void paintBracketHighlight(Graphics gfx, int line, int y, int position)
+	protected void paintBracketHighlight(Graphics gfx, int line, int y, int height, int position)
 	{
 		if (position == -1) return;
 
-		y += fm.getLeading() + fm.getMaxDescent();
 		int x = textArea._offsetToX(line, position);
 		if (x > 1)
 		{
 			x--;
 		}
 
-		int height = fm.getHeight() - fm.getDescent() + 1;
 		// as only fixed width fonts are allowed for the editor
 		// the width can be calculated using a single character
 		int width = fm.charWidth('(') + 1;
@@ -686,19 +697,23 @@ public class TextAreaPainter
 			gfx.setColor(bracketHighlightColor);
 			gfx.fillRect(x, y, width, height);
 		}
-		gfx.setColor(getForeground());
-		gfx.drawRect(x, y, width,	height);
 
+		if (bracketHighlightRec)
+		{
+			gfx.setColor(getForeground());
+			gfx.drawRect(x, y, width,	height);
+		}
 	}
 
-	protected void paintCaret(Graphics gfx, int line, int y)
+	protected void paintCaret(Graphics gfx, int line, int y, int height)
 	{
 		int offset = textArea.getCaretPosition() - textArea.getLineStartOffset(line);
-		if (bracketHighlight && textArea.getBracketPosition() > -1)
+
+		if (bracketHighlightBoth && textArea.getBracketPosition() > -1)
 		{
-			boolean matchBefore = Settings.getInstance().getBracketHighlightBefore();
-			int charOffset = matchBefore ? 0 : -1;
-			paintBracketHighlight(gfx, line, y, offset + charOffset);
+			boolean matchBefore = Settings.getInstance().getBracketHighlightLeft();
+			int charOffset = matchBefore ? -1 : 0;
+			paintBracketHighlight(gfx, line, y, height, offset + charOffset);
 		}
 
 		if (textArea.isCaretVisible())
@@ -706,14 +721,12 @@ public class TextAreaPainter
 			int caretX = textArea._offsetToX(line, offset);
 
 			int caretWidth = (textArea.isOverwriteEnabled() ? fm.charWidth('w') : 2);
-			y += fm.getLeading() + fm.getMaxDescent();
-			int height = fm.getHeight();
 
 			gfx.setColor(caretColor);
 
 			if (textArea.isOverwriteEnabled())
 			{
-				gfx.fillRect(caretX, y + height - 1,	caretWidth, 1);
+				gfx.drawRect(caretX, y + height - 1,	caretWidth, 1);
 			}
 			else
 			{

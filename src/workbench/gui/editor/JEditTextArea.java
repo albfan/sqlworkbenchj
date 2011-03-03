@@ -783,7 +783,7 @@ public class JEditTextArea
 	public int lineToY(int line)
 	{
 		FontMetrics fm = painter.getFontMetrics();
-		return (line - firstLine) * fm.getHeight() - (fm.getLeading() + fm.getMaxDescent());
+		return ((line - firstLine) * fm.getHeight()) - (fm.getLeading() + fm.getDescent());
 	}
 
 	/**
@@ -2273,9 +2273,14 @@ public class JEditTextArea
 		updateStatusBar();
 	}
 
+	public void invalidateBracketLine()
+	{
+		updateBracketHighlight(getCaretPosition());
+	}
+
 	protected void updateBracketHighlight(int newCaretPosition)
 	{
-		if (newCaretPosition == 0)
+		if (newCaretPosition == 0 || !Settings.getInstance().isBracketHighlightEnabled())
 		{
 			bracketPosition = -1;
 			bracketLine = -1;
@@ -2284,8 +2289,8 @@ public class JEditTextArea
 
 		try
 		{
-			boolean matchBefore = Settings.getInstance().getBracketHighlightBefore();
-			int charOffset = matchBefore ? 0 : -1;
+			boolean matchBefore = Settings.getInstance().getBracketHighlightLeft();
+			int charOffset = matchBefore ? -1 : 0;
 			int offset = TextUtilities.findMatchingBracket(document, newCaretPosition + charOffset);
 			if (offset != -1)
 			{

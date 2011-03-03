@@ -75,9 +75,6 @@ public class EditorColorsPanel
 		Color dt = sett.getEditorDatatypeColor();
 		datatypes.setSelectedColor(dt);
 
-		Color hilite = sett.getEditorBracketHighlightColor();
-		bracketHilite.setSelectedColor(hilite);
-
 		errorColor.setSelectedColor(Settings.getInstance().getEditorErrorColor());
 		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		currLineColor.setSelectedColor(Settings.getInstance().getEditorCurrentLineColor());
@@ -96,7 +93,6 @@ public class EditorColorsPanel
 		sett.setColor("workbench.editor.color.literal1", literals.getSelectedColor());
 		sett.setColor("workbench.editor.color.operator", operators.getSelectedColor());
 
-		sett.setColor(Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR, bracketHilite.getSelectedColor());
 		sett.setEditorErrorColor(errorColor.getSelectedColor());
 		sett.setEditorCurrentLineColor(currLineColor.getSelectedColor());
 		sett.setEditorSelectionColor(selectionColor.getSelectedColor());
@@ -146,8 +142,6 @@ public class EditorColorsPanel
     bgColor = new WbColorPicker(true);
     cursorLabel = new JLabel();
     cursorColor = new WbColorPicker(true);
-    bracketHiliteLabel = new JLabel();
-    bracketHilite = new WbColorPicker(true);
 
     setLayout(new GridBagLayout());
 
@@ -397,26 +391,6 @@ public class EditorColorsPanel
     gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     editorColors.add(cursorColor, gridBagConstraints);
 
-    bracketHiliteLabel.setText(ResourceMgr.getString("LblBracketHiliteColor")); // NOI18N
-    bracketHiliteLabel.setToolTipText(ResourceMgr.getString("d_LblBracketHiliteColor")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 5, 0, 0);
-    editorColors.add(bracketHiliteLabel, gridBagConstraints);
-
-    bracketHilite.setToolTipText(ResourceMgr.getString("d_LblBracketHiliteColor")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(9, 3, 0, 0);
-    editorColors.add(bracketHilite, gridBagConstraints);
-
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -429,8 +403,6 @@ public class EditorColorsPanel
   private JLabel bgColorLabel;
   private WbColorPicker blockComments;
   private JLabel blockCommentsLabel;
-  private WbColorPicker bracketHilite;
-  private JLabel bracketHiliteLabel;
   private WbColorPicker currLineColor;
   private JLabel currLineLabel;
   private WbColorPicker cursorColor;

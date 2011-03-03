@@ -80,12 +80,12 @@ public class ValueConverter
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;
 
-	private final Integer INT_TRUE = Integer.valueOf(1);
-	private final Integer INT_FALSE = Integer.valueOf(0);
-	private final Long LONG_TRUE = Long.valueOf(1);
-	private final Long LONG_FALSE = Long.valueOf(0);
-	private final BigDecimal BIG_TRUE = BigDecimal.valueOf(1);
-	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
+	private Integer integerTrue = Integer.valueOf(1);
+	private Integer integerFalse = Integer.valueOf(0);
+	private Long longTrue = Long.valueOf(1);
+	private Long longFalse = Long.valueOf(0);
+	private BigDecimal bigDecimalTrue = BigDecimal.valueOf(1);
+	private BigDecimal bigDecimalFalse = BigDecimal.valueOf(0);
 
 	private static final String FORMAT_MILLIS = "millis";
 	private boolean checkBuiltInFormats = true;
@@ -170,6 +170,18 @@ public class ValueConverter
 		}
 	}
 
+	public void setNumericBooleanValues(int falseValue, int trueValue)
+	{
+		integerFalse = Integer.valueOf(falseValue);
+		integerTrue = Integer.valueOf(trueValue);
+
+		longFalse = Long.valueOf(falseValue);
+		longTrue = Long.valueOf(trueValue);
+
+		bigDecimalFalse = BigDecimal.valueOf(falseValue);
+		bigDecimalTrue = BigDecimal.valueOf(trueValue);
+	}
+	
 	public void setDecimalCharacter(char aChar)
 	{
 		this.decimalCharacter = aChar;
@@ -256,15 +268,14 @@ public class ValueConverter
 				{
 					if (b.booleanValue())
 					{
-						return LONG_TRUE;
+						return longTrue;
 					}
 					else
 					{
-						return LONG_FALSE;
+						return longFalse;
 					}
 				}
 			}
-
 			throw new ConverterException(value, Types.BIGINT, e);
 		}
 	}
@@ -294,15 +305,14 @@ public class ValueConverter
 				{
 					if (b.booleanValue())
 					{
-						return INT_TRUE;
+						return integerTrue;
 					}
 					else
 					{
-						return INT_FALSE;
+						return integerFalse;
 					}
 				}
 			}
-
 			throw new ConverterException(value, type, e);
 		}
 	}
@@ -328,11 +338,11 @@ public class ValueConverter
 				{
 					if (b.booleanValue())
 					{
-						return BIG_TRUE;
+						return bigDecimalTrue;
 					}
 					else
 					{
-						return BIG_FALSE;
+						return bigDecimalFalse;
 					}
 				}
 			}

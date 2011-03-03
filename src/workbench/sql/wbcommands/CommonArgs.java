@@ -26,13 +26,13 @@ import workbench.util.ValueConverter;
 
 /**
  * A class to manage common parameters for various WbCommands.
- * 
+ *
  * When adding the parameters to the ArgumentParser, the necessary
- * values for the code completion are also supplied. 
+ * values for the code completion are also supplied.
  * For parameters with no fixed set of values a sample list
- * with popular (or so I think) values is added, e.g. the -encoding 
+ * with popular (or so I think) values is added, e.g. the -encoding
  * parameter.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class CommonArgs
@@ -51,6 +51,8 @@ public class CommonArgs
 	public static final String ARG_DATE_FORMAT = "dateFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_DECCHAR = "decimal";
+	public static final String ARG_NUMERIC_TRUE = "numericTrue";
+	public static final String ARG_NUMERIC_FALSE = "numericFalse";
 	public static final String ARG_FALSE_LITERALS = "literalsFalse";
 	public static final String ARG_TRUE_LITERALS = "literalsTrue";
 	public static final String ARG_CHECK_FK_DEPS = "checkDependencies";
@@ -61,7 +63,7 @@ public class CommonArgs
 	public static final String ARG_DATE_LITERAL_TYPE = "sqlDateLiterals";
 	public static final String ARG_DELETE_TARGET = "deleteTarget";
 	public static final String ARG_TRUNCATE_TABLE = "truncateTable";
-	
+
 	private static List<String> getDelimiterArguments()
 	{
 		return StringUtil.stringToList("'\\t',';',\"','\",'|',<char>");
@@ -71,7 +73,7 @@ public class CommonArgs
 	{
 		cmdLine.addArgument(ARG_TRANS_CONTROL, ArgumentType.BoolArgument);
 	}
-	
+
 	public static List<String> getListArgument(ArgumentParser cmdLine, String arg)
 	{
 		String value = cmdLine.getValue(arg);
@@ -93,41 +95,41 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_POST_TABLE_STMT);
 		cmdLine.addArgument(ARG_IGNORE_TABLE_STMT_ERRORS, ArgumentType.BoolArgument);
 	}
-	
+
 	public static void addCheckDepsParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_CHECK_FK_DEPS, ArgumentType.BoolArgument);
 	}
-	
+
 	public static void addContinueParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_CONTINUE, ArgumentType.BoolArgument);
 	}
-	
+
 	public static void addImportModeParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\""));
 	}
-	
+
 	public static void addSqlDateLiteralParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_DATE_LITERAL_TYPE, Settings.getInstance().getLiteralTypeList());
 	}
-	
+
 	public static void addVerboseXmlParameter(ArgumentParser cmdLine)
 	{
-		cmdLine.addArgument(ARG_VERBOSE_XML, ArgumentType.BoolArgument);	
+		cmdLine.addArgument(ARG_VERBOSE_XML, ArgumentType.BoolArgument);
 	}
-	
+
 	public static void addCommitParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_COMMIT, StringUtil.stringToList("none,atEnd,<number>"));
-	}	
-	
+	}
+
 	public static void addDelimiterParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_DELIM, getDelimiterArguments());
-	}	
+	}
 
 	public static boolean checkQuoteEscapting(ArgumentParser cmdLine)
 	{
@@ -136,9 +138,9 @@ public class CommonArgs
 		if (quoteAlways && escape == QuoteEscapeType.duplicate) return false;
 		return true;
 	}
-	
+
 	/**
-	 * Adds the quoteCharEscaping argument. Valid values 
+	 * Adds the quoteCharEscaping argument. Valid values
 	 * are none, duplicate, escape.
 	 * @see workbench.util.QuoteEscapeType
 	 */
@@ -146,7 +148,7 @@ public class CommonArgs
 	{
 		cmdLine.addArgument(ARG_QUOTE_ESCAPE, StringUtil.stringToList("none,duplicate,escape"));
 	}
-	
+
 	/**
 	 * Adds the -encoding parameter to the ArgumentParser.
 	 * The encodings that are added to the code completion list
@@ -158,7 +160,7 @@ public class CommonArgs
 	{
 		cmdLine.addArgument(ARG_ENCODING, StringUtil.stringToList(Settings.getInstance().getPopularEncodings()));
 	}
-	
+
 	public static void addProgressParameter(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_PROGRESS, StringUtil.stringToList("true,false,<number>"));
@@ -167,7 +169,7 @@ public class CommonArgs
 	public static void setProgressInterval(ProgressReporter reporter, ArgumentParser cmdLine)
 	{
 		String value = cmdLine.getValue(ARG_PROGRESS);
-			
+
 		if ("true".equalsIgnoreCase(value))
 		{
 			reporter.setReportInterval(1);
@@ -191,7 +193,7 @@ public class CommonArgs
 	{
 		String commitParam = cmdLine.getValue("commitevery");
 		if (commitParam == null) return;
-		
+
 		if ("none".equalsIgnoreCase(commitParam) || "false".equalsIgnoreCase(commitParam))
 		{
 			committer.commitNothing();
@@ -204,26 +206,26 @@ public class CommonArgs
 		{
 			committer.setCommitEvery(StringUtil.getIntValue(commitParam,0));
 		}
-		
+
 	}
-	
+
 	public static void addCommitAndBatchParams(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_BATCHSIZE);
 		cmdLine.addArgument(ARG_COMMIT_BATCH, ArgumentType.BoolArgument);
 	}
-	
+
 	public static void setCommitAndBatchParams(BatchCommitter committer, ArgumentParser cmdLine)
 	{
-		
+
 		int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
 		String commitParam = cmdLine.getValue("commitevery");
-		
+
 		if (queueSize > 0)
 		{
 			committer.setUseBatch(true);
 			committer.setBatchSize(queueSize);
-			
+
 			if (cmdLine.isArgPresent(ARG_COMMIT_BATCH))
 			{
 				committer.setCommitBatch(cmdLine.getBoolean(ARG_COMMIT_BATCH, false));
@@ -238,7 +240,7 @@ public class CommonArgs
 			setCommitEvery(committer, cmdLine);
 		}
 	}
-	
+
 	public static QuoteEscapeType getQuoteEscaping(ArgumentParser cmdLine)
 	{
 		String esc = cmdLine.getValue(ARG_QUOTE_ESCAPE);
@@ -268,14 +270,16 @@ public class CommonArgs
 		}
 		cmdLine.addArgument(ARG_FALSE_LITERALS);
 		cmdLine.addArgument(ARG_TRUE_LITERALS);
+		cmdLine.addArgument(ARG_NUMERIC_FALSE);
+		cmdLine.addArgument(ARG_NUMERIC_TRUE);
 	}
-	
+
 	public static ValueConverter getConverter(ArgumentParser cmdLine)
 		throws IllegalArgumentException
 	{
 		ValueConverter converter = new ValueConverter();
 		converter.setAutoConvertBooleanNumbers(cmdLine.getBoolean(ARG_AUTO_BOOLEAN, true));
-		
+
 		String format = null;
 		try
 		{
@@ -290,7 +294,7 @@ public class CommonArgs
 			String msg = ResourceMgr.getFormattedString("ErrIllegalDateTimeFormat", format);
 			throw new IllegalArgumentException(msg, e);
 		}
-		
+
 		String decimal = cmdLine.getValue(ARG_DECCHAR);
 		if (decimal != null) converter.setDecimalCharacter(decimal.charAt(0));
 
@@ -300,7 +304,15 @@ public class CommonArgs
 		{
 			converter.setBooleanLiterals(trueValues, falseValues);
 		}
+
+		if (cmdLine.isArgPresent(ARG_NUMERIC_FALSE) && cmdLine.isArgPresent(ARG_NUMERIC_TRUE))
+		{
+			int trueValue = cmdLine.getIntValue(ARG_NUMERIC_TRUE, 1);
+			int falseValue = cmdLine.getIntValue(ARG_NUMERIC_FALSE, 0);
+			converter.setNumericBooleanValues(falseValue, trueValue);
+			converter.setAutoConvertBooleanNumbers(true);
+		}
 		return converter;
 	}
-	
+
 }

@@ -13,8 +13,6 @@ package workbench.db.oracle;
 
 import workbench.db.ColumnIdentifier;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import workbench.db.IndexColumn;
 import workbench.db.IndexReader;
@@ -163,7 +161,7 @@ public class OracleMetadataTest
 		error = compiler.compileObject(mv);
 		assertNull(error);
 	}
-	
+
 	@Test
 	public void testRowIDConverter()
 		throws Exception

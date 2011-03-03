@@ -92,9 +92,12 @@ public class Settings
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
-	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = "workbench.editor.bracket.hilite.color";
-	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BEFORE = "workbench.editor.bracket.hilite.after";
-	public static final String PROPERTY_EDITOR_BRACKET_HILITE = "workbench.editor.bracket.hilite.enable";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BASE = "workbench.editor.bracket.hilite";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".color";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_LEFT = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".left";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_REC = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".rectangle";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BOTH = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".both";
+	public static final String PROPERTY_EDITOR_BRACKET_HILITE = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".enable";
 	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
@@ -1597,7 +1600,7 @@ public class Settings
 	}
 
 
-	public boolean getBracketHighlight()
+	public boolean isBracketHighlightEnabled()
 	{
 		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE, true);
 	}
@@ -1612,14 +1615,40 @@ public class Settings
 	 * character left of the caret. If false the character to the right of
 	 * the caret is taken as the "base" character
 	 */
-	public boolean getBracketHighlightBefore()
+	public boolean getBracketHighlightLeft()
 	{
-		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE_BEFORE, true);
+		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE_LEFT, true);
 	}
 
-	public void setBracketHighlightBefore(boolean flag)
+	public void setBracketHighlightLeft(boolean flag)
 	{
-		setProperty(PROPERTY_EDITOR_BRACKET_HILITE_BEFORE, flag);
+		setProperty(PROPERTY_EDITOR_BRACKET_HILITE_LEFT, flag);
+	}
+
+	/**
+	 * Returns true if the matching bracket be highlighted with a rectangle
+	 */
+	public boolean getBracketHighlightRectangle()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE_REC, true);
+	}
+
+	public void setBracketHighlightRectangle(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_BRACKET_HILITE_REC, flag);
+	}
+
+	/**
+	 * Returns true if the matching bracket be highlighted with a rectangle
+	 */
+	public boolean getBracketHighlightBoth()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_BRACKET_HILITE_BOTH, false);
+	}
+
+	public void setBracketHighlightBoth(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_BRACKET_HILITE_BOTH, flag);
 	}
 
 	public Color getEditorBracketHighlightColor()
