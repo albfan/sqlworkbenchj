@@ -115,14 +115,15 @@ public class ShowTipAction
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		// This is the mouse clicked event from either
-		// the tip itself or the editor.
+
 		if (e.getSource() == currentTooltip)
 		{
+			// If the tooltip is clicked, close it
 			closeTooltip();
 		}
 		else if (e.getSource() == area)
 		{
+			// Handle cursor change in the editor
 			updateTooltip();
 		}
 		else
@@ -154,7 +155,6 @@ public class ShowTipAction
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-		// nothing to do
 	}
 
 	@Override

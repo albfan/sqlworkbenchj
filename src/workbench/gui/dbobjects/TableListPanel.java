@@ -805,14 +805,6 @@ public class TableListPanel
 	public void setCatalogAndSchema(String newCatalog, String newSchema, boolean retrieve)
 		throws Exception
 	{
-//		boolean sameCatalogAndSchema = StringUtil.equalString(currentSchema, newSchema) && StringUtil.equalString(currentCatalog, newCatalog);
-//
-//		if (!sameCatalogAndSchema)
-//		{
-//			LogMgr.logDebug("TableListPanel.setCatalogAndSchema()", "Selection has changed. Schema: " + currentSchema + " -> " + newSchema
-//				+ ", Catalog: " + currentCatalog + " -> " + newCatalog);
-//		}
-
 		this.currentSchema = newSchema;
 		this.currentCatalog = newCatalog;
 

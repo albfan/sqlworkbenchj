@@ -18,6 +18,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.ScriptParser;
 
 /**
+ * A class to provide tooltips for an INSERT statement.
  *
  * @author Thomas Kellerer
  */
@@ -25,6 +26,10 @@ public class InsertTipProvider
 	implements ParameterTipProvider
 {
 	private SqlPanel sqlPanel;
+	private int lastCommandStart = Integer.MAX_VALUE;
+	private int lastCommandEnd = -1;
+	private String lastCommand;
+	private long lastParseTime = 0;
 
 	public InsertTipProvider(SqlPanel panel)
 	{
@@ -34,23 +39,36 @@ public class InsertTipProvider
 	@Override
 	public String getCurrentTooltip()
 	{
-		ScriptParser parser = sqlPanel.createScriptParser();
 		EditorPanel editor = sqlPanel.getEditor();
-		parser.setScript(editor.getText());
-		int index = parser.getCommandIndexAtCursorPos(editor.getCaretPosition());
-		if (index < 0)
-		{
-			return null;
-		}
-		String currentStatement = parser.getCommand(index);
+		int currentPosition = editor.getCaretPosition();
 
-		if (currentStatement == null)
+		// Cache the last used statement (and it's bounds), so that we do not need
+		// to parse the whole editor script each time a tooltip is requested
+		if (editor.isModifiedAfter(lastParseTime) || currentPosition < lastCommandStart || currentPosition > lastCommandEnd)
 		{
+			lastParseTime = System.currentTimeMillis();
+			ScriptParser parser = sqlPanel.createScriptParser();
+			parser.setScript(editor.getText());
+			int index = parser.getCommandIndexAtCursorPos(editor.getCaretPosition());
+			if (index < 0)
+			{
+				return null;
+			}
+			lastCommand = parser.getCommand(index);
+			lastCommandStart = parser.getStartPosForCommand(index);
+			lastCommandEnd = parser.getEndPosForCommand(index);
+		}
+
+		if (lastCommand == null)
+		{
+			lastParseTime = 0;
+			lastCommandStart = Integer.MAX_VALUE;
+			lastCommandEnd = 0;
 			return null;
 		}
-		int statementStart = parser.getStartPosForCommand(index);
-		int positionInStatement = editor.getCaretPosition() - statementStart;
-		InsertColumnMatcher matcher = new InsertColumnMatcher(currentStatement);
+
+		int positionInStatement = currentPosition - lastCommandStart;
+		InsertColumnMatcher matcher = new InsertColumnMatcher(lastCommand);
 		String tip = matcher.getTooltipForPosition(positionInStatement);
 		if (tip == null)
 		{
