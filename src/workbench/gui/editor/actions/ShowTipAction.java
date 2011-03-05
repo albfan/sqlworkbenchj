@@ -68,6 +68,7 @@ public class ShowTipAction
 		String tip = tipProvider.getCurrentTooltip();
 		if (tip == null)
 		{
+			closeTooltip();
 			return;
 		}
 		currentTooltip = area.createToolTip();
@@ -92,10 +93,12 @@ public class ShowTipAction
 			if (currentTooltip != null)
 			{
 				currentTooltip.removeMouseListener(this);
+				currentTooltip = null;
 			}
 			if (currentPopup != null)
 			{
 				currentPopup.hide();
+				currentPopup = null;
 			}
 			area.stopKeyNotification();
 			area.getPainter().removeMouseListener(this);

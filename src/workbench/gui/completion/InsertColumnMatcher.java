@@ -31,7 +31,6 @@ public class InsertColumnMatcher
 
 	public InsertColumnMatcher(String sql)
 	{
-		columns = new ArrayList<InsertColumnInfo>();
 		analyzeStatement(sql);
 	}
 
@@ -49,6 +48,7 @@ public class InsertColumnMatcher
 			if (!token.getContents().equals("INSERT"))
 			{
 				isInsert = false;
+				columns = Collections.emptyList();
 				return;
 			}
 
@@ -58,6 +58,8 @@ public class InsertColumnMatcher
 			List<ElementInfo> valueEntries = null;
 
 			int bracketCount = 0;
+			boolean isSubSelect = false;
+
 			while (token != null)
 			{
 				if (token.getContents().equals(")"))
@@ -99,11 +101,13 @@ public class InsertColumnMatcher
 					{
 						element.setOffset(token.getCharBegin());
 					}
+					isSubSelect = true;
 				}
 				token = lexer.getNextToken(false, false);
 			}
 
 			int maxElements = columnEntries.size() > valueEntries.size() ? columnEntries.size() : valueEntries.size();
+			columns = new ArrayList<InsertColumnInfo>(maxElements);
 			for (int i=0; i < maxElements; i++)
 			{
 				InsertColumnInfo info = new InsertColumnInfo();
@@ -121,10 +125,37 @@ public class InsertColumnMatcher
 				}
 				columns.add(info);
 			}
+			if (isSubSelect)
+			{
+				adjustValueStarts();
+			}
 		}
 		catch (Exception e)
 		{
+			if (columns == null)
+			{
+				columns = Collections.emptyList();
+			}
 			LogMgr.logError("InsertColumnMatcher.analyzeStatemet()", "Could not analyze statement: " + sql, e);
+		}
+	}
+
+	/**
+	 * The start position of sub-select columns does not consider whitespace before the column name.
+	 * It is always the start of the actual column name. This is not correct
+	 * for tooltip hinting (as the "start of the column is right behind the previous comma),
+	 * so we need to adjust those values.
+	 */
+	private void adjustValueStarts()
+	{
+		for (int i=0; i < columns.size() - 1; i++)
+		{
+			InsertColumnInfo current = columns.get(i);
+			InsertColumnInfo next = columns.get(i + 1);
+			if (next.value != null && next.valueStart > 0 && next.valueEnd > 0)
+			{
+				next.valueStart = current.valueEnd + 1; // plus 1 because of the comma
+			}
 		}
 	}
 

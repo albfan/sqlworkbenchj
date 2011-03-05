@@ -99,7 +99,7 @@ public class InsertColumnMatcherTest
 			"INSERT INTO person \n" +
 			"( \n" +
 			"  id, \n" +
-			"  magic_value, \n" +
+			"  value_column, \n" +
 			"  firstname, \n" +
 			"  lastname, \n" +
 			"  birthday \n" +
@@ -117,12 +117,13 @@ public class InsertColumnMatcherTest
 		assertNotNull(columns);
 		assertEquals(6, columns.size());
 		assertEquals("some_id", matcher.getValueForColumn("id"));
-		assertEquals("some_value", matcher.getValueForColumn("magic_value"));
+		assertEquals("some_value", matcher.getValueForColumn("value_column"));
 		assertEquals("'Arthur'", matcher.getValueForColumn("firstname"));
 		assertEquals("'Dent'", matcher.getValueForColumn("lastname"));
 		assertEquals("CURRENT_DATE", matcher.getValueForColumn("birthday"));
-		assertEquals("magic_value", matcher.getTooltipForPosition(sql.indexOf("some_value,")));
+		assertEquals("value_column", matcher.getTooltipForPosition(sql.indexOf("some_value,")));
 		assertEquals(null, matcher.getTooltipForPosition(sql.indexOf("foobar_value")));
+		assertEquals("firstname", matcher.getTooltipForPosition(sql.indexOf("  'Arthur'")));
 
 	}
 }

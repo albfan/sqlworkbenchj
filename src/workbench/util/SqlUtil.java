@@ -631,7 +631,7 @@ public class SqlUtil
 
 					if (ignoreFirstBracket && bracketCount == 0 && col.trim().endsWith(")"))
 					{
-						// When dealing with Postgres' DISTINCT ON the last column
+						// When dealing with Postgres' DISTINCT ON, the last column
 						// inside the brackets will be extracted including the bracket
 						col = col.substring(0, col.length() - 1);
 					}
