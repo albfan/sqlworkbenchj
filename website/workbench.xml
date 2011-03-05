@@ -48,6 +48,7 @@
       <li><a href="manual/using.html#macros">Macros</a> (aka aliases) for frequently used SQL statements</li>
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with macros)</li>
       <li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
+      <!--<li>Tooltips for INSERT statements to show the corresponding value or column (<image-link title="INSERT Hint" name="insert_hint.png">Screenshot</image-link>) </li>-->
       <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
       <li>An interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
       <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
@@ -85,6 +86,7 @@ VALUES
       <p>For more details, please read the <a href="manual/using.html#blob-support">manual</a>.</p>
     </content>
   </page>
+
   <page name="databases" title="Supported DBMS"  toc="main">
     <title>Supported database systems</title>
     <content>
@@ -112,6 +114,31 @@ VALUES
     drivers through the JDBC/ODBC bridge, though this is not very performant. But basic
     queries on e.g. Excel&reg; worksheets do work.
     </p>
+    </content>
+  </page>
+
+
+  <page name="screenshots" title="Screenshots" toc="main">
+    <title>Screenshots</title>
+    <content>
+      <h3>Screenshots</h3>
+      <ul style="margin-top:10px">
+      <li><image-link title="Main window" name="MainWindow.png">Main Window</image-link><br/></li>
+      <li><image-link title="SQL Formatter" name="SqlFormat.png">SQL Formatter</image-link></li>
+      <li><image-link title="Select related child rows" name="child_rows.png">Select related child rows</image-link></li>
+      <li><image-link title="Select parent rows" name="parent_rows.png">Select related parent rows</image-link></li>
+      <li><image-link title="Search object source" name="objectsearcher.png">Search in the source of all objects</image-link></li>
+      <li><image-link title="Using WbGrepSource" name="wbgrepsource.png">Search in the source code using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-source">WbGrepSource</a></b></li>
+      <li><image-link title="Search table data" name="SearchTables.png">Search data in all tables in the DbExplorer</image-link></li>
+      <li><image-link title="Using WbGrepData" name="wbgrepdata.png">Search data in all tables using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-data">WbGrepData</a></b></li>
+      <li><image-link title="Data Pumper" name="DataPumper.png">Copy data between databases</image-link></li>
+      <li><image-link title="Auto-completion" name="completion.png">Auto-completion for SQL statements</image-link></li>
+      <!--<li><image-link title="INSERT Hint" name="insert_hint.png">Hints for columns and values in INSERT statements</image-link></li>-->
+      <li><image-link title="Console mode" name="console.png">Console mode</image-link></li>
+      <li><image-link name="TableSource.png" title="SQL source for table definition">DbExplorer displaying table source</image-link></li>
+      <li><image-link title="SQL Source Display" name="ViewSource.png">DbExplorer displaying the source of a VIEW</image-link></li>
+      <li><image-link title="Foreign key display" name="FkDisplay.png">DbExplorer displaying foreign key relationships</image-link></li>
+     </ul>
     </content>
   </page>
 
