@@ -580,7 +580,18 @@ public class SqlUtil
 	 */
 	public static List<String> getSelectColumns(String select, boolean includeAlias)
 	{
-		List<String> result = new LinkedList<String>();
+		List<ElementInfo> entries = getColumnEntries(select, includeAlias);
+		List<String> result = new ArrayList<String>(entries.size());
+		for (ElementInfo entry : entries)
+		{
+			result.add(entry.getElementValue());
+		}
+		return result;
+	}
+
+	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias)
+	{
+		List<ElementInfo> result = new LinkedList<ElementInfo>();
 		try
 		{
 			SQLLexer lex = new SQLLexer(select);
@@ -633,7 +644,7 @@ public class SqlUtil
 					{
 						col = striptColumnAlias(col);
 					}
-					result.add(col);
+					result.add(new ElementInfo(col, lastColStart, t.getCharBegin()));
 
 					if (SqlFormatter.SELECT_TERMINAL.contains(v))
 					{
@@ -656,11 +667,11 @@ public class SqlUtil
 				String col = select.substring(lastColStart);
 				if (includeAlias)
 				{
-					result.add(col.trim());
+					result.add(new ElementInfo(col.trim(), lastColStart, select.length()));
 				}
 				else
 				{
-					result.add(striptColumnAlias(col));
+					result.add(new ElementInfo(striptColumnAlias(col), lastColStart, select.length()));
 				}
 			}
 		}

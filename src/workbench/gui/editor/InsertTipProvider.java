@@ -14,6 +14,7 @@ import workbench.gui.completion.InsertColumnMatcher;
 import workbench.gui.completion.ParameterTipProvider;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.ResourceMgr;
 import workbench.sql.ScriptParser;
 
 /**
@@ -48,8 +49,20 @@ public class InsertTipProvider
 			return null;
 		}
 		int statementStart = parser.getStartPosForCommand(index);
+		int positionInStatement = editor.getCaretPosition() - statementStart;
 		InsertColumnMatcher matcher = new InsertColumnMatcher(currentStatement);
-		String tip = matcher.getTooltipForPosition(editor.getCaretPosition() - statementStart);
+		String tip = matcher.getTooltipForPosition(positionInStatement);
+		if (tip == null)
+		{
+			if (matcher.inColumnList(positionInStatement))
+			{
+				tip = ResourceMgr.getString("ErrNoInsertVal");
+			}
+			if (matcher.inValueList(positionInStatement))
+			{
+				tip = ResourceMgr.getString("ErrNoInsertCol");
+			}
+		}
 		return tip;
 	}
 

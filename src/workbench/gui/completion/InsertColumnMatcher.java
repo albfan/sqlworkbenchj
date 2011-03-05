@@ -16,6 +16,8 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.ElementInfo;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -50,11 +52,10 @@ public class InsertColumnMatcher
 				return;
 			}
 
-			boolean valuesList = false;
 			boolean afterValues = false;
 
-			List<EntryInfo> columnEntries = null;
-			List<EntryInfo> valueEntries = null;
+			List<ElementInfo> columnEntries = null;
+			List<ElementInfo> valueEntries = null;
 
 			int bracketCount = 0;
 			while (token != null)
@@ -90,20 +91,33 @@ public class InsertColumnMatcher
 				{
 					afterValues = true;
 				}
+				else if (token.getContents().equals("SELECT"))
+				{
+					String subSelect = sql.substring(token.getCharBegin());
+					valueEntries = SqlUtil.getColumnEntries(subSelect, true);
+					for (ElementInfo element : valueEntries)
+					{
+						element.setOffset(token.getCharBegin());
+					}
+				}
 				token = lexer.getNextToken(false, false);
 			}
 
-			for (int i=0; i < columnEntries.size(); i++)
+			int maxElements = columnEntries.size() > valueEntries.size() ? columnEntries.size() : valueEntries.size();
+			for (int i=0; i < maxElements; i++)
 			{
 				InsertColumnInfo info = new InsertColumnInfo();
-				info.columnStart = columnEntries.get(i).start;
-				info.columnEnd = columnEntries.get(i).end;
-				info.columnName = columnEntries.get(i).value;
+				if (i < columnEntries.size())
+				{
+					info.columnStart = columnEntries.get(i).getStartPosition();
+					info.columnEnd = columnEntries.get(i).getEndPosition();
+					info.columnName = columnEntries.get(i).getElementValue();
+				}
 				if (i < valueEntries.size())
 				{
-					info.valueStart = valueEntries.get(i).start;
-					info.valueEnd = valueEntries.get(i).end;
-					info.value = valueEntries.get(i).value;
+					info.valueStart = valueEntries.get(i).getStartPosition();
+					info.valueEnd = valueEntries.get(i).getEndPosition();
+					info.value = valueEntries.get(i).getElementValue();
 				}
 				columns.add(info);
 			}
@@ -114,9 +128,9 @@ public class InsertColumnMatcher
 		}
 	}
 
-	private List<EntryInfo> getListValues(SQLLexer lexer, int lastStart, String sql)
+	private List<ElementInfo> getListValues(SQLLexer lexer, int lastStart, String sql)
 	{
-		List<EntryInfo> result = new ArrayList<EntryInfo>();
+		List<ElementInfo> result = new ArrayList<ElementInfo>();
 
 		int bracketCount = 1;
 		int lastComma = lastStart;
@@ -133,20 +147,14 @@ public class InsertColumnMatcher
 				bracketCount --;
 				if (bracketCount == 0)
 				{
-					EntryInfo info = new EntryInfo();
-					info.start = lastComma;
-					info.end = token.getCharBegin();
-					info.value = sql.substring(info.start, info.end).trim();
+					ElementInfo info = new ElementInfo(sql.substring(lastComma, token.getCharBegin()).trim(), lastComma, token.getCharBegin());
 					result.add(info);
 					break;
 				}
 			}
 			else if (c.equals(",") && bracketCount == 1)
 			{
-				EntryInfo info = new EntryInfo();
-				info.start = lastComma;
-				info.end = token.getCharBegin();
-				info.value = sql.substring(info.start, info.end).trim();
+				ElementInfo info = new ElementInfo(sql.substring(lastComma, token.getCharBegin()).trim(), lastComma, token.getCharBegin());
 				result.add(info);
 				lastComma = token.getCharEnd();
 			}
@@ -154,6 +162,31 @@ public class InsertColumnMatcher
 		}
 		return result;
 	}
+
+	public boolean inValueList(int position)
+	{
+		for (InsertColumnInfo info : columns)
+		{
+			if (info.valueStart <= position && info.valueEnd >= position)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean inColumnList(int position)
+	{
+		for (InsertColumnInfo info : columns)
+		{
+			if (info.columnStart <= position && info.columnEnd >= position)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	public List<String> getColumns()
 	{
@@ -210,13 +243,6 @@ public class InsertColumnMatcher
 		}
 		return null;
 	}
-}
-
-class EntryInfo
-{
-	int start;
-	int end;
-	String value;
 }
 
 class InsertColumnInfo

@@ -15,6 +15,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -26,6 +28,7 @@ import javax.swing.PopupFactory;
 import workbench.gui.actions.WbAction;
 import workbench.gui.completion.ParameterTipProvider;
 import workbench.gui.editor.JEditTextArea;
+import workbench.log.LogMgr;
 
 /**
  * Display a tooltip for the current statement.
@@ -38,7 +41,7 @@ import workbench.gui.editor.JEditTextArea;
  */
 public class ShowTipAction
 	extends WbAction
-	implements MouseListener, KeyListener, AdjustmentListener
+	implements MouseListener, KeyListener, AdjustmentListener, FocusListener
 {
 	private JEditTextArea area;
 	private Popup currentPopup;
@@ -79,23 +82,31 @@ public class ShowTipAction
 		currentTooltip.addMouseListener(this);
 		area.getHorizontalBar().addAdjustmentListener(this);
 		area.getVerticalScrollBar().addAdjustmentListener(this);
+		area.addFocusListener(this);
 	}
 
 	private void closeTooltip()
 	{
-		if (currentTooltip != null)
+		try
 		{
-			currentTooltip.removeMouseListener(this);
+			if (currentTooltip != null)
+			{
+				currentTooltip.removeMouseListener(this);
+			}
+			if (currentPopup != null)
+			{
+				currentPopup.hide();
+			}
+			area.stopKeyNotification();
+			area.getPainter().removeMouseListener(this);
+			area.getHorizontalBar().removeAdjustmentListener(this);
+			area.getVerticalScrollBar().removeAdjustmentListener(this);
+			area.removeFocusListener(this);
 		}
-		if (currentPopup != null)
+		catch (Exception e)
 		{
-			currentPopup.hide();
+			LogMgr.logError("ShowTipAction.closeTooltip()", "Error when closing tip!", e);
 		}
-		area.stopKeyNotification();
-		area.getPainter().removeMouseListener(this);
-		area.getHorizontalBar().removeAdjustmentListener(this);
-		area.getVerticalScrollBar().removeAdjustmentListener(this);
-
 	}
 
 	@Override
@@ -107,9 +118,13 @@ public class ShowTipAction
 		{
 			closeTooltip();
 		}
-		else
+		else if (e.getSource() == area)
 		{
 			updateTooltip();
+		}
+		else
+		{
+			LogMgr.logDebug("ShowTipAction.mouseClicked()", "mouseListener was not removed!!", new Exception());
 		}
 	}
 
@@ -142,22 +157,28 @@ public class ShowTipAction
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
-		closeTooltip();
+		if (e.getSource() == area)
+		{
+			closeTooltip();
+		}
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		switch (e.getKeyCode())
+		if (e.getSource() == area)
 		{
-			case KeyEvent.VK_RIGHT:
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_UP:
-			case KeyEvent.VK_DOWN:
-				updateTooltip();
-				break;
-			default:
-				closeTooltip();
+			switch (e.getKeyCode())
+			{
+				case KeyEvent.VK_RIGHT:
+				case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_UP:
+				case KeyEvent.VK_DOWN:
+					updateTooltip();
+					break;
+				default:
+					closeTooltip();
+			}
 		}
 	}
 
@@ -199,5 +220,19 @@ public class ShowTipAction
 	public void adjustmentValueChanged(AdjustmentEvent e)
 	{
 		closeTooltip();
+	}
+
+	@Override
+	public void focusGained(FocusEvent e)
+	{
+	}
+
+	@Override
+	public void focusLost(FocusEvent e)
+	{
+		if (e.getComponent() == area)
+		{
+			closeTooltip();
+		}
 	}
 }
