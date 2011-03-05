@@ -58,6 +58,8 @@ public class SqlFormatter
 	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.treeSet(
 		"UNIQUE", "CONSTRAINT", "FOREIGN KEY", "PRIMARY KEY");
 
+	private final Set<String> DATE_LITERALS = CollectionUtil.treeSet("DATE", "TIME", "TIMESTAMP");
+
 	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.treeSet(";");
 
 	public static final Set<String> SELECT_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM");
@@ -361,6 +363,7 @@ public class SqlFormatter
 		boolean isLastOpenBracket = "(".equals(lastText);
 		boolean isLastCloseBracket = ")".equals(lastText);
 
+		if (DATE_LITERALS.contains(lastText) && current.isLiteral()) return true;
 		if (lastText.endsWith("'") && currentText.equals("''")) return false;
 		if (lastText.equals("''") && currentText.startsWith("'")) return false;
 
@@ -390,6 +393,7 @@ public class SqlFormatter
 		if (current.isSeparator() || current.isOperator()) return false;
 		if (last.isOperator() && (current.isReservedWord() || current.isIdentifier() || current.isLiteral())) return true;
 		if (last.isSeparator() || last.isOperator()) return false;
+
 		return true;
 	}
 
@@ -908,7 +912,7 @@ public class SqlFormatter
 		}
 
 		SQLToken t = this.lexer.getNextToken(true, false);
-
+		SQLToken last = null;
 		int elementCount = 0;
 		int bracketCount = 1;
 		while (t != null)
@@ -969,9 +973,14 @@ public class SqlFormatter
 			}
 			else if (!t.isWhiteSpace())
 			{
+				if (this.needsWhitespace(last, t))
+				{
+					appendText(' ');
+				}
 				this.appendTokenText(t);
 				if (t.isComment()) this.appendText(' ');
 			}
+			last = t;
 			t = this.lexer.getNextToken(true, false);
 		}
 		return null;

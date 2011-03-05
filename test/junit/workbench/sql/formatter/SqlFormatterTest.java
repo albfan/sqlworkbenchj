@@ -32,6 +32,37 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testDateLiteral()
+		throws Exception
+	{
+		String sql = "select * from my_table where birthday = date'1950-05-06'";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM my_table\n" +
+			"WHERE birthday = DATE '1950-05-06'";
+		assertEquals(expected, formatted);
+
+		sql = "insert into some_table (id, created_at) values (1, timestamp      '2011-12-13 01:02:03')";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected =
+			"INSERT INTO some_table\n" +
+			"(\n"+
+			"  id,\n"+
+			"  created_at\n"+
+			")\n"+
+			"VALUES\n"+
+			"(\n"+
+			"  1,\n"+
+			"  TIMESTAMP '2011-12-13 01:02:03'\n"+
+			")";
+//		System.out.println("*****\n" + formatted);
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testOldStyleJoin()
 		throws Exception
 	{

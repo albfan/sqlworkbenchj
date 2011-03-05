@@ -60,8 +60,8 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
-
 import workbench.WbManager;
+
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
@@ -69,6 +69,8 @@ import workbench.gui.actions.ScrollDownAction;
 import workbench.gui.actions.ScrollUpAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.completion.ParameterTipProvider;
+import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.menu.TextPopup;
@@ -127,6 +129,7 @@ public class JEditTextArea
 	private TokenMarker currentTokenMarker;
 
 	private KeyListener keyEventInterceptor;
+	private KeyListener keyNotificationListener;
 	private EditorStatusbar statusBar;
 
 	protected static final String CENTER = "center";
@@ -301,9 +304,13 @@ public class JEditTextArea
 		int start = this.getSelectionStart();
 		int end = this.getSelectionEnd();
 		if (toLower)
+		{
 			sel = sel.toLowerCase();
+		}
 		else
+		{
 			sel = sel.toUpperCase();
+		}
 		this.setSelectedText(sel);
 		this.select(start, end);
 	}
@@ -342,6 +349,26 @@ public class JEditTextArea
 		}
 	}
 
+	public JScrollBar getVerticalScrollBar()
+	{
+		return vertical;
+	}
+
+	public JScrollBar getHorizontalBar()
+	{
+		return horizontal;
+	}
+
+	public void notifiyKeyEvents(KeyListener l)
+	{
+		this.keyNotificationListener = l;
+	}
+
+	public void stopKeyNotification()
+	{
+		this.keyNotificationListener = null;
+	}
+
 	public final void addKeyBinding(WbAction anAction)
 	{
 		this.inputHandler.addKeyBinding(anAction);
@@ -356,7 +383,7 @@ public class JEditTextArea
 	 * isManagingFocus() returns true to make sure the tab key is handled
 	 * by the editor, and does not move the focus to the next component
 	 *
-	 * @return always true
+	 * @return true
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -1108,9 +1135,13 @@ public class JEditTextArea
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
 		if (lineElement == null)
+		{
 			return -1;
+		}
 		else
+		{
 			return lineElement.getEndOffset();
+		}
 	}
 
 	/**
@@ -1120,11 +1151,14 @@ public class JEditTextArea
 	public int getLineLength(int line)
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
-
-		if(lineElement == null)
+		if (lineElement == null)
+		{
 			return -1;
+		}
 		else
+		{
 			return lineElement.getEndOffset() - lineElement.getStartOffset() - 1;
+		}
 	}
 
 	/**
@@ -1942,7 +1976,7 @@ public class JEditTextArea
 	}
 
 	/**
-	 * Sets the `magic' caret position. This can be used to preserve
+	 * Sets the 'magic' caret position. This can be used to preserve
 	 * the column position when moving up and down lines.
 	 * @param magicCaret The magic caret position
 	 */
@@ -2150,18 +2184,20 @@ public class JEditTextArea
 		this.keyEventInterceptor = null;
 	}
 
-	private void forwardKeyEvent(KeyEvent evt)
+	private void forwardKeyEvent(KeyListener l, KeyEvent evt)
 	{
+		if (l == null) return;
+
 		switch (evt.getID())
 		{
 			case KeyEvent.KEY_TYPED:
-				keyEventInterceptor.keyTyped(evt);
+				l.keyTyped(evt);
 				break;
 			case KeyEvent.KEY_PRESSED:
-				keyEventInterceptor.keyPressed(evt);
+				l.keyPressed(evt);
 				break;
 			case KeyEvent.KEY_RELEASED:
-				keyEventInterceptor.keyReleased(evt);
+				l.keyReleased(evt);
 			break;
 		}
 	}
@@ -2180,9 +2216,10 @@ public class JEditTextArea
 
 		if (keyEventInterceptor != null)
 		{
-			forwardKeyEvent(evt);
+			forwardKeyEvent(keyEventInterceptor, evt);
 			return;
 		}
+
 
 		int oldcount = NumberStringCache.getNumberString(this.getLineCount()).length();
 		switch (evt.getID())
@@ -2196,6 +2233,11 @@ public class JEditTextArea
 			case KeyEvent.KEY_RELEASED:
 				inputHandler.keyReleased(evt);
 				break;
+		}
+
+		if (keyNotificationListener != null)
+		{
+			forwardKeyEvent(keyNotificationListener, evt);
 		}
 
 		if (!evt.isConsumed())
@@ -2355,7 +2397,7 @@ public class JEditTextArea
 		// currently changed line. This still can leave
 		// incorrect tokens with regards to multiline literals
 		// but my assumptioin is, that literals spanning more than
-		// 'delta' number lines are used very rarely in SQL scripts.
+		// 'invalidationInterval * 2' number of lines are used very rarely in SQL scripts.
 
 		// Testing for possible literals in those lines and then only
 		// invalidating the lines that need it, is probably
@@ -2374,7 +2416,6 @@ public class JEditTextArea
 		int repaintEnd = (endInvalid > (repaintStart + getVisibleLines()) ? repaintStart + getVisibleLines() : endInvalid);
 		painter.invalidateLineRange(repaintStart, repaintEnd);
 	}
-
 
 	public void showContextMenu()
 	{
@@ -2407,9 +2448,9 @@ public class JEditTextArea
 		}
 	}
 
-	/** Invoked when the mouse wheel is rotated.
+	/**
+	 * Invoked when the mouse wheel is rotated.
 	 * @see MouseWheelEvent
-	 *
 	 */
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
@@ -2581,8 +2622,10 @@ public class JEditTextArea
 		@Override
 		public void adjustmentValueChanged(final AdjustmentEvent evt)
 		{
-			if(!scrollBarsInitialized)
+			if (!scrollBarsInitialized)
+			{
 				return;
+			}
 
 			// If this is not done, mousePressed events accumilate
 			// and the result is that scrolling doesn't stop after
@@ -2592,10 +2635,14 @@ public class JEditTextArea
 				@Override
 				public void run()
 				{
-					if(evt.getAdjustable() == vertical)
+					if (evt.getAdjustable() == vertical)
+					{
 						setFirstLine(vertical.getValue());
+					}
 					else
+					{
 						setHorizontalOffset(horizontal != null ? -horizontal.getValue() : 0);
+					}
 				}
 			});
 		}

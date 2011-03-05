@@ -140,7 +140,9 @@ import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.export.ExportFileDialog;
+import workbench.gui.editor.InsertTipProvider;
 import workbench.gui.editor.actions.IndentSelection;
+import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
@@ -663,7 +665,6 @@ public class SqlPanel
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
 
-
 		// The update actions are proxies for the real ones
 		// Once a result tab (DwPanel) has been displayed
 		// they are "dispatched" to the real ones
@@ -892,6 +893,7 @@ public class SqlPanel
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
+		editor.addKeyBinding(new ShowTipAction(editor, new InsertTipProvider(this)));
 	}
 
 	@Override
