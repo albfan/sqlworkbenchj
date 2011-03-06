@@ -268,8 +268,7 @@
     <br/>
     <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
       <xsl:variable name="build-nr" select="@build"/>
-      <a name="build_{$build-nr}"></a>
-      <h1 class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
+      <h1 id="build_{$build-nr}" class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
 
       <xsl:if test="count(entry[@type='enh']) &gt; 0">
         <h3 class="history-entry">Enhancements</h3>
@@ -354,7 +353,7 @@
 
   <xsl:template match="dev-build">
     <xsl:if test="$includeDev = 1">
-      <h3 style="margin-top:20px">Development build</h3>
+      <h3 id="dev_build" style="margin-top:20px">Development build</h3>
       <p>
         A development build is generated while testing and implementing new features for the next stable build.
         <br/>
@@ -380,7 +379,7 @@
     <xsl:if test="$includeDev = 1">
       <br/>Current development build:
       <span style="font-weight:bold">
-        <a href="downloads.html">
+        <a href="downloads.html#dev_build">
           <xsl:value-of select="$devBuildNumber"/> (
           <xsl:value-of select="$devBuildDate"/>)
         </a>
