@@ -94,21 +94,21 @@ public class ValueConverterTest
 		try
 		{
 			Object i = converter.convertValue("42", Types.INTEGER);
-			assertEquals("Wrong value returned", new Integer(42), i);
+			assertEquals("Wrong value returned", Integer.valueOf(42), i);
 
 			i = converter.convertValue("32168", Types.BIGINT);
-			assertEquals("Wrong value returned", new Long(32168), i);
+			assertEquals("Wrong value returned", Long.valueOf(32168), i);
 
 			i = converter.convertValue("4.2E+1", Types.INTEGER);
-			assertEquals("Wrong value returned", new Integer(42), i);
+			assertEquals("Wrong value returned", Integer.valueOf(42), i);
 
 			converter.setDecimalCharacter(',');
 			i = converter.convertValue("4,2E+1", Types.INTEGER);
-			assertEquals("Wrong value returned", new Integer(42), i);
+			assertEquals("Wrong value returned", Integer.valueOf(42), i);
 
 			converter.setDecimalCharacter('.');
 			i = converter.convertValue("3.2168E+4", Types.BIGINT);
-			assertEquals("Wrong value returned", new Long(32168), i);
+			assertEquals("Wrong value returned", Long.valueOf(32168), i);
 
 			boolean exceptionThrown = false;
 			try
@@ -129,6 +129,43 @@ public class ValueConverterTest
 	}
 
 	@Test
+	public void testNumericListerals()
+		throws Exception
+	{
+		ValueConverter converter = new ValueConverter();
+		converter.setNumericBooleanValues(-24, 42);
+		converter.setBooleanLiterals(CollectionUtil.arrayList("true", "yes", "J"), CollectionUtil.arrayList("false", "no", "N"));
+		assertEquals("Wrong value returned", Integer.valueOf(-24), converter.convertValue("no", Types.INTEGER));
+		assertEquals("Wrong value returned", Integer.valueOf(-24), converter.convertValue("N", Types.INTEGER));
+		assertEquals("Wrong value returned", Integer.valueOf(-24), converter.convertValue("false", Types.INTEGER));
+		assertEquals("Wrong value returned", Integer.valueOf(42), converter.convertValue("yes", Types.INTEGER));
+		assertEquals("Wrong value returned", Integer.valueOf(42), converter.convertValue("true", Types.INTEGER));
+		assertEquals("Wrong value returned", Integer.valueOf(42), converter.convertValue("J", Types.INTEGER));
+		boolean exception = false;
+		try
+		{
+			converter.convertValue("foobar", Types.INTEGER);
+		}
+		catch (ConverterException e)
+		{
+			exception = true;
+		}
+		assertTrue("No converter exception thrown", exception);
+
+		exception = false;
+		try
+		{
+			converter.convertValue("Nein", Types.INTEGER);
+		}
+		catch (ConverterException e)
+		{
+			exception = true;
+		}
+		assertTrue("No converter exception thrown", exception);
+
+	}
+
+	@Test
 	public void testBooleanConvert()
 		throws Exception
 	{
@@ -137,9 +174,9 @@ public class ValueConverterTest
 		try
 		{
 			Object i = converter.convertValue("true", Types.INTEGER);
-			assertEquals("Wrong value returned", new Integer(1), i);
+			assertEquals("Wrong value returned", Integer.valueOf(1), i);
 			i = converter.convertValue("false", Types.INTEGER);
-			assertEquals("Wrong value returned", new Integer(0), i);
+			assertEquals("Wrong value returned", Integer.valueOf(0), i);
 		}
 		catch (Exception e)
 		{
@@ -179,10 +216,10 @@ public class ValueConverterTest
 		ValueConverter converter = new ValueConverter();
 		converter.setDecimalCharacter('.');
 		Object data = converter.convertValue("42", Types.INTEGER);
-		assertEquals("Number not converted", new Integer(42), data);
+		assertEquals("Number not converted", Integer.valueOf(42), data);
 
 		data = converter.convertValue("42", Types.BIGINT);
-		assertEquals("Number not converted", new Long(42), data);
+		assertEquals("Number not converted", Long.valueOf(42), data);
 
 		data = converter.convertValue("3.14152", Types.DECIMAL);
 		BigDecimal d = (BigDecimal)data;

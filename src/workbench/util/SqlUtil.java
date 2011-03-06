@@ -576,7 +576,8 @@ public class SqlUtil
 	 * @param select the SQL String to parse
 	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
 	 *       the column name including the alias (e.g. "p.name AS person_name"
-	 * @return a List of String objecs.
+	 * @return a List of column names
+	 * @see #getColumnEntries(java.lang.String, boolean)
 	 */
 	public static List<String> getSelectColumns(String select, boolean includeAlias)
 	{
@@ -589,6 +590,20 @@ public class SqlUtil
 		return result;
 	}
 
+	/**
+	 * Parse the given SQL SELECT query and return the columns defined
+	 * in the select list, including their start and end position inside
+	 * the SQL string.
+	 *
+	 * If the SQL string does not start with SELECT an empty List is returned.
+	 *
+	 * @param select the SQL String to parse
+	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
+	 *       the column name including the alias (e.g. "p.name AS person_name"
+	 * @return a List of ElementInfos
+	 * @see #getSelectColumns(java.lang.String, boolean) 
+	 *
+	 */
 	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias)
 	{
 		List<ElementInfo> result = new LinkedList<ElementInfo>();

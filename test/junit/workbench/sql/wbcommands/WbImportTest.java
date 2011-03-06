@@ -903,6 +903,50 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testNumericLiterals()
+		throws Exception
+	{
+		File importfile = new File(this.basedir, "bool_numeric_values.txt");
+		BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(importfile, "UTF-8", false));
+		out.write("nr,int_flag\n");
+		out.write("1,true\n");
+		out.write("2,ja\n");
+		out.write("3,true\n");
+		out.write("4,no\n");
+		out.write("5,nein\n");
+		out.write("6,yes\n");
+		out.write("7,false\n");
+		out.close();
+
+		// Test importing correct true/false values
+		String cmd = "wbimport -literalsFalse='false,no,nein' -literalsTrue='true,ja,yes' -type=text -header=true  -table=bool_int_test -continueOnError=false -delimiter=',' -numericFalse='-24' -numericTrue='42' -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
+		StatementRunnerResult result = importCmd.execute(cmd);
+		String msg = result.getMessageBuffer().toString();
+		assertEquals(msg, true, result.isSuccess());
+
+		Statement stmt = this.connection.createStatement();
+		ResultSet rs = stmt.executeQuery("select count(*) from bool_int_test where int_flag = -24");
+		int rows = 0;
+		if (rs.next())
+		{
+			rows = rs.getInt(1);
+		}
+		assertEquals("Wrong number of rows imported", 3, rows);
+		rs.close();
+
+		rs = stmt.executeQuery("select count(*) from bool_int_test where int_flag = 42");
+		rows = 0;
+		if (rs.next())
+		{
+			rows = rs.getInt(1);
+		}
+		assertEquals("Wrong number of rows imported", 4, rows);
+		rs.close();
+		stmt.close();
+		assertTrue("Could not delete input file: " + importfile.getCanonicalPath(), importfile.delete());
+	}
+
+	@Test
 	public void testTextClobImport()
 	{
 		try

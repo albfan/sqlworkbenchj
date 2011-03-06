@@ -456,15 +456,8 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								When exporting data from a DBMS that supports the BOOLEAN
-								datatype, the export file will contain the literals "true" or
-								"false" for the value of the boolean columns. When importing
-								this file into a DBMS that does not support the BOOLEAN
-								datatype, the import would fail.
-							</para>
-							<para>
-								In case you are importing the boolean column into a numeric
-								column in the target DBMS, &wb-productname; will automatically
+								In case you are importing a boolean column (containing "true", "false")
+                into a numeric column in the target DBMS, &wb-productname; will automatically
 								convert the literal <literal>true</literal> to the numeric value 1 (one)
 								and the literal <literal>false</literal> to the numeric value 0 (zero).
 								If you do not want this automatic conversion, you have to
@@ -472,16 +465,56 @@
 								The default values for the true/false literals can be overwritten
 								with the -literalsFalse and -literalsTrue switches.
 							</para>
+              <para>
+                To store different values than 0/1 in the target column, use the parameters
+                <literal>-numericFalse</literal> and <literal>-numericTrue</literal>
+              </para>
 						</entry>
 					</row>
-
+					<row>
+						<entry>-numericFalse -numericTrue</entry>
+						<entry>
+              <para>
+                These parameters control the conversion of boolean literals into numbers.
+              </para>
+              <para>
+                If these parameters are used, any text input that is identified as a "false" literal, will be stored with the number specified
+                with <literal>-numericFalse</literal>. Any text input that is identified as "true" will be stored as the number specified
+                with <literal>-numericFalse</literal>.
+              </para>
+              <para>
+                To use -1 for false and 1 for true, use the following parameters: <literal>-numericFalse='-1' -numericTrue='1'</literal>.
+                Note that '-1' must be quoted due to the dash. If these parameters are used, <literal>-booleanToNumber</literal>
+                will be assumed true implicitely.
+              </para>
+              <para>
+                These parameters can be combined with <literal>-literalsFalse</literal> and <literal>-listeralsTrue</literal>.
+              </para>
+							<para>
+								Please note:
+								<itemizedlist>
+									<listitem>
+										<simpara>
+											This conversion is only applied for "text" input values. Valid numbers in the input file will
+                      <emphasis role="bold">not</emphasis> be converted to the values specified with
+                      <literal>-numericFalse</literal> or <literal>-numericTrue</literal>. This means that you cannot change a <literal>0</literal> (zero)
+                      in the input file into a <literal>-1</literal> in the target column.
+										</simpara>
+										</listitem>
+								</itemizedlist>
+							</para>
+            </entry>
+          </row>
 					<row>
 						<entry>-literalsFalse -literalsTrue</entry>
 						<entry>
+              <para>
+                These parameters control the conversion of boolean literals into boolean values.
+              </para>
 							<para>
-								When dealing with boolean values in the input file, these two switches define
-								the literals that represent the value <literal>false</literal> and the
-								value <literal>true</literal> when parsing the input data.
+								These two switches define the text values that represent the (boolean) values <literal>false</literal> and
+								<literal>true</literal> in the input file. This conversion is applied when storing the data in a column
+                that is of type <literal>boolean</literal> in the database.
 							</para>
 							<para>
 								The value to these switches is a comma separated list of literals
