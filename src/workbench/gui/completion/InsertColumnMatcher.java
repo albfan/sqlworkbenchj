@@ -76,7 +76,8 @@ public class InsertColumnMatcher
 					if (bracketCount == 1)
 					{
 						columnEntries = getListValues(lexer, token.getCharEnd(), sql);
-						// getListValues returned when hitting a ) so the bracket has been closed
+						// getListValues() terminated a the closing bracket
+						// so the bracket count must be decreased here again.
 						bracketCount --;
 					}
 				}
@@ -274,15 +275,16 @@ public class InsertColumnMatcher
 		}
 		return null;
 	}
+
+	private class InsertColumnInfo
+	{
+		int columnStart;
+		int columnEnd;
+		int valueStart;
+		int valueEnd;
+		String columnName;
+		String value;
+		boolean valueIsColumn;
+	}
 }
 
-class InsertColumnInfo
-{
-	int columnStart;
-	int columnEnd;
-	int valueStart;
-	int valueEnd;
-	String columnName;
-	String value;
-	boolean valueIsColumn;
-}
