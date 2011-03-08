@@ -34,10 +34,11 @@ public class MySqlEnumReader
 	implements ColumnDefinitionEnhancer
 {
 
+	@Override
 	public void updateColumnDefinition(TableDefinition tbl, WbConnection connection)
 	{
 		if (!hasEnums(tbl)) return;
-		
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		HashMap<String, String> defs = new HashMap<String, String>(17);

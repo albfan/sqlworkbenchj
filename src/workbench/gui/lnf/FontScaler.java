@@ -13,7 +13,6 @@ package workbench.gui.lnf;
 
 import java.awt.Font;
 import java.awt.Toolkit;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**

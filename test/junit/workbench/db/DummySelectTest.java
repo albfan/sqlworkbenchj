@@ -13,13 +13,9 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
-import workbench.resource.Settings;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *

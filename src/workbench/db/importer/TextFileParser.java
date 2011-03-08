@@ -130,11 +130,13 @@ public class TextFileParser
 		return filesProcessed;
 	}
 
+	@Override
 	public ImportFileHandler getFileHandler()
 	{
 		return this.fileHandler;
 	}
 
+	@Override
 	public void setValueModifier(ImportValueModifier mod)
 	{
 		this.valueModifier = mod;
@@ -150,11 +152,13 @@ public class TextFileParser
 		this.targetSchema = schema;
 	}
 
+	@Override
 	public void setReceiver(RowDataReceiver rec)
 	{
 		this.receiver = rec;
 	}
 
+	@Override
 	public void setInputFile(File file)
 	{
 		this.sourceFiles = null;
@@ -170,22 +174,26 @@ public class TextFileParser
 	 * @see #setSourceFiles(workbench.db.importer.ImportFileLister)
 	 * @see #setTableName(java.lang.String)
 	 */
+	@Override
 	public void setMultiFileImport(boolean flag)
 	{
 		this.multiFileImport = flag;
 	}
 
+	@Override
 	public boolean isMultiFileImport()
 	{
 		return this.multiFileImport;
 	}
 
+	@Override
 	public void setSourceFiles(ImportFileLister source)
 	{
 		this.inputFile = null;
 		this.sourceFiles = source;
 	}
 
+	@Override
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
@@ -203,17 +211,20 @@ public class TextFileParser
 		this.quoteEscape = type;
 	}
 
+	@Override
 	public boolean hasErrors()
 	{
 		return this.hasErrors;
 	}
 
+	@Override
 	public boolean hasWarnings()
 	{
 		return this.hasWarnings;
 	}
 
 
+	@Override
 	public String getSourceFilename()
 	{
 		if (this.inputFile == null) return null;
@@ -238,6 +249,7 @@ public class TextFileParser
 		}
 	}
 
+	@Override
 	public String getLastRecord()
 	{
 		return this.currentLine;
@@ -280,6 +292,7 @@ public class TextFileParser
 		this.clobsAreFilenames = flag;
 	}
 
+	@Override
 	public void setValueConverter(ValueConverter convert)
 	{
 		this.converter = convert;
@@ -379,7 +392,7 @@ public class TextFileParser
 					importColumns.add(ImportFileColumn.SKIP_COLUMN);
 					continue;
 				}
-				int index = (tableCols != null ? tableCols.indexOf(sourceCol) : 0);
+				int index = tableCols.indexOf(sourceCol);
 				if (index < 0)
 				{
 					if (this.abortOnError)
@@ -484,6 +497,7 @@ public class TextFileParser
 		this.connection = aConn;
 	}
 
+	@Override
 	public String getEncoding()
 	{
 		return (this.encoding == null ? Settings.getInstance().getDefaultDataEncoding() : this.encoding);
@@ -495,11 +509,13 @@ public class TextFileParser
 		this.encoding = enc;
 	}
 
+	@Override
 	public MessageBuffer getMessages()
 	{
 		return this.messages;
 	}
 
+	@Override
 	public void setAbortOnError(boolean flag)
 	{
 		this.abortOnError = flag;
@@ -515,6 +531,7 @@ public class TextFileParser
 		}
 	}
 
+	@Override
 	public void stop()
 	{
 		LogMgr.logDebug("TextFileParser.stop()", "Stopping import");
@@ -522,11 +539,13 @@ public class TextFileParser
 		this.regularStop = true;
 	}
 
+	@Override
 	public boolean isCancelled()
 	{
 		return this.cancelImport;
 	}
 
+	@Override
 	public void cancel()
 	{
 		LogMgr.logDebug("TextFileParser.cancel()", "Cancelling import");
@@ -551,6 +570,7 @@ public class TextFileParser
 		}
 	}
 
+	@Override
 	public void start()
 		throws Exception
 	{
@@ -1107,6 +1127,7 @@ public class TextFileParser
 	 *
 	 * @return the columns defined in the input file
 	 */
+	@Override
 	public List<ColumnIdentifier> getColumnsFromFile()
 	{
 		BufferedReader in = null;
@@ -1156,7 +1177,7 @@ public class TextFileParser
 	{
 		TableDefinition def = getTargetTable();
 
-		if (def == null || CollectionUtil.isEmpty(def.getColumns()))
+		if (def == null || def.getColumns().isEmpty())
 		{
 			TableIdentifier tbl = createTargetTableId();
 			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableExpression());
@@ -1230,6 +1251,7 @@ public class TextFileParser
 	 *	Returns the column list as a comma separated string
 	 *  that can be used for the WbImport command
 	 */
+	@Override
 	public String getColumns()
 	{
 		StringBuilder result = new StringBuilder();
@@ -1265,11 +1287,13 @@ public class TextFileParser
 		this.decodeUnicode = flag;
 	}
 
+	@Override
 	public void setTrimValues(boolean trim)
 	{
 		this.trimValues = trim;
 	}
 
+	@Override
 	public void setErrorHandler(JobErrorHandler handler)
 	{
 		this.errorHandler = handler;

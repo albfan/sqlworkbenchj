@@ -139,6 +139,7 @@ public class DataCopier
 		return this.importer.setMode(mode);
 	}
 
+	@Override
 	public void setReportInterval(int value)
 	{
 		this.importer.setReportInterval(value);
@@ -430,31 +431,37 @@ public class DataCopier
 		this.importer.setContinueOnError(cont);
 	}
 
+	@Override
 	public void setUseBatch(boolean flag)
 	{
 		this.importer.setUseBatch(flag);
 	}
 
+	@Override
 	public void setCommitBatch(boolean flag)
 	{
 		this.importer.setCommitBatch(flag);
 	}
 
+	@Override
 	public int getBatchSize()
 	{
 		return this.importer.getBatchSize();
 	}
 
+	@Override
 	public void setBatchSize(int size)
 	{
 		this.importer.setBatchSize(size);
 	}
 
+	@Override
 	public void commitNothing()
 	{
 		this.importer.commitNothing();
 	}
 
+	@Override
 	public void setCommitEvery(int interval)
 	{
 		this.importer.setCommitEvery(interval);
@@ -469,6 +476,7 @@ public class DataCopier
 	{
 		Thread t = new WbThread("DataCopier Thread")
 		{
+			@Override
 			public void run()
 			{
 				try

@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,6 +41,7 @@ public class TableDefinition
 
 	public List<ColumnIdentifier> getColumns()
 	{
+		if (columns == null) return Collections.emptyList();
 		return columns;
 	}
 

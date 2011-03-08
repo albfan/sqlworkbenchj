@@ -123,12 +123,14 @@ public class TableDataDiff
 		this.monitor = rowMonitor;
 	}
 
+	@Override
 	public void addWarning(String msg)
 	{
 		this.warnings.append(msg);
 		this.warnings.appendNewLine();
 	}
 
+	@Override
 	public void addError(String msg)
 	{
 		this.errors.append(msg);
@@ -173,6 +175,7 @@ public class TableDataDiff
 		this.columnsToIgnore.addAll(columnNames);
 	}
 
+	@Override
 	public void setReportInterval(int interval)
 	{
 		this.progressInterval = interval;

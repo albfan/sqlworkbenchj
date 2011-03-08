@@ -102,7 +102,7 @@ public class TestUtil
 		prepareEnvironment(true);
 	}
 
-	public void prepareEnvironment(boolean noTemplates)
+	public final void prepareEnvironment(boolean noTemplates)
 		throws IOException
 	{
 		prepareBaseDir();
@@ -196,7 +196,7 @@ public class TestUtil
 		dropAll(con, false);
 		return con;
 	}
-	
+
 	/**
 	 * Return a connection to an H2 (in-memory) Database with the name of this TestUtil
 	 * @see TestUtil#TestUtil(String)
@@ -443,7 +443,7 @@ public class TestUtil
 	{
 		executeScript(con, script, alternateDelimiter, true);
 	}
-	
+
 	public static void executeScript(WbConnection con, String script, DelimiterDefinition alternateDelimiter, boolean printError)
 		throws SQLException
 	{
@@ -454,7 +454,7 @@ public class TestUtil
 		{
 			parser.setAlternateDelimiter(alternateDelimiter);
 		}
-		
+
 		int count = parser.getSize();
 		for (int i=0; i < count; i++)
 		{
@@ -501,7 +501,7 @@ public class TestUtil
 		}
 		return result;
 	}
-	
+
 	public void prepareSource(WbFile sourceDb)
 		throws SQLException, ClassNotFoundException
 	{

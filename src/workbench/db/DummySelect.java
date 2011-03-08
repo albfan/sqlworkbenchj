@@ -18,7 +18,7 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DummySelect
@@ -38,35 +38,42 @@ public class DummySelect
 		this.columns = new ArrayList<ColumnIdentifier>(cols);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return null;
 	}
 
+	@Override
 	public void setComment(String c)
 	{
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return null;
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return getObjectExpression(conn);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return null;
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return null;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return null;
@@ -77,22 +84,26 @@ public class DummySelect
 	{
 		return null;
 	}
-	
+
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return null;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return "SELECT";
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return null;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -103,7 +114,7 @@ public class DummySelect
 		List<ColumnIdentifier> cols = columns;
 		if (cols == null) cols = tableDef.getColumns();
 
-		if (cols == null || cols.size() == 0)
+		if (cols.isEmpty())
 		{
 			return StringUtil.EMPTY_STRING;
 		}

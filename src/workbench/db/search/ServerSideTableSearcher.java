@@ -54,11 +54,13 @@ public class ServerSideTableSearcher
 	private boolean excludeLobColumns = true;
 	private DataStore result = null;
 
+	@Override
 	public void startBackgroundSearch()
 	{
 		this.cancelSearch = false;
 		this.searchThread = new WbThread("TableSearcher Thread")
 		{
+			@Override
 			public void run()
 			{
 				search();
@@ -67,6 +69,7 @@ public class ServerSideTableSearcher
 		this.searchThread.start();
 	}
 
+	@Override
 	public void cancelSearch()
 	{
 		this.cancelSearch = true;
@@ -99,14 +102,16 @@ public class ServerSideTableSearcher
 		if (!aFlag) this.cancelSearch = false;
 	}
 
+	@Override
 	public boolean isRunning()
 	{
 		return this.isRunning;
 	}
 
+	@Override
 	public void search()
 	{
-		if (this.tablesToSearch == null || this.tablesToSearch.size() == 0) return;
+		if (this.tablesToSearch == null || this.tablesToSearch.isEmpty()) return;
 		this.setRunning(true);
 		try
 		{
@@ -129,6 +134,7 @@ public class ServerSideTableSearcher
 		}
 	}
 
+	@Override
 	public void setExcludeLobColumns(boolean flag)
 	{
 		this.excludeLobColumns = flag;
@@ -340,6 +346,7 @@ public class ServerSideTableSearcher
 		return setResult;
 	}
 
+	@Override
 	public void setTableNames(List<TableIdentifier> tables)
 	{
 		this.tablesToSearch = new ArrayList<TableIdentifier>(tables);
@@ -350,16 +357,19 @@ public class ServerSideTableSearcher
 		return display;
 	}
 
+	@Override
 	public void setConsumer(TableSearchConsumer searchDisplay)
 	{
 		this.display = searchDisplay;
 	}
 
+	@Override
 	public String getCriteria()
 	{
 		return criteria;
 	}
 
+	@Override
 	public void setCriteria(String aText, boolean ignoreCase)
 	{
 		if (aText == null) return;
@@ -367,16 +377,19 @@ public class ServerSideTableSearcher
 		return;
 	}
 
+	@Override
 	public void setConnection(WbConnection conn)
 	{
 		this.connection = conn;
 	}
 
+	@Override
 	public void setMaxRows(int max)
 	{
 		this.maxRows = max;
 	}
 
+	@Override
 	public ColumnExpression getSearchExpression()
 	{
 		String expressionPattern = StringUtil.trimQuotes(criteria.replaceAll("[%_]", ""));

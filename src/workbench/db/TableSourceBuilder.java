@@ -23,7 +23,6 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -281,17 +280,20 @@ public class TableSourceBuilder
 
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
-			result.append(lineEnding + "   ,");
+			result.append(lineEnding);
+			result.append("   ,");
 			if (StringUtil.isNonBlank(pkname))
 			{
-				result.append("CONSTRAINT " + pkname);
+				result.append("CONSTRAINT ");
+				result.append(pkname);
 			}
 			result.append(' ');
 			result.append(dbConnection.getDbSettings().getInlinePKKeyword());
 			result.append(" (");
 
 			result.append(StringUtil.listToString(pkCols, ", ", false));
-			result.append(")" + lineEnding);
+			result.append(")");
+			result.append(lineEnding);
 
 			if (includeFk)
 			{
