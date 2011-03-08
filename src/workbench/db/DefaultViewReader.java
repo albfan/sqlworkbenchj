@@ -43,12 +43,14 @@ public class DefaultViewReader
 		this.connection = con;
 	}
 
+	@Override
 	public CharSequence getExtendedViewSource(TableIdentifier tbl)
 		throws SQLException
 	{
 		return getExtendedViewSource(new TableDefinition(tbl), false, false);
 	}
 
+	@Override
 	public CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
 		throws SQLException
 	{
@@ -66,6 +68,7 @@ public class DefaultViewReader
 	 *
 	 * @see #getViewSource(workbench.db.TableIdentifier)
 	 */
+	@Override
 	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
 		throws SQLException
 	{
@@ -122,7 +125,10 @@ public class DefaultViewReader
 
 		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableExpression(connection)));
 
-		result.append(lineEnding + "(" + lineEnding);
+		result.append(lineEnding);
+		result.append('(');
+		result.append(lineEnding);
+
 		int colCount = columns.size();
 		for (int i=0; i < colCount; i++)
 		{
@@ -136,9 +142,12 @@ public class DefaultViewReader
 				result.append(lineEnding);
 			}
 		}
-		result.append(lineEnding + ")");
+		result.append(lineEnding);
+		result.append(')');
 
-		result.append(lineEnding + "AS " + lineEnding);
+		result.append(lineEnding);
+		result.append("AS ");
+		result.append(lineEnding);
 		result.append(source);
 		result.append(lineEnding);
 
@@ -191,6 +200,7 @@ public class DefaultViewReader
 	 *
 	 *	@return the view source as stored in the database.
 	 */
+	@Override
 	public CharSequence getViewSource(TableIdentifier viewId)
 		throws NoConfigException
 	{
