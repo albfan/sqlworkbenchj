@@ -387,7 +387,7 @@ public class DbMetadata
 		// drives the "Data" tab in the DbExplorer)
 		Set<String> types = getObjectsWithData();
 
-		if (!getDbSettings().includeSystemTablesInSelectable())
+		if (!dbSettings.includeSystemTablesInSelectable())
 		{
 			Iterator<String> itr = types.iterator();
 			while (itr.hasNext())
@@ -740,7 +740,7 @@ public class DbMetadata
 	private Set<String> readIgnored(String type, String defaultList)
 	{
 		Set<String> result = null;
-		String ids = Settings.getInstance().getProperty("workbench.sql.ignore." + type + "." + this.getDbId(), defaultList);
+		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), defaultList);
 		if (ids != null)
 		{
 			result = new TreeSet<String>(StringUtil.stringToList(ids, ","));
@@ -1008,6 +1008,7 @@ public class DbMetadata
 	 * @param name
 	 * @return true if the values is already quoted.
 	 */
+	@Override
 	public boolean isQuoted(String name)
 	{
 		if (StringUtil.isEmptyString(name)) return false;
@@ -1022,6 +1023,7 @@ public class DbMetadata
 		return false;
 	}
 
+	@Override
 	public String removeQuotes(String name)
 	{
 		if (StringUtil.isEmptyString(name)) return name;
@@ -1033,6 +1035,7 @@ public class DbMetadata
 		return StringUtil.removeQuotes(name, quoteCharacter);
 	}
 
+	@Override
 	public String quoteObjectname(String aName)
 	{
 		return quoteObjectname(aName, false);
