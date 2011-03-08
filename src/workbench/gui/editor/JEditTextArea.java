@@ -69,8 +69,6 @@ import workbench.gui.actions.ScrollDownAction;
 import workbench.gui.actions.ScrollUpAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.completion.ParameterTipProvider;
-import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.menu.TextPopup;

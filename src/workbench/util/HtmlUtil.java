@@ -88,76 +88,76 @@ public class HtmlUtil
 		return sb.toString();
 	}
 
-//	public static final String unescapeHTML(String s)
-//	{
-//		String [][] escape =
-//		{
-//			{  "&lt;"     , "<" } ,
-//			{  "&gt;"     , ">" } ,
-//			{  "&amp;"    , "&" } ,
-//			{  "&quot;"   , "\"" } ,
-//			{  "&agrave;" , "\u00e0" } ,
-//			{  "&Agrave;" , "\u00c0" } ,
-//			{  "&acirc;"  , "\u00e2" } ,
-//			{  "&auml;"   , "\u00e4" } ,
-//			{  "&Auml;"   , "\u00c4" } ,
-//			{  "&Acirc;"  , "\u00c2" } ,
-//			{  "&aring;"  , "\u00e5" } ,
-//			{  "&Aring;"  , "\u00c5" } ,
-//			{  "&aelig;"  , "\u00e6" } ,
-//			{  "&AElig;"  , "\u00c6" } ,
-//			{  "&ccedil;" , "\u00e7" } ,
-//			{  "&Ccedil;" , "\u00c7" } ,
-//			{  "&eacute;" , "\u00e9" } ,
-//			{  "&Eacute;" , "\u00c9" } ,
-//			{  "&egrave;" , "\u00e8" } ,
-//			{  "&Egrave;" , "\u00c8" } ,
-//			{  "&ecirc;"  , "\u00ea" } ,
-//			{  "&Ecirc;"  , "\u00ca" } ,
-//			{  "&euml;"   , "\u00eb" } ,
-//			{  "&Euml;"   , "\u00cb" } ,
-//			{  "&iuml;"   , "\u00ef" } ,
-//			{  "&Iuml;"   , "\u00cf" } ,
-//			{  "&ocirc;"  , "\u00f4" } ,
-//			{  "&Ocirc;"  , "\u00d4" } ,
-//			{  "&ouml;"   , "\u00f6" } ,
-//			{  "&Ouml;"   , "\u00d6" } ,
-//			{  "&oslash;" , "\u00f8" } ,
-//			{  "&Oslash;" , "\u00d8" } ,
-//			{  "&szlig;"  , "\u00df" } ,
-//			{  "&ugrave;" , "\u00f9" } ,
-//			{  "&Ugrave;" , "\u00d9" } ,
-//			{  "&ucirc;"  , "\u00fb" } ,
-//			{  "&Ucirc;"  , "\u00db" } ,
-//			{  "&uuml;"   , "\u00fc" } ,
-//			{  "&Uuml;"   , "\u00dc" } ,
-//			{  "&nbsp;"   , " " } ,
-//			{  "&reg;"    , "\u00a9" } ,
-//			{  "&copy;"   , "\u00ae" } ,
-//			{  "&euro;"   , "\u20a0" }
-//		};
-//
-//		int i, j, k;
-//
-//		i = s.indexOf("&");
-//		if (i > -1)
-//		{
-//			j = s.indexOf(";");
-//			if (j > i)
-//			{
-//				String temp = s.substring(i , j + 1);
-//				// search in escape[][] if temp is there
-//				k = 0;
-//				while (k < escape.length)
-//				{
-//					if (escape[k][0].equals(temp)) break;
-//					else k++;
-//				}
-//				s = s.substring(0 , i) + escape[k][1] + s.substring(j + 1);
-//				return unescapeHTML(s); // recursive call
-//			}
-//		}
-//		return s;
-//	}
+	public static final String unescapeHTML(String s)
+	{
+		String [][] escape =
+		{
+			{  "&lt;"     , "<" } ,
+			{  "&gt;"     , ">" } ,
+			{  "&amp;"    , "&" } ,
+			{  "&quot;"   , "\"" } ,
+			{  "&agrave;" , "\u00e0" } ,
+			{  "&Agrave;" , "\u00c0" } ,
+			{  "&acirc;"  , "\u00e2" } ,
+			{  "&auml;"   , "\u00e4" } ,
+			{  "&Auml;"   , "\u00c4" } ,
+			{  "&Acirc;"  , "\u00c2" } ,
+			{  "&aring;"  , "\u00e5" } ,
+			{  "&Aring;"  , "\u00c5" } ,
+			{  "&aelig;"  , "\u00e6" } ,
+			{  "&AElig;"  , "\u00c6" } ,
+			{  "&ccedil;" , "\u00e7" } ,
+			{  "&Ccedil;" , "\u00c7" } ,
+			{  "&eacute;" , "\u00e9" } ,
+			{  "&Eacute;" , "\u00c9" } ,
+			{  "&egrave;" , "\u00e8" } ,
+			{  "&Egrave;" , "\u00c8" } ,
+			{  "&ecirc;"  , "\u00ea" } ,
+			{  "&Ecirc;"  , "\u00ca" } ,
+			{  "&euml;"   , "\u00eb" } ,
+			{  "&Euml;"   , "\u00cb" } ,
+			{  "&iuml;"   , "\u00ef" } ,
+			{  "&Iuml;"   , "\u00cf" } ,
+			{  "&ocirc;"  , "\u00f4" } ,
+			{  "&Ocirc;"  , "\u00d4" } ,
+			{  "&ouml;"   , "\u00f6" } ,
+			{  "&Ouml;"   , "\u00d6" } ,
+			{  "&oslash;" , "\u00f8" } ,
+			{  "&Oslash;" , "\u00d8" } ,
+			{  "&szlig;"  , "\u00df" } ,
+			{  "&ugrave;" , "\u00f9" } ,
+			{  "&Ugrave;" , "\u00d9" } ,
+			{  "&ucirc;"  , "\u00fb" } ,
+			{  "&Ucirc;"  , "\u00db" } ,
+			{  "&uuml;"   , "\u00fc" } ,
+			{  "&Uuml;"   , "\u00dc" } ,
+			{  "&nbsp;"   , " " } ,
+			{  "&reg;"    , "\u00a9" } ,
+			{  "&copy;"   , "\u00ae" } ,
+			{  "&euro;"   , "\u20a0" }
+		};
+
+		int i, j, k;
+
+		i = s.indexOf("&");
+		if (i > -1)
+		{
+			j = s.indexOf(";");
+			if (j > i)
+			{
+				String temp = s.substring(i , j + 1);
+				// search in escape[][] if temp is there
+				k = 0;
+				while (k < escape.length)
+				{
+					if (escape[k][0].equals(temp)) break;
+					else k++;
+				}
+				s = s.substring(0 , i) + escape[k][1] + s.substring(j + 1);
+				return unescapeHTML(s); // recursive call
+			}
+		}
+		return s;
+	}
 
 }

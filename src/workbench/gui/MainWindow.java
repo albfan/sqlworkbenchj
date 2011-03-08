@@ -1693,6 +1693,7 @@ public class MainWindow
 		this.currentConnection = null;
 		this.closeWorkspace(false);
 		this.setMacroMenuEnabled(false);
+		getJobIndicator().allJobsEnded();
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
 		ShowDbmsManualAction.getInstance().setDbms(null);

@@ -96,4 +96,9 @@ public class RunningJobIndicator
 		}
 	}
 
+	public synchronized void allJobsEnded()
+	{
+		runningJobs = 0;
+		updateTitle();
+	}
 }

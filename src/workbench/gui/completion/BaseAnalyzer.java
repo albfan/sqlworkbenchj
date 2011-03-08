@@ -183,7 +183,10 @@ public abstract class BaseAnalyzer
 
 		if (tbl == null || StringUtil.isBlank(tbl.getSchema()))
 		{
-			if (this.dbConnection != null) return this.dbConnection.getMetadata().getCurrentSchema();
+			if (this.dbConnection != null)
+			{
+				return this.dbConnection.getMetadata().getCurrentSchema();
+			}
 			return null;
 		}
 
@@ -208,8 +211,15 @@ public abstract class BaseAnalyzer
 		this.buildResult();
 	}
 
-	public String getTitle() { return this.title; }
-	public List getData() { return this.elements; }
+	public String getTitle()
+	{
+		return this.title;
+	}
+
+	public List getData()
+	{
+		return this.elements;
+	}
 
 	protected abstract void checkContext();
 

@@ -335,7 +335,7 @@ public class TextAreaPainter
 	{
 		super.setFont(font);
 		currentLineTokens = null;
-		this.fm = getFontMetrics(font);
+		this.fm = getFontMetrics(getFont());
 		synchronized (stylesLockMonitor)
 		{
 			if (styles != null)

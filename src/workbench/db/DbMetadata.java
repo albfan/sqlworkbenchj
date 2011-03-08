@@ -369,7 +369,7 @@ public class DbMetadata
 
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 
-		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
+		this.metaSqlMgr = new MetaDataSqlManager(productName);
 
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
@@ -581,7 +581,7 @@ public class DbMetadata
 	 * in a properties file.
 	 * @see #getDbId()
 	 */
-	public String getProductName()
+	public final String getProductName()
 	{
 		return this.productName;
 	}
@@ -591,7 +591,7 @@ public class DbMetadata
 	 *
 	 * @see #getProductName()
 	 */
-	public String getDbId()
+	public final String getDbId()
 	{
 		if (this.dbId == null)
 		{
@@ -740,7 +740,7 @@ public class DbMetadata
 	private Set<String> readIgnored(String type, String defaultList)
 	{
 		Set<String> result = null;
-		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), defaultList);
+		String ids = Settings.getInstance().getProperty("workbench.sql.ignore." + type + "." + this.getDbId(), defaultList);
 		if (ids != null)
 		{
 			result = new TreeSet<String>(StringUtil.stringToList(ids, ","));
@@ -751,7 +751,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	/**
 	 * For testing purposes only
 	 */

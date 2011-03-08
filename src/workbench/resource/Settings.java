@@ -42,6 +42,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.lnf.FontScaler;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
 import workbench.interfaces.PropertyStorage;
@@ -1089,6 +1090,11 @@ public class Settings
 		{
 			f = new Font("Monospaced", Font.PLAIN, 12);
 		}
+		if (getScaleFonts())
+		{
+			FontScaler scaler = new FontScaler();
+			f = scaler.scaleFont(f);
+		}
 		return f;
 	}
 
@@ -1119,6 +1125,14 @@ public class Settings
 		{
 			f = UIManager.getFont("Table.font");
 		}
+		else if (getScaleFonts())
+		{
+			// when retrieving the default font from UIManager there is no need
+			// to scale it, as this has already been done in LnfHelper during
+			// initialization of the UI
+			FontScaler scaler = new FontScaler();
+			f = scaler.scaleFont(f);
+		}
 		return f;
 	}
 
@@ -1140,6 +1154,16 @@ public class Settings
 	public void setStandardFont(Font f)
 	{
 		this.setFont(PROPERTY_STANDARD_FONT, f);
+	}
+
+	/**
+	 * Returns true if the fonts should be scaled based on the DPI settings
+	 * of the system.
+	 *
+	 */
+	public boolean getScaleFonts()
+	{
+		return getBoolProperty("workbench.gui.desktop.scalefonts", true);
 	}
 
 	/**
@@ -2517,6 +2541,7 @@ public class Settings
 		return StringUtil.stringToList(list, ",", true, true, false);
 	}
 
+	@Override
 	public int getIntProperty(String aProperty, int defaultValue)
 	{
 		String sysValue = System.getProperty(aProperty, null);
@@ -2656,6 +2681,7 @@ public class Settings
 			result = true;
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					target.setSize(new Dimension(w, h));

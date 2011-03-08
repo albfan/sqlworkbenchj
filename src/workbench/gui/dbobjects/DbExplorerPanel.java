@@ -185,6 +185,7 @@ public class DbExplorerPanel
 			this.selectorPanel = new JPanel();
 			schemaReloader = new Reloadable()
 			{
+				@Override
 				public void reload()
 				{
 					if (!WbSwingUtilities.checkConnection(DbExplorerPanel.this, dbConnection)) return;
@@ -266,17 +267,20 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public void setLocked(boolean flag)
 	{
 		this.locked = flag;
 		updateTabTitle();
 	}
 
+	@Override
 	public boolean isLocked()
 	{
 		return locked;
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (!this.isVisible()) return;
@@ -289,6 +293,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public void setConnectionClient(Connectable client)
 	{
 		// not used
@@ -331,6 +336,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public boolean isBusy()
 	{
 		synchronized (busyLock)
@@ -339,6 +345,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public String getId()
 	{
 		return "WbExp-" + NumberStringCache.getNumberString(this.internalId);
@@ -449,6 +456,7 @@ public class DbExplorerPanel
 		this.schemaSelector.addActionListener(this);
 	}
 
+	@Override
 	public boolean isConnected()
 	{
 		return (this.dbConnection != null);
@@ -484,6 +492,7 @@ public class DbExplorerPanel
 		{
 			Thread t = new WbThread("DbExplorer connection")
 			{
+				@Override
 				public void run()
 				{
 					doConnect(profile);
@@ -524,6 +533,7 @@ public class DbExplorerPanel
 		this.schemaLabel.setText(StringUtil.capitalize(schemaName));
 	}
 
+	@Override
 	public void setConnection(WbConnection aConnection)
 	{
 		if (this.isBusy()) return;
@@ -582,6 +592,7 @@ public class DbExplorerPanel
 			{
 				WbThread t = new WbThread("DbExplorerInit")
 				{
+					@Override
 					public void run()
 					{
 						initConnection();
@@ -672,6 +683,7 @@ public class DbExplorerPanel
 		this.selectorPanel.validate();
 	}
 
+	@Override
 	public void setVisible(boolean flag)
 	{
 		boolean wasVisible = this.isVisible();
@@ -689,6 +701,7 @@ public class DbExplorerPanel
 				// and the panel was not visible when the connection was provided
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						retrieve();
@@ -702,6 +715,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public void panelSelected()
 	{
 		Component panel = this.tabPane.getSelectedComponent();
@@ -720,11 +734,13 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public void reset()
 	{
 		this.setLocked(false);
@@ -734,6 +750,7 @@ public class DbExplorerPanel
 		if (this.tabPane != null && this.tabPane.getTabCount() > 0) this.tabPane.setSelectedIndex(0);
 	}
 
+	@Override
 	public void disconnect()
 	{
 		this.tables.disconnect();
@@ -760,6 +777,7 @@ public class DbExplorerPanel
 		if (this.searchPanel != null) searchPanel.restoreSettings();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.schemaSelector)
@@ -820,6 +838,7 @@ public class DbExplorerPanel
 
 		Thread t = new WbThread("SchemaChange")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -845,6 +864,7 @@ public class DbExplorerPanel
 		t.start();
 	}
 
+	@Override
 	public void setTabName(String name)
 	{
 		this.tabTitle = name;
@@ -870,11 +890,13 @@ public class DbExplorerPanel
 		PanelTitleSetter.updateTitle(this);
 	}
 
+	@Override
 	public String getTabTitle()
 	{
 		return (tabTitle == null ? ResourceMgr.getString("LblDbExplorer") : tabTitle);
 	}
 
+	@Override
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		String plainTitle = getTabTitle();
@@ -891,25 +913,54 @@ public class DbExplorerPanel
 		return window;
 	}
 
+	@Override
 	public List getActions()
 	{
 		return Collections.EMPTY_LIST;
 	}
 
+	@Override
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
 	}
 
-	public void showLogMessage(String aMsg) {}
-	public void clearStatusMessage() {}
-	public void showStatusMessage(String aMsg) {}
-	public void clearLog() {}
-	public void appendToLog(String msg) { }
+	@Override
+	public void showLogMessage(String aMsg)
+	{
+	}
 
-	public void showLogPanel() {}
-	public void showResultPanel() {}
+	@Override
+	public void clearStatusMessage()
+	{
+	}
 
+	@Override
+	public void showStatusMessage(String aMsg)
+	{
+	}
+
+	@Override
+	public void clearLog()
+	{
+	}
+
+	@Override
+	public void appendToLog(String msg)
+	{
+	}
+
+	@Override
+	public void showLogPanel()
+	{
+	}
+
+	@Override
+	public void showResultPanel()
+	{
+	}
+
+	@Override
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
@@ -933,6 +984,7 @@ public class DbExplorerPanel
 		window = null;
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		if (e.getSource() == this.tabPane)
@@ -944,6 +996,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public void dispose()
 	{
 		this.reset();
@@ -954,6 +1007,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
@@ -991,11 +1045,13 @@ public class DbExplorerPanel
 	}
 
 
+	@Override
 	public boolean isModified()
 	{
 		return tables.isModified();
 	}
 
+	@Override
 	public boolean canClosePanel()
 	{
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
@@ -1005,6 +1061,7 @@ public class DbExplorerPanel
 		return canClose;
 	}
 
+	@Override
 	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
@@ -1029,6 +1086,7 @@ public class DbExplorerPanel
 		}
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				updateTabTitle();
@@ -1036,6 +1094,7 @@ public class DbExplorerPanel
 		});
 	}
 
+	@Override
 	public void executionStart(WbConnection conn, Object source)
 	{
 	}
@@ -1043,6 +1102,7 @@ public class DbExplorerPanel
 	/*
 	 *	Fired by the SqlPanel if DB access finished
 	 */
+	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		if (this.connectionInitPending)
@@ -1059,6 +1119,7 @@ public class DbExplorerPanel
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return getId();

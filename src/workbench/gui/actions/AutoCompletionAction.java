@@ -18,6 +18,7 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.CompletionHandler;
 import workbench.gui.editor.JEditTextArea;
 import workbench.interfaces.StatusBar;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -66,7 +67,7 @@ public class AutoCompletionAction
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				LogMgr.logError("AutoCompletionAction.setConnection()", "Error setting connection", e);
 			}
 		}
 
@@ -80,6 +81,7 @@ public class AutoCompletionAction
 		this.setEnabled(conn != null);
 	}
 
+	@Override
 	public void setAccelerator(KeyStroke key)
 	{
 		KeyStroke old = this.getAccelerator();
@@ -88,6 +90,7 @@ public class AutoCompletionAction
 		editor.addKeyBinding(this);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		handler.showCompletionPopup();

@@ -36,25 +36,26 @@ public class SelectAnalyzer
 	private final int NO_JOIN_ON = 0;
 	private final int JOIN_ON_TABLE_LIST = 1;
 	private final int JOIN_ON_COLUMN_LIST = 2;
-	
+
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
-	{	
+	{
 		super(conn, statement, cursorPos);
 	}
-	
+
 	@SuppressWarnings("unchecked")
+	@Override
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
-		
+
 		String currentWord = getCurrentWord();
-		
+
 		setAppendDot(false);
 		setColumnPrefix(null);
-		int fromPos = SqlUtil.getFromPosition(this.sql); 
-		
+		int fromPos = SqlUtil.getFromPosition(this.sql);
+
 		int wherePos = -1;
-		
+
 		if (fromPos > 0)
 		{
 			wherePos = SqlUtil.getWherePosition(sql);
@@ -63,10 +64,10 @@ public class SelectAnalyzer
 		int groupPos = SqlUtil.getKeywordPosition("GROUP BY", sql);
 		int havingPos = SqlUtil.getKeywordPosition("HAVING", sql);
 		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
-		
+
 		// find the tables from the FROM clause
 		List<String> tables = SqlUtil.getTables(sql, true);
-		
+
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
 		if (havingPos > -1 && afterGroup)
@@ -78,7 +79,7 @@ public class SelectAnalyzer
 		{
 			afterGroup = (cursorPos < orderPos);
 		}
-		
+
 		boolean afterHaving = (havingPos > 0 && cursorPos > havingPos);
 		if (orderPos > -1 && afterHaving)
 		{
@@ -88,17 +89,17 @@ public class SelectAnalyzer
 		boolean inTableList = ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos));
-		
+
 		if (inTableList && afterGroup) inTableList = false;
 		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
-		
+
 		int joinState = inJoinONPart();
-			
+
 		if (inTableList && joinState != JOIN_ON_TABLE_LIST)
 		{
 			inTableList = false;
 		}
-		
+
 		if (inTableList)
 		{
 			String q = getQualifierLeftOfCursor();
@@ -108,10 +109,10 @@ public class SelectAnalyzer
 			}
 
 			// If no FROM is present but there is a word with a dot
-			// at the cursor position we will first try to use that 
+			// at the cursor position we will first try to use that
 			// as a table name (because usually you type the table name
-			// first in the SELECT list. If no columns for that 
-			// name are found, BaseAnalyzer will try to use that as a 
+			// first in the SELECT list. If no columns for that
+			// name are found, BaseAnalyzer will try to use that as a
 			// schema name.
 			if (fromPos < 0 && q != null)
 			{
@@ -122,7 +123,7 @@ public class SelectAnalyzer
 			{
 				context = CONTEXT_TABLE_LIST;
 			}
-		
+
 			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 		else
@@ -131,7 +132,7 @@ public class SelectAnalyzer
 			// current cursor position is after the WHERE
 			// statement or before the FROM statement, so
 			// we'll try to find a proper column list
-			
+
 			int count = tables.size();
 			this.tableForColumnList = null;
 
@@ -142,7 +143,7 @@ public class SelectAnalyzer
 				this.title = ResourceMgr.getString("TxtTitleColumns");
 				return;
 			}
-			
+
 			if (afterHaving)
 			{
 				this.elements = getColumnsForHaving();
@@ -150,10 +151,10 @@ public class SelectAnalyzer
 				this.title = ResourceMgr.getString("TxtTitleGroupFuncs");
 				return;
 			}
-			
+
 			this.addAllMarker = !afterWhere;
 
-			
+
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
 			// in the table list.
@@ -167,11 +168,11 @@ public class SelectAnalyzer
 					table = currentWord.substring(0, pos);
 				}
 			}
-			
+
 			if (table != null)
 			{
 				currentAlias = findAlias(table, tables);
-				
+
 				if (currentAlias != null)
 				{
 					tableForColumnList = currentAlias.getTable();
@@ -232,7 +233,7 @@ public class SelectAnalyzer
 		}
 		return null;
 	}
-	
+
 	private int inJoinONPart()
 	{
 		int result = NO_JOIN_ON;
@@ -263,7 +264,7 @@ public class SelectAnalyzer
 						{
 							result = JOIN_ON_TABLE_LIST;
 						}
-						else 
+						else
 						{
 							result = NO_JOIN_ON;
 						}
@@ -292,8 +293,8 @@ public class SelectAnalyzer
 			LogMgr.logError("SelectAnalyzer.inJoinONPart()", "Error parsing SQL Statement!", e);
 		}
 		return result;
-	}	
-	
+	}
+
 	private List getColumnsForHaving()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
@@ -308,7 +309,7 @@ public class SelectAnalyzer
 		}
 		return validCols;
 	}
-	
+
 	private List getColumnsForGroupBy()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
@@ -333,9 +334,9 @@ public class SelectAnalyzer
 		}
 		return validCols;
 	}
-	
+
 	/**
-	 * This will only return any tables in the FROM clause to 
+	 * This will only return any tables in the FROM clause to
 	 * support correlated sub-queries
 	 */
 	public List<TableAlias> getTables()

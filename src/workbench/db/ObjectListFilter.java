@@ -13,7 +13,6 @@ package workbench.db;
 
 import java.util.HashMap;
 import java.util.Map;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 

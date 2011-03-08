@@ -21,7 +21,7 @@ import workbench.util.WbStringTokenizer;
 
 /**
  * A class that represents a table (or view) in the database.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class TableIdentifier
@@ -89,12 +89,14 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	@Override
 	public void setComment(String comment)
 	{
 		this.commentWasInitialized = true;
 		this.tableComment = comment;
 	}
 
+	@Override
 	public String getComment()
 	{
 		return tableComment;
@@ -111,33 +113,39 @@ public class TableIdentifier
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getTableExpression(con);
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		if (conn == null) return SqlUtil.quoteObjectname(tablename);
 		return conn.getMetadata().quoteObjectname(this.tablename);
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection con)
 	{
 		return SqlUtil.buildExpression(con, catalog, schema, tablename);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return getTableExpression(conn);
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		if (type == null) return "TABLE";
 		return type.toUpperCase();
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return getTableName();
@@ -198,6 +206,7 @@ public class TableIdentifier
 		return this.expression;
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return getTableExpression().hashCode();
@@ -300,7 +309,7 @@ public class TableIdentifier
 		return null;
 	}
 
-	public void adjustCase(WbConnection conn)
+	public final void adjustCase(WbConnection conn)
 	{
 		if (this.neverAdjustCase) return;
 		if (conn == null) return;
@@ -391,7 +400,7 @@ public class TableIdentifier
 		}
 	}
 
-	public void setTable(String aTable)
+	public final void setTable(String aTable)
 	{
 		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
 			throw new IllegalArgumentException("Table name may not be null");
@@ -469,6 +478,7 @@ public class TableIdentifier
 		this.tablename = StringUtil.trimQuotes(name).trim();
 	}
 
+	@Override
 	public String getSchema()
 	{
 		if (schema == null) return null;
@@ -481,7 +491,7 @@ public class TableIdentifier
 		return result.toString();
 	}
 
-	public void setSchema(String aSchema)
+	public final void setSchema(String aSchema)
 	{
 		if (this.isNewTable) return;
 
@@ -497,6 +507,7 @@ public class TableIdentifier
 		this.expression = null;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		if (catalog == null) return null;
@@ -509,7 +520,7 @@ public class TableIdentifier
 		return result.toString();
 	}
 
-	public void setCatalog(String aCatalog)
+	public final void setCatalog(String aCatalog)
 	{
 		if (this.isNewTable) return;
 
@@ -525,6 +536,7 @@ public class TableIdentifier
 		this.expression = null;
 	}
 
+	@Override
 	public String toString()
 	{
 		if (this.isNewTable)
@@ -560,11 +572,13 @@ public class TableIdentifier
 		this.showOnlyTableName = flag;
 	}
 
+	@Override
 	public int compareTo(TableIdentifier other)
 	{
 		return this.getTableExpression().compareTo(other.getTableExpression());
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableIdentifier)
@@ -640,6 +654,7 @@ public class TableIdentifier
 		this.type = type;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{

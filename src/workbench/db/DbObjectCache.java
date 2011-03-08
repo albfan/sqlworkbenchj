@@ -161,15 +161,26 @@ public class DbObjectCache
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
 		DbMetadata meta = this.dbConnection.getMetadata();
 		String schemaToUse = getSchemaToUse(schema);
+
+		// For SQL Server schema and catalog should not be removed ....
+		boolean useSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
+		boolean useCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
+
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String tSchema = tbl.getSchema();
 			if (schemaToUse == null || meta.ignoreSchema(tSchema) || schemaToUse.equalsIgnoreCase(tSchema))
 			{
 				TableIdentifier copy = tbl.createCopy();
-				copy.setSchema(null);
-				String cat = copy.getCatalog();
-				if (meta.ignoreCatalog(cat)) copy.setCatalog(null);
+				if (!useSchema)
+				{
+					copy.setSchema(null);
+				}
+				if (!useCatalog)
+				{
+					String cat = copy.getCatalog();
+					if (meta.ignoreCatalog(cat)) copy.setCatalog(null);
+				}
 				result.add(copy);
 			}
 		}
@@ -282,6 +293,7 @@ public class DbObjectCache
 	 * Notification about the state of the connection. If the connection
 	 * is closed, we can dispose the object cache
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (WbConnection.PROP_CONNECTION_STATE.equals(evt.getPropertyName()) &&

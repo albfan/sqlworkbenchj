@@ -29,13 +29,13 @@ public class GenericSchemaInfoReader
 {
 	private String schemaQuery = null;
 	private boolean useSavepoint = false;
-	
+
 	public GenericSchemaInfoReader(String dbid)
 	{
-		this.schemaQuery = Settings.getInstance().getProperty("workbench.db." + dbid + ".currentschema.query", null);
+		schemaQuery = Settings.getInstance().getProperty("workbench.db." + dbid + ".currentschema.query", null);
 		useSavepoint = Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".currentschema.query.usesavepoint", false);
 	}
-	
+
 	/**
 	 * Retrieves the currently active schema from the server.
 	 * This is done by running the query configured for the passed dbid.
@@ -44,6 +44,7 @@ public class GenericSchemaInfoReader
 	 * @see #GenericSchemaInfoReader(String)
 	 * @see workbench.db.DbMetadata#getDbId()
 	 */
+	@Override
 	public String getCurrentSchema(WbConnection conn)
 	{
 		if (conn == null) return null;
@@ -88,5 +89,5 @@ public class GenericSchemaInfoReader
 		}
 		return currentSchema;
 	}
-	
+
 }

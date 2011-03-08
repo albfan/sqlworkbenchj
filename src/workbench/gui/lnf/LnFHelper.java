@@ -14,6 +14,7 @@ package workbench.gui.lnf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.util.Set;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -21,6 +22,7 @@ import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -31,6 +33,37 @@ import workbench.util.StringUtil;
 public class LnFHelper
 {
 	private boolean isWindowsClassic;
+
+	private final Set<String> fontProperties = CollectionUtil.treeSet(
+		"Button.font",
+		"CheckBox.font",
+		"CheckBoxMenuItem.font",
+		"ColorChooser.font",
+		"ComboBox.font",
+		"EditorPane.font",
+		"FileChooser.font",
+		"Label.font",
+		"List.font",
+		"Menu.font",
+		"MenuBar.font",
+		"MenuItem.font",
+		"OptionPane.font",
+		"Panel.font",
+		"PasswordField.font",
+		"PopupMenu.font",
+		"ProgressBar.font",
+		"RadioButton.font",
+		"RadioButtonMenuItem.font",
+		"TabbedPane.font",
+		"TextArea.font",
+		"TextField.font",
+		"TextPane.font",
+		"TitledBorder.font",
+		"ToggleButton.font",
+		"ToolBar.font",
+		"ToolTip.font",
+		"Tree.font",
+		"ViewPort.font");
 
 	public boolean isWindowsClassic()
 	{
@@ -47,35 +80,15 @@ public class LnFHelper
 		Font stdFont = settings.getStandardFont();
 		if (stdFont != null)
 		{
-			def.put("Button.font", stdFont);
-			def.put("CheckBox.font", stdFont);
-			def.put("CheckBoxMenuItem.font", stdFont);
-			def.put("ColorChooser.font", stdFont);
-			def.put("ComboBox.font", stdFont);
-			def.put("EditorPane.font", stdFont);
-			def.put("FileChooser.font", stdFont);
-			def.put("Label.font", stdFont);
-			def.put("List.font", stdFont);
-			def.put("Menu.font", stdFont);
-			def.put("MenuBar.font", stdFont);
-			def.put("MenuItem.font", stdFont);
-			def.put("OptionPane.font", stdFont);
-			def.put("Panel.font", stdFont);
-			def.put("PasswordField.font", stdFont);
-			def.put("PopupMenu.font", stdFont);
-			def.put("ProgressBar.font", stdFont);
-			def.put("RadioButton.font", stdFont);
-			def.put("RadioButtonMenuItem.font", stdFont);
-			def.put("TabbedPane.font", stdFont);
-			def.put("TextArea.font", stdFont);
-			def.put("TextField.font", stdFont);
-			def.put("TextPane.font", stdFont);
-			def.put("TitledBorder.font", stdFont);
-			def.put("ToggleButton.font", stdFont);
-			def.put("ToolBar.font", stdFont);
-			def.put("ToolTip.font", stdFont);
-			def.put("Tree.font", stdFont);
-			def.put("ViewPort.font", stdFont);
+			for (String property : fontProperties)
+			{
+				def.put(property, stdFont);
+			}
+		}
+		else if (isWindowsLookAndFeel())
+		{
+			// The default Windows look and feel does not scale the fonts properly
+			scaleDefaultFonts();
 		}
 
 		Font dataFont = settings.getDataFont();
@@ -85,12 +98,6 @@ public class LnFHelper
 			def.put("TableHeader.font", dataFont);
 		}
 
-			// use our own classes for some GUI elements
-//		if (!"Nimbus".equals(UIManager.getLookAndFeel().getName()))
-//		{
-//			def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-//		}
-//
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
 
@@ -98,6 +105,28 @@ public class LnFHelper
 		{
 			Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 			def.put("Table.gridColor", c);
+		}
+	}
+
+	private boolean isWindowsLookAndFeel()
+	{
+		String lnf = UIManager.getLookAndFeel().getClass().getName();
+		return lnf.indexOf("plaf.windows") > -1;
+	}
+
+	private void scaleDefaultFonts()
+	{
+		if (!Settings.getInstance().getScaleFonts()) return;
+		UIDefaults def = UIManager.getDefaults();
+		FontScaler scaler = new FontScaler();
+		for (String property : fontProperties)
+		{
+			Font base = def.getFont(property);
+			if (base != null)
+			{
+				Font scaled = scaler.scaleFont(base);
+				def.put(property, scaled);
+			}
 		}
 	}
 
@@ -166,7 +195,7 @@ public class LnFHelper
 			// should not ahppen
 		}
 	}
-	
+
 	private void checkWindowsClassic(String clsname)
 	{
 		try

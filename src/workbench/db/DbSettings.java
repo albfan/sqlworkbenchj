@@ -73,13 +73,13 @@ public class DbSettings
 		this.supportsCommentInSql = settings.getBoolProperty(prefix + "sql.embeddedcomments", true);
 
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
-		this.neverQuoteObjects = quote.contains(this.getDbId());
+		this.neverQuoteObjects = quote.contains(dbId);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
 		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
 	}
 
-	public String getDbId()
+	public final String getDbId()
 	{
 		return this.dbId;
 	}
@@ -852,7 +852,7 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "index.sorted", true);
 	}
 
-	public boolean includeSystemTablesInSelectable()
+	public final boolean includeSystemTablesInSelectable()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "systemtables.selectable", false);
 	}
@@ -953,7 +953,7 @@ public class DbSettings
 		boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.fk_included", false);
 		return !included;
 	}
-	
+
 	/**
 	 * If customized SQL is configured to retrieve the source of a table, this setting controls if table and column
 	 * comments should be gnerated by SQL Workbench.
@@ -1275,4 +1275,13 @@ public class DbSettings
 		Settings.getInstance().setProperty(prefix + "queryinfo.preparedstatement", flag);
 	}
 
+	public boolean alwaysUseSchemaForCompletion()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "completion.use.schema", false);
+	}
+
+	public boolean alwaysUseCatalogForCompletion()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "completion.use.catalog", false);
+	}
 }
