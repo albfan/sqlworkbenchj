@@ -168,7 +168,9 @@ public class DbObjectCache
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String tSchema = tbl.getSchema();
-			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema))
+			// meta.ignoreSchema() needs to be tested, because if that is true
+			// the returned Tables will not contain the schema...
+			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || meta.ignoreSchema(schemaToUse))
 			{
 				TableIdentifier copy = tbl.createCopy();
 				if (meta.ignoreSchema(copy.getSchema()) && !alwaysUseSchema)
