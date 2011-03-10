@@ -40,6 +40,10 @@ public class PostgresRuleReaderTest
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null)
+		{
+			return;
+		}
 		TestUtil.executeScript(con,
 			"CREATE table person (id integer, firstname varchar(50), lastname varchar(50));\n" +
 			"COMMIT;\n" +
@@ -60,6 +64,10 @@ public class PostgresRuleReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null)
+		{
+			return;
+		}
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_ID, new String[] { "RULE" });
 		assertEquals(1, objects.size());
 		TableIdentifier tbl = objects.get(0);

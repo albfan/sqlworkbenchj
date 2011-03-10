@@ -158,28 +158,27 @@ public class DbObjectCache
 
 	private Set<TableIdentifier> filterTablesBySchema(String schema)
 	{
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator(true));
 		DbMetadata meta = this.dbConnection.getMetadata();
 		String schemaToUse = getSchemaToUse(schema);
 
-		// For SQL Server schema and catalog should not be removed ....
-		boolean useSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
-		boolean useCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
+		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
+		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
 
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String tSchema = tbl.getSchema();
-			if (schemaToUse == null || meta.ignoreSchema(tSchema) || schemaToUse.equalsIgnoreCase(tSchema))
+			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema))
 			{
 				TableIdentifier copy = tbl.createCopy();
-				if (!useSchema)
+				if (meta.ignoreSchema(copy.getSchema()) && !alwaysUseSchema)
 				{
 					copy.setSchema(null);
 				}
-				if (!useCatalog)
+
+				if (meta.ignoreCatalog(copy.getCatalog()) && !alwaysUseCatalog)
 				{
-					String cat = copy.getCatalog();
-					if (meta.ignoreCatalog(cat)) copy.setCatalog(null);
+					copy.setCatalog(null);
 				}
 				result.add(copy);
 			}

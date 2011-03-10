@@ -392,8 +392,8 @@ public class TextFileParser
 					importColumns.add(ImportFileColumn.SKIP_COLUMN);
 					continue;
 				}
-				int index = tableCols.indexOf(sourceCol);
-				if (index < 0)
+				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
+				if (index < 0 && tableCols != null)
 				{
 					if (this.abortOnError)
 					{

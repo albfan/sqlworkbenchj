@@ -1277,11 +1277,11 @@ public class DbSettings
 
 	public boolean alwaysUseSchemaForCompletion()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "completion.use.schema", false);
+		return Settings.getInstance().getBoolProperty(prefix + "completion.always_use.schema", false);
 	}
 
 	public boolean alwaysUseCatalogForCompletion()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "completion.use.catalog", false);
+		return Settings.getInstance().getBoolProperty(prefix + "completion.always_use.catalog", false);
 	}
 }

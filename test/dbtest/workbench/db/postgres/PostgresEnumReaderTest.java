@@ -43,6 +43,10 @@ public class PostgresEnumReaderTest
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null)
+		{
+			return;
+		}
 		TestUtil.executeScript(con,
 			"CREATE TYPE stimmung AS ENUM ('sad','ok','happy');\n" +
 			"COMMENT ON TYPE stimmung IS 'my enum';\n" +
@@ -73,6 +77,10 @@ public class PostgresEnumReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null)
+		{
+			return;
+		}
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Collection<EnumIdentifier> enums = reader.getDefinedEnums(con, TEST_ID, null);
 		assertEquals(1, enums.size());

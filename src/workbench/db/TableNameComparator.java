@@ -21,8 +21,24 @@ import workbench.util.StringUtil;
 public class TableNameComparator
 	implements Comparator<TableIdentifier>
 {
+	private boolean useExpression = false;
+
+	public TableNameComparator()
+	{
+	}
+
+	public TableNameComparator(boolean sortOnExpression)
+	{
+		useExpression = sortOnExpression;
+	}
+
+	@Override
 	public int compare(TableIdentifier t1, TableIdentifier t2)
 	{
+		if (useExpression)
+		{
+			return StringUtil.compareStrings(t1.getTableExpression(), t2.getTableExpression(), true);
+		}
 		return StringUtil.compareStrings(t1.getTableName(), t2.getTableName(), true);
 	}
 
