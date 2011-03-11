@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat;
  * A wrapper around Java's File object to allow of automatic "expansion" of
  * system properties and other utility functions such as getFullPath() which
  * does not throw an exception
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbFile
@@ -32,31 +32,31 @@ public class WbFile
 	 *
 	 * Variables in the names are replaced with the value of the corresponding
 	 * system property (e.g. ${user.home})
-	 * 
+	 *
 	 * @param parent
 	 * @param filename
-	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String) 
+	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String)
 	 */
 	public WbFile(String parent, String filename)
 	{
 		super(StringUtil.replaceProperties(parent), StringUtil.replaceProperties(filename));
 	}
-	
+
 	public WbFile(File parent, String filename)
 	{
 		super(parent, StringUtil.replaceProperties(filename));
 	}
-	
+
 	public WbFile(File f)
 	{
 		super(f.getAbsolutePath());
 	}
-	
+
 	public WbFile(String filename)
 	{
 		super(StringUtil.replaceProperties(filename));
 	}
-	
+
 	/**
 	 * Renames this file by adding the current timestamp to the filename.
 	 */
@@ -67,7 +67,7 @@ public class WbFile
 		WbFile newfile = new WbFile(this.getParent(), newname);
 		this.renameTo(newfile);
 	}
-	
+
 	/**
 	 * Returns the filename without an extension
 	 */
@@ -80,7 +80,9 @@ public class WbFile
 	}
 
 	/**
-	 * Returns the extension (the characters after the last dot)
+	 * Returns the extension of this file.
+	 * The extension is defined as the the characters after the last dot, but
+	 * excluding the dot.
 	 */
 	public String getExtension()
 	{
@@ -98,7 +100,7 @@ public class WbFile
 	 * the file to ensure that it's writeabl.
 	 *
 	 * @see #canCreate()
-	 * @see #tryCreate() 
+	 * @see #tryCreate()
 	 */
 	public boolean isWriteable()
 	{
@@ -110,11 +112,11 @@ public class WbFile
 	 * Checks if this file can be created
 	 * Note that canCreate() does <b>not</b> check if the file already
 	 * exists. <br/>
-	 * 
+	 *
 	 * <b>If the file already exists, it will be deleted!</b>
 	 *
 	 * This method calls tryCreate() and swallows any IOException
-	 * 
+	 *
 	 * @return true if the file can be created
 	 */
 	public boolean canCreate()
@@ -132,7 +134,7 @@ public class WbFile
 
 	/**
 	 * Tries to create this file.
-	 * 
+	 *
 	 * @throws java.io.IOException
 	 */
 	public void tryCreate()
@@ -153,7 +155,7 @@ public class WbFile
 			this.delete();
 		}
 	}
-	
+
 	/**
 	 * Returns the canoncial name for this file
 	 * @return the canonical filename or the absolute filename if getCanonicalPath threw an Exception
