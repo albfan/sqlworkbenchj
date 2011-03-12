@@ -39,7 +39,12 @@ public class TextFormatter
 		parser.setScript(sql);
 
 		String delimit = parser.getDelimiterString();
+		int pos = StringUtil.findFirstNonWhitespace(editor.getText(), editor.getSelectionEnd());
+		int delimitPos = editor.getText().indexOf(delimit, editor.getSelectionEnd());
 
+		boolean delimiterAfterSelection = pos == delimitPos;
+
+		// check needed for single statements
 		boolean addDelimiter = sql.trim().endsWith(delimit);
 
 		int count = parser.getSize();
@@ -58,6 +63,13 @@ public class TextFormatter
 				continue;
 			}
 
+			// only add the delimiter to the last statement if there is no
+			// delimiter following directly after the currently selected text
+			if ((i == count - 1 && !delimiterAfterSelection) || i < count - 1 || addDelimiter)
+			{
+				command += delimit;
+			}
+
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.addDBFunctions(dbFunctions);
 			f.setDbDataTypes(dbDatatypes);
@@ -66,14 +78,6 @@ public class TextFormatter
 			{
 				String formattedSql = f.getFormattedSql();
 				newSql.append(formattedSql);
-
-				// if this is a script that is formatted, make sure each statement is
-				// terminated correctly. If only a single statement was formatted
-				// then this is not necessary
-				if (count > 1 && addDelimiter)
-				{
-					newSql.append(delimit);
-				}
 			}
 			catch (Exception e)
 			{

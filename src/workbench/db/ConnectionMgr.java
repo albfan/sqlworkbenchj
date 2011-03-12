@@ -605,7 +605,7 @@ public class ConnectionMgr
 		}
 		catch (Throwable io)
 		{
-			LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!");
+			LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!", io);
 		}
 		finally
 		{
