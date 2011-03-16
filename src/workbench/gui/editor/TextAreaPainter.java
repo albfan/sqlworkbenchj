@@ -606,7 +606,7 @@ public class TextAreaPainter
 			paintLineHighlight(gfx, line, y);
 		}
 
-		y += fm.getLeading() + fm.getMaxDescent() + 1;
+		y += fm.getLeading() + fm.getMaxDescent();
 		int height = fm.getHeight() - 2;
 
 		if (bracketHighlight && line == textArea.getBracketLine())
@@ -695,13 +695,13 @@ public class TextAreaPainter
 		if (bracketHighlightColor != null)
 		{
 			gfx.setColor(bracketHighlightColor);
-			gfx.fillRect(x, y, width, height);
+			gfx.fillRect(x, y, width, height - 1);
 		}
 
 		if (bracketHighlightRec)
 		{
 			gfx.setColor(getForeground());
-			gfx.drawRect(x, y, width,	height);
+			gfx.drawRect(x, y, width,	height - 1);
 		}
 	}
 
