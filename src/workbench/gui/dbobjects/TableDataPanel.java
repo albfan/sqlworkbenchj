@@ -436,7 +436,7 @@ public class TableDataPanel
 			}
 		});
 
-		String sql = this.buildSqlForTable(true);
+		String sql = this.buildSqlForRowCount();
 		if (sql == null) return -1;
 
 		long rowCount = 0;
@@ -565,17 +565,18 @@ public class TableDataPanel
 		});
 	}
 
-	private String buildSqlForTable(boolean forRowCount)
+	private String buildSqlForRowCount()
 	{
 		if (this.table == null) return null;
+		StringBuilder sql = new StringBuilder(100);
+		sql.append("SELECT COUNT(*) FROM ");
+		sql.append(this.table.getTableExpression(this.dbConnection));
+		return sql.toString();
+	}
 
-		if (forRowCount)
-		{
-			StringBuilder sql = new StringBuilder(100);
-			sql.append("SELECT COUNT(*) FROM ");
-			sql.append(this.table.getTableExpression(this.dbConnection));
-			return sql.toString();
-		}
+	private String buildSqlForTable()
+	{
+		if (this.table == null) return null;
 
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection);
 		try
@@ -717,7 +718,7 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 
-		String sql = this.buildSqlForTable(false);
+		String sql = this.buildSqlForTable();
 		if (sql == null) return;
 
 		this.retrieveStart();

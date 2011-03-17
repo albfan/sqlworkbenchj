@@ -300,6 +300,16 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.dml", true);
 	}
 
+	public boolean alwaysUseSchema()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "schema.always", false);
+	}
+
+	public boolean alwaysUseCatalog()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "catalog.always", false);
+	}
+
 	public boolean needsCatalogIfNoCurrent()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.neededwhenempty", false);

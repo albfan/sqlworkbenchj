@@ -230,7 +230,7 @@ public class CommandMapper
 			this.dbSpecificCommands.add(WbCall.EXEC_VERB_SHORT);
 			this.dbSpecificCommands.add(echo.getVerb());
 		}
-		else if (metaData.isSqlServer() || metaData.isMySql() || metaData.supportsCatalogs())
+		else if (metaData.isSqlServer() || metaData.isMySql())
 		{
 			UseCommand cmd = new UseCommand();
 			this.cmdDispatch.put(cmd.getVerb(), cmd);

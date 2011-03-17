@@ -725,6 +725,8 @@ public class DbMetadata
 	public boolean ignoreSchema(String schema)
 	{
 		if (StringUtil.isEmptyString(schema)) return true;
+		if (dbSettings.alwaysUseSchema()) return false;
+
 		if (schemasToIgnore == null)
 		{
 			schemasToIgnore = readIgnored("schema", null);
@@ -769,7 +771,7 @@ public class DbMetadata
 	 * <br/>
 	 * If the current  schema is different to the table's schema, it returns true.
 	 * <br/>
-	 * If either no current schema is available, or it is the same as the table's schema
+	 * If either no current schema is available, or if is the same as the table's schema
 	 * the result of ignoreSchema() is checked to leave out e.g. the PUBLIC schema in Postgres or H2
 	 *
 	 * @see #ignoreSchema(java.lang.String)
@@ -777,14 +779,14 @@ public class DbMetadata
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
-		if (!supportsSchemas()) return false;
-
 		try
 		{
 			String tblSchema = table.getSchema();
 
 			// Object names may never be prefixed with PUBLIC
 			if (this.isOracle && "PUBLIC".equalsIgnoreCase(tblSchema)) return false;
+
+			if (dbSettings.alwaysUseSchema()) return true;
 
 			String currentSchema = getCurrentSchema();
 
@@ -798,7 +800,7 @@ public class DbMetadata
 		}
 		catch (Throwable th)
 		{
-			return false;
+			return true;
 		}
 	}
 
@@ -822,8 +824,8 @@ public class DbMetadata
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
 		if (this.isAccess) return true;
-		if (!this.supportsCatalogs()) return false;
 		if (!dbSettings.useCatalogInDML()) return false;
+		if (dbSettings.alwaysUseCatalog()) return true;
 
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
@@ -858,6 +860,8 @@ public class DbMetadata
 	public boolean ignoreCatalog(String catalog)
 	{
 		if (catalog == null) return true;
+		if (dbSettings.alwaysUseCatalog()) return false;
+
 		if (catalogsToIgnore == null)
 		{
 			catalogsToIgnore = readIgnored("catalog", "$current");
@@ -1214,7 +1218,6 @@ public class DbMetadata
 	 */
 	public String getCurrentSchema()
 	{
-		if (!supportsSchemas()) return null;
 		if (this.schemaInfoReader != null)
 		{
 			return this.schemaInfoReader.getCurrentSchema(this.dbConnection);
@@ -2165,8 +2168,6 @@ public class DbMetadata
 	 */
 	public String getCurrentCatalog()
 	{
-		if (!this.supportsCatalogs()) return null;
-
 		String catalog = null;
 
 		String query = this.dbSettings.getQueryForCurrentCatalog();
@@ -2210,39 +2211,6 @@ public class DbMetadata
 		if (catalog == null) catalog = StringUtil.EMPTY_STRING;
 
 		return catalog;
-	}
-
-	protected boolean supportsSchemas()
-	{
-		boolean supportsSchemas = false;
-		try
-		{
-			supportsSchemas = metaData.supportsSchemasInDataManipulation()
-		                  || metaData.supportsSchemasInTableDefinitions()
-											|| metaData.supportsSchemasInProcedureCalls();
-		}
-		catch (Exception e)
-		{
-			supportsSchemas = false;
-		}
-		return supportsSchemas;
-
-	}
-
-	public boolean supportsCatalogs()
-	{
-		boolean supportsCatalogs = false;
-		try
-		{
-			supportsCatalogs = metaData.supportsCatalogsInDataManipulation()
-		                  || metaData.supportsCatalogsInTableDefinitions()
-											|| metaData.supportsCatalogsInProcedureCalls();
-		}
-		catch (Exception e)
-		{
-			supportsCatalogs = false;
-		}
-		return supportsCatalogs;
 	}
 
 	/**
