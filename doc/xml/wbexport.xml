@@ -244,7 +244,7 @@
 						<entry>
               <para>
                 Selects the object types to be exported. By default only TABLEs are exported. If you want to export
-                the content of VIEWs or SYNONYMs as well, you have to specify all types with this parameter. 
+                the content of VIEWs or SYNONYMs as well, you have to specify all types with this parameter.
               </para>
               <para><literal>-sourceTable=* -types=VIEW,SYNONYM</literal> or <literal>-sourceTable=T% -types=TABLE,VIEW,SYNONYM</literal></para>
             </entry>
@@ -448,7 +448,7 @@
                 can be distributed over several directories to avoid an excessive number of
                 files in a single directory. The parameter <literal>lobsPerDirectory</literal> defines
                 how many LOB files are written into a single directory. When the specified number of files have been written,
-                a new directory is created. The directories are always created as a sub-directory of the target directory. The name 
+                a new directory is created. The directories are always created as a sub-directory of the target directory. The name
                 for each directory is the base export filename plus "_lobs" plus a running number. So if you export
                 the data into a file "the_big_table.txt", the LOB files will be stored in "the_big_table_lobs_1",
                 "the_big_table_lobs_2", "the_big_table_lobs_3" and so on.
@@ -750,23 +750,21 @@
 							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal>, <literal>db2</literal></para>
 							<para>
 								This parameter controls the creation of a control file for
-								the bulk load utilities of Oracle and Microsoft SQL Server.
-								<literal>oracle</literal> will create a control file for Oracle's
-								SQL*Loader utility, <literal>sqlserver</literal> will create a format
-								file for Microsoft's <literal>bcp</literal> utility.
-								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
-								for Oracle and <literal>.fmt</literal> for SQL Server.
-								For PostgreSQL, this will create the necessary <literal>COPY</literal>
-								syntax to import the generated text file. For DB2 this will create an IMPORT command
-                to import the exported data.
+								the bulk load utilities of some DBMS.
+								<itemizedlist>
+									<listitem><simpara><literal>postgres</literal> will create a SQL script with the necessary <ulink url="http://www.postgresql.org/docs/current/static/sql-copy.html"><literal>COPY</literal></ulink> syntax to import the generated text file</simpara></listitem>
+									<listitem><simpara><literal>oracle</literal> will create a control file (.ctl) for Oracle's <ulink url="http://download.oracle.com/docs/cd/B28359_01/server.111/b28319/part_ldr.htm">SQL*Loader</ulink> utility</simpara></listitem>
+                  <listitem><simpara><literal>sqlserver</literal> will create a format file (.fmt) for Microsoft's <ulink url="http://msdn.microsoft.com/en-us/library/ms162802%28v=SQL.90%29.aspx"><literal>bcp</literal></ulink> utility</simpara></listitem>
+                  <listitem><simpara><literal>db2</literal>will create a SQL script with a DB2 <ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/index.jsp?topic=/com.ibm.db2.luw.admin.cmd.doc/doc/r0008304.html"><literal>IMPORT</literal></ulink> command</simpara></listitem>
+								</itemizedlist>
 							</para>
 							<para>
 								You can specify several formats at the same time. In that case one control file for each
-								format specified will be created.
+								format will be created.
 							</para>
 							<para>
                 The generated format file(s) are intended as a starting point for your own adjustments. Don't expect
-                them to be complete specifying all possible options.
+                them to be complete.
 							</para>
 						</entry>
 					</row>
