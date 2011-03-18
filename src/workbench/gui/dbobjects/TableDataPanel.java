@@ -142,6 +142,7 @@ public class TableDataPanel
 
 		this.dataDisplay = new DwPanel()
 		{
+			@Override
 			public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
 				throws SQLException
 			{
@@ -294,6 +295,7 @@ public class TableDataPanel
 		return this.dataDisplay.isModified();
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
@@ -330,6 +332,7 @@ public class TableDataPanel
 		this.reset();
 	}
 
+	@Override
 	public void reset()
 	{
 		if (!initialized) return;
@@ -349,6 +352,7 @@ public class TableDataPanel
 		storeColumnOrder();
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				dataDisplay.clearContent();
@@ -385,6 +389,7 @@ public class TableDataPanel
 		{
 			t = new WbThread("RowCount cancel")
 			{
+				@Override
 				public void run()
 				{
 					cancelRowCountRetrieve();
@@ -395,6 +400,7 @@ public class TableDataPanel
 		{
 			t = new WbThread("RowCount Retrieve")
 			{
+				@Override
 				public void run()
 				{
 					showRowCount();
@@ -427,6 +433,7 @@ public class TableDataPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				rowCountLabel.setText("");
@@ -484,6 +491,7 @@ public class TableDataPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataDisplay.setStatusMessage("");
@@ -556,6 +564,7 @@ public class TableDataPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				dataDisplay.getTable().clearLastFilter(true);
@@ -600,6 +609,7 @@ public class TableDataPanel
 		this.rowCountLabel.setIcon(null);
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;
@@ -620,12 +630,14 @@ public class TableDataPanel
 	 * 	Implementation of the Interruptable interface.
 	 * 	This will kick off a Thread that cancels the retrieval.
 	 */
+	@Override
 	public void cancelExecution()
 	{
 		if (!initialized) return;
 
 		Thread t = new WbThread("Cancel thread")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -732,6 +744,7 @@ public class TableDataPanel
 			WbSwingUtilities.showWaitCursor(this);
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
@@ -755,6 +768,7 @@ public class TableDataPanel
 			// passed SQL statement.
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataDisplay.setUpdateTableToBeUsed(table);
@@ -803,6 +817,7 @@ public class TableDataPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataDisplay.clearStatusMessage();
@@ -827,6 +842,7 @@ public class TableDataPanel
 		}
 	}
 
+	@Override
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
@@ -846,6 +862,7 @@ public class TableDataPanel
 		initGui();
 		Thread t = new WbThread("TableDataPanel retrieve thread")
 		{
+			@Override
 			public void run()
 			{
 				doRetrieve(respectMaxRows);
@@ -966,12 +983,13 @@ public class TableDataPanel
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
 				msg = msg.replace("%rows%", Long.toString(rows));
 				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
-				if (choice == JOptionPane.NO_OPTION) return;
+				if (choice != JOptionPane.YES_OPTION) return;
 			}
 			this.doRetrieve(true);
 		}
 	}
 
+	@Override
 	public void reload()
 	{
 		if (GuiSettings.getConfirmDiscardResultSetChanges() && isModified())
@@ -997,6 +1015,7 @@ public class TableDataPanel
 		return SwingUtilities.getWindowAncestor(this);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.config)
@@ -1028,6 +1047,7 @@ public class TableDataPanel
 		}
 	}
 
+	@Override
 	public void tableDataDeleted(List tables)
 	{
 		if (tables == null) return;
@@ -1038,6 +1058,7 @@ public class TableDataPanel
 		}
 	}
 
+	@Override
 	public synchronized void addDbExecutionListener(DbExecutionListener l)
 	{
 		if (l == null) return;
@@ -1045,6 +1066,7 @@ public class TableDataPanel
 		this.execListener.add(l);
 	}
 
+	@Override
 	public synchronized void removeDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) return;
