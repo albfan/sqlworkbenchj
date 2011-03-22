@@ -74,7 +74,7 @@ public class SqlUtil
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
-			"FLASHBACK ARCHIVE"));
+			"FLASHBACK ARCHIVE", "TYPE BODY", "CAST", "FOREIGN DATA WRAPPER", "OPERATOR"));
 	}
 
 	private static class TypesWithoutNamesHolder
@@ -262,6 +262,7 @@ public class SqlUtil
 		public String objectType;
 		public String objectName;
 
+		@Override
 		public String toString()
 		{
 			return "Type: " + objectType + ", name: " + objectName;
@@ -601,7 +602,7 @@ public class SqlUtil
 	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
 	 *       the column name including the alias (e.g. "p.name AS person_name"
 	 * @return a List of ElementInfos
-	 * @see #getSelectColumns(java.lang.String, boolean) 
+	 * @see #getSelectColumns(java.lang.String, boolean)
 	 *
 	 */
 	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias)

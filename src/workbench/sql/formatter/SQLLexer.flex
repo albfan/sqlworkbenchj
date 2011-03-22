@@ -169,6 +169,7 @@ keyword=(
 (PRIMARY{wsp}KEY)|
 (SNAPSHOT{wsp}LOG)|
 (START{wsp}WITH)|
+(FOREIGN{wsp}DATA{wsp}WRAPPER)|
 "ABS"|
 "ABSOLUTE"|
 "ACCESS"|

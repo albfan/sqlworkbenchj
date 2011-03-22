@@ -341,6 +341,11 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("#someTemp", info.objectName);
 		assertEquals("TABLE", info.objectType);
+
+		sql = "create type body my_type is begin\n null; end;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("my_type", info.objectName);
+		assertEquals("TYPE BODY", info.objectType);
 	}
 
 	@Test

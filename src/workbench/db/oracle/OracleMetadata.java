@@ -140,11 +140,12 @@ public class OracleMetadata
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
 	}
 
-	protected boolean fixNVARCHARSemantics()
+	protected final boolean fixNVARCHARSemantics()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals("workbench.db.oracle.fixdatetype"))
@@ -495,6 +496,7 @@ public class OracleMetadata
 	 *
 	 *	@return extended error information if available
 	 */
+	@Override
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
 		final String ERROR_QUERY =
@@ -652,6 +654,7 @@ public class OracleMetadata
 		return result.toString();
 	}
 
+	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, -1);
