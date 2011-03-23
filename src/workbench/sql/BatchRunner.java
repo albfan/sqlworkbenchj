@@ -234,7 +234,7 @@ public class BatchRunner
 	{
 		return this.profile;
 	}
-	
+
 	public boolean hasProfile()
 	{
 		return this.profile != null;
@@ -274,6 +274,7 @@ public class BatchRunner
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.stmtRunner)
@@ -914,7 +915,8 @@ public class BatchRunner
 
 			if (jar != null)
 			{
-				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
+				WbFile jarFile = new WbFile(jar);
+				ConnectionMgr.getInstance().registerDriver(driverclass, jarFile.getFullPath());
 			}
 
 			result = ConnectionProfile.createEmptyProfile();
