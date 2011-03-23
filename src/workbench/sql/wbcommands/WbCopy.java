@@ -71,8 +71,8 @@ public class WbCopy
 	private CopyTask copier;
 
 	// for testing purposes
-	private long lastCopyCount; 
-	
+	private long lastCopyCount;
+
 	public WbCopy()
 	{
 		super();
@@ -113,12 +113,14 @@ public class WbCopy
 	{
 		return lastCopyCount;
 	}
-	
+
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	protected boolean isConnectionRequired() { return false; }
 
 	private void addWrongParams(StatementRunnerResult result)
@@ -149,6 +151,7 @@ public class WbCopy
 		return sourceKey;
 	}
 
+	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
@@ -284,12 +287,14 @@ public class WbCopy
 		return result;
 	}
 
+	@Override
 	public void done()
 	{
 		super.done();
 		this.copier = null;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -362,6 +367,7 @@ public class WbCopy
 	/**
 	 * Extracts the target profile from the passed SQL statement.
 	 */
+	@Override
 	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
 	{
 		cmdLine.parse(getCommandLine(sql));
