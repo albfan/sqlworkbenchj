@@ -118,13 +118,14 @@ public class ExtensionFileFilter
 		return XML_EXT.equalsIgnoreCase(ext);
 	}
 
+	@Override
 	public boolean accept(File f)
 	{
 		if (f.isDirectory())
 		{
 			return true;
 		}
-		if (this.extensions == null || this.extensions.size() == 0) return true;
+		if (this.extensions == null || this.extensions.isEmpty()) return true;
 
 		String extension = getExtension(f);
 		if (extension == null) return false;
@@ -233,7 +234,8 @@ public class ExtensionFileFilter
 		}
 		return ff;
 	}
-	// The description of this filter
+
+	@Override
 	public String getDescription()
 	{
 		return this.desc;
