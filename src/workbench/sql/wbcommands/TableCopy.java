@@ -102,7 +102,7 @@ class TableCopy
 		{
 			throw new TableNotFoundException(targettable);
 		}
-		
+
 		if (targetId == null && skipTargetCheck)
 		{
 			targetId = new TableIdentifier(targettable);
@@ -154,18 +154,21 @@ class TableCopy
 		return true;
 	}
 
+	@Override
 	public boolean isSuccess()
 	{
 		if (this.copier == null) return true;
 		return copier.isSuccess();
 	}
 
+	@Override
 	public CharSequence getMessages()
 	{
 		if (this.copier == null) return null;
 		return copier.getAllMessages();
 	}
 
+	@Override
 	public void cancel()
 	{
 		if (this.copier != null)

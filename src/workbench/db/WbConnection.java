@@ -596,12 +596,13 @@ public class WbConnection
 
 	public boolean getAutoCommit()
 	{
+		if (this.sqlConnection == null) return false;
+
 		if (!getDbSettings().supportsTransactions())
 		{
 			return true;
 		}
 
-		if (this.sqlConnection == null) return false;
 		try
 		{
 			return this.sqlConnection.getAutoCommit();

@@ -41,6 +41,7 @@ public class JdbcTableDefinitionReader
 	 * @return the definition of the table.
 	 * @see TableColumnsDatastore
 	 */
+	@Override
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, List<String> primaryKeyColumns, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
@@ -54,6 +55,9 @@ public class JdbcTableDefinitionReader
 		ResultSet rs = null;
 
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+
+		TableIdentifier requested = new TableIdentifier(catalog, schema, tablename);
+		boolean hasWildcards = hasSQLWildcard(tablename) || hasSQLWildcard(schema);
 
 		try
 		{
@@ -72,6 +76,13 @@ public class JdbcTableDefinitionReader
 
 			while (rs != null && rs.next())
 			{
+				String colTable = rs.getString("TABLE_NAME");
+				String colSchema = rs.getString("TABLE_SCHEM");
+				String colCatalog = rs.getString("TABLE_CAT");
+				if (hasWildcards && !isTableColumn(requested, new TableIdentifier(colCatalog, colSchema, colTable), dbConnection))
+				{
+					continue;
+				}
 				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
@@ -132,6 +143,27 @@ public class JdbcTableDefinitionReader
 		}
 
 		return columns;
+	}
+
+	private boolean hasSQLWildcard(String input)
+	{
+		if (input == null)
+		{
+			return false;
+		}
+		return input.indexOf('_') > -1 || input.indexOf('%') > -1;
+	}
+	private boolean isTableColumn(TableIdentifier requestedTable, TableIdentifier retrievedTable, WbConnection dbConnection)
+	{
+		if (!requestedTable.getTableName().equals(retrievedTable.getTableName()))
+		{
+			return false;
+		}
+
+		String fullName1 = requestedTable.getTableExpression(dbConnection);
+		String fullName2 = retrievedTable.getTableExpression(dbConnection);
+
+		return fullName1.equals(fullName2);
 	}
 
 }
