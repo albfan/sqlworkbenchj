@@ -64,16 +64,6 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.maxrows.warning.show", flag);
 	}
 
-	public static Color getMaxRowsWarningColor()
-	{
-		return Settings.getInstance().getColor("workbench.gui.maxrows.warning.color", Color.RED);
-	}
-
-	public static void setMaxRowsWarningColor(Color c)
-	{
-		Settings.getInstance().setColor("workbench.gui.maxrows.warning.color", c);
-	}
-
 	public static int getRowNumberMargin()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.table.rownumber.margin", 1);

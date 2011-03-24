@@ -52,12 +52,29 @@ public class JdbcTableDefinitionReader
 		String schema = StringUtil.trimQuotes(table.getSchema());
 		String tablename = StringUtil.trimQuotes(table.getTableName());
 
+		String escape = dbConnection.getMetadata().getJdbcMetaData().getSearchStringEscape();
+
+		if (StringUtil.isNonEmpty(escape))
+		{
+			// Make sure wildcards are properly escaped. We never want a LIKE evaluation
+			// of the table or schema name here.
+			if (hasSQLWildcard(tablename))
+			{
+				tablename = tablename.replace("_", escape + "_");
+				tablename = tablename.replace("%", escape + "%");
+				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "Using tablename pattern: " + tablename);
+			}
+
+			if (hasSQLWildcard(schema))
+			{
+				schema = schema.replace("_", escape + "_");
+				schema = schema.replace("%", escape + "%");
+				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "Using schema pattern: " + tablename);
+			}
+		}
+
 		ResultSet rs = null;
-
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
-
-		TableIdentifier requested = new TableIdentifier(catalog, schema, tablename);
-		boolean hasWildcards = hasSQLWildcard(tablename) || hasSQLWildcard(schema);
 
 		try
 		{
@@ -76,13 +93,6 @@ public class JdbcTableDefinitionReader
 
 			while (rs != null && rs.next())
 			{
-				String colTable = rs.getString("TABLE_NAME");
-				String colSchema = rs.getString("TABLE_SCHEM");
-				String colCatalog = rs.getString("TABLE_CAT");
-				if (hasWildcards && !isTableColumn(requested, new TableIdentifier(colCatalog, colSchema, colTable), dbConnection))
-				{
-					continue;
-				}
 				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
@@ -153,17 +163,4 @@ public class JdbcTableDefinitionReader
 		}
 		return input.indexOf('_') > -1 || input.indexOf('%') > -1;
 	}
-	private boolean isTableColumn(TableIdentifier requestedTable, TableIdentifier retrievedTable, WbConnection dbConnection)
-	{
-		if (!requestedTable.getTableName().equals(retrievedTable.getTableName()))
-		{
-			return false;
-		}
-
-		String fullName1 = requestedTable.getTableExpression(dbConnection);
-		String fullName2 = retrievedTable.getTableExpression(dbConnection);
-
-		return fullName1.equals(fullName2);
-	}
-
 }

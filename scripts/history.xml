@@ -7,7 +7,10 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exlusion constraints from PostgreSQL 9.0</entry>
-    <entry dev-build="3" type="fix">Compilation errors for a TYPE BODY were not displayed</entry>
+    <entry dev-build="3" type="fix">In the DbExplorer the columns for tables that had "similar" names (according to a LIKE expression with underscores) were not displayed correctly.</entry>
+    <entry dev-build="3" type="fix">Fixed a problem with schema display in the auto-completion for SQL Server</entry>
+    <entry dev-build="3" type="fix">Fixed a problem with schema detection in the DbExplorer when the JDBC driver did not support all metadata calls (e.g. DB2 for host systems)</entry>
+    <entry dev-build="3" type="fix">In Oracle, compilation errors for a TYPE BODY were not displayed</entry>
     <entry dev-build="2" type="fix">In Oracle, the source for a primary key index that had a different name than the primary key was not shown in the DbExplorer</entry>
     <entry dev-build="1" type="fix">Retrieving of column comments for queries did not work when the table had an alias</entry>
   </release>

@@ -601,13 +601,13 @@ public class TextAreaPainter
 
 	protected void paintHighlight(Graphics gfx, int line, int y)
 	{
+		int height = fm.getHeight();
+		y += fm.getLeading() + fm.getMaxDescent();
+
 		if (line >= textArea.getSelectionStartLine()	&& line <= textArea.getSelectionEndLine())
 		{
-			paintLineHighlight(gfx, line, y);
+			paintLineHighlight(gfx, line, y, height);
 		}
-
-		y += fm.getLeading() + fm.getMaxDescent();
-		int height = fm.getHeight() - 2;
 
 		if (bracketHighlight && line == textArea.getBracketLine())
 		{
@@ -620,15 +620,12 @@ public class TextAreaPainter
 		}
 	}
 
-	protected void paintLineHighlight(Graphics gfx, int line, int y)
+	protected void paintLineHighlight(Graphics gfx, int line, int y, int height)
 	{
 		int selectionStart = textArea.getSelectionStart();
 		int selectionEnd = textArea.getSelectionEnd();
 
 		if (selectionStart == selectionEnd) return;
-
-		int height = fm.getHeight();
-		y += fm.getLeading() + fm.getMaxDescent();
 
 		Color c = this.textArea.getAlternateSelectionColor();
 		if (c != null)
