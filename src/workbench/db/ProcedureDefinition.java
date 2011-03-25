@@ -183,11 +183,6 @@ public class ProcedureDefinition
 			}
 			return drop;
 		}
-		if (meta.isSqlServer())
-		{
-			// Workaround for Microsoft. The database name is not valid in a DROP statement for a procedure
-			return "DROP " + getObjectType() + " " + meta.quoteObjectname(schema) + "." + meta.quoteObjectname(this.procName);
-		}
 		// Apply default statements
 		return null;
 	}
