@@ -128,11 +128,13 @@ public class ProcedureDefinition
 		return displayName;
 	}
 
+	@Override
 	public String getComment()
 	{
 		return comment;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		comment = cmt;
@@ -167,18 +169,24 @@ public class ProcedureDefinition
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
+		DbMetadata meta = con.getMetadata();
 		if (isOraclePackage())
 		{
-			return "DROP PACKAGE "  + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
+			return "DROP PACKAGE "  + meta.quoteObjectname(schema) + "." + meta.quoteObjectname(catalog);
 		}
 		if (isOracleObjectType())
 		{
-			String drop = "DROP TYPE " + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
+			String drop = "DROP TYPE " + meta.quoteObjectname(schema) + "." + meta.quoteObjectname(catalog);
 			if (cascade)
 			{
 				drop += " FORCE";
 			}
 			return drop;
+		}
+		if (meta.isSqlServer())
+		{
+			// Workaround for Microsoft. The database name is not valid in a DROP statement for a procedure
+			return "DROP " + getObjectType() + " " + meta.quoteObjectname(schema) + "." + meta.quoteObjectname(this.procName);
 		}
 		// Apply default statements
 		return null;
@@ -213,6 +221,7 @@ public class ProcedureDefinition
 		return result.toString();
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -231,21 +240,25 @@ public class ProcedureDefinition
 		return this.source;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.procName);
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return getObjectExpression(conn);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, procName);
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return procName;
@@ -281,12 +294,13 @@ public class ProcedureDefinition
 		return null;
 	}
 
+	@Override
 	public String getCatalog()
 	{
-		//		if (oracleType != null) return null;
 		return this.catalog;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return this.schema;
@@ -302,6 +316,7 @@ public class ProcedureDefinition
 		return this.resultType;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		if (this.isOraclePackage())
@@ -325,6 +340,7 @@ public class ProcedureDefinition
 		return "";
 	}
 
+	@Override
 	public String toString()
 	{
 		String name = oracleType != null ? catalog + "." + procName : procName;

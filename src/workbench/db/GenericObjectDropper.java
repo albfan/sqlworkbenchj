@@ -38,16 +38,19 @@ public class GenericObjectDropper
 	private RowActionMonitor monitor;
 	private boolean cancel;
 
+	@Override
 	public List<? extends DbObject> getObjects()
 	{
 		return objects;
 	}
 
+	@Override
 	public void setRowActionMonitor(RowActionMonitor mon)
 	{
 		this.monitor = mon;
 	}
 
+	@Override
 	public boolean supportsFKSorting()
 	{
 		if (objects == null) return false;
@@ -64,6 +67,7 @@ public class GenericObjectDropper
 		return true;
 	}
 
+	@Override
 	public boolean supportsCascade()
 	{
 		boolean canCascade = false;
@@ -87,26 +91,31 @@ public class GenericObjectDropper
 		return canCascade;
 	}
 
+	@Override
 	public void setObjects(List<? extends DbObject> toDrop)
 	{
 		this.objects = toDrop;
 	}
 
+	@Override
 	public void setObjectTable(TableIdentifier tbl)
 	{
 		this.objectTable = tbl;
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.connection;
 	}
 
+	@Override
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
 	}
 
+	@Override
 	public CharSequence getScript()
 	{
 		if (this.connection == null) throw new NullPointerException("No connection!");
@@ -147,6 +156,7 @@ public class GenericObjectDropper
 		return sql;
 	}
 
+	@Override
 	public void dropObjects()
 		throws SQLException
 	{
@@ -195,6 +205,7 @@ public class GenericObjectDropper
 		}
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -213,6 +224,7 @@ public class GenericObjectDropper
 		}
 	}
 
+	@Override
 	public void setCascade(boolean flag)
 	{
 		if (this.supportsCascade())
