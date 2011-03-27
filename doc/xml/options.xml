@@ -1200,6 +1200,39 @@ WHERE id = 42;</programlisting>
 				</para>
 			</section>
 
+			<section id="opt-formatter-comma-space-in-list">
+				<title>Space after comma for IN lists</title>
+				<para>
+					If this option is selected, a space is added after the comma inside an <literal>IN</literal> list.
+				</para>
+			</section>
+
+			<section id="opt-formatter-comma-after-newline">
+				<title>Comma after line break</title>
+				<para>
+					If this option is enabled, the commas inside the <literal>SELECT</literal> list are put on the start of the next line,
+          rather than on same line as the last column.
+				</para>
+        <para>If this option is disabled a <literal>SELECT</literal> statement will be formatted like this:</para>
+<programlisting>SELECT id,
+       lastname,
+       firstname
+FROM person;</programlisting>
+        <para>If this option is enabled the above statement will be formatted like this:</para>
+<programlisting>SELECT id
+       ,lastname
+       ,firstname
+FROM person;</programlisting>
+			</section>
+
+			<section id="opt-formatter-space-after-leading-comma">
+				<title>Space after a comma with line break</title>
+				<para>
+          This option is only available is "Comma after line break" is enabled. In that case it controls
+          if a space character is inserted after the comma.
+				</para>
+			</section>
+
 	</section>
 
 	<section id="options-sql-generation">
