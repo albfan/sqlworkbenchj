@@ -132,6 +132,7 @@ public class ConnectionEditorPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				tfProfileName.requestFocusInWindow();
@@ -958,6 +959,7 @@ public class ConnectionEditorPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				ConnectionPropertiesEditor.editProperties(SwingUtilities.getWindowAncestor(ConnectionEditorPanel.this), currentProfile);
@@ -1148,6 +1150,7 @@ public class ConnectionEditorPanel
 	 * and the property that has changed.
 	 *
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (!this.init)
@@ -1162,6 +1165,7 @@ public class ConnectionEditorPanel
 		}
 	}
 
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.readOnly)
@@ -1204,6 +1208,7 @@ public class ConnectionEditorPanel
 		}
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		DelimiterDefinition delim = getProfile().getAlternateDelimiter();
@@ -1215,6 +1220,7 @@ public class ConnectionEditorPanel
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 	// nothing to do
