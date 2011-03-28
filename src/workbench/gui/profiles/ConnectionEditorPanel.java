@@ -22,6 +22,7 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +59,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.FileDialogUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -926,7 +928,15 @@ public class ConnectionEditorPanel
 			Object currentDriver = this.cbDrivers.getSelectedItem();
 			try
 			{
-				Collections.sort(aDriverList);
+				Comparator<DbDriver> comparator = new Comparator<DbDriver>()
+				{
+					@Override
+					public int compare(DbDriver o1, DbDriver o2)
+					{
+						return StringUtil.compareStrings(o1.getName(), o2.getName(), true);
+					}
+				};
+				Collections.sort(aDriverList, comparator);
 				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
 				if (currentDriver != null)
 				{
