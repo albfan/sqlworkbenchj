@@ -119,6 +119,7 @@ public class ProfileTree
 		delete.addToInputMap(im, am);
 	}
 
+	@Override
 	public void setModel(TreeModel model)
 	{
 		super.setModel(model);
@@ -129,6 +130,7 @@ public class ProfileTree
 		model.addTreeModelListener(this);
 	}
 
+	@Override
 	public boolean isPathEditable(TreePath path)
 	{
 		if (path == null) return false;
@@ -140,6 +142,7 @@ public class ProfileTree
 		return node.getAllowsChildren();
 	}
 
+	@Override
 	public void treeNodesChanged(TreeModelEvent e)
 	{
 		Object[] changed = e.getChildren();
@@ -157,10 +160,11 @@ public class ProfileTree
 			// of the profile possibly changed as well, so we need to
 			// trigger a repaint to display the correct title
 			// in the tree
-			this.repaint();
+			WbSwingUtilities.repaintLater(this);
 		}
 	}
 
+	@Override
 	public void expandAll()
 	{
 		TreePath[] groups = this.profileModel.getGroupNodes();
@@ -170,6 +174,7 @@ public class ProfileTree
 		}
 	}
 
+	@Override
 	public void collapseAll()
 	{
 		TreePath[] groups = this.profileModel.getGroupNodes();
@@ -219,14 +224,17 @@ public class ProfileTree
 		return result;
 	}
 
+	@Override
 	public void treeNodesInserted(TreeModelEvent e)
 	{
 	}
 
+	@Override
 	public void treeNodesRemoved(TreeModelEvent e)
 	{
 	}
 
+	@Override
 	public void treeStructureChanged(TreeModelEvent e)
 	{
 	}
@@ -262,6 +270,7 @@ public class ProfileTree
 
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
@@ -360,18 +369,22 @@ public class ProfileTree
 		return null;
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
@@ -390,26 +403,31 @@ public class ProfileTree
 		}
 	}
 
+	@Override
 	public void copy()
 	{
 		storeSelectedNodes();
 		this.clipboardType = CLIP_COPY;
 	}
 
+	@Override
 	public void selectAll()
 	{
 	}
 
+	@Override
 	public void clear()
 	{
 	}
 
+	@Override
 	public void cut()
 	{
 		storeSelectedNodes();
 		this.clipboardType = CLIP_CUT;
 	}
 
+	@Override
 	public void paste()
 	{
 		if (clipboardNodes == null) return;
@@ -453,6 +471,7 @@ public class ProfileTree
 		selectNode(nodes[0]);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		// invoked from the "paste into new folder" action
@@ -496,6 +515,7 @@ public class ProfileTree
 	 * after creation.
 	 * @return the name of the new group or null if the user cancelled the name input
 	 */
+	@Override
 	public String addGroup()
 	{
 		String group = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
@@ -526,6 +546,7 @@ public class ProfileTree
 		this.selectPath(path);
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		checkActions();

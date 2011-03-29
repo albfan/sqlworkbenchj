@@ -164,7 +164,7 @@ public class ConnectionProfile
 		if (connectionTimeout == null) return 0;
 		return connectionTimeout.intValue();
 	}
-	
+
 	public Integer getConnectionTimeout()
 	{
 		return connectionTimeout;
@@ -412,7 +412,7 @@ public class ConnectionProfile
 	 *	@see #getPassword()
 	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */
-	public void setPassword(String aPwd)
+	public final void setPassword(String aPwd)
 	{
 		if (aPwd == null)
 		{
@@ -547,7 +547,7 @@ public class ConnectionProfile
 	 * @see #isNew()
 	 * @see #isChanged()
 	 */
-	public void reset()
+	public final void reset()
 	{
 		this.changed = false;
 		this.isNew = false;
@@ -572,6 +572,7 @@ public class ConnectionProfile
 	/**
 	 *	Returns the name of the Profile
 	 */
+	@Override
 	public String toString()
 	{
 		return this.name;
@@ -584,11 +585,13 @@ public class ConnectionProfile
 	 * @see ProfileKey#hashCode()
 	 * @return the hashcode for the profile key
 	 */
+	@Override
 	public int hashCode()
 	{
 		return getKey().hashCode();
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		try
@@ -607,7 +610,7 @@ public class ConnectionProfile
 		return this.url;
 	}
 
-	public void setUrl(String newUrl)
+	public final void setUrl(String newUrl)
 	{
 		if (newUrl != null) newUrl = newUrl.trim();
 		if (!StringUtil.equalString(newUrl, url)) changed = true;
@@ -619,7 +622,7 @@ public class ConnectionProfile
 		return this.driverclass;
 	}
 
-	public void setDriverclass(String drvClass)
+	public final void setDriverclass(String drvClass)
 	{
 		if (!StringUtil.equalString(drvClass, driverclass)) changed = true;
 		if (drvClass != null)
@@ -634,7 +637,7 @@ public class ConnectionProfile
 		return this.username;
 	}
 
-	public void setUsername(java.lang.String newName)
+	public final void setUsername(java.lang.String newName)
 	{
 		if (newName != null) newName = newName.trim();
 		if (!StringUtil.equalString(newName, username) && !changed) changed = true;
@@ -660,7 +663,7 @@ public class ConnectionProfile
 		return this.name;
 	}
 
-	public void setName(String aName)
+	public final void setName(String aName)
 	{
 		if (!changed && !StringUtil.equalString(name, aName)) changed = true;
 		this.name = aName;
@@ -760,6 +763,7 @@ public class ConnectionProfile
 	{
 		return new Comparator<ConnectionProfile>()
 		{
+			@Override
 			public int compare(ConnectionProfile o1, ConnectionProfile o2)
 			{
 				if (o1 == null && o2 == null) return 0;
@@ -871,6 +875,7 @@ public class ConnectionProfile
 		this.confirmUpdates = flag;
 	}
 
+	@Override
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		if (Settings.PROPERTY_ENCRYPT_PWD.equals(evt.getPropertyName()))

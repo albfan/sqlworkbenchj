@@ -126,12 +126,14 @@ public class ProfileEditorPanel
 		ConnectionMgr.getInstance().addDriverChangeListener(this);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals("drivers"))
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					fillDrivers();
@@ -167,13 +169,13 @@ public class ProfileEditorPanel
 		return this.connectionEditor.getCurrentDriver();
 	}
 
-	public void fillDrivers()
+	public final void fillDrivers()
 	{
 		List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
 	}
 
-	public void restoreSettings()
+	public final void restoreSettings()
 	{
 		int pos = GuiSettings.getProfileDividerLocation();
 		if (pos < 210)
@@ -186,6 +188,11 @@ public class ProfileEditorPanel
 		((ProfileTree)profileTree).expandGroups(l);
 	}
 
+	public boolean profilesChanged()
+	{
+		ProfileListModel list = (ProfileListModel)profileTree.getModel();
+		return list.profilesChanged();
+	}
 	/**
 	 * Hands the complete ProfileList over to the ConnectionMgr.
 	 */
@@ -274,6 +281,7 @@ public class ProfileEditorPanel
 	 *	This will also remove the profile from the ConnectionMgr's
 	 *	profile list.
 	 */
+	@Override
 	public void deleteItem()
 		throws Exception
 	{
@@ -330,6 +338,7 @@ public class ProfileEditorPanel
 	 *	Create a new profile. This will be added to the ListModel and the
 	 *	ConnectionMgr's profile list.
 	 */
+	@Override
 	public void newItem(boolean createCopy)
 		throws Exception
 	{
@@ -389,6 +398,7 @@ public class ProfileEditorPanel
 		return null;
 	}
 
+	@Override
 	public void saveItem()
 		throws Exception
 	{
@@ -403,14 +413,16 @@ public class ProfileEditorPanel
 		return this.profileTree.getRowCount();
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		return this.connectionEditor.validateInput();
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
-	// nothing to do
+		// nothing to do
 	}
 
 	/** This method is called from within the constructor to

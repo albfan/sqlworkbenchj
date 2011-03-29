@@ -23,6 +23,7 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.event.TreeSelectionEvent;
@@ -186,6 +187,7 @@ public class ProfileSelectionDialog
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
@@ -196,9 +198,12 @@ public class ProfileSelectionDialog
 		else if (e.getSource() == this.cancelButton ||
 			e.getActionCommand().equals(escActionCommand))
 		{
-			this.selectedProfile = null;
-			this.cancelled = true;
-			this.closeDialog();
+			if (checkModifiedGroups())
+			{
+				this.selectedProfile = null;
+				this.cancelled = true;
+				this.closeDialog();
+			}
 		}
 		else if (e.getSource() == this.manageDriversButton)
 		{
@@ -210,20 +215,42 @@ public class ProfileSelectionDialog
 		}
 	}
 
+	private boolean checkModifiedGroups()
+	{
+		if (profiles.profilesChanged())
+		{
+			int result = WbSwingUtilities.getYesNoCancel(this, ResourceMgr.getString("MsgProfilesChanged"));
+			if (result == JOptionPane.YES_OPTION)
+			{
+				profiles.applyProfiles();
+				return true;
+			}
+			if (result == JOptionPane.NO_OPTION)
+			{
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
 	public boolean isCancelled()
 	{
 		return this.cancelled;
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 		this.profiles.done();
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		this.cancelled = true;
@@ -231,46 +258,56 @@ public class ProfileSelectionDialog
 		this.closeDialog();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 		this.cancelled = true;
 		this.selectedProfile = null;
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		this.okButton.setEnabled(profiles.getSelectedProfile() != null);
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent evt)
 	{
 		profileListClicked(evt);
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}

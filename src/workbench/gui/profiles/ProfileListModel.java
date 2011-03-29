@@ -96,6 +96,18 @@ class ProfileListModel
 		return null;
 	}
 
+	public boolean profilesChanged()
+	{
+		for (ConnectionProfile profile : profiles)
+		{
+			if (profile.isChanged())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public TreePath[] getGroupNodes()
 	{
 		if (this.rootNode == null) return null;
