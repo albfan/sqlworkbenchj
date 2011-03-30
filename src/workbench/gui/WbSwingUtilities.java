@@ -116,6 +116,7 @@ public class WbSwingUtilities
 	{
 		invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				label.setText(text);
@@ -271,6 +272,7 @@ public class WbSwingUtilities
 
 		Runnable r = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				caller.setCursor(cursor);
@@ -391,6 +393,7 @@ public class WbSwingUtilities
 	{
 		invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
@@ -402,6 +405,7 @@ public class WbSwingUtilities
 	{
 		invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
@@ -413,6 +417,7 @@ public class WbSwingUtilities
 	{
 		invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
@@ -463,6 +468,7 @@ public class WbSwingUtilities
 		{
 			invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dialog.setResizable(false);
@@ -626,6 +632,7 @@ public class WbSwingUtilities
 		{
 			WindowAdapter w = new WindowAdapter()
 			{
+				@Override
 				public void windowOpened(WindowEvent evt)
 				{
 					EventQueue.invokeLater(doLater);
@@ -871,6 +878,7 @@ public class WbSwingUtilities
 	{
 		invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				callRepaint(c);
@@ -882,6 +890,7 @@ public class WbSwingUtilities
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				callRepaint(c);
@@ -893,10 +902,12 @@ public class WbSwingUtilities
 	{
 		win.addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowActivated(WindowEvent evt)
 			{
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						comp.requestFocus();
@@ -911,6 +922,7 @@ public class WbSwingUtilities
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				comp.requestFocus();

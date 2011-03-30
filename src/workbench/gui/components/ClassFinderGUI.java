@@ -90,6 +90,7 @@ public class ClassFinderGUI
 		if (drivers == null) return;
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				statusBar.setText("");
@@ -113,6 +114,7 @@ public class ClassFinderGUI
 	{
 		Thread t = new WbThread("CheckDriver")
 		{
+			@Override
 			public void run()
 			{
 				statusBar.setText(ResourceMgr.getString(statusKey));

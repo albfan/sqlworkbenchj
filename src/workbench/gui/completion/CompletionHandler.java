@@ -111,6 +111,7 @@ public class CompletionHandler
 		// the status bar will not be updated...
 		WbThread t = new WbThread("Completion")
 		{
+			@Override
 			public void run()
 			{
 				showPopup();

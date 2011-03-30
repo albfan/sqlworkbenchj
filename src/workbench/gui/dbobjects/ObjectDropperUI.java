@@ -94,6 +94,7 @@ public class ObjectDropperUI
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (cancelled)
@@ -416,6 +417,7 @@ public class ObjectDropperUI
 		dropThread = new WbThread("DropThread")
 		{
 
+			@Override
 			public void run()
 			{
 				doDrop();
@@ -434,6 +436,7 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 		EventQueue.invokeLater(new Runnable()
 		{
 
+			@Override
 			public void run()
 			{
 				statusLabel.setText("");
@@ -464,6 +467,7 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 
 	this.checkThread = new WbThread("FKCheck")
 	{
+		@Override
 		public void run()
 		{
 			List<TableIdentifier> sorted = null;
@@ -518,33 +522,40 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
   protected javax.swing.JLabel statusLabel;
   // End of variables declaration//GEN-END:variables
 
+	@Override
 	public void setMonitorType(int aType)
 	{
 	}
 
+	@Override
 	public int getMonitorType()
 	{
 		return RowActionMonitor.MONITOR_PLAIN;
 	}
 
+	@Override
 	public void saveCurrentType(String type)
 	{
 	}
 
+	@Override
 	public void restoreType(String type)
 	{
 	}
 
+	@Override
 	public void setCurrentObject(String object, long number, long totalObjects)
 	{
 		String lbl = ResourceMgr.getFormattedString("LblDropping", object);
 		statusLabel.setText(lbl);
 	}
 
+	@Override
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
 	}
 
+	@Override
 	public void jobFinished()
 	{
 	}

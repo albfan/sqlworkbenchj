@@ -79,7 +79,7 @@ public class RowData
 	private List<String> dependencyDeletes;
 
 	private Object userObject;
-	
+
 	private DataConverter converter;
 	boolean ignoreReadErrors;
 
@@ -354,7 +354,7 @@ public class RowData
 	{
 		userObject = value;
 	}
-	
+
 	/**
 	 * Sets the new data for the given column.
 	 * <br>
@@ -411,9 +411,14 @@ public class RowData
 		return this.getValue(aColumn);
 	}
 
-	public void restoreOriginalValues()
+	/**
+	 * Restore the values read from the database
+	 * @return true if there were original values
+	 *         false if nothing was restored
+	 */
+	public boolean restoreOriginalValues()
 	{
-		if (this.originalData == null) return;
+		if (this.originalData == null) return false;
 		for (int i=0; i < this.originalData.length; i++)
 		{
 			if (this.originalData[i] != null)
@@ -423,6 +428,7 @@ public class RowData
 		}
 		this.originalData = null;
 		this.resetStatus();
+		return true;
 	}
 
 	public void resetStatusForColumn(int column)
@@ -479,7 +485,7 @@ public class RowData
 		Arrays.fill(colData, null);
 		this.resetStatus();
 	}
-	
+
 	/**
 	 *	Sets the status of this row to new.
 	 */

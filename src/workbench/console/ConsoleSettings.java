@@ -41,7 +41,7 @@ public class ConsoleSettings
 	{
 	}
 
-	public static final ConsoleSettings getInstance()
+	public static ConsoleSettings getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}

@@ -968,11 +968,13 @@ public class DataStore
 	 * This will have no effect if {@link #isModified()} returns <code>false</code>
 	 * @see #setValue(int, int, Object)
 	 */
-	public void restoreOriginalValues()
+	public boolean restoreOriginalValues()
 	{
 		RowData row = null;
+		int rows = 0;
 		if (this.deletedRows != null)
 		{
+			rows = deletedRows.size();
 			for (int i=0; i < this.deletedRows.size(); i++)
 			{
 				row = this.deletedRows.get(i);
@@ -983,9 +985,14 @@ public class DataStore
 		for (int i=0; i < this.data.size(); i++)
 		{
 			row = this.getRow(i);
-			row.restoreOriginalValues();
+			boolean restored = row.restoreOriginalValues();
+			if (restored)
+			{
+				rows ++;
+			}
 		}
 		this.resetStatus();
+		return rows > 0;
 	}
 
 	/**
@@ -1081,7 +1088,7 @@ public class DataStore
 	 * @param aResultSet the ResultSet to read
 	 * @see #initData(ResultSet,int)
 	 */
-	public void initData(ResultSet aResultSet)
+	public final void initData(ResultSet aResultSet)
 		throws SQLException
 	{
 		this.initData(aResultSet, -1);
@@ -1097,7 +1104,7 @@ public class DataStore
 	 * @param maxRows max. number of rows to read. Zero or lower to read all rows
 	 * @see #initData(ResultSet)
 	 */
-	public void initData(ResultSet aResultSet, int maxRows)
+	public final void initData(ResultSet aResultSet, int maxRows)
 		throws SQLException
 	{
 		if (this.resultInfo == null)

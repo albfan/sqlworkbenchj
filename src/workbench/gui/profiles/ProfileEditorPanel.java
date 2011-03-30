@@ -193,6 +193,13 @@ public class ProfileEditorPanel
 		ProfileListModel list = (ProfileListModel)profileTree.getModel();
 		return list.profilesChanged();
 	}
+
+	public boolean groupsChanged()
+	{
+		ProfileListModel list = (ProfileListModel)profileTree.getModel();
+		return list.groupsChanged();
+	}
+
 	/**
 	 * Hands the complete ProfileList over to the ConnectionMgr.
 	 */

@@ -198,12 +198,9 @@ public class ProfileSelectionDialog
 		else if (e.getSource() == this.cancelButton ||
 			e.getActionCommand().equals(escActionCommand))
 		{
-			if (checkModifiedGroups())
-			{
-				this.selectedProfile = null;
-				this.cancelled = true;
-				this.closeDialog();
-			}
+			this.selectedProfile = null;
+			this.cancelled = true;
+			this.closeDialog();
 		}
 		else if (e.getSource() == this.manageDriversButton)
 		{

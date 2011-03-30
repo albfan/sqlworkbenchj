@@ -724,6 +724,11 @@ public class DbMetadata
 	 */
 	public boolean ignoreSchema(String schema)
 	{
+		return ignoreSchema(schema, null);
+	}
+
+	public boolean ignoreSchema(String schema, String currentSchema)
+	{
 		if (StringUtil.isEmptyString(schema)) return true;
 		if (dbSettings.alwaysUseSchema()) return false;
 
@@ -733,7 +738,7 @@ public class DbMetadata
 		}
 		if (schemasToIgnore.contains("$current"))
 		{
-			String current = getCurrentSchema();
+			String current = (currentSchema == null ? getCurrentSchema() : currentSchema);
 			if (current != null && schema.equals(current)) return true;
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
@@ -2121,10 +2126,11 @@ public class DbMetadata
 		DataStore ds = getObjects(null, schema, table, types);
 		int count = ds.getRowCount();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
+		String currentSchema = getCurrentSchema();
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = buildTableIdentifierFromDs(ds, i);
-			if (ignoreSchema(tbl.getSchema()))
+			if (ignoreSchema(tbl.getSchema(), currentSchema))
 			{
 				tbl.setSchema(null);
 			}

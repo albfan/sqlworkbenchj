@@ -241,6 +241,7 @@ public class FKHandler
 				fkColCol = 8;
 			}
 
+			String currentSchema = dbConnection.getMetadata().getCurrentSchema();
 			while (rs.next())
 			{
 				String table = rs.getString(tableCol);
@@ -248,7 +249,7 @@ public class FKHandler
 				String col = rs.getString(colCol);
 				String fk_name = rs.getString(fkNameCol);
 				String schema = rs.getString(schemaCol);
-				if (!this.dbConnection.getMetadata().ignoreSchema(schema))
+				if (!this.dbConnection.getMetadata().ignoreSchema(schema, currentSchema))
 				{
 					table = schema + "." + table;
 				}

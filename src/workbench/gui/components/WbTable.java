@@ -505,7 +505,7 @@ public class WbTable
 		{
 			fm = getFontMetrics(f);
 		}
-		
+
 		if (fm != null)
 		{
 			setRowHeight(fm.getHeight() + 2);
@@ -1189,16 +1189,26 @@ public class WbTable
 		}
 	}
 
+	/**
+	 * Restores the original values in the underlying DataStore.
+	 * Fires a tableDataChanged() event if values were restored.
+	 * 
+	 * @see DataStore#restoreOriginalValues()
+	 */
 	public void restoreOriginalValues()
 	{
 		if (this.dwModel == null) return;
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				dwModel.getDataStore().restoreOriginalValues();
-				dwModel.fireTableDataChanged();
+				boolean restored = dwModel.getDataStore().restoreOriginalValues();
+				if (restored)
+				{
+					dwModel.fireTableDataChanged();
+				}
 			}
 		});
 	}

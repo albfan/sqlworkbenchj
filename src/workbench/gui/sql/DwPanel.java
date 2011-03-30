@@ -193,6 +193,7 @@ public class DwPanel
 		this.setConnection(null);
 	}
 
+	@Override
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
@@ -306,6 +307,7 @@ public class DwPanel
 	/**
 	 * Starts the saving of the data in the background
 	 */
+	@Override
 	public void saveChangesToDatabase()
 	{
 		if (savingData)
@@ -320,6 +322,7 @@ public class DwPanel
 		final JobErrorHandler handler = this;
 		WbThread t = new WbThread("DwPanel update")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -628,6 +631,7 @@ public class DwPanel
 		{
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					clearContent();
@@ -738,6 +742,7 @@ public class DwPanel
 			// Make sure this is executed on the EDT
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataTable.reset();
@@ -930,6 +935,7 @@ public class DwPanel
 		}
 	}
 
+	@Override
 	public int duplicateRow()
 	{
 		if (this.dataTable.getSelectedRowCount() != 1) return -1;
@@ -947,6 +953,7 @@ public class DwPanel
 			// and start editing in the first column
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
@@ -966,6 +973,7 @@ public class DwPanel
 		return newRow;
 	}
 
+	@Override
 	public void deleteRowWithDependencies()
 	{
 		if (this.readOnly) return;
@@ -988,6 +996,7 @@ public class DwPanel
 
 		Thread t = new WbThread("DeleteDependency")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -1020,6 +1029,7 @@ public class DwPanel
 	}
 
 
+	@Override
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
@@ -1040,6 +1050,7 @@ public class DwPanel
 				// selecting all rows...
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						dataTable.clearSelection();
@@ -1054,6 +1065,7 @@ public class DwPanel
 		}
 	}
 
+	@Override
 	public long addRow()
 	{
 		if (this.readOnly) return -1;
@@ -1064,11 +1076,13 @@ public class DwPanel
 		return newRow;
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;
 	}
 
+	@Override
 	public void cancelExecution()
 	{
 		if (this.stmtRunner != null)
@@ -1164,6 +1178,7 @@ public class DwPanel
 		if (this.dataTable.getModel() == aModel) return;
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				dataTable.setModel(aModel);
@@ -1203,6 +1218,7 @@ public class DwPanel
 		checkResultSetActions();
 	}
 
+	@Override
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
 		String msg = ResourceMgr.getString("ErrUpdateSqlError");
@@ -1275,13 +1291,14 @@ public class DwPanel
 	 *  <li>the originalValues for the DataStore are restored </li>
 	 *  </ul>
 	 */
+	@Override
 	public void endEdit()
 	{
 		if (!this.isEditingStarted()) return;
 
 		dataTable.stopEditing();
 		dataTable.setShowStatusColumn(false);
-		this.checkResultSetActions();
+		checkResultSetActions();
 		updateAction.setEnabled(false);
 		dataTable.restoreOriginalValues();
 
@@ -1292,6 +1309,7 @@ public class DwPanel
 		}
 	}
 
+	@Override
 	public boolean startEdit()
 	{
 		return startEdit(true);
@@ -1405,6 +1423,7 @@ public class DwPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					checkResultSetActions();
@@ -1475,6 +1494,7 @@ public class DwPanel
 	 *  the table defaults to beeing editable) the edit mode (with status column
 	 *  and the different actions enabled) is switched on automatically.
 	 */
+	@Override
 	public void tableChanged(TableModelEvent e)
 	{
 		if (this.batchUpdate) return;
@@ -1489,6 +1509,7 @@ public class DwPanel
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (!editing) startEdit();
@@ -1505,6 +1526,7 @@ public class DwPanel
 	 * @see #disableUpdateActions()
 	 * @see #checkResultSetActions()
 	 */
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (this.readOnly)
@@ -1521,11 +1543,13 @@ public class DwPanel
 	 *	Called from the viewport, when the display has been scrolled
 	 *  We need to update the row display then.
 	 */
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		this.rowCountChanged();
 	}
 
+	@Override
 	public void fatalError(String msg)
 	{
 		WbSwingUtilities.showErrorMessage(this, msg);

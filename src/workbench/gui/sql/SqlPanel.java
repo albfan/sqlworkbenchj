@@ -379,6 +379,7 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public void setLocked(final boolean flag)
 	{
 		if (flag == locked) return;
@@ -398,11 +399,13 @@ public class SqlPanel
 		});
 	}
 
+	@Override
 	public boolean isLocked()
 	{
 		return locked;
 	}
 
+	@Override
 	public String getId()
 	{
 		return NumberStringCache.getNumberString(this.internalId);
@@ -414,6 +417,7 @@ public class SqlPanel
 		this.internalId = anId;
 	}
 
+	@Override
 	public void setConnectionClient(Connectable client)
 	{
 	}
@@ -446,6 +450,7 @@ public class SqlPanel
 		contentPanel.setDividerLocation(loc);
 	}
 
+	@Override
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
@@ -478,6 +483,7 @@ public class SqlPanel
 		toolbar.add(connectionInfo);
 	}
 
+	@Override
 	public void addToToolbar(WbAction anAction, boolean withSeperator)
 	{
 		if (!SwingUtilities.isEventDispatchThread())
@@ -564,6 +570,7 @@ public class SqlPanel
 		return false;
 	}
 
+	@Override
 	public void fileNameChanged(Object sender, String newFilename)
 	{
 		if (sender == this.editor)
@@ -925,6 +932,7 @@ public class SqlPanel
 		return false;
 	}
 
+	@Override
 	public boolean isModified()
 	{
 		if (isDataModified()) return true;
@@ -956,6 +964,7 @@ public class SqlPanel
 
 	private Runnable selector = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_selectEditor();
@@ -987,23 +996,27 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public String getText()
 	{
 		if (editor == null) return null;
 		return editor.getText();
 	}
 
+	@Override
 	public String getSelectedText()
 	{
 		if (editor == null) return null;
 		return editor.getSelectedText();
 	}
 
+	@Override
 	public JComponent getPanel()
 	{
 		return this;
 	}
 
+	@Override
 	public String getStatementAtCursor()
 	{
 		ScriptParser parser = createScriptParser();
@@ -1013,6 +1026,7 @@ public class SqlPanel
 		return currentStatement;
 	}
 
+	@Override
 	public void reformatSql()
 	{
 		this.storeStatementInHistory();
@@ -1043,6 +1057,7 @@ public class SqlPanel
 			showResultPanel();
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					currentData.getTable().requestFocusInWindow();
@@ -1057,6 +1072,7 @@ public class SqlPanel
 	 *
 	 * @see #updateDb()
 	 */
+	@Override
 	public void saveChangesToDatabase()
 	{
 		if (this.currentData == null)
@@ -1074,6 +1090,7 @@ public class SqlPanel
 
 		Thread t = new WbThread("Workbench DB Update Thread")
 		{
+			@Override
 			public void run()
 			{
 				updateDb();
@@ -1105,6 +1122,7 @@ public class SqlPanel
 			iconHandler.showBusyIcon(false);
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					WbSwingUtilities.showErrorMessage(SqlPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
@@ -1127,11 +1145,13 @@ public class SqlPanel
 		this.checkResultSetActions();
 	}
 
+	@Override
 	public void panelSelected()
 	{
 		selectEditorLater();
 	}
 
+	@Override
 	public List getActions()
 	{
 		return this.actions;
@@ -1141,6 +1161,7 @@ public class SqlPanel
 	 *	Show a message in the log panel. This will also switch
 	 *	the display to the log panel (away from the result panel)
 	 */
+	@Override
 	public void showLogMessage(String aMsg)
 	{
 		this.showLogPanel();
@@ -1150,6 +1171,7 @@ public class SqlPanel
 	/**
 	 *	Clear the message log, but do not switch the panel display to it.
 	 */
+	@Override
 	public void clearLog()
 	{
 		setLogText("");
@@ -1159,6 +1181,7 @@ public class SqlPanel
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				log.setText(msg);
@@ -1169,10 +1192,12 @@ public class SqlPanel
 	/**
 	 *	Show the panel with the log messages.
 	 */
+	@Override
 	public void showLogPanel()
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				int index = resultTab.getTabCount() - 1;
@@ -1181,6 +1206,7 @@ public class SqlPanel
 		});
 	}
 
+	@Override
 	public void showResultPanel()
 	{
 		showResultPanel(0);
@@ -1193,6 +1219,7 @@ public class SqlPanel
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				resultTab.setSelectedIndex(index);
@@ -1208,6 +1235,7 @@ public class SqlPanel
 	/**
 	 *	Display a message in the status bar of the DwPanel.
 	 */
+	@Override
 	public void showStatusMessage(String aMsg)
 	{
 		statusBar.setStatusMessage(aMsg);
@@ -1217,6 +1245,7 @@ public class SqlPanel
 	/**
 	 *	Clear the message in the status bar of the DwPanel
 	 */
+	@Override
 	public void clearStatusMessage()
 	{
 		this.statusBar.clearStatusMessage();
@@ -1228,6 +1257,7 @@ public class SqlPanel
 		this.sqlHistory = new SqlHistory(editor,size);
 	}
 
+	@Override
 	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{

@@ -165,15 +165,20 @@ public class DbObjectCache
 		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
 		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
 
+		String currentSchema = meta.getCurrentSchema();
+
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String tSchema = tbl.getSchema();
+
 			// meta.ignoreSchema() needs to be tested, because if that is true
 			// the returned Tables will not contain the schema...
-			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || meta.ignoreSchema(schemaToUse))
+			boolean ignoreSchema = meta.ignoreSchema(schemaToUse, currentSchema);
+			
+			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || ignoreSchema)
 			{
 				TableIdentifier copy = tbl.createCopy();
-				if (meta.ignoreSchema(copy.getSchema()) && !alwaysUseSchema)
+				if (ignoreSchema && !alwaysUseSchema)
 				{
 					copy.setSchema(null);
 				}

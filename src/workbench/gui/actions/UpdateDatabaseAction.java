@@ -23,7 +23,7 @@ public class UpdateDatabaseAction
 	extends WbAction
 {
 	private DbUpdater panel;
-	
+
 	public UpdateDatabaseAction(DbUpdater aPanel)
 	{
 		super();
@@ -35,6 +35,7 @@ public class UpdateDatabaseAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		panel.saveChangesToDatabase();
@@ -44,5 +45,5 @@ public class UpdateDatabaseAction
 	{
 		this.panel = client;
 	}
-	
+
 }

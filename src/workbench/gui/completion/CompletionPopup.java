@@ -48,7 +48,6 @@ import workbench.resource.Settings;
 import workbench.util.ArgumentValue;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
-import workbench.util.WbThread;
 
 /**
  * @author  Thomas Kellerer
@@ -107,7 +106,13 @@ public class CompletionPopup
 
 	public void showPopup(String valueToSelect)
 	{
-		//if (window != null) closePopup(false);
+		if (!editor.isReallyVisible())
+		{
+			// this can happen if the code completion takes some time to populate the
+			// result and the user changes the current tab during this
+			return;
+		}
+
 		try
 		{
 			scroll.setColumnHeaderView(headerComponent);
@@ -123,21 +128,15 @@ public class CompletionPopup
 
 			if (selectCurrentWordInEditor)
 			{
-				Thread t = new WbThread("select")
+				// Make sure this is executed on the EDT
+				WbSwingUtilities.invoke(new Runnable()
 				{
+					@Override
 					public void run()
 					{
-						// Make sure this is executed on the EDT
-						WbSwingUtilities.invoke(new Runnable()
-						{
-							public void run()
-							{
-								editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
-							}
-						});
+						editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
 					}
-				};
-				t.start();
+				});
 			}
 			int count = data.getSize();
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
@@ -193,6 +192,7 @@ public class CompletionPopup
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					window.setLocation(p);
@@ -247,6 +247,7 @@ public class CompletionPopup
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					elementList.requestFocusInWindow();
@@ -314,6 +315,7 @@ public class CompletionPopup
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				editor.requestFocus();
@@ -508,6 +510,7 @@ public class CompletionPopup
 	/**
 	 * Implementation of the FocusListener interface
 	 */
+	@Override
 	public void focusGained(FocusEvent focusEvent)
 	{
 	}
@@ -515,6 +518,7 @@ public class CompletionPopup
 	/**
 	 * Implementation of the FocusListener interface
 	 */
+	@Override
 	public void focusLost(FocusEvent focusEvent)
 	{
 		if (this.searchField == null) closePopup(false);
@@ -523,6 +527,7 @@ public class CompletionPopup
 	/**
 	 * Implementation of the MouseListener interface
 	 */
+	@Override
 	public void mouseClicked(java.awt.event.MouseEvent mouseEvent)
 	{
 		int clicks = mouseEvent.getClickCount();
@@ -536,11 +541,27 @@ public class CompletionPopup
 		}
 	}
 
-	public void mouseEntered(MouseEvent mouseEvent) {}
-	public void mouseExited(MouseEvent mouseEvent) {}
-	public void mousePressed(MouseEvent mouseEvent)	{}
-	public void mouseReleased(MouseEvent mouseEvent) {}
+	@Override
+	public void mouseEntered(MouseEvent mouseEvent)
+	{
+	}
 
+	@Override
+	public void mouseExited(MouseEvent mouseEvent)
+	{
+	}
+
+	@Override
+	public void mousePressed(MouseEvent mouseEvent)
+	{
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent mouseEvent)
+	{
+	}
+
+	@Override
 	public void keyPressed(KeyEvent evt)
 	{
 		int index = -1;
@@ -614,6 +635,7 @@ public class CompletionPopup
 		if (StringUtil.isBlank(text)) return;
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				openQuickSearch(text);
@@ -638,6 +660,7 @@ public class CompletionPopup
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (searchField != null)
@@ -650,6 +673,7 @@ public class CompletionPopup
 		});
 	}
 
+	@Override
 	public void keyTyped(KeyEvent evt)
 	{
 		if (this.searchField == null)
@@ -660,6 +684,7 @@ public class CompletionPopup
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (searchField != null)
@@ -676,35 +701,43 @@ public class CompletionPopup
 		setSearchFieldCursor();
 	}
 
+	@Override
 	public void keyReleased(KeyEvent keyEvent)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 		this.cleanup();
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
@@ -713,8 +746,17 @@ public class CompletionPopup
 		extends JPanel
 	{
 		@SuppressWarnings("deprecation")
-		public boolean isManagingFocus() { return false; }
-		public boolean getFocusTraversalKeysEnabled() {	return false;	}
+		@Override
+		public boolean isManagingFocus()
+		{
+			return false;
+		}
+
+		@Override
+		public boolean getFocusTraversalKeysEnabled()
+		{
+			return false;
+		}
 	}
 
 }

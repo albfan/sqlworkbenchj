@@ -34,11 +34,13 @@ public class PostgresConstraintReader
 				"where rel.contype in ('c', 'x') \n" +
 				" and t.relname = ? ";
 
+	@Override
 	public String getColumnConstraintSql()
 	{
 		return null;
 	}
 
+	@Override
 	public String getTableConstraintSql()
 	{
 		return TABLE_SQL;

@@ -45,6 +45,7 @@ public class ConnectionProfile
 	private boolean autocommit;
 	private boolean rollbackBeforeDisconnect;
 	private boolean changed;
+	private boolean groupChanged;
 	private boolean isNew;
 	private boolean storePassword = true;
 	private boolean separateConnection;
@@ -296,6 +297,7 @@ public class ConnectionProfile
 		if (StringUtil.equalString(this.group, g)) return;
 		this.group = g;
 		this.changed = true;
+		this.groupChanged = true;
 	}
 
 	public boolean isProfileForKey(ProfileKey key)
@@ -542,6 +544,11 @@ public class ConnectionProfile
 		return this.changed || this.isNew;
 	}
 
+	public boolean isGroupChanged()
+	{
+		return this.groupChanged;
+	}
+
 	/**
 	 * Reset the changed and new flags.
 	 * @see #isNew()
@@ -550,6 +557,7 @@ public class ConnectionProfile
 	public final void reset()
 	{
 		this.changed = false;
+		this.groupChanged = false;
 		this.isNew = false;
 		if (this.alternateDelimiter != null) this.alternateDelimiter.resetChanged();
 		if (this.schemaFilter != null) schemaFilter.resetModified();
