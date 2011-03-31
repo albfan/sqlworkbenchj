@@ -661,22 +661,18 @@ public class DbExplorerPanel
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(catalogTerm);
 
+			int index = 0;
+			int indexToSelect = 0;
 			for (String db : catalogs)
 			{
 				// only select the catalog if it's actually present in the newly retrieved list
-				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
+				if (db.equalsIgnoreCase(catalogToSelect)) indexToSelect = index;
 				catalogSelector.addItem(db);
+				index ++;
 			}
 
-			if (selectLastCatalog)
-			{
-				this.catalogSelector.setSelectedItem(catalogToSelect);
-			}
-			else
-			{
-				this.catalogSelector.setSelectedIndex(0);
-			}
-
+			this.catalogSelector.setSelectedIndex(indexToSelect);
+			
 			this.catalogSelector.addActionListener(this);
 			this.catalogSelector.setVisible(true);
 			this.catalogSelector.setEnabled(true);
