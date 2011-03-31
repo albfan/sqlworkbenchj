@@ -636,7 +636,7 @@ public class DbExplorerPanel
 		}
 		else
 		{
-			String cat = StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
+			String catalogTerm = StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
 
 			String catalogToSelect = null;
 			boolean selectLastCatalog = false;
@@ -646,33 +646,35 @@ public class DbExplorerPanel
 				catalogToSelect = catalogFromWorkspace;
 				catalogFromWorkspace = null;
 			}
-			else if (catalogSelector.getItemCount() > 0 && !switchCatalog)
+			else if (catalogSelector.getItemCount() > 0)
 			{
+				// if there are entries in the dropdown, make sure the currently selected
+				// catalog is restored when re-loading the databases.
 				Object o = catalogSelector.getSelectedItem();
 				catalogToSelect = o == null ? null : o.toString();
 			}
 			else
 			{
-				catalogToSelect = dbConnection.getMetadata().getCurrentCatalog();
+				catalogToSelect = this.dbConnection.getMetadata().getCurrentCatalog();
 			}
 
 			this.catalogSelector.removeAllItems();
-			this.catalogLabel.setText(cat);
+			this.catalogLabel.setText(catalogTerm);
 
 			for (String db : catalogs)
 			{
+				// only select the catalog if it's actually present in the newly retrieved list
 				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}
 
-			if (switchCatalog)
-			{
-				String db = this.dbConnection.getMetadata().getCurrentCatalog();
-				catalogSelector.setSelectedItem(db);
-			}
-			else if (selectLastCatalog && catalogToSelect != null)
+			if (selectLastCatalog)
 			{
 				this.catalogSelector.setSelectedItem(catalogToSelect);
+			}
+			else
+			{
+				this.catalogSelector.setSelectedIndex(0);
 			}
 
 			this.catalogSelector.addActionListener(this);

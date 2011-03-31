@@ -797,7 +797,7 @@ public class DbMetadata
 
 			if (StringUtil.isBlank(currentSchema))
 			{
-				 return (!ignoreSchema(tblSchema));
+				 return (!ignoreSchema(tblSchema, currentSchema));
 			}
 
 			// If the current schema is not the one of the table, the schema is needed in DML statements
@@ -1220,6 +1220,8 @@ public class DbMetadata
 
 	/**
 	 * Returns the current schema.
+	 *
+	 * @see SchemaInformationReader#getCurrentSchema(workbench.db.WbConnection)
 	 */
 	public String getCurrentSchema()
 	{
@@ -1232,17 +1234,17 @@ public class DbMetadata
 
 	/**
 	 * Returns the schema that should be used for the current user
-	 * This essential call {@link #getCurrentSchema()}. The method
+	 * This essentially calls {@link #getCurrentSchema()}. The method
 	 * then checks if the schema should be ignored for the current
-	 * dbms by calling {@link #ignoreSchema(String)}. If the
-	 * Schema should not be ignored, the it's returned, otherwise
+	 * dbms by calling {@link #ignoreSchema(String, String)}. If the
+	 * Schema should not be ignored, then it's returned, otherwise
 	 * the method will return null
 	 */
 	public String getSchemaToUse()
 	{
 		String schema = this.getCurrentSchema();
 		if (schema == null) return null;
-		if (this.ignoreSchema(schema)) return null;
+		if (this.ignoreSchema(schema, schema)) return null;
 		return schema;
 	}
 
@@ -2211,7 +2213,7 @@ public class DbMetadata
 			catch (Exception e)
 			{
 				LogMgr.logWarning("DbMetadata.getCurrentCatalog", "Could not retrieve catalog using getCatalog()", e);
-				catalog = StringUtil.EMPTY_STRING;
+				catalog = null;
 			}
 		}
 		if (catalog == null) catalog = StringUtil.EMPTY_STRING;

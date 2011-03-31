@@ -58,13 +58,13 @@ public class H2IndexReader
 		{
 			LogMgr.logInfo("H2IndexReader.getPrimaryKeyIndex()", "Using query=\n" + sql);
 		}
-		
+
 		ResultSet rs = null;
 		Statement stmt = null;
 		try
 		{
 			stmt = this.metaData.getSqlConnection().createStatement();
-			if (!metaData.ignoreSchema(tbl.getSchema()))
+			if (StringUtil.isNonBlank(tbl.getSchema()))
 			{
 				String schema = StringUtil.trimQuotes(tbl.getSchema());
 				sql += " AND table_schema = '" + schema + "' ";
@@ -88,5 +88,5 @@ public class H2IndexReader
 		}
 		return pkName;
 	}
-	
+
 }

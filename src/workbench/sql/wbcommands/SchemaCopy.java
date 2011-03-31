@@ -279,6 +279,7 @@ class SchemaCopy
 		return null;
 	}
 
+	@Override
 	public boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
 	{
@@ -347,16 +348,19 @@ class SchemaCopy
 		return createTableType != null;
 	}
 
+	@Override
 	public boolean isSuccess()
 	{
 		return this.success;
 	}
 
+	@Override
 	public CharSequence getMessages()
 	{
 		return messages.getBuffer();
 	}
 
+	@Override
 	public void cancel()
 	{
 		this.cancel = true;
