@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-03-27">
+  <release build="-1" date="2011-04-02">
     <entry dev-build="2" type="enh">For simple INSERT statements a tooltip can now be show (Ctrl-P) that displays the corresponding column name or column value.</entry>
     <entry dev-build="2" type="enh">The matching bracket highlighting can now be configured</entry>
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
