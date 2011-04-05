@@ -17,26 +17,54 @@ package workbench.storage.filter;
 public class GreaterOrEqualComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return false; }
+	@Override
+	public boolean supportsIgnoreCase()
+	{
+		return false;
+	}
 
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getOperator() { return "\u2265"; }
+	@Override
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
 
+	@Override
+	public String getOperator()
+	{
+		return "\u2265";
+	}
+
+	@Override
 	public String getDescription()
 	{
 		return "greater or equal";
 	}
 
-	public boolean needsValue() { return true; }
-	public boolean comparesEquality() { return false; }
+	@Override
+	public boolean needsValue()
+	{
+		return true;
+	}
 
+	@Override
+	public boolean comparesEquality()
+	{
+		return false;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
+		
 		try
 		{
-			int result = ((Comparable)reference).compareTo(value);
+			int result = ((Comparable) reference).compareTo(value);
 			return result <= 0;
 		}
 		catch (Exception e)
@@ -45,19 +73,21 @@ public class GreaterOrEqualComparator
 		}
 	}
 
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return Comparable.class.isAssignableFrom(valueClass);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return (other instanceof GreaterOrEqualComparator);
 	}
 
+	@Override
 	public boolean validateInput(Object value)
 	{
 		return (value instanceof Comparable);
 	}
-
 }

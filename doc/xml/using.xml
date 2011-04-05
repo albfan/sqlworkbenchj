@@ -261,7 +261,7 @@ COMMIT;
 			</para>
 		</note>
     -->
-    
+
 		<section id="display-multiline">
 			<title>Displaying values with embedded newlines</title>
 			<para>
@@ -311,7 +311,7 @@ SELECT * FROM company;</programlisting>
     <indexterm><primary>DDL</primary><secondary>Execute DDL statements</secondary></indexterm>
     <indexterm><primary>Stored procedures</primary><secondary>create stored procedure</secondary></indexterm>
     <indexterm><primary>Triggers</primary><secondary>create trigger</secondary></indexterm>
-    
+
 		<para>
 			&wb-productname; will send the contents of the editor unaltered to the DBMS, so
 			executing DDL statements (<literal>CREATE TABLE</literal>, ...) is possible.
@@ -1174,11 +1174,18 @@ WHERE base_id = 1;</programlisting>
 		<title>Filtering the result</title>
 
 		<para>
-			Once the data has been retrieved from the Server it can be filtered
-			with the need to re-retrieve the data. You can define the filter in two
-			ways: either enter column and their filter values manually, or create
+			Once the data has been retrieved from the server it can be filtered
+			without re-retrieving it. You can define the filter in two
+			ways: either select the filter columns and their filter values manually, or create
 			a filter from the currently selected values in the result set.
 		</para>
+
+    <para>
+      <note>
+        The filter is applied on the data that is retrieved from the database. The data will <emphasis role="bold">not</emphasis>
+        be reloaded from the database when you define a filter.
+      </note>
+    </para>
 
 		<section id="filter-manual">
 			<title>Defining a filter manually</title>
@@ -1192,6 +1199,14 @@ WHERE base_id = 1;</programlisting>
 				condition will be applied to all columns of the result set.
 			</para>
 
+      <para>
+        <important>
+          The value expression for a column does not accept SQL expressions! You can only compare the column
+          to a constant, not to the result of a SQL function (such as <literal>CURRENT_DATE</literal> or <literal>now()</literal>)
+          If you need this kind of filter, you have to use a SQL statement with the approriate <literal>WHERE</literal> condition.
+        </important>
+      </para>
+
 			<para>
 				To add a multi-column expression, press the <guibutton>More</guibutton> button, to create
 				a new line. To remove a column expression from the filter, click the <literal>Remove</literal>
@@ -1201,6 +1216,7 @@ WHERE base_id = 1;</programlisting>
 				expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>',
 				and '<literal>ARTHUR</literal>'.
 			</para>
+
 			<para>
 				By default, the column expressions are combined with an <literal>OR</literal>, i.e.
 				that a row will be displayed if at least one of the column expressions evaluates
@@ -1297,9 +1313,9 @@ WHERE base_id = 1;</programlisting>
       For more details on running a stored procedure with <literal>OUT</literal> parameters or <literal>REF CURSORS</literal>
       please refer to the description of the <link linkend="command-wbcall">WbCall</link> command.
     </para>
-    
+
   </section>
-  
+
   &export-import;
 
 </section>

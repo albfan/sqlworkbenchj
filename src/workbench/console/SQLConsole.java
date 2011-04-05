@@ -141,8 +141,6 @@ public class SQLConsole
 
 			// Enable console-specific commands for the batch runner
 			runner.addCommand(new WbDisconnect());
-			runner.addCommand(new WbStoreProfile());
-			runner.addCommand(new WbDeleteProfile());
 			runner.addCommand(new WbDisplay());
 			runner.addCommand(new WbToggleDisplay());
 			runner.addCommand(new WbListProfiles());

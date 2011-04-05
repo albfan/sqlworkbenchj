@@ -12,6 +12,7 @@
 package workbench.gui.filter;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -26,6 +27,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -158,8 +160,14 @@ public class DefineFilterExpressionPanel
 		scroll.getVerticalScrollBar().setUnitIncrement((int)d.getHeight());
 		scroll.getHorizontalScrollBar().setUnitIncrement(25);
 
+		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel infoLabel = new JLabel(ResourceMgr.getString("MsgFilterHelp"));
+		infoPanel.add(infoLabel);
+		this.add(infoPanel, BorderLayout.SOUTH);
+
 		double w = d.getWidth() + scroll.getHorizontalScrollBar().getPreferredSize().getWidth();
-		double h = (d.getHeight() * 3) + andButton.getPreferredSize().getHeight() + scroll.getHorizontalScrollBar().getPreferredSize().getHeight();
+		double h = (d.getHeight() * 3) + andButton.getPreferredSize().getHeight() + scroll.getHorizontalScrollBar().getPreferredSize().getHeight() +
+			infoLabel.getPreferredSize().getHeight();
 		this.setPreferredSize(new Dimension((int)w,(int)h));
 	}
 
@@ -231,10 +239,10 @@ public class DefineFilterExpressionPanel
 
 	public void selectColumn(String col)
 	{
-		if (panels.size() == 0) return;
+		if (panels.isEmpty()) return;
 		panels.get(0).expressionPanel.selectColumn(col);
 	}
-	
+
 	private void removeAllPanels()
 	{
 		this.panels.clear();
@@ -281,6 +289,7 @@ public class DefineFilterExpressionPanel
 		this.repaint();
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		for (PanelEntry entry : panels)
@@ -382,6 +391,7 @@ public class DefineFilterExpressionPanel
 		return prefSize;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == saveButton)
@@ -430,7 +440,7 @@ public class DefineFilterExpressionPanel
 
 		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(info);
 		int col = source.getSelectedColumn();
-		
+
 		FilterExpression lastFilter = source.getLastFilter();
 		if (lastFilter != null)
 		{
@@ -469,9 +479,10 @@ public class DefineFilterExpressionPanel
 		this.saveButton.setEnabled(e != null);
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
-		if (this.panels.size() == 0) return;
+		if (this.panels.isEmpty()) return;
 		PanelEntry entry = panels.get(0);
 		if (entry == null || entry.expressionPanel == null) return;
 		entry.expressionPanel.setFocusToColumn();

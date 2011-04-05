@@ -54,7 +54,6 @@ public class ColumnExpressionPanel
 	private ResultInfo columnInfo;
 	protected JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
-	//private Class lastColumnClass;
 	private boolean ignoreComparatorChange;
 
 	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
@@ -150,6 +149,7 @@ public class ColumnExpressionPanel
 		{
 			SwingUtilities.invokeLater(new Runnable() {
 
+				@Override
 				public void run()
 				{
 					columnSelector.setSelectedIndex(index);
@@ -158,6 +158,7 @@ public class ColumnExpressionPanel
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (evt.getSource() == this.columnSelector)
@@ -227,7 +228,7 @@ public class ColumnExpressionPanel
 		return model.findItemIgnoreCase(col);
 	}
 
-	public void setExpressionValue(ExpressionValue expr)
+	public final void setExpressionValue(ExpressionValue expr)
 	{
 		String col = expr.getColumnName();
 		int index = 0;

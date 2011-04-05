@@ -19,10 +19,10 @@ import workbench.gui.filter.DefineFilterExpressionPanel;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Filter data from a WbTable 
+ *	Filter data from a WbTable
  *	@author  Thomas Kellerer
  */
-public class FilterDataAction 
+public class FilterDataAction
 		extends WbAction
 		implements TableModelListener
 {
@@ -36,20 +36,22 @@ public class FilterDataAction
 		this.setIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
-		this.setEnabled(false);		
+		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		DefineFilterExpressionPanel.showDialog(this.client);
 	}
 
+	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.getLastFilter() != null || this.client.getRowCount() > 0);
 	}
 
-	public void setClient(WbTable c)
+	public final void setClient(WbTable c)
 	{
 		if (this.client != null)
 		{

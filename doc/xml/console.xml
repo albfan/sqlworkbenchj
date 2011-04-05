@@ -1,14 +1,14 @@
 <section id="console-mode">
 	<title>Using &wb-productname; in console mode</title>
-	
+
 	<para>
 		&wb-productname; can also be used from the commandline without starting the GUI, e.g. when
 		you only have a console window (Putty, SSH) to access the database. In that case you can either
-		run scripts using the <link linkend="using-scripting">batch mode</link>, or start &wb-productname; 
+		run scripts using the <link linkend="using-scripting">batch mode</link>, or start &wb-productname;
 		in console mode, where you can run statements interactively, similar to the GUI mode (but of course with
 		less comfortable editing possibilities).
 	</para>
-	
+
 	<para>
 		When using &wb-productname; in console mode, you
 		<emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>.
@@ -23,7 +23,7 @@
 		properties <link linkend="commandline-connect-noprofile">directly </link>.
 		Additionally you can specify all parameters that can be used in <link linkend="using-scripting">batch mode</link>.
 	</para>
-		
+
 	<para>
 		The following batch mode parameters will be ignored in console mode:
 		<simplelist columns="1">
@@ -83,7 +83,7 @@ SQL&gt;</screen>
 
 	<section id="console-mode-connection">
 		<title>Setting or changing the connection</title>
-		
+
 		<para>
 			If you did not specify a connection on the commandline when starting the console, you can set or
 			change the current connection in console mode using the
@@ -103,7 +103,7 @@ SQL&gt;</screen>
 		<title>Displaying result sets</title>
 		<para>
 			If you are running <literal>SELECT</literal> statements in console mode, the result is
-			displayed on the screen in "tabular" format. Note that &wb-productname; reads the whole result 
+			displayed on the screen in "tabular" format. Note that &wb-productname; reads the whole result
 			into memory in order to be to adjust the column widths to the displayed data.
 		</para>
 
@@ -205,7 +205,7 @@ id | firstname | lastname
 Execution time: 0.078s
 SQL></screen>
   </section>
-  
+
 	<section id="console-maxrows">
 		<title>Controlling the number of rows displayed</title>
 		<para>
@@ -293,10 +293,17 @@ SQL></screen>
 Profile '{MyGroup}/PostgreSQL Production' added
 SQL> </screen>
 				<para>
-					As the profile name is the only parameter to this command, no quoting is necessary.
-					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
-					profile's name. If there is already a profile with the same name, that profile is overwritten.
+					If no parameter switch is given, everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
+					profile's name. By default the password is not saved.
 				</para>
+        <para>
+          Alternatively the command supports the parameters <literal>name</literal> and <literal>savePassword</literal>. If
+          you want to store the password in the profile, the version using parameters must be used:
+        </para>
+				<screen>SQL> WbStoreProfile -name="{MyGroup}/DevelopmentServer" -savePassword=true
+Profile '{MyGroup}/DevelopmentServer' added
+SQL> </screen>
+
 				<para>
 					If the current connection references a JDBC driver that is not already defined,
 					a new entry for the driver defintions is created referencing the library

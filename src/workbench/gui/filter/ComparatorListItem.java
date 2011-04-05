@@ -26,6 +26,7 @@ public class ComparatorListItem
 		comparator = comp;
 	}
 
+	@Override
 	public String toString()
 	{
 		return comparator.getOperator();
@@ -36,6 +37,7 @@ public class ComparatorListItem
 		return comparator;
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof ComparatorListItem)

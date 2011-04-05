@@ -19,6 +19,8 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -30,12 +32,14 @@ public class WbStoreProfile
 	extends SqlCommand
 {
 	public static final String VERB = "WBSTOREPROFILE";
-
+	public static final String ARG_PROFILE_NAME = "name";
+	public static final String ARG_SAVE_PASSWORD = "savePassword";
 	public WbStoreProfile()
 	{
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
@@ -46,7 +50,25 @@ public class WbStoreProfile
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String name = getCommandLine(sql);
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_PROFILE_NAME);
+		cmdLine.addArgument(ARG_SAVE_PASSWORD, ArgumentType.BoolArgument);
+
+		String arguments = getCommandLine(sql);
+		cmdLine.parse(arguments);
+
+		String name = null;
+		boolean storePwd = false;
+
+		if (cmdLine.hasArguments())
+		{
+			name = cmdLine.getValue(ARG_PROFILE_NAME);
+			storePwd = cmdLine.getBoolean(ARG_SAVE_PASSWORD, false);
+		}
+		else
+		{
+			name = arguments;
+		}
 
 		if (this.currentConnection == null)
 		{
@@ -63,14 +85,21 @@ public class WbStoreProfile
 		}
 
 		ProfileKey key = new ProfileKey(name);
-		
+
 		ConnectionProfile profile = this.currentConnection.getProfile().createCopy();
 		profile.setName(key.getName());
 		profile.setGroup(key.getGroup());
-		profile.setPassword(null);
-		profile.setStorePassword(false);
+		if (storePwd)
+		{
+			profile.setStorePassword(true);
+		}
+		else
+		{
+			profile.setPassword(null);
+			profile.setStorePassword(false);
+		}
 		profile.setWorkspaceFile(null);
-		
+
 		ConnectionMgr.getInstance().addProfile(profile);
 		ConnectionMgr.getInstance().saveProfiles();
 		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", key.toString()));
@@ -92,7 +121,7 @@ public class WbStoreProfile
 		}
 
 		result.setSuccess();
-		
+
 		return result;
 	}
 

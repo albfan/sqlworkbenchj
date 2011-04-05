@@ -11,23 +11,35 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 /**
  * @author Thomas Kellerer
  */
 public class ContainsNotComparator
 	extends ContainsComparator
 {
-	public String getDescription() { return getOperator(); }
-	public String getOperator() { return "contains not"; }
+	@Override
+	public String getDescription()
+	{
+		return getOperator();
+	}
 
+	@Override
+	public String getOperator()
+	{
+		return ResourceMgr.getString("TxtOpContainsNot");
+	}
+
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		return !super.evaluate(reference, value, ignoreCase);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return (other instanceof ContainsNotComparator);
 	}
 }
-

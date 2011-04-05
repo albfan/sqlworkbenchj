@@ -73,6 +73,8 @@ import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.sql.wbcommands.console.WbAbout;
+import workbench.sql.wbcommands.console.WbDeleteProfile;
+import workbench.sql.wbcommands.console.WbStoreProfile;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -139,6 +141,9 @@ public class CommandMapper
 		addCommand(new WbIsolationLevel());
 		addCommand(new WbConnInfo());
 
+		addCommand(new WbStoreProfile());
+		addCommand(new WbDeleteProfile());
+
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);
@@ -180,7 +185,7 @@ public class CommandMapper
 	/**
 	 * Add a new command definition during runtime.
 	 */
-	public void addCommand(SqlCommand command)
+	public final void addCommand(SqlCommand command)
 	{
 		cmdDispatch.put(command.getVerb(), command);
 		String longVerb = command.getAlternateVerb();

@@ -19,15 +19,25 @@ import workbench.resource.ResourceMgr;
 public class ContainsComparator
 	implements ColumnComparator
 {
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
+	@Override
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
 
+	@Override
 	public String getDescription()
 	{
 		return ResourceMgr.getString("TxtOpContains");
 	}
 
-	public String getOperator() { return "contains"; }
-	
+	@Override
+	public String getOperator()
+	{
+		return getDescription();
+	}
+
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null && value == null) return true;
@@ -46,35 +56,41 @@ public class ContainsComparator
 			return false;
 		}
 	}
-	
+
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return (CharSequence.class.isAssignableFrom(valueClass));
 	}
 
+	@Override
 	public boolean supportsIgnoreCase()
 	{
 		return true;
 	}
 
-	public boolean needsValue() 
-	{ 
-		return true; 
-	}
-	
-	public boolean validateInput(Object value) 
-	{ 
-		return true; 
+	@Override
+	public boolean needsValue()
+	{
+		return true;
 	}
 
-	public boolean comparesEquality() 
-	{ 
-		return false; 
+	@Override
+	public boolean validateInput(Object value)
+	{
+		return true;
 	}
-	
+
+	@Override
+	public boolean comparesEquality()
+	{
+		return false;
+	}
+
+	@Override
 	public boolean equals(Object other)
 	{
 		return (other instanceof ContainsComparator);
 	}
-	
+
 }
