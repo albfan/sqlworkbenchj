@@ -595,7 +595,7 @@ VALUES
         <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
         <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
         <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
-        <li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>
+        <li>Download the Jemmy library from <a href="http://java.net/projects/jemmy">http://java.net/projects/jemmy</a> (Required to run the GUI tests)</li>
         <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
       </ul>
       <p>
