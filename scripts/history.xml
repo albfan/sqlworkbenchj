@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-04-02">
+    <entry dev-build="4" type="enh">WbDeleteProfile and WbSaveProfile are now also supported in batch mode.</entry>
+    <entry dev-build="4" type="enh">WbSaveProfile now supports a parameter whether the password should be stored or not (in that case the new -name parameter must be used to specify the profile's name)</entry>
     <entry dev-build="2" type="enh">For simple INSERT statements a tooltip can now be show (Ctrl-P) that displays the corresponding column name or column value.</entry>
     <entry dev-build="2" type="enh">The matching bracket highlighting can now be configured</entry>
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
