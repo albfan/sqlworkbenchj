@@ -28,6 +28,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -84,7 +85,7 @@ public class ObjectCompilerUI
 				}
 				else
 				{
-					appendLog(ResourceMgr.getString("TxtError") + "\n  " + error);
+					appendLog(ResourceMgr.getString("TxtError") + "\n  " + error.replaceAll(StringUtil.REGEX_CRLF, "\n    "));
 				}
 			}
 		}

@@ -59,7 +59,7 @@ public class OracleObjectCompiler
 			{
 				return null;
 			}
-			return error;
+			return error.trim();
 		}
 		catch (SQLException e)
 		{
