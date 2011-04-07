@@ -55,6 +55,7 @@ public class DdlCommand
 		this.isUpdatingCommand = true;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -132,7 +133,8 @@ public class DdlCommand
 			result.clear();
 
 			StringBuilder msg = new StringBuilder(150);
-			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+			msg.append(ResourceMgr.getString("MsgExecuteError"));
+			msg.append('\n');
 			if (reportFullStatementOnError)
 			{
 				msg.append(sql);
@@ -160,6 +162,7 @@ public class DdlCommand
 		return result;
 	}
 
+	@Override
 	public void done()
 	{
 		super.done();
@@ -240,6 +243,7 @@ public class DdlCommand
 		}
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return verb;

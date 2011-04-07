@@ -346,6 +346,12 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("my_type", info.objectName);
 		assertEquals("TYPE BODY", info.objectType);
+
+		sql = "alter function mystuff compile";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertNotNull(info);
+		assertEquals("mystuff", info.objectName);
+		assertEquals("FUNCTION", info.objectType);
 	}
 
 	@Test

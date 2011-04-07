@@ -43,7 +43,7 @@ public class OracleObjectCompiler
 	public String compileObject(DbObject object)
 	{
 		String sql = createCompileStatement(object);
-	    
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleObjectCompiler.compileObject()", "Using SQL: " + sql);
@@ -54,7 +54,12 @@ public class OracleObjectCompiler
 			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
 			stmt.executeUpdate(sql);
-			return null;
+			String error = dbConnection.getMetadata().getExtendedErrorInfo(null, object.getObjectName(), object.getObjectType());
+			if (StringUtil.isBlank(error))
+			{
+				return null;
+			}
+			return error;
 		}
 		catch (SQLException e)
 		{
@@ -89,12 +94,12 @@ public class OracleObjectCompiler
 		sql.append(" COMPILE");
 		return sql.toString();
 	}
-	
+
 	public static boolean canCompile(DbObject object)
 	{
 		if (object == null) return false;
 		String type = object.getObjectType();
 		return COMPILABLE_TYPES.contains(type);
 	}
-	
+
 }

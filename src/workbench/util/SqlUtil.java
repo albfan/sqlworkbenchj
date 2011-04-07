@@ -209,7 +209,7 @@ public class SqlUtil
 		if (t == null) return null;
 		String verb = t.getContents();
 
-		if (!verb.startsWith("CREATE") && !verb.equals("DROP") && !verb.equals("RECREATE")) return null;
+		if (!verb.startsWith("CREATE") && !verb.equals("DROP") && !verb.equals("RECREATE") && !verb.equals("ALTER")) return null;
 
 		try
 		{

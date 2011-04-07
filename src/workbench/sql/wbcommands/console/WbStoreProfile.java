@@ -105,6 +105,9 @@ public class WbStoreProfile
 		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", key.toString()));
 
 		DbDriver drv = ConnectionMgr.getInstance().findDriver(profile.getDriverclass());
+
+		// if a profile was created from the commandline, this will implicitely also create
+		// a new driver entry if no matching driver was found. In that case it is marked as "internal"
 		if (drv.isInternal())
 		{
 			DbDriver newDrv = drv.createCopy();

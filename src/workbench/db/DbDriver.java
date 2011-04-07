@@ -91,7 +91,7 @@ public class DbDriver
 		return this.name;
 	}
 
-	public void setName(String name)
+	public final void setName(String name)
 	{
 		this.name = name;
 	}
@@ -101,7 +101,7 @@ public class DbDriver
 		return this.driverClass;
 	}
 
-	public void setDriverClass(String aClass)
+	public final void setDriverClass(String aClass)
 	{
 		this.driverClass = aClass.trim();
 		this.driverClassInstance = null;
@@ -160,7 +160,7 @@ public class DbDriver
 		return null;
 	}
 
-	public void setLibrary(String libList)
+	public final void setLibrary(String libList)
 	{
 		this.libraryList = splitLibraryList(libList);
 		this.driverClassInstance = null;

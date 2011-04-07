@@ -793,6 +793,7 @@ public class ConnectionMgr
 	 * @param evt
 	 * @see #clearProfiles()
 	 */
+	@Override
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(Settings.PROPERTY_PROFILE_STORAGE))

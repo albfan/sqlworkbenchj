@@ -44,7 +44,7 @@ public class ObjectCompilerUI
 	private List<DbObject> objects;
 	private OracleObjectCompiler compiler;
 	private WbConnection dbConnection;
-	
+
 	public ObjectCompilerUI(List<DbObject> objectList, WbConnection conn)
 		throws SQLException
 	{
@@ -63,6 +63,7 @@ public class ObjectCompilerUI
 		this.worker.start();
 	}
 
+	@Override
 	public void run()
 	{
 		String msg = ResourceMgr.getString("TxtCompilingObject");
@@ -98,6 +99,7 @@ public class ObjectCompilerUI
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				log.appendLine(msg);
@@ -129,14 +131,17 @@ public class ObjectCompilerUI
 		this.startCompile();
 	}
 
+	@Override
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		if (this.worker != null)
@@ -151,18 +156,22 @@ public class ObjectCompilerUI
 		this.window.dispose();
 	}
 
+	@Override
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}
