@@ -1,6 +1,20 @@
 #!/bin/sh 
+
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+ 
 # Start SQL Workbench/J
-scriptpath=`dirname $0`
+scriptpath=`dirname "$PRG"`
 
 JAVA_BIN=""
 
@@ -25,4 +39,4 @@ fi
 # installed the option -Djava.awt.headless=true might
 # be needed for some combinations of OS and JDK
 
-$JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx256m -jar $scriptpath/sqlworkbench.jar $@
+exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx256m -jar $scriptpath/sqlworkbench.jar $@
