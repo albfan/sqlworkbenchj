@@ -68,12 +68,14 @@ public class WbTextLabel
 		renderingHints = (Map)tk.getDesktopProperty("awt.font.desktophints");
 	}
 
+	@Override
 	public void setForeground(Color c)
 	{
 		super.setForeground(c);
 		textColor = c;
 	}
 
+	@Override
 	public void setBorder(Border b)
 	{
 		super.setBorder(b);
@@ -85,6 +87,7 @@ public class WbTextLabel
 		this.alignment = align;
 	}
 
+	@Override
 	public void setFont(Font f)
 	{
 		super.setFont(f);
@@ -118,6 +121,7 @@ public class WbTextLabel
 		paint(g);
 	}
 
+	@Override
 	public void paint(Graphics g)
 	{
 		if (g == null) return;
@@ -134,22 +138,27 @@ public class WbTextLabel
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
