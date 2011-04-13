@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-06-13">
+  <release build="-1" date="2011-07-17">
     <entry dev-build="8" type="enh">Foreign keys referencing unique constraints are now displayed for Oracle (this is a workaround for a bug in the Oracle JDBC Driver)</entry>
     <entry dev-build="8" type="enh">WbImport now accepts multi-character delimiters (e.g. \t\t)</entry>
     <entry dev-build="7" type="enh">The suffix for escaping variables can now be defined as "empty", so that e.g. &amp;val can be used as variable name</entry>
