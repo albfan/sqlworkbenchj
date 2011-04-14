@@ -185,8 +185,6 @@
   
   <xsl:template match="proc-def">
     <xsl:value-of select="normalize-space(proc-source)"/>
-    <xsl:value-of select="$newline"/>
-    <xsl:text>/</xsl:text>
   </xsl:template>
 
   <xsl:template match="add-index">
@@ -266,7 +264,7 @@
     <xsl:if test="nullable = 'false'">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
-      <xsl:text >MODIFY </xsl:text>
+      <xsl:text> MODIFY </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> NOT NULL;</xsl:text>
       <xsl:value-of select="$newline"/>
@@ -276,7 +274,7 @@
       <xsl:value-of select="$table"/>
       <xsl:text> MODIFY </xsl:text>
       <xsl:value-of select="$column"/>
-      <xsl:text> DEFAULT</xsl:text>
+      <xsl:text> DEFAULT </xsl:text>
       <xsl:value-of select="default-value"/>
       <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
