@@ -60,4 +60,23 @@ public class TableDefinition
 		}
 		return null;
 	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder(getColumnCount() * 10 + 25);
+		result.append(table.toString());
+		result.append(" (");
+		List<ColumnIdentifier> cols = getColumns();
+		for (int i=0; i < cols.size(); i++)
+		{
+			if (i > 0)
+			{
+				result.append(", ");
+			}
+			result.append(cols.get(i).getColumnName());
+		}
+		result.append(')');
+		return result.toString();
+	}
 }

@@ -133,10 +133,6 @@ public class PanelWorkspaceHandler
 			title = ResourceMgr.getDefaultTabLabel();
 		}
 		w.setTabTitle(index, title);
-		if (client.hasFileLoaded() && client.editor.isModified())
-		{
-			client.editor.saveCurrentFile();
-		}
 	}
 
 }
