@@ -1,11 +1,11 @@
 /*
  * PostgresTableSourceBuilderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -40,7 +40,9 @@ public class PostgresTableSourceBuilderTest
 		PostgresTestUtil.initTestCase(TEST_SCHEMA);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
-		TestUtil.executeScript(con, "create table base_table (id integer, some_data varchar(100));\n" +
+		TestUtil.executeScript(con,
+			"create table base_table (id integer, some_data varchar(100));\n" +
+			"alter table base_table add constraint uc_some_data unique (some_data); \n" +
 			"create table child_table (other_data varchar(100)) inherits (base_table);\n" +
 			"create type order_status_type as enum ('new', 'open', 'closed');\n" +
 			"create domain product_price as integer check (value > 0);\n" +
@@ -77,10 +79,20 @@ public class PostgresTableSourceBuilderTest
 
 		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "more_data");
 		String sql = tbl.getSource(con).toString();
-		System.out.println(sql);
 		assertTrue(sql.contains(" enum 'order_status_type': 'new','open','closed'"));
 		assertTrue(sql.contains(" domain 'product_price': integer CHECK (VALUE > 0)"));
 		assertTrue(sql.contains("sequence sourcebuilder.data_seq"));
 	}
 
+	@Test
+	public void testUniqueConstraint()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+
+		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "base_table");
+		String sql = tbl.getSource(con).toString();
+		assertTrue(sql.contains("ADD CONSTRAINT uc_some_data UNIQUE (some_data);"));
+	}
 }

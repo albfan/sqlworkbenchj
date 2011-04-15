@@ -19,6 +19,7 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="9" type="fix">The dependency display in the DbExplorer did not work with unique constraints in Oracle</entry>
     <entry dev-build="8" type="fix">The source for XMLTYPE columns was generated incorrectly for Oracle</entry>
     <entry dev-build="8" type="fix">The correct source code for unique constraints is now shown in the DbExplorer for Oracle, PostgreSQL, DB2 and SQL Server 2005+</entry>
     <entry dev-build="7" type="fix">Table names with non-standard upper/lowercase usage where not quoted in the code completion.</entry>

@@ -95,7 +95,7 @@ public class TableSourceBuilder
 		DataStore fkDef = null;
 		if (includeFk)
 		{
-			FKHandler fk = new FKHandler(dbConnection);
+			FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 			fkDef = fk.getForeignKeys(def.getTable(), false);
 		}
 
@@ -532,7 +532,7 @@ public class TableSourceBuilder
 
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
-		FKHandler fk = new FKHandler(dbConnection);
+		FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 		DataStore fkDef = fk.getForeignKeys(table, false);
 		return getFkSource(table, fkDef, null, createInlineConstraints);
 	}

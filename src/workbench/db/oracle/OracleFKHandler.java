@@ -14,7 +14,7 @@ package workbench.db.oracle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import workbench.db.FKHandler;
+import workbench.db.DefaultFKHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -29,7 +29,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class OracleFKHandler
-	extends FKHandler
+	extends DefaultFKHandler
 {
 	// This is essentially a copy of the Statement used by the Oracle driver
 	final String baseSql =
@@ -144,7 +144,7 @@ public class OracleFKHandler
 		sql.append(" AND f.owner = '");
 		sql.append(tbl.getRawSchema());
 		sql.append('\'');
-		sql.append(" ORDER BY pktable_schem, pktable_name, key_seq");
+		sql.append("\n ORDER BY pktable_schem, pktable_name, key_seq");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

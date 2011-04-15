@@ -25,6 +25,6 @@ public class FKHandlerFactory
 		{
 			return new OracleFKHandler(conn);
 		}
-		return new FKHandler(conn);
+		return new DefaultFKHandler(conn);
 	}
 }
