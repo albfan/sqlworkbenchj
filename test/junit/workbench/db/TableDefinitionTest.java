@@ -42,6 +42,6 @@ public class TableDefinitionTest
 		cols.add(lastname);
 
 		TableDefinition def = new TableDefinition(tbl, cols);
-		assertEquals("PERSON(ID, FIRSTNAME, LASTNAME)", def.toString());
+		assertEquals("PERSON (ID, FIRSTNAME, LASTNAME)", def.toString());
 	}
 }
