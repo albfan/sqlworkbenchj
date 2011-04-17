@@ -46,7 +46,7 @@ public class ColumnOrderMgr
 		protected static final ColumnOrderMgr instance = new ColumnOrderMgr();
 	}
 
-	public static final ColumnOrderMgr getInstance()
+	public static ColumnOrderMgr getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
@@ -77,7 +77,7 @@ public class ColumnOrderMgr
 		List<String> cols = columnOrders.get(key);
 		if (cols != null)
 		{
-			applyColumnOrder(table, cols);
+			applyColumnOrder(table, cols, true);
 		}
 	}
 
@@ -101,11 +101,11 @@ public class ColumnOrderMgr
 		if (tbl == null) ds.checkUpdateTable();
 		tbl = ds.getUpdateTable();
 		if (tbl == null) return null;
-		
+
 		String url = con.getUrl();
 		return getColumnOrderKey(tbl, url);
 	}
-	
+
 	public String getColumnOrderKey(TableIdentifier tbl, String url)
 	{
 		String key = tbl.getTableExpression() + "@" + url;
@@ -135,13 +135,13 @@ public class ColumnOrderMgr
 	{
 		String key = getColumnOrderKey(table);
 		removeColumnOrder(key);
-		
+
 		if (table == null) return;
 
 		TableColumnModel current = table.getColumnModel();
 		if (current == null) return;
 		if (current.getColumnCount() == 0) return;
-		
+
 		Comparator<TableColumn> comp = new Comparator<TableColumn>()
 		{
 			public int compare(TableColumn o1, TableColumn o2)
@@ -162,10 +162,10 @@ public class ColumnOrderMgr
 		}
 		table.setColumnModel(model);
 	}
-	
-	public void applyColumnOrder(WbTable table, List<String> newOrder)
+
+	public void applyColumnOrder(WbTable table, List<String> newOrder, boolean addMissing)
 	{
-		if (newOrder == null || newOrder.size() == 0) return;
+		if (newOrder == null || newOrder.isEmpty()) return;
 
 		TableColumnModel model = new DefaultTableColumnModel();
 		TableColumnModel current = table.getColumnModel();
@@ -186,19 +186,22 @@ public class ColumnOrderMgr
 			}
 		}
 
-		// Now check if all columns in the table are present in the saved set
-		// Those that are missing will simply be added to the end of the column model
-		for (int i=0; i < current.getColumnCount(); i++)
+		if (addMissing)
 		{
-			TableColumn col = current.getColumn(i);
-			String name = col.getIdentifier().toString();
-			if (!newOrder.contains(name))
+			// Now check if all columns in the table are present in the saved set
+			// The missing columns will simply be added to the end of the column model
+			for (int i=0; i < current.getColumnCount(); i++)
 			{
-				newOrder.add(name);
-				model.addColumn(col);
+				TableColumn col = current.getColumn(i);
+				String name = col.getIdentifier().toString();
+				if (!newOrder.contains(name))
+				{
+					newOrder.add(name);
+					model.addColumn(col);
+				}
 			}
 		}
-		
+
 		table.setColumnModel(model);
 	}
 
@@ -219,7 +222,7 @@ public class ColumnOrderMgr
 		}
 		return cols;
 	}
-	
+
 	public synchronized void storeColumnOrder(WbTable table)
 	{
 		if (table == null) return;
@@ -231,7 +234,7 @@ public class ColumnOrderMgr
 		throws IOException
 	{
 		File f = Settings.getInstance().getColumnOrderStorage();
-		if (columnOrders.size() == 0 && f.exists())
+		if (columnOrders.isEmpty() && f.exists())
 		{
 			f.delete();
 		}

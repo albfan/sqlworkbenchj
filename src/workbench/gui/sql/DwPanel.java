@@ -1416,7 +1416,7 @@ public class DwPanel
 
 				if (colOrder != null)
 				{
-					ColumnOrderMgr.getInstance().applyColumnOrder(dataTable, colOrder);
+					ColumnOrderMgr.getInstance().applyColumnOrder(dataTable, colOrder, true);
 				}
 				dataTable.requestFocusInWindow();
 			}

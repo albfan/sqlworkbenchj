@@ -96,6 +96,7 @@ import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
+import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
@@ -196,6 +197,9 @@ public class TableListPanel
 	private final Object msgLock = new Object();
 
 	private TableChangeValidator validator = new TableChangeValidator();
+	private boolean rememberTableListColumnOrder;
+	private List<String> objectListColumnOrder;
+	private List<String> columnOrderFromWorkspace;
 
 	// </editor-fold>
 
@@ -384,6 +388,9 @@ public class TableListPanel
 				}
 			});
 		}
+
+		rememberTableListColumnOrder = Settings.getInstance().getRememberMetaColumnOrder("tablelist");
+
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		showObjectDefinitionPanels(false, false);
@@ -649,6 +656,11 @@ public class TableListPanel
 			return;
 		}
 
+		if (rememberTableListColumnOrder)
+		{
+			objectListColumnOrder = ColumnOrderMgr.getInstance().getColumnOrder(tableList);
+		}
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -911,6 +923,15 @@ public class TableListPanel
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
 					tableList.adjustRowsAndColumns();
+					if (columnOrderFromWorkspace != null)
+					{
+						ColumnOrderMgr.getInstance().applyColumnOrder(tableList, columnOrderFromWorkspace, false);
+						columnOrderFromWorkspace = null;
+					}
+					else
+					{
+						ColumnOrderMgr.getInstance().applyColumnOrder(tableList, objectListColumnOrder, false);
+					}
 					updateDisplayClients();
 				}
 			});
@@ -1075,6 +1096,12 @@ public class TableListPanel
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
 			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
+			if (Settings.getInstance().getRememberMetaColumnOrder("tablelist"))
+			{
+				// The objectListColumnOrder might not have been initialized yet
+				objectListColumnOrder = ColumnOrderMgr.getInstance().getColumnOrder(tableList);
+				props.setProperty(prefix + "columnorder", StringUtil.listToString(objectListColumnOrder, ','));
+			}
 		}
 		catch (Throwable th)
 		{
@@ -1116,6 +1143,11 @@ public class TableListPanel
 		else
 		{
 			this.tableTypeToSelect = defType;
+		}
+		String colString = props.getProperty(prefix + "columnorder", null);
+		if (StringUtil.isNonEmpty(colString))
+		{
+			columnOrderFromWorkspace = StringUtil.stringToList(colString, ",");
 		}
 	}
 

@@ -951,6 +951,29 @@ public class Settings
 		setProperty("workbench.gui.dbobjects.showfocus", flag);
 	}
 
+	/**
+	 * Indicate if the column order of tables displaying meta data (table list, procedures)
+	 * should be saved in the workspace
+	 *
+	 * @param tableType the table for which the column order should be checked (e.g. tablelist)
+	 */
+	public boolean getRememberMetaColumnOrder(String tableType)
+	{
+		return getBoolProperty("workbench.dbexplorer." + tableType + ".remembersort", true);
+	}
+
+	/**
+	 * Control if the column order of tables displaying meta data (table list, procedures)
+	 * should be saved in the workspace
+	 *
+	 * @param tableType the table for which the column order should be checked (e.g. tablelist)
+	 * @param flag 
+	 */
+	public void setRememberMetaColumnOrder(String tableType, boolean flag)
+	{
+		setProperty("workbench.dbexplorer." + tableType + ".remembersort", flag);
+	}
+
 	public boolean showFocusInDbExplorer()
 	{
 		return getBoolProperty("workbench.gui.dbobjects.showfocus", false);
@@ -966,11 +989,17 @@ public class Settings
 		return getBoolProperty(PROPERTY_DBEXP_REMEMBER_SORT, false);
 	}
 
+	/**
+	 * Set if the column order in the DbExplorer's Data tab should be remembered across restarts
+	 */
 	public void setRememberColumnOrder(boolean flag)
 	{
 		setProperty("workbench.dbexplorer.remember.columnorder", flag);
 	}
 
+	/**
+	 * Indicate if the column order in the DbExplorer's Data tab should be remembered across restarts
+	 */
 	public boolean getRememberColumnOrder()
 	{
 		return getBoolProperty("workbench.dbexplorer.remember.columnorder", false);
