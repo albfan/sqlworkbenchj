@@ -72,13 +72,16 @@ public class PostgresUniqueConstraintReaderTest
 		if (con == null) return;
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
 		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
+		boolean foundConstraint = false;
 		for (IndexDefinition idx : indexList)
 		{
 			if (idx.getName().equals("uk_id"))
 			{
 				assertTrue(idx.isUniqueConstraint());
 				assertEquals("uk_id", idx.getUniqueConstraintName());
+				foundConstraint = true;
 			}
 		}
+		assertTrue(foundConstraint);
 	}
 }
