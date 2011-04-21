@@ -145,7 +145,7 @@ public class TableDependency
 	/**
 	 *	Create the dependency tree.
 	 */
-	private int readTree(DependencyNode parent, boolean exportedKeys, int level)
+	private void readTree(DependencyNode parent, boolean exportedKeys, int level)
 	{
 		try
 		{
@@ -203,7 +203,7 @@ public class TableDependency
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 
-			if (level > 15)
+			if (level > 25)
 			{
 				// this is a bit paranoid, as I am testing for cycles before recursing
 				// into the next child. This is a safetey net, just in case the cycle
@@ -212,10 +212,10 @@ public class TableDependency
 				// A circular dependency with more than 10 levels is an ugly design anyway :)
 				LogMgr.logError("TableDependency.readTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
 				this.readAborted = true;
-				return count;
+				return;
 			}
 
-			if (directChildrenOnly && level == 1) return count;
+			if (directChildrenOnly && level == 1) return;
 
 			List<DependencyNode> children = parent.getChildren();
 
@@ -227,14 +227,16 @@ public class TableDependency
 				}
 				visitedRelations.put(parent, child);
 				this.leafs.add(child);
+				if (readAborted)
+				{
+					break;
+				}
 			}
-      return count;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("TableDependencyTree.readTree()", "Error when reading FK definition", e);
 		}
-    return 0;
 	}
 
 	private boolean isCycle(DependencyNode child, DependencyNode parent)
