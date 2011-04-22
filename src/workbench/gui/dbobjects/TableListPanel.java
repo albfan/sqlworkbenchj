@@ -39,7 +39,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -53,7 +52,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
@@ -96,10 +94,8 @@ import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.AlterObjectAction;
-import workbench.gui.actions.ResetColOrderAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
-import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
@@ -130,7 +126,7 @@ public class TableListPanel
 	protected WbConnection dbConnection;
 	protected JPanel listPanel;
 	protected CriteriaPanel findPanel;
-	protected WbTable tableList;
+	protected DbObjectTable tableList;
 	protected TableDefinitionPanel tableDefinition;
 	protected WbTable indexes;
 	protected WbTable importedKeys;
@@ -200,11 +196,6 @@ public class TableListPanel
 	private final Object msgLock = new Object();
 
 	private TableChangeValidator validator = new TableChangeValidator();
-	private boolean rememberTableListColumnOrder;
-	private List<String> objectListColumnOrder;
-	private List<String> columnOrderFromWorkspace;
-	private List<String> originalObjectListOrder;
-
 	// </editor-fold>
 
 	public TableListPanel(MainWindow aParent)
@@ -299,34 +290,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new DbObjectTable()
-		{
-			@Override
-			protected JPopupMenu getHeaderPopup()
-			{
-				JPopupMenu menu = super.getHeaderPopup();
-				if (isColumnOrderChanged() && originalObjectListOrder != null)
-				{
-					ResetColOrderAction resetColOrder = new ResetColOrderAction(null)
-					{
-						@Override
-						public void executeAction(ActionEvent e)
-						{
-							ColumnOrderMgr.getInstance().applyColumnOrder(tableList, originalObjectListOrder, false);
-						}
-
-						@Override
-						public boolean isEnabled()
-						{
-							return true;
-						}
-					};
-					menu.addSeparator();
-					menu.add(resetColOrder);
-				}
-				return menu;
-			}
-		};
+		this.tableList = new DbObjectTable();
 
 		this.tableList.setName("dbtablelist");
 		this.tableList.setSelectOnRightButtonClick(true);
@@ -421,8 +385,7 @@ public class TableListPanel
 			});
 		}
 
-		rememberTableListColumnOrder = Settings.getInstance().getRememberMetaColumnOrder("tablelist");
-
+		tableList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		showObjectDefinitionPanels(false, false);
@@ -688,11 +651,8 @@ public class TableListPanel
 			return;
 		}
 
-		if (rememberTableListColumnOrder)
-		{
-			objectListColumnOrder = ColumnOrderMgr.getInstance().getColumnOrder(tableList);
-		}
-
+		tableList.saveColumnOrder();
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -719,6 +679,7 @@ public class TableListPanel
 				importedTableTree.reset();
 				exportedTableTree.reset();
 				tableData.reset();
+				tableList.reset();
 			}
 		});
 	}
@@ -941,7 +902,7 @@ public class TableListPanel
 			}
 
 			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
-			saveColumnOrder(ds);
+			tableList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
 			// Make sure some columns are not modified by the user
@@ -956,15 +917,6 @@ public class TableListPanel
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
 					tableList.adjustRowsAndColumns();
-					if (columnOrderFromWorkspace != null)
-					{
-						ColumnOrderMgr.getInstance().applyColumnOrder(tableList, columnOrderFromWorkspace, false);
-						columnOrderFromWorkspace = null;
-					}
-					else
-					{
-						ColumnOrderMgr.getInstance().applyColumnOrder(tableList, objectListColumnOrder, false);
-					}
 					updateDisplayClients();
 				}
 			});
@@ -1005,16 +957,6 @@ public class TableListPanel
 			WbSwingUtilities.showDefaultCursor(this);
 			setBusy(false);
 			endTransaction();
-		}
-	}
-
-	private void saveColumnOrder(DataStore objectList)
-	{
-		ColumnIdentifier[] columns = objectList.getColumns();
-		originalObjectListOrder = new ArrayList<String>(columns.length);
-		for (ColumnIdentifier col : columns)
-		{
-			originalObjectListOrder.add(col.getColumnName());
 		}
 	}
 
@@ -1139,10 +1081,10 @@ public class TableListPanel
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
 			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
-			if (Settings.getInstance().getRememberMetaColumnOrder("tablelist"))
+
+			List<String> objectListColumnOrder = tableList.saveColumnOrder();
+			if (objectListColumnOrder != null)
 			{
-				// The objectListColumnOrder might not have been initialized yet
-				objectListColumnOrder = ColumnOrderMgr.getInstance().getColumnOrder(tableList);
 				props.setProperty(prefix + "columnorder", StringUtil.listToString(objectListColumnOrder, ','));
 			}
 		}
@@ -1190,7 +1132,7 @@ public class TableListPanel
 		String colString = props.getProperty(prefix + "columnorder", null);
 		if (StringUtil.isNonEmpty(colString))
 		{
-			columnOrderFromWorkspace = StringUtil.stringToList(colString, ",");
+			tableList.setNewColumnOrder(StringUtil.stringToList(colString, ","));
 		}
 	}
 

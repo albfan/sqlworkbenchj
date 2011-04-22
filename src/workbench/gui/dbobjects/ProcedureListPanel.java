@@ -85,7 +85,7 @@ public class ProcedureListPanel
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
-	private WbTable procList;
+	private DbObjectTable procList;
 	private WbTable procColumns;
 	protected DbObjectSourcePanel source;
 	private JTabbedPane displayTab;
@@ -172,6 +172,7 @@ public class ProcedureListPanel
 		procList.setReadOnly(true);
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		this.procList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("procedurelist"));
 
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
 
@@ -246,6 +247,7 @@ public class ProcedureListPanel
 	public void reset()
 	{
 		if (!initialized) return;
+		procList.saveColumnOrder();
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -315,6 +317,7 @@ public class ProcedureListPanel
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
+			procList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
 			WbSwingUtilities.invoke(new Runnable()
@@ -386,6 +389,11 @@ public class ProcedureListPanel
 	private void storeSettings(PropertyStorage props, String prefix)
 	{
 		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
+		List<String> objectListColumnOrder = procList.saveColumnOrder();
+		if (objectListColumnOrder != null)
+		{
+			props.setProperty(prefix + "columnorder", StringUtil.listToString(objectListColumnOrder, ','));
+		}
 	}
 
 	public void restoreSettings()
@@ -415,6 +423,11 @@ public class ProcedureListPanel
 		int loc = props.getIntProperty(prefix + "divider", 200);
 		splitPane.setDividerLocation(loc);
 		findPanel.restoreSettings(props, prefix);
+		String colString = props.getProperty(prefix + "columnorder", null);
+		if (StringUtil.isNonEmpty(colString))
+		{
+			procList.setNewColumnOrder(StringUtil.stringToList(colString, ","));
+		}
 	}
 
 	public void valueChanged(ListSelectionEvent e)
@@ -571,7 +584,7 @@ public class ProcedureListPanel
 		}
 		return names;
 	}
-	
+
 	private int findOracleProcedureInPackage(CharSequence sql, ProcedureDefinition def)
 	{
 		if (sql == null) return 0;

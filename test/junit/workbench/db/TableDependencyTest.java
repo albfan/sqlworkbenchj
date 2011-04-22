@@ -308,4 +308,109 @@ public class TableDependencyTest
 		}
 	}
 
+	@Test
+	public void testCycle2()
+		throws Exception
+	{
+		String sql =
+			"create table main  \n" +
+			"( \n" +
+			"   BASE integer not null,  \n" +
+			"   REGION integer not null,  \n" +
+			"   YEAR integer not null,  \n" +
+			"   MOVEMENTNUM integer not null, \n" +
+			"   location integer not null, \n" +
+			"   store integer not null, \n" +
+			"   purchorg integer not null, \n" +
+			"   ordernum integer not null, \n" +
+			"   DELIVERYPLACE integer not null, \n" +
+			"   ADDRPOOL integer not null,  \n" +
+			"   num integer \n" +
+			"); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"   ADD CONSTRAINT PK_main PRIMARY KEY (BASE, REGION, YEAR, MOVEMENTNUM); \n" +
+			" \n" +
+			"create table STORE  \n" +
+			"( \n" +
+			"  BASE integer not null, \n" +
+			"  REGION integer not null,  \n" +
+			"  LOCATION integer not null, \n" +
+			"  STORE integer not null, \n" +
+			"  constraint pk_store primary key (base, region, location, store) \n" +
+			"); \n" +
+			" \n" +
+			"create table ORDERS  \n" +
+			"( \n" +
+			"  BASE integer not null, \n" +
+			"  PURCHORG integer not null,  \n" +
+			"  ORDERNUM integer not null,  \n" +
+			"  primary key (base, purchorg, ordernum) \n" +
+			"); \n" +
+			" \n" +
+			"create table REGION  \n" +
+			"(  \n" +
+			"   BASE integer not null, \n" +
+			"   REGION integer not null, \n" +
+			"   primary key (base,region) \n" +
+			"); \n" +
+			" \n" +
+			"create table DELIVERYPLACE  \n" +
+			"( \n" +
+			"  BASE integer not null, \n" +
+			"  REGION integer not null, \n" +
+			"  LOCATION integer not null, \n" +
+			"  STORE integer not null, \n" +
+			"  DELIVERYPLACE integer not null,  \n" +
+			"  primary key (BASE,REGION,LOCATION,STORE,DELIVERYPLACE) \n" +
+			"); \n" +
+			" \n" +
+			"create table CONTACTPERSON  \n" +
+			"( \n" +
+			"   BASE integer not null, \n" +
+			"   ADDRPOOL integer not null, \n" +
+			"   num integer not null,  \n" +
+			"   primary key (BASE,ADDRPOOL,num) \n" +
+			"); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"  ADD CONSTRAINT F_main_STORE FOREIGN KEY (BASE, REGION, LOCATION, STORE) \n" +
+			"  REFERENCES STORE (BASE,REGION,LOCATION,STORE); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"  ADD CONSTRAINT F_main_ORDER FOREIGN KEY (BASE, PURCHORG, ORDERNUM) \n" +
+			"  REFERENCES ORDERS (BASE,PURCHORG,ORDERNUM); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"  ADD CONSTRAINT F_main_REGION FOREIGN KEY (BASE, REGION) \n" +
+			"  REFERENCES REGION (BASE,REGION); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"  ADD CONSTRAINT F_main_DELIVERYPLACE FOREIGN KEY (BASE, REGION, LOCATION, STORE, DELIVERYPLACE) \n" +
+			"  REFERENCES DELIVERYPLACE (BASE,REGION,LOCATION,STORE,DELIVERYPLACE); \n" +
+			" \n" +
+			"ALTER TABLE main \n" +
+			"  ADD CONSTRAINT F_main_CONTACTPERSON FOREIGN KEY (BASE, ADDRPOOL, num) \n" +
+			"  REFERENCES CONTACTPERSON (BASE,ADDRPOOL,num);\n" +
+			"commit;";
+
+		WbConnection con = getTestUtil().getConnection();
+		TestUtil.executeScript(con, sql);
+
+		try
+		{
+			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("main"));
+			TableDependency dep = new TableDependency(con, tbl);
+			dep.readTreeForParents();
+			assertEquals(false, dep.wasAborted());
+			assertNotNull("No root returned", dep.getRootNode());
+			List<DependencyNode> children = dep.getRootNode().getChildren();
+			assertEquals(5, children.size());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 }
