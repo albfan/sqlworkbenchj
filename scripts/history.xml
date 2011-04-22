@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-04-02">
+    <entry dev-build="5" type="enh">The order of the columns in the DbExplorer's table list is now saved in the workspace</entry>
     <entry dev-build="4" type="enh">WbDeleteProfile and WbSaveProfile are now also supported in batch mode.</entry>
     <entry dev-build="4" type="enh">WbSaveProfile now supports a parameter whether the password should be stored or not (in that case the new -name parameter must be used to specify the profile's name)</entry>
     <entry dev-build="2" type="enh">For simple INSERT statements a tooltip can now be show (Ctrl-P) that displays the corresponding column name or column value.</entry>
@@ -9,6 +10,7 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exlusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="5" type="fix">When choosing not to save a modified file when closing the application, the file was saved nevertheless.</entry>
     <entry dev-build="4" type="fix">When recompiling an Oracle function or procedure using ALTER ... COMPILE, compilation warnings where not shown.</entry>
     <entry dev-build="4" type="fix">Fixed a bug where that caused the code completion to be extremely slow on.</entry>
     <entry dev-build="3" type="fix">In the DbExplorer the columns for tables that had "similar" names (according to a LIKE expression with underscores) were not displayed correctly.</entry>
