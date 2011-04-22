@@ -154,19 +154,45 @@ public class SchemaDiff
 	 * Control whether table constraints should be compared as well.
 	 * The default is to not compare primary keys.
 	 */
-	public void setIncludeTableConstraints(boolean flag) { this.diffConstraints = flag; }
+	public void setIncludeTableConstraints(boolean flag)
+	{
+		this.diffConstraints = flag;
+	}
 
-	public void setCompareJdbcTypes(boolean flag) { this.compareJdbcTypes = flag; }
-	public boolean getCompareJdbcTypes() { return this.compareJdbcTypes; }
+	public void setCompareJdbcTypes(boolean flag)
+	{
+		this.compareJdbcTypes = flag;
+	}
 
-	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
+	public boolean getCompareJdbcTypes()
+	{
+		return this.compareJdbcTypes;
+	}
 
-	public void setIncludeProcedures(boolean flag) { this.diffProcs = flag; }
+	public void setIncludeViews(boolean flag)
+	{
+		this.diffViews = flag;
+	}
 
-	public void setIncludeTableGrants(boolean flag) { this.diffGrants = flag; }
-	public boolean getIncludeTableGrants() { return this.diffGrants; }
+	public void setIncludeProcedures(boolean flag)
+	{
+		this.diffProcs = flag;
+	}
 
-	public void setTreatViewAsTable(boolean flag) { this.treatViewAsTable = flag; }
+	public void setIncludeTableGrants(boolean flag)
+	{
+		this.diffGrants = flag;
+	}
+
+	public boolean getIncludeTableGrants()
+	{
+		return this.diffGrants;
+	}
+
+	public void setTreatViewAsTable(boolean flag)
+	{
+		this.treatViewAsTable = flag;
+	}
 
 //	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 
@@ -776,7 +802,9 @@ public class SchemaDiff
 
 			try
 			{
-				if (referenceDb.getMetadata().isTableType(entry.reference.getType()))
+				String refType = entry.reference.getType();
+
+				if (referenceDb.getMetadata().isTableType(refType) && !refType.equals(referenceDb.getMetadata().getMViewTypeName()))
 				{
 					ReportTable source = createReportTableInstance(entry.reference, this.referenceDb);
 					if (entry.target == null)

@@ -80,7 +80,7 @@ public class ReportView
 			// This is important for e.g. Oracle. Otherwise the table definition
 			// will contain multiple columns if a table exists more then once in
 			// different schemas with the same name
-			tbl.setSchema(conn.getMetadata().getSchemaToUse());
+			tbl.setSchema(conn.getMetadata().getCurrentSchema());
 		}
 		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);

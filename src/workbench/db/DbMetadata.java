@@ -1318,6 +1318,11 @@ public class DbMetadata
 			snapshotList = oracleMetaData.getSnapshots(schemaPattern);
 		}
 
+		// When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
+		// materialized views twice, so we need to get rid of them.
+		boolean detectDuplicates = isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types);
+		Set<String> processed = new TreeSet<String>();
+
 		boolean hideIndexes = hideIndexes();
 
 		ResultSet tableRs = null;
@@ -1344,6 +1349,8 @@ public class DbMetadata
 
 				if (filter.isExcluded(ttype, name)) continue;
 
+				String remarks = tableRs.getString(5);
+
 				boolean isSynoym = "SYNONYM".equals(ttype);
 
 				// prevent duplicate retrieval of SYNONYMs if the driver
@@ -1357,25 +1364,35 @@ public class DbMetadata
 
 				if (hideIndexes && isIndexType(ttype)) continue;
 
-				if (checkOracleSnapshots)
+				String fqName = null;
+				if (detectDuplicates || checkOracleSnapshots)
 				{
-					StringBuilder t = new StringBuilder(30);
+					// As this name is only used to workaround Oracle problems, schema and table name are enough
+					// for a fully qualified name.
+					StringBuilder t = new StringBuilder(schema.length() + name.length() + 1);
 					t.append(schema);
 					t.append('.');
 					t.append(name);
-					if (snapshotList.contains(t.toString()))
-					{
-						ttype = MVIEW_NAME;
-					}
+					fqName = t.toString();
 				}
 
-				String rem = tableRs.getString(5);
+				if (checkOracleSnapshots && !ttype.equals(MVIEW_NAME) && snapshotList.contains(fqName))
+				{
+					ttype = MVIEW_NAME;
+				}
+
+				if (detectDuplicates)
+				{
+					if (processed.contains(fqName)) continue;
+					processed.add(fqName);
+				}
+
 				int row = result.addRow();
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schema);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, remarks);
 				if (!sequencesReturned && "SEQUENCE".equals(ttype)) sequencesReturned = true;
 			}
 		}
