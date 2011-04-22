@@ -15,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,9 +284,11 @@ public class DbObjectCache
 	private TableIdentifier findKey(TableIdentifier key)
 	{
 		if (key == null) return null;
+		// as contains() is using the comparator as well, we have to use it here also!
+		Comparator<? super TableIdentifier> comparator = objects.comparator();
 		for (TableIdentifier tbl : objects.keySet())
 		{
-			if (key.equals(tbl)) return tbl;
+			if (comparator.compare(key, tbl) == 0) return tbl;
 		}
 		return null;
 	}

@@ -1786,7 +1786,8 @@ public class DbMetadata
 		}
 		try
 		{
-			return this.metaData.storesLowerCaseIdentifiers();
+			boolean lower = this.metaData.storesLowerCaseIdentifiers();
+			return lower;
 		}
 		catch (SQLException e)
 		{
@@ -1809,7 +1810,8 @@ public class DbMetadata
 		}
 		try
 		{
-			return this.metaData.storesUpperCaseIdentifiers();
+			boolean upper = this.metaData.storesUpperCaseIdentifiers();
+			return upper;
 		}
 		catch (SQLException e)
 		{
