@@ -895,6 +895,16 @@ public class Settings
 
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
 
+	public boolean getDbExpFilterDuringTyping()
+	{
+		return getBoolProperty("workbench.dbexplorer.instantfilter", false);
+	}
+
+	public void setDbExpFilterDuringTyping(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.instantfilter", flag);
+	}
+
 	public boolean getAlwaysUseSeparateConnForDbExpWindow()
 	{
 		return getBoolProperty("workbench.dbexplorer.connection.always.separate", false);

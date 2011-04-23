@@ -31,6 +31,7 @@ public class DbExplorerOptionsPanel
 		initComponents();
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -44,11 +45,13 @@ public class DbExplorerOptionsPanel
 		set.setRememberColumnOrder(rememberColOrder.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
 		set.setDefaultExplorerObjectType(this.defTableType.getText());
+		set.setDbExpFilterDuringTyping(filterWhileTyping.isSelected());
 		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
 		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -57,9 +60,10 @@ public class DbExplorerOptionsPanel
 		defTableType.setText(set.getDefaultExplorerObjectType());
 		rememberColOrder.setSelected(set.getRememberColumnOrder());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
+		filterWhileTyping.setSelected(Settings.getInstance().getDbExpFilterDuringTyping());
 		((PlacementChooser)tabPlacement).showPlacement();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -86,6 +90,7 @@ public class DbExplorerOptionsPanel
     rememberColOrder = new javax.swing.JCheckBox();
     allowTableAlter = new javax.swing.JCheckBox();
     useQuickFilterRegex = new javax.swing.JCheckBox();
+    filterWhileTyping = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -284,6 +289,17 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(useQuickFilterRegex, gridBagConstraints);
+
+    filterWhileTyping.setText(ResourceMgr.getString("LblFilterWhileType")); // NOI18N
+    filterWhileTyping.setToolTipText(ResourceMgr.getString("d_LblFilterWhileType")); // NOI18N
+    filterWhileTyping.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    add(filterWhileTyping, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -293,6 +309,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;
   private javax.swing.JLabel defTableTypeLabel;
+  private javax.swing.JCheckBox filterWhileTyping;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;

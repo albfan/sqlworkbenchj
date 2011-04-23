@@ -287,6 +287,10 @@ public class TableListPanel
 		this.extendPopupMenu();
 
 		this.findPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
+		if (Settings.getInstance().getDbExpFilterDuringTyping())
+		{
+			((QuickFilterPanel)findPanel).setFilterOnType(true);
+		}
 
 		reloadAction = new ReloadAction(this);
 		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));

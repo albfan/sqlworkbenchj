@@ -220,8 +220,7 @@ public class DbObjectCache
 
 		List<ColumnIdentifier> cols = this.objects.get(toSearch);
 
-		// To support Oracle public synonyms, try to find a table with that name
-		// but without a schema
+		// To support Oracle public synonyms, try to find a table with that name but without a schema
 		if (retrieveOraclePublicSynonyms && toSearch.getSchema() != null && cols == null)
 		{
 			toSearch.setSchema(null);
@@ -244,12 +243,13 @@ public class DbObjectCache
 			// so we'll get a containsKey() == true even if the type is different
 			// (which is necessary because the TableIdentifier passed to this
 			// method will never contain a type!)
+			// only using objects.get() would not return anything!
 			if (objects.containsKey(toSearch))
 			{
 				// we have already retrieved the list of tables, but not the columns for this table
-				// the stored key contains precise type and schema information, so we need
+				// the table identifier in the object map contains correct type and schema information, so we need
 				// to use that
-				tblToUse = findKey(toSearch);
+				tblToUse = findEntry(toSearch);
 			}
 			else
 			{
@@ -266,7 +266,8 @@ public class DbObjectCache
 				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tblToUse, e);
 				cols = null;
 			}
-			if (tblToUse != null && cols != null && cols.size() > 0)
+
+			if (tblToUse != null && CollectionUtil.isNonEmpty(cols))
 			{
 				this.objects.put(tblToUse, cols);
 			}
@@ -281,11 +282,13 @@ public class DbObjectCache
 	 * properties that the passed key does not have (even
 	 * though they are equal)
 	 */
-	private TableIdentifier findKey(TableIdentifier key)
+	private TableIdentifier findEntry(TableIdentifier key)
 	{
 		if (key == null) return null;
+
 		// as contains() is using the comparator as well, we have to use it here also!
 		Comparator<? super TableIdentifier> comparator = objects.comparator();
+		
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			if (comparator.compare(key, tbl) == 0) return tbl;

@@ -12,12 +12,14 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -36,6 +38,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 
@@ -65,7 +68,8 @@ import workbench.util.StringUtil;
  */
 public class QuickFilterPanel
 	extends JPanel
-	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener, PropertyChangeListener
+	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener,
+		PropertyChangeListener, KeyListener
 {
 	private WbTable searchTable;
 	private String searchColumn;
@@ -96,6 +100,30 @@ public class QuickFilterPanel
 		this.searchColumn = column;
 		showColumnDropDown = false;
 		this.initGui(historyProperty);
+	}
+
+	public void setFilterOnType(boolean flag)
+	{
+		if (flag)
+		{
+			enableAutoFilter();
+		}
+		else
+		{
+			disableAutoFilter();
+		}
+	}
+
+	private void enableAutoFilter()
+	{
+		Component ed = filterValue.getEditor().getEditorComponent();
+		ed.addKeyListener(this);
+	}
+
+	private void disableAutoFilter()
+	{
+		Component ed = filterValue.getEditor().getEditorComponent();
+		ed.removeKeyListener(this);
 	}
 
 	private void initDropDown()
@@ -221,13 +249,14 @@ public class QuickFilterPanel
 		ed.addMouseListener(textListener);
 	}
 
+	@Override
 	public void setColumnList(String[] columns)
 	{
 		if (columns == null || columns.length == 0) return;
 		if (StringUtil.arraysEqual(columns, columnList)) return;
 
 		columnList = columns;
-		
+
 		this.searchColumn = columns[0];
 		initPopup();
 		if (showColumnDropDown)
@@ -248,15 +277,15 @@ public class QuickFilterPanel
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), filterAction.getActionName());
 		im.put(filterAction.getAccelerator(), filterAction.getActionName());
 		am.put(filterAction.getActionName(), this.filterAction);
-//		im.put(resetFilterAction.getAccelerator(), resetFilterAction.getActionName());
-//		am.put(resetFilterAction.getActionName(), resetFilterAction);
 	}
 
+	@Override
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
 		filterValue.saveSettings(props, prefix);
 	}
 
+	@Override
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
 		filterValue.removeActionListener(this);
@@ -264,11 +293,13 @@ public class QuickFilterPanel
 		filterValue.addActionListener(this);
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		filterValue.saveSettings();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		filterValue.removeActionListener(this);
@@ -276,6 +307,7 @@ public class QuickFilterPanel
 		filterValue.addActionListener(this);
 	}
 
+	@Override
 	public void setFocusToEntryField()
 	{
 		this.filterValue.grabFocus();
@@ -296,7 +328,7 @@ public class QuickFilterPanel
 		// let the caller handle the exception
 		Pattern.compile(regex);
 		LogMgr.logInfo("QuickFilterPanel.getPattern()", "Using regex pattern [" + regex + "] instead of [" + input + "]");
-		
+
 		return regex;
 	}
 
@@ -336,14 +368,19 @@ public class QuickFilterPanel
 		s.append('$');
 		return s.toString();
 	}
-	
+
+	@Override
 	public void applyQuickFilter()
+	{
+		applyFilter(this.filterValue.getText());
+	}
+
+	private void applyFilter(String filterExpression)
 	{
 		try
 		{
-			filterValue.removeActionListener(this);
-			String value = this.filterValue.getText();
-			if (StringUtil.isEmptyString(value) || value.trim().equals("*") || value.trim().equals("%"))
+			this.filterValue.removeActionListener(this);
+			if (StringUtil.isEmptyString(filterExpression) || filterExpression.trim().equals("*") || filterExpression.trim().equals("%"))
 			{
 				this.searchTable.resetFilter();
 			}
@@ -351,27 +388,28 @@ public class QuickFilterPanel
 			{
 				try
 				{
-					String pattern = getPattern(value);
+					String pattern = getPattern(filterExpression);
 					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, pattern);
 					col.setIgnoreCase(true);
 					searchTable.applyFilter(col);
-					filterValue.addToHistory(value);
+					this.filterValue.addToHistory(filterExpression);
 				}
 				catch (Exception e)
 				{
 					searchTable.resetFilter();
 					LogMgr.logError("QuickFilterPanel.applyQuickFilter()", "Cannot apply filter expression", e);
-					String msg = ResourceMgr.getFormattedString("ErrBadRegex", value);
+					String msg = ResourceMgr.getFormattedString("ErrBadRegex", filterExpression);
 					WbSwingUtilities.showErrorMessage(this, msg);
 				}
 			}
 		}
 		finally
 		{
-			filterValue.addActionListener(this);
+			this.filterValue.addActionListener(this);
 		}
 	}
 
+	@Override
 	public String getText()
 	{
 		return filterValue.getText();
@@ -382,11 +420,13 @@ public class QuickFilterPanel
 		setText(aText);
 	}
 
+	@Override
 	public void setText(String aText)
 	{
 		filterValue.setText(aText);
 	}
 
+	@Override
 	public void addToToolbar(WbAction anAction, boolean atFront, boolean withSep)
 	{
 		JButton button = anAction.getToolbarButton();
@@ -403,6 +443,7 @@ public class QuickFilterPanel
 	}
 
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == filterValue)
@@ -444,15 +485,32 @@ public class QuickFilterPanel
 		setFilterTooltip();
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 	}
 
-	public void mouseEntered(java.awt.event.MouseEvent e) {}
-	public void mouseExited(java.awt.event.MouseEvent e) {}
-	public void mousePressed(java.awt.event.MouseEvent e) {}
-	public void mouseReleased(java.awt.event.MouseEvent e) {}
+	@Override
+	public void mouseEntered(java.awt.event.MouseEvent e)
+	{
+	}
 
+	@Override
+	public void mouseExited(java.awt.event.MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mousePressed(java.awt.event.MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseReleased(java.awt.event.MouseEvent e)
+	{
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		int count = this.searchTable.getColumnCount();
@@ -462,6 +520,49 @@ public class QuickFilterPanel
 			names[i] = this.searchTable.getColumnName(i);
 		}
 		setColumnList(names);
+	}
+
+	private synchronized void filterByEditorValue()
+	{
+		Component comp = filterValue.getEditor().getEditorComponent();
+		if (comp instanceof JTextField)
+		{
+			JTextField editor = (JTextField)comp;
+			String value = editor.getText();
+			if (StringUtil.isNonBlank(value))
+			{
+				filterValue.setText(value);
+				applyFilter(value);
+				// this is necessary to remove the text selection that is automatically done
+				// because of setting the text in applayFilter
+				editor.setCaretPosition(value.length());
+			}
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				filterByEditorValue();
+			}
+		});
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+
 	}
 
 }
