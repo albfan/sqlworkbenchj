@@ -47,13 +47,13 @@ public class OracleTablePartition
 			"where object_type = 'TABLE' \n" +
 			"  and owner = ? \n" +
 			"  and name = ? \n" +
-			"order by column_position \n";	
+			"order by column_position \n";
 	}
 
 	@Override
 	protected String getRetrievePartitionDefinitionSql()
 	{
-		return 
+		return
 			"select pt.owner,  \n" +
 			"       pt.table_name, \n" +
 			"       pt.partitioning_type,  \n" +
@@ -64,7 +64,7 @@ public class OracleTablePartition
 			"       pt.def_subpartition_count \n" +
 			"from all_part_tables pt \n" +
 			"where pt.owner = ? \n" +
-			"  and pt.table_name = ? ";			
+			"  and pt.table_name = ? ";
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class OracleTablePartition
 					"FROM all_tab_partitions \n" +
 					"WHERE table_owner = ?  \n" +
 					"  AND table_name = ? \n" +
-					"ORDER BY partition_position";			
+					"ORDER BY partition_position";
 		}
 		return
 			"SELECT partition_name,  \n" +
@@ -103,8 +103,8 @@ public class OracleTablePartition
 		"       column_position \n" +
 		"from all_subpart_key_columns \n" +
 		"where owner = ? \n" +
-		"  and name = ? \n" + 
-		"order by column_position";	
+		"  and name = ? \n" +
+		"order by column_position";
 	}
 
 	@Override
@@ -112,18 +112,18 @@ public class OracleTablePartition
 	{
 		if (useCompression)
 		{
-		return 
-			"select partition_name,  \n" +
-			"       subpartition_name,  \n" +
-			"       high_value, \n" +
-			"       subpartition_position, \n" +
-			"       compression \n" +
-			"from all_tab_subpartitions \n" +
-			"where table_owner = ?  \n" +
-			"  and table_name = ?  \n" +
-			"order by subpartition_position";			
+			return
+				"select partition_name,  \n" +
+				"       subpartition_name,  \n" +
+				"       high_value, \n" +
+				"       subpartition_position, \n" +
+				"       compression \n" +
+				"from all_tab_subpartitions \n" +
+				"where table_owner = ?  \n" +
+				"  and table_name = ?  \n" +
+				"order by subpartition_position";
 		}
-		return 
+		return
 			"select partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
@@ -131,7 +131,7 @@ public class OracleTablePartition
 			"from all_tab_subpartitions \n" +
 			"where table_owner = ?  \n" +
 			"  and table_name = ?  \n" +
-			"order by subpartition_position";			
+			"order by subpartition_position";
 	}
-	
+
 }

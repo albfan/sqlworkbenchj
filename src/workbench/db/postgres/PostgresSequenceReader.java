@@ -157,8 +157,12 @@ public class PostgresSequenceReader
 			dbConnection.rollback(sp);
 			LogMgr.logError("PostgresSequenceReader.getOwnedByClause()", "Error retrieving sequence column", e);
 		}
-		return;
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
 	}
+
 	/**
 	 *	Return the source SQL for a PostgreSQL sequence definition.
 	 *

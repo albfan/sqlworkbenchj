@@ -34,11 +34,18 @@ public class SequenceDefinition
 	private String comment;
 	private TableIdentifier relatedTable;
 	private String relatedColumn;
-	
+
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
-	
+
 	public SequenceDefinition(String seqSchema, String seqName)
 	{
+		sequenceName = seqName;
+		schema = seqSchema;
+	}
+
+	public SequenceDefinition(String seqCatalog, String seqSchema, String seqName)
+	{
+		catalog = seqCatalog;
 		sequenceName = seqName;
 		schema = seqSchema;
 	}
@@ -58,7 +65,7 @@ public class SequenceDefinition
 	{
 		return relatedColumn;
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -77,17 +84,17 @@ public class SequenceDefinition
 	{
 		comment = cmt;
 	}
-	
+
 	public String getSchema()
 	{
 		return schema;
 	}
-	
+
 	public void setCatalog(String cat)
 	{
 		catalog = cat;
 	}
-	
+
 	@Override
 	public String getCatalog()
 	{
@@ -99,7 +106,7 @@ public class SequenceDefinition
 	{
 		return null;
 	}
-	
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
@@ -119,27 +126,27 @@ public class SequenceDefinition
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, sequenceName);
 	}
-	
+
 	public String getObjectType()
 	{
 		return "SEQUENCE";
 	}
-	
+
 	public String getObjectName()
 	{
 		return getSequenceName();
 	}
-	
-	public String getSequenceName() 
+
+	public String getSequenceName()
 	{
 		return this.sequenceName;
 	}
-	
+
 	public String getSequenceOwner()
 	{
 		return this.schema;
 	}
-	
+
 	/**
 	 * As each Database has a different set of attributes for a sequence
 	 * these attributes are stored as key/value pairs to be as generic
@@ -149,27 +156,27 @@ public class SequenceDefinition
 	{
 		this.properties.put(property.toUpperCase().trim(), value);
 	}
-	
+
 	public Object getSequenceProperty(String property)
 	{
 		return properties.get(property.toUpperCase().trim());
 	}
-	
+
 	public CharSequence getSource()
 	{
 		return source;
 	}
-	
+
 	public void setSource(CharSequence src)
 	{
 		source = src;
 	}
-	
+
 	public Iterator<String> getProperties()
 	{
 		return this.properties.keySet().iterator();
 	}
-	
+
 	@Override
 	public boolean equals(Object other)
 	{
@@ -177,12 +184,12 @@ public class SequenceDefinition
 		{
 			SequenceDefinition od = (SequenceDefinition)other;
 			if (od.properties.size() != this.properties.size()) return false;
-			
+
 			for (Map.Entry<String, Object> entry : properties.entrySet())
 			{
 				Object ov = od.properties.get(entry.getKey());
 				if (ov == null) return false;
-				if (!ov.equals(entry.getValue())) return false; 
+				if (!ov.equals(entry.getValue())) return false;
 			}
 			return true;
 		}
@@ -198,7 +205,7 @@ public class SequenceDefinition
 	 * Note that some sequence readers might not put all retrieved attributes
 	 * into the properties, so this is not necessarily the same as retrieving
 	 * the raw definition directly from the sequence reader.
-	 * 
+	 *
 	 * @return a DataStore with the sequence properties
 	 */
 	public DataStore getRawDefinition()
@@ -229,7 +236,7 @@ public class SequenceDefinition
 		}
 		DataStore ds = new DataStore(colnames, types);
 		ds.addRow();
-		
+
 		i = 1;
 		ds.setValue(0, 0, getSequenceName());
 		for (String name : properties.keySet())
@@ -239,10 +246,10 @@ public class SequenceDefinition
 			i++;
 		}
 		ds.resetStatus();
-		
+
 		return ds;
 	}
-	
+
 	@Override
 	public int hashCode()
 	{
@@ -250,5 +257,11 @@ public class SequenceDefinition
 		hash = 67 * hash + (this.properties != null ? this.properties.hashCode() : 0);
 		return hash;
 	}
-	
+
+	@Override
+	public String toString()
+	{
+		return getSequenceName();
+	}
+
 }

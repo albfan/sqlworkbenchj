@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 public class OracleSchemaDiffTest
 	extends WbTestCase
 {
-	// More examples: http://psoug.org/reference/partitions.html
+
 	public OracleSchemaDiffTest()
 	{
 		super("OracleSchemaDiffTest");

@@ -466,6 +466,13 @@ public class StringUtil
 		return isWhitespace(value);
 	}
 
+	/**
+	 * Checks if the given string value is not empty (!= null && length() > 0).
+	 * Whitespaces are considered "not empty".
+	 *
+	 * @param value
+	 * @see #isEmpty(CharSequence)
+	 */
 	public static boolean isNonEmpty(CharSequence value)
 	{
 		return !isEmptyString(value);

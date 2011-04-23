@@ -14,6 +14,7 @@ package workbench.db.hsqldb;
 import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -23,6 +24,7 @@ import workbench.util.StringUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +40,7 @@ public class HsqlSequenceReader
 {
 	private Connection dbConn;
 	private String baseQuery;
+	private boolean supportsColumnSequence;
 
 	public HsqlSequenceReader(Connection conn)
 	{
@@ -62,6 +65,7 @@ public class HsqlSequenceReader
 			query += "information_schema.system_sequences";
 		}
 		baseQuery = query;
+		supportsColumnSequence = JdbcUtils.hasMinimumServerVersion(conn, "2.1");
 	}
 
 	public void readSequenceSource(SequenceDefinition def)
@@ -155,6 +159,8 @@ public class HsqlSequenceReader
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
 		result.setSequenceProperty("CYCLE_OPTION", ds.getValue(row, "CYCLE_OPTION"));
 		result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
+		readRelatedTable(result); // must be called before buildSource is called!
+
 		result.setSource(buildSource(result));
 		return result;
 	}
@@ -197,7 +203,58 @@ public class HsqlSequenceReader
 		result.append(inc);
 		result.append(';');
 		result.append(nl);
+		if (def.getRelatedTable() != null)
+		{
+			result.append(nl);
+			result.append("-- Sequence for: " + def.getRelatedTable().getTableExpression() + "." + def.getRelatedColumn());
+			result.append(nl);
+		}
 
 		return result;
+	}
+
+	private void readRelatedTable(SequenceDefinition def)
+	{
+		if (def == null) return;
+		if (!supportsColumnSequence) return;
+
+		String sql =
+				"SELECT table_catalog, table_schema, table_name, column_name \n" +
+				"FROM information_schema.system_column_sequence_usage \n" +
+				"WHERE sequence_schema = ? \n " +
+				"  AND sequence_name = ? ";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try
+		{
+			pstmt = dbConn.prepareStatement(sql);
+			pstmt.setString(1, def.getSchema());
+			pstmt.setString(2, def.getSequenceName());
+
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String cat = rs.getString(1);
+				String schema = rs.getString(2);
+				String name = rs.getString(3);
+				String col = rs.getString(4);
+				if (StringUtil.isNonEmpty(name) && StringUtil.isNonEmpty(col))
+				{
+					def.setRelatedTable(new TableIdentifier(cat, schema, name), col);
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			supportsColumnSequence = false;
+			LogMgr.logError("HsqlSequenceReader.getOwnedByClause()", "Error retrieving sequence column", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return;
 	}
 }
