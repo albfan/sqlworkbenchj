@@ -146,7 +146,7 @@ public class SelectCommand
 			this.runner.rollbackSavepoint();
 			throw mem;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
