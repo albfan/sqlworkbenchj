@@ -287,10 +287,9 @@ public class TableListPanel
 		this.extendPopupMenu();
 
 		this.findPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
-		if (Settings.getInstance().getDbExpFilterDuringTyping())
-		{
-			((QuickFilterPanel)findPanel).setFilterOnType(true);
-		}
+		((QuickFilterPanel)findPanel).setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_INSTANT_FILTER);
 
 		reloadAction = new ReloadAction(this);
 		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
@@ -439,6 +438,7 @@ public class TableListPanel
 		tableDefinition.removePropertyChangeListener(this);
 		tableDefinition.dispose();
 		tableData.dispose();
+		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	private void extendPopupMenu()
@@ -2001,6 +2001,10 @@ public class TableListPanel
 		{
 			invalidateData();
 			this.shouldRetrieveTable = false;
+		}
+		else if (Settings.PROPERTY_DBEXP_INSTANT_FILTER.equals(evt.getPropertyName()))
+		{
+			((QuickFilterPanel)findPanel).setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
 		}
 	}
 

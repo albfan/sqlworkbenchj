@@ -372,10 +372,10 @@ public class QuickFilterPanel
 	@Override
 	public void applyQuickFilter()
 	{
-		applyFilter(this.filterValue.getText());
+		applyFilter(this.filterValue.getText(), true);
 	}
 
-	private void applyFilter(String filterExpression)
+	private void applyFilter(String filterExpression, boolean storeInHistory)
 	{
 		try
 		{
@@ -532,7 +532,7 @@ public class QuickFilterPanel
 			if (StringUtil.isNonBlank(value))
 			{
 				filterValue.setText(value);
-				applyFilter(value);
+				applyFilter(value, false);
 				// this is necessary to remove the text selection that is automatically done
 				// because of setting the text in applayFilter
 				editor.setCaretPosition(value.length());

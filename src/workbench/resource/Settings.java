@@ -114,8 +114,9 @@ public class Settings
 	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.datatype";
 
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
+	public static final String PROPERTY_DBEXP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
 	// </editor-fold>
-
+	
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
 
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -897,12 +898,12 @@ public class Settings
 
 	public boolean getDbExpFilterDuringTyping()
 	{
-		return getBoolProperty("workbench.dbexplorer.instantfilter", false);
+		return getBoolProperty(PROPERTY_DBEXP_INSTANT_FILTER, false);
 	}
 
 	public void setDbExpFilterDuringTyping(boolean flag)
 	{
-		setProperty("workbench.dbexplorer.instantfilter", flag);
+		setProperty(PROPERTY_DBEXP_INSTANT_FILTER, flag);
 	}
 
 	public boolean getAlwaysUseSeparateConnForDbExpWindow()
