@@ -141,7 +141,7 @@ public class HsqlColumnEnhancer
 	 */
 	private Map<String, SequenceDefinition> getColumnSequences(WbConnection conn, TableIdentifier tbl)
 	{
-		if (!supportColumnSequence || !JdbcUtils.hasMinimumServerVersion(conn, "2.1"))
+		if (!supportColumnSequence || !JdbcUtils.hasMinimumServerVersion(conn, "2.1.1"))
 		{
 			supportColumnSequence = false;
 			return Collections.emptyMap();

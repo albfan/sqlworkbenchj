@@ -65,7 +65,7 @@ public class HsqlSequenceReader
 			query += "information_schema.system_sequences";
 		}
 		baseQuery = query;
-		supportsColumnSequence = JdbcUtils.hasMinimumServerVersion(conn, "2.1");
+		supportsColumnSequence = JdbcUtils.hasMinimumServerVersion(conn, "2.1.1");
 	}
 
 	public void readSequenceSource(SequenceDefinition def)

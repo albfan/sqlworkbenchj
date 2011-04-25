@@ -22,6 +22,25 @@ public class VersionNumberTest
 {
 
 	@Test
+	public void testPatchLevel()
+	{
+		VersionNumber one = new VersionNumber("2.1");
+		VersionNumber two = new VersionNumber("2.1.1");
+		assertTrue(two.isNewerThan(one));
+		assertFalse(one.isNewerThan(two));
+
+		one = new VersionNumber("2.1.1");
+		two = new VersionNumber("2.1.4");
+		assertTrue(two.isNewerThan(one));
+		assertFalse(one.isNewerThan(two));
+
+		one = new VersionNumber("2.1.0");
+		two = new VersionNumber("2.1.1");
+		assertTrue(two.isNewerThan(one));
+		assertFalse(one.isNewerThan(two));
+	}
+
+	@Test
 	public void testVersion()
 	{
 		VersionNumber one = new VersionNumber("94");
