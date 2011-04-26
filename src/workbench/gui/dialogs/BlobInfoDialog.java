@@ -53,7 +53,7 @@ public class BlobInfoDialog
 	private File uploadFile;
 	private boolean hasTools = false;
 	private boolean setToNull = false;
-	
+
 	public BlobInfoDialog(java.awt.Frame parent, boolean modal, boolean readOnly)
 	{
 		super(parent, modal);
@@ -74,7 +74,7 @@ public class BlobInfoDialog
 			DefaultComboBoxModel model = new DefaultComboBoxModel();
 			String name = Settings.getInstance().getLastUsedBlobTool();
 			int toSelect = -1;
-			
+
 			for (int i = 0; i < tools.size(); i++)
 			{
 				model.addElement(tools.get(i));
@@ -83,7 +83,7 @@ public class BlobInfoDialog
 					toSelect = i;
 				}
 			}
-			
+
 			this.externalTools.setModel(model);
 			if (toSelect != -1)
 			{
@@ -95,21 +95,22 @@ public class BlobInfoDialog
 		WbSwingUtilities.center(this, parent);
 	}
 
-	public File getUploadedFile() 
-	{ 
-		return uploadFile; 
+	public File getUploadedFile()
+	{
+		return uploadFile;
 	}
-	
-	public boolean setToNull() 
-	{ 
+
+	public boolean setToNull()
+	{
 		return setToNull;
 	}
-	
+
 	public byte[] getNewValue()
 	{
 		return handler.getNewValue();
 	}
-	
+
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == escAction)
@@ -137,10 +138,10 @@ public class BlobInfoDialog
 			lbl = ResourceMgr.getString("LblBlobSize");
 		}
 		long len = 0;
-		
+
 		if (value == null)
 		{
-			lbl = lbl + ": (null)";
+			lbl += ": (null)";
 		}
 		else
 		{
@@ -156,9 +157,9 @@ public class BlobInfoDialog
 		{
 			infoLabel.setToolTipText(handler.getByteDisplay(len).toString());
 		}
-		// Show as text is always enabled to allow text editing 
+		// Show as text is always enabled to allow text editing
 		// for null BLOBs as well.
-		
+
 		saveAsButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
 		showHexButton.setEnabled(len > 0);
@@ -181,7 +182,7 @@ public class BlobInfoDialog
 			LogMgr.logError("BlobInfoDialog.openWithExternalViewer()", "Error running external program", e);
 			String msg = ExceptionUtil.getDisplay(e);
 			WbSwingUtilities.showErrorMessage(this, msg);
-		}		
+		}
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -385,7 +386,7 @@ public class BlobInfoDialog
 		try
 		{
 			byte[] data = handler.getBlobAsArray(this.blobValue);
-			if (data == null) 
+			if (data == null)
 			{
 				WbSwingUtilities.showErrorMessageKey(this, "MsgBlobNotRetrieved");
 				return;
@@ -418,7 +419,7 @@ public class BlobInfoDialog
 		{
 			String file = FileDialogUtil.getBlobFile(this);
 			if (file == null) return;
-			
+
 			fileSize = BlobHandler.saveBlobToFile(blobValue, file);
 			String msg = ResourceMgr.getString("MsgBlobSaved");
 			File f = new File(file);

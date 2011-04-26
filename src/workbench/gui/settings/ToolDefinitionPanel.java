@@ -50,6 +50,7 @@ public class ToolDefinitionPanel
 		initComponents();
 		tfName.addFocusListener(new FocusAdapter()
 		{
+			@Override
 			public void focusLost(FocusEvent evt)
 			{
 				nameFieldFocusLost(evt);
@@ -86,9 +87,12 @@ public class ToolDefinitionPanel
     lblPath = new javax.swing.JLabel();
     tfPath = new StringPropertyEditor();
     selectLibButton = new FlatButton();
+    parameters = new StringPropertyEditor();
+    lblParameters = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
+    lblName.setLabelFor(tfName);
     lblName.setText(ResourceMgr.getString("LblLnFName")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -110,19 +114,19 @@ public class ToolDefinitionPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
     add(tfName, gridBagConstraints);
 
+    lblPath.setLabelFor(tfPath);
     lblPath.setText(ResourceMgr.getString("LblExePath")); // NOI18N
     lblPath.setToolTipText(ResourceMgr.getString("d_LblExePath")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 7);
     add(lblPath, gridBagConstraints);
 
     tfPath.setColumns(10);
     tfPath.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfPath.setName("commandLine"); // NOI18N
+    tfPath.setName("executablePath"); // NOI18N
     tfPath.addMouseListener(new TextComponentMouseListener());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -130,7 +134,7 @@ public class ToolDefinitionPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
     add(tfPath, gridBagConstraints);
 
     selectLibButton.setText("...");
@@ -144,6 +148,29 @@ public class ToolDefinitionPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
     add(selectLibButton, gridBagConstraints);
+
+    parameters.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    parameters.setName("parameters"); // NOI18N
+    tfName.addMouseListener(new TextComponentMouseListener());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 3, 6, 3);
+    add(parameters, gridBagConstraints);
+
+    lblParameters.setLabelFor(lblParameters);
+    lblParameters.setText(ResourceMgr.getString("LblCompletionListParams")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 7);
+    add(lblParameters, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -211,7 +238,9 @@ public class ToolDefinitionPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JLabel lblName;
+  public javax.swing.JLabel lblParameters;
   public javax.swing.JLabel lblPath;
+  public javax.swing.JTextField parameters;
   public javax.swing.JButton selectLibButton;
   public javax.swing.JTextField tfName;
   public javax.swing.JTextField tfPath;

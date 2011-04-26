@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,17 +20,33 @@ import java.util.List;
  */
 public class ToolDefinition
 {
-	private String appPath;
+	private String exePath;
 	private String name;
+	private String parameters;
 
 	public ToolDefinition()
 	{
 	}
 
-	public ToolDefinition(String exe, String name)
+	public ToolDefinition(String exe, String params, String name)
 	{
-		setCommandLine(exe);
+		setExecutablePath(exe);
 		setName(name);
+		setParameters(params);
+	}
+
+	/**
+	 * Return any parameter that should be passed to the application when starting it.
+	 * @return
+	 */
+	public String getParameters()
+	{
+		return parameters;
+	}
+
+	public void setParameters(String parameters)
+	{
+		this.parameters = parameters;
 	}
 
 	public String getName()
@@ -43,52 +60,61 @@ public class ToolDefinition
 	}
 
 	/**
-	 * The commndline for this external tool, including possible (static)
-	 * parameters.
+	 * The path to the executable for this tool.
+	 * Parameters are not part of this.
+	 *
+	 * @see #getParameters()
 	 */
-	public String getCommandLine()
+	public String getExecutablePath()
 	{
-		return appPath;
+		return exePath;
 	}
 
 	/**
-	 * The command line that should be used to run the external tool. This may
-	 * include parameters to the application, therefor a File object cannot be passed
-	 *
-	 * Parameters are separated with spaces from the actual program path.
-	 * Program paths with spaces are expected to be enclosed with double quotes
+	 * The command line that should be used to run the external tool. This must not
+	 * include parameters for the application. They have to be defined through setParameters()
 	 *
 	 * The method is invoked through reflection from the {@link workbench.gui.settings.ToolDefinitionPanel}
 	 * by a {@link workbench.gui.components.StringPropertyEditor}
 	 *
 	 * @param path
+	 * @see #setParameters(java.lang.String)
 	 */
-	public void setCommandLine(String path)
+	public void setExecutablePath(String path)
 	{
-		this.appPath = path;
+		this.exePath = path;
 	}
 
+	@Override
 	public String toString()
 	{
 		return getName();
 	}
 
+	/**
+	 * Returns a File object to the executable of this tool
+	 *
+	 * @see #getExecutablePath()
+	 * @see #getParameters()
+	 */
 	public WbFile getExecutable()
 	{
-		if (this.appPath == null) return null;
-		// as the commandline may include parameters, we assume the first token is the actual program.
-		// but this requires that if the path to the executable contains spaces, the exe path
-		// must be enclosed in double quotes
-		List<String> appDef = tokenizePath();
-		String prgPath = appDef.get(0);
-		WbFile f = new WbFile(prgPath);
-		return f;
+		if (this.exePath == null) return null;
+		return new WbFile(exePath);
 	}
 
+	/**
+	 * Starts the executable passing any possible arguments to it.
+	 * If this tool has parameters defined, they will occur before the arguments passed to this method.
+	 *
+	 * @param arg additional arguments for the application
+	 *
+	 * @throws IOException
+	 */
 	public void runApplication(String arg)
 		throws IOException
 	{
-		List<String> appDef = tokenizePath();
+		List<String> appDef = getComandElements();
 		String[] cmd = new String[appDef.size() + 1];
 		for (int i = 0; i < appDef.size(); i++)
 		{
@@ -98,16 +124,26 @@ public class ToolDefinition
 		Runtime.getRuntime().exec(cmd, null);
 	}
 
+	/**
+	 * Check if the given executable actually exists.
+	 * This is equivalent to <code>getExecutable().exists()</code>
+	 * @return true if File.exists() returns true
+	 */
 	public boolean executableExists()
 	{
 		WbFile f = getExecutable();
 		return f.exists();
 	}
 
-	private List<String> tokenizePath()
+	private List<String> getComandElements()
 	{
-		WbStringTokenizer tok = new WbStringTokenizer(this.appPath, " ", true, "\"", false);
-		return tok.getAllTokens();
+		List<String> result = new ArrayList<String>(2);
+		result.add(this.exePath);
+		if (StringUtil.isNonBlank(parameters))
+		{
+			result.add(this.parameters);
+		}
+		return result;
 	}
 
 	@Override

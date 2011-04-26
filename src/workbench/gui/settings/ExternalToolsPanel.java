@@ -71,6 +71,7 @@ public class ExternalToolsPanel
 		add(definitionPanel, BorderLayout.CENTER);
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		List<ToolDefinition> l = new LinkedList<ToolDefinition>();
@@ -82,6 +83,7 @@ public class ExternalToolsPanel
 		Settings.getInstance().setExternalTools(l);
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		tools = new DefaultListModel();
@@ -95,16 +97,19 @@ public class ExternalToolsPanel
 		toolList.setSelectedIndex(0);
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		ToolDefinition def = (ToolDefinition)toolList.getSelectedValue();
 		definitionPanel.setDefinition(def);
 	}
 
+	@Override
 	public void saveItem() throws Exception
 	{
 	}
 
+	@Override
 	public void deleteItem() throws Exception
 	{
 		int index = toolList.getSelectedIndex();
@@ -119,11 +124,12 @@ public class ExternalToolsPanel
 		toolList.repaint();
 	}
 
+	@Override
 	public void newItem(boolean copyCurrent) throws Exception
 	{
 		try
 		{
-			ToolDefinition tool = new ToolDefinition("path_to_program", "New Tool");
+			ToolDefinition tool = new ToolDefinition("path_to_program", "commandline parameters", "New Tool");
 			tools.addElement(tool);
 			toolList.setSelectedIndex(tools.size()-1);
 
@@ -134,6 +140,7 @@ public class ExternalToolsPanel
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals("name"))

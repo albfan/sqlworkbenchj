@@ -182,7 +182,6 @@ public class RunScriptPanel
 				runThread.interrupt();
 			}
 			runThread = null;
-			runner = null;
 		}
 		catch (Exception e)
 		{

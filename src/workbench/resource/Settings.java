@@ -116,7 +116,7 @@ public class Settings
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	public static final String PROPERTY_DBEXP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
 	// </editor-fold>
-	
+
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
 
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -125,6 +125,10 @@ public class Settings
 	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
 
 	private static final String LIB_DIR_KEY = "%LibDir%";
+	private static final String TOOLS_EXE = ".executable";
+	private static final String TOOLS_NAME = ".name";
+	private static final String TOOLS_PARAM = ".parameter";
+	private static final String TOOLS_PREFIX = "workbench.tools.";
 
 	private WbProperties props;
 	private WbFile configfile;
@@ -558,10 +562,11 @@ public class Settings
 
 		for (int i = 0; i < numTools; i++)
 		{
-			String path = getProperty("workbench.tools." + i + ".executable", "");
-			String name = getProperty("workbench.tools." + i + ".name", path);
+			String path = getProperty(TOOLS_PREFIX + i + TOOLS_EXE, "");
+			String name = getProperty(TOOLS_PREFIX + i + TOOLS_NAME, path);
+			String params = getProperty(TOOLS_PREFIX + i + TOOLS_PARAM, null);
 
-			ToolDefinition tool = new ToolDefinition(path, name);
+			ToolDefinition tool = new ToolDefinition(path, params, name);
 
 			if (!checkExists)
 			{
@@ -581,8 +586,9 @@ public class Settings
 		int numTools = getIntProperty("workbench.tools.count", 0);
 		for (int i=0; i < numTools; i++)
 		{
-			removeProperty("workbench.tools." + i + ".executable");
-			removeProperty("workbench.tools." + i + ".name");
+			removeProperty(TOOLS_PREFIX + i + TOOLS_EXE);
+			removeProperty(TOOLS_PREFIX + i + TOOLS_NAME);
+			removeProperty(TOOLS_PREFIX + i + TOOLS_PARAM);
 		}
 	}
 
@@ -592,8 +598,9 @@ public class Settings
 		int count = 0;
 		for (ToolDefinition tool : tools)
 		{
-			setProperty("workbench.tools." + count + ".executable", tool.getCommandLine());
-			setProperty("workbench.tools." + count + ".name", tool.getName());
+			setProperty(TOOLS_PREFIX + count + TOOLS_EXE, tool.getExecutablePath());
+			setProperty(TOOLS_PREFIX + count + TOOLS_NAME, tool.getName());
+			setProperty(TOOLS_PREFIX + count + TOOLS_PARAM, tool.getParameters());
 			count ++;
 		}
 		setProperty("workbench.tools.count", count);
@@ -1081,7 +1088,7 @@ public class Settings
 		String baseKey = "workbench.font." + aFontName;
 		if (aFont == null)
 		{
-			this.props.remove(baseKey + ".name");
+			this.props.remove(baseKey + TOOLS_NAME);
 			this.props.remove(baseKey + ".size");
 			this.props.remove(baseKey + ".style");
 			return;
@@ -1090,7 +1097,7 @@ public class Settings
 		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
 		int style = aFont.getStyle();
-		this.props.setProperty(baseKey + ".name", name);
+		this.props.setProperty(baseKey + TOOLS_NAME, name);
 		this.props.setProperty(baseKey + ".size", size);
 		String value = null;
 		if ((style & Font.BOLD) == Font.BOLD)
@@ -1222,7 +1229,7 @@ public class Settings
 		Font result = null;
 
 		String baseKey = "workbench.font." + aFontName;
-		String name = this.props.getProperty(baseKey + ".name", null);
+		String name = this.props.getProperty(baseKey + TOOLS_NAME, null);
 
 		if (name == null) return null;
 

@@ -1333,15 +1333,14 @@ FROM person;</programlisting>
 			place where this is used, is in the <link linkend="update-blob-editmode">BLOB info dialog</link>,
 			to open the BLOB data with one of the defined external tools.
 		</para>
-
 		<para>
 			This could be a program to display images, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
 			office documents or a text editor to display text files.
 		</para>
-		<para>
-			You do not need to define the PDF Reader here, as the definition from the
-			<link linkend="options-general">general options</link> will automatically be used in the BLOB info dialog.
-		</para>
+    <para>
+      If the tool needs additional parameters (e.g. to select a hex editing mode for a text editor), they have to
+      be entered in the "Parameters" field. Do not add parameters to the definition of the executable.
+    </para>
 	</section>
 
 	<section id="options-look-and-feel">

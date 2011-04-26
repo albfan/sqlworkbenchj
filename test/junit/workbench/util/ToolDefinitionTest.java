@@ -31,7 +31,7 @@ public class ToolDefinitionTest
 		File f = File.createTempFile("my test", ".exec", new File(util.getBaseDir()));
 
 		WbFile t = new WbFile(f);
-		ToolDefinition tool = new ToolDefinition("\"" + t.getFullPath() + "\" /h", "MyTool");
+		ToolDefinition tool = new ToolDefinition(t.getFullPath(), "/h", "MyTool");
 		WbFile exe = tool.getExecutable();
 		assertEquals(t.getFullPath(), exe.getFullPath());
 	}
