@@ -12,6 +12,7 @@
 package workbench.resource;
 
 import java.awt.Image;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.net.URL;
@@ -32,7 +33,7 @@ import workbench.util.VersionNumber;
 
 /**
  * A class to manage the ResourceBundle for the localization.
- * 
+ *
  * @author Thomas Kellerer.kellerer
  */
 public class ResourceMgr
@@ -106,7 +107,7 @@ public class ResourceMgr
 		return new VersionNumber(nr);
 	}
 
-	public static void setWindowIcons(JFrame window, String baseName)
+	public static void setWindowIcons(Window window, String baseName)
 	{
 		List<Image> icons = new ArrayList<Image>(2);
 		icons.add(getPng(baseName + "16").getImage());
@@ -121,7 +122,7 @@ public class ResourceMgr
 		icons.add(retrieveImage("workbench32.png").getImage());
 		window.setIconImages(icons);
 	}
-	
+
 	public static String getDefaultTabLabel()
 	{
 		return Settings.getInstance().getProperty("workbench.gui.tabs.defaultlabel", getString("LblTabStatement"));

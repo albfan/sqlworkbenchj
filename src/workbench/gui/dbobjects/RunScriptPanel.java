@@ -103,8 +103,8 @@ public class RunScriptPanel
 
 	public void openWindow(Component comp, String title, String highlight)
 	{
-		Window w = SwingUtilities.getWindowAncestor(comp);
 		Frame parent = null;
+		Window w = SwingUtilities.getWindowAncestor(comp);
 		if (w instanceof Frame)
 		{
 			parent = (Frame) w;
@@ -120,6 +120,7 @@ public class RunScriptPanel
 			public void run()
 			{
 				window = new JDialog(owner, title, true);
+				ResourceMgr.setWindowIcons(window, "script");
 				escAction = new EscAction(window, RunScriptPanel.this);
 
 				window.getContentPane().add(RunScriptPanel.this);
@@ -195,6 +196,7 @@ public class RunScriptPanel
 
 		runThread = new WbThread("RunScript")
 		{
+			@Override
 			public void run()
 			{
 				runScript();
@@ -217,7 +219,7 @@ public class RunScriptPanel
 			runner.setRowMonitor(((SimpleStatusBar)statusbar).getMonitor());
 			runner.setAbortOnError(true);
 			runner.setStoreErrors(true);
-			
+
 			// Make sure nothing is written to system.out
 			runner.setResultLogger(new ResultLogger() {
 				@Override

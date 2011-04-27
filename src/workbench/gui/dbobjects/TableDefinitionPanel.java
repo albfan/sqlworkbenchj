@@ -136,7 +136,7 @@ public class TableDefinitionPanel
 
 		tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_ALLOW_ALTER_TABLE);
-		
+
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
 		this.reloadAction.addToInputMap(this.tableDefinition);
@@ -329,6 +329,7 @@ public class TableDefinitionPanel
 			{
 				WbSwingUtilities.invoke(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						tableDefinition.reset();
@@ -359,6 +360,7 @@ public class TableDefinitionPanel
 
 				WbSwingUtilities.invoke(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						applyTableModel(model);
@@ -442,6 +444,7 @@ public class TableDefinitionPanel
 		}
 	}
 
+	@Override
 	public void reset()
 	{
 		if (!initialized) return;
@@ -489,6 +492,7 @@ public class TableDefinitionPanel
 	 * This method should not be called directly, use {@link #retrieve(workbench.db.TableIdentifier) }
 	 * instead.
 	 */
+	@Override
 	public void reload()
 	{
 		if (this.currentTable == null) return;
@@ -498,6 +502,7 @@ public class TableDefinitionPanel
 
 		WbThread t = new WbThread("TableDefinition Retrieve")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -514,6 +519,7 @@ public class TableDefinitionPanel
 		t.start();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.createIndexAction)
@@ -522,6 +528,7 @@ public class TableDefinitionPanel
 		}
 	}
 
+	@Override
 	public List<DbObject> getSelectedObjects()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return null;
@@ -537,16 +544,19 @@ public class TableDefinitionPanel
 		return columns;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return this;
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public TableIdentifier getObjectTable()
 	{
 		return this.currentTable;
@@ -611,6 +621,7 @@ public class TableDefinitionPanel
 	/**
 	 * Invoked when the selection in the table list has changed
 	 */
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
@@ -631,7 +642,7 @@ public class TableDefinitionPanel
 
 	/**
 	 * Returns a SELECT statement for retrieve all rows and columns from the displayed table.
-	 * 
+	 *
 	 * @see TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
 	 */
 	public String getSelectForTable()

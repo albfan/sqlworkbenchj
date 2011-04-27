@@ -95,6 +95,7 @@ public class ObjectScripterUI
 		if (this.isRunning()) return;
 		WbThread t = new WbThread("ObjectScripter Thread")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -112,6 +113,7 @@ public class ObjectScripterUI
 					setRunning(false);
 					EventQueue.invokeLater(new Runnable()
 					{
+						@Override
 						public void run() { statusMessage.setText(StringUtil.EMPTY_STRING); }
 					});
 				}
@@ -120,6 +122,7 @@ public class ObjectScripterUI
 		t.start();
 	}
 
+	@Override
 	public void setCurrentObject(String aTableName)
 	{
 		this.statusMessage.setText(aTableName);
@@ -149,10 +152,12 @@ public class ObjectScripterUI
 		this.startScripting();
 	}
 
+	@Override
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
@@ -161,6 +166,7 @@ public class ObjectScripterUI
 	{
 		WbThread t = new WbThread("Scripter Cancel")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -195,6 +201,7 @@ public class ObjectScripterUI
 		this.window.dispose();
 	}
 
+	@Override
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		if (this.isRunning())
@@ -205,18 +212,22 @@ public class ObjectScripterUI
 		closeWindow();
 	}
 
+	@Override
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}

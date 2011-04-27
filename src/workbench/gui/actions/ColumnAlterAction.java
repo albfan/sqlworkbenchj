@@ -12,11 +12,8 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.List;
-import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.db.ColumnChanger;
@@ -96,21 +93,15 @@ public class ColumnAlterAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		Window w = SwingUtilities.getWindowAncestor(definition);
-		Frame parent = null;
-		if (w instanceof Frame)
-		{
-			parent = (Frame)w;
-		}
 		String alterScript = getScript();
 		if (alterScript == null)
 		{
 			String msg = ResourceMgr.getString("MsgNoAlterAvailable");
-			WbSwingUtilities.showMessage(parent, msg);
+			WbSwingUtilities.showMessage(definition, msg);
 		}
 
 		final RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
-		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
+		panel.openWindow(definition, ResourceMgr.getString("TxtAlterTable"));
 
 		if (panel.wasRun() && panel.isSuccess() && client != null)
 		{
