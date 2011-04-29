@@ -126,16 +126,31 @@ public class SqlUtil
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlUtil.stripVerb()", "Error cleaning up SQL", e);
+			result = "";
 		}
 		return result;
 	}
 
 
+	/**
+	 * Quote the given objectName if needed according to the SQL standard.
+	 *
+	 * @param objectName the name to quote
+	 * @return the quoted version of the name.
+	 */
 	public static String quoteObjectname(String object)
 	{
 		return quoteObjectname(object, false);
 	}
 
+	/**
+	 * Quote the given objectName if needed according to the SQL standard.
+	 * If quoteAlways is true, then no name checking is performed.
+	 *
+	 * @param objectName the name to quote
+	 * @param quoteAlways if true, the name is not tested for special characters
+	 * @return the quoted version of the name.
+	 */
 	public static String quoteObjectname(String objectName, boolean quoteAlways)
 	{
 		if (objectName == null) return null;
@@ -154,7 +169,6 @@ public class SqlUtil
 		if (!quoteAlways)
 		{
 			Matcher m = SQL_IDENTIFIER.matcher(objectName);
-			//doQuote = m.find() || Character.isDigit(aColname.charAt(0));;
 			doQuote = !m.matches();
 		}
 		if (!doQuote) return objectName;
@@ -166,10 +180,11 @@ public class SqlUtil
 	}
 
 	/**
-	 * Removes double quotes character from the start and the beginning of a string.
+	 * Removes quote characters from the start and the end of a string.
 	 * <br/>
-	 * Removes the matching quote character at the beginning from the end of the string.
 	 * For performance reasons the input is not trimmed and is not tested (unlike StringUtil.trimQuotes)
+	 *
+	 * It does take the idiotic MySQL backticks into account but not SQL Server's weird [..] quoting.
 	 *
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
@@ -275,8 +290,7 @@ public class SqlUtil
 	}
 
 	/**
-	 * Escapes any underscore in the passed name with the escape character defined
-	 * for the given connection.
+	 * Escapes any underscore in the passed name with the escape character defined by the connection.
 	 *
 	 * @param name the object identifier to test
 	 * @param conn the connection
@@ -287,12 +301,10 @@ public class SqlUtil
 	 */
 	public static String escapeUnderscore(String name, WbConnection conn)
 	{
-		if (name.indexOf('_') == -1)
-		{
-			return name;
-		}
+		if (name == null) return null;
+		if (name.indexOf('_') == -1) return name;
 
-		String escape = conn.getSearchStringEscape();
+		String escape = (conn == null ? null : conn.getSearchStringEscape());
 		return escapeUnderscore(name, escape);
 	}
 
@@ -304,10 +316,11 @@ public class SqlUtil
 	 * @return an escaped version of the name
 	 *
 	 * @see WbConnection#getSearchStringEscape()
-	 * @see #escapeUnderscore(java.lang.String, workbench.db.WbConnection) 
+	 * @see #escapeUnderscore(java.lang.String, workbench.db.WbConnection)
 	 */
 	public static String escapeUnderscore(String name, String escape)
 	{
+		if (name == null) return null;
 		if (name.indexOf('_') > -1 && StringUtil.isNonEmpty(escape))
 		{
 			// Only the underscore is replaced as the % character is not allowed in SQL identifiers
@@ -604,6 +617,13 @@ public class SqlUtil
 		return result;
 	}
 
+	/**
+	 * Returns the real table name assuming that the passed String is a table name with an alias
+
+	 * @param table
+	 * @param keepAlias
+	 * @return
+	 */
 	private static String getTableDefinition(String table, boolean keepAlias)
 	{
 		if (keepAlias) return table;

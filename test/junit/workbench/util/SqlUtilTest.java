@@ -51,6 +51,8 @@ public class SqlUtilTest
 		name = "sometable";
 		escaped = SqlUtil.escapeUnderscore(name, "\\");
 		assertEquals("sometable", escaped);
+
+		assertNull(SqlUtil.escapeUnderscore(null, "\\"));
 	}
 
 	@Test
