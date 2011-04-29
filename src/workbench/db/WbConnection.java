@@ -835,6 +835,24 @@ public class WbConnection
 		return this.metaData;
 	}
 
+	/**
+	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
+	 *
+	 * @return the escape characters to mask wildcards in a string literal
+	 */
+	public String getSearchStringEscape()
+	{
+		try
+		{
+			return this.sqlConnection.getMetaData().getSearchStringEscape();
+		}
+		catch (Throwable e)
+		{
+			// Should not happen
+			return null;
+		}
+	}
+
 	public String getUrl()
 	{
 		try

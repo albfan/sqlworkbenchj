@@ -275,6 +275,49 @@ public class SqlUtil
 	}
 
 	/**
+	 * Escapes any underscore in the passed name with the escape character defined
+	 * for the given connection.
+	 *
+	 * @param name the object identifier to test
+	 * @param conn the connection
+	 * @return an escaped version of the name
+	 *
+	 * @see WbConnection#getSearchStringEscape()
+	 * @see #escapeUnderscore(java.lang.String, java.lang.String)
+	 */
+	public static String escapeUnderscore(String name, WbConnection conn)
+	{
+		if (name.indexOf('_') == -1)
+		{
+			return name;
+		}
+
+		String escape = conn.getSearchStringEscape();
+		return escapeUnderscore(name, escape);
+	}
+
+	/**
+	 * Escapes any underscore in the passed name with the given escape character.
+	 *
+	 * @param name the object identifier to test
+	 * @param escape the esacpe character to use connection
+	 * @return an escaped version of the name
+	 *
+	 * @see WbConnection#getSearchStringEscape()
+	 * @see #escapeUnderscore(java.lang.String, workbench.db.WbConnection) 
+	 */
+	public static String escapeUnderscore(String name, String escape)
+	{
+		if (name.indexOf('_') > -1 && StringUtil.isNonEmpty(escape))
+		{
+			// Only the underscore is replaced as the % character is not allowed in SQL identifiers
+			StringBuilder temp = new StringBuilder(name);
+			name = StringUtil.replaceBuffer(temp, "_", escape + "_").toString();
+		}
+		return name;
+	}
+
+	/**
 	 * Returns the type that is beeing created e.g. TABLE, VIEW, PROCEDURE
 	 */
 	public static String getCreateType(CharSequence sql)

@@ -1524,18 +1524,23 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			DataStore ds = getObjects(catalog, schema, table.getRawTableName(), null);
+			String tablename = SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
+			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+			catalog = SqlUtil.escapeUnderscore(catalog, dbConnection);
+
+			DataStore ds = getObjects(catalog, schema, tablename, null);
+
 			String[] cols = getTableListColumns();
 
 			if (ds.getRowCount() == 0 && this.isOracle)
 			{
 				// try again with PUBLIC, maybe it's a public synonym
-				ds = getObjects(null, "PUBLIC", table.getRawTableName(), null);
+				ds = getObjects(null, "PUBLIC", tablename, null);
 			}
 
 			if (ds.getRowCount() == 0 && schemaWasNull && searchAllSchemas)
 			{
-				ds = getObjects(null, null, table.getRawTableName(), null);
+				ds = getObjects(null, null, tablename, null);
 			}
 
 			if (ds.getRowCount() == 1)

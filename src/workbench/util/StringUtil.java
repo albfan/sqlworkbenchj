@@ -349,7 +349,7 @@ public class StringUtil
 	 * Null safe string replacement.
 	 *
 	 * This is a wrapper around String.replace(String, String) but does not throw an
-	 * exception if any parameter is null.
+	 * exception if one of the parameters is null.
 	 *
 	 * @param haystack the string in which to replace. If null, null is returned
 	 * @param needle the string to search for. If null, haystack is returned.
@@ -362,6 +362,43 @@ public class StringUtil
 		if (haystack == null) return null;
 
 		return haystack.replace(needle, replacement);
+	}
+
+	/**
+	 * Replace all occurances of a search string in the passed StringBuilder.
+	 *
+	 * This is faster than using String.replace() as that uses regular expressions internally
+	 *
+	 * @param haystack
+	 * @param needle
+	 * @param replacement
+	 * @return
+	 */
+	public static StringBuilder replaceBuffer(StringBuilder haystack, String needle, String replacement)
+	{
+
+		int pos = haystack.indexOf(needle);
+		if (pos == -1)
+		{
+			return haystack;
+		}
+
+		StringBuilder result = new StringBuilder(haystack.length() + 10);
+
+		int lastpos = 0;
+		int len = needle.length();
+		while (pos != -1)
+		{
+			result.append(haystack.substring(lastpos, pos));
+			result.append(replacement);
+			lastpos = pos + len;
+			pos = haystack.indexOf(needle, lastpos);
+		}
+		if (lastpos < haystack.length())
+		{
+			result.append(haystack.substring(lastpos));
+		}
+		return result;
 	}
 
 	private static final int[] limits =
@@ -438,6 +475,14 @@ public class StringUtil
 		return text;
 	}
 
+	/**
+	 * Check if the given string is a number.
+	 *
+	 * This is done by parsing the String using Double.parseDouble() and catching all possible exceptions.
+	 *
+	 * @param value
+	 * @return
+	 */
 	public static boolean isNumber(String value)
 	{
 		try
@@ -546,14 +591,22 @@ public class StringUtil
 		return result;
 	}
 
-	public static double getDoubleValue(String aValue, double aDefault)
+	/**
+	 * Parse the given value as a double.
+	 * If the value cannot be parsed, the default value will be returned.
+	 *
+	 * @param value  the string to parse
+	 * @param defaultValue the value to be returned if something goes wrong.
+	 * @return the parse value of the input.
+	 */
+	public static double getDoubleValue(String value, double defaultValue)
 	{
-		if (aValue == null) return aDefault;
+		if (value == null) return defaultValue;
 
-		double result = aDefault;
+		double result = defaultValue;
 		try
 		{
-			result = Double.parseDouble(aValue.trim());
+			result = Double.parseDouble(value.trim());
 		}
 		catch (NumberFormatException e)
 		{
@@ -702,11 +755,6 @@ public class StringUtil
 			result.add(element);
 		}
 		return result;
-	}
-
-	public static String[] toArray(Collection<String> strings)
-	{
-		return toArray(strings, false);
 	}
 
 	public static String[] toArray(Collection<String> strings, boolean toUpper)

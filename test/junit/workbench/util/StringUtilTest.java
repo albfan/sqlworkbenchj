@@ -227,187 +227,155 @@ public class StringUtilTest
 	@Test
 	public void testMakeFilename()
 	{
-		try
-		{
-			String fname = StringUtil.makeFilename("TABLE_NAME");
-			assertEquals("table_name", fname);
+		String fname = StringUtil.makeFilename("TABLE_NAME");
+		assertEquals("table_name", fname);
 
-			fname = StringUtil.makeFilename("TABLE_\\NAME");
-			assertEquals("table_name", fname);
+		fname = StringUtil.makeFilename("TABLE_\\NAME");
+		assertEquals("table_name", fname);
 
-			fname = StringUtil.makeFilename("TABLE_<>NAME");
-			assertEquals("table_name", fname);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		fname = StringUtil.makeFilename("TABLE_<>NAME");
+		assertEquals("table_name", fname);
 	}
 
 	@Test
 	public void testReplace()
 	{
-		try
-		{
-			String s = StringUtil.replace(null, "gaga", "gogo");
-			assertNull(s);
+		String s = StringUtil.replace(null, "gaga", "gogo");
+		assertNull(s);
 
-			s = StringUtil.replace("gaga", null, "gogo");
-			assertEquals("gaga", s);
+		s = StringUtil.replace("gaga", null, "gogo");
+		assertEquals("gaga", s);
 
-			s = StringUtil.replace("gaga", "gogo", null);
-			assertEquals("gaga", s);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		s = StringUtil.replace("gaga", "gogo", null);
+		assertEquals("gaga", s);
 	}
 
 	@Test
 	public void testEndsWith()
 	{
-		try
-		{
-			String s = "this is a test";
-			assertTrue(StringUtil.endsWith(s, "test"));
-			assertFalse(StringUtil.endsWith(s, "testing"));
+		String s = "this is a test";
+		assertTrue(StringUtil.endsWith(s, "test"));
+		assertFalse(StringUtil.endsWith(s, "testing"));
 
-			assertFalse(StringUtil.endsWith("bla", "blabla"));
-			assertTrue(StringUtil.endsWith("bla", "bla"));
+		assertFalse(StringUtil.endsWith("bla", "blabla"));
+		assertTrue(StringUtil.endsWith("bla", "bla"));
 
-			assertFalse(StringUtil.endsWith("est", "test"));
-			assertFalse(StringUtil.endsWith("no est", "test"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertFalse(StringUtil.endsWith("est", "test"));
+		assertFalse(StringUtil.endsWith("no est", "test"));
 	}
 
 	@Test
 	public void testIndexOf()
 	{
-		try
-		{
-			String s = ".this. is a test";
-			int pos = StringUtil.indexOf(s, '.');
-			assertEquals(0, pos);
+		String s = ".this. is a test";
+		int pos = StringUtil.indexOf(s, '.');
+		assertEquals(0, pos);
 
-			s = "this. is. a. test.";
-			pos = StringUtil.indexOf(s, '.');
-			assertEquals(4, pos);
+		s = "this. is. a. test.";
+		pos = StringUtil.indexOf(s, '.');
+		assertEquals(4, pos);
 
-			s = "this. is. a test";
-			pos = StringUtil.indexOf(s, '.', 2);
-			assertEquals(8, pos);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		s = "this. is. a test";
+		pos = StringUtil.indexOf(s, '.', 2);
+		assertEquals(8, pos);
 	}
 
 	@Test
 	public void testLastIndexOf()
 	{
-		try
-		{
-			String s = "this is a test.";
-			int pos = StringUtil.lastIndexOf(s, '.');
-			assertEquals(s.length() - 1, pos);
+		String s = "this is a test.";
+		int pos = StringUtil.lastIndexOf(s, '.');
+		assertEquals(s.length() - 1, pos);
 
-			s = "this. is. a. test.";
-			pos = StringUtil.lastIndexOf(s, '.');
-			assertEquals(s.length() - 1, pos);
+		s = "this. is. a. test.";
+		pos = StringUtil.lastIndexOf(s, '.');
+		assertEquals(s.length() - 1, pos);
 
-			s = "this is a test";
-			pos = StringUtil.lastIndexOf(s, '.');
-			assertEquals(-1, pos);
+		s = "this is a test";
+		pos = StringUtil.lastIndexOf(s, '.');
+		assertEquals(-1, pos);
 
-			StringBuilder b = new StringBuilder("this is a test.");
-			pos = StringUtil.lastIndexOf(b, '.');
-			assertEquals(b.length() - 1, pos);
+		StringBuilder b = new StringBuilder("this is a test.");
+		pos = StringUtil.lastIndexOf(b, '.');
+		assertEquals(b.length() - 1, pos);
 
-			b = new StringBuilder("this. is a test");
-			pos = StringUtil.lastIndexOf(b, '.');
-			assertEquals(4, pos);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		b = new StringBuilder("this. is a test");
+		pos = StringUtil.lastIndexOf(b, '.');
+		assertEquals(4, pos);
 	}
 
 	@Test
 	public void testDecodeUnicode()
 	{
-		try
-		{
-			String value = "Incorrect \\ string";
-			String decoded = StringUtil.decodeUnicode(value);
-			assertEquals(value, decoded);
+		String value = "Incorrect \\ string";
+		String decoded = StringUtil.decodeUnicode(value);
+		assertEquals(value, decoded);
 
-			value = "Test \\u00E4\\u00E5";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("Test \u00E4\u00E5", decoded);
+		value = "Test \\u00E4\\u00E5";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("Test \u00E4\u00E5", decoded);
 
-			value = "Wrong \\uxyz encoded";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals(value, decoded);
+		value = "Wrong \\uxyz encoded";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals(value, decoded);
 
-			value = "Wrong \\u04";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("Wrong string not decoded", value, decoded);
+		value = "Wrong \\u04";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("Wrong string not decoded", value, decoded);
 
-			value = "test \\u";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("Wrong string not decoded", value, decoded);
+		value = "test \\u";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("Wrong string not decoded", value, decoded);
 
-			value = "test \\u wrong";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("Wrong string not decoded", value, decoded);
+		value = "test \\u wrong";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("Wrong string not decoded", value, decoded);
 
-			decoded = StringUtil.decodeUnicode("\\r\\ntest");
-			assertEquals("Single char not replaced correctly", "\r\ntest", decoded);
+		decoded = StringUtil.decodeUnicode("\\r\\ntest");
+		assertEquals("Single char not replaced correctly", "\r\ntest", decoded);
 
-			decoded = StringUtil.decodeUnicode("Hello \\t World");
-			assertEquals("Single char not replaced correctly", "Hello \t World", decoded);
+		decoded = StringUtil.decodeUnicode("Hello \\t World");
+		assertEquals("Single char not replaced correctly", "Hello \t World", decoded);
 
-			decoded = StringUtil.decodeUnicode("test\\t");
-			assertEquals("Single char not replaced correctly", "test\t", decoded);
+		decoded = StringUtil.decodeUnicode("test\\t");
+		assertEquals("Single char not replaced correctly", "test\t", decoded);
 
-			decoded = StringUtil.decodeUnicode("test\\x");
-			assertEquals("Single char not replaced correctly", "test\\x", decoded);
+		decoded = StringUtil.decodeUnicode("test\\x");
+		assertEquals("Single char not replaced correctly", "test\\x", decoded);
 
-			decoded = StringUtil.decodeUnicode("test\\");
-			assertEquals("Single char not replaced correctly", "test\\", decoded);
+		decoded = StringUtil.decodeUnicode("test\\");
+		assertEquals("Single char not replaced correctly", "test\\", decoded);
 
-			decoded = StringUtil.decodeUnicode("test\\\\");
-			assertEquals("test\\", decoded);
+		decoded = StringUtil.decodeUnicode("test\\\\");
+		assertEquals("test\\", decoded);
 
-			value = "abc\\\\def";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("abc\\def", decoded);
+		value = "abc\\\\def";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("abc\\def", decoded);
 
-			value = "abc\\\\n";
-			decoded = StringUtil.decodeUnicode(value);
-			assertEquals("abc\\n", decoded);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		value = "abc\\\\n";
+		decoded = StringUtil.decodeUnicode(value);
+		assertEquals("abc\\n", decoded);
+	}
 
+	@Test
+	public void testReplaceBuffer()
+	{
+		String value = "something";
+		String result = StringUtil.replaceBuffer(new StringBuilder(value), "some", "other").toString();
+		assertEquals("otherthing", result);
+
+		value = "ababababaab";
+		result = StringUtil.replaceBuffer(new StringBuilder(value), "a", "x").toString();
+		assertEquals("xbxbxbxbxxb", result);
+
+		value = "foobear";
+		result = StringUtil.replaceBuffer(new StringBuilder(value), "bear", "bar").toString();
+		assertEquals("foobar", result);
+
+		value = "some text";
+		result = StringUtil.replaceBuffer(new StringBuilder(value), "xyz", "zxy").toString();
+		assertEquals(value, result);
 	}
 
 	@Test
@@ -418,21 +386,8 @@ public class StringUtilTest
 		assertEquals("Umlaut not replaced", "\\u00E4", enc);
 
 		value = "\n";
-//		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, true);
-//		assertEquals("NL not replaced" , "\\u000A", enc);
-
 		enc = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT, null);
 		assertEquals("NL not replaced" , "\\n", enc);
-
-//		value = "abcdefghijk";
-//		enc = StringUtil.escapeUnicode(value, null, CharacterRange.RANGE_7BIT, true);
-//		assertEquals("NL not replaced" , value, enc);
-
-//		value = "abc;def;ghi";
-//		enc = StringUtil.escapeUnicode(value, ";", CharacterRange.RANGE_7BIT, true);
-//		assertEquals("Additional characters not replaced", "abc\\u003Bdef\\u003Bghi", enc);
-		//System.out.println("enc=" + enc);
-
 	}
 
 	@Test
@@ -534,8 +489,6 @@ public class StringUtilTest
 
 		assertEquals(false, StringUtil.equalString(one, two));
 		assertEquals(false, StringUtil.equalStringIgnoreCase(two, one));
-
-
 	}
 
 	@Test
@@ -579,126 +532,83 @@ public class StringUtilTest
 	@Test
 	public void testIsWhitespace()
 	{
-		try
-		{
-			String s = "bla";
-			assertEquals(false, StringUtil.isWhitespace(s));
+		String s = "bla";
+		assertEquals(false, StringUtil.isWhitespace(s));
 
-			s = "   bla   ";
-			assertEquals(false, StringUtil.isWhitespace(s));
+		s = "   bla   ";
+		assertEquals(false, StringUtil.isWhitespace(s));
 
-			s = " \n \n";
-			assertEquals(true, StringUtil.isWhitespace(s));
+		s = " \n \n";
+		assertEquals(true, StringUtil.isWhitespace(s));
 
-			s = " \t\r\n   ;";
-			assertEquals(false, StringUtil.isWhitespace(s));
+		s = " \t\r\n   ;";
+		assertEquals(false, StringUtil.isWhitespace(s));
 
-			s = "";
-			assertEquals(false, StringUtil.isWhitespace(s));
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		s = "";
+		assertEquals(false, StringUtil.isWhitespace(s));
 	}
 
 	@Test
 	public void testTrimBuffer()
 	{
-		try
-		{
-			StringBuilder b = new StringBuilder("bla");
-			StringUtil.trimTrailingWhitespace(b);
-			assertEquals("Buffer was changed", "bla", b.toString());
+		StringBuilder b = new StringBuilder("bla");
+		StringUtil.trimTrailingWhitespace(b);
+		assertEquals("Buffer was changed", "bla", b.toString());
 
-			b = new StringBuilder("bla bla ");
-			StringUtil.trimTrailingWhitespace(b);
-			assertEquals("Whitespace not removed", "bla bla", b.toString());
+		b = new StringBuilder("bla bla ");
+		StringUtil.trimTrailingWhitespace(b);
+		assertEquals("Whitespace not removed", "bla bla", b.toString());
 
-			b = new StringBuilder("bla bla \t");
-			StringUtil.trimTrailingWhitespace(b);
-			assertEquals("Whitespace not removed", "bla bla", b.toString());
+		b = new StringBuilder("bla bla \t");
+		StringUtil.trimTrailingWhitespace(b);
+		assertEquals("Whitespace not removed", "bla bla", b.toString());
 
-			b = new StringBuilder("bla bla \t\n\r  \t");
-			StringUtil.trimTrailingWhitespace(b);
-			assertEquals("Whitespace not removed", "bla bla", b.toString());
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		b = new StringBuilder("bla bla \t\n\r  \t");
+		StringUtil.trimTrailingWhitespace(b);
+		assertEquals("Whitespace not removed", "bla bla", b.toString());
 	}
 
 	@Test
 	public void testToArray()
 	{
-		try
-		{
-			List<String> elements = new LinkedList<String>();
-			elements.add("one");
-			elements.add("two");
-			elements.add("three");
+		List<String> elements = new LinkedList<String>();
+		elements.add("one");
+		elements.add("two");
+		elements.add("three");
 
-			String[] result = StringUtil.toArray(elements);
-			assertEquals(result.length, 3);
-			assertEquals(result[1], "two");
+		String[] result = StringUtil.toArray(elements, false);
+		assertEquals(result.length, 3);
+		assertEquals(result[1], "two");
 
-			result = StringUtil.toArray(elements, true);
-			assertEquals(result.length, 3);
-			assertEquals(result[1], "TWO");
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		result = StringUtil.toArray(elements, true);
+		assertEquals(result.length, 3);
+		assertEquals(result[1], "TWO");
 	}
 
 	@Test
 	public void testGetDoubleValue()
 	{
-		try
-		{
-			double value = StringUtil.getDoubleValue("123.45", -1);
-			assertEquals(123.45, value, 0.01);
+		double value = StringUtil.getDoubleValue("123.45", -1);
+		assertEquals(123.45, value, 0.01);
 
-			value = StringUtil.getDoubleValue(" 123.45 ", -1);
-			assertEquals(123.45, value, 0.01);
+		value = StringUtil.getDoubleValue(" 123.45 ", -1);
+		assertEquals(123.45, value, 0.01);
 
-			value = StringUtil.getDoubleValue("bla", -66);
-			assertEquals(-66, value, 0.01);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		value = StringUtil.getDoubleValue("bla", -66);
+		assertEquals(-66, value, 0.01);
 	}
 
 	@Test
 	public void testGetIntValue()
 	{
-		try
-		{
-			int iValue = StringUtil.getIntValue(" 123 ", -1);
-			assertEquals(123, iValue);
+		int iValue = StringUtil.getIntValue(" 123 ", -1);
+		assertEquals(123, iValue);
 
-			iValue = StringUtil.getIntValue("42", -1);
-			assertEquals(42, iValue);
+		iValue = StringUtil.getIntValue("42", -1);
+		assertEquals(42, iValue);
 
-			iValue = StringUtil.getIntValue("bla", -24);
-			assertEquals(-24, iValue);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		iValue = StringUtil.getIntValue("bla", -24);
+		assertEquals(-24, iValue);
 	}
 
 	@Test

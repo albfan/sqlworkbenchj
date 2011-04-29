@@ -48,30 +48,9 @@ public class JdbcTableDefinitionReader
 		DbSettings dbSettings = dbConnection.getDbSettings();
 		DbMetadata dbmeta = dbConnection.getMetadata();
 
-		String catalog = StringUtil.trimQuotes(table.getCatalog());
-		String schema = StringUtil.trimQuotes(table.getSchema());
-		String tablename = StringUtil.trimQuotes(table.getTableName());
-
-		String escape = dbConnection.getMetadata().getJdbcMetaData().getSearchStringEscape();
-
-		if (StringUtil.isNonEmpty(escape))
-		{
-			// Make sure wildcards are properly escaped. We never want a LIKE evaluation
-			// of the table or schema name here.
-			if (hasSQLWildcard(tablename))
-			{
-				tablename = tablename.replace("_", escape + "_");
-				tablename = tablename.replace("%", escape + "%");
-				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "Using tablename pattern: " + tablename);
-			}
-
-			if (hasSQLWildcard(schema))
-			{
-				schema = schema.replace("_", escape + "_");
-				schema = schema.replace("%", escape + "%");
-				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "Using schema pattern: " + tablename);
-			}
-		}
+		String catalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getCatalog()), dbConnection);
+		String schema = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getSchema()), dbConnection);
+		String tablename = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getTableName()), dbConnection);
 
 		ResultSet rs = null;
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
@@ -153,14 +132,5 @@ public class JdbcTableDefinitionReader
 		}
 
 		return columns;
-	}
-
-	private boolean hasSQLWildcard(String input)
-	{
-		if (input == null)
-		{
-			return false;
-		}
-		return input.indexOf('_') > -1 || input.indexOf('%') > -1;
 	}
 }

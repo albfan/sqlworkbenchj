@@ -38,6 +38,22 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testEscapeWildcards()
+	{
+		String name = "test_table";
+		String escaped = SqlUtil.escapeUnderscore(name, "\\");
+		assertEquals("test\\_table", escaped);
+
+		name = "test_table_";
+		escaped = SqlUtil.escapeUnderscore(name, "\\");
+		assertEquals("test\\_table\\_", escaped);
+
+		name = "sometable";
+		escaped = SqlUtil.escapeUnderscore(name, "\\");
+		assertEquals("sometable", escaped);
+	}
+
+	@Test
 	public void testAddSemicolon()
 	{
 		String input = "  from some_table;   ";
