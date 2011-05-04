@@ -44,7 +44,8 @@ public class OracleMViewReader
 
 		if (includeDrop)
 		{
-			result.append("DROP MATERIALIZED VIEW " + table.getTableExpression(dbConnection));
+			result.append("DROP MATERIALIZED VIEW ");
+			result.append(table.getTableExpression(dbConnection));
 			result.append(";\n\n");
 		}
 
@@ -66,7 +67,15 @@ public class OracleMViewReader
 		if (!retrieved)
 		{
 			String sql = retrieveMViewQuery(dbConnection, table);
-			result.append("CREATE MATERIALIZED VIEW " + table.getTableExpression(dbConnection));
+			if (includeDrop)
+			{
+				result.append("CREATE MATERIALIZED VIEW ");
+			}
+			else
+			{
+				result.append("CREATE OR REPLACE MATERIALIZED VIEW ");
+			}
+			result.append(table.getTableExpression(dbConnection));
 			String options = getMViewOptions(dbConnection, table);
 			if (options != null)
 			{

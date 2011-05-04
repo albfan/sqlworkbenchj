@@ -32,6 +32,30 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testTrailingSemicolon()
+		throws Exception
+	{
+		String sql = "select * from test";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM test";
+		assertEquals(expected, formatted);
+
+		sql = "select * from test;";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM test;";
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter("select");
+		assertEquals("SELECT", 	f.getFormattedSql());
+	}
+
+	@Test
 	public void testDateLiteral()
 		throws Exception
 	{

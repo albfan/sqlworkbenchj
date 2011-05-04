@@ -261,6 +261,7 @@ public class EditorPanel
 
 	}
 
+	@Override
 	public void fontChanged(String aKey, Font aFont)
 	{
 		if (aKey.equals(Settings.PROPERTY_EDITOR_FONT))
@@ -319,6 +320,7 @@ public class EditorPanel
 		this.addPopupMenuItem(this.formatSql, true);
 	}
 
+	@Override
 	public void setEditable(boolean editable)
 	{
 		super.setEditable(editable);
@@ -342,6 +344,7 @@ public class EditorPanel
 		}
 	}
 
+	@Override
 	public void reformatSql()
 	{
 		TextFormatter f = new TextFormatter();
@@ -384,6 +387,7 @@ public class EditorPanel
 			return text;
 	}
 
+	@Override
 	public boolean closeFile(boolean clearText)
 	{
 		if (this.currentFile == null) return false;
@@ -430,6 +434,7 @@ public class EditorPanel
 		this.filenameChangeListeners.remove(aListener);
 	}
 
+	@Override
 	public boolean openFile()
 	{
 		boolean result = false;
@@ -681,6 +686,7 @@ public class EditorPanel
 		return result;
 	}
 
+	@Override
 	public boolean saveCurrentFile()
 	{
 		boolean result = false;
@@ -703,6 +709,7 @@ public class EditorPanel
 		return result;
 	}
 
+	@Override
 	public boolean saveFile()
 	{
 		boolean result = false;
@@ -836,6 +843,7 @@ public class EditorPanel
 	/**
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
@@ -853,6 +861,7 @@ public class EditorPanel
 		WbSwingUtilities.repaintNow(this);
 	}
 
+	@Override
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 		if (this.isEditable())
@@ -865,14 +874,17 @@ public class EditorPanel
 		}
 	}
 
+	@Override
 	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
 	{
 	}
 
+	@Override
 	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}
 
+	@Override
 	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
 	{
 		try
@@ -901,6 +913,7 @@ public class EditorPanel
 					final Window w = SwingUtilities.getWindowAncestor(this);
 					EventQueue.invokeLater(new Runnable()
 					{
+						@Override
 						public void run()
 						{
 							w.toFront();
@@ -928,6 +941,7 @@ public class EditorPanel
 	}
 
 
+	@Override
 	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}

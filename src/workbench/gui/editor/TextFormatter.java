@@ -41,11 +41,8 @@ public class TextFormatter
 		String delimit = parser.getDelimiterString();
 		int pos = StringUtil.findFirstNonWhitespace(editor.getText(), editor.getSelectionEnd());
 		int delimitPos = editor.getText().indexOf(delimit, editor.getSelectionEnd());
-
-		boolean delimiterAfterSelection = pos == delimitPos;
-
-		// check needed for single statements
-		boolean addDelimiter = sql.trim().endsWith(delimit);
+		boolean isSelected = editor.isTextSelected();
+		boolean delimiterAfterSelection = (pos == delimitPos);
 
 		int count = parser.getSize();
 		if (count < 1) return;
@@ -65,7 +62,7 @@ public class TextFormatter
 
 			// only add the delimiter to the last statement if there is no
 			// delimiter following directly after the currently selected text
-			if ((i == count - 1 && !delimiterAfterSelection) || i < count - 1 || addDelimiter)
+			if (!isSelected && ((i == count - 1 && !delimiterAfterSelection) || i < count - 1))
 			{
 				command += delimit;
 			}

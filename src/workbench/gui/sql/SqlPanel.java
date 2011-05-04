@@ -1286,12 +1286,14 @@ public class SqlPanel
 	 *  This is to prevent a corrupted workspace due to interrupting the saving
 	 *  because of the check for unsaved changes in the current editor file
 	 */
+	@Override
 	public boolean canClosePanel()
 	{
 		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
 		return fileOk;
 	}
 
+	@Override
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
@@ -1324,6 +1326,7 @@ public class SqlPanel
 	/**
 	 * Implementation of the ResultReceiver interface
 	 */
+	@Override
 	public String getTitle()
 	{
 		return getTabTitle();
@@ -1334,6 +1337,7 @@ public class SqlPanel
 	 * This is not necessarily the same as the tabName because
 	 * e.g. a filename could be appended to the tabName
 	 */
+	@Override
 	public String getTabTitle()
 	{
 		String defaultLabel = ResourceMgr.getDefaultTabLabel();
@@ -1366,6 +1370,7 @@ public class SqlPanel
 		PanelTitleSetter.updateTitle(this);
 	}
 
+	@Override
 	public void setTabTitle(final JTabbedPane tab, final int index)
 	{
 		String fname = null;
@@ -1392,6 +1397,7 @@ public class SqlPanel
 		return this.tabName;
 	}
 
+	@Override
 	public void setTabName(String aName)
 	{
 		if (StringUtil.isBlank(aName))
@@ -1424,11 +1430,13 @@ public class SqlPanel
 		this.editor.setText(aStatement);
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.getTabTitle();
 	}
 
+	@Override
 	public void disconnect()
 	{
 		synchronized (this)
@@ -1446,11 +1454,13 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public boolean isConnected()
 	{
 		// I'm only checking if the connection is defined, because
@@ -1460,6 +1470,7 @@ public class SqlPanel
 		return (this.dbConnection != null);
 	}
 
+	@Override
 	public void setConnection(WbConnection aConnection)
 	{
 		synchronized (this.connectionLock)
@@ -1513,6 +1524,7 @@ public class SqlPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (dbConnection != null)
@@ -1532,7 +1544,11 @@ public class SqlPanel
 		});
 	}
 
-	public boolean isRequestFocusEnabled() { return true; }
+	@Override
+	public boolean isRequestFocusEnabled()
+	{
+		return true;
+	}
 
 	public void storeStatementInHistory()
 	{
@@ -1635,6 +1651,7 @@ public class SqlPanel
 		return success;
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;
@@ -1643,6 +1660,7 @@ public class SqlPanel
 	/**
 	 *	Implementation of the Interruptable Interface.
 	 */
+	@Override
 	public void cancelExecution()
 	{
 		if (!this.isBusy()) return;
@@ -1663,6 +1681,7 @@ public class SqlPanel
 			{
 				WbThread t = new WbThread("SqlPanel " + this.getId() + " Cancel Thread")
 				{
+					@Override
 					public void run()
 					{
 						cancelRetrieve();
@@ -1708,6 +1727,7 @@ public class SqlPanel
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				for (int i=0; i < anActionList.length; i++)

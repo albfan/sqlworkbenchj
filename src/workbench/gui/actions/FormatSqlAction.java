@@ -39,6 +39,7 @@ public class FormatSqlAction extends WbAction
 		this.setCreateToolbarSeparator(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.reformatSql();
