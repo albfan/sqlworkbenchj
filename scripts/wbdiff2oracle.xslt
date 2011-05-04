@@ -2,21 +2,21 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:output
-  encoding="iso-8859-15" 
-  method="text" 
-  indent="no" 
-  standalone="yes"  
+  encoding="iso-8859-15"
+  method="text"
+  indent="no"
+  standalone="yes"
   omit-xml-declaration="yes"
 />
 
-<!-- 
+<!--
   Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Oracle
   Author: Thomas Kellerer
-  Thanks to Etienne for his addition and bugfixes 
+  Thanks to Etienne for his addition and bugfixes
 -->
 
   <xsl:strip-space elements="*"/>
-  
+
   <xsl:variable name="quote">
     <xsl:text>"</xsl:text>
   </xsl:variable>
@@ -27,11 +27,11 @@
   <xsl:template match="/">
 
     <xsl:apply-templates select="/schema-diff/add-table"/>
-    
+
     <xsl:for-each select="/schema-diff/modify-table">
-      
+
       <xsl:variable name="table" select="@name"/>
-      
+
       <xsl:apply-templates select="add-column">
         <xsl:with-param name="table" select="$table"/>
       </xsl:apply-templates>
@@ -128,18 +128,39 @@
         <xsl:value-of select="$newline"/>
     </xsl:for-each>
 
-    <xsl:for-each select="/schema-diff/create-view">
+    <xsl:for-each select="/schema-diff/create-view[not(@type)]">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
 
-    <xsl:for-each select="/schema-diff/update-view">
+    <xsl:for-each select="/schema-diff/create-view[@type='MATERIALIZED VIEW']">
+        <xsl:call-template name="create-mview"/>
+    </xsl:for-each>
+
+    <xsl:for-each select="/schema-diff/update-view[not(@type)]">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
 
     <xsl:for-each select="/schema-diff/create-proc">
       <xsl:apply-templates select="proc-def"/>
     </xsl:for-each>
-  
+
+  </xsl:template>
+
+  <xsl:template name="create-mview">
+    <xsl:variable name="mview-source">
+        <xsl:if test="contains(view-def/view-source/text(), 'OR REPLACE')">
+            <xsl:value-of select="view-def/view-source"/>
+        </xsl:if>
+        <xsl:if test="not(contains(view-def/view-source/text(), 'OR REPLACE'))">
+            <xsl:call-template name="_replace_text">
+              <xsl:with-param name="text" select="view-def/view-source"/>
+              <xsl:with-param name="replace" select="'CREATE MATERIALIZED VIEW'"/>
+              <xsl:with-param name="by" select="'CREATE OR REPLACE MATERIALIZED VIEW'"/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:variable>
+    <xsl:value-of select="$mview-source"/>
+    <xsl:value-of select="$newline"/>
   </xsl:template>
 
   <xsl:template name="drop-fk">
@@ -182,9 +203,10 @@
     <xsl:text>);</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:template>
-  
+
   <xsl:template match="proc-def">
-    <xsl:value-of select="normalize-space(proc-source)"/>
+    <xsl:value-of select="proc-source"/>
+    <xsl:value-of select="$newline"/>
   </xsl:template>
 
   <xsl:template match="add-index">
@@ -215,7 +237,7 @@
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:template>
-  
+
   <xsl:template match="add-column">
     <xsl:param name="table"/>
     <xsl:for-each select="column-def">
@@ -318,9 +340,9 @@
     <xsl:text> DROP PRIMARY KEY;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:template>
-  
+
   <!-- re-create a view -->
-  <xsl:template match="view-def">
+  <xsl:template name="view-def">
     <xsl:text>CREATE OR REPLACE VIEW</xsl:text>
     <xsl:value-of select="view-name"/>
     <xsl:value-of select="$newline"/>
@@ -332,7 +354,7 @@
       <xsl:variable name="uppername">
         <xsl:value-of select="translate(column-name,
                                   'abcdefghijklmnopqrstuvwxyz',
-                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>   
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
       </xsl:variable>
       <xsl:variable name="colname">
         <xsl:choose>
@@ -455,6 +477,26 @@
       <xsl:text>);</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="_replace_text">
+    <xsl:param name="text"/>
+    <xsl:param name="replace"/>
+    <xsl:param name="by"/>
+    <xsl:choose>
+      <xsl:when test="contains($text, $replace)">
+        <xsl:value-of select="substring-before($text, $replace)"/>
+        <xsl:copy-of select="$by"/>
+        <xsl:call-template name="_replace_text">
+          <xsl:with-param name="text" select="substring-after($text, $replace)"/>
+          <xsl:with-param name="replace" select="$replace"/>
+          <xsl:with-param name="by" select="$by"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$text"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
 </xsl:stylesheet>
