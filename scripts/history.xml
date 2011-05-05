@@ -10,6 +10,7 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="6" type="fix">WbSchemaDiff did not compare indexes and check constraints correctly</entry>
     <entry dev-build="5" type="fix">Code completion was not always working properly if the table name ended with an underscore</entry>
     <entry dev-build="5" type="fix">WbSchemaDiff did not process materialized views correctly.</entry>
     <entry dev-build="5" type="fix">When choosing not to save a modified file when closing the application, the file was saved nevertheless.</entry>
