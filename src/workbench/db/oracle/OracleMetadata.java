@@ -106,7 +106,7 @@ public class OracleMetadata
 			try
 			{
 				stmt = this.connection.createStatement();
-				String sql = "SELECT /* wb */ value FROM v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
+				String sql = "SELECT /* SQLWorkbench */ value FROM v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
 				rs = stmt.executeQuery(sql);
 				if (rs.next())
 				{
@@ -362,7 +362,7 @@ public class OracleMetadata
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
 		final String sql1 =
-			"SELECT t.column_name AS column_name,  \n   " +
+			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n   " +
 			      getDecodeForDataType("t.data_type", fixNVARCHAR, getMapDateToTimestamp()) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     DECODE(t.data_precision, null, " +
@@ -450,7 +450,7 @@ public class OracleMetadata
 		// If yes, use the link name directly
 		if (dblink.indexOf('.') > 0)
 		{
-			sql = "SELECT username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = 'PUBLIC')";
+			sql = "SELECT /* SQLWorkbench */ username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = 'PUBLIC')";
 		}
 		else
 		{
@@ -459,7 +459,7 @@ public class OracleMetadata
 			// name, so I'm using a like to retrieve the definition
 			// hoping that there won't be two dblinks with the same name
 			// but different domains
-			sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
+			sql = "SELECT /* SQLWorkbench */ username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
 			dblink += ".%";
 		}
 
@@ -500,7 +500,7 @@ public class OracleMetadata
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
 		final String ERROR_QUERY =
-			"SELECT line, position, text " +
+			"SELECT /* SQLWorkbench */ line, position, text " +
 			" FROM all_errors   " +
 			"WHERE owner = ? " +
 			"  AND type = ? " +
@@ -573,7 +573,7 @@ public class OracleMetadata
 			return Collections.emptySet();
 		}
 		Set<String> result = new HashSet<String>();
-		String sql = "SELECT owner||'.'||mview_name FROM all_mviews";
+		String sql = "SELECT /* SQLWorkbench */ owner||'.'||mview_name FROM all_mviews";
 		if (schema != null)
 		{
 			sql += " WHERE owner = ?";
