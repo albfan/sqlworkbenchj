@@ -416,6 +416,12 @@ public class OracleIndexReader
 			"  and table_name = ? \n" +
 			"  and constraint_type = 'P'";
 
+		String schema = tbl.getSchema();
+		if (schema == null)
+		{
+			schema = this.metaData.getWbConnection().getCurrentSchema();
+		}
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyIndex()", "Using SQL=" + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
@@ -426,7 +432,7 @@ public class OracleIndexReader
 		try
 		{
 			stmt = metaData.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tbl.getSchema());
+			stmt.setString(1, schema);
 			stmt.setString(2, tbl.getTableName());
 			rs = stmt.executeQuery();
 			if (rs.next())

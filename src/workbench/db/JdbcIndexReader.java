@@ -91,10 +91,13 @@ public class JdbcIndexReader
 
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
+			String catalog = SqlUtil.getTableCatalog(metaData.getWbConnection(), tbl);
+			String schema = SqlUtil.getTableSchema(metaData.getWbConnection(), tbl);
+
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+				keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(catalog, schema, tbl.getTableName());
 				while (keysRs.next())
 				{
 					pkName = keysRs.getString("PK_NAME");

@@ -40,22 +40,37 @@ public class OracleConstraintReader
            " and owner = ? \n" +
            " and table_name = ?  \n";
 
+	@Override
 	public int getIndexForSchemaParameter()
 	{
 		return 1;
 	}
+
+	@Override
 	public int getIndexForCatalogParameter()
 	{
 		return -1;
 	}
+
+	@Override
 	public int getIndexForTableNameParameter()
 	{
 		return 2;
 	}
 
-	public String getColumnConstraintSql() { return null; }
-	public String getTableConstraintSql() { return TABLE_SQL; }
+	@Override
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
 
+	@Override
+	public String getTableConstraintSql()
+	{
+		return TABLE_SQL;
+	}
+
+	@Override
 	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getTableConstraintSql();
@@ -64,10 +79,11 @@ public class OracleConstraintReader
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
+
 		try
 		{
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, aTable.getSchema());
+			stmt.setString(1, SqlUtil.getTableSchema(dbConnection, aTable));
 			stmt.setString(2, aTable.getTableName());
 
 			rs = stmt.executeQuery();

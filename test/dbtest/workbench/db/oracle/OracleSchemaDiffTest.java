@@ -85,6 +85,10 @@ public class OracleSchemaDiffTest
 	{
 		WbConnection reference = OracleTestUtil.getOracleConnection();
 		WbConnection target = OracleTestUtil.getOracleConnection2();
+		if (reference == null || target == null)
+		{
+			return;
+		}
 
 		SchemaDiff diff = new SchemaDiff(reference, target);
 		diff.setIncludeViews(true);
@@ -105,6 +109,58 @@ public class OracleSchemaDiffTest
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/update-view[@type='MATERIALIZED VIEW']/view-def[@name='V_PERSON'])");
 		assertEquals("1", value);
+	}
+
+	@Test
+	public void testCheckConstraints()
+		throws Exception
+	{
+		String sql = "CREATE TABLE foo \n" +
+			"( \n" +
+			"  id integer not null, \n" +
+			"  weekday_start integer not null, \n" +
+			"  weekday integer, \n" +
+			"  is_active integer not null, \n" +
+			"  CONSTRAINT CHK_WEEKDAY CHECK (WEEKDAY IS NULL OR (weekday IN (1,2,3,4,5,6,7))), \n "+
+			"  CONSTRAINT CHK_WEEKDAY_START CHECK (weekday_start IN (1,2,3,4,5,6,7)), \n" +
+      "  CONSTRAINT CKC_IS_ACTIVE CHECK (IS_ACTIVE IN (0,1)), \n" +
+			"  CONSTRAINT pk_foo PRIMARY KEY (id) \n" +
+			")";
+
+		WbConnection reference = OracleTestUtil.getOracleConnection();
+		WbConnection target = OracleTestUtil.getOracleConnection2();
+		if (reference == null || target == null)
+		{
+			return;
+		}
+		// Remove other tables
+		TestUtil.executeScript(reference, " DROP MATERIALIZED VIEW V_PERSON; DROP TABLE person CASCADE CONSTRAINTS;");
+		TestUtil.executeScript(target, "DROP MATERIALIZED VIEW V_PERSON; DROP TABLE person CASCADE CONSTRAINTS;");
+
+		TestUtil.executeScript(reference, sql);
+		TestUtil.executeScript(target, sql);
+
+		SchemaDiff diff = new SchemaDiff(reference, target);
+		diff.setIncludeViews(true);
+		diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
+		diff.setCompareConstraintsByName(true);
+		diff.setIncludeTableConstraints(true);
+		TestUtil util = getTestUtil();
+		File outfile = new File(util.getBaseDir(), "ora_diff2.xml");
+		Writer out = new FileWriter(outfile);
+		diff.writeXml(out);
+		FileUtil.closeQuietely(out);
+		assertTrue(outfile.exists());
+		assertTrue(outfile.length() > 0);
+		Reader in = new FileReader(outfile);
+		String xml = FileUtil.readCharacters(in);
+		assertNotNull(xml);
+
+		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+		assertEquals("0", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='FOO']/table-constraints)");
+		assertEquals("0", value);
 	}
 
 }

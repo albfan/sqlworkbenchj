@@ -1177,6 +1177,7 @@ class DiffEntry
 		target = tar;
 	}
 
+	@Override
 	public String toString()
 	{
 		if (target == null)
