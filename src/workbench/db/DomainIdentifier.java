@@ -123,7 +123,7 @@ public class DomainIdentifier
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, catalog, schema, domain);
+		return SqlUtil.buildExpression(null, catalog, schema, domain);
 	}
 
 	public String getObjectExpression(WbConnection conn)

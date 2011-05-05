@@ -129,7 +129,7 @@ public class TableIdentifier
 	@Override
 	public String getFullyQualifiedName(WbConnection con)
 	{
-		return SqlUtil.buildExpression(con, catalog, schema, tablename);
+		return SqlUtil.buildExpression(null, catalog, schema, tablename);
 	}
 
 	@Override

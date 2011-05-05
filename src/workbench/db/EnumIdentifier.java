@@ -74,7 +74,7 @@ public class EnumIdentifier
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, catalog, schema, enumName);
+		return SqlUtil.buildExpression(null, catalog, schema, enumName);
 	}
 
 	public String getObjectExpression(WbConnection conn)

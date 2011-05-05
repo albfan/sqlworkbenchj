@@ -89,7 +89,7 @@ public class OracleObjectCompiler
 		{
 			sql.append(object.getObjectType());
 			sql.append(' ');
-			sql.append(object.getObjectExpression(dbConnection));
+			sql.append(object.getFullyQualifiedName(dbConnection));
 		}
 		sql.append(" COMPILE");
 		return sql.toString();

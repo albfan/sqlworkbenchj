@@ -31,13 +31,13 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class CommonDiffParameters 
+public class CommonDiffParameters
 {
 	public static final String PARAM_SOURCEPROFILE = "referenceProfile";
 	public static final String PARAM_SOURCEPROFILE_GROUP = "referenceGroup";
 	public static final String PARAM_TARGETPROFILE = "targetProfile";
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
-	
+
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
 
@@ -48,10 +48,10 @@ public class CommonDiffParameters
 	public static final String PARAM_TARGETSCHEMA = "targetSchema";
 
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
-	
+
 	private RowActionMonitor monitor;
 	private ArgumentParser cmdLine;
-	
+
 	public CommonDiffParameters(ArgumentParser args)
 	{
 		cmdLine = args;
@@ -72,31 +72,31 @@ public class CommonDiffParameters
 	{
 		this.monitor = rowMonitor;
 	}
-	
+
 	public WbConnection getTargetConnection(WbConnection current, StatementRunnerResult result)
 	{
 		return getConnection(PARAM_TARGETPROFILE, PARAM_TARGETPROFILE_GROUP, current, "Target", result);
 	}
-	
+
 	public WbConnection getSourceConnection(WbConnection current, StatementRunnerResult result)
 	{
 		return getConnection(PARAM_SOURCEPROFILE, PARAM_SOURCEPROFILE_GROUP, current, "Source", result);
 	}
-	
+
 	protected WbConnection getConnection(String nameArg, String groupArg, WbConnection current, String connType, StatementRunnerResult result)
 	{
 		String profileName = cmdLine.getValue(nameArg);
 		String profileGroup = cmdLine.getValue(groupArg);
 		ProfileKey profileKey = null;
 		if (profileName != null) profileKey = new ProfileKey(profileName, profileGroup);
-		
+
 		if (profileKey == null || (current != null && current.getProfile().isProfileForKey(profileKey)))
 		{
 			return current;
 		}
-		
+
 		WbConnection connection = null;
-		
+
 		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profileKey);
 		if (prof == null)
 		{
@@ -117,7 +117,7 @@ public class CommonDiffParameters
 
 		return connection;
 	}
-	
+
 	public TableMapping getTables(WbConnection referenceConn, WbConnection targetCon)
 		throws SQLException
 	{
@@ -125,13 +125,13 @@ public class CommonDiffParameters
 		List<TableIdentifier> refTables = null;
 		List<TableIdentifier> targetTables = null;
 		boolean matchNames = true;
-		
+
 		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA))
 		{
 			String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
 
-			if (refSchema == null) 
+			if (refSchema == null)
 			{
 				refSchema = referenceConn.getMetadata().getSchemaToUse();
 			}
@@ -140,7 +140,7 @@ public class CommonDiffParameters
 				refSchema = referenceConn.getMetadata().adjustSchemaNameCase(refSchema);
 			}
 
-			if (targetSchema == null) 
+			if (targetSchema == null)
 			{
 				targetSchema = targetCon.getMetadata().getSchemaToUse();
 			}
@@ -158,7 +158,7 @@ public class CommonDiffParameters
 			}
 			else
 			{
-				refTables = referenceConn.getMetadata().getObjectList(refSchema, referenceConn.getMetadata().getTableTypesArray());
+				refTables = referenceConn.getMetadata().getObjectList(null, refSchema, referenceConn.getMetadata().getTableTypesArray(), false);
 			}
 
 			if (StringUtil.isNonBlank(targetTableNames))
@@ -166,9 +166,9 @@ public class CommonDiffParameters
 				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, referenceConn.getMetadata().getTableTypesArray(), targetCon);
 				targetTables = targetArg.getTables();
 			}
-			else 
+			else
 			{
-				targetTables = targetCon.getMetadata().getObjectList(targetSchema, referenceConn.getMetadata().getTableTypesArray());
+				targetTables = targetCon.getMetadata().getObjectList(null, targetSchema, referenceConn.getMetadata().getTableTypesArray(), false);
 				matchNames = true;
 			}
 		}
@@ -197,7 +197,7 @@ public class CommonDiffParameters
 				matchNames = false;
 			}
 		}
-		
+
 		String exNames = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 		List<TableIdentifier> excluded = null;
 		if (exNames != null)
@@ -205,12 +205,12 @@ public class CommonDiffParameters
 			SourceTableArgument args = new SourceTableArgument(exNames, referenceConn);
 			excluded = args.getTables();
 		}
-		
+
 		int index = 0;
 		for (TableIdentifier refTable : refTables)
 		{
 			if (TableIdentifier.findTableByName(excluded, refTable) != null) continue;
-			
+
 			if (matchNames)
 			{
 				TableIdentifier other = TableIdentifier.findTableByName(targetTables, refTable);
@@ -230,7 +230,7 @@ public class CommonDiffParameters
 				}
 			}
 		}
-		
+
 		return mapping;
 	}
 

@@ -91,8 +91,8 @@ public class JdbcIndexReader
 
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
-			String catalog = SqlUtil.getTableCatalog(metaData.getWbConnection(), tbl);
-			String schema = SqlUtil.getTableSchema(metaData.getWbConnection(), tbl);
+			String catalog = tbl.getCatalog();
+			String schema = tbl.getSchema();
 
 			ResultSet keysRs = null;
 			try
@@ -315,9 +315,6 @@ public class JdbcIndexReader
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(metaData.getWbConnection());
 
-		// This will map an indexname to an IndexDefinition object
-		// getIndexInfo() returns one row for each column
-		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
 		List<IndexDefinition> result = null;
 
 		try

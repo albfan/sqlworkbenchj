@@ -1,11 +1,11 @@
 /*
  * OracleViewGrantReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -60,7 +60,7 @@ public class OracleViewGrantReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		List<TableIdentifier> views = con.getMetadata().getObjectList("WBJUNIT", new String[] { "VIEW" });
+		List<TableIdentifier> views = con.getMetadata().getObjectList(null, "WBJUNIT", new String[] { "VIEW" }, false);
 		assertEquals(1, views.size());
 		TableIdentifier v = views.get(0);
 		assertEquals("VIEW", v.getType());

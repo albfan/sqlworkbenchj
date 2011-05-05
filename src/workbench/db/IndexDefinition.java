@@ -80,7 +80,7 @@ public class IndexDefinition
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
+		return SqlUtil.buildExpression(null, getCatalog(), getSchema(), indexName);
 	}
 
 	@Override

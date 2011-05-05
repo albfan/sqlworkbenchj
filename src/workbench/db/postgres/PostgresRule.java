@@ -91,7 +91,7 @@ public class PostgresRule
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, catalog, schema, ruleName);
+		return SqlUtil.buildExpression(null, catalog, schema, ruleName);
 	}
 
 	public String getObjectExpression(WbConnection conn)

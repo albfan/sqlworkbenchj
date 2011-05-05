@@ -165,7 +165,7 @@ public class TriggerDefinition
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return getObjectExpression(conn);
+		return getObjectExpression(null);
 	}
 
 	public String getObjectExpression(WbConnection conn)

@@ -131,27 +131,6 @@ public class SqlUtil
 		return result;
 	}
 
-	public static String getTableSchema(WbConnection conn, TableIdentifier tbl)
-	{
-		String schema = tbl.getSchema();
-		if (schema == null)
-		{
-			schema = conn.getCurrentSchema();
-		}
-		return schema;
-	}
-
-	public static String getTableCatalog(WbConnection conn, TableIdentifier tbl)
-	{
-		String catalog = tbl.getCatalog();
-		if (catalog  == null)
-		{
-			catalog  = conn.getCurrentCatalog();
-		}
-		return catalog ;
-	}
-
-
 	/**
 	 * Quote the given objectName if needed according to the SQL standard.
 	 *

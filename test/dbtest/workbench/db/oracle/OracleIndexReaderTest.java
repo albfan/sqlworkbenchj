@@ -1,11 +1,11 @@
 /*
  * OracleIndexReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -48,7 +48,7 @@ public class OracleIndexReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		String sql = 
+		String sql =
 			"create table some_table (id integer, some_data varchar(100));\n" +
 			"create index aaa_upper on some_table (upper(some_data));\n" +
 			"create index bbb_id on some_table(id) reverse;\n";
@@ -133,7 +133,7 @@ public class OracleIndexReaderTest
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
 		String pkSource = builder.getPkSource(tbl.getTable(), CollectionUtil.arrayList("ID"), "PK_T").toString();
 		assertTrue(pkSource.indexOf("USING INDEX") > -1);
-		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX " + OracleTestUtil.SCHEMA_NAME + ".UNIQUE_ID") > -1);
+		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX UNIQUE_ID") > -1);
 	}
 
 }

@@ -66,7 +66,7 @@ public class OracleMViewReaderTest
 		String source = reader.getMViewSource(con, mview, null, false).toString();
 		assertNotNull(source);
 		String expected =
-			"CREATE MATERIALIZED VIEW V_PERSON\n" +
+			"CREATE OR REPLACE MATERIALIZED VIEW V_PERSON\n" +
 			"  BUILD IMMEDIATE\n" +
 			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
 			"  ENABLE QUERY REWRITE\n" +
@@ -95,7 +95,7 @@ public class OracleMViewReaderTest
 		String source = reader.getMViewSource(con, mview, null, false).toString();
 		assertNotNull(source);
 		String expected =
-			"CREATE MATERIALIZED VIEW V_PERSON\n" +
+			"CREATE OR REPLACE MATERIALIZED VIEW V_PERSON\n" +
 			"  BUILD DEFERRED\n" +
 			"  REFRESH FORCE ON COMMIT WITH PRIMARY KEY\n" +
 			"  DISABLE QUERY REWRITE\n" +

@@ -83,7 +83,7 @@ public class OracleConstraintReader
 		try
 		{
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, SqlUtil.getTableSchema(dbConnection, aTable));
+			stmt.setString(1, aTable.getSchema());
 			stmt.setString(2, aTable.getTableName());
 
 			rs = stmt.executeQuery();

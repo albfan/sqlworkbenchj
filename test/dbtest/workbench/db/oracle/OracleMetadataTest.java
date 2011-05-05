@@ -116,7 +116,7 @@ public class OracleMetadataTest
 		assertEquals("person id", id.getComment());
 
 		String sql = tbl.getSource(con).toString().trim();
-		assertTrue(sql.startsWith("CREATE MATERIALIZED VIEW MV_PERSON"));
+		assertTrue(sql.startsWith("CREATE OR REPLACE MATERIALIZED VIEW MV_PERSON"));
 		IndexReader r = con.getMetadata().getIndexReader();
 		assertNotNull(r);
 		assertTrue(r instanceof OracleIndexReader);

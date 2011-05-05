@@ -244,7 +244,7 @@ public class ProcedureDefinition
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return getObjectExpression(conn);
+		return getObjectExpression(null);
 	}
 
 	@Override
