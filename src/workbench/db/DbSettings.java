@@ -1294,4 +1294,14 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "completion.always_use.catalog", false);
 	}
+
+	public String getUniqueKeyViolationErrorState()
+	{
+		return Settings.getInstance().getProperty(prefix + "errorstate.unique", null);
+	}
+
+	public int getUniqueKeyViolationErrorCode()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "errorcode.unique", -1);
+	}
 }

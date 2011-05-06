@@ -45,6 +45,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
+import workbench.db.DbSettings;
 import workbench.db.compare.BatchedStatement;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -212,7 +213,7 @@ public class DataImporter
 			insertSqlStart = sql;
 		}
 	}
-	
+
 	private boolean supportsBatch()
 	{
 		if (this.dbConn == null) return true;
@@ -278,6 +279,7 @@ public class DataImporter
 	 * @see #setTableList(java.util.List)
 	 * @see #setTargetTable(workbench.db.TableIdentifier, java.util.List)
 	 */
+	@Override
 	public void beginMultiTable()
 		throws SQLException
 	{
@@ -291,6 +293,7 @@ public class DataImporter
 		}
 	}
 
+	@Override
 	public void endMultiTable()
 	{
 		this.multiTable = false;
@@ -309,6 +312,7 @@ public class DataImporter
 		else this.endRow = Long.MAX_VALUE;
 	}
 
+	@Override
 	public void setCommitBatch(boolean flag)
 	{
 		this.commitBatch = flag;
@@ -321,6 +325,7 @@ public class DataImporter
 	/**
 	 * Do not commit any changes after finishing the import
 	 */
+	@Override
 	public void commitNothing()
 	{
 		this.commitBatch = false;
@@ -338,6 +343,7 @@ public class DataImporter
 	 *
 	 * @param aCount the interval in which commits should be sent
 	 */
+	@Override
 	public void setCommitEvery(int aCount)
 	{
 		if (aCount > 0 || aCount == Committer.NO_COMMIT_FLAG)
@@ -353,11 +359,13 @@ public class DataImporter
 		this.continueOnError = flag;
 	}
 
+	@Override
 	public int getBatchSize()
 	{
 		return batchSize;
 	}
 
+	@Override
 	public void setBatchSize(int size)
 	{
 		this.batchSize = size;
@@ -380,11 +388,13 @@ public class DataImporter
 		}
 	}
 
+	@Override
 	public void setTableList(List<TableIdentifier> targetTables)
 	{
 		this.tablesToBeProcessed = targetTables;
 	}
 
+	@Override
 	public void deleteTargetTables()
 		throws SQLException
 	{
@@ -425,6 +435,7 @@ public class DataImporter
 		this.createTarget = flag;
 	}
 
+	@Override
 	public boolean getCreateTarget()
 	{
 		return createTarget;
@@ -441,6 +452,7 @@ public class DataImporter
 	/**
 	 * 	Use batch updates if the driver supports this
 	 */
+	@Override
 	public void setUseBatch(boolean flag)
 	{
 		if (this.isModeInsertUpdate() || this.isModeUpdateInsert()) return;
@@ -625,7 +637,7 @@ public class DataImporter
 		if (this.keyColumns == null) return Collections.emptyList();
 		return Collections.unmodifiableList(keyColumns);
 	}
-	
+
 	/**
 	 * 	Set the key columns for the target table to be used
 	 * 	for update mode.
@@ -781,26 +793,28 @@ public class DataImporter
 	 *	This method is called if cancelExecution() is called
 	 *	to check if the user should confirm the cancelling of the import
 	 */
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;
 	}
 
+	@Override
 	public void cancelExecution()
 	{
 		if (this.tableDeleter != null)
 		{
 			this.tableDeleter.cancel();
 		}
-		
+
 		this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 	}
 
-	private void cancelStatement(BatchedStatement stmt) 
+	private void cancelStatement(BatchedStatement stmt)
 	{
 		if (stmt == null) return;
-		try 
+		try
 		{
 			stmt.cancel();
 		}
@@ -809,11 +823,14 @@ public class DataImporter
 			LogMgr.logDebug("DataImporter.cancelStatement()", "Error when cancelling statement", e);
 		}
 	}
+
+	@Override
 	public void setTableCount(int total)
 	{
 		this.totalTables = total;
 	}
 
+	@Override
 	public void setCurrentTable(int current)
 	{
 		this.currentTable = current;
@@ -835,6 +852,7 @@ public class DataImporter
 		}
 	}
 
+	@Override
 	public void recordRejected(String record, long importRow, Throwable error)
 	{
 		if (record == null) return;
@@ -855,6 +873,7 @@ public class DataImporter
 		}
 	}
 
+	@Override
 	public boolean shouldProcessNextRow()
 	{
 		if (currentImportRow + 1 < startRow) return false;
@@ -862,6 +881,7 @@ public class DataImporter
 		return true;
 	}
 
+	@Override
 	public void nextRowSkipped()
 	{
 		this.currentImportRow ++;
@@ -871,6 +891,7 @@ public class DataImporter
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
 	 */
+	@Override
 	public void processRow(Object[] row)
 		throws SQLException
 	{
@@ -935,10 +956,21 @@ public class DataImporter
 						rows = this.insertRow(row, useSavepoint);
 						inserted = true;
 					}
+					catch (SQLException sql)
+					{
+						if (ignoreInsertError(sql))
+						{
+							inserted = false;
+						}
+						else
+						{
+							throw sql;
+						}
+					}
 					catch (Exception e)
 					{
-						//LogMgr.logDebug("DataImporter.processRow()", "Error inserting row, trying update");
-						inserted = false;
+						LogMgr.logDebug("DataImporter.processRow()", "Unexpected error when inserting row in insert/update mode", e);
+						throw new SQLException("Error during insert", e);
 					}
 
 					// The update statement might have been set to null
@@ -960,16 +992,7 @@ public class DataImporter
 
 					if (this.updateStatement == null)
 					{
-						try
-						{
-							rows = this.insertRow(row, useSavepoint && continueOnError);
-						}
-						catch (SQLException ignore)
-						{
-							// if UPDATE/INSERT was requested but the update statement
-							// has been set to null, an update is not possible
-							// so a failed insert should not be considered an error
-						}
+						rows = this.insertRow(row, useSavepoint && continueOnError);
 					}
 					else
 					{
@@ -1032,6 +1055,34 @@ public class DataImporter
 			throw new SQLException("Not enough memory!");
 		}
 
+	}
+
+	/**
+	 * Check if the given SQL Exception identifies a primary (unique) key violation.
+	 * If an error code or SQLState is configured for the current DBMS this is checked.
+	 * Otherwise this returns true.
+	 *
+	 * @param sql the exception
+	 * @return true if the error should be ignored in insert/update mode
+	 * @see DbSettings#getUniqueKeyViolationErrorCode()
+	 * @see DbSettings#getUniqueKeyViolationErrorState() 
+	 */
+	private boolean ignoreInsertError(SQLException sql)
+	{
+		String state = dbConn.getDbSettings().getUniqueKeyViolationErrorState();
+		int error = dbConn.getDbSettings().getUniqueKeyViolationErrorCode();
+		if (state != null)
+		{
+			return state.equals(sql.getSQLState());
+		}
+
+		if (error > 0)
+		{
+			return sql.getErrorCode() == error;
+		}
+
+		// Nothing configured to detect a primary key violation --> ignore it
+		return true;
 	}
 
 	private void setUpdateSavepoint()
@@ -1399,6 +1450,7 @@ public class DataImporter
 		}
 	}
 
+	@Override
 	public void tableImportFinished()
 		throws SQLException
 	{
@@ -1430,6 +1482,7 @@ public class DataImporter
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
+	@Override
 	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
 		throws SQLException
 	{
@@ -1995,6 +2048,7 @@ public class DataImporter
 	/**
 	 *	Callback from the RowDataProducer
 	 */
+	@Override
 	public void importFinished()
 	{
 		if (!isRunning) return;
@@ -2033,7 +2087,7 @@ public class DataImporter
 			cancelStatement(insertStatement);
 			cancelStatement(updateStatement);
 			closeStatements();
-			
+
 			if (this.transactionControl && !this.dbConn.getAutoCommit())
 			{
 				LogMgr.logInfo("DataImporter.cleanupRollback()", "Rollback changes");
@@ -2053,12 +2107,13 @@ public class DataImporter
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
+	@Override
 	public void tableImportError()
 	{
 		cleanupRollback();
 	}
 
-
+	@Override
 	public void importCancelled()
 	{
 		if (!isRunning) return;
@@ -2094,6 +2149,7 @@ public class DataImporter
 		return this.reportInterval;
 	}
 
+	@Override
 	public void setReportInterval(int interval)
 	{
 		if (interval > 0)
