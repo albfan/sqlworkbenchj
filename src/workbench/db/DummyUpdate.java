@@ -16,24 +16,24 @@ import java.util.List;
 /**
  * @author Thomas Kellerer
  */
-public class DummyInsert
+public class DummyUpdate
 	extends DummyDML
 	implements DbObject
 {
-	public DummyInsert(TableIdentifier tbl)
+	public DummyUpdate(TableIdentifier tbl)
 	{
-		super(tbl, false);
+		super(tbl, true);
 	}
 
-	public DummyInsert(TableIdentifier tbl, List<ColumnIdentifier> cols)
+	public DummyUpdate(TableIdentifier tbl, List<ColumnIdentifier> cols)
 	{
-		super(tbl, cols, false);
+		super(tbl, cols, true);
 	}
 
 	@Override
 	public String getObjectType()
 	{
-		return "INSERT";
+		return "UPDATE";
 	}
 
 }

@@ -41,6 +41,8 @@ public class DummyInsertTest
 			con.commit();
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
 			DummyInsert insert = new DummyInsert(person);
+			assertEquals("INSERT", insert.getObjectType());
+
 			String sql = insert.getSource(con).toString();
 
 			String verb = SqlUtil.getSqlVerb(sql);

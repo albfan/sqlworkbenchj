@@ -33,6 +33,7 @@ public class ObjectScripter
 	public static final String TYPE_VIEW = "view";
 	public static final String TYPE_SYNONYM = "synonym";
 	public static final String TYPE_INSERT = "insert";
+	public static final String TYPE_UPDATE = "update";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_PROC = "procedure";
 	public static final String TYPE_PKG = "package";
@@ -51,13 +52,18 @@ public class ObjectScripter
 	private Collection<String> commitTypes;
 	private boolean appendCommit;
 
+	private Collection<String> typesWithoutSeparator;
+
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
-		commitTypes = CollectionUtil.treeSet(TYPE_SEQUENCE,
+		
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_SEQUENCE,
 			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG,
 			TYPE_DOMAIN, TYPE_ENUM);
+
+		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 	}
 
 	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
@@ -92,6 +98,7 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
 			if (!cancel) this.appendObjectType(TYPE_MVIEW);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
+			if (!cancel) this.appendObjectType(TYPE_UPDATE);
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
 			if (!cancel) this.appendObjectType(TYPE_FUNC);
 			if (!cancel) this.appendObjectType(TYPE_PROC);
@@ -178,7 +185,7 @@ public class ObjectScripter
 
 			if (source != null && source.length() > 0)
 			{
-				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
+				boolean useSeparator = !typesWithoutSeparator.contains(type);
 				if (useSeparator) this.script.append("-- BEGIN " + type + " " + dbo.getObjectName() + nl);
 				this.script.append(source);
 				if (useSeparator) this.script.append("-- END " + type + " " + dbo.getObjectName() + nl);

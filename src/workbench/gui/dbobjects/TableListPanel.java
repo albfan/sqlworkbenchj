@@ -462,6 +462,7 @@ public class TableListPanel
 		}
 
 		this.tableList.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableList.getSelectionModel()), true);
+		this.tableList.addPopupAction(CreateDummySqlAction.createDummyUpdateAction(this, tableList.getSelectionModel()), false);
 		this.tableList.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableList.getSelectionModel()), false);
 
 		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, tableList.getSelectionModel());
@@ -652,7 +653,7 @@ public class TableListPanel
 		}
 
 		tableList.saveColumnOrder();
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()

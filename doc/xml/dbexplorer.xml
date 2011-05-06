@@ -5,7 +5,7 @@
 		The Database Object Explorer displays the available database objects
 		such as Tables, Views, Triggers and Stored Procedures.
 	</para>
-  
+
 	<para>
 		There are three ways to start the DbExplorer
 		<simplelist columns="1">
@@ -22,35 +22,35 @@
 		the terms used for the current DBMS (Schema for PostgreSQL and Oracle, Owner and Database for SQL Server,
 		Database for MySQL).
 	</para>
-  
+
 	<para>
 		The displayed list can be filtered using the quick filter above the list. To filter
-		the list by the object name, simply enter the criteria in the filter field, and 
+		the list by the object name, simply enter the criteria in the filter field, and
 		press <literal>ENTER</literal> or click the filter icon
 		<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>.
 		The criteria field will list the last 25 values that were entered in the dropdown.
-		If you want to filter based on a different column of the list, right-click on the 
+		If you want to filter based on a different column of the list, right-click on the
 		criteria field, and select the desired column from the <literal>Filtercolumn</literal>
 		menu item of the popup menu. The same filter can be applied on the <literal>Procedures</literal>
 		tab.
 	</para>
-	
+
 	<para>
-		The list of tables can be pre-filtered to remove unwanted entries such as tables 
+		The list of tables can be pre-filtered to remove unwanted entries such as tables
 		that have been deleted and now reside in Oracle's "Recycle Bin". The filtering
-		is done through a <link linkend="db-settings-filter-tables">regular expression</link> 
-		on a per-database basis. By default this is only defined for Oracle and will filter out 
+		is done through a <link linkend="db-settings-filter-tables">regular expression</link>
+		on a per-database basis. By default this is only defined for Oracle and will filter out
 		any table that starts with <literal>BIN$</literal>.
 	</para>
-	
+
 	<para>
 		Synonyms are displayed if the current DBMS supports them.
-		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a 
-		regular expression</link> in your <literal>workbench.settings</literal> file. 
+		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a
+		regular expression</link> in your <literal>workbench.settings</literal> file.
 		This filter will also be applied when displaying the list of available tables when opening
 		the <link linkend="command-completion">command completion</link> popup.
 	</para>
-  
+
 	<para>
 		The first tab displays the structure of tables and views. The type
 		of object displayed can be chosen from the drop down right above the table
@@ -64,7 +64,7 @@
 		If a DbExplorer is already open (either a window or a tab), the existing one is made visible (or active), when
 		using this menu item.
 	</para>
-	
+
 	<para>
 		You can open any number of additional DbExplorer tabs or windows using
 		<menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer panel</guimenuitem></menuchoice> or
@@ -117,7 +117,7 @@
 
 		<simplesect id="dbexplorer-create-insert">
 			<title>Create empty INSERT</title>
-        
+
 			<blockquote>
 				<para>
 					This creates an empty <literal>INSERT</literal> statement for the
@@ -127,14 +127,26 @@
 			</blockquote>
 		</simplesect>
 
+		<simplesect id="dbexplorer-create-insert">
+			<title>Create empty UPDATE</title>
+
+			<blockquote>
+				<para>
+					This creates an empty <literal>UPDATE</literal> statement for the
+					currently selected table(s). This is intended for programmers that want
+					to use the statement inside their code.
+				</para>
+			</blockquote>
+		</simplesect>
+
 		<simplesect id="dbexplorer-create-select">
 			<title>Create default SELECT</title>
-        
+
 			<blockquote>
 				<para>
 					This creates a <literal>SELECT</literal> for the
 					selected table(s) that includes all columns for the table. This feature is intended
-					for programmers who want to put a SELECT statement into their code. 
+					for programmers who want to put a SELECT statement into their code.
 				</para>
 				<para>
 					If you want to generate a SELECT statement to actually retrieve data from within the
@@ -219,8 +231,8 @@
 				</para>
 				<para>
 					The list of tables is sorted according to the sort order
-					in the table list. If the tables have foreign key constraints, 
-					you can re-order them to be processed in the correct order by 
+					in the table list. If the tables have foreign key constraints,
+					you can re-order them to be processed in the correct order by
 					clicking on the <guibutton>Check foreign keys</guibutton> button.
 				</para>
 				<para>
@@ -243,7 +255,7 @@
         </para>
       </blockquote>
     </simplesect>
-     
+
 	</section>
 
 	<section id="table-details">
@@ -270,7 +282,7 @@
 			If the DBMS supports synonyms, the columns tab will display
 			the column definition of the underlying table or view. The source tab
 			will display the statement to re-create the synonym. If the underlying object
-			of the synonym is a table, then indexes, foreign keys and triggers for 
+			of the synonym is a table, then indexes, foreign keys and triggers for
 			that table will be displayed as well.
 		</para>
 		<para>
@@ -340,7 +352,7 @@
 
 	<section id="table-data">
 		<title>Table data</title>
-		
+
 		<para>
 			The data tab will display the data from the currently selected
 			table. There are several options to configure the display of this tab.
@@ -348,16 +360,16 @@
 			checked, then the data will be retrieved from the database as soon as
 			the table is selected in the table list (and the tab is visible).
 		</para>
-    
+
 		<para>
 			The data tab will also display a total row count of the table. As this
-			display can take a while, the automatic retrieval of the row count can be disabled. 
-			To disable the automatic calculation of the table's rowcount, click on the <guibutton>Settings</guibutton> 
+			display can take a while, the automatic retrieval of the row count can be disabled.
+			To disable the automatic calculation of the table's rowcount, click on the <guibutton>Settings</guibutton>
 			button and deselect the checkbox <literal>Autoload table row count</literal>. To calculate
 			the table's row count when this is not done automatically, click on the <literal>Rows</literal>
 			label. You can cancel the row count retrieval while it's running by clicking on the label again.
 		</para>
-    
+
 		<para>
 			The data tab is only available if the currently selected objects
 			is recognized as an object that can can be "SELECTED". Which object types
@@ -416,7 +428,7 @@
 			columns appear in the source table. The saved order will be deleted as well.
 		</para>
 	</section>
-	
+
 	<section id="customize-dbexplorer-retrieval">
 		<title>Customize data retrieval</title>
 		<para>
@@ -464,7 +476,7 @@ FROM geo_table
 </programlisting>
 			to retrieve the data of that table.
 		</para>
-		
+
     <para>
       Note that the data of columns that have been "converted" through this mechanism, might not be updateable any more. If
       you intend to edit such a column you will have to provide a column alias in order for &wb-productname; to generate
@@ -491,14 +503,14 @@ FROM geo_table
 		</para>
 
 		<para>
-			You can check the generated SELECT statement by using the 
+			You can check the generated SELECT statement by using the
 			<link linkend="dbexplorer-select-data">Put SELECT into</link> feature.
 			The statement that is generated and put into the editor, is the same as the one used for the
 			data retrieval.
 		</para>
 
 		<para>
-			The defined expression will also be used for the <link linkend="search-table-data">Search table data</link> feature, 
+			The defined expression will also be used for the <link linkend="search-table-data">Search table data</link> feature,
       when using the server side search. If you want to search inside the data that is returned by the defined
       expression you have to make sure that you DBMS supports the result of that expression as part of a
       <literal>LIKE</literal> expression. E.g. for the above Oracle example, &wb-productname; will generate
@@ -523,7 +535,7 @@ FROM geo_table
       for details.
     </para>
   </section>
-  
+
 	<section id="view-details">
 		<title>View details</title>
 		<para>When a database <literal>VIEW</literal> is selected in the object list
@@ -531,14 +543,14 @@ FROM geo_table
 		returned by a select from that view.</para>
 		<para>The data details tab works the same way as the data tab
 		for a table. If the view is updateable (depends on the view definition
-		and the underlying DBMS) then the data can also be changed within 
+		and the underlying DBMS) then the data can also be changed within
 		the data tab</para>
-		<para>The source code is retrieved by customized SQL queries (this 
-			is not supported by the JDBC driver). If the source code of views is not 
+		<para>The source code is retrieved by customized SQL queries (this
+			is not supported by the JDBC driver). If the source code of views is not
 			displayed for your DBMS, please contact <email>support@sql-workbench.net</email>.
 		</para>
 	</section>
-  
+
 	<section id="procedure-tab">
 		<title>Procedure tab</title>
 
@@ -547,10 +559,10 @@ FROM geo_table
 			stored in the current schema. For procedures or functions returning a
 			result set, the definition of the columns will be displayed as well.
 		</para>
-		
+
 		<para>
 			To display the procedure's source code &wb-productname; uses its
-			own SQL queries. For most popular DBMS systems the necessary 
+			own SQL queries. For most popular DBMS systems the necessary
 			queries are built into the application. If the procedure sourc
 			is not displayed for your DBMS, please contact the author.
 		</para>
@@ -558,9 +570,9 @@ FROM geo_table
 		<para>
 			Functions inside Oracle packages will be listed separately on the left
 			side, but the source code will contain all functions/procedures from
-			that package. 
+			that package.
 		</para>
-		
+
 	</section>
 
 	<section id="search-table-data">
@@ -592,7 +604,7 @@ FROM geo_table
         To server side search is enabled by selecting the checkbox labelled
         "<literal>Server side search</literal>".
       </para>
-      
+
       <para>
         The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
         restriction for each text column on the selected tables. Therefore the
@@ -679,7 +691,7 @@ FROM geo_table
         search value. If at least one column's value matches, the row will be displayed.
         The comparison is always done in a case-insesitively. The contents of BLOB columns will never be searched.
       </para>
-      
+
       <para>
         The character representation that is used is based on the default formatting
         options from the <link linkend="">Options Window</link>. This means that e.g.
@@ -691,9 +703,9 @@ FROM geo_table
         The client side search is also available through the
         <link linkend="command-search-data">WbGrepData</link> command
       </para>
-      
+
     </section>
-    
+
 	</section>
 
 </section>

@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-04-25">
+    <entry dev-build="6" type="enh">In the DbExplorer's table list, a new option has been added to generate an "empty" UPDATE statement (in addition to the INSERT and SELECT statements)</entry>
     <entry dev-build="6" type="enh">When using -mode=insert,update for WbCopy or WbImport only real primary key violations are now ignored (previously all errors during insert were ignored)</entry>
     <entry dev-build="6" type="enh">The list of triggers in the DbExplorer now contains an additional column to show the status of the trigger for Oracle and Postgres</entry>
     <entry dev-build="5" type="enh">The order of the columns in the DbExplorer's table list is now saved in the workspace</entry>
