@@ -35,6 +35,7 @@ public class TriggerDefinition
 	private String event;
 	private TableIdentifier table;
 	private CharSequence source;
+	private String status;
 
 	public TriggerDefinition(String cat, String schem, String name)
 	{
@@ -43,14 +44,26 @@ public class TriggerDefinition
 		triggerName = name;
 	}
 
+	@Override
 	public String getComment()
 	{
 		return comment;
 	}
 
+	@Override
 	public void setComment(String c)
 	{
 		comment = c;
+	}
+
+	public String getStatus()
+	{
+		return status;
+	}
+
+	public void setStatus(String statusText)
+	{
+		this.status = statusText;
 	}
 
 	/**

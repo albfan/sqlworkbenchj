@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
-   
+
   <void method="put">
    <string>Apache Derby</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
@@ -118,12 +118,12 @@
     </void>
    </object>
 	</void>
-	
+
   <void method="put">
    <string>DB2/NT</string>
    <object id="db2_lst_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>select trigname as trigger_name, 
+     <string>select trigname as trigger_name,
         case trigtime
            when 'A' then 'AFTER'
            when 'B' then 'BEFORE'
@@ -133,7 +133,7 @@
           when 'I' then 'INSERT'
           when 'U' then 'UPDATE'
           when 'D' then 'DELETE'
-        end as trigger_event 
+        end as trigger_event
 from syscat.triggers</string>
     </void>
     <void property="objectNameField">
@@ -158,16 +158,24 @@ from syscat.triggers</string>
    <object idref="db2_lst_trg"/>
 	</void>
 
-	<void method="put">  
-   <string>DB2/LINUX</string>  
+	<void method="put">
+   <string>DB2/LINUX</string>
    <object idref="db2_lst_trg"/>
 	</void>
-	
+
   <void method="put">
    <string>Oracle</string>
    <object id="list_oracle_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event, table_name FROM all_triggers</string>
+     <string>
+       SELECT trigger_name,
+              trigger_type,
+              triggering_event as trigger_event,
+              table_name,
+              '' as remarks,
+              status
+      FROM all_triggers
+    </string>
     </void>
     <void property="objectNameField">
      <string>table_name</string>
@@ -186,48 +194,48 @@ from syscat.triggers</string>
    <object idref="list_oracle_trg"/>
   </void>
 
-  <void method="put"> 
-   <string>Adaptive Server Enterprise</string> 
+  <void method="put">
+   <string>Adaptive Server Enterprise</string>
    <object id="list_asa_trg" class="workbench.db.GetMetaDataSql">
-    <void property="baseSql"> 
-     <string>select trigname as trigger_name, trigtime as trigger_type, event from systriggers</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>tname</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
-	
-  <void method="put"> 
-   <string>Adaptive Server Anywhere</string> 
+    <void property="baseSql">
+     <string>select trigname as trigger_name, trigtime as trigger_type, event from systriggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>tname</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Anywhere</string>
    <object idref="list_asa_trg"/>
-  </void> 
-  
-  <void method="put"> 
-   <string>FirstSQL/J</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select class_name||'.'||class_method as trigger_name, 
-             mode as trigger_type, 
-             command as event 
-    from definition_schema.systriggers</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>table_name</string> 
-    </void> 
+  </void>
+
+  <void method="put">
+   <string>FirstSQL/J</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select class_name||'.'||class_method as trigger_name,
+             mode as trigger_type,
+             command as event
+    from definition_schema.systriggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
     <void property="schemaField">
      <string>table_schema</string>
     </void>
-    <void property="orderBy"> 
-     <string>ORDER BY 1</string> 
-    </void> 
-   </object> 
-  </void> 
+    <void property="orderBy">
+     <string>ORDER BY 1</string>
+    </void>
+   </object>
+  </void>
 
-	
+
   <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -256,13 +264,13 @@ from syscat.triggers</string>
     </void>
    </object>
   </void>
-	
-  <void method="put"> 
-   <string>PostgreSQL</string> 
+
+  <void method="put">
+   <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql"> 
-     <string>select trg.tgname,  
-       case trg.tgtype &amp; cast(2 as int2) 
+    <void property="baseSql">
+     <string>select trg.tgname,
+       case trg.tgtype &amp; cast(2 as int2)
          when 0 then 'AFTER'
          else 'BEFORE'
        end as trigger_type,
@@ -276,84 +284,88 @@ from syscat.triggers</string>
          when 12 then 'INSERT, DELETE'
        end as trigger_event,
        ns.nspname||'.'||tbl.relname as table_name,
-       obj_description(trg.oid) as remarks
+       obj_description(trg.oid) as remarks,
+	     case
+          when trg.tgenabled='O' then 'ENABLED'
+	        else 'DISABLED'
+        end as status
 FROM pg_trigger trg
  JOIN pg_class tbl on trg.tgrelid = tbl.oid
  JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
 AND trg.tgname not like 'RI_ConstraintTrigger%'
 AND trg.tgname not like 'pg_sync_pg%'
-</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>tbl.relname</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by 1</string> 
-    </void> 
-   </object> 
-  </void> 
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl.relname</string>
+    </void>
+    <void property="orderBy">
+     <string>order by 1</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>MySQL</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>MySQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT trigger_name,
                     action_timing AS trigger_type,
                     event_manipulation as trigger_event,
                     event_object_table as trigger_table
              FROM information_schema.triggers
-      </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>event_object_table</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>event_object_schema</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
+      </string>
+    </void>
+    <void property="objectNameField">
+     <string>event_object_table</string>
+    </void>
+    <void property="schemaField">
+     <string>event_object_schema</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>H2</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>H2</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>
         SELECT trigger_name,
                trigger_type,
                case before when 'true' then 'BEFORE' else 'AFTER' end as trigger_event,
                table_name as trigger_table
         FROM information_schema.triggers</string>
-    </void> 
-    <void property="objectNameField"> 
-     <string>table_name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
-	
-  <void method="put"> 
-   <string>HSQL Database Engine</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>HSQL Database Engine</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>
        SELECT trigger_name,
               trigger_type,
               triggering_event as trigger_event, table_name as trigger_table
       FROM information_schema.system_triggers</string>
-    </void> 
-    <void property="objectNameField"> 
-     <string>table_name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
    <string>HSQL Database Engine 2.0</string>
@@ -378,10 +390,10 @@ AND trg.tgname not like 'pg_sync_pg%'
    </object>
   </void>
 
-  <void method="put"> 
-   <string>Firebird</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>Firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>
        SELECT rdb$trigger_name AS TRIGGER_NAME,
           case
@@ -406,49 +418,49 @@ AND trg.tgname not like 'pg_sync_pg%'
           trim(rdb$relation_name) as trigger_table
     FROM rdb$triggers
     WHERE rdb$system_flag = 0
-</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>rdb$relation_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>RDB$OWNER_NAME</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>INGRES</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>rdb$relation_name</string>
+    </void>
+    <void property="schemaField">
+     <string>RDB$OWNER_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>INGRES</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>
-select rdef.rule_name as trigger_name, 
+select rdef.rule_name as trigger_name,
        'AFTER' as trigger_type,
-       case rdef.rule_statement 
+       case rdef.rule_statement
           when 1 then 'DELETE'
-          when 2 then 'INSERT' 
+          when 2 then 'INSERT'
           when 4 then 'UPDATE'
           when 3 then 'INSERT,DELETE'
           when 6 then 'INSERT,UPDATE'
           when 5 then 'UPDATE,DELETE'
           when 7 then 'INSERT,UPDATE,DELETE'
-          else '' 
+          else ''
        end as trigger_event
 from iirule rdef, iirules rlist
 where rdef.rule_name = rlist.rule_name
-     </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>rlist.table_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>rlist.rule_owner</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by rlist.rule_name</string> 
-    </void> 
-   </object> 
-  </void> 
-    
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>rlist.table_name</string>
+    </void>
+    <void property="schemaField">
+     <string>rlist.rule_owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by rlist.rule_name</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

@@ -48,12 +48,14 @@ public class DefaultTriggerReader
 	/**
 	 * Return a list of triggers available in the given schema.
 	 */
+	@Override
 	public DataStore getTriggers(String catalog, String schema)
 		throws SQLException
 	{
 		return getTriggers(catalog, schema, null);
 	}
 
+	@Override
 	public List<TriggerDefinition> getTriggerList(String catalog, String schema, String baseTable)
 		throws SQLException
 	{
@@ -66,10 +68,13 @@ public class DefaultTriggerReader
 			String trgEvent = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT);
 			String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 			String comment = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
+			String status = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS);
 			TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
 			trg.setTriggerType(trgType);
 			trg.setTriggerEvent(trgEvent);
 			trg.setComment(comment);
+			trg.setStatus(status);
+			
 			if (tableName != null)
 			{
 				TableIdentifier tbl = new TableIdentifier(tableName);
@@ -82,6 +87,7 @@ public class DefaultTriggerReader
 	/**
 	 *	Return the list of defined triggers for the given table.
 	 */
+	@Override
 	public DataStore getTableTriggers(TableIdentifier table)
 		throws SQLException
 	{
@@ -93,8 +99,8 @@ public class DefaultTriggerReader
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int[] sizes =   {30, 30, 20, 20, 20};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int[] sizes =   {30, 30, 20, 20, 20, 10};
 
 		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 
@@ -119,8 +125,10 @@ public class DefaultTriggerReader
 		ResultSet rs = stmt.executeQuery(query);
 		try
 		{
-			boolean hasTableName = rs.getMetaData().getColumnCount() >= 4;
-			boolean hasComment = rs.getMetaData().getColumnCount() >= 5;
+			int colCount = rs.getMetaData().getColumnCount();
+			boolean hasTableName =  colCount >= 4;
+			boolean hasComment = colCount >= 5;
+			boolean hasStatus = colCount >= 6;
 
 			while (rs.next())
 			{
@@ -150,6 +158,13 @@ public class DefaultTriggerReader
 					if (!rs.wasNull() && value != null) value = value.trim();
 					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, value);
 				}
+
+				if (hasStatus)
+				{
+					value = rs.getString(6);
+					if (!rs.wasNull() && value != null) value = value.trim();
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS, value);
+				}
 			}
 			result.resetStatus();
 		}
@@ -160,6 +175,7 @@ public class DefaultTriggerReader
 		return result;
 	}
 
+	@Override
 	public TriggerDefinition findTrigger(String catalog, String schema, String name)
 		throws SQLException
 	{
@@ -174,7 +190,8 @@ public class DefaultTriggerReader
 		}
 		return null;
 	}
-	
+
+	@Override
 	public String getTriggerSource(TriggerDefinition trigger, boolean includeDependencies)
 		throws SQLException
 	{
@@ -238,7 +255,7 @@ public class DefaultTriggerReader
 					}
 				}
 			}
-			
+
 			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
 			if (warn != null)
 			{
@@ -258,7 +275,7 @@ public class DefaultTriggerReader
 						result.append(delim.getDelimiter());
 					}
 				}
-				
+
 				CommentSqlManager mgr = new CommentSqlManager(this.dbConnection.getMetadata().getDbId());
 				String ddl = mgr.getCommentSqlTemplate("trigger");
 				if (result.length() > 0 && StringUtil.isNonBlank(ddl) && StringUtil.isNonBlank(trgComment))
