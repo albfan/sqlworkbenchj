@@ -48,7 +48,7 @@ public class JdbcTableDefinitionReader
 		DbSettings dbSettings = dbConnection.getDbSettings();
 		DbMetadata dbmeta = dbConnection.getMetadata();
 
-		String catalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getCatalog()), dbConnection);
+		String catalog = StringUtil.trimQuotes(table.getCatalog());
 		String schema = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getSchema()), dbConnection);
 		String tablename = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getTableName()), dbConnection);
 

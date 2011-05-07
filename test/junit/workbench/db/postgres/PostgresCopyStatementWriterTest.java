@@ -70,6 +70,11 @@ public class PostgresCopyStatementWriterTest
 			{
 				return "\"";
 			}
+			@Override
+			public String getEncoding()
+			{
+				return "UTF-8";
+			}
 		};
 
 		ColumnIdentifier id = new ColumnIdentifier("id" ,Types.INTEGER, true);
@@ -117,11 +122,12 @@ public class PostgresCopyStatementWriterTest
 
 			List<String> contents = TestUtil.readLines(formatFile);
 			assertNotNull(contents);
-			assertEquals(1, contents.size());
-			assertTrue(contents.get(0).startsWith("\\copy person (id, firstname, lastname)  from "));
-			assertTrue(contents.get(0).contains("delimiter as '\\t'"));
+			assertEquals(1, contents.size()); // the \copy command cannot span multiple lines.
+			assertTrue(contents.get(0).startsWith("\\copy person (id, firstname, lastname)"));
+			assertTrue(contents.get(0).contains("delimiter as '\t'"));
 			assertTrue(contents.get(0).contains("csv header"));
 			assertTrue(contents.get(0).contains("quote as '\"'"));
+			assertTrue(contents.get(0).contains("encoding 'UTF-8'"));
 		}
 		finally
 		{

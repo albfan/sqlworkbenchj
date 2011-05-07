@@ -217,6 +217,7 @@ public class TableListPanel
 
 		Reloadable indexReload = new Reloadable()
 		{
+			@Override
 			public void reload()
 			{
 				shouldRetrieveIndexes = true;
@@ -245,6 +246,7 @@ public class TableListPanel
 
 		Reloadable sourceReload = new Reloadable()
 		{
+			@Override
 			public void reload()
 			{
 				shouldRetrieveTable = true;
@@ -395,26 +397,31 @@ public class TableListPanel
 	{
 		DbObjectList indexList = new DbObjectList()
 		{
+			@Override
 			public void reload()
 			{
 				reload();
 			}
 
+			@Override
 			public Component getComponent()
 			{
 				return TableListPanel.this;
 			}
 
+			@Override
 			public WbConnection getConnection()
 			{
 				return dbConnection;
 			}
 
+			@Override
 			public TableIdentifier getObjectTable()
 			{
 				return TableListPanel.this.getObjectTable();
 			}
 
+			@Override
 			public List<DbObject> getSelectedObjects()
 			{
 				int[] rows = indexes.getSelectedRows();

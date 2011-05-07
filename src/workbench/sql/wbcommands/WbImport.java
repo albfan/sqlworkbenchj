@@ -145,7 +145,11 @@ public class WbImport
 		ModifierArguments.addArguments(cmdLine);
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	private void addWrongParamsMessage(StatementRunnerResult result)
 	{
@@ -763,12 +767,14 @@ public class WbImport
 		}
 	}
 
+	@Override
 	public void done()
 	{
 		super.done();
 		this.imp = null;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{

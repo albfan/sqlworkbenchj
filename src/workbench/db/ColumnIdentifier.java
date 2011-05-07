@@ -43,9 +43,11 @@ public class ColumnIdentifier
 	private String columnTypeName;
 	private String sourceTable;
 	private boolean autoincrement;
+	private String collation;
+	private String collationExpression;
 
 	/**
-	 * Stores the definition of "computed" columns (e.g. Firebird, SQL Server, DB2)
+	 * Stores the definition of "computed" columns (e.g. Oracle, Firebird, SQL Server, DB2)
 	 */
 	private String expression;
 
@@ -76,6 +78,39 @@ public class ColumnIdentifier
 		setColumnName(aName.trim());
 		this.type = aType;
 		this.isPk = isPkColumn;
+	}
+
+	/**
+	 * Returns a DBMS dependent expression to define the column's collation.
+	 *
+	 * This is an expression that can be used inside a CREATE TABLE statement
+	 * @see #getCollation()
+	 */
+	public String getCollationExpression()
+	{
+		return collationExpression;
+	}
+
+	public void setCollationExpression(String expression)
+	{
+		this.collationExpression = expression;
+	}
+
+	/**
+	 * Returns the raw name of the column's collation.
+	 *
+	 * This is usually not an expression that can be used to reconstruct the column definition.
+	 * 
+	 * @see #getCollationExpression()
+	 */
+	public String getCollation()
+	{
+		return collation;
+	}
+
+	public void setCollation(String collationName)
+	{
+		this.collation = collationName;
 	}
 
 	public boolean isAutoincrement()
@@ -138,11 +173,13 @@ public class ColumnIdentifier
 		return alias;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return null;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return null;
@@ -167,26 +204,31 @@ public class ColumnIdentifier
 		return conn.getMetadata().quoteObjectname(this.name);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return getObjectName(conn);
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return getObjectName(conn);
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return "COLUMN";
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return getColumnName();
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 	{
 		return this.name + " " + this.dbmsType;
@@ -252,14 +294,35 @@ public class ColumnIdentifier
 		return NumberStringCache.getNumberString(digits);
 	}
 
-	public void setIsPkColumn(boolean flag) { this.isPk = flag; }
-	public boolean isPkColumn() { return this.isPk; }
+	public void setIsPkColumn(boolean flag)
+	{
+		this.isPk = flag;
+	}
 
-	public void setIsNullable(boolean flag) { this.isNullable = flag; }
-	public boolean isNullable() { return this.isNullable; }
+	public boolean isPkColumn()
+	{
+		return this.isPk;
+	}
 
-	public void setDbmsType(String dbType) { this.dbmsType = dbType; }
-	public String getDbmsType() { return this.dbmsType; }
+	public void setIsNullable(boolean flag)
+	{
+		this.isNullable = flag;
+	}
+
+	public boolean isNullable()
+	{
+		return this.isNullable;
+	}
+
+	public void setDbmsType(String dbType)
+	{
+		this.dbmsType = dbType;
+	}
+
+	public String getDbmsType()
+	{
+		return this.dbmsType;
+	}
 
 	public boolean isIdentityColumn()
 	{
@@ -280,7 +343,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Creates a deep copy of this ColumnIdentifier.
-	 * 
+	 *
 	 * @return a copy of this identifier
 	 */
 	public ColumnIdentifier createCopy()
@@ -305,7 +368,7 @@ public class ColumnIdentifier
 		result.displaySize = this.displaySize;
 		result.expression = this.expression;
 		result.alias = this.alias;
-		
+
 		return result;
 	}
 
@@ -359,6 +422,7 @@ public class ColumnIdentifier
 		return this.type;
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.name;
@@ -373,6 +437,7 @@ public class ColumnIdentifier
 	 * @param other the object to compare
 	 * @return true if the other ColumnIdentifier has the same name
 	 */
+	@Override
 	public boolean equals(Object other)
 	{
 		try
@@ -386,16 +451,19 @@ public class ColumnIdentifier
 		}
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return hashCode;
 	}
 
+	@Override
 	public String getComment()
 	{
 		return comment;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		this.comment = cmt;
@@ -533,6 +601,7 @@ public class ColumnIdentifier
 		}
 	}
 
+	@Override
 	public int compareTo(ColumnIdentifier other)
 	{
 		if (other == null) return 1;
@@ -544,6 +613,7 @@ public class ColumnIdentifier
 	{
 		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
 		{
+			@Override
 			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
 			{
 				int pos1 = o1.getPosition();

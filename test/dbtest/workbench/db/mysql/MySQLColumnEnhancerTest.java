@@ -1,11 +1,11 @@
 /*
  * MySqlEnumReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.mysql;
@@ -27,11 +27,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class MySqlEnumReaderTest
+public class MySQLColumnEnhancerTest
 	extends WbTestCase
 {
 
-	public MySqlEnumReaderTest()
+	public MySQLColumnEnhancerTest()
 	{
 		super("MySqlEnumReaderTest");
 	}
@@ -41,10 +41,10 @@ public class MySqlEnumReaderTest
 		throws Exception
 	{
 		MySQLTestUtil.initTestcase("MySqlEnumReaderTest");
-		
+
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
 		if (con == null) return;
-		
+
 		String sql = "CREATE TABLE enum_test \n" +
 								 "( \n" +
 								 "   nr     INT, \n" +
@@ -68,11 +68,11 @@ public class MySqlEnumReaderTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) 
+		if (con == null)
 		{
 			return;
 		}
-		
+
 		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("enum_test"));
 		assertNotNull(def);
 

@@ -77,7 +77,7 @@ public class ColumnChanger
 	public String getAlterScript(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		List<String> statements = getAlterStatements(table, oldDefinition, newDefinition);
-		if (statements.size() == 0) return null;
+		if (statements.isEmpty()) return null;
 
 		StringBuilder result = new  StringBuilder(statements.size() * 50);
 
@@ -330,7 +330,7 @@ public class ColumnChanger
 		}
 		return sql;
 	}
-	
+
 	private String changeDefault(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		String alterDefault = dbSettings.getAlterColumnDefaultSql();

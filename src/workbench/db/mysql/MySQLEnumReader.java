@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
-import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
@@ -30,12 +29,10 @@ import workbench.util.SqlUtil;
  * @author  Thomas Kellerer
  * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
  */
-public class MySqlEnumReader
-	implements ColumnDefinitionEnhancer
+public class MySQLEnumReader
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition tbl, WbConnection connection)
+	public void readEnums(TableDefinition tbl, WbConnection connection)
 	{
 		if (!hasEnums(tbl)) return;
 

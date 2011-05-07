@@ -69,7 +69,7 @@ public class GetMetaDataSql
 			}
 
 			if (needsAnd) sql.append(" AND ");
-			sql.append(schemaField + " = '" + getNameValue(schema) + "'");
+			sql.append(schemaField + getOperator(schema) + "'" + getNameValue(schema) + "'");
 			needsAnd = true;
 		}
 
@@ -81,7 +81,7 @@ public class GetMetaDataSql
 				needsWhere = false;
 			}
 			if (needsAnd) sql.append(" AND ");
-			sql.append(catalogField + " = '" + getNameValue(catalog) + "'");
+			sql.append(catalogField + getOperator(catalog) + "'" + getNameValue(catalog) + "'");
 			needsAnd = true;
 		}
 
@@ -106,13 +106,13 @@ public class GetMetaDataSql
 		if (baseObjectCatalog != null && baseObjectCatalogField != null)
 		{
 			sql.append(" AND ");
-			sql.append(baseObjectCatalogField + " = '" + getNameValue(baseObjectCatalog) + "'");
+			sql.append(baseObjectCatalogField + getOperator(baseObjectCatalog) + "'" + getNameValue(baseObjectCatalog) + "'");
 		}
 
 		if (baseObjectSchema != null && baseObjectSchemaField != null)
 		{
 			sql.append(" AND ");
-			sql.append(baseObjectSchemaField + " = '" + getNameValue(baseObjectSchema) + "'");
+			sql.append(baseObjectSchemaField + getOperator(baseObjectSchema) + "'" + getNameValue(baseObjectSchema) + "'");
 		}
 
 		if (this.orderBy != null)
@@ -121,6 +121,17 @@ public class GetMetaDataSql
 		}
 		return sql.toString();
 	}
+
+	private String getOperator(String inputValue)
+	{
+		if (inputValue == null) return "";
+		if (inputValue.indexOf('%') > -1)
+		{
+			return " LIKE ";
+		}
+		return " = ";
+	}
+
 
 	private String getNameValue(String value)
 	{
@@ -195,6 +206,7 @@ public class GetMetaDataSql
 		this.objectName = name;
 	}
 
+	@Override
 	public String toString()
 	{
 		return getSql();

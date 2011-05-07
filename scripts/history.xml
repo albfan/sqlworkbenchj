@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-04-25">
+    <entry dev-build="6" type="enh">For MySQL and SQL Server column level collation and character set definitions are now shown</entry>
+    <entry dev-build="6" type="enh">Support for new features in PostgreSQL 9.1 has been added. The SQL source in the DbExplorer will now show FOREIGN and UNLOGGED tables correctly as well as column level collations</entry>
     <entry dev-build="6" type="enh">In the DbExplorer's table list, a new option has been added to generate an "empty" UPDATE statement (in addition to the INSERT and SELECT statements)</entry>
     <entry dev-build="6" type="enh">When using -mode=insert,update for WbCopy or WbImport only real primary key violations are now ignored (previously all errors during insert were ignored)</entry>
     <entry dev-build="6" type="enh">The list of triggers in the DbExplorer now contains an additional column to show the status of the trigger for Oracle and Postgres</entry>
@@ -13,6 +15,8 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="6" type="fix">For MySQL retrieving the table definition of tables in a database where the database name contained underscores did not work</entry>
+    <entry dev-build="6" type="fix">When selecting * in the schema dropdown of the DbExplorer no triggers where displayed in the trigger panel</entry>
     <entry dev-build="6" type="fix">WbSchemaDiff did not compare indexes and check constraints correctly</entry>
     <entry dev-build="5" type="fix">Code completion was not always working properly if the table name ended with an underscore</entry>
     <entry dev-build="5" type="fix">WbSchemaDiff did not process materialized views correctly.</entry>

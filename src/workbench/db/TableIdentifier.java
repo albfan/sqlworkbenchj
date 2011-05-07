@@ -45,6 +45,7 @@ public class TableIdentifier
 	private String tableComment;
 	private boolean commentWasInitialized;
 	private boolean retrieveFkSource;
+	private String tableTypeOption;
 
 	public TableIdentifier(String aName)
 	{
@@ -88,6 +89,21 @@ public class TableIdentifier
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
 	}
+
+	/**
+	 * Return an expression that should be used in the CREATE TABLE statement to specify
+	 * an optional table type (e.g. CREATE UNLOGGED TABLE for Postgres)
+	 */
+	public String getTableTypeOption()
+	{
+		return tableTypeOption;
+	}
+
+	public void setTableTypeOption(String option)
+	{
+		this.tableTypeOption = option;
+	}
+
 
 	@Override
 	public void setComment(String comment)

@@ -11,6 +11,7 @@
  */
 package workbench.db.postgres;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,6 +51,11 @@ public class PostgresTableSourceBuilder
 	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		if (table == null) return null;
+
+		if ("FOREIGN TABLE".equals(table.getType()))
+		{
+			return getForeignTableOptions(table);
+		}
 
 		StringBuilder result = null;
 		PreparedStatement pstmt = null;
@@ -101,6 +107,115 @@ public class PostgresTableSourceBuilder
 		return (result == null ? null : result.toString());
 	}
 
+	@Override
+	public void readTableTypeOptions(TableIdentifier tbl)
+	{
+		boolean is91 = JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
+		if (!is91) return;
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "select ct.relpersistence, ct.relkind \n" +
+             "from pg_class ct \n" +
+             "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+			       " where cns.nspname = ? \n" +
+             "   and ct.relname = ?";
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getSchema());
+			pstmt.setString(2, tbl.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresTableSourceBuilder.readTablePersistence()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String persistence = rs.getString(1);
+				String type = rs.getString(2);
+				if (StringUtil.isNonEmpty(persistence))
+				{
+					switch (persistence.charAt(0))
+					{
+						case 'u':
+							tbl.setTableTypeOption("UNLOGGED");
+							break;
+						case 't':
+							tbl.setTableTypeOption("TEMPORARY");
+							break;
+					}
+				}
+				if ("f".equalsIgnoreCase(type))
+				{
+					tbl.setTableTypeOption("FOREIGN");
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+	}
+
+	public String getForeignTableOptions(TableIdentifier table)
+	{
+		String sql =
+			"select ft.ftoptions, fs.srvname \n" +
+			"from pg_foreign_table ft \n" +
+			"  join pg_class tbl on tbl.oid = ft.ftrelid  \n" +
+			"  join pg_namespace ns on tbl.relnamespace = ns.oid  \n" +
+			"  join pg_foreign_server fs on ft.ftserver = fs.oid \n " +
+			" WHERE tbl.relname = ? \n" +
+			"   and ns.nspname = ? ";
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		StringBuilder result = new StringBuilder(100);
+		try
+		{
+			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, table.getTableName());
+			stmt.setString(2, table.getSchema());
+			rs = stmt.executeQuery();
+			if (rs.next())
+			{
+				Array array = rs.getArray(1);
+				String[] options = array == null ? null : (String[])array.getArray();
+				String serverName = rs.getString(2);
+				result.append("SERVER ");
+				result.append(serverName);
+				if (options != null && options.length > 0)
+				{
+					result.append("\nOPTIONS (");
+					for (int i = 0; i < options.length; i++)
+					{
+						if (i > 0)
+						{
+							result.append(", ");
+						}
+						result.append(options[i]);
+					}
+					result.append(')');
+				}
+				return result.toString();
+			}
+			return null;
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("PostgresTableSourceBuilder.getForeignTableOptions()", "Could not retrieve table options", ex);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
 
 	@Override
 	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)

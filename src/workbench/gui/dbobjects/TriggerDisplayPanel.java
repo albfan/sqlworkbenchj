@@ -88,6 +88,7 @@ public class TriggerDisplayPanel
 		this.reset();
 	}
 
+	@Override
 	public void reset()
 	{
 		this.triggers.reset();
@@ -106,6 +107,7 @@ public class TriggerDisplayPanel
 			final DataStoreTableModel rs = new DataStoreTableModel(trg);
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					triggers.setModel(rs, true);
@@ -130,6 +132,7 @@ public class TriggerDisplayPanel
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;

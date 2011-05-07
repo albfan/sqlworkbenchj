@@ -44,6 +44,8 @@ public class ColumnDefinitionTemplate
 	 */
 	public static final String PARAM_EXPRESSION = "%expression%";
 
+	public static final String PARAM_COLLATION_NAME = "%collation%";
+
 	private String dbid;
 	private String template;
 	private boolean fixDefaultExpression;
@@ -111,6 +113,7 @@ public class ColumnDefinitionTemplate
 		sql = replaceNullable(sql, dbid, column.isNullable());
 		sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, colConstraint);
 		sql = replaceArg(sql, PARAM_EXPRESSION, expr);
+		sql = replaceArg(sql, PARAM_COLLATION_NAME, column.getCollationExpression());
 		return sql.trim();
 	}
 
@@ -118,7 +121,7 @@ public class ColumnDefinitionTemplate
 	{
 		this.fixDefaultExpression = flag;
 	}
-	
+
 	/**
 	 * Fix potential problems with default values for some JDBC drivers.
 	 *
@@ -134,7 +137,7 @@ public class ColumnDefinitionTemplate
 	private String getDefaultExpression(ColumnIdentifier column)
 	{
 		if (!fixDefaultExpression) return column.getDefaultValue();
-		
+
 		String value = column.getDefaultValue();
 		if (value == null) return null;
 		if (SqlUtil.isCharacterType(column.getDataType()))

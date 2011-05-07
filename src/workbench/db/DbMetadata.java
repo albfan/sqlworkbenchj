@@ -45,7 +45,7 @@ import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiSequenceReader;
-import workbench.db.mysql.MySqlEnumReader;
+import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleSynonymReader;
@@ -72,6 +72,7 @@ import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
+import workbench.db.postgres.PostgresColumnEnhancer;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -212,6 +213,7 @@ public class DbMetadata
 			extenders.add(new PostgresEnumReader());
 			extenders.add(new PostgresRuleReader());
 			extenders.add(new PostgresTypeReader());
+			columnEnhancer = new PostgresColumnEnhancer();
 		}
 		else if (productLower.indexOf("oracle") > -1)
 		{
@@ -283,8 +285,9 @@ public class DbMetadata
 		else if (productLower.indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
-			columnEnhancer = new MySqlEnumReader();
+			columnEnhancer = new MySQLColumnEnhancer();
 			objectListEnhancer = new MySQLTableCommentReader();
+
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
@@ -956,13 +959,21 @@ public class DbMetadata
 		return result;
 	}
 
-	public StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
+	/**
+	 * Generate a CREATE statement for the given object type
+	 * @param includeDrop if true, a DROP ... will be included in the SQL
+	 * @param objectType the object type (TABLE, VIEW, ...)
+	 * @param name the name of the object to create
+	 * @param typeOption an option for the CREATE statement. This is only
+	 * @return
+	 */
+	public StringBuilder generateCreateObject(boolean includeDrop, String objectType, String name, String typeOption)
 	{
 		StringBuilder result = new StringBuilder();
 		boolean replaceAvailable = false;
 
 		String prefix = "workbench.db.";
-		String suffix = "." + type.toLowerCase() + ".sql." + this.getDbId();
+		String suffix = "." + objectType.toLowerCase() + ".sql." + this.getDbId();
 
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
@@ -973,7 +984,7 @@ public class DbMetadata
 
 		if (includeDrop && !replaceAvailable)
 		{
-			result.append(generateDrop(type, name));
+			result.append(generateDrop(objectType, name));
 			result.append('\n');
 		}
 
@@ -983,13 +994,21 @@ public class DbMetadata
 			if (create == null)
 			{
 				result.append("CREATE ");
-				result.append(type.toUpperCase());
+				result.append(objectType.toUpperCase());
 				result.append(' ');
 				result.append(name);
 			}
 			else
 			{
 				create = StringUtil.replace(create, "%name%", name);
+				if (StringUtil.isNonBlank(typeOption))
+				{
+					create = StringUtil.replace(create, "%typeoption%", typeOption);
+				}
+				else
+				{
+					create = StringUtil.replace(create, "%typeoption% ", "");
+				}
 				result.append(create);
 			}
 		}
@@ -1526,7 +1545,6 @@ public class DbMetadata
 
 			String tablename = SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
 			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
-			catalog = SqlUtil.escapeUnderscore(catalog, dbConnection);
 
 			DataStore ds = getObjects(catalog, schema, tablename, null);
 

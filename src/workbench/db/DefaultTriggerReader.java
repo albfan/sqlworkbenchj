@@ -74,7 +74,7 @@ public class DefaultTriggerReader
 			trg.setTriggerEvent(trgEvent);
 			trg.setComment(comment);
 			trg.setStatus(status);
-			
+
 			if (tableName != null)
 			{
 				TableIdentifier tbl = new TableIdentifier(tableName);
@@ -111,6 +111,15 @@ public class DefaultTriggerReader
 			return result;
 		}
 
+		if ("*".equals(schema))
+		{
+			schema = null;
+		}
+		if ("*".equals(catalog))
+		{
+			catalog = null;
+		}
+		
 		sql.setSchema(schema);
 		sql.setCatalog(catalog);
 		sql.setObjectName(tableName);
@@ -208,6 +217,7 @@ public class DefaultTriggerReader
 	 * @throws SQLException
 	 * @return the trigger source
 	 */
+	@Override
 	public String getTriggerSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable, String trgComment, boolean includeDependencies)
 		throws SQLException
 	{
@@ -322,6 +332,7 @@ public class DefaultTriggerReader
 		return source;
 	}
 
+	@Override
 	public CharSequence getDependentSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable)
 		throws SQLException
 	{

@@ -34,6 +34,7 @@ public class ReportColumn
 	public static final String TAG_COLUMN_POSITION = "dbms-position";
 	public static final String TAG_COLUMN_AUTO_INC = "auto-increment";
 	public static final String TAG_COLUMN_DEFAULT = "default-value";
+	public static final String TAG_COLUMN_COLLATION = "collation";
 	public static final String TAG_COLUMN_NULLABLE = "nullable";
 	public static final String TAG_COLUMN_PK = "primary-key";
 	public static final String TAG_COLUMN_COMMENT = "comment";
@@ -111,9 +112,16 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDigitsDisplay());
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
-		if (isRealColumn && StringUtil.isNonBlank(column.getComputedColumnExpression()))
+		if (isRealColumn)
 		{
-			tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression());
+			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
+			{
+				tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression());
+			}
+			if (StringUtil.isNonBlank(column.getCollation()))
+			{
+				tagWriter.appendTag(result, myindent, TAG_COLUMN_COLLATION, column.getCollation());
+			}
 		}
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_COMMENT, this.column.getComment(), true);
 

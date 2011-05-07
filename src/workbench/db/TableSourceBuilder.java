@@ -221,7 +221,13 @@ public class TableSourceBuilder
 		{
 			name = dbConnection.getMetadata().quoteObjectname(tableNameToUse);
 		}
-		result.append(meta.generateCreateObject(includeDrop, typeToUse, name));
+
+		if (table.getTableTypeOption() == null)
+		{
+			readTableTypeOptions(table);
+		}
+
+		result.append(meta.generateCreateObject(includeDrop, typeToUse, name, table.getTableTypeOption()));
 		result.append("\n(\n");
 
 		List<String> pkCols = new LinkedList<String>();
@@ -333,6 +339,15 @@ public class TableSourceBuilder
 		}
 
 		return result;
+	}
+
+	/**
+	 * Read additional options for the CREATE TABLE part
+	 * @param tbl
+	 */
+	public void readTableTypeOptions(TableIdentifier tbl)
+	{
+		// nothing here
 	}
 
 	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)

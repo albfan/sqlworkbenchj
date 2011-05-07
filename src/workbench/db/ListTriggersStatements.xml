@@ -299,6 +299,9 @@ AND trg.tgname not like 'pg_sync_pg%'
     <void property="objectNameField">
      <string>tbl.relname</string>
     </void>
+    <void property="schemaField">
+         <string>ns.nspname</string>
+    </void>
     <void property="orderBy">
      <string>order by 1</string>
     </void>

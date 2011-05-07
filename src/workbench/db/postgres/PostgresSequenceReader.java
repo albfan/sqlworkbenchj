@@ -42,6 +42,7 @@ public class PostgresSequenceReader
 		this.dbConnection = conn;
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;

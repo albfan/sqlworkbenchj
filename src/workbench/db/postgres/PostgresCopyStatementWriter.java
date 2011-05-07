@@ -53,24 +53,28 @@ public class PostgresCopyStatementWriter
 				if (i > 0) out.print(", ");
 				out.print(resultInfo.getColumnName(i));
 			}
-			out.print(") ");
+			out.print(")");
 
 
 			out.print(" from ");
-			out.print("\"" + baseFile.getFullPath() + "\"");
+			out.print("'" + baseFile.getFullPath() + "'");
 
 			String delim = exporter.getTextDelimiter();
-			if (delim.equals("\t")) delim = "\\t";
-			out.print(" delimiter as '" + delim + "' ");
+			out.print(" delimiter as '" + delim + "'");  // a tab should be written as a tab!
 
 			if (exporter.getExportHeaders())
 			{
-				out.print(" csv header ");
+				out.print(" csv header");
 			}
 			String quote = exporter.getTextQuoteChar();
 			if (quote != null)
 			{
 				out.print(" quote as '" + quote + "'");
+			}
+			String encoding = exporter.getEncoding();
+			if (quote != null)
+			{
+				out.print(" encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
 			}
 			out.println();
 		}

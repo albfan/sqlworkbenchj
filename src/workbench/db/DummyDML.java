@@ -110,6 +110,7 @@ public class DummyDML
 		return null;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
