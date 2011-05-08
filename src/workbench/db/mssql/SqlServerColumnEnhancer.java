@@ -208,7 +208,9 @@ public class SqlServerColumnEnhancer
 
 		PreparedStatement stmt = null;
 
+		HashMap<String, String> expressions = new HashMap<String, String>(table.getColumnCount());
 		HashMap<String, String> collations = new HashMap<String, String>(table.getColumnCount());
+
 		String sql =
 			"SELECT column_name, \n" +
 			"       collation_name \n" +
@@ -235,7 +237,8 @@ public class SqlServerColumnEnhancer
 				String collation = rs.getString(2);
 				if (isNonDefault(collation, defaultCollation))
 				{
-					collations.put(colname, "COLLATE " + collation);
+					expressions.put(colname, "COLLATE " + collation);
+					collations.put(colname, collation);
 				}
 			}
 		}
@@ -249,11 +252,14 @@ public class SqlServerColumnEnhancer
 		}
 		for (ColumnIdentifier col : table.getColumns())
 		{
-			String collation = collations.get(col.getColumnName());
-			if (StringUtil.isNonEmpty(collation))
+			String expression = expressions.get(col.getColumnName());
+			if (StringUtil.isNonEmpty(expression))
 			{
-				String dataType = col.getDbmsType() + " " + collation;
+				String dataType = col.getDbmsType() + " " + expression;
 				col.setDbmsType(dataType);
+
+				String collation = collations.get(col.getColumnName());
+				col.setCollation(collation);
 			}
 		}
 	}

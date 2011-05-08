@@ -67,6 +67,7 @@ public class MySQLColumnCollationReader
 		PreparedStatement stmt = null;
 
 		HashMap<String, String> collations = new HashMap<String, String>(table.getColumnCount());
+		HashMap<String, String> expressions = new HashMap<String, String>(table.getColumnCount());
 		String sql =
 			"SELECT column_name, \n" +
 			"       character_set_name, \n" +
@@ -108,7 +109,11 @@ public class MySQLColumnCollationReader
 
 				if (expression != null)
 				{
-					collations.put(colname, expression);
+					expressions.put(colname, expression);
+				}
+				if (collation != null)
+				{
+					collations.put(colname, collation);
 				}
 			}
 		}
@@ -122,11 +127,16 @@ public class MySQLColumnCollationReader
 		}
 		for (ColumnIdentifier col : table.getColumns())
 		{
-			String collation = collations.get(col.getColumnName());
-			if (StringUtil.isNonEmpty(collation))
+			String expression = expressions.get(col.getColumnName());
+			if (expression != null)
 			{
-				String dataType = col.getDbmsType() + " " + collation;
+				String dataType = col.getDbmsType() + " " + expression;
 				col.setDbmsType(dataType);
+			}
+			String collation = collations.get(col.getColumnName());
+			if (collation != null)
+			{
+				col.setCollation(collation);
 			}
 		}
 	}
