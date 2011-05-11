@@ -324,6 +324,7 @@ public class WbTable
 
 		Action a = new AbstractAction()
 		{
+			@Override
 			public void actionPerformed(ActionEvent evt)
 			{
 				stopEditing();
@@ -443,6 +444,7 @@ public class WbTable
 	 * fonts properly. So I have to adjust the row height
 	 * when the font is defined
 	 */
+	@Override
 	public void setFont(Font f)
 	{
 		super.setFont(f);
@@ -522,6 +524,7 @@ public class WbTable
 		this.useMultilineTooltip = flag;
 	}
 
+	@Override
 	public JToolTip createToolTip()
 	{
 		if (useMultilineTooltip)
@@ -629,6 +632,7 @@ public class WbTable
 		this.rowResizer = null;
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (popup != null)
@@ -640,6 +644,7 @@ public class WbTable
 		});
 	}
 
+	@Override
 	public void reset()
 	{
 		this.cancelEditing();
@@ -1192,7 +1197,7 @@ public class WbTable
 	/**
 	 * Restores the original values in the underlying DataStore.
 	 * Fires a tableDataChanged() event if values were restored.
-	 * 
+	 *
 	 * @see DataStore#restoreOriginalValues()
 	 */
 	public void restoreOriginalValues()

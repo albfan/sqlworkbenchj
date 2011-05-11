@@ -140,16 +140,19 @@ public class ToolTipRenderer
 		return 1;
 	}
 
+	@Override
 	public void setUseAlternatingColors(boolean flag)
 	{
 		this.useAlternatingColors = flag;
 	}
 
+	@Override
 	public void setEditingRow(int row)
 	{
 		this.editingRow = row;
 	}
 
+	@Override
 	public void setHighlightColumns(boolean[] cols)
 	{
 		this.highlightCols = cols;
@@ -165,11 +168,13 @@ public class ToolTipRenderer
 		this.halign = align;
 	}
 
+	@Override
 	public int getHorizontalAlignment()
 	{
 		return this.halign;
 	}
 
+	@Override
 	public void setHighlightBackground(Color c)
 	{
 		this.highlightBackground = c;
@@ -205,6 +210,7 @@ public class ToolTipRenderer
 		}
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
 		initDisplay(table, value, selected, focus, row, col);
@@ -223,6 +229,7 @@ public class ToolTipRenderer
 		return this;
 	}
 
+	@Override
 	public Dimension getPreferredSize()
 	{
 		Dimension d = super.getPreferredSize();
@@ -294,6 +301,7 @@ public class ToolTipRenderer
 		}
 	}
 
+	@Override
 	public void paint(Graphics g)
 	{
 		int w = this.getWidth();
@@ -355,6 +363,7 @@ public class ToolTipRenderer
 		}
 	}
 
+	@Override
 	public void print(Graphics g)
 	{
 		this.isPrinting = true;
@@ -362,9 +371,18 @@ public class ToolTipRenderer
 		this.isPrinting = false;
 	}
 
-  protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {}
-  public boolean isOpaque() { return true; }
+	@Override
+	protected void firePropertyChange(String propertyName, Object oldValue, Object newValue)
+	{
+	}
 
+	@Override
+	public boolean isOpaque()
+	{
+		return true;
+	}
+
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		if (value == null)
@@ -405,6 +423,7 @@ public class ToolTipRenderer
 		}
 	}
 
+	@Override
 	public String getDisplayValue()
 	{
 		return displayValue;

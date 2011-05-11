@@ -12,7 +12,6 @@
 package workbench.db.search;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
@@ -60,16 +59,19 @@ public class ClientSideTableSearcher
 	{
 	}
 
+	@Override
 	public String getCriteria()
 	{
 		return searchString;
 	}
 
+	@Override
 	public void startBackgroundSearch()
 	{
 		this.cancelSearch = false;
 		this.searchThread = new WbThread("TableSearcher Thread")
 		{
+			@Override
 			public void run()
 			{
 				search();
@@ -78,6 +80,7 @@ public class ClientSideTableSearcher
 		this.searchThread.start();
 	}
 
+	@Override
 	public void cancelSearch()
 	{
 		this.cancelSearch = true;
@@ -115,6 +118,7 @@ public class ClientSideTableSearcher
 		}
 	}
 
+	@Override
 	public void search()
 	{
 		if (isRunning) return;
@@ -122,10 +126,13 @@ public class ClientSideTableSearcher
 		setRunning(true);
 		try
 		{
+			long total = tablesToSearch.size();
+			long current = 1;
 			for (TableIdentifier table : tablesToSearch)
 			{
 				if (cancelSearch) break;
-				searchTable(table);
+				searchTable(table, current, total);
+				current++;
 			}
 		}
 		finally
@@ -134,7 +141,7 @@ public class ClientSideTableSearcher
 		}
 	}
 
-	protected void searchTable(TableIdentifier table)
+	protected void searchTable(TableIdentifier table, long current, long total)
 	{
 		Savepoint sp = null;
 		ResultSet rs = null;
@@ -156,7 +163,7 @@ public class ClientSideTableSearcher
 
 			if (consumer != null)
 			{
-				consumer.setCurrentTable(table.getTableName(), sql);
+				consumer.setCurrentTable(table.getTableName(), sql, current, total);
 			}
 			searchQuery = connection.createStatementForQuery();
 
@@ -207,11 +214,13 @@ public class ClientSideTableSearcher
 		}
 	}
 
+	@Override
 	public boolean isRunning()
 	{
 		return this.isRunning;
 	}
 
+	@Override
 	public void setConnection(WbConnection conn)
 	{
 		connection = conn;
@@ -222,6 +231,7 @@ public class ClientSideTableSearcher
 		this.comparator = comp;
 	}
 
+	@Override
 	public void setCriteria(String search, boolean ignoreCase)
 	{
 		if (StringUtil.isBlank(search)) return;
@@ -238,26 +248,31 @@ public class ClientSideTableSearcher
 		searcher = new RowDataSearcher(searchString, comparator, ignoreCase);
 	}
 
+	@Override
 	public void setConsumer(TableSearchConsumer searchConsumer)
 	{
 		consumer = searchConsumer;
 	}
 
+	@Override
 	public void setExcludeLobColumns(boolean flag)
 	{
 		excludeLobs = flag;
 	}
 
+	@Override
 	public void setMaxRows(int max)
 	{
 		maxRows = max <= 0 ? Integer.MAX_VALUE : max;
 	}
 
+	@Override
 	public void setTableNames(List<TableIdentifier> tables)
 	{
 		tablesToSearch = CollectionUtil.arrayList(tables);
 	}
 
+	@Override
 	public ColumnExpression getSearchExpression()
 	{
 		return searcher.getExpression();

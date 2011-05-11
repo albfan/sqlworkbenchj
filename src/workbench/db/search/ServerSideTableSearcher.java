@@ -116,10 +116,13 @@ public class ServerSideTableSearcher
 		try
 		{
 			this.connection.setBusy(true);
+			long total = tablesToSearch.size();
+			long current = 1;
 			for (TableIdentifier tbl : tablesToSearch)
 			{
-				this.searchTable(tbl);
+				this.searchTable(tbl, current, total);
 				if (this.cancelSearch) break;
+				current ++;
 			}
 			if (this.display != null) this.display.setStatusText("");
 		}
@@ -140,7 +143,7 @@ public class ServerSideTableSearcher
 		this.excludeLobColumns = flag;
 	}
 
-	private void searchTable(TableIdentifier table)
+	private void searchTable(TableIdentifier table, long current, long total)
 	{
 		ResultSet rs = null;
 		Savepoint sp = null;
@@ -149,7 +152,7 @@ public class ServerSideTableSearcher
 		try
 		{
 			String sql = this.buildSqlForTable(table);
-			if (this.display != null) this.display.setCurrentTable(table.getTableExpression(), sql);
+			if (this.display != null) this.display.setCurrentTable(table.getTableExpression(), sql, current, total);
 			if (sql == null) return;
 
 			if (!connection.getAutoCommit() && useSavepoint)

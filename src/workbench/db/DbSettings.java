@@ -1304,4 +1304,16 @@ public class DbSettings
 	{
 		return Settings.getInstance().getIntProperty(prefix + "errorcode.unique", -1);
 	}
+
+	/**
+	 * Checks if this DBMS supports triggers on views.
+	 * It is better to call TriggerReader#supportsTriggersOnViews() instead as that also
+	 * checks for the current DBMS version.
+	 *
+	 * @see TriggerReader#supportsTriggersOnViews() 
+	 */
+	public boolean supportsTriggersOnViews()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "view.trigger.supported", false);
+	}
 }

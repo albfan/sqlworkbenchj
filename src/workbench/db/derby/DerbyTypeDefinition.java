@@ -1,11 +1,11 @@
 /*
  * DerbyTypeDefinition
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.derby;
@@ -83,7 +83,9 @@ public class DerbyTypeDefinition
 	{
 		StringBuilder sql = new StringBuilder(100);
 		sql.append("CREATE TYPE ");
-		sql.append(typeSchema + "." + typeName);
+		sql.append(typeSchema);
+		sql.append('.');
+		sql.append(typeName);
 		sql.append("\n  EXTERNAL NAME '");
 		sql.append(javaClassname);
 		sql.append("' \n  ");

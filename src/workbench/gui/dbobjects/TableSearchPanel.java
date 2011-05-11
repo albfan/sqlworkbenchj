@@ -141,6 +141,7 @@ public class TableSearchPanel
 		startButton.setText(ResourceMgr.getString("LblStartSearch"));
 		startButton.addActionListener(new java.awt.event.ActionListener()
 		{
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt)
 			{
 				startSearch();
@@ -219,6 +220,7 @@ public class TableSearchPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -290,7 +292,7 @@ public class TableSearchPanel
 	 *	Call back function from the table searcher...
 	 */
 	@Override
-	public synchronized void setCurrentTable(String table, String sql)
+	public synchronized void setCurrentTable(String table, String sql, long currentObject, long totalObjects)
 	{
 		if (sql == null)
 		{
@@ -393,7 +395,7 @@ public class TableSearchPanel
 		searcher.setExcludeLobColumns(excludeLobs.isSelected());
 		searcher.setTableNames(searchTables);
 		fireDbExecStart();
-		searcher.startBackgroundSearch(); 
+		searcher.startBackgroundSearch();
 	}
 
 	private String getWorkspacePrefix(int index)

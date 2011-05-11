@@ -1216,6 +1216,12 @@ public class DataStore
 		setResultName(parser.getResultName(sql));
 	}
 
+	/**
+	 * Define a column expression that was used to filter rows for this datastore.
+	 * This can be used to highlight the filter condition in the front end.
+	 * 
+	 * @param filter
+	 */
 	public void setGeneratingFilter(ColumnExpression filter)
 	{
 		this.generatingFilter = filter;
@@ -1226,7 +1232,10 @@ public class DataStore
 		return generatingFilter;
 	}
 
-	public String getGeneratingSql() { return this.sql; }
+	public String getGeneratingSql()
+	{
+		return this.sql;
+	}
 
 	public boolean checkUpdateTable()
 	{

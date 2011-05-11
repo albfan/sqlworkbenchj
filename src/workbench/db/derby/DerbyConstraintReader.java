@@ -17,21 +17,39 @@ import workbench.db.AbstractConstraintReader;
  * Constraint reader for the Derby database
  * @author  Thomas Kellerer
  */
-public class DerbyConstraintReader 
+public class DerbyConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL = "select cons.constraintname, c.checkdefinition \n" +
-             "from sys.syschecks c, sys.systables t, sys.sysconstraints cons, sys.sysschemas s \n" + 
-             "where t.tableid = cons.tableid \n" + 
-             "and   t.schemaid = s.schemaid \n" + 
-             "and   cons.constraintid = c.constraintid \n" + 
-             "and   t.tablename = ? \n" + 
+             "from sys.syschecks c, sys.systables t, sys.sysconstraints cons, sys.sysschemas s \n" +
+             "where t.tableid = cons.tableid \n" +
+             "and   t.schemaid = s.schemaid \n" +
+             "and   cons.constraintid = c.constraintid \n" +
+             "and   t.tablename = ? \n" +
              "and   s.schemaname = ?";
 
-						 
-	public String getColumnConstraintSql() { return null; }
-	public String getTableConstraintSql() { return TABLE_SQL; }
-	
-	public int getIndexForTableNameParameter() { return 1; }
-	public int getIndexForSchemaParameter() { return 2; }
+
+	@Override
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
+
+	@Override
+	public String getTableConstraintSql()
+	{
+		return TABLE_SQL;
+	}
+
+	@Override
+	public int getIndexForTableNameParameter()
+	{
+		return 1;
+	}
+
+	@Override
+	public int getIndexForSchemaParameter()
+	{
+		return 2;
+	}
 }

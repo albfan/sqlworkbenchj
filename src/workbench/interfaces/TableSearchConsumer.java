@@ -15,11 +15,11 @@ import workbench.db.TableIdentifier;
 import workbench.storage.DataStore;
 
 /**
- * @author Thomas Kellerer  
- */ 
+ * @author Thomas Kellerer
+ */
 public interface TableSearchConsumer
 {
-	void setCurrentTable(String aTablename, String aStatement);
+	void setCurrentTable(String aTablename, String aStatement, long number, long totalObjects);
 	void error(String msg);
 	void tableSearched(TableIdentifier table, DataStore result);
 	void setStatusText(String aStatustext);

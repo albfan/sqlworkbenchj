@@ -90,6 +90,7 @@ public class DerbySequenceReader
 		return result;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
 		String sql = baseQuery;
@@ -167,7 +168,8 @@ public class DerbySequenceReader
 		Number cache = (Number) def.getSequenceProperty("CACHE");
 		String type = (String) def.getSequenceProperty("DATATYPE");
 
-    result.append(" AS " + type);
+    result.append(" AS ");
+		result.append(type);
 		result.append(buildSequenceDetails(true, type, start, minvalue, maxvalue, increment, cycle, order, cache));
 
 		result.append(';');
@@ -180,18 +182,19 @@ public class DerbySequenceReader
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
+		String indent = nl + "       ";
 		if (start.longValue() > 0)
 		{
-			if (doFormat) result.append(nl + "       ");
+			if (doFormat) result.append(indent);
 			result.append("START WITH ");
 			result.append(start);
 		}
 
-		if (doFormat) result.append(nl + "      ");
+		if (doFormat) result.append(indent);
 		result.append(" INCREMENT BY ");
 		result.append(increment);
 
-		if (doFormat) result.append(nl + "      ");
+		if (doFormat) result.append(indent);
 
 		boolean hasMinValue = false;
 		if ("integer".equalsIgnoreCase(type))
@@ -213,7 +216,7 @@ public class DerbySequenceReader
 			if (doFormat) result.append(" NO MINVALUE");
 		}
 
-		if (doFormat) result.append(nl + "      ");
+		if (doFormat) result.append(indent);
 		if (maxvalue != null && maxvalue.longValue() == -1)
 		{
 			if (maxvalue.longValue() != Long.MAX_VALUE)
@@ -227,7 +230,7 @@ public class DerbySequenceReader
 			result.append(" NO MAXVALUE");
 		}
 
-		if (doFormat) result.append(nl + "      ");
+		if (doFormat) result.append(indent);
 		if (cycle != null && cycle.equals("Y"))
 		{
 			result.append(" CYCLE");

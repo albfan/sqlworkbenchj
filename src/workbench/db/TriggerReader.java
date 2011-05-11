@@ -71,7 +71,7 @@ public interface TriggerReader {
 		TriggerReader.TRIGGER_COMMENT_COLUMN,
 		TriggerReader.TRIGGER_STATUS_COLUMN
 	};
-	
+
 	TriggerDefinition findTrigger(String catalog, String schema, String name)
 		throws SQLException;
 
@@ -118,4 +118,8 @@ public interface TriggerReader {
 	DataStore getTriggers(String catalog, String schema)
 		throws SQLException;
 
+	/**
+	 * Checks if the DBMS supports triggers on views.
+	 */
+	boolean supportsTriggersOnViews();
 }

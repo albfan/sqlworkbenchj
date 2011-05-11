@@ -36,10 +36,6 @@ public class DerbySynonymReader
 	{
 	}
 
-	/**
-	 * The DB2 JDBC driver returns Alias' automatically, so there
-	 * is no need to retrieve them here
-	 */
 	@Override
 	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
@@ -91,6 +87,7 @@ public class DerbySynonymReader
 		return result;
 	}
 
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -136,6 +133,7 @@ public class DerbySynonymReader
 		return result;
 	}
 
+	@Override
 	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -144,7 +142,8 @@ public class DerbySynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append(nl + "   FOR ");
+		result.append(nl);
+		result.append("   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

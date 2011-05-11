@@ -14,8 +14,8 @@ package workbench.storage.filter;
 import java.util.Map;
 
 /**
- * A class to define the filter criteria for a single column 
- * 
+ * A class to define the filter criteria for a single column
+ *
  * @author Thomas Kellerer
  */
 public class ColumnExpression
@@ -25,7 +25,7 @@ public class ColumnExpression
 	private Object filterValue;
 	private ColumnComparator comparator;
 	private boolean ignoreCase;
-	
+
 	/**
 	 * Default constructor needed for XML serialisation.
 	 */
@@ -35,11 +35,11 @@ public class ColumnExpression
 
 	/**
 	 * Define the filter for a column
-	 * 
+	 *
 	 * @param column the column name
 	 * @param comp the comparator to be used to compare the reference value against the actual values
 	 * @param value the filter value to compare against the actual values
-	 * 
+	 *
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)
 	 */
@@ -52,10 +52,10 @@ public class ColumnExpression
 
 	/**
 	 * Define a "generic" column filter
-	 * 
+	 *
 	 * @param comp the comparator to be used to compare the reference value against the actual values
 	 * @param value the filter value to compare against the actual values
-	 * 
+	 *
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)
 	 */
@@ -65,7 +65,8 @@ public class ColumnExpression
 		setFilterValue(value);
 		setColumnName("*");
 	}
-	
+
+	@Override
 	public Object getFilterValue()
 	{
 		return filterValue;
@@ -76,6 +77,7 @@ public class ColumnExpression
 		this.filterValue = value;
 	}
 
+	@Override
 	public ColumnComparator getComparator()
 	{
 		return comparator;
@@ -85,7 +87,8 @@ public class ColumnExpression
 	{
 		this.comparator = comp;
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		try
@@ -110,16 +113,17 @@ public class ColumnExpression
 		if (value != null && !comparator.supportsType(value.getClass())) return false;
 		return comparator.evaluate(filterValue, value, this.ignoreCase);
 	}
-	
+
+	@Override
 	public boolean evaluate(Map columnValues)
 	{
 		Object value = columnValues.get(this.columnName);
 		return evaluate(value);
 	}
-	
+
+	@Override
 	public String getColumnName()
 	{
-
 		return this.columnName;
 	}
 
@@ -127,23 +131,27 @@ public class ColumnExpression
 	{
 		this.columnName = (column == null ? null : column.toLowerCase());
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return "[" + columnName + "] " + this.comparator.getOperator() + " " + comparator.getValueExpression(this.filterValue);
 	}
 
+	@Override
 	public boolean isIgnoreCase()
 	{
 		return ignoreCase;
 	}
 
+	@Override
 	public void setIgnoreCase(boolean ignore)
 	{
 		this.ignoreCase = ignore;
 	}
-	
-	public boolean isColumnSpecific() 
+
+	@Override
+	public boolean isColumnSpecific()
 	{
 		return true;
 	}

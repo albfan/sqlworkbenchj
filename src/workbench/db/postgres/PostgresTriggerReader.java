@@ -1,11 +1,11 @@
 /*
  * PostgresTriggerReader
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import workbench.db.DefaultTriggerReader;
+import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -23,6 +24,8 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
 /**
+ * A TriggerReader for Postgres that retrieves not only the trigger source but also
+ * the source code of the associated function.
  *
  * @author Thomas Kellerer
  */
@@ -86,7 +89,7 @@ public class PostgresTriggerReader
 				if (src != null)
 				{
 					result = new StringBuilder(src.length() + 50);
-					result.append("---[ ");
+					result.append("\n---[ ");
 					result.append(funcName);
 					result.append(" ]---\n");
 					result.append(src);
@@ -99,6 +102,16 @@ public class PostgresTriggerReader
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Triggers on views are supported since Version 9.1
+	 */
+	@Override
+	public boolean supportsTriggersOnViews()
+	{
+		if (dbConnection == null) return false;
+		return JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
 	}
 
 }

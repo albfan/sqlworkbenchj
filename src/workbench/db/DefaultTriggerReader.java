@@ -119,7 +119,7 @@ public class DefaultTriggerReader
 		{
 			catalog = null;
 		}
-		
+
 		sql.setSchema(schema);
 		sql.setCatalog(catalog);
 		sql.setObjectName(tableName);
@@ -269,7 +269,11 @@ public class DefaultTriggerReader
 			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
 			if (warn != null)
 			{
-				if (result.length() > 0) result.append(nl + nl);
+				if (result.length() > 0)
+				{
+					result.append(nl);
+					result.append(nl);
+				}
 				result.append(warn);
 			}
 
@@ -338,4 +342,12 @@ public class DefaultTriggerReader
 	{
 		return null;
 	}
+
+	@Override
+	public boolean supportsTriggersOnViews()
+	{
+		if (dbConnection == null) return false;
+		return dbConnection.getDbSettings().supportsTriggersOnViews();
+	}
+
 }

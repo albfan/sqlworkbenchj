@@ -55,6 +55,7 @@ import javax.swing.table.TableModel;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -80,7 +81,6 @@ import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import workbench.WbManager;
 import workbench.db.DbObject;
-import workbench.db.FKHandler;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceReader;
@@ -89,6 +89,7 @@ import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
+import workbench.db.TriggerReaderFactory;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
@@ -103,6 +104,7 @@ import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
 import workbench.resource.GuiSettings;
 import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
@@ -129,17 +131,11 @@ public class TableListPanel
 	protected DbObjectTable tableList;
 	protected TableDefinitionPanel tableDefinition;
 	protected WbTable indexes;
-	protected WbTable importedKeys;
-	protected WbTable exportedKeys;
+	protected FkDisplayPanel importedKeys;
+	protected FkDisplayPanel exportedKeys;
 	protected ReloadAction reloadAction;
 
 	protected TableDataPanel tableData;
-
-	private TableDependencyTreeDisplay importedTableTree;
-	private WbSplitPane importedPanel;
-
-	private TableDependencyTreeDisplay exportedTableTree;
-	private WbSplitPane exportedPanel;
 
 	private JPanel indexPanel;
 	private TriggerDisplayPanel triggers;
@@ -171,8 +167,6 @@ public class TableListPanel
 	protected boolean shouldRetrieveIndexes;
 	protected boolean shouldRetrieveExportedKeys;
 	protected boolean shouldRetrieveImportedKeys;
-	protected boolean shouldRetrieveExportedTree;
-	protected boolean shouldRetrieveImportedTree;
 	protected boolean shouldRetrieveTableData;
 
 	protected boolean busy;
@@ -269,25 +263,8 @@ public class TableListPanel
 
 		this.tableData = new TableDataPanel();
 
-		this.importedKeys = new WbTable();
-		this.importedKeys.setAdjustToColumnLabel(false);
-		WbScrollPane scroll = new WbScrollPane(this.importedKeys);
-		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
-		this.importedPanel.setDividerLocation(100);
-		this.importedPanel.setDividerSize(8);
-		this.importedPanel.setTopComponent(scroll);
-		this.importedTableTree = new TableDependencyTreeDisplay(this);
-		this.importedPanel.setBottomComponent(this.importedTableTree);
-
-		this.exportedKeys = new WbTable();
-		this.exportedKeys.setAdjustToColumnLabel(false);
-		scroll = new WbScrollPane(this.exportedKeys);
-		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
-		this.exportedPanel.setDividerLocation(100);
-		this.exportedPanel.setDividerSize(8);
-		this.exportedPanel.setTopComponent(scroll);
-		this.exportedTableTree = new TableDependencyTreeDisplay(this);
-		this.exportedPanel.setBottomComponent(this.exportedTableTree);
+		this.importedKeys = new FkDisplayPanel(this, true);
+		this.exportedKeys = new FkDisplayPanel(this, false);
 
 		this.triggers = new TriggerDisplayPanel();
 
@@ -345,7 +322,7 @@ public class TableListPanel
 		this.listPanel.add(summaryStatusBarLabel, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		scroll = new WbScrollPane(this.tableList);
+		WbScrollPane scroll = new WbScrollPane(this.tableList);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -379,6 +356,7 @@ public class TableListPanel
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					indexes.showFocusBorder();
@@ -390,7 +368,7 @@ public class TableListPanel
 		tableList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
-		showObjectDefinitionPanels(false, false);
+		showObjectDefinitionPanels(false);
 	}
 
 	private void initIndexDropper(Reloadable indexReload)
@@ -517,6 +495,7 @@ public class TableListPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -527,9 +506,9 @@ public class TableListPanel
 					addBaseObjectPanels();
 					addDataPanel();
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedPanel);
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedPanel);
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
+					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
+					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
+					addTriggerPanel();
 					restoreIndex(index);
 				}
 				finally
@@ -558,7 +537,7 @@ public class TableListPanel
 	 *
 	 * @param includeDataPanel if true, the Data panel will also be displayed
 	 */
-	private void showObjectDefinitionPanels(final boolean includeDataPanel, boolean restoreIndex)
+	private void showObjectDefinitionPanels(final boolean includeDataPanel)
 	{
 		int count = displayTab.getTabCount();
 
@@ -567,6 +546,7 @@ public class TableListPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -577,6 +557,7 @@ public class TableListPanel
 
 					addBaseObjectPanels();
 					if (includeDataPanel) addDataPanel();
+					showTriggerIfSupported();
 
 					exportedKeys.reset();
 					indexes.reset();
@@ -592,6 +573,27 @@ public class TableListPanel
 				}
 			}
 		});
+	}
+
+	private void showTriggerIfSupported()
+	{
+		TriggerReader reader = TriggerReaderFactory.createReader(dbConnection);
+
+		if (reader == null) return;
+		if (!reader.supportsTriggersOnViews()) return;
+
+		TableIdentifier tbl = getObjectTable();
+		if (tbl == null) return;
+		DbSettings dbs = dbConnection.getDbSettings();
+		if (dbs.isViewType(tbl.getType()))
+		{
+			addTriggerPanel();
+		}
+	}
+
+	protected void addTriggerPanel()
+	{
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
 	}
 
 	protected void addBaseObjectPanels()
@@ -663,6 +665,7 @@ public class TableListPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				tableList.cancelEditing();
@@ -683,9 +686,7 @@ public class TableListPanel
 				exportedKeys.reset();
 				indexes.reset();
 				triggers.reset();
-				tableSource.setText("");
-				importedTableTree.reset();
-				exportedTableTree.reset();
+				tableSource.reset();
 				tableData.reset();
 				tableList.reset();
 			}
@@ -696,33 +697,13 @@ public class TableListPanel
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				int index = displayTab.getSelectedIndex();
-				switch (index)
+				Resettable panel = (Resettable)displayTab.getSelectedComponent();
+				if (panel != null)
 				{
-					case 0:
-						tableDefinition.reset();
-						break;
-					case 1:
-						tableSource.setText("");
-						break;
-					case 2:
-						tableData.reset();
-						break;
-					case 3:
-						indexes.reset();
-						break;
-					case 4:
-						importedKeys.reset();
-						importedTableTree.reset();
-						break;
-					case 5:
-						exportedKeys.reset();
-						exportedTableTree.reset();
-						break;
-					case 6:
-						triggers.reset();
+					panel.reset();
 				}
 			}
 		});
@@ -737,23 +718,21 @@ public class TableListPanel
 		shouldRetrieveIndexes = true;
 		shouldRetrieveExportedKeys = true;
 		shouldRetrieveImportedKeys = true;
-		shouldRetrieveExportedTree = true;
-		shouldRetrieveImportedTree = true;
 	}
 
-	public void setConnection(WbConnection aConnection)
+	public void setConnection(WbConnection connection)
 	{
-		dbConnection = aConnection;
+		dbConnection = connection;
 
 		tableTypes.removeActionListener(this);
 		displayTab.removeChangeListener(this);
 
-		importedTableTree.setConnection(aConnection);
-		exportedTableTree.setConnection(aConnection);
-		tableData.setConnection(aConnection);
-		tableDefinition.setConnection(aConnection);
-		triggers.setConnection(aConnection);
-		tableSource.setDatabaseConnection(aConnection);
+		importedKeys.setConnection(connection);
+		exportedKeys.setConnection(connection);
+		tableData.setConnection(connection);
+		tableDefinition.setConnection(connection);
+		triggers.setConnection(connection);
+		tableSource.setDatabaseConnection(connection);
 
 		renameAction.setConnection(dbConnection);
 		validator.setConnection(dbConnection);
@@ -804,7 +783,7 @@ public class TableListPanel
 
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);
-		this.compileAction.setConnection(aConnection);
+		this.compileAction.setConnection(connection);
 	}
 
 	public boolean isReallyVisible()
@@ -846,6 +825,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public void tableChanged(TableModelEvent e)
 	{
 		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
@@ -856,6 +836,7 @@ public class TableListPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				listPanel.requestFocus();
@@ -920,6 +901,7 @@ public class TableListPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					tableList.setModel(model, true);
@@ -981,6 +963,7 @@ public class TableListPanel
 
 		Thread t = new WbThread("TableListPanel retrieve() thread")
 		{
+			@Override
 			public void run()
 			{
 				retrieve();
@@ -995,6 +978,7 @@ public class TableListPanel
 		if (this.shouldRetrieve) startRetrieve(true);
 	}
 
+	@Override
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -1087,8 +1071,8 @@ public class TableListPanel
 			if (type != null) props.setProperty(prefix + "objecttype", type);
 
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
-			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
-			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
+			props.setProperty(prefix + "exportedtreedivider", Integer.toString(exportedKeys.getDividerLocation()));
+			props.setProperty(prefix + "importedtreedivider", Integer.toString(importedKeys.getDividerLocation()));
 
 			List<String> objectListColumnOrder = tableList.saveColumnOrder();
 			if (objectListColumnOrder != null)
@@ -1118,14 +1102,14 @@ public class TableListPanel
 		if (loc != -1)
 		{
 			if (loc == 0 || loc > maxWidth) loc = 200;
-			this.exportedPanel.setDividerLocation(loc);
+			exportedKeys.setDividerLocation(loc);
 		}
 
 		loc = props.getIntProperty(prefix + "importedtreedivider",-1);
 		if (loc != -1)
 		{
 			if (loc == 0 || loc > maxWidth) loc = 200;
-			this.importedPanel.setDividerLocation(loc);
+			importedKeys.setDividerLocation(loc);
 		}
 
 		String defType = Settings.getInstance().getDefaultExplorerObjectType();
@@ -1148,6 +1132,7 @@ public class TableListPanel
 	/**
 	 * Invoked when the selection in the table list has changed
 	 */
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
@@ -1162,6 +1147,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public boolean canChangeSelection()
 	{
 		if (this.tableData == null) return true;
@@ -1211,7 +1197,7 @@ public class TableListPanel
 		}
 		else
 		{
-			this.showObjectDefinitionPanels(hasData, true);
+			this.showObjectDefinitionPanels(hasData);
 		}
 
 		this.tableData.reset();
@@ -1330,6 +1316,7 @@ public class TableListPanel
 			final String s = (sql == null ? "" : sql.toString());
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					tableSource.setText(s);
@@ -1344,6 +1331,7 @@ public class TableListPanel
 			final String msg = ExceptionUtil.getDisplay(e);
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					tableSource.setText(msg);
@@ -1419,6 +1407,7 @@ public class TableListPanel
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				infoWindow.setVisible(true);
@@ -1432,6 +1421,7 @@ public class TableListPanel
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					infoLabel = null;
@@ -1450,6 +1440,7 @@ public class TableListPanel
 	{
 		Thread t = new WbThread("TableListPanel Cancel")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -1497,6 +1488,7 @@ public class TableListPanel
 	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -1539,6 +1531,7 @@ public class TableListPanel
 			{
 				switch (index)
 				{
+					// Index 0 to 2 are always the same, so this can be dealt with here
 					case 0:
 						if (this.shouldRetrieveTable) this.retrieveTableDefinition();
 						break;
@@ -1552,19 +1545,8 @@ public class TableListPanel
 							this.shouldRetrieveTableData = false;
 						}
 						break;
-					case 3:
-						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
-						break;
-					case 4:
-						if (this.shouldRetrieveImportedKeys) this.retrieveImportedTables();
-						if (this.shouldRetrieveImportedTree) this.retrieveImportedTree();
-						break;
-					case 5:
-						if (this.shouldRetrieveExportedKeys) this.retrieveExportedTables();
-						if (this.shouldRetrieveExportedTree) this.retrieveExportedTree();
-						break;
-					case 6:
-						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
+					default:
+						retrievePanel(index);
 				}
 			}
 		}
@@ -1579,6 +1561,28 @@ public class TableListPanel
 			this.repaint();
 			closeInfoWindow();
 			endTransaction();
+		}
+	}
+
+	private void retrievePanel(int index)
+		throws SQLException
+	{
+		Component panel = displayTab.getSelectedComponent();
+		if (panel == this.indexPanel && shouldRetrieveIndexes)
+		{
+			retrieveIndexes();
+		}
+		else if (panel == importedKeys && shouldRetrieveImportedKeys)
+		{
+			retrieveImportedTables();
+		}
+		else if (panel == exportedKeys && shouldRetrieveExportedKeys)
+		{
+			retrieveExportedTables();
+		}
+		else if (panel == triggers && shouldRetrieveTriggers)
+		{
+			retrieveTriggers();
 		}
 	}
 
@@ -1612,6 +1616,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public TableIdentifier getObjectTable()
 	{
 		if (this.selectedTable == null) return null;
@@ -1656,6 +1661,7 @@ public class TableListPanel
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					indexes.setModel(model, true);
@@ -1681,16 +1687,8 @@ public class TableListPanel
 	{
 		try
 		{
-			FKHandler handler = new FKHandler(dbConnection);
-			final DataStoreTableModel model = new DataStoreTableModel(handler.getReferencedBy(getObjectTable()));
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					exportedKeys.setModel(model, true);
-					exportedKeys.adjustRowsAndColumns();
-				}
-			});
+			WbSwingUtilities.showWaitCursor(this);
+			exportedKeys.retrieve(getObjectTable());
 			this.shouldRetrieveExportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1707,16 +1705,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			FKHandler handler = new FKHandler(dbConnection);
-			final DataStoreTableModel model = new DataStoreTableModel(handler.getForeignKeys(getObjectTable(), false));
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				public void run()
-				{
-					importedKeys.setModel(model, true);
-					importedKeys.adjustRowsAndColumns();
-				}
-			});
+			importedKeys.retrieve(getObjectTable());
 			this.shouldRetrieveImportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1731,46 +1720,7 @@ public class TableListPanel
 		}
 	}
 
-	protected void retrieveImportedTree()
-	{
-		try
-		{
-			WbSwingUtilities.showWaitCursor(this);
-			importedTableTree.readReferencedTables(getObjectTable());
-			this.shouldRetrieveImportedTree = false;
-		}
-		catch (Throwable th)
-		{
-			this.shouldRetrieveImportedTree = true;
-			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
-			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursor(this);
-		}
-	}
-
-	protected void retrieveExportedTree()
-	{
-		try
-		{
-			WbSwingUtilities.showWaitCursor(this);
-			exportedTableTree.readReferencingTables(getObjectTable());
-			this.shouldRetrieveExportedTree = false;
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
-			this.shouldRetrieveExportedTree = true;
-			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursor(this);
-		}
-	}
-
+	@Override
 	public void reload()
 	{
 		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
@@ -1829,6 +1779,7 @@ public class TableListPanel
 	 *
 	 * @param e the Event that ocurred
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (ignoreStateChanged) return;
@@ -1837,7 +1788,7 @@ public class TableListPanel
 		{
 			try
 			{
-				this.showObjectDefinitionPanels(false, false);
+				this.showObjectDefinitionPanels(false);
 				this.startRetrieve(true);
 			}
 			catch (Exception ex)
@@ -1859,6 +1810,7 @@ public class TableListPanel
 					// we have the correct table name in the instance variables
 					EventQueue.invokeLater(new Runnable()
 					{
+						@Override
 						public void run()
 						{
 							showTableData(panelIndex, appendText);
@@ -1903,6 +1855,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public void addTableListDisplayClient(JTable aClient)
 	{
 		if (this.tableListClients == null) this.tableListClients = new ArrayList<JTable>();
@@ -1913,6 +1866,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public void removeTableListDisplayClient(JTable aClient)
 	{
 		if (this.tableListClients == null) return;
@@ -1939,16 +1893,19 @@ public class TableListPanel
 		return tbl;
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return this;
 	}
 
+	@Override
 	public List<DbObject> getSelectedObjects()
 	{
 		int[] rows = this.tableList.getSelectedRows();
@@ -1973,6 +1930,7 @@ public class TableListPanel
 		return result;
 	}
 
+	@Override
 	public void selectTable(TableIdentifier table)
 	{
 		for (int row = 0; row < this.tableList.getRowCount(); row ++)
@@ -1988,6 +1946,7 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public void exportData()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -2004,6 +1963,7 @@ public class TableListPanel
 	/** Invoked when the displayed tab has changed.
 	 *	Retrieve table detail information here.
 	 */
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		if (this.ignoreStateChanged) return;
@@ -2012,6 +1972,7 @@ public class TableListPanel
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					startRetrieveCurrentPanel();
@@ -2025,6 +1986,7 @@ public class TableListPanel
 	 * sends a PropertyChange event. This will invalidate
 	 * the currently retrieved index list
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
@@ -2038,26 +2000,30 @@ public class TableListPanel
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		this.shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-
 
 }

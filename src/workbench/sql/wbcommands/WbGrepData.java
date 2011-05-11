@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.JdbcUtils;
@@ -118,7 +117,7 @@ public class WbGrepData
 
 		String types = cmdLine.getValue(SourceTableArgument.PARAM_TYPES);
 		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, types, currentConnection);
-		
+
 		tables = parser.getTables();
 
 		searcher = new ClientSideTableSearcher();
@@ -213,20 +212,23 @@ public class WbGrepData
 		searcher = null;
 	}
 
-	public void setCurrentTable(String tableName, String query)
+	@Override
+	public void setCurrentTable(String tableName, String query, long number, long totalObjects)
 	{
 		if (rowMonitor != null)
 		{
-			rowMonitor.setCurrentObject(tableName, -1, -1);
+			rowMonitor.setCurrentObject(tableName, number, totalObjects);
 		}
 	}
 
+	@Override
 	public void error(String msg)
 	{
 		searchResult.addMessage(msg);
 		searchResult.setFailure();
 	}
 
+	@Override
 	public void tableSearched(TableIdentifier table, DataStore result)
 	{
 		searchedTables.add(table.getTableName());
@@ -239,6 +241,7 @@ public class WbGrepData
 		}
 	}
 
+	@Override
 	public void setStatusText(String message)
 	{
 		if (rowMonitor != null)
@@ -247,6 +250,7 @@ public class WbGrepData
 		}
 	}
 
+	@Override
 	public void searchStarted()
 	{
 		if (rowMonitor != null)
@@ -257,6 +261,7 @@ public class WbGrepData
 		foundTables = 0;
 	}
 
+	@Override
 	public void searchEnded()
 	{
 		if (rowMonitor != null)

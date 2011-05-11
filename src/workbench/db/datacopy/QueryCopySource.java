@@ -57,16 +57,30 @@ public class QueryCopySource
 		this.retrieveSql = SqlUtil.trimSemicolon(sql);
 	}
 
-	public boolean hasErrors() { return this.hasErrors; }
-	public boolean hasWarnings() { return this.hasWarnings; }
+	@Override
+	public boolean hasErrors()
+	{
+		return this.hasErrors;
+	}
 
-	public void setValueConverter(ValueConverter converter) {}
+	@Override
+	public boolean hasWarnings()
+	{
+		return this.hasWarnings;
+	}
 
+	@Override
+	public void setValueConverter(ValueConverter converter)
+	{
+	}
+
+	@Override
 	public void setReceiver(RowDataReceiver rec)
 	{
 		this.receiver = rec;
 	}
 
+	@Override
 	public void start()
 		throws Exception
 	{
@@ -125,18 +139,21 @@ public class QueryCopySource
 		}
 	}
 
+	@Override
 	public String getLastRecord()
 	{
 		if (currentRow == null) return null;
 		return currentRow.toString();
 	}
 
+	@Override
 	public void stop()
 	{
 		this.regularStop = true;
 		cancel();
 	}
 
+	@Override
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -157,26 +174,25 @@ public class QueryCopySource
 		return null;
 	}
 
+	@Override
 	public boolean isCancelled()
 	{
 		return !keepRunning && !regularStop;
 	}
 
+	@Override
 	public MessageBuffer getMessages()
 	{
 		return null;
 	}
 
+	@Override
 	public void setAbortOnError(boolean flag)
 	{
 		this.abortOnError = flag;
 	}
 
-	public void setCheckDependencies(boolean flag)
-	{
-		// not supported
-	}
-
+	@Override
 	public void setErrorHandler(JobErrorHandler handler)
 	{
 	}

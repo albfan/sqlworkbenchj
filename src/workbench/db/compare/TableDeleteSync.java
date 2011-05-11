@@ -147,6 +147,7 @@ public class TableDeleteSync
 		this.encoding = encoding;
 	}
 
+	@Override
 	public void setReportInterval(int interval)
 	{
 		this.progressInterval = interval;

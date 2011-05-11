@@ -34,7 +34,7 @@ public class RowDataSearcher
 {
 	private ColumnExpression filterExpression;
 	private TextRowDataConverter converter;
-	
+
 	public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
 	{
 		if (comp == null)
@@ -49,7 +49,7 @@ public class RowDataSearcher
 	public ColumnExpression getExpression()
 	{
 		ColumnExpression expr = new ColumnExpression("*", filterExpression.getComparator(), filterExpression.getFilterValue());
-		expr.setIgnoreCase(true);
+		expr.setIgnoreCase(filterExpression.isIgnoreCase());
 		return expr;
 	}
 

@@ -162,28 +162,34 @@ public class ClientSideTableSearcherTest
 			return results;
 		}
 
-		public void setCurrentTable(String aTablename, String aStatement)
+		@Override
+		public void setCurrentTable(String aTablename, String aStatement, long current, long total)
 		{
 		}
 
+		@Override
 		public void error(String msg)
 		{
 		}
 
+		@Override
 		public void tableSearched(TableIdentifier table, DataStore result)
 		{
 			results.add(result);
 		}
 
+		@Override
 		public void setStatusText(String aStatustext)
 		{
 		}
 
+		@Override
 		public void searchStarted()
 		{
 			results.clear();
 		}
 
+		@Override
 		public void searchEnded()
 		{
 		}
