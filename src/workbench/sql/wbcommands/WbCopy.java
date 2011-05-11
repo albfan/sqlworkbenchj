@@ -171,6 +171,14 @@ public class WbCopy
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 
+		boolean doSyncDelete = cmdLine.getBoolean(PARAM_DELETE_SYNC, false);
+		if (doSyncDelete && StringUtil.isNonBlank(sourcequery))
+		{
+			result.addMessage(ResourceMgr.getString("ErrCopySyncNoQuery"));
+			result.setFailure();
+			return result;
+		}
+
 		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery))
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
