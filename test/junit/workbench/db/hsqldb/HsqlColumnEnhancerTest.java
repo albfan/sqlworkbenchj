@@ -87,7 +87,7 @@ public class HsqlColumnEnhancerTest
 			");";
 		TestUtil util = getTestUtil();
 		WbConnection con = util.getHSQLConnection("column_sequence_test");
-		if (JdbcUtils.hasMinimumServerVersion(con, "2.1.1"))
+		if (JdbcUtils.hasMinimumServerVersion(con, "2.2"))
 		{
 			TestUtil.executeScript(con, sql);
 			TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier(null, "PUBLIC", "COMPANY"));
