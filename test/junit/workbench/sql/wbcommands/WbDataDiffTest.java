@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -189,10 +190,10 @@ public class WbDataDiffTest
 			assertEquals("2", result);
 
 			result = TestUtil.getXPathValue(xml, "/table-data-diff[@name='PERSON']/update[1]/col[2]/text()");
-			assertEquals("last2", result);
+			assertEquals("first2", result);
 
 			result = TestUtil.getXPathValue(xml, "/table-data-diff[@name='PERSON']/update[2]/col[2]/text()");
-			assertEquals("last17", result);
+			assertEquals("first17", result);
 
 			xml = FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "person_$insert.xml"), "UTF-8"));
 			result = TestUtil.getXPathValue(xml, "count(/table-data-diff/insert)");
@@ -214,13 +215,57 @@ public class WbDataDiffTest
 			{
 				fail("Could not delete " + main.getFullPath());
 			}
-
 		}
 		finally
 		{
 			source.disconnect();
 			target.disconnect();
 		}
+	}
+
+	@Test
+	public void testXml()
+		throws Exception
+	{
+		String sql =
+			"create table foo1 (id integer primary key, some_data varchar(100)); \n" +
+			"create table foo2 (id integer primary key, some_data varchar(100)); \n" +
+			" \n" +
+			"insert into foo1 values (1, 'one'); \n" +
+			"insert into foo1 values (2, 'two'); \n" +
+			"insert into foo1 values (3, 'three'); \n" +
+			" \n" +
+			" \n" +
+			"insert into foo2 values (1, 'one-'); \n" +
+			"insert into foo2 values (2, 'two-');";
+
+		WbConnection conn = util.getConnection();
+		TestUtil.executeScript(conn, sql);
+		WbDataDiff diff = new WbDataDiff();
+		diff.setConnection(conn);
+		File xml = new File(util.getBaseDir(), "diff.xml");
+		StatementRunnerResult result = diff.execute("WbDataDiff -file='" + xml.getAbsolutePath() + "'  -type=xml -referenceTables=foo1 -targetTables=foo2");
+
+		assertTrue(result.isSuccess());
+		String[] expectedFiles = new String[]
+			{
+				"diff.xml",
+				"foo2_$insert.xml",
+				"foo2_$update.xml",
+			};
+			String content = FileUtil.readCharacters(EncodingUtil.createReader(xml, "UTF-8"));
+			String value = TestUtil.getXPathValue(content, "count(/data-diff/summary/mapping)");
+			assertEquals("1", value);
+
+			content= FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "foo2_$update.xml"), "UTF-8"));
+			value = TestUtil.getXPathValue(content, "count(/table-data-diff/update)");
+			assertEquals("2", value);
+
+			value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[1]/col[@name='SOME_DATA']/text()");
+			assertEquals("one", value);
+
+			value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[2]/col[@name='SOME_DATA']/text()");
+			assertEquals("two", value);
 	}
 
 	private void insertData(Statement stmt)
@@ -370,33 +415,17 @@ public class WbDataDiffTest
 				"person_$update.sql",
 			};
 
-//			for (String fname : expectedFiles)
-//			{
-//				WbFile f = new WbFile(util.getBaseDir(), fname);
-//				assertTrue("File " + f.getFileName() + " does not exist", f.exists());
-//			}
-//
-//			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
-//			assertTrue(main.exists());
-//
-//			String[] notTexpectedFiles = new String[]
-//			{
-//				"dummy_$delete.sql",
-//				"dummy_$insert.sql",
-//				"dummy_$update.sql",
-//				"address_$delete.sql",
-//				"address_$insert.sql",
-//				"address_$update.sql",
-//				"person_address_$delete.sql",
-//				"person_address_$insert.sql"
-//			};
-//
-//			for (String fname : notTexpectedFiles)
-//			{
-//				WbFile f = new WbFile(util.getBaseDir(), fname);
-//				assertFalse(f.exists());
-//			}
+			for (String fname : expectedFiles)
+			{
+				WbFile f = new WbFile(util.getBaseDir(), fname);
+				assertTrue("File " + f.getFileName() + " does not exist", f.exists());
+			}
 
+			for (String fname : expectedFiles)
+			{
+				WbFile f = new WbFile(util.getBaseDir(), fname);
+				assertTrue(f.delete());
+			}
 		}
 		finally
 		{

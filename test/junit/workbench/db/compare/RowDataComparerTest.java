@@ -11,6 +11,7 @@
  */
 package workbench.db.compare;
 
+import java.sql.Types;
 import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
@@ -73,7 +74,7 @@ public class RowDataComparerTest
 		instance.setRows(reference, target);
 		instance.setConnection(null);
 		instance.setResultInfo(info);
-		
+
 		String sql = instance.getMigration(1);
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("UPDATE", verb);
@@ -167,6 +168,55 @@ public class RowDataComparerTest
 		instance.setRows(reference, target);
 		xml = instance.getMigration(1);
 		assertNull(xml);
+	}
+
+	@Test
+	public void testGetMigrationXml2()
+	{
+		ColumnIdentifier[] cols = new ColumnIdentifier[3];
+		cols[0] = new ColumnIdentifier("ID");
+		cols[0].setIsPkColumn(true);
+		cols[0].setIsNullable(false);
+		cols[0].setDataType(Types.INTEGER);
+		cols[0].setDbmsType("integer");
+
+		cols[1] = new ColumnIdentifier("SOME_DATA");
+		cols[1].setIsPkColumn(false);
+		cols[1].setIsNullable(false);
+		cols[1].setDataType(Types.VARCHAR);
+		cols[1].setDbmsType("varchar(100)");
+
+		cols[2] = new ColumnIdentifier("SOME_MORE");
+		cols[2].setIsPkColumn(false);
+		cols[2].setIsNullable(false);
+		cols[2].setDataType(Types.VARCHAR);
+		cols[2].setDbmsType("varchar(100)");
+
+		ResultInfo info1 = new ResultInfo(cols);
+		info1.setUpdateTable(new TableIdentifier("FOO1"));
+
+		ResultInfo info2 = new ResultInfo(cols);
+		info2.setUpdateTable(new TableIdentifier("FOO2"));
+
+		RowData reference = new RowData(info1);
+		reference.setValue(0, new Integer(1));
+		reference.setValue(1, "one");
+		reference.setValue(2, "more");
+		reference.resetStatus();
+
+		RowData target = new RowData(info2);
+		target.setValue(0, new Integer(1));
+		target.setValue(1, "one-");
+		target.setValue(2, "more");
+		target.resetStatus();
+
+		RowDataComparer instance = new RowDataComparer();
+		instance.setTypeXml(true);
+		instance.setConnection(null);
+		instance.setResultInfo(info2);
+		instance.setRows(reference, target);
+		String xml = instance.getMigration(1);
+		System.out.println(xml);
 	}
 
 }

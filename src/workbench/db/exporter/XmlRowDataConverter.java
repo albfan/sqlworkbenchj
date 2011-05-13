@@ -120,6 +120,7 @@ public class XmlRowDataConverter
 		this.writeClobFiles = flag;
 	}
 
+	@Override
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
@@ -164,6 +165,7 @@ public class XmlRowDataConverter
 		closeRowTag = "</" + rowtag + ">";
 	}
 
+	@Override
 	public StrBuffer getStart()
 	{
 		StrBuffer xml = new StrBuffer(250);
@@ -182,6 +184,7 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer xml = new StrBuffer(100);
@@ -203,6 +206,7 @@ public class XmlRowDataConverter
 		if (ending != null) this.lineEnding = ending;
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		TagWriter tagWriter = new TagWriter();
@@ -227,7 +231,10 @@ public class XmlRowDataConverter
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			if (modifiedColumnsOnly && row.isColumnModified(c)) continue;
+			if (modifiedColumnsOnly)
+			{
+				if (!metaData.isPkColumn(c) && !row.isColumnModified(c)) continue;
+			}
 
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
