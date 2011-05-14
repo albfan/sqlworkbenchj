@@ -144,6 +144,7 @@ public class ColumnOrderMgr
 
 		Comparator<TableColumn> comp = new Comparator<TableColumn>()
 		{
+			@Override
 			public int compare(TableColumn o1, TableColumn o2)
 			{
 				return o1.getModelIndex() - o2.getModelIndex();

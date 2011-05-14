@@ -104,4 +104,38 @@ public class OracleMViewReaderTest
 		assertEquals(expected, source.trim());
 	}
 
+	@Test
+	public void testRefreshSource()
+		throws Exception
+	{
+
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		String sql =
+			"CREATE TABLE person (id integer);\n " +
+			"create materialized view mv_person \n" +
+			"refresh complete  \n" +
+			"start with sysdate next round(sysdate + 1) + 5/24  \n" +
+			"as  \n" +
+			"select count(*) \n" +
+			"from person \n" +
+			";";
+
+		TestUtil.executeScript(con, sql);
+		OracleMViewReader reader = new OracleMViewReader();
+		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
+		String source = reader.getMViewSource(con, mview, null, false).toString();
+		assertNotNull(source);
+		String expected =
+			"CREATE OR REPLACE MATERIALIZED VIEW MV_PERSON\n" +
+			"  BUILD IMMEDIATE\n" +
+			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
+			"  NEXT round(sysdate + 1) + 5/24\n" +
+			"  DISABLE QUERY REWRITE\n" +
+			"AS\n" +
+			"select count(*) \n" +
+			"from person;";
+//		System.out.println("***\n"+expected + "\n++++\n" + source);
+		assertEquals(expected, source.trim());
+	}
 }

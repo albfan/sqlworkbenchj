@@ -26,8 +26,6 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -131,9 +129,8 @@ import workbench.util.SqlUtil;
  */
 public class WbTable
 	extends JTable
-	implements ActionListener, FocusListener, MouseListener,
-	           FontChangedListener, ListSelectionListener, PropertyChangeListener, Resettable,
-						 FontZoomProvider
+	implements ActionListener, MouseListener, FontChangedListener, ListSelectionListener, PropertyChangeListener,
+						 Resettable, FontZoomProvider
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected JPopupMenu popup;
@@ -658,6 +655,7 @@ public class WbTable
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (popup == null) popup = new JPopupMenu();
@@ -695,6 +693,7 @@ public class WbTable
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				popup.add(action.getMenuItem(), index + 1);
@@ -711,6 +710,7 @@ public class WbTable
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (popup == null) popup = new JPopupMenu();
@@ -731,6 +731,7 @@ public class WbTable
 		});
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		super.valueChanged(e);
@@ -860,6 +861,7 @@ public class WbTable
 		return (c == null ? super.getSelectionForeground() : c);
 	}
 
+	@Override
 	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
 	{
 		boolean result = true;
@@ -885,6 +887,7 @@ public class WbTable
 		return result;
 	}
 
+	@Override
 	public Component prepareEditor(TableCellEditor editor, int row, int column)
 	{
 		Component comp = super.prepareEditor(editor, row, column);
@@ -922,6 +925,7 @@ public class WbTable
 		setColumnSelectionInterval(col, col);
 	}
 
+	@Override
 	public boolean editCellAt(final int row, int column, final EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
@@ -935,6 +939,7 @@ public class WbTable
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					clearSelection();
@@ -970,6 +975,7 @@ public class WbTable
 		}
 	}
 
+	@Override
 	public void removeEditor()
 	{
 		final int row = this.getEditingRow();
@@ -1024,6 +1030,7 @@ public class WbTable
 		}
 	}
 
+	@Override
 	public void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
@@ -1253,6 +1260,7 @@ public class WbTable
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_setShowStatusColumn(flag);
@@ -1306,6 +1314,7 @@ public class WbTable
 			{
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						changeSelection(row, -1, false, false);
@@ -1343,6 +1352,7 @@ public class WbTable
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				updateSortRenderer();
@@ -1382,6 +1392,7 @@ public class WbTable
 		final Container c = (this.scrollPane == null ? this : scrollPane);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				adjustRowHeight();
@@ -1455,6 +1466,7 @@ public class WbTable
 		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.getDateRenderer(format));
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (Settings.getInstance().isDateFormatProperty(evt.getPropertyName()))
@@ -1463,6 +1475,7 @@ public class WbTable
 		}
 	}
 
+	@Override
 	protected void createDefaultRenderers()
 	{
 		defaultRenderersByColumnClass = new UIDefaults();
@@ -1475,6 +1488,7 @@ public class WbTable
 	 * check for a BLOB column. If the specified column is not
 	 * a BLOB column, the default handling from JTable will be used.
 	 */
+	@Override
 	public TableCellRenderer getCellRenderer(int row, int column)
 	{
 		TableCellRenderer rend = null;
@@ -1866,6 +1880,7 @@ public class WbTable
 	 * Start sorting if the column header has been clicked.
 	 * @param e the MouseEvent triggering the click
 	 */
+	@Override
 	public void mouseClicked(final MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3)
@@ -1875,6 +1890,7 @@ public class WbTable
 				this.headerPopupX = e.getX();
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						JPopupMenu headerPopup = getHeaderPopup();
@@ -1894,6 +1910,7 @@ public class WbTable
 						final ListSelectionModel model = this.getSelectionModel();
 						EventQueue.invokeLater(new Runnable()
 						{
+							@Override
 							public void run()
 							{
 								model.setSelectionInterval(row, row);
@@ -1906,6 +1923,7 @@ public class WbTable
 
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						popup.show(WbTable.this, x,y);
@@ -1935,14 +1953,17 @@ public class WbTable
 		}
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON1)
@@ -1952,6 +1973,7 @@ public class WbTable
 		}
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
@@ -1969,6 +1991,7 @@ public class WbTable
 		return column;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		int column = getPopupColumnIndex();
@@ -2203,6 +2226,7 @@ public class WbTable
 		return hasPK;
 	}
 
+	@Override
 	public void fontChanged(String aFontId, Font newFont)
 	{
 		if (aFontId.equals(Settings.PROPERTY_DATA_FONT))
@@ -2212,15 +2236,6 @@ public class WbTable
 			this.defaultEditor.setFont(newFont);
 			this.numberEditorTextField.setFont(newFont);
 		}
-	}
-
-	public void focusGained(FocusEvent e)
-	{
-	}
-
-	public void focusLost(FocusEvent e)
-	{
-		//this.stopEditing();
 	}
 
 	public long addRow()
@@ -2263,6 +2278,7 @@ public class WbTable
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					edit.requestFocusInWindow();

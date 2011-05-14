@@ -64,6 +64,7 @@ public abstract class AbstractConstraintReader
 	 *	the column name, the value is the full expression which can be appended
 	 *	to the column definition inside a CREATE TABLE statement.
 	 */
+	@Override
 	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getColumnConstraintSql();
@@ -111,6 +112,7 @@ public abstract class AbstractConstraintReader
 		return result;
 	}
 
+	@Override
 	public String getConstraintSource(List<TableConstraint> constraints, String indent)
 	{
 		if (constraints == null) return null;
@@ -138,6 +140,7 @@ public abstract class AbstractConstraintReader
 	 * Returns the SQL Statement that should be appended to a CREATE table
 	 * in order to create the constraints defined on the table
 	 */
+	@Override
 	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getTableConstraintSql();

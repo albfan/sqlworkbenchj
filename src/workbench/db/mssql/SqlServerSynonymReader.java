@@ -126,6 +126,7 @@ public class SqlServerSynonymReader
 		return result;
 	}
 
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String schema, String synonymName)
 		throws SQLException
 	{
@@ -164,6 +165,7 @@ public class SqlServerSynonymReader
 		return tbl;
 	}
 
+	@Override
 	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{

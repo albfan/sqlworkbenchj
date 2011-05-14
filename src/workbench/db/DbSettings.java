@@ -1310,10 +1310,20 @@ public class DbSettings
 	 * It is better to call TriggerReader#supportsTriggersOnViews() instead as that also
 	 * checks for the current DBMS version.
 	 *
-	 * @see TriggerReader#supportsTriggersOnViews() 
+	 * @see TriggerReader#supportsTriggersOnViews()
 	 */
 	public boolean supportsTriggersOnViews()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "view.trigger.supported", false);
+	}
+
+	public boolean supportsCatalogs()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "catalogs.supported", true);
+	}
+
+	public boolean supportsSchemas()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "schemas.supported", true);
 	}
 }

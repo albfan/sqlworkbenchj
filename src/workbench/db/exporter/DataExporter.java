@@ -394,11 +394,13 @@ public class DataExporter
 		return this.dbConn;
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;
 	}
 
+	@Override
 	public void cancelCurrent()
 	{
 		if (this.exportWriter != null)
@@ -407,6 +409,7 @@ public class DataExporter
 		}
 	}
 
+	@Override
 	public void cancelExecution()
 	{
 		this.cancelJobs = true;
@@ -499,6 +502,7 @@ public class DataExporter
 	/**
 	 * Do not write any COMMITs to generated SQL scripts
 	 */
+	@Override
 	public void commitNothing()
 	{
 		this.commitEvery = Committer.NO_COMMIT_FLAG;
@@ -509,6 +513,7 @@ public class DataExporter
 	 * generated SQL scripts.
 	 * @param count the number of statements after which a COMMIT should be added
 	 */
+	@Override
 	public void setCommitEvery(int count)
 	{
 		this.commitEvery = count;
@@ -541,6 +546,7 @@ public class DataExporter
 	 *
 	 * @param interval the new progress interval
 	 */
+	@Override
 	public void setReportInterval(int interval)
 	{
 		if (interval <= 0)
@@ -883,7 +889,7 @@ public class DataExporter
 	{
 		Thread t = new WbThread("Export Jobs")
 		{
-
+			@Override
 			public void run()
 			{
 				try
@@ -1048,12 +1054,14 @@ public class DataExporter
 		return this.warnings.getBuffer();
 	}
 
+	@Override
 	public void addWarning(String msg)
 	{
 		this.warnings.append(msg);
 		this.warnings.appendNewLine();
 	}
 
+	@Override
 	public void addError(String msg)
 	{
 		this.errors.append(msg);

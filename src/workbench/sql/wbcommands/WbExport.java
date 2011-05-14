@@ -182,7 +182,11 @@ public class WbExport
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	private void addWrongArgumentsMessage(StatementRunnerResult result)
 	{
@@ -244,11 +248,18 @@ public class WbExport
 		return Settings.getInstance().getBoolProperty("workbench.export." + type + ".default.header", false);
 	}
 
+	private boolean getIgnoreOwnerDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.export.default.ignoreowner", true);
+	}
+
+	@Override
 	public boolean ignoreMaxRows()
 	{
 		return true;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -320,13 +331,13 @@ public class WbExport
 		if ("txt".equals(type)) type = "text";
 
 		if ("text".equals(type) && !CommonArgs.checkQuoteEscapting(cmdLine))
-			{
-				String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
-				LogMgr.logError("WbExport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
-				return result;
-			}
+		{
+			String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
+			LogMgr.logError("WbExport.execute()", msg, null);
+			result.addMessage(msg);
+			result.setFailure();
+			return result;
+		}
 
 		this.exporter = new DataExporter(this.currentConnection);
 
@@ -727,7 +738,7 @@ public class WbExport
 		}
 		else
 		{
-			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, false);
+			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, getIgnoreOwnerDefault());
 			String where = cmdLine.getValue(ARG_TABLEWHERE);
 			try
 			{
@@ -832,7 +843,7 @@ public class WbExport
 				}
 				else
 				{
-					String sql = "SELECT * FROM " + prefix + tbl.getTableExpression();
+					String sql = "SELECT * FROM " + prefix + tbl.getTableExpression(currentConnection);
 					exporter.addQueryJob(sql, f, where);
 				}
 			}
@@ -878,6 +889,7 @@ public class WbExport
 		}
 	}
 
+	@Override
 	public void consumeResult(StatementRunnerResult toConsume)
 	{
 		// Run an export that is defined by a SQL Statement
@@ -933,6 +945,7 @@ public class WbExport
 		}
 	}
 
+	@Override
 	public void done()
 	{
 		super.done();
@@ -943,6 +956,7 @@ public class WbExport
 		defaultExtension = null;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -953,10 +967,12 @@ public class WbExport
 		super.cancel();
 	}
 
+	@Override
 	public void jobFinished()
 	{
 	}
 
+	@Override
 	public void setCurrentObject(String object, long number, long total)
 	{
 		this.currentTable = object;
@@ -966,6 +982,7 @@ public class WbExport
 		}
 	}
 
+	@Override
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		if (this.showProgress && this.rowMonitor != null)
@@ -974,15 +991,32 @@ public class WbExport
 		}
 	}
 
+	@Override
 	public void setReportInterval(int interval)
 	{
 		this.progressInterval = interval;
 	}
 
-	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
-	public void setMonitorType(int aType) {}
-	public void saveCurrentType(String type) {}
-	public void restoreType(String type) {}
+	@Override
+	public int getMonitorType()
+	{
+		return RowActionMonitor.MONITOR_PLAIN;
+	}
+
+	@Override
+	public void setMonitorType(int aType)
+	{
+	}
+
+	@Override
+	public void saveCurrentType(String type)
+	{
+	}
+
+	@Override
+	public void restoreType(String type)
+	{
+	}
 
 	protected String findTypeFromFilename(WbFile f)
 	{

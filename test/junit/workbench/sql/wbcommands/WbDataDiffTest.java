@@ -26,8 +26,6 @@ import workbench.util.FileUtil;
 import workbench.util.WbFile;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *

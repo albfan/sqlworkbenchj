@@ -124,22 +124,12 @@ public class SourceTableArgument
 					tbl.setSchema(schemaToUse);
 				}
 				tbl.adjustCase(dbConn);
-				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
+				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types, false);
 				result.addAll(l);
 			}
 			else
 			{
-				String catalog = dbConn.getCurrentCatalog();
-				TableIdentifier tbl = new TableIdentifier(t);
-					if (tbl.getSchema() == null)
-				{
-					tbl.setSchema(schemaToUse);
-				}
-				if (tbl.getCatalog() == null && !dbConn.getMetadata().ignoreCatalog(catalog))
-				{
-					tbl.setCatalog(catalog);
-				}
-				tbl.adjustCase(dbConn);
+				TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t));
 				result.add(tbl);
 			}
 		}

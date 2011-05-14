@@ -41,6 +41,7 @@ public class SqlServerProcedureReader
 		super(db);
 	}
 
+	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuffer();

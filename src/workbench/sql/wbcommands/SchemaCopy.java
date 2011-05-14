@@ -160,10 +160,15 @@ class SchemaCopy
 		{
 			TableIdentifier targetTable = sourceTable.createCopy();
 
-			if (!createTargetTable())
+			if (createTargetTable())
+			{
+				targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
+				targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
+			}
+			else
 			{
 				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
-				if (targetTable == null && (sourceTable.getSchema() == null || sourceTable.getCatalog() == null))
+				if (targetTable == null)
 				{
 					// if the table was not found using the schema/catalog as specified in the source
 					// table, try the default schema and catalog.

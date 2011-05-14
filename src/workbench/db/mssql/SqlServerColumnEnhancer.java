@@ -189,7 +189,7 @@ public class SqlServerColumnEnhancer
 		ResultSet rs = null;
 		try
 		{
-			String getDefaultSql = "select databasepropertyex('"+ table.getTable().getCatalog() + "', 'Collation')";
+			String getDefaultSql = "select cast(databasepropertyex('"+ table.getTable().getCatalog() + "', 'Collation') as varchar(max))";
 			info = conn.createStatement();
 			rs = info.executeQuery(getDefaultSql);
 			if (rs.next())

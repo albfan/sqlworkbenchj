@@ -53,6 +53,7 @@ public class SqlServerDataConverter
 	 *
 	 * @return true if Microsoft's "timestamp" type
 	 */
+	@Override
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
 		return (jdbcType == Types.BINARY && dbmsType.equals("timestamp"));
@@ -70,6 +71,7 @@ public class SqlServerDataConverter
 	 * @return the originalValue or a converted value if approriate
 	 * @see #convertsType(int, java.lang.String)
 	 */
+	@Override
 	public Object convertValue(int jdbcType, String dbmsType, Object originalValue)
 	{
 		if (originalValue == null) return null;

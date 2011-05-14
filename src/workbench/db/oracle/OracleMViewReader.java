@@ -22,8 +22,10 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
+ * A class to retrieve the source of an Oracle materialized view
  *
  * @author Thomas Kellerer
  */
@@ -76,6 +78,8 @@ public class OracleMViewReader
 				result.append("CREATE OR REPLACE MATERIALIZED VIEW ");
 			}
 			result.append(table.getTableExpression(dbConnection));
+
+			// getMViewOptions() will store any defined primary key in pkIndex
 			String options = getMViewOptions(dbConnection, table);
 			if (options != null)
 			{
@@ -116,6 +120,17 @@ public class OracleMViewReader
 		return result.toString();
 	}
 
+	/**
+	 * Retrieve options for the given materialized view (like REFRESH type...).
+	 *
+	 * A call to this method will also store the name of the primary key index (if any)
+	 * in the instance variable pkIndex
+	 *
+	 * @param dbConnection
+	 * @param mview
+	 * @return a SQL string that can be used after the CREATE MATERIALIZED VIEW part
+	 * @see #pkIndex
+	 */
 	private String getMViewOptions(WbConnection dbConnection, TableIdentifier mview)
 	{
 		String sql =
@@ -125,9 +140,11 @@ public class OracleMViewReader
 			"       mv.build_mode, \n " +
 			"       mv.fast_refreshable, \n" +
 			"       cons.constraint_name, \n" +
-			"       cons.index_name \n" +
+			"       cons.index_name, \n" +
+			"       rc.interval \n" +
 			"from all_mviews mv \n" +
 			"  left join all_constraints cons on cons.owner = mv.owner and cons.table_name = mv.mview_name and cons.constraint_type = 'P' \n " +
+			"  left join all_refresh_children rc on rc.owner = mv.owner and rc.name = mv.mview_name \n" +
 			"where mv.owner = ? \n" +
 			" and mv.mview_name = ? ";
 
@@ -169,6 +186,13 @@ public class OracleMViewReader
 					result.append(" WITH ROWID");
 				}
 
+				String next = rs.getString("INTERVAL");
+				if (StringUtil.isNonBlank(next))
+				{
+					result.append("\n  NEXT ");
+					result.append(next.trim());
+				}
+
 				String rewrite = rs.getString("REWRITE_ENABLED");
 				if ("Y".equals(rewrite))
 				{
@@ -183,7 +207,7 @@ public class OracleMViewReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("OracleMetadata.getSnapshotSource()", "Error accessing all_mviews", e);
+			LogMgr.logWarning("OracleMetadata.getMViewOptions()", "Error accessing all_mviews", e);
 			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
@@ -193,6 +217,13 @@ public class OracleMViewReader
 		return result.toString();
 	}
 
+	/**
+	 * Retrieve the query that is associated with a materialized view.
+	 *
+	 * @param dbConnection the connection to use
+	 * @param mview the view to retrieve
+	 * @return the query as stored in the database
+	 */
 	private String retrieveMViewQuery(WbConnection dbConnection, TableIdentifier mview)
 	{
 		String result = null;
@@ -230,7 +261,7 @@ public class OracleMViewReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("OracleMetadata.getSnapshotSource()", "Error accessing all_mviews", e);
+			LogMgr.logWarning("OracleMetadata.retrieveMViewQuery()", "Error accessing all_mviews", e);
 			result = ExceptionUtil.getDisplay(e);
 		}
 		finally
@@ -240,7 +271,15 @@ public class OracleMViewReader
 		return result;
 	}
 
-	private String getSourceFromDBMSMeta(WbConnection dbConnection, TableIdentifier table)
+	/**
+	 * Retrieve the full source of materialized view using the DBMS_METADATA package.
+	 *
+	 * @param dbConnection the connection to use
+	 * @param mview the materialized view to retrieve
+	 * @return the source as obtained from the database
+	 * @throws SQLException
+	 */
+	private String getSourceFromDBMSMeta(WbConnection dbConnection, TableIdentifier mview)
 		throws SQLException
 	{
 		PreparedStatement stmt = null;
@@ -253,13 +292,13 @@ public class OracleMViewReader
 		{
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleMViewReader.getSourceFromDBMSMeta()", "Retrieving MVIEW options using: \n"  + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
+				LogMgr.logDebug("OracleMViewReader.getSourceFromDBMSMeta()", "Retrieving MVIEW options using: \n"  + SqlUtil.replaceParameters(sql, mview.getSchema(), mview.getTableName()));
 			}
 
 			stmt = dbConnection.getMetadata().getSqlConnection().prepareStatement(sql);
 
-			stmt.setString(1, table.getObjectName());
-			stmt.setString(2, table.getSchema());
+			stmt.setString(1, mview.getObjectName());
+			stmt.setString(2, mview.getSchema());
 
 			rs = stmt.executeQuery();
 			if (rs.next())
@@ -271,7 +310,7 @@ public class OracleMViewReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleIndexReader", "Error retrieving mview via DBMS_METADATA", e);
+			LogMgr.logError("OracleMViewReader.getSourceFromDBMSMeta()", "Error retrieving mview via DBMS_METADATA", e);
 			throw e;
 		}
 		finally

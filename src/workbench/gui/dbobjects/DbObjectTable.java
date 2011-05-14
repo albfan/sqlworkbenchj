@@ -14,6 +14,7 @@ package workbench.gui.dbobjects;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JPopupMenu;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
@@ -117,13 +118,32 @@ public class DbObjectTable
 	{
 		if (pendingOrder != null)
 		{
-			ColumnOrderMgr.getInstance().applyColumnOrder(this, pendingOrder, false);
+			if (canApplyColumnOrder(pendingOrder))
+			{
+				ColumnOrderMgr.getInstance().applyColumnOrder(this, pendingOrder, true);
+			}
 			pendingOrder = null;
 		}
-		else if (columnOrder != null)
+		else if (canApplyColumnOrder(columnOrder))
 		{
-			ColumnOrderMgr.getInstance().applyColumnOrder(this, columnOrder, false);
+			ColumnOrderMgr.getInstance().applyColumnOrder(this, columnOrder, true);
 		}
+	}
+
+	private boolean canApplyColumnOrder(List<String> newColumns)
+	{
+		if (CollectionUtil.isEmpty(newColumns)) return false;
+		if (getColumnCount() == 0) return false;
+
+		Set<String> currentCols = CollectionUtil.caseInsensitiveSet();
+		for (int i=0; i < getColumnCount(); i++)
+		{
+			currentCols.add(getColumnName(i));
+		}
+
+		Set<String> newCols = CollectionUtil.caseInsensitiveSet();
+		newCols.addAll(newColumns);
+		return currentCols.containsAll(newCols);
 	}
 
 	@Override

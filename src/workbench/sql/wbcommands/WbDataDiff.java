@@ -344,8 +344,8 @@ public class WbDataDiff
 						TableIdentifier refTable = mapping.referenceTables.get(i);
 						TableIdentifier targetTable = mapping.targetTables.get(i);
 						out.write("    <mapping>" + nl);
-						out.write("      <reference-table>" + refTable.getTableExpression(sourceCon) + "</reference-table>" + nl);
-						out.write("      <target-table>" + targetTable.getTableExpression(targetCon) + "</target-table>" + nl);
+						out.write("      <reference-table>" + refTable.getFullyQualifiedName(sourceCon) + "</reference-table>" + nl);
+						out.write("      <target-table>" + targetTable.getFullyQualifiedName(targetCon) + "</target-table>" + nl);
 						out.write("    </mapping>" + nl);
 					}
 					out.write("  </summary>" + nl + nl);
@@ -398,7 +398,7 @@ public class WbDataDiff
 
 					if (xmlOutput)
 					{
-						out.write("    <table name=\"" + table.getTableExpression(targetCon) + "\">" + nl);
+						out.write("    <table name=\"" + table.getFullyQualifiedName(targetCon) + "\">" + nl);
 						if (ins.exists())
 						{
 							if (ins.length() > 0)

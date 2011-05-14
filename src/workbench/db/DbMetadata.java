@@ -1244,7 +1244,7 @@ public class DbMetadata
 	 */
 	public String getCurrentSchema()
 	{
-		if (this.schemaInfoReader != null)
+		if (dbSettings.supportsSchemas() && this.schemaInfoReader != null)
 		{
 			return this.schemaInfoReader.getCurrentSchema(this.dbConnection);
 		}
@@ -2232,6 +2232,11 @@ public class DbMetadata
 	 */
 	public String getCurrentCatalog()
 	{
+		if (!dbSettings.supportsCatalogs())
+		{
+			return StringUtil.EMPTY_STRING;
+		}
+
 		String catalog = null;
 
 		String query = this.dbSettings.getQueryForCurrentCatalog();

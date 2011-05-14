@@ -31,8 +31,17 @@ public class SqlServerConstraintReader
            "and   cons.parent_obj = tab.id \n" +
            "and   tab.name = ? \n";
 
-	public String getColumnConstraintSql() { return null; }
-	public String getTableConstraintSql() { return TABLE_SQL; }
+	@Override
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
+
+	@Override
+	public String getTableConstraintSql()
+	{
+		return TABLE_SQL;
+	}
 
 
 }
