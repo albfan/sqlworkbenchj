@@ -66,6 +66,7 @@ import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
+import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mysql.MySQLTableCommentReader;
@@ -268,6 +269,11 @@ public class DbMetadata
 			columnEnhancer = new SqlServerColumnEnhancer();
 			objectListEnhancer = new SqlServerObjectListEnhancer();
 			dataTypeResolver = new SqlServerDataTypeResolver();
+			if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.use.schemareader", true))
+			{
+				// SqlServerSchemaInfoReader will cache the user's default schema
+				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection.getSqlConnection());
+			}
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -345,7 +351,10 @@ public class DbMetadata
 			columnEnhancer = new H2ColumnEnhancer();
 		}
 
-		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
+		if (schemaInfoReader == null)
+		{
+			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
+		}
 
 		if (this.dataTypeResolver == null)
 		{

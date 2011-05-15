@@ -50,10 +50,10 @@ public class SqlServerTypeReader
 									 "from sys.types t join sys.schemas s on t.schema_id = s.schema_id \n" +
 									 "where t.is_user_defined = 1";
 
-		// the data types for which the max_length information are valid
+	// the data types for which the max_length information are valid
 	private Set<String> maxLengthTypes = CollectionUtil.treeSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
 
-		// the data types for which the scale and precision columns are valid
+	// the data types for which the scale and precision columns are valid
 	private Set<String> numericTypes = CollectionUtil.treeSet("decimal", "numeric");
 
 	public static boolean versionSupportsTypes(WbConnection con)
@@ -61,6 +61,7 @@ public class SqlServerTypeReader
 		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
 	}
 
+	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
@@ -81,16 +82,19 @@ public class SqlServerTypeReader
 		return true;
 	}
 
+	@Override
 	public List<String> supportedTypes()
 	{
 		return CollectionUtil.arrayList("TYPE");
 	}
 
+	@Override
 	public boolean handlesType(String type)
 	{
 		return "TYPE".equalsIgnoreCase(type);
 	}
 
+	@Override
 	public boolean handlesType(String[] types)
 	{
 		if (types == null) return true;
@@ -165,6 +169,7 @@ public class SqlServerTypeReader
 		return domain;
 	}
 
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -205,6 +210,7 @@ public class SqlServerTypeReader
 		return sql;
 	}
 
+	@Override
 	public DomainIdentifier getObjectDefinition(WbConnection con, DbObject name)
 	{
 		Statement stmt = null;
@@ -235,6 +241,7 @@ public class SqlServerTypeReader
 		return result;
 	}
 
+	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		DomainIdentifier type = getObjectDefinition(con, object);

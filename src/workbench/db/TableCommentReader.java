@@ -27,7 +27,7 @@ public class TableCommentReader
 	public TableCommentReader()
 	{
 	}
-	
+
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given table.
 	 * The syntax to be used, can be configured in the workbench.settings file.
@@ -50,7 +50,7 @@ public class TableCommentReader
 
 		String comment = null;
 
-		if (!table.commentIsDefined())
+		if (table.commentIsDefined())
 		{
 			comment = table.getComment();
 		}
@@ -58,7 +58,7 @@ public class TableCommentReader
 		{
 			comment = getTableComment(dbConnection, table);
 		}
-		
+
 		String result = null;
 		if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 		{
@@ -116,7 +116,7 @@ public class TableCommentReader
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given columns.
 	 * The syntax to be used, can be configured in the workbench.settings file.
-	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String) 
+	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String)
 	 */
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
 	{

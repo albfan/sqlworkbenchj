@@ -967,7 +967,7 @@ public class Settings
 	 * should be saved in the workspace
 	 *
 	 * @param tableType the table for which the column order should be checked (e.g. tablelist)
-	 * @param flag 
+	 * @param flag
 	 */
 	public void setRememberMetaColumnOrder(String tableType, boolean flag)
 	{

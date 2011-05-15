@@ -105,6 +105,11 @@ public class SqlServerObjectListEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
+		if (schema == null)
+		{
+			schema = con.getMetadata().getCurrentSchema();
+		}
+
 		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 		try
 		{
