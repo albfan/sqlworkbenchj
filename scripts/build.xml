@@ -954,6 +954,11 @@
     <antcall target="db-test"/>
   </target>
 
+  <target name="test-mssql">
+    <property name="test.db" value="mssql"/>
+    <antcall target="db-test"/>
+  </target>
+
   <target name="test-pg">
     <property name="test.db" value="postgres"/>
     <antcall target="db-test"/>
