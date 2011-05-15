@@ -127,7 +127,7 @@
 			</blockquote>
 		</simplesect>
 
-		<simplesect id="dbexplorer-create-insert">
+		<simplesect id="dbexplorer-create-update">
 			<title>Create empty UPDATE</title>
 
 			<blockquote>
