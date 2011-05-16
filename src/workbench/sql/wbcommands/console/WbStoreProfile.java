@@ -16,6 +16,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.profiles.ProfileKey;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -115,6 +116,7 @@ public class WbStoreProfile
 			newDrv.setName(drvName);
 			newDrv.setSampleUrl(profile.getUrl());
 			WbFile f = new WbFile(drv.getLibrary());
+			LogMgr.logDebug("WbStoreProfile", "Chaing driver jar from [" + drv.getLibrary() + "] to: " + f.getFullPath());
 			newDrv.setLibrary(f.getFullPath());
 			profile.setDriverName(drvName);
 
