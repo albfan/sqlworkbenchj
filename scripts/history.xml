@@ -15,6 +15,7 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="7" type="fix">WbStoreProfile did not correctly register the used driver in WbDrivers.xml</entry>
     <entry dev-build="6" type="fix">WbDataDiff did not always write correct XML files for update statements</entry>
     <entry dev-build="6" type="fix">For MySQL retrieving the table definition of tables in a database where the database name contained underscores did not work</entry>
     <entry dev-build="6" type="fix">When selecting * in the schema dropdown of the DbExplorer no triggers where displayed in the trigger panel</entry>

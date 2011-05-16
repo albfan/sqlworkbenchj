@@ -80,7 +80,7 @@ public class WbStoreProfile
 
 		if (StringUtil.isBlank(name))
 		{
-			result.addMessage("ErrNoProfile");
+			result.addMessageByKey("ErrNoProfile");
 			result.setFailure();
 			return result;
 		}
@@ -115,11 +115,7 @@ public class WbStoreProfile
 			String drvName = currentConnection.getSqlConnection().getMetaData().getDriverName();
 			newDrv.setName(drvName);
 			newDrv.setSampleUrl(profile.getUrl());
-			WbFile f = new WbFile(drv.getLibrary());
-			LogMgr.logDebug("WbStoreProfile", "Chaing driver jar from [" + drv.getLibrary() + "] to: " + f.getFullPath());
-			newDrv.setLibrary(f.getFullPath());
 			profile.setDriverName(drvName);
-
 			ConnectionMgr.getInstance().getDrivers().add(newDrv);
 			ConnectionMgr.getInstance().saveDrivers();
 			result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", drvName));

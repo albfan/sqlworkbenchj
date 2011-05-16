@@ -298,7 +298,9 @@ public class DbDriver
 		copy.libraryList = new ArrayList<String>(libraryList);
 		copy.sampleUrl = this.sampleUrl;
 		copy.name = this.name;
-		copy.isInternal = this.isInternal;
+
+		// the internal attribute should not be copied!
+
 		return copy;
 	}
 
