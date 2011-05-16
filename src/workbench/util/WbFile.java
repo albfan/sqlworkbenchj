@@ -172,6 +172,7 @@ public class WbFile
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return getFullPath();
