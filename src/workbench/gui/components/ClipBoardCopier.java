@@ -105,7 +105,7 @@ public class ClipBoardCopier
 			// under Windows
 			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
 			printer.setColumnMapping(getColumnOrder());
-			
+
 			out = new StringWriter(count * 250);
 			printer.writeDataString(out, rows);
 
@@ -134,7 +134,7 @@ public class ClipBoardCopier
 	private int[] getColumnOrder()
 	{
 		if (!client.isColumnOrderChanged()) return null;
-		
+
 		TableColumnModel model = client.getColumnModel();
 		int colCount = model.getColumnCount();
 		int[] result = new int[colCount];
@@ -146,7 +146,7 @@ public class ClipBoardCopier
 		}
 		return result;
 	}
-	
+
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(false, selectedOnly, showSelectColumns, false);
@@ -189,6 +189,7 @@ public class ClipBoardCopier
 		// create a new thread to run the actual copy
 		WbThread t = new WbThread("CopyThread")
 		{
+			@Override
 			public void run()
 			{
 				_copyAsSql(useUpdate, selectedOnly, showSelectColumns, includeDelete);
@@ -353,9 +354,11 @@ public class ClipBoardCopier
 		DataStore ds = this.client.getDataStore();
 		if (ds == null) return Collections.emptyList();
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(cols.length);
+		TableColumnModel model = client.getColumnModel();
 		for (int i=0; i < cols.length; i++)
 		{
-			result.add(ds.getResultInfo().getColumn(cols[i]));
+			int realIndex = model.getColumn(i).getModelIndex();
+			result.add(ds.getResultInfo().getColumn(realIndex));
 		}
 		return result;
 	}
