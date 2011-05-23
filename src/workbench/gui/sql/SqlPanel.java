@@ -1703,6 +1703,22 @@ public class SqlPanel
 			cancelExecution = true;
 			setCancelState(false);
 			stmtRunner.cancel();
+			if (this.executionThread != null)
+			{
+				executionThread.interrupt();
+			}
+
+			if (this.executionThread != null)
+			{
+				try
+				{
+					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 30000));
+				}
+				catch (InterruptedException ex)
+				{
+					LogMgr.logDebug("SqlPanel.cancelRetrieve()", "Error when waiting for cancel to finish", ex);
+				}
+			}
 		}
 		finally
 		{
@@ -1758,11 +1774,13 @@ public class SqlPanel
 		this.startExecution(sql, offset, -1, highlight, this.appendResults);
 	}
 
+	@Override
 	public void commit()
 	{
 		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false, this.appendResults);
 	}
 
+	@Override
 	public void rollback()
 	{
 		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false, this.appendResults);
@@ -1797,6 +1815,7 @@ public class SqlPanel
 
 		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
 		{
+			@Override
 			public void run()
 			{
 				runStatement(sql, offset, commandAtIndex, highlight, appendResult);
@@ -1865,6 +1884,7 @@ public class SqlPanel
 
 		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
 		{
+			@Override
 			public void run()
 			{
 				runCurrentSql();
@@ -1912,6 +1932,7 @@ public class SqlPanel
 
 	private boolean macroExecution = false;
 
+	@Override
 	public void executeMacroSql(final String sql, final boolean replaceText)
 	{
 		if (isBusy()) return;
@@ -1930,6 +1951,7 @@ public class SqlPanel
 		this.startExecution(sql, 0, -1, false, this.appendResults);
 	}
 
+	@Override
 	public void exportData()
 	{
 		final String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
@@ -1958,6 +1980,7 @@ public class SqlPanel
 
 		this.executionThread = new WbThread("ExportSQL")
 		{
+			@Override
 			public void run()
 			{
 				setBusy(true);
@@ -2022,11 +2045,13 @@ public class SqlPanel
 		this.executionThread.start();
 	}
 
+	@Override
 	public void fatalError(String msg)
 	{
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 
+	@Override
 	public int getActionOnError(int errorRow, String errorColumn, String dataLine, String errorMessage)
 	{
 		if (this.importRunning)
@@ -2158,6 +2183,7 @@ public class SqlPanel
 		this.worker = importer;
 		WbThread importThread = new WbThread("DataImport")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -2192,10 +2218,12 @@ public class SqlPanel
 		this.selectEditor();
 	}
 
+	@Override
 	public void appendToLog(final String logMessage)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				log.append(logMessage);
@@ -2204,6 +2232,7 @@ public class SqlPanel
 		});
 	}
 
+	@Override
 	public String getPassword(String prompt)
 	{
 		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
@@ -2211,6 +2240,7 @@ public class SqlPanel
 		return pwd;
 	}
 
+	@Override
 	public boolean confirmExecution(String prompt)
 	{
 		String title = null;
@@ -2226,6 +2256,7 @@ public class SqlPanel
 	private boolean executeAllStatements = true;
 	private boolean cancelAll = false;
 
+	@Override
 	public boolean confirmStatementExecution(String command)
 	{
 		if (executeAllStatements) return true;
@@ -2273,6 +2304,7 @@ public class SqlPanel
 	 * @param evt
 	 * @see #updateResultInfos()
 	 */
+	@Override
 	public void stateChanged(ChangeEvent evt)
 	{
 		if (ignoreStateChange || isBusy()) return;
@@ -2385,6 +2417,7 @@ public class SqlPanel
 			ignoreStateChange = true;
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					Component keep = resultTab.getSelectedComponent();
@@ -2446,6 +2479,7 @@ public class SqlPanel
 			{
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						resultTab.fireStateChanged();
@@ -2478,6 +2512,7 @@ public class SqlPanel
 			ignoreStateChange = true;
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					while (resultTab.getTabCount() > 1)
@@ -2511,6 +2546,7 @@ public class SqlPanel
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_updateProxiedActions();
@@ -2613,6 +2649,7 @@ public class SqlPanel
 
 	private boolean checkPrepared;
 
+	@Override
 	public boolean processParameterPrompts(String sql)
 	{
 		boolean goOn = true;
@@ -2986,6 +3023,7 @@ public class SqlPanel
 
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						highlightError(p, command, offset);
@@ -3034,6 +3072,7 @@ public class SqlPanel
 					final int selend = oldSelectionEnd;
 					EventQueue.invokeLater(new Runnable()
 					{
+						@Override
 						public void run()
 						{
 							editor.select(selstart, selend);
@@ -3125,6 +3164,7 @@ public class SqlPanel
 			final boolean success = result.isSuccess();
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (success)
@@ -3174,6 +3214,7 @@ public class SqlPanel
 	 * The given sql will be executed and the result will always
 	 * be displayed in a new result tab
 	 */
+	@Override
 	public void showResult(final String sql, String comment, ResultReceiver.ShowType how)
 	{
 		if (how == ResultReceiver.ShowType.logText)
@@ -3272,6 +3313,7 @@ public class SqlPanel
 			final List<DwPanel> newPanels = new ArrayList<DwPanel>(results.size());
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -3308,6 +3350,7 @@ public class SqlPanel
 			count += results.size();
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -3339,6 +3382,7 @@ public class SqlPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				editor.scrollTo(line, 0);
@@ -3357,6 +3401,7 @@ public class SqlPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				editor.select(0, 0);
@@ -3385,6 +3430,7 @@ public class SqlPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				importFileAction.setEnabled(mayEdit);
@@ -3402,6 +3448,7 @@ public class SqlPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				executeAll.setEnabled(flag);
@@ -3449,11 +3496,13 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public boolean isBusy()
 	{
 		return threadBusy;
 	}
 
+	@Override
 	public void fontChanged(String aFontId, Font newFont)
 	{
 		if (aFontId.equals(Settings.PROPERTY_MSGLOG_FONT))
@@ -3462,12 +3511,14 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) this.execListener = Collections.synchronizedList(new LinkedList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 
+	@Override
 	public void removeDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) return;
@@ -3513,6 +3564,7 @@ public class SqlPanel
 		}
 	}
 
+	@Override
 	public void reset()
 	{
 		editor.reset();
@@ -3525,6 +3577,7 @@ public class SqlPanel
 		if (sqlHistory != null) sqlHistory.clear();
 	}
 
+	@Override
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
@@ -3547,6 +3600,7 @@ public class SqlPanel
 		this.connectionInfo = null;
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		String prop = evt.getPropertyName();

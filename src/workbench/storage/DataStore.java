@@ -1219,7 +1219,7 @@ public class DataStore
 	/**
 	 * Define a column expression that was used to filter rows for this datastore.
 	 * This can be used to highlight the filter condition in the front end.
-	 * 
+	 *
 	 * @param filter
 	 */
 	public void setGeneratingFilter(ColumnExpression filter)
@@ -1342,7 +1342,7 @@ public class DataStore
 	 * cancels the processing of the ResultSet.
 	 *
 	 * @see #DataStore(java.sql.ResultSet)
-	 * @see #initData(ResultSet)
+	 * @see #initData(java.sql.ResultSet)
 	 */
 	public void cancelRetrieve()
 	{

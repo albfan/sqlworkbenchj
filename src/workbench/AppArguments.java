@@ -176,30 +176,30 @@ public class AppArguments
 				{
 					if (StringUtil.isBlank(line)) continue;
 
-					line = line.trim();
-					if (line.startsWith("#")) continue;
+					String wbLine = line.trim();
+					if (wbLine.startsWith("#")) continue;
 
-					if (line.startsWith("classpath:"))
+					if (wbLine.startsWith("classpath:"))
 					{
-						String filename = line.substring("classpath:".length()).trim();
+						String filename = wbLine.substring("classpath:".length()).trim();
 						File lib = new File(filename);
 						if (lib.getParent() == null)
 						{
-							// If not directory is given, Liquibase assumes the current directory
+							// If no directory is given, Liquibase assumes the current directory
 							// WbDriver on the other hand will search the jar file in the config directory, if no directory
 							// is specified, which is most probably not correct.
 							filename = "./" + lib.getName();
 						}
-						line = ARG_CONN_JAR + "=" + filename;
+						wbLine = ARG_CONN_JAR + "=" + filename;
 					}
 					else
 					{
-						line = line.replace("driver:", ARG_CONN_DRIVER + "=");
-						line = line.replace("url:", ARG_CONN_URL + "=");
-						line = line.replace("username:", ARG_CONN_USER + "=");
-						line = line.replace("password:", ARG_CONN_PWD + "=");
+						wbLine = wbLine.replace("driver:", ARG_CONN_DRIVER + "=");
+						wbLine = wbLine.replace("url:", ARG_CONN_URL + "=");
+						wbLine = wbLine.replace("username:", ARG_CONN_USER + "=");
+						wbLine = wbLine.replace("password:", ARG_CONN_PWD + "=");
 					}
-					translated.add(line);
+					translated.add(wbLine);
 				}
 				parse(translated);
 			}

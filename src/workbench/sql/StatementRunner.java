@@ -104,6 +104,7 @@ public class StatementRunner
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))

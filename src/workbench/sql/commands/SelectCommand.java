@@ -171,9 +171,13 @@ public class SelectCommand
 	public void setMaxRows(int max)
 	{
 		if (max >= 0)
+		{
 			this.maxRows = max;
+		}
 		else
+		{
 			this.maxRows = 0;
+		}
 	}
 
 }

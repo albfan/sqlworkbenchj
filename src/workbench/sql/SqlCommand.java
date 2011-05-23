@@ -178,7 +178,8 @@ public class SqlCommand
 		{
 			currentRetrievalData.cancelRetrieve();
 		}
-		else if (currentStatement != null)
+		
+		if (currentStatement != null)
 		{
 			try
 			{
@@ -208,7 +209,7 @@ public class SqlCommand
 			try { currentStatement.clearBatch(); } catch (Exception th) {}
 			try { currentStatement.clearWarnings(); } catch (Exception th) {}
 			try { currentConnection.clearWarnings(); } catch (Exception e) {}
-			
+
 			try
 			{
 				currentStatement.close();
@@ -379,7 +380,7 @@ public class SqlCommand
 
 		int counter = 0;
 		int maxLoops = currentConnection.getDbSettings().getMaxResults();
-		
+
 		while (moreResults || updateCount > -1)
 		{
 
@@ -495,7 +496,7 @@ public class SqlCommand
 
 			// some JDBC drivers do not implement getMoreResults() and getUpdateCount()
 			// correctly, so this is a safety to prevent an endless loop
-			if (maxLoops > 0 && counter > maxLoops) 
+			if (maxLoops > 0 && counter > maxLoops)
 			{
 				LogMgr.logWarning("SqlCommand.processResults()", "Breaking out of loop because " + maxLoops + " iterations reached");
 				break;

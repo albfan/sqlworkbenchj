@@ -424,16 +424,31 @@ class VariableDataStore
 		this.setUpdateTable(TABLE_ID);
 	}
 
+	@Override
 	public List<DmlStatement> getUpdateStatements(WbConnection aConn)
 	{
 		return Collections.emptyList();
 	}
 
-	public boolean hasPkColumns() { return true; }
+	@Override
+	public boolean hasPkColumns()
+	{
+		return true;
+	}
 
-	public boolean isUpdateable() { return true; }
-	public boolean hasUpdateableColumns() { return true; }
+	@Override
+	public boolean isUpdateable()
+	{
+		return true;
+	}
 
+	@Override
+	public boolean hasUpdateableColumns()
+	{
+		return true;
+	}
+
+	@Override
 	public int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException, IllegalArgumentException
 	{
