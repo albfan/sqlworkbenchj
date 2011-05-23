@@ -1705,11 +1705,6 @@ public class SqlPanel
 			stmtRunner.cancel();
 			if (this.executionThread != null)
 			{
-				executionThread.interrupt();
-			}
-
-			if (this.executionThread != null)
-			{
 				try
 				{
 					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 30000));
@@ -1718,6 +1713,10 @@ public class SqlPanel
 				{
 					LogMgr.logDebug("SqlPanel.cancelRetrieve()", "Error when waiting for cancel to finish", ex);
 				}
+			}
+			if (this.executionThread != null && executionThread.isAlive())
+			{
+				executionThread.interrupt();
 			}
 		}
 		finally
