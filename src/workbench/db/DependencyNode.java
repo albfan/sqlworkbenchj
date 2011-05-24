@@ -20,12 +20,12 @@ import workbench.util.StringUtil;
 
 /**
  * A node in the dependency tree for a table
- * 
+ *
  * @see workbench.db.TableDependency
  * @see workbench.db.DeleteScriptGenerator
  * @see workbench.db.importer.TableDependencySorter
- * 
- * @author Thomas Kellerer  
+ *
+ * @author Thomas Kellerer
  */
 public class DependencyNode
 {
@@ -34,13 +34,13 @@ public class DependencyNode
 	private String updateAction = "";
 	private String deleteAction = "";
 	private String fkName;
-	
+
 	/**
 	 * Maps the columns of the base table (this.table) to the matching column
 	 * of the parent table (parentNode.getTable())
 	 */
 	private Map<String, String> columns = new HashMap<String, String>();
-	
+
 	private List<DependencyNode> childTables = new ArrayList<DependencyNode>();
 
 	public DependencyNode(TableIdentifier aTable)
@@ -59,7 +59,7 @@ public class DependencyNode
 	}
 
 	/**
-	 * Returns the level of this node in the dependency hierarchy. 
+	 * Returns the level of this node in the dependency hierarchy.
 	 * @return 0 if no parent is available (i.e. the root of the tree)
 	 *         -1 if this is a self referencing dependency
 	 */
@@ -77,6 +77,7 @@ public class DependencyNode
 		this.fkName = aFkName;
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.table.getTableName();
@@ -84,26 +85,52 @@ public class DependencyNode
 
 	public String debugString()
 	{
+
+		if (parentNode == null)
+		{
+			return "root node for table " + this.table.getTableName();
+		}
+
 		StringBuilder result = new StringBuilder(20);
-		result.append(this.table.getTableName());
 		if (fkName != null)
 		{
-			result.append(" <" + this.fkName + ">");
+			result.append("foreign key " + this.fkName + ", ");
 		}
-		if (columns.size() > 0) result.append(" [");
+
+		result.append(this.table.getTableName());
+		if (columns.size() > 0)
+		{
+			String cols = StringUtil.listToString(columns.keySet(), ',');
+			result.append('(');
+			result.append(cols);
+			result.append(')');
+		}
+
+		if (parentNode != null)
+		{
+			result.append(" references ");
+			result.append(parentNode.toString());
+			result.append('(');
+		}
+		else if (columns.size() > 0)
+		{
+			result.append(" --> (");
+		}
 		boolean first = true;
 		for (String col : columns.keySet())
 		{
 			if (!first)
 			{
-				result.append(", ");
-				first = false;
+				result.append(',');
 			}
 			result.append(col);
-			result.append(" -> ");
 			result.append(columns.get(col));
+			first = false;
 		}
-		if (columns.size() > 0) result.append("]");
+		if (columns.size() > 0)
+		{
+			result.append(')');
+		}
 		return result.toString();
 	}
 
@@ -126,7 +153,7 @@ public class DependencyNode
 	/**
 	 * Returns a Map that maps the columns of the base table to the matching column
 	 * of the related (parent/child) table.
-	 * 
+	 *
 	 * The keys to the map are columns from this node's table {@link #getTable()}
 	 * The values in this map are columns found in this node's "parent" table
 	 *
@@ -155,6 +182,7 @@ public class DependencyNode
 		return this.table.equals(tbl) && aFkname.equals(this.fkName);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof DependencyNode)
@@ -165,6 +193,7 @@ public class DependencyNode
 		return false;
 	}
 
+	@Override
 	public int hashCode()
 	{
 		StringBuilder sb = new StringBuilder(60);
@@ -208,7 +237,7 @@ public class DependencyNode
 		}
 		return null;
 	}
-	
+
 	public DependencyNode addChild(TableIdentifier table, String aFkname)
 	{
 		if (aFkname == null) throw new NullPointerException("FK Name may not be null");
@@ -263,7 +292,7 @@ public class DependencyNode
 		int level = getLevel();
 		StringBuilder indent = new StringBuilder(level * 2);
 		for (int i=0; i < level; i++) indent.append("  ");
-		
+
 		System.out.println(indent + toString() + " [@" + level + "]");
 		for (DependencyNode node : childTables)
 		{

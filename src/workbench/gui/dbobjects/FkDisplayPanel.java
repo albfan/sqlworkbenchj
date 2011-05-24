@@ -41,6 +41,7 @@ public class FkDisplayPanel
 	private WbSplitPane splitPanel;
 	private boolean showImportedKeys;
 	private WbConnection dbConnection;
+	private boolean isRetrieving;
 
 	public FkDisplayPanel(TableLister lister, boolean showImported)
 	{
@@ -91,30 +92,47 @@ public class FkDisplayPanel
 		dependencyTree.reset();
 	}
 
+	public boolean isRetrieving()
+	{
+		return isRetrieving;
+	}
+	
+	public void cancel()
+	{
+		dependencyTree.cancelRetrieve();
+	}
 
 	protected void retrieve(TableIdentifier table)
 		throws SQLException
 	{
-		FKHandler handler = FKHandlerFactory.createInstance(dbConnection);
-		final DataStoreTableModel model;
-		if (showImportedKeys)
+		try
 		{
-			model = new DataStoreTableModel(handler.getForeignKeys(table, false));
-		}
-		else
-		{
-			model = new DataStoreTableModel(handler.getReferencedBy(table));
-		}
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
+			isRetrieving = true;
+			FKHandler handler = FKHandlerFactory.createInstance(dbConnection);
+			final DataStoreTableModel model;
+			if (showImportedKeys)
 			{
-				keys.setModel(model, true);
-				keys.adjustRowsAndColumns();
+				model = new DataStoreTableModel(handler.getForeignKeys(table, false));
 			}
-		});
-		retrieveTree(table);
+			else
+			{
+				model = new DataStoreTableModel(handler.getReferencedBy(table));
+			}
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					keys.setModel(model, true);
+					keys.adjustRowsAndColumns();
+				}
+			});
+			retrieveTree(table);
+		}
+		finally
+		{
+			isRetrieving = false;
+		}
 	}
 
 	protected void retrieveTree(TableIdentifier table)

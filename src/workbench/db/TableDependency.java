@@ -34,6 +34,7 @@ public class TableDependency
 	private List<DependencyNode> leafs;
 	private boolean directChildrenOnly;
 	private boolean readAborted;
+	private boolean cancelRetrieve;
 	private Map<DependencyNode, DependencyNode> visitedRelations;
 
 	public TableDependency(WbConnection con, TableIdentifier tbl)
@@ -78,6 +79,11 @@ public class TableDependency
 		return null;
 	}
 
+	public void cancel()
+	{
+		this.cancelRetrieve = true;
+	}
+
 	/**
 	 * Read the hierarchy of tables referencing this one.
 	 * This is equivalent to calling <tt>readDependencyTree(true)</tt>
@@ -106,6 +112,7 @@ public class TableDependency
 		if (connection == null) return;
 
 		this.readAborted = false;
+		this.cancelRetrieve = false;
 		this.leafs = new ArrayList<DependencyNode>();
 
 		// Make sure we are using the "correct" TableIdentifier
@@ -131,6 +138,12 @@ public class TableDependency
 				resetBusy = true;
 			}
 			readTree(this.tableRoot, exportedKeys, 0);
+			if (cancelRetrieve)
+			{
+				tableRoot = new DependencyNode(tableToUse); // reset all children
+				visitedRelations.clear();
+				leafs.clear();
+			}
 		}
 		finally
 		{
@@ -147,6 +160,11 @@ public class TableDependency
 	 */
 	private void readTree(DependencyNode parent, boolean exportedKeys, int level)
 	{
+		if (cancelRetrieve)
+		{
+			return;
+		}
+
 		try
 		{
 			DataStore ds = null;
@@ -181,6 +199,8 @@ public class TableDependency
 			}
 
 			int count = ds.getRowCount();
+
+//			System.out.println("level: " + level  + ", retrieving: " + parent.debugString());
 
 			for (int i=0; i<count; i++)
 			{
@@ -229,6 +249,12 @@ public class TableDependency
 				this.leafs.add(child);
 				if (readAborted)
 				{
+					break;
+				}
+
+				if (cancelRetrieve)
+				{
+					LogMgr.logDebug("TableDependency.readTree()", "Cancelled!");
 					break;
 				}
 			}

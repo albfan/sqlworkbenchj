@@ -1454,6 +1454,16 @@ public class TableListPanel
 						showCancelMessage();
 						tableData.cancelRetrieve();
 					}
+					else if (importedKeys.isRetrieving())
+					{
+						showCancelMessage();
+						importedKeys.cancel();
+					}
+					else if (exportedKeys.isRetrieving())
+					{
+						showCancelMessage();
+						exportedKeys.cancel();
+					}
 					else
 					{
 						showWaitMessage();

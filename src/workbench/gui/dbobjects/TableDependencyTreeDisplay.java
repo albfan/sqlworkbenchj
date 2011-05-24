@@ -58,6 +58,7 @@ public class TableDependencyTreeDisplay
 	private boolean showExported;
 	private JTree tree;
 	private TableLister tables;
+	private TableDependency dependencyReader;
 
 	public TableDependencyTreeDisplay(TableLister lister)
 	{
@@ -65,6 +66,14 @@ public class TableDependencyTreeDisplay
 		setLayout(new BorderLayout());
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		tables = lister;
+	}
+
+	public void cancelRetrieve()
+	{
+		if (dependencyReader != null)
+		{
+			dependencyReader.cancel();
+		}
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -86,21 +95,22 @@ public class TableDependencyTreeDisplay
 
 	private void readTree(TableIdentifier aTable, boolean exportedKeys)
 	{
+		reset();
 		this.showExported = exportedKeys;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			TableDependency dep = new TableDependency(this.connection, aTable);
+			dependencyReader = new TableDependency(this.connection, aTable);
 			if (exportedKeys)
 			{
-				dep.readTreeForParents();
+				dependencyReader.readTreeForParents();
 			}
 			else
 			{
-				dep.readTreeForChildren();
+				dependencyReader.readTreeForChildren();
 			}
 
-			DependencyNode root = dep.getRootNode();
+			DependencyNode root = dependencyReader.getRootNode();
 			this.readTreeNodes(root);
 		}
 		catch (OutOfMemoryError mem)
@@ -111,9 +121,14 @@ public class TableDependencyTreeDisplay
 		{
 			LogMgr.logError("TableDependencyTreeDisplay.readTree()", "Error reading three", e);
 		}
+		finally
+		{
+			dependencyReader = null;
+		}
 		WbSwingUtilities.showDefaultCursor(this);
 	}
 
+	@Override
 	public void reset()
 	{
 		if (tree != null)
@@ -238,6 +253,7 @@ public class TableDependencyTreeDisplay
 		this.nodesToExpand = null;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
