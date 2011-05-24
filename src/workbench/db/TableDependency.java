@@ -200,7 +200,10 @@ public class TableDependency
 
 			int count = ds.getRowCount();
 
-//			System.out.println("level: " + level  + ", retrieving: " + parent.debugString());
+//			if (LogMgr.isDebugEnabled())
+//			{
+//				LogMgr.logDebug("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
+//			}
 
 			for (int i=0; i<count; i++)
 			{
@@ -246,15 +249,9 @@ public class TableDependency
 					this.readTree(child, exportedKeys, level + 1);
 				}
 				visitedRelations.put(parent, child);
-				this.leafs.add(child);
-				if (readAborted)
+				leafs.add(child);
+				if (readAborted || cancelRetrieve)
 				{
-					break;
-				}
-
-				if (cancelRetrieve)
-				{
-					LogMgr.logDebug("TableDependency.readTree()", "Cancelled!");
 					break;
 				}
 			}
