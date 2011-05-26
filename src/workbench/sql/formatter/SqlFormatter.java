@@ -950,10 +950,12 @@ public class SqlFormatter
 				}
 				else
 				{
-					this.appendText(" (");
-					bracketCount ++;
+					this.appendText("(");
 					t = this.processFunctionCall(t);
-					continue;
+					if (!t.getContents().equals(")")) // can happen with functions that do not have parameters
+					{
+						continue;
+					}
 				}
 			}
 			else if (text.equals(","))

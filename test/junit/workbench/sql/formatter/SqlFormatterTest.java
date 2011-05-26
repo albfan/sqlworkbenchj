@@ -31,6 +31,29 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+
+	@Test
+	public void testMySQLWhiteSpaceBug()
+		throws Exception
+	{
+		String sql = "INSERT INTO test (id, wert) VALUES ( uuid(), 1)";
+		String expected = "INSERT INTO test\n  (id, wert)\nVALUES\n  (uuid(), 1)";
+
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		int cols = Settings.getInstance().getFormatterMaxColumnsInInsert();
+		try
+		{
+			Settings.getInstance().setFormatterMaxColumnsInInsert(10);
+			String formatted = f.getFormattedSql().toString();
+			System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
+			assertEquals("SELECT in VALUES not formatted", expected, formatted);
+		}
+		finally
+		{
+			Settings.getInstance().setFormatterMaxColumnsInInsert(cols);
+		}
+	}
+
 	@Test
 	public void testTrailingSemicolon()
 		throws Exception
@@ -82,7 +105,7 @@ public class SqlFormatterTest
 			"  1,\n"+
 			"  TIMESTAMP '2011-12-13 01:02:03'\n"+
 			")";
-//		System.out.println("*****\n" + formatted);
+		//System.out.println("*****\n" + formatted + "\n---------\n" + expected);
 		assertEquals(expected, formatted);
 	}
 
@@ -909,7 +932,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
-		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
+		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "  (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
 		SqlFormatter f = new SqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 //		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
