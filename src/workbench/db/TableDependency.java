@@ -35,6 +35,7 @@ public class TableDependency
 	private boolean directChildrenOnly;
 	private boolean readAborted;
 	private boolean cancelRetrieve;
+	private boolean cancelled;
 	private Map<DependencyNode, DependencyNode> visitedRelations;
 
 	public TableDependency(WbConnection con, TableIdentifier tbl)
@@ -79,9 +80,29 @@ public class TableDependency
 		return null;
 	}
 
+	@SuppressWarnings("SleepWhileInLoop")
 	public void cancel()
 	{
 		this.cancelRetrieve = true;
+		long start = System.currentTimeMillis();
+		long maxWait = 1000 * 60; // one minute
+
+		while (!cancelled)
+		{
+			try
+			{
+				Thread.sleep(100);
+				if (System.currentTimeMillis() - start > maxWait)
+				{
+					// Prevent an endless loop in case cancelling does not work for some reason
+					// e.g because the retrieval from the database hangs
+					break;
+				}
+			}
+			catch (InterruptedException ex)
+			{
+			}
+		}
 	}
 
 	/**
@@ -113,6 +134,7 @@ public class TableDependency
 
 		this.readAborted = false;
 		this.cancelRetrieve = false;
+		this.cancelled = false;
 		this.leafs = new ArrayList<DependencyNode>();
 
 		// Make sure we are using the "correct" TableIdentifier
@@ -252,6 +274,10 @@ public class TableDependency
 				leafs.add(child);
 				if (readAborted || cancelRetrieve)
 				{
+					if (cancelRetrieve)
+					{
+						cancelled = true;
+					}
 					break;
 				}
 			}
