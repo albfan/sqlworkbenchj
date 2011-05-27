@@ -18,19 +18,23 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
 
 /**
  * @author Thomas Kellerer
  */
 public class TableIndexPanel
 	extends JPanel
+	implements Resettable
 {
 	private ReloadAction reloadIndex;
+	private WbTable indexList;
 
 	public TableIndexPanel(WbTable indexTable, Reloadable reloader)
 	{
 		super();
 		this.setLayout(new BorderLayout());
+		indexList = indexTable;
 		WbScrollPane p = new WbScrollPane(indexTable);
 		this.add(p, BorderLayout.CENTER);
 		if (reloader != null)
@@ -40,6 +44,15 @@ public class TableIndexPanel
 			WbToolbar toolbar = new WbToolbar();
 			toolbar.add(reloadIndex);
 			this.add(toolbar, BorderLayout.NORTH);
+		}
+	}
+
+	@Override
+	public void reset()
+	{
+		if (indexList != null)
+		{
+			indexList.reset();
 		}
 	}
 
