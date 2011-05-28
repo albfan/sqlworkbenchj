@@ -1326,4 +1326,13 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "schemas.supported", true);
 	}
+
+	/**
+	 * Return true if the driver for this DBMS is known to support CallableStatement.getParameterMetaData()
+	 * @return
+	 */
+	public boolean supportsParameterMetaData()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "parameter.metadata.supported", true);
+	}
 }

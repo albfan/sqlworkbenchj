@@ -125,8 +125,8 @@ public class WbCallOraTest
 			"end; \n" +
 			"/";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
-		
-		sql = 
+
+		sql =
 			"CREATE PACKAGE proc_pckg  \n" +
 			"AS  \n" +
 			"  PROCEDURE process_pkg_data(some_value out number, some_id in number); \n" +
@@ -143,8 +143,66 @@ public class WbCallOraTest
 			" \n" +
 			"END proc_pckg; \n" +
 			"/";
-		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);		
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER, true);
 
+		sql =
+			"CREATE TYPE some_type AS OBJECT (some_value varchar(100), some_id integer);\n" +
+			"create type some_type_table as table of some_type;\n";
+		TestUtil.executeScript(con, sql, true);
+
+		sql =
+			"create or replace package overload_pkg \n" +
+			"as \n" +
+			"  procedure get_data( db_status   out    number \n" +
+			"                    , app_status  out    number \n" +
+			"                    , id1         in     number \n" +
+			"                    , id2         in     number \n" +
+			"                    , id3         in     number \n" +
+			"                    , cur         in out sys_refcursor); \n" +
+			" \n" +
+			"   procedure get_data( db_status  out     number \n" +
+			"                  , app_status    out     number \n" +
+			"                  , id1           in      number \n" +
+			"                  , id2           in      number \n" +
+			"                  , id3           in      number \n" +
+			"                  , id4           in      number \n" +
+			"                  , some_filter   in      some_type_table \n" +
+			"                  , cur           in out  sys_refcursor); \n" +
+			"end overload_pkg; \n" +
+			"/ \n" +
+			" \n" +
+			"create or replace package body overload_pkg \n" +
+			"as \n" +
+			"   \n" +
+			"  procedure get_data( db_status   out    number \n" +
+			"                    , app_status  out    number \n" +
+			"                    , id1         in     number \n" +
+			"                    , id2         in     number \n" +
+			"                    , id3         in     number \n" +
+			"                    , cur         in out sys_refcursor) \n" +
+			"  is \n" +
+			"  begin \n" +
+			"    db_status := 1; \n" +
+			"    app_status := 2; \n" +
+			"  end get_data; \n" +
+			"   \n" +
+			"   procedure get_data( db_status     out    number \n" +
+			"                     , app_status    out    number \n" +
+			"                     , id1           in     number \n" +
+			"                     , id2           in     number \n" +
+			"                     , id3           in     number \n" +
+			"                     , id4           in     number \n" +
+			"                     , some_filter   in     some_type_table \n" +
+			"                     , cur           in out sys_refcursor) \n" +
+			"  is \n" +
+			"  begin \n" +
+			"    db_status := 10; \n" +
+			"    app_status := 20; \n" +
+			"  end get_data; \n" +
+			"                                     \n" +
+			"end overload_pkg; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER, true);
 }
 
 	@AfterClass
@@ -152,6 +210,45 @@ public class WbCallOraTest
 		throws Exception
 	{
 		OracleTestUtil.cleanUpTestCase();
+	}
+
+	@Test
+	public void testOverload()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+
+		StatementParameterPrompter prompter = new StatementParameterPrompter()
+		{
+			@Override
+			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+			{
+				assertEquals(1, parms.getParameterCount());
+				parms.setParameterValue(0, "0");
+				parms.setParameterValue(1, "1");
+				return true;
+			}
+		};
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		call.setParameterPrompter(prompter);
+
+		String cmd = "WbCall overload_pkg.get_data(?,?,1,2,3,4,some_type_table(),?)";
+		StatementRunnerResult result = call.execute(cmd);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+
+		// Person result
+		DataStore data = results.get(0);
+		assertEquals(10, data.getValueAsInt(0, 1, -1));
+		assertEquals(20, data.getValueAsInt(1, 1, -1));
 	}
 
 	@Test
@@ -342,7 +439,7 @@ public class WbCallOraTest
 		assertEquals("SOME_VALUE", name);
 		assertEquals(42, value);
 	}
-	
+
 	@Test
 	public void testRegularProcedure()
 		throws Exception

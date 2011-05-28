@@ -52,6 +52,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -464,10 +465,22 @@ public class TestUtil
 			{
 				stmt = con.createStatement();
 				stmt.execute(sql);
+				SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+				if (printError && info != null)
+				{
+					String msg = con.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType);
+					if (StringUtil.isNonBlank(msg))
+					{
+						System.out.println("**** Error executing statement:\n" + msg + "\n------------------");
+					}
+				}
 			}
 			catch (SQLException e)
 			{
-				if (printError) System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
+				if (printError)
+				{
+					System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
+				}
 				throw e;
 			}
 			finally

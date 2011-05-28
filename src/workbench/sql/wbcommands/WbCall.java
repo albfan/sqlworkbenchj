@@ -269,7 +269,6 @@ public class WbCall
 					else
 					{
 						int row = resultData.addRow();
-						int index = def.getIndex();
 						resultData.setValue(row, 0, def.getParameterName());
 						resultData.setValue(row, 1, parmValue == null ? "NULL" : parmValue.toString());
 					}
@@ -310,6 +309,11 @@ public class WbCall
 	private List<ParameterDefinition> checkParametersFromStatement(CallableStatement cstmt)
 		throws SQLException
 	{
+		if (!currentConnection.getDbSettings().supportsParameterMetaData())
+		{
+			return null;
+		}
+
 		ArrayList<ParameterDefinition> parameterNames = null;
 
 		ParameterMetaData parmData = cstmt.getParameterMetaData();
@@ -418,17 +422,51 @@ public class WbCall
 		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(procname));
 
 		ProcedureDefinition procDef = null;
+		DataStore params = null;
+
 		List<ProcedureDefinition> procs = meta.getProcedureReader().getProcedureList(catalog, schemaToUse, nameToUse);
-		if (procs.size() > 0)
+
+		if (procs.size() == 1)
 		{
 			procDef = procs.get(0);
+		}
+		else if (procs.size() > 1)
+		{
+			List<DataStore> procParams = new ArrayList<DataStore>(procs.size());
+
+			// if more than one procedure was found this could be an overloaded one
+			// so loop through all definitions and compare the number of parameters
+			for (ProcedureDefinition proc : procs)
+			{
+				params = meta.getProcedureReader().getProcedureColumns(proc);
+
+				// temporarily store the retrieved parameters, in order to avoid a second retrieval
+				// for the first procedure in case none matched
+				procParams.add(params);
+
+				if (params.getRowCount() == sqlParams.size())
+				{
+					procDef = proc;
+					break;
+				}
+			}
+
+			if (procDef == null)
+			{
+				// Fallback in case nothing matched
+				procDef = procs.get(0);
+				params = procParams.get(0);
+			}
 		}
 		else
 		{
 			procDef = new ProcedureDefinition(catalog, schemaToUse, nameToUse, -1);
 		}
 
-		DataStore params = meta.getProcedureReader().getProcedureColumns(procDef);
+		if (params == null)
+		{
+			params = meta.getProcedureReader().getProcedureColumns(procDef);
+		}
 
 		int parameterIndexOffset = 0;
 		boolean needFuncCall = ProcedureDefinition.returnsRefCursor(currentConnection, params);
@@ -442,8 +480,8 @@ public class WbCall
 
 		if (meta.isOracle() && !needFuncCall && !hasPlaceHolder(sqlParams))
 		{
-			// Workaround for Oracle packages that define optional OUT parameters
-			// if no ? is specified, and this is not a function call, there is no need
+			// Workaround for Oracle packages that define optional OUT parameters.
+			// If no ? is specified, and this is not a function call, there is no need
 			// to retrieve any possible OUT parameter.
 			return null;
 		}

@@ -48,6 +48,7 @@ public class JdbcProcedureReader
 		this.connection = conn;
 	}
 
+	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuffer();
@@ -57,6 +58,7 @@ public class JdbcProcedureReader
 	/**
 	 * Checks if the given procedure exists in the database
 	 */
+	@Override
 	public boolean procedureExists(ProcedureDefinition def)
 	{
 		String catalog = def.getCatalog();
@@ -91,6 +93,7 @@ public class JdbcProcedureReader
 		return exists;
 	}
 
+	@Override
 	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
@@ -233,6 +236,7 @@ public class JdbcProcedureReader
 		return procname.substring(0,pos);
 	}
 
+	@Override
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
@@ -275,7 +279,7 @@ public class JdbcProcedureReader
 		throws SQLException
 	{
 		int row = ds.addRow();
-		
+
 		String colName = rs.getString("COLUMN_NAME");
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
 		int colType = rs.getInt("COLUMN_TYPE");
@@ -329,10 +333,10 @@ public class JdbcProcedureReader
 			size = length;
 			digits = 0;
 		}
-		
+
 		String rem = rs.getString("REMARKS");
 		int ordinal = -1;
-		
+
 		try
 		{
 			ordinal = rs.getInt("ORDINAL_POSITION");
@@ -349,8 +353,10 @@ public class JdbcProcedureReader
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
-		
+
 	}
+
+	@Override
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
@@ -458,6 +464,7 @@ public class JdbcProcedureReader
 	/**
 	 * Return a List of {@link workbench.db.ProcedureDefinition} objects.
 	 */
+	@Override
 	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema, String name)
 		throws SQLException
 	{

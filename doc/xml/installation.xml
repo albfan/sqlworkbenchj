@@ -24,7 +24,7 @@
       is located.
     </para>
     -->
-    
+
   </section>
 
   <section id="first-time-install">
@@ -137,7 +137,7 @@
     <indexterm><primary>Windows</primary><secondary>32bit</secondary></indexterm>
     <indexterm><primary>Windows</primary><secondary>64bit</secondary></indexterm>
     <indexterm><primary>Windows</primary><secondary>using the launcher</secondary></indexterm>
-    
+
     <para>
       On a 32bit Windows&reg; platform the supplied SQLWorkbench.exe can be used to
       start the program when using a Sun JDK. The native launcher searches for an installed
@@ -152,7 +152,7 @@
         for a 64bit Java installation.
       </para>
     </important>
-    
+
     <para>
       The launcher only works with a Sun JDK, as it directly calls the
       JDK&apos; dll to start the virtual machine. If you are using a different JDK
@@ -167,13 +167,21 @@
       on how to increase the memory that is available to &wb-productname;
     </para>
 
-  
+
     <section id="launcher-parameters">
       <title>Parameters for the Windows launcher</title>
 
       <para>
         The launcher executables are based on <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>, further documentation on
         the format of the configuration file and parameters can also be found there.
+      </para>
+      <para>
+        If the launcher cannot find your installed Java runtime, you can specify the location of the JRE by creating a text file
+        named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal> when using the 64bit version) with the following content:
+      </para>
+      <programlisting>vm.location=c:\Program Files\Java\jdk16\jre\bin\client\jvm.dll</programlisting>
+      <para>
+        Note that you need to specify the full path to the <literal>jvm.dll</literal>, not the directory where the Java runtime is installed.
       </para>
     </section>
 
@@ -285,7 +293,7 @@
         as the full path to the driver's jar file(s) is stored in the file (unless you
         define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
       </para>
-      
+
     </section>
 
   </section>
@@ -312,13 +320,13 @@
       This will increase the memory for the application to 512MB. For more options to configure the JVM, please refer to the
       documentation of <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>
     </para>
-    
+
     <para>
       If you are running &wb-productname; on a non-Windows&reg; operating system or do not
       want to use the launcher, then you need to pass this parameter directly to the JVM
     </para>
     <para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
-    
+
     <para>
       If you are using the supplied shell scripts to start &wb-productname;, you can
       edit the scripts and change the value for the -Xmx parameter in there.
@@ -335,7 +343,7 @@
       that much memory
     </para>
     -->
-    
+
   </section>
 
   <section id="commandline" xreflabel="command line parameters">

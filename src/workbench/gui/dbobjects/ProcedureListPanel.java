@@ -137,6 +137,7 @@ public class ProcedureListPanel
 
 		Reloadable sourceReload = new Reloadable()
 		{
+			@Override
 			public void reload()
 			{
 				if (dbConnection.isBusy()) return;
@@ -163,6 +164,7 @@ public class ProcedureListPanel
 		this.statusRenderer = new ProcStatusRenderer();
 		this.procList = new DbObjectTable()
 		{
+			@Override
 			public TableCellRenderer getCellRenderer(int row, int column)
 			{
 				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
@@ -251,6 +253,7 @@ public class ProcedureListPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				procList.reset();
@@ -307,6 +310,7 @@ public class ProcedureListPanel
 			reset();
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
@@ -322,6 +326,7 @@ public class ProcedureListPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					int rows = model.getRowCount();
@@ -351,6 +356,7 @@ public class ProcedureListPanel
 		}
 	}
 
+	@Override
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -430,6 +436,7 @@ public class ProcedureListPanel
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
@@ -455,6 +462,7 @@ public class ProcedureListPanel
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				retrieveProcDefinition(def);
@@ -562,6 +570,7 @@ public class ProcedureListPanel
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				source.setCaretPosition(pos,(pos > 0));
@@ -597,21 +606,25 @@ public class ProcedureListPanel
 		return (pos < 0 ? 0 : pos);
 	}
 
+	@Override
 	public TableIdentifier getObjectTable()
 	{
 		return null;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return this;
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public List<? extends DbObject> getSelectedObjects()
 	{
 		if (!initialized) return null;
@@ -637,6 +650,7 @@ public class ProcedureListPanel
 		return result;
 	}
 
+	@Override
 	public void reload()
 	{
 		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
@@ -659,6 +673,7 @@ public class ProcedureListPanel
 				// we have the correct table name in the instance variables
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						showProcedureCallData(panelIndex, appendText);

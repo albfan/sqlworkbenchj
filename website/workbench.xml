@@ -99,11 +99,13 @@ VALUES
       <li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
       <li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
       <li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://www-01.ibm.com/software/data/informix">Informix</a></li>
       <li><a target="_blank" href="http://www.ingres.com/">Ingres</a></li>
       <li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="http://www.zentus.com/sqlitejdbc/">SQLiteJDBC</a>)</li>
       <li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
       <li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
       <li><a target="_blank" href="http://www.teradata.com">Teradata</a> (<a target="_blank" href="http://www.teradata.com/DownloadCenter/Forum158-1.aspx">Download JDBC driver</a>)</li>
+      <li><a target="_blank" href="http://www.luciddb.org/">LucidDB</a></li>
     </ul>
     <p>Displaying the source for trigger, views, stored procedures and functions is not part of the JDBC
     API and thus is implemeted through customized SQL queries. If you find that support for this information
@@ -162,22 +164,18 @@ VALUES
       <p>
         The application is now ready to be run, no further installation steps are necessary.
       </p>
+      <p>
+        More details about installing and configuring the application can be found <a href="manual/install.html">in the manual</a>
+      </p>
 
       <h3 style="padding-top:10px">Starting the application</h3>
 
       <h4>Microsoft Windows</h4>
 
       <p>
-        If you are using Windows&reg; start the application by double-clicking the
-        <tt>SQLWorkbench.exe</tt> executable (Windows Vista users please <a href="vista.html">read this</a>).
-      </p>
-      <p style="margin-left:15px;margin-right:15px;padding:10px;border-style:solid;border-width:2px;border-color:red">
-        SQLWorkbench.exe is a <b>32bit</b> application and will <b>not</b> work on a 64bit Windows system. <br/>
-        Please use the supplied <tt>SQLWorkbench.vbs</tt> script to start SQL Workbench in that case.
-      </p>
-      <p>
-        The supplied script <tt>MakeShortcut.vbs</tt> can be used to create a Windows shortcut to start SQL Workbench without the .exe.
-        The shortcut will use the default Java installation on the system.
+        If you are using Microsoft Windows&reg; start the application by double-clicking the
+        <tt>SQLWorkbench.exe</tt> executable. If you are using a 64bit operating system <b>and</b> a 64bit Java runtime,
+        you have to use <tt>SQLWorkbench64.exe</tt> instead.
       </p>
 
       <h4>Linux and other Unix-style operating systems</h4>
@@ -196,14 +194,23 @@ VALUES
         to specify the location of the driver's JAR file(s).
       </p>
       <p>
+         The necessary JDBC driver is not part of the SQL Workbench/J distribution and if you have not already downloaded one
+         you will need to do that before you can connect to the database.
+      </p>
+      <p>
+        Links to the download locations for several popular database systems are available <a href="databases.html">here</a>
+      </p>
+      <p>
         To define the driver, <image-link title="Select driver" name="startup_driver.png">select the JAR file(s)</image-link> that
-        is supplied by your database system. The driver definition dialog has a list of pre-defined drivers and the name of their jar file.
+        is supplied by your <a href="databases.html">database system</a>. The driver definition dialog has a list of
+        pre-defined drivers and the name of their jar file.
       </p>
       <p>
         To select the driver's JAR file, click on the "..." button next to the input field labelled "Library".
         After you have selected the JAR file, SQL Workbench/J will search for the approriate driver class to be
         used. If a JDBC driver implementation is found in the JAR file(s), it is automatically entered in the
-        input field labeled "Classname". If more than one class is found you will have to select one.
+        input field labeled "Classname". If more than one class is found you will have to select one. Please consult the manual
+        of your driver (or database) for details on which driver class to use then.
       </p>
 
       <h3 style="padding-top:10px">Specifying the database connection</h3>
