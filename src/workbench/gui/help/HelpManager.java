@@ -130,6 +130,7 @@ public class HelpManager
 		{
 			WbThread t = new WbThread("OpenPDF")
 			{
+				@Override
 				public void run()
 				{
 					try
