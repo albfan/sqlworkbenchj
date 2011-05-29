@@ -1266,7 +1266,7 @@ public class DbSettings
 	}
 
 	/**
-	 * Returns a flag if the driver returns "read-made" expressions for the DEFAULT value of a column.
+	 * Returns a flag if the driver returns "ready-made" expressions for the DEFAULT value of a column.
 	 *
 	 * @return
 	 */
@@ -1275,6 +1275,13 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "defaultvalue.isexpression", true);
 	}
 
+	/**
+	 * Returns true if the JDBC driver returns the correct ResultSetMetadata only by preparing a statement.
+	 *
+	 * If this is false, the ResultSetMetadata is only returned after actually retrieving data through the
+	 * statement.
+	 *
+	 */
 	public boolean usePreparedStatementForQueryInfo()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "queryinfo.preparedstatement", false);
@@ -1295,11 +1302,32 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "completion.always_use.catalog", false);
 	}
 
+	/**
+	 * Returns the sqlstate for a unique (primary) key violation error for the DBMS.
+	 *
+	 * This value can be compared against SQLException.getSQLState() to test for such an error.
+	 *
+	 * Some DBMS only return exact information on pk violations through the sqlstate, some through
+	 * the error code.
+	 *
+	 * @return the sql state that is defined for this DBMS or null if none is defined
+	 * @see #getUniqueKeyViolationErrorCode()
+	 */
 	public String getUniqueKeyViolationErrorState()
 	{
 		return Settings.getInstance().getProperty(prefix + "errorstate.unique", null);
 	}
 
+	/**
+	 * Returns the error code for a unique (primary) key violation error for the DBMS.
+	 * This value can be compared against SQLException.getErrorCode() to test for such an error.
+	 *
+	 * Some DBMS only return exact information on pk violations through the sqlstate, some through
+	 * the error code.
+	 *
+	 * @return the numeric value of the error code or -1 if none is defined
+	 * @see #getUniqueKeyViolationErrorState()
+	 */
 	public int getUniqueKeyViolationErrorCode()
 	{
 		return Settings.getInstance().getIntProperty(prefix + "errorcode.unique", -1);
