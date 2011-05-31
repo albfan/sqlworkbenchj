@@ -58,6 +58,7 @@ public class DependencyTreeCellRenderer
 		this.unselectedBackground = UIManager.getColor("Tree.textBackground");
 	}
 
+	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
 	{
 		this.isSelected = selected;
@@ -121,6 +122,7 @@ public class DependencyTreeCellRenderer
 		return this;
 	}
 
+	@Override
 	public void paint(Graphics g)
 	{
 		Color bColor;
