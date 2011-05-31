@@ -270,6 +270,7 @@ public class MainWindow
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					showMacroPopup.showPopup();
@@ -320,6 +321,7 @@ public class MainWindow
 	 * to highlight the current tab the context menu
 	 * @see workbench.gui.dbobjects.TableListPanel#stateChanged(ChangeEvent)
 	 */
+	@Override
 	public void addTabChangeListener(ChangeListener aListener)
 	{
 		this.sqlTab.addChangeListener(aListener);
@@ -628,6 +630,7 @@ public class MainWindow
 		{
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					Container content = getContentPane();
@@ -645,6 +648,7 @@ public class MainWindow
 		WbSwingUtilities.repaintLater(this);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
@@ -713,6 +717,7 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void macroListChanged()
 	{
 		int count = this.sqlTab.getTabCount();
@@ -876,6 +881,7 @@ public class MainWindow
 
 		Thread t = new WbThread("Disconnect panel " + p.getId())
 		{
+			@Override
 			public void run()
 			{
 				disconnectPanel(p);
@@ -916,6 +922,7 @@ public class MainWindow
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				createNewConnection.checkState();
@@ -945,6 +952,7 @@ public class MainWindow
 		createNewConnectionForPanel(panel);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				int index = getIndexForPanel(panel);
@@ -960,6 +968,7 @@ public class MainWindow
 
 		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
 		{
+			@Override
 			public void run()
 			{
 				connectPanel(aPanel);
@@ -1036,6 +1045,7 @@ public class MainWindow
 		WbSwingUtilities.waitForEmptyQueue();
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (Settings.getInstance().getLogConnectionDetails())
@@ -1069,6 +1079,7 @@ public class MainWindow
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				current.panelSelected();
@@ -1084,6 +1095,7 @@ public class MainWindow
 		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				updateCurrentTab(index);
@@ -1151,33 +1163,40 @@ public class MainWindow
 		sett.setProperty(this.getClass().getName() + ".macropopup.visible", macroVisible);
 	}
 
+	@Override
 	public void windowOpened(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent windowEvent)
 	{
 		WbManager.getInstance().closeMainWindow(this);
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
 		WbFocusManager.getInstance().grabActions(null, null);
 	}
 
+	@Override
 	public void windowActivated(WindowEvent windowEvent)
 	{
 		WbFocusManager.getInstance().grabActions(nextTab, prevTab);
 	}
 
+	@Override
 	public void windowIconified(WindowEvent windowEvent)
 	{
 	}
@@ -1192,12 +1211,17 @@ public class MainWindow
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (StringUtil.isEmptyString(aMsg))
+				{
 					current.clearStatusMessage();
+				}
 				else
+				{
 					current.showStatusMessage(aMsg);
+				}
 			}
 		});
 	}
@@ -1208,6 +1232,7 @@ public class MainWindow
 		if (current != null) current.showLogMessage(aMsg);
 	}
 
+	@Override
 	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
 		if (Settings.getInstance().getLogConnectionDetails())
@@ -1264,6 +1289,7 @@ public class MainWindow
 	 * @return an id specific for the current tab or a "global" id the connection
 	 *         is shared between all tabs of this window
 	 */
+	@Override
 	public String getConnectionId(ConnectionProfile aProfile)
 	{
 		if (aProfile != null && aProfile.getUseSeparateConnectionPerTab())
@@ -1295,6 +1321,7 @@ public class MainWindow
 	 *	Call-back function which gets executed on the AWT thread after
 	 *  the initial connection has been completed
 	 */
+	@Override
 	public void connected(WbConnection conn)
 	{
 		if (Settings.getInstance().getLogConnectionDetails())
@@ -1328,6 +1355,7 @@ public class MainWindow
 		selectCurrentEditor();
 	}
 
+	@Override
 	public void connectFailed(String error)
 	{
 		if (Settings.getInstance().getLogConnectionDetails())
@@ -1359,6 +1387,7 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void connectCancelled()
 	{
 		if (this.exitOnCancel)
@@ -1367,6 +1396,7 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void connectEnded()
 	{
 		for (int i=0; i < sqlTab.getTabCount(); i++)
@@ -1461,6 +1491,7 @@ public class MainWindow
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				WbWorkspace w = null;
@@ -1609,6 +1640,7 @@ public class MainWindow
 
 		Runnable run = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -1675,6 +1707,7 @@ public class MainWindow
 			// and it must be called synchronously!
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					disconnected();
@@ -1770,6 +1803,7 @@ public class MainWindow
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
@@ -2345,6 +2379,7 @@ public class MainWindow
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
         try
@@ -2500,6 +2535,7 @@ public class MainWindow
 	 *  @param e  a ChangeEvent object
 	 *
 	 */
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		if (e.getSource() == this.sqlTab)
@@ -2632,12 +2668,14 @@ public class MainWindow
 	 * @see #getTabTitle(int)
 	 * @see MainPanel#getTabTitle()
 	 */
+	@Override
 	public String getCurrentTabTitle()
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		return this.getTabTitle(index);
 	}
 
+	@Override
 	public void setCurrentTabTitle(String newName)
 	{
 		int index = this.sqlTab.getSelectedIndex();
@@ -2687,6 +2725,7 @@ public class MainWindow
 		return canCloseTab(index);
 	}
 
+	@Override
 	public boolean canCloseTab(int index)
 	{
 		if (index < 0) return false;
@@ -2698,11 +2737,13 @@ public class MainWindow
 		return numTabs > 1;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return this;
 	}
 
+	@Override
 	public boolean canRenameTab()
 	{
 		return (this.currentWorkspaceFile != null);
@@ -2782,18 +2823,21 @@ public class MainWindow
 		moveTab(index, index + 1);
 	}
 
+	@Override
 	public void endMove(int finalIndex)
 	{
 		this.tabRemovalInProgress = false;
 		this.tabSelected(finalIndex);
 	}
 
+	@Override
 	public boolean startMove(int index)
 	{
 		this.tabRemovalInProgress = true;
 		return true;
 	}
 
+	@Override
 	public boolean moveTab(int oldIndex, int newIndex)
 	{
 		MainPanel panel = this.getSqlPanel(oldIndex);
@@ -2819,6 +2863,7 @@ public class MainWindow
 	 * <br/>
 	 * The user will not be
 	 */
+	@Override
 	public void tabCloseButtonClicked(int index)
 	{
 		MainPanel panel = this.getSqlPanel(index);
@@ -2912,6 +2957,7 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getSource() == this.sqlTab)
@@ -2939,27 +2985,33 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		getJobIndicator().jobEnded();
 	}
 
+	@Override
 	public void executionStart(WbConnection conn, Object source)
 	{
 		if (Settings.getInstance().getAutoSaveWorkspace())
@@ -2969,19 +3021,23 @@ public class MainWindow
 		getJobIndicator().jobStarted();
 	}
 
+	@Override
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 		dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
 	}
 
+	@Override
 	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
 	{
 	}
 
+	@Override
 	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}
 
+	@Override
 	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
 	{
 		try
@@ -3020,6 +3076,7 @@ public class MainWindow
 		}
 	}
 
+	@Override
 	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}

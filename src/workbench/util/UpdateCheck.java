@@ -28,7 +28,7 @@ public class UpdateCheck
 {
 	private WbVersionReader versionReader;
 	public static final boolean DEBUG = Boolean.getBoolean("workbench.debug.versioncheck");
-	
+
 	public void startUpdateCheck()
 	{
 		if (DEBUG)
@@ -133,6 +133,7 @@ public class UpdateCheck
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.versionReader)

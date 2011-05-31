@@ -10,34 +10,39 @@
  *
  */
 package workbench.gui.actions;
+
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JMenuItem;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectCompilerUI;
 import workbench.log.LogMgr;
+
 /**
  * @author Thomas Kellerer
  */
-public class CompileDbObjectAction 
+public class CompileDbObjectAction
 	extends WbAction
 	implements ListSelectionListener
 {
 	private JMenuItem menuItem;
 	private DbObjectList source;
 	private ListSelectionModel selection;
-	
+
 	public CompileDbObjectAction(DbObjectList client, ListSelectionModel list)
 	{
 		super();
@@ -47,7 +52,7 @@ public class CompileDbObjectAction
 		setVisible(false);
 		setEnabled(false);
 	}
-	
+
 	public void setVisible(boolean flag)
 	{
 		if (this.menuItem == null)
@@ -72,20 +77,26 @@ public class CompileDbObjectAction
 			this.setEnabled(false);
 		}
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
 		compileObjects();
 	}
-	
+
 	private void compileObjects()
 	{
-		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
-		
+		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection()))
+		{
+			return;
+		}
+
 		List<DbObject> objects = getSelectedObjects();
-		if (objects == null || objects.size() == 0) return;
-		
+		if (objects == null || objects.isEmpty())
+		{
+			return;
+		}
+
 		try
 		{
 			ObjectCompilerUI compilerUI = new ObjectCompilerUI(objects, this.source.getConnection());
@@ -100,34 +111,60 @@ public class CompileDbObjectAction
 	private List<DbObject> getSelectedObjects()
 	{
 		List<? extends DbObject> selected = this.source.getSelectedObjects();
-		if (selected == null || selected.size() == 0) return null;
-		
-		List<DbObject> objects = new ArrayList<DbObject>(selected.size());
+		if (selected == null || selected.isEmpty())
+		{
+			return null;
+		}
+
+		List<String> catalogs = new ArrayList<String>();
+		List<DbObject> objects = new ArrayList<DbObject>();
 		for (DbObject dbo : selected)
 		{
-			if (OracleObjectCompiler.canCompile(dbo))
+			if (!OracleObjectCompiler.canCompile(dbo))
 			{
-				objects.add(dbo);
+				// next selected element
+				continue;
 			}
+
+			if (dbo instanceof ProcedureDefinition)
+			{
+				ProcedureDefinition pd = (ProcedureDefinition) dbo;
+				if (pd.isOraclePackage())
+				{
+					// keep only one package-procedure per catalog
+					if (!catalogs.contains(pd.getCatalog()))
+					{
+						catalogs.add(pd.getCatalog());
+					}
+					else
+					{
+						// a stored procedure was already added for the catalog
+						continue;
+					}
+				}
+			}
+			objects.add(dbo);
 		}
+
 		return objects;
 	}
-	
+
 	private void checkState()
 	{
 		List<DbObject> selected = getSelectedObjects();
 		this.setEnabled(selected != null && selected.size() > 0);
 	}
-	
+
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				checkState();
 			}
 		});
 	}
-	
 }

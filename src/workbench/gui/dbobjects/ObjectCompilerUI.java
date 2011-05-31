@@ -22,6 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
@@ -70,14 +71,27 @@ public class ObjectCompilerUI
 		String msg = ResourceMgr.getString("TxtCompilingObject");
 		this.log.setText("");
 		int count = this.objects.size();
+
 		try
 		{
 			this.dbConnection.setBusy(true);
-			for (int i=0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				DbObject o = this.objects.get(i);
-				if (i > 0) appendLog("\n");
-				appendLog(msg + " " + o.getObjectName() + "... ");
+				if (i > 0)
+				{
+					appendLog("\n");
+				}
+
+				if (o instanceof ProcedureDefinition && ((ProcedureDefinition)o).isOraclePackage())
+				{
+					appendLog(msg + " " + o.getCatalog() + "... ");
+				}
+				else
+				{
+					appendLog(msg + " " + o.getObjectName() + "... ");
+				}
+
 				String error = this.compiler.compileObject(o);
 				if (error == null)
 				{
@@ -107,6 +121,7 @@ public class ObjectCompilerUI
 			}
 		});
 	}
+
 	public void show(Window aParent)
 	{
 		if (this.window == null)
@@ -119,7 +134,7 @@ public class ObjectCompilerUI
 
 			if (!Settings.getInstance().restoreWindowSize(this.window, ObjectCompilerUI.class.getName()))
 			{
-				this.window.setSize(500,400);
+				this.window.setSize(500, 400);
 			}
 
 			if (!Settings.getInstance().restoreWindowPosition(this.window, ObjectCompilerUI.class.getName()))
@@ -176,5 +191,4 @@ public class ObjectCompilerUI
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}
-
 }
