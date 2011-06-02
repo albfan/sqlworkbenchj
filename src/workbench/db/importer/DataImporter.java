@@ -732,7 +732,7 @@ public class DataImporter
 		{
 			deleteSql = "DELETE FROM " + this.targetTable.getTableExpression(this.dbConn);
 		}
-		
+
 		Statement stmt = null;
 		try
 		{
@@ -1762,6 +1762,7 @@ public class DataImporter
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(insertSql);
 			int batch = (this.isModeInsert() ? batchSize : 1);
 			this.insertStatement = new BatchedStatement(stmt, dbConn, batch);
+			this.insertStatement.setCommitBatch(this.commitBatch);
 			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + insertSql);
 		}
 		catch (SQLException e)
@@ -1904,6 +1905,7 @@ public class DataImporter
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(updateSql);
 			int batch = (this.isModeUpdate() ? batchSize : 1);
 			this.updateStatement = new BatchedStatement(stmt, dbConn, batch);
+			this.updateStatement.setCommitBatch(this.commitBatch);
 		}
 		catch (SQLException e)
 		{

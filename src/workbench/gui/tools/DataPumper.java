@@ -20,7 +20,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.SQLException;
@@ -161,6 +163,7 @@ public class DataPumper
 		this.targetTable.setTableDropDownName("targetTable");
 	}
 
+	@Override
 	public JFrame getWindow()
 	{
 		return window;
@@ -200,12 +203,14 @@ public class DataPumper
 		s.setProperty("workbench.datapumper.batchsize", getBatchSize());
 	}
 
+	@Override
 	public void activate()
 	{
 		this.window.setVisible(true);
 		this.window.toFront();
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return null;
@@ -370,6 +375,7 @@ public class DataPumper
 
 		Thread t = new WbThread("DataPumper source connection")
 		{
+			@Override
 			public void run()
 			{
 				doConnectSource(profile);
@@ -422,6 +428,7 @@ public class DataPumper
 
 			Thread t = new WbThread("Retrieve source tables")
 			{
+				@Override
 				public void run()
 				{
 					sourceTable.setConnection(sourceConnection);
@@ -443,6 +450,7 @@ public class DataPumper
 
 		Thread t = new WbThread("DataPumper target connection")
 		{
+			@Override
 			public void run()
 			{
 				doConnectTarget(profile);
@@ -489,6 +497,7 @@ public class DataPumper
 
 		  Thread t = new WbThread("Retrieve target tables")
 		  {
+				@Override
 			  public void run()
 			  {
 				  targetTable.setConnection(targetConnection);
@@ -1063,9 +1072,9 @@ public class DataPumper
 
 	public void showWindow(MainWindow aParent)
 	{
-//		this.mainWindow = aParent;
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleDataPumper"))
 		{
+			@Override
 			public void setVisible(boolean visible)
 			{
 				if (!visible) saveSettings();
@@ -1095,9 +1104,9 @@ public class DataPumper
 		}
 
 		this.window .setVisible(true);
-		//adjustColumnWidth();
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				checkConnections();
@@ -1227,6 +1236,7 @@ public class DataPumper
 		HelpManager.showDataPumperHelp();
 	}
 
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.closeButton)
@@ -1353,15 +1363,18 @@ public class DataPumper
 		return false;
 	}
 
-	public void windowActivated(java.awt.event.WindowEvent e)
+	@Override
+	public void windowActivated(WindowEvent e)
 	{
 	}
 
-	public void windowClosed(java.awt.event.WindowEvent e)
+	@Override
+	public void windowClosed(WindowEvent e)
 	{
 	}
 
-	public void windowClosing(java.awt.event.WindowEvent e)
+	@Override
+	public void windowClosing(WindowEvent e)
 	{
 		if (this.copyRunning)
 		{
@@ -1370,6 +1383,7 @@ public class DataPumper
 		this.closeWindow();
 	}
 
+	@Override
 	public void closeWindow()
 	{
 		this.done();
@@ -1380,6 +1394,7 @@ public class DataPumper
 		}
 	}
 
+	@Override
 	public void disconnect()
 	{
 		this.disconnectSource();
@@ -1397,6 +1412,7 @@ public class DataPumper
 
 		Thread t = new WbThread("DataPumper disconnect thread")
 		{
+			@Override
 			public void run()
 			{
 				disconnect();
@@ -1412,19 +1428,23 @@ public class DataPumper
 	}
 
 
-	public void windowDeactivated(java.awt.event.WindowEvent e)
+	@Override
+	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
-	public void windowDeiconified(java.awt.event.WindowEvent e)
+	@Override
+	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
-	public void windowIconified(java.awt.event.WindowEvent e)
+	@Override
+	public void windowIconified(WindowEvent e)
 	{
 	}
 
-	public void windowOpened(java.awt.event.WindowEvent e)
+	@Override
+	public void windowOpened(WindowEvent e)
 	{
 	}
 
@@ -1435,7 +1455,8 @@ public class DataPumper
 	 *	checked, and if both are present, we'll initialize the
 	 *	ColumnMapper
 	 */
-	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
 	{
 		TableIdentifier theTarget = this.targetTable.getSelectedTable();
 		TableIdentifier source = this.sourceTable.getSelectedTable();
@@ -1482,6 +1503,7 @@ public class DataPumper
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					initColumnMapper();
@@ -1844,6 +1866,7 @@ public class DataPumper
 		cancelButton.setEnabled(false);
 		WbThread t = new WbThread("DataPumper cancel")
 		{
+			@Override
 			public void run()
 			{
 				doCancel();
@@ -1857,6 +1880,7 @@ public class DataPumper
 		if (copier != null) copier.cancel();
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				cancelButton.setEnabled(false);
@@ -1898,7 +1922,7 @@ public class DataPumper
 		{
 			this.copyRunning = true;
 			String tableType = (ttable.isNewTable() ? DbSettings.DEFAULT_CREATE_TABLE_TYPE : null);
-			
+
 			if (this.fileImporter != null)
 			{
 				this.initImporter();
@@ -2003,11 +2027,13 @@ public class DataPumper
 		return true;
 	}
 
+	@Override
 	public void setCurrentObject(String object, long currentRow, long total)
 	{
 		updateMonitor(currentRow);
 	}
 
+	@Override
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		updateMonitor(currentRow);
@@ -2017,6 +2043,7 @@ public class DataPumper
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (currentRow == 1) updateWindowTitle();
@@ -2026,17 +2053,33 @@ public class DataPumper
 		});
 	}
 
-	public void saveCurrentType(String type) {}
-	public void restoreType(String type) {}
-	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
-	public void setMonitorType(int aType) {}
+	@Override
+	public void saveCurrentType(String type)
+	{
+	}
 
+	@Override
+	public void restoreType(String type)
+	{
+	}
+
+	@Override
+	public int getMonitorType()
+	{
+		return RowActionMonitor.MONITOR_PLAIN;
+	}
+
+	@Override
+	public void setMonitorType(int aType)
+	{
+	}
+
+	@Override
 	public void jobFinished()
 	{
 		this.copyRunning = false;
 		if (this.copier.isSuccess())
 		{
-
 			String msg = this.copier.getRowsInsertedMessage();
 			String msg2 = this.copier.getRowsUpdatedMessage();
 			StringBuilder copied = new StringBuilder(50);
@@ -2090,6 +2133,7 @@ public class DataPumper
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					showLog();

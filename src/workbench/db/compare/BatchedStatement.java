@@ -246,10 +246,12 @@ public class BatchedStatement
 			if (i == Statement.SUCCESS_NO_INFO) rows ++;
 			else rows += i;
 		}
+
 		if (commitBatch)
 		{
 			statement.getConnection().commit();
 		}
+		
 		statement.clearBatch();
 		closeStreams();
 		return rows;
@@ -270,7 +272,7 @@ public class BatchedStatement
 	 * directly.
 	 *
 	 * @return the number of rows affected
-	 * 
+	 *
 	 * @throws java.sql.SQLException
 	 */
 	public long executeUpdate()
@@ -280,7 +282,7 @@ public class BatchedStatement
 	}
 
 	/**
-	 * Executes any pending rows in the batch queue. 
+	 * Executes any pending rows in the batch queue.
 	 *
 	 * @return the number of rows affected
 	 * @see #runBatch()
@@ -298,7 +300,7 @@ public class BatchedStatement
 	}
 
 	/**
-	 * Closes the underlying statement, clears the batch 
+	 * Closes the underlying statement, clears the batch
 	 * and closes any stream that was used by the batch.
 	 */
 	public void close()
