@@ -278,7 +278,6 @@ public abstract class ConsolePrinter
 			currentLine++;
 			if (printed) pw.println();
 		}
-		return;
 	}
 
 	private int writePadded(PrintWriter out, String value, int width)

@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 /**
  * An implementation of {@link workbench.interfaces.ParameterPrompter} and
  * {@link workbench.interfaces.ExecutionController} for Console and Batch mode
- * of SQL Workbench/J
+ * of SQL Workbench/J.
  *
  * It will interactively prompt the user for variables or the confirmation
  * to continue with a given SQL statement.
@@ -48,6 +48,7 @@ public class ConsolePrompter
 		this.executeAll = false;
 	}
 
+	@Override
 	public boolean processParameterPrompts(String sql)
 	{
 		VariablePool pool = VariablePool.getInstance();
@@ -82,11 +83,13 @@ public class ConsolePrompter
 		return ConsoleReaderFactory.getConsoleReader().readLine(prompt);
 	}
 
+	@Override
 	public String getPassword(String prompt)
 	{
 		return ConsoleReaderFactory.getConsoleReader().readPassword(prompt + " ");
 	}
 
+	@Override
 	public boolean confirmExecution(String prompt)
 	{
 		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
@@ -98,6 +101,7 @@ public class ConsolePrompter
 		return yes.equalsIgnoreCase(choice) || "yes".equalsIgnoreCase(choice);
 	}
 
+	@Override
 	public boolean confirmStatementExecution(String command)
 	{
 		if (executeAll) return true;

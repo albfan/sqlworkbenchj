@@ -17,7 +17,7 @@ import workbench.interfaces.StatusBar;
 /**
  * An implementation of the {@link workbench.interfaces.StatusBar} interface
  * to display information in Console mode
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ConsoleStatusBar
@@ -25,12 +25,12 @@ public class ConsoleStatusBar
 {
 	private PrintStream output;
 	private String lastMessage;
-	
+
 	public ConsoleStatusBar()
 	{
 		output = System.out;
 	}
-	
+
 	private String createDeleteString(String original)
 	{
 		if (original == null) return "\r";
@@ -62,6 +62,7 @@ public class ConsoleStatusBar
 		this.lastMessage = message;
 	}
 
+	@Override
 	public void clearStatusMessage()
 	{
 		if (lastMessage != null)
@@ -75,13 +76,15 @@ public class ConsoleStatusBar
 		}
 	}
 
+	@Override
 	public void repaint()
 	{
 	}
 
+	@Override
 	public String getText()
 	{
 		return lastMessage;
 	}
-	
+
 }

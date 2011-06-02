@@ -30,11 +30,13 @@ public class SimpleConsole
 		inputScanner = new Scanner(System.in);
 	}
 
+	@Override
 	public String readPassword(String prompt)
 	{
 		return readLine(prompt);
 	}
 
+	@Override
 	public String readLine(String prompt)
 	{
 		System.out.print(prompt);

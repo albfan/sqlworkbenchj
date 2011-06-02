@@ -29,6 +29,7 @@ public class SystemConsole
 	{
 	}
 
+	@Override
 	public String readPassword(String prompt)
 	{
 		if (System.console() != null)
@@ -42,6 +43,7 @@ public class SystemConsole
 		return readLine(prompt);
 	}
 
+	@Override
 	public String readLine(String prompt)
 	{
 		if (System.console() != null)

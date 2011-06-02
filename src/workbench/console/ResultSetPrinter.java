@@ -49,17 +49,20 @@ public class ResultSetPrinter
 		pw = new PrintWriter(out);
 	}
 
+	@Override
 	public boolean ignoreMaxRows()
 	{
 		return false;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
 
 	}
 
+	@Override
 	public void done()
 	{
 	}
@@ -104,6 +107,7 @@ public class ResultSetPrinter
 		return widths;
 	}
 
+	@Override
 	public void consumeResult(StatementRunnerResult toConsume)
 	{
 		ResultSet data = toConsume.getResultSets().get(0);

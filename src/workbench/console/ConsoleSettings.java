@@ -63,7 +63,7 @@ public class ConsoleSettings
 
 	protected void firePropertyChange(RowDisplay oldDisplay, RowDisplay newDisplay)
 	{
-		if (listener.size() == 0) return;
+		if (listener.isEmpty()) return;
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, "display", oldDisplay, newDisplay);
 		for (PropertyChangeListener l : listener)
 		{
