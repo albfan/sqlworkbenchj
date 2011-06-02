@@ -83,6 +83,7 @@ public class TableDependency
 	@SuppressWarnings("SleepWhileInLoop")
 	public void cancel()
 	{
+		this.cancelled = false;
 		this.cancelRetrieve = true;
 		long start = System.currentTimeMillis();
 		long maxWait = 1000 * 60; // one minute
@@ -305,6 +306,11 @@ public class TableDependency
 		}
 
 		return false;
+	}
+
+	public boolean wasCancelled()
+	{
+		return this.cancelled;
 	}
 
 	public boolean wasAborted()

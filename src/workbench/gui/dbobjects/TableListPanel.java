@@ -1378,11 +1378,6 @@ public class TableListPanel
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgWaitRetrieveEnded"));
 	}
 
-	private void showRetrieveMessage()
-	{
-		this.showPopupMessagePanel(ResourceMgr.getString("MsgRetrieving"));
-	}
-
 	protected void showPopupMessagePanel(final String aMsg)
 	{
 		synchronized (msgLock)
@@ -1480,7 +1475,7 @@ public class TableListPanel
 				}
 				setBusy(false);
 				invalidateData();
-				startRetrieveThread(true);
+				startRetrieveThread();
 			}
 		};
 		t.start();
@@ -1494,11 +1489,11 @@ public class TableListPanel
 		}
 		else
 		{
-			startRetrieveThread(false);
+			startRetrieveThread();
 		}
 	}
 
-	protected void startRetrieveThread(final boolean withMessage)
+	protected void startRetrieveThread()
 	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
@@ -1507,7 +1502,7 @@ public class TableListPanel
 			{
 				try
 				{
-					retrieveCurrentPanel(withMessage);
+					retrieveCurrentPanel();
 				}
 				finally
 				{
@@ -1518,7 +1513,7 @@ public class TableListPanel
 		panelRetrieveThread.start();
 	}
 
-	protected void retrieveCurrentPanel(final boolean withMessage)
+	protected void retrieveCurrentPanel()
 	{
 		if (this.dbConnection == null) return;
 
@@ -1531,11 +1526,6 @@ public class TableListPanel
 
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
-
-		if (withMessage)
-		{
-			showRetrieveMessage();
-		}
 
 		this.setBusy(true);
 
@@ -1560,7 +1550,7 @@ public class TableListPanel
 						}
 						break;
 					default:
-						retrievePanel(index);
+						retrievePanel();
 				}
 			}
 		}
@@ -1578,7 +1568,7 @@ public class TableListPanel
 		}
 	}
 
-	private void retrievePanel(int index)
+	private void retrievePanel()
 		throws SQLException
 	{
 		Component panel = displayTab.getSelectedComponent();
