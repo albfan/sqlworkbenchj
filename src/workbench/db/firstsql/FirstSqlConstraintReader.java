@@ -44,6 +44,7 @@ public class FirstSqlConstraintReader
              "  and cons.table_name = ? ";
 
 
+	@Override
 	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{
 		return Collections.emptyMap();
