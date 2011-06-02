@@ -139,6 +139,7 @@ public class FirebirdDomainReader
 		return result;
 	}
 
+	@Override
 	public DomainIdentifier getObjectDefinition(WbConnection connection, DbObject object)
 	{
 		List<DomainIdentifier> domains = getDomainList(connection, object.getSchema(), object.getObjectName());
@@ -173,6 +174,7 @@ public class FirebirdDomainReader
 		return result.toString();
 	}
 
+	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return false;
@@ -193,11 +195,13 @@ public class FirebirdDomainReader
 		return true;
 	}
 
+	@Override
 	public boolean handlesType(String type)
 	{
 		return StringUtil.equalStringIgnoreCase("DOMAIN", type);
 	}
 
+	@Override
 	public boolean handlesType(String[] types)
 	{
 		if (types == null) return true;
@@ -208,6 +212,7 @@ public class FirebirdDomainReader
 		return false;
 	}
 
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -230,11 +235,13 @@ public class FirebirdDomainReader
 		return result;
 	}
 
+	@Override
 	public List<String> supportedTypes()
 	{
 		return CollectionUtil.arrayList("DOMAIN");
 	}
 
+	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		return getDomainSource(getObjectDefinition(con, object));

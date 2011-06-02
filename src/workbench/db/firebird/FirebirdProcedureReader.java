@@ -31,6 +31,7 @@ public class FirebirdProcedureReader
 		super(conn);
 	}
 
+	@Override
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StringBuilder source = new StringBuilder();

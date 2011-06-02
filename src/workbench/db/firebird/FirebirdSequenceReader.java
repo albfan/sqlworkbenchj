@@ -45,6 +45,7 @@ public class FirebirdSequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
+	@Override
 	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
@@ -52,6 +53,7 @@ public class FirebirdSequenceReader
 		return def.getSource();
 	}
 
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
@@ -65,6 +67,7 @@ public class FirebirdSequenceReader
 		return result;
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
     DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
@@ -89,6 +92,7 @@ public class FirebirdSequenceReader
 		return result;
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
@@ -110,9 +114,9 @@ public class FirebirdSequenceReader
 			result.append("';");
 		}
 		def.setSource(result);
-		return;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		Statement stmt = null;
@@ -128,7 +132,7 @@ public class FirebirdSequenceReader
 
 			if (StringUtil.isNonBlank(sequence))
 			{
-				if (sequence.indexOf("%") > 0)
+				if (sequence.indexOf('%') > 0)
 				{
 					sql += " AND rdb$generator_name LIKE '" + sequence + "' \n";
 				}
