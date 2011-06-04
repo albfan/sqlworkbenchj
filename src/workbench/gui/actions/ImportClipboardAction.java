@@ -3,8 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2011, Thomas Kellerer
- * No part of this code may be reused without the permission of the author
+ * Copyright 2002-2011, Thomas Kellerer No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -22,6 +21,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Import data from the clipboard into a table
+ *
  * @author Thomas Kellerer
  */
 public class ImportClipboardAction
@@ -38,8 +38,13 @@ public class ImportClipboardAction
 		this.setEnabled(false);
 	}
 
-	public boolean hasCtrlModifier() { return true; }
+	@Override
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
 
+	@Override
 	public void executeAction(ActionEvent evt)
 	{
 		String content = getClipboardContents();
@@ -49,7 +54,10 @@ public class ImportClipboardAction
 
 	private String getClipboardContents()
 	{
-		if (client == null) return null;
+		if (client == null)
+		{
+			return null;
+		}
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		Transferable content = clp.getContents(client);
 		try
@@ -63,5 +71,4 @@ public class ImportClipboardAction
 		}
 		return null;
 	}
-
 }
