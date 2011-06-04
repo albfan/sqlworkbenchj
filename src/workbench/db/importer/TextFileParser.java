@@ -22,34 +22,34 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.JobErrorHandler;
-import workbench.resource.Settings;
-import workbench.util.ExceptionUtil;
+import workbench.db.exporter.BlobMode;
+import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.util.BlobDecoder;
+import workbench.util.CollectionUtil;
 import workbench.util.CsvLineParser;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
+import workbench.util.FixedLengthLineParser;
+import workbench.util.LineParser;
 import workbench.util.MessageBuffer;
+import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
-import workbench.util.WbStringTokenizer;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import workbench.db.exporter.BlobMode;
-import workbench.db.importer.modifier.ImportValueModifier;
-import workbench.util.BlobDecoder;
-import workbench.util.CollectionUtil;
-import workbench.util.FixedLengthLineParser;
-import workbench.util.LineParser;
-import workbench.util.QuoteEscapeType;
 import workbench.util.WbFile;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
