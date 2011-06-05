@@ -1,73 +1,73 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <java version="1.5" class="java.beans.XMLDecoder">
- <object class="java.util.HashMap"> 
- 
-  <void method="put">  
-   <string>H2</string>  
-   <object class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>SELECT view_definition FROM information_schema.views</string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>table_name</string>  
-    </void>  
-    <void property="schemaField">  
-     <string>table_schema</string>  
-    </void>  
-   </object>  
-  </void>  
-	
-  <void method="put"> 
-   <string>Microsoft SQL Server</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>exec sp_helptext</string> 
-    </void> 
-    <void property="isProcedureCall"> 
-     <boolean>true</boolean> 
-    </void> 
-    <void property="objectNameArgumentPos"> 
-     <int>1</int> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>FirstSQL/J</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT v.view_definition 
+ <object class="java.util.HashMap">
+
+  <void method="put">
+   <string>H2</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT view_definition FROM information_schema.views</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="schemaField">
+     <string>table_schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Microsoft SQL Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>exec sp_helptext</string>
+    </void>
+    <void property="isProcedureCall">
+     <boolean>true</boolean>
+    </void>
+    <void property="objectNameArgumentPos">
+     <int>1</int>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>FirstSQL/J</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT v.view_definition
      FROM definition_schema.sysviews v, definition_schema.sysviewtables t
      WHERE v.table_name = t.view_name
      AND   v.table_schema = t.view_schema
-     </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>t.view_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>t.view_schema</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>DB2/NT</string> 
-   <object id="db2_view_source" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text from syscat.views</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>viewname</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>viewschema</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-	<void method="put">  
-   <string>DB2/LINUX</string>  
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>t.view_name</string>
+    </void>
+    <void property="schemaField">
+     <string>t.view_schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>DB2/NT</string>
+   <object id="db2_view_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text from syscat.views</string>
+    </void>
+    <void property="objectNameField">
+     <string>viewname</string>
+    </void>
+    <void property="schemaField">
+     <string>viewschema</string>
+    </void>
+   </object>
+  </void>
+
+	<void method="put">
+   <string>DB2/LINUX</string>
    <object idref="db2_view_source"/>
 	</void>
 
@@ -96,62 +96,62 @@
 		</object>
 	</void>
 
-  <void method="put">    
-    <string>DB2</string>    
+  <void method="put">
+    <string>DB2</string>
     <object id="db2_host" class="workbench.db.GetMetaDataSql">
-      <void property="baseSql">      
+      <void property="baseSql">
         <string>SELECT text from SYSIBM.SYSVIEWS</string>
-      </void>     
-      <void property="objectNameField">      
+      </void>
+      <void property="objectNameField">
         <string>NAME</string>
-      </void>     
-      <void property="schemaField">      
+      </void>
+      <void property="schemaField">
         <string>CREATOR</string>
-      </void>    
+      </void>
 		 <void property="orderBy">
 			 <string>order by seqno</string>
 		 </void>
-    </object>   
-  </void> 
+    </object>
+  </void>
 
-  <void method="put"> 
-   <string>Cloudscape</string> 
-   <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT v.viewdefinition 
+  <void method="put">
+   <string>Cloudscape</string>
+   <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT v.viewdefinition
      FROM sys.sysviews v, sys.systables t, sys.sysschemas s
      WHERE v.tableid = t.tableid
      AND   t.schemaid = s.schemaid
-     </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>t.tablename</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>s.schemaname</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Apache Derby</string> 
-   <object idref="id_list_cloudscape_views"/> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Oracle</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text FROM all_views</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>view_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>owner</string> 
-    </void> 
-   </object> 
-  </void> 
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>t.tablename</string>
+    </void>
+    <void property="schemaField">
+     <string>s.schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Apache Derby</string>
+   <object idref="id_list_cloudscape_views"/>
+  </void>
+
+  <void method="put">
+   <string>Oracle</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM all_views</string>
+    </void>
+    <void property="objectNameField">
+     <string>view_name</string>
+    </void>
+    <void property="schemaField">
+     <string>owner</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
    <string>PostgreSQL</string>
@@ -172,53 +172,69 @@ WHERE c.relkind = 'v'::char
     </void>
    </object>
   </void>
-  
+
   <!--
-  <void method="put"> 
-   <string>PostgreSQL</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT definition FROM pg_views</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>viewname</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="put">
+   <string>PostgreSQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT definition FROM pg_views</string>
+    </void>
+    <void property="objectNameField">
+     <string>viewname</string>
+    </void>
+   </object>
+  </void>
   -->
-  
-  <void method="put"> 
-   <string>ThinkSQL Relational Database Management System</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+
+  <void method="put">
+   <string>ThinkSQL Relational Database Management System</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT view_definition
 FROM catalog_definition_schema.systable NATURAL JOIN catalog_definition_schema.sysschema
 WHERE table_type='V'
-     </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>TABLE_NAME</string> 
-    </void> 
-    <void property="schemaField"> 
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>TABLE_NAME</string>
+    </void>
+    <void property="schemaField">
      <string>SCHEMA_NAME</string>
-    </void> 
-   </object> 
-  </void> 
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>MySQL</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>TABLE_NAME</string> 
-    </void> 
+  <void method="put">
+   <string>MySQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string>
+    </void>
+    <void property="objectNameField">
+     <string>TABLE_NAME</string>
+    </void>
     <void property="catalogField">
      <string>TABLE_SCHEMA</string>
     </void>
-   </object> 
-  </void> 
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Solid Database Engine</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+SELECT cast(SYS_VIEWS.TEXT AS LONG VARCHAR) AS view_definition
+FROM _SYSTEM.SYS_TABLES
+  JOIN _SYSTEM.SYS_VIEWS ON SYS_TABLES.ID = SYS_VIEWS.V_ID
+    </string>
+    </void>
+    <void property="objectNameField">
+     <string>SYS_TABLES.TABLE_NAME</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
    <string>HSQL Database Engine</string>
@@ -231,119 +247,119 @@ WHERE table_type='V'
     </void>
    </object>
   </void>
-  
-  <void method="put"> 
-   <string>HSQL Database Engine 2.0</string>
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>TABLE_NAME</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Firebird</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT rdb$view_source FROM rdb$relations</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>rdb$relation_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>RDB$OWNER_NAME</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>INGRES</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text_segment FROM iiviews</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>table_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>table_owner</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by text_sequence</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Adaptive Server Anywhere</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select viewtext from sysviews</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>viewname</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>vcreator</string> 
-    </void> 
-   </object> 
-  </void> 
 
-  <void method="put"> 
-   <string>Mckoi SQL Database</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>HSQL Database Engine 2.0</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string>
+    </void>
+    <void property="objectNameField">
+     <string>TABLE_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT rdb$view_source FROM rdb$relations</string>
+    </void>
+    <void property="objectNameField">
+     <string>rdb$relation_name</string>
+    </void>
+    <void property="schemaField">
+     <string>RDB$OWNER_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>INGRES</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text_segment FROM iiviews</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="schemaField">
+     <string>table_owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by text_sequence</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Anywhere</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select viewtext from sysviews</string>
+    </void>
+    <void property="objectNameField">
+     <string>viewname</string>
+    </void>
+    <void property="schemaField">
+     <string>vcreator</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Mckoi SQL Database</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT substring(i_view_data('query string', query), 12, length(i_view_data('query string', query)) - 16)
              FROM SYS_INFO.sUSRView
-       </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>"name"</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>"schema"</string> 
-    </void> 
-   </object> 
-  </void> 
+       </string>
+    </void>
+    <void property="objectNameField">
+     <string>"name"</string>
+    </void>
+    <void property="schemaField">
+     <string>"schema"</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>Informix Dynamic Server</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT V.viewtext, V.seqno FROM informix.sysviews V,informix.systables T where V.tabid=T.tabid</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>T.tabname</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>T.owner</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by V.seqno</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put">  
-   <string>SQLite</string>  
-   <object class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>SELECT sql FROM sqlite_master</string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>tbl_name</string>  
-    </void>  
-    <void property="orderBy"> 
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT V.viewtext, V.seqno FROM informix.sysviews V,informix.systables T where V.tabid=T.tabid</string>
+    </void>
+    <void property="objectNameField">
+     <string>T.tabname</string>
+    </void>
+    <void property="schemaField">
+     <string>T.owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by V.seqno</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>SQLite</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT sql FROM sqlite_master</string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl_name</string>
+    </void>
+    <void property="orderBy">
 		 <!-- this is a hack to make string comparison case insensitive -->
 		 <!-- it is not really an order by statement by may be added at the same -->
 		 <!-- place as the order by keyword -->
-     <string>collate nocase</string> 
-    </void> 
-   </object>  
-  </void>  
+     <string>collate nocase</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
     <string>LucidDB</string>
@@ -360,5 +376,5 @@ WHERE table_type='V'
     </object>
   </void>
 
- </object> 
-</java> 
+ </object>
+</java>

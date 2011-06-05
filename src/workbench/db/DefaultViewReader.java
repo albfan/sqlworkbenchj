@@ -199,6 +199,7 @@ public class DefaultViewReader
 	 *	To create a complete SQL to re-create a view, use {@link #getExtendedViewSource(workbench.db.TableIdentifier) }
 	 *
 	 *	@return the view source as stored in the database.
+	 *  @throws NoConfigException if no SQL was configured in ViewSourceStatements.xml
 	 */
 	@Override
 	public CharSequence getViewSource(TableIdentifier viewId)
@@ -206,13 +207,15 @@ public class DefaultViewReader
 	{
 		if (viewId == null) return null;
 
+		GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
+		if (sql == null) throw new NoConfigException("No SQL to retrieve the VIEW source");
+
 		StringBuilder source = new StringBuilder(500);
 		Statement stmt = null;
 		ResultSet rs = null;
+
 		try
 		{
-			GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
-			if (sql == null) throw new NoConfigException("No SQL to retrieve the VIEW source");
 			TableIdentifier tbl = viewId.createCopy();
 			tbl.adjustCase(connection);
 			sql.setSchema(tbl.getSchema());
