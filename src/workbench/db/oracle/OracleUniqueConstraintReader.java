@@ -49,10 +49,13 @@ public class OracleUniqueConstraintReader
 
 		for (IndexDefinition idx : indexList)
 		{
-			if (!idx.isUnique() || idx.isPrimaryKeyIndex())
+			if (idx.isPrimaryKeyIndex())
 			{
+				// Only skip Primary key indexes.
+				// Non-Unique indexes can still back a unique constraint...
 				continue;
 			}
+			
 			if (first)
 			{
 				first = false;

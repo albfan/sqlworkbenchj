@@ -180,9 +180,14 @@ public class JdbcIndexReader
 			tableName = table.getTableName();
 		}
 
+		String uniqueConstraint = null;
 		if (indexDefinition.isUniqueConstraint())
 		{
-			return getUniqueConstraint(table, indexDefinition);
+			uniqueConstraint = getUniqueConstraint(table, indexDefinition);
+			if (indexDefinition.isUnique() && indexDefinition.getUniqueConstraintName().equals(indexDefinition.getName()))
+			{
+				return uniqueConstraint;
+			}
 		}
 
 		String template = this.metaData.getDbSettings().getCreateIndexSQL();
@@ -224,6 +229,12 @@ public class JdbcIndexReader
 			idx.append(options);
 		}
 		idx.append(";\n");
+
+		if (uniqueConstraint != null)
+		{
+			idx.insert(0, '\n');
+			idx.append(uniqueConstraint);
+		}
 		return idx;
 	}
 
