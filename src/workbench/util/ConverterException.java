@@ -14,7 +14,8 @@ package workbench.util;
 /**
  * @author Thomas Kellerer
  */
-public class ConverterException extends java.lang.Exception
+public class ConverterException
+	extends Exception
 {
 
 	public ConverterException(String msg)
@@ -27,6 +28,7 @@ public class ConverterException extends java.lang.Exception
 		super("Could not convert [" + input + "] for datatype " + SqlUtil.getTypeName(type), cause);
 	}
 
+	@Override
 	public String getLocalizedMessage()
 	{
 		if (this.getCause() == null)

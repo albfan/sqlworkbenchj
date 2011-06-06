@@ -51,6 +51,7 @@ public class CsvLineParser
 		this.quoteChar = quote;
 	}
 
+	@Override
 	public void setLine(String line)
 	{
 		this.lineData = line;
@@ -88,11 +89,13 @@ public class CsvLineParser
 		this.escapeType = type;
 	}
 
+	@Override
 	public boolean hasNext()
 	{
 		return oneMore || current < len;
 	}
 
+	@Override
 	public String getNext()
 	{
 		// The line ends with the delimiter
@@ -114,7 +117,7 @@ public class CsvLineParser
 			{
 				break;
 			}
-			
+
 			if (c == this.quoteChar)
 			{
 				// don't return the quote at the end
@@ -176,7 +179,6 @@ public class CsvLineParser
 			{
 				String quoteString = new String(new char[] { quoteChar } );
 				next = StringUtil.replace(next, "\\" + quoteChar, quoteString);
-//				next = StringUtil.replace(next, "\\\\", "\\");
 			}
 			else if (this.escapeType == QuoteEscapeType.duplicate)
 			{
@@ -192,6 +194,7 @@ public class CsvLineParser
 		else return next;
 	}
 
+	@Override
 	public void setTrimValues(boolean trimValues)
 	{
 		this.trimValues = trimValues;

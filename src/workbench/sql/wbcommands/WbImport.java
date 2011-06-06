@@ -193,6 +193,7 @@ public class WbImport
 		return Settings.getInstance().getBoolProperty("workbench.import.default.trimvalues", false);
 	}
 
+	@Override
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{

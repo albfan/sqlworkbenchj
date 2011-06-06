@@ -34,7 +34,17 @@ public class ValueConverterTest
 	}
 
 	@Test
+	public void testEmptyStringBool()
+		throws Exception
+	{
+		ValueConverter converter = new ValueConverter();
+		Object flag = converter.convertValue("", Types.BOOLEAN);
+		assertNull(flag);
+	}
+	
+	@Test
 	public void testConvertBoolLiterals()
+		throws Exception
 	{
 		ValueConverter converter = new ValueConverter();
 		try

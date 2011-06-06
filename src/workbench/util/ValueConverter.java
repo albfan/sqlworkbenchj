@@ -25,7 +25,10 @@ import workbench.resource.Settings;
 
 /**
  * Utility class to parse Strings into approriate Java classes according
- * to a type from java.sql.Types.
+ * to a type from java.sql.Type
+ *
+ * This class is not thread safe for parsing dates and timestamps due to the
+ * fact that SimpleDateFormat is not thread safe.
  *
  * @author  Thomas Kellerer
  */
@@ -140,11 +143,8 @@ public class ValueConverter
 			}
 			else
 			{
-				synchronized (dateFormatter)
-				{
-					this.defaultDateFormat = aFormat;
-					this.dateFormatter.applyPattern(aFormat);
-				}
+				this.defaultDateFormat = aFormat;
+				this.dateFormatter.applyPattern(aFormat);
 			}
 		}
 	}
@@ -161,11 +161,8 @@ public class ValueConverter
 			}
 			else
 			{
-				synchronized (timestampFormatter)
-				{
-					this.defaultTimestampFormat = aFormat;
-					this.timestampFormatter.applyPattern(aFormat);
-				}
+				this.defaultTimestampFormat = aFormat;
+				this.timestampFormatter.applyPattern(aFormat);
 			}
 		}
 	}
@@ -181,7 +178,7 @@ public class ValueConverter
 		bigDecimalFalse = BigDecimal.valueOf(falseValue);
 		bigDecimalTrue = BigDecimal.valueOf(trueValue);
 	}
-	
+
 	public void setDecimalCharacter(char aChar)
 	{
 		this.decimalCharacter = aChar;
@@ -263,7 +260,7 @@ public class ValueConverter
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value);
+				Boolean b = getBoolean(value, Types.BOOLEAN);
 				if (b != null)
 				{
 					if (b.booleanValue())
@@ -300,7 +297,7 @@ public class ValueConverter
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value);
+				Boolean b = getBoolean(value, Types.BOOLEAN);
 				if (b != null)
 				{
 					if (b.booleanValue())
@@ -333,7 +330,7 @@ public class ValueConverter
 			// true/false should be 1/0
 			if (autoConvertBooleanNumbers)
 			{
-				Boolean b = getBoolean(value);
+				Boolean b = getBoolean(value, Types.BOOLEAN);
 				if (b != null)
 				{
 					if (b.booleanValue())
@@ -458,7 +455,7 @@ public class ValueConverter
 
 			case Types.BIT:
 			case Types.BOOLEAN:
-				return convertBool(v, type);
+				return getBoolean(v, type);
 
 			default:
 				return aValue;
@@ -490,21 +487,18 @@ public class ValueConverter
 
 		java.util.Date parsed = null;
 
-		synchronized (this.formatter)
+		for (int i = 0; i < timeFormats.length; i++)
 		{
-			for (int i = 0; i < timeFormats.length; i++)
+			try
 			{
-				try
-				{
-					this.formatter.applyPattern(timeFormats[i]);
-					parsed = this.formatter.parse(time);
-					LogMgr.logDebug("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
-					break;
-				}
-				catch (Exception e)
-				{
-					parsed = null;
-				}
+				this.formatter.applyPattern(timeFormats[i]);
+				parsed = this.formatter.parse(time);
+				LogMgr.logDebug("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
+				break;
+			}
+			catch (Exception e)
+			{
+				parsed = null;
 			}
 		}
 
@@ -558,10 +552,7 @@ public class ValueConverter
 				}
 				else
 				{
-					synchronized (this.timestampFormatter)
-					{
-						result = this.timestampFormatter.parse(timestampInput);
-					}
+					result = this.timestampFormatter.parse(timestampInput);
 				}
 			}
 			catch (Exception e)
@@ -582,21 +573,18 @@ public class ValueConverter
 		{
 			int usedPattern = -1;
 
-			synchronized (this.formatter)
+			for (int i = 0; i < dateFormats.length; i++)
 			{
-				for (int i = 0; i < dateFormats.length; i++)
+				try
 				{
-					try
-					{
-						this.formatter.applyPattern(timestampFormats[i]);
-						result = this.formatter.parse(timestampInput);
-						usedPattern = i;
-						break;
-					}
-					catch (ParseException e)
-					{
-						result = null;
-					}
+					this.formatter.applyPattern(timestampFormats[i]);
+					result = this.formatter.parse(timestampInput);
+					usedPattern = i;
+					break;
+				}
+				catch (ParseException e)
+				{
+					result = null;
 				}
 			}
 
@@ -605,11 +593,8 @@ public class ValueConverter
 				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + timestampInput + "' using the format: " + timestampFormats[usedPattern]);
 
 				// use this pattern from now on to avoid multiple attempts for the next values
-				synchronized (timestampFormatter)
-				{
-					defaultTimestampFormat = timestampFormats[usedPattern];
-					timestampFormatter.applyPattern(this.defaultTimestampFormat);
-				}
+				defaultTimestampFormat = timestampFormats[usedPattern];
+				timestampFormatter.applyPattern(this.defaultTimestampFormat);
 			}
 		}
 
@@ -649,10 +634,7 @@ public class ValueConverter
 				}
 				else
 				{
-					synchronized (this.dateFormatter)
-					{
-						result = this.dateFormatter.parse(dateInput);
-					}
+					result = this.dateFormatter.parse(dateInput);
 				}
 			}
 			catch (Exception e)
@@ -668,10 +650,7 @@ public class ValueConverter
 		{
 			try
 			{
-				synchronized (timestampFormatter)
-				{
-					result = this.timestampFormatter.parse(dateInput);
-				}
+				result = this.timestampFormatter.parse(dateInput);
 			}
 			catch (ParseException e)
 			{
@@ -688,28 +667,22 @@ public class ValueConverter
 		// Still no luck, try to detect the format by trying the built-in formats
 		if (result == null && checkBuiltInFormats)
 		{
-			synchronized (this.formatter)
+			for (int i = 0; i < dateFormats.length; i++)
 			{
-				for (int i = 0; i < dateFormats.length; i++)
+				try
 				{
-					try
-					{
-						this.formatter.applyPattern(dateFormats[i]);
-						result = this.formatter.parse(dateInput);
-						LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + dateFormats[i]);
+					this.formatter.applyPattern(dateFormats[i]);
+					result = this.formatter.parse(dateInput);
+					LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + dateFormats[i]);
 
-						// use this format from now on...
-						synchronized (dateFormatter)
-						{
-							defaultDateFormat = dateFormats[i];
-							dateFormatter.applyPattern(defaultDateFormat);
-						}
-						break;
-					}
-					catch (Exception e)
-					{
-						result = null;
-					}
+					// use this format from now on...
+					defaultDateFormat = dateFormats[i];
+					dateFormatter.applyPattern(defaultDateFormat);
+					break;
+				}
+				catch (Exception e)
+				{
+					result = null;
 				}
 			}
 		}
@@ -781,7 +754,7 @@ public class ValueConverter
 		return result.toString();
 	}
 
-	private Boolean getBoolean(String value)
+	private Boolean getBoolean(String value, int type)
 		throws ConverterException
 	{
 		if (this.booleanFalseValues != null && this.booleanTrueValues != null)
@@ -794,7 +767,7 @@ public class ValueConverter
 			{
 				return Boolean.TRUE;
 			}
-			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals");
+			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals", type, null);
 		}
 		else
 		{
@@ -808,17 +781,5 @@ public class ValueConverter
 			}
 		}
 		return null;
-	}
-
-	private Boolean convertBool(String value, int type)
-		throws ConverterException
-	{
-		Boolean b = getBoolean(value);
-		if (b != null)
-		{
-			return b;
-		}
-
-		throw new ConverterException(value, type, null);
 	}
 }
