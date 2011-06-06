@@ -27,6 +27,7 @@ import workbench.util.StringUtil;
 
 /**
  * Manage SQL keywords to support built-in keywords and user-defined keywords.
+ *
  * By default the files
  * <ul>
  *   <li>keywords.wb (general SQL keywords)</li>
@@ -35,6 +36,7 @@ import workbench.util.StringUtil;
  *   <li>operators.wb (SQL operators)</li>
  * </ul>
  * are read from this package.
+ * 
  * If any of those files exist in the config directory, their contents
  * is read as well and merged with the predefined keywords.
  * <br/>

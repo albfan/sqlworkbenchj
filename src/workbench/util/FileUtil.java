@@ -34,7 +34,7 @@ public class FileUtil
 	 * The size of the buffer used by copy()
 	 */
 	private static final int BUFF_SIZE = 32*1024;
-	
+
 	/*
 	 * Closes all streams in the list.
 	 * @param a list of streams to close
@@ -49,9 +49,10 @@ public class FileUtil
 			closeQuietely(str);
 		}
 	}
-	
+
 	/**
 	 * Read the lines of the given Reader into a Collection.
+	 *
 	 * The Reader will be closed after all lines have been read.
 	 * Empty lines are ignored and not add to the collection.
 	 *
@@ -71,7 +72,7 @@ public class FileUtil
 	 *
 	 * @param input the "file" to read
 	 * @param trim if true, each line will be trimmed after reading
-	 * 
+	 *
 	 * @return a Collection with all the lines in the file
 	 */
 	public static List<String> getLines(BufferedReader input, boolean trim)
@@ -80,7 +81,7 @@ public class FileUtil
 
 		try
 		{
-			String line; 
+			String line;
 			while ( (line = input.readLine()) != null)
 			{
 				if (StringUtil.isNonEmpty(line))
@@ -99,14 +100,13 @@ public class FileUtil
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Read the contents of the Reader into the provided StringBuilder.
-	 * Max. numLines lines are read.
-	 * 
-	 * The Reader will not be closed
-	 * 
-	 * @param in the Reader to be used 
+	 *
+	 * Up to numLines lines are read. The Reader will not be closed.
+	 *
+	 * @param in the Reader to be used
 	 * @param buffer the StringBuilder to received the lines
 	 * @param numLines the max. number of lines to be read
 	 * @param lineEnd the lineEnding to be used
@@ -127,12 +127,13 @@ public class FileUtil
 		}
 		return lines;
 	}
-	
+
 	/**
-	 * Try to detect the line ending used by the passed Reader.
+	 * Try to detect the type of line ending used by the passed Reader.
+	 *
 	 * This will advance the reader until a line ending is found.
 	 * The reader will not be closed
-	 * 
+	 *
 	 * @param in the "file" to test
 	 * @return the sequence of characters used as the line ending (e.g. \n or \r\n)
 	 * @throws java.io.IOException
@@ -145,7 +146,7 @@ public class FileUtil
 		while (c != -1)
 		{
 			if (c == '\r')
-			{ 
+			{
 				char n = (char)in.read();
 				if (n == '\n')
 				{
@@ -162,8 +163,14 @@ public class FileUtil
 		}
 		return ending;
 	}
-	
-	
+
+
+	/**
+	 * Tries to estimate the number of records in the given file using the first 5 lines.
+	 *
+	 * @param f the file to check
+	 * @see #estimateRecords(java.io.File, long)
+	 */
 	public static long estimateRecords(File f)
 		throws IOException
 	{
@@ -172,12 +179,15 @@ public class FileUtil
 
 	/**
 	 * Tries to estimate the number of records in the given file.
+	 *
 	 * This is done by reading the first <tt>sampleLines</tt> records
 	 * of the file and assuming the average size of an row in the first
 	 * lines is close to the average row in the complete file.
 	 *
+	 * The first line is always ignored assuming this is a header line.
+	 *
 	 * @param f the file to check
-	 * @param sampleLines the number of lines to read 
+	 * @param sampleLines the number of lines to read
 	 */
 	public static long estimateRecords(File f, long sampleLines)
 		throws IOException
@@ -187,7 +197,7 @@ public class FileUtil
 		if (!f.isFile()) return -1;
 		long size = f.length();
 		if (size == 0) return 0;
-		
+
 		long lineSize = 0;
 
 		BufferedReader in = null;
@@ -228,11 +238,11 @@ public class FileUtil
 		OutputStream out = new FileOutputStream(destination);
 		return copy(in, out);
 	}
-	
+
 	/**
 	 * Copies the content of the InputStream to the OutputStream.
 	 * Both streams are closed automatically.
-	 * 
+	 *
 	 * @return the number of bytes copied
 	 */
 	public static long copy(InputStream in, OutputStream out)
@@ -258,15 +268,26 @@ public class FileUtil
 		return filesize;
 	}
 
+	/**
+	 * Reads the contents of the file into a String.
+	 *
+	 * @param f the file to read
+	 * @param encoding the file's encoding
+	 * @return the file content as a single String
+	 *
+	 * @throws IOException
+	 * @see #readCharacters(java.io.Reader)
+	 */
 	public static String readFile(File f, String encoding)
 		throws IOException
 	{
 		Reader r = EncodingUtil.createReader(f, encoding);
 		return readCharacters(r);
 	}
-	
+
 	/**
 	 * Read the content of the Reader into a String.
+	 *
 	 * The Reader is closed automatically.
 	 */
 	public static String readCharacters(Reader in)
@@ -300,7 +321,7 @@ public class FileUtil
 	{
 		if (in == null) return null;
 		ByteBuffer result = new ByteBuffer();
-		byte[] buff = new byte[BUFF_SIZE];	
+		byte[] buff = new byte[BUFF_SIZE];
 
 		try
 		{
@@ -319,12 +340,12 @@ public class FileUtil
 	}
 
 	/**
-	 * Returns the number of characters according to the 
-	 * encoding in the specified file. For single-byte 
+	 * Returns the number of characters according to the
+	 * encoding in the specified file. For single-byte
 	 * encodings this should be identical to source.length()
 	 * <br/>
 	 * For large files this might take some time!
-	 * 
+	 *
 	 * @param source the (text) file to check
 	 * @param encoding the encoding of the text file
 	 * @return the number of characters (not bytes) in the file
@@ -348,16 +369,16 @@ public class FileUtil
 
 		return result;
 	}
-	
+
 	/**
 	 * Closes a Closeable without throwing an IOException.
-	 * 
+	 *
 	 * @param c the Closeable to close
 	 */
 	public static void closeQuietely(Closeable c)
 	{
 		if (c == null) return;
-		
+
 		try
 		{
 			c.close();
@@ -367,5 +388,5 @@ public class FileUtil
 			// ignore
 		}
 	}
-	
+
 }

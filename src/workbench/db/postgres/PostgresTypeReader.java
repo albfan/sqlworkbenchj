@@ -35,8 +35,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * An ObjectlistEnhancer to work around a bug in the Postgres JDBC driver, as that driver
- * does not return a value in the TABLE_TYPE column
+ * An ObjectlistEnhancer to work around a bug in the Postgres JDBC driver
+ * to return a proper value in the TABLE_TYPE column.
  *
  * @author Thomas Kellerer
  */
