@@ -59,6 +59,7 @@ public class AppArguments
 	public static final String ARG_INTERACTIVE = "interactive";
 	public static final String ARG_PROPFILE = "arguments";
 	public static final String ARG_LB_CONN = "lbDefaults";
+	public static final String ARG_CONN_NAME = "connectionName";
 
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
@@ -116,6 +117,7 @@ public class AppArguments
 		addArgument(ARG_CONN_JAR);
 		addArgument(ARG_CONN_FETCHSIZE);
 		addArgument(ARG_CONN_USER);
+		addArgument(ARG_CONN_NAME);
 		addArgument(ARG_CONN_PWD);
 		addArgument(ARG_CONN_SEPARATE, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_EMPTYNULL, ArgumentType.BoolArgument);

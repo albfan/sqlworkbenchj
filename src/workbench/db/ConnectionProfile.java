@@ -53,6 +53,7 @@ public class ConnectionProfile
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean trimCharData;
+	private boolean temporaryProfile;
 
 	private boolean readOnly;
 	private Boolean sessionReadOnly;
@@ -104,6 +105,16 @@ public class ConnectionProfile
 		cp.setStoreExplorerSchema(true);
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
+	}
+
+	public boolean isTemporaryProfile()
+	{
+		return temporaryProfile;
+	}
+
+	public void setTemporaryProfile(boolean flag)
+	{
+		this.temporaryProfile = flag;
 	}
 
 	public ObjectNameFilter getCatalogFilter()

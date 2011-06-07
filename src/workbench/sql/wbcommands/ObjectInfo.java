@@ -13,21 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.DbSettings;
-import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
-import workbench.db.IndexReader;
-import workbench.db.ProcedureDefinition;
-import workbench.db.ProcedureReader;
-import workbench.db.SequenceDefinition;
-import workbench.db.SequenceReader;
-import workbench.db.TableColumnsDatastore;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.TriggerDefinition;
-import workbench.db.TriggerReader;
-import workbench.db.TriggerReaderFactory;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
@@ -226,7 +212,17 @@ public class ObjectInfo
 			return result;
 		}
 
-		DataStore details = connection.getMetadata().getObjectDetails(toDescribe);
+		DataStore details = null;
+		if (connection.getMetadata().objectTypeCanContainData(toDescribe.getType()))
+		{
+			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
+			connection.getObjectCache().addTable(def);
+			details = new TableColumnsDatastore(def);
+		}
+		else
+		{
+			details = connection.getMetadata().getObjectDetails(toDescribe);
+		}
 		boolean isExtended = connection.getMetadata().isExtendedObject(toDescribe);
 
 		CharSequence source = null;

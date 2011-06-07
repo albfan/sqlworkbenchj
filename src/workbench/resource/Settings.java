@@ -50,7 +50,6 @@ import workbench.gui.settings.ExternalFileHandling;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
-import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
@@ -2438,8 +2437,8 @@ public class Settings
 			this.props.setProperty(key + ".group", "");
 		}
 
-		// comparing with == is intended
-		if (prof.getName() == BatchRunner.CMD_LINE_PROFILE_NAME) return;
+		// Do not remember profiles defined on the commandline
+		if (prof.isTemporaryProfile()) return;
 
 		this.props.setProperty(key, prof.getName());
 		this.props.setProperty(key + ".group", prof.getGroup());

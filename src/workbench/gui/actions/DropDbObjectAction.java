@@ -95,6 +95,7 @@ public class DropDbObjectAction
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					data.reload();

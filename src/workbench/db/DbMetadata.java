@@ -549,12 +549,12 @@ public class DbMetadata
 	public boolean objectTypeCanContainData(String type)
 	{
 		if (type == null) return false;
-		return getObjectsWithData().contains(type.toLowerCase());
+		return getObjectsWithData().contains(type);
 	}
 
-	private Set<String> getObjectsWithData()
+	public Set<String> getObjectsWithData()
 	{
-		Set<String> objectsWithData = new TreeSet<String>();
+		Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
 		String keyPrefix = "workbench.db.objecttype.selectable.";
 		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
 		String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);

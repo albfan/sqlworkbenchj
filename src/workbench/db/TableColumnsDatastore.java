@@ -22,7 +22,7 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
- * @see DbMetadata#getTableColumns(workbench.db.TableIdentifier) 
+ * @see DbMetadata#getTableColumns(workbench.db.TableIdentifier)
  */
 public class TableColumnsDatastore
 	extends DataStore
@@ -119,6 +119,7 @@ public class TableColumnsDatastore
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, col.getDbmsType());
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, col.getDefaultValue());
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, col.getComment());
+				getRow(row).setUserObject(col);
 			}
 		}
 		this.resetStatus();
@@ -137,24 +138,28 @@ public class TableColumnsDatastore
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
 		for (int i=0; i < count; i++)
 		{
-			String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			int type = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
-			String dbmstype = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-			boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
-			ColumnIdentifier ci = new ColumnIdentifier(meta.quoteObjectname(col), meta.getDataTypeResolver().fixColumnType(type, dbmstype), pk);
-			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
-			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, -1);
-			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-			int position = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_POSITION, 0);
-			String comment = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_REMARKS);
-			String def = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
-			ci.setColumnSize(size);
-			ci.setDecimalDigits(digits);
-			ci.setIsNullable(StringUtil.stringToBool(nullable));
-			ci.setDbmsType(dbmstype);
-			ci.setComment(comment);
-			ci.setDefaultValue(def);
-			ci.setPosition(position);
+			ColumnIdentifier ci = (ColumnIdentifier)ds.getRow(i).getUserObject();
+			if (ci == null)
+			{
+				String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+				int type = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
+				String dbmstype = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+				boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
+				ci = new ColumnIdentifier(meta.quoteObjectname(col), meta.getDataTypeResolver().fixColumnType(type, dbmstype), pk);
+				int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
+				int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, -1);
+				String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
+				int position = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_POSITION, 0);
+				String comment = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_REMARKS);
+				String def = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+				ci.setColumnSize(size);
+				ci.setDecimalDigits(digits);
+				ci.setIsNullable(StringUtil.stringToBool(nullable));
+				ci.setDbmsType(dbmstype);
+				ci.setComment(comment);
+				ci.setDefaultValue(def);
+				ci.setPosition(position);
+			}
 			result.add(ci);
 		}
 		return result;

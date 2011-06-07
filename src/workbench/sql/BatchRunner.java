@@ -906,6 +906,7 @@ public class BatchRunner
 			String commit =  cmdLine.getValue(AppArguments.ARG_CONN_AUTOCOMMIT);
 			String wksp = cmdLine.getValue(AppArguments.ARG_WORKSPACE);
 			String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
+			String title = cmdLine.getValue(AppArguments.ARG_CONN_NAME, CMD_LINE_PROFILE_NAME);
 			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
 			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
 			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
@@ -920,7 +921,8 @@ public class BatchRunner
 			}
 
 			result = ConnectionProfile.createEmptyProfile();
-			result.setName(CMD_LINE_PROFILE_NAME);
+			result.setTemporaryProfile(true);
+			result.setName(title);
 			result.setDriverclass(driverclass);
 			result.setDriverName(null);
 			result.setStoreExplorerSchema(false);

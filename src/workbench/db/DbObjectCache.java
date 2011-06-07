@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 
 /**
@@ -112,7 +114,7 @@ public class DbObjectCache
 	}
 
 	/**
-	 * Get the tables (and views) the are currently in the cache
+	 * Get the procedures the are currently in the cache
 	 */
 	public List<ProcedureDefinition> getProcedures(String schema)
 	{
@@ -199,17 +201,16 @@ public class DbObjectCache
 	}
 
 	/**
-	 * Return the columns for the given table
-	 * @return a List with {@link workbench.db.ColumnIdentifier} objects
+	 * Return the columns for the given table.
+	 *
+	 * If the table columns are not in the cache they are retrieved from the database.
+	 * 
+	 * @return the columns of the table.
+	 * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
 	 */
-	public List<ColumnIdentifier> getColumns(TableIdentifier tbl)
+	public synchronized List<ColumnIdentifier> getColumns(TableIdentifier tbl)
 	{
 		String schema = getSchemaToUse(tbl.getSchema());
-
-		if (this.objects.size() == 0 || !schemasInCache.contains(schema == null ? NULL_SCHEMA : schema))
-		{
-			this.getTables(schema);
-		}
 
 		TableIdentifier toSearch = tbl.createCopy();
 		toSearch.adjustCase(dbConnection);
@@ -219,6 +220,19 @@ public class DbObjectCache
 		}
 
 		List<ColumnIdentifier> cols = this.objects.get(toSearch);
+		if (cols == null)
+		{
+			try
+			{
+				TableDefinition def = dbConnection.getMetadata().getTableDefinition(toSearch);
+				addTable(def);
+			}
+			catch (SQLException sql)
+			{
+				LogMgr.logWarning("DbObjectCache.getColumns()", "Error retrieving table definition", sql);
+				return null;
+			}
+		}
 
 		// To support Oracle public synonyms, try to find a table with that name but without a schema
 		if (retrieveOraclePublicSynonyms && toSearch.getSchema() != null && cols == null)
@@ -276,6 +290,76 @@ public class DbObjectCache
 		return Collections.unmodifiableList(cols);
 	}
 
+	public synchronized void removeTable(TableIdentifier tbl)
+	{
+		if (tbl == null) return;
+
+		boolean removed = this.objects.remove(tbl) != null;
+		if (removed)
+		{
+			LogMgr.logDebug("DbObjectCach.addTableList()", "Removed " + tbl.getTableName() + " from the cache");
+		}
+	}
+
+	public synchronized void addTableList(DataStore tables, String schema)
+	{
+		if (schema == null || "*".equals(schema) || "%".equals(schema)) return;
+		Set<String> selectable = dbConnection.getMetadata().getObjectsWithData();
+
+		int count = 0;
+
+		// remove all tables for this schema otherwise we cannot get rid of
+		// tables that might have been dropped.
+		Iterator<TableIdentifier> itr = objects.keySet().iterator();
+		while (itr.hasNext())
+		{
+			TableIdentifier tbl = itr.next();
+			if (schema.equalsIgnoreCase(tbl.getSchema()))
+			{
+				itr.remove();
+			}
+		}
+
+		for (int row = 0; row < tables.getRowCount(); row++)
+		{
+			String type = tables.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			if (selectable.contains(type))
+			{
+				TableIdentifier tbl = createIdentifier(tables, row);
+				if (objects.get(tbl) == null)
+				{
+					// The table is either not there, or no columns have been retrieved so it's safe to add
+					objects.put(tbl, null);
+					count ++;
+				}
+			}
+		}
+		this.schemasInCache.add(schema);
+		LogMgr.logDebug("DbObjectCach.addTableList()", "Added " + count + " objects");
+	}
+
+	private TableIdentifier createIdentifier(DataStore tableList, int row)
+	{
+		String name = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		String schema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+		String catalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+		String type = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+		String comment = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
+		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+		tbl.setType(type);
+		tbl.setNeverAdjustCase(true);
+		tbl.setComment(comment);
+		return tbl;
+	}
+
+	public synchronized void addTable(TableDefinition table)
+	{
+		if (table != null)
+		{
+			this.objects.put(table.getTable(), table.getColumns());
+		}
+	}
+
 	/**
 	 * Return the stored key according to the passed
 	 * TableIdentifier. The stored key might carry additional
@@ -288,7 +372,7 @@ public class DbObjectCache
 
 		// as contains() is using the comparator as well, we have to use it here also!
 		Comparator<? super TableIdentifier> comparator = objects.comparator();
-		
+
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			if (comparator.compare(key, tbl) == 0) return tbl;

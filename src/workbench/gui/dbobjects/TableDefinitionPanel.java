@@ -30,16 +30,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import workbench.db.ColumnDropper;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
-import workbench.db.DbObject;
-import workbench.db.IndexColumn;
-import workbench.db.IndexReader;
-import workbench.db.TableColumnsDatastore;
-import workbench.db.TableIdentifier;
-import workbench.db.TableSelectBuilder;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -354,6 +345,13 @@ public class TableDefinitionPanel
 					int posIndex = dsModel.findColumn("POSITION");
 					int pkIndex = dsModel.findColumn("PK");
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
+
+					if (meta.isTableType(currentTable.getType()) || meta.getViewTypeName().equals(currentTable.getType()))
+					{
+						List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(meta, def);
+						TableDefinition tbl = new TableDefinition(currentTable, cols);
+						dbConnection.getObjectCache().addTable(tbl);
+					}
 				}
 
 				alterButton.setVisible(dbConnection.getDbSettings().columnCommentAllowed(currentTable.getType()));

@@ -89,7 +89,7 @@ public class MainWindowTest
 		final JListOperator pages = new JListOperator(dialog);
 
 		int count = pages.getModel().getSize();
-		assertEquals(15, count);
+		assertEquals(16, count);
 
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("pagetitle");
@@ -133,7 +133,7 @@ public class MainWindowTest
 		Thread.sleep(250);
 
 		// Now test the DbExplorer in a stand-alone window
-		
+
 		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("Tools|New DbExplorer Window", "|");
 		tool.waitEmpty();
 
@@ -406,7 +406,7 @@ public class MainWindowTest
 		assertNotNull(logWindow);
 		logWindow.close();
 	}
-	
+
 	private void appendTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -455,12 +455,13 @@ public class MainWindowTest
 	private String saveChanges(final SqlPanel panel)
 	{
 		Runnable r = new Runnable()
+		{
+			@Override
+			public void run()
 			{
-				public void run()
-				{
-					panel.updateDb();
-				}
-			};
+				panel.updateDb();
+			}
+		};
 		testUtil.execute(r);
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
@@ -472,13 +473,15 @@ public class MainWindowTest
 	private String runSql(final SqlPanel panel, final String sql)
 	{
 		Runnable r = new Runnable()
+		{
+			@Override
+			public void run()
 			{
-				public void run()
-				{
-					panel.getEditor().setText(sql);
-					panel.runAll();
-				}
-			};
+				panel.getEditor().setText(sql);
+				panel.runAll();
+			}
+		};
+		
 		testUtil.execute(r);
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();

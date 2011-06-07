@@ -895,6 +895,7 @@ public class TableListPanel
 			}
 
 			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
+			dbConnection.getObjectCache().addTableList(ds, currentSchema);
 			tableList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
