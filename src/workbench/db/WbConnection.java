@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import workbench.db.objectcache.DbObjectCache;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
@@ -60,7 +62,6 @@ public class WbConnection
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
 	private List<PropertyChangeListener> listeners;
-	private DbObjectCache objectCache;
 
 	private Method clearSettings;
 	private Object dbAccess;
@@ -186,11 +187,7 @@ public class WbConnection
 
 	public DbObjectCache getObjectCache()
 	{
-		if (this.objectCache == null)
-		{
-			this.objectCache = new DbObjectCache(this);
-		}
-		return this.objectCache;
+		return DbObjectCacheFactory.getInstance().getCache(this);
 	}
 
 	/**

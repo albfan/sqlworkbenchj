@@ -878,6 +878,7 @@ public class DbMetadata
 	{
 		if (catalog == null) return true;
 		if (dbSettings.alwaysUseCatalog()) return false;
+		if (!dbSettings.supportsCatalogs()) return true;
 
 		if (catalogsToIgnore == null)
 		{

@@ -58,7 +58,7 @@ public class ObjectScripter
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
-		
+
 		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_SEQUENCE,
 			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG,
 			TYPE_DOMAIN, TYPE_ENUM);
@@ -66,22 +66,26 @@ public class ObjectScripter
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 	}
 
+	@Override
 	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
 	{
 		this.progressMonitor = aMonitor;
 	}
 
+	@Override
 	public String getScript()
 	{
 		if (this.script == null) this.generateScript();
 		return this.script.toString();
 	}
 
+	@Override
 	public boolean isCancelled()
 	{
 		return this.cancel;
 	}
 
+	@Override
 	public void generateScript()
 	{
 		try
@@ -115,6 +119,7 @@ public class ObjectScripter
 		}
 	}
 
+	@Override
 	public void cancel()
 	{
 		this.cancel = true;

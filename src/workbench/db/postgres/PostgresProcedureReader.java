@@ -250,6 +250,7 @@ public class PostgresProcedureReader
 		}
 	}
 
+	@Override
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
@@ -622,7 +623,7 @@ public class PostgresProcedureReader
 				{
 					source.append(",\n  initcond = '" + initcond + "'");
 				}
-				source.append("\n);");
+				source.append("\n);\n");
 			}
 			connection.releaseSavepoint(sp);
 		}

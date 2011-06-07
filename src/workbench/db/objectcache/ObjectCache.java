@@ -9,10 +9,8 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.objectcache;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +23,13 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.ProcedureDefinition;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableNameSorter;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -34,10 +39,8 @@ import workbench.util.CollectionUtil;
  * A cache for database objects to support Auto-completion in the editor
  * @author  Thomas Kellerer
  */
-public class DbObjectCache
-	implements PropertyChangeListener
+class ObjectCache
 {
-	private WbConnection dbConnection;
 	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
 	private boolean retrieveOraclePublicSynonyms;
 
@@ -45,19 +48,18 @@ public class DbObjectCache
 	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 
-	DbObjectCache(WbConnection conn)
+	ObjectCache(WbConnection conn)
 	{
-		this.dbConnection = conn;
 		this.createCache();
 		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
-		conn.addChangeListener(this);
 	}
 
 	private void createCache()
 	{
-		schemasInCache = new TreeSet<String>();
+		schemasInCache = CollectionUtil.caseInsensitiveSet();
 		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>(new TableNameSorter(true));
 	}
+
 	/**
 	 * Add this list of tables to the current cache.
 	 */
@@ -72,28 +74,28 @@ public class DbObjectCache
 		}
 	}
 
-	public Set<TableIdentifier> getTables(String schema)
+	Set<TableIdentifier> getTables(WbConnection dbConnection, String schema)
 	{
-		return getTables(schema, null);
+		return getTables(dbConnection, schema, null);
 	}
 
-	private String getSchemaToUse(String schema)
+	private String getSchemaToUse(WbConnection dbConnection, String schema)
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
+		DbMetadata meta = dbConnection.getMetadata();
 		return meta.adjustSchemaNameCase(schema);
 	}
 
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	public Set<TableIdentifier> getTables(String schema, List<String> type)
+	Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
 	{
-		String schemaToUse = getSchemaToUse(schema);
+		String schemaToUse = getSchemaToUse(dbConnection, schema);
 		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse)))
 		{
 			try
 			{
-				DbMetadata meta = this.dbConnection.getMetadata();
+				DbMetadata meta = dbConnection.getMetadata();
 				List<TableIdentifier> tables = meta.getSelectableObjectsList(null, schemaToUse);
 				for (TableIdentifier tbl : tables)
 				{
@@ -108,28 +110,28 @@ public class DbObjectCache
 			}
 		}
 		if (type != null)
-			return filterTablesByType(schemaToUse, type);
+			return filterTablesByType(dbConnection, schemaToUse, type);
 		else
-			return filterTablesBySchema(schemaToUse);
+			return filterTablesBySchema(dbConnection, schemaToUse);
 	}
 
 	/**
 	 * Get the procedures the are currently in the cache
 	 */
-	public List<ProcedureDefinition> getProcedures(String schema)
+	public List<ProcedureDefinition> getProcedures(WbConnection dbConnection, String schema)
 	{
-		String schemaToUse = getSchemaToUse(schema);
+		String schemaToUse = getSchemaToUse(dbConnection, schema);
 		List<ProcedureDefinition> procs = procedureCache.get(schemaToUse);
 		if (procs == null)
 		{
 			try
 			{
-				procs = this.dbConnection.getMetadata().getProcedureReader().getProcedureList(null, schemaToUse, "%");
+				procs = dbConnection.getMetadata().getProcedureReader().getProcedureList(null, schemaToUse, "%");
 				if (dbConnection.getDbSettings().getRetrieveProcParmsForAutoCompletion())
 				{
 					for (ProcedureDefinition proc : procs)
 					{
-						proc.getParameterTypes(this.dbConnection);
+						proc.getParameterTypes(dbConnection);
 					}
 				}
 				procedureCache.put(schemaToUse, procs);
@@ -142,10 +144,10 @@ public class DbObjectCache
 		return procs;
 	}
 
-	private Set<TableIdentifier> filterTablesByType(String schema, List<String> type)
+	private Set<TableIdentifier> filterTablesByType(WbConnection dbConnection, String schema, List<String> type)
 	{
-		this.getTables(schema);
-		String schemaToUse = getSchemaToUse(schema);
+		this.getTables(dbConnection, schema);
+		String schemaToUse = getSchemaToUse(dbConnection, schema);
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter());
 		for (TableIdentifier tbl : objects.keySet())
 		{
@@ -163,11 +165,11 @@ public class DbObjectCache
 		return result;
 	}
 
-	private Set<TableIdentifier> filterTablesBySchema(String schema)
+	private Set<TableIdentifier> filterTablesBySchema(WbConnection dbConnection, String schema)
 	{
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter(true));
-		DbMetadata meta = this.dbConnection.getMetadata();
-		String schemaToUse = getSchemaToUse(schema);
+		DbMetadata meta = dbConnection.getMetadata();
+		String schemaToUse = getSchemaToUse(dbConnection, schema);
 
 		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
 		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
@@ -204,13 +206,13 @@ public class DbObjectCache
 	 * Return the columns for the given table.
 	 *
 	 * If the table columns are not in the cache they are retrieved from the database.
-	 * 
+	 *
 	 * @return the columns of the table.
 	 * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
 	 */
-	public synchronized List<ColumnIdentifier> getColumns(TableIdentifier tbl)
+	public synchronized List<ColumnIdentifier> getColumns(WbConnection dbConnection, TableIdentifier tbl)
 	{
-		String schema = getSchemaToUse(tbl.getSchema());
+		String schema = getSchemaToUse(dbConnection, tbl.getSchema());
 
 		TableIdentifier toSearch = tbl.createCopy();
 		toSearch.adjustCase(dbConnection);
@@ -243,7 +245,7 @@ public class DbObjectCache
 			if (cols == null)
 			{
 				// retrieve Oracle PUBLIC synonyms
-				this.getTables("PUBLIC");
+				this.getTables(dbConnection, "PUBLIC");
 				cols = this.objects.get(toSearch);
 			}
 		}
@@ -268,12 +270,12 @@ public class DbObjectCache
 			else
 			{
 				// retrieve the real table identifier based on the table name
-				tblToUse = this.dbConnection.getMetadata().findObject(toSearch);
+				tblToUse = dbConnection.getMetadata().findObject(toSearch);
 			}
 
 			try
 			{
-				cols = this.dbConnection.getMetadata().getTableColumns(tblToUse);
+				cols = dbConnection.getMetadata().getTableColumns(tblToUse);
 			}
 			catch (Throwable e)
 			{
@@ -290,7 +292,7 @@ public class DbObjectCache
 		return Collections.unmodifiableList(cols);
 	}
 
-	public synchronized void removeTable(TableIdentifier tbl)
+	synchronized void removeTable(TableIdentifier tbl)
 	{
 		if (tbl == null) return;
 
@@ -301,7 +303,7 @@ public class DbObjectCache
 		}
 	}
 
-	public synchronized void addTableList(DataStore tables, String schema)
+	synchronized void addTableList(WbConnection dbConnection, DataStore tables, String schema)
 	{
 		if (schema == null || "*".equals(schema) || "%".equals(schema)) return;
 		Set<String> selectable = dbConnection.getMetadata().getObjectsWithData();
@@ -352,11 +354,15 @@ public class DbObjectCache
 		return tbl;
 	}
 
-	public synchronized void addTable(TableDefinition table)
+	public synchronized void addTable(TableDefinition definition)
 	{
-		if (table != null)
+		if (definition != null)
 		{
-			this.objects.put(table.getTable(), table.getColumns());
+			TableIdentifier table = definition.getTable();
+			if (table.getSchema() != null)
+			{
+				this.objects.put(definition.getTable(), definition.getColumns());
+			}
 		}
 	}
 
@@ -387,20 +393,6 @@ public class DbObjectCache
 	{
 		if (this.objects != null) this.objects.clear();
 		this.schemasInCache.clear();
-	}
-
-	/**
-	 * Notification about the state of the connection. If the connection
-	 * is closed, we can dispose the object cache
-	 */
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (WbConnection.PROP_CONNECTION_STATE.equals(evt.getPropertyName()) &&
-			  WbConnection.CONNECTION_CLOSED.equals(evt.getNewValue()))
-		{
-			this.clear();
-		}
 	}
 
 }
