@@ -45,7 +45,7 @@ public class SqlFormatterTest
 		{
 			Settings.getInstance().setFormatterMaxColumnsInInsert(10);
 			String formatted = f.getFormattedSql().toString();
-			System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
+//			System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
 			assertEquals("SELECT in VALUES not formatted", expected, formatted);
 		}
 		finally
@@ -825,6 +825,36 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testCreateTableQuoted()
+		throws Exception
+	{
+		String sql = "create table \"public\".\"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"CREATE TABLE \"public\".\"users\" \n" +
+			"(\n" +
+			"  \"id\"          INTEGER,\n" +
+			"  \"firstname\"   VARCHAR(100),\n" +
+			"  \"lastname\"    VARCHAR(100)\n" +
+			")";
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
+		sql = "create table \"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected =
+			"CREATE TABLE \"users\" \n" +
+			"(\n" +
+			"  \"id\"          INTEGER,\n" +
+			"  \"firstname\"   VARCHAR(100),\n" +
+			"  \"lastname\"    VARCHAR(100)\n" +
+			")";
+		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
 	}
 
 	@Test

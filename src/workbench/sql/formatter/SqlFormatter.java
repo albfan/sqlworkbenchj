@@ -1724,14 +1724,35 @@ public class SqlFormatter
 		// the next token has to be the table name, so
 		// we can simply write it out
 
-		this.appendText(t.getContents());
-		this.appendText(' ');
+		String name = t.getContents();
+		this.appendText(name);
 
-		t = this.skipComments();
+		// the SQLLexer does not handle quoted multi-part identifiers correctly...
+		if (SqlUtil.isQuotedIdentifier(name))
+		{
+			t = this.skipComments();
+			if (t.getContents().equals("."))
+			{
+				appendText('.');
+				// the following token must be another identifier, otherwise the syntax is not correct
+				t = this.skipComments();
+				appendText(t.getContents());
+				appendText(' ');
+				t = this.skipComments();
+			}
+			else
+			{
+				appendText(' ');
+			}
+		}
+		else
+		{
+			this.appendText(' ');
+			t = this.skipComments();
+		}
 
 		if (t == null) return t;
 
-		// this has to be the opening bracket before the table definition
 		if (t.getContents().equals("AS"))
 		{
 			this.appendNewline();

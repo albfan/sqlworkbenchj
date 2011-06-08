@@ -208,6 +208,24 @@ public class SqlUtil
 		return input;
 	}
 
+	public static boolean isQuotedIdentifier(String input)
+	{
+		if (input == null) return false;
+
+		int len = input.length();
+
+		char firstChar = input.charAt(0);
+		char lastChar = input.charAt(len - 1);
+
+		if ( (firstChar == '"' && lastChar == '"') ||
+				 (firstChar == '`' && lastChar == '`') /* workaround the idiotic MySQL quoting */
+				 )
+		{
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Extract the name of the created or dropped object.
 	 *
