@@ -23,6 +23,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
@@ -37,6 +38,7 @@ import workbench.util.CollectionUtil;
 
 /**
  * A cache for database objects to support Auto-completion in the editor
+ * 
  * @author  Thomas Kellerer
  */
 class ObjectCache
@@ -110,9 +112,13 @@ class ObjectCache
 			}
 		}
 		if (type != null)
+		{
 			return filterTablesByType(dbConnection, schemaToUse, type);
+		}
 		else
+		{
 			return filterTablesBySchema(dbConnection, schemaToUse);
+		}
 	}
 
 	/**
@@ -361,7 +367,15 @@ class ObjectCache
 			TableIdentifier table = definition.getTable();
 			if (table.getSchema() != null)
 			{
-				this.objects.put(definition.getTable(), definition.getColumns());
+				List<ColumnIdentifier> old = this.objects.put(definition.getTable(), definition.getColumns());
+				if (old == null)
+				{
+					LogMgr.logDebug("ObjectCache.addTable()", "Added table definition for " + table.getTableExpression());
+				}
+				else
+				{
+					LogMgr.logDebug("ObjectCache.addTable()", "Replaced existing table definition for " + table.getTableExpression());
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * DbObjectCache
+ * DbObjectCacheWrapper
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,46 +15,62 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 
 /**
+ * A wrapper around ObjectCache in order to avoid having to supply the Connection for each call.
  *
  * @author Thomas Kellerer
  */
-public interface DbObjectCache
+public class DbObjectCache
 {
+	private final ObjectCache objectCache;
+	private final WbConnection dbConnection;
 
-	void addTable(TableDefinition table);
+	DbObjectCache(ObjectCache cache, WbConnection connection)
+	{
+		dbConnection = connection;
+		objectCache = cache;
+	}
 
-	void addTableList(DataStore tables, String schema);
+	public void addTable(TableDefinition table)
+	{
+		objectCache.addTable(table);
+	}
 
-	/**
-	 * Disposes any db objects held in the cache
-	 */
-	void clear();
+	public void addTableList(DataStore tables, String schema)
+	{
+		objectCache.addTableList(dbConnection, tables, schema);
+	}
 
-	/**
-	 * Return the columns for the given table.
-	 *
-	 * If the table columns are not in the cache they are retrieved from the database.
-	 *
-	 * @return the columns of the table.
-	 * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
-	 */
-	List<ColumnIdentifier> getColumns(TableIdentifier tbl);
+	public void clear()
+	{
+		objectCache.clear();
+	}
 
-	/**
-	 * Get the procedures the are currently in the cache
-	 */
-	List<ProcedureDefinition> getProcedures(String schema);
+	public List<ColumnIdentifier> getColumns(TableIdentifier tbl)
+	{
+		return objectCache.getColumns(dbConnection, tbl);
+	}
 
-	Set<TableIdentifier> getTables(String schema);
+	public List<ProcedureDefinition> getProcedures(String schema)
+	{
+		return objectCache.getProcedures(dbConnection, schema);
+	}
 
-	/**
-	 * Get the tables (and views) the are currently in the cache
-	 */
-	Set<TableIdentifier> getTables(String schema, List<String> type);
+	public Set<TableIdentifier> getTables(String schema)
+	{
+		return objectCache.getTables(dbConnection, schema);
+	}
 
-	void removeTable(TableIdentifier tbl);
+	public Set<TableIdentifier> getTables(String schema, List<String> type)
+	{
+		return objectCache.getTables(dbConnection, schema, type);
+	}
 
+	public void removeTable(TableIdentifier tbl)
+	{
+		objectCache.removeTable(tbl);
+	}
 }

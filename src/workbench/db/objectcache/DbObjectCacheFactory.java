@@ -17,13 +17,16 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 
 /**
+ * A factory for DbObjectCache instances.
+ *
+ * For each unique JDBC URL (including the username) one instance of the cache will be maintained.
  *
  * @author Thomas Kellerer
  */
 public class DbObjectCacheFactory
 	implements PropertyChangeListener
 {
-	private Object lock = new Object();
+	private final Object lock = new Object();
 	private Map<String, ObjectCache> caches;
 
 	/**
@@ -58,7 +61,7 @@ public class DbObjectCacheFactory
 				cache = new ObjectCache(connection);
 				caches.put(key, cache);
 			}
-			return new DbObjectCacheWrapper(cache, connection);
+			return new DbObjectCache(cache, connection);
 		}
 	}
 
