@@ -582,6 +582,15 @@ another_variable=24</programlisting>
             </row>
 
             <row>
+              <entry>-connectionName</entry>
+              <entry>
+                When specifying a connection without a profile (only using <literal>-username</literal>, <literal>-password</literal>
+                and so on) then the name of the connection can be defined using this parameter. The connection name
+                will be shown in the title of the main window if &wb-productname; is started in GUI mode.
+                The parameter does not have any visible effect when running in batch or console mode.
+              </entry>
+            </row>
+            <row>
               <entry>-workspace</entry>
               <entry>The workspace file to be loaded. If the file specification does not
               include a directory, the workspace will be loaded from the
