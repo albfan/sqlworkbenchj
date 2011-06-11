@@ -62,6 +62,11 @@ import workbench.util.WbProperties;
 /**
  * The singleton to manage configuration settings for SQL Workbench/J
  *
+ * Configuration properties are read from the file workbench.settings
+ *
+ * Defaults are applied by first read default.properties and then reading the user configuration
+ * stored in workbench.settings
+ *
  * @author Thomas Kellerer
  */
 public class Settings
@@ -2339,7 +2344,9 @@ public class Settings
 
 	public String getSqlParameterSuffix()
 	{
-		return getProperty("workbench.sql.parameter.suffix", "]");
+		// The built-in default suffix is stored in default.properties thus is can be "deleted"
+		// by adding an empty property in workbench.settings
+		return getProperty("workbench.sql.parameter.suffix", "");
 	}
 
 	/**
