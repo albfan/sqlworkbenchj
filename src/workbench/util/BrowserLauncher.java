@@ -29,6 +29,7 @@ public class BrowserLauncher
 		{
 			WbThread t = new WbThread("OpenBrowser")
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -57,7 +58,7 @@ public class BrowserLauncher
 	{
 		openURL(new URI(url));
 	}
-	
+
 	public static void openURL(final URI url)
 		throws Exception
 	{
@@ -65,6 +66,7 @@ public class BrowserLauncher
 		{
 			WbThread t = new WbThread("OpenBrowser")
 			{
+				@Override
 				public void run()
 				{
 					try
