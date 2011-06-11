@@ -290,6 +290,7 @@ public class CompletionPopup
 		{
 			result = value;
 		}
+		result = this.context.getAnalyzer().cleanupPasteValue(result);
 		if (this.context.getAnalyzer().appendDotToSelection()) result += ".";
 		if (this.context.getAnalyzer().isKeywordList()) result += " ";
 		if (this.context.getAnalyzer().isWbParam())

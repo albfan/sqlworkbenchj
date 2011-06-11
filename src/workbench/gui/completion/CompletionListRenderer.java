@@ -1,11 +1,11 @@
 /*
  * CompletionListRenderer
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.gui.completion;
@@ -23,7 +23,7 @@ import workbench.util.SqlUtil;
  * If a ColumnIdentifier is displayed, and that is a PK column, the name will be displayed in bold face.
  *
  * For instances of DbObject, the object's comment (remark) is shown as a tooltip.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class CompletionListRenderer
@@ -59,7 +59,6 @@ public class CompletionListRenderer
 			{
 				setToolTipText(comment);
 			}
-
 		}
 		return c;
 	}

@@ -369,6 +369,19 @@ public abstract class BaseAnalyzer
 		this.elements.addAll(tables);
 	}
 
+	public String cleanupPasteValue(String toPaste)
+	{
+		if (schemaForTableList != null && this.context == CONTEXT_TABLE_LIST)
+		{
+			TableIdentifier tbl = new TableIdentifier(toPaste);
+			if (schemaForTableList.equalsIgnoreCase(tbl.getSchema()))
+			{
+				return tbl.getTableName();
+			}
+		}
+		return toPaste;
+	}
+
 	@SuppressWarnings("unchecked")
 	private boolean retrieveColumns()
 	{

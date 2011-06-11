@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-05-15">
+  <release build="-1" date="2011-06-07">
     <entry dev-build="6" type="enh">For PostgreSQL 9.1 and Oracle, the trigger panel in the DbExplorer is now also shown for Views</entry>
     <entry dev-build="6" type="enh">For MySQL and SQL Server column level collation and character set definitions are now shown</entry>
     <entry dev-build="6" type="enh">Support for new features in PostgreSQL 9.1 has been added. The SQL source in the DbExplorer will now show FOREIGN and UNLOGGED tables correctly as well as column level collations</entry>
@@ -16,6 +16,9 @@
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
+    <entry dev-build="7" type="fix">Table names with non-standard upper/lowercase usage where not quoted in the code completion.</entry>
+    <entry dev-build="7" type="fix">Code completion used the wrong value to insert into the editor when the current word limited the list a specific schema.</entry>
+    <entry dev-build="7" type="fix">Empty strings where not treated as NULL values for boolean or bit columns when importing text files using WbImport</entry>
     <entry dev-build="7" type="fix">When compiling several procedures from within the DbExplorer's procedure list, Oracle packages are now only compiled once (contributed by Andreas)</entry>
     <entry dev-build="7" type="fix">WbCall did not handle overloaded package procedures in Oracle</entry>
     <entry dev-build="7" type="fix">The SQL Formatter did not properly format function calls that do not have parameters in e.g the VALUES list</entry>

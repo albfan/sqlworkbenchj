@@ -219,6 +219,7 @@ public class TableIdentifier
 		copy.retrieveFkSource = this.retrieveFkSource;
 		copy.commentWasInitialized = this.commentWasInitialized;
 		copy.tableComment = this.tableComment;
+		copy.tableTypeOption = this.tableTypeOption;
 		return copy;
 	}
 
@@ -370,9 +371,20 @@ public class TableIdentifier
 		return result.toString();
 	}
 
-	String getRawCatalog() { return this.catalog; }
-	String getRawTableName() { return this.tablename; }
-	String getRawSchema() { return this.schema; }
+	String getRawCatalog()
+	{
+		return this.catalog;
+	}
+
+	String getRawTableName()
+	{
+		return this.tablename;
+	}
+
+	String getRawSchema()
+	{
+		return this.schema;
+	}
 
 	public String getTableName()
 	{

@@ -244,6 +244,12 @@ public class TableIdentifierTest
 		assertEquals(sql, t2.getTableExpression());
 		assertEquals(true, tbl.equals(t2));
 		assertEquals("this is a comment", t2.getComment());
+
+		tbl = new TableIdentifier("foo");
+		tbl.setTableTypeOption("TEMP");
+
+		t2 = tbl.createCopy();
+		assertEquals(tbl.getTableTypeOption(), t2.getTableTypeOption());
 	}
 
 	@Test

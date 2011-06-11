@@ -1201,7 +1201,7 @@ public class DbMetadata
 		boolean isUpper = StringUtil.isUpperCase(name);
 		boolean isLower = StringUtil.isLowerCase(name);
 
-		if (isUpper && storesUpperCaseIdentifiers())  return true;
+		if (isUpper && storesUpperCaseIdentifiers()) return true;
 		if (isLower && storesLowerCaseIdentifiers()) return true;
 
 		return false;

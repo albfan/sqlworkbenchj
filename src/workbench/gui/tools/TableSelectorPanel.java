@@ -33,7 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import workbench.db.TableIdentifier;
-import workbench.db.TableNameComparator;
+import workbench.db.TableNameSorter;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
@@ -284,7 +284,7 @@ public class TableSelectorPanel
 			tableSelector.removeItemListener(this);
 			List<TableIdentifier> tables = dbConnection.getMetadata().getSelectableObjectsList(null, currentSchema);
 
-			Collections.sort(tables, new TableNameComparator());
+			Collections.sort(tables, new TableNameSorter());
 			tableSelector.removeAllItems();
 
 			if (allowNewTable)

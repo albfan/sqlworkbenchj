@@ -53,7 +53,7 @@ public class DbObjectCache
 	private void createCache()
 	{
 		schemasInCache = new TreeSet<String>();
-		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>();
+		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>(new TableNameSorter(true));
 	}
 	/**
 	 * Add this list of tables to the current cache.
@@ -92,6 +92,10 @@ public class DbObjectCache
 			{
 				DbMetadata meta = this.dbConnection.getMetadata();
 				List<TableIdentifier> tables = meta.getSelectableObjectsList(null, schemaToUse);
+				for (TableIdentifier tbl : tables)
+				{
+					tbl.checkQuotesNeeded(dbConnection);
+				}
 				this.setTables(tables);
 				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schemaToUse);
 			}
@@ -139,7 +143,7 @@ public class DbObjectCache
 	{
 		this.getTables(schema);
 		String schemaToUse = getSchemaToUse(schema);
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter());
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String ttype = tbl.getType();
@@ -158,7 +162,7 @@ public class DbObjectCache
 
 	private Set<TableIdentifier> filterTablesBySchema(String schema)
 	{
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator(true));
+		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter(true));
 		DbMetadata meta = this.dbConnection.getMetadata();
 		String schemaToUse = getSchemaToUse(schema);
 
@@ -174,7 +178,7 @@ public class DbObjectCache
 			// meta.ignoreSchema() needs to be tested, because if that is true
 			// the returned Tables will not contain the schema...
 			boolean ignoreSchema = meta.ignoreSchema(schemaToUse, currentSchema);
-			
+
 			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || ignoreSchema)
 			{
 				TableIdentifier copy = tbl.createCopy();
