@@ -113,6 +113,7 @@ public class ConnectionInfo
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (getParent() != null)
@@ -125,6 +126,7 @@ public class ConnectionInfo
 		});
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.sourceConnection
@@ -135,6 +137,7 @@ public class ConnectionInfo
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (this.sourceConnection == null) return;

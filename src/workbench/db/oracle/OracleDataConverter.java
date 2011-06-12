@@ -51,7 +51,7 @@ public class OracleDataConverter
 	{
 		return String.class;
 	}
-	
+
 	/**
 	 * Two Oracle datatypes are supported
 	 * <ul>
@@ -62,6 +62,7 @@ public class OracleDataConverter
 	 * @param jdbcType the jdbcType as returned by the driver
 	 * @param dbmsType the name of the datatype for this value
 	 */
+	@Override
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
 		return (jdbcType == Types.VARBINARY && dbmsType.equals("RAW") ||
@@ -83,6 +84,7 @@ public class OracleDataConverter
 	 * @return the originalValue or a converted value if approriate
 	 * @see #convertsType(int, java.lang.String)
 	 */
+	@Override
 	public Object convertValue(int jdbcType, String dbmsType, Object inputValue)
 	{
 		if (inputValue == null) return null;
@@ -139,7 +141,7 @@ public class OracleDataConverter
 		{
 			try
 			{
-				stringValueMethod = value.getClass().getDeclaredMethod("stringValue");
+				stringValueMethod = value.getClass().getMethod("stringValue");
 			}
 			catch (Throwable th)
 			{
