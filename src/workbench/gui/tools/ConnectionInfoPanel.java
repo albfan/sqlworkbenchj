@@ -97,13 +97,31 @@ public class ConnectionInfoPanel
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        copyButton = new javax.swing.JButton();
         jTabbedPane1 = new WbTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         infotext = new InfoEditorPane();
+        copyButton = new javax.swing.JButton();
         extendedPanel = new javax.swing.JPanel();
 
         setLayout(new java.awt.GridBagLayout());
+
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        infotext.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        infotext.setContentType("text/html");
+        infotext.setEditable(false);
+        infotext.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
+        jScrollPane1.setViewportView(infotext);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        jPanel1.add(jScrollPane1, gridBagConstraints);
 
         copyButton.setText(ResourceMgr.getString("LblCopyInfo")); // NOI18N
         copyButton.setToolTipText(ResourceMgr.getString("d_LblCopyInfo")); // NOI18N
@@ -117,15 +135,9 @@ public class ConnectionInfoPanel
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        add(copyButton, gridBagConstraints);
+        jPanel1.add(copyButton, gridBagConstraints);
 
-        infotext.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        infotext.setContentType("text/html");
-        infotext.setEditable(false);
-        infotext.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
-        jScrollPane1.setViewportView(infotext);
-
-        jTabbedPane1.addTab("Basic", jScrollPane1);
+        jTabbedPane1.addTab("Basic", jPanel1);
 
         extendedPanel.setLayout(new java.awt.BorderLayout());
         jTabbedPane1.addTab("Extended", extendedPanel);
@@ -133,7 +145,6 @@ public class ConnectionInfoPanel
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -162,6 +173,7 @@ public class ConnectionInfoPanel
     private javax.swing.JButton copyButton;
     private javax.swing.JPanel extendedPanel;
     private javax.swing.JEditorPane infotext;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
