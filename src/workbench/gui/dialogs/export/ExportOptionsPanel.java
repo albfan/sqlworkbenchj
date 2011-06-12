@@ -69,17 +69,17 @@ public class ExportOptionsPanel
 	private WbConnection dbConnection;
 	private boolean poiAvailable = false;
 	private boolean xlsxAvailable = false;
-	
+
 	private final String ODS_ITEM = ResourceMgr.getString("TxtOdsName");
 	private final String XLS_ITEM = ResourceMgr.getString("TxtXlsName");
-	private final String XLSM_ITEM = "Excel 2003 (xlsm)";
-	private final String XLSX_ITEM = "Excel 2007 (xlsx)";
-	
+	private final String XLSM_ITEM = "Excel XML Spreadsheet (xml)";
+	private final String XLSX_ITEM = "Excel Workbook (xlsx)";
+
 	public ExportOptionsPanel()
 	{
 		this(null);
 	}
-	
+
 	public ExportOptionsPanel(ResultInfo columns)
 	{
 		super();
@@ -98,14 +98,14 @@ public class ExportOptionsPanel
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		p.add(this.generalOptions, BorderLayout.CENTER);
-		
+
 		JPanel s = new JPanel(new BorderLayout(2, 2));
 		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 2, 5, 0));
 		s.setBorder(b);
-		
+
 		poiAvailable = PoiHelper.isPoiAvailable();
 		xlsxAvailable = PoiHelper.isXLSXAvailable();
-		
+
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");
 		typeSelector.addItem("SQL");
@@ -121,35 +121,35 @@ public class ExportOptionsPanel
 		{
 			typeSelector.addItem(XLSX_ITEM);
 		}
-		
+
 		JLabel type = new JLabel(ResourceMgr.getString("LblExportType"));
 		s.add(type, BorderLayout.WEST);
 		s.add(typeSelector, BorderLayout.CENTER);
 		p.add(s, BorderLayout.SOUTH);
-		
+
 		this.add(p, BorderLayout.NORTH);
-		
+
 		this.textOptions = new TextOptionsPanel();
 		this.typePanel = new JPanel();
 		this.card = new CardLayout();
 		this.typePanel.setLayout(card);
 		this.typePanel.add(this.textOptions, "text");
-		
+
 		this.sqlOptions = new SqlOptionsPanel(columns);
 		this.typePanel.add(this.sqlOptions, "sql");
-		
+
 		xmlOptions = new XmlOptionsPanel();
 		this.typePanel.add(xmlOptions, "xml");
 
 		odsOptions = new SpreadSheetOptionsPanel("ods");
 		this.typePanel.add(odsOptions, "ods");
-		
+
 		htmlOptions = new HtmlOptionsPanel();
-		this.typePanel.add(htmlOptions, "html"); 
-		
+		this.typePanel.add(htmlOptions, "html");
+
 		xlsmOptions = new SpreadSheetOptionsPanel("xlsm");
 		this.typePanel.add(xlsmOptions, "xlsm");
-		
+
 		if (poiAvailable)
 		{
 			xlsOptions = new SpreadSheetOptionsPanel("xls");
@@ -161,7 +161,7 @@ public class ExportOptionsPanel
 			xlsxOptions = new SpreadSheetOptionsPanel("xlsx");
 			typePanel.add(xlsxOptions, "xlsx");
 		}
-		
+
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
 	}
@@ -187,12 +187,12 @@ public class ExportOptionsPanel
 			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
 		}
 	}
-	
+
 	public void setIncludeSqlUpdate(boolean flag)
 	{
 		this.sqlOptions.setIncludeUpdate(flag);
 	}
-	
+
 	public void setIncludeSqlDeleteInsert(boolean flag)
 	{
 		this.sqlOptions.setIncludeDeleteInsert(flag);
@@ -202,7 +202,7 @@ public class ExportOptionsPanel
 	{
 		return this.selectedColumns;
 	}
-	
+
 	public void saveSettings()
 	{
 		this.generalOptions.saveSettings();
@@ -222,7 +222,7 @@ public class ExportOptionsPanel
 		}
 		Settings.getInstance().setProperty("workbench.export.type", this.currentType.getCode());
 	}
-	
+
 	public void restoreSettings()
 	{
 		this.generalOptions.restoreSettings();
@@ -244,9 +244,9 @@ public class ExportOptionsPanel
 		ExportType type = ExportType.getTypeFromCode(code);
 		this.setExportType(type);
 	}
-	
+
 	/**
-	 *	Sets the displayed options according to 
+	 *	Sets the displayed options according to
 	 *  DataExporter.EXPORT_XXXX types
 	 */
 	public void setExportType(ExportType type)
@@ -296,7 +296,7 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "text");
 	}
-	
+
 	public void setTypeText()
 	{
 		showTextOptions();
@@ -308,7 +308,7 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "sql");
 	}
-	
+
 	public void setTypeSql()
 	{
 		showSqlOptions();
@@ -320,7 +320,7 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "xml");
 	}
-	
+
 	public void setTypeXml()
 	{
 		showXmlOptions();
@@ -332,7 +332,7 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "html");
 	}
-	
+
 	public void setTypeHtml()
 	{
 		showHtmlOptions();
@@ -344,14 +344,14 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "ods");
 	}
-	
+
 	public void setTypeOds()
 	{
 		showOdsOptions();
 		this.currentType = ExportType.ODS;
 		typeSelector.setSelectedItem(ODS_ITEM);
 	}
-	
+
 	private void showXlsOptions()
 	{
 		this.card.show(this.typePanel, "xls");
@@ -366,7 +366,7 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "xlsm");
 	}
-	
+
 	public void setTypeXls()
 	{
 		showXlsOptions();
@@ -392,7 +392,7 @@ public class ExportOptionsPanel
 	{
 		return xlsmOptions;
 	}
-	
+
 	public SpreadSheetOptions getXlsOptions()
 	{
 		return xlsOptions;
@@ -402,47 +402,50 @@ public class ExportOptionsPanel
 	{
 		return xlsxOptions;
 	}
-	
+
 	public SpreadSheetOptions getOdsOptions()
 	{
 		return odsOptions;
 	}
-	
+
 	public XmlOptions getXmlOptions()
 	{
 		return xmlOptions;
 	}
-	
+
 	public HtmlOptions getHtmlOptions()
 	{
 		return htmlOptions;
 	}
-	
+
 	public SqlOptions getSqlOptions()
 	{
 		return sqlOptions;
 	}
-	
+
 	public ExportOptions getExportOptions()
 	{
 		return generalOptions;
 	}
-	
+
 	public TextOptions getTextOptions()
 	{
 		return textOptions;
 	}
-	
-	public String getEncoding() 
+
+	@Override
+	public String getEncoding()
 	{
 		return generalOptions.getEncoding();
 	}
-	
+
+	@Override
 	public void setEncoding(String enc)
 	{
 		generalOptions.setEncoding(enc);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent event)
 	{
 		if (event.getSource() == this.typeSelector)
@@ -493,7 +496,7 @@ public class ExportOptionsPanel
 				type = ExportType.HTML;
 				showHtmlOptions();
 			}
-			
+
 			this.currentType = type;
 			firePropertyChange("exportType", null, type);
 		}
@@ -502,7 +505,7 @@ public class ExportOptionsPanel
 			this.selectColumns();
 		}
 	}
-	
+
 	private void retrieveQueryColumns()
 	{
 		try
@@ -521,7 +524,7 @@ public class ExportOptionsPanel
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
-	
+
 	private void selectColumns()
 	{
 		if (this.dataStoreColumns == null)
@@ -532,8 +535,8 @@ public class ExportOptionsPanel
 			}
 		}
 		if (this.dataStoreColumns == null) return;
-		
-		if (this.columnSelectorPanel == null) 
+
+		if (this.columnSelectorPanel == null)
 		{
 			this.columnSelectorPanel = new ColumnSelectorPanel(this.dataStoreColumns.getColumns());
 			this.columnSelectorPanel.selectAll();
@@ -542,7 +545,7 @@ public class ExportOptionsPanel
 		{
 			this.columnSelectorPanel.selectColumns(this.selectedColumns);
 		}
-		
+
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (choice == JOptionPane.OK_OPTION)
@@ -550,5 +553,5 @@ public class ExportOptionsPanel
 			this.selectedColumns = this.columnSelectorPanel.getSelectedColumns();
 		}
 	}
-	
+
 }

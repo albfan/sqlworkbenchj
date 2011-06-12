@@ -89,18 +89,19 @@
 
     <important>
       <para>
-        Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format. To distinguish between the
-        two (XML based) formats from Microsoft, the naming has been changed to reflect the default file extensions that are
-        used by Microsoft.
+        Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format (now called "XML Spreadsheet").
+        To distinguish between the two (XML based) formats from Microsoft, the naming has been changed to reflect the default
+        file extensions that are used by Microsoft. When using Microsof Office 2010, the <literal>-type=xlsm</literal>
+        (plain XML format) should be saved with a file extension of <literal>.xml</literal> in order to be identified correctly.
       </para>
     </important>
 
     <para>
       &wb-productname; supports three different Excel file formats:
         <itemizedlist>
-          <listitem>Office 2003 (xlsm) - this is a plain XML format that does not need additional libraries</listitem>
-          <listitem>The "old" binary format (xls) - only <literal>poi.jar</literal> is needed</listitem>
-          <listitem>Office 2007 (xlsx) - additional libraries from the POI project are needed</listitem>
+          <listitem>Excel XML Spreadsheet (xlsm) - this is a plain XML format that does not need additional libraries</listitem>
+          <listitem>Excel 97-2003 binary format (xls) - only <literal>poi.jar</literal> is needed</listitem>
+          <listitem>Excel 2007 Workbook (xlsx) - additional libraries from the POI project are needed</listitem>
         </itemizedlist>
     </para>
 
@@ -174,22 +175,19 @@
 								format that can be opened e.g. with OpenOffice.org.
 							</para>
 							<para>
-								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML"). This format
-                has been introduced with build 108 as <literal>xlsx</literal> now selects the Office 2007 format.
+								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("XML Spreadsheet").
+                 When using Microsof Office 2010, this export format should should be saved with a file extension
+                 of <literal>.xml</literal> in order to be identified correctly.
               </para>
 							<para>
 								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
-								for Microsoft Excel. The file <literal>poi.jar</literal> is required.
+								for Microsoft Excel (97-2003). The file <literal>poi.jar</literal> is required.
 							</para>
               <para>
-                <literal>xlsx</literal> will generate a spreadsheet file in the Office Open XML format introduced with Microsof Office 2007.
+                <literal>xlsx</literal> will generate a spreadsheet file in the default format introduced with Microsof Office 2007.
                 Additional external libraries are required in order to be able to use this format. Please read the note at the beginning of
                 this section.
 							</para>
-              <para><blockquote>
-                Before build 108, <literal>xlsx</literal> selected the Office 2003 XML format not the new Office 2007 format!
-              </blockquote></para>
-
 						</entry>
 					</row>
 
