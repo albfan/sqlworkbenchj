@@ -216,36 +216,44 @@ public class ValidatingDialog
 		this.dispose();
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 		if (validator == null) editorComponent.requestFocusInWindow();
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		this.close();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (validator != null) validator.componentDisplayed();
@@ -261,6 +269,7 @@ public class ValidatingDialog
 		this.close();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.cancelButton || e.getSource() == this.esc)
