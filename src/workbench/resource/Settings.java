@@ -52,14 +52,7 @@ import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.PkMapping;
-import workbench.util.FileDialogUtil;
-import workbench.util.FileUtil;
-import workbench.util.PlatformHelper;
-import workbench.util.StringUtil;
-import workbench.util.ToolDefinition;
-import workbench.util.WbFile;
-import workbench.util.WbLocale;
-import workbench.util.WbProperties;
+import workbench.util.*;
 
 /**
  * The singleton to manage configuration settings for SQL Workbench/J
@@ -3042,7 +3035,17 @@ public class Settings
 		return this.configfile;
 	}
 
-	public void saveSettings(boolean makeBackup)
+	public boolean makeBackups()
+	{
+		return getBoolProperty("workbench.settings.makebackup", false);
+	}
+
+	/**
+	 * Save all properties to the configuration file.
+	 *
+	 * @param renameExistingFile if true, the existing file will be renamed before the current properties are written
+	 */
+	public void saveSettings(boolean renameExistingFile)
 	{
 		if (this.props == null) return;
 
@@ -3056,9 +3059,28 @@ public class Settings
 
 		ShortcutManager.getInstance().saveSettings();
 
-		if (makeBackup)
+		if (renameExistingFile)
 		{
 			this.configfile.makeBackup();
+		}
+
+		if (makeBackups())
+		{
+			// versioned backups are something different than renaming the existing file
+			// renameExistingFile will be true if an out of memory error occurred at some point
+			// in that case FileVersioning might not work properly so both things are done.
+			int maxVersions = getMaxWorkspaceBackup();
+			String dir = getWorkspaceBackupDir();
+			String sep = getFileVersionDelimiter();
+			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
+			try
+			{
+				version.createBackup(configfile);
+			}
+			catch (IOException e)
+			{
+				LogMgr.logWarning("Settings.saveSettings()", "Error when creating backup file!", e);
+			}
 		}
 
 		try
