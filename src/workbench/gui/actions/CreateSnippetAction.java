@@ -47,6 +47,7 @@ public class CreateSnippetAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		String sql = this.client.getSelectedText();
@@ -64,24 +65,41 @@ public class CreateSnippetAction extends WbAction
 		StringSelection sel = new StringSelection(code);
 		clp.setContents(sel, sel);
 	}
-	
+
 	public String makeJavaString(String text, boolean removeSemicolon)
 	{
 		if (text == null) return "";
-		
+
 		String prefix = Settings.getInstance().getProperty("workbench.clipcreate.codeprefix", "String sql = ");
 		String concat = Settings.getInstance().getProperty("workbench.clipcreate.concat", "+");
+		int indentSize = Settings.getInstance().getIntProperty("workbench.clipcreate.indent", -1);
 		boolean includeNewLine = Settings.getInstance().getBoolProperty("workbench.clipcreate.includenewline", true);
-
+		boolean newLineAfterPrefix = Settings.getInstance().getBoolProperty("workbench.clipcreate.startnewline", false);
 
 		StringBuilder result = new StringBuilder(text.length() + prefix.length() + 10);
 		result.append(prefix);
-		if (prefix.endsWith("=")) result.append(" ");
-		int k = result.length();
-		StringBuilder indent = new StringBuilder(k);
-		for (int i=0; i < k; i++) indent.append(' ');
-		BufferedReader reader = new BufferedReader(new StringReader(text));
+		
 		boolean first = true;
+
+		if (newLineAfterPrefix)
+		{
+			result.append('\n');
+			first = false;
+		}
+		else if (prefix.endsWith("="))
+		{
+			result.append(" ");
+		}
+
+		if (indentSize <= 0)
+		{
+			indentSize = result.length();
+		}
+
+		StringBuilder indent = new StringBuilder(indentSize);
+		for (int i=0; i < indentSize; i++) indent.append(' ');
+
+		BufferedReader reader = new BufferedReader(new StringReader(text));
 		try
 		{
 			String line = reader.readLine();
@@ -128,5 +146,5 @@ public class CreateSnippetAction extends WbAction
 		}
 		return result.toString();
 	}
-	
+
 }

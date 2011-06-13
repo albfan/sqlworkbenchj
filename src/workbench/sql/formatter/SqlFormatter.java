@@ -1573,7 +1573,9 @@ public class SqlFormatter
 		StringBuilder line = new StringBuilder(50);
 		int maxColLength = 0;
 
-		boolean isColstart = true;
+		boolean isColname = true;
+		boolean inDatatype = false;
+		int tokenCount = 0;
 
 		int bracketCount = 0;
 
@@ -1595,6 +1597,13 @@ public class SqlFormatter
 			{
 				bracketCount --;
 			}
+			else if (!t.isComment())
+			{
+				// only count "real" tokens
+				tokenCount ++;
+			}
+
+			inDatatype = (bracketCount == 1 && tokenCount == 2);
 
 			// Closing bracket reached --> end of create table statement
 			if (bracketCount < 0)
@@ -1603,27 +1612,25 @@ public class SqlFormatter
 				break;
 			}
 
-			if (isColstart ||
-				  (last != null && last.isIdentifier() && "(".equals(w)) ||
-				  (needsWhitespace(last, t, true) && bracketCount == 0)
-				)
+			if (isColname || (needsWhitespace(last, t, true) && !inDatatype))
 			{
 				line.append(' ');
 			}
 
 			line.append(w);
 
-			if (isColstart && bracketCount == 0)
+			if (isColname)
 			{
 				if (w.length() > maxColLength) maxColLength = w.length();
-				isColstart = false;
+				isColname = false;
 			}
 
 			if (w.equals(",") && bracketCount == 0)
 			{
 				cols.add(line);
 				line = new StringBuilder(50);
-				isColstart = true;
+				isColname = true;
+				tokenCount = 0;
 			}
 
 			last = t;

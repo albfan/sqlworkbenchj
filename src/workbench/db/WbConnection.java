@@ -947,6 +947,30 @@ public class WbConnection
 		}
 	}
 
+	/**
+	 * An exception safe version of getDatabaseProductVersion().
+	 *
+	 * @return the result of getDatabaseProductVersion() or an empty string if an exception occurred
+	 */
+	public String getDatabaseProductVersion()
+	{
+		try
+		{
+			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
+			return jdbcmeta.getDatabaseProductVersion();
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logWarning("WbConnection.getDatabaseProductVersion()", "Error retrieving DB product ersion (" + ExceptionUtil.getDisplay(e) + ")");
+			return "";
+		}
+	}
+
+	/**
+	 * Return the database version as reported by DatabaseMetaData.getDatabaseMajorVersion() and getDatabaseMinorVersion()
+	 *
+	 * @return a string with the major and minor version concatenated with a dot.
+	 */
 	public String getDatabaseVersion()
 	{
 		try

@@ -31,6 +31,32 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+	@Test
+	public void testVirtualColumns()
+		throws Exception
+	{
+		String sql =
+			"create table table1  \n" +
+			"( \n" +
+			"  a   INT NOT NULL, \n" +
+			"  b   varchar(32), \n" +
+			"  c   int as (a MOD 10) virtual, \n" +
+			"  d   varchar(5) AS (LEFT(b,5)) persistent \n" +
+			")";
+		String expected =
+			"CREATE TABLE table1 \n" +
+			"(\n" +
+			"  a   INT NOT NULL,\n" +
+			"  b   VARCHAR(32),\n" +
+			"  c   INT AS (a MOD 10) virtual,\n" +
+			"  d   VARCHAR(5) AS (LEFT(b,5)) persistent\n" +
+			")";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("LEFT"));
+		String formatted = f.getFormattedSql();
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
 
 	@Test
 	public void testMySQLWhiteSpaceBug()
@@ -853,7 +879,7 @@ public class SqlFormatterTest
 			"  \"firstname\"   VARCHAR(100),\n" +
 			"  \"lastname\"    VARCHAR(100)\n" +
 			")";
-		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
 	}
 
