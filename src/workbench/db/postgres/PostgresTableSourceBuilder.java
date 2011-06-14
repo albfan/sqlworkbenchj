@@ -111,15 +111,26 @@ public class PostgresTableSourceBuilder
 	public void readTableTypeOptions(TableIdentifier tbl)
 	{
 		boolean is91 = JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
-		if (!is91) return;
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "select ct.relpersistence, ct.relkind \n" +
-             "from pg_class ct \n" +
-             "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
-			       " where cns.nspname = ? \n" +
-             "   and ct.relname = ?";
+		String sql = null;
+		if (is91)
+		{
+			sql = "select ct.relpersistence, ct.relkind \n" +
+							 "from pg_class ct \n" +
+							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+							 " where cns.nspname = ? \n" +
+							 "   and ct.relname = ?";
+		}
+		else
+		{
+			sql = "select case when ct.relistemp then 't' else null end as relpersitence, ct.relkind \n" +
+							 "from pg_class ct \n" +
+							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+							 " where cns.nspname = ? \n" +
+							 "   and ct.relname = ?";
+		}
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
