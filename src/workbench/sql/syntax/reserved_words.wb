@@ -1,4 +1,4 @@
-# a list of SQL 2003 reserved words
+# a (partial) list of SQL 2003 reserved words
 # these would need quoting if used as a table or column name
 ALL
 ALTER
@@ -26,6 +26,7 @@ DROP
 EXCEPT
 EXISTS
 FROM
+FOREIGN
 FULL
 GRANT
 GROUP
@@ -35,6 +36,7 @@ INNER
 INSERT
 INTERSECT
 JOIN
+KEY
 LEFT
 LIKE
 MERGE
@@ -45,6 +47,7 @@ ON
 OR
 ORDER
 OUTER
+PRIMARY
 RECURSIVE
 REFERENCES
 REVOKE
