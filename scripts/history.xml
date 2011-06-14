@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-09-13">
+  <release build="111" date="2011-09-18">
     <entry dev-build="11" type="enh">A new commandline argument is available (-connectionName) to define the connection name to be displayed in the window title if the application is started without a profile (but with a full connection definition)</entry>
     <entry dev-build="11" type="enh">The internal cache used for auto-completion is now updated when tables or table definitions are retrieved in the DbExplorer.</entry>
     <entry dev-build="11" type="enh">Displaying the SQL of a view for SolidDB is now supported (contributed by Jason).</entry>
