@@ -424,8 +424,9 @@
           style="${docbook.root}/html/docbook.xsl">
 
       <xmlcatalog>
-        <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${docbook.dtd}/docbookx.dtd"/>
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${docbook.dtd}/docbookx.dtd"/>
       </xmlcatalog>
+
       <param name="use.extensions" expression="0"/>
       <param name="textinsert.extension" expression="1"/>
       <param name="html.stylesheet" expression="${html-stylesheet}"/>
