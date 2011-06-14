@@ -20,6 +20,7 @@ import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -86,7 +87,7 @@ public class StatementFactory
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
 		if (!resultInfo.hasPkColumns()) throw new IllegalArgumentException("Cannot proceed without a primary key");
-		
+
 		DmlStatement dml = null;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
@@ -187,7 +188,7 @@ public class StatementFactory
 	{
 		testSettings = settings;
 	}
-	
+
 	protected DbSettings getDbSettings()
 	{
 		if (testSettings != null) return testSettings;
@@ -203,7 +204,7 @@ public class StatementFactory
 		if (template == null) return null;
 		return template.replace("%value%", value.toString());
 	}
-	
+
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		return this.createInsertStatement(aRow, ignoreStatus, lineEnd, null);
@@ -427,7 +428,7 @@ public class StatementFactory
 		dml = new DmlStatement(sql, values);
 		return dml;
 	}
-	
+
 	/**
 	 * Defines an alternative table to be used when generating the SQL statements.
 	 * By default the table defined through the ResultInfo from the constructor is used.
@@ -450,21 +451,21 @@ public class StatementFactory
 	 * @see workbench.db.DbMetadata#needSchemaInDML(workbench.db.TableIdentifier)
 	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
 	 */
-	public void setIncludeTableOwner(boolean flag) 
+	public void setIncludeTableOwner(boolean flag)
 	{
-		this.includeTableOwner = flag; 
+		this.includeTableOwner = flag;
 	}
 
 	public void setEmptyStringIsNull(boolean flag)
 	{
 		this.emptyStringIsNull = flag;
 	}
-	
+
 	public void setIncludeNullInInsert(boolean flag)
 	{
 		this.includeNullInInsert = flag;
 	}
-	
+
 	public void setCurrentConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -475,79 +476,39 @@ public class StatementFactory
 			includeNullInInsert = (prof == null ? true : prof.getIncludeNullInInsert());
 		}
 	}
-	
-	private String adjustColumnName(String value)
+
+	private String adjustColumnName(String colName)
 	{
-		if (value == null) return null;
-		if (value.startsWith("\"")) return value;
-		if (dbConnection != null && !dbConnection.getMetadata().isDefaultCase(value))
+		if (colName == null) return null;
+		if (dbConnection != null)
 		{
-			return dbConnection.getMetadata().quoteObjectname(value);
+			return dbConnection.getMetadata().quoteObjectname(colName);
 		}
-		return value;
+		return SqlUtil.quoteObjectname(colName);
 	}
 
 	private TableIdentifier getUpdateTable()
 	{
 		return tableToUse != null ? tableToUse : resultInfo.getUpdateTable();
 	}
-	
-	private String adjustIdentifierCase(String value)
-	{
-		if (value == null) return null;
-		if (value.startsWith("\"")) return value;
-		
-		// If the table name is not in the same case the server stores it
-		// and the case may not be changed at all, then we need to quote the table name.
-		
-		TableIdentifier updateTable = getUpdateTable();
-		
-		// setNeverAdjustCase() will only be set for TableIdentifiers that have
-		// been "retrieved" from the database (e.g. in the DbExplorer)
-		// For table names that the user entered, neverAdjustCase() will be false
-		boolean neverAdjust = (updateTable == null ? false : updateTable.getNeverAdjustCase());
-		if (neverAdjust) return value;
-		
-		// If the table name should not be adjusted, we'll need to check 
-		// if it needs quotes.
-		if (neverAdjust && dbConnection != null)
-		{
-			boolean caseSensitive =  dbConnection.getMetadata().isCaseSensitive();
-			boolean defaultCase = dbConnection.getMetadata().isDefaultCase(value);
-			if (caseSensitive) return value;
-			if (!defaultCase) return dbConnection.getMetadata().quoteObjectname(value);
-		}
-		
-		if (this.identifierCase == CASE_UPPER)
-		{
-			return value.toUpperCase();
-		}
-		else if (this.identifierCase == CASE_LOWER)
-		{
-			return value.toLowerCase();
-		}
-
-		return value;
-	}
 
 	private String getTableNameToUse()
 	{
-		String expression = null;
-		
 		TableIdentifier updateTable = getUpdateTable();
 		if (updateTable == null) throw new IllegalArgumentException("Cannot proceed without update table defined");
-		
+
+		TableIdentifier toUse = updateTable.createCopy();
+		toUse.adjustCase(dbConnection);
+
 		if (includeTableOwner)
 		{
-			expression = updateTable.getTableExpression(this.dbConnection);
+			return toUse.getTableExpression(this.dbConnection);
 		}
-		else
+		if (dbConnection == null)
 		{
-			expression = updateTable.getTableName();
+			return SqlUtil.quoteObjectname(toUse.getTableName());
 		}
-		
-		expression = adjustIdentifierCase(expression);
-		return expression;
+		return dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
 	}
 
 	private boolean isNull(Object value)
@@ -557,5 +518,5 @@ public class StatementFactory
 		if (emptyStringIsNull && s.length() == 0) return true;
 		return false;
 	}
-	
+
 }

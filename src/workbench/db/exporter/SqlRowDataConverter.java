@@ -72,12 +72,14 @@ public class SqlRowDataConverter
 		setOriginalConnection(con);
 	}
 
+	@Override
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
 		this.literalFormatter = new SqlLiteralFormatter(con);
 	}
 
+	@Override
 	public void setResultInfo(ResultInfo meta)
 	{
 		super.setResultInfo(meta);
@@ -116,6 +118,7 @@ public class SqlRowDataConverter
 		}
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		boolean writeCommit = true;
@@ -158,6 +161,7 @@ public class SqlRowDataConverter
 		}
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		StrBuffer result = new StrBuffer();
@@ -193,9 +197,13 @@ public class SqlRowDataConverter
 		result.append(';');
 
 		if (doFormatting)
+		{
 			result.append(doubleLineTerminator);
+		}
 		else
+		{
 			result.append(lineTerminator);
+		}
 
 		if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
 		{
@@ -205,6 +213,7 @@ public class SqlRowDataConverter
 		return result;
 	}
 
+	@Override
 	public StrBuffer getStart()
 	{
 		if (!this.createTable) return null;
