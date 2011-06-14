@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
  *   <li>operators.wb (SQL operators)</li>
  * </ul>
  * are read from this package.
- * 
+ *
  * If any of those files exist in the config directory, their contents
  * is read as well and merged with the predefined keywords.
  * <br/>
@@ -67,6 +67,11 @@ public class SqlKeywordHelper
 	public SqlKeywordHelper(String id)
 	{
 		this.dbId = id;
+	}
+
+	public Set<String> getReservedWords()
+	{
+		return loadKeywordsFromFile("reserved_words.wb");
 	}
 
 	public Set<String> getKeywords()
@@ -127,7 +132,7 @@ public class SqlKeywordHelper
 		if (s != null)
 		{
 			BufferedReader in = new BufferedReader(new InputStreamReader(s));
-			Collection<String> builtin = FileUtil.getLines(in, true);
+			Collection<String> builtin = FileUtil.getLines(in, true, true);
 			result.addAll(builtin);
 		}
 
@@ -145,7 +150,7 @@ public class SqlKeywordHelper
 			try
 			{
 				BufferedReader customFile = new BufferedReader(new FileReader(f));
-				Collection<String> custom = FileUtil.getLines(customFile, true);
+				Collection<String> custom = FileUtil.getLines(customFile, true, true);
 				result.addAll(custom);
 			}
 			catch (Exception e)

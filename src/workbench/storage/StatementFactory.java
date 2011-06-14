@@ -21,7 +21,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * A class to generate DELETE, INSERT or UPDATE statements based
@@ -38,12 +37,7 @@ public class StatementFactory
 	private boolean emptyStringIsNull;
 	private boolean includeNullInInsert = true;
 
-	private static final int CASE_NO_CHANGE = 1;
-	private static final int CASE_UPPER = 2;
-	private static final int CASE_LOWER = 4;
-	private int identifierCase = CASE_NO_CHANGE;
-
-	// DbSettings used by the Unit tests
+	// DbSettings is only used by the unit tests
 	private DbSettings testSettings;
 
 	/**
@@ -54,12 +48,6 @@ public class StatementFactory
 	{
 		this.resultInfo = metaData;
 		this.setCurrentConnection(conn);
-		String s = Settings.getInstance().getGeneratedSqlTableCase();
-		if (!StringUtil.isEmptyString(s))
-		{
-			if (s.equals("lower")) identifierCase = CASE_LOWER;
-			else if (s.equals("upper")) identifierCase = CASE_UPPER;
-		}
 	}
 
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
@@ -184,12 +172,18 @@ public class StatementFactory
 		return dml;
 	}
 
+	/**
+	 * Set a different DbSettings configuration.
+	 *
+	 * This is only intended for testing purposes
+	 *
+	 */
 	void setTestSettings(DbSettings settings)
 	{
 		testSettings = settings;
 	}
 
-	protected DbSettings getDbSettings()
+	private DbSettings getDbSettings()
 	{
 		if (testSettings != null) return testSettings;
 		if (dbConnection == null) return null;
@@ -484,7 +478,7 @@ public class StatementFactory
 		{
 			return dbConnection.getMetadata().quoteObjectname(colName);
 		}
-		return SqlUtil.quoteObjectname(colName);
+		return SqlUtil.quoteObjectname(colName, false, true);
 	}
 
 	private TableIdentifier getUpdateTable()
@@ -506,7 +500,7 @@ public class StatementFactory
 		}
 		if (dbConnection == null)
 		{
-			return SqlUtil.quoteObjectname(toUse.getTableName());
+			return SqlUtil.quoteObjectname(toUse.getTableName(), false, true);
 		}
 		return dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
 	}

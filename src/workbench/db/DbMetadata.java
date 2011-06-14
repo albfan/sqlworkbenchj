@@ -139,6 +139,7 @@ public class DbMetadata
 
 	private String quoteCharacter;
 	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet();
+	private final Set<String> reservedWords = CollectionUtil.caseInsensitiveSet();
 
 	private Pattern selectIntoPattern;
 
@@ -152,6 +153,7 @@ public class DbMetadata
 
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
+	private List<String> driverKeywords;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -426,6 +428,18 @@ public class DbMetadata
 				LogMgr.logError("DbMetadata.<init>", "Incorrect Pattern for detecting SELECT ... INTO <new table> specified", e);
 				this.selectIntoPattern = null;
 			}
+		}
+		try
+		{
+			String words = metaData.getSQLKeywords();
+			if (StringUtil.isNonBlank(words))
+			{
+				driverKeywords = StringUtil.stringToList(words, ",");
+			}
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logDebug("DbMetadata.<init>", "Could not read SQL keywords from driver", sql);
 		}
 
 	}
@@ -1025,6 +1039,20 @@ public class DbMetadata
 		return result;
 	}
 
+	public boolean isReservedWord(String name)
+	{
+		synchronized (reservedWords)
+		{
+			if (reservedWords.isEmpty())
+			{
+				SqlKeywordHelper helper = new SqlKeywordHelper(this.getDbId());
+				reservedWords.addAll(helper.getReservedWords());
+				reservedWords.addAll(helper.getOperators());
+			}
+			return this.reservedWords.contains(name);
+		}
+	}
+
 	public boolean isKeyword(String name)
 	{
 		synchronized (keywords)
@@ -1034,6 +1062,10 @@ public class DbMetadata
 				SqlKeywordHelper helper = new SqlKeywordHelper(this.getDbId());
 				keywords.addAll(helper.getKeywords());
 				keywords.addAll(helper.getOperators());
+				if (driverKeywords != null)
+				{
+					keywords.addAll(driverKeywords);
+				}
 			}
 			return this.keywords.contains(name);
 		}
@@ -1129,9 +1161,9 @@ public class DbMetadata
 				}
 			}
 
-			if (needQuote || isKeyword(name))
+			if (needQuote || isReservedWord(name))
 			{
-				StringBuilder result = new StringBuilder(name.length() + 4);
+				StringBuilder result = new StringBuilder(name.length() + quoteCharacter.length() * 2);
 				result.append(this.quoteCharacter);
 				result.append(name.trim());
 				result.append(this.quoteCharacter);

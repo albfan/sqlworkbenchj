@@ -64,6 +64,11 @@ public class FileUtil
 		return getLines(in, false);
 	}
 
+	public static List<String> getLines(BufferedReader input, boolean trim)
+	{
+		return getLines(input, trim, false);
+	}
+
 	/**
 	 * Read the lines of the given Reader into a Collection.
 	 * <br/>
@@ -75,7 +80,7 @@ public class FileUtil
 	 *
 	 * @return a Collection with all the lines in the file
 	 */
-	public static List<String> getLines(BufferedReader input, boolean trim)
+	public static List<String> getLines(BufferedReader input, boolean trim, boolean checkComments)
 	{
 		List<String> result = new ArrayList<String>();
 
@@ -86,6 +91,10 @@ public class FileUtil
 			{
 				if (StringUtil.isNonEmpty(line))
 				{
+					if (checkComments && line.trim().startsWith("#"))
+					{
+						continue;
+					}
 					result.add(trim ? line.trim() : line);
 				}
 			}

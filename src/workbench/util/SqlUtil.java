@@ -41,6 +41,7 @@ import workbench.resource.GuiSettings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.storage.ResultInfo;
 
 /**
@@ -152,6 +153,21 @@ public class SqlUtil
 	 */
 	public static String quoteObjectname(String objectName, boolean quoteAlways)
 	{
+		return quoteObjectname(objectName, quoteAlways, false);
+	}
+
+	/**
+	 * Quote the given objectName if needed according to the SQL standard.
+	 * If quoteAlways is true, then no name checking is performed.
+	 *
+	 * @param objectName the name to quote
+	 * @param quoteAlways if true, the name is not tested for special characters
+	 * @param checkReservedWords  if true, the value will be compared to a list of SQL 2003 reserved words.
+	 * 
+	 * @return the quoted version of the name.
+	 */
+	public static String quoteObjectname(String objectName, boolean quoteAlways, boolean checkReservedWords)
+	{
 		if (objectName == null) return null;
 		if (objectName.length() == 0) return "";
 		if (objectName.charAt(0) == '"') return objectName;
@@ -170,7 +186,18 @@ public class SqlUtil
 			Matcher m = SQL_IDENTIFIER.matcher(objectName);
 			doQuote = !m.matches();
 		}
-		if (!doQuote) return objectName;
+
+		if (checkReservedWords)
+		{
+			SqlKeywordHelper helper = new SqlKeywordHelper();
+			doQuote = helper.getReservedWords().contains(objectName);
+		}
+
+		if (!doQuote)
+		{
+			return objectName;
+		}
+
 		StringBuilder col = new StringBuilder(objectName.length() + 2);
 		col.append('"');
 		col.append(objectName);

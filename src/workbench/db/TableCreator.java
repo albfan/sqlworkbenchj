@@ -185,14 +185,14 @@ public class TableCreator
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
 					stmt.executeUpdate(pkSql.toString());
 				}
-				
+
 				if (storeSQL)
 				{
 					generatedSQL.add(pkSql.toString());
 				}
 			}
 
-			if (this.connection.getDbSettings().ddlNeedsCommit() && 
+			if (this.connection.getDbSettings().ddlNeedsCommit() &&
 				  connection.getDbSettings().commitCreateTable(creationType) &&
 				  !this.connection.getAutoCommit())
 			{
@@ -242,7 +242,7 @@ public class TableCreator
 		// just use "simple" quoting rules for the target database (instead of checking
 		// the case of the column name by using DbMetadata.quoteObjectName()
 		// This is to ensure that the columns are created with the default case of the target DBMS
-		boolean isKeyword = connection.getMetadata().isKeyword(name);
+		boolean isKeyword = connection.getMetadata().isReservedWord(name);
 		name = SqlUtil.quoteObjectname(name, isKeyword);
 		result.append(name);
 		result.append(' ');

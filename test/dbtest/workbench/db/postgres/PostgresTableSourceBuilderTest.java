@@ -18,6 +18,7 @@ import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.JdbcUtils;
 
 /**
  *
@@ -95,4 +96,18 @@ public class PostgresTableSourceBuilderTest
 		String sql = tbl.getSource(con).toString();
 		assertTrue(sql.contains("ADD CONSTRAINT uc_some_data UNIQUE (some_data);"));
 	}
+
+	@Test
+	public void testUnloggedTables()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+		if (!JdbcUtils.hasMinimumServerVersion(con, "9.1")) return;
+		TestUtil.executeScript(con, "create unlogged table no_crash_safe (id integer, some_data varchar(100));");
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("no_crash_safe"));
+		String source = tbl.getSource(con).toString();
+		assertTrue(source.indexOf("CREATE UNLOGGED TABLE") > -1);
+	}
+	
 }
