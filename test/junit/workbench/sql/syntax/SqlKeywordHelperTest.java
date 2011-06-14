@@ -145,4 +145,17 @@ public class SqlKeywordHelperTest
 		custom3.delete();
 	}
 
+	@Test
+	public void testRemoveKeywords()
+		throws Exception
+	{
+		File custom = new File(util.getBaseDir(), "myid.reserved_words.wb");
+		TestUtil.writeFile(custom, "FOO\n-SELECT");
+		SqlKeywordHelper helper = new SqlKeywordHelper("myid");
+		Set<String> reserved = helper.getReservedWords();
+		assertTrue(reserved.contains("FOO"));
+		assertFalse(reserved.contains("SELECT"));
+		assertFalse(reserved.contains("-SELECT"));
+	}
+
 }

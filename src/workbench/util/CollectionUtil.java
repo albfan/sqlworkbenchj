@@ -11,13 +11,7 @@
  */
 package workbench.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Utility functions for Collection handling.
@@ -34,6 +28,11 @@ public class CollectionUtil
 	public static boolean isEmpty(Collection c)
 	{
 		return (c == null || c.isEmpty());
+	}
+
+	public static boolean isEmpty(Map m)
+	{
+		return (m == null || m.isEmpty());
 	}
 
 	public static <E> Set<E> treeSet(E... add)

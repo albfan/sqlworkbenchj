@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
  * The actual format is controlled through the configuration property workbench.db.postgresql.blobformat
  * valid values are <tt>decode</tt>, and <tt>escape</tt>
  * For escape an binary "escape" syntax is used, e.g.: E'\\001'::bytea
- * 
+ *
  * See also: http://www.postgresql.org/docs/current/static/datatype-binary.html
  *
  * @author Thomas Kellerer
@@ -41,7 +41,7 @@ public class PostgresBlobFormatter
 		String type = Settings.getInstance().getProperty("workbench.db.postgresql.blobformat", "decode");
 		useEscape = "escape".equalsIgnoreCase(type);
 	}
-	
+
 	public PostgresBlobFormatter(boolean useEscapedOctal)
 	{
 		useEscape = useEscapedOctal;
@@ -52,13 +52,14 @@ public class PostgresBlobFormatter
 		useEscape = (mode == BlobLiteralType.pgEscape);
 	}
 
+	@Override
 	public CharSequence getBlobLiteral(Object value)
 		throws SQLException
 	{
 		if (useEscape) return getEscapeString(value);
 		return getDecodeString(value);
 	}
-	
+
 	private CharSequence getDecodeString(Object value)
 	{
 		if (value == null) return null;

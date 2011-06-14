@@ -22,30 +22,30 @@ public abstract class ComplexExpression
 	implements FilterExpression
 {
 	protected List<FilterExpression> filter = new LinkedList<FilterExpression>();
-	
+
 	public void addExpression(FilterExpression expr)
 	{
 		filter.add(expr);
 	}
-	
+
 	public void addColumnExpression(String colname, ColumnComparator comp, Object refValue)
 	{
 		addColumnExpression(colname, comp, refValue, comp.supportsIgnoreCase());
 	}
-	
+
 	public void addColumnExpression(String colname, ColumnComparator comp, Object refValue, boolean ignoreCase)
 	{
 		ColumnExpression def = new ColumnExpression(colname, comp, refValue);
 		if (comp.supportsIgnoreCase()) def.setIgnoreCase(ignoreCase);
 		addExpression(def);
 	}
-	
+
 	public boolean hasFilter()
 	{
 		if (this.filter == null) return false;
 		return (this.filter.size() > 0);
 	}
-	
+
 	public void removeExpression(FilterExpression expr)
 	{
 		filter.remove(expr);
@@ -55,9 +55,10 @@ public abstract class ComplexExpression
 	 * Get the list of FilterExpression s that define this ComplexExpression
 	 */
 	public List getExpressions() { return filter; }
-	
+
 	public void setExpressions(List<FilterExpression> l) { this.filter = l;}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		try
@@ -70,14 +71,16 @@ public abstract class ComplexExpression
 			return false;
 		}
 	}
+	@Override
 	public boolean isColumnSpecific()
 	{
 		for (FilterExpression expr : filter)
-		{	
+		{
 			if (expr.isColumnSpecific()) return true;
 		}
 		return false;
 	}
-	
+
+	@Override
 	public abstract boolean evaluate(Map<String, Object> columnValues);
 }

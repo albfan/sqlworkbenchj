@@ -31,19 +31,26 @@ public class DateEqualsComparator
 		this.sqlType = type;
 	}
 
+	@Override
 	public boolean supportsIgnoreCase() { return false; }
 
+	@Override
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
+	@Override
 	public String getOperator() { return "="; }
 
+	@Override
 	public String getDescription()
 	{
 		return "equals";
 	}
 
+	@Override
 	public boolean needsValue() { return true; }
+	@Override
 	public boolean comparesEquality() { return true; }
 
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -57,16 +64,19 @@ public class DateEqualsComparator
 		}
 	}
 
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return java.util.Date.class.isAssignableFrom(valueClass);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return (other instanceof DateEqualsComparator);
 	}
 
+	@Override
 	public boolean validateInput(Object value)
 	{
 		if (value == null) return false;

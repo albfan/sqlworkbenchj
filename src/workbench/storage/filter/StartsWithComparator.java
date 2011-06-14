@@ -19,41 +19,49 @@ import workbench.resource.ResourceMgr;
 public class StartsWithComparator
 	implements ColumnComparator
 {
+	@Override
 	public boolean supportsIgnoreCase()
 	{
 		return true;
 	}
 
+	@Override
 	public String getValueExpression(Object value)
 	{
 		return "'" + value + "'";
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return ResourceMgr.getString("TxtOpStartsWith");
 	}
 
+	@Override
 	public String getOperator()
 	{
 		return "starts with";
 	}
 
+	@Override
 	public boolean needsValue()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean validateInput(Object value)
 	{
 		return value instanceof String;
 	}
 
+	@Override
 	public boolean comparesEquality()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null)
@@ -79,11 +87,13 @@ public class StartsWithComparator
 		}
 	}
 
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return (CharSequence.class.isAssignableFrom(valueClass));
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return other instanceof StartsWithComparator;

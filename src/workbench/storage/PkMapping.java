@@ -30,6 +30,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -81,8 +82,7 @@ public class PkMapping
 	}
 	public synchronized String getMappingAsText()
 	{
-		if (this.columnMapping == null) return null;
-		if (this.columnMapping.size() == 0) return null;
+		if (CollectionUtil.isEmpty(this.columnMapping)) return null;
 
 		StringBuilder result = new StringBuilder(this.columnMapping.size() * 50);
 		Iterator<Entry<String, String>> itr = this.columnMapping.entrySet().iterator();

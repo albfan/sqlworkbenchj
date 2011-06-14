@@ -45,15 +45,15 @@ public class ShortcutManager
 	private Map<String, ShortcutDefinition> keyMap;
 
 	private Map<String, String> actionNames;
-	
+
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action in the customization dialog
 	private List<WbAction> allActions = new LinkedList<WbAction>();
-	
+
 	private Map<KeyStroke, WbAction> keyDebugMap;
 
 	private boolean modified;
-	
+
   private static class LazyInstanceHolder
 	{
     static final ShortcutManager instane = new ShortcutManager(Settings.getInstance().getShortcutFilename());
@@ -89,7 +89,7 @@ public class ShortcutManager
 	{
 		return LazyInstanceHolder.instane;
 	}
-	
+
 	public void removeShortcut(String clazz)
 	{
 		this.assignKey(clazz, null);
@@ -107,7 +107,7 @@ public class ShortcutManager
 
 	public void fireShortcutsChanged()
 	{
-		if (this.changeListener.size() == 0) return;
+		if (this.changeListener.isEmpty()) return;
 
 		ChangeEvent event = new ChangeEvent(this);
 		for (ChangeListener l : changeListener)
@@ -118,7 +118,7 @@ public class ShortcutManager
 			}
 		}
 	}
-	
+
 	public void registerAction(WbAction anAction)
 	{
 		String clazz = anAction.getClass().getName();
@@ -184,10 +184,10 @@ public class ShortcutManager
 			{
 				return action.getToolTipText();
 			}
-		}		
+		}
 		return null;
 	}
-	
+
 	public WbAction getActionForClass(String clazz)
 	{
 		for (WbAction a : allActions)
@@ -282,7 +282,7 @@ public class ShortcutManager
 		{
 			return;
 		}
-		
+
 		// we only want to save those definitions where a different mapping is defined
 		// so we first create a copy of the current keymap, and then remove any
 		// definition that is not customized.

@@ -111,6 +111,7 @@ public class TablePrinter
 
 		Thread pt = new Thread()
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -337,6 +338,7 @@ public class TablePrinter
 		}
 	}
 
+	@Override
 	public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 		throws PrinterException
 	{
@@ -391,17 +393,20 @@ public class TablePrinter
 		return PAGE_EXISTS;
   }
 
+	@Override
 	public int getNumberOfPages()
 	{
 		return this.pageCount;
 	}
 
+	@Override
 	public PageFormat getPageFormat(int pageIndex)
 		throws IndexOutOfBoundsException
 	{
 		return this.format;
 	}
 
+	@Override
 	public Printable getPrintable(int pageIndex)
 		throws IndexOutOfBoundsException
 	{

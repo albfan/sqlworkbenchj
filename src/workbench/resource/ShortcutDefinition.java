@@ -18,7 +18,7 @@ import javax.swing.KeyStroke;
 /**
  * A class to store the assigned KeyStrokes for an Action in order to be serializable
  * using the XMLEncode and XMLDecoder.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ShortcutDefinition
@@ -32,7 +32,7 @@ public class ShortcutDefinition
 	public ShortcutDefinition()
 	{
 	}
-	
+
 	public ShortcutDefinition(String aClass)
 	{
 		this.setActionClass(aClass);
@@ -46,7 +46,7 @@ public class ShortcutDefinition
 			this.clearKeyStroke();
 		}
 	}
-	
+
 	public boolean isMappedTo(KeyStroke key)
 	{
 		if (key == null) return false;
@@ -58,11 +58,11 @@ public class ShortcutDefinition
 		return false;
 	}
 
-	public boolean getShortcutRemoved() 
+	public boolean getShortcutRemoved()
 	{
 		return this.shortcutRemoved;
 	}
-	
+
 	/**
 	 *	Clears the currently defined shortcut.
 	 *	If a default shortcut is defined, this will make this Definition "customized"
@@ -74,54 +74,54 @@ public class ShortcutDefinition
 	}
 
 	/**
-	 * Get the default (storeable) KeyStroke. 
-	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved 
+	 * Get the default (storeable) KeyStroke.
+	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved
 	 */
 	public KeyStroke getDefaultKeyStroke()
 	{
 		if (this.defaultKey != null) return this.defaultKey.getKeyStroke();
 		return null;
 	}
-	
+
 	/**
-	 * Set the default (storeable) alternate KeyStroke. 
-	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved 
+	 * Set the default (storeable) alternate KeyStroke.
+	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved
 	 * @param aKey
 	 */
 	public void setAlternateKey(StoreableKeyStroke aKey)
 	{
 		this.alternateKey = aKey;
 	}
-	
+
 	/**
-	 * Get the default (storeable) alternate KeyStroke. 
-	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved 
+	 * Get the default (storeable) alternate KeyStroke.
+	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved
 	 */
 	public KeyStroke getAlternateKeyStroke()
 	{
 		if (this.alternateKey != null) return this.alternateKey.getKeyStroke();
 		return null;
 	}
-	
+
 	/**
-	 * Set the current/active (storeable) KeyStroke. 
-	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved 
+	 * Set the current/active (storeable) KeyStroke.
+	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved
 	 * @param aKey
 	 */
 	public void setCurrentKey(StoreableKeyStroke aKey)
 	{
 		this.currentKey = aKey;
 	}
-	
+
 	/**
-	 * Get the current/active (storeable) KeyStroke. 
-	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved 
+	 * Get the current/active (storeable) KeyStroke.
+	 * This is only here to statisfy the XMLEncoder, so that the whole thing can be saved
 	 */
 	public StoreableKeyStroke getCurrentKey()
 	{
 		return currentKey;
 	}
-	
+
 	public KeyStroke getCurrentKeyStroke()
 	{
 		if (this.currentKey == null) return null;
@@ -142,11 +142,11 @@ public class ShortcutDefinition
 		this.currentKey = aKey;
 		this.shortcutRemoved = false;
 	}
-	
+
 	/**
 	 * Assign a default key for this action class.
 	 * This method is called assign (instead of setDefaultKey) so that the XMLEncoder does not consider
-	 * reading or writing this "property" as KeyStrokes cannot be serialized 
+	 * reading or writing this "property" as KeyStrokes cannot be serialized
 	 * to XML
 	 * @param aKey
 	 */
@@ -157,7 +157,7 @@ public class ShortcutDefinition
 	}
 
 	/**
-	 * Return the current default key. This is the "matching" 
+	 * Return the current default key. This is the "matching"
 	 * getter for the assignDefaultKey() method.
 	 * @return KeyStroke
 	 */
@@ -165,12 +165,12 @@ public class ShortcutDefinition
 	{
 		return this.defaultKey;
 	}
-	
-	
+
+
 	/**
 	 * Assign an alternate key for this action class.
 	 * This method is called assign so that the XMLEncoder does not consider
-	 * reading or writing this "property" as KeyStrokes cannot be serialized 
+	 * reading or writing this "property" as KeyStrokes cannot be serialized
 	 * to XML
 	 * @param aKey
 	 */
@@ -188,27 +188,27 @@ public class ShortcutDefinition
 	{
 		return this.alternateKey;
 	}
-	
+
 	public boolean hasDefault()
 	{
 		return this.defaultKey != null;
 	}
-	
+
 	/**
 	 * Return if the this shortcut definition is customized.
 	 * It's customized if a default exists, and currently no shortcut is defined.
 	 * Or if a shortcut is defined, that is different to the default.
 	 * @return true if this shortcut definition differs from the default.
 	 */
-	public boolean isCustomized() 
-	{ 
+	public boolean isCustomized()
+	{
 		if (this.defaultKey == null && this.currentKey == null) return false;
 		if (this.defaultKey == null && this.currentKey != null) return true;
 		if (this.defaultKey != null && this.currentKey == null) return this.shortcutRemoved;
-		
-		return ( !this.currentKey.equals(this.defaultKey) );  
+
+		return ( !this.currentKey.equals(this.defaultKey) );
 	}
-	
+
 	/**
 	 * Restores the default mapping for this shortcut.
 	 * After a call to resetToDefault() isCustomized() will return false
@@ -218,11 +218,11 @@ public class ShortcutDefinition
 		shortcutRemoved = false;
 		currentKey = null;
 	}
-	
+
 	/**
 	 * 	Returns the active KeyStroke.
-	 * 	This is either the current or the default, or null if the shortcut 
-	 *  has been removed completely. 
+	 * 	This is either the current or the default, or null if the shortcut
+	 *  has been removed completely.
 	 * @return the keystroke that is active
 	 */
 	public KeyStroke getActiveKeyStroke()
@@ -232,32 +232,33 @@ public class ShortcutDefinition
 		if (this.defaultKey != null) return this.defaultKey.getKeyStroke();
 		return null;
 	}
-	
+
 	public StoreableKeyStroke getActiveKey()
 	{
 		if (this.shortcutRemoved) return null;
 		if (this.currentKey != null) return this.currentKey;
 		return this.defaultKey;
 	}
-	
-	public String getActionClass() 
+
+	public String getActionClass()
 	{
 		return this.actionClass;
 	}
-	
+
 	public void setActionClass(String aClass)
 	{
 		if (aClass == null) throw new IllegalArgumentException("ClassName cannot be null");
 		this.actionClass = aClass;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		StringBuilder result = new StringBuilder(50);
 		result.append(this.actionClass);
 		StoreableKeyStroke active = (this.currentKey != null) ? this.currentKey : this.defaultKey;
 		if (active != null)
-		{	
+		{
 			result.append(" [");
 			result.append(active.toString());
 			result.append(']');
@@ -268,7 +269,7 @@ public class ShortcutDefinition
 		}
 		if(isCustomized())
 			result.append(" (customized)");
-		
+
 		return result.toString();
 	}
 }

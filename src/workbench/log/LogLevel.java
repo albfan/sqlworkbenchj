@@ -40,6 +40,7 @@ public enum LogLevel
 	 return error;
  	}
 
+	@Override
 	public String toString()
 	{
 		if (this == error) return "ERROR";
@@ -48,5 +49,5 @@ public enum LogLevel
 		if (this == debug) return "DEBUG";
 		return super.toString();
 	}
-	
+
 }

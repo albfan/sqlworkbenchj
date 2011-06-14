@@ -34,7 +34,7 @@ import workbench.util.NumberStringCache;
 /**
  * A class to execute a SQL Statement and to create the statement
  * from a given list of values.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class DmlStatement
@@ -45,7 +45,7 @@ public class DmlStatement
 	private String chrFunc;
 	private String concatString;
 	private String concatFunction;
-	
+
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
 	 *	and the given values.
@@ -77,7 +77,7 @@ public class DmlStatement
 
 	/**
 	 * Execute the statement as a prepared statement
-	 * 
+	 *
 	 * @param aConnection the Connection to be used
 	 * @return the number of rows affected
 	 */
@@ -85,10 +85,10 @@ public class DmlStatement
 		throws SQLException
 	{
 		List<Closeable> streamsToClose = new LinkedList<Closeable>();
-		
+
 		PreparedStatement stmt = null;
 		int rows = -1;
-		
+
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
@@ -163,7 +163,7 @@ public class DmlStatement
 			FileUtil.closeStreams(streamsToClose);
 			SqlUtil.closeStatement(stmt);
 		}
-		
+
 		return rows;
 	}
 
@@ -175,31 +175,31 @@ public class DmlStatement
 	{
 		return this.usePrepared;
 	}
-	
+
 	public void setConcatString(String concat)
 	{
 		if (concat == null) return;
 		this.concatString = concat;
 		this.concatFunction = null;
 	}
-	
+
 	public void setConcatFunction(String func)
 	{
 		if (func == null) return;
 		this.concatFunction = func;
 		this.concatString = null;
 	}
-	
+
 	public void setChrFunction(String aFunc)
 	{
 		this.chrFunc = aFunc;
 	}
-	
+
 	/**
 	 * Returns a "real" SQL Statement which can be executed
 	 * directly. The statement contains the parameter values
 	 * as literals. No placeholders are used.
-	 *	
+	 *
 	 * @param literalFormatter the Formatter for date and other literals
 	 * @return a SQL statement that can be executed
 	 */
@@ -244,14 +244,14 @@ public class DmlStatement
 		if (aValue == null) return null;
 		if (this.chrFunc == null) return aValue;
 		boolean useConcatFunc = (this.concatFunction != null);
-		
+
 		if (!useConcatFunc && this.concatString == null) this.concatString = "||";
 		StringBuilder result = new StringBuilder();
 		boolean funcAppended = false;
 		boolean quotePending = false;
-		
+
 		char last = 0;
-		
+
 		int len = aValue.length();
 		for (int i=0; i < len; i++)
 		{
@@ -282,7 +282,7 @@ public class DmlStatement
 				}
 				else
 				{
-					if (last >= 32) 
+					if (last >= 32)
 					{
 						result.append('\'');
 						result.append(this.concatString);
@@ -313,7 +313,7 @@ public class DmlStatement
 		}
 		return result;
 	}
-	
+
 	private int countParameters(CharSequence aSql)
 	{
 		if (aSql == null) return -1;
@@ -336,7 +336,8 @@ public class DmlStatement
 	{
 		return sql.toString();
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return getSql();

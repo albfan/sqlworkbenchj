@@ -31,8 +31,8 @@ import workbench.gui.renderer.WbRenderer;
 
 
 /**
- *	This class is responsible for keeping a page definition while printing a JTable. 
- *	When printing this page, the TablePrintPage assumes that the clipping is set in 
+ *	This class is responsible for keeping a page definition while printing a JTable.
+ *	When printing this page, the TablePrintPage assumes that the clipping is set in
  *  a way that it can start printing at 0,0 and can print over the whole Graphics object
  *  This means the caller needs to set the margins according to the page layout.
  *  It is also not checked if the definition actually fits on the graphics context
@@ -43,10 +43,10 @@ import workbench.gui.renderer.WbRenderer;
  */
 public class TablePrintPage
 {
-	
+
 	private JTable table;
 	private int startRow;
-	private int endRow; 
+	private int endRow;
 	private int startCol;
 	private int endCol;
 	private int[] colWidth;
@@ -57,12 +57,12 @@ public class TablePrintPage
 	private int lineSpacing;
 	private int colSpacing;
 	private String[] colHeaders;
-	
+
 	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn)
 	{
 		this(source, startRow, endRow, startColumn, endColumn, null);
 	}
-	
+
 	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn, int[] width)
 	{
 		this.table = source;
@@ -73,17 +73,45 @@ public class TablePrintPage
 		this.colWidth = width;
 	}
 
-	public void setFont(Font aFont) { this.printFont = aFont; }
-	public Font getFont() { return this.printFont; }
+	public void setFont(Font aFont)
+	{
+		this.printFont = aFont;
+	}
 
-	public void setPageNumberAcross(int aNum) { this.pageNumAcross = aNum; }
-	public int getPageNumberAcross() { return this.pageNumAcross; }
-	
-	public void setPageNumberDown(int aNum) { this.pageNumDown = aNum; }
-	public int getPageNumberDown() { return this.pageNumDown; }
-	
-	public void setPageIndex(int aNum) { this.pageIndex = aNum; }
-	public int getPageIndex() { return this.pageIndex; }
+	public Font getFont()
+	{
+		return this.printFont;
+	}
+
+	public void setPageNumberAcross(int aNum)
+	{
+		this.pageNumAcross = aNum;
+	}
+
+	public int getPageNumberAcross()
+	{
+		return this.pageNumAcross;
+	}
+
+	public void setPageNumberDown(int aNum)
+	{
+		this.pageNumDown = aNum;
+	}
+
+	public int getPageNumberDown()
+	{
+		return this.pageNumDown;
+	}
+
+	public void setPageIndex(int aNum)
+	{
+		this.pageIndex = aNum;
+	}
+
+	public int getPageIndex()
+	{
+		return this.pageIndex;
+	}
 
 	public void setColumnHeaders(String[] headers)
 	{
@@ -94,18 +122,19 @@ public class TablePrintPage
 	{
 		this.colWidth = widths;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return "Page V:" + this.pageNumDown + ", H:" + this.pageNumAcross + ", from row " + this.startRow + " to " + this.endRow + ", from column " + this.startCol + " to " + this.endCol;
 	}
-	
+
 	public void setSpacing(int line, int column)
 	{
 		this.lineSpacing = line;
 		this.colSpacing = column;
 	}
-	
+
 	private void calculateColWidth()
 	{
 		TableColumnModel model =  this.table.getColumnModel();
@@ -116,7 +145,7 @@ public class TablePrintPage
 			this.colWidth[col] = model.getColumn(col).getWidth();
 		}
 	}
-	
+
 	public void print(Graphics2D pg)
 	{
 		Font dataFont = this.printFont;
@@ -126,13 +155,13 @@ public class TablePrintPage
 		{
 			this.calculateColWidth();
 		}
-		
+
 		Font headerFont = dataFont.deriveFont(Font.BOLD);
 		FontMetrics fm = pg.getFontMetrics(headerFont);
 		int lineHeight = fm.getHeight();
-		
+
 		AffineTransform oldTransform = pg.getTransform();
-		
+
 		pg.setFont(headerFont);
 		pg.setColor(Color.BLACK);
 
@@ -154,18 +183,18 @@ public class TablePrintPage
 		if (s != null) pg.setStroke(s);
 		fm = pg.getFontMetrics(dataFont);
     lineHeight = fm.getHeight();
-		
+
 		pg.setTransform(oldTransform);
 		y += (lineHeight + lineSpacing);
 		pg.translate(0, y);
 		pg.setFont(dataFont);
-		
+
 
 		Rectangle paintIconR = new Rectangle();
 		Rectangle paintTextR = new Rectangle();
 		Rectangle paintViewR = new Rectangle();
-		
-		for (int row = this.startRow; row <= this.endRow; row++) 
+
+		for (int row = this.startRow; row <= this.endRow; row++)
 		{
 			int cx = 0;
 			for (int col= this.startCol; col <= this.endCol; col++)
@@ -190,15 +219,15 @@ public class TablePrintPage
 					paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 					paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 
-					String display = SwingUtilities.layoutCompoundLabel(fm, data, (Icon) null, 
-						SwingConstants.TOP, 
-						wb.getHorizontalAlignment(), 
-						SwingConstants.TOP, 
-						SwingConstants.RIGHT, 
+					String display = SwingUtilities.layoutCompoundLabel(fm, data, (Icon) null,
+						SwingConstants.TOP,
+						wb.getHorizontalAlignment(),
+						SwingConstants.TOP,
+						SwingConstants.RIGHT,
 						paintViewR, paintIconR, paintTextR, 0);
-					
+
 					pg.drawString(display, cx + paintTextR.x, lineHeight);
-					
+
 					cx += this.colWidth[col] + colSpacing;
 				}
 				else

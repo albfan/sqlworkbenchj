@@ -60,8 +60,9 @@ public class SqlKeywordHelper
 	}
 
 	/**
-	 * Read keywords specific for the DBMS identified by the given DBID
+	 * Read keywords specific for the DBMS identified by the given DBID.
 	 * (dbms-independent keywords will be included).
+	 * 
 	 * @param id the DBID for the dbms
 	 */
 	public SqlKeywordHelper(String id)
@@ -121,7 +122,22 @@ public class SqlKeywordHelper
 				result.addAll(dbms);
 			}
 		}
+		removeItems(result);
 		return result;
+	}
+
+	private void removeItems(Set<String> items)
+	{
+		Set<String> toRemove = CollectionUtil.caseInsensitiveSet();
+		for (String value : items)
+		{
+			if (value.charAt(0) == '-')
+			{
+				toRemove.add(value.substring(1));
+				toRemove.add(value);
+			}
+		}
+		items.removeAll(toRemove);
 	}
 
 	private Set<String> readFile(String filename)

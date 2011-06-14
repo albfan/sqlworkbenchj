@@ -39,6 +39,7 @@ public class SimpleLogger
 	{
 	}
 
+	@Override
 	public void setMessageFormat(String newFormat)
 	{
 		if (newFormat == null) return;
@@ -48,20 +49,23 @@ public class SimpleLogger
 		messageFormat = messageFormat.replace("{source}", "%3$s");
 		messageFormat = messageFormat.replace("{message}", "%4$s");
 		messageFormat = messageFormat.replace("{error}", "%5$s");
-		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1; 
+		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1;
 		messageFormat = messageFormat.replace("{stacktrace}", "");
 	}
 
+	@Override
 	public void logToSystemError(boolean flag)
 	{
 		logSystemErr = flag;
 	}
 
+	@Override
 	public void setRootLevel(LogLevel lvl)
 	{
 		level = lvl;
 	}
 
+	@Override
 	public LogLevel getRootLevel()
 	{
 		return level;
@@ -73,6 +77,7 @@ public class SimpleLogger
 		return currentFile;
 	}
 
+	@Override
 	public void setOutputFile(File logfile, int maxFilesize)
 	{
 		if (logfile == null)
@@ -115,6 +120,7 @@ public class SimpleLogger
 		}
 	}
 
+	@Override
 	public void shutdownWbLog()
 	{
 		if (logOut != null)
@@ -134,6 +140,7 @@ public class SimpleLogger
 		}
 	}
 
+	@Override
 	public void logSqlError(Object caller, String sql, Throwable th)
 	{
 		if (th instanceof SQLException)
@@ -146,11 +153,13 @@ public class SimpleLogger
 		}
 	}
 
+	@Override
 	public boolean levelEnabled(LogLevel tolog)
 	{
 		return level.compareTo(tolog) >= 0;
 	}
 
+	@Override
 	public synchronized void logMessage(LogLevel level, Object aCaller, String aMsg, Throwable th)
 	{
 		if (!levelEnabled(level))

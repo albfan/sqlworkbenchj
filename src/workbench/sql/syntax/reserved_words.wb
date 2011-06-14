@@ -1,14 +1,11 @@
 # a (partial) list of SQL 2003 reserved words
 # these would need quoting if used as a table or column name
 ALL
-ALTER
 AND
 ANY
 AS
-BEGIN
 BETWEEN
 BY
-CALL
 CASCADE
 CASE
 CAST
@@ -36,7 +33,6 @@ INNER
 INSERT
 INTERSECT
 JOIN
-KEY
 LEFT
 LIKE
 MERGE
@@ -48,7 +44,6 @@ OR
 ORDER
 OUTER
 PRIMARY
-RECURSIVE
 REFERENCES
 REVOKE
 RIGHT
@@ -65,5 +60,4 @@ UPDATE
 VALUES
 WHEN
 WHERE
-WINDOW
 WITH

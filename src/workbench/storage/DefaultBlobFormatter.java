@@ -27,12 +27,12 @@ public class DefaultBlobFormatter
 	private String suffix;
 	private boolean upperCase = false;
 	private BlobLiteralType literalType = BlobLiteralType.hex;
-	
+
 	public void setLiteralType(BlobLiteralType type)
 	{
 		this.literalType = (type == null ? BlobLiteralType.hex : type);
 	}
-	
+
 	public void setUseUpperCase(boolean flag)
 	{
 		this.upperCase = flag;
@@ -47,7 +47,8 @@ public class DefaultBlobFormatter
 	{
 		this.suffix = s;
 	}
-	
+
+	@Override
 	public String getBlobLiteral(Object value)
 		throws SQLException
 	{
@@ -55,9 +56,9 @@ public class DefaultBlobFormatter
 
 		int addSpace = (prefix != null ? prefix.length() : 0);
 		addSpace += (suffix != null ? suffix.length() : 0);
-		
-		StringBuilder result = null; 
-		
+
+		StringBuilder result = null;
+
 		if (value instanceof byte[])
 		{
 			byte[] buffer = (byte[])value;
@@ -125,5 +126,5 @@ public class DefaultBlobFormatter
 	{
 		return literalType;
 	}
-	
+
 }

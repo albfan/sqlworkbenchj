@@ -329,6 +329,7 @@ public class PrintPreview
 			Settings.getInstance().setPageFormat(newFormat);
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					printTarget.setPageFormat(newFormat);
@@ -351,6 +352,7 @@ public class PrintPreview
 			// does not work properly
 			WbThread t = new WbThread("PageSetup Thread")
 			{
+				@Override
 				public void run()
 				{
 					showNativePageSetup();
@@ -362,6 +364,7 @@ public class PrintPreview
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					showCrossPlatformPageSetup();
@@ -415,6 +418,7 @@ public class PrintPreview
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.printButton)
@@ -433,6 +437,7 @@ public class PrintPreview
 		{
 			Thread runner = new WbThread("PrintPreview Zoom thread")
 			{
+				@Override
 				public void run()
 				{
 					changeZoom();
@@ -489,31 +494,38 @@ public class PrintPreview
 		Settings.getInstance().storeWindowPosition(this);
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		this.saveSettings();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
@@ -524,6 +536,7 @@ public class PrintPreview
 		protected int H_GAP = 16;
 		protected int V_GAP = 10;
 
+		@Override
 		public Dimension getPreferredSize()
 		{
 			int n = getComponentCount();
@@ -550,16 +563,19 @@ public class PrintPreview
 			return new Dimension(ww + ins.left + ins.right, hh + ins.top + ins.bottom);
 		}
 
+		@Override
 		public Dimension getMaximumSize()
 		{
 			return getPreferredSize();
 		}
 
+		@Override
 		public Dimension getMinimumSize()
 		{
 			return getPreferredSize();
 		}
 
+		@Override
 		public void doLayout()
 		{
 			Insets ins = getInsets();
@@ -642,22 +658,26 @@ public class PrintPreview
 			repaint();
 		}
 
+		@Override
 		public Dimension getPreferredSize()
 		{
 			Insets ins = getInsets();
 			return new Dimension(m_w + ins.left + ins.right, m_h + ins.top + ins.bottom);
 		}
 
+		@Override
 		public Dimension getMaximumSize()
 		{
 			return getPreferredSize();
 		}
 
+		@Override
 		public Dimension getMinimumSize()
 		{
 			return getPreferredSize();
 		}
 
+		@Override
 		public void paint(Graphics g)
 		{
 			if (this.m_img != null)

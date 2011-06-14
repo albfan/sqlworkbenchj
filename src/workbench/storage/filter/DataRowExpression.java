@@ -39,6 +39,7 @@ public class DataRowExpression
 		setFilterValue(referenceValue);
 	}
 
+	@Override
 	public Object getFilterValue()
 	{
 		return filterValue;
@@ -49,6 +50,7 @@ public class DataRowExpression
 		this.filterValue = value;
 	}
 
+	@Override
 	public ColumnComparator getComparator()
 	{
 		return comparator;
@@ -59,6 +61,7 @@ public class DataRowExpression
 		this.comparator = comp;
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		try
@@ -78,6 +81,7 @@ public class DataRowExpression
 		}
 	}
 
+	@Override
 	public boolean evaluate(Map<String, Object> columnValues)
 	{
 		for (Object value : columnValues.values())
@@ -98,23 +102,28 @@ public class DataRowExpression
 		return cls.charAt(0) == '[';
 	}
 
+	@Override
 	public String toString()
 	{
 		return "[any column] " + this.comparator.getOperator() + " " + comparator.getValueExpression(this.filterValue);
 	}
 
+	@Override
 	public boolean isIgnoreCase()
 	{
 		return ignoreCase;
 	}
 
+	@Override
 	public void setIgnoreCase(boolean flag)
 	{
 		this.ignoreCase = flag;
 	}
 
+	@Override
 	public String getColumnName() { return "*"; }
 
+	@Override
 	public boolean isColumnSpecific()
 	{
 		return false;

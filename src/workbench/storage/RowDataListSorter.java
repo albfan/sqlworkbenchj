@@ -114,6 +114,7 @@ public class RowDataListSorter
 		return result;
 	}
 
+	@Override
 	public int compare(RowData row1, RowData row2)
 	{
 		if (this.definition == null) return 0;

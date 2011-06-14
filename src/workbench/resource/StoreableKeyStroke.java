@@ -16,7 +16,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 /**
- * A class which wraps keyStroke and can be serialized 
+ * A class which wraps keyStroke and can be serialized
  * using the XMLDecode/XMLEncoder classes
  *
  * @author Thomas Kellerer
@@ -25,10 +25,10 @@ public class StoreableKeyStroke
 {
 	private int keyCode;
 	private int modifier;
-	
+
 	private boolean keyCodeSet = false;
 	private boolean modifierSet = false;
-	
+
 	public StoreableKeyStroke()
 	{
 	}
@@ -40,7 +40,7 @@ public class StoreableKeyStroke
 		this.modifierSet = true;
 		this.keyCodeSet = true;
 	}
-	
+
 	public KeyStroke getKeyStroke()
 	{
 		if (keyCodeSet || modifierSet)
@@ -49,26 +49,26 @@ public class StoreableKeyStroke
 		}
 		return null;
 	}
-	
+
 	public int getKeyCode()
 	{
 		KeyStroke theKey = getKeyStroke();
 		if (theKey != null) return theKey.getKeyCode();
 		return 0;
 	}
-	
+
 	public void setKeyCode(int c)
 	{
 		this.keyCode = c;
 		this.keyCodeSet = true;
 	}
-	
+
 	public void setKeyModifier(int mod)
 	{
 		this.modifier = mod;
 		this.modifierSet = true;
 	}
-	
+
 	public int getKeyModifier()
 	{
 		KeyStroke theKey = getKeyStroke();
@@ -86,13 +86,14 @@ public class StoreableKeyStroke
 	public boolean equals(StoreableKeyStroke other)
 	{
 		KeyStroke thisKey = getKeyStroke();
-		KeyStroke otherKey = ((StoreableKeyStroke)other).getKeyStroke();
+		KeyStroke otherKey = other.getKeyStroke();
 		if (thisKey == null && otherKey == null) return true;
 		if (thisKey == null && otherKey != null) return false;
 		if (thisKey != null && otherKey == null) return false;
 		return thisKey.equals(otherKey);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof StoreableKeyStroke)
@@ -115,14 +116,15 @@ public class StoreableKeyStroke
 		return hash;
 	}
 
+	@Override
 	public String toString()
 	{
 		KeyStroke thisKey = getKeyStroke();
 		if (thisKey == null) return "";
-		
+
 		int mod = thisKey.getModifiers();
 		int code = thisKey.getKeyCode();
-		
+
 		String modText = KeyEvent.getKeyModifiersText(mod);
 		if (modText.length() == 0)
 			return KeyEvent.getKeyText(code);

@@ -19,7 +19,8 @@ import java.util.Map;
 public class AndExpression
 	extends ComplexExpression
 {
-	
+
+	@Override
 	public boolean evaluate(Map<String, Object> columnValues)
 	{
 		for (FilterExpression expr : filter)
@@ -28,7 +29,8 @@ public class AndExpression
 		}
 		return true;
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof AndExpression)
@@ -40,7 +42,8 @@ public class AndExpression
 			return false;
 		}
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		StringBuilder value = new StringBuilder();
@@ -51,5 +54,5 @@ public class AndExpression
 		}
 		return value.toString();
 	}
-	
+
 }

@@ -24,41 +24,49 @@ public class RegExComparator
 	implements ColumnComparator
 {
 
+	@Override
 	public boolean supportsIgnoreCase()
 	{
 		return true;
 	}
 
+	@Override
 	public String getValueExpression(Object value)
 	{
 		return "'" + value + "'";
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return ResourceMgr.getString("TxtOpMatches");
 	}
 
+	@Override
 	public String getOperator()
 	{
 		return "matches";
 	}
 
+	@Override
 	public boolean needsValue()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean comparesEquality()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
 	}
 
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null)
@@ -80,11 +88,13 @@ public class RegExComparator
 		return m.find();
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return (other instanceof RegExComparator);
 	}
 
+	@Override
 	public boolean validateInput(Object value)
 	{
 		if (!(value instanceof String))

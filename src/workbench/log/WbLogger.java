@@ -12,10 +12,9 @@
 package workbench.log;
 
 import java.io.File;
-import workbench.gui.components.LogFileViewer;
 
 /**
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface WbLogger

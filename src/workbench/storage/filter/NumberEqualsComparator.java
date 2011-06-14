@@ -20,36 +20,43 @@ public class NumberEqualsComparator
 	implements ColumnComparator
 {
 
+	@Override
 	public boolean supportsIgnoreCase()
 	{
 		return false;
 	}
 
+	@Override
 	public String getValueExpression(Object value)
 	{
 		return (value == null ? "" : value.toString());
 	}
 
+	@Override
 	public String getOperator()
 	{
 		return "=";
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return "equals";
 	}
 
+	@Override
 	public boolean needsValue()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean comparesEquality()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null)
@@ -66,16 +73,19 @@ public class NumberEqualsComparator
 		}
 	}
 
+	@Override
 	public boolean supportsType(Class valueClass)
 	{
 		return Number.class.isAssignableFrom(valueClass);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		return other instanceof NumberEqualsComparator;
 	}
 
+	@Override
 	public boolean validateInput(Object value)
 	{
 		return value == null ? false : StringUtil.isNumber(value.toString());
