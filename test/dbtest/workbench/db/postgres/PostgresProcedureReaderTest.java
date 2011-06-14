@@ -111,7 +111,7 @@ public class PostgresProcedureReaderTest
 			"  stype = anyarray,\n" +
 			"  initcond = '{}'\n" +
 			");";
-		assertEquals(expected, source);
+		assertEquals(expected, source.trim());
 	}
 
 	@Test
