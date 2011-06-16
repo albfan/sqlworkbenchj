@@ -1379,4 +1379,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "fixfkretrieval", true);
 	}
+
+	public String getQuoteEscapeCharacter()
+	{
+		return Settings.getInstance().getProperty(prefix + "quote.escape", "\"");
+	}
 }

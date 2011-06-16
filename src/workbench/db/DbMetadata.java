@@ -379,12 +379,16 @@ public class DbMetadata
 			LogMgr.logError("DbMetadata.<init>", "Error when retrieving identifier quote character", e);
 		}
 
-		if (StringUtil.isBlank(quoteCharacter)) this.quoteCharacter = "\"";
-
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 
 		this.metaSqlMgr = new MetaDataSqlManager(productName);
 
+		if (StringUtil.isBlank(quoteCharacter))
+		{
+			this.quoteCharacter = dbSettings.getQuoteEscapeCharacter();
+			LogMgr.logDebug("DbMetadata.<init>", "Using quote escape character: " + quoteCharacter);
+
+		}
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 
