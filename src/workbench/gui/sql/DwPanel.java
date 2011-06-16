@@ -749,7 +749,6 @@ public class DwPanel
 					dataTable.setAutoCreateColumnsFromModel(true);
 					dataTable.setModel(new DataStoreTableModel(newData), true);
 					setPrintHeader(sql);
-					dataTable.checkCopyActions();
 					checkResultSetActions();
 					dataTable.applyHighlightExpression(newData.getGeneratingFilter());
 					if (GuiSettings.getShowTableRowNumbers())

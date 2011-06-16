@@ -1094,6 +1094,7 @@ public class WbTable
 		addListeners();
 		adjustRowsAndColumns();
 		updateSortRenderer();
+		checkCopyActions();
 	}
 
 	public boolean isColumnOrderChanged()
