@@ -339,6 +339,7 @@ public class SelectAnalyzer
 	 * This will only return any tables in the FROM clause to
 	 * support correlated sub-queries
 	 */
+	@Override
 	public List<TableAlias> getTables()
 	{
 		List<String> tables = SqlUtil.getTables(sql, true);
