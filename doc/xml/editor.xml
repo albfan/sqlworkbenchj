@@ -108,7 +108,7 @@ FROM orders ord
     <para>
       When writing (long) <literal>INSERT</literal> statements it is often helpful to check if a specific value
       is actually written into the intended column. To check the column a value corresponds to (or the vice versa),
-      press Ctrl-P while in the column list or value list. A little tooltip will appear to show the corresponding
+      press <literal>Ctrl-#</literal> while in the column list or value list. A little tooltip will appear to show the corresponding
       element from the "other" part of the statement. Consider the following statement:
     </para>
     <programlisting>
