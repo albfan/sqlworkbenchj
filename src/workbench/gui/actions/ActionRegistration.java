@@ -11,6 +11,8 @@
  */
 package workbench.gui.actions;
 
+import workbench.gui.editor.actions.ShowTipAction;
+
 /**
  * 	Register actions with the ShortcutManager that are not created upon startup.
  * 	For this, a dummy action is created (with no client) which will
@@ -29,5 +31,6 @@ public class ActionRegistration
 		new CopySelectedAsSqlInsertAction(null);
 		new CopySelectedAsSqlUpdateAction(null);
 		new SetNullAction(null);
+		new ShowTipAction(null, null);
 	}
 }
