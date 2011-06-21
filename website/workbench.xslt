@@ -203,7 +203,9 @@
         <a target="new" href="http://www.mgm-tp.com/home/index.html" title="mgm technology partners GmbH">
           <span id="mgm"></span>
         </a>
+
         <div id="top"></div>
+
         <a href="index.html" title="home">
           <span id="head"></span>
         </a>
@@ -212,8 +214,8 @@
           <xsl:call-template name="make-toc">
             <xsl:with-param name="currentPage" select="$pageName"/>
           </xsl:call-template>
-
         </div>
+
         <div id="main">
           <xsl:if test="$imageName">
             <img src="{$imageName}"/>
@@ -224,6 +226,7 @@
             </div>
           </xsl:if>
         </div>
+
       </body>
     </html>
   </xsl:template>

@@ -48,7 +48,7 @@
       <li><a href="manual/using.html#macros">Macros</a> (aka aliases) for frequently used SQL statements</li>
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with macros)</li>
       <li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
-      <!--<li>Tooltips for INSERT statements to show the corresponding value or column (<image-link title="INSERT Hint" name="insert_hint.png">Screenshot</image-link>) </li>-->
+      <li>Tooltips for INSERT statements to show the corresponding value or column (<image-link title="INSERT Hint" name="insert_hint.png">Screenshot</image-link>) </li>
       <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
       <li>An interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
       <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
