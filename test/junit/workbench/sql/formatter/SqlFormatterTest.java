@@ -415,13 +415,13 @@ public class SqlFormatterTest
              "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
              "    INNER JOIN DirectReports AS d \n" +
              "        ON e.ManagerID = d.EmployeeID";
-		SqlFormatter f = new SqlFormatter(sql);
+		SqlFormatter f = new SqlFormatter(sql, "postgresql");
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT e.ManagerID,\n" +
              "       e.EmployeeID,\n" +
              "       e.Title,\n" +
              "       edh.DepartmentID,\n" +
-             "       0 AS LEVEL\n" +
+             "       0 AS Level\n" +
              "FROM HumanResources.Employee AS e \n" +
              "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
              "WHERE ManagerID IS NULL\n" +
@@ -430,7 +430,7 @@ public class SqlFormatterTest
              "       e.EmployeeID,\n" +
              "       e.Title,\n" +
              "       edh.DepartmentID,\n" +
-             "       LEVEL+1\n" +
+             "       Level + 1\n" +
              "FROM HumanResources.Employee AS e \n" +
              "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
              "  INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID";
@@ -444,7 +444,7 @@ public class SqlFormatterTest
              "(SELECT state, 0 as numorders, SUM(pop) as pop \n" +
              "FROM zipcensus \n" +
              "GROUP BY state)";
-		f = new SqlFormatter(sql);
+		f = new SqlFormatter(sql, "oracle");
 		formatted = f.getFormattedSql();
 		expected = "(SELECT o.state,\n" +
              "       COUNT(*) AS numorders,\n" +
@@ -532,10 +532,10 @@ public class SqlFormatterTest
              "    ON DirectReports.DeptID = dp.DepartmentID \n" +
              "WHERE dp.GroupName = N'Research and Development' OR Level = 0";
 
-		SqlFormatter f = new SqlFormatter(sql);
+		SqlFormatter f = new SqlFormatter(sql, "postgresql");
 		String formatted = f.getFormattedSql();
 		String expected =
-						"WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, LEVEL) \n" +
+						"WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, Level) \n" +
 						"AS\n" +
 						"(\n" +
 						"  -- Anchor member definition \n" +
@@ -543,7 +543,7 @@ public class SqlFormatterTest
 						"         e.EmployeeID,\n" +
 						"         e.Title,\n" +
 						"         edh.DepartmentID,\n" +
-						"         0 AS LEVEL\n" +
+						"         0 AS Level\n" +
 						"  FROM HumanResources.Employee AS e \n" +
 						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
 						"  WHERE ManagerID IS NULL\n" +
@@ -553,7 +553,7 @@ public class SqlFormatterTest
 						"         e.EmployeeID,\n" +
 						"         e.Title,\n" +
 						"         edh.DepartmentID,\n" +
-						"         LEVEL+1\n" +
+						"         Level + 1\n" +
 						"  FROM HumanResources.Employee AS e \n" +
 						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
 						"    INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID\n" +
@@ -562,13 +562,13 @@ public class SqlFormatterTest
 						"SELECT ManagerID,\n" +
 						"       EmployeeID,\n" +
 						"       Title,\n" +
-						"       LEVEL\n" +
+						"       Level\n" +
 						"FROM DirectReports \n" +
 						"  INNER JOIN HumanResources.Department AS dp ON DirectReports.DeptID = dp.DepartmentID\n" +
 						"WHERE dp.GroupName = N 'Research and Development'\n" +
-						"OR    LEVEL = 0";
+						"OR    Level = 0";
 
-//		System.out.println("+++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+//		System.out.println("+++++++++++++++++++ got:\n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 		sql = "with tmp as\n" +
 			"(SELECT *\n" +
@@ -915,7 +915,7 @@ public class SqlFormatterTest
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 
 		sql = "create table person (id1 integer not null, constraint xyz exclude (id1 with =))";
-		f = new SqlFormatter(sql);
+		f = new SqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 		String expected =
 				"CREATE TABLE person \n"+
@@ -926,7 +926,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted.trim());
 
 		sql = "create table person (id1 integer not null primary key, some_data varchar (100), constraint xyz exclude (some_data with =))";
-		f = new SqlFormatter(sql);
+		f = new SqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 //		System.out.println("++++\n" + formatted + "\n-----");
 		expected =

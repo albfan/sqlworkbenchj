@@ -11,7 +11,6 @@
  */
 package workbench.gui.editor;
 
-import java.util.Set;
 import workbench.gui.sql.EditorPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -27,7 +26,14 @@ import workbench.util.StringUtil;
 public class TextFormatter
 {
 
-	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, Set<String> dbFunctions, Set<String> dbDatatypes, String lineComment)
+	private String dbId;
+
+	public TextFormatter(String id)
+	{
+		this.dbId = id;
+	}
+
+	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, String lineComment)
 	{
 		if (!editor.isEditable()) return;
 
@@ -67,9 +73,7 @@ public class TextFormatter
 				command += delimit;
 			}
 
-			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
-			f.addDBFunctions(dbFunctions);
-			f.setDbDataTypes(dbDatatypes);
+			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
 
 			try
 			{

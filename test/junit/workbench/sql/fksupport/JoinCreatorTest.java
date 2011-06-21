@@ -1,11 +1,11 @@
 /*
  * JoinCreatorTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.sql.fksupport;
@@ -59,12 +59,12 @@ public class JoinCreatorTest
 			");\n" +
 			"commit;"
 		);
-		
+
 		String sql = "select * from person p join address a join address_type adt on  ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
 		Settings.getInstance().setAutoCompletionPasteCase("lower");
 		JoinCreator creator = new JoinCreator(sql, pos, conn);
-		
+
 		TableAlias join = creator.getJoinTable();
 		assertEquals("person", join.getObjectName());
 		assertEquals("p", join.getNameToUse());
@@ -90,7 +90,7 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
-		
+
 		sql = "select person_id from address ad join address_type adt on ";
 		pos = sql.length() - 1;
 		creator = new JoinCreator(sql, pos, conn);
@@ -102,12 +102,12 @@ public class JoinCreatorTest
 		joined = creator.getJoinedTable();
 		assertEquals("address_type", joined.getObjectName());
 		assertEquals("adt", joined.getAlias());
-		
+
 		sql = "select * from address a join person p on ";
 		pos = sql.length() -1;
 		creator = new JoinCreator(sql, pos, conn);
 		join = creator.getJoinTable();
-		System.out.println("jointable: " + join.getObjectName());
-		System.out.println("condition: " + creator.getJoinCondition().trim());
+		assertEquals("address", join.getObjectName());
+		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", creator.getJoinCondition().trim());
 	}
 }

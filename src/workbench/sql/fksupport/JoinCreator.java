@@ -1,11 +1,11 @@
 /*
  * JoinCreator
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.sql.fksupport;
@@ -21,6 +21,7 @@ import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -45,10 +46,13 @@ public class JoinCreator
 	private WbConnection connection;
 	private int cursorPos;
 	private Map<Integer, TableAlias> tablePositions;
-	
+	private Set<String> keywords;
+
 	public JoinCreator(String statement, int positionInStatement, WbConnection dbConn)
 	{
 		this.connection = dbConn;
+		SqlKeywordHelper helper = new SqlKeywordHelper(connection.getDbId());
+		keywords = helper.getKeywords();
 		int realPos = setSql(statement, positionInStatement);
 		setCursorPosition(realPos);
 	}
@@ -114,7 +118,7 @@ public class JoinCreator
 		}
 		return false;
 	}
-	
+
 	public TableAlias getJoinTable()
 	{
 		Integer pos = getTableIndexBeforeCursor();
@@ -148,7 +152,7 @@ public class JoinCreator
 		}
 		return tableIndex.get(tableIndex.size() - 1);
 	}
-	
+
 	private void retrieveTablePositions()
 	{
 		tablePositions = new TreeMap<Integer, TableAlias>();
@@ -157,7 +161,7 @@ public class JoinCreator
 
 		boolean nextIsTable = false;
 		Set<String> joinKeywords = SqlUtil.getJoinKeyWords();
-		
+
 		SQLToken token = lexer.getNextToken(false, false);
 		while (token != null)
 		{
@@ -184,7 +188,7 @@ public class JoinCreator
 							next = lexer.getNextToken(false, false);
 						}
 
-						if (!next.isReservedWord())
+						if (!keywords.contains(next.getText()))
 						{
 							tbl = new TableAlias(value + " " + next.getContents());
 						}

@@ -33,34 +33,34 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.treeSet(
+	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.caseInsensitiveSet(
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
 		"RIGHT JOIN", "START WITH", "CONNECT BY");
 
-	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.treeSet(
+	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.caseInsensitiveSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
 	// keywords terminating a WHERE clause
-	public static final Set<String> WHERE_TERMINAL = CollectionUtil.treeSet(
+	public static final Set<String> WHERE_TERMINAL = CollectionUtil.caseInsensitiveSet(
 	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
 	// keywords terminating the FROM part
-	public static final Set<String> FROM_TERMINAL = CollectionUtil.treeSet(WHERE_TERMINAL,
+	public static final Set<String> FROM_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
 		"WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating an GROUP BY clause
-	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.treeSet(WHERE_TERMINAL,
+	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
 		"SELECT", "UPDATE", "DELETE", "INSERT", "CREATE", "CREATE OR REPLACE");
 
-	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.treeSet(
+	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.caseInsensitiveSet(
 		"UNIQUE", "CONSTRAINT", "FOREIGN KEY", "PRIMARY KEY");
 
-	private final Set<String> DATE_LITERALS = CollectionUtil.treeSet("DATE", "TIME", "TIMESTAMP");
+	private final Set<String> DATE_LITERALS = CollectionUtil.caseInsensitiveSet("DATE", "TIME", "TIMESTAMP");
 
-	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.treeSet(";");
+	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(";");
 
 	public static final Set<String> SELECT_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM");
 	private final Set<String> SET_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM", "WHERE");
@@ -72,26 +72,40 @@ public class SqlFormatter
 	private StringBuilder leadingWhiteSpace = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
+
 	private Set<String> dbFunctions = CollectionUtil.caseInsensitiveSet();
 	private Set<String> dataTypes = CollectionUtil.caseInsensitiveSet();
+	private Set<String> keywords = CollectionUtil.caseInsensitiveSet();
+
 	private static final String NL = "\n";
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
+	private String dbId;
 
-	public SqlFormatter(CharSequence aScript)
+	SqlFormatter(CharSequence aScript)
 	{
-		this(aScript, 0, Settings.getInstance().getFormatterMaxSubselectLength());
+		this(aScript, 0, Settings.getInstance().getFormatterMaxSubselectLength(), null);
 	}
 
-	public SqlFormatter(CharSequence aScript, int maxLength)
+	public SqlFormatter(CharSequence aScript, String dbId)
 	{
-		this(aScript, 0, maxLength);
+		this(aScript, 0, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
 	}
 
-	private SqlFormatter(CharSequence aScript, int indentCount, int maxLength)
+	public SqlFormatter(CharSequence aScript, int maxLength, String dbId)
+	{
+		this(aScript, 0, maxLength, dbId);
+	}
+
+	SqlFormatter(CharSequence aScript, int maxLength)
+	{
+		this(aScript, 0, maxLength, null);
+	}
+
+	private SqlFormatter(CharSequence aScript, int indentCount, int maxLength, String dbId)
 	{
 		this.sql = aScript;
 		Reader in = new CharSequenceReader(this.sql);
@@ -109,7 +123,7 @@ public class SqlFormatter
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		commaAfterLineBreak = Settings.getInstance().getFormatterSetCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
-		initTypesAndFunctions();
+		setDbId(dbId);
 	}
 
 	public void setUseLowerCaseFunctions(boolean flag)
@@ -122,13 +136,42 @@ public class SqlFormatter
 		return NL;
 	}
 
-	public void setDbDataTypes(Set<String> types)
+	private void setDbId(String id)
 	{
-		this.dataTypes = CollectionUtil.caseInsensitiveSet();
-		if (types != null)
+		this.dbId = id;
+		SqlKeywordHelper helper = new SqlKeywordHelper(dbId);
+		keywords.clear();
+		dataTypes.clear();
+		dbFunctions.clear();
+		keywords.addAll(helper.getKeywords());
+		dataTypes.addAll(helper.getDataTypes());
+		dbFunctions.addAll(helper.getSqlFunctions());
+	}
+
+	private boolean isDbFunction(SQLToken token)
+	{
+		if (token == null) return false;
+		return isDbFunction(token.getText());
+	}
+
+	private boolean isDbFunction(String key)
+	{
+		if (dbFunctions == null)
 		{
-			dataTypes.addAll(types);
+			SqlKeywordHelper keyWords = new SqlKeywordHelper();
+			dbFunctions = keyWords.getSqlFunctions();
 		}
+		return this.dbFunctions.contains(key);
+	}
+
+	private boolean isDatatype(String key)
+	{
+		return this.dataTypes.contains(key);
+	}
+
+	private boolean isKeyword(String verb)
+	{
+		return keywords.contains(verb);
 	}
 
 	public void setAddSpaceAfterCommInList(boolean flag)
@@ -149,31 +192,14 @@ public class SqlFormatter
 	/**
 	 * Adds the passed set of DBMS specific functions to the list
 	 * of already existing database functions.
+	 *
 	 * Duplicates will be removed.
+	 *
+	 * This is for testing purposes only.
 	 */
-	public void addDBFunctions(Set<String> functionNames)
+	void addDBFunctions(Set<String> functionNames)
 	{
-		if (functionNames != null)
-		{
-			this.dbFunctions.addAll(functionNames);
-		}
-	}
-
-	public void addDBMSFunctions(String dbid)
-	{
-		SqlKeywordHelper keyWords = new SqlKeywordHelper(dbid);
-		if (dbFunctions == null)
-		{
-			dbFunctions = CollectionUtil.caseInsensitiveSet();
-		}
-		dbFunctions.addAll(keyWords.getSqlFunctions());
-	}
-
-	private void initTypesAndFunctions()
-	{
-		SqlKeywordHelper keyWords = new SqlKeywordHelper();
-		dbFunctions = keyWords.getSqlFunctions();
-		dataTypes = keyWords.getDataTypes();
+		this.dbFunctions.addAll(functionNames);
 	}
 
 	private void saveLeadingWhitespace()
@@ -256,15 +282,24 @@ public class SqlFormatter
 	private void appendTokenText(SQLToken t)
 	{
 		if (t == null) return;
-		String text = t.getContents();
+		String text = t.getText();
+
 		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
 		{
 			text = text.toLowerCase();
 		}
-		else if (!this.upperCaseKeywords && t.isReservedWord())
+		else if (this.isKeyword(text))
 		{
-			text = text.toLowerCase();
+			if (upperCaseKeywords)
+			{
+				text = text.toUpperCase();
+			}
+			else
+			{
+				text = text.toLowerCase();
+			}
 		}
+
 		appendText(text);
 	}
 
@@ -320,27 +355,6 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 
-	private boolean isDbFunction(SQLToken token)
-	{
-		if (token == null) return false;
-		return isDbFunction(token.getText());
-	}
-
-	private boolean isDbFunction(String key)
-	{
-		if (dbFunctions == null)
-		{
-			SqlKeywordHelper keyWords = new SqlKeywordHelper();
-			dbFunctions = keyWords.getSqlFunctions();
-		}
-		return this.dbFunctions.contains(key);
-	}
-
-	private boolean isDatatype(String key)
-	{
-		return this.dataTypes.contains(key);
-	}
-
 	private boolean needsWhitespace(SQLToken last, SQLToken current)
 	{
 		return this.needsWhitespace(last, current, false);
@@ -369,14 +383,14 @@ public class SqlFormatter
 
 		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
 		if (isCurrentOpenBracket && isDatatype(currentText)) return false;
-		if (isCurrentOpenBracket && last.isReservedWord()) return true;
+		if (isCurrentOpenBracket && isKeyword(lastText)) return true;
 		if (isCurrentOpenBracket && last.isIdentifier()) return true;
 		if (isLastCloseBracket && currChar == ',') return false;
-		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
+		if (isLastCloseBracket && (current.isIdentifier() || isKeyword(currentText))) return true;
 
-		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentText)) return false;
+		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentText)) return true;
 
-		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
+		if (last.isLiteral() && (current.isIdentifier() || isKeyword(currentText) || current.isOperator())) return true;
 
 		if (currChar == '?') return true;
 		if (currChar == '=') return true;
@@ -386,12 +400,12 @@ public class SqlFormatter
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
 		if (lastChar == '.' && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
-		if (isLastOpenBracket && current.isReservedWord()) return false;
+		if (isLastOpenBracket && isKeyword(currentText)) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;
 		if ((last.isIdentifier() || last.isLiteral()) && current.isOperator()) return true;
 		if ((current.isIdentifier() || current.isLiteral()) && last.isOperator()) return true;
 		if (current.isSeparator() || current.isOperator()) return false;
-		if (last.isOperator() && (current.isReservedWord() || current.isIdentifier() || current.isLiteral())) return true;
+		if (last.isOperator() && (isKeyword(currentText) || current.isIdentifier() || current.isLiteral())) return true;
 		if (last.isSeparator() || last.isOperator()) return false;
 
 		return true;
@@ -413,7 +427,7 @@ public class SqlFormatter
 				inJoin = SqlUtil.getJoinKeyWords().contains(text);
 			}
 
-			if (t.isReservedWord() && FROM_TERMINAL.contains(text.toUpperCase()))
+			if (FROM_TERMINAL.contains(text.toUpperCase()))
 			{
 				return t;
 			}
@@ -481,7 +495,7 @@ public class SqlFormatter
 						indent(5);
 					}
 				}
-				this.appendText(text);
+				this.appendTokenText(t);
 				if (LINE_BREAK_AFTER.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
@@ -541,7 +555,7 @@ public class SqlFormatter
 				t = processCase(caseIndent);
 				continue;
 			}
-			else if (t.isReservedWord() && terminalKeys.contains(text.toUpperCase()))
+			else if (terminalKeys.contains(text.toUpperCase()))
 			{
 				return t;
 			}
@@ -566,13 +580,13 @@ public class SqlFormatter
 						this.appendText(' ');
 						this.appendTokenText(t);
 					}
-					else if (t.isReservedWord())
+					else if (isKeyword(t.getText()))
 					{
-						if (LINE_BREAK_BEFORE.contains(t.getContents()))
+						if (LINE_BREAK_BEFORE.contains(t.getText()))
 						{
 							appendNewline();
-							appendTokenText(t);
 						}
+						appendTokenText(t);
 					}
 				}
 			}
@@ -677,7 +691,7 @@ public class SqlFormatter
 	private void appendSubSelect(StringBuilder subSql, int lastIndent)
 		throws Exception
 	{
-		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
+		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength, this.dbId);
 		String s = f.getFormattedSql();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
@@ -1108,7 +1122,7 @@ public class SqlFormatter
 				String text = t.getContents();
 				this.appendComment(text);
 			}
-			else if (t.isReservedWord() || wbTester.isWbCommand(word))
+			else if (isKeyword(word) || wbTester.isWbCommand(word))
 			{
 				if (lastToken.isComment() && !isStartOfLine()) this.appendNewline();
 
@@ -1362,7 +1376,7 @@ public class SqlFormatter
 		{
 			String verb = t.getContents();
 
-			if (t.isReservedWord() && WHERE_TERMINAL.contains(verb))
+			if (WHERE_TERMINAL.contains(verb))
 			{
 				return t;
 			}
@@ -1385,7 +1399,7 @@ public class SqlFormatter
 			{
 				String lastWord = lastToken.getContents();
 
-				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
+				if (!lastToken.isSeparator() && !isDbFunction(lastWord)) this.appendText(' ');
 				appendText(t.getContents());
 
 				SQLToken next = skipComments();
@@ -1405,7 +1419,7 @@ public class SqlFormatter
 					continue;
 				}
 			}
-			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
+			else if (bracketCount == 0 && (verb.equalsIgnoreCase("AND") || verb.equalsIgnoreCase("OR")) )
 			{
 				// TODO: this attempt to keep conditions in bracktes together, results
 				// in effectively no formatting when the whole WHERE clause is put
@@ -1459,7 +1473,7 @@ public class SqlFormatter
 		if (t.isIdentifier())
 		{
 			this.appendText(' ');
-			this.appendText(t.getContents());
+			this.appendTokenText(t);
 			t = this.lexer.getNextToken(false, false);
 			if (t.getContents().equalsIgnoreCase("VALUES"))
 			{
@@ -1506,7 +1520,7 @@ public class SqlFormatter
 				bracketCount ++;
 			}
 			if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-			this.appendText(t.getContents());
+			this.appendTokenText(t);
 
 			if (bracketCount == 0)
 			{
@@ -1527,7 +1541,7 @@ public class SqlFormatter
 		if (verb.equals("TABLE"))
 		{
 			this.appendText(' ');
-			this.appendText(t.getContents());
+			this.appendTokenText(t);
 			this.appendText(' ');
 			t = this.processCreateTable(t);
 			return t;
@@ -1649,7 +1663,7 @@ public class SqlFormatter
 
 			appendText("  ");
 			appendText(colname);
-			if (column.isReservedWord())
+			if (isKeyword(colname))
 			{
 				appendText(" ");
 			}
@@ -1697,7 +1711,7 @@ public class SqlFormatter
 				{
 					appendText(' ');
 				}
-				appendText(w);
+				appendTokenText(t);
 
 				if (",".equals(w) && bracketCount == 0)
 				{
@@ -1743,7 +1757,7 @@ public class SqlFormatter
 				appendText('.');
 				// the following token must be another identifier, otherwise the syntax is not correct
 				t = this.skipComments();
-				appendText(t.getContents());
+				appendTokenText(t);
 				appendText(' ');
 				t = this.skipComments();
 			}
@@ -1771,7 +1785,7 @@ public class SqlFormatter
 			if (t.getContents().equals("SELECT"))
 			{
 				CharSequence select = this.sql.subSequence(t.getCharBegin(), sql.length());
-				SqlFormatter f = new SqlFormatter(select);
+				SqlFormatter f = new SqlFormatter(select, this.dbId);
 				String formattedSelect = f.getFormattedSql();
 				appendText(formattedSelect.toString());
 				return null;
@@ -1931,12 +1945,12 @@ public class SqlFormatter
 			else if ("AS".equals(t.getContents()))
 			{
 				this.appendNewline();
-				this.appendText(t.getContents());
+				this.appendTokenText(t);
 				this.appendNewline();
 			}
 			else
 			{
-				this.appendText(t.getContents());
+				this.appendTokenText(t);
 				if (this.needsWhitespace(last, t, true))
 				{
 					this.appendText(' ');
@@ -1961,16 +1975,16 @@ public class SqlFormatter
 			{
 				return this.processCommaList(t, 5, 7);
 			}
-			else if (t.isReservedWord() && "ON".equals(text))
+			else if ("ON".equalsIgnoreCase(text))
 			{
 				this.appendNewline();
 				this.indent("       ");
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			else
 			{
 				if (this.needsWhitespace(last, t)) this.appendText(' ');
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			t = this.lexer.getNextToken(true, false);
 		}

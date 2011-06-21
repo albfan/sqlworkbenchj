@@ -135,6 +135,7 @@ public class EditorPanel
 	private Set<String> dbDatatypes;
 	private boolean isMySQL;
 	private DelimiterDefinition alternateDelimiter;
+	private String dbId;
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -245,12 +246,15 @@ public class EditorPanel
 
 			// Support Microsoft's broken object quoting using square brackets (e.g. [wrong_table])
 			token.setIsMicrosoft(aConnection.getMetadata().isSqlServer());
+			this.dbId = aConnection.getDbSettings().getDbId();
+		}
+		else
+		{
+			this.dbId = null;
+			this.commentChar = "--";
 		}
 
-		this.commentChar = "--";
-		String dbId = (aConnection == null ? null : aConnection.getMetadata().getDbId());
-
-		SqlKeywordHelper helper = new SqlKeywordHelper(dbId);
+		SqlKeywordHelper helper = new SqlKeywordHelper(this.dbId);
 		dbFunctions.addAll(helper.getSqlFunctions());
 		dbDatatypes.addAll(helper.getDataTypes());
 
@@ -258,7 +262,6 @@ public class EditorPanel
 		token.addDatatypes(dbDatatypes);
 		token.addSqlKeyWords(helper.getKeywords());
 		token.addOperators(helper.getOperators());
-
 	}
 
 	@Override
@@ -347,8 +350,8 @@ public class EditorPanel
 	@Override
 	public void reformatSql()
 	{
-		TextFormatter f = new TextFormatter();
-		f.formatSql(this, alternateDelimiter, dbFunctions, dbDatatypes, isMySQL ? "#" : "--");
+		TextFormatter f = new TextFormatter(this.dbId);
+		f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
 	}
 
 	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)

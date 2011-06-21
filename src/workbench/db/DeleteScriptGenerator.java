@@ -137,7 +137,7 @@ public class DeleteScriptGenerator
 	{
 		try
 		{
-			SqlFormatter f = new SqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength());
+			SqlFormatter f = new SqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength(), connection.getDbId());
 			String formatted = f.getFormattedSql() + "\n";
 			return formatted;
 		}

@@ -242,7 +242,7 @@ public class DefaultViewReader
 				StringUtil.trimTrailingWhitespace(source);
 				if (this.connection.getDbSettings().getFormatViewSource())
 				{
-					SqlFormatter f = new SqlFormatter(source);
+					SqlFormatter f = new SqlFormatter(source, connection.getDbId());
 					source = new StringBuilder(f.getFormattedSql());
 				}
 

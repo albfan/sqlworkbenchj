@@ -137,6 +137,12 @@ public class WbConnection
 		return this.id;
 	}
 
+	public String getDbId()
+	{
+		if (getDbSettings() == null) return null;
+		return getDbSettings().getDbId();
+	}
+
 	private void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;

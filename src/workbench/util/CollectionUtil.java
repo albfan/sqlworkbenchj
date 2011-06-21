@@ -62,6 +62,14 @@ public class CollectionUtil
 		return result;
 	}
 
+	public static Set<String> caseInsensitiveSet(Set<String> base, String... a)
+	{
+		Set<String> result = caseInsensitiveSet();
+		result.addAll(base);
+		result.addAll(Arrays.asList(a));
+		return result;
+	}
+
 	public static <E> List<E> arrayList(List<E> source)
 	{
 		return new ArrayList<E>(source);
