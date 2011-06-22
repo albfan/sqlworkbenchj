@@ -25,7 +25,8 @@ public class CsvLineParser
 	private String lineData = null;
 	private int len = 0;
 	private int current = 0;
-	private char delimiter;
+	private String delimiter;
+	private int delimiterLength;
 	private char quoteChar = 0;
 	private boolean returnEmptyStrings = false;
 	private boolean trimValues = false;
@@ -33,22 +34,38 @@ public class CsvLineParser
 	private QuoteEscapeType escapeType = QuoteEscapeType.none;
 	private boolean unquotedEmptyIsNull = false;
 
+	public CsvLineParser(String delimit)
+	{
+		delimiter = delimit;
+		delimiterLength = delimiter.length();
+	}
+
 	public CsvLineParser(char delimit)
 	{
-		this.delimiter = delimit;
+		delimiter = String.valueOf(delimit);
+		delimiterLength = 1;
 	}
 
 	public CsvLineParser(char delimit, char quote)
 	{
-		this.delimiter = delimit;
-		this.quoteChar = quote;
+		delimiter = String.valueOf(delimit);
+		delimiterLength = 1;
+		quoteChar = quote;
+	}
+
+	public CsvLineParser(String delimit, char quote)
+	{
+		delimiter = delimit;
+		quoteChar = quote;
+		delimiterLength = delimiter.length();
 	}
 
 	public CsvLineParser(String line, char delimit, char quote)
 	{
 		this.setLine(line);
-		this.delimiter = delimit;
-		this.quoteChar = quote;
+		delimiter = String.valueOf(delimit);
+		delimiterLength = 1;
+		quoteChar = quote;
 	}
 
 	@Override
@@ -72,6 +89,34 @@ public class CsvLineParser
 	{
 		unquotedEmptyIsNull = flag;
 		if (flag) returnEmptyStrings = false;
+	}
+
+	private boolean isDelimiter(char current, int currentIndex)
+	{
+		if (delimiterLength == 1)
+		{
+			return (current == delimiter.charAt(0));
+		}
+
+		if (current == delimiter.charAt(0))
+		{
+			for (int i=1; i < delimiterLength; i++)
+			{
+				if (i + currentIndex < this.lineData.length())
+				{
+					if (delimiter.charAt(i) != lineData.charAt(currentIndex + 1))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -113,7 +158,7 @@ public class CsvLineParser
 		while (current < len)
 		{
 			char c = this.lineData.charAt(current);
-			if (!inQuotes && (c == delimiter))
+			if (!inQuotes && (isDelimiter(c, current)))
 			{
 				break;
 			}
@@ -153,7 +198,6 @@ public class CsvLineParser
 					inQuotes = !inQuotes;
 				}
 			}
-
 			current ++;
 		}
 
@@ -165,8 +209,8 @@ public class CsvLineParser
 			next = this.lineData.substring(beginField, current - endOffset);
 		}
 
-		this.current ++; // skip the delimiter
-		if (current == len && lineData.charAt(current-1) == delimiter)
+		this.current += delimiterLength; // skip the delimiter
+		if (current == len && isDelimiter(lineData.charAt(current-delimiterLength), current - delimiterLength))
 		{
 			// if the line ends with the delimiter, we have one more
 			// (empty) element

@@ -24,13 +24,29 @@ public class CsvLineParserTest
 {
 
 	@Test
+	public void testMultiCharDelimiter()
+		throws Exception
+	{
+		CsvLineParser parser = new CsvLineParser("\t\t",'\'');
+		parser.setReturnEmptyStrings(true);
+		parser.setLine("1234\t\tde_DE\t\t8888888888");
+		List<String> elements = getParserElements(parser);
+
+		System.out.println(elements.toString());
+		assertEquals(3, elements.size());
+		assertEquals("1234", elements.get(0));
+		assertEquals("de_DE", elements.get(1));
+		assertEquals("8888888888", elements.get(2));
+	}
+
+	@Test
 	public void testEscapedEscapes()
 	{
 		CsvLineParser parser = new CsvLineParser(';','\'');
 		parser.setQuoteEscaping(QuoteEscapeType.escape);
 		parser.setReturnEmptyStrings(true);
 		parser.setLine("'\\\\\\'ku\"la'");
-		
+
 		String result = null;
 		if (parser.hasNext())
 		{
@@ -58,7 +74,7 @@ public class CsvLineParserTest
 		assertEquals(ex, result);
 
 	}
-	
+
 	@Test
 	public void testEscapedQuotes()
 	{
