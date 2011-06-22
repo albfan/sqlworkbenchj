@@ -47,6 +47,16 @@ public class TableIdentifier
 	private boolean retrieveFkSource;
 	private String tableTypeOption;
 
+	/**
+	 * DBMS specific options for the table
+	 */
+	private String tableConfigOptions;
+
+	/**
+	 * DBMS specific tablespace options
+	 */
+	private String tableSpace;
+
 	public TableIdentifier(String aName)
 	{
 		this.expression = null;
@@ -88,6 +98,33 @@ public class TableIdentifier
 		this.setTable(aTable);
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
+	}
+
+	/**
+	 * Return the tablespace used for this table (if applicable)
+	 */
+	public String getTablespace()
+	{
+		return tableSpace;
+	}
+
+	public void setTablespace(String tableSpaceName)
+	{
+		this.tableSpace = tableSpaceName;
+	}
+
+	/**
+	 * Return DBMS specific configuration options for this table.
+	 * @return
+	 */
+	public String getTableConfigOptions()
+	{
+		return this.tableConfigOptions;
+	}
+
+	public void setTableConfigOptions(String options)
+	{
+		this.tableConfigOptions = options;
 	}
 
 	/**

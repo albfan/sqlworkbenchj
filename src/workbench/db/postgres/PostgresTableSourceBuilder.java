@@ -89,7 +89,7 @@ public class PostgresTableSourceBuilder
 					result.append(',');
 					result.append(tableName);
 				}
-				result.append(")");
+				result.append(')');
 			}
 		}
 		catch (SQLException e)
@@ -102,32 +102,72 @@ public class PostgresTableSourceBuilder
 			SqlUtil.closeAll(rs, pstmt);
 		}
 
-		// TODO: Append tablespace information (pg_class.reltablespace), storage options (pg_class.reloptions)
+		String options = table.getTableConfigOptions();
+		if (StringUtil.isNonEmpty(options))
+		{
+			if (result == null)
+			{
+				result = new StringBuilder(options.length() + 10);
+			}
+			else
+			{
+				result.append('\n');
+			}
+			result.append("WITH (");
+			result.append(options);
+			result.append(")");
+		}
 
+		String tblSpace = table.getTablespace();
+		if (StringUtil.isNonEmpty(tblSpace))
+		{
+			if (result == null)
+			{
+				result = new StringBuilder(tblSpace.length() + 10);
+			}
+			else
+			{
+				result.append('\n');
+			}
+			result.append("TABLESPACE ");
+			result.append(tblSpace);
+		}
 		return (result == null ? null : result.toString());
 	}
 
 	@Override
-	public void readTableTypeOptions(TableIdentifier tbl)
+	public void readTableConfigOptions(TableIdentifier tbl)
 	{
 		boolean is91 = JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
+
+		String optionsCol = null;
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.1"))
+		{
+			optionsCol = "array_to_string(ct.reloptions, ', ')";
+		}
+		else
+		{
+			optionsCol = "null as reloptions";
+		}
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = null;
 		if (is91)
 		{
-			sql = "select ct.relpersistence, ct.relkind \n" +
+			sql = "select ct.relpersistence, ct.relkind, " + optionsCol + ", spc.spcname \n" +
 							 "from pg_class ct \n" +
 							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+				       "    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
 							 " where cns.nspname = ? \n" +
 							 "   and ct.relname = ?";
 		}
 		else
 		{
-			sql = "select case when ct.relistemp then 't' else null end as relpersitence, ct.relkind \n" +
+			sql = "select case when ct.relistemp then 't' else null end as relpersitence, ct.relkind, " + optionsCol + ", spc.spcname \n" +
 							 "from pg_class ct \n" +
 							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+				       "    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
 							 " where cns.nspname = ? \n" +
 							 "   and ct.relname = ?";
 		}
@@ -145,6 +185,8 @@ public class PostgresTableSourceBuilder
 			{
 				String persistence = rs.getString(1);
 				String type = rs.getString(2);
+				String options = rs.getString(3);
+				String tableSpace = rs.getString(4);
 				if (StringUtil.isNonEmpty(persistence))
 				{
 					switch (persistence.charAt(0))
@@ -161,6 +203,8 @@ public class PostgresTableSourceBuilder
 				{
 					tbl.setTableTypeOption("FOREIGN");
 				}
+				tbl.setTableConfigOptions(options);
+				tbl.setTablespace(tableSpace);
 			}
 		}
 		catch (SQLException e)
@@ -228,6 +272,14 @@ public class PostgresTableSourceBuilder
 		}
 	}
 
+	/**
+	 * Return domain information for columns in the specified table.
+	 *
+	 * @param table
+	 * @param columns
+	 * @param aIndexDef
+	 * @return
+	 */
 	@Override
 	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{

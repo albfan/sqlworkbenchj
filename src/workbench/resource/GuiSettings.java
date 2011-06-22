@@ -482,6 +482,20 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.display.showpworkspace", true);
 	}
 
+	public static void setShowURLinWindowTitle(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.display.showurl", flag);
+	}
+
+	/**
+	 * Return true if the JDBC URL should be shown in the Window title instead of the profilename
+	 * @return
+	 */
+	public static boolean getShowURLinWindowTitle()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.display.showurl", false);
+	}
+
 	public static void setShowProfileGroupInWindowTitle(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.display.showprofilegroup", flag);

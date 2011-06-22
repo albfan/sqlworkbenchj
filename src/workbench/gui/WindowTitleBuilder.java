@@ -31,6 +31,8 @@ public class WindowTitleBuilder
 		boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
 		boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
 		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
+		boolean showURL = GuiSettings.getShowURLinWindowTitle();
+
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
 
@@ -46,23 +48,31 @@ public class WindowTitleBuilder
 		}
 		else
 		{
-			if (showProfileGroup)
+			if (showURL)
 			{
-				char open = getOpeningBracket(enclose);
-				char close = getClosingBracket(enclose);
-
-				if (open != 0 && close != 0)
-				{
-					title.append(open);
-				}
-				title.append(profile.getGroup());
-				if (open != 0 && close != 0)
-				{
-					title.append(close);
-				}
-				if (sep != null) title.append(sep);
+				title.append(profile.getUrl());
 			}
-			title.append(profile.getName());
+			else
+			{
+				if (showProfileGroup)
+				{
+					char open = getOpeningBracket(enclose);
+					char close = getClosingBracket(enclose);
+
+					if (open != 0 && close != 0)
+					{
+						title.append(open);
+					}
+					title.append(profile.getGroup());
+					if (open != 0 && close != 0)
+					{
+						title.append(close);
+					}
+					if (sep != null) title.append(sep);
+				}
+
+				title.append(profile.getName());
+			}
 		}
 
 		if (workspaceFile != null && showWorkspace)

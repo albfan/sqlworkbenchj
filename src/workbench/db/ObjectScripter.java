@@ -132,6 +132,8 @@ public class ObjectScripter
 			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"));
 		}
 		boolean first = true;
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
+		
 		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
@@ -140,7 +142,6 @@ public class ObjectScripter
 
 			TableIdentifier tbl = (TableIdentifier)dbo;
 			tbl.adjustCase(this.dbConnection);
-			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
 			StringBuilder source = builder.getFkSource(tbl);
 			if (source != null && source.length() > 0)
 			{

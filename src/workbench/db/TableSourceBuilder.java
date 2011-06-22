@@ -222,10 +222,7 @@ public class TableSourceBuilder
 			name = dbConnection.getMetadata().quoteObjectname(tableNameToUse);
 		}
 
-		if (table.getTableTypeOption() == null)
-		{
-			readTableTypeOptions(table);
-		}
+		readTableConfigOptions(table);
 
 		result.append(meta.generateCreateObject(includeDrop, typeToUse, name, table.getTableTypeOption()));
 		result.append("\n(\n");
@@ -319,6 +316,7 @@ public class TableSourceBuilder
 			result.append(options);
 			result.append(lineEnding);
 		}
+		StringUtil.trimTrailingWhitespace(result);
 		result.append(';');
 		result.append(lineEnding);
 		// end of CREATE TABLE
@@ -335,6 +333,7 @@ public class TableSourceBuilder
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, pkname);
+			result.append(lineEnding);
 			result.append(pkSource);
 		}
 
@@ -342,10 +341,13 @@ public class TableSourceBuilder
 	}
 
 	/**
-	 * Read additional options for the CREATE TABLE part
-	 * @param tbl
+	 * Read additional options for the CREATE TABLE part.
+	 *
+	 * This could be tablespace definitions or other options that are valid for the CREATE TABLE
+	 *
+	 * @param tbl the table for which to read the options
 	 */
-	public void readTableTypeOptions(TableIdentifier tbl)
+	public void readTableConfigOptions(TableIdentifier tbl)
 	{
 		// nothing here
 	}

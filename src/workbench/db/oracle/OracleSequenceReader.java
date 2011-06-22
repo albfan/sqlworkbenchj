@@ -61,6 +61,7 @@ public class OracleSequenceReader
 		return def;
 	}
 
+	@Override
   public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
   {
     String sql = "SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
@@ -132,6 +133,7 @@ public class OracleSequenceReader
 	}
 
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;

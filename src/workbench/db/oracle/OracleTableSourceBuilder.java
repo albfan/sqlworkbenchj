@@ -11,17 +11,17 @@
  */
 package workbench.db.oracle;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
-import workbench.db.IndexDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -32,29 +32,126 @@ public class OracleTableSourceBuilder
 {
 
 	private final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
+	private String defaultTablespace;
 
 	public OracleTableSourceBuilder(WbConnection con)
 	{
 		super(con);
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.check_default_tablespace", false))
+		{
+			readDefaultTableSpace();
+		}
+	}
+
+	private void readDefaultTableSpace()
+	{
+		Statement stmt = null;
+		ResultSet rs = null;
+		String sql = "select default_tablespace from user_users";
+
+		try
+		{
+			stmt = this.dbConnection.createStatementForQuery();
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.readDefaultTableSpace()", "Using sql: " + sql);
+			}
+
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+				this.defaultTablespace = rs.getString(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.readDefaultTableSpace()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
 	}
 
 	@Override
 	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
+		StringBuilder result = new StringBuilder(100);
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_partitions", true))
 		{
 			try
 			{
 				OracleTablePartition reader = new OracleTablePartition(this.dbConnection);
 				reader.retrieve(table, dbConnection);
-				return reader.getSourceForTableDefinition();
+				String sql = reader.getSourceForTableDefinition();
+				if (sql != null)
+				{
+					result.append(sql);
+				}
 			}
 			catch (SQLException sql)
 			{
 				LogMgr.logError("OracleTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving partitions", sql);
 			}
 		}
-		return null;
+
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true))
+		{
+			String tablespace = table.getTablespace();
+			if (StringUtil.isNonEmpty(tablespace) && !tablespace.equals(defaultTablespace))
+			{
+				if (result.length() > 0)
+				{
+					result.append('\n');
+				}
+				result.append("TABLESPACE ");
+				result.append(tablespace);
+			}
+		}
+		return result.toString();
+	}
+
+
+	/**
+	 * Read additional options for the CREATE TABLE part
+	 * @param tbl
+	 */
+	@Override
+	public void readTableConfigOptions(TableIdentifier tbl)
+	{
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select tablespace_name \n" +
+			"from all_tables  \n" +
+			"where owner = ? \n" +
+			"and table_name = ? ";
+
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getSchema());
+			pstmt.setString(2, tbl.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+			}
+
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String tablespace = rs.getString(1);
+				tbl.setTablespace(tablespace);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
 	}
 
 	/**

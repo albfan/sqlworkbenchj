@@ -11,9 +11,10 @@
  */
 package workbench.db.oracle;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
 import workbench.db.DefaultFKHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -95,40 +96,63 @@ public class OracleFKHandler
 		{
 			LogMgr.logError("OracleFKHandler.getRawKeyList()", "Could not retrieve foreign keys", e);
 		}
+		// something went wrong, use the driver's implementation
 		return super.getRawKeyList(tbl, exported);
+	}
+
+	/**
+	 * Adjust the baseSql query to reflect if a table for the current user is queried.
+	 *
+	 * If the table belongs to the current user, the user_XXX views can be used
+	 * instead of the all_XXX views. Using the user_XXX views is faster (at least on my system) than the all_XXX
+	 * views - although this is still an awfully slow statement...
+	 *
+	 * @param schema
+	 * @return the query to use
+	 */
+	private String getQuery(TableIdentifier tbl)
+	{
+		String user = getConnection().getProfile().getUsername().toUpperCase();
+		String schema = tbl.getRawSchema();
+		boolean isOwner = schema.equals(user);
+		if (isOwner)
+		{
+			String sql = baseSql.replace("all_constraints", "user_constraints");
+			sql = sql.replace("all_cons_columns", "user_cons_columns");
+			return sql;
+		}
+		return baseSql;
 	}
 
 	private DataStore getExportedKeyList(TableIdentifier tbl)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
-		sql.append(baseSql);
-		sql.append(" AND p.table_name = '");
-		sql.append(tbl.getRawTableName());
-		sql.append('\'');
-		sql.append(" AND p.owner = '");
-		sql.append(tbl.getRawSchema());
-		sql.append('\'');
-		sql.append(" ORDER BY fktable_schem, fktable_name, key_seq");
+		sql.append(getQuery(tbl));
+		sql.append("AND p.table_name = ? \n");
+		sql.append("AND p.owner = ? \n");
+		sql.append("ORDER BY fktable_schem, fktable_name, key_seq");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using: " + sql);
 		}
 
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
 		try
 		{
-			stmt = this.getConnection().createStatement();
-			rs = stmt.executeQuery(sql.toString());
+			pstmt = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+			pstmt.setString(1, tbl.getRawTableName());
+			pstmt.setString(2, tbl.getRawSchema());
+			rs = pstmt.executeQuery();
 			result = processResult(rs);
 		}
 		finally
 		{
 			// the result set is closed by processResult
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeStatement(pstmt);
 		}
 		return result;
 	}
@@ -137,33 +161,31 @@ public class OracleFKHandler
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
-		sql.append(baseSql);
-		sql.append(" AND f.table_name = '");
-		sql.append(tbl.getRawTableName());
-		sql.append('\'');
-		sql.append(" AND f.owner = '");
-		sql.append(tbl.getRawSchema());
-		sql.append('\'');
-		sql.append("\n ORDER BY pktable_schem, pktable_name, key_seq");
+		sql.append(getQuery(tbl));
+		sql.append("AND f.table_name = ? \n");
+		sql.append("AND f.owner = ? \n");
+		sql.append("ORDER BY pktable_schem, pktable_name, key_seq");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using: " + sql);
 		}
 
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
 		try
 		{
-			stmt = this.getConnection().createStatement();
-			rs = stmt.executeQuery(sql.toString());
+			pstmt = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+			pstmt.setString(1, tbl.getRawTableName());
+			pstmt.setString(2, tbl.getRawSchema());
+			rs = pstmt.executeQuery();
 			result = processResult(rs);
 		}
 		finally
 		{
 			// the result set is closed by processResult
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeStatement(pstmt);
 		}
 		return result;
 	}
