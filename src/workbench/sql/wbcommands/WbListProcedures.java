@@ -21,6 +21,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 
@@ -40,15 +41,17 @@ public class WbListProcedures
 	public WbListProcedures()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("schema");
-		cmdLine.addArgument("catalog");
+		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
+		cmdLine.addArgument("catalog", ArgumentType.CatalogArgument);
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

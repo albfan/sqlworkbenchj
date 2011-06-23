@@ -12,8 +12,10 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.db.DbObject;
+import workbench.db.WbConnection;
 import workbench.db.search.ObjectSourceSearcher;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -43,18 +45,18 @@ public class WbGrepSource
 	public static final String PARAM_MATCHALL = "matchAll";
 	public static final String PARAM_IGNORE_CASE = "ignoreCase";
 	public static final String PARAM_USE_REGEX = "useRegex";
-	
+
 	private ObjectSourceSearcher searcher;
-	
+
 	public WbGrepSource()
 	{
 		super();
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TYPES);
-		cmdLine.addArgument(PARAM_SCHEMAS);
-		cmdLine.addArgument(PARAM_NAMES);
+		cmdLine.addArgument(PARAM_TYPES, ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument(PARAM_SCHEMAS, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(PARAM_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_SEARCH_EXP);
 		cmdLine.addArgument(PARAM_USE_REGEX);
 		cmdLine.addArgument(PARAM_MATCHALL, ArgumentType.BoolArgument);
@@ -80,7 +82,7 @@ public class WbGrepSource
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrSrcSearchWrongParameters"));
 			return result;
 		}
-		
+
 		List<String> values = cmdLine.getListValue(PARAM_SEARCH_EXP);
 		if (CollectionUtil.isEmpty(values))
 		{
@@ -89,7 +91,7 @@ public class WbGrepSource
 			result.setFailure();
 			return result;
 		}
-		
+
 		boolean matchAll = cmdLine.getBoolean(PARAM_MATCHALL, false);
 		boolean ignoreCase = cmdLine.getBoolean(PARAM_IGNORE_CASE, true);
 		boolean regEx = cmdLine.getBoolean(PARAM_USE_REGEX, false);
@@ -110,7 +112,7 @@ public class WbGrepSource
 		result.addDataStore(ds);
 		result.addMessage(msg);
 		result.setSuccess();
-		
+
 		return result;
 	}
 

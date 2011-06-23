@@ -45,7 +45,7 @@ public class WbDefineVar
 		super();
 		this.cmdLine = new ArgumentParser();
 		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
-		this.cmdLine.addArgument("encoding", ArgumentType.StringArgument);
+		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override

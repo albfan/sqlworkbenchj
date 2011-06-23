@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -24,13 +25,23 @@ import workbench.storage.PkMapping;
 public class WbListPkDef
 	extends SqlCommand
 {
+
 	public static final String VERB = "WBLISTPKDEF";
 	public static final String FORMATTED_VERB = "WbListPkDef";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

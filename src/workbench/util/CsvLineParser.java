@@ -34,12 +34,6 @@ public class CsvLineParser
 	private QuoteEscapeType escapeType = QuoteEscapeType.none;
 	private boolean unquotedEmptyIsNull = false;
 
-	public CsvLineParser(String delimit)
-	{
-		delimiter = delimit;
-		delimiterLength = delimiter.length();
-	}
-
 	public CsvLineParser(char delimit)
 	{
 		delimiter = String.valueOf(delimit);
@@ -53,19 +47,17 @@ public class CsvLineParser
 		quoteChar = quote;
 	}
 
+	public CsvLineParser(String delimit)
+	{
+		delimiter = delimit;
+		delimiterLength = delimiter.length();
+	}
+
 	public CsvLineParser(String delimit, char quote)
 	{
 		delimiter = delimit;
 		quoteChar = quote;
 		delimiterLength = delimiter.length();
-	}
-
-	public CsvLineParser(String line, char delimit, char quote)
-	{
-		this.setLine(line);
-		delimiter = String.valueOf(delimit);
-		delimiterLength = 1;
-		quoteChar = quote;
 	}
 
 	@Override

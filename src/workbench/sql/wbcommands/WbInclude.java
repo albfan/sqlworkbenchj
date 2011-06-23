@@ -139,11 +139,11 @@ public class WbInclude
 			verbose = cmdLine.getBoolean("verbose", false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
-			encoding = cmdLine.getValue("encoding");
+			encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue("delimiter"));
 			setUnknownMessage(result, cmdLine, null);
 		}
-		
+
 		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();

@@ -12,9 +12,9 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
 import java.sql.Types;
 import java.util.List;
+
 import workbench.WbManager;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
@@ -30,6 +30,7 @@ import workbench.util.StringUtil;
 public class WbListCatalogs
 	extends SqlCommand
 {
+
 	public static final String VERB = "WBLISTDB";
 	public static final String VERB_ALTERNATE = "WBLISTCAT";
 
@@ -38,9 +39,19 @@ public class WbListCatalogs
 		super();
 	}
 
-	public String getVerb() { return VERB; }
-	public String getAlternateVerb() { return VERB_ALTERNATE; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
+	public String getAlternateVerb()
+	{
+		return VERB_ALTERNATE;
+	}
+
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -49,9 +60,9 @@ public class WbListCatalogs
 
 		List<String> cats = currentConnection.getMetadata().getCatalogInformation();
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
-		String[] cols = { catName };
-		int[] types = { Types.VARCHAR };
-		int[] sizes = { 10 };
+		String[] cols = {catName};
+		int[] types = {Types.VARCHAR};
+		int[] sizes = {10};
 
 		DataStore ds = new DataStore(cols, types, sizes);
 		for (String cat : cats)
@@ -68,5 +79,4 @@ public class WbListCatalogs
 		result.setSuccess();
 		return result;
 	}
-
 }

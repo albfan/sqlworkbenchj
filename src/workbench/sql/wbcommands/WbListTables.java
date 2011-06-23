@@ -22,6 +22,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 /**
@@ -40,11 +41,17 @@ public class WbListTables extends SqlCommand
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("objects");
-		cmdLine.addArgument("types");
-		cmdLine.addArgument("schema");
+		cmdLine.addArgument("types", ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
 	}
-	public String getVerb() { return VERB; }
 
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
+
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

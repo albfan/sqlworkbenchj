@@ -176,8 +176,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
-		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES);
+		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
 		RegexModifierParameter.addArguments(cmdLine);
 	}

@@ -60,7 +60,7 @@ public class WbDataDiff
 	private TableDataDiff dataDiff;
 	private TableDeleteSync deleteSync;
 	private boolean xmlOutput;
-
+	private CommonDiffParameters params;
 	public WbDataDiff()
 	{
 		super();
@@ -77,7 +77,7 @@ public class WbDataDiff
 		CommonArgs.addProgressParameter(cmdLine);
 
 		// Add common diff parameters
-		new CommonDiffParameters(this.cmdLine);
+		params = new CommonDiffParameters(this.cmdLine);
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class WbDataDiff
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		CommonDiffParameters params = new CommonDiffParameters(this.cmdLine);
+
 		this.cmdLine.parse(getCommandLine(sql));
 
 		if (cmdLine.getArgumentCount() == 0)
@@ -140,7 +140,7 @@ public class WbDataDiff
 		}
 
 		outputDir = new WbFile(mainScript.getParentFile());
-		String encoding = cmdLine.getValue(CommonDiffParameters.PARAM_ENCODING);
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();

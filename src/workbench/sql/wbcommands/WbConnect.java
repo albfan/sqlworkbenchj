@@ -35,7 +35,7 @@ import workbench.util.StringUtil;
  * When running in GUI mode, this will only change the connection as long
  * as the script is being executed. In console mode, this will change the
  * connection permanently.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbConnect
@@ -64,6 +64,7 @@ public class WbConnect
 		cmdLine.addArgument(AppArguments.ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

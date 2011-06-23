@@ -40,11 +40,13 @@ public class WbCommandAnalyzer
 		super(conn, statement, cursorPos);
 	}
 
+	@Override
 	public boolean isWbParam()
 	{
 		return this.isParameter;
 	}
 
+	@Override
 	public char quoteCharForValue(String value)
 	{
 		if (this.isParameter) return 0;
@@ -57,6 +59,7 @@ public class WbCommandAnalyzer
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public void checkContext()
 	{
 		CommandMapper mapper = new CommandMapper();
@@ -109,6 +112,18 @@ public class WbCommandAnalyzer
 			else if (type == ArgumentType.ListArgument)
 			{
 				this.elements = new ArrayList(p.getAllowedValues(parameter));
+			}
+			else if (type == ArgumentType.ObjectTypeArgument)
+			{
+				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getObjectTypes());
+			}
+			else if (type == ArgumentType.SchemaArgument)
+			{
+				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter()));
+			}
+			else if (type == ArgumentType.CatalogArgument)
+			{
+				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getCatalogInformation(dbConnection.getCatalogFilter()));
 			}
 			else if (type == ArgumentType.ProfileArgument)
 			{

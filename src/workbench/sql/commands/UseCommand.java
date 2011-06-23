@@ -14,12 +14,12 @@ package workbench.sql.commands;
 import java.sql.SQLException;
 
 import workbench.db.CatalogChanger;
-import workbench.sql.formatter.SQLLexer;
-import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -34,7 +34,7 @@ import workbench.util.StringUtil;
  * @see workbench.db.CatalogChanger#setCurrentCatalog(workbench.db.WbConnection, java.lang.String)
  * @see workbench.sql.CommandMapper#getCommandToUse(java.lang.String)
  * @see workbench.sql.CommandMapper#addCommand(workbench.sql.SqlCommand)
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class UseCommand
@@ -42,6 +42,7 @@ public class UseCommand
 {
 	public static final String VERB = "USE";
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -70,7 +71,6 @@ public class UseCommand
 			msg = StringUtil.replace(msg, "%catalogterm%", StringUtil.capitalize(term));
 			result.addMessage(msg);
 			result.setSuccess();
-
 		}
 		catch (Exception e)
 		{
@@ -87,6 +87,7 @@ public class UseCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

@@ -122,7 +122,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
 		cmdLine.addArgument(ARG_DIRECTORY);
-		cmdLine.addArgument(ARG_TARGET_SCHEMA);
+		cmdLine.addArgument(ARG_TARGET_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ILLEGAL_DATE_NULL, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);

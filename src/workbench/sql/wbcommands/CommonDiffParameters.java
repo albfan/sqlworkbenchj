@@ -39,7 +39,6 @@ public class CommonDiffParameters
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 
 	public static final String PARAM_FILENAME = "file";
-	public static final String PARAM_ENCODING = "encoding";
 
 	public static final String PARAM_REFERENCETABLES = "referenceTables";
 	public static final String PARAM_TARGETTABLES = "targetTables";
@@ -60,7 +59,7 @@ public class CommonDiffParameters
 		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_FILENAME);
-		cmdLine.addArgument(PARAM_ENCODING);
+		CommonArgs.addEncodingParameter(cmdLine);
 		cmdLine.addArgument(PARAM_REFERENCETABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_TARGETTABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_REFERENCESCHEMA);

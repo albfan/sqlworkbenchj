@@ -123,8 +123,8 @@ public class WbRunLB
 				ids.add(id);
 			}
 		}
-		
-		String encoding = checkParameters ? cmdLine.getValue("encoding", "UTF-8") : "UTF-8";
+
+		String encoding = checkParameters ? cmdLine.getValue(CommonArgs.ARG_ENCODING, "UTF-8") : "UTF-8";
 
 		if (checkParameters)
 		{

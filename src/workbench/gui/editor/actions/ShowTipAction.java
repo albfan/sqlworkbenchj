@@ -54,7 +54,7 @@ public class ShowTipAction
 		area = edit;
 		tipProvider = provider;
 		setMenuTextByKey("MnuTxtShowInsertParms");
-		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_MASK));
+		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, KeyEvent.CTRL_MASK));
 		initializeShortcut();
 	}
 

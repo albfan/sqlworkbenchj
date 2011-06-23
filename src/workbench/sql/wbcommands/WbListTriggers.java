@@ -22,6 +22,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 
 /**
  * List all triggers defined for the current schema.
@@ -40,15 +41,17 @@ public class WbListTriggers
 	public WbListTriggers()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("schema");
-		cmdLine.addArgument("catalog");
+		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
+		cmdLine.addArgument("catalog", ArgumentType.CatalogArgument);
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

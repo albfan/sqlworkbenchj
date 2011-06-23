@@ -91,6 +91,7 @@ public class WbSchemaDiff
 		return false;
 	}
 
+	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
@@ -153,7 +154,7 @@ public class WbSchemaDiff
 			List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
 			diff.setExcludeTables(l);
 		}
-		
+
 		String refSchema = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCESCHEMA);
 		String targetSchema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
 
@@ -224,7 +225,7 @@ public class WbSchemaDiff
 			}
 			else
 			{
-				String encoding = cmdLine.getValue(CommonDiffParameters.PARAM_ENCODING);
+				String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 				if (encoding == null)
 				{
 					encoding = diff.getEncoding();

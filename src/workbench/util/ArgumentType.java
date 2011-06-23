@@ -13,7 +13,7 @@ package workbench.util;
 
 /**
  * Available argument types for the ArgumentParser
- * 
+ *
  * @author Thomas Kellerer
  */
 public enum ArgumentType
@@ -37,7 +37,7 @@ public enum ArgumentType
 	/**
 	 * A parameter that accepts a fixed set of values. The
 	 * values can be registered using ArgumentParser.addArgument(String, List)
-	 * @see ArgumentParser#addArgument(java.lang.String, java.util.List) 
+	 * @see ArgumentParser#addArgument(java.lang.String, java.util.List)
 	 */
 	ListArgument,
 
@@ -53,6 +53,21 @@ public enum ArgumentType
 	 * the value for this parameter will be returned as a list
 	 */
 	Repeatable,
-	
+
+	/**
+	 * A parameter that shows available object types from the database
+	 */
+	ObjectTypeArgument,
+
+	/**
+	 * A parameter that shows available schemas
+	 */
+	SchemaArgument,
+
+	/**
+	 * A parameter that shows available catalogs (databases)
+	 */
+	CatalogArgument,
+
 	Deprecated;
 }

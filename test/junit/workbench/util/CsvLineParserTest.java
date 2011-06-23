@@ -32,9 +32,23 @@ public class CsvLineParserTest
 		parser.setLine("1234\t\tde_DE\t\t8888888888");
 		List<String> elements = getParserElements(parser);
 
-		System.out.println(elements.toString());
 		assertEquals(3, elements.size());
 		assertEquals("1234", elements.get(0));
+		assertEquals("de_DE", elements.get(1));
+		assertEquals("8888888888", elements.get(2));
+
+		parser.setLine("1234\t\tde_DE\t\t8888888888\t\t");
+		elements = getParserElements(parser);
+		assertEquals(4, elements.size());
+		assertEquals("1234", elements.get(0));
+		assertEquals("de_DE", elements.get(1));
+		assertEquals("8888888888", elements.get(2));
+		assertEquals("", elements.get(3));
+
+		parser.setLine("'12\t34'\t\tde_DE\t\t8888888888");
+		elements = getParserElements(parser);
+		assertEquals(3, elements.size());
+		assertEquals("12\t34", elements.get(0));
 		assertEquals("de_DE", elements.get(1));
 		assertEquals("8888888888", elements.get(2));
 	}

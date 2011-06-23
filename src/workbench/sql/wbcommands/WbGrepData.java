@@ -68,8 +68,8 @@ public class WbGrepData
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
-		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES);
+		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
