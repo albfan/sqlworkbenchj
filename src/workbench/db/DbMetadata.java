@@ -1660,7 +1660,10 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			DataStore ds = getObjects(catalog, schema, table.getRawTableName(), types);
+			String tablename = SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
+			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+
+			DataStore ds = getObjects(catalog, schema, tablename, types);
 
 			if (ds.getRowCount() == 1)
 			{
