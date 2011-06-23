@@ -20,16 +20,16 @@ import java.io.Writer;
  * offers better performance than the class java.lang.StringBuffer.
  *
  * Initially copied from http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,1701,2488,00.html
- * 
+ *
  * This will only have an advantage if this object is not converted to a String object
- * too often. java.lang.StringBuilder can re-use the internal char[] array when 
- * it's toString() method is called, whereas StrBuffer.toString() will allocate 
+ * too often. java.lang.StringBuilder can re-use the internal char[] array when
+ * it's toString() method is called, whereas StrBuffer.toString() will allocate
  * a new char array due to the constructor of String.
- * 
+ *
  * So StrBuffer is most efficient when it is never converted to a String object.
  * For this, methods to write to a Stream and a Writer are provided that
  * write out the internal char array directly.
- * 
+ *
  * @author Thomas Kellerer
  * @see    java.lang.StringBuilder
  */
@@ -48,8 +48,6 @@ public class StrBuffer
 	 */
 	private char[] charData;
 
-	public static StrBuffer emptyBuffer() { return new StrBuffer(0); }
-	
 	/**
 	 * Make an empty string buffer with 80 characters of storage.
 	 */
@@ -95,10 +93,10 @@ public class StrBuffer
 	{
 		numchar = 0;
 	}
-	
+
 	/**
 	 *	Remove count characters from the end of the buffer
-	 */ 
+	 */
 	public StrBuffer removeFromEnd(int count)
 	{
 		if (count > this.numchar) this.numchar = 0;
@@ -179,7 +177,7 @@ public class StrBuffer
 		if (len == 0) return this;
 		if (len == 1)
 		{
-			return this.append(str.charData[0]);	
+			return this.append(str.charData[0]);
 		}
 		return append(str.charData, 0, len);
 	}
@@ -202,6 +200,7 @@ public class StrBuffer
 	/**
 	 *	Returns the current length of this StrBuffer
 	 */
+	@Override
 	public int length()
 	{
 		return this.numchar;
@@ -282,7 +281,7 @@ public class StrBuffer
 		if (len == 1)
 		{
 			return this.append(s.charAt(0));
-		}		
+		}
 		int newlen = this.numchar + len;
 		if (newlen > this.charData.length) moreStorage(newlen);
 		for (int i=0; i < len; i++)
@@ -293,23 +292,26 @@ public class StrBuffer
 		this.numchar = newlen;
 		return this;
 	}
-	
+
 	/**
 	 * Returns a new string based on the contents of this StrBuffer.
 	 *
 	 * @return  a string
 	 */
+	@Override
 	public String toString()
 	{
 		return new String(this.charData, 0, this.numchar);
 	}
 
+	@Override
 	public char charAt(int index)
 	{
 		if (index >= this.numchar) throw new IndexOutOfBoundsException(index + " >= " + this.numchar);
 		return this.charData[index];
 	}
 
+	@Override
 	public CharSequence subSequence(int start, int end)
 	{
 		if (start < 0) throw new IndexOutOfBoundsException("start must be >= 0");
@@ -333,7 +335,7 @@ public class StrBuffer
 	 * Writes the content of this StrBuffer to the Writer.
 	 *
 	 * This is more efficient than calling writer.write(StrBuffer)
-	 * 
+	 *
 	 * @param out
 	 * @throws IOException
 	 */
@@ -350,5 +352,5 @@ public class StrBuffer
 			out.print(this.charData[i]);
 		}
 	}
-	
+
 }

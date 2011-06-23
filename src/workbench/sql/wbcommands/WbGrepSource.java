@@ -12,10 +12,8 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import workbench.db.DbObject;
-import workbench.db.WbConnection;
 import workbench.db.search.ObjectSourceSearcher;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -37,9 +35,6 @@ public class WbGrepSource
 	extends SqlCommand
 {
 	public static final String VERB = "WBGREPSOURCE";
-	public static final String PARAM_TYPES = "types";
-	public static final String PARAM_SCHEMAS = "schemas";
-	public static final String PARAM_NAMES = "objects";
 
 	public static final String PARAM_SEARCH_EXP = "searchValues";
 	public static final String PARAM_MATCHALL = "matchAll";
@@ -54,9 +49,9 @@ public class WbGrepSource
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TYPES, ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument(PARAM_SCHEMAS, ArgumentType.SchemaArgument);
-		cmdLine.addArgument(PARAM_NAMES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_SEARCH_EXP);
 		cmdLine.addArgument(PARAM_USE_REGEX);
 		cmdLine.addArgument(PARAM_MATCHALL, ArgumentType.BoolArgument);
@@ -96,9 +91,9 @@ public class WbGrepSource
 		boolean ignoreCase = cmdLine.getBoolean(PARAM_IGNORE_CASE, true);
 		boolean regEx = cmdLine.getBoolean(PARAM_USE_REGEX, false);
 
-		List<String> schemas = cmdLine.getListValue(PARAM_SCHEMAS);
-		List<String> types = cmdLine.getListValue(PARAM_TYPES);
-		List<String> names = cmdLine.getListValue(PARAM_NAMES);
+		List<String> schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
+		List<String> types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
+		List<String> names = cmdLine.getListValue(CommonArgs.ARG_OBJECTS);
 
 		searcher = new ObjectSourceSearcher(this.currentConnection);
 		searcher.setRowMonitor(this.rowMonitor);

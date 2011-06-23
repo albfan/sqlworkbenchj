@@ -30,9 +30,17 @@ public class WbListVars extends SqlCommand
 {
 	public static final String VERB = "WBVARLIST";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException

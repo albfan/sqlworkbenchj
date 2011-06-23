@@ -111,6 +111,7 @@ public class LiquibaseParser
 		return false;
 	}
 
+	@Override
 	public void startElement(String namespaceURI, String sName, String tagName, Attributes attrs)
 		throws SAXException
 	{
@@ -138,6 +139,7 @@ public class LiquibaseParser
 		}
 	}
 
+	@Override
 	public void endElement(String namespaceURI, String sName, String tagName)
 		throws SAXException
 	{
@@ -153,6 +155,7 @@ public class LiquibaseParser
 		}
 	}
 
+	@Override
 	public void characters(char[] buf, int offset, int len)
 		throws SAXException
 	{

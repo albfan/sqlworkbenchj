@@ -41,8 +41,8 @@ public class WbListTriggers
 	public WbListTriggers()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
-		cmdLine.addArgument("catalog", ArgumentType.CatalogArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 	}
 
 	@Override
@@ -56,11 +56,19 @@ public class WbListTriggers
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+
+		String options = getCommandLine(aSql);
+
+		cmdLine.parse(options);
+
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(this.currentConnection);
 
-		DataStore ds = reader.getTriggers(currentConnection.getMetadata().getCurrentCatalog(), currentConnection.getCurrentSchema());
+		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA, currentConnection.getCurrentSchema());
+		String catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG, currentConnection.getMetadata().getCurrentCatalog());
+		DataStore ds = reader.getTriggers(catalog, schema);
+		
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));
 		result.addDataStore(ds);
 		return result;

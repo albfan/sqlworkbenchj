@@ -23,7 +23,7 @@ import workbench.util.StringUtil;
  * <br>
  * When running in batch mode, this command has no effect. Technically this is
  * caused because no {@link ExecutionController} is available in batch mode.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbConfirm
@@ -37,16 +37,19 @@ public class WbConfirm
 		this.isUpdatingCommand = false;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	protected boolean isConnectionRequired()
 	{
 		return false;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -65,7 +68,7 @@ public class WbConfirm
 			}
 
 			boolean continueScript = controller.confirmExecution(msg);
-			
+
 			if (!continueScript)
 			{
 				result.setStopScript(true);

@@ -68,8 +68,8 @@ public class WbGrepData
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES, ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
@@ -107,7 +107,7 @@ public class WbGrepData
 		}
 
 		String tableNames = cmdLine.getValue(PARAM_TABLES);
-		String excludeTables = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
+		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
 
 		if (StringUtil.isBlank(tableNames))
@@ -115,7 +115,7 @@ public class WbGrepData
 			tableNames = "%";
 		}
 
-		String types = cmdLine.getValue(SourceTableArgument.PARAM_TYPES);
+		String types = cmdLine.getValue(CommonArgs.ARG_TYPES);
 		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, types, currentConnection);
 
 		tables = parser.getTables();

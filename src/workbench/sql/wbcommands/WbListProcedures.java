@@ -41,8 +41,8 @@ public class WbListProcedures
 	public WbListProcedures()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
-		cmdLine.addArgument("catalog", ArgumentType.CatalogArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public class WbListProcedures
 
 		if (cmdLine.hasArguments())
 		{
-			schema = cmdLine.getValue("schema");
-			catalog = cmdLine.getValue("catalog");
+			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
+			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
 		else if (StringUtil.isNonBlank(args))
 		{

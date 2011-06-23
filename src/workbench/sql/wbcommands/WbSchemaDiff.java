@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.FileUtil;
-import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
@@ -220,7 +220,7 @@ public class WbSchemaDiff
 		{
 			if (output == null)
 			{
-				out = new StrWriter(5000);
+				out = new StringWriter(5000);
 				outputToConsole = true;
 			}
 			else

@@ -33,9 +33,9 @@ public class MacOSHelper
 	implements InvocationHandler
 {
 	private Object proxy;
-	
+
 	private static boolean isMacOS = System.getProperty("os.name").startsWith("Mac OS");
-	
+
 	public static boolean isMacOS()
 	{
 		return isMacOS;
@@ -82,6 +82,7 @@ public class MacOSHelper
 
 	}
 
+	@Override
 	public Object invoke(Object prx, Method method, Object[] args)
 		throws Throwable
 	{

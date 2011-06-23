@@ -63,6 +63,12 @@ public class CommonArgs
 	public static final String ARG_DATE_LITERAL_TYPE = "sqlDateLiterals";
 	public static final String ARG_DELETE_TARGET = "deleteTarget";
 	public static final String ARG_TRUNCATE_TABLE = "truncateTable";
+	public static final String ARG_SCHEMA = "schema";
+	public static final String ARG_CATALOG = "catalog";
+	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
+	public static final String ARG_SCHEMAS = "schemas";
+	public static final String ARG_TYPES = "types";
+	public static final String ARG_OBJECTS = "objects";
 
 	private static List<String> getDelimiterArguments()
 	{

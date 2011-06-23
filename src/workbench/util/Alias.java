@@ -91,6 +91,7 @@ public class Alias
 		return alias;
 	}
 
+	@Override
 	public String toString()
 	{
 		if (display == null)

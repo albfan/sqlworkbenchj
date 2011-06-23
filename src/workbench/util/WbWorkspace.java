@@ -179,6 +179,7 @@ public class WbWorkspace
 		return this.tabInfo;
 	}
 
+	@Override
 	public void close()
 		throws IOException
 	{

@@ -24,7 +24,7 @@ import workbench.util.WbStringTokenizer;
  * Defines a primary key for a table or view. This is stored in a
  * workbench specific file in order allow updates on tables (or views) that
  * have no defined primary key in the database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbDefinePk
@@ -32,10 +32,19 @@ public class WbDefinePk
 {
 	public static final String VERB = "WBDEFINEPK";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

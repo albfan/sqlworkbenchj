@@ -34,8 +34,13 @@ public class AlterSessionCommand
 {
 	public static final String VERB = "ALTER SESSION";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{

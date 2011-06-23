@@ -44,10 +44,11 @@ public class SetCommand extends SqlCommand
 {
 	public static final String VERB = "SET";
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = null; 
+		StatementRunnerResult result = null;
 
 		Savepoint sp = null;
 		try
@@ -67,7 +68,7 @@ public class SetCommand extends SqlCommand
 				{
 					t = l.getNextToken(false, false);
 				}
-				
+
 				if (t != null)
 				{
 					param = t.getContents();
@@ -77,7 +78,7 @@ public class SetCommand extends SqlCommand
 			{
 				LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
 			}
-			
+
 			boolean execSql = true;
 			boolean checkSchema = false;
 
@@ -246,7 +247,7 @@ public class SetCommand extends SqlCommand
 
 		Set<String> offValues = CollectionUtil.caseInsensitiveSet("off", "false", "0");
 		Set<String> onValues = CollectionUtil.caseInsensitiveSet("on", "true", "1");
-		
+
 		try
 		{
 			if (offValues.contains(param))
@@ -309,6 +310,7 @@ public class SetCommand extends SqlCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

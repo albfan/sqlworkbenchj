@@ -27,9 +27,19 @@ public class WbRemoveVar extends SqlCommand
 {
 	public static final String VERB = "WBVARDELETE";
 
-	public String getVerb() { return VERB; }
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

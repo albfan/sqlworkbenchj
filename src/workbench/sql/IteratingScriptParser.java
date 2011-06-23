@@ -119,6 +119,7 @@ public class IteratingScriptParser
 	 * @see #setFile(File, String)
 	 * @see workbench.resource.Settings#getDefaultEncoding()
 	 */
+	@Override
 	public final void setFile(File f, String enc)
 		throws IOException
 	{
@@ -132,6 +133,7 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	@Override
 	public void setStoreStatementText(boolean flag)
 	{
 		storeSqlInCommands = flag;
@@ -144,16 +146,19 @@ public class IteratingScriptParser
 	/**
 	 * Should the parser check for MySQL hash comments?
 	 */
+	@Override
 	public void setAlternateLineComment(String comment)
 	{
 		this.alternateLineComment = (StringUtil.isBlank(comment) ? null : comment.trim());
 	}
 
+	@Override
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
 	}
 
+	@Override
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnStartingWhitespace = flag;
@@ -162,11 +167,13 @@ public class IteratingScriptParser
 	/**
 	 * Support Oracle style @ includes
 	 */
+	@Override
 	public void setSupportOracleInclude(boolean flag)
 	{
 		this.supportOracleInclude = flag;
 	}
 
+	@Override
 	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
@@ -180,6 +187,7 @@ public class IteratingScriptParser
 	/**
 	 *	Define the script to be parsed
 	 */
+	@Override
 	public final void setScript(String aScript)
 	{
 		this.cleanup();
@@ -190,6 +198,7 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	@Override
 	public void reset()
 	{
 		lastCommandEnd = 0;
@@ -202,6 +211,7 @@ public class IteratingScriptParser
 		lastQuote = 0;
 	}
 
+	@Override
 	public void setDelimiter(DelimiterDefinition delim)
 	{
 		if (delim == null)
@@ -215,6 +225,7 @@ public class IteratingScriptParser
 		this.delimiterLength = this.delimiter.getDelimiter().length();
 	}
 
+	@Override
 	public int getScriptLength()
 	{
 		return this.scriptLength;
@@ -234,6 +245,7 @@ public class IteratingScriptParser
 		return pos;
 	}
 
+	@Override
 	public boolean hasMoreCommands()
 	{
 		if (lastPos < this.scriptLength)
@@ -277,6 +289,7 @@ public class IteratingScriptParser
 	 *	Parse the given SQL Script into a List of single SQL statements.
 	 *	Returns the index of the statement indicated by the currentCursorPos
 	 */
+	@Override
 	public ScriptCommandDefinition getNextCommand()
 	{
 		int pos;
@@ -528,11 +541,13 @@ public class IteratingScriptParser
 		return c;
 	}
 
+	@Override
 	public void setCheckEscapedQuotes(boolean flag)
 	{
 		this.checkEscapedQuotes = flag;
 	}
 
+	@Override
 	public void done()
 	{
 		this.script.done();

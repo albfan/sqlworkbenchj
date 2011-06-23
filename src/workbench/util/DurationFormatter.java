@@ -69,9 +69,9 @@ public class DurationFormatter
 	public String formatDuration(long millis, boolean includeFractionalSeconds)
 	{
 		long hours = (millis / ONE_HOUR);
-		millis = millis - (hours * ONE_HOUR);
+		millis -= (hours * ONE_HOUR);
 		long minutes = millis / ONE_MINUTE;
-		millis = millis - (minutes * ONE_MINUTE);
+		millis -= (minutes * ONE_MINUTE);
 
 		StringBuilder result = new StringBuilder(17);
 
@@ -86,7 +86,7 @@ public class DurationFormatter
 			result.append(minutes);
 			result.append("m ");
 		}
-		
+
 		if (includeFractionalSeconds)
 		{
 			synchronized (numberFormatter)

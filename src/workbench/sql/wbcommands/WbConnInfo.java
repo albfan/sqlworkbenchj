@@ -71,6 +71,4 @@ public class WbConnInfo
 		return VERB;
 	}
 
-
-
 }

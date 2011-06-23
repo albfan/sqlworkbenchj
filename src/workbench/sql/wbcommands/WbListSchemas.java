@@ -37,8 +37,13 @@ public class WbListSchemas
 		super();
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

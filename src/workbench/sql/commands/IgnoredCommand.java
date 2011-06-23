@@ -37,6 +37,7 @@ public class IgnoredCommand
 		this.verb = aVerb.toUpperCase();
 	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -48,6 +49,7 @@ public class IgnoredCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return verb;

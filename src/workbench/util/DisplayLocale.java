@@ -34,7 +34,7 @@ public class DisplayLocale
 	{
 		this.locale = l;
 	}
-	
+
 	public Locale getLocale()
 	{
 		if (locale == null) return null;
@@ -50,12 +50,13 @@ public class DisplayLocale
 	{
 		return locale == null;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		if (display != null) return display;
 
-		if (locale == null) 
+		if (locale == null)
 		{
 			display = ResourceMgr.getString("LblDefaultIndicator");
 		}
@@ -83,18 +84,20 @@ public class DisplayLocale
 		}
 		return this.display;
 	}
-	
+
+	@Override
 	public int compareTo(DisplayLocale other)
 	{
 		if (this.locale == null) return -1;
 		if (other.locale == null) return 1;
 		return this.locale.compareTo(other.locale);
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
-		
+
 		if (other instanceof DisplayLocale)
 		{
 			DisplayLocale dl = (DisplayLocale)other;
@@ -105,7 +108,8 @@ public class DisplayLocale
 		}
 		return false;
 	}
-	
+
+	@Override
 	public int hashCode()
 	{
 		return locale.hashCode();

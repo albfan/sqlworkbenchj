@@ -34,6 +34,7 @@ public class LobFileParameter
 		setBinary(isBinary);
 	}
 
+	@Override
 	public String toString()
 	{
 		return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
@@ -49,11 +50,33 @@ public class LobFileParameter
 		FileUtil.closeQuietely(dataStream);
 	}
 
-	public void setBinary(boolean flag) { binary = flag; }
-	public boolean isBinary() { return binary; }
-	public String getFilename() { return filename; }
-	public void setFilename(String fname) { filename = fname; }
+	public void setBinary(boolean flag)
+	{
+		binary = flag;
+	}
 
-	public String getEncoding() { return encoding; }
-	public void setEncoding(String enc) { encoding = enc; }
+	public boolean isBinary()
+	{
+		return binary;
+	}
+
+	public String getFilename()
+	{
+		return filename;
+	}
+
+	public void setFilename(String fname)
+	{
+		filename = fname;
+	}
+
+	public String getEncoding()
+	{
+		return encoding;
+	}
+
+	public void setEncoding(String enc)
+	{
+		encoding = enc;
+	}
 }

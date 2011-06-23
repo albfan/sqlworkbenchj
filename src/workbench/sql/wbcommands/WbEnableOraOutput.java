@@ -24,15 +24,20 @@ import workbench.sql.formatter.SQLToken;
  * <br/>
  * If the support is enabled, messages from dbms_output.put_line() will
  * be shown in the message tab of the GUI.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbEnableOraOutput extends SqlCommand
 {
 	public static final String VERB = "ENABLEOUT";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{

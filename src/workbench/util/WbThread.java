@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
  */
 public class WbThread
 	extends Thread
-	implements Thread.UncaughtExceptionHandler 	
+	implements Thread.UncaughtExceptionHandler
 {
 
 	public WbThread(String name)
@@ -36,6 +36,7 @@ public class WbThread
 		this.setUncaughtExceptionHandler(this);
 	}
 
+	@Override
 	public void uncaughtException(Thread thread, Throwable error)
 	{
 		LogMgr.logError("WbThread.uncaughtException()", "Thread + " + thread.getName() + " caused an exception", error);

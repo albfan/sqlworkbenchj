@@ -15,11 +15,9 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -62,6 +60,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
@@ -131,6 +130,7 @@ public class ObjectSourceSearchPanel
 
 		searchThread = new WbThread("SourceSearch")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -158,6 +158,7 @@ public class ObjectSourceSearchPanel
 		searchThread = null;
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), results.getRowCount());
@@ -210,6 +211,7 @@ public class ObjectSourceSearchPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				DataStoreTableModel model = new DataStoreTableModel(data);
@@ -276,6 +278,7 @@ public class ObjectSourceSearchPanel
 
 		WbThread t = new WbThread("Connection")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -305,6 +308,7 @@ public class ObjectSourceSearchPanel
 		objectSource.setDatabaseConnection(connection);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				statusbar.setText("");
@@ -388,6 +392,7 @@ public class ObjectSourceSearchPanel
 		{
 			Thread t = new WbThread("DataPumper disconnect thread")
 			{
+				@Override
 				public void run()
 				{
 					disconnect();
@@ -398,6 +403,7 @@ public class ObjectSourceSearchPanel
 		}
 	}
 
+	@Override
 	public void closeWindow()
 	{
 		this.done();
@@ -408,6 +414,7 @@ public class ObjectSourceSearchPanel
 		}
 	}
 
+	@Override
 	public void disconnect()
 	{
 		if (connection != null)
@@ -416,16 +423,19 @@ public class ObjectSourceSearchPanel
 		}
 	}
 
+	@Override
 	public void activate()
 	{
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return connection;
 	}
 
+	@Override
 	public JFrame getWindow()
 	{
 		return window;
@@ -441,6 +451,7 @@ public class ObjectSourceSearchPanel
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_showWindow(parent);
@@ -452,6 +463,7 @@ public class ObjectSourceSearchPanel
 	{
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleObjectSearcher"))
 		{
+			@Override
 			public void setVisible(boolean visible)
 			{
 				if (!visible) saveSettings();
@@ -485,6 +497,7 @@ public class ObjectSourceSearchPanel
 			{
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						connect(profile);
@@ -567,6 +580,7 @@ public class ObjectSourceSearchPanel
 		return null;
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
@@ -577,6 +591,7 @@ public class ObjectSourceSearchPanel
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				objectSource.setText(source == null ? "" : source.toString());
@@ -603,19 +618,19 @@ public class ObjectSourceSearchPanel
 		if (StringUtil.isNonBlank(objectTypes.getText()))
 		{
 			result.append(indent);
-			result.append("-" + WbGrepSource.PARAM_TYPES + "=" + StringUtil.quoteIfNeeded(objectTypes.getText()));
+			result.append("-" + CommonArgs.ARG_TYPES + "=" + StringUtil.quoteIfNeeded(objectTypes.getText()));
 		}
 
 		if (StringUtil.isNonBlank(objectNames.getText()))
 		{
 			result.append(indent);
-			result.append("-" + WbGrepSource.PARAM_NAMES + "=" + StringUtil.quoteIfNeeded(objectNames.getText()));
+			result.append("-" + CommonArgs.ARG_OBJECTS + "=" + StringUtil.quoteIfNeeded(objectNames.getText()));
 		}
 
 		if (StringUtil.isNonBlank(schemaNames.getText()))
 		{
 			result.append(indent);
-			result.append("-" + WbGrepSource.PARAM_SCHEMAS + "=" + StringUtil.quoteIfNeeded(schemaNames.getText()));
+			result.append("-" + CommonArgs.ARG_SCHEMAS + "=" + StringUtil.quoteIfNeeded(schemaNames.getText()));
 		}
 
 		result.append("\n;");
@@ -625,31 +640,38 @@ public class ObjectSourceSearchPanel
 		w.dispose();
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		closeWindow();
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}

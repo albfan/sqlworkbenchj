@@ -27,22 +27,22 @@ import workbench.util.StringUtil;
  * @see workbench.interfaces.ImportFileParser#setValueModifier(workbench.db.importer.modifier.ImportValueModifier)
  * @see workbench.db.importer.TextFileParser#setValueModifier(workbench.db.importer.modifier.ImportValueModifier)
  */
-public class ModifierArguments 
+public class ModifierArguments
 {
 	public static final String ARG_SUBSTRING = "colSubstring";
 	public static final String ARG_REGEX = "colReplacement";
 	public static final String ARG_MAXLENGTH = "maxLength";
-	
+
 	private SubstringModifier substring = new SubstringModifier();
 	private RegexModifier regex = new RegexModifier();
-	
-	public static final void addArguments(ArgumentParser cmdLine)
+
+	public static void addArguments(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_REGEX);
 		cmdLine.addArgument(ARG_SUBSTRING);
 		cmdLine.addArgument(ARG_MAXLENGTH);
 	}
-	
+
 	public ModifierArguments(ArgumentParser cmdLine)
 		throws NumberFormatException
 	{
@@ -53,13 +53,13 @@ public class ModifierArguments
 		value = cmdLine.getValue(ARG_REGEX);
 		parseRegex(value);
 	}
-	
+
 	private void parseRegex(String parameterValue)
 	{
 		if (parameterValue == null) return;
-		
+
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
-		if (entries.size() == 0) return;
+		if (entries.isEmpty()) return;
 
 		for (String entry : entries)
 		{
@@ -70,7 +70,7 @@ public class ModifierArguments
 				String[] limits = parts[1].split(":");
 				String expression = null;
 				String replacement = "";
-				
+
 				if (limits.length == 1)
 				{
 					expression = limits[0].trim();
@@ -82,24 +82,24 @@ public class ModifierArguments
 				}
 				regex.addDefinition(col, expression, replacement);
 			}
-		}		
+		}
 	}
-	
+
 	/**
 	 * Parses a parameter value for column substring definitions.
 	 * e.g. description=0:5,firstname=5:10
 	 * the two values define the parameters for String.substring(int, int)
-	 * 
-	 * If only one value is supplied, it is assumed to be a maxlength, 
+	 *
+	 * If only one value is supplied, it is assumed to be a maxlength,
 	 * so description=5 is equivalent to description=0:5
-	 */	
+	 */
 	private void parseSubstring(String parameterValue)
 		throws NumberFormatException
 	{
 		if (parameterValue == null) return;
-		
+
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
-		if (entries.size() == 0) return;
+		if (entries.isEmpty()) return;
 
 		for (String entry : entries)
 		{
@@ -110,7 +110,7 @@ public class ModifierArguments
 				String[] limits = parts[1].split(":");
 				int start = 0;
 				int end = 0;
-				
+
 				if (limits.length == 1)
 				{
 					end = Integer.parseInt(limits[0].trim());
@@ -124,7 +124,7 @@ public class ModifierArguments
 			}
 		}
 	}
-	
+
 	/**
 	 * For testing purposes to access the initialized modifier
 	 */
@@ -132,7 +132,7 @@ public class ModifierArguments
 	{
 		return substring;
 	}
-	
+
 	/**
 	 * For testing purposes to access the initialized modifier
 	 */
@@ -140,12 +140,12 @@ public class ModifierArguments
 	{
 		return regex;
 	}
-	
+
 	/**
 	 * Returns a combined modifier with substring and regex modifications.
 	 * the substring modifier will be applied before the regex modifier
 	 * during import.
-	 * 
+	 *
 	 * @return an ImportValueModifier that applies substring and regex modifications.
 	 */
 	public ImportValueModifier getModifier()
@@ -159,5 +159,5 @@ public class ModifierArguments
 		}
 		return null;
 	}
-	
+
 }

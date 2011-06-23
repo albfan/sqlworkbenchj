@@ -102,6 +102,7 @@ public class DelimiterDefinition
 		return new DelimiterDefinition(delim, single);
 	}
 
+	@Override
 	public String toString()
 	{
 		return delimiter;
@@ -133,7 +134,7 @@ public class DelimiterDefinition
 	}
 
 	@SuppressWarnings({"UnusedDeclaration"})
-	public void setSingleLine(boolean flag) 
+	public void setSingleLine(boolean flag)
 	{
 		if (flag != this.singleLineDelimiter)
 		{
@@ -167,6 +168,7 @@ public class DelimiterDefinition
 		return StringUtil.equalStringIgnoreCase(this.delimiter, other);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
@@ -187,6 +189,7 @@ public class DelimiterDefinition
 		return false;
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return (this.delimiter + Boolean.toString(this.singleLineDelimiter)).hashCode();

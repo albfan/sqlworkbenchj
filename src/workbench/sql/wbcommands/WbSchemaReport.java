@@ -47,12 +47,11 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
 	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
-	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_TABLE_NAMES = "tables";
 
 	public static final String ALTERNATE_VERB = "WBREPORT";
 	public static final String VERB = "WBSCHEMAREPORT";
-	
+
 	private SchemaReporter reporter;
 	private int currentTable = 0;
 
@@ -60,14 +59,13 @@ public class WbSchemaReport
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("types");
+		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument("schemas");
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
@@ -78,8 +76,13 @@ public class WbSchemaReport
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
@@ -107,7 +110,7 @@ public class WbSchemaReport
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
 
-		List<String> types = cmdLine.getListValue(PARAM_TYPES);
+		List<String> types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 		reporter.setObjectTypes(types);
 
 		reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
@@ -135,7 +138,7 @@ public class WbSchemaReport
 		}
 		else
 		{
-			String arg = cmdLine.getValue("schemas");
+			String arg = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
 			List<String> schemas = StringUtil.stringToList(arg, ",");
 			this.reporter.setSchemas(schemas);
 		}
@@ -218,6 +221,7 @@ public class WbSchemaReport
 		return result;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -227,6 +231,7 @@ public class WbSchemaReport
 		}
 	}
 
+	@Override
 	public void setCurrentObject(String anObject, long number, long total)
 	{
 		if (anObject == null)
@@ -258,11 +263,35 @@ public class WbSchemaReport
 		return ALTERNATE_VERB;
 	}
 
-	public void setCurrentRow(long number, long total) {}
-	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
-	public void setMonitorType(int aType) {}
-	public void jobFinished() {}
-	public void saveCurrentType(String type) {}
-	public void restoreType(String type) {}
+	@Override
+	public void setCurrentRow(long number, long total)
+	{
+	}
+
+	@Override
+	public int getMonitorType()
+	{
+		return RowActionMonitor.MONITOR_PLAIN;
+	}
+
+	@Override
+	public void setMonitorType(int aType)
+	{
+	}
+
+	@Override
+	public void jobFinished()
+	{
+	}
+
+	@Override
+	public void saveCurrentType(String type)
+	{
+	}
+
+	@Override
+	public void restoreType(String type)
+	{
+	}
 
 }

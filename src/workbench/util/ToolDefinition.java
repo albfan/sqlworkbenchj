@@ -21,7 +21,7 @@ public class ToolDefinition
 {
 	private String appPath;
 	private String name;
-	
+
 	public ToolDefinition()
 	{
 	}
@@ -31,7 +31,7 @@ public class ToolDefinition
 		setCommandLine(exe);
 		setName(name);
 	}
-	
+
 	public String getName()
 	{
 		return name;
@@ -54,7 +54,7 @@ public class ToolDefinition
 	/**
 	 * The command line that should be used to run the external tool. This may
 	 * include parameters to the application, therefor a File object cannot be passed
-	 * 
+	 *
 	 * Parameters are separated with spaces from the actual program path.
 	 * Program paths with spaces are expected to be enclosed with double quotes
 	 *
@@ -84,7 +84,7 @@ public class ToolDefinition
 		WbFile f = new WbFile(prgPath);
 		return f;
 	}
-	
+
 	public void runApplication(String arg)
 		throws IOException
 	{
@@ -97,19 +97,20 @@ public class ToolDefinition
 		cmd[appDef.size()] = arg;
 		Runtime.getRuntime().exec(cmd, null);
 	}
-	
+
 	public boolean executableExists()
 	{
 		WbFile f = getExecutable();
 		return f.exists();
 	}
-	
+
 	private List<String> tokenizePath()
 	{
 		WbStringTokenizer tok = new WbStringTokenizer(this.appPath, " ", true, "\"", false);
 		return tok.getAllTokens();
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if (this.name == null) return false;

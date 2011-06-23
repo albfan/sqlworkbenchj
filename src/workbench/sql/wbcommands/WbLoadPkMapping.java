@@ -41,10 +41,19 @@ public class WbLoadPkMapping
 		cmdLine.addArgument("file");
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

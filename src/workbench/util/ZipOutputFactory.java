@@ -29,7 +29,7 @@ public class ZipOutputFactory
 	protected File archive;
 	protected OutputStream baseOut;
 	protected ZipOutputStream zout;
-	
+
 	public ZipOutputFactory(File zip)
 	{
 		this.archive = zip;
@@ -43,42 +43,50 @@ public class ZipOutputFactory
 		zout.setLevel(9);
 	}
 
-	public boolean isArchive() { return true; }
-	
-	public OutputStream createOutputStream(File output) 
+	@Override
+	public boolean isArchive()
+	{
+		return true;
+	}
+
+	@Override
+	public OutputStream createOutputStream(File output)
 		throws IOException
 	{
 		String filename = output.getName();
 		return createOutputStream(filename);
 	}
-	
-	public OutputStream createOutputStream(String filename) 
+
+	public OutputStream createOutputStream(String filename)
 		throws IOException
 	{
 		if (this.zout == null) initArchive();
-		
+
 		ZipEntry currentEntry = new ZipEntry(filename);
 		this.zout.putNextEntry(currentEntry);
 		return new ZipEntryOutputStream(zout);
 	}
 
+	@Override
 	public Writer createWriter(String output, String encoding)
 		throws IOException
 	{
 		OutputStream out = createOutputStream(output);
 		return EncodingUtil.createWriter(out, encoding);
 	}
-	
+
+	@Override
 	public Writer createWriter(File output, String encoding)
 		throws IOException
 	{
 		OutputStream out = createOutputStream(output);
 		return EncodingUtil.createWriter(out, encoding);
 	}
-	
+
+	@Override
 	public void done() throws IOException
 	{
-		if (this.zout != null) 
+		if (this.zout != null)
 		{
 			zout.close();
 		}
@@ -87,5 +95,5 @@ public class ZipOutputFactory
 			baseOut.close();
 		}
 	}
-	
+
 }

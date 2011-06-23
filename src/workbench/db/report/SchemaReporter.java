@@ -15,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,7 +39,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 
 
@@ -152,11 +152,30 @@ public class SchemaReporter
 		types.addAll(newTypeList);
 	}
 
-	public void setIncludeSequences(boolean flag) { this.includeSequences = flag; }
-	public void setIncludeTables(boolean flag) { this.includeTables = flag; }
-	public void setIncludeProcedures(boolean flag) { this.includeProcedures = flag; }
-	public void setIncludeGrants(boolean flag) { this.includeGrants = flag; }
-	public void setIncludeTriggers(boolean flag) { includeTriggers = flag; }
+	public void setIncludeSequences(boolean flag)
+	{
+		this.includeSequences = flag;
+	}
+
+	public void setIncludeTables(boolean flag)
+	{
+		this.includeTables = flag;
+	}
+
+	public void setIncludeProcedures(boolean flag)
+	{
+		this.includeProcedures = flag;
+	}
+
+	public void setIncludeGrants(boolean flag)
+	{
+		this.includeGrants = flag;
+	}
+
+	public void setIncludeTriggers(boolean flag)
+	{
+		includeTriggers = flag;
+	}
 
 	public void setOutputFilename(String filename)
 	{
@@ -170,7 +189,7 @@ public class SchemaReporter
 	public String getXml()
 	{
 		this.cancel = false;
-		StrWriter out = new StrWriter(5000);
+		StringWriter out = new StringWriter(5000);
 		try
 		{
 			this.writeXml(out);
@@ -339,11 +358,13 @@ public class SchemaReporter
 	/**
 	 * Cancel the current reporting process (this might leave a corrupted XML file)
 	 */
+	@Override
 	public void cancelExecution()
 	{
 		this.cancel = true;
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;

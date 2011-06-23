@@ -108,7 +108,7 @@ public class WbProperties
 			key = (String)keys[i];
 			if (reference != null)
 			{
-				String currentValue = (String)getProperty(key);
+				String currentValue = getProperty(key);
 				String referenceValue = reference.getProperty(key);
 				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue)) continue;
 			}

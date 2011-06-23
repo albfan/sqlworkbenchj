@@ -66,7 +66,6 @@ public class WbImport
 	public static final String ARG_COL_FILTER = "columnFilter";
 	public static final String ARG_LINE_FILTER = "lineFilter";
 	public static final String ARG_DIRECTORY = "sourceDir";
-	public static final String ARG_TARGET_SCHEMA = "schema";
 	public static final String ARG_USE_TRUNCATE = "useTruncate";
 	public static final String ARG_TRIM_VALUES = "trimValues";
 	public static final String ARG_FILE_EXT = "extension";
@@ -122,7 +121,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
 		cmdLine.addArgument(ARG_DIRECTORY);
-		cmdLine.addArgument(ARG_TARGET_SCHEMA, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ILLEGAL_DATE_NULL, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);
@@ -268,7 +267,7 @@ public class WbImport
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
-		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
+		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
 		if (inputFile != null)
 		{

@@ -24,31 +24,38 @@ import java.io.Writer;
 public class DefaultOutputFactory
 	implements OutputFactory
 {
-	
-	public boolean isArchive() { return false; }
-	
-	public OutputStream createOutputStream(File output) 
+
+	@Override
+	public boolean isArchive()
+	{
+		return false;
+	}
+
+	@Override
+	public OutputStream createOutputStream(File output)
 		throws IOException
 	{
 		return new FileOutputStream(output);
 	}
 
+	@Override
 	public Writer createWriter(File output, String encoding)
 		throws IOException
 	{
 		OutputStream out = createOutputStream(output);
 		return EncodingUtil.createWriter(out, encoding);
 	}
-	
+
+	@Override
 	public Writer createWriter(String filename, String encoding)
 		throws IOException
 	{
 		return createWriter(new File(filename), encoding);
 	}
-	
-	public void done() 
+
+	@Override
+	public void done()
 		throws IOException
 	{
 	}
-	
 }

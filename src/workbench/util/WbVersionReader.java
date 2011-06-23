@@ -38,7 +38,7 @@ public class WbVersionReader
 	private Timer timeout;
 	private ActionListener client;
 	private WbThread readThread;
-	
+
 	/**
 	 * Constructor only for unit testing
 	 */
@@ -48,7 +48,7 @@ public class WbVersionReader
 		this.currentStableBuildNumber = stable;
 		this.userAgent = "VersionTest";
 	}
-	
+
 	public WbVersionReader(ActionListener a)
 	{
 		this("manual", a);
@@ -56,7 +56,7 @@ public class WbVersionReader
 
 	public WbVersionReader(String type, ActionListener a)
 	{
-		this.userAgent = "WbUpdateCheck, " + 
+		this.userAgent = "WbUpdateCheck, " +
 			ResourceMgr.getBuildNumber().toString() + ", " + type + ", " +
 			Settings.getInstance().getLanguage().getLanguage() + ", " +
 			System.getProperty("os.name");
@@ -67,7 +67,7 @@ public class WbVersionReader
 	{
 		this.timeout = new Timer(60 * 1000, this);
 		this.timeout.start();
-		
+
 		this.readThread = new WbThread("VersionReaderThread")
 		{
 			public void run()
@@ -90,7 +90,7 @@ public class WbVersionReader
 		try
 		{
 			URL url = new URL("http://www.sql-workbench.net/release.property");
-			
+
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", this.userAgent);
 			conn.setRequestProperty("Referer", System.getProperty("java.version"));
@@ -105,7 +105,7 @@ public class WbVersionReader
 			this.currentStableBuildNumber = new VersionNumber(props.getProperty("release.build.number", null));
 			this.currentStableBuildDate = props.getProperty("release.build.date", null);
 			success = true;
-			
+
 			long end = System.currentTimeMillis();
 			LogMgr.logDebug("WbVersionReader.readBuildInfo()", "Retrieving version information took " + (end - start) + "ms");
 		}
@@ -134,7 +134,7 @@ public class WbVersionReader
 	{
 		return getAvailableUpdate(ResourceMgr.getBuildNumber());
 	}
-	
+
 	public UpdateVersion getAvailableUpdate(VersionNumber current)
 	{
 		if (UpdateCheck.DEBUG) return UpdateVersion.stable;
@@ -163,6 +163,7 @@ public class WbVersionReader
 		return this.currentStableBuildDate;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.timeout)

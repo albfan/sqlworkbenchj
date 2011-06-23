@@ -22,36 +22,43 @@ import java.util.zip.ZipOutputStream;
 public class ZipEntryOutputStream
 	extends OutputStream
 {
+
 	private ZipOutputStream zout;
+
 	public ZipEntryOutputStream(ZipOutputStream out)
 	{
 		zout = out;
 	}
 
+	@Override
 	public void close()
 		throws IOException
 	{
 		zout.closeEntry();
 	}
 
+	@Override
 	public void flush()
 		throws IOException
 	{
 		zout.flush();
 	}
 
+	@Override
 	public void write(byte[] b, int off, int len)
 		throws IOException
 	{
 		zout.write(b, off, len);
 	}
 
+	@Override
 	public void write(byte[] b)
 		throws IOException
 	{
 		zout.write(b);
 	}
 
+	@Override
 	public void write(int b)
 		throws IOException
 	{

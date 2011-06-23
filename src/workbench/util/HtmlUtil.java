@@ -88,7 +88,7 @@ public class HtmlUtil
 		return sb.toString();
 	}
 
-	public static final String unescapeHTML(String s)
+	public static String unescapeHTML(String s)
 	{
 		String [][] escape =
 		{
@@ -139,10 +139,10 @@ public class HtmlUtil
 
 		int i, j, k;
 
-		i = s.indexOf("&");
+		i = s.indexOf('&');
 		if (i > -1)
 		{
-			j = s.indexOf(";");
+			j = s.indexOf(';');
 			if (j > i)
 			{
 				String temp = s.substring(i , j + 1);

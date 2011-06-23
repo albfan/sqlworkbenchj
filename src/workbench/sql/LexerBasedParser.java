@@ -65,11 +65,13 @@ public class LexerBasedParser
 		setFile(f, encoding);
 	}
 
+	@Override
 	public void setDelimiter(DelimiterDefinition def)
 	{
 		delimiter = def.createCopy();
 	}
 
+	@Override
 	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		emptyLineIsDelimiter = flag;
@@ -82,16 +84,19 @@ public class LexerBasedParser
 	 *
 	 * @param flag if true, the actual SQL is returned otherwise only the start and end
 	 */
+	@Override
 	public void setStoreStatementText(boolean flag)
 	{
 		storeStatementText = flag;
 	}
 
+	@Override
 	public void done()
 	{
 		FileUtil.closeQuietely(input);
 	}
 
+	@Override
 	public ScriptCommandDefinition getNextCommand()
 	{
 		calledOnce = true;

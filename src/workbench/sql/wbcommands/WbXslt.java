@@ -19,7 +19,6 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
@@ -47,13 +46,19 @@ public class WbXslt
 		cmdLine.addArgument(ARG_PARAMETERS);
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -102,9 +107,9 @@ public class WbXslt
 		}
 
 		Map<String, String> params = cmdLine.getMapValue(ARG_PARAMETERS);
-		
+
 		XsltTransformer transformer = new XsltTransformer();
-		
+
 		try
 		{
 			transformer.setSaveSystemOutMessages(true);

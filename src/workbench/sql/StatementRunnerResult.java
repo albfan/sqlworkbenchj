@@ -85,7 +85,6 @@ public class StatementRunnerResult
 		StringBuilder msg = new StringBuilder(100);
 		msg.append(ResourceMgr.getString("MsgExecTime"));
 		msg.append(' ');
-		//msg.append(timingFormatter.getDurationAsSeconds(executionTime));
 		msg.append(timingFormatter.formatDuration(executionTime, (executionTime < DurationFormatter.ONE_MINUTE)));
 		return msg.toString();
 	}

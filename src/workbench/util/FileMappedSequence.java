@@ -23,7 +23,7 @@ import workbench.interfaces.CharacterSequence;
 import workbench.log.LogMgr;
 
 /**
- * An implementatio of CharacterSequence that does not read the 
+ * An implementatio of CharacterSequence that does not read the
  * entire file but only a part of it into memory
  * @author Thomas Kellerer
  */
@@ -34,38 +34,38 @@ public class FileMappedSequence
 	// this will be adjusted dynamically according to the
 	// calls to substring
 	private int chunkSize;
-	
+
 	// The current chunk that has been read from the file
 	private String chunk;
-	
+
 	// The decoder used to convert the bytes from the file
 	// into a String object
 	private CharsetDecoder decoder;
-	
+
 	// Stores the starting position of the current chunk in the file
 	private int chunkByteStart = -1;
-	
+
 	// The character index in the complete sequence where the current chunk starts
 	// (for single byte character sets this will be equal to chunkByteStart
 	private int chunkCharStart;
-	
+
 	// The length of the underlying file
 	private long fileSize;
-	
+
 	// The real length in characters
 	private long charLength;
-	
+
 	private FileInputStream input;
 	private FileChannel channel;
 	private ByteBuffer readBuffer;
 	private int increasedChunkSize = -1;
-	
+
 	public FileMappedSequence(File f, String characterSet)
 		throws IOException
 	{
 		this(f, characterSet, 512 * 1024);
 	}
-	
+
 	public FileMappedSequence(File f, String characterSet, int size)
 		throws IOException
 	{
@@ -74,7 +74,7 @@ public class FileMappedSequence
 		// Read the first chunk in order to initialize the character counters properly
 		readFirstChunk();
 	}
-	
+
 	private void init(File f, String characterSet)
 		throws IOException
 	{
@@ -95,28 +95,29 @@ public class FileMappedSequence
 		this.decoder = charset.newDecoder();
 	}
 
+	@Override
 	public int length()
 	{
 		return (int)this.charLength;
 	}
-	
+
 	void readFirstChunk()
 	{
 		chunkByteStart = -1;
 		readNextChunk();
 	}
-	
+
 	void readNextChunk()
 	{
 		boolean success = false;
 		int tries = 0;
 
 		int oldChunkCharEnd = chunkCharStart + chunk.length();
-		
+
 		int newChunkSize = (increasedChunkSize <= 0 ? chunkSize : increasedChunkSize);
 		increasedChunkSize = -1;
 		int nextStart = (chunkByteStart == -1 ? 0 : chunkByteStart + chunkSize);
-		
+
 		while (!success)
 		{
 			try
@@ -136,7 +137,7 @@ public class FileMappedSequence
 					LogMgr.logError("FileMappedSequence.readNextChunk()", "Error reading file", cc);
 					throw new IllegalStateException("Could not read next chunk");
 				}
-				// This can happen if the chunk ends in the middle 
+				// This can happen if the chunk ends in the middle
 				// of an UTF8 sequence, and the decoder was missing a byte
 				// I can't think of any other solution, than to simply increase
 				// the window by 1 byte and try again
@@ -178,7 +179,7 @@ public class FileMappedSequence
 					LogMgr.logError("FileMappedSequence.readPreviousChunk()", "Error when reading chunk from: " + newStart + " with size: " + chunkSize, io);
 					throw new IllegalStateException("Could not read previous chunk");
 				}
-				// This can happen if the chunk ends in the middle 
+				// This can happen if the chunk ends in the middle
 				// of an UTF8 sequence, and the decoder was missing a byte
 				// I can't think of any other solution, than to simply increase
 				// the window by 1 byte and try again
@@ -187,7 +188,7 @@ public class FileMappedSequence
 			}
 		}
 	}
-	
+
 	private void _readChunk(int byteStart, int size)
 		throws CharacterCodingException, IOException
 	{
@@ -196,18 +197,18 @@ public class FileMappedSequence
 		{
 			readBuffer = ByteBuffer.allocateDirect(size);
 		}
-		
+
 		if (byteStart + size > this.fileSize)
 		{
 			chunkSize = (int)(this.fileSize - byteStart);
 		}
-		
+
 		readBuffer.clear();
 		readBuffer.limit(size);
 		int read = this.channel.read(readBuffer, byteStart);
 		if (read == -1) return;
 
-		// Rewind is necessary because the decoder starts at the 
+		// Rewind is necessary because the decoder starts at the
 		// current position
 		readBuffer.rewind();
 
@@ -220,8 +221,9 @@ public class FileMappedSequence
 		CharBuffer cb = decoder.decode(readBuffer);
 		this.chunk = cb.toString();
 	}
-	
-	
+
+
+	@Override
 	public void done()
 	{
 		try
@@ -238,11 +240,12 @@ public class FileMappedSequence
 	{
 		return chunk.length();
 	}
-	
+
+	@Override
 	public char charAt(int index)
 	{
 		if (index > this.charLength || index < 0) throw new StringIndexOutOfBoundsException(index + " > " + charLength);
-		
+
 		int chunkLength = chunk.length();
 		if (index >= chunkCharStart + chunkLength)
 		{
@@ -252,11 +255,12 @@ public class FileMappedSequence
 		{
 			while (index < chunkCharStart) readPreviousChunk();
 		}
-		int indexInChunk = index - chunkCharStart; 
-		
+		int indexInChunk = index - chunkCharStart;
+
 		return this.chunk.charAt(indexInChunk);
 	}
 
+	@Override
 	public String subSequence(int start, int end)
 	{
 		if (end > this.charLength) throw new StringIndexOutOfBoundsException(end + " > " + charLength);
@@ -264,11 +268,11 @@ public class FileMappedSequence
 
 		// ensure the current chunk includes the start index
 		charAt(start);
-		
-		int startInChunk = start - chunkCharStart; 
+
+		int startInChunk = start - chunkCharStart;
 		int sequenceLength = (end - start);
 		int endInChunk = startInChunk + sequenceLength;
-		
+
 		if (endInChunk < chunk.length())
 		{
 			return chunk.substring(startInChunk, endInChunk);

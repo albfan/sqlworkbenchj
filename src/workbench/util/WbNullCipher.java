@@ -17,6 +17,16 @@ package workbench.util;
 public class WbNullCipher
 	implements WbCipher
 {
-	public String decryptString(String aValue) { return aValue; }
-	public String encryptString(String aValue) { return aValue; }
+
+	@Override
+	public String decryptString(String aValue)
+	{
+		return aValue;
+	}
+
+	@Override
+	public String encryptString(String aValue)
+	{
+		return aValue;
+	}
 }

@@ -95,6 +95,7 @@ public final class WbManager
 		return wb;
 	}
 
+	@Override
 	public void uncaughtException(Thread thread, Throwable error)
 	{
 		error.printStackTrace();
@@ -248,6 +249,7 @@ public final class WbManager
 		}
 	}
 
+	@Override
 	public void fontChanged(String aFontKey, Font newFont)
 	{
 		if (aFontKey.equals(Settings.PROPERTY_DATA_FONT))
@@ -307,6 +309,7 @@ public final class WbManager
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					FocusManager.setCurrentManager(WbFocusManager.getInstance());
@@ -417,6 +420,7 @@ public final class WbManager
 		MacroManager.getInstance().save();
 		Thread t = new WbThread("WbManager disconnect")
 		{
+			@Override
 			public void run()
 			{
 				disconnectWindows();
@@ -447,6 +451,7 @@ public final class WbManager
 		b.setToolTipText(ResourceMgr.getDescription("MsgAbortImmediately"));
 		b.addActionListener(new ActionListener()
 			{
+			@Override
 				public void actionPerformed(ActionEvent evt)
 				{
 					doShutdown(0);
@@ -481,6 +486,7 @@ public final class WbManager
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (closeMessage != null)
@@ -581,6 +587,7 @@ public final class WbManager
 			this.mainWindows.remove(win);
 			WbThread t = new WbThread("WindowDisconnect")
 			{
+				@Override
 				public void run()
 				{
 					// First parameter tells the window to disconnect in the
@@ -609,6 +616,7 @@ public final class WbManager
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				openNewWindow(false);
@@ -664,6 +672,7 @@ public final class WbManager
 			// has enough time to initialize
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					main.selectConnection(exitOnCancel);
@@ -805,6 +814,7 @@ public final class WbManager
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					runGui();
@@ -817,6 +827,7 @@ public final class WbManager
 	{
 		WbThread t1 = new WbThread("WarmUp1")
 		{
+			@Override
 			public void run()
 			{
 				MacroManager.getInstance().getMacros();
@@ -827,6 +838,7 @@ public final class WbManager
 
 		WbThread t2 = new WbThread("WarmUp2")
 		{
+			@Override
 			public void run()
 			{
 				ConnectionMgr.getInstance().readProfiles();
@@ -1003,6 +1015,7 @@ public final class WbManager
 	/**
 	 *  This is the callback method for the shutdownhook.
 	 */
+	@Override
 	public void run()
 	{
 		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted. Aborting process...");

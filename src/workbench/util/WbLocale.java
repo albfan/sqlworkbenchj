@@ -21,28 +21,31 @@ public class WbLocale
 	implements Comparable<WbLocale>
 {
 	private final Locale locale;
-	
+
 	public WbLocale(Locale l)
 	{
 		this.locale = l;
 	}
-	
-	public Locale getLocale() 
+
+	public Locale getLocale()
 	{
 		return locale;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		String lang = StringUtil.capitalize(locale.getDisplayLanguage(locale));
 		return lang;
 	}
-	
+
+	@Override
 	public int compareTo(WbLocale other)
 	{
 		return this.toString().compareTo(other.toString());
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
@@ -53,7 +56,8 @@ public class WbLocale
 		}
 		return false;
 	}
-	
+
+	@Override
 	public int hashCode()
 	{
 		return locale.hashCode();

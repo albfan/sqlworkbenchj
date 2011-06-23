@@ -36,6 +36,7 @@ public class CaseInsensitiveComparator
 	 * @return 0 if both are null or compareToIgnoreCase() returns 0
 	 * @see workbench.util.StringUtil#compareStrings(String, String, boolean)
 	 */
+	@Override
 	public int compare(String value1, String value2)
 	{
 		if (value1 == null && value2 == null) return 0;

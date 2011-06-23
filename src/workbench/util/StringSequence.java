@@ -24,7 +24,7 @@ public class StringSequence
 	implements CharacterSequence
 {
 	private CharSequence source;
-	
+
 	/**
 	 * Create a StringSequence based on the given String
 	 */
@@ -33,24 +33,28 @@ public class StringSequence
 		this.source = s;
 	}
 
+	@Override
 	public void done()
 	{
 		this.source = null;
 	}
 
+	@Override
 	public int length()
 	{
 		return source.length();
 	}
-	
+
+	@Override
 	public char charAt(int index)
 	{
 		return this.source.charAt(index);
 	}
 
+	@Override
 	public CharSequence subSequence(int start, int end)
 	{
 		return this.source.subSequence(start, end);
 	}
-	
+
 }

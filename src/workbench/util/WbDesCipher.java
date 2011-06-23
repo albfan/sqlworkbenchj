@@ -26,10 +26,10 @@ public class WbDesCipher
 {
 	private static final byte[] KEY_DATA = {-108,-50,-5,-75,-98,28,-116,107};
 	private static final SecretKeySpec KEY = new SecretKeySpec(KEY_DATA, "DES");
-	private Cipher cipher; 
-	
+	private Cipher cipher;
+
 	private static WbCipher instance;
-	
+
 	public static WbCipher getInstance()
 	{
 		synchronized (KEY_DATA)
@@ -51,7 +51,7 @@ public class WbDesCipher
 			return instance;
 		}
 	}
-	
+
 	private WbDesCipher()
 	{
 		try
@@ -65,6 +65,7 @@ public class WbDesCipher
 		}
 	}
 
+	@Override
 	public String decryptString(String aValue)
 	{
 		if (aValue == null) return aValue;
@@ -84,6 +85,7 @@ public class WbDesCipher
 		}
 	}
 
+	@Override
 	public String encryptString(String aValue)
 	{
 		if (aValue == null) return null;
@@ -106,7 +108,7 @@ public class WbDesCipher
 	 *	Creates a String from the given array
 	 *	which can be used to store the array
 	 *	in a text file (e.g. XML)
-	 *	
+	 *
 	 *	@see #makeArray(String)
 	 */
 	private String makeString(byte[] values)
@@ -149,5 +151,5 @@ public class WbDesCipher
 		}
 		return result;
 	}
-	
+
 }

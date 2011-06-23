@@ -21,7 +21,7 @@ import workbench.sql.StatementRunnerResult;
  * <br/>
  * Setting the default fetch size using this command will overwrite the setting
  * in the connection profile, but will not change the connection profile.
- * 
+ *
  * @author Thomas Kellerer
  * @see workbench.db.WbConnection#setFetchSize(int)
  */
@@ -36,16 +36,13 @@ public class WbFetchSize
 		isUpdatingCommand = false;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
-	protected boolean isConnectionRequired()
-	{
-		return true;
-	}
-
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{

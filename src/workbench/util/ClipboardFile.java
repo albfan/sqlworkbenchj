@@ -20,7 +20,6 @@ import java.io.IOException;
 public class ClipboardFile
 	extends File
 {
-
 	private String buffer;
 
 	public ClipboardFile(String contents)
@@ -34,50 +33,128 @@ public class ClipboardFile
 		return this.buffer;
 	}
 
-	public boolean canRead() { return true; }
-	public boolean canWrite() { return false; }
-	public boolean delete() { return false; }
-	public String getAbsolutePath() { return "Clipboard"; }
-	public File getAbsoluteFile() {  return this; }
-	public String getName() { return "Clipboard"; }
-	public boolean isDirectory() { return false; }
-	public boolean isHidden() { return false; }
-	public boolean exists() { return true; }
-	public String getParent() { return null; }
-	public File getParentFile() { return null; }
-	public String getPath() { return getAbsolutePath(); }
+	@Override
+	public boolean canRead()
+	{
+		return true;
+	}
 
+	@Override
+	public boolean canWrite()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean delete()
+	{
+		return false;
+	}
+
+	@Override
+	public String getAbsolutePath()
+	{
+		return "Clipboard";
+	}
+
+	@Override
+	public File getAbsoluteFile()
+	{
+		return this;
+	}
+
+	@Override
+	public String getName()
+	{
+		return "Clipboard";
+	}
+
+	@Override
+	public boolean isDirectory()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isHidden()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean exists()
+	{
+		return true;
+	}
+
+	@Override
+	public String getParent()
+	{
+		return null;
+	}
+
+	@Override
+	public File getParentFile()
+	{
+		return null;
+	}
+
+	@Override
+	public String getPath()
+	{
+		return getAbsolutePath();
+	}
+
+	@Override
 	public String getCanonicalPath()
 		throws IOException
 	{
 		return getAbsolutePath();
 	}
 
+	@Override
 	public File getCanonicalFile()
 		throws IOException
 	{
 		return this;
 	}
 
+	@Override
 	public boolean createNewFile()
 		throws IOException
 	{
 		return false;
 	}
 
-	public int compareTo(File pathname) { return -1; }
-	public boolean equals(Object obj) { return false; }
+	@Override
+	public int compareTo(File pathname)
+	{
+		return -1;
+	}
 
+	@Override
+	public boolean equals(Object obj)
+	{
+		return false;
+	}
+
+	@Override
 	public long length()
 	{
-		if (this.buffer == null) return 0;
+		if (this.buffer == null)
+		{
+			return 0;
+		}
 		return this.buffer.length();
 	}
 
+	@Override
 	public int hashCode()
 	{
-		if (buffer == null) return 0;
+		if (buffer == null)
+		{
+			return 0;
+		}
 		return buffer.hashCode();
 	}
-
 }

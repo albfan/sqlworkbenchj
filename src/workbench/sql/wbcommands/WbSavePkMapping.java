@@ -40,9 +40,19 @@ public class WbSavePkMapping
 		cmdLine.addArgument("file");
 	}
 
-	public String getVerb() { return VERB; }
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+
+	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{

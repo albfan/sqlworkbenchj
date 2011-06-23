@@ -52,7 +52,7 @@ public class LobFileParameterParser
 		while (m.find())
 		{
 			int start = m.start();
-			int end = sql.indexOf("}", start + 1);
+			int end = sql.indexOf('}', start + 1);
 			if (end > -1)
 			{
 				String parm = sql.substring(start + 2, end);
@@ -63,7 +63,7 @@ public class LobFileParameterParser
 					String s = tok.nextToken();
 					String arg = null;
 					String value = null;
-					int pos = s.indexOf("=");
+					int pos = s.indexOf('=');
 					if (pos > -1)
 					{
 						arg = s.substring(0, pos);

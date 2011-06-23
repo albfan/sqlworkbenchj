@@ -47,6 +47,7 @@ public class JoinCompletionAction
 		setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbConnection conn = client.getConnection();

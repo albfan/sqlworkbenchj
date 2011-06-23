@@ -12,6 +12,7 @@
 package workbench.db.diff;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 
 /**
@@ -717,7 +717,7 @@ public class SchemaDiff
 	 */
 	public String getMigrateTargetXml()
 	{
-		StrWriter writer = new StrWriter(5000);
+		StringWriter writer = new StringWriter(5000);
 		try
 		{
 			this.writeXml(writer);

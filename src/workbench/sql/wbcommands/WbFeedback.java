@@ -21,7 +21,7 @@ import workbench.util.ArgumentParser;
 
 /**
  * Control the level of feedback during script execution.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbFeedback
@@ -44,10 +44,19 @@ public class WbFeedback
 		this.cmdLine.addArgument("off");
 	}
 
-	public String getVerb() { return command; }
+	@Override
+	public String getVerb()
+	{
+		return command;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{

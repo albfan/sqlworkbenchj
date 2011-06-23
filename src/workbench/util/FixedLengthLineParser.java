@@ -39,11 +39,13 @@ public class FixedLengthLineParser
 		}
 	}
 
+	@Override
 	public void setTrimValues(boolean flag)
 	{
 		this.trimValues = flag;
 	}
 
+	@Override
 	public void setLine(String newLine)
 	{
 		this.line = newLine;
@@ -51,11 +53,13 @@ public class FixedLengthLineParser
 		this.currentLineIndex = 0;
 	}
 
+	@Override
 	public boolean hasNext()
 	{
 		return currentColIndex < widths.length;
 	}
 
+	@Override
 	public String getNext()
 	{
 		if (!hasNext())

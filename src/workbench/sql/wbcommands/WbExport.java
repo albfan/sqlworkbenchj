@@ -17,9 +17,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+
 import workbench.WbManager;
+import workbench.db.TableIdentifier;
+import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.ExportDataModifier;
+import workbench.db.exporter.ExportType;
+import workbench.db.exporter.PoiHelper;
+import workbench.db.exporter.WrongFormatFileException;
 import workbench.interfaces.ProgressReporter;
+import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -30,16 +39,8 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
-import workbench.util.StringUtil;
-import workbench.db.TableIdentifier;
-import workbench.db.exporter.BlobMode;
-import workbench.db.exporter.ControlFileFormat;
-import workbench.db.exporter.ExportDataModifier;
-import workbench.db.exporter.ExportType;
-import workbench.db.exporter.PoiHelper;
-import workbench.db.exporter.WrongFormatFileException;
-import workbench.interfaces.ResultSetConsumer;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
 
@@ -176,8 +177,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES, ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
@@ -611,8 +612,8 @@ public class WbExport
 		List<TableIdentifier> tablesToExport = null;
 		try
 		{
-			String excluded = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
-			String types = cmdLine.getValue(SourceTableArgument.PARAM_TYPES);
+			String excluded = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
+			String types = cmdLine.getValue(CommonArgs.ARG_TYPES);
 			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, types, this.currentConnection);
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && argParser.wasWildCardArgument())

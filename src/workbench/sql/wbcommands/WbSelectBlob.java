@@ -44,7 +44,7 @@ import workbench.util.WbFile;
  * As WbExport can also retrieve BLOB data and allows automated control
  * over the generated filenames (e.g. by using a different column's content)
  * WbExport should be preferred over this command.
- * 
+ *
  * @author Thomas Kellerer
  * @see WbExport
  */
@@ -59,8 +59,13 @@ public class WbSelectBlob
 		this.isUpdatingCommand = false;
 	}
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{

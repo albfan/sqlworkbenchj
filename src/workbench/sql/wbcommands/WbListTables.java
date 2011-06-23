@@ -40,9 +40,10 @@ public class WbListTables extends SqlCommand
 	public WbListTables()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("objects");
-		cmdLine.addArgument("types", ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument("schema", ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);
+		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.SchemaArgument);
 	}
 
 	@Override
@@ -86,8 +87,8 @@ public class WbListTables extends SqlCommand
 				types = new String[typeList.size()];
 				typeList.toArray(types);
 			}
-			schema = cmdLine.getValue("schema");
-			catalog = cmdLine.getValue("catalog");
+			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
+			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
 
 		if (StringUtil.isBlank(schema)) schema = currentConnection.getMetadata().getSchemaToUse();

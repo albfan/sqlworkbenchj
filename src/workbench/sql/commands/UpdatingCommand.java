@@ -23,7 +23,7 @@ import workbench.util.LobFileStatement;
 
 /**
  * Handles DML statements (UPDATE, DELETE, INSERT, TRUNCATE)
- * 
+ *
  * @author Thomas Kellerer
  */
 public class UpdatingCommand
@@ -45,6 +45,7 @@ public class UpdatingCommand
 		checkLobParameter = aVerb.equals("UPDATE") || aVerb.equals("INSERT");
 	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -116,6 +117,7 @@ public class UpdatingCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return verb;

@@ -43,16 +43,19 @@ public class WbMode
 		cmdLine.addArgument("reset");
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	protected boolean isConnectionRequired()
 	{
 		return true;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -89,7 +92,7 @@ public class WbMode
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (command.equalsIgnoreCase("reset"))
 		{
 			profile.resetSessionFlags();

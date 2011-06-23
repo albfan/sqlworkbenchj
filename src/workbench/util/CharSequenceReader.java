@@ -16,12 +16,12 @@ import java.io.Reader;
 
 /**
  * A character stream whose source is a CharSequence.
- * 
- * Copied from the JDK's StringReader as that does not 
+ *
+ * Copied from the JDK's StringReader as that does not
  * support a CharSequence as the input.
- * 
- * @author Thomas Kellerer  
- */ 
+ *
+ * @author Thomas Kellerer
+ */
 public class CharSequenceReader
 	extends Reader
 {
@@ -57,6 +57,7 @@ public class CharSequenceReader
 	 *
 	 * @exception  IOException  If an I/O error occurs
 	 */
+	@Override
 	public int read()
 		throws IOException
 	{
@@ -80,6 +81,7 @@ public class CharSequenceReader
 	 *
 	 * @exception  IOException  If an I/O error occurs
 	 */
+	@Override
 	public int read(char[] cbuf, int off, int len)
 		throws IOException
 	{
@@ -96,14 +98,14 @@ public class CharSequenceReader
 			}
 			if (next >= length) return -1;
 			int n = Math.min(length - next, len);
-				
+
 			int buffPos = off;
 			for (int i=next; i < next + n; i++)
 			{
 				cbuf[buffPos] = str.charAt(i);
 				buffPos ++;
 			}
-			
+
 			next += n;
 			return n;
 		}
@@ -125,6 +127,7 @@ public class CharSequenceReader
 	 *
 	 * @exception  IOException  If an I/O error occurs
 	 */
+	@Override
 	public long skip(long ns)
 		throws IOException
 	{
@@ -147,6 +150,7 @@ public class CharSequenceReader
 	 *
 	 * @exception  IOException  If the stream is closed
 	 */
+	@Override
 	public boolean ready()
 		throws IOException
 	{
@@ -160,6 +164,7 @@ public class CharSequenceReader
 	/**
 	 * Tells whether this stream supports the mark() operation, which it does.
 	 */
+	@Override
 	public boolean markSupported()
 	{
 		return true;
@@ -178,6 +183,7 @@ public class CharSequenceReader
 	 * @exception  IllegalArgumentException  If readAheadLimit is < 0
 	 * @exception  IOException  If an I/O error occurs
 	 */
+	@Override
 	public void mark(int readAheadLimit)
 		throws IOException
 	{
@@ -198,6 +204,7 @@ public class CharSequenceReader
 	 *
 	 * @exception  IOException  If an I/O error occurs
 	 */
+	@Override
 	public void reset()
 		throws IOException
 	{
@@ -214,6 +221,7 @@ public class CharSequenceReader
 	 * ready(), mark(), or reset() invocations will throw an IOException.
 	 * Closing a previously closed stream has no effect.
 	 */
+	@Override
 	public void close()
 	{
 		str = null;

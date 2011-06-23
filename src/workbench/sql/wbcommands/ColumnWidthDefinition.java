@@ -31,7 +31,7 @@ public class ColumnWidthDefinition
 		throws MissingWidthDefinition
 	{
 		List<String> entries = StringUtil.stringToList(paramValue, ",", true, true);
-		if (entries == null || entries.size() == 0)
+		if (entries == null || entries.isEmpty())
 		{
 			return;
 		}

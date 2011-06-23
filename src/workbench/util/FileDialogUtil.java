@@ -17,16 +17,16 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
-import workbench.gui.components.EncodingPanel;
-
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.resource.Settings;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.EncodingPanel;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -90,8 +90,8 @@ public class FileDialogUtil
 				String ext = ExtensionFileFilter.getExtension(fl);
 				if (StringUtil.isEmptyString(ext))
 				{
-					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + eff.getDefaultExtension();
+					if (!filename.endsWith(".")) filename += ".";
+					filename += eff.getDefaultExtension();
 				}
 				this.lastFileType = this.getFileFilterType(ff);
 			}
@@ -136,7 +136,7 @@ public class FileDialogUtil
 	{
 		return getBlobFile(caller, true);
 	}
-	
+
 	public static String getBlobFile(Component caller, boolean showSaveDialog)
 	{
 		try
@@ -167,9 +167,9 @@ public class FileDialogUtil
 			LogMgr.logError("FileDialogUtil.getBlobFile()", "Error selecting file", e);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
 			return null;
-		}			
+		}
 	}
-	
+
 	public String getWorkspaceFilename(Window parent, boolean toSave)
 	{
 		return this.getWorkspaceFilename(parent, toSave, false);
@@ -181,7 +181,7 @@ public class FileDialogUtil
 		{
 			String lastDir = Settings.getInstance().getLastWorkspaceDir();
 			JFileChooser fc = new WbFileChooser(lastDir);
-			
+
 			FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
 			fc.addChoosableFileFilter(wksp);
 			String filename = null;
@@ -197,7 +197,7 @@ public class FileDialogUtil
 				fc.setDialogTitle(ResourceMgr.getString("TxtLoadWksp"));
 				answer = fc.showOpenDialog(parent);
 			}
-			
+
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
 				File fl = fc.getSelectedFile();
@@ -209,8 +209,8 @@ public class FileDialogUtil
 					String ext = ExtensionFileFilter.getExtension(fl);
 					if (StringUtil.isEmptyString(ext))
 					{
-						if (!filename.endsWith(".")) filename = filename + ".";
-						filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
+						if (!filename.endsWith(".")) filename += ".";
+						filename += ExtensionFileFilter.WORKSPACE_EXT;
 					}
 				}
 				else
@@ -232,7 +232,7 @@ public class FileDialogUtil
 			LogMgr.logError("FileDialogUtil.getWorkspaceFilename()", "Error selecting file", e);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
 			return null;
-		}			
+		}
 	}
 
 	public String putConfigDirKey(String aPathname)
@@ -274,7 +274,7 @@ public class FileDialogUtil
 			Settings.getInstance().setPKMappingFilename(file);
 		}
 	}
-	
+
 	public static String selectPkMapFile(Component parent)
 	{
 		String fileName = Settings.getInstance().getPKMappingFilename();
@@ -287,12 +287,12 @@ public class FileDialogUtil
 		{
 			f = new File(fileName).getParentFile();
 		}
-				
+
 		try
 		{
 			JFileChooser dialog = new WbFileChooser(f);
 			dialog.setApproveButtonText(ResourceMgr.getString("LblOK"));
-			if (fileName != null) 
+			if (fileName != null)
 			{
 				dialog.setSelectedFile(new File(fileName));
 			}
@@ -310,6 +310,6 @@ public class FileDialogUtil
 			LogMgr.logError("FileDialogUtil.selectPkMapFile()", "Error selecting file", e);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
 			return null;
-		}			
+		}
 	}
 }

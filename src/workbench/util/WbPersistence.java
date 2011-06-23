@@ -28,8 +28,8 @@ import java.io.InputStream;
 import workbench.log.LogMgr;
 
 /**
- * @author Thomas Kellerer  
- */ 
+ * @author Thomas Kellerer
+ */
 public class WbPersistence
 	implements ExceptionListener
 {
@@ -38,7 +38,7 @@ public class WbPersistence
 	public WbPersistence()
 	{
 	}
-	
+
 	public WbPersistence(String file)
 	{
 		filename = file;
@@ -113,9 +113,10 @@ public class WbPersistence
 		}
 	}
 
+	@Override
 	public void exceptionThrown(Exception e)
 	{
 		LogMgr.logError("WbPersistence", "Error reading file " + filename, e);
 	}
-	
+
 }

@@ -32,6 +32,7 @@ public class WbHelp
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
@@ -57,7 +58,7 @@ public class WbHelp
 			commands.remove("ENABLEOUT");
 			commands.remove("DISABLEOUT");
 		}
-		
+
 		for (String verb : commands)
 		{
 			msg.append(verb);
