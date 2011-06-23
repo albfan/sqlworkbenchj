@@ -842,6 +842,14 @@ public class WbConnection
 	 */
 	public String getSearchStringEscape()
 	{
+		// using a config property to override the driver's behaviour
+		// is necessary because some Oracle drivers return the wrong escape character
+		String escape = getDbSettings().getSearchStringEscape();
+		if (escape != null)
+		{
+			return escape;
+		}
+
 		try
 		{
 			return this.sqlConnection.getMetaData().getSearchStringEscape();

@@ -1363,4 +1363,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "parameter.metadata.supported", true);
 	}
+
+	public String getSearchStringEscape()
+	{
+		return Settings.getInstance().getProperty(prefix + "searchstringescape", null);
+	}
 }
