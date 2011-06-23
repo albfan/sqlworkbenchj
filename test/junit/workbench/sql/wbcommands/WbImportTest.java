@@ -13,9 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -24,11 +21,21 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+
+import org.junit.After;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
@@ -40,12 +47,6 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipOutputFactory;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import workbench.WbTestCase;
-
 /**
  *
  * @author Thomas Kellerer
@@ -329,57 +330,96 @@ public class WbImportTest
 	}
 
 	@Test
-	public void testConstantValues()
+	public void testTwoCharDelimiter()
+		throws Exception
 	{
-		try
+		File importFile  = new File(this.basedir, "two_char.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("nr\t\tlastname\t\tfirstname");
+		out.println("1\t\tDent\t\tArthur");
+		out.println("2\t\tPrefect\t\tFord");
+		out.println("3\t\tBeeblebrox\t\tZaphod");
+		out.close();
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -delimiter='\\t\\t' -type=text -header=true -continueonerror=false -table=junit_test");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = this.connection.createStatementForQuery();
+		ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+		int count = -1;
+		if (rs.next())
 		{
-			File importFile  = new File(this.basedir, "constant_import.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tlastname");
-			out.println("1\tDent");
-			out.println("2\tPrefect");
-			out.println("3\tBeeblebrox");
-			out.close();
-
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"firstname=Unknown\" -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values imported", 3, count);
-
-			rs.close();
-
-			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
-			if (rs.next())
-			{
-				String lname = rs.getString(1);
-				String fname = rs.getString(2);
-				assertEquals("Wrong lastname", "Dent", lname);
-				assertEquals("Wrong firstname", "Unknown", fname);
-			}
-			else
-			{
-				fail("First row not imported");
-			}
-			rs.close();
-
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
+			count = rs.getInt(1);
 		}
-		catch (Exception e)
+		assertEquals("Not enough values imported", 3, count);
+
+		rs.close();
+
+		rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
+		if (rs.next())
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			String lname = rs.getString(1);
+			String fname = rs.getString(2);
+			assertEquals("Wrong lastname", "Dent", lname);
+			assertEquals("Wrong firstname", "Arthur", fname);
+		}
+		else
+		{
+			fail("First row not imported");
+		}
+		rs.close();
+
+		stmt.close();
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
+		}
+	}
+
+	@Test
+	public void testConstantValues()
+		throws Exception
+	{
+		File importFile  = new File(this.basedir, "constant_import.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("nr\tlastname");
+		out.println("1\tDent");
+		out.println("2\tPrefect");
+		out.println("3\tBeeblebrox");
+		out.close();
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"firstname=Unknown\" -type=text -header=true -continueonerror=false -table=junit_test");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = this.connection.createStatementForQuery();
+		ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+		int count = -1;
+		if (rs.next())
+		{
+			count = rs.getInt(1);
+		}
+		assertEquals("Not enough values imported", 3, count);
+
+		rs.close();
+
+		rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
+		if (rs.next())
+		{
+			String lname = rs.getString(1);
+			String fname = rs.getString(2);
+			assertEquals("Wrong lastname", "Dent", lname);
+			assertEquals("Wrong firstname", "Unknown", fname);
+		}
+		else
+		{
+			fail("First row not imported");
+		}
+		rs.close();
+
+		stmt.close();
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
 		}
 	}
 
@@ -507,73 +547,65 @@ public class WbImportTest
 
 	@Test
 	public void testEscapedQuotes()
+		throws Exception
 	{
 		String data =
 			"nr\ttestvalue\n" +
 			"1\tone\n" +
 			"2\twith\"quote";
-		try
+		// Test with escape character
+		String content = StringUtil.replace(data, "\"", "\\\"");
+
+		File datafile = new File(this.basedir, "escaped_quotes1.txt");
+		BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
+		out.write(content);
+		out.close();
+
+		Statement stmt = this.connection.createStatement();
+		stmt.executeUpdate("create table imp_test (nr integer, testvalue varchar(100))");
+
+		String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
+		StatementRunnerResult result = importCmd.execute(cmd);
+		assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+
+		ResultSet rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
+		String value = null;
+		if (rs.next()) value = rs.getString(1);
+		rs.close();
+		assertEquals("Wrong value imported", "with\"quote", value);
+
+		if (!datafile.delete())
 		{
-
-			// Test with escape character
-			String content = StringUtil.replace(data, "\"", "\\\"");
-
-			File datafile = new File(this.basedir, "escaped_quotes1.txt");
-			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
-			out.write(content);
-			out.close();
-
-			Statement stmt = this.connection.createStatement();
-			stmt.executeUpdate("create table imp_test (nr integer, testvalue varchar(100))");
-
-			String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
-			StatementRunnerResult result = importCmd.execute(cmd);
-			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
-
-			ResultSet rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
-			String value = null;
-			if (rs.next()) value = rs.getString(1);
-			rs.close();
-			assertEquals("Wrong value imported", "with\"quote", value);
-
-			if (!datafile.delete())
-			{
-				fail("Could not delete input file: " + datafile.getCanonicalPath());
-			}
-
-			// test with duplicated quotes
-			content = StringUtil.replace(data, "\"", "\"\"");
-
-			datafile = new File(this.basedir, "escaped_quotes2.txt");
-			out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
-			out.write(content);
-			out.close();
-
-			stmt.executeUpdate("delete from imp_test");
-			this.connection.commit();
-
-			cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
-			result = importCmd.execute(cmd);
-			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
-
-			rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
-			value = null;
-			if (rs.next()) value = rs.getString(1);
-			rs.close();
-			stmt.close();
-			assertEquals("Wrong value imported", "with\"quote", value);
-
-			if (!datafile.delete())
-			{
-				fail("Could not delete input file: " + datafile.getCanonicalPath());
-			}
-
+			fail("Could not delete input file: " + datafile.getCanonicalPath());
 		}
-		catch (Exception e)
+
+		// test with duplicated quotes
+		content = StringUtil.replace(data, "\"", "\"\"");
+
+		datafile = new File(this.basedir, "escaped_quotes2.txt");
+		out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
+		out.write(content);
+		out.close();
+
+		stmt.executeUpdate("delete from imp_test");
+		this.connection.commit();
+
+		cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
+		result = importCmd.execute(cmd);
+		assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+
+		rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
+		value = null;
+		if (rs.next()) value = rs.getString(1);
+		rs.close();
+		stmt.close();
+		assertEquals("Wrong value imported", "with\"quote", value);
+
+		if (!datafile.delete())
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("Could not delete input file: " + datafile.getCanonicalPath());
 		}
+
 	}
 
 	@Test
