@@ -43,9 +43,14 @@ public class WbStringTokenizer
 		this.setSourceString(aSource);
 	}
 
-	public WbStringTokenizer(char aDelim, String quotingChars, boolean keep)
+	public WbStringTokenizer(char delimChar, String quotingChars, boolean keep)
 	{
-		this.delimit = new String(new char[] { aDelim });
+		this(String.valueOf(delimChar), quotingChars, keep);
+	}
+	
+	public WbStringTokenizer(String aDelim, String quotingChars, boolean keep)
+	{
+		this.delimit = aDelim;
 		this.singleWordDelimiter = false;
 		this.quoteChars = quotingChars;
 		this.keepQuotes = keep;

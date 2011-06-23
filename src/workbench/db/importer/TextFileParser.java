@@ -816,7 +816,7 @@ public class TextFileParser
 		}
 		else
 		{
-			CsvLineParser csv = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
+			CsvLineParser csv = new CsvLineParser(delimiter, quoteCharToUse);
 			csv.setReturnEmptyStrings(true);
 			csv.setUnquotedEmptyStringIsNull(alwaysQuoted);
 			csv.setQuoteEscaping(this.quoteEscape);
@@ -1107,7 +1107,7 @@ public class TextFileParser
 		throws Exception
 	{
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
-		WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
+		WbStringTokenizer tok = new WbStringTokenizer(delimiter, this.quoteChar, false);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setSourceString(headerLine);
 		while (tok.hasMoreTokens())
@@ -1139,7 +1139,7 @@ public class TextFileParser
 			setupFileHandler();
 			in = this.fileHandler.getMainFileReader();
 			String firstLine = in.readLine();
-			WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
+			WbStringTokenizer tok = new WbStringTokenizer(delimiter, this.quoteChar, false);
 			tok.setSourceString(firstLine);
 			int i = 1;
 			while (tok.hasMoreTokens())
