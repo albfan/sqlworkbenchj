@@ -81,10 +81,29 @@ public class PlainEditor
 		l.addAction(replacer.getReplaceAction());
 	}
 
-	public int getCaretPosition() { return this.editor.getCaretPosition(); }
-	public int getSelectionEnd() { return this.editor.getSelectionEnd(); }
-	public int getSelectionStart() { return this.editor.getSelectionStart(); }
-	public void select(int start, int end) { this.editor.select(start, end); }
+	@Override
+	public int getCaretPosition()
+	{
+		return this.editor.getCaretPosition();
+	}
+
+	@Override
+	public int getSelectionEnd()
+	{
+		return this.editor.getSelectionEnd();
+	}
+
+	@Override
+	public int getSelectionStart()
+	{
+		return this.editor.getSelectionStart();
+	}
+
+	@Override
+	public void select(int start, int end)
+	{
+		this.editor.select(start, end);
+	}
 
 	public void setInfoText(String text)
 	{
@@ -97,16 +116,19 @@ public class PlainEditor
 		this.infoText.setText(text);
 	}
 
+	@Override
 	public void requestFocus()
 	{
 		this.editor.requestFocus();
 	}
 
+	@Override
 	public boolean requestFocusInWindow()
 	{
 		return this.editor.requestFocusInWindow();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		boolean wrap = Settings.getInstance().getPlainEditorWordWrap();
@@ -114,46 +136,65 @@ public class PlainEditor
 		this.editor.setLineWrap(wrap);
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());
 	}
 
+	@Override
 	public void setSelectedText(String aText)
 	{
 		this.editor.replaceSelection(aText);
 	}
 
+	@Override
 	public String getText()
 	{
 		return this.editor.getText();
 	}
 
+	@Override
 	public String getSelectedText()
 	{
 		return this.editor.getSelectedText();
 	}
 
+	@Override
 	public void setText(String aText)
 	{
 		this.editor.setText(aText);
 	}
 
+	@Override
 	public void setCaretPosition(int pos)
 	{
 		this.editor.setCaretPosition(pos);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		this.editor.setLineWrap(this.wordWrap.isSelected());
 	}
 
+	@Override
 	public void setEditable(boolean flag)
 	{
 		this.editor.setEditable(flag);
 		this.editor.setBackground(enabledBackground);
 	}
 
+	@Override
+	public boolean isEditable()
+	{
+		return this.editor.isEditable();
+	}
+
+	@Override
+	public boolean isTextSelected()
+	{
+		return (getSelectionStart() < getSelectionEnd());
+	}
 
 }

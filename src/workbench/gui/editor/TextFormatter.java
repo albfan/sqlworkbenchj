@@ -11,7 +11,7 @@
  */
 package workbench.gui.editor;
 
-import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.SqlTextContainer;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
@@ -33,7 +33,7 @@ public class TextFormatter
 		this.dbId = id;
 	}
 
-	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, String lineComment)
+	public void formatSql(SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
 	{
 		if (!editor.isEditable()) return;
 

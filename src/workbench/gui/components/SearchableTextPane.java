@@ -39,9 +39,16 @@ public class SearchableTextPane
 		l.addAction(searcher.getFindAgainAction());
 	}
 
+	@Override
 	public void setSelectedText(String aText)
 	{
 		this.setText(aText);
+	}
+
+	@Override
+	public boolean isTextSelected()
+	{
+		return getSelectionStart() < getSelectionEnd();
 	}
 
 	public void setPage(URL url)
@@ -58,5 +65,5 @@ public class SearchableTextPane
 			FileUtil.closeQuietely(in);
 		}
 	}
-	
+
 }

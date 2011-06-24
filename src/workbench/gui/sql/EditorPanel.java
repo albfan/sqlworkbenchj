@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -45,21 +46,15 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
+
 import workbench.WbManager;
 import workbench.db.WbConnection;
-import workbench.gui.actions.FileSaveAction;
-import workbench.gui.editor.SearchAndReplace;
-import workbench.gui.editor.SyntaxUtilities;
-import workbench.gui.editor.TextFormatter;
-import workbench.interfaces.EncodingSelector;
-import workbench.sql.DelimiterDefinition;
-import workbench.util.EncodingUtil;
-import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.CommentAction;
 import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileReloadAction;
+import workbench.gui.actions.FileSaveAction;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
@@ -75,20 +70,21 @@ import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
+import workbench.gui.editor.SearchAndReplace;
 import workbench.gui.editor.SyntaxDocument;
+import workbench.gui.editor.SyntaxUtilities;
+import workbench.gui.editor.TextFormatter;
 import workbench.gui.editor.TokenMarker;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.FormattableSql;
-import workbench.interfaces.TextContainer;
-import workbench.interfaces.TextFileContainer;
+import workbench.interfaces.*;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CollectionUtil;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
@@ -104,7 +100,7 @@ import workbench.util.StringUtil;
 public class EditorPanel
 	extends JEditTextArea
 	implements ClipboardSupport, FontChangedListener, PropertyChangeListener, DropTargetListener,
-						 TextContainer, TextFileContainer, FormattableSql
+						 SqlTextContainer, TextFileContainer, FormattableSql
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
@@ -381,13 +377,18 @@ public class EditorPanel
 	 * Return the selected statement of the editor. If no
 	 * text is selected, the whole text will be returned
 	 */
+	@Override
 	public String getSelectedStatement()
 	{
 		String text = this.getSelectedText();
 		if (text == null || text.length() == 0)
+		{
 			return this.getText();
+		}
 		else
+		{
 			return text;
+		}
 	}
 
 	@Override

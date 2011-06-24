@@ -27,4 +27,6 @@ public interface TextContainer
 	int getSelectionEnd();
 	void select(int start, int end);
 	void setEditable(boolean flag);
+	boolean isEditable();
+	boolean isTextSelected();
 }
