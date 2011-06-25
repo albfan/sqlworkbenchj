@@ -56,7 +56,15 @@ public class TextFormatterTest
 			@Override
 			public String getSelectedStatement()
 			{
-				return editorText;
+				String text = this.getSelectedText();
+				if (text == null || text.length() == 0)
+				{
+					return this.getText();
+				}
+				else
+				{
+					return text;
+				}
 			}
 
 			@Override
@@ -68,7 +76,7 @@ public class TextFormatterTest
 			@Override
 			public String getSelectedText()
 			{
-				return null;
+				return editorText.substring(getSelectionStart(), getSelectionEnd());
 			}
 
 			@Override
@@ -148,7 +156,50 @@ public class TextFormatterTest
 		selectionStart = 0;
 		selectionEnd = editorText.length();
 		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
-		System.out.println("formatted:\n" + editorText);
+//		System.out.println("formatted:\n" + editorText);
 		assertEquals(expected, editorText.trim());
+
+		editorText = "update foo set bar = 1;";
+		selectionStart = 0;
+		selectionEnd = editorText.length() - 1;
+//		System.out.println("selected: " + editor.getSelectedStatement());
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		expected =
+			"UPDATE foo\n" +
+			"   SET bar = 1";
+
+//		System.out.println("formatted:\n" + editorText);
+		assertEquals(expected, editorText.trim());
+
+		editorText = "update foo set bar = 1;";
+		selectionStart = 0;
+		selectionEnd = editorText.length();
+//		System.out.println("selected: " + editor.getSelectedStatement());
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		expected =
+			"UPDATE foo\n" +
+			"   SET bar = 1;";
+
+//		System.out.println("formatted:\n" + editorText);
+		assertEquals(expected, editorText.trim());
+
+		editorText = "update foo set bar = 1 where id = 1\n/\nupdate foo set bar = 2 where id = 2\n/\n";
+		selectionStart = 0;
+		selectionEnd = 0;
+//		System.out.println("selected: " + editor.getSelectedStatement());
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		expected =
+			"UPDATE foo\n" +
+			"   SET bar = 1\n" +
+			"WHERE id = 1\n" +
+			"/\n" +
+			"UPDATE foo\n" +
+			"   SET bar = 2\n" +
+			"WHERE id = 2\n" +
+			"/";
+
+//		System.out.println("formatted:\n" + editorText);
+		assertEquals(expected, editorText.trim());
+
 	}
 }

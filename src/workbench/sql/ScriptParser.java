@@ -225,7 +225,7 @@ public class ScriptParser
 	{
 		this.supportIdioticQuotes = flag;
 	}
-	
+
 	/**
 	 *	Define the script to be parsed.
 	 *	The delimiter to be used will be checked automatically
@@ -457,10 +457,10 @@ public class ScriptParser
 		this.checkEscapedQuotes = flag;
 	}
 
-	public String getDelimiterString()
+	public DelimiterDefinition getDelimiter()
 	{
-		if (this.useAlternateDelimiter) return this.alternateDelimiter.getDelimiter();
-		return this.delimiter.getDelimiter();
+		if (this.useAlternateDelimiter) return this.alternateDelimiter;
+		return this.delimiter;
 	}
 
 	private ScriptIterator getParserInstance()

@@ -44,16 +44,17 @@ public class TextFormatter
 		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
 
-		String delimit = parser.getDelimiterString();
-		int pos = StringUtil.findFirstNonWhitespace(editor.getText(), editor.getSelectionEnd());
-		int delimitPos = editor.getText().indexOf(delimit, editor.getSelectionEnd());
+
+		DelimiterDefinition delimiter = parser.getDelimiter();
+
 		boolean isSelected = editor.isTextSelected();
-		boolean delimiterAfterSelection = (pos == delimitPos);
+		boolean selectionWithDelimiter = sql.trim().endsWith(delimiter.getDelimiter());
 
 		int count = parser.getSize();
 		if (count < 1) return;
 
 		StringBuilder newSql = new StringBuilder(sql.length() + 100);
+		boolean needDelimiter = (count > 1) || (count == 1 && isSelected && selectionWithDelimiter);
 
 		for (int i=0; i < count; i++)
 		{
@@ -66,12 +67,6 @@ public class TextFormatter
 				continue;
 			}
 
-			// only add the delimiter to the last statement if there is no
-			// delimiter following directly after the currently selected text
-			if (!isSelected && ((i == count - 1 && !delimiterAfterSelection) || i < count - 1))
-			{
-				command += delimit;
-			}
 
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
 
@@ -79,6 +74,14 @@ public class TextFormatter
 			{
 				String formattedSql = f.getFormattedSql();
 				newSql.append(formattedSql.trim());
+				if (needDelimiter)
+				{
+					if (delimiter.isSingleLine())
+					{
+						newSql.append('\n');
+					}
+					newSql.append(delimiter.getDelimiter());
+				}
 				newSql.append('\n');
 			}
 			catch (Exception e)
