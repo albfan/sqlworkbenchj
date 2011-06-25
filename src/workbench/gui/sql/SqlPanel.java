@@ -1125,7 +1125,7 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					WbSwingUtilities.showErrorMessage(SqlPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+					WbSwingUtilities.showErrorMessageKey(SqlPanel.this, "MsgOutOfMemoryError");
 				}
 			});
 		}

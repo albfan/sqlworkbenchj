@@ -57,13 +57,13 @@ public class AlterObjectAction
 	{
 		client = reload;
 	}
-	
+
 	public void setConnection(WbConnection con)
 	{
 		dbConnection = con;
 		checkEnabled();
 	}
-	
+
 	private void checkEnabled()
 	{
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
@@ -79,7 +79,7 @@ public class AlterObjectAction
 
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		if (ds == null) return false;
-		
+
 		List<String> types = CollectionUtil.arrayList();
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
@@ -103,8 +103,7 @@ public class AlterObjectAction
 		String alterScript = getScript();
 		if (alterScript == null)
 		{
-			String msg = ResourceMgr.getString("MsgNoAlterAvailable");
-			WbSwingUtilities.showErrorMessage(tableList, msg);
+			WbSwingUtilities.showErrorMessageKey(tableList, "MsgNoAlterAvailable");
 		}
 
 		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);

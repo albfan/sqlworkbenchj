@@ -18,11 +18,12 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- * Action to copy the contents of the data as SQL update statements into the clipboard
+ * Action to copy the contents of the data as SQL update statements into the clipboard.
+ * 
  * @see workbench.gui.components.ClipBoardCopier
  * @author  Thomas Kellerer
  */
-public class CopyAsSqlUpdateAction 
+public class CopyAsSqlUpdateAction
 	extends WbAction
 {
 	private WbTable client;
@@ -36,9 +37,19 @@ public class CopyAsSqlUpdateAction
 		this.setEnabled(false);
 	}
 
-	public boolean hasCtrlModifier() { return true; }
-	public boolean hasShiftModifier() { return false; }
-	
+	@Override
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean hasShiftModifier()
+	{
+		return false;
+	}
+
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);

@@ -12,7 +12,6 @@
 package workbench.gui.macros;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
 import workbench.util.StringUtil;
@@ -42,7 +41,7 @@ public class MacroRunner
 			String selected = client.getSelectedText();
 			if (selected == null)
 			{
-				WbSwingUtilities.showErrorMessage(client.getPanel(), ResourceMgr.getString("ErrNoSelection4Macro"));
+				WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoSelection4Macro");
 				return;
 			}
 			sql = replaceSelected(sql, selected);
@@ -53,7 +52,7 @@ public class MacroRunner
 			String current = client.getStatementAtCursor();
 			if (current == null)
 			{
-				WbSwingUtilities.showErrorMessage(client.getPanel(), ResourceMgr.getString("ErrNoCurrent4Macro"));
+				WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoCurrent4Macro");
 				return;
 			}
 			sql = replaceCurrent(sql, current);

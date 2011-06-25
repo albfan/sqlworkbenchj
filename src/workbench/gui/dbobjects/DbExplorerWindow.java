@@ -12,11 +12,8 @@
 package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
-import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -67,11 +64,13 @@ public class DbExplorerWindow
 		this.panel.setDbExecutionListener(this);
 	}
 
+	@Override
 	public JFrame getWindow()
 	{
 		return this;
 	}
 
+	@Override
 	public void activate()
 	{
 		setVisible(true);
@@ -107,21 +106,25 @@ public class DbExplorerWindow
 		connectionSelector.selectConnection();
 	}
 
+	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		jobIndicator.jobEnded();
 	}
 
+	@Override
 	public void executionStart(WbConnection conn, Object source)
 	{
 		jobIndicator.jobStarted();
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return panel.getConnection();
 	}
 
+	@Override
 	public void closeWindow()
 	{
 		this.saveSettings();
@@ -131,6 +134,7 @@ public class DbExplorerWindow
 		this.dispose();
 	}
 
+	@Override
 	public void disconnect()
 	{
 		this.panel.disconnect();
@@ -158,10 +162,12 @@ public class DbExplorerWindow
 		}
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 		if (standalone)
@@ -177,6 +183,7 @@ public class DbExplorerWindow
 		}
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		if (panel.canClosePanel())
@@ -185,18 +192,22 @@ public class DbExplorerWindow
 		}
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
@@ -205,6 +216,7 @@ public class DbExplorerWindow
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				DbExplorerPanel dbPanel = new DbExplorerPanel();
@@ -220,15 +232,18 @@ public class DbExplorerWindow
 		});
 	}
 
+	@Override
 	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
 	{
 		return true;
 	}
 
+	@Override
 	public void connectCancelled()
 	{
 	}
 
+	@Override
 	public void connectFailed(String error)
 	{
 		this.setProfileName(null);
@@ -237,18 +252,21 @@ public class DbExplorerWindow
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 
+	@Override
 	public void connected(WbConnection conn)
 	{
 		this.setProfileName(conn.getProfile().getName());
 		this.panel.setConnection(conn);
 	}
 
+	@Override
 	public String getConnectionId(ConnectionProfile profile)
 	{
 		if (this.panel == null) return "DbExplorerWindow";
 		return this.panel.getId();
 	}
 
+	@Override
 	public void connectEnded()
 	{
 	}

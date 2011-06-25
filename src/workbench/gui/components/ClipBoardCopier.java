@@ -33,6 +33,7 @@ import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -179,6 +180,7 @@ public class ClipBoardCopier
 	{
 		if (this.data == null)
 		{
+			// Should not happen.
 			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
 			LogMgr.logError("ClipBoardCopier.copyAsSql()", "Cannot copy without a DataStore!", null);
 			return;
@@ -217,8 +219,7 @@ public class ClipBoardCopier
 			if (!pkOK)
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
-				String msg = ResourceMgr.getString("ErrCopyNotAvailable");
-				WbSwingUtilities.showErrorMessage(client, msg);
+				WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNotAvailable");
 				return;
 			}
 		}
@@ -246,6 +247,26 @@ public class ClipBoardCopier
 			if (result == null) return;
 			columnsToInclude = result.columns;
       selectedOnly = result.selectedOnly;
+		}
+
+		// Now check if the selected columns are different to the key columns.
+		// If only key columns are selected the creating an UPDATE statement does not make sense.
+		if (useUpdate)
+		{
+			List<ColumnIdentifier> keyColumns = new ArrayList<ColumnIdentifier>();
+			for (ColumnIdentifier col : data.getResultInfo().getColumns())
+			{
+				if (col.isPkColumn())
+				{
+					keyColumns.add(col);
+				}
+			}
+			if (columnsToInclude.size() == keyColumns.size() && columnsToInclude.containsAll(keyColumns))
+			{
+				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE statement with only key columns!", null);
+				WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
+				return;
+			}
 		}
 
 		try

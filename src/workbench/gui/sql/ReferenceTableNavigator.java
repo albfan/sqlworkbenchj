@@ -44,6 +44,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -110,6 +111,7 @@ public class ReferenceTableNavigator
 		this.source.addPopupMenu(selectChildTables, false);
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		boolean selected = this.source.getSelectedRowCount() > 0;
@@ -140,21 +142,25 @@ public class ReferenceTableNavigator
 		return this.baseTable;
 	}
 
+	@Override
 	public void menuSelected(MenuEvent evt)
 	{
 	}
 
+	@Override
 	public void menuDeselected(MenuEvent evt)
 	{
 		closePopup(evt);
 	}
 
+	@Override
 	public void menuCanceled(MenuEvent evt)
 	{
 		selectParentTables.getPopupMenu().setVisible(false);
 		selectChildTables.getPopupMenu().setVisible(false);
 	}
 
+	@Override
 	public void popupMenuWillBecomeVisible(PopupMenuEvent evt)
 	{
 		JPopupMenu pop = (JPopupMenu)evt.getSource();
@@ -168,11 +174,13 @@ public class ReferenceTableNavigator
 		}
 	}
 
+	@Override
 	public void popupMenuWillBecomeInvisible(PopupMenuEvent evt)
 	{
 
 	}
 
+	@Override
 	public void popupMenuCanceled(PopupMenuEvent evt)
 	{
 		closePopup(evt);
@@ -224,6 +232,7 @@ public class ReferenceTableNavigator
 	{
 		WbThread init = new WbThread("InitChildren")
 		{
+			@Override
 			public void run()
 			{
 				synchronized (connectionLock)
@@ -245,6 +254,7 @@ public class ReferenceTableNavigator
 	{
 		WbThread init = new WbThread("InitParents")
 		{
+			@Override
 			public void run()
 			{
 				synchronized (connectionLock)
@@ -273,7 +283,7 @@ public class ReferenceTableNavigator
 			TableDependency dep = navi.getTree();
 			List<DependencyNode> tables = dep.getLeafs();
 
-			if (tables == null || tables.size() == 0)
+			if (CollectionUtil.isEmpty(tables))
 			{
 				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtNoTables"));
 				item.setEnabled(false);
@@ -354,6 +364,7 @@ public class ReferenceTableNavigator
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				synchronized (menu)
@@ -408,6 +419,7 @@ public class ReferenceTableNavigator
 		return rows;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JMenuItem item = (JMenuItem)evt.getSource();
@@ -509,6 +521,7 @@ public class ReferenceTableNavigator
 		this.rebuildMenu();
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(DwPanel.PROP_UPDATE_TABLE))

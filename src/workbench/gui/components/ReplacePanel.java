@@ -324,6 +324,7 @@ public class ReplacePanel
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (criteriaAdded)
@@ -345,6 +346,8 @@ public class ReplacePanel
 			e.printStackTrace();
 		}
 	}
+
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		Object source = e.getSource();
@@ -464,31 +467,38 @@ public class ReplacePanel
 		((HistoryTextField)replaceValue).restoreSettings(Settings.getInstance(), settingsKey + ".");
 	}
 
+	@Override
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		this.closeWindow();
 	}
 
+	@Override
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}

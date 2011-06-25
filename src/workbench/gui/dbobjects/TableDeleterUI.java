@@ -309,6 +309,7 @@ public class TableDeleterUI
 		this.checkThread = new WbThread("FKCheck")
 		{
 
+			@Override
 			public void run()
 			{
 				List<TableIdentifier> sorted = null;
@@ -349,6 +350,7 @@ public class TableDeleterUI
 		this.checkThread = null;
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				statusLabel.setText("");
@@ -363,11 +365,13 @@ public class TableDeleterUI
 		});
 	}
 
+	@Override
 	public void fatalError(String msg)
 	{
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 
+	@Override
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog, errorMessage);
@@ -450,7 +454,7 @@ public class TableDeleterUI
 
 		boolean canCascade = connection == null ? false : connection.getDbSettings().supportsCascadedTruncate();
 		cascadeTruncate.setEnabled(canCascade && useTruncate);
-		if (!canCascade) 
+		if (!canCascade)
 		{
 			cascadeTruncate.setSelected(false);
 		}
@@ -462,6 +466,7 @@ public class TableDeleterUI
 
 		this.deleteThread = new WbThread("TableDeleteThread")
 		{
+			@Override
 			public void run()
 			{
 				doDelete();
@@ -498,6 +503,7 @@ public class TableDeleterUI
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					deleteButton.setEnabled(true);
@@ -590,35 +596,43 @@ public class TableDeleterUI
 		}
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		this.cancelled = true;
 		closeWindow();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
+	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public JCheckBox addMissingTables;
   public ButtonGroup buttonGroup1;
