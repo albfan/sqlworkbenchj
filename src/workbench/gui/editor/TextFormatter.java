@@ -78,7 +78,8 @@ public class TextFormatter
 			try
 			{
 				String formattedSql = f.getFormattedSql();
-				newSql.append(formattedSql);
+				newSql.append(formattedSql.trim());
+				newSql.append('\n');
 			}
 			catch (Exception e)
 			{
