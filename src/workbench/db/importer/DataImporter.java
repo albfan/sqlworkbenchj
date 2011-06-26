@@ -178,6 +178,13 @@ public class DataImporter
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 		this.isOracle = this.dbConn.getMetadata().isOracle();
 		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
+
+		// apparently the JDBC/ODBC bridge does not support setObject(x, null) so always use setNull()
+		// regardless of the DBMS
+		if (dbConn.getProfile().getDriverclass().equals("sun.jdbc.odbc.JdbcOdbcDriver")) {
+			this.useSetNull = true;
+		}
+		
 		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
 	}
 
