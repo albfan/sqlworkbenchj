@@ -105,21 +105,32 @@ public class OracleFKHandler
 	 *
 	 * If the table belongs to the current user, the user_XXX views can be used
 	 * instead of the all_XXX views. Using the user_XXX views is faster (at least on my system) than the all_XXX
-	 * views - although this is still an awfully slow statement...
+	 * views - although it  is still an awfully slow statement...
+	 * <br>
+	 * Querying user_constraints instead of all_constraints means that constraints between two schemas
+	 * will not be shown. In order to still enable this, the config property:
+	 * <br>
+	 * <code>workbench.db.oracle.optimize_fk_query</code>
+	 * <br>
+	 * can be set to false, if all_constraints should always be queried.
 	 *
 	 * @param schema
 	 * @return the query to use
 	 */
 	private String getQuery(TableIdentifier tbl)
 	{
-		String user = getConnection().getProfile().getUsername().toUpperCase();
-		String schema = tbl.getRawSchema();
-		boolean isOwner = schema.equals(user);
-		if (isOwner)
+		boolean optimize = Settings.getInstance().getBoolProperty("workbench.db.oracle.optimize_fk_query", true);
+		if (optimize)
 		{
-			String sql = baseSql.replace("all_constraints", "user_constraints");
-			sql = sql.replace("all_cons_columns", "user_cons_columns");
-			return sql;
+			String user = getConnection().getProfile().getUsername().toUpperCase();
+			String schema = tbl.getRawSchema();
+			boolean isOwner = schema.equals(user);
+			if (isOwner)
+			{
+				String sql = baseSql.replace("all_constraints", "user_constraints");
+				sql = sql.replace("all_cons_columns", "user_cons_columns");
+				return sql;
+			}
 		}
 		return baseSql;
 	}
