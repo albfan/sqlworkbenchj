@@ -87,6 +87,39 @@ public class ArgumentParser
 		return allowed.contains(value);
 	}
 
+	/**
+	 * Register an enum as an argument.
+	 *
+	 * The elements of the enum are registered as valid argument parameters.
+	 *
+	 * @param key the argument name
+	 * @param enumClass  the enum's class
+	 *
+	 * @see #addArgument(java.lang.String, java.util.List)
+	 * @see #getEnumValue(java.lang.String, java.lang.Enum, java.lang.Class)
+	 */
+	public <T extends Enum<T>> void addArgument(String key, Class<T> enumClass)
+	{
+		T[] values = enumClass.getEnumConstants();
+		List<String> names = new ArrayList<String>(values.length);
+		for (T value : values)
+		{
+			names.add(value.toString());
+		}
+		addArgument(key, names);
+	}
+
+	/**
+	 * Register an argument with a predefined list of values.
+	 *
+	 * The list of allowed values can be used for autocompletion in the frontend.
+	 *
+	 * @param key the argument name
+	 * @param values  the allowed values
+	 *
+	 * @see #isAllowedValue(java.lang.String, java.lang.String)
+	 * @see #getAllowedValues(java.lang.String)
+	 */
 	public void addArgument(String key, List<String> values)
 	{
 		addArgument(key, ArgumentType.ListArgument);
@@ -277,6 +310,7 @@ public class ArgumentParser
 
 	/**
 	 * Return a list of unknown arguments.
+	 *
 	 * Each argument passed in the original command line
 	 * that has not been registered using addArgument()
 	 * will be listed in the result. For each argument
@@ -384,7 +418,7 @@ public class ArgumentParser
 	}
 
 	/**
-	 * Return the parameter for the give argument.
+	 * Return the parameter value for the given argument.
 	 *
 	 * If no value was specified or the parameter was not
 	 * passed on the commandline null will be returned.
@@ -416,6 +450,15 @@ public class ArgumentParser
 		return (String)value;
 	}
 
+	/**
+	 * Returns all values that were supplied for a repeatable argument.
+	 *
+	 * A repeatable argument can be supplied multiple times, e.g. -constant=a -constant=b
+	 * For that example the returned list will contain two values "a", "b".
+	 *
+	 * @param key the argument that is marked as ArgumentType.repeatable.
+	 * @return all values supplied.
+	 */
 	public List<String> getList(String key)
 	{
 		if (getArgumentType(key) != ArgumentType.Repeatable)
@@ -435,6 +478,12 @@ public class ArgumentParser
 		return value;
 	}
 
+	/**
+	 * Returns the values of a parameter that allows comma delimited values.
+	 * 
+	 * @param key the argument name
+	 * @return the values that were specified.
+	 */
 	public List<String> getListValue(String key)
 	{
 		if (getArgumentType(key) == ArgumentType.Repeatable)
@@ -474,4 +523,69 @@ public class ArgumentParser
 		return StringUtil.getIntValue(this.getValue(key),def);
 	}
 
+	/**
+	 * Return the enum value for the given argument.
+	 *
+	 * @param <T> the enum type
+	 * @param argName the argument name (previously registered using addArgument())
+	 * @param defaultValue the default value if nothing was specified
+	 * @return the value supplied by the user or the default value if nothing was specified
+	 * @throws IllegalArgumentException if the user supplied an invalid enum value
+	 * @throws NullPointerException if the defaultValue is null
+	 *
+	 * @see #getEnumValue(java.lang.String, java.lang.Enum)
+	 * @see #getEnumValue(java.lang.String, java.lang.Enum, java.lang.Class)
+	 * @see #addArgument(java.lang.String, java.lang.Class)
+	 */
+	public <T extends Enum<T>> T getEnumValue(String argName, T defaultValue)
+	{
+		return getEnumValue(argName, defaultValue, defaultValue.getDeclaringClass());
+	}
+
+	/**
+	 * Return the enum value for the given argument.
+	 *
+	 * This method can be used if no default value for the Enum should be used. To convert
+	 * the user supplied string into an enum instance, the enum class is necessary.
+	 *
+	 * @param <T> the enum type
+	 * @param argName the argument name (previously registered using addArgument())
+	 * @param enumClass the enum class
+	 * @return the value supplied by the user or the default value if nothing was specified
+	 * @throws IllegalArgumentException if the user supplied an invalid enum value
+	 *
+	 * @see #getEnumValue(java.lang.String, java.lang.Class)
+	 * @see #getEnumValue(java.lang.String, java.lang.Enum, java.lang.Class)
+	 * @see #addArgument(java.lang.String, java.lang.Class)
+	 */
+
+	public <T extends Enum<T>> T getEnumValue(String argName, Class<T> enumClass)
+	{
+		return getEnumValue(argName, null, enumClass);
+	}
+
+	/**
+	 * Return the enum value for the given argument.
+	 *
+	 * @param <T> the enum type
+	 * @param argName the argument name (previously registered using addArgument())
+	 * @param defaultValue the default value if nothing was specified
+	 * @param enumClass the enum class
+	 * @return the value supplied by the user or the default value if nothing was specified
+	 * @throws IllegalArgumentException if the user supplied an invalid enum value
+	 *
+	 * @see #getEnumValue(java.lang.String, java.lang.Class)
+	 * @see #getEnumValue(java.lang.String, java.lang.Enum)
+	 * @see #addArgument(java.lang.String, java.lang.Class)
+	 */
+	public <T extends Enum<T>> T getEnumValue(String argName, T defaultValue, Class<T> enumClass)
+		throws IllegalArgumentException
+	{
+		String value = getValue(argName, null);
+		if (value == null)
+		{
+			return defaultValue;
+		}
+		return Enum.valueOf(enumClass, value);
+	}
 }

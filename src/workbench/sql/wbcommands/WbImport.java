@@ -84,6 +84,7 @@ public class WbImport
 	public static final String ARG_USE_SAVEPOINT = "useSavepoint";
 	public static final String ARG_INSERT_START = "insertSQL";
 	public static final String ARG_ILLEGAL_DATE_NULL = "illegalDateIsNull";
+	public static final String ARG_EMPTY_FILE = "emptyFile";
 
 	private DataImporter imp;
 
@@ -106,6 +107,7 @@ public class WbImport
 		CommonArgs.addImportModeParameter(cmdLine);
 
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
+		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
 		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
@@ -269,6 +271,22 @@ public class WbImport
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
+		EmptyImportFileHandling emptyHandling = null;
+
+		try
+		{
+			emptyHandling = cmdLine.getEnumValue(ARG_EMPTY_FILE, EmptyImportFileHandling.fail);
+		}
+		catch (IllegalArgumentException iae)
+		{
+			String emptyValue = cmdLine.getValue(ARG_EMPTY_FILE);
+			LogMgr.logError("WbImport.execute()", "Invalid value '" + emptyValue + "' specified for parameter: " + ARG_EMPTY_FILE, iae);
+			String msg = ResourceMgr.getFormattedString("ErrInvalidArgValue", emptyValue, ARG_EMPTY_FILE);
+			result.addMessage(msg);
+			result.setFailure();
+			return result;
+		}
+
 		if (inputFile != null)
 		{
 			if (!inputFile.exists())
@@ -289,11 +307,12 @@ public class WbImport
 				}
 				return result;
 			}
-			if (inputFile.length() == 0)
+
+			if (inputFile.length() == 0 && emptyHandling != EmptyImportFileHandling.ignore)
 			{
 				String msg = ResourceMgr.getFormattedString("ErrImportFileEmpty", inputFile.getFullPath());
 				result.addMessage(msg);
-				if (continueOnError)
+				if (continueOnError || emptyHandling == EmptyImportFileHandling.warning)
 				{
 					LogMgr.logWarning("WbImport.execute()", msg, null);
 					result.setWarning(true);

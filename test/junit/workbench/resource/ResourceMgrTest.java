@@ -11,6 +11,8 @@
  */
 package workbench.resource;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
 import workbench.WbTestCase;
 import java.io.BufferedReader;
@@ -80,4 +82,29 @@ public class ResourceMgrTest
 		}
 	}
 
+	@Test
+	public void testQuoting()
+	{
+		Locale en = new Locale("en");
+		Locale de = new Locale("de");
+
+		ResourceBundle enBundle = ResourceMgr.getResourceBundle(en);
+		checkQuoting(enBundle);
+		ResourceBundle deBundle = ResourceMgr.getResourceBundle(de);
+		checkQuoting(deBundle);
+	}
+
+	private void checkQuoting(ResourceBundle bundle)
+	{
+		Pattern p = Pattern.compile("\\s+'\\{[0-9]+\\}'\\s+");
+		for (String key : bundle.keySet())
+		{
+			String value = bundle.getString(key);
+			Matcher m = p.matcher(value);
+			if (m.find())
+			{
+				fail("Key=" + key + " for language " + bundle.getLocale() + " uses incorrect single quotes for parameter marker");
+			}
+		}
+	}
 }

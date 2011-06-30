@@ -253,6 +253,23 @@
 					</row>
 
 					<row>
+						<entry>-emptyFile</entry>
+						<entry>
+							<para>Possible values: <literal>ignore</literal>, <literal>warning</literal>, <literal>fail</literal></para>
+							<para>
+                This parameter controls the behaviour when an empty file (i.e. with a length of zero bytes) is used
+                for the input file. <literal>ignore</literal> means the file is ignored, no warning will be shown
+                or written to the logfile. <literal>warning</literal> means the file is ignored, but a warning
+                will be shown and logged. With <literal>fail</literal> an empty file will be treated as an error
+                unless <literal>-continueOnError=true</literal> is specified.
+						</para>
+						<para>
+							The default value is <literal>fail</literal>
+						</para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-useSavepoint</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>

@@ -19,6 +19,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -55,7 +56,7 @@ public class ArgumentParserTest
 		arg.addArgument("type", StringUtil.stringToList("text,xml,sql"));
 		Collection<ArgumentValue> c = arg.getAllowedValues("type");
 		assertEquals(3, c.size());
-		
+
 		assertTrue(c.contains(new StringArgumentValue("text")));
 		assertTrue(c.contains(new StringArgumentValue("TEXT")));
 		assertTrue(c.contains(new StringArgumentValue("TeXt")));
@@ -110,7 +111,7 @@ public class ArgumentParserTest
 		assertEquals("4,2", props.get("other.thing"));
 
 	}
-	
+
 	@Test
 	public void testParser()
 	{
@@ -154,4 +155,39 @@ public class ArgumentParserTest
 		assertEquals("Wrong type", "text", arg.getValue("type"));
 	}
 
+	static enum TestEnum
+	{
+		one,
+		two,
+		three;
+	}
+
+	@Test
+	public void testEnumGet()
+	{
+		ArgumentParser arg = new ArgumentParser();
+		String argName = "enumArg";
+
+		arg.addArgument(argName, TestEnum.class);
+
+		assertTrue(arg.isAllowedValue(argName, "one"));
+		assertFalse(arg.isAllowedValue(argName, "onetwo"));
+
+		arg.parse("-enumArg=three");
+
+		TestEnum value = arg.getEnumValue(argName, TestEnum.one);
+		assertEquals(TestEnum.three, value);
+
+		boolean isError = false;
+		try
+		{
+			arg.parse("-enumArg=foo");
+			arg.getEnumValue(argName, TestEnum.one);
+		}
+		catch (IllegalArgumentException e)
+		{
+			isError = true;
+		}
+		assertTrue(isError);
+	}
 }

@@ -39,6 +39,7 @@ import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
+import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.Base64;
 import workbench.util.EncodingUtil;
@@ -3484,27 +3485,52 @@ public class WbImportTest
 	}
 
 	@Test
-	public void testEmptyFile()
+	public void testEmptyFileWithContinue()
+		throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "bad_import.txt");
-			importFile.createNewFile();
+		File importFile  = new File(this.basedir, "bad_import.txt");
+		importFile.createNewFile();
 
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueonerror=true -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueonerror=true -table=junit_test");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-		}
-		catch (Exception e)
+		if (!importFile.delete())
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
 		}
 	}
+
+	@Test
+	public void testEmptyFileCondition()
+		throws Exception
+	{
+		WbFile importFile  = new WbFile(this.basedir, "bad_import.txt");
+		importFile.createNewFile();
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -emptyFile=ignore -table=junit_test");
+		assertTrue("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
+		}
+
+		importFile.createNewFile();
+		result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueOnError=false -emptyFile=fail -table=junit_test");
+		String error = result.getMessageBuffer().toString();
+		String expected = ResourceMgr.getFormattedString("ErrImportFileEmpty", importFile.getFullPath());
+		assertFalse(result.isSuccess());
+		assertEquals(expected, error);
+
+		importFile.createNewFile();
+		result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueOnError=false -emptyFile=warning -table=junit_test");
+		error = result.getMessageBuffer().toString();
+		expected = ResourceMgr.getFormattedString("ErrImportFileEmpty", importFile.getFullPath());
+		assertTrue(result.isSuccess());
+		assertTrue(result.hasWarning());
+		assertEquals(expected, error);
+	}
+
 
 	@Test
 	public void testDependencyXmlImport()
