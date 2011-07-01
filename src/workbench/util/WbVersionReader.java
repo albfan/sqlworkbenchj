@@ -17,10 +17,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
+
 import javax.swing.Timer;
-import workbench.resource.Settings;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -70,6 +72,7 @@ public class WbVersionReader
 
 		this.readThread = new WbThread("VersionReaderThread")
 		{
+			@Override
 			public void run()
 			{
 				readBuildInfo();

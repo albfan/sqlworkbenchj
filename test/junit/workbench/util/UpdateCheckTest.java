@@ -12,8 +12,9 @@
 package workbench.util;
 
 import java.util.Date;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *

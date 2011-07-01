@@ -19,13 +19,14 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.util.SqlUtil;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -98,7 +99,7 @@ public class PostgresSequenceReader
 				buf.append(tbl.getTableName());
 				buf.append('.');
 				buf.append(col);
-				buf.append(';');
+				buf.append(";\n");
 			}
 		}
 		catch (Exception e)
@@ -112,17 +113,19 @@ public class PostgresSequenceReader
 	private void readRelatedTable(SequenceDefinition def)
 	{
 		if (def == null) return;
-		String basesql = "SELECT s.relname as sequence_name,  \n" +
-             "       n.nspname as sequence_schema,  \n" +
-             "       t.relname as related_table, " +
-						 "       a.attname as related_column \n" +
-             "  FROM pg_class s, pg_depend d, pg_class t, pg_attribute a, pg_namespace n \n" +
-             "  WHERE s.relkind     = 'S' \n" +
-             "    AND n.oid         = s.relnamespace \n" +
-             "    AND d.objid       = s.oid \n" +
-             "    AND d.refobjid    = t.oid \n" +
-             "    AND (d.refobjid, d.refobjsubid) = (a.attrelid, a.attnum)";
-	  String sql = "SELECT * FROM ( " + basesql + ") t \n" +
+		String sql =
+			"SELECT seq.relname as sequence_name,  \n" +
+			"       n.nspname as sequence_schema, \n" +
+			"       tab.relname as related_table,  \n" +
+			"       col.attname as related_column \n" +
+			"FROM pg_class seq  \n" +
+			"  JOIN pg_depend d ON d.objid = seq.oid  \n" +
+			"  JOIN pg_class tab ON d.objid = seq.oid AND d.refobjid = tab.oid  \n" +
+			"  JOIN pg_attribute col ON (d.refobjid, d.refobjsubid) = (col.attrelid, col.attnum) \n" +
+			"  JOIN pg_namespace n ON n.oid = seq.relnamespace  \n" +
+			"WHERE seq.relkind = 'S'";
+
+	  sql = "SELECT * FROM ( " + sql + ") t \n" +
 			"WHERE sequence_name = ?" ;
 
 		PreparedStatement pstmt = null;
@@ -169,6 +172,7 @@ public class PostgresSequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
+	@Override
 	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
@@ -178,6 +182,7 @@ public class PostgresSequenceReader
 	/**
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
@@ -296,11 +301,13 @@ public class PostgresSequenceReader
 		readSequenceSource(def);
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		return getSequence(owner, sequence);
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		if (sequence == null) return null;

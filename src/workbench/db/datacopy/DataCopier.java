@@ -11,7 +11,14 @@
  */
 package workbench.db.datacopy;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import workbench.db.*;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.importer.*;
@@ -22,13 +29,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.*;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A class to copy data from one database to another.
@@ -529,6 +529,7 @@ public class DataCopier
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
+			this.addError(ExceptionUtil.getDisplay(e));
 			this.importer.tableImportError();
 			throw e;
 		}
