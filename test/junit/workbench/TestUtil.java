@@ -391,14 +391,14 @@ public class TestUtil
 		try
 		{
 			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
-      xmlFact.setNamespaceAware(true);
-      DocumentBuilder builder = xmlFact.newDocumentBuilder();
+			xmlFact.setNamespaceAware(true);
+			DocumentBuilder builder = xmlFact.newDocumentBuilder();
 			InputSource inputSource = new InputSource(new StringReader(xml));
-      Document doc = builder.parse(inputSource);
+			Document doc = builder.parse(inputSource);
 			XPath xpath = XPathFactory.newInstance().newXPath();
 			if (namespaceMapping != null)
 			{
-			  xpath.setNamespaceContext(new SimpleNamespaceContext(namespaceMapping));
+				xpath.setNamespaceContext(new SimpleNamespaceContext(namespaceMapping));
 			}
 			String value = (String) xpath.evaluate(expression, doc, XPathConstants.STRING);
 			return value;
