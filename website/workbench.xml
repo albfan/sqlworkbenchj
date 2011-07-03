@@ -599,6 +599,7 @@ VALUES
       </p>
       <p>To prepare your environment to build SQL Workbench/J from source you will need to</p>
       <ul>
+        <li>Download and install a Java6 <b>JDK</b>. The Java runtime (JRE) does not contain a compiler, therefor the JDK is required.</li>
         <li>Download and install Ant 1.7 from <a href="http://ant.apache.org/">http://ant.apache.org</a></li>
         <li>
           Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,
@@ -607,10 +608,10 @@ VALUES
         </li>
         <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> unzip the distribution to ${wbroot}/etc/poi</li>
         <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
-        <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
-        <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
-        <li>Download the Jemmy library from <a href="http://java.net/projects/jemmy">http://java.net/projects/jemmy</a> (Required to run the GUI tests)</li>
-        <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
+        <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a> (Required to run the JUnit test. Not needed if you get everything from the SVN repository)</li>
+        <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a> (Required to run the JUnit test. Not needed if you get everything from the SVN repository)</li>
+        <li>Download the Jemmy library from <a href="http://java.net/projects/jemmy">http://java.net/projects/jemmy</a> (Required to run the GUI tests. Not needed if you get everything from the SVN repository)</li>
+        <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory (Not needed if you get everything from the SVN repository)</li>
       </ul>
       <p>
         If you check out the subversion repository, the junit directory will be available automatically.
