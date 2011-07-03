@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
@@ -81,13 +82,17 @@ public class DataStore
 
 	private WbConnection originalConnection;
 
-	private boolean allowUpdates = false;
-	private boolean updateHadErrors = false;
+	private boolean allowUpdates;
+	private boolean updateHadErrors;
 
-	private boolean cancelRetrieve = false;
-	private boolean cancelUpdate = false;
+	private boolean cancelRetrieve;
+	private boolean cancelUpdate;
 
 	private List<ColumnIdentifier> missingPkcolumns;
+
+	private int currentUpdateRow;
+	private int currentInsertRow;
+	private int currentDeleteRow;
 
 	/**
 	 *	Create a DataStore which is not based on a result set
@@ -1053,8 +1058,15 @@ public class DataStore
 		return (this.hasDeletedRows() || this.hasUpdatedRows());
 	}
 
-	public boolean isFiltered() { return this.filteredRows != null; }
-	public boolean isModified() { return this.modified;  }
+	public boolean isFiltered()
+	{
+		return this.filteredRows != null;
+	}
+
+	public boolean isModified()
+	{
+		return this.modified;
+	}
 
 	public boolean isUpdateable()
 	{
@@ -1830,10 +1842,6 @@ public class DataStore
 		}
 		return result;
 	}
-
-	private int currentUpdateRow = 0;
-	private int currentInsertRow = 0;
-	private int currentDeleteRow = 0;
 
 	protected void resetUpdateRowCounters()
 	{

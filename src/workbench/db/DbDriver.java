@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -19,17 +20,15 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Properties;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import workbench.db.postgres.PostgresUtil;
 import workbench.resource.ResourceMgr;
+import workbench.util.WbFile;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -49,7 +48,7 @@ public class DbDriver
 	private String driverClass;
 	private List<String> libraryList;
 	private boolean isInternal;
-
+	private boolean addToLibraryPath;
 	private String sampleUrl;
 
 	public DbDriver()
@@ -130,6 +129,56 @@ public class DbDriver
 		return createLibraryString(StringUtil.getPathSeparator());
 	}
 
+	private void addToLibraryPath()
+	{
+		if (this.libraryList == null) return;
+		Set<String> paths = new TreeSet<String>();
+		for (String file : libraryList)
+		{
+			WbFile f = buildFile(file);
+			paths.add(f.getParentFile().getAbsolutePath());
+		}
+
+		String current = System.getProperty("java.library.path");
+		String wbSaved = System.getProperty("workbench.original.library.path", null);
+
+		// saving the original path is done to ensure that the new path is not growing each time the driver is loaded.
+		if (wbSaved == null)
+		{
+			System.setProperty("workbench.original.library.path", current);
+		}
+		else
+		{
+			current = wbSaved;
+		}
+
+		StringBuilder newPath = new StringBuilder(current);
+		for (String path : paths)
+		{
+			newPath.append(File.pathSeparatorChar);
+			newPath.append(path);
+		}
+
+		System.setProperty("java.library.path", newPath.toString());
+
+		// the following hack is taken from: http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
+		// the explanation for this hack is:
+		// The Classloader has a static field (sys_paths) that contains the paths.
+		// If that field is set to null, it is initialized automatically. Therefore forcing that field to null will result
+		// into the reevaluation of the library path as soon as loadLibrary() is called and as we have changed
+		// java.library.path before nulling the field, this will result in an updated java.library.path
+		try
+		{
+			Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+			fieldSysPath.setAccessible( true );
+			fieldSysPath.set(null, null);
+		}
+		catch (Throwable nf)
+		{
+			LogMgr.logError("DbDriver.addToLibraryPath()", "Could not modify system path!", nf);
+		}
+	}
+
 	private String createLibraryString(String separator)
 	{
 		if (this.libraryList == null) return null;
@@ -194,6 +243,7 @@ public class DbDriver
 		return false;
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.getDescription();
@@ -230,17 +280,17 @@ public class DbDriver
 				int index = 0;
 				for (String fname : libraryList)
 				{
-					String realFile = Settings.getInstance().replaceLibDirKey(fname);
-					File f = new File(realFile);
-					if (f.getParentFile() == null)
-					{
-						f = new File(Settings.getInstance().getLibDir(), realFile);
-					}
+					File f = buildFile(fname);
 					url[index] = f.toURI().toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
 					index ++;
 				}
 				classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());
+			}
+
+			if (addToLibraryPath)
+			{
+				addToLibraryPath();
 			}
 
 			Class drvClass = null;
@@ -289,6 +339,17 @@ public class DbDriver
 			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class: " + this.driverClass, e);
 			throw new Exception("Could not load driver class " + this.driverClass, e);
 		}
+	}
+
+	private WbFile buildFile(String fname)
+	{
+		String realFile = Settings.getInstance().replaceLibDirKey(fname);
+		WbFile f = new WbFile(realFile);
+		if (f.getParentFile() == null)
+		{
+			f = new WbFile(Settings.getInstance().getLibDir(), realFile);
+		}
+		return f;
 	}
 
 	public DbDriver createCopy()
@@ -478,6 +539,7 @@ public class DbDriver
 		this.driverClassInstance.connect(url, props);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
@@ -507,11 +569,13 @@ public class DbDriver
 		return b.toString();
 	}
 
+	@Override
 	public int hashCode()
 	{
 		return getId().hashCode();
 	}
 
+	@Override
 	public int compareTo(DbDriver o)
 	{
 		return getId().compareTo(o.getId());
