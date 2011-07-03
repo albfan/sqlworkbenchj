@@ -19,7 +19,6 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import workbench.resource.ResourceMgr;
 
 /**
  *
