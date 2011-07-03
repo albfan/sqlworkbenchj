@@ -28,34 +28,26 @@ public class DdlCommandTest
 
 	public DdlCommandTest()
 	{
-		super("ResourceMgrTest");
+		super("DdlCommandTest");
 	}
 
 	@Test
 	public void testIgnoreDropErrors()
+		throws Exception
 	{
-		try
-		{
-			TestUtil util = new TestUtil("ignoreDrop");
-			StatementRunner runner = util.createConnectedStatementRunner();
-			String sql = "drop table does_not_exist";
-			runner.setIgnoreDropErrors(true);
-			runner.runStatement(sql);
-			StatementRunnerResult result = runner.getResult();
-			assertTrue(result.isSuccess());
+		TestUtil util = getTestUtil();
+		StatementRunner runner = util.createConnectedStatementRunner();
+		String sql = "drop table does_not_exist";
+		runner.setIgnoreDropErrors(true);
+		runner.runStatement(sql);
+		StatementRunnerResult result = runner.getResult();
+		assertTrue(result.isSuccess());
 
-			runner.setIgnoreDropErrors(false);
-			runner.setUseSavepoint(true);
-			runner.runStatement(sql);
-			result = runner.getResult();
-			assertFalse(result.isSuccess());
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		runner.setIgnoreDropErrors(false);
+		runner.setUseSavepoint(true);
+		runner.runStatement(sql);
+		result = runner.getResult();
+		assertFalse(result.isSuccess());
 	}
 
 
