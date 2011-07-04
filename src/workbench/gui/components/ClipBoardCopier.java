@@ -249,7 +249,7 @@ public class ClipBoardCopier
 		}
 
 		// Now check if the selected columns are different to the key columns.
-		// If only key columns are selected the creating an UPDATE statement does not make sense.
+		// If only key columns are selected then creating an UPDATE statement does not make sense.
 		if (useUpdate)
 		{
 			List<ColumnIdentifier> keyColumns = new ArrayList<ColumnIdentifier>();
