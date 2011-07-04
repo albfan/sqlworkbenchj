@@ -30,6 +30,7 @@ import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -66,6 +67,7 @@ public class DriverEditorDialog
 		// dialog), so we're trying to make this window visible
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				toFront();
@@ -76,7 +78,7 @@ public class DriverEditorDialog
 
 	private void initComponents()
 	{
-		driverListPanel = new workbench.gui.profiles.DriverlistEditorPanel();
+		driverListPanel = new DriverlistEditorPanel();
 		buttonPanel = new JPanel();
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
@@ -87,12 +89,12 @@ public class DriverEditorDialog
 		setName("DriverEditorDialog");
 		addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowClosing(WindowEvent evt)
 			{
 				closeDialog(evt);
 			}
 		});
-
 
 		driverListPanel.setBorder(BorderFactory.createEtchedBorder());
 		getContentPane().add(driverListPanel, BorderLayout.CENTER);
@@ -115,6 +117,7 @@ public class DriverEditorDialog
 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == okButton)
@@ -147,17 +150,23 @@ public class DriverEditorDialog
 	{
 		try
 		{
-			this.driverListPanel.saveItem();
-			this.cancelled = false;
-			this.closeDialog();
+			if (driverListPanel.canChangeSelection())
+			{
+				this.driverListPanel.saveItem();
+				this.cancelled = false;
+				this.closeDialog();
+			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("DriverEditorDialog.okButton()", "Error closing dialog", e);
 		}
 	}
 
-  public boolean isCancelled() { return this.cancelled; }
+	public boolean isCancelled()
+	{
+		return this.cancelled;
+	}
 
 	private void closeDialog(WindowEvent evt)
 	{
@@ -179,6 +188,7 @@ public class DriverEditorDialog
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				DriverEditorDialog d = new DriverEditorDialog(parentFrame);

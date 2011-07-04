@@ -33,14 +33,14 @@ import workbench.resource.ResourceMgr;
  * <br/>
  * @author  Thomas Kellerer
  */
-public class BlobColumnPanel 
+public class BlobColumnPanel
 	extends JPanel
 {
-	private static final int BUTTON_WIDTH = 16;
+	private final int BUTTON_WIDTH = 16;
 	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
 	private Insets insets = ToolTipRenderer.getDefaultInsets();
-	
+
 	public BlobColumnPanel()
 	{
 		super();
@@ -64,12 +64,12 @@ public class BlobColumnPanel
 		c.fill = GridBagConstraints.NONE;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		add(label, c);
-		
+
 		c.gridx = 1;
 		c.fill = GridBagConstraints.NONE;
 		c.weightx = 0;
 		add(openButton, c);
-		
+
 		openButton.setVisible(true);
 		this.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
 	}
@@ -80,7 +80,7 @@ public class BlobColumnPanel
 		return insets;
 	}
 
-	
+
 	public int getButtonWidth()
 	{
 		if (openButton != null && openButton.isVisible())
@@ -100,38 +100,38 @@ public class BlobColumnPanel
 			this.label.setText("(BLOB)");
 		}
 	}
-	
+
 	public void addActionListener(ActionListener l)
 	{
 		if (openButton != null) openButton.addActionListener(l);
 	}
-	
+
 	public void removeActionListener(ActionListener l)
 	{
 		if (openButton != null) openButton.removeActionListener(l);
 	}
-	
+
 	public void setFont(Font f)
 	{
 		super.setFont(f);
 		if (label != null) label.setFont(f);
 	}
-	
-	public String getLabel() 
+
+	public String getLabel()
 	{
 		return label.getText();
 	}
-	
+
 	public void setBackground(Color c)
 	{
 		super.setBackground(c);
 		if (label != null) label.setBackground(c);
 	}
-	
+
 	public void setForeground(Color c)
 	{
 		super.setForeground(c);
 		if (label != null) label.setForeground(c);
 	}
-	
+
 }

@@ -33,12 +33,12 @@ import workbench.util.SqlUtil;
 public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String TABLE_SQL =
-	         "SELECT constraint_name, search_condition \n" +
-           "FROM all_constraints cons   \n" +
-           "WHERE constraint_type = 'C' \n" +
-           " and owner = ? \n" +
-           " and table_name = ?  \n";
+	private final String TABLE_SQL =
+		 "SELECT constraint_name, search_condition \n" +
+		 "FROM all_constraints cons   \n" +
+		 "WHERE constraint_type = 'C' \n" +
+		 " and owner = ? \n" +
+		 " and table_name = ?  \n";
 
 	@Override
 	public int getIndexForSchemaParameter()

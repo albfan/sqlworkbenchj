@@ -612,6 +612,12 @@ public class OracleMetadata
 		return result;
 	}
 
+	/**
+	 * Checks if the property "remarksReporting" is enabled for the given connection.
+	 *
+	 * @param con the connection to test
+	 * @return true if the driver returns comments for tables and columns
+	 */
 	public static boolean remarksEnabled(WbConnection con)
 	{
 		if (con == null) return false;
@@ -632,9 +638,8 @@ public class OracleMetadata
 		result.append('(');
 		result.append(size);
 
-		// Only apply this logic vor VARCHAR columns
-		// NVARCHAR (which might have been reported as type == VARCHAR) does not
-		// allow Byte/Char semantics
+		// Only apply this logic on VARCHAR columns
+		// NVARCHAR (which might have been reported as type == VARCHAR) does not allow Byte/Char semantics
 		if (type.startsWith("VARCHAR"))
 		{
 			if (alwaysShowCharSemantics || semantics != defaultLengthSemantics)

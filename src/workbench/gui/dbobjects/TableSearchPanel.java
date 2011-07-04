@@ -30,7 +30,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -66,6 +65,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.FilteredProperties;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
@@ -301,16 +301,24 @@ public class TableSearchPanel
 		}
 		else
 		{
-			this.statusInfo.setText(this.fixedStatusText + table);
+			StringBuilder info = new StringBuilder(fixedStatusText.length() + 25);
+			info.append(this.fixedStatusText); // the text already contains a trailing space
+			info.append(table);
+			info.append(" (");
+			info.append(NumberStringCache.getNumberString(currentObject));
+			info.append('/');
+			info.append(NumberStringCache.getNumberString(totalObjects));
+			info.append(')');
+			this.statusInfo.setText(info.toString());
 			this.sqlDisplay.appendLine(sql + ";");
 		}
 		this.sqlDisplay.appendLine("\n\n");
 	}
 
 	@Override
-	public void setStatusText(String aStatustext)
+	public void setStatusText(String statusText)
 	{
-		this.statusInfo.setText(aStatustext);
+		this.statusInfo.setText(statusText);
 	}
 
 	public void setConnection(WbConnection connection)
@@ -348,6 +356,7 @@ public class TableSearchPanel
 		this.resultPanel = new JPanel(new GridBagLayout());
     this.resultScrollPane.setViewportView(resultPanel);
 		this.sqlDisplay.setText("");
+		this.setStatusText("");
 	}
 
 	public void searchData()
@@ -472,12 +481,14 @@ public class TableSearchPanel
 		}
 	}
 
+	@Override
 	public void searchEnded()
 	{
 		fireDbExecEnd();
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				// insert a dummy panel at the end which will move
@@ -523,6 +534,7 @@ public class TableSearchPanel
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					searchData();
@@ -552,6 +564,7 @@ public class TableSearchPanel
 			super(view);
 		}
 
+		@Override
 		public Dimension getPreferredSize()
 		{
 			Dimension d = super.getPreferredSize();

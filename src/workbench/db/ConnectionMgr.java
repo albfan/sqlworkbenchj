@@ -201,6 +201,18 @@ public class ConnectionMgr
 		}
 	}
 
+	public boolean isNameUsed(String aName)
+	{
+		for (DbDriver db : drivers)
+		{
+			if (db.getName().equals(aName))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public DbDriver findDriverByName(String drvClassName, String aName)
 	{
 		DbDriver firstMatch = null;
@@ -597,7 +609,7 @@ public class ConnectionMgr
 			for (int i=0; i < templates.size(); i++)
 			{
 				DbDriver drv = templates.get(i);
-				if (!this.drivers.contains(drv))
+				if (!this.isNameUsed(drv.getName()))
 				{
 					this.drivers.add(drv);
 				}

@@ -44,6 +44,7 @@ public class ViewLogfileAction
 		this.setEnabled(logFile != null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		final WbFile logFile = LogMgr.getLogfile();
@@ -51,6 +52,7 @@ public class ViewLogfileAction
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (viewer == null)

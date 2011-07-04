@@ -34,7 +34,12 @@ import workbench.util.StringUtil;
  * An implementation of the IndexReader interface for Oracle.
  *
  * This class uses its own SQL Statement to retrieve the index list from the database
- * as Oracle's JDBC driver runs an ANALYZE before actually returning the index information
+ * as Oracle's JDBC driver runs an ANALYZE before actually returning the index information (which is awfully slow).
+ *
+ * The use of the JDBC (i.e. driver's) function can be enabled by setting the workbench property:
+ * <tt>workbench.db.oracle.indexlist.usejdbc=true</tt>
+ *
+ * Indexes that are returned with the type "DOMAIN" are always retrieve using DBMS_METADATA.GET_DDL
  *
  * @author Thomas Kellerer
  */
@@ -107,7 +112,11 @@ public class OracleIndexReader
 			"       i.leaf_blocks as pages, \n" +
 			"       null as filter_condition \n" +
 			"FROM all_indexes i" +
-			"  JOIN all_ind_columns c ON i.index_name = c.index_name AND i.table_owner = c.table_owner AND i.table_name = c.table_name AND i.owner = c.index_owner \n" +
+			"  JOIN all_ind_columns c " +
+			"       ON i.index_name = c.index_name " +
+			"          AND i.table_owner = c.table_owner " +
+			"          AND i.table_name = c.table_name " +
+			"          AND i.owner = c.index_owner \n" +
 			"WHERE i.table_name = ? \n");
 
 		if (tbl.getSchema() != null)
@@ -209,6 +218,7 @@ public class OracleIndexReader
 			}
 			catch (SQLException e)
 			{
+				LogMgr.logWarning("OracleIndexReader.getIndexSource()", "Could not retrieve source using dbms_meta", e);
 				return getExtendedIndexSource(table, definition, tableNameToUse, "");
 			}
 		}
@@ -235,8 +245,11 @@ public class OracleIndexReader
 			if (rs.next())
 			{
 				source = rs.getString(1);
-				if (source != null) source = source.trim();
-				source += ";\n";
+				if (source != null)
+				{
+					source = OracleUtil.cleanupQuotedIdentifiers(source);
+					source += ";\n";
+				}
 			}
 		}
 		catch (SQLException e)

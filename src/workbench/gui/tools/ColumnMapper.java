@@ -40,9 +40,9 @@ import workbench.util.StringUtil;
 
 /**
  * A panel to map columns from one table definition to another.
- * Source and target are populated with a list of ColumnIdentifiers. 
+ * Source and target are populated with a list of ColumnIdentifiers.
  * Identifiers that have the same name are automatically "mapped".
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class ColumnMapper
@@ -53,7 +53,7 @@ public class ColumnMapper
 	private List<ColumnIdentifier> targetColumns;
 	private ColumnMapRow[] mapping;
 	protected JComboBox sourceDropDown;
-	private static final MapDataModel EMPTY_DATA_MODEL = new MapDataModel(new ColumnMapRow[0]);
+	private final MapDataModel EMPTY_DATA_MODEL = new MapDataModel(new ColumnMapRow[0]);
 	private MapDataModel data;
 
 	private boolean allowTargetEditing = false;
@@ -87,8 +87,8 @@ public class ColumnMapper
 		col.setMaxWidth(width + addWidth);
 		//col.setPreferredWidth(width);
 	}
-	
-	
+
+
 	public void resetData()
 	{
 		if (this.columnDisplay.getModel() != EMPTY_DATA_MODEL)
@@ -105,6 +105,7 @@ public class ColumnMapper
 		// then it may not be edited even if source editing is allowed
 		JTable t = new JTable()
 		{
+			@Override
 			public TableCellEditor getCellEditor(int row, int column)
 			{
 				TableCellEditor editor = super.getCellEditor(row, column);
@@ -190,7 +191,7 @@ public class ColumnMapper
 		}
 		return null;
 	}
-	
+
 	public void setAllowSourceEditing(boolean aFlag)
 	{
 		this.allowSourceEditing = aFlag;
@@ -238,7 +239,7 @@ public class ColumnMapper
 	}
 
 	/**
-	 * Return the columns from the input file as they should 
+	 * Return the columns from the input file as they should
 	 * be specified for the WbImport command
 	 */
 	public List<ColumnIdentifier> getMappingForImport()
@@ -251,7 +252,7 @@ public class ColumnMapper
 			ColumnIdentifier col = this.sourceColumns.get(i);
 
 			ColumnIdentifier target = getTargetColumn(col);
-			
+
 			if (target == null)
 			{
 				result.add(skipId);
@@ -263,7 +264,7 @@ public class ColumnMapper
 		}
 		return result;
 	}
-	
+
 	protected MappingDefinition getMapping()
 	{
 		int count = this.mapping.length;
@@ -284,7 +285,7 @@ public class ColumnMapper
 		def.sourceColumns = new ColumnIdentifier[realCount];
 		def.targetColumns = new ColumnIdentifier[realCount];
 		def.hasSkippedColumns = (realCount != count);
-		
+
 		int index = 0;
 		for (int i=0; i < count; i++)
 		{
@@ -326,6 +327,7 @@ class MapDataModel
 		this.data = data;
 	}
 
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		if (columnIndex == 2)
@@ -333,11 +335,13 @@ class MapDataModel
 		return ColumnIdentifier.class;
 	}
 
+	@Override
 	public int getColumnCount()
 	{
 		return 3;
 	}
 
+	@Override
 	public String getColumnName(int columnIndex)
 	{
 		switch (columnIndex)
@@ -353,11 +357,13 @@ class MapDataModel
 		}
 	}
 
+	@Override
 	public int getRowCount()
 	{
 		return this.data.length;
 	}
 
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		ColumnMapRow row = this.data[rowIndex];
@@ -396,6 +402,7 @@ class MapDataModel
 		this.allowTargetEditing = flag;
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		if (rowIndex < 0 || rowIndex > this.getRowCount() -1) return false;
@@ -410,6 +417,7 @@ class MapDataModel
 		return true;
 	}
 
+	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		ColumnMapRow row = this.data[rowIndex];
@@ -487,9 +495,17 @@ class ColumnMapRow
 		this.source = o;
 	}
 
-	public ColumnIdentifier getSource() { return this.source; }
-	public ColumnIdentifier getTarget() { return this.target; }
+	public ColumnIdentifier getSource()
+	{
+		return this.source;
+	}
 
+	public ColumnIdentifier getTarget()
+	{
+		return this.target;
+	}
+
+	@Override
 	public String toString()
 	{
 		return "Mapping " + source + " -> " + target;
@@ -500,6 +516,7 @@ class SkipColumnIndicator
 {
 	private final String display = ResourceMgr.getString("LblDPDoNotCopyColumns");
 
+	@Override
 	public String toString()
 	{
 		return display;

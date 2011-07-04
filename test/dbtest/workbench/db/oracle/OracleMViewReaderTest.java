@@ -71,7 +71,7 @@ public class OracleMViewReaderTest
 			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
 			"  ENABLE QUERY REWRITE\n" +
 			"AS\n" +
-			"SELECT \"PERSON\".\"ID\" \"ID\",\"PERSON\".\"NAME\" \"NAME\" FROM \"PERSON\" \"PERSON\";";
+			"SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
 		assertEquals(expected, source.trim());
 	}
 
@@ -100,7 +100,7 @@ public class OracleMViewReaderTest
 			"  REFRESH FORCE ON COMMIT WITH PRIMARY KEY\n" +
 			"  DISABLE QUERY REWRITE\n" +
 			"AS\n" +
-			"SELECT \"PERSON\".\"ID\" \"ID\",\"PERSON\".\"NAME\" \"NAME\" FROM \"PERSON\" \"PERSON\";";
+			"SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
 		assertEquals(expected, source.trim());
 	}
 

@@ -24,6 +24,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to re-compile Oracle objects like stored procedures, packages.
  *
  * @author  Thomas Kellerer
  */
@@ -40,6 +41,13 @@ public class OracleObjectCompiler
 		this.dbConnection = conn;
 	}
 
+	/**
+	 * Recompile the given object.
+	 *
+	 * @param object the object to recompile
+	 * @return the error message if the compile was not successful
+	 *         null if the compile was ok.
+	 */
 	public String compileObject(DbObject object)
 	{
 		String sql = createCompileStatement(object);
@@ -72,7 +80,7 @@ public class OracleObjectCompiler
 		}
 	}
 
-	public String createCompileStatement(DbObject object)
+	String createCompileStatement(DbObject object)
 	{
 		StringBuilder sql = new StringBuilder(50);
 		sql.append("ALTER ");

@@ -250,7 +250,7 @@ public class OracleMViewReader
 				}
 				else
 				{
-					result = result.trim();
+					result = OracleUtil.cleanupQuotedIdentifiers(result);
 				}
 
 				if (!result.endsWith(";"))
@@ -304,7 +304,10 @@ public class OracleMViewReader
 			if (rs.next())
 			{
 				source = rs.getString(1);
-				if (source != null) source = source.trim();
+				if (source != null)
+				{
+					source = OracleUtil.cleanupQuotedIdentifiers(source);
+				}
 				source += ";\n";
 			}
 		}

@@ -152,19 +152,20 @@ public class LexerBasedParserTest
 	@Test
 	public void testPatterns()
 	{
-		assertTrue(LexerBasedParser.isMultiLine("\n\n"));
-		assertTrue(LexerBasedParser.isMultiLine("\r\n\r\n"));
-		assertFalse(LexerBasedParser.isMultiLine(" \r\n "));
-		assertFalse(LexerBasedParser.isMultiLine("\r\n"));
-		assertTrue(LexerBasedParser.isMultiLine(" \r\n\t\r\n "));
-		assertTrue(LexerBasedParser.isMultiLine(" \r\n\t  \r\n\t"));
+		LexerBasedParser parser = new LexerBasedParser();
+		assertTrue(parser.isMultiLine("\n\n"));
+		assertTrue(parser.isMultiLine("\r\n\r\n"));
+		assertFalse(parser.isMultiLine(" \r\n "));
+		assertFalse(parser.isMultiLine("\r\n"));
+		assertTrue(parser.isMultiLine(" \r\n\t\r\n "));
+		assertTrue(parser.isMultiLine(" \r\n\t  \r\n\t"));
 
-		assertTrue(LexerBasedParser.isLineBreak("\n"));
-		assertTrue(LexerBasedParser.isLineBreak(" \n "));
-		assertTrue(LexerBasedParser.isLineBreak("\r\n"));
-		assertTrue(LexerBasedParser.isLineBreak(" \r\n "));
-		assertTrue(LexerBasedParser.isLineBreak("\r\n  "));
-		assertTrue(LexerBasedParser.isLineBreak("           \t\r\n\t"));
+		assertTrue(parser.isLineBreak("\n"));
+		assertTrue(parser.isLineBreak(" \n "));
+		assertTrue(parser.isLineBreak("\r\n"));
+		assertTrue(parser.isLineBreak(" \r\n "));
+		assertTrue(parser.isLineBreak("\r\n  "));
+		assertTrue(parser.isLineBreak("           \t\r\n\t"));
 	}
 
 	@Test

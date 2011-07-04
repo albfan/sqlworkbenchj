@@ -17,6 +17,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
@@ -26,6 +28,9 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
+import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.Validator;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +38,7 @@ import workbench.resource.ResourceMgr;
  */
 public class DriverlistEditorPanel
 	extends JPanel
-	implements FileActions
+	implements FileActions, Validator, ListSelectionControl
 {
 	private DriverListModel model;
 	private JToolBar toolbar;
@@ -66,13 +71,16 @@ public class DriverlistEditorPanel
 	private void initComponents()
 	{
 		driverList = new JList();
+		driverList.setSelectionModel(new VetoableListSelectionModel(this));
 		driverEditor = new DriverEditorPanel();
+		driverEditor.setValidator(this);
 
 		setLayout(new BorderLayout());
 
-		driverList.addListSelectionListener(new javax.swing.event.ListSelectionListener()
+		driverList.addListSelectionListener(new ListSelectionListener()
 		{
-			public void valueChanged(javax.swing.event.ListSelectionEvent evt)
+			@Override
+			public void valueChanged(ListSelectionEvent evt)
 			{
 				driverListValueChanged(evt);
 			}
@@ -88,10 +96,9 @@ public class DriverlistEditorPanel
 		add(toolbar, BorderLayout.NORTH);
 		add(scroll, BorderLayout.WEST);
 		add(driverEditor, BorderLayout.CENTER);
-
 	}
 
-	private void driverListValueChanged(javax.swing.event.ListSelectionEvent evt)
+	private void driverListValueChanged(ListSelectionEvent evt)
 	{
 		if (evt.getSource() == this.driverList)
 		{
@@ -140,7 +147,7 @@ public class DriverlistEditorPanel
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("DriverListEditorPanel.selectDriver()", "Error selecting item", e);
 			driverList.setSelectedIndex(0);
 		}
 	}
@@ -148,6 +155,7 @@ public class DriverlistEditorPanel
 	/**
 	 *	Remove an item from the listmodel
 	 */
+	@Override
 	public void deleteItem() throws Exception
 	{
 		int index = this.driverList.getSelectedIndex();
@@ -166,6 +174,7 @@ public class DriverlistEditorPanel
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
 	 */
+	@Override
 	public void newItem(boolean copyCurrent) throws Exception
 	{
 		DbDriver drv;
@@ -183,12 +192,44 @@ public class DriverlistEditorPanel
 		this.driverList.updateUI();
 	}
 
-	public void saveItem() throws Exception
+	@Override
+	public void saveItem()
+		throws Exception
 	{
-		ConnectionMgr conn = ConnectionMgr.getInstance();
-		this.driverEditor.updateDriver();
-		conn.setDrivers(this.model.getValues());
-		conn.saveDrivers();
+		// driverEditor.validateName() will call this.isValid() in turn, but will also display an error message if needed
+		if (driverEditor.validateName())
+		{
+			ConnectionMgr conn = ConnectionMgr.getInstance();
+			this.driverEditor.updateDriver();
+			conn.setDrivers(this.model.getValues());
+			conn.saveDrivers();
+		}
+	}
+
+	@Override
+	public boolean isValid(String name)
+	{
+		if (name == null) return false;
+
+		int selected = driverList.getSelectedIndex();
+		int count = model.getValues().size();
+		for (int index = 0; index < count; index ++)
+		{
+			if (index != selected)
+			{
+				if (name.equalsIgnoreCase(model.getDriver(index).getName()))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean canChangeSelection()
+	{
+		return driverEditor.validateName();
 	}
 
 }

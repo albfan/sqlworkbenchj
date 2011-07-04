@@ -46,8 +46,8 @@ public class LexerBasedParser
 	private boolean checkOracleInclude;
 	private boolean calledOnce;
 
-	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
-	private static Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
+	private Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
+	private Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
@@ -204,12 +204,12 @@ public class LexerBasedParser
 		}
 	}
 
-	static boolean isLineBreak(String text)
+	boolean isLineBreak(String text)
 	{
 		return SIMPLE_LINE_BREAK.matcher(text).matches();
 	}
 
-	static boolean isMultiLine(String text)
+	boolean isMultiLine(String text)
 	{
 		return MULTI_LINE_PATTERN.matcher(text).matches();
 	}

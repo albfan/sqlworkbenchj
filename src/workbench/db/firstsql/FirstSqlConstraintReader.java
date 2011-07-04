@@ -35,13 +35,14 @@ import workbench.util.SqlUtil;
 public class FirstSqlConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String SQL = "select ch.check_clause, ch.constraint_name \n" +
-             "from definition_schema.syschecks ch,  \n" +
-             "     definition_schema.sysconstraints cons \n" +
-             "where cons.constraint_type = 'check' \n" +
-             "  and cons.constraint_name = ch.constraint_name" +
-             "  and cons.table_schema = ? \n" +
-             "  and cons.table_name = ? ";
+	private final String SQL =
+		"select ch.check_clause, ch.constraint_name \n" +
+		"from definition_schema.syschecks ch,  \n" +
+		"     definition_schema.sysconstraints cons \n" +
+		"where cons.constraint_type = 'check' \n" +
+		"  and cons.constraint_name = ch.constraint_name" +
+		"  and cons.table_schema = ? \n" +
+		"  and cons.table_name = ? ";
 
 
 	@Override

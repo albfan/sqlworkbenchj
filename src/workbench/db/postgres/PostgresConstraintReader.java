@@ -22,7 +22,7 @@ import workbench.db.AbstractConstraintReader;
 public class PostgresConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String TABLE_SQL =
+	private final String TABLE_SQL =
 				"select rel.conname,  \n" +
 				"       case  \n" +
 				"         when rel.consrc is null then pg_get_constraintdef(rel.oid) \n" +

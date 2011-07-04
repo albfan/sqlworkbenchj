@@ -48,6 +48,7 @@ public class StringPropertyEditor
 		this.addMouseListener(new TextComponentMouseListener());
 	}
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.setSourceObject(aSource, aProperty, null);
@@ -99,6 +100,7 @@ public class StringPropertyEditor
 		this.getDocument().addDocumentListener(this);
 	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -117,11 +119,29 @@ public class StringPropertyEditor
 		}
 	}
 
-	public boolean isChanged() { return this.changed; }
+	@Override
+	public boolean isChanged()
+	{
+		return this.changed;
+	}
 
-	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
-	public void insertUpdate(DocumentEvent e) { documentChanged(); }
-	public void removeUpdate(DocumentEvent e) { documentChanged(); }
+	@Override
+	public void changedUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
 
 	private void documentChanged()
 	{
@@ -132,6 +152,7 @@ public class StringPropertyEditor
 		}
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				firePropertyChange(propName, null, getText());
@@ -139,23 +160,26 @@ public class StringPropertyEditor
 		});
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
 
-	/** Invoked when a component gains the keyboard focus.
+	/**
+	 * Invoked when a component gains the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusGained(FocusEvent e)
 	{
-		//System.out.println(e.getOppositeComponent().getClass().getName());
 		// When the popup menu for copy & paste is used, the oppositeComponent()
 		// is the RootPane. In this case we don't want to chage the selection
 		if (!(e.getOppositeComponent() instanceof javax.swing.JRootPane))
@@ -164,9 +188,11 @@ public class StringPropertyEditor
 		}
 	}
 
-	/** Invoked when a component loses the keyboard focus.
+	/**
+	 * Invoked when a component loses the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		if (!this.immediateUpdate) this.applyChanges();

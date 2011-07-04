@@ -22,22 +22,25 @@ import workbench.db.AbstractConstraintReader;
 public class Db2ConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String HOST_TABLE_SQL = "select checkname, '('||checkcondition||')' \n" +
-					 "from  sysibm.syschecks \n" +
-					 "where tbname = ? " +
-					 "and tbowner = ?";
+	private final String HOST_TABLE_SQL =
+		"select checkname, '('||checkcondition||')' \n" +
+		"from  sysibm.syschecks \n" +
+		"where tbname = ? " +
+		"  and tbowner = ?";
 
-	private static final String AS400_TABLE_SQL = "select chk.constraint_name, '('||chk.check_clause||')' \n" +
-					 "from  qsys2.syschkcst chk \n" +
-					 "  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
-					 " where cons.table_name = ? " +
-					 " and cons.table_schema = ?";
+	private final String AS400_TABLE_SQL =
+		"select chk.constraint_name, '('||chk.check_clause||')' \n" +
+		"from  qsys2.syschkcst chk \n" +
+		"  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
+		"where cons.table_name = ? " +
+		"  and cons.table_schema = ?";
 
-	private static final String LUW_TABLE_SQL = "select cons.constname, '('||cons.text||')' \n" +
-					 "from syscat.checks cons \n" +
-					 "where type <> 'S' " +
-					 "AND tabname = ? " +
-					 "and tabschema = ?";
+	private final String LUW_TABLE_SQL =
+		"select cons.constname, '('||cons.text||')' \n" +
+		"from syscat.checks cons \n" +
+		"where type <> 'S' " +
+		"  AND tabname = ? " +
+		"  and tabschema = ?";
 
 	private final boolean isHostDB2;
 	private final boolean isAS400; // aka iSeries

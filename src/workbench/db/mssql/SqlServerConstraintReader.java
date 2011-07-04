@@ -21,15 +21,15 @@ import workbench.db.AbstractConstraintReader;
 public class SqlServerConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String TABLE_SQL =
-					 "select cons.name, c.text \n" +
-           "from sysobjects cons, \n" +
-           "     syscomments c, \n" +
-           "     sysobjects tab \n" +
-           "where cons.xtype = 'C' \n" +
-           "and   cons.id = c.id \n" +
-           "and   cons.parent_obj = tab.id \n" +
-           "and   tab.name = ? \n";
+	private final String TABLE_SQL =
+		 "select cons.name, c.text \n" +
+		 "from sysobjects cons, \n" +
+		 "     syscomments c, \n" +
+		 "     sysobjects tab \n" +
+		 "where cons.xtype = 'C' \n" +
+		 "and   cons.id = c.id \n" +
+		 "and   cons.parent_obj = tab.id \n" +
+		 "and   tab.name = ? \n";
 
 	@Override
 	public String getColumnConstraintSql()

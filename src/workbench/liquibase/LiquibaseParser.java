@@ -43,7 +43,7 @@ public class LiquibaseParser
 	private List<ChangeSetIdentifier> idsToRead;
 
 	private boolean captureContent;
-	private static final String CHANGESET_TAG = "changeSet";
+	private final String CHANGESET_TAG = "changeSet";
 	private StringBuilder currentContent;
 	private boolean currentSplitValue;
 
