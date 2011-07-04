@@ -314,13 +314,17 @@ public class TableIdentifier
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
 			String catalogToUse = getCatalogToUse(conn);
+			boolean hasCatalog = false;
 			if (StringUtil.isNonBlank(catalogToUse))
 			{
+				hasCatalog = true;
 				result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
 				result.append('.');
 			}
 
-			String schemaToUse = getSchemaToUse(conn);
+			// if a catalog is present we always need the schema as the combination catalog.tablename is not valid
+			// (this is mainly needed for SQL Server)
+			String schemaToUse = hasCatalog ? this.schema : getSchemaToUse(conn);
 			if (StringUtil.isNonBlank(schemaToUse))
 			{
 				result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
