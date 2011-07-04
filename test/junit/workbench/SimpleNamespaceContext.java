@@ -25,12 +25,12 @@ import javax.xml.namespace.NamespaceContext;
  *
  * @author Thomas Kellerer
  */
-public class SimpleNamespaceContext 
+public class SimpleNamespaceContext
 	implements NamespaceContext
 {
 
 	private Map<String, String> namespaceMap;
-	
+
 	public SimpleNamespaceContext(Map<String, String> nameMap)
 	{
 		namespaceMap = new HashMap<String, String>(nameMap);
@@ -38,12 +38,14 @@ public class SimpleNamespaceContext
 		namespaceMap.put(XMLConstants.XMLNS_ATTRIBUTE, XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
 	}
 
+	@Override
 	public String getNamespaceURI(String prefix)
 	{
 		String uri = namespaceMap.get(prefix);
 		return (uri == null ? XMLConstants.XML_NS_URI : uri);
 	}
 
+	@Override
 	public String getPrefix(String namespaceURI)
 	{
 		if (namespaceURI == null) return null;
@@ -54,7 +56,8 @@ public class SimpleNamespaceContext
 		}
 		return null;
 	}
-	
+
+	@Override
 	public Iterator getPrefixes(String namespaceURI)
 	{
 		List<String> prefixes = new ArrayList<String>();
@@ -68,5 +71,5 @@ public class SimpleNamespaceContext
 		}
 		return prefixes.iterator();
 	}
-	
+
 }
