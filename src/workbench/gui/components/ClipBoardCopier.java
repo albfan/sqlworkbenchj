@@ -33,7 +33,6 @@ import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
-import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -261,7 +260,8 @@ public class ClipBoardCopier
 					keyColumns.add(col);
 				}
 			}
-			if (columnsToInclude.size() == keyColumns.size() && columnsToInclude.containsAll(keyColumns))
+
+			if (columnsToInclude != null && columnsToInclude.size() == keyColumns.size() && columnsToInclude.containsAll(keyColumns))
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE statement with only key columns!", null);
 				WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
