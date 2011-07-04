@@ -52,7 +52,6 @@ import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
