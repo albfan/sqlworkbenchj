@@ -13,16 +13,18 @@ package workbench.db.postgres;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.WbTestCase;
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
-import static org.junit.Assert.*;
 
 /**
  *

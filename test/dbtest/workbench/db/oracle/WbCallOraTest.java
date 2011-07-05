@@ -12,9 +12,12 @@ package workbench.db.oracle;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ProcedureDefinition;
@@ -26,7 +29,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.sql.wbcommands.WbCall;
 import workbench.storage.DataStore;
-import static org.junit.Assert.*;
 
 /**
  *

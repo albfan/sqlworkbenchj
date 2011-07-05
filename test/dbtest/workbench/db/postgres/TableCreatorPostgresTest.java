@@ -11,28 +11,34 @@
  */
 package workbench.db.postgres;
 
-import org.junit.AfterClass;
-import workbench.db.*;
-import java.util.ArrayList;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
+import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
+import workbench.db.TableCreator;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class PGTableCreatorTest
+public class TableCreatorPostgresTest
 	extends WbTestCase
 {
 	private static final String TEST_ID = "pgtablecreator";
 
-	public PGTableCreatorTest()
+	public TableCreatorPostgresTest()
 	{
 		super("TableCreatorTest");
 	}
