@@ -399,7 +399,8 @@ public class SqlCommand
 			return;
 		}
 
-		boolean firstResultProcessed = false;
+		// if no result was passed, we need to call getResultSet() immediately
+		boolean firstResultProcessed = (firstResult == null);
 
 		ResultSet rs = null;
 		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : false);
