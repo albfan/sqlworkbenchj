@@ -1,5 +1,5 @@
 /*
- * SelectCommandTest
+ * SqlCommandTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -7,31 +7,41 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.sql.commands;
-
+package workbench.sql;
 import java.util.List;
-import org.junit.Test;
+import org.junit.AfterClass;
 
+import org.junit.Test;
 import workbench.WbTestCase;
-import workbench.db.WbConnection;
+import static org.junit.Assert.*;import org.junit.BeforeClass;
 import workbench.TestUtil;
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 
-import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class SelectCommandTest
+public class SqlCommandTest
 	extends WbTestCase
 {
 
-	public SelectCommandTest()
+	public SqlCommandTest()
 	{
-		super("SelectCommandTest");
+		super("SqlCommandTest");
+	}
+
+	@BeforeClass
+	public static void setUpClass()
+		throws Exception
+	{
+	}
+
+	@AfterClass
+	public static void tearDownClass()
+		throws Exception
+	{
 	}
 
 	@Test
@@ -51,8 +61,12 @@ public class SelectCommandTest
 		);
 
 		String sql = "select * from person order by id;";
-		runner.runStatement(sql);
-		StatementRunnerResult result = runner.getResult();
+		SqlCommand command = new SqlCommand();
+		command.setConnection(con);
+		command.setStatementRunner(runner);
+		
+		StatementRunnerResult result = command.execute(sql);
+
 		assertTrue(result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> data = result.getDataStores();
@@ -68,5 +82,4 @@ public class SelectCommandTest
 		assertEquals("Zaphod", person.getValueAsString(1, 1));
 		assertEquals("Beeblebrox", person.getValueAsString(1, "lastname"));
 	}
-
 }
