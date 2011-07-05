@@ -247,7 +247,7 @@ public class OracleIndexReader
 				source = rs.getString(1);
 				if (source != null)
 				{
-					source = OracleUtil.cleanupQuotedIdentifiers(source);
+					source = OracleDDLCleaner.cleanupQuotedIdentifiers(source);
 					source += ";\n";
 				}
 			}

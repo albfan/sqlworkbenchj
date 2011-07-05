@@ -196,7 +196,7 @@ public class DriverlistEditorPanel
 	public void saveItem()
 		throws Exception
 	{
-		// driverEditor.validateName() will call this.isValid() in turn, but will also display an error message if needed
+		// validateName() will call isValid() in turn, but will also display an error message if needed
 		if (driverEditor.validateName())
 		{
 			ConnectionMgr conn = ConnectionMgr.getInstance();

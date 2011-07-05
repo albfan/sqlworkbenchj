@@ -13,6 +13,9 @@ import javax.swing.DefaultListSelectionModel;
 import workbench.interfaces.ListSelectionControl;
 
 /**
+ * A list selection model that supports "cancelling" of a selection change.
+ *
+ * The selection mode for this model is always SINGLE_SELECTION.
  *
  * @author Thomas Kellerer
  */
@@ -24,16 +27,57 @@ public class VetoableListSelectionModel
 	public VetoableListSelectionModel(ListSelectionControl listControl)
 	{
 		super();
-		setSelectionMode(SINGLE_SELECTION);
+		if (listControl == null)
+		{
+			throw new NullPointerException("ListControl must not be null");
+		}
+		
+		super.setSelectionMode(SINGLE_SELECTION);
 		this.selectionController = listControl;
 	}
 
+	/**
+	 * Set the new selection but ask the registered ListSelectionControl before doing so.
+	 *
+	 * @param newIndex the index to be selected
+	 * @param ignored not used because of the single selection mode
+	 *
+	 * @see ListSelectionControl#canChangeSelection()
+	 */
 	@Override
-	public void setSelectionInterval(int index0, int index1)
+	public void setSelectionInterval(int newIndex, int ignored)
 	{
 		if (selectionController.canChangeSelection())
 		{
-			super.setSelectionInterval(index0, index1);
+			super.setSelectionInterval(newIndex, newIndex);
+		}
+	}
+
+	/**
+	 * Set the selection mode to SINGLE_SELECTION.
+	 *
+	 * @param selectionMode must be SINGLE_SELECTIONI
+	 * @throws IllegalArgumentException if selectionMode is not SINGLE_SELECTION
+	 */
+	@Override
+	public void setSelectionMode(int selectionMode)
+	{
+		if (selectionMode == SINGLE_SELECTION)
+		{
+			super.setSelectionMode(selectionMode);
+		}
+		else
+		{
+			throw new IllegalArgumentException("Only SINGLE_SELECTION_MODE allowed");
+		}
+	}
+
+	@Override
+	public void setLeadSelectionIndex(int leadIndex)
+	{
+		if (selectionController.canChangeSelection())
+		{
+			super.setLeadSelectionIndex(leadIndex);
 		}
 	}
 
