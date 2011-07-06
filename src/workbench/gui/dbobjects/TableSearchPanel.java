@@ -25,11 +25,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -244,9 +240,16 @@ public class TableSearchPanel
 
 					String label = table.getTableExpression() + " " + ResourceMgr.getFormattedString("MsgRows", rows);
 					TitledBorder b = new TitledBorder(" " + label);
-					Font f = b.getTitleFont().deriveFont(Font.BOLD);
-					b.setTitleFont(f);
 					pane.setBorder(b);
+					Font f = b.getTitleFont();
+					if (f == null)
+					{
+						// With JDK 7, getTitleFont() seems to return null...
+						UIDefaults def = UIManager.getDefaults();
+						f = def.getFont("Label.font");
+					}
+					f = f.deriveFont(Font.BOLD);
+					b.setTitleFont(f);
 
 					GridBagConstraints constraints = new GridBagConstraints();
 					constraints.gridx = 0;
