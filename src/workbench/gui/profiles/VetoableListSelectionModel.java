@@ -1,5 +1,5 @@
 /*
- * VetoableListSelectionModel
+ * VetoableListSelectionModel.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -31,7 +31,7 @@ public class VetoableListSelectionModel
 		{
 			throw new NullPointerException("ListControl must not be null");
 		}
-		
+
 		super.setSelectionMode(SINGLE_SELECTION);
 		this.selectionController = listControl;
 	}
