@@ -248,9 +248,15 @@ public class TableSearchPanel
 						UIDefaults def = UIManager.getDefaults();
 						f = def.getFont("Label.font");
 					}
-					f = f.deriveFont(Font.BOLD);
-					b.setTitleFont(f);
 
+					// Check for != null again - just to make sure.
+					// Because if a NPE is thrown here, nothing will be shown to the user
+					if (f != null)
+					{
+						f = f.deriveFont(Font.BOLD);
+						b.setTitleFont(f);
+					}
+					
 					GridBagConstraints constraints = new GridBagConstraints();
 					constraints.gridx = 0;
 					constraints.fill = GridBagConstraints.HORIZONTAL;
