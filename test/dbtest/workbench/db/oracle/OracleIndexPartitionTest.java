@@ -79,18 +79,6 @@ public class OracleIndexPartitionTest
 			 "  PARTITION wb_list_part_4 \n" +
 			 ")";
 
-		// todo
-		String pkIndex =
-			"ALTER TABLE PART_TABLE \n" +
-			"   ADD CONSTRAINT PK_DELIVERY PRIMARY KEY (LOCATION_ID, ITEMID, RECEIPTDATE)  \n" +
-			"   USING INDEX ( \n" +
-			"     CREATE INDEX \"WBJUNIT\".\"IDX_DELIVERY\" ON \"WBJUNIT\".\"DELIVERY\" (\"LOCATION_ID\", \"ITEMID\", \"RECEIPTDATE\", \"SUM_QTY_PIECE\") REVERSE  \n" +
-			"    PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS COMPRESS 2  \n" +
-			"    STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645 \n" +
-			"    PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT) \n" +
-			"    TABLESPACE \"WBJUNIT_INDEX\" \n" +
-			"   )";
-
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
@@ -104,6 +92,10 @@ public class OracleIndexPartitionTest
 			if (e.getErrorCode() == 439)
 			{
 				partitioningAvailable = false;
+			}
+			else
+			{
+				throw e;
 			}
 		}
 	}

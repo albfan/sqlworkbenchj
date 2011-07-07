@@ -957,20 +957,20 @@ public class DbMetadata
 		return type;
 	}
 
-	public CharSequence generateDrop(String type, String objectName)
+	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
 	{
+		String type = toDrop.getObjectType();
+		String objectName = toDrop.getObjectNameForDrop(dbConnection);
 		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
 
-		String prefix = "workbench.db.";
-		String suffix = "." + type.toLowerCase() + ".sql." + this.getDbId();
-
-		String drop = Settings.getInstance().getProperty(prefix + "drop" + suffix, null);
+		String drop = dbConnection.getDbSettings().getDropDDL(type, cascadeConstraints);
 		if (drop == null)
 		{
+			// Fallback, just in case no DROP statement was configured
 			result.append("DROP ");
 			result.append(type.toUpperCase());
 			result.append(' ');
-			result.append(quoteObjectname(objectName));
+			result.append(objectName);
 			String cascade = this.dbSettings.getCascadeConstraintsVerb(type);
 			if (cascade != null)
 			{
@@ -981,7 +981,7 @@ public class DbMetadata
 		}
 		else
 		{
-			drop = StringUtil.replace(drop, "%name%", quoteObjectname(objectName));
+			drop = StringUtil.replace(drop, "%name%", objectName);
 			result.append(SqlUtil.addSemicolon(drop));
 		}
 		return result;
@@ -995,13 +995,17 @@ public class DbMetadata
 	 * @param typeOption an option for the CREATE statement. This is only
 	 * @return
 	 */
-	public StringBuilder generateCreateObject(boolean includeDrop, String objectType, String name, String typeOption)
+	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toDrop, String typeOption)
 	{
 		StringBuilder result = new StringBuilder();
 		boolean replaceAvailable = false;
 
+		String objectType = toDrop.getObjectType();
+
 		String prefix = "workbench.db.";
 		String suffix = "." + objectType.toLowerCase() + ".sql." + this.getDbId();
+
+		String name = toDrop.getObjectExpression(dbConnection);
 
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
@@ -1012,7 +1016,7 @@ public class DbMetadata
 
 		if (includeDrop && !replaceAvailable)
 		{
-			result.append(generateDrop(objectType, name));
+			result.append(generateDrop(toDrop, true));
 			result.append('\n');
 		}
 

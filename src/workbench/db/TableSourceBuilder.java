@@ -210,12 +210,6 @@ public class TableSourceBuilder
 
 		Map<String, String> columnConstraints = meta.getColumnConstraints(table);
 
-		String typeToUse = "TABLE";
-		if (meta.isExtendedObject(table))
-		{
-			typeToUse = table.getType();
-		}
-
 		String name = table.getTableExpression(dbConnection);
 		if (tableNameToUse != null)
 		{
@@ -224,7 +218,7 @@ public class TableSourceBuilder
 
 		readTableConfigOptions(table);
 
-		result.append(meta.generateCreateObject(includeDrop, typeToUse, name, table.getTableTypeOption()));
+		result.append(meta.generateCreateObject(includeDrop, table, table.getTableTypeOption()));
 		result.append("\n(\n");
 
 		List<String> pkCols = new LinkedList<String>();
@@ -421,7 +415,7 @@ public class TableSourceBuilder
 
 		if (includeDrop)
 		{
-			CharSequence drop = dbConnection.getMetadata().generateDrop(table.getType(), table.getTableExpression(dbConnection));
+			CharSequence drop = dbConnection.getMetadata().generateDrop(table, true);
 			result.append(drop);
 			result.append("\n\n");
 		}

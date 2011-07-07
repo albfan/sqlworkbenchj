@@ -177,7 +177,7 @@ public class JdbcIndexReader
 		String tableName = tableNameToUse;
 		if (tableName == null)
 		{
-			tableName = table.getTableName();
+			tableName = table.getTableExpression(this.metaData.getWbConnection());
 		}
 
 		String uniqueConstraint = null;
@@ -198,7 +198,7 @@ public class JdbcIndexReader
 
 		if (tableNameToUse != null)
 		{
-			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.metaData.getWbConnection()));
+			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, tableName);
 		}
 
 		if (indexDefinition.isUnique())

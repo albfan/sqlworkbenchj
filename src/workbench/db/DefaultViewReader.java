@@ -123,7 +123,7 @@ public class DefaultViewReader
 			return result.toString();
 		}
 
-		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableExpression(connection), null));
+		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable, null));
 
 		result.append(lineEnding);
 		result.append('(');

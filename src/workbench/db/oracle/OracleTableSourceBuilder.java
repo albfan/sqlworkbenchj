@@ -193,6 +193,10 @@ public class OracleTableSourceBuilder
 		else
 		{
 			String indexSql = reader.getExtendedIndexSource(table, idx, null, "    ").toString();
+			if ("NORMAL/REV".equals(idx.getIndexType()))
+			{
+				indexSql = indexSql.replace("\n    REVERSE", " REVERSE"); // cosmetic cleanup
+			}
 			StringBuilder using = new StringBuilder(indexSql.length() + 20);
 			using.append("\n   USING INDEX (\n     ");
 			using.append(SqlUtil.trimSemicolon(indexSql).trim().replace("\n", "\n  "));

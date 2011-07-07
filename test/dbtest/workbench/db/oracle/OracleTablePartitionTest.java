@@ -30,7 +30,7 @@ public class OracleTablePartitionTest
 	extends WbTestCase
 {
 	private static boolean partitioningAvailable;
-	
+
 	// More examples: http://psoug.org/reference/partitions.html
 	public OracleTablePartitionTest()
 	{
@@ -41,7 +41,7 @@ public class OracleTablePartitionTest
 	public static void setUpClass()
 		throws Exception
 	{
-		String sql = 
+		String sql =
 			"CREATE TABLE wb_list_partition_test \n" +
 			"( \n" +
 			"  test_id integer not null primary key, \n" +
@@ -69,7 +69,7 @@ public class OracleTablePartitionTest
 			"  PARTITION wb_hash_part_4, \n" +
 			"  PARTITION wb_hash_part_5 \n" +
 			");";
-		
+
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
@@ -87,7 +87,7 @@ public class OracleTablePartitionTest
 			}
 		}
 
-		sql = 
+		sql =
 			"CREATE TABLE RANGE_SUB_PART_HASH \n" +
 			"( \n" +
 			"  invoice_no    NUMBER NOT NULL, \n" +
@@ -134,7 +134,6 @@ public class OracleTablePartitionTest
 			if (e.getErrorCode() == 439)
 			{
 				partitioningAvailable = false;
-				return;
 			}
 		}
 	}
@@ -151,15 +150,15 @@ public class OracleTablePartitionTest
 		throws Exception
 	{
 		if (!partitioningAvailable) return;
-		
+
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_LIST_PARTITION_TEST"));
 		assertNotNull(tbl);
 		OracleTablePartition reader = new OracleTablePartition(con, false);
 		reader.retrieve(tbl, con);
-		
+
 		assertTrue(reader.isPartitioned());
 		assertEquals("LIST", reader.getPartitionType());
 		List<String> columns = reader.getColumns();
@@ -184,7 +183,7 @@ public class OracleTablePartitionTest
 			")";
 		assertEquals(expected, reader.getSourceForTableDefinition().trim());
 	}
-	
+
 	@Test
 	public void testRetrieveHashPartition()
 		throws Exception
@@ -192,12 +191,12 @@ public class OracleTablePartitionTest
 		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_HASH_PARTITION_TEST"));
 		assertNotNull(tbl);
 		OracleTablePartition reader = new OracleTablePartition(con, false);
 		reader.retrieve(tbl, con);
-		
+
 		assertTrue(reader.isPartitioned());
 		assertEquals("HASH", reader.getPartitionType());
 		List<String> columns = reader.getColumns();
@@ -218,9 +217,9 @@ public class OracleTablePartitionTest
 			"  PARTITION WB_HASH_PART_4,\n" +
 			"  PARTITION WB_HASH_PART_5\n" +
 			")";
-		assertEquals(expected, reader.getSourceForTableDefinition().trim());		
-	}	
-	
+		assertEquals(expected, reader.getSourceForTableDefinition().trim());
+	}
+
 	@Test
 	public void testRetrieveDefaultSubPartition()
 		throws Exception
@@ -228,12 +227,12 @@ public class OracleTablePartitionTest
 		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("RANGE_SUB_PART_HASH"));
 		assertNotNull(tbl);
 		OracleTablePartition reader = new OracleTablePartition(con, false);
 		reader.retrieve(tbl, con);
-		
+
 		assertTrue(reader.isPartitioned());
 		assertEquals("RANGE", reader.getPartitionType());
 		List<String> columns = reader.getColumns();
@@ -246,7 +245,7 @@ public class OracleTablePartitionTest
 			assertEquals(i + 1, partitions.get(i).getPosition());
 			assertNotNull(partitions.get(i).getPartitionValue());
 		}
-		String expected = 
+		String expected =
 			"PARTITION BY RANGE (INVOICE_DATE)\n" +
 			"SUBPARTITION BY HASH (INVOICE_NO)\n" +
 			"SUBPARTITIONS 8\n" +
@@ -256,6 +255,6 @@ public class OracleTablePartitionTest
 			"  PARTITION INVOICES_Q3 VALUES LESS THAN (TO_DATE(' 2010-09-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),\n" +
 			"  PARTITION INVOICES_Q4 VALUES LESS THAN (TO_DATE(' 2011-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))\n" +
 			")";
-		assertEquals(expected, reader.getSourceForTableDefinition().trim());		
-	}		
+		assertEquals(expected, reader.getSourceForTableDefinition().trim());
+	}
 }
