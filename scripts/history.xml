@@ -4,6 +4,7 @@
   <release build="-1" date="2011-09-18">
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="2" type="fix">Displaying the source code for functions did not work properly in PostgreSQL</entry>
     <entry dev-build="1" type="fix">Copy as SQL UPDATE did not work properly</entry>
     <entry dev-build="1" type="fix">If more than one statement was selected reformatting the SQL would remove the delimiter</entry>
     <entry dev-build="1" type="fix">Implemented a workaround for a bug in old MySQL drivers that would cause an error when processing the result of a SELECT statement</entry>
