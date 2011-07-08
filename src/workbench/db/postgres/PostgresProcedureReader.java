@@ -110,11 +110,18 @@ public class PostgresProcedureReader
 			Statement stmt = null;
 			ResultSet rs = null;
 			Savepoint sp = null;
+			String sql = "select oid, typname, format_type(oid, null) from pg_type";
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresProcedureReader.getTypeLookup()", "Using query=" + sql);
+			}
+
 			try
 			{
 				sp = connection.setSavepoint();
 				stmt = connection.createStatement();
-				rs = stmt.executeQuery("select oid, typname, format_type(oid, null) from pg_type");
+				rs = stmt.executeQuery(sql);
 				while (rs.next())
 				{
 					Integer oid = Integer.valueOf(rs.getInt(1));
@@ -466,7 +473,11 @@ public class PostgresProcedureReader
 				source.append('\n');
 				if (StringUtil.isNonBlank(def.getComment()))
 				{
-					source.append("\nCOMMENT ON FUNCTION " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
+					source.append("\nCOMMENT ON FUNCTION ");
+					source.append(name.getFormattedName());
+					source.append(" IS '");
+					source.append(SqlUtil.escapeQuotes(def.getComment()));
+					source.append("'\n" );
 					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 					source.append('\n');
 				}
@@ -489,7 +500,9 @@ public class PostgresProcedureReader
 			source.append(getAggregateSource(name, def.getSchema()));
 			if (StringUtil.isNonBlank(def.getComment()))
 			{
-				source.append("\n\nCOMMENT ON AGGREGATE IS '" + SqlUtil.escapeQuotes(def.getComment()) + "';\n\n");
+				source.append("\n\nCOMMENT ON AGGREGATE IS '");
+				source.append(SqlUtil.escapeQuotes(def.getComment()));
+				source.append("';\n\n");
 			}
 		}
 		def.setSource(source);
@@ -535,7 +548,11 @@ public class PostgresProcedureReader
 					source.append('\n');
 					if (StringUtil.isNonBlank(def.getComment()))
 					{
-						source.append("\nCOMMENT ON FUNCTION " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
+						source.append("\nCOMMENT ON FUNCTION ");
+						source.append(name.getFormattedName());
+						source.append(" IS '");
+						source.append(SqlUtil.escapeQuotes(def.getComment()));
+						source.append("'\n" );
 						source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 						source.append('\n');
 					}
@@ -601,27 +618,33 @@ public class PostgresProcedureReader
 				source.append(name.getFormattedName());
 				source.append("\n(\n");
 				String sfunc = rs.getString("aggtransfn");
-				source.append("  sfunc = " + sfunc);
+				source.append("  sfunc = ");
+				source.append(sfunc);
 
 				String stype = rs.getString("stype");
-				source.append(",\n  stype = " + stype);
+				source.append(",\n  stype = ");
+				source.append(stype);
 
 				String sortop = rs.getString("oprname");
 				if (StringUtil.isNonBlank(sortop))
 				{
-					source.append(",\n  sortop = " + SqlUtil.quoteObjectname(sortop));
+					source.append(",\n  sortop = ");
+					source.append(SqlUtil.quoteObjectname(sortop));
 				}
 
 				String finalfunc = rs.getString("aggfinalfn");
 				if (StringUtil.isNonBlank(finalfunc) && !finalfunc.equals("-"))
 				{
-					source.append(",\n  finalfunc = " + finalfunc);
+					source.append(",\n  finalfunc = ");
+					source.append( finalfunc);
 				}
 
 				String initcond = rs.getString("agginitval");
 				if (StringUtil.isNonBlank(initcond))
 				{
-					source.append(",\n  initcond = '" + initcond + "'");
+					source.append(",\n  initcond = '");
+					source.append(initcond);
+					source.append('\'');
 				}
 				source.append("\n);\n");
 			}
