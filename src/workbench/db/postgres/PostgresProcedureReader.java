@@ -72,7 +72,7 @@ public class PostgresProcedureReader
 			pgType2Java.put("int2", Integer.valueOf(Types.SMALLINT));
 			pgType2Java.put("int4", Integer.valueOf(Types.INTEGER));
 			pgType2Java.put("integer", Integer.valueOf(Types.INTEGER));
-			pgType2Java.put("oid", Integer.valueOf(Types.INTEGER));
+			pgType2Java.put("oid", Integer.valueOf(Types.BIGINT));
 			pgType2Java.put("int8", Integer.valueOf(Types.BIGINT));
 			pgType2Java.put("money", Integer.valueOf(Types.DOUBLE));
 			pgType2Java.put("numeric", Integer.valueOf(Types.NUMERIC));
@@ -369,7 +369,7 @@ public class PostgresProcedureReader
 				if (rs.wasNull() || src == null) src = "";
 
 				String lang = rs.getString("lang_name");
-				int retTypeOid = rs.getInt("return_type_oid");
+				long retTypeOid = rs.getLong("return_type_oid");
 				String readableReturnType = rs.getString("formatted_return_type");
 
 				String types = rs.getString("argtypes");

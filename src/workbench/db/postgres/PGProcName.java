@@ -76,7 +76,7 @@ public class PGProcName
 		List<PGType> result = new ArrayList<PGType>(items.length);
 		for (String s : items)
 		{
-			int oid = Integer.valueOf(s.trim());
+			Long oid = Long.valueOf(s.trim());
 			PGType typ = typeMap.getTypeFromOID(oid);
 			if (typ != null)
 			{
