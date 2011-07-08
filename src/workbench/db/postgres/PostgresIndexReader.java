@@ -54,6 +54,7 @@ public class PostgresIndexReader
 	 * @param tableNameToUse an optional alternative tablename to use
 	 * @return
 	 */
+	@Override
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return null;

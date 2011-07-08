@@ -29,6 +29,7 @@ public class IndexDefinition
 	private TableIdentifier baseTable;
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	private String comment;
+	private boolean isUniqueConstraint;
 
 	public IndexDefinition(TableIdentifier table, String name)
 	{
@@ -58,6 +59,16 @@ public class IndexDefinition
 	public String getCatalog()
 	{
 		return null;
+	}
+
+	public boolean isUniqueConstraint()
+	{
+		return isUniqueConstraint;
+	}
+
+	public void setIsUniqueConstraint(boolean flag)
+	{
+		this.isUniqueConstraint = flag;
 	}
 
 	public void addColumn(String column, String direction)
