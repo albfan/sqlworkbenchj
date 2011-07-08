@@ -70,7 +70,7 @@ public class PGProcName
 		}
 	}
 
-	public static List<PGType> getTypesFromOid(String oidList, PGTypeLookup typeMap)
+	private List<PGType> getTypesFromOid(String oidList, PGTypeLookup typeMap)
 	{
 		String[] items = oidList.split(";");
 		List<PGType> result = new ArrayList<PGType>(items.length);

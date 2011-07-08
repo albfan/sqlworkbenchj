@@ -17,9 +17,9 @@ package workbench.db.postgres;
  */
 public class PGType
 {
-	String rawType;
-	String formattedType;
-	long oid;
+	final String rawType;
+	final String formattedType;
+	final long oid;
 
 	public PGType(String raw, String formatted, long id)
 	{

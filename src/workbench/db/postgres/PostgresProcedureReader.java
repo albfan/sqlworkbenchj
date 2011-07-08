@@ -124,11 +124,11 @@ public class PostgresProcedureReader
 				rs = stmt.executeQuery(sql);
 				while (rs.next())
 				{
-					Long oid = Long.valueOf(rs.getLong(1));
+					long oid = rs.getLong(1);
 					String name = rs.getString(2);
 					String formattedName = rs.getString(3);
-					PGType typ = new PGType(name, StringUtil.trimQuotes(formattedName), oid.longValue());
-					typeMap.put(typ.oid, typ);
+					PGType typ = new PGType(name, StringUtil.trimQuotes(formattedName), oid);
+					typeMap.put(Long.valueOf(typ.oid), typ);
 					if ("void".equals(typ.rawType))
 					{
 						voidType = typ;
