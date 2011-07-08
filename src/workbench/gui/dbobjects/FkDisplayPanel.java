@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.sql.SQLException;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+
 import workbench.db.FKHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -24,8 +25,6 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.util.ExceptionUtil;
 
 /**
  *
