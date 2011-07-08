@@ -37,7 +37,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.swing.UIManager;
+
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -45,14 +47,15 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.FontScaler;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
-import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
-import workbench.sql.DelimiterDefinition;
 import workbench.sql.BatchRunner;
+import workbench.sql.DelimiterDefinition;
 import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
+import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 import workbench.util.ToolDefinition;
 import workbench.util.WbFile;
@@ -1197,7 +1200,7 @@ public class Settings
 	 */
 	public boolean getScaleFonts()
 	{
-		return getBoolProperty("workbench.gui.desktop.scalefonts", true);
+		return PlatformHelper.isWindows() && getBoolProperty("workbench.gui.desktop.scalefonts", true);
 	}
 
 	/**
