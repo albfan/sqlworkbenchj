@@ -41,16 +41,16 @@ public class PGProcNameTest
 		assertEquals(1043, proc2.getArguments().get(2).oid);
 	}
 
-	private Map<Integer, PGType> getTypes()
+	private Map<Long, PGType> getTypes()
 	{
-		Map<Integer, PGType> result = new HashMap<Integer, PGType>();
-		result.put(16, new PGType("bool", "boolean", 16));
-		result.put(18, new PGType("char", "char", 18));
-		result.put(20, new PGType("bigint", "bigint", 20));
-		result.put(23, new PGType("integer", "integer", 23));
-		result.put(21, new PGType("smallint", "smalling", 21));
-		result.put(1043, new PGType("varchar", "character varying", 1043));
+		Map<Long, PGType> result = new HashMap<Long, PGType>();
+		result.put(16L, new PGType("bool", "boolean", 16));
+		result.put(18L, new PGType("char", "char", 18));
+		result.put(20L, new PGType("bigint", "bigint", 20));
+		result.put(23L, new PGType("integer", "integer", 23));
+		result.put(21L, new PGType("smallint", "smalling", 21));
+		result.put(1043L, new PGType("varchar", "character varying", 1043));
 		return result;
 	}
-	
+
 }
