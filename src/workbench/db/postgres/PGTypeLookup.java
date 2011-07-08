@@ -20,17 +20,18 @@ import java.util.Map;
  */
 public class PGTypeLookup
 {
-	private Map<Integer, PGType> oidToTypeMap;
-	private Map<String, PGType> rawTypeMap = new HashMap<String, PGType>();
-	
-	public PGTypeLookup(Map<Integer, PGType> oidMap)
+	private Map<Long, PGType> oidToTypeMap;
+	private Map<String, PGType> rawTypeMap;
+
+	public PGTypeLookup(Map<Long, PGType> oidMap)
 	{
 		oidToTypeMap = oidMap;
+		rawTypeMap = new HashMap<String, PGType>(oidToTypeMap.size());
 	}
 
-	public PGType getTypeFromOID(int oid)
+	public PGType getTypeFromOID(long oid)
 	{
-		return oidToTypeMap.get(oid);
+		return oidToTypeMap.get(Long.valueOf(oid));
 	}
 
 	public PGType getTypeEntry(String rawType)

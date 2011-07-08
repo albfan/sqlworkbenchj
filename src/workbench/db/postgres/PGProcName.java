@@ -94,7 +94,7 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) argTypes.append(' ');
-			argTypes.append(Integer.toString(arguments.get(i).oid));
+			argTypes.append(Long.toString(arguments.get(i).oid));
 		}
 		return argTypes.toString();
 	}
@@ -104,6 +104,7 @@ public class PGProcName
 		return arguments;
 	}
 
+	@Override
 	public int compareTo(PGProcName o)
 	{
 		return getFormattedName().compareTo(o.getFormattedName());
@@ -133,6 +134,7 @@ public class PGProcName
 		return formattedName;
 	}
 
+	@Override
 	public String toString()
 	{
 		return getFormattedName();

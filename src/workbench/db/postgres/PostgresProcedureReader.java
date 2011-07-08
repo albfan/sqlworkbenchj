@@ -106,7 +106,7 @@ public class PostgresProcedureReader
 	{
 		if (pgTypes == null)
 		{
-			Map<Integer, PGType> typeMap = new HashMap<Integer, PGType>(300);
+			Map<Long, PGType> typeMap = new HashMap<Long, PGType>(300);
 			Statement stmt = null;
 			ResultSet rs = null;
 			Savepoint sp = null;
@@ -124,8 +124,10 @@ public class PostgresProcedureReader
 				rs = stmt.executeQuery(sql);
 				while (rs.next())
 				{
-					Integer oid = Integer.valueOf(rs.getInt(1));
-					PGType typ = new PGType(rs.getString(2), StringUtil.trimQuotes(rs.getString(3)), oid.intValue());
+					Long oid = Long.valueOf(rs.getLong(1));
+					String name = rs.getString(2);
+					String formattedName = rs.getString(3);
+					PGType typ = new PGType(name, StringUtil.trimQuotes(formattedName), oid.longValue());
 					typeMap.put(typ.oid, typ);
 					if ("void".equals(typ.rawType))
 					{
@@ -149,9 +151,9 @@ public class PostgresProcedureReader
 		return pgTypes;
 	}
 
-	private String getRawTypeNameFromOID(int oid)
+	private String getRawTypeNameFromOID(long oid)
 	{
-		PGType typ = getTypeLookup().getTypeFromOID(Integer.valueOf(oid));
+		PGType typ = getTypeLookup().getTypeFromOID(Long.valueOf(oid));
 		return typ.rawType;
 	}
 
@@ -411,7 +413,7 @@ public class PostgresProcedureReader
 						source.append(' ');
 					}
 
-					int typeOid = StringUtil.getIntValue(argTypes.get(i), voidType.oid);
+					long typeOid = StringUtil.getLongValue(argTypes.get(i), voidType.oid);
 					source.append(getRawTypeNameFromOID(typeOid));
 					paramCount ++;
 				}

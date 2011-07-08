@@ -19,9 +19,9 @@ public class PGType
 {
 	String rawType;
 	String formattedType;
-	int oid;
+	long oid;
 
-	public PGType(String raw, String formatted, int id)
+	public PGType(String raw, String formatted, long id)
 	{
 		if (raw.equals("int2"))
 		{
@@ -46,5 +46,5 @@ public class PGType
 		formattedType = formatted;
 		oid = id;
 	}
-	
+
 }
