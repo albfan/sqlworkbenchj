@@ -12,6 +12,7 @@
 package workbench.db;
 
 import workbench.db.derby.DerbyTableSourceBuilder;
+import workbench.db.h2database.H2TableSourceBuilder;
 import workbench.db.oracle.OracleTableSourceBuilder;
 import workbench.db.postgres.PostgresTableSourceBuilder;
 
@@ -36,6 +37,10 @@ public class TableSourceBuilderFactory
 		else if (con.getMetadata().isOracle())
 		{
 			return new OracleTableSourceBuilder(con);
+		}
+		else if (con.getMetadata().isH2())
+		{
+			return new H2TableSourceBuilder(con);
 		}
 		return new TableSourceBuilder(con);
 	}

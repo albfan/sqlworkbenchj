@@ -111,7 +111,10 @@ public class TableDependencyTreeDisplay
 			}
 
 			DependencyNode root = dependencyReader.getRootNode();
-			this.readTreeNodes(root);
+			if (root != null)
+			{
+				this.readTreeNodes(root);
+			}
 		}
 		catch (OutOfMemoryError mem)
 		{
