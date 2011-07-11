@@ -11,16 +11,17 @@
  */
 package workbench.db.diff;
 
-import java.io.File;
-import org.junit.Test;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import org.junit.After;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
 
 /**
  *
