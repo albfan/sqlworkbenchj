@@ -32,7 +32,6 @@ import workbench.storage.filter.NumberEqualsComparator;
 import workbench.storage.filter.OrExpression;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -52,7 +51,6 @@ public class DataStoreTest
 	{
 		super("DataStoreTest");
 		util = getTestUtil();
-		util.prepareEnvironment();
 	}
 
 	@Test

@@ -11,66 +11,73 @@
  */
 package workbench.db;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.TestUtil;
-import workbench.sql.ScriptParser;
-import static org.junit.Assert.*;
+
+import org.junit.AfterClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.sql.ScriptParser;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ColumnDropperTest
+	extends WbTestCase
 {
 	public ColumnDropperTest()
 	{
+		super("ColumnDropperTest");
 	}
+
+	@AfterClass
+	public static void tearDownClass()
+		throws Exception
+	{
+		ConnectionMgr.getInstance().disconnectAll();
+	}
+
 
 	@Test
 	public void testDropObjects()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("dropColumn");
+		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
 
-		try
-		{
-			Statement stmt = con.createStatement();
-			stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20), dummy1 integer, dummy2 date)");
-			con.commit();
-			TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("PERSON"));
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
-			cols.add(new ColumnIdentifier("DUMMY1"));
-			cols.add(new ColumnIdentifier("DUMMY2"));
+		TestUtil.executeScript(con,
+			"create table person (nr integer, firstname varchar(20), lastname varchar(20), dummy1 integer, dummy2 date);\n" +
+			"commit;\n");
+		con.commit();
 
-			ColumnDropper dropper = new ColumnDropper(con, table, cols);
-			String sql = dropper.getScript().toString();
+		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		cols.add(new ColumnIdentifier("DUMMY1"));
+		cols.add(new ColumnIdentifier("DUMMY2"));
 
-			assertNotNull(sql);
-			ScriptParser p = new ScriptParser(sql.trim());
-			p.setReturnStartingWhitespace(false);
-			assertEquals(4, p.getSize());
+		ColumnDropper dropper = new ColumnDropper(con, table, cols);
+		String sql = dropper.getScript().toString();
 
-			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0).trim());
-			assertEquals("COMMIT", p.getCommand(1).trim());
-			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2).trim());
-			assertEquals("COMMIT", p.getCommand(3).trim());
+		assertNotNull(sql);
+		ScriptParser p = new ScriptParser(sql.trim());
+		p.setReturnStartingWhitespace(false);
+		assertEquals(4, p.getSize());
 
-			dropper.dropObjects();
+		assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0).trim());
+		assertEquals("COMMIT", p.getCommand(1).trim());
+		assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2).trim());
+		assertEquals("COMMIT", p.getCommand(3).trim());
 
-			List<ColumnIdentifier> tableCols = con.getMetadata().getTableColumns(table);
-			assertEquals(3, tableCols.size());
-			assertEquals("NR", tableCols.get(0).getColumnName());
-			assertEquals("FIRSTNAME", tableCols.get(1).getColumnName());
-			assertEquals("LASTNAME", tableCols.get(2).getColumnName());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		dropper.dropObjects();
+
+		List<ColumnIdentifier> tableCols = con.getMetadata().getTableColumns(table);
+		assertEquals(3, tableCols.size());
+		assertEquals("NR", tableCols.get(0).getColumnName());
+		assertEquals("FIRSTNAME", tableCols.get(1).getColumnName());
+		assertEquals("LASTNAME", tableCols.get(2).getColumnName());
 	}
 }

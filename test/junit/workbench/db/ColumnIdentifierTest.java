@@ -21,17 +21,19 @@ import static org.junit.Assert.*;
 
 public class ColumnIdentifierTest
 {
-	
+
 	@Test
 	public void testAdjustQuotes()
 	{
 		QuoteHandler ansi = new QuoteHandler()
 		{
+			@Override
 			public boolean isQuoted(String name)
 			{
 				return name.startsWith("\"");
 			}
 
+			@Override
 			public String removeQuotes(String name)
 			{
 				if (isQuoted(name))
@@ -41,6 +43,7 @@ public class ColumnIdentifierTest
 				return name;
 			}
 
+			@Override
 			public String quoteObjectname(String name)
 			{
 				if (isQuoted(name)) return name;
@@ -51,11 +54,13 @@ public class ColumnIdentifierTest
 
 		QuoteHandler wrongQuoting = new QuoteHandler()
 		{
+			@Override
 			public boolean isQuoted(String name)
 			{
 				return name.startsWith("`");
 			}
 
+			@Override
 			public String removeQuotes(String name)
 			{
 				if (isQuoted(name))
@@ -65,6 +70,7 @@ public class ColumnIdentifierTest
 				return name;
 			}
 
+			@Override
 			public String quoteObjectname(String name)
 			{
 				if (isQuoted(name)) return name;
@@ -74,11 +80,13 @@ public class ColumnIdentifierTest
 
 		QuoteHandler wrongQuoting2 = new QuoteHandler()
 		{
+			@Override
 			public boolean isQuoted(String name)
 			{
 				return name.startsWith("[") && name.contains("]");
 			}
 
+			@Override
 			public String removeQuotes(String name)
 			{
 				if (isQuoted(name))
@@ -89,6 +97,7 @@ public class ColumnIdentifierTest
 				return name;
 			}
 
+			@Override
 			public String quoteObjectname(String name)
 			{
 				if (isQuoted(name)) return name;
@@ -140,7 +149,7 @@ public class ColumnIdentifierTest
 		copy = col.createCopy();
 		assertEquals("42", copy.getDefaultValue());
 	}
-	
+
 	@Test
 	public void testSort()
 	{
@@ -161,7 +170,7 @@ public class ColumnIdentifierTest
 
 		ColumnIdentifier col6 = new ColumnIdentifier("six", Types.VARCHAR, true);
 		col6.setPosition(6);
-		
+
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 		cols.add(col3);
 		cols.add(col6);
@@ -174,7 +183,7 @@ public class ColumnIdentifierTest
 		{
 			assertEquals("Wrong position in sorted list", i+1, cols.get(i).getPosition());
 		}
-		
+
 	}
 
 	@Test
@@ -185,18 +194,18 @@ public class ColumnIdentifierTest
 		assertEquals("Columns are not equal", true, col1.equals(col2));
 		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
 		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
-		
+
 		col1 = new ColumnIdentifier("mycol", Types.VARCHAR, true);
 		col2 = new ColumnIdentifier("MYCOL", Types.VARCHAR, true);
 		assertEquals("Columns are not equal", true, col1.equals(col2));
 		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
 		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
-		
+
 		col1 = new ColumnIdentifier("Pr\u00e4fix", Types.VARCHAR, true);
 		col2 = new ColumnIdentifier("\"PR\u00c4FIX\"", Types.VARCHAR, true);
 		assertEquals("Columns are not equal", true, col1.equals(col2));
 		assertEquals("Columns are not equal", 0, col1.compareTo(col2));
 		assertEquals("Columns are not equal", true, col1.hashCode() == col2.hashCode());
 	}
-	
+
 }

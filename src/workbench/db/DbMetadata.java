@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.derby.DerbySequenceReader;
 import workbench.db.derby.DerbySynonymReader;
@@ -40,51 +41,50 @@ import workbench.db.firebird.FirebirdSequenceReader;
 import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
+import workbench.db.h2database.H2SequenceReader;
+import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.ibm.DB2TypeReader;
+import workbench.db.ibm.Db2ColumnEnhancer;
+import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiSequenceReader;
-import workbench.db.mysql.MySQLColumnEnhancer;
-import workbench.db.oracle.DbmsOutput;
-import workbench.db.oracle.OracleMetadata;
-import workbench.db.oracle.OracleSynonymReader;
-import workbench.db.postgres.PostgresDDLFilter;
-import workbench.db.postgres.PostgresSequenceReader;
-import workbench.storage.SortDefinition;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.db.h2database.H2SequenceReader;
-import workbench.db.hsqldb.HsqlColumnEnhancer;
-import workbench.db.ibm.DB2TypeReader;
-import workbench.db.ibm.Db2ColumnEnhancer;
-import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
+import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
+import workbench.db.oracle.DbmsOutput;
+import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleSequenceReader;
+import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresColumnEnhancer;
+import workbench.db.postgres.PostgresDDLFilter;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
+import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
-import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Retrieve meta data information from the database.
@@ -393,7 +393,8 @@ public class DbMetadata
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 
 		List<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, "TABLE");
-		tableTypesList = new TreeSet<String>(new CaseInsensitiveComparator());
+		LogMgr.logDebug("DbMetadata.<init>", "Using configured tabletypes: " + ttypes);
+		tableTypesList = CollectionUtil.caseInsensitiveSet();
 		tableTypesList.addAll(ttypes);
 
 		tableTypes = tableTypesList.toArray(new String[]{});
@@ -573,6 +574,7 @@ public class DbMetadata
 	public Set<String> getObjectsWithData()
 	{
 		Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
+		objectsWithData.addAll(getTableTypes());
 		String keyPrefix = "workbench.db.objecttype.selectable.";
 		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
 		String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
@@ -598,7 +600,7 @@ public class DbMetadata
 
 		if (this.isOracle)
 		{
-			objectsWithData.add(MVIEW_NAME.toLowerCase());
+			objectsWithData.add(MVIEW_NAME);
 		}
 
 		return objectsWithData;
@@ -1392,8 +1394,6 @@ public class DbMetadata
 		boolean detectDuplicates = isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types);
 		Set<String> processed = new TreeSet<String>();
 
-		boolean hideIndexes = hideIndexes();
-
 		ResultSet tableRs = null;
 		try
 		{
@@ -1431,7 +1431,7 @@ public class DbMetadata
 					synRetrieved = true;
 				}
 
-				if (hideIndexes && isIndexType(ttype)) continue;
+				if (isIndexType(ttype)) continue;
 
 				String fqName = null;
 				if (detectDuplicates || checkOracleSnapshots)
@@ -2470,20 +2470,10 @@ public class DbMetadata
 		return (type.indexOf("INDEX") > -1);
 	}
 
-	private boolean hideIndexes()
-	{
-		return (isPostgres && Settings.getInstance().getBoolProperty("workbench.db.postgres.hideindex", true));
-	}
-
-	/**
-	 * Return a list of types that identify tables in the target database.
-	 * e.g. TABLE, SYSTEM TABLE, ...
-	 */
-	public Collection<String> getObjectTypes()
+	private Collection<String> retrieveTableTypes()
 	{
 		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		ResultSet rs = null;
-		boolean hideIndexes = hideIndexes();
 
 		try
 		{
@@ -2498,26 +2488,8 @@ public class DbMetadata
 				// trim the returned value...
 				type = type.trim();
 
-				if (hideIndexes && isIndexType(type)) continue;
+				if (isIndexType(type)) continue;
 				result.add(type);
-			}
-			String additional = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",null);
-			List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
-			result.addAll(addTypes);
-
-			if (this.synonymReader != null)
-			{
-				result.add("SYNONYM");
-			}
-
-			if (sequenceReader != null)
-			{
-				result.add("SEQUENCE");
-			}
-
-			for (ObjectListExtender extender : extenders)
-			{
-				result.addAll(extender.supportedTypes());
 			}
 		}
 		catch (Exception e)
@@ -2527,6 +2499,36 @@ public class DbMetadata
 		finally
 		{
 			try { rs.close(); }	 catch (Throwable e) {}
+		}
+		return result;
+	}
+
+	/**
+	 * Return a list of types that identify tables in the target database.
+	 * e.g. TABLE, SYSTEM TABLE, ...
+	 */
+	public Collection<String> getObjectTypes()
+	{
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		result.addAll(retrieveTableTypes());
+
+		String additional = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",null);
+		List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
+		result.addAll(addTypes);
+
+		if (this.synonymReader != null)
+		{
+			result.add("SYNONYM");
+		}
+
+		if (sequenceReader != null)
+		{
+			result.add("SEQUENCE");
+		}
+
+		for (ObjectListExtender extender : extenders)
+		{
+			result.addAll(extender.supportedTypes());
 		}
 		return result;
 	}
