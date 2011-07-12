@@ -20,7 +20,7 @@ import workbench.util.SqlUtil;
 
 /**
  * A Shutdown hook for H2 Database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class HsqlShutdownHook
@@ -31,18 +31,19 @@ public class HsqlShutdownHook
 	{
 		String url = con.getUrl();
 		if (url == null) return true;
-		
+
 		// this is a HSQL server connection. Do not shut down this!
 		if (url.startsWith("jdbc:hsqldb:hsql:")) return false;
-		
+
 		return true;
 	}
-	
+
+	@Override
 	public void shutdown(WbConnection con)
 		throws SQLException
 	{
 		if (con == null) return;
-		
+
 		boolean otherActive = ConnectionMgr.getInstance().isActive(con);
 		if (otherActive) return;
 
@@ -62,5 +63,5 @@ public class HsqlShutdownHook
 		}
 		con.shutdown();
 	}
-	
+
 }

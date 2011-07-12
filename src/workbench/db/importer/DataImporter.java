@@ -732,18 +732,27 @@ public class DataImporter
 		{
 			deleteSql = "DELETE FROM " + this.targetTable.getTableExpression(this.dbConn);
 		}
-		Statement stmt = this.dbConn.createStatement();
-		LogMgr.logInfo("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
-		int rows = stmt.executeUpdate(deleteSql);
-		if (this.deleteTarget == DeleteType.truncate)
+		
+		Statement stmt = null;
+		try
 		{
-			String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", this.targetTable.getTableExpression(this.dbConn));
-			this.messages.append(msg);
-			this.messages.appendNewLine();
+			stmt = this.dbConn.createStatement();
+			LogMgr.logInfo("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
+			int rows = stmt.executeUpdate(deleteSql);
+			if (this.deleteTarget == DeleteType.truncate)
+			{
+				String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", this.targetTable.getTableExpression(this.dbConn));
+				this.messages.append(msg);
+				this.messages.appendNewLine();
+			}
+			else
+			{
+				this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable.getTableExpression(this.dbConn) + "\n");
+			}
 		}
-		else
+		finally
 		{
-			this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable.getTableExpression(this.dbConn) + "\n");
+			SqlUtil.closeStatement(stmt);
 		}
 	}
 
@@ -1065,7 +1074,7 @@ public class DataImporter
 	 * @param sql the exception
 	 * @return true if the error should be ignored in insert/update mode
 	 * @see DbSettings#getUniqueKeyViolationErrorCode()
-	 * @see DbSettings#getUniqueKeyViolationErrorState() 
+	 * @see DbSettings#getUniqueKeyViolationErrorState()
 	 */
 	private boolean ignoreInsertError(SQLException sql)
 	{

@@ -35,9 +35,12 @@ public class WbCommandAnalyzer
 	// to check if the selected value should be enhanced with - and =
 	private boolean isParameter;
 
+	private boolean changeCase;
+
 	public WbCommandAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		super(conn, statement, cursorPos);
+		changeCase = true;
 	}
 
 	@Override
@@ -64,6 +67,8 @@ public class WbCommandAnalyzer
 	{
 		CommandMapper mapper = new CommandMapper();
 		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
+
+		changeCase = true;
 
 		if (word != null && word.trim().toLowerCase().equals("wb"))
 		{
@@ -128,6 +133,7 @@ public class WbCommandAnalyzer
 			else if (type == ArgumentType.ProfileArgument)
 			{
 				this.elements = ConnectionMgr.getInstance().getProfileKeys();
+				changeCase = false;
 			}
 			else
 			{
@@ -145,6 +151,12 @@ public class WbCommandAnalyzer
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = p.needsSwitch();
 		}
+	}
+
+	@Override
+	public boolean convertCase()
+	{
+		return changeCase;
 	}
 
 	/**

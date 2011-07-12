@@ -221,7 +221,7 @@ public class WbDefineVar
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 
 		return result;

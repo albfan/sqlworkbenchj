@@ -20,9 +20,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.WbFile;
 
 /**
@@ -50,6 +53,7 @@ public class ImportFileLister
 		extension = ext;
 		FileFilter ff = new FileFilter()
 		{
+			@Override
 			public boolean accept(File pathname)
 			{
 				if (pathname.isDirectory()) return false;
@@ -121,14 +125,16 @@ public class ImportFileLister
 	}
 
 	/**
-	 * Removes any file that contains the given string i
+	 * Removes any file that contains the given string
+	 *
 	 * @param containedNames
 	 */
 	public void ignoreFiles(List<String> containedNames)
 	{
-		if (containedNames == null) return;
+		if (CollectionUtil.isEmpty(containedNames)) return;
 
 		Iterator<WbFile> itr = toProcess.iterator();
+		Set<WbFile> toRemove = new TreeSet<WbFile>();
 		while (itr.hasNext())
 		{
 			WbFile f = itr.next();
@@ -138,10 +144,11 @@ public class ImportFileLister
 				if (fname.indexOf(contained) > -1)
 				{
 					LogMgr.logDebug("ImportFileLister.<init>", "Ignoring file: " + f.getFullPath());
-					itr.remove();
+					toRemove.add(f);
 				}
 			}
 		}
+		toProcess.removeAll(toRemove);
 	}
 
 	public void setIgnoreSchema(boolean flag)

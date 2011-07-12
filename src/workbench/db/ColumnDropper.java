@@ -51,24 +51,29 @@ public class ColumnDropper
 		this.table = tbl;
 	}
 
+	@Override
 	public void setRowActionMonitor(RowActionMonitor mon)
 	{
 	}
 
+	@Override
 	public boolean supportsCascade()
 	{
 		return false;
 	}
 
+	@Override
 	public void setCascade(boolean flag)
 	{
 	}
 
+	@Override
 	public boolean supportsFKSorting()
 	{
 		return false;
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -79,26 +84,31 @@ public class ColumnDropper
 		}
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.conn;
 	}
 
+	@Override
 	public void setConnection(WbConnection con)
 	{
 		this.conn = con;
 	}
 
+	@Override
 	public void setObjectTable(TableIdentifier tbl)
 	{
 		this.table = tbl;
 	}
 
+	@Override
 	public List<? extends DbObject> getObjects()
 	{
 		return columns;
 	}
 
+	@Override
 	public void setObjects(List<? extends DbObject> toDrop)
 	{
 		this.columns = new ArrayList<ColumnIdentifier>();
@@ -112,6 +122,7 @@ public class ColumnDropper
 		}
 	}
 
+	@Override
 	public CharSequence getScript()
 	{
 		List<String> statements = getSql(table, columns, conn);
@@ -128,12 +139,13 @@ public class ColumnDropper
 		return result;
 	}
 
+	@Override
 	public void dropObjects()
 		throws SQLException
 	{
 		if (this.conn == null) return;
 		if (this.table == null) return;
-		if (this.columns == null || this.columns.size() == 0) return;
+		if (this.columns == null || this.columns.isEmpty()) return;
 
 		List<String> statements = getSql(table, columns, conn);
 

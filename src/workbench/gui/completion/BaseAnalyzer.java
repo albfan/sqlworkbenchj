@@ -123,6 +123,17 @@ public abstract class BaseAnalyzer
 		return false;
 	}
 
+	/**
+	 * checks if the value selected by the user should be changed according to the upper/lowercase settings.
+	 *
+	 * @return true - check the "paste case"
+	 *         false - use the selected vale "as is"
+	 */
+	public boolean convertCase()
+	{
+		return true;
+	}
+
 	public String getSelectionPrefix()
 	{
 		return this.columnPrefix;

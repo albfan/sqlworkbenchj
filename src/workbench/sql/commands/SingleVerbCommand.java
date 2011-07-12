@@ -35,6 +35,7 @@ public class SingleVerbCommand extends SqlCommand
 		this.isUpdatingCommand = "COMMIT".equalsIgnoreCase(this.verb);
 	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -75,6 +76,7 @@ public class SingleVerbCommand extends SqlCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return verb;

@@ -272,24 +272,25 @@ public class CompletionPopup
 	private String getPasteValue(String value)
 	{
 		if (value == null) return value;
-		String result;
+		String result = value;
 		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
-		if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase)
+
+		if (this.context.getAnalyzer().convertCase())
 		{
-			result = value;
+			if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase)
+			{
+				result = value;
+			}
+			else if ("lower".equalsIgnoreCase(pasteCase))
+			{
+				result = value.toLowerCase();
+			}
+			else if ("upper".equalsIgnoreCase(pasteCase))
+			{
+				result = value.toUpperCase();
+			}
 		}
-		else if ("lower".equalsIgnoreCase(pasteCase))
-		{
-			result = value.toLowerCase();
-		}
-		else if ("upper".equalsIgnoreCase(pasteCase))
-		{
-			result = value.toUpperCase();
-		}
-		else
-		{
-			result = value;
-		}
+
 		result = this.context.getAnalyzer().cleanupPasteValue(result);
 		if (this.context.getAnalyzer().appendDotToSelection()) result += ".";
 		if (this.context.getAnalyzer().isKeywordList()) result += " ";

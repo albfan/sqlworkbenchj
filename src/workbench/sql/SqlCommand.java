@@ -178,7 +178,7 @@ public class SqlCommand
 		{
 			currentRetrievalData.cancelRetrieve();
 		}
-		
+
 		if (currentStatement != null)
 		{
 			try
@@ -727,7 +727,8 @@ public class SqlCommand
 		StringBuilder msg = new StringBuilder(150);
 		if (!errorMessagesOnly)
 		{
-			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+			msg.append(ResourceMgr.getString("MsgExecuteError"));
+			msg.append('\n');
 			if (reportFullStatementOnError)
 			{
 				msg.append(sql);
