@@ -220,7 +220,6 @@ public class OracleMetadata
 		// The Oracle driver stupidly reports TIMESTAMP(n) columns as Types.OTHER
 		if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP("))
 		{
-			LogMgr.logDebug("OracleMetaData.fixColumnType()", "Got Types.OTHER but expected Types.TIMESTAMP!");
 			return Types.TIMESTAMP;
 		}
 
@@ -434,7 +433,7 @@ public class OracleMetadata
 		stmt.setString(2, table);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleMetadata.getColumns()", "Using: " + sql);
+			LogMgr.logDebug("OracleMetadata.prepareColumnsStatement()", "Using: " + sql);
 		}
 		return stmt;
 	}
