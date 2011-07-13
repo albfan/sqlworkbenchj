@@ -68,6 +68,9 @@ public class WbCopy
 
 	private static final String ID_PREFIX = "$Wb-Copy$";
 
+	private static int instanceCount;
+	private int instanceId;
+
 	private CopyTask copier;
 
 	// for testing purposes
@@ -157,6 +160,11 @@ public class WbCopy
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
+		synchronized (VERB)
+		{
+			instanceId = ++instanceCount;
+		}
+
 		cmdLine.parse(getCommandLine(sql));
 
 		if (cmdLine.hasUnknownArguments())
@@ -186,13 +194,13 @@ public class WbCopy
 			return result;
 		}
 
-		WbConnection targetCon = getConnection(result, targetKey, ID_PREFIX + "-Target$");
+		WbConnection targetCon = getConnection(result, targetKey, ID_PREFIX + "-Target-"+ instanceId + "$");
 		if (targetCon == null || !result.isSuccess())
 		{
 			return result;
 		}
 
-		WbConnection sourceCon = getConnection(result, sourceKey, ID_PREFIX + "-Source$");
+		WbConnection sourceCon = getConnection(result, sourceKey, ID_PREFIX + "-Source-" + instanceId + "$");
 		if (sourceCon == null || !result.isSuccess())
 		{
 			return result;
