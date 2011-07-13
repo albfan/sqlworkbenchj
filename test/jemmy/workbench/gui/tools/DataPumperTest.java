@@ -105,6 +105,7 @@ public class DataPumperTest
 
 		tool.invokeAndWait(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				srctbl.setSelectedIndex(0);
@@ -128,6 +129,7 @@ public class DataPumperTest
 
 		tool.invokeAndWait(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				targettbl.setSelectedIndex(1);
@@ -145,6 +147,7 @@ public class DataPumperTest
 
 		tool.invokeAndWait(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				mode.setSelectedIndex(1); // Update mode
@@ -187,7 +190,7 @@ public class DataPumperTest
 
 	public void checkData()
 	{
-		WbConnection target = ConnectionMgr.getInstance().findConnection("Dp-Target");
+		WbConnection target = ConnectionMgr.getInstance().findConnection("Dp-Target1");
 		assertNotNull(target);
 
 		Statement stmt = null;
