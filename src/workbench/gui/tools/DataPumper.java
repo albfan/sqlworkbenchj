@@ -97,6 +97,9 @@ public class DataPumper
 	implements ActionListener, WindowListener, PropertyChangeListener,
 						 RowActionMonitor, ToolWindow
 {
+	private static int instanceCount;
+	private int windowId;
+
 	private File sourceFile;
 	private ProducerFactory fileImporter;
 	private DataCopier copier;
@@ -127,6 +130,8 @@ public class DataPumper
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
 	{
 		super();
+		this.windowId = ++instanceCount;
+
 		this.sourceProfile = source;
 		this.targetProfile = target;
 
@@ -397,7 +402,7 @@ public class DataPumper
 
 		try
 		{
-			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.sourceProfile, "Dp-Source");
+			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.sourceProfile, "Dp-Source" + this.windowId);
 			this.sourceConnection.getMetadata().disableOutput();
 		}
 		catch (Exception e)
@@ -472,7 +477,7 @@ public class DataPumper
 
 		try
 		{
-			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.targetProfile, "Dp-Target");
+			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.targetProfile, "Dp-Target" + windowId);
 			this.targetConnection.getMetadata().disableOutput();
 		}
 		catch (Exception e)
@@ -1608,7 +1613,8 @@ public class DataPumper
 		CommandTester t = new CommandTester();
 
 		StringBuilder result = new StringBuilder(150);
-		result.append(t.formatVerb(WbCopy.VERB) + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
+		result.append(t.formatVerb(WbCopy.VERB));
+		result.append(" -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String indent = "\n      ";
 
 
@@ -1737,7 +1743,8 @@ public class DataPumper
 		if (!"insert".equals(mode))
 		{
 			result.append(indent);
-			result.append("-" + CommonArgs.ARG_IMPORT_MODE + "=" + mode);
+			result.append("-" + CommonArgs.ARG_IMPORT_MODE + "=");
+			result.append(mode);
 			Collection<ColumnIdentifier> keys = this.getKeyColumns();
 			if (keys.size() > 0)
 			{
@@ -1764,7 +1771,8 @@ public class DataPumper
 		if (size > 0)
 		{
 			result.append(indent);
-			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=" + size);
+			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=");
+			result.append(Integer.toString(size));
 		}
 
 		if (size <= 0)
@@ -2086,7 +2094,11 @@ public class DataPumper
 			if (msg != null)
 			{
 				copied.append(msg);
-				if (msg2 != null) copied.append(", " + msg2);
+				if (msg2 != null)
+				{
+					copied.append(", ");
+					copied.append(msg2);
+				}
 			}
 			else if (msg2 != null && msg2.length() > 0)
 			{

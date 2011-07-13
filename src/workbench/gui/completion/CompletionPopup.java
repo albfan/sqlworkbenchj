@@ -195,16 +195,19 @@ public class CompletionPopup
 				@Override
 				public void run()
 				{
-					window.setLocation(p);
-					window.pack();
-					if (window.getWidth() < d.width + 5)
+					if (window != null)
 					{
-						window.setSize(d.width + 5, window.getHeight());
+						window.setLocation(p);
+						window.pack();
+						if (window.getWidth() < d.width + 5)
+						{
+							window.setSize(d.width + 5, window.getHeight());
+						}
+						window.setVisible(true);
+						elementList.requestFocus();
+						elementList.setSelectedIndex(toSelect);
+						elementList.ensureIndexIsVisible(toSelect);
 					}
-					window.setVisible(true);
-					elementList.requestFocus();
-					elementList.setSelectedIndex(toSelect);
-					elementList.ensureIndexIsVisible(toSelect);
 				}
 			});
 

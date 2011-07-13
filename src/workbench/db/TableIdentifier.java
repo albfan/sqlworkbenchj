@@ -229,6 +229,7 @@ public class TableIdentifier
 	{
 		if (con == null) return;
 		DbMetadata meta = con.getMetadata();
+		if (meta == null) return;
 		this.schemaWasQuoted = !meta.isDefaultCase(this.schema);
 		this.catalogWasQuoted = !meta.isDefaultCase(this.catalog);
 		this.tableWasQuoted = !meta.isDefaultCase(this.tablename);

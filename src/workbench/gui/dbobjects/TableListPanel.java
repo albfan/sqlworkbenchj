@@ -1230,8 +1230,12 @@ public class TableListPanel
 	private boolean isTable()
 	{
 		if (this.selectedTable == null) return false;
+		if (this.dbConnection == null) return false;
 		DbMetadata meta = this.dbConnection.getMetadata();
+		if (meta == null) return false;
 		DbSettings dbs = this.dbConnection.getDbSettings();
+		if (dbs == null) return false;
+		
 		String type = selectedTable.getType();
 		if (meta.isTableType(type)) return true;
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))

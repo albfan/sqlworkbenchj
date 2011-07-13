@@ -16,6 +16,7 @@ import java.sql.Savepoint;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
@@ -223,14 +224,21 @@ public class DdlCommand
 
 	/**
 	 * Retrieve extended error information if the DBMS supports this.
+	 *
 	 * Currently this is only implemented for Oracle to read errors
 	 * after creating a stored procedure from the ALL_ERRORS view.
+	 *
+	 * @see DbMetadata#getExtendedErrorInfo(String, String, String)
 	 */
 	private boolean addExtendErrorInfo(WbConnection aConnection, SqlUtil.DdlObjectInfo info , StatementRunnerResult result)
 	{
 		if (info == null) return false;
+		if (aConnection == null) return false;
 
-		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType);
+		DbMetadata meta = aConnection.getMetadata();
+		if (meta == null) return false;
+
+		String msg = meta.getExtendedErrorInfo(null, info.objectName, info.objectType);
 		if (msg != null && msg.length() > 0)
 		{
 			result.addMessageNewLine();

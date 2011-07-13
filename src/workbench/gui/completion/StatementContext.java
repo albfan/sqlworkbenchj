@@ -106,7 +106,10 @@ public class StatementContext
 		}
 	}
 
-	public BaseAnalyzer getAnalyzer() { return this.analyzer; }
+	public BaseAnalyzer getAnalyzer()
+	{
+		return this.analyzer;
+	}
 
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
@@ -117,6 +120,8 @@ public class StatementContext
 			SQLLexer lexer = new SQLLexer(sql);
 
 			SQLToken t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+
 			SQLToken lastToken = null;
 
 			int lastStart = 0;
@@ -128,9 +133,7 @@ public class StatementContext
 			List<Integer> unionStarts = new ArrayList<Integer>();
 			int bracketCount = 0;
 			boolean inSubselect = false;
-			boolean checkForInsertSelect = verb.equals("INSERT")
-				|| verb.equals("CREATE")
-				|| verb.equals("CREATE OR REPLACE");
+			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE") || verb.equals("CREATE OR REPLACE");
 
 			while (t != null)
 			{
