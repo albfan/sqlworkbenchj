@@ -5,7 +5,8 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
-    <entry dev-build="3" type="fix">Starting more than one DataPumper did not work</entry>
+    <entry dev-build="3" type="fix">Running more than one DataPumper in parallel did not work.</entry>
+    <entry dev-build="3" type="fix">Running more than one WbCopy command in parallel did not work.</entry>
     <entry dev-build="2" type="fix">Displaying the source code for functions did not always work properly in PostgreSQL</entry>
     <entry dev-build="1" type="fix">Copy as SQL UPDATE did not work properly</entry>
     <entry dev-build="1" type="fix">If more than one statement was selected reformatting the SQL would remove the delimiter</entry>
