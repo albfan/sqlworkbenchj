@@ -71,7 +71,7 @@ public class ExceptionUtil
 		}
 		return result;
 	}
-	
+
 	public static StringBuilder getAllExceptions(SQLException th)
 	{
 		StringBuilder result = new StringBuilder(100);
@@ -85,7 +85,7 @@ public class ExceptionUtil
 		}
 		return result;
 	}
-	
+
 	public static String getDisplay(Throwable th)
 	{
 		if (th instanceof SQLException)
@@ -102,30 +102,33 @@ public class ExceptionUtil
 	{
 		return getDisplayBuffer(null, th, includeStackTrace).toString();
 	}
-	
+
 	public static StringBuilder getDisplayBuffer(StringBuilder result, Throwable th, boolean includeStackTrace)
 	{
 		if (result == null) result = new StringBuilder(50);
+		
 		try
 		{
 			if (th.getMessage() == null)
 			{
 				result.append(th.getClass().getName());
-				if (!includeStackTrace) 
+				if (!includeStackTrace)
 				{
 					// always include Stacktrace for NPE
 					// sometimes these are not properly logged, and this way
 					// the stacktrace does at least show up in the front end
-					// which should not happen anyway, but if it does, 
+					// which should not happen anyway, but if it does,
 					// we have at least proper error information
 					includeStackTrace = (th instanceof NullPointerException);
-				} 
+				}
 			}
 			else
 			{
+				result.append(th.getClass().getName());
+				result.append(": ");
 				result.append(th.getMessage().trim());
 			}
-			
+
 			if (th instanceof SQLException)
 			{
 				SQLException se = (SQLException)th;
@@ -150,7 +153,8 @@ public class ExceptionUtil
 		catch (Throwable th1)
 		{
 			LogMgr.logError("ExceptionUtil.getDisplay()", "Error while creating display string", th1);
-			result.append("Exception: " + th.getClass().getName());
+			result.append("Exception: ");
+			result.append(th.getClass().getName());
 		}
 		return result;
 	}

@@ -17,9 +17,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
+
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -91,6 +93,7 @@ public class DataStoreTableModel
 	 *	@param row - The row to get. Counting starts at zero.
 	 *	@param col - The column to get. Counting starts at zero.
 	 */
+	@Override
 	public Object getValueAt(int row, int col)
 	{
 		if (this.showStatusColumn && col == 0)
@@ -111,6 +114,7 @@ public class DataStoreTableModel
 		}
 	}
 
+	@Override
 	public int findColumn(String aColname)
 	{
 		int index = this.dataCache.getColumnIndex(aColname);
@@ -185,6 +189,7 @@ public class DataStoreTableModel
 		inputValidator = validator;
 	}
 
+	@Override
 	public void setValueAt(Object aValue, int row, int column)
 	{
 		// Updates to the status column shouldn't happen anyway ....
@@ -226,6 +231,7 @@ public class DataStoreTableModel
 		}
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				fireTableDataChanged();
@@ -238,6 +244,7 @@ public class DataStoreTableModel
 	 *	This will return the number of columns of the underlying DataStore (plus one
 	 *  if the status column is enabled)
 	 */
+	@Override
 	public int getColumnCount()
 	{
 		return this.dataCache.getColumnCount() + this.columnStartIndex;
@@ -327,12 +334,14 @@ public class DataStoreTableModel
 	/**
 	 *	Number of rows in the result set
 	 */
+	@Override
 	public int getRowCount()
 	{
 		if (this.dataCache == null) return 0;
 		return this.dataCache.getRowCount();
 	}
 
+	@Override
 	public Class getColumnClass(int aColumn)
 	{
 		if (this.dataCache == null) return null;
@@ -396,6 +405,7 @@ public class DataStoreTableModel
 
 	/** Return the name of the column as defined by the ResultSetData.
 	 */
+	@Override
 	public String getColumnName(int aColumn)
 	{
 		if (this.showStatusColumn && aColumn == 0) return " ";
@@ -411,6 +421,7 @@ public class DataStoreTableModel
 		}
 	}
 
+	@Override
 	public boolean isCellEditable(int row, int column)
 	{
 		if (!this.noneditableColumns.isEmpty())
@@ -631,6 +642,7 @@ public class DataStoreTableModel
 		final TableModelEvent event = new TableModelEvent(this);
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				fireTableChanged(event);
@@ -663,6 +675,7 @@ public class DataStoreTableModel
 
 		Thread t = new WbThread("Data Sort")
 		{
+			@Override
 			public void run()
 			{
 				try
