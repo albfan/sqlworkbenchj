@@ -13,6 +13,7 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -37,6 +38,7 @@ public class WbAbout
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
@@ -86,8 +88,10 @@ public class WbAbout
 		if (this.currentConnection == null) return null;
 		StringBuilder content = new StringBuilder(100);
 
+		Savepoint sp = null;
 		try
 		{
+			sp = currentConnection.setSavepoint();
 			DatabaseMetaData meta = currentConnection.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = currentConnection.getMetadata();
 
@@ -123,9 +127,11 @@ public class WbAbout
 				content.append(s + ": " + catalog + "\n");
 			}
 			content.append("Workbench DBID: " + wbmeta.getDbId() + " \n");
+			currentConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			currentConnection.rollback(sp);
 			LogMgr.logError("WbAbout.getConnectionInfo()", "Error retrieving connection info", e);
 			return null;
 		}
