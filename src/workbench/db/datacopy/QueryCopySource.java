@@ -13,6 +13,7 @@ package workbench.db.datacopy;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Map;
@@ -89,8 +90,14 @@ public class QueryCopySource
 		ResultSet rs = null;
 		this.keepRunning = true;
 		this.regularStop = false;
+		Savepoint sp = null;
+		
 		try
 		{
+			if (this.sourceConnection.getDbSettings().selectStartsTransaction())
+			{
+				sp = sourceConnection.setSavepoint();
+			}
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
@@ -136,6 +143,7 @@ public class QueryCopySource
 		finally
 		{
 			SqlUtil.closeAll(rs, retrieveStatement);
+			sourceConnection.rollback(sp);
 		}
 	}
 
