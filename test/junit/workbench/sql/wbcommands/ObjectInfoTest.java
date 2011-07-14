@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
 
 /**
  *
@@ -48,14 +49,16 @@ public class ObjectInfoTest
 			+ "CREATE VIEW v_person (pnr, pname) AS SELECT nr, person_name FROM PERSON; \n"
 			+ "create sequence seq_id; \n"
 			+ "commit;");
-	}
+
+}
 
 	@Test
-	public void testGetObjectInfo()
+	public void testGetFullObjectInfo()
 		throws Exception
 	{
 		String objectName = "person";
 		ObjectInfo info = new ObjectInfo();
+		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", true);
 		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false);
 		assertTrue(tableInfo.hasDataStores());
 		DataStore ds = tableInfo.getDataStores().get(0);
@@ -101,5 +104,28 @@ public class ObjectInfoTest
 //		System.out.println(seqInfo.getSourceCommand());
 		assertTrue(seqInfo.hasDataStores());
 		assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
+	}
+
+	@Test
+	public void testGetPartialObjectInfo()
+		throws Exception
+	{
+		String objectName = "person";
+		ObjectInfo info = new ObjectInfo();
+		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", false);
+		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false);
+		assertTrue(tableInfo.hasDataStores());
+		DataStore ds = tableInfo.getDataStores().get(0);
+		assertEquals(2, ds.getRowCount());
+		assertEquals("NR", ds.getValueAsString(0, 0));
+		assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
+
+		tableInfo = info.getObjectInfo(db, objectName, true);
+		assertTrue(tableInfo.hasDataStores());
+		assertEquals(2, tableInfo.getDataStores().size());
+
+		DataStore indexes = tableInfo.getDataStores().get(1);
+		assertEquals("PERSON - Indexes", indexes.getResultName());
+		assertEquals(1, indexes.getRowCount());
 	}
 }
