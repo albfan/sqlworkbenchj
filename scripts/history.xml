@@ -3,6 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-06-13">
     <entry dev-build="8" type="enh">The SQL for foreign keys referencing unique constraints (instead of primary keys) is now displayed for Oracle and Postgres</entry>
+    <entry dev-build="8" type="enh">WbImport now accepts multi-character delimiters (e.g. \t\t)</entry>
     <entry dev-build="7" type="enh">The suffix for escaping variables can now be defined as "empty", so that e.g. &amp;val can be used as variable name</entry>
     <entry dev-build="6" type="enh">For PostgreSQL 9.1 and Oracle, the trigger panel in the DbExplorer is now also shown for Views</entry>
     <entry dev-build="6" type="enh">For MySQL and SQL Server column level collation and character set definitions are now shown</entry>
@@ -13,7 +14,7 @@
     <entry dev-build="5" type="enh">The order of the columns in the DbExplorer's table list is now saved in the workspace</entry>
     <entry dev-build="4" type="enh">WbDeleteProfile and WbSaveProfile are now also supported in batch mode.</entry>
     <entry dev-build="4" type="enh">WbSaveProfile now supports a parameter whether the password should be stored or not (in that case the new -name parameter must be used to specify the profile's name)</entry>
-    <entry dev-build="2" type="enh">For simple INSERT statements a tooltip can now be show (Ctrl-P) that displays the corresponding column name or column value.</entry>
+    <entry dev-build="2" type="enh">For simple INSERT statements a tooltip can now be show (Ctrl-#) that displays the corresponding column name or column value.</entry>
     <entry dev-build="2" type="enh">The matching bracket highlighting can now be configured</entry>
     <entry dev-build="2" type="enh">When converting boolean values to numeric values during WbImport, the numeric values to be used can now be specified using the new parameters -numericFalse and -numericTrue</entry>
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
