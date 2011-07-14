@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -94,7 +95,7 @@ public class FkDisplayPanel
 	protected void retrieve(TableIdentifier table)
 		throws SQLException
 	{
-		FKHandler handler = new FKHandler(dbConnection);
+		FKHandler handler = FKHandlerFactory.createInstance(dbConnection);
 		final DataStoreTableModel model;
 		if (showImportedKeys)
 		{

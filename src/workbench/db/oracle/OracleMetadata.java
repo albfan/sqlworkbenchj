@@ -378,13 +378,14 @@ public class OracleMetadata
 		String sql2 =
 			"     t.data_default AS column_def,  \n" +
 			"     t.char_used, \n " +
-			"       t.column_id AS ordinal_position,   \n" +
-			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
+			"     t.column_id AS ordinal_position,   \n" +
+			"     DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
 
 		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
 		if (includeVirtualColumns)
 		{
-			sql2 += ", t.virtual_column \n FROM all_tab_cols t \n";
+			// for some reason XMLTYPE columns are returned with virtual_column = 'YES' which seems like a bug in all_tab_cols....
+			sql2 += ", case when data_type <> 'XMLTYPE' THEN t.virtual_column else 'NO' end as virtual_column \n FROM all_tab_cols t \n";
 		}
 		else
 		{

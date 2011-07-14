@@ -371,17 +371,17 @@ public class TableIdentifier
 		return result.toString();
 	}
 
-	String getRawCatalog()
+	public String getRawCatalog()
 	{
 		return this.catalog;
 	}
 
-	String getRawTableName()
+	public String getRawTableName()
 	{
 		return this.tablename;
 	}
 
-	String getRawSchema()
+	public String getRawSchema()
 	{
 		return this.schema;
 	}

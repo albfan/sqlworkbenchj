@@ -625,7 +625,7 @@ public class TableSourceBuilder
 
 			if (meta.isSystemConstraintName(fkname))
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, "");
+				stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, "");
 				stmt = StringUtil.replace(stmt, " CONSTRAINT ", "");
 			}
 			else
@@ -633,11 +633,11 @@ public class TableSourceBuilder
 				if (dbConnection.getDbSettings().useFQConstraintName())
 				{
 					String fqName = SqlUtil.buildExpression(dbConnection, table.getCatalog(), table.getSchema(), fkname);
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fqName);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fqName);
 				}
 				else
 				{
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkname);
 				}
 			}
 

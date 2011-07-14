@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
@@ -100,7 +101,7 @@ public class JoinColumnsDetector
 		throws SQLException
 	{
 		Map<String, String> columns = new HashMap<String, String>(2);
-		FKHandler fkHandler = new FKHandler(connection);
+		FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
 		DataStore ds = fkHandler.getImportedKeys(table2);
 		int count = ds.getRowCount();
 		for (int row = 0; row < count; row ++)

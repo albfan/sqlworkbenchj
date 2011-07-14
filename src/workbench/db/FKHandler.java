@@ -65,7 +65,7 @@ public class FKHandler
 
 	private WbConnection dbConnection;
 
-	public FKHandler(WbConnection conn)
+	protected FKHandler(WbConnection conn)
 	{
 		dbConnection = conn;
 	}
@@ -74,6 +74,7 @@ public class FKHandler
 	 * Returns a DataStore with the exported keys with the raw information copied from the result
 	 * of the DatabaseMetaData.getExportedKeys()
 	 *
+	 * These are "outgoing" foreign keys from the passed table
 	 * @param source the table to check
 	 * @return the defined foreign keys
 	 * @throws SQLException
@@ -105,6 +106,8 @@ public class FKHandler
 	 *
 	 * This will include all foreign key constraints on columns of the passed table that reference other tables.
 	 *
+	 * The column indexes of this datastore are defined by the COLUMN_IDX_xxx constants in this class
+	 *
 	 * @param table the table to check
 	 * @param includeNumericRuleValue
 	 * @return all "outgoing" foreign keys
@@ -120,6 +123,8 @@ public class FKHandler
 	 *
 	 * This will include all foreign key constraints from other tables that reference the passed table.
 	 *
+	 * The column indexes of this datastore are defined by the COLUMN_IDX_xxx constants in this class
+	 *
 	 * @param table the table to check
 	 * @param includeNumericRuleValue
 	 * @return all "incoming" foreign keys
@@ -130,7 +135,12 @@ public class FKHandler
 		return ds;
 	}
 
-	private DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
+	protected WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+
+	protected DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
 		throws SQLException
 	{
 		TableIdentifier table = tbl.createCopy();
@@ -140,10 +150,20 @@ public class FKHandler
 
 		ResultSet rs;
 		if (exported)
-			rs = meta.getExportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
+		{
+			rs = meta.getExportedKeys(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName());
+		}
 		else
-			rs = meta.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
+		{
+			rs = meta.getImportedKeys(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName());
+		}
+		return processResult(rs);
 
+	}
+
+	protected DataStore processResult(ResultSet rs)
+		throws SQLException
+	{
 		DataStore ds = new DataStore(rs, false);
 		try
 		{
@@ -174,7 +194,7 @@ public class FKHandler
 		return ds;
 	}
 
-	private DataStore getKeyList(TableIdentifier tableId, boolean getOwnFk, boolean includeNumericRuleValue)
+	private DataStore getKeyList(TableIdentifier tbl, boolean getOwnFk, boolean includeNumericRuleValue)
 	{
 		String cols[] = null;
 		String refColName = null;
@@ -204,16 +224,12 @@ public class FKHandler
 			sizes = new int[] {25, 10, 30, 12, 12, 15};
 		}
 		DataStore ds = new DataStore(cols, types, sizes);
-		if (tableId == null) return ds;
+		if (tbl == null) return ds;
 
-		ResultSet rs = null;
+		DataStore rawList = null;
 
 		try
 		{
-			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
-			TableIdentifier tbl = tableId.createCopy();
-			tbl.adjustCase(this.dbConnection);
-
 			int tableCol;
 			int fkNameCol;
 			int colCol;
@@ -224,41 +240,43 @@ public class FKHandler
 
 			if (getOwnFk)
 			{
-				rs = meta.getImportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-				tableCol = 3;
-				schemaCol = 2;
-				fkNameCol = 12;
-				colCol = 8;
-				fkColCol = 4;
+				//rs = meta.getImportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+				rawList = getRawKeyList(tbl, false);
+				tableCol = 2;
+				schemaCol = 1;
+				fkNameCol = 11;
+				colCol = 7;
+				fkColCol = 3;
 			}
 			else
 			{
-				rs = meta.getExportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-				tableCol = 7;
-				schemaCol = 6;
-				fkNameCol = 12;
-				colCol = 4;
-				fkColCol = 8;
+				//rs = meta.getExportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+				rawList = getRawKeyList(tbl, true);
+				tableCol = 6;
+				schemaCol = 5;
+				fkNameCol = 11;
+				colCol = 3;
+				fkColCol = 7;
 			}
 
 			String currentSchema = dbConnection.getMetadata().getCurrentSchema();
-			while (rs.next())
+			for (int rawRow = 0; rawRow < rawList.getRowCount(); rawRow ++)
 			{
-				String table = rs.getString(tableCol);
-				String fk_col = rs.getString(fkColCol);
-				String col = rs.getString(colCol);
-				String fk_name = rs.getString(fkNameCol);
-				String schema = rs.getString(schemaCol);
+				String table = rawList.getValueAsString(rawRow, tableCol);
+				String fk_col = rawList.getValueAsString(rawRow, fkColCol);
+				String col = rawList.getValueAsString(rawRow, colCol);
+				String fk_name = rawList.getValueAsString(rawRow, fkNameCol);
+				String schema = rawList.getValueAsString(rawRow, schemaCol);
 				if (!this.dbConnection.getMetadata().ignoreSchema(schema, currentSchema))
 				{
 					table = schema + "." + table;
 				}
-				int updateAction = rs.getInt(updateActionCol);
+				int updateAction = rawList.getValueAsInt(rawRow, updateActionCol, DatabaseMetaData.importedKeyNoAction);
 				String updActionDesc = dbSettings.getRuleDisplay(updateAction);
-				int deleteAction = rs.getInt(deleteActionCol);
+				int deleteAction = rawList.getValueAsInt(rawRow, deleteActionCol, DatabaseMetaData.importedKeyNoAction);
 				String delActionDesc = dbSettings.getRuleDisplay(deleteAction);
 
-				int deferrableCode = rs.getInt(14);
+				int deferrableCode = rawList.getValueAsInt(rawRow, 13, DatabaseMetaData.importedKeyNoAction);
 				String deferrable = dbSettings.getRuleDisplay(deferrableCode);
 
 				int row = ds.addRow();
@@ -281,10 +299,6 @@ public class FKHandler
 		{
 			LogMgr.logError("FKHandler.getKeyList()", "Error when retrieving foreign keys", e);
 			ds.reset();
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
 		}
 		return ds;
 	}

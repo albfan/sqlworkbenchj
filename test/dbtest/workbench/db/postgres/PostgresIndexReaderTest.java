@@ -23,7 +23,6 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
@@ -74,6 +73,7 @@ public class PostgresIndexReaderTest
 		TestUtil.executeScript(conn,
 			"create table person (id integer, firstname varchar(50), lastname varchar(50));\n" +
 			"create index idx_person_id on person (id);\n" +
+			"alter table person add constraint uq_firstname unique (firstname);\n" +
 			"commit;\n");
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
@@ -84,24 +84,20 @@ public class PostgresIndexReaderTest
 		}
 		assertFalse(indexes.isEmpty());
 
-		
 		IndexDefinition index = indexes.get(0);
 		assertEquals("idx_person_id", index.getObjectName());
 		String sql = index.getSource(conn).toString();
 		String type = SqlUtil.getCreateType(sql);
 
-		System.out.println(sql);
+//		System.out.println(sql);
 		assertEquals("INDEX", type);
 		assertTrue(sql.contains("idx_person_id"));
 		assertTrue(sql.contains("(id"));
 
-		DataStore indexDS = conn.getMetadata().getIndexReader().getTableIndexInformation(table);
-		String sql2 = reader.getIndexSource(table, indexDS, null).toString();
-
-		System.out.println(sql2);
-
+		index = indexes.get(1);
+		assertEquals("uq_firstname", index.getObjectName());
+		sql = index.getSource(conn).toString();
+		assertTrue(sql.startsWith("ALTER TABLE"));
 	}
-
-
 
 }

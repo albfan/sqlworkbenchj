@@ -340,6 +340,12 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "create.index", Settings.getInstance().getProperty("workbench.db.sql.create.index", null));
 	}
 
+	public String getCreateUniqeConstraintSQL()
+	{
+		return Settings.getInstance().getProperty(prefix + "create.uniqueconstraint", Settings.getInstance().getProperty("workbench.db.sql.create.uniqueconstraint", null));
+	}
+
+
 	public String getSelectForFunctionSQL()
 	{
 		return Settings.getInstance().getProperty(prefix + "function.select", null);
@@ -1367,5 +1373,10 @@ public class DbSettings
 	public String getSearchStringEscape()
 	{
 		return Settings.getInstance().getProperty(prefix + "searchstringescape", null);
+	}
+
+	public boolean fixFKRetrieval()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "fixfkretrieval", true);
 	}
 }

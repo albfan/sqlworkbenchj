@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
@@ -272,7 +273,7 @@ public class ReportTable
 
 	private void readForeignKeys(WbConnection conn)
 	{
-		FKHandler	fk = new FKHandler(conn);
+		FKHandler	fk = FKHandlerFactory.createInstance(conn);
 		DataStore ds = fk.getForeignKeys(this.table, true);
 		int keys = ds.getRowCount();
 		if (keys == 0) return;

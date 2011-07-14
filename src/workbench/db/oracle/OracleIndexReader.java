@@ -23,6 +23,7 @@ import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
+import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -57,6 +58,12 @@ public class OracleIndexReader
 		this.indexStatement = null;
 	}
 
+	@Override
+	public UniqueConstraintReader getUniqueConstraintReader()
+	{
+		return new OracleUniqueConstraintReader();
+	}
+
 	/**
 	 * Replacement for the DatabaseMetaData.getIndexInfo() method.
 	 * <br/>
@@ -78,7 +85,7 @@ public class OracleIndexReader
 		return getIndexInfo(table, null, null, unique);
 	}
 
-	public ResultSet getIndexInfo(TableIdentifier table, String indexName, String indexSchema, boolean unique)
+	private ResultSet getIndexInfo(TableIdentifier table, String indexName, String indexSchema, boolean unique)
 		throws SQLException
 	{
 		if (this.indexStatement != null)
@@ -105,8 +112,7 @@ public class OracleIndexReader
 			"       decode(c.descend, 'ASC', 'A', 'DESC', 'D', null) as asc_or_desc, \n" +
 			"       i.distinct_keys as cardinality, \n" +
 			"       i.leaf_blocks as pages, \n" +
-			"       null as filter_condition, \n" +
-			"       i.index_type \n" +
+			"       null as filter_condition \n" +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c ON i.index_name = c.index_name AND i.table_owner = c.table_owner AND i.table_name = c.table_name AND i.owner = c.index_owner \n" +
 			"WHERE i.table_name = ? \n");
@@ -115,6 +121,7 @@ public class OracleIndexReader
 		{
 			sql.append("  AND i.owner = ? \n");
 		}
+
 		if (unique)
 		{
 			sql.append("  AND i.uniqueness = 'UNIQUE'\n");
@@ -138,6 +145,7 @@ public class OracleIndexReader
 		{
 			sql.append("  AND i.index_name NOT LIKE 'I_SNAP$%' \n");
 		}
+
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
 
 		if (Settings.getInstance().getDebugMetadataSql())

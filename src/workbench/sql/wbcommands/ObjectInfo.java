@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.DbSettings;
 import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
 import workbench.db.IndexReader;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -166,7 +167,7 @@ public class ObjectInfo
 				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving sequences", e);
 			}
 		}
-		
+
 		if (toDescribe == null)
 		{
 			try
@@ -295,7 +296,7 @@ public class ObjectInfo
 
 			try
 			{
-				FKHandler fk = new FKHandler(connection);
+				FKHandler fk = FKHandlerFactory.createInstance(connection);
 				DataStore references = fk.getForeignKeys(toDescribe, false);
 				if (references.getRowCount() > 0)
 				{

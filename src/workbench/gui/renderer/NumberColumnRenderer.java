@@ -23,7 +23,7 @@ import workbench.resource.Settings;
 
 /**
  * Display numeric values according to the global formatting settings.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class NumberColumnRenderer
@@ -32,7 +32,7 @@ public class NumberColumnRenderer
 	private final DecimalFormat decimalFormatter;
 	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
 	private int maxDigits = -1;
-	
+
 	public NumberColumnRenderer()
 	{
 		super();
@@ -61,7 +61,7 @@ public class NumberColumnRenderer
 		this.setMaxDigits(maxDigits);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
-	
+
 	public final void setMaxDigits(int digits)
 	{
 		synchronized (this.decimalFormatter)
@@ -71,7 +71,7 @@ public class NumberColumnRenderer
 			decimalFormatter.setMaximumFractionDigits(maxDigits);
 		}
 	}
-	
+
 	public void setDecimalSymbol(char aSymbol)
 	{
 		synchronized (this.decimalFormatter)
@@ -80,23 +80,24 @@ public class NumberColumnRenderer
 			this.decimalFormatter.setDecimalFormatSymbols(this.symb);
 		}
 	}
-	
+
 	private boolean isInteger(Number n)
 	{
-		return (n instanceof Integer 
-			|| n instanceof Long 
-			|| n instanceof Short 
+		return (n instanceof Integer
+			|| n instanceof Long
+			|| n instanceof Short
 			|| n instanceof BigInteger
 			|| n instanceof AtomicInteger
 			|| n instanceof AtomicLong);
 	}
-	
+
+	@Override
 	public void prepareDisplay(Object aValue)
 	{
 		try
 		{
 			Number n = (Number) aValue;
-			
+
 			// BigDecimal cannot be formatted using a DecimalFormatter
 			// without possible loss of precission
 			if (n instanceof BigDecimal)
@@ -106,7 +107,7 @@ public class NumberColumnRenderer
 				// Oracle returns all numeric values as BigDecimal
 				// but if the value is actual an "Integer" toString() will
 				// return a String without a decimal separator
-				// in that case we won't apply the rounding to the 
+				// in that case we won't apply the rounding to the
 				// required number of decimal digits
 				String v = d.toString();
 				if (v.lastIndexOf('.') > -1)
@@ -117,7 +118,7 @@ public class NumberColumnRenderer
 
 					v = rounded.toString();
 					// toString() will use a dot as the decimal separator
-					// if the user configured a different one, we have to 
+					// if the user configured a different one, we have to
 					// replace the last dot in the string with the user
 					// defined decimal separator.
 					if (sepChar != '.')
@@ -131,24 +132,24 @@ public class NumberColumnRenderer
 						}
 					}
 				}
-				
+
 				this.displayValue = v;
 			}
 			else if (isInteger(n))
 			{
-				// BigInteger cannot be formatted without a possible 
-				// loss of precission as well, but for "Integer" types, 
+				// BigInteger cannot be formatted without a possible
+				// loss of precission as well, but for "Integer" types,
 				// toString() should produce the correct results
 				displayValue = n.toString();
 			}
-			else 
+			else
 			{
 				synchronized (this.decimalFormatter)
 				{
 					displayValue = decimalFormatter.format(n.doubleValue());
 				}
 			}
-			
+
 			if (showTooltip)
 			{
 				this.tooltip = aValue.toString();
@@ -160,7 +161,7 @@ public class NumberColumnRenderer
 		}
 		catch (Throwable th)
 		{
-			displayValue = aValue.toString(); 
+			displayValue = aValue.toString();
 			this.tooltip = null;
 		}
 	}

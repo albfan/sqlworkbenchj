@@ -152,21 +152,38 @@ public class JdbcIndexReader
 		return result;
 	}
 
+
+	protected String getUniqueConstraint(TableIdentifier table, IndexDefinition indexDefinition)
+	{
+		String template = this.metaData.getDbSettings().getCreateUniqeConstraintSQL();
+		String tableName = table.getTableExpression(this.metaData.getWbConnection());
+		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
+		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, indexDefinition.getUniqueConstraintName());
+
+		return sql;
+	}
+
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse)
 	{
 		if (indexDefinition == null) return null;
 		StringBuilder idx = new StringBuilder(100);
-		String template = this.metaData.getDbSettings().getCreateIndexSQL();
-
-		String type = indexDefinition.getIndexType();
-		type = getSQLKeywordForType(type);
 
 		String tableName = tableNameToUse;
 		if (tableName == null)
 		{
 			tableName = table.getTableName();
 		}
+
+		if (indexDefinition.isUniqueConstraint())
+		{
+			return getUniqueConstraint(table, indexDefinition);
+		}
+
+		String template = this.metaData.getDbSettings().getCreateIndexSQL();
+		String type = indexDefinition.getIndexType();
+		type = getSQLKeywordForType(type);
 
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 
@@ -297,12 +314,17 @@ public class JdbcIndexReader
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
+			idxData.getRow(row).setUserObject(idx);
 		}
 		idxData.sortByColumn(0, true);
 		idxData.resetStatus();
 		return idxData;
 	}
 
+	public UniqueConstraintReader getUniqueConstraintReader()
+	{
+		return null;
+	}
 
 	/**
 	 * Returns a list of indexes defined for the given table
@@ -332,6 +354,11 @@ public class JdbcIndexReader
 		{
 			SqlUtil.closeResult(idxRs);
 			indexInfoProcessed();
+		}
+		UniqueConstraintReader reader = getUniqueConstraintReader();
+		if (reader != null)
+		{
+			reader.processIndexList(result, this.metaData.getWbConnection());
 		}
 		return result;
 	}

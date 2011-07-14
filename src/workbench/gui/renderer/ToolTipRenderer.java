@@ -124,7 +124,8 @@ public class ToolTipRenderer
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("ToolTipRenderer.getDefaultInsets()", "Error reading default insets from settings", e);
+				String value = Settings.getInstance().getProperty("workbench.gui.renderer.insets", null);
+				LogMgr.logError("ToolTipRenderer.getDefaultInsets()", "Error reading default insets from settings: " + value, e);
 				result = null;
 			}
 		}

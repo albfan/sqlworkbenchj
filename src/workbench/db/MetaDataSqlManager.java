@@ -33,7 +33,7 @@ public class MetaDataSqlManager
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key%";
 	public static final String COLUMN_NAME_PLACEHOLDER = "%column_name%";
 	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";
-	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
+	public static final String CONSTRAINT_NAME_PLACEHOLDER = "%constraintname%";
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
 	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";

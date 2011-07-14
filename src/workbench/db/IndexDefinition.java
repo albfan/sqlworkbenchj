@@ -14,6 +14,7 @@ package workbench.db;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to store the defintion of a database index.
@@ -29,7 +30,7 @@ public class IndexDefinition
 	private TableIdentifier baseTable;
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	private String comment;
-	private boolean isUniqueConstraint;
+	private String uniqueConstraintName;
 
 	public IndexDefinition(TableIdentifier table, String name)
 	{
@@ -63,12 +64,24 @@ public class IndexDefinition
 
 	public boolean isUniqueConstraint()
 	{
-		return isUniqueConstraint;
+		return uniqueConstraintName != null;
 	}
 
-	public void setIsUniqueConstraint(boolean flag)
+	public void setUniqueConstraintName(String name)
 	{
-		this.isUniqueConstraint = flag;
+		if (StringUtil.isBlank(name))
+		{
+			this.uniqueConstraintName = null;
+		}
+		else
+		{
+			this.uniqueConstraintName = name;
+		}
+	}
+
+	public String getUniqueConstraintName()
+	{
+		return uniqueConstraintName;
 	}
 
 	public void addColumn(String column, String direction)
@@ -143,6 +156,17 @@ public class IndexDefinition
 		return getExpression();
 	}
 
+	public String getColumnList()
+	{
+		StringBuilder result = new StringBuilder(this.columns.size() * 10);
+		for (int i=0; i < this.columns.size(); i++)
+		{
+			if (i > 0) result.append(", ");
+			result.append(columns.get(i).getColumn());
+		}
+		return result.toString();
+	}
+
 	public String getExpression()
 	{
 		StringBuilder result = new StringBuilder(this.columns.size() * 10);
@@ -177,8 +201,9 @@ public class IndexDefinition
 			boolean equals = false;
 			if (this.isPK && other.isPK || this.isUnique && other.isUnique)
 			{
+				equals = true;
 				// for PK indexes the order of the columns in the index does not matter
-				// so we consider the same list of columns equals even if they have different order
+				// so we consider the same list of columns equal even if they have a different order
 				for (IndexColumn col : columns)
 				{
 					if (!other.columns.contains(col))
@@ -187,7 +212,6 @@ public class IndexDefinition
 						break;
 					}
 				}
-				equals = true;
 			}
 			else
 			{
@@ -213,5 +237,17 @@ public class IndexDefinition
 		if (con == null) return null;
 		IndexReader reader = con.getMetadata().getIndexReader();
 		return reader.getIndexSource(baseTable, this, null);
+	}
+
+	public static IndexDefinition findIndex(List<IndexDefinition> indexList, String indexName, String indexSchema)
+	{
+		for (IndexDefinition idx : indexList)
+		{
+			if (idx.getObjectName().equals(indexName) && (indexSchema == null || indexSchema.equals(idx.getSchema())))
+			{
+				return idx;
+			}
+		}
+		return null;
 	}
 }

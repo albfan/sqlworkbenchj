@@ -17,12 +17,12 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class IndexColumn 
+public class IndexColumn
 {
 	private String column;
 	private String direction;
-	
-  public IndexColumn(String col, String dir) 
+
+  public IndexColumn(String col, String dir)
   {
 		this.column = col;
 		this.direction = dir;
@@ -32,23 +32,23 @@ public class IndexColumn
 	{
 		this.column = newName;
 	}
-	
-	public String getColumn() 
-	{ 
-		return this.column; 
+
+	public String getColumn()
+	{
+		return this.column;
 	}
-	
-	public String getDirection() 
-	{ 
+
+	public String getDirection()
+	{
 		if (this.direction == null) return null;
-		
+
 		// Map JDBC direction info to SQL standard
 		if (direction.equalsIgnoreCase("a")) return "ASC";
 		if (direction.equalsIgnoreCase("d")) return "DESC";
-		
-		return this.direction; 
+
+		return this.direction;
 	}
-	
+
 	public String getExpression()
 	{
 		if (StringUtil.isEmptyString(direction))
@@ -61,6 +61,7 @@ public class IndexColumn
 		}
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof IndexColumn)

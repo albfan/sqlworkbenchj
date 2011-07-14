@@ -13,9 +13,10 @@ package workbench.db.report;
 
 import java.util.Map;
 import java.util.TreeMap;
+
 import workbench.util.CaseInsensitiveComparator;
-import workbench.util.StrBuffer;
 import workbench.util.NumberStringCache;
+import workbench.util.StrBuffer;
 
 /**
  *
@@ -30,10 +31,10 @@ public class ForeignKeyDefinition
 	public static final String TAG_UPDATE_RULE = "update-rule";
 	public static final String TAG_DELETE_RULE = "delete-rule";
 	public static final String TAG_DEFER_RULE = "deferrable";
-	
+
 	private String fkName;
-	
-	// Stores which column in the source table 
+
+	// Stores which column in the source table
 	// references which column in the foreignTabl
 	private Map<String, String> columnMap = new TreeMap<String, String>(new CaseInsensitiveComparator());
 	private ReportTable foreignTable;
@@ -46,7 +47,7 @@ public class ForeignKeyDefinition
 	private int deferrableRuleValue;
 	private boolean compareFKRules;
 
-	
+
 	public ForeignKeyDefinition(String name)
 	{
 		fkName = name;
@@ -56,27 +57,27 @@ public class ForeignKeyDefinition
 	{
 		compareFKRules = flag;
 	}
-	
+
 	public void addReferenceColumn(String myColumn, String foreignColumn)
 	{
 		this.columnMap.put(myColumn, foreignColumn);
 	}
-	
+
 	public void setUpdateRuleValue(int value) { this.updateRuleValue = value; }
 	public int getUpdateRuleValue() { return this.updateRuleValue; }
 	public void setDeleteRuleValue(int value) { this.deleteRuleValue = value; }
 	public int getDeleteRuleValue() { return this.deleteRuleValue; }
 	public void setDeferrableRuleValue(int value) { this.deferrableRuleValue = value; }
 	public int getDeferrableRuleValue() { return this.deferrableRuleValue; }
-	
-	public void setForeignTable(ReportTable tbl) 
-	{ 
+
+	public void setForeignTable(ReportTable tbl)
+	{
 		if (this.foreignTable == null)
 		{
 			this.foreignTable = tbl;
-		} 
+		}
 	}
-	
+
 	public ColumnReference getColumnReference(String sourceCol)
 	{
 		String targetCol = this.columnMap.get(sourceCol);
@@ -88,7 +89,7 @@ public class ForeignKeyDefinition
 		}
 		return ref;
 	}
-	
+
 	public void setUpdateRule(String rule) { this.updateRule = rule; }
 	public String getUpdateRule() { return this.updateRule; }
 	public void setDeleteRule(String rule) { this.deleteRule = rule; }
@@ -96,22 +97,23 @@ public class ForeignKeyDefinition
 	public void setDeferRule(String rule) { this.deferRule= rule; }
 	public String getDeferRule() { return this.deferRule; }
 
-	
+
 	public ReportTable getForeignTable()
 	{
 		return this.foreignTable;
 	}
-	
+
 	public String getFkName()
 	{
 		return fkName;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return this.getFkName();
 	}
-	
+
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer result = new StrBuffer(250);
@@ -121,9 +123,9 @@ public class ForeignKeyDefinition
 		result.append('\n');
 
 		result.append(getInnerXml(myindent));
-		
+
 		tagWriter.appendCloseTag(result, indent, TAG_FOREIGN_KEY);
-		
+
 		return result;
 	}
 
@@ -140,7 +142,7 @@ public class ForeignKeyDefinition
 
 		tagWriter.appendOpenTag(result, indent, TAG_SOURCE_COLS);
 		result.append('\n');
-		
+
 		for (String col : columnMap.keySet())
 		{
 			tagWriter.appendTag(result, colIndent, "column", col);
@@ -155,11 +157,11 @@ public class ForeignKeyDefinition
 			tagWriter.appendTag(result, colIndent, "column", target);
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_TARGET_COLS);
-		
+
 		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", NumberStringCache.getNumberString(this.deleteRuleValue));
 		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", NumberStringCache.getNumberString(this.updateRuleValue));
 		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.deferRule, "jdbcValue", NumberStringCache.getNumberString(this.deferrableRuleValue));
-		
+
 		return result;
 	}
 
@@ -176,7 +178,8 @@ public class ForeignKeyDefinition
 		}
 		return hash;
 	}
-	
+
+	@Override
 	public boolean equals(Object o)
 	{
 		if (o == null) return false;
@@ -206,7 +209,7 @@ public class ForeignKeyDefinition
 			return false;
 		}
 	}
-	
+
 	public boolean isDefinitionEqual(ForeignKeyDefinition ref)
 	{
 		try
@@ -230,7 +233,7 @@ public class ForeignKeyDefinition
 			return false;
 		}
 	}
-	
+
 	public boolean equals(ForeignKeyDefinition ref)
 	{
 		try

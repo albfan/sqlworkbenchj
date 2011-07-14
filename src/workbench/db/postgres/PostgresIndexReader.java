@@ -20,6 +20,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
+import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -85,12 +86,25 @@ public class PostgresIndexReader
 			{
 				String idxName = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
 				String pk = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
+
+				IndexDefinition def = (IndexDefinition)indexDefinition.getRow(i).getUserObject();
 				if ("YES".equalsIgnoreCase(pk)) continue;
 				if (indexCount > 0) sql.append(',');
-				sql.append('\'');
-				sql.append(idxName);
-				sql.append('\'');
-				indexCount ++;
+
+				if (def != null && def.isUniqueConstraint())
+				{
+					String constraint = getUniqueConstraint(table, def);
+					source.append(constraint);
+					source.append(';');
+					source.append(nl);
+				}
+				else
+				{
+					sql.append('\'');
+					sql.append(idxName);
+					sql.append('\'');
+					indexCount++;
+				}
 			}
 			sql.append(')');
 			if (indexCount > 0)
@@ -132,6 +146,11 @@ public class PostgresIndexReader
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.default.indexsource", false))
 		{
 			return super.getIndexSource(table, indexDefinition, tableNameToUse);
+		}
+
+		if (indexDefinition.isUniqueConstraint())
+		{
+			return getUniqueConstraint(table, indexDefinition);
 		}
 
 		WbConnection con = this.metaData.getWbConnection();
@@ -179,5 +198,9 @@ public class PostgresIndexReader
 		return result;
 	}
 
-
+	@Override
+	public UniqueConstraintReader getUniqueConstraintReader()
+	{
+		return new PostgresUniqueConstraintReader();
+	}
 }

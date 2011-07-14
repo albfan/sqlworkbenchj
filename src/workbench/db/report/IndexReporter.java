@@ -82,6 +82,10 @@ public class IndexReporter
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, index.getExpression());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, index.isUnique());
+			if (index.isUniqueConstraint())
+			{
+				tagWriter.appendTag(result, defIndent, ForeignKeyDefinition.TAG_CONSTRAINT_NAME, index.getUniqueConstraintName());
+			}
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, index.isPrimaryKeyIndex());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, index.getIndexType());
 			List<IndexColumn> columns = index.getColumns();
