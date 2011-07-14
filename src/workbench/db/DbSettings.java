@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import sun.security.action.GetBooleanAction;
 import workbench.db.exporter.RowDataConverter;
 import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
@@ -1383,5 +1384,11 @@ public class DbSettings
 	public String getQuoteEscapeCharacter()
 	{
 		return Settings.getInstance().getProperty(prefix + "quote.escape", "\"");
+	}
+
+	public boolean objectInfoWithFK()
+	{
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.includefk", false);
+		return Settings.getInstance().getBoolProperty(prefix + ".objectinfo.includefk", global);
 	}
 }

@@ -56,7 +56,7 @@ public class ObjectInfo
 	 *
 	 * @param connection the database connection
 	 * @param objectName the object name to test
-	 * @param includeDependencies if true dependen objects (e.g. indexes, constraints) are retrieved as well
+	 * @param includeDependencies if true dependent objects (e.g. indexes, constraints) are retrieved as well
 	 * @return a StatementRunnerResult with DataStores that contain the definion or the
 	 *  source SQL of the object in the message of the result object
 	 * @throws SQLException
@@ -290,27 +290,29 @@ public class ObjectInfo
 				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving triggers for " + toDescribe, e);
 			}
 
-			try
+			if (connection.getDbSettings().objectInfoWithFK())
 			{
-				FKHandler fk = FKHandlerFactory.createInstance(connection);
-				DataStore references = fk.getForeignKeys(toDescribe, false);
-				if (references.getRowCount() > 0)
+				try
 				{
-					references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
-					result.addDataStore(references);
+					FKHandler fk = FKHandlerFactory.createInstance(connection);
+					DataStore references = fk.getForeignKeys(toDescribe, false);
+					if (references.getRowCount() > 0)
+					{
+						references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+						result.addDataStore(references);
+					}
+					DataStore referencedBy = fk.getReferencedBy(toDescribe);
+					if (referencedBy.getRowCount() > 0)
+					{
+						referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+						result.addDataStore(referencedBy);
+					}
 				}
-				DataStore referencedBy = fk.getReferencedBy(toDescribe);
-				if (referencedBy.getRowCount() > 0)
+				catch (Exception e)
 				{
-					referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
-					result.addDataStore(referencedBy);
+					LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving foreign keys for " + toDescribe, e);
 				}
 			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving foreign keys for " + toDescribe, e);
-			}
-
 		}
 
 		return result;
