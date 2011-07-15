@@ -733,30 +733,25 @@ public class ValueConverter
 		{
 			return input;
 		}
-		String value = input.trim();
-		int len = value.length();
-		if (len == 0)
+
+		if (decimalCharacter == '.')
 		{
-			return value;
-		}
-		StringBuilder result = new StringBuilder(len);
-		int pos = value.lastIndexOf(this.decimalCharacter);
-		for (int i = 0; i < len; i++)
-		{
-			char c = value.charAt(i);
-			if (i == pos)
-			{
-				// replace the decimal char with a . as that is required by BigDecimal(String)
-				// this way we only leave the last decimal character
-				result.append('.');
-			}
-			// filter out everything but valid number characters
-			else if ("+-0123456789eE".indexOf(c) > -1)
-			{
-				result.append(c);
-			}
+			// no need to search and replace the decimal character
+			return input;
 		}
 
+		int len = input.length();
+		if (len == 0)
+		{
+			return input;
+		}
+		int pos = input.lastIndexOf(this.decimalCharacter);
+		if (pos < 0) return input;
+
+		StringBuilder result = new StringBuilder(input);
+		// replace the decimal char with a . as that is required by BigDecimal(String)
+		// this way we only leave the last decimal character
+		result.setCharAt(pos, '.');
 		return result.toString();
 	}
 
