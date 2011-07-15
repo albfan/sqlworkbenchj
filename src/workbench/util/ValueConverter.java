@@ -347,6 +347,11 @@ public class ValueConverter
 		}
 	}
 
+	private String makeString(Object value)
+	{
+		return value.toString().trim();
+	}
+
 	/**
 	 * Convert the given input value to a class instance
 	 * according to the given type (from java.sql.Types)
@@ -355,87 +360,87 @@ public class ValueConverter
 	 * blob file parameter)
 	 * @see workbench.storage.DataStore#convertCellValue(Object, int)
 	 */
-	public Object convertValue(Object aValue, int type)
+	public Object convertValue(Object value, int type)
 		throws ConverterException
 	{
-		if (aValue == null)
+		if (value == null)
 		{
 			return null;
 		}
 
-		String v = aValue.toString().trim();
-
 		switch (type)
 		{
 			case Types.BIGINT:
-				return getLong(v);
+				return getLong(makeString(value));
 
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
-				return getInt(v, type);
+				return getInt(makeString(value), type);
 
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
-				return getBigDecimal(v, type);
+				return getBigDecimal(makeString(value), type);
 
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
-				return aValue.toString();
+				return value.toString();
 
 			case Types.DATE:
-				if (v.length() == 0) return null;
+				if (StringUtil.isBlank(makeString(value))) return null;
 
 				try
 				{
-					return this.parseDate((String)aValue);
+					return this.parseDate(makeString(value));
 				}
 				catch (Exception e)
 				{
-					throw new ConverterException(aValue, type, e);
+					throw new ConverterException(value, type, e);
 				}
 
 			case Types.TIMESTAMP:
-				if (v.length() == 0) return null;
+				String ts = makeString(value);
+				if (StringUtil.isBlank(ts)) return null;
 				try
 				{
-					return this.parseTimestamp((String)aValue);
+					return this.parseTimestamp(ts);
 				}
 				catch (Exception e)
 				{
-					throw new ConverterException(aValue, type, e);
+					throw new ConverterException(value, type, e);
 				}
 
 			case Types.TIME:
-				if (v.length() == 0) return null;
+				String t = makeString(value);
+				if (StringUtil.isBlank(t)) return null;
 
 				try
 				{
-					return this.parseTime((String)aValue);
+					return this.parseTime(t);
 				}
 				catch (Exception e)
 				{
-					throw new ConverterException(aValue, type, e);
+					throw new ConverterException(value, type, e);
 				}
 
 			case Types.BLOB:
 			case Types.BINARY:
 			case Types.LONGVARBINARY:
 			case Types.VARBINARY:
-				if (aValue instanceof String)
+				if (value instanceof String)
 				{
 					LobFileParameterParser p = null;
 					try
 					{
-						p = new LobFileParameterParser(aValue.toString());
+						p = new LobFileParameterParser(value.toString());
 					}
 					catch (Exception e)
 					{
-						throw new ConverterException(aValue, type, e);
+						throw new ConverterException(value, type, e);
 					}
 					LobFileParameter[] parms = p.getParameters();
 					if (parms == null) return null;
@@ -443,22 +448,23 @@ public class ValueConverter
 					if (fname == null) return null;
 					return new File(fname);
 				}
-				else if (aValue instanceof File)
+				else if (value instanceof File)
 				{
-					return aValue;
+					return value;
 				}
-				else if (aValue instanceof byte[])
+				else if (value instanceof byte[])
 				{
-					return aValue;
+					return value;
 				}
 				return null;
 
 			case Types.BIT:
 			case Types.BOOLEAN:
-				return getBoolean(v, type);
+				String b = makeString(value);
+				return getBoolean(b, type);
 
 			default:
-				return aValue;
+				return value;
 		}
 	}
 
