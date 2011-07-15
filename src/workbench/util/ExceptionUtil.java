@@ -106,7 +106,7 @@ public class ExceptionUtil
 	public static StringBuilder getDisplayBuffer(StringBuilder result, Throwable th, boolean includeStackTrace)
 	{
 		if (result == null) result = new StringBuilder(50);
-		
+
 		try
 		{
 			if (th.getMessage() == null)
@@ -124,8 +124,6 @@ public class ExceptionUtil
 			}
 			else
 			{
-				result.append(th.getClass().getName());
-				result.append(": ");
 				result.append(th.getMessage().trim());
 			}
 
