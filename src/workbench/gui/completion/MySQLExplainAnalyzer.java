@@ -42,7 +42,7 @@ public class MySQLExplainAnalyzer
 			while (t != null)
 			{
 				// Only SELECT statements are supported
-				if (t.getContents().equalsIgnoreCase("SELECT"))
+				if (t.getText().equalsIgnoreCase("SELECT"))
 				{
 					return t.getCharBegin();
 				}
@@ -69,9 +69,10 @@ public class MySQLExplainAnalyzer
 			SQLToken t = lexer.getNextToken(false, false);
 			while (t != null)
 			{
-				if (!t.getContents().equalsIgnoreCase("EXPLAIN"))
+				String v = t.getText();
+				if (!v.equalsIgnoreCase("EXPLAIN"))
 				{
-					usedOptions.add(t.getContents());
+					usedOptions.add(v);
 				}
 				t = lexer.getNextToken(false, false);
 			}

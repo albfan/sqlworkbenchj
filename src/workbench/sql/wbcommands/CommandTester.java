@@ -97,6 +97,7 @@ public class CommandTester
 		commands.add(WbRunLB.VERB);
 		commands.add(WbIsolationLevel.VERB);
 		commands.add(WbConnInfo.VERB);
+		commands.add(WbExec.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()

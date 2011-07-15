@@ -490,12 +490,19 @@ public class StringUtil
 			 Double.parseDouble(value);
 			 return true;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			return false;
 		}
 	}
 
+	/**
+	 * Checks if the given parameter is not empty and deos not only exist of whitespace
+	 *
+	 * @param value
+	 * @return true if at least one non-whitespace character is returned
+	 * @see #isBlank(java.lang.CharSequence)
+	 */
 	public static boolean isNonBlank(CharSequence value)
 	{
 		return !isBlank(value);
@@ -513,6 +520,7 @@ public class StringUtil
 
 	/**
 	 * Checks if the given string value is not empty (!= null && length() > 0).
+	 * 
 	 * Whitespaces are considered "not empty".
 	 *
 	 * @param value

@@ -286,10 +286,7 @@ keyword=(
 "JOIN"|
 "KEY"|
 "LANGUAGE"|
-"LARGE"|
 "LAST"|
-"LATERAL"|
-"LEADING"|
 "LEFT"|
 "LENGTH"|
 "LESS"|
@@ -394,8 +391,6 @@ keyword=(
 "THEN"|
 "TIME"|
 "TIMESTAMP"|
-"TO"|
-"TRANSACTION"|
 "TRIGGER"|
 "TRIM"|
 "TRUNCATE"|
@@ -422,6 +417,7 @@ keyword=(
 "WBDATADIFF"|
 "WBDEFINEPK"|
 "WBENDBATCH"|
+"WBEXEC"|
 "WBFEEDBACK"|
 "WBEXPORT"|
 "WBIMPORT"|

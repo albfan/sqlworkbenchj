@@ -30,6 +30,7 @@ public class AlterTableAnalyzer
 		super(conn, statement, cursorPos);
 	}
 
+	@Override
 	protected void checkContext()
 	{
 		int addPos = -1;
