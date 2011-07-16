@@ -146,7 +146,7 @@ public class WbCommandAnalyzer
 			this.elements = p.getRegisteredArguments();
 			String params = SqlUtil.stripVerb(this.sql);
 			p.parse(params);
-			List argsPresent = p.getArgumentsOnCommandLine();
+			List<String> argsPresent = p.getArgumentsOnCommandLine();
 			this.elements.removeAll(argsPresent);
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = p.needsSwitch();

@@ -197,15 +197,18 @@ public class ArgumentParser
 				if (pos > -1)
 				{
 					arg = word.substring(0, pos).trim();
-					value = word.substring(pos + 1).trim();
-					char first = value.charAt(0);
-					char last = value.charAt(value.length() - 1);
-					if ( (first == '"' && last == '"') || (first == '\'' && last == '\''))
+					value = pos < word.length() - 1 ? word.substring(pos + 1).trim() : "";
+					if (value.length() > 0)
 					{
-						int otherPos = value.indexOf(first, 1);
-						if (otherPos == -1 || otherPos == value.length() - 1)
+						char first = value.charAt(0);
+						char last = value.charAt(value.length() - 1);
+						if ( (first == '"' && last == '"') || (first == '\'' && last == '\''))
 						{
-							value = StringUtil.trimQuotes(value);
+							int otherPos = value.indexOf(first, 1);
+							if (otherPos == -1 || otherPos == value.length() - 1)
+							{
+								value = StringUtil.trimQuotes(value);
+							}
 						}
 					}
 				}
@@ -252,7 +255,7 @@ public class ArgumentParser
 		ArrayList<String> result = new ArrayList<String>(this.arguments.size());
 		for (Map.Entry<String, Object> entry : arguments.entrySet())
 		{
-			if (entry.getValue() != null)
+			if (entry.getValue() != null && getArgumentType(entry.getKey()) != ArgumentType.Repeatable)
 			{
 				result.add(entry.getKey());
 			}
@@ -480,7 +483,7 @@ public class ArgumentParser
 
 	/**
 	 * Returns the values of a parameter that allows comma delimited values.
-	 * 
+	 *
 	 * @param key the argument name
 	 * @return the values that were specified.
 	 */

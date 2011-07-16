@@ -67,7 +67,7 @@
 						an XML report for all tables that start with <literal>CONTRACT_</literal>.
 					</entry>
 				</row>
-        
+
 				<row>
 					<entry>-excludeTableNames</entry>
 					<entry>
@@ -1035,7 +1035,7 @@
         If you want to run a stored procedure that has <literal>OUT</literal> parameters, you have to use the <literal>WbCall</literal>
         command to correctly see the returned value of the parameters.
       </para>
-      
+
       <para>
         Consider the following (Oracle) procedure:
       </para>
@@ -1123,7 +1123,7 @@ $$ LANGUAGE plpgsql;
      <para>
        This will then display the result from the SELECT inside the function.
       </para>
-      
+
     </simplesect>
 
   </section>
@@ -1263,7 +1263,7 @@ $$ LANGUAGE plpgsql;
        </para>
        <para>
          <literal>WbRunLB</literal> will only extract SQL statements stored in <literal>&lt;sql&gt;</literal> or
-         <literal>&lt;createProcedure&gt;</literal> tags. 
+         <literal>&lt;createProcedure&gt;</literal> tags.
        </para>
        <para>
          It will not convert any of the Liquibase tags to "real" SQL.
@@ -1782,7 +1782,7 @@ WHERE id=42;</programlisting>
       that is shown in the DbExplorer's "Database" dropdown.
     </para>
     <para>
-      The output of this command depends on the underlying JDBC driver and DBMS. 
+      The output of this command depends on the underlying JDBC driver and DBMS.
       For MS SQL Server this lists the available databases (which then could be changed
       with the command <literal>USE &#60;dbname&#62;</literal>)
     </para>
@@ -1932,7 +1932,7 @@ WHERE id=42;</programlisting>
         </thead>
 
         <tbody valign="top">
-          
+
           <row>
             <entry>-inputfile</entry>
             <entry>The name of the XML source file.</entry>
@@ -1961,10 +1961,25 @@ WHERE id=42;</programlisting>
     </informaltable>
   </section>
 
+  <section id="command-wbexec">
+    <title>Running operating system commands - WbExec</title>
+    <para>
+      To run an operating system command use WbExec followed by a valid command for your operating system.
+    </para>
+    <para>
+      To run the program <literal>ls</literal> the following call can be used: <programlisting>WbExec ls</programlisting>
+    </para>
+    <para>
+      To run Windows commands that are internal to <literal>cmd.exe</literal> such as <literal>DIR</literal>, you
+      must call <literal>cmd.exe</literal> with the <literal>/c</literal> switch to make sure cmd.exe is terminated:
+      <programlisting>WbExec cmd /c dir /n</programlisting>
+    </para>
+  </section>
+
   <section id="command-dbms-output" xreflabel="ENABLEOUT">
     <title>Using Oracle's DBMS_OUTPUT package</title>
     <indexterm><primary>Oracle</primary><secondary>dbms_output</secondary></indexterm>
-    
+
     <para>
       To turn on support for Oracle's <literal>DBMS_OUTPUT</literal> package you have to use the
 			(&wb-productname; specific) command <literal>ENABLEOUT</literal>.
@@ -1995,6 +2010,5 @@ WHERE id=42;</programlisting>
 			<literal>dbms_output.disable()</literal> procedure.
 		</para>
   </section>
-
 
 </section>

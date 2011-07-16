@@ -11,6 +11,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class WbExec
 	public static final String VERB = "WBEXEC";
 	public static final String ARG_COMMAND = "command";
 	public static final String ARG_PRG_ARG = "argument";
+	public static final String ARG_WORKING_DIR = "dir";
 
 	private Process task;
 
@@ -39,6 +41,7 @@ public class WbExec
 		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_COMMAND);
+		cmdLine.addArgument(ARG_WORKING_DIR);
 		cmdLine.addArgument(ARG_PRG_ARG, ArgumentType.Repeatable);
 	}
 
@@ -68,7 +71,7 @@ public class WbExec
 		if (StringUtil.isBlank(command))
 		{
 			result.setFailure();
-			result.addMessage("Please specify a valid operating system command");
+			result.addMessageByKey("ErrExecNoParm");
 			return result;
 		}
 		BufferedReader stdIn = null;
@@ -87,6 +90,11 @@ public class WbExec
 					args.addAll(params);
 				}
 				ProcessBuilder pb = new ProcessBuilder(args);
+				String dir = cmdLine.getValue(ARG_WORKING_DIR);
+				if (StringUtil.isNonBlank(dir))
+				{
+					pb.directory(new File(dir));
+				}
 				this.task = pb.start();
 			}
 			else
@@ -125,6 +133,7 @@ public class WbExec
 		{
 			LogMgr.logError("WbExec.execute()", "Error calling external program", e);
 			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.setFailure();
 		}
 		finally
 		{
