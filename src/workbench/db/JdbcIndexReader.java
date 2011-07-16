@@ -18,6 +18,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import workbench.db.ibm.DB2UniqueConstraintReader;
+import workbench.db.mssql.SqlServerUniqueConstraintReader;
+import workbench.db.oracle.OracleUniqueConstraintReader;
+import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
@@ -323,6 +327,22 @@ public class JdbcIndexReader
 
 	public UniqueConstraintReader getUniqueConstraintReader()
 	{
+		if (this.metaData.isPostgres())
+		{
+			return new PostgresUniqueConstraintReader();
+		}
+		if (this.metaData.isOracle())
+		{
+			return new OracleUniqueConstraintReader();
+		}
+		if (this.metaData.getDbId().startsWith("db2"))
+		{
+			return new DB2UniqueConstraintReader();
+		}
+		if (this.metaData.isSqlServer())
+		{
+			return new SqlServerUniqueConstraintReader();
+		}
 		return null;
 	}
 

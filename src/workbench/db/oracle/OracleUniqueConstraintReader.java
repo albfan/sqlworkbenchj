@@ -49,7 +49,7 @@ public class OracleUniqueConstraintReader
 
 		for (IndexDefinition idx : indexList)
 		{
-			if (!idx.isUnique())
+			if (!idx.isUnique() || idx.isPrimaryKeyIndex())
 			{
 				continue;
 			}
@@ -59,7 +59,7 @@ public class OracleUniqueConstraintReader
 			}
 			else
 			{
-				sql.append(", ");
+				sql.append(" OR ");
 			}
 			idxCount ++;
 			String schema = con.getMetadata().removeQuotes(idx.getSchema());
@@ -109,6 +109,4 @@ public class OracleUniqueConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
-
-
 }

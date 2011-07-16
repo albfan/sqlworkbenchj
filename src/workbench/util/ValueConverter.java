@@ -93,12 +93,14 @@ public class ValueConverter
 	private static final String FORMAT_MILLIS = "millis";
 	private boolean checkBuiltInFormats = true;
 	private boolean illegalDateIsNull;
+	private boolean cleanupNumbers = false;
 
 	public ValueConverter()
 	{
 		Settings sett = Settings.getInstance();
 		this.setDefaultDateFormat(sett.getDefaultDateFormat());
 		this.setDefaultTimestampFormat(sett.getDefaultTimestampFormat());
+		cleanupNumbers = Settings.getInstance().getBoolProperty("workbench.converter.cleanupdecimals", false);
 	}
 
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
@@ -734,17 +736,23 @@ public class ValueConverter
 			return input;
 		}
 
+		int len = input.length();
+		if (len == 0)
+		{
+			return input;
+		}
+
+		if (cleanupNumbers)
+		{
+			return cleanupNumberString(input);
+		}
+
 		if (decimalCharacter == '.')
 		{
 			// no need to search and replace the decimal character
 			return input;
 		}
 
-		int len = input.length();
-		if (len == 0)
-		{
-			return input;
-		}
 		int pos = input.lastIndexOf(this.decimalCharacter);
 		if (pos < 0) return input;
 
@@ -752,6 +760,29 @@ public class ValueConverter
 		// replace the decimal char with a . as that is required by BigDecimal(String)
 		// this way we only leave the last decimal character
 		result.setCharAt(pos, '.');
+		return result.toString();
+	}
+
+	private String cleanupNumberString(String value)
+	{
+		int len = value.length();
+		StringBuilder result = new StringBuilder(len);
+		int pos = value.lastIndexOf(this.decimalCharacter);
+		for (int i = 0; i < len; i++)
+		{
+			char c = value.charAt(i);
+			if (i == pos)
+			{
+				// replace the decimal char with a . as that is required by BigDecimal(String)
+				// this way we only leave the last decimal character
+				result.append('.');
+			}
+			// filter out everything but valid number characters
+			else if ("+-0123456789eE".indexOf(c) > -1)
+			{
+				result.append(c);
+			}
+		}
 		return result.toString();
 	}
 

@@ -33,7 +33,6 @@ public class Db2ConstraintReader
 					 " where cons.table_name = ? " +
 					 " and cons.table_schema = ?";
 
-
 	private static final String LUW_TABLE_SQL = "select cons.constname, '('||cons.text||')' \n" +
 					 "from syscat.checks cons \n" +
 					 "where type <> 'S' " +
@@ -59,11 +58,13 @@ public class Db2ConstraintReader
 		return m.matches();
 	}
 
+	@Override
 	public String getColumnConstraintSql()
 	{
 		return null;
 	}
 
+	@Override
 	public String getTableConstraintSql()
 	{
 		if (isHostDB2) return HOST_TABLE_SQL;
@@ -71,11 +72,13 @@ public class Db2ConstraintReader
 		return LUW_TABLE_SQL;
 	}
 
+	@Override
 	public int getIndexForTableNameParameter()
 	{
 		return 1;
 	}
 
+	@Override
 	public int getIndexForSchemaParameter()
 	{
 		return 2;

@@ -20,7 +20,6 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
-import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -198,9 +197,4 @@ public class PostgresIndexReader
 		return result;
 	}
 
-	@Override
-	public UniqueConstraintReader getUniqueConstraintReader()
-	{
-		return new PostgresUniqueConstraintReader();
-	}
 }

@@ -9,11 +9,10 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.postgres;
+package workbench.db.mssql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 
@@ -29,7 +28,7 @@ import workbench.util.SqlUtil;
  *
  * @author Thomas Kellerer
  */
-public class PostgresUniqueConstraintReader
+public class SqlServerUniqueConstraintReader
 	implements UniqueConstraintReader
 {
 
@@ -40,17 +39,15 @@ public class PostgresUniqueConstraintReader
 		if (con == null) return;
 
 		StringBuilder sql = new StringBuilder(200);
-		sql.append("select *  \n" +
-             "from ( \n" +
-             "  select ind.relname as index_name, indschem.nspname as index_schema, cons.conname as constraint_name \n" +
-             "  from pg_constraint cons \n" +
-             "    join pg_class tbl ON tbl.oid = cons.conrelid \n" +
-             "    join pg_namespace ns ON ns.oid = tbl.relnamespace \n" +
-             "    join pg_class ind ON ind.oid = cons.conindid \n" +
-             "    join pg_namespace indschem ON indschem.oid = ind.relnamespace \n" +
-             "  where cons.contype = 'u' \n" +
-             ") t \n" +
-             "where (index_name, index_schema) in (");
+		sql.append(
+			"select ind.name as indname, sch.name as indschema, cons.name as consname \n" +
+			"from sys.indexes ind \n" +
+			"  join sys.objects obj on ind.object_id = obj.object_id \n" +
+			"  join sys.schemas sch on sch.schema_id = obj.schema_id \n" +
+			"  join sys.key_constraints cons on cons.unique_index_id  = ind.index_id \n" +
+			"where is_unique = 1  \n" +
+			"and is_unique_constraint = 1 \n" +
+			"and (");
 
 		boolean first = true;
 		int idxCount = 0;
@@ -67,19 +64,18 @@ public class PostgresUniqueConstraintReader
 			}
 			else
 			{
-				sql.append(", ");
+				sql.append(" OR ");
 			}
 			idxCount ++;
 			String schema = con.getMetadata().removeQuotes(idx.getSchema());
 			String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
-			sql.append(" ('");
-			sql.append(idxName);
-			sql.append("', '");
+			sql.append(" (sch.name = '");
 			sql.append(schema);
+			sql.append("' AND ind.name = '");
+			sql.append(idxName);
 			sql.append("') ");
 		}
 		sql.append(')');
-
 		if (idxCount == 0)
 		{
 			return;
@@ -87,15 +83,13 @@ public class PostgresUniqueConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
+			LogMgr.logDebug("SqlServerUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
 		}
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		Savepoint sp = null;
 		try
 		{
-			sp = con.setSavepoint();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(sql.toString());
 			while (rs.next())
@@ -109,17 +103,14 @@ public class PostgresUniqueConstraintReader
 					def.setUniqueConstraintName(consName);
 				}
 			}
-			con.releaseSavepoint(sp);
 		}
 		catch (SQLException se)
 		{
-			con.rollback(sp);
-			LogMgr.logError("PostgresUniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
+			LogMgr.logError("SqlServerUniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
-
 }
