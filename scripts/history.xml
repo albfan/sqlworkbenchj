@@ -2,7 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-06-13">
-    <entry dev-build="8" type="enh">The SQL for foreign keys referencing unique constraints (instead of primary keys) is now displayed for Oracle and Postgres</entry>
+    <entry dev-build="8" type="enh">Foreign keys referencing unique constraints are now displayed for Oracle (this is a workaround for a bug in the Oracle JDBC Driver)</entry>
     <entry dev-build="8" type="enh">WbImport now accepts multi-character delimiters (e.g. \t\t)</entry>
     <entry dev-build="7" type="enh">The suffix for escaping variables can now be defined as "empty", so that e.g. &amp;val can be used as variable name</entry>
     <entry dev-build="6" type="enh">For PostgreSQL 9.1 and Oracle, the trigger panel in the DbExplorer is now also shown for Views</entry>
@@ -20,7 +20,7 @@
     <entry dev-build="1" type="enh">For Oracle, WbSchemaReport and WbSchemaDiff now includes the information about partitioned tables and indexes</entry>
     <entry dev-build="1" type="enh">The generated table source in the DbExplorer now includes the new exclusion constraints from PostgreSQL 9.0</entry>
     <entry dev-build="8" type="fix">The source for XMLTYPE columns was generated incorrectly for Oracle</entry>
-    <entry dev-build="8" type="fix">The source code for unique constraints was not shown correctly in the DbExplorer</entry>
+    <entry dev-build="8" type="fix">The correct source code for unique constraints is now shown in the DbExplorer for Oracle, PostgreSQL, DB2 and SQL Server 2005+</entry>
     <entry dev-build="7" type="fix">Table names with non-standard upper/lowercase usage where not quoted in the code completion.</entry>
     <entry dev-build="7" type="fix">Code completion used the wrong value to insert into the editor when the current word limited the list a specific schema.</entry>
     <entry dev-build="7" type="fix">Empty strings where not treated as NULL values for boolean or bit columns when importing text files using WbImport</entry>

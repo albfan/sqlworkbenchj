@@ -1,5 +1,5 @@
 /*
- * OracleUniqueConstraintReader.java
+ * SqlServerUniqueConstraintReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import workbench.db.IndexDefinition;
+import workbench.db.JdbcUtils;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -35,10 +36,12 @@ public class SqlServerUniqueConstraintReader
 	@Override
 	public void processIndexList(List<IndexDefinition> indexList, WbConnection con)
 	{
+		if (!isSupported(con)) return;
+
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(500);
 		sql.append(
 			"select ind.name as indname, sch.name as indschema, cons.name as consname \n" +
 			"from sys.indexes ind \n" +
@@ -113,4 +116,11 @@ public class SqlServerUniqueConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
+	private boolean isSupported(WbConnection con)
+	{
+		return JdbcUtils.hasMinimumServerVersion(con.getSqlConnection(), "9.0");
+	}
+
+
 }

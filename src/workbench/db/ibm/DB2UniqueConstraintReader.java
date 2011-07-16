@@ -37,7 +37,7 @@ public class DB2UniqueConstraintReader
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(500);
 		if (con.getDbSettings().getDbId().equals("db2"))
 		{
 			// DB2 LUW

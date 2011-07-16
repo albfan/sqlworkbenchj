@@ -37,7 +37,7 @@ public class OracleUniqueConstraintReader
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(500);
 		sql.append(
 			"select index_name, constraint_name \n" +
 			"from all_constraints \n" +

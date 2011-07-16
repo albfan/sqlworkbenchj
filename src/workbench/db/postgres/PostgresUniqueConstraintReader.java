@@ -1,5 +1,5 @@
 /*
- * OracleUniqueConstraintReader.java
+ * PostgresUniqueConstraintReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -39,7 +39,7 @@ public class PostgresUniqueConstraintReader
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
-		StringBuilder sql = new StringBuilder(200);
+		StringBuilder sql = new StringBuilder(500);
 		sql.append("select *  \n" +
              "from ( \n" +
              "  select ind.relname as index_name, indschem.nspname as index_schema, cons.conname as constraint_name \n" +
