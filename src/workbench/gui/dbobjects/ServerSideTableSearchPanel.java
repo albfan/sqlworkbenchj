@@ -50,7 +50,7 @@ public class ServerSideTableSearchPanel
 		searchText.addMouseListener(new TextComponentMouseListener());
 		String tip = ResourceMgr.getDescription("LblSearchTableSqlCriteria");
 		searchText.setToolTipText(tip);
-		
+
 		columnFunction = new JTextField();
 		columnFunction.addMouseListener(new TextComponentMouseListener());
     JLabel likeLabel = new JLabel();
@@ -81,18 +81,21 @@ public class ServerSideTableSearchPanel
     add(searchText, gridBagConstraints);
 	}
 
+	@Override
 	public void disableControls()
 	{
 		columnFunction.setEnabled(false);
 		searchText.setEnabled(false);
 	}
 
+	@Override
 	public void enableControls()
 	{
 		columnFunction.setEnabled(true);
 		searchText.setEnabled(true);
 	}
 
+	@Override
 	public TableDataSearcher getSearcher()
 	{
 		searcher.setCriteria(searchText.getText(), false);
@@ -100,18 +103,21 @@ public class ServerSideTableSearchPanel
 		return searcher;
 	}
 
+	@Override
 	public void saveSettings(String prefix, PropertyStorage props)
 	{
 		props.setProperty(prefix + ".criteria", this.searchText.getText());
 		props.setProperty(prefix + ".column-function", this.columnFunction.getText());
 	}
 
+	@Override
 	public void restoreSettings(String prefix, PropertyStorage props)
 	{
 		this.searchText.setText(props.getProperty(prefix + ".criteria", ""));
 		this.columnFunction.setText(props.getProperty(prefix + ".column-function", "$col$"));
 	}
 
+	@Override
 	public void addKeyListenerForCriteria(KeyListener listener)
 	{
 		searchText.addKeyListener(listener);

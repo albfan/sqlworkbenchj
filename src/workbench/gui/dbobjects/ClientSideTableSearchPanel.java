@@ -86,7 +86,7 @@ public class ClientSideTableSearchPanel
 		ListComboBoxModel model = new ListComboBoxModel(items);
 		comparatorDropDown.setModel(model);
 		comparatorDropDown.setSelectedIndex(0);
-		
+
 		//comparatorDropDown.setModel();
     constraints = new GridBagConstraints();
     constraints.gridx = 1;
@@ -120,19 +120,22 @@ public class ClientSideTableSearchPanel
 		ComparatorListItem item = (ComparatorListItem)comparatorDropDown.getSelectedItem();
 		return item.getComparator();
 	}
-	
+
+	@Override
 	public void disableControls()
 	{
 		searchText.setEnabled(false);
 		comparatorDropDown.setEnabled(false);
 	}
 
+	@Override
 	public void enableControls()
 	{
 		searchText.setEnabled(true);
 		comparatorDropDown.setEnabled(true);
 	}
 
+	@Override
 	public TableDataSearcher getSearcher()
 	{
 		// Comparator must be defined before setting the criteria!
@@ -141,6 +144,7 @@ public class ClientSideTableSearchPanel
 		return searcher;
 	}
 
+	@Override
 	public void saveSettings(String prefix, PropertyStorage props)
 	{
 		props.setProperty(prefix + ".clientsearch.criteria", this.searchText.getText());
@@ -148,6 +152,7 @@ public class ClientSideTableSearchPanel
 		props.setProperty(prefix + ".clientsearch.ignorecase", ignoreCase.isSelected());
 	}
 
+	@Override
 	public void restoreSettings(String prefix, PropertyStorage props)
 	{
 		searchText.setText(props.getProperty(prefix + ".clientsearch.criteria", ""));
@@ -167,7 +172,8 @@ public class ClientSideTableSearchPanel
 			}
 		}
 	}
-	
+
+	@Override
 	public void addKeyListenerForCriteria(KeyListener listener)
 	{
 		searchText.addKeyListener(listener);
