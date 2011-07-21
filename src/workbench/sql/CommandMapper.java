@@ -99,7 +99,7 @@ public class CommandMapper
 		addCommand(new WbRunLB());
 		addCommand(new WbIsolationLevel());
 		addCommand(new WbConnInfo());
-		addCommand(new WbExec());
+		addCommand(new WbSysExec());
 
 		addCommand(new WbStoreProfile());
 		addCommand(new WbDeleteProfile());

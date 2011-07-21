@@ -395,7 +395,7 @@ public class SqlFormatter
 		if (currChar == '?') return true;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
-		if (lastChar == '[') return false;
+		if (lastChar == '[' && !last.isIdentifier()) return false;
 
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
@@ -1732,6 +1732,18 @@ public class SqlFormatter
 		return t;
 	}
 
+	private boolean isQuotedIdentifier(String name)
+	{
+		boolean isQuoted = SqlUtil.isQuotedIdentifier(name);
+		if (!isQuoted && dbId != null && dbId.contains("microsoft"))
+		{
+			// workaround the stupid Microsoft usage of brackets
+			if (name.startsWith("[") && name.endsWith("]")) return true;
+		}
+		return isQuoted;
+
+	}
+
 	/**
 	 * Process a CREATE TABLE statement.
 	 * The CREATE TABLE has already been added!
@@ -1749,7 +1761,15 @@ public class SqlFormatter
 		this.appendText(name);
 
 		// the SQLLexer does not handle quoted multi-part identifiers correctly...
-		if (SqlUtil.isQuotedIdentifier(name))
+		// and it does not detect the stupid Microsoft quoted multi-part identifiers either
+		if (name.startsWith("[") && name.endsWith("]."))
+		{
+			t = this.skipComments(); // this must be the real table name
+			appendText(t.getContents());
+			appendText(' ');
+			t = this.skipComments();
+		}
+		else if (isQuotedIdentifier(name))
 		{
 			t = this.skipComments();
 			if (t.getContents().equals("."))

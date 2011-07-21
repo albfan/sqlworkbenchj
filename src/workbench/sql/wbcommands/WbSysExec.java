@@ -26,21 +26,21 @@ import workbench.util.*;
  *
  * @author Thomas Kellerer
  */
-public class WbExec
+public class WbSysExec
 	extends SqlCommand
 {
-	public static final String VERB = "WBEXEC";
-	public static final String ARG_COMMAND = "command";
+	public static final String VERB = "WBSYSEXEC";
+	public static final String ARG_PROGRAM = "program";
 	public static final String ARG_PRG_ARG = "argument";
 	public static final String ARG_WORKING_DIR = "dir";
 
 	private Process task;
 
-	public WbExec()
+	public WbSysExec()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_COMMAND);
+		cmdLine.addArgument(ARG_PROGRAM);
 		cmdLine.addArgument(ARG_WORKING_DIR);
 		cmdLine.addArgument(ARG_PRG_ARG, ArgumentType.Repeatable);
 	}
@@ -79,7 +79,7 @@ public class WbExec
 		try
 		{
 			cmdLine.parse(command);
-			String prg = cmdLine.getValue(ARG_COMMAND);
+			String prg = cmdLine.getValue(ARG_PROGRAM);
 			if (StringUtil.isNonBlank(prg))
 			{
 				List<String> args = new ArrayList<String>();

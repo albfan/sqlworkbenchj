@@ -81,10 +81,7 @@ public class ArgumentParser
 	public boolean hasValidValue(String parameter)
 	{
 		String value = getValue(parameter);
-		if (value == null) return true;
-		Collection<ArgumentValue> allowed = this.getAllowedValues(parameter);
-		if (allowed == null || allowed.isEmpty()) return true;
-		return allowed.contains(value);
+		return isAllowedValue(parameter, value);
 	}
 
 	/**

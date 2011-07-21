@@ -32,6 +32,53 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testStupidMicrosoftQuoting()
+		throws Exception
+	{
+		String sql = "CREATE TABLE [DDD]( [Id] [int] NOT NULL, [DayId] [int] NOT NULL, [MonthId] [int] NOT NULL, [YearId] [int] NOT NULL, [D1] [datetime] NOT NULL, [D2] [datetime] NOT NULL, [D3] [date] NOT NULL, [D4] [date] NOT NULL, [D5] [time](7) NOT NULL, [D6] [smalldatetime] NULL, CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ( [Id] ASC ))";
+		SqlFormatter f = new SqlFormatter(sql, "microsoft_sql_server");
+		String formatted = f.getFormattedSql();
+		String expected =
+				"CREATE TABLE [DDD] \n" +
+				"(\n" +
+				"  [Id]        [int] NOT NULL,\n" +
+				"  [DayId]     [int] NOT NULL,\n" +
+				"  [MonthId]   [int] NOT NULL,\n" +
+				"  [YearId]    [int] NOT NULL,\n" +
+				"  [D1]        [datetime] NOT NULL,\n" +
+				"  [D2]        [datetime] NOT NULL,\n" +
+				"  [D3]        [date] NOT NULL,\n" +
+				"  [D4]        [date] NOT NULL,\n" +
+				"  [D5]        [time](7) NOT NULL,\n" +
+				"  [D6]        [smalldatetime] NULL,\n" +
+				"  CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ([Id] ASC)\n" +
+				")";
+//		System.out.println("----------\n" + formatted + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		sql = "CREATE TABLE [dbo].[DDD]( [Id] [int] NOT NULL, [DayId] [int] NOT NULL, [MonthId] [int] NOT NULL, [YearId] [int] NOT NULL, [D1] [datetime] NOT NULL, [D2] [datetime] NOT NULL, [D3] [date] NOT NULL, [D4] [date] NOT NULL, [D5] [time](7) NOT NULL, [D6] [smalldatetime] NULL, CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ( [Id] ASC ))";
+		f = new SqlFormatter(sql, "microsoft_sql_server");
+		formatted = f.getFormattedSql();
+		expected =
+				"CREATE TABLE [dbo].[DDD] \n" +
+				"(\n" +
+				"  [Id]        [int] NOT NULL,\n" +
+				"  [DayId]     [int] NOT NULL,\n" +
+				"  [MonthId]   [int] NOT NULL,\n" +
+				"  [YearId]    [int] NOT NULL,\n" +
+				"  [D1]        [datetime] NOT NULL,\n" +
+				"  [D2]        [datetime] NOT NULL,\n" +
+				"  [D3]        [date] NOT NULL,\n" +
+				"  [D4]        [date] NOT NULL,\n" +
+				"  [D5]        [time](7) NOT NULL,\n" +
+				"  [D6]        [smalldatetime] NULL,\n" +
+				"  CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ([Id] ASC)\n" +
+				")";
+//		System.out.println("----------\n" + formatted + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testVirtualColumns()
 		throws Exception
 	{
