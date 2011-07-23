@@ -83,6 +83,12 @@ public class TextFormatter
 					newSql.append(delimiter.getDelimiter());
 				}
 				newSql.append('\n');
+
+				// add a blank line between the statements, but not for the last one
+				if (count > 1 && i < count - 2)
+				{
+					newSql.append('\n');
+				}
 			}
 			catch (Exception e)
 			{
