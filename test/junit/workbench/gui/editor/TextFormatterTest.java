@@ -146,7 +146,7 @@ public class TextFormatterTest
 
 		String expected =
 			"UPDATE foo\n" +
-			"   SET bar = 1;\n" +
+			"   SET bar = 1;\n\n" +
 			"UPDATE bar\n" +
 			"   SET foo = 2;";
 
