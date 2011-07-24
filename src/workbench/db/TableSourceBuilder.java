@@ -210,12 +210,6 @@ public class TableSourceBuilder
 
 		Map<String, String> columnConstraints = meta.getColumnConstraints(table);
 
-		String name = table.getTableExpression(dbConnection);
-		if (tableNameToUse != null)
-		{
-			name = dbConnection.getMetadata().quoteObjectname(tableNameToUse);
-		}
-
 		readTableConfigOptions(table);
 
 		result.append(meta.generateCreateObject(includeDrop, table, table.getTableTypeOption()));

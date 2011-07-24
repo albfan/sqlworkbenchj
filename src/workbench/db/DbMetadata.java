@@ -778,7 +778,7 @@ public class DbMetadata
 
 	private Set<String> readIgnored(String type, String defaultList)
 	{
-		Set<String> result = null;
+		Set<String> result;
 		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), defaultList);
 		if (ids != null)
 		{

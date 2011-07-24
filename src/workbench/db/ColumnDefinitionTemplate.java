@@ -180,7 +180,7 @@ public class ColumnDefinitionTemplate
 	{
 		if (template != null) return template;
 
-		String sql = null;
+		String sql;
 		if (computedColumn)
 		{
 			sql = getProperty("coldef.computed", PARAM_EXPRESSION);

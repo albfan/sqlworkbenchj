@@ -31,10 +31,22 @@ public class SqlServerConstraintReader
 		 "and   cons.parent_obj = tab.id \n" +
 		 "and   tab.name = ? \n";
 
+	private final String DEFAULT_CONSTRAINTS_SQL =
+		"select col.name, \n" +
+		"       case  \n" +
+		"          when is_system_named = 1 then 'DEFAULT ' + cons.definition \n" +
+		"          else 'CONSTRAINT ' + cons.name + ' DEFAULT ' + cons.definition \n" +
+		"       end as value \n" +
+		"from sys.default_constraints cons \n" +
+		"  join sys.columns col on cons.object_id = col.default_object_id and cons.parent_column_id = col.column_id \n" +
+		"  join sysobjects tab on cons.parent_object_id = tab.id  \n" +
+		"where cons.type = 'D' \n" +
+		"  and tab.name = ? ";
+
 	@Override
 	public String getColumnConstraintSql()
 	{
-		return null;
+		return DEFAULT_CONSTRAINTS_SQL;
 	}
 
 	@Override
