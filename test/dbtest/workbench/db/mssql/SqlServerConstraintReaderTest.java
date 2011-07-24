@@ -42,12 +42,15 @@ public class SqlServerConstraintReaderTest
 		if (conn == null) return;
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
-				"create table sales \n" +
-				"( \n" +
-				"   pieces integer, \n" +
-				"   single_price numeric(19,2), \n" +
-				"   constraint positive_amount check (pieces > 0) \n" +
-				")";
+			"create table sales \n" +
+			"( \n" +
+			"   pieces integer, \n" +
+			"   single_price numeric(19,2), \n" +
+			"   constraint positive_amount check (pieces > 0) \n" +
+			");\n" +
+			"commit;\n" +
+			"create table def_test ( id integer constraint inital_value default 1);\n" +
+			"commit;";
 		TestUtil.executeScript(conn, sql);
 	}
 
@@ -73,6 +76,21 @@ public class SqlServerConstraintReaderTest
 		assertNotNull(source);
 		assertTrue(source.indexOf("CHECK ([pieces]>(0))") > -1);
 		assertTrue(source.indexOf("CONSTRAINT positive_amount") > -1);
+	}
+
+	@Test
+	public void testDefaultConstraintName()
+		throws SQLException
+	{
+		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
+		if (conn == null) return;
+
+		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("def_test"));
+		assertNotNull(tbl);
+		String source = tbl.getSource(conn).toString();
+		assertNotNull(source);
+//		System.out.println(source);
+		assertTrue(source.indexOf("CONSTRAINT inital_value") > -1);
 	}
 
 }

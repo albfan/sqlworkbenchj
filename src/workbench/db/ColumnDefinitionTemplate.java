@@ -101,8 +101,19 @@ public class ColumnDefinitionTemplate
 		String type = StringUtil.padRight(dataTypeOverride == null ? column.getDbmsType() : dataTypeOverride, typeLength);
 
 		sql = replaceArg(sql, ColumnChanger.PARAM_DATATYPE, type);
+		boolean isDefaultConstraint = false;
+		if (StringUtil.isNonBlank(colConstraint))
+		{
+			isDefaultConstraint = colConstraint.indexOf("DEFAULT") > -1;
+		}
+
+
 		String def = getDefaultExpression(column);
-		if (StringUtil.isNonBlank(def))
+		if (isDefaultConstraint)
+		{
+			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, colConstraint);
+		}
+		else if (StringUtil.isNonBlank(def))
 		{
 			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "DEFAULT " + def);
 		}
@@ -111,7 +122,15 @@ public class ColumnDefinitionTemplate
 			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "");
 		}
 		sql = replaceNullable(sql, dbid, column.isNullable());
-		sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, colConstraint);
+		
+		if (isDefaultConstraint)
+		{
+			sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, "");
+		}
+		else
+		{
+			sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, colConstraint);
+		}
 		sql = replaceArg(sql, PARAM_EXPRESSION, expr);
 		sql = replaceArg(sql, PARAM_COLLATION_NAME, column.getCollationExpression());
 		return sql.trim();

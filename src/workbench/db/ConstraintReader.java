@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ public interface ConstraintReader
 	 *	the column name, the value is the full expression which can be appended
 	 *	to the column definition inside a CREATE TABLE statement.
 	 */
-	Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable);
+	Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier aTable);
 
 
 	/**

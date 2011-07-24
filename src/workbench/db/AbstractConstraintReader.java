@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,12 +59,18 @@ public abstract class AbstractConstraintReader
 	}
 
 	/**
-	 *	Returns the column constraints for the given table. The key to the Map is
-	 *	the column name, the value is the full expression which can be appended
-	 *	to the column definition inside a CREATE TABLE statement.
+	 * Returns the column constraints for the given table.
+	 *
+	 * The key to the Map is the column name, the value is the full expression which can be appended
+	 * to the column definition inside a CREATE TABLE statement.
+	 *
+	 * For SQL Server this can also return "default constraints" (default value definitions with a name).
+	 * This must be taken into consideration when (re-)building the source code based on these constraints.
+	 *
+	 * @see ColumnDefinitionTemplate#getColumnDefinitionSQL(ColumnIdentifier, String, int)
 	 */
 	@Override
-	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
+	public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getColumnConstraintSql();
 		if (sql == null) return Collections.emptyMap();
@@ -80,7 +85,7 @@ public abstract class AbstractConstraintReader
 		PreparedStatement stmt = null;
 		try
 		{
-			stmt = dbConnection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			stmt = dbConnection.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			int index = this.getIndexForSchemaParameter();
 			if (index > 0) stmt.setString(index, aTable.getSchema());
 

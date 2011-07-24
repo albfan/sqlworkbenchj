@@ -2693,7 +2693,7 @@ public class DbMetadata
 			{
 				sp = this.dbConnection.setSavepoint();
 			}
-			columnConstraints = reader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+			columnConstraints = reader.getColumnConstraints(this.dbConnection, table);
 			dbConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)

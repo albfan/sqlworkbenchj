@@ -31,7 +31,8 @@ import workbench.db.postgres.PostgresProcedureReader;
 import workbench.resource.Settings;
 
 /**
- *
+ * A factory to create instances of the various readers specific for a DBMS.
+ * 
  * @author Thomas Kellerer
  */
 public class ReaderFactory
@@ -106,7 +107,7 @@ public class ReaderFactory
 		}
 		if (meta.isSqlServer())
 		{
-			return new SqlServerConstraintReader();
+			return new SqlServerConstraintReader(meta.getWbConnection());
 		}
 		if (dbid.startsWith("db2"))
 		{
