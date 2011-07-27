@@ -27,11 +27,12 @@ public class CycleErrorException
 		root = tbl;
 	}
 
+	@Override
 	public String getMessage()
 	{
 		return "A cyclic dependency was detected for root table '" + root.getTableExpression() + "'";
 	}
-	
+
 	public TableIdentifier getRootTable()
 	{
 		return root;

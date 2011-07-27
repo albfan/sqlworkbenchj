@@ -24,14 +24,34 @@ import workbench.util.StringUtil;
 public class JdbcUtils
 {
 
+	/**
+	 * Check if the server has the minimum specified version.
+	 *
+	 * @param con  the connection to the check
+	 * @param targetVersion the minimum version in the format major.minor (e.g. 8.4)
+	 *
+	 * @return true if the server's version is at least the one requested or higher.
+	 * @see VersionNumber
+	 */
 	public static boolean hasMinimumServerVersion(WbConnection con, String targetVersion)
 	{
 		if (con == null) return false;
 		return hasMinimumServerVersion(con.getSqlConnection(), targetVersion);
 	}
 
+	/**
+	 * Check if the server has the minimum specified version.
+	 *
+	 * @param con  the connection to the check
+	 * @param targetVersion the minimum version in the format major.minor (e.g. 8.4)
+	 *
+	 * @return true if the server's version is at least the one requested or higher.
+	 * @see VersionNumber
+	 */
 	public static boolean hasMinimumServerVersion(Connection con, String targetVersion)
 	{
+		if (con == null) return false;
+
 		VersionNumber target = new VersionNumber(targetVersion);
 		try
 		{
@@ -46,8 +66,19 @@ public class JdbcUtils
 		}
 	}
 
+	/**
+	 * Check if the driver used for the connection has the minimum specified version.
+	 *
+	 * @param con  the connection to the check
+	 * @param targetVersion the minimum version in the format major.minor (e.g. 8.4)
+	 *
+	 * @return true if the driver's version is at least the one requested or higher.
+	 * @see VersionNumber
+	 */
 	public static boolean hasMiniumDriverVersion(Connection con, String targetVersion)
 	{
+		if (con == null) return false;
+
 		VersionNumber target = new VersionNumber(targetVersion);
 		try
 		{
@@ -62,6 +93,14 @@ public class JdbcUtils
 		}
 	}
 
+	/**
+	 * Return the index of the column identified by it's name.
+	 *
+	 * @param rs the result set to check
+	 * @param colname the column name to find
+	 *
+	 * @return  he index of the column or -1 if the column was not found
+	 */
 	public static int getColumnIndex(ResultSet rs, String colname)
 	{
 		try

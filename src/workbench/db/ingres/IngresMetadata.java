@@ -99,6 +99,7 @@ public class IngresMetadata
 		return result;
 	}
 
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -134,6 +135,7 @@ public class IngresMetadata
 		return result;
 	}
 
+	@Override
 	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -148,6 +150,7 @@ public class IngresMetadata
 	}
 
 
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(SELECT_SEQUENCE_DEF);
@@ -205,6 +208,7 @@ public class IngresMetadata
 		return result;
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
@@ -225,6 +229,7 @@ public class IngresMetadata
 		return def;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		PreparedStatement stmt = null;
@@ -251,6 +256,7 @@ public class IngresMetadata
 		return result;
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
@@ -312,6 +318,7 @@ public class IngresMetadata
 		return result.toString();
 	}
 
+	@Override
 	public String getSequenceSource(String catalog, String owner, String sequence)
 	{
 		ResultSet rs = null;

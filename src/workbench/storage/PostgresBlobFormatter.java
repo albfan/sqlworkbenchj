@@ -16,8 +16,7 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- * A class to format a byte[] array to be used as a literal in a SQL
- * statement for PostgreSQL.
+ * A class to format a byte[] array to be used as a literal in a SQL statement for PostgreSQL.
  * <br/>
  * The literal is constructed using the decode() function and a hex representation
  * of the value (as that is the most compact form)

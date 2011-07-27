@@ -20,5 +20,4 @@ public enum DeleteType
 	none,
 	delete,
 	truncate;
-
 }

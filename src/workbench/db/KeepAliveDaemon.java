@@ -72,6 +72,7 @@ public class KeepAliveDaemon
 		this.lastAction = millis;
 	}
 
+	@Override
 	public void run()
 	{
 		while (!stopThread)
@@ -136,7 +137,7 @@ public class KeepAliveDaemon
 		}
 		return result;
 	}
-	
+
 	public static String getTimeDisplay(long millis)
 	{
 		if (millis == 0) return "";

@@ -143,6 +143,7 @@ public class TableDependencySorter
 		{
 			comp = new Comparator<LevelNode>()
 			{
+				@Override
 				public int compare(LevelNode o1, LevelNode o2)
 				{
 					return o2.level - o1.level;
@@ -153,6 +154,7 @@ public class TableDependencySorter
 		{
 			comp = new Comparator<LevelNode>()
 			{
+				@Override
 				public int compare(LevelNode o1, LevelNode o2)
 				{
 					return o1.level - o2.level;
@@ -175,9 +177,9 @@ public class TableDependencySorter
 		return -1;
 	}
 
-	protected void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
+	private void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
-		if (nodes == null || nodes.size() == 0) return;
+		if (nodes == null || nodes.isEmpty()) return;
 //		TableIdentifier root = nodes.get(0).getTable();
 
 		for (DependencyNode node : nodes)
@@ -224,7 +226,7 @@ public class TableDependencySorter
 
 		List<DependencyNode> children = startWith.getChildren();
 
-		if (children.size() == 0) return Collections.emptyList();
+		if (children.isEmpty()) return Collections.emptyList();
 
 		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>();
 
@@ -253,6 +255,7 @@ public class TableDependencySorter
 			node = nd;
 		}
 
+		@Override
 		public boolean equals(Object other)
 		{
 			if (other instanceof LevelNode)
@@ -263,11 +266,13 @@ public class TableDependencySorter
 			return false;
 		}
 
+		@Override
 		public int hashCode()
 		{
 			return node.getTable().getTableName().hashCode();
 		}
 
+		@Override
 		public String toString()
 		{
 			return node.getTable().getTableName() + ", Level=" + level;

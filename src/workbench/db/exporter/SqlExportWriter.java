@@ -17,13 +17,13 @@ import workbench.resource.Settings;
 
 /**
  * Export data as SQL INSERT statements.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class SqlExportWriter
 	extends ExportWriter
 {
-	
+
 	/** Creates a new instance of SqlExportWriter
 	 * @param exp The exporter to convert the rows for
 	 */
@@ -33,11 +33,13 @@ public class SqlExportWriter
 		canAppendStart = true;
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new SqlRowDataConverter(exporter.getConnection());
 	}
 
+	@Override
 	public void configureConverter()
 	{
 		super.configureConverter();
@@ -57,7 +59,7 @@ public class SqlExportWriter
 			if (encoding == null) encoding = Settings.getInstance().getDefaultFileEncoding();
 			conv.setClobAsFile(encoding);
 		}
-		
+
 		// the key columns need to be set before the createInsert flag!
 		conv.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
 		try
@@ -69,14 +71,14 @@ public class SqlExportWriter
 			LogMgr.logError("SqlExportWriter.createConverter()", "Illegal SQL type requested. Reverting to INSERT", null);
 			conv.setCreateInsert();
 		}
-		
+
 		String table = exporter.getTableName();
 		if (table != null)
 		{
 			conv.setAlternateUpdateTable(new TableIdentifier(table));
 		}
 		conv.setCreateTable(exporter.isIncludeCreateTable());
-	
+
 	}
 
 }

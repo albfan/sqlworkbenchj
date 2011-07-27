@@ -22,13 +22,14 @@ import workbench.util.StringUtil;
 
 /**
  * A Shutdown hook for Apache Derby.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DerbyShutdownHook
 	implements DbShutdownHook
 {
 
+	@Override
 	public void shutdown(WbConnection conn)
 		throws SQLException
 	{
@@ -42,21 +43,21 @@ public class DerbyShutdownHook
 		{
 			// ignore
 		}
-		
+
 		conn.shutdown();
-		
+
 		if (!canShutdown(conn)) return;
-		
+
 		ConnectionProfile prof = conn.getProfile();
-		
+
 		String drvClass = prof.getDriverclass();
 		String drvName = prof.getDriverName();
 
 		String url = prof.getUrl();
-		int pos = url.indexOf(";");
+		int pos = url.indexOf(';');
 		if (pos < 0) pos = url.length();
 		String command = url.substring(0, pos) + ";shutdown=true";
-		
+
 		try
 		{
 			DbDriver drv = ConnectionMgr.getInstance().findDriverByName(drvClass, drvName);
@@ -78,22 +79,22 @@ public class DerbyShutdownHook
 	private boolean canShutdown(WbConnection conn)
 	{
 		String cls = conn.getProfile().getDriverclass();
-		
+
 		// Never send a shutdown to a Derby server connection
 		if (!cls.equals("org.apache.derby.jdbc.EmbeddedDriver")) return false;
-		
+
 		String url = conn.getUrl();
 		int pos = StringUtil.indexOf(url, ':', 2);
 		if (pos < 0) return true;
-		
+
 		String prefix = url.substring(pos + 1);
-		
+
 		// Do not shutdown Cloudscape server connections!
 		if (url.startsWith(prefix + "net:")) return false;
-		
-		// Derby network URL starts with a // 
+
+		// Derby network URL starts with a //
 		if (url.startsWith(prefix + "//")) return false;
-		
+
 		return true;
 	}
 }

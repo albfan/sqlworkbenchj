@@ -39,41 +39,49 @@ public class BaseObjectType
 		this.typeName = typeName;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return catalog;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return schema;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return objectType;
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return typeName;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return typeName;
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, typeName);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return typeName;
 	}
 
+	@Override
 	public String toString()
 	{
 		return getObjectName();
@@ -89,6 +97,7 @@ public class BaseObjectType
 		return source;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -115,16 +124,19 @@ public class BaseObjectType
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return remarks;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		remarks = cmt;

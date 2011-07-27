@@ -14,14 +14,12 @@ package workbench.storage;
 import workbench.db.ColumnIdentifier;
 
 /**
- * A wrapper class do hold the current value of a column
- * and it's definition.
+ * A wrapper class do hold the current value of a column and it's definition.
  *
- * The column definition is represented by a {@link workbench.db.ColumnIdentifier}
+ * The column definition is represented by a {@link workbench.db.ColumnIdentifier}<br/>
+ * The column value can be any Java object<br/>
  *
- * The value can be any Java object
- * This is used by {@link workbench.storage.DmlStatement} to store the values
- * when creating PreparedStatements
+ * This is used by {@link workbench.storage.DmlStatement} to store the values when creating PreparedStatements
  *
  * @author Thomas Kellerer
  */

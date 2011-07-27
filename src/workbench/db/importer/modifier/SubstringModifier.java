@@ -22,8 +22,9 @@ import workbench.db.ColumnIdentifier;
 public class SubstringModifier
 	implements ImportValueModifier
 {
-	public Map<ColumnIdentifier, ColumnValueSubstring> limits =  new HashMap<ColumnIdentifier, ColumnValueSubstring>();
+	private Map<ColumnIdentifier, ColumnValueSubstring> limits =  new HashMap<ColumnIdentifier, ColumnValueSubstring>();
 
+	@Override
 	public int getSize()
 	{
 		return limits.size();
@@ -43,6 +44,7 @@ public class SubstringModifier
 		this.limits.put(col.createCopy(), s);
 	}
 
+	@Override
 	public String modifyValue(ColumnIdentifier col, String value)
 	{
 		ColumnValueSubstring s = this.limits.get(col);

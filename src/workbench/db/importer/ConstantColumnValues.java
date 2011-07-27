@@ -110,7 +110,7 @@ public class ConstantColumnValues
 			{
 				throw new SQLException("Column '" + colname + "' not found in target table!");
 			}
-			
+
 		}
 	}
 
@@ -140,10 +140,10 @@ public class ConstantColumnValues
 		List<String> result = CollectionUtil.arrayList();
 		for (String f : args)
 		{
-			f = StringUtil.trimQuotes(f);
-			if (f.startsWith("$"))
+			String arg = StringUtil.trimQuotes(f);
+			if (arg.startsWith("$"))
 			{
-				result.add(f.substring(1));
+				result.add(arg.substring(1));
 			}
 		}
 		return result;
@@ -162,7 +162,7 @@ public class ConstantColumnValues
 		}
 		return stmt;
 	}
-	
+
 	public boolean isSelectStatement(int index)
 	{
 		Object value = getValue(index);

@@ -29,17 +29,18 @@ public enum ExportType
 	XLSX("XLSX");
 
 	private String display;
-	
+
 	private ExportType(String disp)
 	{
 		display = disp;
 	}
 
+	@Override
 	public String toString()
 	{
 		return display;
 	}
-	
+
 	public static ExportType getExportType(String type)
 	{
 		if (type.equalsIgnoreCase("txt")) return TEXT;
@@ -76,7 +77,7 @@ public enum ExportType
 	{
 		return this == SQL_INSERT || this == SQL_UPDATE || this == SQL_DELETE_INSERT;
 	}
-	
+
 	public String getDefaultFileExtension()
 	{
 		switch (this)
@@ -109,7 +110,7 @@ public enum ExportType
 		}
 		return null;
 	}
-	
+
 	public String getCode()
 	{
 		switch (this)
@@ -142,5 +143,5 @@ public enum ExportType
 		}
 		return null;
 	}
-	
+
 }

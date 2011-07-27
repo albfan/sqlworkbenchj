@@ -13,26 +13,28 @@ package workbench.db.exporter;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
- * 
+ *
  * @author Alessandro Palumbo
  */
 public class XlsExportWriter
 	extends ExportWriter
 {
-	
+
 	public XlsExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new XlsRowDataConverter();
 	}
 
+	@Override
 	public boolean managesOutput()
 	{
 		return true;
 	}
-	
+
 }

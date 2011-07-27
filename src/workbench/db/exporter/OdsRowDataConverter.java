@@ -39,6 +39,7 @@ public class OdsRowDataConverter
 	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+	@Override
 	public StrBuffer getStart()
 	{
 		Writer out = null;
@@ -187,7 +188,7 @@ public class OdsRowDataConverter
 			FileUtil.closeQuietely(out);
 		}
 	}
-	
+
 	private void writeMeta()
 	{
 		Writer out = null;
@@ -257,6 +258,7 @@ public class OdsRowDataConverter
 		content.write(styles);
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		try
@@ -294,7 +296,7 @@ public class OdsRowDataConverter
 				content.append("<table:database-range table:target-range-address=\"" + title + "." + start + ":" + title + "." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
 				content.append("</table:database-ranges>\n");
 			}
-			
+
 			content.write("</office:spreadsheet> \n");
 			content.write("</office:body>\n");
 			content.write("</office:document-content>\n");
@@ -324,6 +326,7 @@ public class OdsRowDataConverter
 		return result.toString();
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();

@@ -41,7 +41,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to delete rows in a target table that do not exist in a
- * reference table
+ * reference table.
  *
  * The table that should be synchronized needs to exist in both the target and
  * the reference database and it is expected that both tables have the same primary

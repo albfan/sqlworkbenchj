@@ -21,9 +21,10 @@ public class DefaultTablenameResolver
 	implements TablenameResolver
 {
 
+	@Override
 	public String getTableName(WbFile f)
 	{
 		return f.getFileName();
 	}
-	
+
 }

@@ -13,7 +13,7 @@ package workbench.storage;
 
 /**
  * A class to identify the position of a row/column in a datastore
- * 
+ *
  * @author Thomas Kellerer
  */
 public class Position
@@ -22,22 +22,29 @@ public class Position
 	 * A Position instance identifying a non-existing position
 	 */
 	public static final Position NO_POSITION = new Position(-1, -1);
-	
+
 	private final int row;
 	private final int column;
-	
+
 	public Position(int line, int col)
 	{
 		this.row = line;
 		this.column = col;
 	}
-	
-	public int getRow() { return row; }
-	public int getColumn() { return column; }
+
+	public int getRow()
+	{
+		return row;
+	}
+
+	public int getColumn()
+	{
+		return column;
+	}
 
 	/**
 	 * Check if this object identifies a valid position inside
-	 * a DataStore or table. If either row or column are &lt; 0 
+	 * a DataStore or table. If either row or column are &lt; 0
 	 * this method returns false.
 	 * @return true if row and column identify a non negative location
 	 */
@@ -45,7 +52,7 @@ public class Position
 	{
 		return (this.column > -1 && this.row > -1);
 	}
-	
+
 	@Override
 	public boolean equals(Object other)
 	{
@@ -56,13 +63,13 @@ public class Position
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString()
 	{
 		return "[" + Integer.toString(row) + ","  + Integer.toString(column) + "]";
 	}
-	
+
 	@Override
 	public int hashCode()
 	{
@@ -70,5 +77,5 @@ public class Position
 		result ^= 37 * row;
 		return result;
 	}
-	
+
 }

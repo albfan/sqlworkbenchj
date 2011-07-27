@@ -62,6 +62,7 @@ public class TableConstraint
 		return expression;
 	}
 
+	@Override
 	public int compareTo(TableConstraint other)
 	{
 		if (other == null) return -1;
@@ -91,6 +92,7 @@ public class TableConstraint
 		return StringUtil.equalString(expression, other.expression);
 	}
 
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableConstraint)
@@ -114,6 +116,7 @@ public class TableConstraint
 		return "check";
 	}
 
+	@Override
 	public String toString()
 	{
 		return getSql();

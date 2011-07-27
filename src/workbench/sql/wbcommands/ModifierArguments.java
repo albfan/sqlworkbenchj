@@ -18,6 +18,7 @@ import workbench.db.importer.modifier.RegexModifier;
 import workbench.db.importer.modifier.SubstringModifier;
 import workbench.db.importer.modifier.ValueFilter;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 /**
@@ -39,7 +40,7 @@ public class ModifierArguments
 	public static void addArguments(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_REGEX);
-		cmdLine.addArgument(ARG_SUBSTRING);
+		cmdLine.addArgument(ARG_SUBSTRING, ArgumentType.Repeatable);
 		cmdLine.addArgument(ARG_MAXLENGTH);
 	}
 

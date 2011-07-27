@@ -134,6 +134,7 @@ public class XmlDataFileParser
 		this.inputFile = file;
 	}
 
+	@Override
 	public void setTrimValues(boolean flag)
 	{
 		this.trimValues = flag;
@@ -147,6 +148,7 @@ public class XmlDataFileParser
 	 * @param flag
 	 * @see #setSourceFiles(workbench.db.importer.ImportFileLister)
 	 */
+	@Override
 	public void setMultiFileImport(boolean flag)
 	{
 		this.multiFileImport = flag;
@@ -158,26 +160,31 @@ public class XmlDataFileParser
 		return filesProcessed;
 	}
 
+	@Override
 	public boolean isMultiFileImport()
 	{
 		return this.multiFileImport;
 	}
 
+	@Override
 	public void setValueModifier(ImportValueModifier mod)
 	{
 		this.valueModifier = mod;
 	}
 
+	@Override
 	public ImportFileHandler getFileHandler()
 	{
 		return this.fileHandler;
 	}
 
+	@Override
 	public String getColumns()
 	{
 		return StringUtil.listToString(this.columnsToImport, ',', false);
 	}
 
+	@Override
 	public String getLastRecord()
 	{
 		return null;
@@ -189,11 +196,13 @@ public class XmlDataFileParser
 		return null;
 	}
 
+	@Override
 	public boolean hasErrors()
 	{
 		return this.hasErrors;
 	}
 
+	@Override
 	public boolean hasWarnings()
 	{
 		if (this.hasWarnings) return true;
@@ -205,6 +214,7 @@ public class XmlDataFileParser
 		return false;
 	}
 
+	@Override
 	public void setValueConverter(ValueConverter convert)
 	{
 		this.converter = convert;
@@ -236,6 +246,7 @@ public class XmlDataFileParser
 
 	/**	 Define the columns to be imported
 	 */
+	@Override
 	public void setColumns(List<ColumnIdentifier> cols)
 		throws SQLException
 	{
@@ -393,11 +404,13 @@ public class XmlDataFileParser
 		return false;
 	}
 
+	@Override
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
 	}
 
+	@Override
 	public List<ColumnIdentifier> getColumnsFromFile()
 	{
 		try
@@ -481,23 +494,27 @@ public class XmlDataFileParser
 		detectTagFormat(tableDef);
 	}
 
+	@Override
 	public String getSourceFilename()
 	{
 		if (this.inputFile == null) return null;
 		return this.inputFile.getAbsolutePath();
 	}
 
+	@Override
 	public void setInputFile(File file)
 	{
 		this.sourceFiles = null;
 		this.inputFile = file;
 	}
 
+	@Override
 	public void setSourceFiles(ImportFileLister source)
 	{
 		this.sourceFiles = source;
 	}
 
+	@Override
 	public void setAbortOnError(boolean flag)
 	{
 		this.abortOnError = flag;
@@ -676,6 +693,7 @@ public class XmlDataFileParser
 		}
 	}
 
+	@Override
 	public void start()
 		throws Exception
 	{
@@ -703,17 +721,20 @@ public class XmlDataFileParser
 		}
 	}
 
+	@Override
 	public void stop()
 	{
 		this.keepRunning = false;
 		this.regularStop = true;
 	}
 
+	@Override
 	public boolean isCancelled()
 	{
 		return !this.keepRunning && !regularStop;
 	}
 
+	@Override
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -730,14 +751,24 @@ public class XmlDataFileParser
 		this.realColIndex = 0;
 	}
 
-	public String getEncoding() { return this.encoding; }
-	public void setEncoding(String enc) { this.encoding = enc; }
+	@Override
+	public String getEncoding()
+	{
+		return this.encoding;
+	}
 
+	public void setEncoding(String enc)
+	{
+		this.encoding = enc;
+	}
+
+	@Override
 	public void setReceiver(RowDataReceiver aReceiver)
 	{
 		this.receiver = aReceiver;
 	}
 
+	@Override
 	public void startDocument()
 		throws SAXException
 	{
@@ -745,6 +776,7 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
+	@Override
 	public void endDocument()
 		throws SAXException
 	{
@@ -752,6 +784,7 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
+	@Override
 	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
 		throws SAXException
 	{
@@ -789,6 +822,7 @@ public class XmlDataFileParser
 		}
 	}
 
+	@Override
 	public void endElement(String namespaceURI, String sName, String qName)
 		throws SAXException
 	{
@@ -825,6 +859,7 @@ public class XmlDataFileParser
 		this.chars = null;
 	}
 
+	@Override
 	public void characters(char[] buf, int offset, int len)
 		throws SAXException
 	{
@@ -837,6 +872,7 @@ public class XmlDataFileParser
 	}
 
 	/**	Only implemented to have even more possibilities for cancelling the import */
+	@Override
 	public void ignorableWhitespace(char[] ch,int start,int length)
     throws SAXException
 	{
@@ -844,6 +880,7 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
+	@Override
 	public void processingInstruction(String target,String data)
 		throws SAXException
 	{
@@ -851,6 +888,7 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
+	@Override
 	public void error(SAXParseException e)
 		throws SAXParseException
 	{
@@ -859,6 +897,7 @@ public class XmlDataFileParser
 		this.ignoreCurrentRow = true;
 	}
 
+	@Override
 	public void fatalError(SAXParseException e)
 		throws SAXParseException
 	{
@@ -868,6 +907,7 @@ public class XmlDataFileParser
 	}
 
 	// dump warnings too
+	@Override
 	public void warning(SAXParseException err)
 		throws SAXParseException
 	{
@@ -1070,6 +1110,7 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
+	@Override
 	public MessageBuffer getMessages()
 	{
 		return this.messages;
@@ -1091,6 +1132,7 @@ public class XmlDataFileParser
 		}
 	}
 
+	@Override
     public void setErrorHandler(JobErrorHandler handler)
 		{
 			this.errorHandler = handler;

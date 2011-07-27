@@ -49,7 +49,7 @@ public class TextRowDataConverter
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName;
 	private char escapeHexType = 'u';
-	
+
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
@@ -78,6 +78,7 @@ public class TextRowDataConverter
 		}
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		return null;
@@ -93,6 +94,7 @@ public class TextRowDataConverter
 		return this.quoteEscape;
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		return convertRowData(row, rowIndex, null);
@@ -122,7 +124,7 @@ public class TextRowDataConverter
 			}
 			int colType = this.metaData.getColumnType(colIndex);
 			String dbmsType = this.metaData.getDbmsTypeName(colIndex);
-			
+
 			String value = null;
 
 			boolean addQuote = quoteAlways;
@@ -170,7 +172,7 @@ public class TextRowDataConverter
 			}
 
 			boolean isNull = (value == null);
-			if (value == null) 
+			if (value == null)
 			{
 				value = "";
 				// Never quote null values
@@ -181,7 +183,7 @@ public class TextRowDataConverter
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
-				
+
 				if (this.escapeRange != null && this.escapeRange != CharacterRange.RANGE_NONE)
 				{
 					if (addQuote)
@@ -205,7 +207,7 @@ public class TextRowDataConverter
 					}
 				}
 			}
-			
+
 			if (addQuote) result.append(this.quoteCharacter);
 			result.append(value);
 			if (addQuote) result.append(this.quoteCharacter);
@@ -221,6 +223,7 @@ public class TextRowDataConverter
 		if (ending != null) this.lineEnding = ending;
 	}
 
+	@Override
 	public StrBuffer getStart()
 	{
 		return getStart(null);
@@ -229,7 +232,7 @@ public class TextRowDataConverter
 	public StrBuffer getStart(int[] colMap)
 	{
 		this.setAdditionalEncodeCharacters();
-		
+
 		if (!this.writeHeader) return null;
 
 		StrBuffer result = new StrBuffer();
@@ -269,7 +272,7 @@ public class TextRowDataConverter
 		if (colIndex >= colMap.length) return -1;
 		return colMap[colIndex];
 	}
-	
+
 	public void setDelimiter(String delimit)
 	{
 		if (StringUtil.isBlank(delimit)) return;

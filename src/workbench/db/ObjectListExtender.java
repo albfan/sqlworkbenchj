@@ -21,7 +21,8 @@ import workbench.storage.DataStore;
 public interface ObjectListExtender
 {
 	/**
-	 * Adds the objects managed by this extender to the existing result
+	 * Adds the objects managed by this extender to the existing result.
+	 * 
 	 * The DataStore's structure is the one created by DbMetadata.getObjects()
 	 *
 	 * @param con the database connection to be used
@@ -37,7 +38,7 @@ public interface ObjectListExtender
 	 * Return a list of object types that this extender handles
 	 */
 	List<String> supportedTypes();
-		
+
 	/**
 	 * Checks if the extender handles the given type
 	 * @param type
@@ -50,7 +51,7 @@ public interface ObjectListExtender
 	 * Checks if at least one of the types is handled by this extender
 	 *
 	 * @param types
-	 * @see #handlesType(java.lang.String) 
+	 * @see #handlesType(java.lang.String)
 	 */
 	boolean handlesType(String[] types);
 

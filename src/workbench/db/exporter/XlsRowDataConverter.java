@@ -44,7 +44,7 @@ public class XlsRowDataConverter
 	private ExcelDataFormat excelFormat = null;
 	private boolean useXLSX;
 	private int firstRow = 0;
-	
+
 	public XlsRowDataConverter()
 	{
 		super();
@@ -57,7 +57,7 @@ public class XlsRowDataConverter
 	{
 		useXLSX = true;
 	}
-	
+
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
@@ -68,6 +68,7 @@ public class XlsRowDataConverter
 		excelFormat = new ExcelDataFormat(numFormat, dateFormat, "0", tsFormat);
 	}
 
+	@Override
 	public StrBuffer getStart()
 	{
 		createFormatters();
@@ -99,7 +100,7 @@ public class XlsRowDataConverter
 				}
 			}
 		}
-		
+
 		if (writeHeader)
 		{
 			// table header with column names
@@ -119,6 +120,7 @@ public class XlsRowDataConverter
 		return null;
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		for (short i = 0; i < this.metaData.getColumnCount(); i++)
@@ -131,7 +133,7 @@ public class XlsRowDataConverter
 			Sheet info = wb.createSheet("SQL");
 			Row infoRow = info.createRow(0);
 			Cell cell = infoRow.createCell(0);
-			
+
 			CellStyle style = wb.createCellStyle();
 			style.setAlignment(CellStyle.ALIGN_LEFT);
 			style.setWrapText(false);
@@ -145,7 +147,7 @@ public class XlsRowDataConverter
 		{
 			sheet.createFreezePane(0, firstRow);
 		}
-		
+
 		FileOutputStream fileOut = null;
 		try
 		{
@@ -179,6 +181,7 @@ public class XlsRowDataConverter
 		return null;
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		StrBuffer ret = new StrBuffer();

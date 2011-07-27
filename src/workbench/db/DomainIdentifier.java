@@ -91,11 +91,13 @@ public class DomainIdentifier
 		return constraintDefinition;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return catalog;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return schema;
@@ -106,31 +108,37 @@ public class DomainIdentifier
 		objectType = type;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return objectType;
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return domain;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return domain;
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(null, catalog, schema, domain);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, this);
 	}
 
+	@Override
 	public String toString()
 	{
 		return getSummary();
@@ -161,6 +169,7 @@ public class DomainIdentifier
 		source = sql;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -177,16 +186,19 @@ public class DomainIdentifier
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return remarks;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		remarks = cmt;

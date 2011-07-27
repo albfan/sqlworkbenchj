@@ -18,7 +18,7 @@ import workbench.storage.BlobLiteralType;
 
 /**
  * An ExportWriter to generate flat files.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class TextExportWriter
@@ -29,11 +29,13 @@ public class TextExportWriter
 		super(exp);
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new TextRowDataConverter();
 	}
 
+	@Override
 	public void configureConverter()
 	{
 		super.configureConverter();
@@ -71,5 +73,5 @@ public class TextExportWriter
 			conv.setWriteBlobToFile(true);
 		}
 	}
-	
+
 }

@@ -57,7 +57,7 @@ public class XmlTableDefinitionParser
 	{
 		return blobEncoding;
 	}
-	
+
 	public String getTagFormat()
 	{
 		return this.tagFormat;
@@ -106,6 +106,7 @@ public class XmlTableDefinitionParser
 		}
 	}
 
+	@Override
 	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
 		throws SAXException
 	{
@@ -116,6 +117,7 @@ public class XmlTableDefinitionParser
 		}
 	}
 
+	@Override
 	public void endElement(String namespaceURI, String sName, String qName)
 		throws SAXException
 	{
@@ -196,6 +198,7 @@ public class XmlTableDefinitionParser
 		}
 	}
 
+	@Override
 	public void characters(char[] buf, int offset, int len)
 		throws SAXException
 	{

@@ -24,6 +24,7 @@ public class ValueFilter
 {
 	private List<ImportValueModifier> modifiers = new LinkedList<ImportValueModifier>();
 
+	@Override
 	public int getSize()
 	{
 		int size = 0;
@@ -34,6 +35,7 @@ public class ValueFilter
 		return size;
 	}
 
+	@Override
 	public String modifyValue(ColumnIdentifier column, String value)
 	{
 		for (ImportValueModifier modifier : modifiers)

@@ -17,7 +17,10 @@ import java.util.List;
 import workbench.util.SqlUtil;
 
 /**
+ * Representation of an enum type definition.
  *
+ * Currently only used for PostgreSQL
+ * 
  * @author Thomas Kellerer
  */
 public class EnumIdentifier
@@ -47,41 +50,49 @@ public class EnumIdentifier
 		return values;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return catalog;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return schema;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return "ENUM";
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return enumName;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return enumName;
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(null, catalog, schema, enumName);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return enumName;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -94,16 +105,19 @@ public class EnumIdentifier
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return remarks;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		remarks = cmt;

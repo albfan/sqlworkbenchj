@@ -66,6 +66,7 @@ public class SequenceDefinition
 		return relatedColumn;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -75,16 +76,19 @@ public class SequenceDefinition
 		return reader.getSequenceSource(catalog, schema, sequenceName);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return comment;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		comment = cmt;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return schema;
@@ -107,31 +111,37 @@ public class SequenceDefinition
 		return null;
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.sequenceName);
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(null, catalog, schema, sequenceName);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, sequenceName);
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return "SEQUENCE";
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return getSequenceName();

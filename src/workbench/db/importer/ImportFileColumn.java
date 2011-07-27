@@ -29,8 +29,7 @@ public class ImportFileColumn
 	private int dataWidth = -1;
 	private Pattern columnFilter;
 
-	public static final ImportFileColumn SKIP_COLUMN =
-		new ImportFileColumn(new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR));
+	public static final ImportFileColumn SKIP_COLUMN = new ImportFileColumn(new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR));
 
 	public ImportFileColumn(ColumnIdentifier col)
 	{
@@ -118,6 +117,7 @@ public class ImportFileColumn
 	{
 		return new ArrayList<ImportFileColumn>()
 		{
+			@Override
 			public int indexOf(Object elem)
 			{
 				if (elem == null) return -1;
@@ -134,6 +134,7 @@ public class ImportFileColumn
 		};
 	}
 
+	@Override
 	public String toString()
 	{
 		return tableColumn.getColumnName() + "@" + targetIndex;

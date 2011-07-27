@@ -20,14 +20,48 @@ import workbench.resource.Settings;
 public class DefaultImportOptions
 	implements ImportOptions
 {
-	
-	public String getEncoding() {  return "UTF-8"; }
-	public String getDateFormat() {	return Settings.getInstance().getDefaultDateFormat(); }
-	public String getTimestampFormat() { return Settings.getInstance().getDefaultTimestampFormat(); }
 
-	public void setEncoding(String enc) {	}
-	public void setDateFormat(String format) { }
-	public void setTimestampFormat(String format) {	}
-	public void setMode(String mode) { }
-	public String getMode() { return "insert"; }
+	@Override
+	public String getEncoding()
+	{
+		return "UTF-8";
+	}
+
+	@Override
+	public String getDateFormat()
+	{
+		return Settings.getInstance().getDefaultDateFormat();
+	}
+
+	@Override
+	public String getTimestampFormat()
+	{
+		return Settings.getInstance().getDefaultTimestampFormat();
+	}
+
+	@Override
+	public void setEncoding(String enc)
+	{
+	}
+
+	@Override
+	public void setDateFormat(String format)
+	{
+	}
+
+	@Override
+	public void setTimestampFormat(String format)
+	{
+	}
+
+	@Override
+	public void setMode(String mode)
+	{
+	}
+
+	@Override
+	public String getMode()
+	{
+		return "insert";
+	}
 }

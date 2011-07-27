@@ -28,6 +28,7 @@ public class XmlTableNameResolver
 		this.encoding = enc;
 	}
 
+	@Override
 	public String getTableName(WbFile f)
 	{
 		String tablename = f.getFileName();

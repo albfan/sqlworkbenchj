@@ -13,24 +13,26 @@ package workbench.db.exporter;
 
 /**
  * An ExportWriter to generate HTML output.
- * 
+ *
  * @author  Thomas Kellerer
  * @see HtmlRowDataConverter
  */
 public class HtmlExportWriter
 	extends ExportWriter
 {
-	
+
 	public HtmlExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new HtmlRowDataConverter();
 	}
 
+	@Override
 	public void configureConverter()
 	{
 		super.configureConverter();

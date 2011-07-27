@@ -29,6 +29,7 @@ public class XlsXMLRowDataConverter
 {
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+	@Override
 	public StrBuffer getStart()
 	{
 		StrBuffer out = new StrBuffer(5000);
@@ -95,6 +96,7 @@ public class XlsXMLRowDataConverter
 		return out;
 	}
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer out = new StrBuffer(250);
@@ -113,7 +115,7 @@ public class XlsXMLRowDataConverter
 			out.append("<AutoFilter x:Range=\"R1C1:R1C" + getRealColumnCount() + "\" xmlns=\"urn:schemas-microsoft-com:office:excel\"></AutoFilter>\n");
 		}
 		out.append("</Worksheet>\n");
-		
+
 		if (getAppendInfoSheet())
 		{
 			out.append("<Worksheet ss:Name=\"SQL\">\n");
@@ -132,6 +134,7 @@ public class XlsXMLRowDataConverter
 		return out;
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();

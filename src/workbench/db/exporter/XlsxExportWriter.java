@@ -13,18 +13,19 @@ package workbench.db.exporter;
 
 /**
  * Export data into an Excel 2007 (XLSX, Office Open) spreadsheet using Apache's POI
- * 
+ *
  * @author Alessandro Palumbo
  */
 public class XlsxExportWriter
 	extends ExportWriter
 {
-	
+
 	public XlsxExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		XlsRowDataConverter xls = new XlsRowDataConverter();
@@ -32,9 +33,10 @@ public class XlsxExportWriter
 		return xls;
 	}
 
+	@Override
 	public boolean managesOutput()
 	{
 		return true;
 	}
-	
+
 }
