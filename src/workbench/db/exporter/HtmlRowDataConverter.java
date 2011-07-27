@@ -19,7 +19,7 @@ import workbench.util.StringUtil;
 
 /**
  * Convert RowData into HTML.
- * 
+ *
  * @author  Thomas Kellerer
  * @see HtmlExportWriter
  */
@@ -32,6 +32,7 @@ public class HtmlRowDataConverter
 	private String heading;
 	private String trailer;
 
+	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer html = new StrBuffer("</table>\n");
@@ -40,8 +41,8 @@ public class HtmlRowDataConverter
 			html.append(trailer);
 			html.append('\n');
 		}
-		
-		if (createFullPage) 
+
+		if (createFullPage)
 		{
 			html.append("</body>\n</html>\n");
 		}
@@ -57,12 +58,13 @@ public class HtmlRowDataConverter
 	{
 		trailer = html;
 	}
-	
+
 	public void setCreateFullPage(boolean flag)
 	{
 		this.createFullPage = flag;
 	}
 
+	@Override
 	public void setPageTitle(String title)
 	{
 		this.pageTitle = title;
@@ -73,6 +75,7 @@ public class HtmlRowDataConverter
 		this.escapeHtml = flag;
 	}
 
+	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
@@ -122,6 +125,7 @@ public class HtmlRowDataConverter
 		return result;
 	}
 
+	@Override
 	public StrBuffer getStart()
 	{
 		StrBuffer result = new StrBuffer(250);
@@ -147,13 +151,13 @@ public class HtmlRowDataConverter
 
 			result.append("</head>\n<body>\n");
 		}
-		
+
 		if (StringUtil.isNonBlank(heading))
 		{
 			result.append(heading);
 			result.append('\n');
 		}
-		
+
 		result.append("<table>\n");
 
 		// table header with column names
