@@ -36,9 +36,10 @@ public class DefaultFKHandler
 
 	/**
 	 * Returns a DataStore with the exported keys with the raw information copied from the result
-	 * of the DatabaseMetaData.getExportedKeys()
+	 * of the DatabaseMetaData.getExportedKeys().
 	 *
-	 * These are "outgoing" foreign keys from the passed table
+	 * These are "outgoing" foreign keys from the passed table (foreign keys in the passed table referencing other tables).
+	 *
 	 * @param source the table to check
 	 * @return the defined foreign keys
 	 * @throws SQLException
@@ -52,9 +53,9 @@ public class DefaultFKHandler
 
 	/**
 	 * Returns a DataStore with the imported keys with the raw information copied from the result
-	 * of the DatabaseMetaData.getImportedKeys()
+	 * of the DatabaseMetaData.getImportedKeys().
 	 *
-	 * These are "incoming" foreign keys to the passed table.
+	 * These are "incoming" foreign keys to the passed table (foreign key referencing the passed table).
 	 *
 	 * @param target the table to check
 	 * @return foreign keys referencing the target table
