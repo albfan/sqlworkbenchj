@@ -32,6 +32,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.*;
 
 /**
  *
@@ -235,5 +236,30 @@ public class OracleMetadataTest
 		assertNotNull(columns);
 		assertEquals(1, columns.size());
 		assertEquals(Types.TIMESTAMP, columns.get(0).getDataType());
+	}
+
+	@Test
+	public void testVirtualColumns()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		if (!JdbcUtils.hasMinimumServerVersion(con, "11.1"))
+		{
+			System.out.println("No Oracle 11 detected. Skipping test for virtual columns");
+			return;
+		}
+
+		String script =
+			"create table virtual_col_test (some_name varchar(100), lower_name generated always as (lower(some_name)));";
+		TestUtil.executeScript(con, script);
+		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("VIRTUAL_COL_TEST"));
+		assertNotNull(def);
+		List<ColumnIdentifier> columns = def.getColumns();
+		assertNotNull(columns);
+		assertEquals(2, columns.size());
+		ColumnIdentifier lower = columns.get(1);
+		assertEquals("LOWER_NAME", lower.getColumnName());
+		assertEquals("GENERATED ALWAYS AS (LOWER(\"SOME_NAME\"))", lower.getComputedColumnExpression());
 	}
 }
