@@ -149,7 +149,7 @@ public class DefaultFKHandler
 				ds.setValue(row, 7, rs.getString(8)); // FKCOLUMN_NAME
 				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9))); // KEY_SEQ
 				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10))); // UPDATE_RULE
-				ds.setValue(row, 10, rs.getString(11)); // DELETE_RULE
+				ds.setValue(row, 10, Integer.valueOf(rs.getInt(11))); // DELETE_RULE
 				ds.setValue(row, 11, rs.getString(12)); // FK_NAME
 				ds.setValue(row, 12, rs.getString(13)); // PK_NAME
 				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14))); // DEFERRABILITY
@@ -203,8 +203,8 @@ public class DefaultFKHandler
 			int fkNameCol;
 			int colCol;
 			int fkColCol;
-			int deleteActionCol = 11;
-			int updateActionCol = 10;
+			int deleteActionCol = 10;
+			int updateActionCol = 9;
 			int schemaCol;
 
 			if (getOwnFk)

@@ -26,8 +26,7 @@ public class ColumnChangerTest
 
 	public ColumnChangerTest()
 	{
-		super();
-		prepare();
+		super("ColumnChangerTest");
 	}
 
 	@Test
@@ -41,12 +40,12 @@ public class ColumnChangerTest
 		assertTrue(changer.canChangeComment());
 		assertTrue(changer.canChangeNullable());
 		assertTrue(changer.canRenameColumn());
-		
+
 		TableIdentifier table = new TableIdentifier("PERSON");
 		ColumnIdentifier oldCol = new ColumnIdentifier("FIRST_NAME", java.sql.Types.VARCHAR, false);
 		oldCol.setDbmsType("VARCHAR(20)");
 		oldCol.setIsNullable(false);
-		
+
 		ColumnIdentifier newCol = oldCol.createCopy();
 		newCol.setDbmsType("VARCHAR(50)");
 		newCol.setColumnName("FIRSTNAME");
@@ -59,7 +58,7 @@ public class ColumnChangerTest
 		assertEquals("ALTER TABLE PERSON ALTER COLUMN FIRST_NAME SET DEFAULT 'Arthur'", sqls.get(1));
 		assertEquals("ALTER TABLE PERSON ALTER COLUMN FIRST_NAME DROP NOT NULL", sqls.get(2));
 		assertEquals("ALTER TABLE PERSON RENAME COLUMN FIRST_NAME TO FIRSTNAME", sqls.get(3));
-		
+
 		oldCol.setDefaultValue("'Arthur'");
 		newCol = oldCol.createCopy();
 		newCol.setDefaultValue(null);
@@ -163,5 +162,5 @@ public class ColumnChangerTest
 		assertEquals("ALTER TABLE PERSON ADD (PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking' )", sqls.get(0).trim());
 		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
-	
+
 }

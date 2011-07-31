@@ -43,7 +43,7 @@ public class OracleFKHandler
 			"       f.table_name AS fktable_name, \n" +
 			"       fc.column_name AS fkcolumn_name, \n" +
 			"       fc.position AS key_seq, \n" +
-			"       NULL AS update_rule, \n" +
+			"       3 AS update_rule, \n" +
 			"       decode (f.delete_rule, \n" +
 			"              'CASCADE', 0, \n" +
 			"              'SET NULL', 2, \n" +
