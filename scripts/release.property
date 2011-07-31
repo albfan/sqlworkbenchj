@@ -1,7 +1,7 @@
-#Mon, 17 Oct 2011 20:33:58 +0200
+#Thu, 03 Nov 2011 22:25:14 +0100
 
 release.build.number=111
 release.build.date=2011-09-18
 
-dev.build.date=2011-10-17
-dev.build.number=111.3
+dev.build.date=2011-11-03
+dev.build.number=111.4
