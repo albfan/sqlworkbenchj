@@ -1469,12 +1469,27 @@ public class MainWindow
 
 	private boolean resultForWorkspaceClose;
 
+	private String cleanupWorkspaceFilename(String filename)
+	{
+		if (filename == null) return filename;
+		WbFile wfile = new WbFile(filename);
+		if (!wfile.isAbsolute() && !wfile.exists() && !filename.contains(FileDialogUtil.CONFIG_DIR_KEY))
+		{
+			wfile = new WbFile(Settings.getInstance().getConfigDir(), filename);
+			filename = wfile.getFullPath();
+		}
+		return filename;
+	}
+
 	public boolean loadWorkspace(String filename, boolean updateRecent)
 	{
 		if (filename == null) return false;
+		filename = cleanupWorkspaceFilename(filename);
+
 		final String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
 		WbFile f = new WbFile(realFilename);
+
 	 	if (!f.exists())
 		{
 			// if the file does not exist, set all variables as if it did
@@ -1578,10 +1593,13 @@ public class MainWindow
 			String workspaceFilename = aProfile.getWorkspaceFile();
 			if (workspaceFilename != null && !workspaceFilename.endsWith(".wksp")) workspaceFilename += ".wksp";
 
+			workspaceFilename = cleanupWorkspaceFilename(workspaceFilename);
+
 			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
 
-			File f = new File(realFilename);
+			WbFile f = new WbFile(realFilename);
+			
 			if (realFilename.length() > 0 && !f.exists())
 			{
 				int action = this.checkNonExistingWorkspace();
