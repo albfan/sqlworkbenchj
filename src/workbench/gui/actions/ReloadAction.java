@@ -37,12 +37,14 @@ public class ReloadAction
 		return ctrlPressed;
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.ctrlPressed = isCtrlPressed(e) && invokedByMouse(e);
 		this.client.reload();
 	}
 
+	@Override
 	public boolean allowDuplicate()
 	{
 		return false;

@@ -1469,11 +1469,13 @@ public class MainWindow
 
 	private boolean resultForWorkspaceClose;
 
-	private String cleanupWorkspaceFilename(String filename)
+	private String getRealWorkspaceFilename(String filename)
 	{
 		if (filename == null) return filename;
+		filename = FileDialogUtil.replaceConfigDir(filename);
+
 		WbFile wfile = new WbFile(filename);
-		if (!wfile.isAbsolute() && !wfile.exists() && !filename.contains(FileDialogUtil.CONFIG_DIR_KEY))
+		if (!wfile.isAbsolute())
 		{
 			wfile = new WbFile(Settings.getInstance().getConfigDir(), filename);
 			filename = wfile.getFullPath();
@@ -1484,9 +1486,7 @@ public class MainWindow
 	public boolean loadWorkspace(String filename, boolean updateRecent)
 	{
 		if (filename == null) return false;
-		filename = cleanupWorkspaceFilename(filename);
-
-		final String realFilename = FileDialogUtil.replaceConfigDir(filename);
+		final String realFilename = getRealWorkspaceFilename(filename);
 
 		WbFile f = new WbFile(realFilename);
 
@@ -1593,13 +1593,12 @@ public class MainWindow
 			String workspaceFilename = aProfile.getWorkspaceFile();
 			if (workspaceFilename != null && !workspaceFilename.endsWith(".wksp")) workspaceFilename += ".wksp";
 
-			workspaceFilename = cleanupWorkspaceFilename(workspaceFilename);
+			realFilename = getRealWorkspaceFilename(workspaceFilename);
 
-			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
 
 			WbFile f = new WbFile(realFilename);
-			
+
 			if (realFilename.length() > 0 && !f.exists())
 			{
 				int action = this.checkNonExistingWorkspace();
@@ -1618,11 +1617,6 @@ public class MainWindow
 				{
 					// start with an empty workspace
 					// and create a new workspace file.
-					if (!f.isAbsolute())
-					{
-						// if no directory was given, assume the configuration directory
-						workspaceFilename = FileDialogUtil.CONFIG_DIR_KEY + "/" + workspaceFilename;
-					}
 					resetWorkspace();
 				}
 			}
@@ -2422,7 +2416,7 @@ public class MainWindow
 		if (this.currentWorkspaceFile == null) return;
 		if (this.currentProfile == null) return;
 		FileDialogUtil util = new FileDialogUtil();
-		String filename = util.putConfigDirKey(this.currentWorkspaceFile);
+		String filename = util.removeConfigDir(this.currentWorkspaceFile);
 		this.currentProfile.setWorkspaceFile(filename);
 
 		// The MainWindow gets a copy of the profile managed by the ConnectionMgr
@@ -2454,6 +2448,7 @@ public class MainWindow
 	/**
 	 *	Saves the current SQL history to a workspace with the given filename
 	 *  If filename == null, a SaveAs dialog will be displayed.
+	 *
 	 *  If the workspace is saved with a new name (filename == null) the user
 	 *  will be asked if the workspace should be assigned to the current profile
 	 */
@@ -2467,19 +2462,12 @@ public class MainWindow
 		{
 			interactive = true;
 			FileDialogUtil util = new FileDialogUtil();
-			filename = util.getWorkspaceFilename(this, true);
+			filename = util.getWorkspaceFilename(this, true, true);
 			if (filename == null) return true;
 		}
 
-		String realFilename = FileDialogUtil.replaceConfigDir(filename);
+		String realFilename = getRealWorkspaceFilename(filename);
 		WbFile f = new WbFile(realFilename);
-
-		// If the workspace is not defined with a directory, assume
-		// the config dir. Otherwise the versioned backup does not work.
-		if (f.getParent() == null || !f.isAbsolute())
-		{
-			f = new WbFile(Settings.getInstance().getConfigDir(), realFilename);
-		}
 
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
@@ -2548,8 +2536,9 @@ public class MainWindow
 	}
 
 	/**
-	 *	Invoked when the a different SQL panel has been selected
-	 *  This fires the tabSelected() method
+	 *	Invoked when the a different SQL panel has been selected.
+	 *
+	 *  This fires the tabSelected() method.
 	 *  @param e  a ChangeEvent object
 	 *
 	 */

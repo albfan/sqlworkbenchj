@@ -19,7 +19,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  Thomas Kellerer
  */
-public class StopAction extends WbAction
+public class StopAction
+	extends WbAction
 {
 	private Interruptable panel;
 
@@ -33,6 +34,7 @@ public class StopAction extends WbAction
 		this.setCreateMenuSeparator(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.panel.cancelExecution();

@@ -170,11 +170,6 @@ public class FileDialogUtil
 		}
 	}
 
-	public String getWorkspaceFilename(Window parent, boolean toSave)
-	{
-		return this.getWorkspaceFilename(parent, toSave, false);
-	}
-
 	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
 	{
 		try
@@ -223,7 +218,7 @@ public class FileDialogUtil
 			}
 			if (replaceConfigDir && filename != null)
 			{
-				filename = this.putConfigDirKey(filename);
+				filename = this.removeConfigDir(filename);
 			}
 			return filename;
 		}
@@ -235,7 +230,7 @@ public class FileDialogUtil
 		}
 	}
 
-	public String putConfigDirKey(String aPathname)
+	public String removeConfigDir(String aPathname)
 	{
 		File f = new File(aPathname);
 		String fname = f.getName();
@@ -243,7 +238,7 @@ public class FileDialogUtil
 		File config = Settings.getInstance().getConfigDir();
 		if (dir.equals(config))
 		{
-			return CONFIG_DIR_KEY + "/" + fname;
+			return fname;
 		}
 		else
 		{

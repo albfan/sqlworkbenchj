@@ -525,24 +525,11 @@
 				to create a new workspace file.
 			</para>
 
-			<note><para>
-				When specifying the location of the workspace file, you can use the placeholder
-				<literal>%ConfigDir%</literal> as part of the filename. The file will then be stored
-				in the same directory as &wb-productname;'s <link linkend="cmdline-parameter-configdir">configuration files</link>
-				e.g.: <literal>%ConfigDir%/oracle.wksp</literal>
-			</para></note>
-
 			<para>
-				When you use the <literal>%ConfigDir%</literal> placeholder, you can move the profiles
-				and workspaces to a different computer, without changing the location of the workspace files.
+				If you specify a filename that does not contain a directory or is a relative filename, it is assumed
+        the workspace is stored in <link linkend="cmdline-parameter-configdir">configuration directory</link>.
 			</para>
 
-			<para>
-				The placeholder will be put automatically into the filename
-				when you select the location of the profile using the file dialog. The file dialog
-				will be opened when you click the button with <literal>...</literal> to the right
-				of the input field.
-			</para>
 			<note><para>
 				As the workspace stores several settings that are related to the connection
 				(e.g. the selected schema in the <link linkend="dbexplorer">DbExplorer</link>) it is recommended to create one

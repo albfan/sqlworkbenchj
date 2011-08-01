@@ -15,17 +15,25 @@ import java.awt.BorderLayout;
 import java.sql.SQLException;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.border.EtchedBorder;
 
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.StopAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
+import workbench.resource.GuiSettings;
+import workbench.util.WbThread;
 
 /**
  *
@@ -33,15 +41,22 @@ import workbench.interfaces.Resettable;
  */
 public class FkDisplayPanel
 	extends JPanel
-	implements Resettable
+	implements Resettable, Reloadable, Interruptable
 {
 
 	protected WbTable keys;
 	private TableDependencyTreeDisplay dependencyTree;
 	private WbSplitPane splitPanel;
+
+	private ReloadAction reloadTree;
+	private StopAction cancelAction;
+
 	private boolean showImportedKeys;
 	private WbConnection dbConnection;
 	private boolean isRetrieving;
+	private boolean isTreeRetrieving;
+
+	private TableIdentifier currentTable;
 
 	public FkDisplayPanel(TableLister lister, boolean showImported)
 	{
@@ -54,7 +69,21 @@ public class FkDisplayPanel
 		this.splitPanel.setDividerSize(8);
 		this.splitPanel.setTopComponent(scroll);
 		this.dependencyTree = new TableDependencyTreeDisplay(lister);
-		this.splitPanel.setBottomComponent(this.dependencyTree);
+		this.dependencyTree.reset();
+		JPanel treePanel = new JPanel(new BorderLayout());
+		treePanel.add(this.dependencyTree, BorderLayout.CENTER);
+
+		WbToolbar toolbar = new WbToolbar();
+		toolbar.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
+		reloadTree = new ReloadAction(this);
+		cancelAction = new StopAction(this);
+		cancelAction.setEnabled(false);
+		toolbar.add(reloadTree);
+		toolbar.addSeparator();
+		toolbar.add(cancelAction);
+
+		treePanel.add(toolbar, BorderLayout.NORTH);
+		this.splitPanel.setBottomComponent(treePanel);
 		this.add(splitPanel, BorderLayout.CENTER);
 		showImportedKeys = showImported;
 	}
@@ -94,9 +123,9 @@ public class FkDisplayPanel
 
 	public boolean isRetrieving()
 	{
-		return isRetrieving;
+		return isRetrieving || isTreeRetrieving;
 	}
-	
+
 	public void cancel()
 	{
 		dependencyTree.cancelRetrieve();
@@ -107,6 +136,7 @@ public class FkDisplayPanel
 	{
 		try
 		{
+			currentTable = table;
 			isRetrieving = true;
 			FKHandler handler = FKHandlerFactory.createInstance(dbConnection);
 			final DataStoreTableModel model;
@@ -125,9 +155,14 @@ public class FkDisplayPanel
 				{
 					keys.setModel(model, true);
 					keys.adjustRowsAndColumns();
+					dependencyTree.reset();
 				}
 			});
-			retrieveTree(table);
+
+			if (GuiSettings.getAutoRetrieveFKTree())
+			{
+				reload();
+			}
 		}
 		finally
 		{
@@ -145,5 +180,49 @@ public class FkDisplayPanel
 		{
 			dependencyTree.readReferencingTables(table);
 		}
+	}
+
+	@Override
+	public void reload()
+	{
+		WbThread t = new WbThread("DependencyTreeRetriever")
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					isTreeRetrieving = true;
+					retrieveTree(currentTable);
+				}
+				finally
+				{
+					isTreeRetrieving = false;
+					reloadTree.setEnabled(true);
+					cancelAction.setEnabled(false);
+					WbSwingUtilities.showDefaultCursor(FkDisplayPanel.this);
+				}
+			}
+		};
+		reloadTree.setEnabled(false);
+		cancelAction.setEnabled(true);
+		WbSwingUtilities.showWaitCursor(this);
+		t.start();
+	}
+
+	@Override
+	public void cancelExecution()
+	{
+		if (isTreeRetrieving)
+		{
+			dependencyTree.cancelRetrieve();
+			cancelAction.setEnabled(false);
+		}
+	}
+
+	@Override
+	public boolean confirmCancel()
+	{
+		return true;
 	}
 }

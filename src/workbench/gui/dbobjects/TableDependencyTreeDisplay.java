@@ -134,14 +134,12 @@ public class TableDependencyTreeDisplay
 	@Override
 	public void reset()
 	{
-		if (tree != null)
-		{
-			DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode(), false);
-			tree.setModel(model);
-		}
+		createTree();
+		DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode(), false);
+		tree.setModel(model);
 	}
 
-	private void createTreeDisplay(DefaultMutableTreeNode root)
+	private void createTree()
 	{
 		if (tree == null)
 		{
@@ -154,10 +152,21 @@ public class TableDependencyTreeDisplay
 			WbScrollPane scroll = new WbScrollPane(tree);
 			add(scroll, BorderLayout.CENTER);
 		}
-		DefaultTreeModel model = new DefaultTreeModel(root, false);
-		tree.setModel(model);
-		this.expandNodes(tree);
-		WbSwingUtilities.repaintLater(this);
+	}
+
+	private void createTreeDisplay(final DefaultMutableTreeNode root)
+	{
+		createTree();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				DefaultTreeModel model = new DefaultTreeModel(root, false);
+				tree.setModel(model);
+				expandNodes(tree);
+			}
+		});
 	}
 
   private void readTreeNodes(DependencyNode root)
