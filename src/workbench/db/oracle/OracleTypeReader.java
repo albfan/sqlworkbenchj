@@ -17,12 +17,14 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -31,6 +33,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to retrieve Oracle object types and their definition.
  *
  * @author Thomas Kellerer
  */
@@ -45,9 +48,8 @@ public class OracleTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
-		// if no type has been requested, the Oracle driver does not includes the object types
+		// if no type has been requested, the Oracle driver does not include the object types
 		// if TYPE has specifically been requested, the objects are returned
-
 		if (requestedTypes != null) return false;
 		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
@@ -74,11 +76,6 @@ public class OracleTypeReader
 			"       attributes \n" +
 			"FROM all_types ";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("OracleObjectTypeReader.getTypes", "Using SQL=\n" + select);
-		}
-
 		int schemaIndex = -1;
 		int nameIndex = -1;
 
@@ -101,6 +98,12 @@ public class OracleTypeReader
 				nameIndex = 1;
 			}
 		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleObjectTypeReader.getTypes", "Using SQL=\n" + select);
+		}
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		List<OracleObjectType> result = new ArrayList<OracleObjectType>();
@@ -207,6 +210,12 @@ public class OracleTypeReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(type.getNumberOfAttributes());
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleTypeReader.getAttributes()", "Using SQL: " + sql);
+		}
+
 		try
 		{
 			stmt = con.createStatementForQuery();
@@ -266,6 +275,11 @@ public class OracleTypeReader
 		if (object == null) return null;
 
 		String sql = "select dbms_metadata.get_ddl('TYPE', ?, ?) from dual";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleTypeReader.retrieveSource()", "Using SQL: " + SqlUtil.replaceParameters(sql, object.getObjectName(), object.getSchema()));
+		}
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

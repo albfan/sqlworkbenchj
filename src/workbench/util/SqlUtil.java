@@ -22,7 +22,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -163,7 +163,7 @@ public class SqlUtil
 	 * @param objectName the name to quote
 	 * @param quoteAlways if true, the name is not tested for special characters
 	 * @param checkReservedWords  if true, the value will be compared to a list of SQL 2003 reserved words.
-	 * 
+	 *
 	 * @return the quoted version of the name.
 	 */
 	public static String quoteObjectname(String objectName, boolean quoteAlways, boolean checkReservedWords)
@@ -1760,28 +1760,33 @@ public class SqlUtil
 	public static String replaceParameters(String sql, Object ... values)
 	{
 		if (values == null) return sql;
-		List<Object> vals = Arrays.asList(values);
+		if (values.length == 0) return sql;
+
 		int valuePos = 0;
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(true, true);
-		StringBuilder result = new StringBuilder(sql.length() + vals.size() * 5);
+		StringBuilder result = new StringBuilder(sql.length() + values.length * 5);
 
 		while (t != null)
 		{
-			if (t.getText().equals("?") && valuePos < vals.size())
+			if (t.getText().equals("?") && valuePos < values.length)
 			{
-				Object v = vals.get(valuePos);
+				Object v = values[valuePos];
+
 				if (v instanceof String)
 				{
 					result.append('\'');
 					result.append(v.toString());
 					result.append('\'');
 				}
+				else if (v != null)
+				{
+					result.append(v.toString());
+				}
 				else
 				{
-					result.append(vals.get(valuePos).toString());
+					result.append("NULL");
 				}
-
 				valuePos ++;
 			}
 			else
