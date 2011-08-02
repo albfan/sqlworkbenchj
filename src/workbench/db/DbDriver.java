@@ -19,15 +19,15 @@ import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.*;
 
+import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
-import java.sql.DriverManager;
-import java.util.*;
-import workbench.db.postgres.PostgresUtil;
-import workbench.resource.ResourceMgr;
 import workbench.util.WbFile;
 
 /**
@@ -409,7 +409,7 @@ public class DbDriver
 			}
 
 			// PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
-			if (doSetAppName() && url.startsWith("jdbc:postgresql"))
+			if (doSetAppName() && url.startsWith("jdbc:postgresql") && !props.containsKey(PostgresUtil.APP_NAME_PROPERTY))
 			{
 				PostgresUtil.setApplicationName(c, getProgramName() + " (" + id + ")");
 			}
@@ -464,6 +464,13 @@ public class DbDriver
 		String appNameProperty = null;
 		String prgName = getProgramName();
 
+		if (url.startsWith("jdbc:postgresql"))
+		{
+			if (PostgresUtil.supportsAppInfoProperty(this.driverClassInstance.getClass()))
+			{
+				appNameProperty = PostgresUtil.APP_NAME_PROPERTY;
+			}
+		}
 		if (url.startsWith("jdbc:oracle:thin"))
 		{
 			appNameProperty = "v$session.program";
