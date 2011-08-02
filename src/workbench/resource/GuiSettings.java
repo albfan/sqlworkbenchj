@@ -31,7 +31,7 @@ public class GuiSettings
 
 	public static boolean getAutoRetrieveFKTree()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", false);
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);
 	}
 
 	public static void setAutorRetrieveFKTree(boolean flag)
