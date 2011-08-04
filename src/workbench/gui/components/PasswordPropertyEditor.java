@@ -22,7 +22,6 @@ import javax.swing.event.DocumentListener;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 
-
 /**
  *
  * @author  Thomas Kellerer
@@ -44,6 +43,7 @@ public class PasswordPropertyEditor
 		this.addFocusListener(this);
 	}
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -73,6 +73,7 @@ public class PasswordPropertyEditor
 		this.getDocument().addDocumentListener(this);
 	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -93,11 +94,13 @@ public class PasswordPropertyEditor
 		}
 	}
 
+	@Override
 	public boolean isChanged()
 	{
 		return this.changed;
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -108,6 +111,7 @@ public class PasswordPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -118,6 +122,7 @@ public class PasswordPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -128,12 +133,14 @@ public class PasswordPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
@@ -142,6 +149,7 @@ public class PasswordPropertyEditor
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 	}
@@ -149,6 +157,7 @@ public class PasswordPropertyEditor
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		if (!this.immediateUpdate) this.applyChanges();

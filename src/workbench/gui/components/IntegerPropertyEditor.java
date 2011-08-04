@@ -46,6 +46,7 @@ public class IntegerPropertyEditor
 		this.addMouseListener(new TextComponentMouseListener());
 	}
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.setSourceObject(aSource, aProperty, null);
@@ -114,6 +115,7 @@ public class IntegerPropertyEditor
 		this.getDocument().addDocumentListener(this);
 	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -132,10 +134,14 @@ public class IntegerPropertyEditor
 		}
 	}
 
+	@Override
 	public boolean isChanged() { return this.changed; }
 
+	@Override
 	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
+	@Override
 	public void insertUpdate(DocumentEvent e) { documentChanged(); }
+	@Override
 	public void removeUpdate(DocumentEvent e) { documentChanged(); }
 
 	private void documentChanged()
@@ -148,12 +154,14 @@ public class IntegerPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
@@ -162,6 +170,7 @@ public class IntegerPropertyEditor
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 	}
@@ -169,6 +178,7 @@ public class IntegerPropertyEditor
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		if (!this.immediateUpdate) this.applyChanges();

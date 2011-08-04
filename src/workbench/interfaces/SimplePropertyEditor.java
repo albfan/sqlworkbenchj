@@ -19,11 +19,11 @@ import java.beans.PropertyChangeListener;
  */
 public interface SimplePropertyEditor
 {
-	void setSourceObject(Object aSource, String aProperty);
+	void setSourceObject(Object source, String property);
 	void applyChanges();
 	boolean isChanged();
-	void addPropertyChangeListener(PropertyChangeListener aListener);
-	void removePropertyChangeListener(PropertyChangeListener aListener);
-	void setImmediateUpdate(boolean aFlag);
+	void addPropertyChangeListener(PropertyChangeListener listener);
+	void removePropertyChangeListener(PropertyChangeListener listener);
+	void setImmediateUpdate(boolean flag);
 	boolean getImmediateUpdate();
 }

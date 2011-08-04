@@ -35,6 +35,7 @@ public class BooleanPropertyEditor
 	private String propName;
 	private boolean immediateUpdate;
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -83,6 +84,7 @@ public class BooleanPropertyEditor
 		}
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent evt)
 	{
 		this.changed = true;
@@ -92,6 +94,7 @@ public class BooleanPropertyEditor
 		}
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				firePropertyChange(propName, null, Boolean.valueOf(isSelected()));
@@ -99,6 +102,7 @@ public class BooleanPropertyEditor
 		});
 	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -116,16 +120,19 @@ public class BooleanPropertyEditor
 		}
 	}
 
+	@Override
 	public boolean isChanged()
 	{
 		return this.changed;
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;

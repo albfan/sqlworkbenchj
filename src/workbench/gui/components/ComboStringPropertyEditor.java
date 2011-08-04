@@ -32,7 +32,7 @@ import workbench.log.LogMgr;
 
 /**
  *	A property editor for a String property, where the values
- *	for the field can also be selected by a dropdown
+ *	for the field can also be selected by a dropdown.
  *
  * @author  Thomas Kellerer
  */
@@ -47,6 +47,7 @@ public class ComboStringPropertyEditor
 	private boolean immediateUpdate;
 	private ActionListener listener;
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -82,6 +83,7 @@ public class ComboStringPropertyEditor
 		{
 			listener = new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent evt)
 				{
 					changed = true;
@@ -116,6 +118,7 @@ public class ComboStringPropertyEditor
 		}
 	}
 
+	@Override
 	public void setModel(ComboBoxModel m)
 	{
 		stopEvents();
@@ -142,8 +145,13 @@ public class ComboStringPropertyEditor
 		}
 	}
 
-	public boolean isChanged() { return this.changed; }
+	@Override
+	public boolean isChanged()
+	{
+		return this.changed;
+	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -166,11 +174,7 @@ public class ComboStringPropertyEditor
 		}
 	}
 
-	/** Invoked when an item has been selected or deselected by the user.
-	 * The code written for this method performs the operations
-	 * that need to occur when an item is selected (or deselected).
-	 *
-	 */
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getStateChange() == ItemEvent.SELECTED)
@@ -183,29 +187,47 @@ public class ComboStringPropertyEditor
 		}
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
 
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 	}
 
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		this.applyChanges();
 	}
 
-	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
-	public void insertUpdate(DocumentEvent e) { documentChanged(); }
-	public void removeUpdate(DocumentEvent e) { documentChanged(); }
+	@Override
+	public void changedUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e)
+	{
+		documentChanged();
+	}
 
 	private void documentChanged()
 	{

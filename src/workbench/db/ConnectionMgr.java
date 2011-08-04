@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import workbench.WbManager;
 import workbench.db.shutdown.DbShutdownFactory;
 import workbench.db.shutdown.DbShutdownHook;
@@ -132,6 +133,16 @@ public class ConnectionMgr
 		return drv.loadClassFromDriverLib(className);
 	}
 
+	private Properties getConnectionProperties(ConnectionProfile profile)
+	{
+		Properties props = new Properties(profile.getConnectionProperties());
+		if (profile.getOracleSysDBA())
+		{
+			props.put("internal_logon", "sysdba");
+		}
+		return props;
+	}
+
 	WbConnection connect(ConnectionProfile profile, String anId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
@@ -153,7 +164,7 @@ public class ConnectionMgr
 			{
 				DriverManager.setLoginTimeout(timeout);
 			}
-			sql = drv.connect(profile.getUrl(), profile.getUsername(), profile.decryptPassword(), anId, profile.getConnectionProperties());
+			sql = drv.connect(profile.getUrl(), profile.getUsername(), profile.decryptPassword(), anId, getConnectionProperties(profile));
 		}
 		finally
 		{

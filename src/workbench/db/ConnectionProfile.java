@@ -54,6 +54,7 @@ public class ConnectionProfile
 	private boolean ignoreDropErrors;
 	private boolean trimCharData;
 	private boolean temporaryProfile;
+	private boolean oracleSysDBA;
 
 	private boolean readOnly;
 	private Boolean sessionReadOnly;
@@ -169,6 +170,17 @@ public class ConnectionProfile
 	{
 		this.changed = hideWarnings != flag;
 		this.hideWarnings = flag;
+	}
+
+	public boolean getOracleSysDBA()
+	{
+		return oracleSysDBA;
+	}
+
+	public void setOracleSysDBA(boolean flag)
+	{
+		this.changed = oracleSysDBA != flag;
+		this.oracleSysDBA = flag;
 	}
 
 	public int getConnectionTimeoutValue()
@@ -738,6 +750,7 @@ public class ConnectionProfile
 		result.setGroup(group);
 		result.setPassword(getPassword());
 		result.setUrl(url);
+		result.setOracleSysDBA(oracleSysDBA);
 		result.setUsername(username);
 		result.setWorkspaceFile(workspaceFile);
 		result.setIgnoreDropErrors(ignoreDropErrors);

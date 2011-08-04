@@ -43,6 +43,7 @@ public class NumberPropertyEditor
 		this.addFocusListener(this);
 	}
 
+	@Override
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -72,6 +73,7 @@ public class NumberPropertyEditor
 		if (doc != null) doc.addDocumentListener(this);
 	}
 
+	@Override
 	public void applyChanges()
 	{
 		if (this.setter == null) return;
@@ -90,6 +92,7 @@ public class NumberPropertyEditor
 		}
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -100,6 +103,7 @@ public class NumberPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -110,6 +114,7 @@ public class NumberPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -125,17 +130,20 @@ public class NumberPropertyEditor
 		firePropertyChange(this.propName, null, null);
 	}
 
+	@Override
 	public boolean isChanged()
 	{
 		return this.changed;
 	}
 
+	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
 
+	@Override
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
@@ -144,6 +152,7 @@ public class NumberPropertyEditor
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 		this.selectAll();
@@ -152,6 +161,7 @@ public class NumberPropertyEditor
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		if (!this.immediateUpdate) this.applyChanges();
