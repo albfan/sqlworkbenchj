@@ -277,7 +277,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(1, 6, 2, 6);
         add(tfURL, gridBagConstraints);
 
         tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -288,7 +288,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(2, 6, 2, 2);
         add(tfUserName, gridBagConstraints);
 
         tfPwd.setName("password"); // NOI18N
@@ -309,7 +309,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
         add(asSysDBA, gridBagConstraints);
 
         lblUsername.setLabelFor(tfUserName);
@@ -318,7 +318,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
+        gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 0);
         add(lblUsername, gridBagConstraints);
 
         lblPwd.setLabelFor(tfPwd);
@@ -345,7 +345,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 2, 0);
         add(lblUrl, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -353,7 +353,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(7, 0, 6, 0);
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
         add(jSeparator2, gridBagConstraints);
 
         showPassword.setText(ResourceMgr.getString("LblShowPassword")); // NOI18N
@@ -515,7 +515,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 6, 6);
+        gridBagConstraints.insets = new java.awt.Insets(1, 5, 4, 6);
         add(wbOptionsPanel, gridBagConstraints);
 
         jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -734,7 +734,7 @@ public class ConnectionEditorPanel
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 7, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         add(jSeparator3, gridBagConstraints);
 
         jPanel5.setLayout(new java.awt.GridBagLayout());
