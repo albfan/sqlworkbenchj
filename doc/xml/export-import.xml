@@ -5,7 +5,7 @@
     You can export the data of the <emphasis role="strong"><indexterm><primary>Export</primary><secondary>result set</secondary></indexterm></emphasis>
 		into local files of the following formats:
 	</para>
-	
+
 	<itemizedlist>
 		<listitem><simpara>HTML</simpara></listitem>
 		<listitem><simpara>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</simpara></listitem>
@@ -20,18 +20,18 @@
   </para>
 
 	<para>
-		To save the data from the current result set into an external file, 
+		To save the data from the current result set into an external file,
 		choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
 		You will be prompted for the filename. On the right side of the file dialog
-		you will have the possibility to define the type of the export. 
-		The export parameters on the right side of the dialog are split into two parts. 
-		The upper part defines parameters that are available for all export types. 
-		These are the encoding for the file, the format for date and date/time data 
+		you will have the possibility to define the type of the export.
+		The export parameters on the right side of the dialog are split into two parts.
+		The upper part defines parameters that are available for all export types.
+		These are the encoding for the file, the format for date and date/time data
 		and the columns that should be exported.
 	</para>
 	<para>
-			All format specific options that are available in the lower part, are also 
-			available when using the <link linkend="command-export">WbExport</link> command. 
+			All format specific options that are available in the lower part, are also
+			available when using the <link linkend="command-export">WbExport</link> command.
 			For a detailed discussion of the individual options please refer to that section.
 	</para>
 	<para>
@@ -66,53 +66,53 @@
 				<para>Text (tab separated)</para>
 				<para>
 					This will use a tab as the column separator, and will not quote any values.
-					The end-of-line sequence will be a newline (Unix style) and 
+					The end-of-line sequence will be a newline (Unix style) and
 					the column headers will be part of the copied data. Special
 					characters (e.g. newlines) in the actual data will not
 					be replaced (as it is possible with the
 					<link linkend="text-escape-switch">WbExport</link> command).
 				</para>
 				<para>
-					When you hold down the <keycap>Shift</keycap> key when you 
+					When you hold down the <keycap>Shift</keycap> key when you
 					select the menu item, the column headers will not be copied
 					to the clipboard. When you hold down the <keycap>Ctrl</keycap> key when selecting
 					the menu item, you can choose which columns should be copied
-					to the clipboard. Pressing <keycap>Shift</keycap> and <keycap>Ctrl</keycap> 
+					to the clipboard. Pressing <keycap>Shift</keycap> and <keycap>Ctrl</keycap>
 					together is also supported.
 				</para>
 			</listitem>
 			<listitem>
 				<para>SQL (INSERT, UPDATE, or DELETE &amp; INSERT)</para>
 				<para>
-					The end-of-line sequence will be a newline (Unix style). 
+					The end-of-line sequence will be a newline (Unix style).
 					No cleanup of data will be done as it is possible with the
-					<link linkend="export-sql-cleanup">WbExport</link> command, apart from 
-					correctly quoting single quotes inside the values (which is required to 
+					<link linkend="export-sql-cleanup">WbExport</link> command, apart from
+					correctly quoting single quotes inside the values (which is required to
 					generate valid SQL)
 				</para>
 			</listitem>
 		</itemizedlist>
 	</para>
 	<para>
-		As with the <literal>Save Data as</literal> command, the options <literal>SQL UPDATE</literal> 
-		and	<literal>SQL DELETE/INSERT</literal> are only available when the current result set is 
+		As with the <literal>Save Data as</literal> command, the options <literal>SQL UPDATE</literal>
+		and	<literal>SQL DELETE/INSERT</literal> are only available when the current result set is
 		updateable. If no key columns could be retrieved for the current result, you can manually
 		define the key columns to be used, using <menuchoice><guimenu>Data</guimenu><guimenuitem>Define key columns</guimenuitem></menuchoice>
 	</para>
 	<note>
 		<para>
-			If you do not want to copy all columns to the clipboard, hold down the 
+			If you do not want to copy all columns to the clipboard, hold down the
 			the <keycap>CTRL</keycap> key while selecting one of the
-			menu items related to the clipboard. A dialog will then let you select the 
+			menu items related to the clipboard. A dialog will then let you select the
 			columns that you want to copy.
 		</para>
 	</note>
 	<para>
-		Alternatively you can hold down the <keycap>Alt</keycap> key while 
-		selecting rows/columns in the result set. This will allow you to 
-		select only the columns and rows that you want to copy. If you then use 
+		Alternatively you can hold down the <keycap>Alt</keycap> key while
+		selecting rows/columns in the result set. This will allow you to
+		select only the columns and rows that you want to copy. If you then use
 		one of the formats available in the <guimenu>Copy selected</guimenu>
-		submenu, only the selected cells will be copied. If you choose to 
+		submenu, only the selected cells will be copied. If you choose to
 		copy the data as <literal>UPDATE</literal> or <literal>DELETE/INSERT</literal>
 		statements, the generated SQL statements will not be correct if you did not
 		select the primary key of the underlying update table.
@@ -178,17 +178,17 @@
 		</informaltable>
 		<para>
 			You can also import text and XML files using the
-			<link linkend="command-import">WbImport</link> 
+			<link linkend="command-import">WbImport</link>
 			command. Using the <literal>WbImport</literal> command is the recommended way to import
-			data, as it is much more flexible, and - more important - it does not read the 
+			data, as it is much more flexible, and - more important - it does not read the
 			data into memory.
 		</para>
 	</section>
 	<section id="import-clipboard">
 		<title>Import the clipboard into the current result</title>
 		<para>
-      You can import the contents of the <indexterm><primary>Import</primary><secondary>clipboard</secondary></indexterm> into the current result, if the
-			format matches the result set. When you select <menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboar</guimenuitem></menuchoice>
+      You can import the contents of the <indexterm><primary>Import</primary><secondary>clipboard</secondary></indexterm> clipboard into the current result,
+      if the format matches the result set. When you select <menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboard</guimenuitem></menuchoice>
 			&wb-productname; will check if the current clipboard contents can be imported into the current
 			result. The data can automatically be imported if the first row of the data contains
 			the column names. One of the following two conditions must be true in order for the import to succeed
