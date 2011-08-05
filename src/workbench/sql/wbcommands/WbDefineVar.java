@@ -11,6 +11,8 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
@@ -22,10 +24,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-import workbench.util.WbStringTokenizer;
+import workbench.util.*;
 
 /**
  * SQL Command to define a variable that gets stored in the system
@@ -45,6 +44,9 @@ public class WbDefineVar
 		super();
 		this.cmdLine = new ArgumentParser();
 		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
+		this.cmdLine.addArgument("contentFile", ArgumentType.StringArgument);
+		this.cmdLine.addArgument("variable", ArgumentType.StringArgument);
+
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -69,6 +71,14 @@ public class WbDefineVar
 
 		cmdLine.parse(sql);
 		WbFile file = this.evaluateFileArgument(cmdLine.getValue("file"));
+		WbFile contentFile = this.evaluateFileArgument(cmdLine.getValue("contentFile"));
+
+		if (file != null && contentFile != null)
+		{
+			result.addMessageByKey("MsgVarFileWrong");
+			result.setFailure();
+			return result;
+		}
 
 		if (file != null)
 		{
@@ -102,6 +112,10 @@ public class WbDefineVar
 				result.setFailure();
 			}
 		}
+		else if (contentFile != null)
+		{
+			readFileContents(result, contentFile);
+		}
 		else
 		{
 			WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
@@ -114,7 +128,7 @@ public class WbDefineVar
 
 			if (var == null)
 			{
-				result.addMessage(ResourceMgr.getString("ErrVarDefWrongParameter"));
+				result.addMessageByKey("ErrVarDefWrongParameter");
 				result.setFailure();
 				return result;
 			}
@@ -123,7 +137,6 @@ public class WbDefineVar
 
 			if (tok.hasMoreTokens()) value = tok.nextToken();
 
-			String msg = null;
 			result.setSuccess();
 
 			if (value != null)
@@ -156,32 +169,39 @@ public class WbDefineVar
 					// we have to remove them again as they should not be part of the variable value
 					value = StringUtil.trimQuotes(value.trim());
 				}
-
-				msg = ResourceMgr.getString("MsgVarDefVariableDefined");
-				try
+				setVariable(result, var, value);
+				if (result.isSuccess())
 				{
-					VariablePool.getInstance().setParameterValue(var, value);
+					String msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 					msg = StringUtil.replace(msg, "%var%", var);
 					msg = StringUtil.replace(msg, "%value%", value);
 					msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
-				}
-				catch (IllegalArgumentException e)
-				{
-					result.setFailure();
-					msg = ResourceMgr.getString("ErrVarDefWrongName");
-					result.setFailure();
+					result.addMessage(msg);
 				}
 			}
 			else
 			{
 				VariablePool.getInstance().removeValue(var);
-				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");
-				msg = msg.replace("%var%", var);
+				String removed = ResourceMgr.getString("MsgVarDefVariableRemoved");
+				removed = removed.replace("%var%", var);
+				result.addMessage(removed);
 			}
-			result.addMessage(msg);
 		}
 
 		return result;
+	}
+
+	private void setVariable(StatementRunnerResult result, String var, String value)
+	{
+		try
+		{
+			VariablePool.getInstance().setParameterValue(var, value);
+		}
+		catch (IllegalArgumentException e)
+		{
+			result.addMessageByKey("ErrVarDefWrongName");
+			result.setFailure();
+		}
 	}
 
 	/**
@@ -225,6 +245,42 @@ public class WbDefineVar
 		}
 
 		return result;
+	}
+
+	private void readFileContents(StatementRunnerResult result, WbFile contentFile)
+	{
+		String varname = cmdLine.getValue("variable");
+		if (StringUtil.isBlank(varname))
+		{
+			result.addMessageByKey("MsgVarNoName");
+			result.setFailure();
+			return;
+		}
+
+		String encoding = cmdLine.getValue("encoding");
+		if (encoding == null)
+		{
+			encoding = EncodingUtil.getDefaultEncoding();
+		}
+
+		try
+		{
+			String value = FileUtil.readFile(contentFile, encoding);
+			setVariable(result, varname, value);
+			String msg = ResourceMgr.getFormattedString("MsgVarReadFile", varname, contentFile.getFullPath());
+			result.addMessage(msg);
+		}
+		catch (FileNotFoundException fnf)
+		{
+			LogMgr.logError("WbDefineVar.execute()", "Content file " + contentFile.getFullPath() + " not found!", fnf);
+			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", contentFile.getFullPath()));
+			result.setFailure();
+		}
+		catch (IOException io)
+		{
+			result.addMessage(ExceptionUtil.getDisplay(io));
+			result.setFailure();
+		}
 	}
 
 }

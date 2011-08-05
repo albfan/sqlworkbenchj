@@ -11,21 +11,25 @@
  */
 package workbench.sql.wbcommands;
 
-import org.junit.AfterClass;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
-import workbench.sql.StatementRunner;
 import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
+import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import workbench.util.WbFile;
 
 /**
  *
@@ -139,5 +143,22 @@ public class WbDefineVarTest
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
+	}
+
+	@Test
+	public void testReadFileContent()
+		throws Exception
+	{
+		VariablePool.getInstance().clear();
+		WbDefineVar cmd = new WbDefineVar();
+		TestUtil util = getTestUtil();
+		WbFile data = new WbFile(util.getBaseDir(), "data.txt");
+		Writer out = EncodingUtil.createWriter(data, "UTF-8", false);
+		String content = "this is the variable value";
+		out.write(content);
+		out.close();
+
+		cmd.execute("WbDefineVar -contentFile='" + data.getFullPath() + "' -encoding='UTF-8' -variable=filevar");
+		assertEquals(content, VariablePool.getInstance().getParameterValue("filevar"));
 	}
 }

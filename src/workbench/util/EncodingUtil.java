@@ -40,7 +40,7 @@ import workbench.resource.ResourceMgr;
 public class EncodingUtil
 {
 	private static String[] charsets;
-	
+
 	/**
 	 *	Create a BufferedReader for the given file and encoding
 	 *  The buffer size is set to 64K
@@ -51,7 +51,7 @@ public class EncodingUtil
 		InputStream inStream = new FileInputStream(f);
 		return createReader(inStream, encoding);
 	}
-	
+
 	public static Reader createReader(InputStream in, String encoding)
 		throws IOException, UnsupportedEncodingException
 	{
@@ -61,7 +61,7 @@ public class EncodingUtil
 			try
 			{
 				String enc = cleanupEncoding(encoding);
-				
+
 				if (enc.toLowerCase().startsWith("utf"))
 				{
 					r = new UnicodeReader(in, enc);
@@ -82,10 +82,10 @@ public class EncodingUtil
 		}
 		return r;
 	}
-	
+
 	/**
 	 * Create a BufferedReader for the given file and encoding.
-	 * If no encoding is given, then a regular FileReader without 
+	 * If no encoding is given, then a regular FileReader without
 	 * a specific encoding is used.
 	 * The default buffer size is 16kb
 	 */
@@ -94,10 +94,10 @@ public class EncodingUtil
 	{
 		return createBufferedReader(f, encoding, 16*1024);
 	}
-	
+
 	/**
 	 * Create a BufferedReader for the given file, encoding and buffer size.
-	 * If no encoding is given, then a regular FileReader without 
+	 * If no encoding is given, then a regular FileReader without
 	 * a specific encoding is used.
 	 */
 	public static BufferedReader createBufferedReader(File f, String encoding, int buffSize)
@@ -106,9 +106,9 @@ public class EncodingUtil
 		Reader r = createReader(f, encoding);
 		return new BufferedReader(r, buffSize);
 	}
-	
+
 	/**
-	 * Allow some common other names for encodings (e.g. UTF for UTF-8) 
+	 * Allow some common other names for encodings (e.g. UTF for UTF-8)
 	 */
 	public static String cleanupEncoding(String input)
 	{
@@ -154,7 +154,7 @@ public class EncodingUtil
 	}
 
 	/**
-	 * Test if the given encoding is supported. Before this is 
+	 * Test if the given encoding is supported. Before this is
 	 * tested, cleanupEncoding() is called to allow for some
 	 * common "abbreviations"
 	 * @see #cleanupEncoding(String)
@@ -178,7 +178,7 @@ public class EncodingUtil
 	{
 		return createWriter(new FileOutputStream(outfile, append), encoding);
 	}
-	
+
 	public static Writer createWriter(OutputStream stream, String encoding)
 		throws IOException
 	{
@@ -202,6 +202,11 @@ public class EncodingUtil
 		return pw;
 	}
 
+	public static String getDefaultEncoding()
+	{
+		return System.getProperty("file.encoding");
+	}
+	
 	public static JComponent createEncodingPanel()
 	{
 		try
