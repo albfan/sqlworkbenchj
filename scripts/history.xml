@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-11-03">
+    <entry dev-build="5" type="enh">The contents for a variable can now be read from an external file (using WbVarDef -variable=foo -contentFile=bar.txt)</entry>
+    <entry dev-build="5" type="enh">A new option to enable a connection to Oracle using the role SYSDBA has been added to the connection profile. This removes the need to specify an extended property.</entry>
     <entry dev-build="5" type="enh">The dependency tree in the DbExplorer can now be retrieved independently from the list of foreign keys. Additionally the automatic retrieval of the tree can now be disabled in the options dialog.</entry>
     <entry dev-build="3" type="enh">A new command "WbSysExec" has been added to run external programs.</entry>
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
