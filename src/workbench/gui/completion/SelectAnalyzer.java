@@ -152,8 +152,7 @@ public class SelectAnalyzer
 				return;
 			}
 
-			this.addAllMarker = !afterWhere;
-
+			this.addAllMarker = !afterWhere && count == 1;
 
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
