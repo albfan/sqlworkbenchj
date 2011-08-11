@@ -29,6 +29,7 @@ import workbench.log.LogMgr;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.FileUtil;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -153,7 +154,6 @@ public class XlsRowDataConverter
 		{
 			fileOut = new FileOutputStream(getOutputFile());
 			wb.write(fileOut);
-			fileOut.close();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -165,17 +165,7 @@ public class XlsRowDataConverter
 		}
 		finally
 		{
-			if (fileOut != null)
-			{
-				try
-				{
-					fileOut.close();
-				}
-				catch (IOException e)
-				{
-					LogMgr.logError("XlsRowDataConverter.getEnd()", "Error closing file!", e);
-				}
-			}
+			FileUtil.closeQuietely(fileOut);
 		}
 
 		return null;

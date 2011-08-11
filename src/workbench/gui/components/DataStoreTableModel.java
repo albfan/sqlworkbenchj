@@ -87,6 +87,24 @@ public class DataStoreTableModel
 	{
 		this.showConverterError = flag;
 	}
+
+	public boolean isColumnModified(int row, int column)
+	{
+		if (this.showStatusColumn && column == 0)
+		{
+			return false;
+		}
+		try
+		{
+			return this.dataCache.isColumnModified(row, column - this.columnStartIndex);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataStoreTableModel.isColumnModified()", "Error checking value at: " + row + "/" + column, e);
+			return false;
+		}
+	}
+
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.

@@ -676,6 +676,7 @@ public class SqlPanel
 		// Once a result tab (DwPanel) has been displayed
 		// they are "dispatched" to the real ones
 		this.updateAction = new UpdateDatabaseAction(null);
+		this.updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		this.insertRow = new InsertRowAction(null);
 		this.deleteRow = new DeleteRowAction(null);
 		this.deleteDependentRow = new DeleteDependentRowsAction(null);

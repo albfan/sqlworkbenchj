@@ -530,8 +530,13 @@ public class SchemaDiff
 			TableIdentifier tid = rid.createCopy();
 			tid.setSchema(targetSchema);
 			tid.setCatalog(null);
-			tid.setNeverAdjustCase(false);
-			tid.adjustCase(targetDb);
+
+			if (!targetDb.getMetadata().needsQuotes(tname))
+			{
+				// if the name does not need quoting, then adjust the case, otherwise use it as it is.
+				tid.setNeverAdjustCase(false);
+				tid.adjustCase(targetDb);
+			}
 
 			DiffEntry entry = null;
 			if (targetDb.getMetadata().objectExists(tid, rid.getType()))

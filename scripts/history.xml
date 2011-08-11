@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-11-09">
+    <entry dev-build="6" type="enh">The save button to update the database can now be set to be always enabled by setting the property workbench.gui.savebutton.always.enabled=true in workbench.settings</entry>
+    <entry dev-build="6" type="enh">A new option has been added to highlight columns that have been changed.</entry>
     <entry dev-build="5" type="enh">The contents for a variable can now be read from an external file (using WbVarDef -variable=foo -contentFile=bar.txt)</entry>
     <entry dev-build="5" type="enh">A new option to enable a connection to Oracle using the role SYSDBA has been added to the connection profile. This removes the need to specify an extended property.</entry>
     <entry dev-build="5" type="enh">The dependency tree in the DbExplorer can now be retrieved independently from the list of foreign keys. Additionally the automatic retrieval of the tree can now be disabled in the options dialog.</entry>
@@ -9,6 +11,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="6" type="fix">WbSchemaDiff did not work when the table names needed quoting because of special characters or mixed case names</entry>
     <entry dev-build="4" type="fix">The ACTION part for foreign key definitions was displayed incorrectly in the generated SQL source and the "References Tab" of DbExplorer</entry>
     <entry dev-build="3" type="fix">Running more than one DataPumper or WbCopy command in parallel did not work.</entry>
     <entry dev-build="2" type="fix">Displaying the source code for functions did not always work properly in PostgreSQL</entry>

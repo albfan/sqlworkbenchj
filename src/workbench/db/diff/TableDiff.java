@@ -182,14 +182,14 @@ public class TableDiff
 			return result;
 		}
 
-		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", target.getTableName());
+		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", StringUtil.trimQuotes(target.getTableName()));
 		result.append('\n');
 		if (rename)
 		{
 			writer.appendOpenTag(result, myindent, TAG_RENAME_TABLE);
 			result.append('\n');
 			myindent.append("  ");
-			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, this.referenceTable.getTable().getTableName());
+			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, StringUtil.trimQuotes(this.referenceTable.getTable().getTableName()));
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}

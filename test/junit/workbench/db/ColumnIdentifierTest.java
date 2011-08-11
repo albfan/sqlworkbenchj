@@ -49,8 +49,13 @@ public class ColumnIdentifierTest
 				if (isQuoted(name)) return name;
 				return "\"" + name + "\"";
 			}
-		};
 
+			@Override
+			public boolean needsQuotes(String name)
+			{
+				return name.indexOf(' ') > -1 || !name.toUpperCase().equals(name);
+			}
+		};
 
 		QuoteHandler wrongQuoting = new QuoteHandler()
 		{
@@ -75,6 +80,12 @@ public class ColumnIdentifierTest
 			{
 				if (isQuoted(name)) return name;
 				return "`" + name + "`";
+			}
+
+			@Override
+			public boolean needsQuotes(String name)
+			{
+				return name.indexOf(' ') > -1;
 			}
 		};
 
@@ -103,6 +114,13 @@ public class ColumnIdentifierTest
 				if (isQuoted(name)) return name;
 				return "[" + name + "]";
 			}
+
+			@Override
+			public boolean needsQuotes(String name)
+			{
+				return name.indexOf(' ') > -1;
+			}
+
 		};
 
 		ColumnIdentifier col1 = new ColumnIdentifier("`Special Name`");

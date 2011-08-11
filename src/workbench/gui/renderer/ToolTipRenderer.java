@@ -68,6 +68,7 @@ public class ToolTipRenderer
 	private Color alternateBackground = GuiSettings.getAlternateRowColor();
 	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 	private Color nullColor = GuiSettings.getNullColor();
+	private Color modifiedColor = GuiSettings.getColumnModifiedColor();
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
@@ -93,6 +94,8 @@ public class ToolTipRenderer
 	private int halign = SwingConstants.LEFT;
 
 	private boolean isAlternatingRow;
+	private boolean isModifiedColumn;
+
 	protected boolean showTooltip = true;
 	protected Map renderingHints;
 
@@ -181,6 +184,25 @@ public class ToolTipRenderer
 		this.highlightBackground = c;
 	}
 
+
+	private boolean doModificationHighlight(JTable table, int row, int col)
+	{
+		if (this.modifiedColor == null)
+		{
+			return false;
+		}
+		try
+		{
+			WbTable tbl = (WbTable)table;
+			return tbl.getDataStoreTableModel().isColumnModified(row, col);
+		}
+		catch (ClassCastException cce)
+		{
+			// should not happen
+			return false;
+		}
+	}
+
 	protected void initDisplay(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
 		this.hasFocus = focus;
@@ -188,6 +210,7 @@ public class ToolTipRenderer
 		this.currentColumn = col;
 		this.isSelected = selected;
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
+		this.isModifiedColumn = doModificationHighlight(table, row, col);
 
 		if (selectedForeground == null)
 		{
@@ -267,7 +290,7 @@ public class ToolTipRenderer
 		{
 			if (isHighlightColumn(currentColumn))
 			{
-				return this.highlightBackground;
+				return highlightBackground;
 			}
 			else
 			{
@@ -288,6 +311,10 @@ public class ToolTipRenderer
 		if (displayValue == null && nullColor != null)
 		{
 			return nullColor;
+		}
+		else if (isModifiedColumn)
+		{
+			return modifiedColor;
 		}
 		else
 		{

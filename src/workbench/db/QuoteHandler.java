@@ -20,4 +20,5 @@ public interface QuoteHandler
 	boolean isQuoted(String name);
 	String removeQuotes(String name);
 	String quoteObjectname(String name);
+	boolean needsQuotes(String name);
 }

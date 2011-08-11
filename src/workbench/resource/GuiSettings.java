@@ -556,6 +556,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.table.alternate.use", flag);
 	}
 
+	public static boolean getAlwaysEnableSaveButton()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.savebutton.always.enabled", false);
+	}
+
 	public static void setNullColor(Color c)
 	{
 		Settings.getInstance().setColor("workbench.gui.table.null.color", c);
@@ -564,6 +569,16 @@ public class GuiSettings
 	public static Color getNullColor()
 	{
 		return Settings.getInstance().getColor("workbench.gui.table.null.color", null);
+	}
+
+	public static void setColumnModifiedColor(Color c)
+	{
+		Settings.getInstance().setColor("workbench.gui.table.modified.color", c);
+	}
+
+	public static Color getColumnModifiedColor()
+	{
+		return Settings.getInstance().getColor("workbench.gui.table.modified.color", null);
 	}
 
 	public static Color getExpressionHighlightColor()

@@ -1145,33 +1145,11 @@ public class DbMetadata
 
 		if (this.dbSettings.neverQuoteObjects()) return removeQuotes(name);
 
-		boolean needQuote = quoteAlways;
-
-		// Excel does not support the standard rules for SQL identifiers
-		// Basically anything that does not contain only characters needs to
-		// be quoted.
-		if (this.isExcel)
-		{
-			Pattern chars = Pattern.compile("[A-Za-z0-9]+");
-			Matcher m = chars.matcher(name);
-			needQuote = !m.matches();
-		}
+		boolean needQuote = quoteAlways ? true : needsQuotes(name);
 
 		try
 		{
-			if (!needQuote && !this.storesMixedCaseIdentifiers())
-			{
-				if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
-				{
-					needQuote = true;
-				}
-				else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
-				{
-					needQuote = true;
-				}
-			}
-
-			if (needQuote || isReservedWord(name))
+			if (needQuote)
 			{
 				StringBuilder result = new StringBuilder(name.length() + quoteCharacter.length() * 2);
 				result.append(this.quoteCharacter);
@@ -1189,6 +1167,52 @@ public class DbMetadata
 		// if it is not a keyword, we have to check for special characters such
 		// as a space, $, digits at the beginning etc
 		return SqlUtil.quoteObjectname(name);
+	}
+
+	/**
+	 * Check if the given object name needs quoting for this DBMS.
+	 *
+	 * @param name the name to check
+	 * @return true if the name needs quotes (or if quoted names should always be used for this DBMS)
+	 */
+	@Override
+	public boolean needsQuotes(String name)
+	{
+		if (name == null) return false;
+		if (name.length() == 0) return false;
+
+		// already quoted?
+		if (isQuoted(name)) return false;
+
+		boolean needQuote = name.indexOf(' ') > -1;
+
+		// Excel does not support the standard rules for SQL identifiers
+		// Basically anything that does not contain only characters needs to
+		// be quoted.
+		if (this.isExcel)
+		{
+			Pattern chars = Pattern.compile("[A-Za-z0-9]+");
+			Matcher m = chars.matcher(name);
+			needQuote = !m.matches();
+		}
+
+		if (!needQuote && !this.storesMixedCaseIdentifiers())
+		{
+			if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
+			{
+				needQuote = true;
+			}
+			else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
+			{
+				needQuote = true;
+			}
+		}
+
+		if (!needQuote)
+		{
+			needQuote = isReservedWord(name);
+		}
+		return needQuote;
 	}
 
 	public String adjustSchemaNameCase(String schema)

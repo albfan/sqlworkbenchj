@@ -36,10 +36,11 @@ public class DriverInfoTest
 		DriverInfo info = new DriverInfo(con.getSqlConnection());
 		Map<String, String> infoMap = info.getInfoMap();
 		Map<String, String> expected = new HashMap<String, String>();
+		expected.put("defaultIsolationLevel", "READ COMMITTED");
+		expected.put("maxTableNameLength","0");
 		expected.put("maxTableNameLength","0");
 		expected.put("maxTablesInSelect", "0");
 		expected.put("supportsUnion", "true");
-		expected.put("ownDeletesAreVisible", "n/a");
 		expected.put("supportsSavepoints", "true");
 		expected.put("maxCharLiteralLength", "0");
 		expected.put("storesMixedCaseQuotedIdentifiers", "true");
@@ -60,9 +61,12 @@ public class DriverInfoTest
 		expected.put("nullsAreSortedAtEnd", "false");
 		expected.put("storesLowerCaseIdentifiers", "false");
 		expected.put("supportsSubqueriesInComparisons", "true");
-		expected.put("othersInsertsAreVisible", "n/a");
+		expected.put("searchStringEscape", "\\");
 		expected.put("catalogSeparator", ".");
-		expected.put("ownUpdatesAreVisible", "n/a");
+		expected.put("supportsCoreSQLGrammar", "true");
+		expected.put("supportsLikeEscapeClause", "true");
+		expected.put("supportsMultipleResultSets", "false");
+		expected.put("supportsMultipleTransactions", "true");
 		expected.put("supportsColumnAliasing", "true");
 		expected.put("supportsMixedCaseIdentifiers", "false");
 		expected.put("supportsANSI92IntermediateSQL", "false");
@@ -84,6 +88,7 @@ public class DriverInfoTest
 		expected.put("supportsFullOuterJoins", "false");
 		expected.put("supportsSubqueriesInIns", "true");
 		expected.put("supportsBatchUpdates", "true");
+//		System.out.println(infoMap + "\n-----------\n" + expected);
 		assertEquals(expected, infoMap);
 	}
 }

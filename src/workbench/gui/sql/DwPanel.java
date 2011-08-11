@@ -136,6 +136,7 @@ public class DwPanel
 		this.dataTable.addTableModelListener(this);
 
 		this.updateAction = new UpdateDatabaseAction(this);
+		this.updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		this.insertRow = new InsertRowAction(this);
 		this.insertRow.setEnabled(false);
 		this.deleteRow = new DeleteRowAction(this);
@@ -261,6 +262,7 @@ public class DwPanel
 
 	/**
 	 * Prepare the DwPanel for saving any changes to the database.
+	 * 
 	 * This will check for the PK columns and if necessary
 	 * ask the user to specify them.
 	 * It will also prompt the user to verify the generated
@@ -275,6 +277,18 @@ public class DwPanel
 		if (this.dbConnection == null) return false;
 		DataStore ds = this.dataTable.getDataStore();
 		if (ds == null) return false;
+
+		if (ds.getUpdateTable() == null)
+		{
+			// this can happen if the Save button is always enabled and was clicked before the
+			// update table was checked.
+			TableCheck check = checkUpdateTable();
+			if (check != TableCheck.tableOk)
+			{
+				// no table --> can't do anything
+				return false;
+			}
+		}
 
 		boolean needPk = ds.needPkForUpdate();
 		if (needPk)
@@ -402,7 +416,7 @@ public class DwPanel
 
 	protected void disableUpdateActions()
 	{
-		this.updateAction.setEnabled(false);
+		this.updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		this.insertRow.setEnabled(false);
 		this.duplicateRow.setEnabled(false);
 		this.deleteRow.setEnabled(false);
@@ -907,7 +921,7 @@ public class DwPanel
 		}
 		else
 		{
-			if (this.updateAction != null) this.updateAction.setEnabled(isModified());
+			if (this.updateAction != null) this.updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton() || isModified());
 			if (this.duplicateRow != null) this.duplicateRow.setEnabled(rows == 1);
 			if (this.deleteRow != null) this.deleteRow.setEnabled(rows > 0);
 			if (this.insertRow != null) this.insertRow.setEnabled(hasResult);
@@ -1298,7 +1312,7 @@ public class DwPanel
 		dataTable.stopEditing();
 		dataTable.setShowStatusColumn(false);
 		checkResultSetActions();
-		updateAction.setEnabled(false);
+		updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		dataTable.restoreOriginalValues();
 
 		TableRowHeader header = TableRowHeader.getRowHeader(dataTable);

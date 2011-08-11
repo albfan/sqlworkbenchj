@@ -197,4 +197,47 @@ public class WbSchemaDiffTest
 			target.disconnect();
 		}
 	}
+
+
+	@Test
+	public void testStrangeNames()
+		throws Exception
+	{
+		String sql =
+			"create schema prod; \n" +
+			"create schema stage; \n" +
+			" \n" +
+			"create table prod.\"Baked beans\" (\"People\" integer, \"Slices\" integer, \"Trays\" integer); \n" +
+			"create table stage.\"Baked beans\" (\"People\" integer, \"Slices\" integer, \"Trays\" integer, \"Pads\" integer);\n" +
+			"commit;";
+
+		try
+		{
+			TestUtil testUtil = getTestUtil();
+			WbConnection con = testUtil.getConnection();
+			TestUtil.executeScript(con, sql);
+
+			WbSchemaDiff diff = new WbSchemaDiff();
+			File output = new File(testUtil.getBaseDir(), "strangeDiff.xml");
+			output.delete();
+			diff.setConnection(con);
+
+			StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -referenceSchema=stage -targetSchema=prod");
+			assertTrue(result.isSuccess());
+
+			FileReader in = new FileReader(output);
+			String xml = FileUtil.readCharacters(in);
+
+			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='Baked beans'])");
+			assertEquals("Incorrect table count", "1", value);
+
+			value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='Baked beans']/add-column)");
+			assertEquals("Incorrect table count", "1", value);
+
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
 }
