@@ -50,9 +50,8 @@ public class TableSelectBuilder
 
 		if (!table.getNeverAdjustCase() || table.getType() == null || table.getSchema() == null)
 		{
-			// if neverAdjustCase() has been set, the TableIdentifier was system generated
-			// if no type or schema is present, it is most probably a user supplied value
-			// thus we need to resolve synonyms
+			// If neverAdjustCase() has been set, the TableIdentifier was system generated.
+			// If no type or schema is present, it is most probably a user supplied value and thus we need to resolve synonyms
 			// This is not done by default because resolving the synonym is quite costly especially on Oracle!
 			tbl = dbConnection.getMetadata().getSynonymTable(table);
 		}
@@ -62,8 +61,20 @@ public class TableSelectBuilder
 
 	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
+		if (table == null)
+		{
+			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not table supplied!");
+			return null;
+		}
+
 		int colCount = columns.size();
-		if (colCount == 0) return null;
+
+		if (colCount == 0)
+		{
+			String tbl = table.getTableExpression(this.dbConnection);
+			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not columns available for table " + tbl  + ". Using \"SELECT *\" instead");
+			return "SELECT * FROM " + tbl;
+		}
 
 		StringBuilder sql = new StringBuilder(colCount * 30 + 50);
 

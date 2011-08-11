@@ -13,6 +13,7 @@ package workbench.util;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -1757,6 +1758,25 @@ public class SqlUtil
 		return identifier.replaceAll("[^A-Za-z0-9_]+", "");
 	}
 
+	public static String getIsolationLevelName(int level)
+	{
+		switch (level)
+		{
+			case Connection.TRANSACTION_READ_COMMITTED:
+				return "READ COMMITTED";
+			case Connection.TRANSACTION_READ_UNCOMMITTED:
+				return "READ UNCOMMITTED";
+			case Connection.TRANSACTION_REPEATABLE_READ:
+				return "REPEATABLE READ";
+			case Connection.TRANSACTION_SERIALIZABLE:
+				return "SERIALIZABLE";
+			case Connection.TRANSACTION_NONE:
+				return "NONE";
+			default:
+				return "unknown";
+		}
+	}
+	
 	public static String replaceParameters(String sql, Object ... values)
 	{
 		if (values == null) return sql;

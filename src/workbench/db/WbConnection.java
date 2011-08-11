@@ -158,22 +158,7 @@ public class WbConnection
 		if (this.sqlConnection == null) return "";
 		try
 		{
-			int level = sqlConnection.getTransactionIsolation();
-			switch (level)
-			{
-				case Connection.TRANSACTION_READ_COMMITTED:
-					return "READ COMMITTED";
-				case Connection.TRANSACTION_READ_UNCOMMITTED:
-					return "READ UNCOMMITTED";
-				case Connection.TRANSACTION_REPEATABLE_READ:
-					return "REPEATABLE READ";
-				case Connection.TRANSACTION_SERIALIZABLE:
-					return "SERIALIZABLE";
-				case Connection.TRANSACTION_NONE:
-					return "NONE";
-				default:
-					return "unknown";
-			}
+			return SqlUtil.getIsolationLevelName(sqlConnection.getTransactionIsolation());
 		}
 		catch (SQLException e)
 		{

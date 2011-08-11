@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -33,11 +34,11 @@ public class DriverInfo
 
 	public DriverInfo(Connection con)
 	{
+		methods.add("getSearchStringEscape");
 		methods.add("getCatalogSeparator");
 		methods.add("getExtraNameCharacters");
 		methods.add("getIdentifierQuoteString");
 		methods.add("getProcedureTerm");
-		methods.add("getSchemaTerm");
 		methods.add("getSchemaTerm");
 		methods.add("allProceduresAreCallable");
 		methods.add("allTablesAreSelectable");
@@ -50,15 +51,8 @@ public class DriverInfo
 		methods.add("getMaxCharLiteralLength");
 		methods.add("getMaxColumnNameLength");
 		methods.add("getMaxColumnsInIndex");
-		methods.add("getMaxColumnsInIndex");
 		methods.add("getMaxTableNameLength");
 		methods.add("getMaxTablesInSelect");
-		methods.add("othersInsertsAreVisible");
-		methods.add("othersInsertsAreVisible");
-		methods.add("othersInsertsAreVisible");
-		methods.add("ownDeletesAreVisible");
-		methods.add("ownDeletesAreVisible");
-		methods.add("ownUpdatesAreVisible");
 		methods.add("storesLowerCaseIdentifiers");
 		methods.add("storesUpperCaseIdentifiers");
 		methods.add("storesMixedCaseIdentifiers");
@@ -72,10 +66,14 @@ public class DriverInfo
 		methods.add("supportsBatchUpdates");
 		methods.add("supportsColumnAliasing");
 		methods.add("supportsCorrelatedSubqueries");
+		methods.add("supportsCoreSQLGrammar");
 		methods.add("supportsDataDefinitionAndDataManipulationTransactions");
 		methods.add("supportsDataManipulationTransactionsOnly");
 		methods.add("supportsFullOuterJoins");
 		methods.add("supportsGetGeneratedKeys");
+		methods.add("supportsLikeEscapeClause");
+		methods.add("supportsMultipleResultSets");
+		methods.add("supportsMultipleTransactions");
 		methods.add("supportsMixedCaseIdentifiers");
 		methods.add("supportsMixedCaseQuotedIdentifiers");
 		methods.add("supportsSavepoints");
@@ -96,6 +94,8 @@ public class DriverInfo
 		try
 		{
 			metaData = con.getMetaData();
+			int level = metaData.getDefaultTransactionIsolation();
+			infoMap.put("defaultIsolationLevel", SqlUtil.getIsolationLevelName(level));
 		}
 		catch (SQLException sql)
 		{
@@ -113,6 +113,7 @@ public class DriverInfo
 				infoMap.put(method, value);
 			}
 		}
+
 	}
 
 	public Map<String, String> getInfoMap()
@@ -147,6 +148,7 @@ public class DriverInfo
 		}
 		catch (Throwable th)
 		{
+			LogMgr.logDebug("DriverInfo.getValue()", "Could not retrieve property: " + methodName, th);
 			return "n/a";
 		}
 	}
