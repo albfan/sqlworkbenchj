@@ -124,6 +124,14 @@
 	<section id="editor-settings">
 		<title>Editor related settings</title>
 
+		<simplesect id="editor-default-tab-name">
+			<title>Define the default name for new tabs</title>
+			<para>Property: <literal>workbench.gui.tabs.defaultlabel</literal></para>
+			<para>
+        When adding a new editor tab, the value of this property will be used to set the new tab's title.
+			</para>
+		</simplesect>
+
 		<simplesect id="auto-completion-public-syn">
 			<title>Include Oracle public synonyms in auto-completion of tables</title>
 			<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>

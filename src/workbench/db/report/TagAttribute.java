@@ -19,8 +19,8 @@ import workbench.util.HtmlUtil;
  */
 public class TagAttribute
 {
-	private final CharSequence tagText; 
-	
+	private final CharSequence tagText;
+
 	public TagAttribute(String name, String value)
 	{
 		StringBuilder b = new StringBuilder(name.length() + value.length() + 1);
@@ -30,10 +30,10 @@ public class TagAttribute
 		b.append('"');
 		tagText = b;
 	}
-	
+
 	public CharSequence getTagText()
 	{
 		return tagText;
 	}
-	
+
 }

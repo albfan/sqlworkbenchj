@@ -25,6 +25,7 @@ import workbench.db.WbConnection;
 import workbench.db.oracle.OracleIndexPartition;
 import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
 /**
@@ -99,7 +100,7 @@ public class IndexReporter
 				{
 
 					List<TagAttribute> attrs = new ArrayList<TagAttribute>(2);
-					attrs.add(new TagAttribute("name", col.getColumn()));
+					attrs.add(new TagAttribute("name", SqlUtil.removeQuoting(col.getColumn())));
 
 					if (col.getDirection() != null)
 					{

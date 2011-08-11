@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import workbench.resource.ResourceMgr;
+import workbench.util.HtmlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -52,9 +53,13 @@ public class TagWriter
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, boolean value)
 	{
 		if (value)
+		{
 			appendTag(target, indent, tag, "true", false);
+		}
 		else
+		{
 			appendTag(target, indent, tag, "false", false);
+		}
 	}
 
 	/**
@@ -110,9 +115,12 @@ public class TagWriter
 		if (useCData)
 		{
 			target.append(CDATA_START);
-			target.append('\n');
+			target.append(value);
 		}
-		target.append(value);
+		else
+		{
+			target.append(HtmlUtil.escapeXML(value));
+		}
 		if (useCData)
 		{
 			target.append(CDATA_END);
@@ -123,8 +131,9 @@ public class TagWriter
 	}
 
 	/**
-	 * Appends the tag and the value in one line. There will be a new line
-	 * after the closing tag.
+	 * Appends the tag and the value in one line.
+	 * 
+	 * There will be a new line after the closing tag.
 	 */
 	public void appendEmptyTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{

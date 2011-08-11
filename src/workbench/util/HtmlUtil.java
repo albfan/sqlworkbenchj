@@ -28,6 +28,27 @@ public class HtmlUtil
 		return result.toString();
 	}
 
+	public static String escapeXML(CharSequence s)
+	{
+		if (s == null) return null;
+		StringBuilder sb = new StringBuilder(s.length() + 100);
+		int n = s.length();
+		for (int i = 0; i < n; i++)
+		{
+			char c = s.charAt(i);
+			switch (c)
+			{
+				case '<': sb.append("&lt;"); break;
+				case '>': sb.append("&gt;"); break;
+				case '&': sb.append("&amp;"); break;
+				case '"': sb.append("&quot;"); break;
+				case '\'': sb.append("&apos;"); break;
+				default:  sb.append(c); break;
+			}
+		}
+		return sb.toString();
+	}
+
 	public static String escapeHTML(String s)
 	{
 		if (s == null) return null;

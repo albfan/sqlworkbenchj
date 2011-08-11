@@ -116,7 +116,7 @@ public class ReportColumn
 		{
 			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
 			{
-				tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression());
+				tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression(), true);
 			}
 			if (StringUtil.isNonBlank(column.getCollation()))
 			{
@@ -144,6 +144,7 @@ public class ReportColumn
 		this.isRealColumn = flag;
 	}
 
+	@Override
 	public String toString()
 	{
 		return column.toString();
