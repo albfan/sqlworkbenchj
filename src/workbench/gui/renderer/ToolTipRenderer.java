@@ -308,13 +308,13 @@ public class ToolTipRenderer
 			return filterHighlightColor;
 		}
 
-		if (displayValue == null && nullColor != null)
-		{
-			return nullColor;
-		}
-		else if (isModifiedColumn)
+		if (isModifiedColumn)
 		{
 			return modifiedColor;
+		}
+		else if (displayValue == null && nullColor != null)
+		{
+			return nullColor;
 		}
 		else
 		{
