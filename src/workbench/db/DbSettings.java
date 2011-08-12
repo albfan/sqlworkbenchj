@@ -176,6 +176,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "clob.longvarchar", true);
 	}
 
+	public boolean supportsResultSetsWithDML()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "dml.supports.results", true);
+	}
+
 	public boolean supportsBatchedStatements()
 	{
 		return this.supportsBatchedStatements;

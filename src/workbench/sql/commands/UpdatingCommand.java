@@ -78,8 +78,7 @@ public class UpdatingCommand
 				isPrepared = true;
 				this.currentStatement = lob.prepareStatement(currentConnection);
 			}
-			else if (Settings.getInstance().getCheckPreparedStatements() &&
-					currentConnection.getPreparedStatementPool().isRegistered(sql))
+			else if (Settings.getInstance().getCheckPreparedStatements() &&	currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{
 				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(sql);
 				isPrepared = true;
@@ -100,7 +99,14 @@ public class UpdatingCommand
 			}
 			appendSuccessMessage(result);
 			result.setSuccess();
-			processResults(result, hasResult);
+			if (currentConnection.getDbSettings().supportsResultSetsWithDML())
+			{
+				processResults(result, hasResult);
+			}
+			else
+			{
+				result.addUpdateCountMsg(currentStatement.getUpdateCount());
+			}
 			runner.releaseSavepoint();
 		}
 		catch (Exception e)

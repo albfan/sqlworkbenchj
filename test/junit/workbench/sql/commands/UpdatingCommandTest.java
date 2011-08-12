@@ -141,6 +141,7 @@ public class UpdatingCommandTest
 			StatementRunnerResult result = runner.getResult();
 			if (!result.isSuccess()) System.out.println(result.getMessageBuffer().toString());
 			assertEquals("Insert not executed", true, result.isSuccess());
+			assertEquals(1, result.getTotalUpdateCount());
 
 			stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, clob_data from clob_test");
@@ -182,6 +183,7 @@ public class UpdatingCommandTest
 			StatementRunnerResult result = runner.getResult();
 			if (!result.isSuccess()) System.out.println(result.getMessageBuffer().toString());
 			assertEquals("Update not executed", true, result.isSuccess());
+			assertEquals(1, result.getTotalUpdateCount());
 
 			stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select some_data from update_test where nr = 3");
