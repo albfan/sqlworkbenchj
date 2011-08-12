@@ -50,12 +50,13 @@ public class SortHeaderRenderer
 		showFullTypeInfo = Settings.getInstance().getBoolProperty("workbench.gui.db.showfulltypeinfo", false);
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
 	{
 		TableCellRenderer realRenderer = table.getTableHeader().getDefaultRenderer();
 
 		JComponent c = (JComponent)realRenderer.getTableCellRendererComponent (table,value, isSelected, hasFocus, row, col);
-		
+
 		boolean sorted = false;
 		boolean ascending = false;
 		boolean primary = false;
@@ -76,10 +77,10 @@ public class SortHeaderRenderer
 			displayLabel.setOpaque(c.isOpaque());
 			display = displayLabel;
 		}
-		
+
 		display.setHorizontalTextPosition(SwingConstants.LEFT);
 		display.setHorizontalAlignment(SwingConstants.LEFT);
-		
+
 		String type = null;
 		String javaTypeName = null;
 		String remarks = null;
