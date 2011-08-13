@@ -154,6 +154,7 @@ public class DwPanel
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(GuiSettings.getHighlightRequiredFields());
 		this.dataTable.setStatusBar(this.statusBar);
+		this.dataTable.setModifiedColor(GuiSettings.getColumnModifiedColor());
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 	}
 
@@ -262,7 +263,7 @@ public class DwPanel
 
 	/**
 	 * Prepare the DwPanel for saving any changes to the database.
-	 * 
+	 *
 	 * This will check for the PK columns and if necessary
 	 * ask the user to specify them.
 	 * It will also prompt the user to verify the generated

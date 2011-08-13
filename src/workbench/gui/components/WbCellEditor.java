@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -31,7 +32,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.interfaces.NullableEditor;
 
@@ -51,6 +54,7 @@ public class WbCellEditor
 	private JScrollPane scroll;
 	private Color defaultBackground;
 	private boolean isNull;
+	private RestoreDataAction restoreValue;
 
 	public WbCellEditor(WbTable parent)
 	{
@@ -66,10 +70,28 @@ public class WbCellEditor
 		editor.setWrapStyleWord(true);
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		restoreValue = new RestoreDataAction(this);
 		TextComponentMouseListener l = new TextComponentMouseListener();
 		l.addAction(new SetNullAction(this));
+		l.addAction(restoreValue);
 		editor.addMouseListener(l);
 		editor.addMouseListener(this);
+	}
+
+	@Override
+	public void restoreOriginal()
+	{
+		int row = parentTable.getEditingRow();
+		int col = parentTable.getEditingColumn();
+		if (row >= 0 && col >= 0)
+		{
+			Object oldValue = parentTable.restoreColumnValue(row, col);
+			if (oldValue != null)
+			{
+				editor.setText(oldValue.toString());
+				isNull = false;
+			}
+		}
 	}
 
 	@Override
@@ -160,6 +182,7 @@ public class WbCellEditor
 		editor.selectAll();
 		setNull(false);
 		setEditable(!parentTable.isReadOnly());
+		restoreValue.setEnabled(parentTable.getDataStoreTableModel().isColumnModified(row, column));
 		return scroll;
 	}
 

@@ -115,12 +115,14 @@ public class ConnectionPropertiesEditor
 		return props;
 	}
 
+	@Override
 	public void deleteItem()
 		throws Exception
 	{
 		this.propTable.deleteRow();
 	}
 
+	@Override
 	public void newItem(boolean copyCurrent)
 		throws Exception
 	{
@@ -128,6 +130,7 @@ public class ConnectionPropertiesEditor
 		this.propTable.getSelectionModel().clearSelection();
 	}
 
+	@Override
 	public void saveItem()
 		throws Exception
 	{

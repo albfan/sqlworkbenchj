@@ -969,6 +969,22 @@ public class DataStore
 	}
 
 	/**
+	 * Restores the original value for the given row and column.
+	 *
+	 * @param row
+	 * @param column
+	 * @return true if the value could be restored
+	 */
+	public Object restoreColumnValue(int row, int column)
+	{
+		RowData data = getRow(row);
+		if (data != null)
+		{
+			return data.restoreOriginalValue(column);
+		}
+		return null;
+	}
+	/**
 	 * Restore the original values as retrieved from the database.
 	 * This will have no effect if {@link #isModified()} returns <code>false</code>
 	 * @see #setValue(int, int, Object)

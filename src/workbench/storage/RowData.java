@@ -412,6 +412,22 @@ public class RowData
 	}
 
 	/**
+	 * Restore the value of a specific column to its original value.
+	 *
+	 * If the column has not been changed, nothing happens
+	 *
+	 * @param column the column to restore
+	 * @return the original (now current) value, null if no original value was present
+	 */
+	public Object restoreOriginalValue(int column)
+	{
+		if (this.originalData == null) return null;
+		this.colData[column] = this.originalData[column];
+		resetStatusForColumn(column);
+		return this.colData[column];
+	}
+
+	/**
 	 * Restore the values read from the database
 	 * @return true if there were original values
 	 *         false if nothing was restored

@@ -202,6 +202,8 @@ public class WbTable
 	private boolean readOnly;
 	private FontZoomer zoomer;
 
+	private Color modifiedColumnColor;
+
 	// </editor-fold>
 
 	public WbTable()
@@ -356,6 +358,17 @@ public class WbTable
 	public boolean isReadOnly()
 	{
 		return readOnly;
+	}
+
+
+	public Color getColumnModifiedColor()
+	{
+		return modifiedColumnColor;
+	}
+
+	public void setModifiedColor(Color color)
+	{
+		this.modifiedColumnColor = color;
 	}
 
 	public void setColumnOrderSavingEnabled(boolean flag)
@@ -1202,6 +1215,12 @@ public class WbTable
 		}
 	}
 
+	public Object restoreColumnValue(int row, int column)
+	{
+		int realColumn = column - getDataStoreTableModel().getRealColumnStart();
+		return getDataStore().restoreColumnValue(row, realColumn);
+	}
+
 	/**
 	 * Restores the original values in the underlying DataStore.
 	 * Fires a tableDataChanged() event if values were restored.
@@ -1543,7 +1562,10 @@ public class WbTable
 	{
 		// need to let JTable do some initialization stuff
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
-		if (this.defaultRenderersByColumnClass == null) createDefaultRenderers();
+		if (this.defaultRenderersByColumnClass == null)
+		{
+			defaultRenderersByColumnClass = new UIDefaults();
+		}
 		initDateRenderers();
 
 		Settings sett = Settings.getInstance();

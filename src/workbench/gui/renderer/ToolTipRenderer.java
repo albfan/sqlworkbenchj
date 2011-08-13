@@ -68,7 +68,7 @@ public class ToolTipRenderer
 	private Color alternateBackground = GuiSettings.getAlternateRowColor();
 	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 	private Color nullColor = GuiSettings.getNullColor();
-	private Color modifiedColor = GuiSettings.getColumnModifiedColor();
+	private Color modifiedColor;
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
@@ -139,6 +139,11 @@ public class ToolTipRenderer
 		return result;
 	}
 
+	public void setModifiedColor(Color newColor)
+	{
+		this.modifiedColor = newColor;
+	}
+
 	public int getLineCount()
 	{
 		return 1;
@@ -185,22 +190,14 @@ public class ToolTipRenderer
 	}
 
 
-	private boolean doModificationHighlight(JTable table, int row, int col)
+	private boolean doModificationHighlight(WbTable table, int row, int col)
 	{
+		this.modifiedColor = table.getColumnModifiedColor();
 		if (this.modifiedColor == null)
 		{
 			return false;
 		}
-		try
-		{
-			WbTable tbl = (WbTable)table;
-			return tbl.getDataStoreTableModel().isColumnModified(row, col);
-		}
-		catch (ClassCastException cce)
-		{
-			// should not happen
-			return false;
-		}
+		return table.getDataStoreTableModel().isColumnModified(row, col);
 	}
 
 	protected void initDisplay(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
@@ -210,7 +207,17 @@ public class ToolTipRenderer
 		this.currentColumn = col;
 		this.isSelected = selected;
 		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
-		this.isModifiedColumn = doModificationHighlight(table, row, col);
+
+		try
+		{
+			WbTable wbtable = (WbTable)table;
+			this.filter = wbtable.getHighlightExpression();
+			this.isModifiedColumn = doModificationHighlight(wbtable, row, col);
+		}
+		catch (ClassCastException cce)
+		{
+			// ignore, should not happen
+		}
 
 		if (selectedForeground == null)
 		{
@@ -224,14 +231,6 @@ public class ToolTipRenderer
 			unselectedBackground = table.getBackground();
 		}
 
-		try
-		{
-			filter = ((WbTable)table).getHighlightExpression();
-		}
-		catch (ClassCastException cce)
-		{
-			// ignore, should not happen
-		}
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.ResourceMgr;
@@ -45,6 +46,7 @@ public class WbTextCellEditor
 	private Color defaultBackground;
 	private boolean changed;
 	private boolean isNull;
+	private RestoreDataAction restoreValue;
 
 	public static WbTextCellEditor createInstance()
 	{
@@ -66,11 +68,28 @@ public class WbTextCellEditor
 		textField = field;
 		textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		textField.addMouseListener(this);
+		restoreValue = new RestoreDataAction(this);
 		TextComponentMouseListener menu = new TextComponentMouseListener();
 		menu.addAction(new SetNullAction(this));
+		menu.addAction(restoreValue);
 		textField.addMouseListener(menu);
 		textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
+	}
+
+	@Override
+	public void restoreOriginal()
+	{
+		int row = parentTable.getEditingRow();
+		int col = parentTable.getEditingColumn();
+		if (row >= 0 && col >= 0)
+		{
+			Object oldValue = parentTable.restoreColumnValue(row, col);
+			if (oldValue != null)
+			{
+				textField.setText(oldValue.toString());
+			}
+		}
 	}
 
 	public String getText()
@@ -129,6 +148,7 @@ public class WbTextCellEditor
 		setEditable(!(parentTable != null && parentTable.isReadOnly()));
 		changed = false;
 		isNull = false;
+		restoreValue.setEnabled(parentTable.getDataStoreTableModel().isColumnModified(row, column));
 		return result;
 	}
 
@@ -228,18 +248,21 @@ public class WbTextCellEditor
 		return changed;
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent arg0)
 	{
 		changed = true;
 		setNull(false);
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent arg0)
 	{
 		changed = true;
 		setNull(false);
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent arg0)
 	{
 		changed = true;

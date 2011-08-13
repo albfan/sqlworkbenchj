@@ -221,6 +221,7 @@ public class ShortcutEditor
 			this.definitions.setValue(row, 2, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_DEFAULT_KEY));
 		}
 		this.definitions.sortByColumn(0, true);
+		this.definitions.resetStatus();
 		this.model = new DataStoreTableModel(this.definitions);
 		this.model.setAllowEditing(false);
 		this.keysTable.setModel(model, true);
@@ -229,6 +230,7 @@ public class ShortcutEditor
 		this.keysTable.getSelectionModel().addListSelectionListener(this);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		Object source = e.getSource();
