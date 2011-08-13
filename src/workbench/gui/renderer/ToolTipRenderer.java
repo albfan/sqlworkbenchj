@@ -274,7 +274,7 @@ public class ToolTipRenderer
 	private boolean isHighlightColumn(int col)
 	{
 		if (this.highlightCols == null) return false;
-		if (col < 0 || col > this.highlightCols.length) return false;
+		if (col < 0 || col >= this.highlightCols.length) return false;
 		return this.highlightCols[col];
 	}
 

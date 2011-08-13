@@ -983,6 +983,7 @@ public class DataStore
 		}
 		return null;
 	}
+
 	/**
 	 * Restore the original values as retrieved from the database.
 	 * This will have no effect if {@link #isModified()} returns <code>false</code>
@@ -1562,6 +1563,14 @@ public class DataStore
 		}
 
 		this.ignoreAllUpdateErrors = false;
+
+		// a bit paranoid, but for some reason this situation seems to happen
+		// especially when the save button is always enabled.
+		if (this.updateTable != null && resultInfo.getUpdateTable() == null)
+		{
+			LogMgr.logWarning("DataStore.updateDb()", "Update table for ResultInfo not in sync with DataStore!");
+			resultInfo.setUpdateTable(this.updateTable);
+		}
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
