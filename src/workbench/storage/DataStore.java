@@ -976,10 +976,10 @@ public class DataStore
 	 */
 	public Object restoreColumnValue(int row, int column)
 	{
-		RowData data = getRow(row);
-		if (data != null)
+		RowData dataRow = getRow(row);
+		if (dataRow != null)
 		{
-			return data.restoreOriginalValue(column);
+			return dataRow.restoreOriginalValue(column);
 		}
 		return null;
 	}
