@@ -363,9 +363,13 @@ public class SqlCommand
 		int updateCount = -1;
 		boolean moreResults = false;
 
-		if (!hasResult)
+		if (hasResult)
 		{
-			// the first "result" is an updateCount
+			moreResults = true;
+		}
+		else
+		{
+			// the initial execute() did not return a result set, so the first "result" is an updateCount
 			try
 			{
 				updateCount = this.currentStatement.getUpdateCount();
@@ -387,10 +391,6 @@ public class SqlCommand
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", e);
 				moreResults = false;
 			}
-		}
-		else
-		{
-			moreResults = true;
 		}
 
 		if (currentConnection == null || currentConnection.isClosed())

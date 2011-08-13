@@ -19,8 +19,6 @@ import static org.junit.Assert.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
-import workbench.db.postgres.PostgresTestUtil;
-import workbench.db.postgres.PostgresTestUtil;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;

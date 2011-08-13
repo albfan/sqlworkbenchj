@@ -623,8 +623,7 @@ public class DataStore
 		// check the columns which are in the new table so that we can refuse any changes to columns
 		// which do not derive from that table.
 
-		// Note that this does not work, if the columns were renamed via an alias in the
-		// select statement
+		// Note that this does not work, if the columns were renamed via an alias in the select statement
 		try
 		{
 			DbMetadata meta = conn.getMetadata();

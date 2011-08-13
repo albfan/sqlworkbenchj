@@ -287,6 +287,7 @@ public class DwPanel
 			if (check != TableCheck.tableOk)
 			{
 				// no table --> can't do anything
+				LogMgr.logError("DwPanel.prepareDatabaseUpdate()", "No update table found! Cannot save changes for SQL=" + ds.getGeneratingSql(), null);
 				return false;
 			}
 		}
