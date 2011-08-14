@@ -93,6 +93,14 @@ public class DelimiterDefinition
 			single = "nl".equalsIgnoreCase(type);
 			delim = arg.substring(0, pos);
 		}
+		else if ("ORA".equalsIgnoreCase(delim))
+		{
+			return DEFAULT_ORA_DELIMITER;
+		}
+		else if ("MSSQL".equalsIgnoreCase(delim))
+		{
+			return DEFAULT_MS_DELIMITER;
+		}
 		else
 		{
 			delim = arg;
