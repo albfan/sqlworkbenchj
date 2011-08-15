@@ -279,6 +279,8 @@ public class DwPanel
 		DataStore ds = this.dataTable.getDataStore();
 		if (ds == null) return false;
 
+		dataTable.stopEditing();
+		
 		if (ds.getUpdateTable() == null)
 		{
 			// this can happen if the Save button is always enabled and was clicked before the
@@ -335,7 +337,6 @@ public class DwPanel
 
 		if (!this.prepareDatabaseUpdate()) return;
 
-		final JobErrorHandler handler = this;
 		WbThread t = new WbThread("DwPanel update")
 		{
 			@Override
@@ -343,7 +344,7 @@ public class DwPanel
 			{
 				try
 				{
-					saveChanges(dbConnection, handler);
+					saveChanges(dbConnection, DwPanel.this);
 				}
 				catch (Exception e)
 				{
