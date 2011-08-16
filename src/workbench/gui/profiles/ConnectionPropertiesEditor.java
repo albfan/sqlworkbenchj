@@ -30,6 +30,7 @@ import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -72,6 +73,7 @@ public class ConnectionPropertiesEditor
 			}
 		}
 		this.propTable = new WbTable();
+		this.propTable.setRendererSetup(new RendererSetup(false));
 
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
 		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.propTable);

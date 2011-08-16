@@ -20,7 +20,7 @@ import workbench.util.SqlUtil;
  * Displays the integer values from java.sql.Types as readable names.
  *
  * @see workbench.util.SqlUtil#getTypeName(int)
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SqlTypeRenderer
@@ -33,6 +33,7 @@ public class SqlTypeRenderer
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		if (value != null)

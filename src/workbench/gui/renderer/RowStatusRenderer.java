@@ -52,6 +52,7 @@ public class RowStatusRenderer
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
 		try

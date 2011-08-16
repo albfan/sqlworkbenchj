@@ -27,6 +27,7 @@ public class StringColumnRenderer
 	extends ToolTipRenderer
 {
 
+	@Override
 	public void prepareDisplay(Object aValue)
 	{
 		try

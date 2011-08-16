@@ -179,12 +179,19 @@ public class ValidatingDialog
 		else
 		{
 			if (parent instanceof Frame)
-				dialog = new ValidatingDialog((Frame)parent, title, editor);
+			{
+				dialog = new ValidatingDialog((Frame) parent, title, editor);
+			}
 			else if (parent instanceof Dialog)
-				dialog = new ValidatingDialog((Dialog)parent, title, editor);
+			{
+				dialog = new ValidatingDialog((Dialog) parent, title, editor);
+			}
 			else
+			{
 				throw new IllegalArgumentException("Parent component must be Dialog or Frame");
+			}
 		}
+
 		if (reference != null)
 		{
 			WbSwingUtilities.center(dialog, reference);
@@ -256,8 +263,14 @@ public class ValidatingDialog
 			@Override
 			public void run()
 			{
-				if (validator != null) validator.componentDisplayed();
-				else editorComponent.requestFocus();
+				if (validator != null)
+				{
+					validator.componentDisplayed();
+				}
+				else
+				{
+					editorComponent.requestFocus();
+				}
 			}
 		});
 	}

@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
  * A class to render date and timestamp values.
  * <br/>
  * The values are formatted according to the global settings.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class DateColumnRenderer
@@ -58,6 +58,7 @@ public class DateColumnRenderer
 		}
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		try

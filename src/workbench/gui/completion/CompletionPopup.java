@@ -421,6 +421,9 @@ public class CompletionPopup
 					{
 						cols.append(", ");
 					}
+
+					// append the table prefix, but not at the beginning because
+					// the alias is already in the editor, otherwise we could not have selected the columns for that table
 					if (context.getAnalyzer().getColumnPrefix() != null && i > 0)
 					{
 						cols.append(context.getAnalyzer().getColumnPrefix());

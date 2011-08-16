@@ -14,8 +14,6 @@ package workbench.gui.sql;
 import java.awt.Container;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.resource.GuiSettings;
 import workbench.util.NumberStringCache;

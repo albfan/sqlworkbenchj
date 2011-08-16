@@ -20,12 +20,13 @@ import workbench.resource.ResourceMgr;
 public class SelectAllMarker
 {
 	private String display;
-	
+
 	public SelectAllMarker()
 	{
 		display = ResourceMgr.getString("LblCompletionAllCols");
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return display;

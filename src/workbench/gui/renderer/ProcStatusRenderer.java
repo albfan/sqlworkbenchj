@@ -18,19 +18,20 @@ import workbench.db.JdbcProcedureReader;
  * Displays the return type of a stored procedure as a readable text.
  * <br/>
  * @see workbench.db.JdbcProcedureReader#convertProcType(int)
- * 
+ *
  * * @author Thomas Kellerer
  */
 public class ProcStatusRenderer
 	extends ToolTipRenderer
 {
-	
+
 	public ProcStatusRenderer()
 	{
 		super();
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		Integer status = (Integer)value;

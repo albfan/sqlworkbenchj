@@ -152,7 +152,7 @@ public class SelectAnalyzer
 				return;
 			}
 
-			this.addAllMarker = !afterWhere && count == 1;
+			this.addAllMarker = !afterWhere;
 
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
@@ -203,7 +203,8 @@ public class SelectAnalyzer
 
 			if (tableForColumnList == null)
 			{
-				context = CONTEXT_FROM_LIST;
+				this.context = CONTEXT_FROM_LIST;
+				this.addAllMarker = false;
 				this.elements = new ArrayList();
 				for (String entry : tables)
 				{

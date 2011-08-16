@@ -111,6 +111,7 @@ public class BlobColumnPanel
 		if (openButton != null) openButton.removeActionListener(l);
 	}
 
+	@Override
 	public void setFont(Font f)
 	{
 		super.setFont(f);
@@ -122,12 +123,14 @@ public class BlobColumnPanel
 		return label.getText();
 	}
 
+	@Override
 	public void setBackground(Color c)
 	{
 		super.setBackground(c);
 		if (label != null) label.setBackground(c);
 	}
 
+	@Override
 	public void setForeground(Color c)
 	{
 		super.setForeground(c);

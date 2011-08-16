@@ -65,10 +65,7 @@ public class ToolTipRenderer
 	protected Color highlightBackground;
 	protected Color filterHighlightColor = GuiSettings.getExpressionHighlightColor();
 
-	private Color alternateBackground = GuiSettings.getAlternateRowColor();
-	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
-	private Color nullColor = GuiSettings.getNullColor();
-	private Color modifiedColor;
+	private RendererSetup rendererSetup;
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
@@ -139,20 +136,9 @@ public class ToolTipRenderer
 		return result;
 	}
 
-	public void setModifiedColor(Color newColor)
-	{
-		this.modifiedColor = newColor;
-	}
-
 	public int getLineCount()
 	{
 		return 1;
-	}
-
-	@Override
-	public void setUseAlternatingColors(boolean flag)
-	{
-		this.useAlternatingColors = flag;
 	}
 
 	@Override
@@ -192,8 +178,7 @@ public class ToolTipRenderer
 
 	private boolean doModificationHighlight(WbTable table, int row, int col)
 	{
-		this.modifiedColor = table.getColumnModifiedColor();
-		if (this.modifiedColor == null)
+		if (this.rendererSetup.modifiedColor == null)
 		{
 			return false;
 		}
@@ -206,11 +191,11 @@ public class ToolTipRenderer
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
 		this.isSelected = selected;
-		this.isAlternatingRow = this.useAlternatingColors && ((row % 2) == 1);
 
 		try
 		{
 			WbTable wbtable = (WbTable)table;
+			rendererSetup = wbtable.getRendererSetup();
 			this.filter = wbtable.getHighlightExpression();
 			this.isModifiedColumn = doModificationHighlight(wbtable, row, col);
 		}
@@ -218,6 +203,8 @@ public class ToolTipRenderer
 		{
 			// ignore, should not happen
 		}
+
+		this.isAlternatingRow = rendererSetup.useAlternatingColors && ((row % 2) == 1);
 
 		if (selectedForeground == null)
 		{
@@ -309,17 +296,17 @@ public class ToolTipRenderer
 
 		if (isModifiedColumn)
 		{
-			return modifiedColor;
+			return rendererSetup.modifiedColor;
 		}
-		else if (displayValue == null && nullColor != null)
+		else if (displayValue == null && rendererSetup.nullColor != null)
 		{
-			return nullColor;
+			return rendererSetup.nullColor;
 		}
 		else
 		{
 			if (isAlternatingRow)
 			{
-				return alternateBackground;
+				return rendererSetup.alternateBackground;
 			}
 			else
 			{

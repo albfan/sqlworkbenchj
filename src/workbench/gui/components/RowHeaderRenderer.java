@@ -25,7 +25,7 @@ import workbench.util.NumberStringCache;
 
 /**
  * A TableRowHeader to show row numbers in a JTable
- * 
+ *
  * @author Thomas Kellerer
  */
 public class RowHeaderRenderer
@@ -122,6 +122,7 @@ public class RowHeaderRenderer
 		}
 	}
 
+	@Override
 	public void prepareDisplay(Object aValue)
 	{
 		try

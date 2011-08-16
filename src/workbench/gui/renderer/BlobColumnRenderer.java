@@ -37,7 +37,7 @@ import workbench.resource.GuiSettings;
  * display a dialog with details about the blob.
  * <br/>
  *
- * @see workbench.gui.components.BlobHandler#showBlobInfoDialog(java.awt.Frame, Object, boolean) 
+ * @see workbench.gui.components.BlobHandler#showBlobInfoDialog(java.awt.Frame, Object, boolean)
  *
  * @author  Thomas Kellerer
  */
@@ -67,16 +67,19 @@ public class BlobColumnRenderer
 		this.displayPanel.setFont(aFont);
 	}
 
+	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
 		return getComponent(table, value, true, isSelected, row, column);
 	}
 
+	@Override
 	public int getHorizontalAlignment()
 	{
 		return SwingConstants.LEFT;
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 		                                             boolean isSelected,
 		                                             boolean hasFocus, int row, int column)
@@ -133,21 +136,19 @@ public class BlobColumnRenderer
 		this.displayPanel.setBackground(c);
 	}
 
+	@Override
 	public Object getCellEditorValue()
 	{
 		return currentValue;
 	}
 
+	@Override
 	public String getDisplayValue()
 	{
 		return displayPanel.getLabel();
 	}
 
-	public void setUseAlternatingColors(boolean flag)
-	{
-		this.useAlternatingColors = flag;
-	}
-
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		cancelCellEditing();
@@ -193,6 +194,7 @@ public class BlobColumnRenderer
 		}
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		// nothing to do

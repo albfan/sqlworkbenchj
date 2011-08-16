@@ -27,7 +27,7 @@ import workbench.util.StringUtil;
  * The renderer uses a JTextArea internally which is a lot slower than the own
  * drawing of the text implemented in ToolTipRender. But ToolTipRenderer
  * cannot cope with line breaks
- * 
+ *
  * @author Thomas Kellerer
  */
 public class TextAreaRenderer
@@ -42,6 +42,7 @@ public class TextAreaRenderer
 		super();
 		textDisplay = new JTextArea()
 		{
+			@Override
 			public Insets getInsets()
 			{
 				return AREA_INSETS;
@@ -63,17 +64,19 @@ public class TextAreaRenderer
 	}
 
 
+	@Override
 	public int getHorizontalAlignment()
 	{
 		return SwingConstants.LEFT;
 	}
-	
+
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean isSelected,	boolean hasFocus, int row, int col)
 	{
 		initDisplay(table, value, isSelected, hasFocus, row, col);
-		
+
 		this.textDisplay.setFont(table.getFont());
-		
+
 		if (hasFocus)
 		{
 			this.textDisplay.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
@@ -91,6 +94,7 @@ public class TextAreaRenderer
 		return textDisplay;
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
 		if (value == null)
@@ -110,7 +114,7 @@ public class TextAreaRenderer
 				this.displayValue = value.toString();
 			}
 			this.textDisplay.setText(this.displayValue);
-			if (showTooltip) 
+			if (showTooltip)
 			{
 				this.textDisplay.setToolTipText(StringUtil.getMaxSubstring(this.displayValue, maxTooltipSize));
 			}

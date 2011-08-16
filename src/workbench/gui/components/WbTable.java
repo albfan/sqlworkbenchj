@@ -102,6 +102,7 @@ import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.renderer.RendererFactory;
+import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.sql.DwStatusBar;
@@ -202,7 +203,7 @@ public class WbTable
 	private boolean readOnly;
 	private FontZoomer zoomer;
 
-	private Color modifiedColumnColor;
+	private RendererSetup rendererSetup;
 
 	// </editor-fold>
 
@@ -220,6 +221,7 @@ public class WbTable
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
 
+		this.rendererSetup = new RendererSetup();
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
 		this.sortDescending = new SortDescendingAction(this);
@@ -361,14 +363,19 @@ public class WbTable
 	}
 
 
-	public Color getColumnModifiedColor()
+	public RendererSetup getRendererSetup()
 	{
-		return modifiedColumnColor;
+		return rendererSetup;
+	}
+
+	public void setRendererSetup(RendererSetup newSetup)
+	{
+		rendererSetup = newSetup;
 	}
 
 	public void setModifiedColor(Color color)
 	{
-		this.modifiedColumnColor = color;
+		this.rendererSetup.setModifiedColor(color);
 	}
 
 	public void setColumnOrderSavingEnabled(boolean flag)

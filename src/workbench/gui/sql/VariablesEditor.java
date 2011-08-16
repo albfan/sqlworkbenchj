@@ -14,6 +14,7 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -22,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
 import workbench.WbManager;
@@ -30,9 +32,11 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
@@ -49,12 +53,30 @@ public class VariablesEditor
 {
 	private DataStore varData;
 	private WbTable variablesTable;
+	private ValidatingDialog parentDialog;
+	private boolean autoAdvance;
 
 	public VariablesEditor(DataStore data)
 	{
 		super();
+		autoAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoadvance", true);
 
-		this.variablesTable = new WbTable();
+		this.variablesTable = new WbTable()
+		{
+			@Override
+			public void editingStopped(ChangeEvent e)
+			{
+				final int editRow = getEditingRow();
+				super.editingStopped(e);
+				if (autoAdvance)
+				{
+					closeOrAdvance(editRow);
+				}
+			}
+		};
+
+		this.variablesTable.setRendererSetup(new RendererSetup(false));
+
 		this.variablesTable.setRowSelectionAllowed(false);
 		this.variablesTable.setColumnSelectionAllowed(false);
 		this.varData = data;
@@ -81,10 +103,35 @@ public class VariablesEditor
 		this.add(scroll, BorderLayout.CENTER);
 	}
 
+	private void closeOrAdvance(final int editedRow)
+	{
+		if (editedRow == variablesTable.getRowCount() - 1)
+		{
+			parentDialog.approveAndClose();
+		}
+		else if (editedRow >= 0)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					startEditRow(editedRow + 1);
+				}
+			});
+		}
+	}
+
+	@Override
 	public void componentDisplayed()
 	{
+		startEditRow(0);
+	}
+
+	private void startEditRow(int row)
+	{
 		this.variablesTable.setColumnSelectionInterval(1,1);
-		this.variablesTable.editCellAt(0, 1);
+		this.variablesTable.editCellAt(row, 1);
 		TableCellEditor editor = this.variablesTable.getCellEditor();
 		if (editor instanceof WbTextCellEditor)
 		{
@@ -92,9 +139,9 @@ public class VariablesEditor
 			wbedit.selectAll();
 			wbedit.requestFocus();
 		}
-
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		this.variablesTable.stopEditing();
@@ -121,13 +168,16 @@ public class VariablesEditor
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				VariablesEditor editor = new VariablesEditor(vardata);
 				Dimension d = new Dimension(300,250);
 				editor.setMinimumSize(d);
 				editor.setPreferredSize(d);
-				dialogResult = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"));
+				editor.parentDialog = ValidatingDialog.createDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"), null, 0, false);
+				editor.parentDialog.setVisible(true);
+				dialogResult = !editor.parentDialog.isCancelled();
 			}
 		});
 

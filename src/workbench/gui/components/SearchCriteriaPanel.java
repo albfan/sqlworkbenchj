@@ -205,6 +205,7 @@ public class SearchCriteriaPanel
 		{
 			private String lastCmd;
 
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				// If the last action as comboBoxChanged and we now receive a comboBoxEdited
@@ -235,16 +236,19 @@ public class SearchCriteriaPanel
 		return result;
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 		criteria.requestFocusInWindow();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 	}
