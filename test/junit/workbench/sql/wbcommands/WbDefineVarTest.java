@@ -161,4 +161,26 @@ public class WbDefineVarTest
 		cmd.execute("WbDefineVar -contentFile='" + data.getFullPath() + "' -encoding='UTF-8' -variable=filevar");
 		assertEquals(content, VariablePool.getInstance().getParameterValue("filevar"));
 	}
+
+	@Test
+	public void testReadFileContentWithVars()
+		throws Exception
+	{
+		VariablePool.getInstance().clear();
+		VariablePool.getInstance().setParameterValue("somevalue", "42");
+
+		WbDefineVar cmd = new WbDefineVar();
+		TestUtil util = getTestUtil();
+		WbFile data = new WbFile(util.getBaseDir(), "data.txt");
+		Writer out = EncodingUtil.createWriter(data, "UTF-8", false);
+		String content = "the answer: $[somevalue]";
+		out.write(content);
+		out.close();
+
+		cmd.execute("WbDefineVar -contentFile='" + data.getFullPath() + "' -encoding='UTF-8' -variable=filevar");
+		String expected = "the answer: 42";
+		String value = VariablePool.getInstance().getParameterValue("filevar");
+		assertEquals(expected, value);
+	}
+
 }

@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-11-17">
+    <entry dev-build="8" type="enh">When using WbVarDef with -contentFile, variables in the source file are now replaced. This can be disabled using the parameter -replaceVars=false</entry>
     <entry dev-build="6" type="enh">The save button to update the database can now be set to be always enabled by setting the property workbench.gui.savebutton.always.enabled=true in workbench.settings</entry>
     <entry dev-build="6" type="enh">A new option has been added to highlight columns that have been changed.</entry>
     <entry dev-build="5" type="enh">The contents for a variable can now be read from an external file (using WbVarDef -variable=foo -contentFile=bar.txt)</entry>

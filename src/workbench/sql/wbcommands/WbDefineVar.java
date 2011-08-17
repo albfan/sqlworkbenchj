@@ -46,6 +46,7 @@ public class WbDefineVar
 		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
 		this.cmdLine.addArgument("contentFile", ArgumentType.StringArgument);
 		this.cmdLine.addArgument("variable", ArgumentType.StringArgument);
+		this.cmdLine.addArgument("replaceVars", ArgumentType.BoolArgument);
 
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -257,6 +258,7 @@ public class WbDefineVar
 			return;
 		}
 
+		boolean replace = cmdLine.getBoolean("replaceVars", true);
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding == null)
 		{
@@ -266,6 +268,11 @@ public class WbDefineVar
 		try
 		{
 			String value = FileUtil.readFile(contentFile, encoding);
+			if (replace)
+			{
+				value = VariablePool.getInstance().replaceAllParameters(value);
+			}
+
 			setVariable(result, varname, value);
 			String msg = ResourceMgr.getFormattedString("MsgVarReadFile", varname, contentFile.getFullPath());
 			result.addMessage(msg);

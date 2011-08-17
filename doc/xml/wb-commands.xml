@@ -993,6 +993,7 @@
       switch. The specified file has to be a regular Java properties file.
       For details see see <link linkend="cmdline-vardef">Reading variables from a file</link>.
     </para>
+    
   </section>
 
   <section id="command-vardelete">
