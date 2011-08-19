@@ -680,7 +680,7 @@ public class WbSwingUtilities
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logError("WbSwingUtilities.getCommitRollbackQuestion()", "Could not detect string width", th);
 			w = 300;
 		}
 
