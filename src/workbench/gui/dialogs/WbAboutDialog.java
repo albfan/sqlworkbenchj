@@ -340,6 +340,7 @@ public class WbAboutDialog
 		}
 }//GEN-LAST:event_jeditLabelMouseClicked
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == escAction)

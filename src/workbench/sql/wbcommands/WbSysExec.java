@@ -57,12 +57,6 @@ public class WbSysExec
 	}
 
 	@Override
-	public void done()
-	{
-		super.done();
-	}
-
-	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
