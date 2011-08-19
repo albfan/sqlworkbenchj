@@ -62,7 +62,7 @@ public class DisplayLocale
 		}
 		else
 		{
-			StringBuffer s = new StringBuffer(20);
+			StringBuilder s = new StringBuilder(20);
 			String country = null;
 			if (displayLocale == null)
 			{
