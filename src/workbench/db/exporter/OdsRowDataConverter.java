@@ -384,7 +384,9 @@ public class OdsRowDataConverter
 		if (SqlUtil.isNumberType(type))
 		{
 			attr.append("\"float\" ");
-			attr.append(" office:value=\"" + data.toString() + "\"");
+			attr.append(" office:value=\"");
+			attr.append(data.toString());
+			attr.append("\"");
 		}
 		else if (type == Types.DATE)
 		{

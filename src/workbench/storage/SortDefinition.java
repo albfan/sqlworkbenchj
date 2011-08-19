@@ -12,16 +12,16 @@
 package workbench.storage;
 
 /**
- * A class to store the sort definition of a result set (e.g. DataStore, 
+ * A class to store the sort definition of a result set (e.g. DataStore,
  * DatastoreTableModel)
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SortDefinition
 {
 	private boolean[] sortAscending;
 	private int[] sortColumns;
-	
+
 	public SortDefinition()
 	{
 	}
@@ -39,10 +39,10 @@ public class SortDefinition
 		System.arraycopy(columns, 0, sortColumns, 0, columns.length);
 		System.arraycopy(ascending, 0, sortAscending, 0, ascending.length);
 	}
-	
+
 	/**
 	 * Create a copy of this sort definition.
-	 * 
+	 *
 	 * @return a new SortDefinition with the same settings as <tt>this</tt>
 	 */
 	public SortDefinition createCopy()
@@ -66,7 +66,8 @@ public class SortDefinition
 		hash = 67 * hash + (this.sortColumns != null ? this.sortColumns.hashCode() : 0);
 		return hash;
 	}
-	
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof SortDefinition)
@@ -88,9 +89,9 @@ public class SortDefinition
 	{
 		return getColumnCount() != 0;
 	}
-	
+
 	/**
-	 * Returns the numer of sort columns defined. 
+	 * Returns the numer of sort columns defined.
 	 * @return the count of sort columns
 	 */
 	public int getColumnCount()
@@ -100,10 +101,10 @@ public class SortDefinition
 	}
 
 	/**
-	 * Return the column index from the result set based on the 
-	 * index in the column list (the primary sort column has 
+	 * Return the column index from the result set based on the
+	 * index in the column list (the primary sort column has
 	 * index 0)
-	 * 
+	 *
 	 * @param definitionIndex the index in the list of columns
 	 * @return the column index in the result set or -1 if no sort columns are defined
 	 */
@@ -113,8 +114,8 @@ public class SortDefinition
 		if (sortColumns == null) return -1;
 		return sortColumns[definitionIndex];
 	}
-	
-	/** 
+
+	/**
 	 * Return true if the data is sorted in ascending order for the given column.
 	 * @param col the column index in the result set
 	 * @return True if sorted in ascending order
@@ -137,7 +138,7 @@ public class SortDefinition
 		int index = findSortColumnIndex(col);
 		return (index == 0);
 	}
-	
+
 	/**
 	 * Check if the table is sorted by a column
 	 * @return true if the given column is a sort column
@@ -148,11 +149,11 @@ public class SortDefinition
 		int index = findSortColumnIndex(col);
 		return (index > -1);
 	}
-	
+
 	/**
 	 * Remove the specified sort column from this definition.
-	 * If the column is not found, nothing is changed. 
-	 * 
+	 * If the column is not found, nothing is changed.
+	 *
 	 * @param column the column index in the result set
 	 */
 	public void removeSortColumn(int column)
@@ -166,14 +167,14 @@ public class SortDefinition
 			this.sortAscending = null;
 			return;
 		}
-		
+
 		int[] newColumns = new int[sortColumns.length-1];
 		boolean[] newDir = new boolean[sortColumns.length-1];
-		
+
 		// Copy the old values before the removed column
 		System.arraycopy(sortColumns, 0, newColumns, 0, index);
 		System.arraycopy(sortAscending, 0, newDir, 0, index);
-		
+
 		// Copy the old values after the removed column
 		System.arraycopy(sortColumns, index + 1, newColumns, index, sortColumns.length - index - 1);
 		System.arraycopy(sortAscending, 0, newDir, index, sortColumns.length - index - 1);
@@ -186,7 +187,7 @@ public class SortDefinition
 	 * Add a column to the list of sort columns.
 	 * If sort columns exist, the new column is added at the end, otherwise
 	 * the column will be the primary sort column.
-	 * 
+	 *
 	 * @param column the column index (inside the result set) to be added
 	 * @param ascending true if sorting should be ascending
 	 */
@@ -194,11 +195,11 @@ public class SortDefinition
 	{
 		setSortColumn(column, ascending, true);
 	}
-	
+
 	/**
 	 * Define a single column as the sort column.
-	 * If sort columns exist, they are reqplaced with the given column 
-	 * 
+	 * If sort columns exist, they are reqplaced with the given column
+	 *
 	 * @param column the column index (inside the result set) to be set
 	 * @param ascending true if sorting should be ascending
 	 */
@@ -206,7 +207,7 @@ public class SortDefinition
 	{
 		setSortColumn(column, ascending, false);
 	}
-	
+
 	private void setSortColumn(int column, boolean ascending, boolean addSortColumn)
 	{
 		if (!addSortColumn || sortColumns == null)
@@ -217,19 +218,19 @@ public class SortDefinition
 		else
 		{
 			int index = findSortColumnIndex(column);
-			
+
 			if (index < 0)
 			{
 				// No definition for this column found, add the column to the list of columns
 				int[] newColumns = new int[sortColumns.length + 1];
 				boolean[] newDir = new boolean[sortColumns.length + 1];
-				
+
 				System.arraycopy(sortColumns, 0, newColumns, 0, sortColumns.length);
 				System.arraycopy(sortAscending, 0, newDir, 0, sortColumns.length);
-				
+
 				newColumns[sortColumns.length] = column;
 				newDir[sortColumns.length] = ascending;
-				
+
 				this.sortColumns = newColumns;
 				this.sortAscending = newDir;
 			}
@@ -239,12 +240,12 @@ public class SortDefinition
 				this.sortAscending[index] = ascending;
 			}
 		}
-	}	
+	}
 
 	/**
 	 * Finds the index of a column in the internal array
 	 * based on the index of the result set
-	 * 
+	 *
 	 * @param column
 	 * @return -1 if the column was not found. The index in sortColumns otherwise
 	 */
@@ -257,5 +258,5 @@ public class SortDefinition
 		}
 		return -1;
 	}
-	
+
 }

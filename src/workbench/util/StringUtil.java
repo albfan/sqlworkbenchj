@@ -57,6 +57,7 @@ public class StringUtil
 	 * @param pattern
 	 * @return the exception's message if an error occurs, null if everything is OK.
 	 */
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static String isDatePatternValid(String pattern)
 	{
 		if (isBlank(pattern)) return null;
@@ -520,7 +521,7 @@ public class StringUtil
 
 	/**
 	 * Checks if the given string value is not empty (!= null && length() > 0).
-	 * 
+	 *
 	 * Whitespaces are considered "not empty".
 	 *
 	 * @param value

@@ -170,7 +170,7 @@ public class StrBuffer
 	/**
 	 *	Appends the passed StrBuffer to this StrBuffer
 	 */
-	public StrBuffer append(StrBuffer str)
+	public final StrBuffer append(StrBuffer str)
 	{
 		if (str == null) return this;
 		int len = str.numchar;
@@ -273,7 +273,7 @@ public class StrBuffer
 		return this;
 	}
 
-	public StrBuffer append(CharSequence s)
+	public final StrBuffer append(CharSequence s)
 	{
 		if (s == null) return this;
 		int len = s.length();

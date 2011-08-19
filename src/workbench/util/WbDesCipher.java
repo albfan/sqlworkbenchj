@@ -80,7 +80,7 @@ public class WbDesCipher
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WbDesCipher.decryptString()", "Could not decrypt", e);
 			return aValue;
 		}
 	}
@@ -99,7 +99,7 @@ public class WbDesCipher
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WbDesCipher.encryptString()", "Could not encrypt", e);
 			return aValue;
 		}
 	}

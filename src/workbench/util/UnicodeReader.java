@@ -54,7 +54,7 @@ public class UnicodeReader
 	 * Read-ahead four bytes and check for BOM marks. Extra bytes are
 	 * unread back to the stream, only BOM bytes are skipped.
 	 */
-	protected void init() throws IOException
+	protected final void init() throws IOException
 	{
 		if (internalIn2 != null) return;
 

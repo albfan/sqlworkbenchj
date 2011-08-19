@@ -72,7 +72,7 @@ public class ColumnExpression
 		return filterValue;
 	}
 
-	public void setFilterValue(Object value)
+	public final void setFilterValue(Object value)
 	{
 		this.filterValue = value;
 	}
@@ -83,7 +83,7 @@ public class ColumnExpression
 		return comparator;
 	}
 
-	public void setComparator(ColumnComparator comp)
+	public final void setComparator(ColumnComparator comp)
 	{
 		this.comparator = comp;
 	}
@@ -127,7 +127,7 @@ public class ColumnExpression
 		return this.columnName;
 	}
 
-	public void setColumnName(String column)
+	public final void setColumnName(String column)
 	{
 		this.columnName = (column == null ? null : column.toLowerCase());
 	}

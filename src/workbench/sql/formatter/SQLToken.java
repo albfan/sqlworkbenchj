@@ -442,6 +442,7 @@ public class SQLToken
 	 *
 	 * @return a string representation of this token
 	 */
+	@Override
 	public String toString()
 	{
 		return "Token #" + Integer.toHexString(ID) + ": " + getDescription() + " from " +charBegin + " to " + charEnd + " : " + contents;

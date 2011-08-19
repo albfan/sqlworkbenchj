@@ -41,7 +41,7 @@ public class MacroManager
 		storage.loadMacros(getMacroFile());
 	}
 
-	public File getMacroFile()
+	public final File getMacroFile()
 	{
 		File f = new File(Settings.getInstance().getConfigDir(), "WbMacros.xml");
 		return f;
@@ -81,7 +81,7 @@ public class MacroManager
 		}
 		return null;
 	}
-	
+
 	public void save()
 	{
 		storage.saveMacros(getMacroFile());

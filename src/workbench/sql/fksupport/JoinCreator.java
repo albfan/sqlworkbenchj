@@ -57,7 +57,7 @@ public class JoinCreator
 		setCursorPosition(realPos);
 	}
 
-	public void setCursorPosition(int position)
+	public final void setCursorPosition(int position)
 	{
 		cursorPos = position;
 		retrieveTablePositions();

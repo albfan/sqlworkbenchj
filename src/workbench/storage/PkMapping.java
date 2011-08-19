@@ -89,13 +89,15 @@ public class PkMapping
 		while (itr.hasNext())
 		{
 			Map.Entry entry = itr.next();
-			result.append(entry.getKey() + "=" + entry.getValue());
-			result.append("\n");
+			result.append(entry.getKey());
+			result.append('=');
+			result.append(entry.getValue());
+			result.append('\n');
 		}
 		return result.toString();
 	}
 
-	public synchronized void loadMapping(String filename)
+	public final synchronized void loadMapping(String filename)
 	{
 		if (filename == null) return;
 		Properties props = new Properties();

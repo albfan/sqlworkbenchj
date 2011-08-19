@@ -49,7 +49,7 @@ public class XsltTransformer
 	private String sysErr;
 	private boolean saveSystemOut;
 	private File xsltUsed;
-	
+
 	/**
 	 * The directory where the initially defined XSLT is stored.
 	 * Will be set by transform() in order to be able to
@@ -74,7 +74,7 @@ public class XsltTransformer
 	{
 		saveSystemOut = flag;
 	}
-	
+
 	public void transform(String inputFileName, String outputFileName, String xslFileName)
 		throws IOException, TransformerException
 	{
@@ -85,7 +85,7 @@ public class XsltTransformer
 	{
 		return xsltUsed;
 	}
-	
+
 	public void transform(String inputFileName, String outputFileName, String xslFileName, Map<String, String> parameters)
 		throws IOException, TransformerException
 	{
@@ -125,12 +125,12 @@ public class XsltTransformer
 				systemErr = new ByteArrayOutputStream();
 				System.setErr(new PrintStream(systemErr));
 			}
-			
+
 			Source sxslt = new StreamSource(xlsInput);
 			sxslt.setSystemId(xslfile.getName());
 			TransformerFactory factory = TransformerFactory.newInstance();
 			factory.setURIResolver(this);
-			
+
 			transformer = factory.newTransformer(sxslt);
 			transformer.setURIResolver(this);
 
@@ -161,7 +161,7 @@ public class XsltTransformer
 			}
 		}
 	}
-	
+
 	public Exception getNestedError()
 	{
 		return nestedError;
@@ -171,7 +171,7 @@ public class XsltTransformer
 	{
 		return getAllOutputs(null);
 	}
-	
+
 	public String getAllOutputs(Exception e)
 	{
 		StringBuilder result = new StringBuilder();
@@ -189,7 +189,8 @@ public class XsltTransformer
 			result.append('\n');
 			if (e != null)
 			{
-				result.append(e.getMessage() + ": ");
+				result.append(e.getMessage());
+				result.append(": ");
 			}
 			result.append(ExceptionUtil.getDisplay(nestedError));
 		}
@@ -199,7 +200,7 @@ public class XsltTransformer
 		}
 		return result.toString();
 	}
-	
+
 	@Override
 	public Source resolve(String href, String base)
 		throws TransformerException
@@ -267,6 +268,7 @@ public class XsltTransformer
 		return new File(file);
 	}
 
+	@SuppressWarnings("CallToThreadDumpStack")
 	public static void main(String[] args)
 	{
 		try

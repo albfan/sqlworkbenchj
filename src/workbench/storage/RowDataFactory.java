@@ -18,11 +18,11 @@ import workbench.db.oracle.OracleDataConverter;
 import workbench.resource.Settings;
 
 /**
- * A factory to create instances of RowData.<br/>
- * <br/>
+ * A factory to create instances of RowData.
+ * <br>
  * When creating a new instance a possible converter is automatically registered
  * with the created instance.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class RowDataFactory
@@ -43,7 +43,7 @@ public class RowDataFactory
 	}
 
 	/**
-	 * Creates instances of necessary DataConverters
+	 * Creates instances of necessary DataConverters.
 	 *
 	 * The following datatypes are currently supported:
 	 * <ul>
@@ -53,7 +53,7 @@ public class RowDataFactory
 	 *
 	 * @see workbench.resource.Settings#getFixSqlServerTimestampDisplay()
 	 * @see workbench.resource.Settings#getConvertOracleTypes()
-	 * 
+	 *
 	 * @param conn the connection for which to create the DataConverter
 	 * @return a suitable converter or null if nothing should be converted
 	 */

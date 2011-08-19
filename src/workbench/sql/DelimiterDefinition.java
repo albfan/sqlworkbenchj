@@ -121,7 +121,7 @@ public class DelimiterDefinition
 		return this.delimiter;
 	}
 
-	public void setDelimiter(String d)
+	public final void setDelimiter(String d)
 	{
 		if (d == null) return;
 		if (!StringUtil.equalString(this.delimiter, d))

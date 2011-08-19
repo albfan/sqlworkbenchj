@@ -269,7 +269,7 @@ public class LexerBasedParser
 	}
 
 	@Override
-	public void setFile(File f, String encoding)
+	public final void setFile(File f, String encoding)
 		throws IOException
 	{
 		scriptLength = (int)FileUtil.getCharacterLength(f, encoding);
@@ -288,7 +288,7 @@ public class LexerBasedParser
 	}
 
 	@Override
-	public void setScript(String script)
+	public final void setScript(String script)
 	{
 		String toUse = StringUtil.rtrim(script);
 		input = new StringReader(toUse);

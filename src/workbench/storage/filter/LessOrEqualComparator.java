@@ -54,7 +54,6 @@ public class LessOrEqualComparator
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

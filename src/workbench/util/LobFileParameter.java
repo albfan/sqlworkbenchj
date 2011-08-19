@@ -50,7 +50,7 @@ public class LobFileParameter
 		FileUtil.closeQuietely(dataStream);
 	}
 
-	public void setBinary(boolean flag)
+	public final void setBinary(boolean flag)
 	{
 		binary = flag;
 	}
@@ -65,7 +65,7 @@ public class LobFileParameter
 		return filename;
 	}
 
-	public void setFilename(String fname)
+	public final void setFilename(String fname)
 	{
 		filename = fname;
 	}
@@ -75,7 +75,7 @@ public class LobFileParameter
 		return encoding;
 	}
 
-	public void setEncoding(String enc)
+	public final void setEncoding(String enc)
 	{
 		encoding = enc;
 	}

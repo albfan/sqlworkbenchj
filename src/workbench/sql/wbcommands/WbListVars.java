@@ -17,8 +17,8 @@ import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
-import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
@@ -42,6 +42,7 @@ public class WbListVars extends SqlCommand
 		return false;
 	}
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

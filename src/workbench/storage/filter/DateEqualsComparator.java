@@ -32,12 +32,22 @@ public class DateEqualsComparator
 	}
 
 	@Override
-	public boolean supportsIgnoreCase() { return false; }
+	public boolean supportsIgnoreCase()
+	{
+		return false;
+	}
 
 	@Override
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
+
 	@Override
-	public String getOperator() { return "="; }
+	public String getOperator()
+	{
+		return "=";
+	}
 
 	@Override
 	public String getDescription()
@@ -46,9 +56,16 @@ public class DateEqualsComparator
 	}
 
 	@Override
-	public boolean needsValue() { return true; }
+	public boolean needsValue()
+	{
+		return true;
+	}
+
 	@Override
-	public boolean comparesEquality() { return true; }
+	public boolean comparesEquality()
+	{
+		return true;
+	}
 
 	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)

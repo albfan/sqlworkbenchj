@@ -22,8 +22,9 @@ public class NumberUtil
 {
 
 	/**
-	 * Compare two Numbers regardless of their actual class because e.g. BigInteger
-	 * cannot be compared to a BigDecimal. The equals method would return false.
+	 * Compare two Numbers regardless of their actual class.
+	 * This works around the problem that e.g. BigInteger cannot be compared to a BigDecimal.
+	 * The equals method would return false.
 	 * <br/>
 	 * When comparing data across different DBMS (and thus JDBC) drivers, values
 	 * that are "equal" might otherwise not be considered equal e.g. an ID=42 in Oracle
@@ -32,7 +33,7 @@ public class NumberUtil
 	 *
 	 * @param one
 	 * @param other
-	 * 
+	 *
 	 * @return true, if both numbers are equals
 	 */
 	public static boolean valuesAreEquals(Number one, Number other)
@@ -46,11 +47,11 @@ public class NumberUtil
 		Number second = makeBigDecimal(other);
 		return first.equals(second);
 	}
-	
+
 	protected static Number makeBigDecimal(Number value)
 	{
 		if (value instanceof BigDecimal) return value;
-		
+
 		if (value instanceof BigInteger)
 		{
 			return new BigDecimal((BigInteger)value);

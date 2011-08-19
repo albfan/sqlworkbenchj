@@ -112,7 +112,10 @@ public class WbAbout
 				{
 					s += " (" + ResourceMgr.getString("LblSchema") + ")";
 				}
-				content.append(s + ": " + schema + "\n");
+				content.append(s);
+				content.append(": ");
+				content.append(schema);
+				content.append('\n');
 			}
 
 			term = wbmeta.getCatalogTerm();
@@ -124,9 +127,14 @@ public class WbAbout
 				{
 					s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
 				}
-				content.append(s + ": " + catalog + "\n");
+				content.append(s);
+				content.append(": ");
+				content.append(catalog);
+				content.append("\n");
 			}
-			content.append("Workbench DBID: " + wbmeta.getDbId() + " \n");
+			content.append("Workbench DBID: ");
+			content.append(wbmeta.getDbId());
+			content.append(" \n");
 			currentConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)

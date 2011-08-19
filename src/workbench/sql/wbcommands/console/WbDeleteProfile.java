@@ -35,6 +35,7 @@ public class WbDeleteProfile
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

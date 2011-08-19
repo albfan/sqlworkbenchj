@@ -30,6 +30,7 @@ public class WbDisplay
 {
 	public static final String VERB = "WBDISPLAY";
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -73,6 +74,7 @@ public class WbDisplay
 		return false;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

@@ -73,7 +73,7 @@ public class TablePrinter
 		init(toPrint, pformat, printerFont);
 	}
 
-	protected void init(WbTable toPrint, PageFormat aFormat, Font aFont)
+	private void init(WbTable toPrint, PageFormat aFormat, Font aFont)
 	{
 		this.table = toPrint;
 		this.printFont = aFont;

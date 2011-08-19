@@ -11,9 +11,7 @@
  */
 package workbench.resource;
 
-
 import javax.swing.KeyStroke;
-
 
 /**
  * A class to store the assigned KeyStrokes for an Action in order to be serializable
@@ -245,7 +243,7 @@ public class ShortcutDefinition
 		return this.actionClass;
 	}
 
-	public void setActionClass(String aClass)
+	public final void setActionClass(String aClass)
 	{
 		if (aClass == null) throw new IllegalArgumentException("ClassName cannot be null");
 		this.actionClass = aClass;

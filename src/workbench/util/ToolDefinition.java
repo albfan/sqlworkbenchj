@@ -44,7 +44,7 @@ public class ToolDefinition
 		return parameters;
 	}
 
-	public void setParameters(String parameters)
+	public final void setParameters(String parameters)
 	{
 		this.parameters = parameters;
 	}
@@ -54,7 +54,7 @@ public class ToolDefinition
 		return name;
 	}
 
-	public void setName(String appName)
+	public final void setName(String appName)
 	{
 		this.name = appName;
 	}
@@ -80,7 +80,7 @@ public class ToolDefinition
 	 * @param path
 	 * @see #setParameters(java.lang.String)
 	 */
-	public void setExecutablePath(String path)
+	public final void setExecutablePath(String path)
 	{
 		this.exePath = path;
 	}

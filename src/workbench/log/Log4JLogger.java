@@ -104,7 +104,7 @@ public class Log4JLogger
 	/**
 	 * @param fQCN the fQCN to set
 	 */
-	public void setFqcn(String fQCN)
+	public final void setFqcn(String fQCN)
 	{
 		fqcn = fQCN;
 	}

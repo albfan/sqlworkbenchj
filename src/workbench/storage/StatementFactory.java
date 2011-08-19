@@ -460,7 +460,7 @@ public class StatementFactory
 		this.includeNullInInsert = flag;
 	}
 
-	public void setCurrentConnection(WbConnection conn)
+	public final void setCurrentConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
 		if (this.dbConnection != null)

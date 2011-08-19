@@ -101,13 +101,19 @@ public class FileMappedSequence
 		return (int)this.charLength;
 	}
 
-	void readFirstChunk()
+	/**
+	 * this is only package visible in order to be callable from the unit test
+	 */
+	final void readFirstChunk()
 	{
 		chunkByteStart = -1;
 		readNextChunk();
 	}
 
-	void readNextChunk()
+	/**
+	 * this is only package visible in order to be callable from the unit test
+	 */
+	final void readNextChunk()
 	{
 		boolean success = false;
 		int tries = 0;
@@ -278,7 +284,7 @@ public class FileMappedSequence
 			return chunk.substring(startInChunk, endInChunk);
 		}
 		// requested sequence extends into the next chunk(s)
-		StringBuffer result = new StringBuffer(sequenceLength);
+		StringBuilder result = new StringBuilder(sequenceLength);
 		result.append(chunk.substring(startInChunk));
 		int nextStart = start + result.length();
 		result.append(subSequence(nextStart, end));

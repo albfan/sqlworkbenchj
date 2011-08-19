@@ -12,14 +12,14 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
-import workbench.sql.DelimiterDefinition;
-import workbench.util.ExceptionUtil;
+
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
-import workbench.resource.Settings;
 import workbench.util.WbFile;
 
 /**

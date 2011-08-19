@@ -53,7 +53,6 @@ public class GreaterThanComparator
 		return "greater than";
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

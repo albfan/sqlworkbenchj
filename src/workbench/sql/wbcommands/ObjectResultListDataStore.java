@@ -28,7 +28,7 @@ public class ObjectResultListDataStore
 	public static final int COL_IDX_OBJECT_NAME = 0;
 	public static final int COL_IDX_OBJECT_TYPE = 1;
 	public static final int COL_IDX_SOURCE = 2;
-	
+
 	private static final String[] colnames = new String[] { "NAME", "TYPE", "SOURCE" };
 	private static final int[] colTypes = new int[] { Types.VARCHAR, Types.VARCHAR, Types.CLOB };
 	private static final int[] colSizes = new int[] { 30, 30, 50 };
@@ -37,7 +37,7 @@ public class ObjectResultListDataStore
 	{
 		super(colnames, colTypes, colSizes);
 	}
-	
+
 	public ObjectResultListDataStore(WbConnection con, List<DbObject> resultList, boolean showFullname)
 		throws SQLException
 	{
@@ -45,7 +45,7 @@ public class ObjectResultListDataStore
 		setResultList(con, resultList, showFullname);
 	}
 
-	public void setResultList(WbConnection con, List<DbObject> resultList, boolean showFullname)
+	public final void setResultList(WbConnection con, List<DbObject> resultList, boolean showFullname)
 		throws SQLException
 	{
 		for (DbObject object : resultList)
@@ -66,5 +66,5 @@ public class ObjectResultListDataStore
 		}
 		resetStatus();
 	}
-	
+
 }

@@ -21,6 +21,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to replace values in the data of a DataStore.
+ *
  * @author Thomas Kellerer
  */
 public class DataStoreReplacer
@@ -33,32 +35,39 @@ public class DataStoreReplacer
 	private int lastSelectedRowIndex;
 	private String lastCriteria;
 	private boolean isRegexSearch;
-	
+
 	public DataStoreReplacer()
 	{
-		
 	}
-	
+
 	/**
 	 * Create a new DataStoreReplacer for the given DataStore.
+	 *
 	 * The datastore is not checked if it is updateable!
-	 * 
+	 *
 	 * @param store the DataStore to search and replace in
-	 */ 
+	 */
 	public DataStoreReplacer(DataStore store)
 	{
 		setDataStore(store);
 	}
 
-	public void setDataStore(DataStore ds)
+	/**
+	 * Define the DataStore to be used by this replacer.
+	 *
+	 * @param ds
+	 */
+	public final void setDataStore(DataStore ds)
 	{
 		this.client = ds;
 		this.reset();
 	}
 	/**
 	 * Limit all search and replace actions to the selected rows.
+	 *
 	 * To reset search & replace in the selected rows, setSelecteRows()
-	 * has to be called again with a null value
+	 * has to be called again with a null value.
+	 *
 	 * @param rows the selected rows to be searched, null to reset row selection
 	 */
 	public void setSelectedRows(int[] rows)
@@ -66,26 +75,26 @@ public class DataStoreReplacer
 		this.selectedRows = rows;
 		this.lastSelectedRowIndex = 0;
 	}
-	
-	public Position getLastFoundPosition() 
+
+	public Position getLastFoundPosition()
 	{
 		return this.lastFoundPosition;
 	}
-	
+
 	public String getLastCriteria()
 	{
 		return this.lastCriteria;
 	}
-	
+
 	/**
 	 * Find the given text in the datastore.
-	 * 
+	 *
 	 * @param text the text to search for
 	 * @param ignoreCase if true, search is case-insesitive
 	 * @param wholeWord if true, only text in word bounderies is found
 	 * @param useRegex treat the text as a regular expression
 	 * @return the position where the text was found
-	 * 
+	 *
 	 * @see workbench.gui.editor.SearchAndReplace#getSearchExpression(String, boolean, boolean, boolean)
 	 */
 	public Position find(String text, boolean ignoreCase, boolean wholeWord, boolean useRegex)
@@ -111,9 +120,10 @@ public class DataStoreReplacer
 	}
 
 	/**
-	 * Find the next occurance of the search string. 
-	 * This returns NO_POSITION if find(String, boolean) has not 
-	 * been called before. 
+	 * Find the next occurance of the search string.
+	 *
+	 * This returns NO_POSITION if find(String, boolean) has not been called before.
+	 * 
 	 * @return the position of the next occurance
 	 */
 	public Position findNext()
@@ -157,15 +167,15 @@ public class DataStoreReplacer
 		this.lastPattern = p;
 
 		int startIndex = startRow;
-		
+
 		if (this.selectedRows != null)
 		{
 			startIndex = this.lastSelectedRowIndex;
 			rowCount = this.selectedRows.length;
 		}
-		
+
 		if (startIndex < 0) startIndex = 0;
-		
+
 		for (int index = startIndex; index < rowCount; index++)
 		{
 			int row = index;
@@ -174,7 +184,7 @@ public class DataStoreReplacer
 				this.lastSelectedRowIndex = index;
 				row = this.selectedRows[index];
 			}
-			
+
 			for (int col=startCol; col < colCount; col++)
 			{
 				int type = client.getColumnType(col);
@@ -190,20 +200,20 @@ public class DataStoreReplacer
 			}
 			startCol = 0;
 		}
-		
+
 		return Position.NO_POSITION;
 	}
-	
+
 	/**
 	 * Replace all occurances of a value with the given replacement value.
-	 * 
+	 *
 	 * @param text the value to search for
 	 * @param replacement the replacement value
 	 * @param rows if not null search and replace is only done in these rows
 	 * @param ignoreCase should the search pattern be applied case-insensitive
 	 * @param wholeWord if true, only whole words are found
 	 * @param useRegex if true, expression is treated as a regular expression
-	 * 
+	 *
 	 * @return the number of occurances replaced
 	 * @see workbench.gui.editor.SearchAndReplace#getSearchExpression(String, boolean, boolean, boolean)
 	 * @see workbench.gui.editor.SearchAndReplace#fixSpecialReplacementChars(String, boolean)
@@ -213,18 +223,18 @@ public class DataStoreReplacer
 	{
 		reset();
 		String expression = SearchAndReplace.getSearchExpression(text, ignoreCase, wholeWord, useRegex);
-		
+
 		this.isRegexSearch = useRegex;
-		
+
 		currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement, isRegexSearch);
 
 		int replaced = 0;
 		Pattern p = Pattern.compile(expression);
-		
+
 		this.setSelectedRows(rows);
-		
+
 		Position pos = findPattern(p);
-		
+
 		while (pos.isValid())
 		{
 			replaceValueAt(pos, this.currentReplacementValue, this.lastPattern);
@@ -238,7 +248,7 @@ public class DataStoreReplacer
 		throws ConverterException
 	{
 		if (this.lastFoundPosition == null) return false;
-		
+
 		if (this.lastFoundPosition.isValid())
 		{
 			currentReplacementValue = SearchAndReplace.fixSpecialReplacementChars(replacement, isRegexSearch);
@@ -247,7 +257,7 @@ public class DataStoreReplacer
 		}
 		return false;
 	}
-	
+
 	private void replaceValueAt(Position pos, String replacement, Pattern p)
 		throws ConverterException
 	{

@@ -505,7 +505,7 @@ public class RowData
 	/**
 	 *	Sets the status of this row to new.
 	 */
-	public void setNew()
+	public final void setNew()
 	{
 		this.status = NEW;
 	}

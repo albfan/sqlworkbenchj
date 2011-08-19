@@ -320,7 +320,7 @@ public class WbDataDiff
 				int len = sourceInfo.length();
 				if (targetInfo.length() > len) len = targetInfo.length();
 
-				StringBuffer line = new StringBuffer(len);
+				StringBuilder line = new StringBuilder(len);
 				line.append("-- ");
 				for (int i=0; i < len; i++) line.append('*');
 				line.append(nl);

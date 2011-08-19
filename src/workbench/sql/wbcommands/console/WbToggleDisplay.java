@@ -27,6 +27,7 @@ public class WbToggleDisplay extends SqlCommand
 {
 	public static final String VERB = "WBTOGGLEDISPLAY";
 
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -55,6 +56,7 @@ public class WbToggleDisplay extends SqlCommand
 		return false;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

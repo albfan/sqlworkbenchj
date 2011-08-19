@@ -11,19 +11,19 @@
  */
 package workbench.sql;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.EncodingUtil;
-import workbench.util.FileUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
@@ -112,7 +112,7 @@ public class ScriptParser
 	 * Define the source file for this ScriptParser.
 	 * Depending on the size the file might be read into memory or not
 	 */
-	public void setFile(File f, String encoding)
+	public final void setFile(File f, String encoding)
 		throws IOException
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
@@ -234,7 +234,7 @@ public class ScriptParser
 	 *	If so, GO will be used (MS SQL Server script style)
 	 *	If none of the above is true, ; (semicolon) will be used
 	 */
-	public void setScript(String script)
+	public final void setScript(String script)
 	{
 		if (script == null) throw new NullPointerException("SQL script may not be null");
 		if (script.equals(this.originalScript)) return;

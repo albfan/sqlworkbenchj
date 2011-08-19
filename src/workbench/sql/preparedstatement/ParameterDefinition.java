@@ -36,7 +36,7 @@ public class ParameterDefinition
 	private String parameterName;
 
 	/**
-	 * Parameter mode according to 
+	 * Parameter mode according to
 	 * ParameterMetaData.parameterModeOut
 	 * ParameterMetaData.parameterModeIn
 	 * ParameterMetaData.parameterModeInOut;
@@ -117,6 +117,7 @@ public class ParameterDefinition
 	{
 		Comparator<ParameterDefinition> comp = new Comparator<ParameterDefinition>()
 		{
+			@Override
 			public int compare(ParameterDefinition p1, ParameterDefinition p2)
 			{
 				return p1.parameterIndex - p2.parameterIndex;
@@ -125,6 +126,7 @@ public class ParameterDefinition
 		Collections.sort(parameters, comp);
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.parameterName + "=" + this.value + "(" + parameterIndex + ")";
@@ -139,12 +141,12 @@ public class ParameterDefinition
 	{
 		return parameterMode;
 	}
-	
+
 	public void setParameterMode(int mode)
 	{
-		if (mode != ParameterMetaData.parameterModeOut && 
+		if (mode != ParameterMetaData.parameterModeOut &&
 			  mode != ParameterMetaData.parameterModeIn &&
-				mode != ParameterMetaData.parameterModeInOut && 
+				mode != ParameterMetaData.parameterModeInOut &&
 				mode != ParameterMetaData.parameterModeUnknown)
 		{
 			throw new IllegalArgumentException("Incorrect parameter mode specified!");

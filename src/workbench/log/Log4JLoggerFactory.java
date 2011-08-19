@@ -34,17 +34,11 @@ public class Log4JLoggerFactory
 		return new Log4JLogger(name);
 	}
 
-	/**
-	 * @param loggerFqcn the loggerFqcn to set
-	 */
 	public static void setLoggerFqcn(Class loggerFqcn)
 	{
 		Log4JLoggerFactory.loggerFqcn = loggerFqcn;
 	}
 
-	/**
-	 * @return the loggerFqcn
-	 */
 	public static Class getLoggerFqcn()
 	{
 		return loggerFqcn;

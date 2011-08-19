@@ -45,7 +45,7 @@ public class DataRowExpression
 		return filterValue;
 	}
 
-	public void setFilterValue(Object value)
+	public final void setFilterValue(Object value)
 	{
 		this.filterValue = value;
 	}
@@ -56,7 +56,7 @@ public class DataRowExpression
 		return comparator;
 	}
 
-	public void setComparator(ColumnComparator comp)
+	public final void setComparator(ColumnComparator comp)
 	{
 		this.comparator = comp;
 	}

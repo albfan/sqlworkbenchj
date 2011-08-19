@@ -124,7 +124,9 @@ public class MacOSHelper
 			for (int i=0; i < args.length; i++)
 			{
 				if (i > 0) arguments.append(", ");
-				arguments.append("args[" + i + "]=");
+				arguments.append("args[");
+				arguments.append(Integer.toString(i));
+				arguments.append("]=");
 				if (args[i] == null)
 				{
 					arguments.append("null");
@@ -132,7 +134,9 @@ public class MacOSHelper
 				else
 				{
 					arguments.append(args[i].getClass().getName());
-					arguments.append(" [" + args[i].toString() + "]");
+					arguments.append(" [");
+					arguments.append(args[i].toString());
+					arguments.append("]");
 				}
 			}
 			LogMgr.logError("MacOSHelper.invoke()", "Error during callback", e);

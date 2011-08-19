@@ -30,6 +30,7 @@ public class WbDisconnect
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
@@ -44,7 +45,7 @@ public class WbDisconnect
 		{
 			//this.currentConnection.disconnect();
 			// setConnection will call disconnect() on the "old" connection
-			this.runner.setConnection(null); 
+			this.runner.setConnection(null);
 			result.addMessage(ResourceMgr.getString("MsgDisconnected"));
 			result.setSuccess();
 		}

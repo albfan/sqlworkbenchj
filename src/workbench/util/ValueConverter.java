@@ -134,7 +134,7 @@ public class ValueConverter
 		this.checkBuiltInFormats = flag;
 	}
 
-	public void setDefaultDateFormat(String aFormat)
+	public final void setDefaultDateFormat(String aFormat)
 		throws IllegalArgumentException
 	{
 		if (!StringUtil.isEmptyString(aFormat))
@@ -151,7 +151,7 @@ public class ValueConverter
 		}
 	}
 
-	public void setDefaultTimestampFormat(String aFormat)
+	public final void setDefaultTimestampFormat(String aFormat)
 		throws IllegalArgumentException
 	{
 		if (!StringUtil.isEmptyString(aFormat))

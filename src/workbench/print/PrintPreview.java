@@ -189,6 +189,7 @@ public class PrintPreview
 			currentPage = 0;
 			Thread t = new WbThread("PrintPreview update font")
 			{
+				@Override
 				public void run()
 				{
 					invalidate();
@@ -638,7 +639,7 @@ public class PrintPreview
 			this.setImage(w, h, source);
 		}
 
-		public void setImage(int w, int h, Image source)
+		public final void setImage(int w, int h, Image source)
 		{
 			m_w = w;
 			m_h = h;

@@ -122,6 +122,7 @@ public class VersionNumber
 		return false;
 	}
 
+	@Override
 	public String toString()
 	{
 		if (major == -1) return "n/a";
