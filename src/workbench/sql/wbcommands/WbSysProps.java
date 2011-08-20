@@ -54,7 +54,7 @@ public class WbSysProps
 		}
 		data.sortByColumn(0, true);
 		data.resetStatus();
-		
+
 		result.addDataStore(data);
 		result.setSuccess();
 		return result;
@@ -64,6 +64,12 @@ public class WbSysProps
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
 	}
 
 
