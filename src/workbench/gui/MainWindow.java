@@ -635,27 +635,11 @@ public class MainWindow
 
 	protected void forceRedraw()
 	{
-		JComponent content = (JComponent)getContentPane();
+		Container content = this.getContentPane();
 		content.invalidate();
+		validate();
 		doLayout();
 		WbSwingUtilities.repaintLater(this);
-
-		if (GuiSettings.getForceRedraw())
-		{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					sqlTab.invalidate();
-					JComponent content = (JComponent)getContentPane();
-					content.invalidate();
-					validate();
-					doLayout();
-					repaint();
-				}
-			});
-		}
 	}
 
 	@Override
