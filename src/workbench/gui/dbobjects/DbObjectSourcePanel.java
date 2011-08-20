@@ -107,6 +107,7 @@ public class DbObjectSourcePanel
 		initialized = true;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();
@@ -121,6 +122,7 @@ public class DbObjectSourcePanel
 				// we have the correct table name in the instance variables
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						editText(panelIndex, false);
@@ -190,6 +192,7 @@ public class DbObjectSourcePanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				sourceEditor.setText(text == null ? "" : text);
@@ -206,6 +209,7 @@ public class DbObjectSourcePanel
 		return sourceEditor.getText();
 	}
 
+	@Override
 	public void requestFocus()
 	{
 		if (sourceEditor != null)
@@ -214,6 +218,7 @@ public class DbObjectSourcePanel
 		}
 	}
 
+	@Override
 	public boolean requestFocusInWindow()
 	{
 		if (sourceEditor != null)
@@ -261,6 +266,7 @@ public class DbObjectSourcePanel
 		}
 	}
 
+	@Override
 	public void reset()
 	{
 		if (sourceEditor != null)

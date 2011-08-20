@@ -2012,15 +2012,18 @@ public class SqlPanel
 					}
 					if (exporter.isSuccess())
 					{
-						String msg2 = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
 						messages.append("\n");
-						messages.append(msg2);
+						messages.append(ResourceMgr.getFormattedString("MsgSpoolOk", NumberStringCache.getNumberString(rowCount)));
 						messages.append("\n");
-						msg2 = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
-						messages.append(msg2);
+						messages.append(ResourceMgr.getString("MsgSpoolTarget"));
+						messages.append(' ');
+						messages.append(exporter.getFullOutputFilename());
 						messages.append("\n\n");
 					}
-					messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s\n");
+					messages.append(ResourceMgr.getString("MsgExecTime"));
+					messages.append(' ');
+					messages.append(Double.toString( ((double)execTime) / 1000.0));
+					messages.append("s\n");
 					appendToLog(messages.toString());
 					showLogPanel();
 				}

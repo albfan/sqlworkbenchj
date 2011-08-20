@@ -909,15 +909,11 @@ public class WbExport
 				toConsume.getResultSets().remove(0);
 				long rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
 
-				String msg = null;
-
 				if (exporter.isSuccess())
 				{
-					msg = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
 					toConsume.addMessage(""); // force new line in output
-					toConsume.addMessage(msg);
-					msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
-					toConsume.addMessage(msg);
+					toConsume.addMessage(ResourceMgr.getFormattedString("MsgSpoolOk", Long.toString(rowCount)));
+					toConsume.addMessage(ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename());
 				}
 				addMessages(toConsume);
 

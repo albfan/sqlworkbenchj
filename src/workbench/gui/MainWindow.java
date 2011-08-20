@@ -637,7 +637,7 @@ public class MainWindow
 	{
 		if (GuiSettings.getForceRedraw())
 		{
-			WbSwingUtilities.invoke(new Runnable()
+			SwingUtilities.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
@@ -650,11 +650,10 @@ public class MainWindow
 					}
 					invalidate();
 					doLayout();
+					repaint();
 				}
 			});
 		}
-
-		WbSwingUtilities.repaintLater(this);
 	}
 
 	@Override
@@ -1062,7 +1061,7 @@ public class MainWindow
 		});
 	}
 
-	protected void updateGuiForTab(int index)
+	private synchronized void updateGuiForTab(int index)
 	{
 		if (index < 0) return;
 
@@ -1070,7 +1069,6 @@ public class MainWindow
 		if (current == null) return;
 
 		JMenuBar menu = this.panelMenus.get(index);
-
 		if (menu == null)	return;
 
 		invalidate();
@@ -1087,6 +1085,8 @@ public class MainWindow
 		invalidate();
 		doLayout();
 
+		forceRedraw();
+		
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
@@ -1097,7 +1097,7 @@ public class MainWindow
 		});
 	}
 
-	protected void tabSelected(final int index)
+	private void tabSelected(final int index)
 	{
 		if (index < 0) return;
 		if (index >= sqlTab.getTabCount()) return;
@@ -1113,7 +1113,7 @@ public class MainWindow
 		});
 	}
 
-	protected void updateCurrentTab(int index)
+	private void updateCurrentTab(int index)
 	{
 		MainPanel current = getSqlPanel(index);
 		if (current == null) return;

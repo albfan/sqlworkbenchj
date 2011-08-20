@@ -371,7 +371,16 @@ public class WbTabbedPane
 	public void mousePressed(MouseEvent e)
 	{
 		int index = getUI().tabForCoordinate(this, e.getX(), e.getY());
+		if (index < 0)
+		{
+			dragStart = null;
+			draggedTabIndex  = -1;
+			tabBounds = null;
+			return;
+		}
+
 		dragStart = e.getPoint();
+
 		tabBounds = getUI().getTabBounds(this, index);
 
 		if (this.tabMover != null)
@@ -389,10 +398,7 @@ public class WbTabbedPane
 		Point dragEnd = e.getPoint();
 		if (dragStart == null) return;
 
-		// When simply clicking on a tab when the tabs are displayed in more than one line
-		// this already triggers "a drag" event. Checking if the cursor was moved at all
-		// and that it's not on the same tab as when the drag started ensures that the endMove()
-		// is only called if a "real" drag happened
+		// Check if the mouse was moved at all to avoid unnecessary events
 		double distance = Math.abs(dragStart.distance(dragEnd));
 		boolean inside = tabBounds.contains(dragEnd);
 

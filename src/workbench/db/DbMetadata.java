@@ -571,7 +571,7 @@ public class DbMetadata
 		return getObjectsWithData().contains(type);
 	}
 
-	public Set<String> getObjectsWithData()
+	public final Set<String> getObjectsWithData()
 	{
 		Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
 		objectsWithData.addAll(getTableTypes());
