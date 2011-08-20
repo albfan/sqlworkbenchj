@@ -20,4 +20,5 @@ public interface Moveable
 	boolean startMove(int index);
 	void endMove(int finalIndex);
 	boolean moveTab(int oldIndex, int newIndex);
+	void moveCancelled();
 }

@@ -17,6 +17,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -46,7 +48,7 @@ import workbench.util.MacOSHelper;
  * <br/>
  * A close button can be displayed inside each tab that will trigger
  * an event with the registered TabCloser.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class WbTabbedPane
@@ -59,6 +61,8 @@ public class WbTabbedPane
 	private boolean hideDisabledButtons;
 	private boolean alwaysUseCustomComponent;
 	private boolean onlyCloseActive;
+	private Point dragStart;
+	private Rectangle tabBounds;
 
 	public WbTabbedPane()
 	{
@@ -76,7 +80,7 @@ public class WbTabbedPane
 	{
 		hideDisabledButtons = flag;
 	}
-	
+
 	public void setCloseButtonEnabled(Component panel, boolean flag)
 	{
 		if (tabCloser == null) return;
@@ -85,11 +89,11 @@ public class WbTabbedPane
 		if (index == -1) return;
 		setCloseButtonEnabled(index, flag);
 	}
-	
+
 	public void setCloseButtonEnabled(int index, boolean flag)
 	{
 		if (tabCloser == null) return;
-		
+
 		TabButtonComponent comp = getTabButton(index);
 		if (comp != null)
 		{
@@ -102,7 +106,7 @@ public class WbTabbedPane
 		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
 		return comp;
 	}
-	
+
 	@Override
 	public void setDisplayedMnemonicIndexAt(int tabIndex, int mnemonicIndex)
 	{
@@ -135,7 +139,7 @@ public class WbTabbedPane
 			comp.setIcon(icon);
 		}
 	}
-	
+
 	/**
 	 * Enable/Disable the close button.
 	 *
@@ -192,7 +196,7 @@ public class WbTabbedPane
 			}
 		}
 	}
-	
+
 	public void closeButtonClicked(final int index)
 	{
 		if (tabCloser == null) return;
@@ -244,6 +248,7 @@ public class WbTabbedPane
 		return fontHeight + 5;
 	}
 
+	@Override
 	public JToolTip createToolTip()
 	{
 		JToolTip tip = new MultiLineToolTip();
@@ -357,13 +362,18 @@ public class WbTabbedPane
 		draggedTabIndex = -1;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 		int index = getUI().tabForCoordinate(this, e.getX(), e.getY());
+		dragStart = e.getPoint();
+		tabBounds = getUI().getTabBounds(this, index);
+
 		if (this.tabMover != null)
 		{
 			if (this.tabMover.startMove(index))
@@ -373,34 +383,47 @@ public class WbTabbedPane
 		}
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		if (this.tabMover != null)
+		Point dragEnd = e.getPoint();
+		if (dragStart == null) return;
+
+		// When simply clicking on a tab when the tabs are displayed in more than one line
+		// this already triggers "a drag" event. Checking if the cursor was moved at all
+		// and that it's not on the same tab as when the drag started ensures that the endMove()
+		// is only called if a "real" drag happened
+		double distance = Math.abs(dragStart.distance(dragEnd));
+		boolean inside = tabBounds.contains(dragEnd);
+
+		if (this.tabMover != null && distance > 2 && inside)
 		{
 			this.tabMover.endMove(draggedTabIndex);
 		}
+		else
+		{
+			this.tabMover.moveCancelled();
+		}
 		draggedTabIndex = -1;
+		dragStart = null;
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseDragged(MouseEvent e)
 	{
-		if (tabMover == null)
-		{
-			return;
-		}
-		if (draggedTabIndex == -1)
-		{
-			return;
-		}
+		if (tabMover == null)	return;
+		if (draggedTabIndex == -1) return;
 
 		int newIndex = getUI().tabForCoordinate(this, e.getX(), e.getY());
 
@@ -414,6 +437,7 @@ public class WbTabbedPane
 		}
 	}
 
+	@Override
 	public void mouseMoved(MouseEvent e)
 	{
 	}
@@ -421,7 +445,7 @@ public class WbTabbedPane
 	private void updateButtons()
 	{
 		if (tabCloser == null) return;
-		
+
 		int count = getTabCount();
 		int index = getSelectedIndex();
 
@@ -458,6 +482,6 @@ public class WbTabbedPane
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
-		updateButtons(); 
+		updateButtons();
 	}
 }

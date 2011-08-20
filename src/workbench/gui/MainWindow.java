@@ -172,7 +172,7 @@ public class MainWindow
 	private WbTabbedPane sqlTab;
 	private TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
-	private List<JMenuBar> panelMenus = new ArrayList<JMenuBar>(13);
+	private List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
 
 	private String currentWorkspaceFile;
 
@@ -397,7 +397,7 @@ public class MainWindow
 		}
 	}
 
-	private JMenuBar createMenuForPanel(MainPanel aPanel)
+	private JMenuBar createMenuForPanel(MainPanel panel)
 	{
 		HashMap<String, JMenu> menus = new HashMap<String, JMenu>(10);
 
@@ -434,14 +434,17 @@ public class MainWindow
 		open.addToMenu(menu);
 
 		// now create the menus for the current tab
-		List actions = aPanel.getActions();
+		List actions = panel.getActions();
 
 		// Create the menus in the correct order
-		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
-		menu.setName(ResourceMgr.MNU_TXT_EDIT);
-		menu.setVisible(false);
-		menuBar.add(menu);
-		menus.put(ResourceMgr.MNU_TXT_EDIT, menu);
+		if (panel instanceof SqlPanel)
+		{
+			menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
+			menu.setName(ResourceMgr.MNU_TXT_EDIT);
+			menu.setVisible(false);
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_EDIT, menu);
+		}
 
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
 		menu.setName(ResourceMgr.MNU_TXT_VIEW);
@@ -459,20 +462,20 @@ public class MainWindow
 		menu.add(nextTab.getMenuItem());
 		menu.add(prevTab.getMenuItem());
 
-		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
-		menu.setName(ResourceMgr.MNU_TXT_DATA);
-		menu.setVisible(false);
-		menuBar.add(menu);
-		menus.put(ResourceMgr.MNU_TXT_DATA, menu);
-
-		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_SQL));
-		menu.setName(ResourceMgr.MNU_TXT_SQL);
-		menu.setVisible(false);
-		menuBar.add(menu);
-		menus.put(ResourceMgr.MNU_TXT_SQL, menu);
-
-		if (aPanel instanceof SqlPanel)
+		if (panel instanceof SqlPanel)
 		{
+			menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
+			menu.setName(ResourceMgr.MNU_TXT_DATA);
+			menu.setVisible(false);
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_DATA, menu);
+
+			menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_SQL));
+			menu.setName(ResourceMgr.MNU_TXT_SQL);
+			menu.setVisible(false);
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_SQL, menu);
+
 			final WbMenu macroMenu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
 			macroMenu.setName(ResourceMgr.MNU_TXT_MACRO);
 			macroMenu.setVisible(true);
@@ -574,11 +577,11 @@ public class MainWindow
 		vTb.addToMenu(viewMenu);
 
 
-		if (aPanel instanceof SqlPanel)
+		if (panel instanceof SqlPanel)
 		{
 			JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
-			SqlPanel panel = (SqlPanel)aPanel;
-			EditorPanel editor = panel.getEditor();
+			SqlPanel sqlpanel = (SqlPanel)panel;
+			EditorPanel editor = sqlpanel.getEditor();
 			FontZoomer zoomer = editor.getFontZoomer();
 
 			IncreaseFontSize inc = new IncreaseFontSize(zoomer);
@@ -595,15 +598,18 @@ public class MainWindow
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
-		aPanel.addToToolbar(this.dbExplorerAction, true);
+		panel.addToToolbar(this.dbExplorerAction, true);
 		return menuBar;
 	}
 
 	/**
 	 * Removes or makes the toolbar visible depending on
-	 * {@link GuiSettings#getShowToolbar}. This method will
-	 * <i>validate</i> this' {@link #getContentPane content pane}
+	 * {@link GuiSettings#getShowToolbar}.
+	 *
+	 * This method will <i>validate</i> this' {@link #getContentPane content pane}
 	 * in case a change on the toolbar's visibility is performed.
+	 *
+	 * This method should be called on the EDT.
 	 */
 	private void updateToolbarVisibility()
 	{
@@ -624,6 +630,7 @@ public class MainWindow
 				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}
+		content.invalidate();
 	}
 
 	protected void forceRedraw()
@@ -1050,24 +1057,23 @@ public class MainWindow
 			@Override
 			public void run()
 			{
-				if (Settings.getInstance().getLogConnectionDetails())
-				{
-					LogMgr.logDebug("MainWindow.tabConnected()", getWindowId() + ": updating GUI for tab: " + anIndex);
-				}
 				updateGuiForTab(anIndex);
 			}
 		});
 	}
 
-	protected void updateGuiForTab(int anIndex)
+	protected void updateGuiForTab(int index)
 	{
-		if (anIndex < 0) return;
+		if (index < 0) return;
 
-		final MainPanel current = this.getSqlPanel(anIndex);
+		final MainPanel current = this.getSqlPanel(index);
 		if (current == null) return;
 
-		JMenuBar menu = this.panelMenus.get(anIndex);
-		if (menu == null) return;
+		JMenuBar menu = this.panelMenus.get(index);
+
+		if (menu == null)	return;
+
+		invalidate();
 
 		this.setJMenuBar(menu);
 
@@ -1076,8 +1082,10 @@ public class MainWindow
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 
-		this.checkMacroMenuForPanel(anIndex);
-		forceRedraw();
+		this.checkMacroMenuForPanel(index);
+
+		invalidate();
+		doLayout();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1593,7 +1601,14 @@ public class MainWindow
 		try
 		{
 			String workspaceFilename = aProfile.getWorkspaceFile();
-			if (workspaceFilename != null && !workspaceFilename.endsWith(".wksp")) workspaceFilename += ".wksp";
+			if (StringUtil.isBlank(workspaceFilename))
+			{
+				workspaceFilename = DEFAULT_WORKSPACE;
+			}
+			else if (!workspaceFilename.endsWith(".wksp"))
+			{
+				workspaceFilename += ".wksp";
+			}
 
 			realFilename = getRealWorkspaceFilename(workspaceFilename);
 
@@ -2830,6 +2845,12 @@ public class MainWindow
 		int lastIndex = sqlTab.getTabCount();
 		if (index >= lastIndex) return;
 		moveTab(index, index + 1);
+	}
+
+	@Override
+	public void moveCancelled()
+	{
+		this.tabRemovalInProgress = false;
 	}
 
 	@Override

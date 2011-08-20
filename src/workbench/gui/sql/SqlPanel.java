@@ -3654,13 +3654,19 @@ public class SqlPanel
 	}
 
 	@Override
+	public void moveCancelled()
+	{
+		ignoreStateChange = false;
+	}
+
+	@Override
 	public boolean moveTab(int oldIndex, int newIndex)
 	{
 		Component c = resultTab.getComponentAt(oldIndex);
 		if (newIndex == resultTab.getTabCount() - 1) return false;
 
 		String title = resultTab.getTitleAt(oldIndex);
-		//System.out.println("moving " + (c == null ? "nothing" : c.toString()) + " from " + oldIndex + " to " + newIndex + ", with title=" + title);
+//		System.out.println("moving " + (c == null ? "nothing" : c.toString()) + " from " + oldIndex + " to " + newIndex + ", with title=" + title);
 		resultTab.remove(c);
 		resultTab.add(c, newIndex);
 		resultTab.setTitleAt(newIndex, title);
