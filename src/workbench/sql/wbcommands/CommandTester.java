@@ -98,6 +98,7 @@ public class CommandTester
 		commands.add(WbIsolationLevel.VERB);
 		commands.add(WbConnInfo.VERB);
 		commands.add(WbSysExec.VERB);
+		commands.add(WbSysProps.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
