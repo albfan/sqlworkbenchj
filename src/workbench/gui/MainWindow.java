@@ -635,6 +635,11 @@ public class MainWindow
 
 	protected void forceRedraw()
 	{
+		JComponent content = (JComponent)getContentPane();
+		content.invalidate();
+		doLayout();
+		WbSwingUtilities.repaintLater(this);
+
 		if (GuiSettings.getForceRedraw())
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -642,13 +647,10 @@ public class MainWindow
 				@Override
 				public void run()
 				{
-					Container content = getContentPane();
-					if (content instanceof JComponent)
-					{
-						content.invalidate();
-						((JComponent)content).revalidate();
-					}
-					invalidate();
+					sqlTab.invalidate();
+					JComponent content = (JComponent)getContentPane();
+					content.invalidate();
+					validate();
 					doLayout();
 					repaint();
 				}
@@ -1002,7 +1004,7 @@ public class MainWindow
 
 		try
 		{
-			// prevent tab change during connection as this is not working properly
+			// prevent a manual tab change during connection as this is not working properly
 			sqlTab.setEnabled(false);
 
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
@@ -1040,7 +1042,7 @@ public class MainWindow
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				LogMgr.logError("MainWindow.waitForConnection()", "Error joining connection thread", e);
 			}
 		}
 	}
@@ -1071,8 +1073,6 @@ public class MainWindow
 		JMenuBar menu = this.panelMenus.get(index);
 		if (menu == null)	return;
 
-		invalidate();
-
 		this.setJMenuBar(menu);
 
 		this.updateToolbarVisibility();
@@ -1082,11 +1082,8 @@ public class MainWindow
 
 		this.checkMacroMenuForPanel(index);
 
-		invalidate();
-		doLayout();
-
 		forceRedraw();
-		
+
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
