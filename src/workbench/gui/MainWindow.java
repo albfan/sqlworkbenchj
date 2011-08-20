@@ -154,7 +154,7 @@ public class MainWindow
 						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener,
 						Moveable, RenameableTab, TabCloser
 {
-	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
+	private static final String DEFAULT_WORKSPACE = "Default.wksp";
 	private static int instanceCount;
 	private int windowId;
 
@@ -1597,7 +1597,7 @@ public class MainWindow
 
 			realFilename = getRealWorkspaceFilename(workspaceFilename);
 
-			if (realFilename == null) realFilename = "";
+			if (realFilename == null) realFilename = DEFAULT_WORKSPACE;
 
 			WbFile f = new WbFile(realFilename);
 
