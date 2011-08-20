@@ -15,7 +15,6 @@ import org.junit.*;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
-import workbench.db.SequenceDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
