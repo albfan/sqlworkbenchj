@@ -11,9 +11,12 @@
 package workbench.db.derby;
 
 import java.util.List;
+
 import org.junit.*;
+import static org.junit.Assert.*;
+
+import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -38,11 +41,17 @@ public class DerbySynonymReaderTest
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
+	@AfterClass
+	public static void afterClass()
+	{
+		DerbyTestUtil.clearProperties();
+	}
+
 	@Test
 	public void testGetSynonymList()
 		throws Exception
 	{
-		WbConnection con = DerbyTestUtil.getDerbyConnection("syntest");
+		WbConnection con = DerbyTestUtil.getDerbyConnection(getTestUtil().getBaseDir(), "syntest");
 		String sql =
 			"create table foo (bar integer);\n" +
 			"create synonym foobar for foo;\n";
@@ -62,7 +71,6 @@ public class DerbySynonymReaderTest
 		assertEquals("FOO", table.getTableName());
 
 		String source = synonym.getSource(con).toString();
-		System.out.println(source);
 		String expected =
 				"CREATE SYNONYM FOOBAR\n" +
 				"   FOR APP.FOO;";

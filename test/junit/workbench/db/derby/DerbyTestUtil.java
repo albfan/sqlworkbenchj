@@ -10,12 +10,15 @@
  */
 package workbench.db.derby;
 
+import java.util.Properties;
 import workbench.AppArguments;
+import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
+import workbench.util.WbFile;
 
 /**
  *
@@ -29,7 +32,7 @@ public class DerbyTestUtil
 	/**
 	 * Return a connection to an embedded Derby engine
 	 */
-	public static WbConnection getDerbyConnection(String schema)
+	public static WbConnection getDerbyConnection(String basedir, String schema)
 	{
 		try
 		{
@@ -40,6 +43,8 @@ public class DerbyTestUtil
 			parser.parse("-url='jdbc:derby:memory:" + PROFILE_NAME + ";create=true' -driver=org.apache.derby.jdbc.EmbeddedDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName(PROFILE_NAME);
+			WbFile dir = new WbFile(basedir);
+			System.setProperty("derby.system.home", dir.getFullPath());
 			ConnectionMgr.getInstance().addProfile(prof);
 			con = ConnectionMgr.getInstance().getConnection(prof, PROFILE_NAME);
 			return con;
@@ -51,4 +56,9 @@ public class DerbyTestUtil
 		}
 	}
 
+	public static void clearProperties()
+	{
+		Properties props = System.getProperties();
+		props.remove("derby.system.home");
+	}
 }
