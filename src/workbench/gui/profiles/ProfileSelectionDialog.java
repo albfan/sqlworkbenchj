@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import workbench.db.ConnectionMgr;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
@@ -163,6 +164,10 @@ public class ProfileSelectionDialog
 			{
 				this.cancelled = false;
 				this.closeDialog();
+				if (Settings.getInstance().getSaveProfilesImmediately())
+				{
+					ConnectionMgr.getInstance().saveProfiles();
+				}
 			}
 		}
 	}

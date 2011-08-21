@@ -2343,6 +2343,16 @@ public class Settings
 
 	// </editor-fold>
 
+	public boolean getSaveProfilesImmediately()
+	{
+		return getBoolProperty("workbench.profiles.saveonclose", false);
+	}
+
+	public void setSaveProfilesImmediately(boolean flag)
+	{
+		setProperty("workbench.profiles.saveonclose", flag);
+	}
+
 	public int getSyncChunkSize()
 	{
 		return getIntProperty("workbench.sql.sync.chunksize", 25);
