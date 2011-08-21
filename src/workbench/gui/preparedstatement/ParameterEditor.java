@@ -31,6 +31,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.StatementParameterPrompter;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
@@ -62,6 +63,7 @@ public class ParameterEditor
 		this.parameterTable.setColumnSelectionAllowed(false);
 		this.parameterTable.setModel(this.model);
 		this.parameterTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		this.parameterTable.setRendererSetup(new RendererSetup(false));
 		TableColumn col = this.parameterTable.getColumnModel().getColumn(2);
 		col.setCellEditor(WbTextCellEditor.createInstance());
 
@@ -94,6 +96,7 @@ public class ParameterEditor
 		}
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 		int count = parameterTable.getColumnCount();
@@ -108,6 +111,7 @@ public class ParameterEditor
 		}
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		this.parameterTable.stopEditing();
@@ -141,6 +145,7 @@ public class ParameterEditor
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				ParameterEditor editor = new ParameterEditor(parms, showNames);

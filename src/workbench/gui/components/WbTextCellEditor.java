@@ -148,7 +148,11 @@ public class WbTextCellEditor
 		setEditable(!(parentTable != null && parentTable.isReadOnly()));
 		changed = false;
 		isNull = false;
-		restoreValue.setEnabled(parentTable.getDataStoreTableModel().isColumnModified(row, column));
+		DataStoreTableModel model = parentTable.getDataStoreTableModel();
+		if (model != null)
+		{
+			restoreValue.setEnabled(model.isColumnModified(row, column));
+		}
 		return result;
 	}
 

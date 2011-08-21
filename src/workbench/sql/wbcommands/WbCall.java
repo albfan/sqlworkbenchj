@@ -513,6 +513,8 @@ public class WbCall
 			}
 		}
 
+		inputParameters.clear();
+		
 		if (definedParamCount > 0)
 		{
 			int realParamIndex = 1 + parameterIndexOffset;
