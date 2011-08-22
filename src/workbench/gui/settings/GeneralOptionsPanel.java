@@ -14,7 +14,6 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -62,7 +61,7 @@ public class GeneralOptionsPanel
 			constraints.weightx = 1.0;
 			layout.setConstraints(autoSaveProfiles, constraints);
 		}
-		
+
 		String[] updTypes = new String[] {
 			ResourceMgr.getString("LblUpdCheckNever"),
 			ResourceMgr.getString("LblUpdCheckDaily"),
