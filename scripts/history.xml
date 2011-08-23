@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-11-17">
+    <entry dev-build="8" type="enh">For Oracle a subset of the SQL*Plus SHOW command is now supported</entry>
     <entry dev-build="8" type="enh">A new option is available to automatically save connection profiles if the connect dialog is closed with OK.</entry>
     <entry dev-build="8" type="enh">Enhanced entering variables in the variable dialog. The ENTER key automatically advances to the next variable and closes the dialog after the last one.</entry>
     <entry dev-build="8" type="enh">When using WbVarDef with -contentFile, variables in the source file are now replaced. This can be disabled using the parameter -replaceVars=false</entry>
@@ -14,6 +15,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="8" type="fix">Fixed a problem with displaying the menus if the editor tabs ran over more than one line</entry>
     <entry dev-build="7" type="fix">Implemented a workaround for the Vertica JDBC driver to allow running DML statements.</entry>
     <entry dev-build="6" type="fix">WbSchemaDiff did not work when the table names needed quoting because of special characters or mixed case names</entry>
     <entry dev-build="4" type="fix">The ACTION part for foreign key definitions was displayed incorrectly in the generated SQL source and the "References Tab" of DbExplorer</entry>
