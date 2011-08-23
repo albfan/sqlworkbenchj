@@ -2767,6 +2767,11 @@ public class DbMetadata
 		return result;
 	}
 
+	public ErrorInformationReader getErrorInformationReader()
+	{
+		return this.errorInfoReader;
+	}
+	
 	/**
 	 * Returns the errors available for the given object and type. This call
 	 * is delegated to the available {@link ErrorInformationReader}

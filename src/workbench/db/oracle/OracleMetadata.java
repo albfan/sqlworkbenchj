@@ -499,38 +499,64 @@ public class OracleMetadata
 	@Override
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
-		final String ERROR_QUERY =
-			"SELECT /* SQLWorkbench */ line, position, text " +
-			" FROM all_errors   " +
-			"WHERE owner = ? " +
-			"  AND type = ? " +
-			"  AND name = ? " +
-			" ORDER BY LINE ";
+		String query =
+			"SELECT /* SQLWorkbench */ line, position, text \n" +
+			" FROM all_errors \n" +
+			"WHERE owner = ? \n";
 
-		if (objectType == null || objectName == null)
+		int typeIndex = -1;
+		int nameIndex = -1;
+
+		if (objectType != null)
 		{
-			return "";
+			query += " and type = ? \n";
+			typeIndex = 2;
 		}
+
+		if (objectName != null)
+		{
+			query += "  and name = ? \n";
+			nameIndex = typeIndex == -1 ? 2 : 3;
+		}
+
+		query += " ORDER BY ";
+		if (objectType == null)
+		{
+			query += "TYPE, ";
+		}
+
+		if (objectName == null)
+		{
+			query += "NAME, ";
+		}
+		query += " LINE ";
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		StringBuilder result = new StringBuilder(250);
 		try
 		{
-			if (objectName.indexOf('.') > -1)
+			if (objectName != null && objectName.indexOf('.') > -1)
 			{
 				schema = objectName.substring(0, objectName.indexOf('.'));
 			}
 			else if (schema == null)
 			{
-				schema = this.connection.getCurrentSchema();
+				schema = this.connection.getCurrentUser();
 			}
 			DbMetadata meta = this.connection.getMetadata();
 
-			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
+			stmt = this.connection.getSqlConnection().prepareStatement(query);
 			stmt.setString(1, meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema)));
-			stmt.setString(2, objectType.toUpperCase().trim());
-			stmt.setString(3, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
+			if (typeIndex > -1)
+			{
+				stmt.setString(typeIndex, objectType.toUpperCase().trim());
+			}
+			if (nameIndex > -1)
+			{
+				stmt.setString(3, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
+			}
 
 			rs = stmt.executeQuery();
 			int count = 0;

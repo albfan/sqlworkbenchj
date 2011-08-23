@@ -181,12 +181,13 @@ public class CommandMapper
 		if (metaData.isOracle())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
-
+			
 			this.cmdDispatch.put(WbCall.EXEC_VERB_LONG, wbcall);
 			this.cmdDispatch.put(WbCall.EXEC_VERB_SHORT, wbcall);
 
 			AlterSessionCommand alter = new AlterSessionCommand();
 			this.cmdDispatch.put(alter.getVerb(), alter);
+			this.cmdDispatch.put(WbOraShow.VERB, new WbOraShow());
 
 			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
@@ -195,6 +196,7 @@ public class CommandMapper
 			this.dbSpecificCommands.add(WbCall.EXEC_VERB_LONG);
 			this.dbSpecificCommands.add(WbCall.EXEC_VERB_SHORT);
 			this.dbSpecificCommands.add(echo.getVerb());
+			this.dbSpecificCommands.add(WbOraShow.VERB);
 		}
 		else if (metaData.isSqlServer() || metaData.isMySql())
 		{

@@ -18,7 +18,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
- * This class simply ignores the command and does not send it to the DBMS
+ * This class simply ignores the command and does not send it to the DBMS.
  *
  * Thus scripts e.g. intended for SQL*Plus (containing WHENEVER or EXIT)
  * can be executed from within the workbench.
