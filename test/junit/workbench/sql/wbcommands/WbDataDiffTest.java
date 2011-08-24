@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.Set;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
@@ -26,6 +28,8 @@ import workbench.util.FileUtil;
 import workbench.util.WbFile;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 
 /**
  *
@@ -430,5 +434,31 @@ public class WbDataDiffTest
 			source.disconnect();
 			target.disconnect();
 		}
+	}
+
+	@Test
+	public void testAlternateKeyParameter()
+	{
+		WbDataDiff diff = new WbDataDiff();
+		ArgumentParser cmdLine = diff.getArgumentParser();
+		String arguments = " -alternateKey='person=id2,id3' -alternateKey='foobar=col1,col2,col3'";
+		cmdLine.parse(arguments);
+		StatementRunnerResult result = new StatementRunnerResult();
+		Map<String, Set<String>> keys = diff.getAlternateKeys(cmdLine, result);
+		assertNotNull(keys);
+		assertEquals(2, keys.size());
+		Set<String> cols = keys.get("person");
+		assertNotNull(cols);
+		assertEquals(2, cols.size());
+		assertTrue(cols.contains("id2"));
+		assertTrue(cols.contains("id3"));
+
+		Set<String> foocols = keys.get("foobar");
+		assertNotNull(foocols);
+		assertEquals(3, foocols.size());
+		assertTrue(foocols.contains("col1"));
+		assertTrue(foocols.contains("col2"));
+		assertTrue(foocols.contains("col3"));
+
 	}
 }

@@ -254,7 +254,7 @@ public class ResultInfo
 				else
 				{
 					String cls = null;
-					if (dbMeta != null) 
+					if (dbMeta != null)
 					{
 						cls = dbMeta.getDataTypeResolver().getColumnClassName(col.getDataType(), col.getDbmsType());
 					}
@@ -364,16 +364,26 @@ public class ResultInfo
 		}
 	}
 
+	/**
+	 * Redefines the PK columns for this ResultInfo.
+	 *
+	 * All existing PK flags will be cleared and for all columns passed the PK flag is set.
+	 */
 	public void setPKColumns(List<ColumnIdentifier> cols)
 	{
+		// reset existing PK definition
+		for (ColumnIdentifier col : columns)
+		{
+			col.setIsPkColumn(false);
+		}
+
 		for (ColumnIdentifier col : cols)
 		{
 			String name = col.getColumnName();
 			int colIndex = this.findColumn(name);
 			if (colIndex > -1)
 			{
-				boolean pk = col.isPkColumn();
-				this.columns[colIndex].setIsPkColumn(pk);
+				this.columns[colIndex].setIsPkColumn(true);
 			}
 		}
 	}

@@ -13,7 +13,10 @@ package workbench.sql.wbcommands;
 
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDataDiff;
@@ -55,12 +58,14 @@ public class WbDataDiff
 	public static final String PARAM_INCLUDE_DELETE = "includeDelete";
 	public static final String PARAM_IGNORE_COLS = "ignoreColumns";
 	public static final String PARAM_OUTPUT_TYPE = "type";
+	public static final String PARAM_ALTERNATE_KEYS = "alternateKey";
 
 	private WbFile outputDir;
 	private TableDataDiff dataDiff;
 	private TableDeleteSync deleteSync;
 	private boolean xmlOutput;
 	private CommonDiffParameters params;
+
 	public WbDataDiff()
 	{
 		super();
@@ -71,6 +76,7 @@ public class WbDataDiff
 		cmdLine.addArgument(PARAM_OUTPUT_TYPE, CollectionUtil.arrayList("sql", "xml"));
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
 		cmdLine.addArgument(WbExport.ARG_USE_CDATA, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_ALTERNATE_KEYS, ArgumentType.Repeatable);
 
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
@@ -107,6 +113,34 @@ public class WbDataDiff
 		super.cancel();
 		if (this.dataDiff != null) this.dataDiff.cancel();
 		if (this.deleteSync != null) this.deleteSync.cancel();
+	}
+
+	protected Map<String, Set<String>> getAlternateKeys(ArgumentParser command, StatementRunnerResult result)
+	{
+		Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+
+		List<String> list = command.getList(PARAM_ALTERNATE_KEYS);
+		if (list == null)
+		{
+			return null;
+		}
+		
+		for (String def : list)
+		{
+			String[] elements = def.split("=");
+			if (elements != null && elements.length == 2)
+			{
+				List<String> l = StringUtil.stringToList(elements[1], ",", true, true, false, false);
+				Set<String> cols = CollectionUtil.caseInsensitiveSet();
+				cols.addAll(l);
+				map.put(elements[0], cols);
+			}
+			else
+			{
+				result.addMessage("Ignoring invalid value: " + def);
+			}
+		}
+		return map;
 	}
 
 	@Override
@@ -240,6 +274,9 @@ public class WbDataDiff
 
 		List<String> ignoreColumns = CommonArgs.getListArgument(cmdLine, PARAM_IGNORE_COLS);
 		dataDiff.setColumnsToIgnore(ignoreColumns);
+
+		Map<String, Set<String>> alternatekeys = getAlternateKeys(cmdLine, result);
+		dataDiff.setAlternateKeys(alternatekeys);
 
 		try
 		{

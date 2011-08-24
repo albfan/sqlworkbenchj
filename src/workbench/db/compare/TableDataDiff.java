@@ -16,9 +16,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -35,11 +33,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CollectionUtil;
-import workbench.util.MessageBuffer;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
+import workbench.util.*;
 
 /**
  * A class to compare the data of two tables and generate approriate INSERT or UPDATE
@@ -95,6 +89,8 @@ public class TableDataDiff
 	private MessageBuffer errors = new MessageBuffer();
 	private long currentRowNumber;
 
+	private Map<String, Set<String>> alternateKeys;
+
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
 	{
@@ -135,6 +131,33 @@ public class TableDataDiff
 	{
 		this.errors.append(msg);
 		this.errors.appendNewLine();
+	}
+
+	public void setAlternateKeys(Map<String, Set<String>> mapping)
+	{
+		if (mapping == null)
+		{
+			this.alternateKeys = null;
+		}
+		else
+		{
+			this.alternateKeys = new TreeMap<String, Set<String>>(CaseInsensitiveComparator.INSTANCE);
+			this.alternateKeys.putAll(mapping);
+		}
+	}
+
+	private Set<String> getAlternatePKs(String tableName)
+	{
+		if (this.alternateKeys == null)
+		{
+			return Collections.emptySet();
+		}
+		Set<String> cols = alternateKeys.get(tableName);
+		if (cols == null)
+		{
+			return Collections.emptySet();
+		}
+		return cols;
 	}
 
 	/**
@@ -234,11 +257,24 @@ public class TableDataDiff
 		}
 		List<ColumnIdentifier> cols = this.reference.getMetadata().getTableColumns(referenceTable);
 		this.pkColumns = new ArrayList<ColumnIdentifier>();
+		Set<String> alternatePK = getAlternatePKs(refTable.getTableName());
+
+		if (!alternatePK.isEmpty() && columnsToIgnore == null)
+		{
+			columnsToIgnore = CollectionUtil.caseInsensitiveSet();
+		}
+
 		for (ColumnIdentifier col : cols)
 		{
-			if (col.isPkColumn())
+			if ((alternatePK.isEmpty() && col.isPkColumn()) || alternatePK.contains(col.getColumnName()))
 			{
 				pkColumns.add(col);
+			}
+
+			if (!alternatePK.isEmpty() && col.isPkColumn())
+			{
+				// when using an alternate PK the real PK columns need to be ignored
+				columnsToIgnore.add(col.getColumnName());
 			}
 		}
 

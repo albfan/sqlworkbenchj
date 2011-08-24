@@ -13,6 +13,10 @@ package workbench.db.compare;
 
 import java.io.StringWriter;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import org.junit.AfterClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -20,6 +24,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
+import workbench.db.ConnectionMgr;
+import workbench.sql.ScriptParser;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -32,11 +39,17 @@ public class TableDataDiffTest
 	private WbConnection source;
 	private WbConnection target;
 	private TestUtil util;
-	
+
 	public TableDataDiffTest()
 	{
 		super("TableDataDiffTest");
 		util = getTestUtil();
+	}
+
+	@AfterClass
+	public static void afterClass()
+	{
+		ConnectionMgr.getInstance().disconnectAll();
 	}
 
 	protected void createDefaultDb()
@@ -60,7 +73,7 @@ public class TableDataDiffTest
 			targetStmt.executeUpdate(create.replace(" person ", " person_t "));
 
 			int rowCount = 187;
-			
+
 			for (int i=0; i < rowCount; i++)
 			{
 				sourceStmt.executeUpdate("INSERT INTO person (id1, id2, firstname, lastname) " +
@@ -83,7 +96,7 @@ public class TableDataDiffTest
 			targetStmt.executeUpdate("delete from person_t where id1 = 17");
 			targetStmt.executeUpdate("delete from person_t where id1 = 53");
 			targetStmt.executeUpdate("delete from person_t where id1 = 67");
-			
+
 			source.commit();
 			target.commit();
 		}
@@ -108,7 +121,9 @@ public class TableDataDiffTest
 		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
 		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
 		diff.doSync();
-//		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
+//		System.out.println("Sync script: \n" + inserts.toString() + "\n---\n" + updates.toString() + "------");
+
+		// Apply the generated scripts. After that the sync must not return any differences
 		TestUtil.executeScript(target, inserts.toString());
 		TestUtil.executeScript(target, updates.toString());
 		target.commit();
@@ -116,8 +131,8 @@ public class TableDataDiffTest
 		inserts = new StringWriter(2500);
 		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
 		diff.doSync();
-//		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
 		assertTrue(updates.toString().length() == 0);
+		assertTrue(inserts.toString().length() == 0);
 	}
 
 
@@ -192,7 +207,64 @@ public class TableDataDiffTest
 		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
 		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
 		diff.doSync();
-		String output = updates.toString() + "\n" + inserts.toString();
+//		String output = updates.toString() + "\n" + inserts.toString();
 //		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
+	}
+
+	@Test
+	public void testAlternatePK()
+		throws Exception
+	{
+		source = util.getConnection("data_diff_reference");
+		target = util.getConnection("data_diff_target");
+		String create = "CREATE table person (" +
+			"id integer not null, " +
+			"firstname varchar(20), " +
+			"lastname varchar(20), " +
+			"some_data varchar(100), " +
+			"primary key(id))";
+		TestUtil.executeScript(source, create);
+		TestUtil.executeScript(target, create);
+
+		String insert =
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (1, 'Arthur', 'Dent', 'foobar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (2, 'Zaphod', 'Beeblebrox', 'zoobar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (3, 'Ford', 'Prefect', 'fordbar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (4, 'Tricia', 'McMillian', 'nothing');\n " +
+			"commit;\n";
+		TestUtil.executeScript(source, insert);
+		String insert2 =
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (3, 'Arthur', 'Dent', 'foobar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (4, 'Zaphod', 'Beeblebrox', 'zoobar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (5, 'Ford', 'Prefect', 'fordbar');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (6, 'Tricia', 'McMillian', 'something');\n " +
+			"commit;\n";
+		TestUtil.executeScript(target, insert2);
+
+		TableDataDiff diff = new TableDataDiff(source, target);
+		StringWriter updates = new StringWriter(2500);
+		StringWriter inserts = new StringWriter(2500);
+		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
+		Map<String, Set<String>> alternatePk = new HashMap<String, Set<String>>();
+		alternatePk.put("person", CollectionUtil.caseInsensitiveSet("firstname", "lastname"));
+		diff.setAlternateKeys(alternatePk);
+
+		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
+		diff.doSync();
+//		System.out.println(updates.toString());
+		assertTrue(inserts.toString().length() == 0);
+		ScriptParser p = new ScriptParser(updates.toString());
+		assertEquals(1, p.getSize());
+		String sync = p.getCommand(0);
+		assertTrue(sync.indexOf("SET SOME_DATA = 'nothing'") > -1);
+		assertTrue(sync.indexOf("WHERE FIRSTNAME = 'Tricia' AND LASTNAME = 'McMillian'") > -1);
 	}
 }

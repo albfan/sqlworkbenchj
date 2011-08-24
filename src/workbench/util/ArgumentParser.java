@@ -191,6 +191,8 @@ public class ArgumentParser
 				String arg = word.trim();
 				String value = null;
 				int pos = word.indexOf('=');
+				boolean wasQuoted = false;
+
 				if (pos > -1)
 				{
 					arg = word.substring(0, pos).trim();
@@ -205,6 +207,7 @@ public class ArgumentParser
 							if (otherPos == -1 || otherPos == value.length() - 1)
 							{
 								value = StringUtil.trimQuotes(value);
+								wasQuoted = true;
 							}
 						}
 					}
@@ -226,8 +229,15 @@ public class ArgumentParser
 							list = new ArrayList<String>();
 							arguments.put(arg, list);
 						}
-						List<String> result = StringUtil.stringToList(value, ",", true, true, false);
-						list.addAll(result);
+						if (wasQuoted)
+						{
+							list.add(value);
+						}
+						else
+						{
+							List<String> result = StringUtil.stringToList(value, ",", true, true, false);
+							list.addAll(result);
+						}
 					}
 					else
 					{

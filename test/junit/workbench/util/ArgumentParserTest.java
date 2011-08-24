@@ -81,6 +81,14 @@ public class ArgumentParserTest
 		constants = parser.getList("constant");
 		assertNotNull(constants);
 		assertEquals(2, constants.size());
+
+		cmdLine = "-constant='somelist=1,2' -constant='otherlist=3,4'";
+		parser.parse(cmdLine);
+		constants = parser.getList("constant");
+		assertNotNull(constants);
+		assertEquals(2, constants.size());
+		assertEquals("somelist=1,2", constants.get(0));
+		assertEquals("otherlist=3,4", constants.get(1));
 	}
 
 	@Test
