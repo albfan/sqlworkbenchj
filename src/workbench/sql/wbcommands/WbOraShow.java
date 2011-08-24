@@ -13,12 +13,16 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.TreeMap;
 import workbench.db.ErrorInformationReader;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.storage.DataStore;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 
 /**
@@ -34,8 +38,23 @@ import workbench.util.SqlUtil;
 public class WbOraShow
 	extends SqlCommand
 {
-
 	public static final String VERB = "SHOW";
+
+	private final long ONE_KB = 1024;
+	private final long ONE_MB = ONE_KB * 1024;
+
+	private Map<String, String> propertyUnits = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+	public WbOraShow()
+	{
+		propertyUnits.put("result_cache_max_size", "kb");
+		propertyUnits.put("sga_max_size", "mb");
+		propertyUnits.put("sga_target", "mb");
+		propertyUnits.put("memory_max_target", "mb");
+		propertyUnits.put("memory_target", "mb");
+		propertyUnits.put("db_recovery_file_dest_size", "mb");
+		propertyUnits.put("db_recycle_cache_size", "mb");
+	}
+
 
 	@Override
 	public StatementRunnerResult execute(String sql)
@@ -173,6 +192,21 @@ public class WbOraShow
 			currentStatement = this.currentConnection.createStatementForQuery();
 			rs = currentStatement.executeQuery(query);
 			processResults(result, true, rs);
+			if (result.hasDataStores())
+			{
+				DataStore ds = result.getDataStores().get(0);
+				for (int row=0; row < ds.getRowCount(); row++)
+				{
+					String property = ds.getValueAsString(row, 0);
+					String value = ds.getValueAsString(row, 2);
+					String formatted = formatMemorySize(property, value);
+					if (formatted != null)
+					{
+						ds.setValue(row, 2, formatted);
+					}
+				}
+				ds.resetStatus();
+			}
 		}
 		catch (SQLException ex)
 		{
@@ -192,6 +226,40 @@ public class WbOraShow
 		return VERB;
 	}
 
+	protected String formatMemorySize(String property, String value)
+	{
+		String unit = propertyUnits.get(property);
+		if (unit == null) return null;
+		try
+		{
+			long lvalue = Long.valueOf(value);
+			if (lvalue == 0) return null;
 
+			if ("kb".equals(unit))
+			{
+				return Long.toString(roundToKb(lvalue)) + "K";
+			}
+			if ("mb".equals(unit))
+			{
+				return Long.toString(roundToMb(lvalue)) + "M";
+			}
+		}
+		catch (NumberFormatException nfe)
+		{
+		}
+		return null;
+	}
+
+	private long roundToKb(long input)
+	{
+		if (input < ONE_KB) return input;
+		return (long)(input / ONE_KB);
+	}
+
+	private long roundToMb(long input)
+	{
+		if (input < ONE_MB) return input;
+		return (long)(input / ONE_MB);
+	}
 
 }
