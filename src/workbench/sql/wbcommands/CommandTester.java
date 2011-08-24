@@ -99,6 +99,7 @@ public class CommandTester
 		commands.add(WbConnInfo.VERB);
 		commands.add(WbSysExec.VERB);
 		commands.add(WbSysProps.VERB);
+		commands.add(WbOraShow.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()

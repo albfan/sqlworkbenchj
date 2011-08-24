@@ -186,4 +186,12 @@ public class WbOraShow
 		return result;
 	}
 
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
+
+
+
 }

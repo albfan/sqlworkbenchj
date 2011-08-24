@@ -1,11 +1,11 @@
 /*
  * CommandTesterTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.sql.wbcommands;
@@ -55,7 +55,7 @@ public class CommandTesterTest
 			if (clsName.startsWith("Wb") && !cls.isInterface() && !clsName.endsWith("Test"))
 			{
 				SqlCommand cmd = (SqlCommand)cls.newInstance();
-				assertTrue(tester.isWbCommand(cmd.getVerb()));
+				assertTrue(clsName + " is not registered!", tester.isWbCommand(cmd.getVerb()));
 			}
 		}
 	}
