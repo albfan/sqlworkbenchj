@@ -1776,13 +1776,13 @@ public class MainWindow
 		return success;
 	}
 
-	public void selectCurrentEditor()
+	private void selectCurrentEditor()
 	{
 		MainPanel p = this.getCurrentPanel();
 		if (p instanceof SqlPanel)
 		{
 			SqlPanel sql = (SqlPanel)p;
-			sql.selectEditor();
+			sql.selectEditorLater();
 		}
 	}
 
