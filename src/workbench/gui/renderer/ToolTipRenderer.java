@@ -381,8 +381,14 @@ public class ToolTipRenderer
 	public void print(Graphics g)
 	{
 		this.isPrinting = true;
-		super.print(g);
-		this.isPrinting = false;
+		try
+		{
+			super.print(g);
+		}
+		finally
+		{
+			this.isPrinting = false;
+		}
 	}
 
 	@Override
