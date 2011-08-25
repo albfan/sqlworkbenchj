@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import workbench.db.ErrorInformationReader;
 import workbench.resource.ResourceMgr;
@@ -23,6 +24,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.storage.DataStore;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -42,6 +44,10 @@ public class WbOraShow
 
 	private final long ONE_KB = 1024;
 	private final long ONE_MB = ONE_KB * 1024;
+
+	private final Set<String> types = CollectionUtil.caseInsensitiveSet(
+		"FUNCTION", "PROCEDURE", "PACKAGE", "PACKAGE BODY", "TRIGGER", "VIEW", "TYPE", "TYPE BODY", "DIMENSION",
+		"JAVA SOURCE", "JAVA CLASS");
 
 	private Map<String, String> propertyUnits = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 	public WbOraShow()
@@ -103,24 +109,64 @@ public class WbOraShow
 		}
 		else if (verb.startsWith("error"))
 		{
-			ErrorInformationReader reader = currentConnection.getMetadata().getErrorInformationReader();
-			if (reader != null)
-			{
-				String errors = reader.getErrorInfo(currentConnection.getCurrentUser(), null, null);
-				if (errors.length() > 0)
-				{
-					result.addMessage(errors);
-				}
-				else
-				{
-					result.addMessage(ResourceMgr.getString("TxtOraNoErr"));
-				}
-			}
+			return getErrors(lexer, sql);
 		}
 		else
 		{
 			result.addMessage(ResourceMgr.getString("ErrOraShow"));
 			result.setFailure();
+		}
+		return result;
+	}
+
+	private StatementRunnerResult getErrors(SQLLexer lexer, String sql)
+	{
+		StatementRunnerResult result = new StatementRunnerResult(sql);
+
+		SQLToken name = lexer.getNextToken(false, false);
+
+		String schema = null;
+		String object = null;
+		String type = null;
+
+		if (name != null)
+		{
+			if (types.contains(name.getText()))
+			{
+				type = name.getContents();
+			}
+			name = lexer.getNextToken(false, false);
+		}
+
+
+		if (name != null)
+		{
+			String v = name.getText();
+			int pos = v.indexOf('.');
+
+			if (pos > 0)
+			{
+				schema = v.substring(0, pos - 1);
+				object = v.substring(pos);
+			}
+			else
+			{
+				object = v;
+			}
+		}
+
+		ErrorInformationReader reader = currentConnection.getMetadata().getErrorInformationReader();
+		if (reader != null)
+		{
+			String errors = reader.getErrorInfo(schema, object, type);
+			if (errors.length() > 0)
+			{
+				result.addMessage(errors);
+			}
+			else
+			{
+				result.addMessage(ResourceMgr.getString("TxtOraNoErr"));
+			}
 		}
 		return result;
 	}

@@ -500,7 +500,7 @@ public class OracleMetadata
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
 		String query =
-			"SELECT /* SQLWorkbench */ line, position, text \n" +
+			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
 			" FROM all_errors \n" +
 			"WHERE owner = ? \n";
 
@@ -519,17 +519,7 @@ public class OracleMetadata
 			nameIndex = typeIndex == -1 ? 2 : 3;
 		}
 
-		query += " ORDER BY ";
-		if (objectType == null)
-		{
-			query += "TYPE, ";
-		}
-
-		if (objectName == null)
-		{
-			query += "NAME, ";
-		}
-		query += " LINE ";
+		query += " ORDER BY type, name, line, position";
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -555,11 +545,17 @@ public class OracleMetadata
 			}
 			if (nameIndex > -1)
 			{
-				stmt.setString(3, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
+				stmt.setString(nameIndex, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
 			}
 
 			rs = stmt.executeQuery();
 			int count = 0;
+			String currentName = null;
+
+			boolean firstHeading = true;
+			int indentLength = 14;
+
+			String indent = StringUtil.padRight("", indentLength);
 			while (rs.next())
 			{
 				if (count > 0)
@@ -569,8 +565,35 @@ public class OracleMetadata
 				int line = rs.getInt(1);
 				int pos = rs.getInt(2);
 				String msg = rs.getString(3);
-				result.append(ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos)));
-				result.append("\n");
+				String name = rs.getString(4);
+				String type = rs.getString(5);
+
+				if (currentName == null || !currentName.equals(name))
+				{
+					if (firstHeading)
+					{
+						firstHeading = false;
+					}
+					else
+					{
+						result.append('\n');
+					}
+					String heading = ResourceMgr.getFormattedString("ErrForObject", type, name);
+					String divide = StringUtil.padRight("", heading.length(), '-');
+					result.append(heading);
+					result.append('\n');
+					result.append(divide);
+					result.append("\n");
+					currentName = name;
+				}
+
+				String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
+				lineInfo = StringUtil.padRight(lineInfo, indentLength + 2);
+				result.append(lineInfo);
+
+			  // indent all lines of the message
+			  msg = msg.trim().replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
+
 				result.append(msg);
 				count++;
 			}

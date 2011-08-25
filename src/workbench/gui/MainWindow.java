@@ -1782,7 +1782,7 @@ public class MainWindow
 		if (p instanceof SqlPanel)
 		{
 			SqlPanel sql = (SqlPanel)p;
-			sql.selectEditorLater();
+			sql.selectEditor();
 		}
 	}
 
