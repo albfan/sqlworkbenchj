@@ -646,4 +646,9 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.forcedraw", MacOSHelper.isMacOS());
 	}
+
+	public static boolean getShowMnemonics()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.showmnemonics", true);
+	}
 }

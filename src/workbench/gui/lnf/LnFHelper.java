@@ -106,6 +106,8 @@ public class LnFHelper
 			Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
 			def.put("Table.gridColor", c);
 		}
+
+		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
 	}
 
 	private boolean isWindowsLookAndFeel()
