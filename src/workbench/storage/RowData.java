@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Struct;
 import java.sql.Types;
 import java.util.Arrays;
@@ -171,6 +172,7 @@ public class RowData
 		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
 		boolean useGetStringForClobs = info.useGetStringForClobs();
 		boolean useGetStringForBit = info.useGetStringForBit();
+		boolean useGetXML = info.useGetXML();
 
 		Object value = null;
 
@@ -248,7 +250,7 @@ public class RowData
 				}
 				else if (SqlUtil.isXMLType(type))
 				{
-					value = readCharacterStream(rs, i + 1);
+					value = readXML(rs, i+1, useGetXML);
 				}
 				else if (SqlUtil.isClobType(type, longVarcharAsClob))
 				{
@@ -292,6 +294,30 @@ public class RowData
 			this.colData[i] = value;
 		}
 		this.resetStatus();
+	}
+
+	private Object readXML(ResultSet rs, int column, boolean useGetXML)
+		throws SQLException
+	{
+		Object value = null;
+		if (useGetXML)
+		{
+			SQLXML xml = null;
+			try
+			{
+				xml = rs.getSQLXML(column);
+				value = xml.getString();
+			}
+			finally
+			{
+				if (xml != null) xml.free();
+			}
+		}
+		else
+		{
+			value = readCharacterStream(rs, column);
+		}
+		return value;
 	}
 
 	private Object readCharacterStream(ResultSet rs, int column)

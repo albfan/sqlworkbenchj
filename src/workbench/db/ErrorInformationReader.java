@@ -19,10 +19,10 @@ package workbench.db;
  *
  * Currently only implemented for Oracle to retrieve detailed error messages
  * after a CREATE PROCEDURE or similar statement.
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface ErrorInformationReader
 {
-	String getErrorInfo(String schema, String object, String type);
+	String getErrorInfo(String schema, String object, String type, boolean formatMessage);
 }

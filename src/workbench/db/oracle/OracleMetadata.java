@@ -497,7 +497,7 @@ public class OracleMetadata
 	 *	@return extended error information if available
 	 */
 	@Override
-	public String getErrorInfo(String schema, String objectName, String objectType)
+	public String getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
 	{
 		String query =
 			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
@@ -568,7 +568,7 @@ public class OracleMetadata
 				String name = rs.getString(4);
 				String type = rs.getString(5);
 
-				if (currentName == null || !currentName.equals(name))
+				if (formatMessages && (currentName == null || !currentName.equals(name)))
 				{
 					if (firstHeading)
 					{
@@ -587,13 +587,14 @@ public class OracleMetadata
 					currentName = name;
 				}
 
-				String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
-				lineInfo = StringUtil.padRight(lineInfo, indentLength + 2);
-				result.append(lineInfo);
-
-			  // indent all lines of the message
-			  msg = msg.trim().replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
-
+				if (formatMessages)
+				{
+					String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
+					lineInfo = StringUtil.padRight(lineInfo, indentLength + 2);
+					result.append(lineInfo);
+					// indent all lines of the message
+					msg = msg.trim().replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
+				}
 				result.append(msg);
 				count++;
 			}

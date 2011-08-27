@@ -161,6 +161,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "bit.use.getstring", false);
 	}
 
+	public boolean useGetXML()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "xml.use.getsqlxml", false);
+	}
+
 	public boolean useGetStringForClobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);

@@ -158,7 +158,7 @@ public class WbOraShow
 		ErrorInformationReader reader = currentConnection.getMetadata().getErrorInformationReader();
 		if (reader != null)
 		{
-			String errors = reader.getErrorInfo(schema, object, type);
+			String errors = reader.getErrorInfo(schema, object, type, true);
 			if (errors.length() > 0)
 			{
 				result.addMessage(errors);

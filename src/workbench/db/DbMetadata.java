@@ -2771,17 +2771,17 @@ public class DbMetadata
 	{
 		return this.errorInfoReader;
 	}
-	
+
 	/**
 	 * Returns the errors available for the given object and type. This call
 	 * is delegated to the available {@link ErrorInformationReader}
 	 * @return extended error information if the current DBMS is Oracle. An empty string otherwise.
 	 * @see ErrorInformationReader
 	 */
-	public String getExtendedErrorInfo(String schema, String objectName, String objectType)
+	public String getExtendedErrorInfo(String schema, String objectName, String objectType, boolean formatMessage)
 	{
 		if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
-		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType);
+		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType, formatMessage);
 	}
 
 }

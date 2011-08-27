@@ -238,7 +238,7 @@ public class DdlCommand
 		DbMetadata meta = aConnection.getMetadata();
 		if (meta == null) return false;
 
-		String msg = meta.getExtendedErrorInfo(null, info.objectName, info.objectType);
+		String msg = meta.getExtendedErrorInfo(null, info.objectName, info.objectType, true);
 		if (msg != null && msg.length() > 0)
 		{
 			result.addMessageNewLine();

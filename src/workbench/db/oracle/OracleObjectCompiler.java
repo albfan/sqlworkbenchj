@@ -62,7 +62,7 @@ public class OracleObjectCompiler
 			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
 			stmt.executeUpdate(sql);
-			String error = dbConnection.getMetadata().getExtendedErrorInfo(null, object.getObjectName(), object.getObjectType());
+			String error = dbConnection.getMetadata().getExtendedErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
 			if (StringUtil.isBlank(error))
 			{
 				return null;

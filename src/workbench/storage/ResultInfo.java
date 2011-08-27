@@ -43,6 +43,7 @@ public class ResultInfo
 	private boolean useGetStringForClobs;
 	private boolean isUserDefinedPK;
 	private boolean useGetStringForBit;
+	private boolean useGetXML;
 
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -119,6 +120,7 @@ public class ResultInfo
 			useGetBytesForBlobs = sourceConnection.getDbSettings().useGetBytesForBlobs();
 			useGetStringForClobs = sourceConnection.getDbSettings().useGetStringForClobs();
 			useGetStringForBit = sourceConnection.getDbSettings().useGetStringForBit();
+			useGetXML = sourceConnection.getDbSettings().useGetXML();
 		}
 
 		for (int i=0; i < this.colCount; i++)
@@ -268,6 +270,11 @@ public class ResultInfo
 			}
 			this.columns[i] = col;
 		}
+	}
+
+	public boolean useGetXML()
+	{
+		return useGetXML;
 	}
 
 	public boolean useGetStringForBit()

@@ -467,7 +467,7 @@ public class TestUtil
 				SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 				if (printError && info != null)
 				{
-					String msg = con.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType);
+					String msg = con.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType, true);
 					if (StringUtil.isNonBlank(msg))
 					{
 						System.out.println("**** Error executing statement:\n" + msg + "\n------------------");
