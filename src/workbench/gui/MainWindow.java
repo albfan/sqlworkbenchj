@@ -31,6 +31,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1341,7 +1343,17 @@ public class MainWindow
 		this.disconnectTab.checkState();
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
-		ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId());
+		DatabaseMetaData meta = conn.getMetadata().getJdbcMetaData();
+		try
+		{
+			int major = meta.getDatabaseMajorVersion();
+			int minor = meta.getDatabaseMinorVersion();
+			ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId(), major, minor);
+		}
+		catch (SQLException sql)
+		{
+			ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId(), -1, -1);
+		}
 		showConnectionWarnings(conn, this.getCurrentPanel());
 		selectCurrentEditor();
 	}
@@ -1740,7 +1752,7 @@ public class MainWindow
 		getJobIndicator().allJobsEnded();
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
-		ShowDbmsManualAction.getInstance().setDbms(null);
+		ShowDbmsManualAction.getInstance().setDbms(null, -1, -1);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.dbExplorerAction.setEnabled(false);

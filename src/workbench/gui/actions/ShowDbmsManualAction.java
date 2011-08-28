@@ -12,6 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.text.MessageFormat;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
@@ -39,7 +40,8 @@ public class ShowDbmsManualAction
 		initMenuDefinition("MnuTxtDbmsHelp");
 		removeIcon();
 	}
-	
+
+	@Override
 	public synchronized void executeAction(ActionEvent e)
 	{
 		if (StringUtil.isNonBlank(onlineManualUrl))
@@ -54,12 +56,33 @@ public class ShowDbmsManualAction
 			}
 		}
 	}
-	
-	public synchronized void setDbms(String dbid)
+
+	public synchronized void setDbms(String dbid, int majorVersion, int minorVersion)
 	{
 		if (StringUtil.isNonBlank(dbid))
 		{
-			onlineManualUrl = Settings.getInstance().getProperty("workbench.db." + dbid + ".manual", null);
+			String url = null;
+			if (majorVersion > -1 && minorVersion > -1)
+			{
+				url = Settings.getInstance().getProperty("workbench.db." + dbid + "." + Integer.toString(majorVersion) + "." + Integer.toString(minorVersion) + ".manual", null);
+			}
+
+			if (url == null && majorVersion > -1)
+			{
+				url = Settings.getInstance().getProperty("workbench.db." + dbid + "." + Integer.toString(majorVersion) + ".manual", null);
+			}
+			if (url == null)
+			{
+				url = Settings.getInstance().getProperty("workbench.db." + dbid + ".manual", null);
+			}
+			if (url != null)
+			{
+				onlineManualUrl = MessageFormat.format(url, majorVersion, minorVersion);
+			}
+			else
+			{
+				onlineManualUrl = null;
+			}
 		}
 		else
 		{
