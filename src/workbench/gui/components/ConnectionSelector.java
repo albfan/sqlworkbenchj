@@ -169,7 +169,7 @@ public class ConnectionSelector
 					WbSwingUtilities.center(connectingInfo, parent);
 					connectingInfo.setVisible(true);
 				}
-				WbSwingUtilities.callRepaint(connectingInfo);
+				connectingInfo.forceRepaint();
 			}
 		});
 	}

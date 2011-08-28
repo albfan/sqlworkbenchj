@@ -961,6 +961,8 @@ public class MainWindow
 	{
 		if (this.isConnectInProgress()) return;
 		if (this.connectThread != null) return;
+		
+		this.showConnectingInfo();
 
 		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
 		{
@@ -981,7 +983,6 @@ public class MainWindow
 	{
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
-		this.showConnectingInfo();
 
 		if (Settings.getInstance().getLogConnectionDetails())
 		{

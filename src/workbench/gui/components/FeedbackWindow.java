@@ -34,7 +34,7 @@ public class FeedbackWindow
 	extends JDialog
 {
 	private JLabel connectLabel;
-	
+
 	public FeedbackWindow(Frame owner, String msg)
 	{
 		super(owner, false);
@@ -52,9 +52,9 @@ public class FeedbackWindow
 		JPanel p = new JPanel();
 		p.setBorder(new CompoundBorder(WbSwingUtilities.getBevelBorderRaised(), new EmptyBorder(15, 20, 15, 20)));
 		p.setLayout(new BorderLayout(0, 0));
-		p.setMinimumSize(new Dimension(250, 50));
+		p.setMinimumSize(new Dimension(350, 50));
 		connectLabel = new JLabel(msg);
-		connectLabel.setMinimumSize(new Dimension(200, 50));
+		connectLabel.setMinimumSize(new Dimension(300, 50));
 		connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		p.add(connectLabel, BorderLayout.CENTER);
 		setUndecorated(true);
@@ -68,6 +68,7 @@ public class FeedbackWindow
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				WbThread t = new WbThread(task, "FeedbackWindow");
@@ -81,7 +82,7 @@ public class FeedbackWindow
 	{
 		return connectLabel.getText();
 	}
-	
+
 	public void setMessage(String msg)
 	{
 		if (StringUtil.isBlank(msg))
@@ -97,7 +98,17 @@ public class FeedbackWindow
 
 	public void forceRepaint()
 	{
-		WbSwingUtilities.repaintNow(connectLabel);
+		WbSwingUtilities.invoke(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				doLayout();
+				invalidate();
+				validate();
+				repaint();
+			}
+		});
 	}
 
 }
