@@ -59,18 +59,19 @@ public class ConnectionSelector
 		return this.connectInProgress;
 	}
 
-	
+
 	public void selectConnection()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_selectConnection();
 			}
 		});
 	}
-	
+
 	protected void _selectConnection()
 	{
 		if (this.isConnectInProgress()) return;
@@ -84,7 +85,7 @@ public class ConnectionSelector
 			dialog.setVisible(true);
 			ConnectionProfile prof = dialog.getSelectedProfile();
 			boolean cancelled = dialog.isCancelled();
-			
+
 			if (cancelled || prof == null)
 			{
 				this.client.connectCancelled();
@@ -110,6 +111,7 @@ public class ConnectionSelector
 
 		Thread t = new WbThread("Connection thread")
 		{
+			@Override
 			public void run()
 			{
 				showPopupMessagePanel("");
@@ -124,6 +126,7 @@ public class ConnectionSelector
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (connectingInfo != null)
@@ -151,6 +154,7 @@ public class ConnectionSelector
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (connectingInfo != null)
@@ -173,10 +177,10 @@ public class ConnectionSelector
 	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
 		if (isConnectInProgress()) return;
-		
+
 		WbConnection conn = null;
 		String error = null;
-		
+
 		if (!client.connectBegin(aProfile, this))
 		{
 			closeConnectingInfo();
@@ -185,7 +189,7 @@ public class ConnectionSelector
 		setConnectIsInProgress();
 
 		connectingInfo.repaint();
-		
+
 		showConnectingInfo();
 		String id = this.client.getConnectionId(aProfile);
 		try
@@ -223,7 +227,7 @@ public class ConnectionSelector
 				next = next.getNextException();
 			}
 			error = logmsg.toString();
-			
+
 			LogMgr.logError("ConnectionSelector.doConnect()", "SQL Exception when connecting", se);
 		}
 		catch (Throwable e)
@@ -242,9 +246,10 @@ public class ConnectionSelector
 
 			final WbConnection theConnection = conn;
 			final String theError = error;
-			
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (theConnection != null)
@@ -257,12 +262,12 @@ public class ConnectionSelector
 					}
 				}
 			});
-				
+
 			if (conn == null && showSelectDialogOnError)
 			{
 				selectConnection();
 			}
-			
+
 		}
 		catch (Throwable th)
 		{
@@ -279,7 +284,7 @@ public class ConnectionSelector
 	{
 		this.connectInProgress = true;
 	}
-	
+
 	private void clearConnectIsInProgress()
 	{
 		this.connectInProgress = false;
@@ -291,10 +296,12 @@ public class ConnectionSelector
 		setStatusMessage(message);
 	}
 
+	@Override
 	public void setStatusMessage(final String message)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				showPopupMessagePanel(message);
@@ -302,16 +309,19 @@ public class ConnectionSelector
 		});
 	}
 
+	@Override
 	public void clearStatusMessage()
 	{
 		showPopupMessagePanel("");
 	}
 
+	@Override
 	public void repaint()
 	{
 		if (this.connectingInfo != null) connectingInfo.forceRepaint();
 	}
 
+	@Override
 	public String getText()
 	{
 		if (this.connectingInfo == null) return "";

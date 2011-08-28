@@ -1648,6 +1648,9 @@ public class MainWindow
 			LogMgr.logDebug("MainWindow.disconnect()", getWindowId() + ": disconnect()");
 		}
 
+		if (saveWorkspace) saveWorkspace(false);
+		if (background) showDisconnectInfo();
+
 		Runnable run = new Runnable()
 		{
 			@Override
@@ -1655,8 +1658,6 @@ public class MainWindow
 			{
 				try
 				{
-					if (saveWorkspace) saveWorkspace(false);
-					if (background) showDisconnectInfo();
 					doDisconnect();
 					if (closeWorkspace) closeWorkspace(background);
 					if (background) closeConnectingInfo();
