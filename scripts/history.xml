@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-11-17">
+    <entry dev-build="8" type="enh">"Help -&gt; Show DBMS Manual" now displays the online manual corresponding to the version of the DBMS</entry>
     <entry dev-build="8" type="enh">For Oracle a subset of the SQL*Plus SHOW command is now supported</entry>
     <entry dev-build="8" type="enh">A new option is available to automatically save connection profiles if the connect dialog is closed with OK.</entry>
     <entry dev-build="8" type="enh">Enhanced entering variables in the variable dialog. The ENTER key automatically advances to the next variable and closes the dialog after the last one.</entry>
