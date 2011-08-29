@@ -14,6 +14,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
@@ -39,6 +40,7 @@ public class ShowDbmsManualAction
 		super();
 		initMenuDefinition("MnuTxtDbmsHelp");
 		removeIcon();
+		setEnabled(false);
 	}
 
 	@Override
@@ -89,6 +91,14 @@ public class ShowDbmsManualAction
 			onlineManualUrl = null;
 		}
 		setEnabled(StringUtil.isNonBlank(onlineManualUrl));
+		if (onlineManualUrl != null)
+		{
+			setTooltip("<html>" + ResourceMgr.getDescription("MnuTxtDbmsHelp") + "<br>(" + onlineManualUrl + ")</html>");
+		}
+		else
+		{
+			setTooltip(null);
+		}
 	}
 
 }
