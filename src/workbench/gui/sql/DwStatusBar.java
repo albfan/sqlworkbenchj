@@ -98,11 +98,6 @@ public class DwStatusBar
 
 	public static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), BorderFactory.createEtchedBorder());
 
-	public DwStatusBar()
-	{
-		this(false, false);
-	}
-
 	public DwStatusBar(boolean showTimeout, boolean showEditorStatus)
 	{
 		super();
@@ -245,6 +240,7 @@ public class DwStatusBar
 		execTime.repaint();
 	}
 
+	@Override
 	public void setEditorLocation(int line, int column)
 	{
 		 if (this.editorStatus == null) return;
@@ -274,6 +270,7 @@ public class DwStatusBar
 		executionTimer.stop();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (!timerRunning) return;
@@ -336,6 +333,7 @@ public class DwStatusBar
 		setRowcountText("");
 	}
 
+	@Override
 	public String getText()
 	{
 		return tfStatus.getText();
@@ -347,6 +345,7 @@ public class DwStatusBar
 		setStatusMessage(message);
 		WbThread t = new WbThread("Notification")
 		{
+			@Override
 			public void run()
 			{
 				WbThread.sleepSilently(2500);
@@ -361,6 +360,7 @@ public class DwStatusBar
 	 *	Display the status message
 	 *
 	 */
+	@Override
 	public void setStatusMessage(final String aMsg)
 	{
 		if (aMsg == null) return;
@@ -375,6 +375,7 @@ public class DwStatusBar
 	/**
 	 * Clears the status bar by displaying the default message.
 	 */
+	@Override
 	public void clearStatusMessage()
 	{
 		this.setStatusMessage(this.readyMsg);
@@ -411,6 +412,7 @@ public class DwStatusBar
 		this.tfMaxRows.requestFocusInWindow();
 	}
 
+	@Override
 	public void showAlert(final NotifierEvent evt)
 	{
 		if (this.notificationHandler != null)
@@ -440,6 +442,7 @@ public class DwStatusBar
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				alertPanel.add(notificationLabel);
@@ -450,6 +453,7 @@ public class DwStatusBar
 		});
 	}
 
+	@Override
 	public void removeAlert()
 	{
 		if (alertPanel != null)
@@ -457,6 +461,7 @@ public class DwStatusBar
 			notificationLabel.removeMouseListener(this);
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					infoPanel.remove(alertPanel);
@@ -468,6 +473,7 @@ public class DwStatusBar
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getSource() != this.notificationLabel) return;
@@ -480,18 +486,22 @@ public class DwStatusBar
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}

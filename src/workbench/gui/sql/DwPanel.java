@@ -280,7 +280,7 @@ public class DwPanel
 		if (ds == null) return false;
 
 		dataTable.stopEditing();
-		
+
 		if (ds.getUpdateTable() == null)
 		{
 			// this can happen if the Save button is always enabled and was clicked before the
@@ -1137,7 +1137,7 @@ public class DwPanel
 		}
 		else
 		{
-			statusBar = new DwStatusBar();
+			statusBar = new DwStatusBar(true, false);
 			sharedStatusBar = false;
 			add(this.statusBar, BorderLayout.SOUTH);
 		}

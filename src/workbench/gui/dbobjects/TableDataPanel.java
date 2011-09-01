@@ -917,6 +917,7 @@ public class TableDataPanel
 		if (initialized)
 		{
 			props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
+			props.setProperty(prefix + "timeout", this.dataDisplay.getQueryTimeout());
 			props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
 			props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
 			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
@@ -952,6 +953,12 @@ public class TableDataPanel
 		}
 		this.autoloadRowCount = props.getBoolProperty(prefix + "autoloadrowcount", true);
 		this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
+		int timeout = props.getIntProperty(prefix + "timeout", 0);
+		if (dataDisplay != null)
+		{
+			this.dataDisplay.setQueryTimeout(timeout);
+		}
+
 	}
 
 	public void showData()
