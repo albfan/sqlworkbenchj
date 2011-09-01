@@ -19,7 +19,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
 /**
- * Make an "IN" List 
+ * Make an "IN" List
  * @see workbench.gui.editor.CodeTools#makeInListForChar()
  * @author  Thomas Kellerer
  */
@@ -39,12 +39,14 @@ public class MakeInListAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		CodeTools tools = new CodeTools(client);
 		tools.makeInListForChar();
 	}
 
+	@Override
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		if(newEnd > newStart)

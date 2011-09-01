@@ -37,15 +37,16 @@ public class MakeNonCharInListAction extends WbAction implements TextSelectionLi
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		CodeTools tools = new CodeTools(client);
 		tools.makeInListForNonChar();
 	}
 
+	@Override
 	public void selectionChanged(int newStart, int newEnd)
 	{
-		//this.setEnabled(newEnd > newStart);
 		if(newEnd > newStart)
 		{
 			int startLine = this.client.getSelectionStartLine();
