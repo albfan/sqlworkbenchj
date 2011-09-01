@@ -1137,7 +1137,7 @@ $$ LANGUAGE plpgsql;
       a script. The format of the command is <literal>WbInclude -file=filename;</literal>.
       For DBMS other then MS SQL, the command can be abbreviated using the @ sign: <literal>@filename;</literal>
       is equivalent to <literal>WbInclude -file=filename;</literal>.
-      The called script way may also include other scripts. Relative filens (e.g. as parameters
+      The called script way may also include other scripts. Relative filenames (e.g. as parameters
       for &wb-productname; commands) in the script are always resolved to the directory
       where the script is located, not the current directory of the application.
     </para>
