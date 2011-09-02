@@ -651,16 +651,6 @@ public class Settings
 		setProperty(PROPERTY_LOG_ALL_SQL, flag);
 	}
 
-	/**
-	 * Controls if the initialization of connections in the main window is logged
-	 * for debugging purposes.
-	 * @return
-	 */
-	public boolean getLogConnectionDetails()
-	{
-		return getBoolProperty("workbench.connection.debug", false);
-	}
-
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
