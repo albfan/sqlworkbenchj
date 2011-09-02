@@ -28,6 +28,7 @@ public class DdlAnalyzer
 		super(conn, statement, cursorPos);
 	}
 
+	@Override
 	protected void checkContext()
 	{
 		SQLLexer lexer = new SQLLexer(this.sql);

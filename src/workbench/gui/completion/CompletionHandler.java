@@ -268,6 +268,7 @@ public class CompletionHandler
 	/**
 	 * Implementation of the ListModel interface
 	 */
+	@Override
 	public Object getElementAt(int index)
 	{
 		return getElementList().get(index);
@@ -276,6 +277,7 @@ public class CompletionHandler
 	/**
 	 * Implementation of the ListModel interface
 	 */
+	@Override
 	public int getSize()
 	{
 		return getElementList().size();
@@ -284,6 +286,7 @@ public class CompletionHandler
 	/**
 	 * Implementation of the ListModel interface
 	 */
+	@Override
 	public void addListDataListener(ListDataListener listDataListener)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList<ListDataListener>();
@@ -293,6 +296,7 @@ public class CompletionHandler
 	/**
 	 * Implementation of the ListModel interface
 	 */
+	@Override
 	public void removeListDataListener(ListDataListener listDataListener)
 	{
 		if (this.listeners == null) return;
