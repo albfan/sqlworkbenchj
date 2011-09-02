@@ -204,6 +204,7 @@ public class WbTable
 	private FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
+	private Font printFont;
 
 	// </editor-fold>
 
@@ -362,6 +363,15 @@ public class WbTable
 		return readOnly;
 	}
 
+	public Font getPrintFont()
+	{
+		return printFont;
+	}
+
+	public void setPrintFont(Font font)
+	{
+		this.printFont = font;
+	}
 
 	public RendererSetup getRendererSetup()
 	{
@@ -595,7 +605,7 @@ public class WbTable
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
 	}
 
-	public WbMenu getCopySelectedMenu()
+	public final WbMenu getCopySelectedMenu()
 	{
 		WbMenu copyMenu = createCopySelectedMenu();
 		populateCopySelectedMenu(copyMenu);
@@ -721,7 +731,7 @@ public class WbTable
 		});
 	}
 
-	public void addPopupAction(final WbAction anAction, final boolean withSep)
+	public final void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
 		addPopupMenu(anAction.getMenuItem(), withSep);
 	}
@@ -1565,7 +1575,7 @@ public class WbTable
 	 * Initialize the default renderers for this table
 	 * @see workbench.gui.renderer.RendererFactory
 	 */
-	public void initDefaultRenderers()
+	private void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
@@ -1669,7 +1679,7 @@ public class WbTable
 		return SqlUtil.isMultiLineColumn(column);
 	}
 
-	protected void initDefaultEditors()
+	private void initDefaultEditors()
 	{
 		TableColumnModel colMod = this.getColumnModel();
 

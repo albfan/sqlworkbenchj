@@ -838,10 +838,6 @@ public class MainWindow
 
 	private void checkConnectionForPanel(final MainPanel aPanel)
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.checkConnectionForPanel()", getWindowId() + ": checking connection for panel " + aPanel);
-		}
 		if (this.isConnectInProgress()) return;
 		if (aPanel.isConnected()) return;
 
@@ -853,10 +849,6 @@ public class MainWindow
 			}
 			else if (this.currentConnection != null)
 			{
-				if (Settings.getInstance().getLogConnectionDetails())
-				{
-					LogMgr.logDebug("MainWindow.checkConnectionForPanel()", getWindowId() + ": setting global connection");
-				}
 				aPanel.setConnection(this.currentConnection);
 			}
 		}
@@ -984,11 +976,6 @@ public class MainWindow
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
 
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": creating new connection for panel " + aPanel.getId());
-		}
-
 		try
 		{
 			// prevent a manual tab change during connection as this is not working properly
@@ -996,10 +983,6 @@ public class MainWindow
 
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
 			int index = this.getIndexForPanel(aPanel);
-			if (Settings.getInstance().getLogConnectionDetails())
-			{
-				LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": calling tabConnected for index: " + index);
-			}
 			this.tabConnected(aPanel, conn, index);
 		}
 		catch (Throwable e)
@@ -1229,11 +1212,6 @@ public class MainWindow
 	@Override
 	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.connectBegin()", getWindowId() + ": connectBegin() for " + aProfile);
-		}
-
 		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			if (!this.saveWorkspace(this.currentWorkspaceFile, true))
@@ -1318,11 +1296,6 @@ public class MainWindow
 	@Override
 	public void connected(WbConnection conn)
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.connected()", getWindowId() + ": connected() with " + conn);
-		}
-
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
@@ -1362,11 +1335,6 @@ public class MainWindow
 	@Override
 	public void connectFailed(String error)
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.connectFailed()", getWindowId() + ": connectFailed()");
-		}
-
 		disconnected();
 		tabSelected(0);
 
@@ -1656,11 +1624,6 @@ public class MainWindow
 
 		setConnectIsInProgress();
 
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.disconnect()", getWindowId() + ": disconnect()");
-		}
-
 		if (saveWorkspace) saveWorkspace(false);
 		if (background) showDisconnectInfo();
 
@@ -1698,11 +1661,6 @@ public class MainWindow
 	 */
 	protected void doDisconnect()
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.doDisconnect()", getWindowId() + ": doDisconnect()");
-		}
-
 		try
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
@@ -1742,10 +1700,6 @@ public class MainWindow
 
 	protected void disconnected()
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.disconnected()", getWindowId() + ": disconnected()");
-		}
 		this.currentProfile = null;
 		this.currentConnection = null;
 		this.closeWorkspace(false);
@@ -2043,11 +1997,6 @@ public class MainWindow
 	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
 		throws Exception
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.getConnectionForTab()", getWindowId() + ": getConnectionFor " + aPanel + ", new=" + returnNew);
-		}
-
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 
