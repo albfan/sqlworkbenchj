@@ -43,6 +43,7 @@ import workbench.util.FileUtil;
 import workbench.util.PropertiesCopier;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
+import workbench.util.WbThread;
 
 /**
  * A connection factory for the application.
@@ -441,6 +442,28 @@ public class ConnectionMgr
 			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
+	}
+
+	public void abortAll()
+	{
+		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to close all connections");
+		Map<String, WbConnection> current = new HashMap<String, WbConnection>(activeConnections);
+		activeConnections.clear();
+
+		for (final WbConnection con : current.values())
+		{
+			WbThread disc = new WbThread("Disconnect for " + con.getId())
+			{
+				@Override
+				public void run()
+				{
+					con.shutdown(false);
+				}
+			};
+			long wait = Settings.getInstance().getIntProperty("workbench.db.connectionmgr.abortwait", 10);
+			WbThread.runWithTimeout(disc, wait * 1000);
+		}
+		LogMgr.logWarning("ConnectionMgr.abortAll()", "Aborting all connections finished");
 	}
 
 	public synchronized void disconnect(WbConnection con)

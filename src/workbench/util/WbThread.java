@@ -50,4 +50,18 @@ public class WbThread
 	{
 		try { Thread.sleep(time); } catch (Throwable th) {}
 	}
+
+	public static void runWithTimeout(Thread toRun, long timeout)
+	{
+		toRun.start();
+		try
+		{
+			toRun.join(timeout);
+			toRun.interrupt();
+		}
+		catch (InterruptedException ie)
+		{
+			LogMgr.logWarning("WbThread.runWithTimeout()", "Waiting was interrupted", ie);
+		}
+	}
 }

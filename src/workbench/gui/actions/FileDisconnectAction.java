@@ -14,12 +14,15 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 
 /**
- * Disconnect the current window
+ * Disconnect the current window.
+ * 
  * @author Thomas Kellerer
  */
-public class FileDisconnectAction 
+public class FileDisconnectAction
 	extends WbAction
 {
 	private MainWindow window;
@@ -32,8 +35,21 @@ public class FileDisconnectAction
 		setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
-		window.disconnect(true, true, true);
+		if (isCtrlPressed(e))
+		{
+			boolean doIt = WbSwingUtilities.getYesNo(window, ResourceMgr.getString("MsgAbortWarning"));
+
+			if (doIt)
+			{
+				window.forceDisconnect();
+			}
+		}
+		else
+		{
+			window.disconnect(true, true, true);
+		}
 	}
 }

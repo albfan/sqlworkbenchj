@@ -1335,7 +1335,7 @@ public class MainWindow
 	@Override
 	public void connectFailed(String error)
 	{
-		disconnected();
+		disconnected(true);
 		tabSelected(0);
 
 		if (error == null) return;
@@ -1618,6 +1618,51 @@ public class MainWindow
 		}
 	}
 
+	public void forceDisconnect()
+	{
+		if (this.isConnectInProgress()) return;
+
+		if (!saveWorkspace(true))
+		{
+			return;
+		}
+
+		setConnectIsInProgress();
+		showDisconnectInfo();
+		try
+		{
+			for (int i=0; i < this.sqlTab.getTabCount(); i++)
+			{
+				final MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+				sql.disconnect();
+			}
+			closeExplorerWindows();
+			WbThread abort = new WbThread("Abort connections")
+			{
+				@Override
+				public void run()
+				{
+					ConnectionMgr.getInstance().abortAll();
+				}
+			};
+			abort.start();
+		}
+		finally
+		{
+			closeConnectingInfo();
+			// this must be called on the AWT thread
+			// and it must be called synchronously!
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					disconnected(false);
+				}
+			});
+		}
+	}
+
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
@@ -1666,12 +1711,12 @@ public class MainWindow
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection conn = null;
 
-			for (int i=0; i < this.sqlTab.getTabCount(); i++)
+			for (int i = 0; i < this.sqlTab.getTabCount(); i++)
 			{
-				final MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+				final MainPanel sql = (MainPanel) this.sqlTab.getComponentAt(i);
 				if (sql instanceof SqlPanel)
 				{
-					((SqlPanel)sql).abortExecution();
+					((SqlPanel) sql).abortExecution();
 				}
 				conn = sql.getConnection();
 				sql.disconnect();
@@ -1692,17 +1737,20 @@ public class MainWindow
 				@Override
 				public void run()
 				{
-					disconnected();
+					disconnected(false);
 				}
 			});
 		}
 	}
 
-	protected void disconnected()
+	protected void disconnected(boolean closeWorkspace)
 	{
 		this.currentProfile = null;
 		this.currentConnection = null;
-		this.closeWorkspace(false);
+		if (closeWorkspace)
+		{
+			this.closeWorkspace(false);
+		}
 		this.setMacroMenuEnabled(false);
 		getJobIndicator().allJobsEnded();
 		this.updateWindowTitle();
@@ -1721,9 +1769,8 @@ public class MainWindow
 	}
 
 
-	public boolean abortAll()
+	public void abortAll()
 	{
-		boolean success = true;
 		try
 		{
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -1732,16 +1779,14 @@ public class MainWindow
 				if (sql instanceof SqlPanel)
 				{
 					SqlPanel sp = (SqlPanel)sql;
-					success = success && sp.abortExecution();
+					sp.forceAbort();
 				}
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("MainWindow.abortAll()", "Error stopping execution",e);
-			success = false;
 		}
-		return success;
 	}
 
 	private void selectCurrentEditor()

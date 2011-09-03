@@ -45,12 +45,14 @@ public class FileDiscardAction
 		this.setEnabled(aClient.hasFileLoaded());
 	}
 
+	@Override
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
 		super.addToInputMap(im, am);
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F4, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK), this.getActionName());
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.closeFile(!isShiftPressed(e));

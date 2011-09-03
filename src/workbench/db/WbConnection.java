@@ -634,6 +634,11 @@ public class WbConnection
 	 */
 	public void shutdown()
 	{
+		shutdown(true);
+	}
+
+	public void shutdown(boolean withRollback)
+	{
 		if (this.keepAlive != null)
 		{
 			this.keepAlive.shutdown();
@@ -645,7 +650,7 @@ public class WbConnection
 			this.preparedStatementPool.done();
 		}
 
-		if (this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
+		if (withRollback && this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
 		{
 			try
 			{
