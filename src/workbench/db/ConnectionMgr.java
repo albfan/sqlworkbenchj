@@ -74,8 +74,10 @@ public class ConnectionMgr
 	}
 
 	/**
-	 * Create a new connection. The profile to be used
-	 * is searched by the given profile key
+	 * Create a new connection.
+	 *
+	 * The profile to be used is searched by the given profile key
+	 *
 	 * @param def the profile to be used
 	 * @param anId the id to be assigned to the connection
 	 * @return a new Connection
@@ -433,7 +435,9 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Disconnects all connections
+	 * Disconnects all connections.
+	 *
+	 * @see #closeConnection(workbench.db.WbConnection)
 	 */
 	public void disconnectAll()
 	{
@@ -444,9 +448,17 @@ public class ConnectionMgr
 		this.activeConnections.clear();
 	}
 
+	/**
+	 * Close all connections in a background thread.
+	 *
+	 * The list of active connections is cleared immediately, so any getConnection() after
+	 * calling this method, will create a new physical connection, even if the current ones
+	 * have not all been disconnected.
+	 */
 	public void abortAll()
 	{
 		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to close all connections");
+
 		Map<String, WbConnection> current = new HashMap<String, WbConnection>(activeConnections);
 		activeConnections.clear();
 
@@ -520,6 +532,7 @@ public class ConnectionMgr
 
 	/**
 	 * Check if there is another connection active with the same URL.
+	 *
 	 * This is used when the connection to an embedded database that
 	 * needs a {@link workbench.db.shutdown.DbShutdownHook} is called.
 	 *
