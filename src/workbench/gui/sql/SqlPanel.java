@@ -3598,7 +3598,7 @@ public class SqlPanel
 		if (this.execListener != null) this.execListener.clear();
 		if (this.toolbar != null) this.toolbar.removeAll();
 		this.toolbar = null;
-		this.abortExecution();
+		this.forceAbort();
 		this.executionThread = null;
 		this.connectionInfo = null;
 	}

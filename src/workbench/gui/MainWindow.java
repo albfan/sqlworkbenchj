@@ -1634,6 +1634,10 @@ public class MainWindow
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
 			{
 				final MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+				if (sql instanceof SqlPanel)
+				{
+					((SqlPanel)sql).forceAbort();
+				}
 				sql.disconnect();
 			}
 			closeExplorerWindows();
