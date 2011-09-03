@@ -1768,7 +1768,6 @@ public class MainWindow
 		}
 	}
 
-
 	public void abortAll()
 	{
 		try
