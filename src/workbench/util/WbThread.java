@@ -43,8 +43,10 @@ public class WbThread
 	}
 
 	/**
-	 * Implementation of sleep() without throwing an exception
+	 * Implementation of sleep() without throwing an exception.
+	 *
 	 * @param time
+	 * @see Thread#sleep(long) 
 	 */
 	public static void sleepSilently(long time)
 	{
