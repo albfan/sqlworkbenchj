@@ -448,6 +448,20 @@ public class StatementRunner
 		}
 	}
 
+	public void abort()
+	{
+		if (this.result != null) this.result.clear();
+		this.result = null;
+		this.savepoint = null;
+		this.currentCommand = null;
+		this.currentConsumer = null;
+		if (mainConnection != null)
+		{
+			this.currentConnection = mainConnection;
+			mainConnection = null;
+		}
+	}
+	
 	public void done()
 	{
 		if (this.result != null) this.result.clear();
@@ -456,7 +470,10 @@ public class StatementRunner
 		this.statementDone();
 		this.currentConsumer = null;
 		this.restoreMainConnection();
-		this.currentConnection.clearWarnings();
+		if (currentConnection != null)
+		{
+			this.currentConnection.clearWarnings();
+		}
 	}
 
 	public void setUseSavepoint(boolean flag)

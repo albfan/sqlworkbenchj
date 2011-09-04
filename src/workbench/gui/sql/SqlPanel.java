@@ -1610,9 +1610,12 @@ public class SqlPanel
 		if (this.executionThread == null) return;
 		try
 		{
+			String name = executionThread.getName();
 			this.cancelExecution = true;
 			this.executionThread.interrupt();
 			this.executionThread = null;
+			this.stmtRunner.abort();
+			LogMgr.logDebug("SqlPanel.forceAbort()", "'" + name + "' was interrupted.");
 		}
 		catch (Exception e)
 		{
@@ -3184,6 +3187,10 @@ public class SqlPanel
 					log.setCaretPosition(log.getDocument().getLength());
 				}
 			});
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("SqlPanel.showResultMessage()", "Could not show message!", th);
 		}
 	}
 
