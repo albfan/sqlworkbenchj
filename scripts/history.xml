@@ -16,6 +16,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="8" type="fix">When specifying a non-existing table using -sourceTable for WbExport no proper error message was shown.</entry>
     <entry dev-build="8" type="fix">Fixed a problem with displaying the menus if the editor tabs ran over more than one line</entry>
     <entry dev-build="7" type="fix">Implemented a workaround for the Vertica JDBC driver to allow running DML statements.</entry>
     <entry dev-build="6" type="fix">WbSchemaDiff did not work when the table names needed quoting because of special characters or mixed case names</entry>
