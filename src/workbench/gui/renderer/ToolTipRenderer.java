@@ -14,6 +14,7 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -95,6 +96,8 @@ public class ToolTipRenderer
 
 	protected boolean showTooltip = true;
 	protected Map renderingHints;
+
+	private Font printFont;
 
 	public ToolTipRenderer()
 	{
@@ -195,7 +198,8 @@ public class ToolTipRenderer
 		try
 		{
 			WbTable wbtable = (WbTable)table;
-			rendererSetup = wbtable.getRendererSetup();
+			this.printFont = wbtable.getPrintFont();
+			this.rendererSetup = wbtable.getRendererSetup();
 			this.filter = wbtable.getHighlightExpression();
 			this.isModifiedColumn = doModificationHighlight(wbtable, row, col);
 		}
@@ -224,8 +228,15 @@ public class ToolTipRenderer
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
 		initDisplay(table, value, selected, focus, row, col);
-		this.setFont(table.getFont());
-
+		if (isPrinting && printFont != null)
+		{
+			this.setFont(printFont);
+		}
+		else
+		{
+			this.setFont(table.getFont());
+		}
+		
 		if (value != null)
 		{
 			prepareDisplay(value);
