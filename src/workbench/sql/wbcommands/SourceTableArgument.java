@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -127,7 +128,14 @@ public class SourceTableArgument
 			else
 			{
 				TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t));
-				result.add(tbl);
+				if (tbl != null)
+				{
+					result.add(tbl);
+				}
+				else
+				{
+					LogMgr.logDebug("SourceTableArgument.parseArgument()", "Table " + t + " not found!");
+				}
 			}
 		}
 		return result;
