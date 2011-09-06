@@ -127,6 +127,16 @@ public class WbSwingUtilities
 	}
 
 	/**
+	 * A simple wrapper around EventQueue.invokeLater().
+	 *
+	 * @param runner the task to execute
+	 */
+	public static void invokeLater(Runnable runner)
+	{
+		EventQueue.invokeLater(runner);
+	}
+	
+	/**
 	 * Synchronously execute code on the EDT.
 	 * If the current thread is the EDT, this merely calls r.run()
 	 * otherwise EventQueue.invokeAndWait() is called with the passed runnable.
