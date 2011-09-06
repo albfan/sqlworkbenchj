@@ -142,7 +142,6 @@ public class JoinCreator
 	private Integer getTableIndexBeforeCursor()
 	{
 		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
-		//Collections.sort(tableIndex);
 		for (int i=0; i < tableIndex.size(); i++)
 		{
 			if (tableIndex.get(i) > cursorPos && i > 0)

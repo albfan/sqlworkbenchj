@@ -39,7 +39,7 @@ public class PlacementChooser
 
 	public void showPlacement()
 	{
-		String placement = Settings.getInstance().getProperty(PLACEMENT_PROPERTY, "top");
+		String placement = getPlacementSettingValue();
 		if ("top".equals(placement))
 		{
 			setSelectedIndex(0);
@@ -58,10 +58,15 @@ public class PlacementChooser
 		}
 	}
 
+	private static String getPlacementSettingValue()
+	{
+		return Settings.getInstance().getProperty(PLACEMENT_PROPERTY, "top");
+	}
+
 	public static int getPlacementLocation()
 	{
-		String tabLocation = Settings.getInstance().getProperty(PLACEMENT_PROPERTY, "bottom");
-		int location = JTabbedPane.BOTTOM;
+		String tabLocation = getPlacementSettingValue();
+		int location = JTabbedPane.TOP;
 		if (tabLocation.equalsIgnoreCase("top"))
 		{
 			location = JTabbedPane.TOP;
@@ -76,13 +81,13 @@ public class PlacementChooser
 		}
 		return location;
 	}
-	
+
 	public void saveSelection()
 	{
 		String placement = getPlacement();
 		Settings.getInstance().setProperty(PLACEMENT_PROPERTY, placement);
 	}
-	
+
 	private String getPlacement()
 	{
 		int placement = getSelectedIndex();
@@ -97,6 +102,6 @@ public class PlacementChooser
 			case 3:
 				return "right";
 		}
-		return "bottom";
+		return "top";
 	}
 }

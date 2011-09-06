@@ -77,7 +77,7 @@ public class ConsoleStatusBar
 	}
 
 	@Override
-	public void repaint()
+	public void doRepaint()
 	{
 	}
 

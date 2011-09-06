@@ -316,7 +316,7 @@ public class ConnectionSelector
 	}
 
 	@Override
-	public void repaint()
+	public void doRepaint()
 	{
 		if (this.connectingInfo != null) connectingInfo.forceRepaint();
 	}

@@ -19,6 +19,6 @@ public interface StatusBar
 	void setStatusMessage(String message);
 	void setStatusMessage(String message, int duration);
 	void clearStatusMessage();
-	void repaint();
+	void doRepaint();
 	String getText();
 }

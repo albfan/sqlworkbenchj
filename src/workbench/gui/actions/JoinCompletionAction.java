@@ -17,6 +17,7 @@ import java.sql.SQLException;
 
 import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.StatusBar;
@@ -69,37 +70,63 @@ public class JoinCompletionAction
 			return;
 		}
 
-		StatusBar statusbar = client.getStatusBar();
-
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (!"SELECT".equalsIgnoreCase(verb))
 		{
 			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
-			statusbar.setStatusMessage(msg, 2500);
+			setStatusMessage(msg, 2500);
 			return;
 		}
 
 		try
 		{
-			statusbar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
+			setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"), 0);
 			JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
 			String condition = creator.getJoinCondition();
 			if (StringUtil.isNonBlank(condition))
 			{
 				editor.insertText(condition + " ");
-				statusbar.clearStatusMessage();
+				setStatusMessage("", 0);
 			}
 			else
 			{
-				statusbar.setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
+				setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
 			}
 		}
 		catch (SQLException ex)
 		{
 			LogMgr.logWarning("JoinCompletionAction.executeAction()", "Error retrieving condition", ex);
-			statusbar.clearStatusMessage();
+			setStatusMessage("", 0);
 		}
 	}
 
+	private void setStatusMessage(final String msg, final int duration)
+	{
+		final StatusBar statusbar = client.getStatusBar();
+		if (statusbar == null)
+		{
+			return;
+		}
 
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (StringUtil.isEmptyString(msg))
+				{
+					statusbar.clearStatusMessage();
+				}
+				else if (duration > 0)
+				{
+					statusbar.setStatusMessage(msg, duration);
+				}
+				else
+				{
+					statusbar.setStatusMessage(msg);
+				}
+				statusbar.doRepaint();
+			}
+		});
+	}
 }

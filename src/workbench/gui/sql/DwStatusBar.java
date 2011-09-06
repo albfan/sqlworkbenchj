@@ -376,7 +376,7 @@ public class DwStatusBar
 	 * Clears the status bar by displaying the default message.
 	 */
 	@Override
-	public void clearStatusMessage()
+	public final void clearStatusMessage()
 	{
 		this.setStatusMessage(this.readyMsg);
 	}
@@ -410,6 +410,12 @@ public class DwStatusBar
 	{
 		this.tfMaxRows.selectAll();
 		this.tfMaxRows.requestFocusInWindow();
+	}
+
+	@Override
+	public void doRepaint()
+	{
+		this.forcePaint();
 	}
 
 	@Override

@@ -58,7 +58,7 @@ public class MacroDefinitionPanel
 	private EditorPanel macroEditor;
 	private MacroDefinition currentMacro;
 	private AutoCompletionAction completeAction;
-	
+
 	/**
 	 * Create a new macro panel
 	 * @param l the listener to be notified when the macro name changes
@@ -104,7 +104,7 @@ public class MacroDefinitionPanel
 	 * be called.
 	 *
 	 * @param macro
-	 * @see #applyChanges() 
+	 * @see #applyChanges()
 	 */
 	public void setMacro(MacroDefinition macro)
 	{
@@ -163,7 +163,7 @@ public class MacroDefinitionPanel
 				}
 
 				@Override
-				public void repaint()
+				public void doRepaint()
 				{
 				}
 
@@ -173,7 +173,7 @@ public class MacroDefinitionPanel
 					return "";
 				}
 			});
-			
+
 			completeAction.setConnection(conn);
 			completeAction.setEnabled(true);
 		}
@@ -185,7 +185,7 @@ public class MacroDefinitionPanel
 		}
 
 	}
-	
+
 	public void applyChanges()
 	{
 		if (currentMacro != null && macroEditor.isModified())
