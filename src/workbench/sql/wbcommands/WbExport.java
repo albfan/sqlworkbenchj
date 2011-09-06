@@ -616,7 +616,7 @@ public class WbExport
 			String types = cmdLine.getValue(CommonArgs.ARG_TYPES);
 			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, types, this.currentConnection);
 			tablesToExport = argParser.getTables();
-			if (tablesToExport.isEmpty())
+			if (tablesToExport.isEmpty() && cmdLine.isArgPresent(ARG_SOURCETABLE))
 			{
 				String key = "ErrImportTableNotFound";
 				if (argParser.wasWildCardArgument())

@@ -525,7 +525,7 @@ public class WbExportTest
 		StatementRunner runner = util.createConnectedStatementRunner(connection);
 		runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
 		StatementRunnerResult result = runner.getResult();
-//			System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
+//		System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
 		runner.runStatement("select  \n" +
 					 "   case \n" +
 					 "     when nr = 1 then 'first.jpg' \n" +
@@ -534,7 +534,6 @@ public class WbExportTest
 					 "   end as fname,  \n" +
 					 "   data \n" +
 					 "from blob_test ");
-		result = runner.getResult();
 		assertEquals("No export file created", true, exportFile.exists());
 
 		File bfile = new File(this.basedir, "first.jpg");
