@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2011-11-17">
+  <release build="-1" date="2011-12-11">
+    <entry dev-build="8" type="enh">A new option for WbDataDiff is available to define alternat key columns for each table. See the manual for details.</entry>
     <entry dev-build="8" type="enh">"Help -&gt; Show DBMS Manual" now displays the online manual corresponding to the version of the DBMS</entry>
     <entry dev-build="8" type="enh">For Oracle a subset of the SQL*Plus SHOW command is now supported</entry>
     <entry dev-build="8" type="enh">A new option is available to automatically save connection profiles if the connect dialog is closed with OK.</entry>
