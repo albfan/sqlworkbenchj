@@ -11,7 +11,11 @@
  */
 package workbench.db.compare;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ExportType;
@@ -40,6 +44,7 @@ public class RowDataComparer
 	private XmlRowDataConverter xmlConverter;
 	private String sqlDateLiteral;
 	private WbFile baseDir;
+	private Set<String> excludeColumns;
 
 	/**
 	 * Compares two database rows.
@@ -174,6 +179,20 @@ public class RowDataComparer
 		}
 	}
 
+	public void excludeColumns(Set<String> columns, ResultInfo info)
+	{
+		ColumnIdentifier[] resultColumns = info.getColumns();
+		List<ColumnIdentifier> toExport = new ArrayList<ColumnIdentifier>();
+		for (ColumnIdentifier col : resultColumns)
+		{
+			if (!columns.contains(col.getColumnName()))
+			{
+				toExport.add(col);
+			}
+		}
+		sqlConverter.setColumnsToExport(toExport);
+	}
+	
 	/**
 	 * Returns the representation for the changes between the rows
 	 * defined by setRows().

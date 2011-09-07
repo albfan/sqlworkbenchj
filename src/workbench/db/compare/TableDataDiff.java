@@ -90,6 +90,8 @@ public class TableDataDiff
 	private long currentRowNumber;
 
 	private Map<String, Set<String>> alternateKeys;
+	private Set<String> realPKCols;
+	private boolean excludeRealPK;
 
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
@@ -131,6 +133,21 @@ public class TableDataDiff
 	{
 		this.errors.append(msg);
 		this.errors.appendNewLine();
+	}
+
+	/**
+	 * Controls the usage of the real PK columns in case alternate keys are defined.
+	 *
+	 * If this is set to true, the real PK will not be included in generated INSERT statements.
+	 *
+	 * If no alternate keys are defined, this flag is ignored.
+	 *
+	 * @param flag  true exclude real PK in INSERT statements
+	 *              false include real PK in INSERT statements
+	 */
+	public void setExcludeRealPK(boolean flag)
+	{
+		this.excludeRealPK = flag;
 	}
 
 	public void setAlternateKeys(Map<String, Set<String>> mapping)
@@ -262,6 +279,7 @@ public class TableDataDiff
 		if (!alternatePK.isEmpty() && columnsToIgnore == null)
 		{
 			columnsToIgnore = CollectionUtil.caseInsensitiveSet();
+			realPKCols = CollectionUtil.caseInsensitiveSet();
 		}
 
 		for (ColumnIdentifier col : cols)
@@ -275,6 +293,7 @@ public class TableDataDiff
 			{
 				// when using an alternate PK the real PK columns need to be ignored
 				columnsToIgnore.add(col.getColumnName());
+				if (excludeRealPK) realPKCols.add(col.getColumnName());
 			}
 		}
 
@@ -418,6 +437,10 @@ public class TableDataDiff
 				Writer writerToUse = null;
 				comparer.setRows(toInsert, i > -1 ? checkRows.get(i) : null);
 				comparer.ignoreColumns(columnsToIgnore, ri);
+				if (excludeRealPK && CollectionUtil.isNonEmpty(realPKCols))
+				{
+					comparer.excludeColumns(realPKCols, info);
+				}
 
 				String output = comparer.getMigration(currentRowNumber);
 

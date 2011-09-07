@@ -84,7 +84,7 @@ another_variable=24</programlisting>
 
   </section>
 
-  <section id="vardef-select">
+  <section id="vardef-read-content">
     <title>Populate a variable from a file</title>
     <para>
       A variable can also be defined by reading the content of a file (this is different from

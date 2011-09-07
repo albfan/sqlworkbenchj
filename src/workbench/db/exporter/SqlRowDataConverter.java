@@ -73,7 +73,7 @@ public class SqlRowDataConverter
 	}
 
 	@Override
-	public void setOriginalConnection(WbConnection con)
+	public final void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
 		this.literalFormatter = new SqlLiteralFormatter(con);

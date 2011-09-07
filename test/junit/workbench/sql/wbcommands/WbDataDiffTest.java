@@ -29,7 +29,6 @@ import workbench.util.WbFile;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import workbench.util.ArgumentParser;
-import workbench.util.ArgumentType;
 
 /**
  *
@@ -459,6 +458,5 @@ public class WbDataDiffTest
 		assertTrue(foocols.contains("col1"));
 		assertTrue(foocols.contains("col2"));
 		assertTrue(foocols.contains("col3"));
-
 	}
 }

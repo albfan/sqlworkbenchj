@@ -235,6 +235,8 @@ public class TableDataDiffTest
 			"values (3, 'Ford', 'Prefect', 'fordbar');\n " +
 			"insert into person (id, firstname, lastname, some_data) " +
 			"values (4, 'Tricia', 'McMillian', 'nothing');\n " +
+			"insert into person (id, firstname, lastname, some_data) " +
+			"values (42, 'Prostetnic', 'Jeltz', 'something');\n " +
 			"commit;\n";
 		TestUtil.executeScript(source, insert);
 		String insert2 =
@@ -258,13 +260,35 @@ public class TableDataDiffTest
 		diff.setAlternateKeys(alternatePk);
 
 		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
+		diff.setExcludeRealPK(false);
 		diff.doSync();
 //		System.out.println(updates.toString());
-		assertTrue(inserts.toString().length() == 0);
+//		System.out.println(inserts.toString());
 		ScriptParser p = new ScriptParser(updates.toString());
 		assertEquals(1, p.getSize());
 		String sync = p.getCommand(0);
 		assertTrue(sync.indexOf("SET SOME_DATA = 'nothing'") > -1);
 		assertTrue(sync.indexOf("WHERE FIRSTNAME = 'Tricia' AND LASTNAME = 'McMillian'") > -1);
+
+		p = new ScriptParser(inserts.toString());
+		assertEquals(1, p.getSize());
+		sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
+		assertTrue(sync.startsWith("INSERT INTO PERSON"));
+		assertTrue(sync.endsWith("(42, 'Prostetnic', 'Jeltz', 'something')"));
+
+		diff = new TableDataDiff(source, target);
+		updates = new StringWriter(2500);
+		inserts = new StringWriter(2500);
+		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
+		diff.setExcludeRealPK(true);
+		diff.setAlternateKeys(alternatePk);
+		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
+		diff.doSync();
+
+		p = new ScriptParser(inserts.toString());
+		sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
+		assertTrue(sync.startsWith("INSERT INTO PERSON"));
+		assertTrue(sync.endsWith("('Prostetnic', 'Jeltz', 'something')"));
+
 	}
 }

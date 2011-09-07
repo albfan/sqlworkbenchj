@@ -41,10 +41,17 @@ public class SimpleStatusBar
 	}
 
 	@Override
+	public void doRepaint()
+	{
+		repaint();
+	}
+
+	@Override
 	public void setStatusMessage(final String message)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				setText(message);
@@ -57,6 +64,7 @@ public class SimpleStatusBar
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				setText("");

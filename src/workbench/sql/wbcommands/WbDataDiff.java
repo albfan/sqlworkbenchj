@@ -59,6 +59,7 @@ public class WbDataDiff
 	public static final String PARAM_IGNORE_COLS = "ignoreColumns";
 	public static final String PARAM_OUTPUT_TYPE = "type";
 	public static final String PARAM_ALTERNATE_KEYS = "alternateKey";
+	public static final String PARAM_EXCLUDE_REAL_PK = "excludeRealPK";
 
 	private WbFile outputDir;
 	private TableDataDiff dataDiff;
@@ -77,6 +78,7 @@ public class WbDataDiff
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
 		cmdLine.addArgument(WbExport.ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_ALTERNATE_KEYS, ArgumentType.Repeatable);
+		cmdLine.addArgument(PARAM_EXCLUDE_REAL_PK, ArgumentType.BoolArgument);
 
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
@@ -124,7 +126,7 @@ public class WbDataDiff
 		{
 			return null;
 		}
-		
+
 		for (String def : list)
 		{
 			String[] elements = def.split("=");
@@ -277,7 +279,8 @@ public class WbDataDiff
 
 		Map<String, Set<String>> alternatekeys = getAlternateKeys(cmdLine, result);
 		dataDiff.setAlternateKeys(alternatekeys);
-
+		dataDiff.setExcludeRealPK(cmdLine.getBoolean(PARAM_EXCLUDE_REAL_PK, false));
+		
 		try
 		{
 			for (int i=0; i < tableCount; i++)
