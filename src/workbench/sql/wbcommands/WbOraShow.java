@@ -225,16 +225,16 @@ public class WbOraShow
 			"       update_comment \n" +
 			"from v$parameter\n ";
 		ResultSet rs = null;
-		StatementRunnerResult result = new StatementRunnerResult(sql);
+
+		if (parameter != null)
+		{
+			query += "where name like lower('%" + parameter + "%')\n ";
+		}
+		query += "order by name";
+		StatementRunnerResult result = new StatementRunnerResult(query);
 
 		try
 		{
-			if (parameter != null)
-			{
-				query += "where name like lower('%" + parameter + "%')\n ";
-			}
-			query += "order by name";
-
 			currentStatement = this.currentConnection.createStatementForQuery();
 			rs = currentStatement.executeQuery(query);
 			processResults(result, true, rs);
