@@ -478,6 +478,20 @@ public class ConnectionMgr
 		LogMgr.logWarning("ConnectionMgr.abortAll()", "Aborting all connections finished");
 	}
 
+	public synchronized void dumpConnections()
+	{
+		if (LogMgr.isDebugEnabled())
+		{
+			StringBuilder msg = new StringBuilder(activeConnections.size() * 20);
+			for (WbConnection conn : activeConnections.values())
+			{
+				msg.append("Active connection: ");
+				msg.append(conn == null ? "null" : conn.toString());
+			}
+			LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString());
+		}
+	}
+
 	public synchronized void disconnect(WbConnection con)
 	{
 		if (con == null) return;

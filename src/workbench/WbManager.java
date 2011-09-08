@@ -598,6 +598,7 @@ public final class WbManager
 					win.disconnect(false, false, false);
 					win.setVisible(false);
 					win.dispose();
+					ConnectionMgr.getInstance().dumpConnections();
 				}
 			};
 			t.start();
