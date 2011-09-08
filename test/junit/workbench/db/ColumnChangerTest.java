@@ -163,4 +163,28 @@ public class ColumnChangerTest
 		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
 
+	@Test
+	public void testMySQL()
+	{
+		DbSettings settings = new DbSettings("mysql", "MySQL");
+		ColumnChanger changer = new ColumnChanger(settings);
+
+		assertTrue(changer.canAddColumn());
+		assertTrue(changer.canAlterType());
+		assertTrue(changer.canChangeComment());
+		assertTrue(changer.canChangeNullable());
+		assertTrue(changer.canRenameColumn());
+
+		TableIdentifier table = new TableIdentifier("PERSON");
+		ColumnIdentifier oldCol = new ColumnIdentifier("FIRST_NAME", java.sql.Types.VARCHAR, false);
+		oldCol.setDbmsType("VARCHAR(20)");
+		oldCol.setIsNullable(false);
+
+		ColumnIdentifier newCol = oldCol.createCopy();
+		newCol.setColumnName("FIRSTNAME");
+		newCol.setIsNullable(false);
+
+		String alterScript = changer.getAlterScript(table, oldCol, newCol);
+		assertEquals("ALTER TABLE PERSON CHANGE FIRST_NAME FIRSTNAME VARCHAR(20) NOT NULL  COMMENT '';", alterScript.trim());
+	}
 }

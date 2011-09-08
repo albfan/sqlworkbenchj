@@ -166,6 +166,17 @@ public class ColumnIdentifierTest
 
 		copy = col.createCopy();
 		assertEquals("42", copy.getDefaultValue());
+
+		col = new ColumnIdentifier("NON_NULL", Types.VARCHAR, true);
+		col.setDbmsType("VARCHAR(50)");
+		col.setIsNullable(false);
+
+		copy = col.createCopy();
+		assertEquals(col.isNullable(), copy.isNullable());
+		
+		col.setIsNullable(true);
+		copy = col.createCopy();
+		assertEquals(col.isNullable(), copy.isNullable());
 	}
 
 	@Test

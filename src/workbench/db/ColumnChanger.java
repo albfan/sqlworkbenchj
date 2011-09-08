@@ -148,11 +148,16 @@ public class ColumnChanger
 		if (StringUtil.isBlank(defaultValue))
 		{
 			sql = sql.replace("DEFAULT " + PARAM_DEFAULT_VALUE, "");
+			sql = sql.replace(PARAM_DEFAULT_VALUE, "");
 		}
 		else
 		{
 			sql = sql.replace(PARAM_DEFAULT_VALUE, defaultValue);
 		}
+
+		String dataType = newCol.getDbmsType();
+		sql = sql.replace(PARAM_NEW_DATATYPE, dataType);
+
 		return sql;
 	}
 
