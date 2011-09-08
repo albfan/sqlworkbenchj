@@ -509,6 +509,10 @@ public class ConnectionMgr
 			{
 				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 			}
+			else
+			{
+				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting connection with ID=" + conn.toString());
+			}
 
 			conn.runPreDisconnectScript();
 
