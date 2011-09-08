@@ -393,7 +393,7 @@ public class SqlCommand
 			}
 		}
 
-		if (currentConnection == null || currentConnection.isClosed())
+		if (currentConnection == null || currentConnection.isClosed() || currentConnection.getMetadata() == null)
 		{
 			LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
 			return;
@@ -403,7 +403,7 @@ public class SqlCommand
 		boolean firstResultProcessed = (firstResult == null);
 
 		ResultSet rs = null;
-		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : false);
+		boolean multipleUpdateCounts = this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts();
 
 		int counter = 0;
 		int maxLoops = currentConnection.getDbSettings().getMaxResults();
@@ -797,10 +797,10 @@ public class SqlCommand
 	protected boolean isMultiple(String sql)
 	{
 		if (this.currentConnection == null) return false;
+		if (this.currentConnection.getMetadata() == null) return false;
 		DbSettings settings = currentConnection.getDbSettings();
 		if (settings.supportsBatchedStatements())
 		{
-			// TODO: analyze the statement properly to find out if it is really a batched statement.
 			return (sql.indexOf('\n') > -1);
 		}
 		return false;
