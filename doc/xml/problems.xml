@@ -359,7 +359,7 @@ SELECT 42 FROM dual;</programlisting>
         This behaviour of the drivers can be changed by adding an additional parameter to the
         JDBC URL that is used to connect to the database. For the jTDS driver append
         <literal>useCursors=true</literal> to the URL, e.g.
-        <literal>jdbc:jtds:sqlserver://localhost:2068;useCursors=true</literal>.
+        <literal>jdbc:jtds:sqlserver://localhost:2068;useCursors=true</literal>
       </para>
       <para>
         The URL parameters for the jTDS driver are listed here: <ulink url="http://jtds.sourceforge.net/faq.html#urlFormat"/>
@@ -367,7 +367,7 @@ SELECT 42 FROM dual;</programlisting>
       <para>
         For the Microsoft driver, use the parameter <literal>selectMethod=cursor</literal> to
         switch to a cursor based retrieval that does not buffer all rows within the driver, e.g.
-        <literal>jdbc:sqlserver://localhost:2068;selectMethod=cursor</literal>.
+        <literal>jdbc:sqlserver://localhost:2068;selectMethod=cursor</literal>
       </para>
       <para>
         The URL parameters for the Microsoft driver are listed here:
