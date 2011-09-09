@@ -572,11 +572,7 @@ public class DbSettings
 	public boolean isViewType(String type)
 	{
 		if (type == null) return false;
-		type = type.toLowerCase();
-		if (type.toUpperCase().indexOf("VIEW") > -1) return true;
-		String viewTypes = Settings.getInstance().getProperty(prefix + "additional.viewtypes", "view").toLowerCase();
-		List types = StringUtil.stringToList(viewTypes, ",", true, true, false);
-		return types.contains(type.toLowerCase());
+		return getViewTypes().contains(type);
 	}
 
 	public boolean isSynonymType(String type)
@@ -1115,6 +1111,16 @@ public class DbSettings
 		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
 
 		return Settings.getInstance().getProperty(prefix + "create.table." + type.toLowerCase(), defaultSql);
+	}
+
+	public Set<String> getViewTypes()
+	{
+		List<String> types = Settings.getInstance().getListProperty("workbench.db.viewtypes", false, "VIEW");
+		List<String> dbTypes = Settings.getInstance().getListProperty(prefix + "additional.viewtypes", false, null);
+		Set<String> allTypes = CollectionUtil.caseInsensitiveSet();
+		allTypes.addAll(types);
+		allTypes.addAll(dbTypes);
+		return allTypes;
 	}
 
 	/**

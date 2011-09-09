@@ -54,7 +54,7 @@ public class SchemaReporter
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private List<ReportProcedure> procedures = new ArrayList<ReportProcedure>();
 	private List<ReportSequence> sequences = new ArrayList<ReportSequence>();
-	private List<String> types;
+	private Set<String> types;
 	private List<String> schemas;
 
 	private TagWriter tagWriter = new TagWriter();
@@ -76,7 +76,8 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = conn.getMetadata().getTableTypes();
+		types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(conn.getMetadata().getTableTypes());
 		setIncludeViews(true);
 	}
 
@@ -135,12 +136,12 @@ public class SchemaReporter
 	{
 		if (flag)
 		{
-			types.add(this.dbConn.getMetadata().getViewTypeName());
+			types.addAll(this.dbConn.getDbSettings().getViewTypes());
 			types.add(DbMetadata.MVIEW_NAME);
 		}
 		else
 		{
-			types.remove(this.dbConn.getMetadata().getViewTypeName());
+			types.removeAll(this.dbConn.getDbSettings().getViewTypes());
 			types.remove(DbMetadata.MVIEW_NAME);
 		}
 	}

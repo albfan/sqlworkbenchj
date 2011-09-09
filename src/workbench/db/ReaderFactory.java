@@ -32,13 +32,11 @@ import workbench.resource.Settings;
 
 /**
  * A factory to create instances of the various readers specific for a DBMS.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ReaderFactory
 {
-	public static final Object READER_LOCK = new Object();
-
 	public static ProcedureReader getProcedureReader(DbMetadata meta)
 	{
 		if (meta.isOracle())

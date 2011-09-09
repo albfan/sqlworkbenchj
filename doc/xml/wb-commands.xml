@@ -85,6 +85,17 @@
 						for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
 					</entry>
 				</row>
+
+				<row>
+					<entry>-types</entry>
+					<entry>A (comma separated) list of object types to include. By default <literal>TABLE</literal>s and
+          <literal>VIEW</literal>s are included. To include e.g. <literal>SYSTEM VIEW</literal>s and
+          <literal>TEMPORARY TABLE</literal>s, use the following option:
+          <literal>-types='TABLE,VIEW,SYSTEM VIEW,TEMPORARY TABLE'</literal>. If you include type names that contain
+          a space (or e.g. a dash) you have to quote the whole list, not just the single value.
+					</entry>
+				</row>
+
 				<row>
 					<entry>-includeTables</entry>
 					<entry>Control the output of table information for the report. The default is

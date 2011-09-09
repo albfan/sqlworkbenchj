@@ -98,6 +98,8 @@ public class DbMetadata
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
 
+	private final Object readerLock = new Object();
+
 	private String schemaTerm;
 	private String catalogTerm;
 	private String productName;
@@ -451,7 +453,7 @@ public class DbMetadata
 
 	public ProcedureReader getProcedureReader()
 	{
-		synchronized (ReaderFactory.READER_LOCK)
+		synchronized (readerLock)
 		{
 			if (this.procedureReader == null)
 			{
@@ -463,7 +465,7 @@ public class DbMetadata
 
 	public ViewReader getViewReader()
 	{
-		synchronized (MVIEW_NAME)
+		synchronized (readerLock)
 		{
 			if (this.viewReader == null)
 			{
@@ -532,7 +534,7 @@ public class DbMetadata
 
 	public IndexReader getIndexReader()
 	{
-		synchronized (ReaderFactory.READER_LOCK)
+		synchronized (readerLock)
 		{
 			if (indexReader == null)
 			{
@@ -2685,9 +2687,9 @@ public class DbMetadata
 		return false;
 	}
 
-	public synchronized ConstraintReader getConstraintReader()
+	public ConstraintReader getConstraintReader()
 	{
-		synchronized (ReaderFactory.READER_LOCK)
+		synchronized (readerLock)
 		{
 			if (constraintReader == null)
 			{
