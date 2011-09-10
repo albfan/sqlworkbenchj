@@ -237,7 +237,6 @@ public class WbSchemaReport
 		if (anObject == null)
 		{
 			this.currentTable = 0;
-			return;
 		}
 		else
 		{

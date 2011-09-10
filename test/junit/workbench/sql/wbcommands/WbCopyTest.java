@@ -54,7 +54,7 @@ public class WbCopyTest
 	{
 		ConnectionMgr.getInstance().disconnectAll();
 	}
-	
+
 	@Test
 	public void testTableWithSchema()
 		throws Exception
@@ -70,35 +70,35 @@ public class WbCopyTest
 			WbCopy copyCmd = new WbCopy();
 			copyCmd.setConnection(source);
 
-			TestUtil.executeScript(source, 
+			TestUtil.executeScript(source,
 				"create schema scott;\n" +
 				"set schema scott;\n" +
-				"create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" + 
+				"create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" +
 				"create table address (person_id integer, address_details varchar(100));\n" +
 
 				"insert into person (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01');\n"+
-				"insert into person (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202');\n" + 
-				"insert into person (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303');\n" + 
+				"insert into person (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202');\n" +
+				"insert into person (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303');\n" +
 				"insert into person (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404');\n" +
 
 				"insert into address (person_id, address_details) values (1, 'Arlington');\n" +
-				"insert into address (person_id, address_details) values (2, 'Heart of Gold');\n" + 
-				"insert into address (person_id, address_details) values (3, 'Sleepy by Lane');\n" + 
+				"insert into address (person_id, address_details) values (2, 'Heart of Gold');\n" +
+				"insert into address (person_id, address_details) values (3, 'Sleepy by Lane');\n" +
 				"insert into address (person_id, address_details) values (4, 'Betelgeuse');\n"+
 				"commit;");
 
-			TestUtil.executeScript(target, 
+			TestUtil.executeScript(target,
 				"create schema scott;\n" +
-				"create table scott.person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" + 
+				"create table scott.person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" +
 				"create table scott.address (person_id integer, address_details varchar(100));\n" +
 				"create schema other;\n" +
 				"alter user sa set initial schema other;\n" +
 				"commit;");
-			
-			String sql = 
-				"wbcopy -deleteTarget=true " + 
-				"       -sourceTable=scott.person,scott.address " + 
-				"       -sourceProfile='namedSchemaCopySource' " + 
+
+			String sql =
+				"wbcopy -deleteTarget=true " +
+				"       -sourceTable=scott.person,scott.address " +
+				"       -sourceProfile='namedSchemaCopySource' " +
 				"       -targetProfile='namedSchemaCopyTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
@@ -131,9 +131,9 @@ public class WbCopyTest
 		{
 			ConnectionMgr.getInstance().removeProfile(source.getProfile());
 			ConnectionMgr.getInstance().removeProfile(target.getProfile());
-		}		
+		}
 	}
-	
+
 	@Test
 	public void testCopyWithSyncDelete()
 		throws Exception
@@ -280,7 +280,7 @@ public class WbCopyTest
 	}
 
 	@Test
-	public void testCreateWithMap() 
+	public void testCreateWithMap()
 		throws Exception
 	{
 		TestUtil util = new TestUtil("CreateOrderedTest");
@@ -838,7 +838,7 @@ public class WbCopyTest
 			}
 			SqlUtil.closeResult(rs);
 			assertEquals(4, personCount);
-			
+
 			Number addressCount = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from address");
 			assertEquals("Wrong number of rows copied to address table", 4, addressCount.intValue());
 			SqlUtil.closeResult(rs);
@@ -1051,7 +1051,7 @@ public class WbCopyTest
 
 		try
 		{
-			target.getDbSettings().setCreateTableTemplate("junit_type", 
+			target.getDbSettings().setCreateTableTemplate("junit_type",
 				"CREATE TEMPORARY TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER  +
 				" ( " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " ) ");
 
@@ -1074,13 +1074,13 @@ public class WbCopyTest
 				"-targetProfile='copyCreateTestTarget' ";
 
 			WbCopy copyCmd = new WbCopy();
-			
+
 			// make sure the target connection is not phyiscally closed by WbCopy otherwise
 			// the temporary will not return the correct results.
 			copyCmd.setConnection(target);
-			
+
 			StatementRunnerResult result = copyCmd.execute(sql);
-			
+
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			long participants = copyCmd.getAffectedRows();
 			assertEquals(4, participants);
@@ -1115,7 +1115,7 @@ public class WbCopyTest
 				"-sourceProfile='copyCreateTestSource' " +
 				"-targetProfile='copyCreateTestTarget' ";
 
-			TestUtil.executeScript(target, 
+			TestUtil.executeScript(target,
 				"create table person_2 (person_id integer not null primary key, last_name varchar(50), first_name varchar(50));\n" +
 				"commit;\n");
 
@@ -1123,7 +1123,7 @@ public class WbCopyTest
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
 			Object count = TestUtil.getSingleQueryValue(target, "select count(*) from person_2");
-			assertEquals(4, count);
+			assertEquals(4, ((Number)count).intValue());
 
 			Object lastName = TestUtil.getSingleQueryValue(target, "select last_name from person_2 where person_id = 3");
 			assertNotNull(lastName);
@@ -1146,7 +1146,7 @@ public class WbCopyTest
 			lastName = TestUtil.getSingleQueryValue(target, "select last_name from person_2 where person_id = 3");
 			assertNotNull(lastName);
 			assertEquals("Moviestar", lastName);
-			
+
 		}
 		finally
 		{

@@ -162,9 +162,7 @@ public class WbSchemaReportTest
 				assertTrue(result.isSuccess());
 				assertTrue("File not created", output.exists());
 
-				InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
-				String xml = FileUtil.readCharacters(r);
-				r.close();
+				String xml = FileUtil.readFile(output, "UTF-8");
 
 				String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='S_TEST" + i + "'])");
 				assertEquals("Incorrect table count", "1", count);
@@ -172,12 +170,84 @@ public class WbSchemaReportTest
 				count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='S_VIEW" + i + "'])");
 				assertEquals("Incorrect view count", "1", count);
 			}
-
+			File output = new File(utl.getBaseDir(), "report_all.xml");
+			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -schemas=schema_1,schema_2");
+			assertTrue(result.isSuccess());
+			String xml = FileUtil.readFile(output, "UTF-8");
+			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+			assertEquals("2", count);
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
+	}
+
+//	@Test
+	public void createHSQLDb()
+		throws Exception
+	{
+		util = new TestUtil("schemaReportTest");
+		util.emptyBaseDirectory();
+
+		this.source = util.getHSQLConnection("procReportTest");
+		TestUtil.executeScript(source,
+			"create schema s1;\n" +
+			"create schema s2;\n" +
+			"create table s1.person (id1 integer not null);\n" +
+			"create table s2.person (id2 integer not null);\n" +
+			"CREATE FUNCTION s1.an_hour_before (t TIMESTAMP) \n" +
+						"  RETURNS TIMESTAMP \n" +
+						"  RETURN t - 1 HOUR;\n" +
+			"CREATE FUNCTION s2.two_hours_before (t TIMESTAMP) \n" +
+						"  RETURNS TIMESTAMP \n" +
+						"  RETURN t - 2 HOUR;\n");
+
+		WbSchemaReport report = new WbSchemaReport();
+		report.setConnection(source);
+		File output = new File(util.getBaseDir(), "proc_report_s1.xml");
+		StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -schemas=s1 -includeProcedures=true");
+		assertTrue(result.isSuccess());
+		assertTrue(output.exists());
+		String xml = FileUtil.readFile(output, "UTF-8");
+
+		String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+		assertEquals("Incorrect table count", "1", count);
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/proc-def)");
+		assertEquals("Incorrect procedure count", "1", count);
+
+		String name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/column-def[1]/column-name");
+		assertEquals("ID1", name);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/table-schema/text()");
+		assertEquals("S1", name);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/proc-def[1]/proc-name");
+		assertEquals("AN_HOUR_BEFORE", name);
+
+		util.emptyBaseDirectory();
+		output = new File(util.getBaseDir(), "proc_report_s2.xml");
+
+		result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -schemas=s2 -includeProcedures=true");
+		assertTrue(result.isSuccess());
+		assertTrue(output.exists());
+		xml = FileUtil.readFile(output, "UTF-8");
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+		assertEquals("Incorrect table count", "1", count);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/table-schema");
+		assertEquals("S2", name);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/column-def[1]/column-name");
+		assertEquals("ID2", name);
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/proc-def)");
+		assertEquals("Incorrect procedure count", "1", count);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/proc-def[1]/proc-name");
+		assertEquals("TWO_HOURS_BEFORE", name);
 	}
 
 	private void setupDatabase()
