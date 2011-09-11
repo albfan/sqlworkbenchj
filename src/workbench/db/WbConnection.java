@@ -856,6 +856,11 @@ public class WbConnection
 
 	public String getUrl()
 	{
+		if (profile != null)
+		{
+			return profile.getUrl();
+		}
+
 		try
 		{
 			return this.sqlConnection.getMetaData().getURL();
@@ -869,13 +874,24 @@ public class WbConnection
 	@Override
 	public String toString()
 	{
-		return getId() + ", " + getCurrentUser() + "@" + getUrl();
+		return getId() + ", " + getDisplayUser() + "@" + getUrl();
+	}
+
+	private String getDisplayUser()
+	{
+		if (profile == null)
+		{
+			return getCurrentUser();
+		}
+		return profile.getUsername();
 	}
 
 	/**
 	 * Return a readable display of a connection.
+	 *
 	 * This might actually send a SELECT to the database to
 	 * retrieve the current user or schema.
+	 *
 	 * @see #getCurrentUser()
 	 * @see DbMetadata#getSchemaToUse()
 	 * @see DbMetadata#getCurrentCatalog()
@@ -887,7 +903,7 @@ public class WbConnection
 		{
 			DbMetadata meta = getMetadata();
 			StringBuilder buff = new StringBuilder(100);
-			String user = getCurrentUser();
+			String user = getDisplayUser();
 			buff.append(ResourceMgr.getString("TxtUser"));
 			buff.append('=');
 			buff.append(user);
@@ -913,20 +929,13 @@ public class WbConnection
 			}
 
 			buff.append(", URL=");
-			if (getProfile() != null)
-			{
-				buff.append(getProfile().getUrl());
-			}
-			else
-			{
-				buff.append(getSqlConnection().getMetaData().getURL());
-			}
+			buff.append(getUrl());
 			displayString = buff.toString();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("ConnectionMgr.getDisplayString()", "Could not retrieve connection information", e);
-			displayString = getCurrentUser() + "@" + getUrl();
+			displayString = toString();
 		}
 		return displayString;
 	}

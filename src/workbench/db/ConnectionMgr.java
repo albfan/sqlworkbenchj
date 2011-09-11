@@ -485,25 +485,10 @@ public class ConnectionMgr
 			StringBuilder msg = new StringBuilder(activeConnections.size() * 20);
 			for (WbConnection conn : activeConnections.values())
 			{
-				msg.append("Active connection: ");
-				String connInfo = null;
-				if (conn != null)
-				{
-					// do not use conn.toString() as that might block on the connection!
-					ConnectionProfile prof = conn.getProfile();
-					connInfo = conn.getId();
-					if (prof != null)
-					{
-						connInfo += ", " + prof.getUsername() + "@" + prof.getUrl();
-					}
-					else
-					{
-						connInfo += " (No profile!)";
-					}
-				}
-				msg.append(connInfo);
+				msg.append("Active connection: " + (conn == null ? "(null)" : conn.toString()));
 				msg.append('\n');
 			}
+			
 			if (msg.length() > 0)
 			{
 				LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString().trim());
