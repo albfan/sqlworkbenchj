@@ -506,7 +506,7 @@ public class ConnectionMgr
 			}
 			if (msg.length() > 0)
 			{
-				LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString());
+				LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString().trim());
 			}
 			else
 			{
