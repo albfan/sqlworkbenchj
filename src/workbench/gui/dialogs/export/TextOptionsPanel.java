@@ -23,8 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import workbench.gui.components.WbComboBox;
 import workbench.gui.dialogs.QuoteEscapeSelector;
 import workbench.gui.dialogs.QuoteSettingVerifier;
@@ -43,7 +41,6 @@ public class TextOptionsPanel
 	implements TextOptions
 {
 	private int preferredWidth;
-	private QuoteSettingVerifier verifier;
 
 	public TextOptionsPanel()
 	{
@@ -86,7 +83,9 @@ public class TextOptionsPanel
 		escapeRange.setMaximumSize(max);
 		escapeRange.setPreferredSize(max);
 		((WbComboBox)escapeRange).setPopupWidth(preferredWidth);
-		verifier = new QuoteSettingVerifier(quoteEscape, quoteAlways);
+
+		// The constructor will setup the necessary actions
+		new QuoteSettingVerifier(quoteEscape, quoteAlways);
 	}
 
 	public void saveSettings()
@@ -135,67 +134,80 @@ public class TextOptionsPanel
 		return quoteEscape.getEscapeType();
 	}
 
+	@Override
 	public void setDecimalSymbol(String symbol)
 	{
 		this.decimalChar.setText(symbol);
 	}
 
+	@Override
 	public String getDecimalSymbol()
 	{
 		return decimalChar.getText();
 	}
 
+	@Override
 	public boolean getExportHeaders()
 	{
 		return this.exportHeaders.isSelected();
 	}
 
+	@Override
 	public String getTextDelimiter()
 	{
 		return this.delimiter.getText();
 	}
 
+	@Override
 	public String getTextQuoteChar()
 	{
 		return this.quoteChar.getText();
 	}
 
+	@Override
 	public void setExportHeaders(boolean flag)
 	{
 		this.exportHeaders.setSelected(flag);
 	}
 
+	@Override
 	public void setTextDelimiter(String delim)
 	{
 		this.delimiter.setText(delim);
 	}
 
+	@Override
 	public void setTextQuoteChar(String quote)
 	{
 		this.quoteChar.setText(quote);
 	}
 
+	@Override
 	public boolean getQuoteAlways()
 	{
 		if (!quoteAlways.isEnabled()) return false;
 		return this.quoteAlways.isSelected();
 	}
 
+	@Override
 	public void setQuoteAlways(boolean flag)
 	{
 		this.quoteAlways.setSelected(flag);
 	}
 
+	@Override
 	public void setEscapeRange(CharacterRange range)
 	{
 		this.escapeRange.setSelectedItem(range);
 	}
 
+	@Override
 	public CharacterRange getEscapeRange()
 	{
 		return (CharacterRange)this.escapeRange.getSelectedItem();
 	}
 
+	@Override
 	public String getLineEnding()
 	{
 		String s = (String)lineEnding.getSelectedItem();
@@ -213,6 +225,7 @@ public class TextOptionsPanel
 		}
 	}
 
+	@Override
 	public void setLineEnding(String ending)
 	{
 		if (ending == null) return;
