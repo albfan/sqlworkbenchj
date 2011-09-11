@@ -585,7 +585,7 @@ public final class WbManager
 		{
 			if (!win.saveWorkspace()) return;
 			this.mainWindows.remove(win);
-			WbThread t = new WbThread("WindowDisconnect")
+			WbThread t = new WbThread(win.getWindowId() + " Disconnect")
 			{
 				@Override
 				public void run()
@@ -596,6 +596,7 @@ public final class WbManager
 					// third parameter tells the window not to save the workspace
 					// this does not need to happen on the EDT
 					win.disconnect(false, false, false);
+					
 					win.setVisible(false);
 					win.dispose();
 					ConnectionMgr.getInstance().dumpConnections();

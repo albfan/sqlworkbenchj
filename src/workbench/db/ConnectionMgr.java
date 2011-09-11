@@ -486,9 +486,32 @@ public class ConnectionMgr
 			for (WbConnection conn : activeConnections.values())
 			{
 				msg.append("Active connection: ");
-				msg.append(conn == null ? "null" : conn.toString());
+				String connInfo = null;
+				if (conn != null)
+				{
+					// do not use conn.toString() as that might block on the connection!
+					ConnectionProfile prof = conn.getProfile();
+					connInfo = conn.getId();
+					if (prof != null)
+					{
+						connInfo += ", " + prof.getUsername() + "@" + prof.getUrl();
+					}
+					else
+					{
+						connInfo += " (No profile!)";
+					}
+				}
+				msg.append(connInfo);
+				msg.append('\n');
 			}
-			LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString());
+			if (msg.length() > 0)
+			{
+				LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString());
+			}
+			else
+			{
+				LogMgr.logDebug("ConnectionMgr.dumpConnections()", "No more active connections.");
+			}
 		}
 	}
 
