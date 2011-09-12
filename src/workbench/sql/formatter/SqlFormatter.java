@@ -121,7 +121,7 @@ public class SqlFormatter
 		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
 		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
-		commaAfterLineBreak = Settings.getInstance().getFormatterSetCommaAfterLineBreak();
+		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		setDbId(dbId);
 	}

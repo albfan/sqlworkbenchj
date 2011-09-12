@@ -227,6 +227,8 @@ public class StatementFactory
 		boolean doFormatting = Settings.getInstance().getDoFormatInserts();
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
+		boolean commaAfterNewLine = Settings.getInstance().getFormatterCommaAfterLineBreak();
+		boolean spaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 
@@ -246,10 +248,19 @@ public class StatementFactory
 			sql.append("  ");
 			valuePart.append(lineEnd);
 			valuePart.append("  ");
+
 			if (colsPerLine == 1)
 			{
-				sql.append("  ");
-				valuePart.append("  ");
+				if ((commaAfterNewLine && spaceAfterComma) || !commaAfterNewLine)
+				{
+					sql.append("  ");
+					valuePart.append("  ");
+				}
+				else
+				{
+					sql.append(' ');
+					valuePart.append(' ');
+				}
 			}
 		}
 
@@ -288,10 +299,27 @@ public class StatementFactory
 					{
 						if (colsPerLine == 1)
 						{
-							sql.append(lineEnd);
-							valuePart.append(lineEnd);
-							sql.append("  , ");
-							valuePart.append("  , ");
+							if (commaAfterNewLine)
+							{
+								sql.append(lineEnd);
+								valuePart.append(lineEnd);
+								sql.append("  ,");
+								valuePart.append("  ,");
+								if (spaceAfterComma)
+								{
+									sql.append(' ');
+									valuePart.append(' ');
+								}
+							}
+							else
+							{
+								sql.append(",");
+								valuePart.append(",");
+								sql.append(lineEnd);
+								valuePart.append(lineEnd);
+								sql.append("    ");
+							  valuePart.append("    ");
+							}
 						}
 						else
 						{

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.resource.Settings;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.util.StringUtil;
 
 /**
@@ -142,6 +143,14 @@ public class DummySelect
 		sql.append(';');
 		sql.append(nl);
 
-		return sql.toString();
+		SqlFormatter formatter = new SqlFormatter(sql, con.getDbId());
+		try
+		{
+			return formatter.getFormattedSql();
+		}
+		catch (Exception e)
+		{
+			return sql.toString();
+		}
 	}
 }

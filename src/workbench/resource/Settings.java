@@ -762,12 +762,12 @@ public class Settings
 		setProperty("workbench.sql.formatter.comma.spaceafter", flag);
 	}
 
-	public boolean getFormatterSetCommaAfterLineBreak()
+	public boolean getFormatterCommaAfterLineBreak()
 	{
 	    return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);
 	}
 
-	public void setFormatterSetCommaAfterLineBreak(boolean flag)
+	public void setFormatterCommaAfterLineBreak(boolean flag)
 	{
 	    setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
 	}

@@ -32,6 +32,7 @@ public class FormatterOptionsPanel
 		initComponents();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		funcsLower.setSelected(Settings.getInstance().getFormatterLowercaseFunctions());
@@ -39,11 +40,12 @@ public class FormatterOptionsPanel
 		updateColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInUpdate()));
 		keywordsUpper.setSelected(Settings.getInstance().getFormatterUpperCaseKeywords());
 		spaceAfterComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterComma());
-		commaAfterLineBreak.setSelected(Settings.getInstance().getFormatterSetCommaAfterLineBreak());
+		commaAfterLineBreak.setSelected(Settings.getInstance().getFormatterCommaAfterLineBreak());
 		addSpaceAfterLineBreakComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma());
 		addSpaceAfterLineBreakComma.setEnabled(commaAfterLineBreak.isSelected());
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -56,7 +58,7 @@ public class FormatterOptionsPanel
 		set.setFormatterMaxColumnsInUpdate(StringUtil.getIntValue(updateColumns.getText(),1));
 		set.setFormatterUpperCaseKeywords(keywordsUpper.isSelected());
 		set.setFormatterAddSpaceAfterComma(spaceAfterComma.isSelected());
-		set.setFormatterSetCommaAfterLineBreak(commaAfterLineBreak.isSelected());
+		set.setFormatterCommaAfterLineBreak(commaAfterLineBreak.isSelected());
 		set.setFormatterAddSpaceAfterLineBreakComma(addSpaceAfterLineBreakComma.isSelected());
 	}
 	/** This method is called from within the constructor to
