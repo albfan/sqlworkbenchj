@@ -21,6 +21,7 @@ import workbench.TestUtil;
 import workbench.storage.ColumnData;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -31,13 +32,16 @@ public class ReferenceTableNavigationTest
 
 	@Test
 	public void testChildNavigation()
+		throws Exception
 	{
 		TestUtil util = new TestUtil("childNav");
+		Statement stmt = null;
+		ResultSet rs = null;
 		try
 		{
 			WbConnection con = util.getConnection();
 			Connection sqlCon = con.getSqlConnection();
-			Statement stmt = sqlCon.createStatement();
+			stmt = sqlCon.createStatement();
 			String baseSql = "CREATE TABLE base  \n" +
              "( \n" +
              "   id1  INTEGER NOT NULL, \n" +
@@ -102,13 +106,13 @@ public class ReferenceTableNavigationTest
 			List<List<ColumnData>> rows = new LinkedList<List<ColumnData>>();
 
 			List<ColumnData> row = new LinkedList<ColumnData>();
-			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
-			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(1), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(1), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
 			rows.add(row);
 
 			row = new LinkedList<ColumnData>();
-			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
-			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(2), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(2), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
 			rows.add(row);
 
 			TableIdentifier base = new TableIdentifier("base");
@@ -123,7 +127,7 @@ public class ReferenceTableNavigationTest
 			assertNotNull("Select for Child1 not created", select);
 
 //			System.out.println("select child1 with:" + select);
-			ResultSet rs = stmt.executeQuery(select);
+			rs = stmt.executeQuery(select);
 			int count = 0;
 			while (rs.next())
 			{
@@ -180,12 +184,11 @@ public class ReferenceTableNavigationTest
 				}
 			}
 			assertEquals(3, count);
-
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			SqlUtil.closeAll(rs, stmt);
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
@@ -224,7 +227,7 @@ public class ReferenceTableNavigationTest
 //		{
 //			System.out.println(node.toString());
 //		}
-		ColumnData col1 = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
+		ColumnData col1 = new ColumnData(Integer.valueOf(1), new ColumnIdentifier("ID"));
 		List<ColumnData> row = new ArrayList<ColumnData>();
 		row.add(col1);
 		List<List<ColumnData>> all = new ArrayList<List<ColumnData>>();
@@ -240,13 +243,16 @@ public class ReferenceTableNavigationTest
 
 	@Test
 	public void testParentNavigation()
+		throws Exception
 	{
 		TestUtil util = new TestUtil("parentNav");
+		Statement stmt = null;
+		ResultSet rs = null;
 		try
 		{
 			WbConnection con = util.getConnection();
 			Connection sqlCon = con.getSqlConnection();
-			Statement stmt = sqlCon.createStatement();
+			stmt = sqlCon.createStatement();
 			String baseSql = "CREATE TABLE base  \n" +
              "( \n" +
              "   id1  INTEGER NOT NULL, \n" +
@@ -312,13 +318,13 @@ public class ReferenceTableNavigationTest
 			List<List<ColumnData>> rows = new LinkedList<List<ColumnData>>();
 
 			List<ColumnData> row = new LinkedList<ColumnData>();
-			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
-			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(1), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(1), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
 			rows.add(row);
 
 			row = new LinkedList<ColumnData>();
-			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
-			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(2), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
+			row.add(new ColumnData(Integer.valueOf(2), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
 			rows.add(row);
 
 			TableIdentifier base = new TableIdentifier("child1");
@@ -334,7 +340,7 @@ public class ReferenceTableNavigationTest
 			String select1 = nav.getSelectForParent(tbl, "fk_child1_base", rows);
 
 //			System.out.println("select parent with = " + select1);
-			ResultSet rs = stmt.executeQuery(select1);
+			rs = stmt.executeQuery(select1);
 			int count = 0;
 			while (rs.next())
 			{
@@ -362,10 +368,10 @@ public class ReferenceTableNavigationTest
 			rs.close();
 
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			SqlUtil.closeAll(rs, stmt);
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 

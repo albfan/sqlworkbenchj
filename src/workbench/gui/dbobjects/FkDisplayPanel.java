@@ -13,8 +13,11 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.sql.SQLException;
+import javax.swing.Box;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import workbench.db.FKHandler;
@@ -33,6 +36,7 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 import workbench.util.WbThread;
 
 /**
@@ -43,13 +47,13 @@ public class FkDisplayPanel
 	extends JPanel
 	implements Resettable, Reloadable, Interruptable
 {
-
 	protected WbTable keys;
 	private TableDependencyTreeDisplay dependencyTree;
 	private WbSplitPane splitPanel;
 
 	private ReloadAction reloadTree;
 	private StopAction cancelAction;
+	private JCheckBox retrieveAll;
 
 	private boolean showImportedKeys;
 	private WbConnection dbConnection;
@@ -79,13 +83,29 @@ public class FkDisplayPanel
 		cancelAction = new StopAction(this);
 		cancelAction.setEnabled(false);
 		toolbar.add(reloadTree);
-		toolbar.addSeparator();
 		toolbar.add(cancelAction);
+		toolbar.addSeparator();
 
 		treePanel.add(toolbar, BorderLayout.NORTH);
 		this.splitPanel.setBottomComponent(treePanel);
 		this.add(splitPanel, BorderLayout.CENTER);
 		showImportedKeys = showImported;
+
+		retrieveAll = new JCheckBox(ResourceMgr.getString("LblRefAllLevel"));
+		retrieveAll.setToolTipText(ResourceMgr.getDescription("LblRefAllLevel"));
+		retrieveAll.setBorder(new EmptyBorder(0, 5, 0,0));
+		retrieveAll.setSelected(true);
+		toolbar.add(retrieveAll);
+	}
+
+	public boolean getRetrieveAll()
+	{
+		return retrieveAll.isSelected();
+	}
+	
+	public void setRetrieveAll(boolean flag)
+	{
+		retrieveAll.setSelected(flag);
 	}
 
 	public void setConnection(WbConnection conn)
@@ -172,6 +192,7 @@ public class FkDisplayPanel
 
 	protected void retrieveTree(TableIdentifier table)
 	{
+		dependencyTree.setRetrieveAll(retrieveAll.isSelected());
 		if (showImportedKeys)
 		{
 			dependencyTree.readReferencedTables(table);

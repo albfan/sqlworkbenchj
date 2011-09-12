@@ -59,6 +59,7 @@ public class TableDependencyTreeDisplay
 	private JTree tree;
 	private TableLister tables;
 	private TableDependency dependencyReader;
+	private boolean retrieveAll = true;
 
 	public TableDependencyTreeDisplay(TableLister lister)
 	{
@@ -74,6 +75,11 @@ public class TableDependencyTreeDisplay
 		{
 			dependencyReader.cancel();
 		}
+	}
+
+	public void setRetrieveAll(boolean flag)
+	{
+		retrieveAll = flag;
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -101,6 +107,7 @@ public class TableDependencyTreeDisplay
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			dependencyReader = new TableDependency(this.connection, aTable);
+			dependencyReader.setRetrieveDirectChildrenOnly(!retrieveAll);
 			if (exportedKeys)
 			{
 				dependencyReader.readTreeForParents();

@@ -1078,7 +1078,8 @@ public class TableListPanel
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
 			props.setProperty(prefix + "exportedtreedivider", Integer.toString(exportedKeys.getDividerLocation()));
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(importedKeys.getDividerLocation()));
-
+			props.setProperty(prefix + "exportedtree.retrieveall", Boolean.toString(exportedKeys.getRetrieveAll()));
+			props.setProperty(prefix + "importedtree.retrieveall", Boolean.toString(importedKeys.getRetrieveAll()));
 			List<String> objectListColumnOrder = tableList.saveColumnOrder();
 			if (objectListColumnOrder != null)
 			{
@@ -1116,6 +1117,9 @@ public class TableListPanel
 			if (loc == 0 || loc > maxWidth) loc = 200;
 			importedKeys.setDividerLocation(loc);
 		}
+
+		importedKeys.setRetrieveAll(props.getBoolProperty(prefix + "importedtree.retrieveall", true));
+		exportedKeys.setRetrieveAll(props.getBoolProperty(prefix + "exportedtree.retrieveall", true));
 
 		String defType = Settings.getInstance().getDefaultExplorerObjectType();
 		if (Settings.getInstance().getStoreExplorerObjectType())
@@ -1235,7 +1239,7 @@ public class TableListPanel
 		if (meta == null) return false;
 		DbSettings dbs = this.dbConnection.getDbSettings();
 		if (dbs == null) return false;
-		
+
 		String type = selectedTable.getType();
 		if (meta.isTableType(type)) return true;
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
