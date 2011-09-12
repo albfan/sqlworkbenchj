@@ -115,6 +115,7 @@ public class CreateDummySqlAction
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		setEnabled(this.selection.getMinSelectionIndex() >= 0);

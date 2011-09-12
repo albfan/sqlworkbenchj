@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.resource.Settings;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -178,7 +179,15 @@ public class DummyDML
 		}
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		String sql = stmt.getExecutableStatement(f) + ";" + nl;
-		return sql;
+		SqlFormatter formatter = new SqlFormatter(sql, con.getDbId());
+		try
+		{
+			return formatter.getFormattedSql();
+		}
+		catch (Exception e)
+		{
+			return sql;
+		}
 	}
 
 }
