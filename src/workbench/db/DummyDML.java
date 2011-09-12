@@ -178,16 +178,10 @@ public class DummyDML
 			stmt = factory.createInsertStatement(dummyData, true, le);
 		}
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		String sql = stmt.getExecutableStatement(f) + ";" + nl;
+		String sql = stmt.getExecutableStatement(f, con) + ";" + nl;
+
 		SqlFormatter formatter = new SqlFormatter(sql, con.getDbId());
-		try
-		{
-			return formatter.getFormattedSql();
-		}
-		catch (Exception e)
-		{
-			return sql;
-		}
+		return formatter.getFormattedSql();
 	}
 
 }

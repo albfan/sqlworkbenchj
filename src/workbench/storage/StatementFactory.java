@@ -69,11 +69,6 @@ public class StatementFactory
 		boolean first = true;
 		int cols = this.resultInfo.getColumnCount();
 
-		boolean doFormatting = Settings.getInstance().getDoFormatUpdates();
-		int columnThresholdForNewline = Settings.getInstance().getFormatUpdateColumnThreshold();
-
-		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
-
 		if (!resultInfo.hasPkColumns()) throw new IllegalArgumentException("Cannot proceed without a primary key");
 
 		DmlStatement dml = null;
@@ -81,10 +76,8 @@ public class StatementFactory
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList<ColumnData> values = new ArrayList<ColumnData>(cols);
 		StringBuilder sql = new StringBuilder("UPDATE ");
-
 		sql.append(getTableNameToUse());
-		if (doFormatting) sql.append("\n  ");
-		sql.append(" SET ");
+		sql.append("\n  SET ");
 		first = true;
 
 		for (int col=0; col < cols; col ++)
@@ -102,8 +95,7 @@ public class StatementFactory
 				}
 				else
 				{
-					sql.append(", ");
-					if (newLineAfterColumn) sql.append("\n       ");
+					sql.append(",\n       ");
 				}
 				String colName = adjustColumnName(this.resultInfo.getColumnName(col));
 
@@ -129,8 +121,7 @@ public class StatementFactory
 				}
 			}
 		}
-		if (doFormatting) sql.append("\n ");
-		sql.append(" WHERE ");
+		sql.append("\nWHERE ");
 		first = true;
 		int count = this.resultInfo.getColumnCount();
 		for (int j=0; j < count; j++)
@@ -217,54 +208,23 @@ public class StatementFactory
 	 */
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List columns)
 	{
-		boolean first = true;
-		DmlStatement dml;
-
 		if (!ignoreStatus && !aRow.isModified()) return null;
 
+		DmlStatement dml;
 		int cols = this.resultInfo.getColumnCount();
 
-		boolean doFormatting = Settings.getInstance().getDoFormatInserts();
-		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
-		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
-		boolean commaAfterNewLine = Settings.getInstance().getFormatterCommaAfterLineBreak();
-		boolean spaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
-		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 
 		ArrayList<ColumnData> values = new ArrayList<ColumnData>(cols);
+
 		StringBuilder sql = new StringBuilder(250);
     sql.append("INSERT INTO ");
+		sql.append(getTableNameToUse());
+		sql.append(" ( ");
+
 		StringBuilder valuePart = new StringBuilder(250);
 
-		sql.append(getTableNameToUse());
-		if (doFormatting) sql.append(lineEnd);
-		else sql.append(' ');
-
-		sql.append('(');
-		if (newLineAfterColumn)
-		{
-			sql.append(lineEnd);
-			sql.append("  ");
-			valuePart.append(lineEnd);
-			valuePart.append("  ");
-
-			if (colsPerLine == 1)
-			{
-				if ((commaAfterNewLine && spaceAfterComma) || !commaAfterNewLine)
-				{
-					sql.append("  ");
-					valuePart.append("  ");
-				}
-				else
-				{
-					sql.append(' ');
-					valuePart.append(' ');
-				}
-			}
-		}
-
-		first = true;
+		boolean first = true;
     String colName = null;
 		int colsInThisLine = 0;
 
@@ -295,46 +255,8 @@ public class StatementFactory
 			{
 				if (!first)
 				{
-					if (newLineAfterColumn && colsInThisLine >= colsPerLine)
-					{
-						if (colsPerLine == 1)
-						{
-							if (commaAfterNewLine)
-							{
-								sql.append(lineEnd);
-								valuePart.append(lineEnd);
-								sql.append("  ,");
-								valuePart.append("  ,");
-								if (spaceAfterComma)
-								{
-									sql.append(' ');
-									valuePart.append(' ');
-								}
-							}
-							else
-							{
-								sql.append(",");
-								valuePart.append(",");
-								sql.append(lineEnd);
-								valuePart.append(lineEnd);
-								sql.append("    ");
-							  valuePart.append("    ");
-							}
-						}
-						else
-						{
-							sql.append(", ");
-							valuePart.append(", ");
-							sql.append(lineEnd);
-							valuePart.append(lineEnd);
-						}
-						colsInThisLine = 0;
-					}
-					else
-					{
-						sql.append(", ");
-						valuePart.append(", ");
-					}
+					sql.append(',');
+					valuePart.append(',');
 				}
 				else
 				{
@@ -357,27 +279,8 @@ public class StatementFactory
 			}
 			colsInThisLine ++;
 		}
-		if (newLineAfterColumn)
-		{
-			sql.append(lineEnd);
-			valuePart.append(lineEnd);
-		}
-
-		sql.append(')');
-		if (doFormatting)
-		{
-			sql.append(lineEnd);
-			sql.append("VALUES");
-			sql.append(lineEnd);
-		}
-		else
-		{
-			sql.append(" VALUES ");
-		}
-		sql.append('(');
+		sql.append(") VALUES (");
 		sql.append(valuePart);
-		sql.append(')');
-
 		dml = new DmlStatement(sql, values);
 		return dml;
 	}

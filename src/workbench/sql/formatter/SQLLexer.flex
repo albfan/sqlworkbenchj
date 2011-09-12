@@ -74,6 +74,8 @@ import workbench.util.CharSequenceReader;
 		try
 		{
 			SQLToken t = getNextToken();
+      if (returnComments && returnWhiteSpace) return t;
+
 			while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
 			{
 				t = getNextToken();

@@ -221,7 +221,6 @@ public class SqlFormatter
 	}
 
 	public String getFormattedSql()
-		throws Exception
 	{
 		saveLeadingWhitespace();
 		if (this.sql.length() == 0) return "";
@@ -412,7 +411,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processFrom(SQLToken last)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
@@ -509,7 +507,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processList(SQLToken last, int indentCount, Set<String> terminalKeys)
-		throws Exception
 	{
 		StringBuilder b = new StringBuilder(indentCount);
 		for (int i=0; i < indentCount; i++) b.append(' ');
@@ -637,13 +634,11 @@ public class SqlFormatter
 	}
 
 	private SQLToken processSubSelect(boolean addSelectKeyword)
-		throws Exception
 	{
 		return processSubSelect(addSelectKeyword, 1, true);
 	}
 
 	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList)
-		throws Exception
 	{
 		SQLToken t = skipComments();
 		int bracketCount = currentBracketCount;
@@ -689,7 +684,6 @@ public class SqlFormatter
 	}
 
 	private void appendSubSelect(StringBuilder subSql, int lastIndent)
-		throws Exception
 	{
 		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength, this.dbId);
 		String s = f.getFormattedSql();
@@ -701,7 +695,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processDecode(int myIndent)
-		throws Exception
 	{
 		StringBuilder current = new StringBuilder(myIndent);
 
@@ -761,7 +754,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processCase(int myIndent)
-		throws Exception
 	{
 		StringBuilder current = new StringBuilder(myIndent);
 
@@ -837,7 +829,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processWbCommand(String wbVerb)
-		throws Exception
 	{
 		int myindent = wbVerb.length() + 1;
 		StringBuilder b = new StringBuilder(myindent);
@@ -905,7 +896,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processBracketList(int indentCount, int elementsPerLine)
-		throws Exception
 	{
 		StringBuilder b = new StringBuilder(indentCount);
 
@@ -1003,7 +993,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processInList(SQLToken current)
-		throws Exception
 	{
 		if (current == null) return null;
 		List<StringBuilder> list = new ArrayList<StringBuilder>(25);
@@ -1021,7 +1010,7 @@ public class SqlFormatter
 				if (bracketcount == 0)
 				{
 					this.appendCommaList(list);
-					return this.lexer.getNextToken();
+					return this.lexer.getNextToken(true, true);
 				}
 				else
 				{
@@ -1108,7 +1097,6 @@ public class SqlFormatter
 	}
 
 	private void formatSql()
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
@@ -1279,7 +1267,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processCTE(SQLToken previousToken)
-		throws Exception
 	{
 		if (previousToken == null) return null;
 
@@ -1366,7 +1353,6 @@ public class SqlFormatter
 
 
 	private SQLToken processWhere(SQLToken previousToken)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = previousToken;
@@ -1448,7 +1434,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken skipComments()
-		throws Exception
 	{
 		SQLToken next = lexer.getNextToken(true, false);
 		if (next == null) return null;
@@ -1463,7 +1448,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processIntoKeyword()
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		// we expect an identifier now (the table name)
@@ -1490,7 +1474,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processFunctionCall(SQLToken last)
-		throws Exception
 	{
 		int bracketCount = 1;
 		SQLToken t = this.lexer.getNextToken(true, false);
@@ -1533,7 +1516,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processCreate(SQLToken previous)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents();
@@ -1749,7 +1731,6 @@ public class SqlFormatter
 	 * The CREATE TABLE has already been added!
 	 */
 	private SQLToken processCreateTable(SQLToken previous)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		if (t == null) return t;
@@ -1832,7 +1813,6 @@ public class SqlFormatter
 	 *  @return the token after the closing bracket
 	 */
 	private SQLToken processCommaList(SQLToken previous, int maxElements, int indentCount)
-		throws Exception
 	{
 		StringBuilder definition = new StringBuilder(200);
 		SQLToken t = previous;
@@ -1940,7 +1920,6 @@ public class SqlFormatter
 	 * Format a CREATE VIEW statement
 	 */
 	private SQLToken processCreateView(SQLToken previous)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
@@ -1983,7 +1962,6 @@ public class SqlFormatter
 	}
 
 	private SQLToken processCreateIndex(SQLToken previous)
-		throws Exception
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken last = previous;

@@ -27,6 +27,8 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
@@ -205,6 +207,12 @@ public class DmlStatement
 	 */
 	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter)
 	{
+		return getExecutableStatement(literalFormatter, null);
+	}
+	
+	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter, WbConnection con)
+	{
+		CharSequence toUse = this.sql;
 		if (this.values.size() > 0)
 		{
 			StringBuilder result = new StringBuilder(this.sql.length() + this.values.size() * 10);
@@ -231,11 +239,17 @@ public class DmlStatement
 					result.append(c);
 				}
 			}
-			return result;
+			toUse = result;
+		}
+
+		if (Settings.getInstance().getDoFormatInserts())
+		{
+			SqlFormatter f = new SqlFormatter(toUse, con == null ? null : con.getDbId());
+			return f.getFormattedSql();
 		}
 		else
 		{
-			return this.sql;
+			return toUse;
 		}
 	}
 

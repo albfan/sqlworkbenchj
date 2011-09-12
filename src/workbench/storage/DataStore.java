@@ -1501,7 +1501,7 @@ public class DataStore
 		{
 			this.updateHadErrors = true;
 
-			String esql = (delete == null ? dml.getExecutableStatement(createLiteralFormatter()).toString() : delete);
+			String esql = (delete == null ? dml.getExecutableStatement(createLiteralFormatter(), this.originalConnection).toString() : delete);
 			if (this.ignoreAllUpdateErrors)
 			{
 				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + esql + " for row = " + row + ", error: " + e.getMessage(), null);

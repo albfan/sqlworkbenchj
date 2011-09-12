@@ -80,7 +80,7 @@ public class StatementFactoryTest
 			assertEquals("UPDATE inet_test SET ip_address = inet '127.0.0.2', id = ? WHERE ip_address = inet '127.0.0.1'", dml.getSql());
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 			String expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = 43 WHERE ip_address = inet '127.0.0.1'";
-			String result = dml.getExecutableStatement(formatter).toString();
+			String result = dml.getExecutableStatement(formatter, null).toString();
 			assertEquals(expected, result);
 		}
 		finally

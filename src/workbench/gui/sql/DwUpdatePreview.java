@@ -40,14 +40,14 @@ public class DwUpdatePreview
 	public boolean confirmUpdate(Component caller, DataStore ds, WbConnection dbConn)
 	{
 		boolean doSave = true;
-		
+
 		Window win = SwingUtilities.getWindowAncestor(caller);
 		MessageBuffer buffer = null;
 		try
 		{
 			List<DmlStatement> stmts = ds.getUpdateStatements(dbConn);
 			if (stmts.isEmpty()) return true;
-			
+
 			Dimension max = new Dimension(800,600);
 			Dimension pref = new Dimension(400, 300);
 			final EditorPanel preview = EditorPanel.createSqlEditor();
@@ -70,7 +70,7 @@ public class DwUpdatePreview
 			boolean lowMemory = false;
 			for (DmlStatement dml : stmts)
 			{
-				buffer.append(dml.getExecutableStatement(f));
+				buffer.append(dml.getExecutableStatement(f, dbConn));
 				buffer.append(";");
 				buffer.appendNewLine();
 				if (MemoryWatcher.isMemoryLow())
@@ -123,6 +123,6 @@ public class DwUpdatePreview
 			return false;
 		}
 		return doSave;
-		
+
 	}
 }

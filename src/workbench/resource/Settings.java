@@ -862,6 +862,16 @@ public class Settings
 		setProperty("workbench.sql.generate.update.doformat", flag);
 	}
 
+	public boolean getDoFormatDeletes()
+	{
+		return getBoolProperty("workbench.sql.generate.delete.doformat",true);
+	}
+
+	public void setDoFormatDeletes(boolean flag)
+	{
+		setProperty("workbench.sql.generate.delete.doformat", flag);
+	}
+
 	public boolean getDoFormatInserts()
 	{
 		return getBoolProperty("workbench.sql.generate.insert.doformat",true);
