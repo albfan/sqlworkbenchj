@@ -32,6 +32,46 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testJDBCEscapes()
+	{
+		String sql = "insert into test (some_col) values ( {d '2011-01-01'})";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {d '2011-01-01'}\n)";
+		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testLobParameter()
+	{
+		String sql = "insert into test (some_col) values ( {$blobfile='/temp/picture.jpg'})";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {$blobfile='/temp/picture.jpg'}\n)";
+		assertEquals(expected, formatted);
+
+		sql = "insert into test (some_col) values ( {$clobfile=/temp/picture.txt encoding='UTF-8'})";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {$clobfile=/temp/picture.txt encoding='UTF-8'}\n)";
+		assertEquals(expected, formatted);
+
+		sql = "update some_table set some_col = {$clobfile=/temp/picture.txt encoding='UTF-8'} where id = 42";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+//		System.out.println(formatted);
+		expected = "UPDATE some_table\n   SET some_col = {$clobfile=/temp/picture.txt encoding='UTF-8'}\nWHERE id = 42";
+		assertEquals(expected, formatted);
+
+		sql = "update some_table set some_col = {$blobfile=?} where id = ?";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+//		System.out.println(formatted);
+		expected = "UPDATE some_table\n   SET some_col = {$blobfile=?}\nWHERE id = ?";
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testStupidMicrosoftQuoting()
 		throws Exception
 	{
@@ -262,6 +302,52 @@ public class SqlFormatterTest
 			"FROM foo";
 		assertEquals(expected, formatted);
 	}
+
+	@Test
+	public void testCaseAlias()
+		throws Exception
+	{
+		String sql = "select case when 1 then 2 when 2 then 3 end some_col from foo";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setCommaAfterLineBreak(false);
+		String expected =
+			"SELECT CASE\n" +
+			"         WHEN 1 THEN 2\n" +
+			"         WHEN 2 THEN 3\n" +
+			"       END some_col\n" +
+			"FROM foo";
+		String formatted = f.getFormattedSql();
+//		System.out.println("----------------\n" + expected + "\n*************\n" + formatted + "\n==================");
+		assertEquals(expected, formatted);
+
+		sql = "select 1, case when 1 then 2 when 2 then 3 end some_col from foo";
+		f = new SqlFormatter(sql);
+		expected =
+			"SELECT 1,\n" +
+			"       CASE\n" +
+			"         WHEN 1 THEN 2\n" +
+			"         WHEN 2 THEN 3\n" +
+			"       END some_col\n" +
+			"FROM foo";
+		formatted = f.getFormattedSql();
+//		System.out.println("----------------\n" + expected + "\n*************\n" + formatted + "\n==================");
+		assertEquals(expected, formatted);
+
+		sql = "select 1, case when 1 then 2 when 2 then 3 end from foo";
+		f = new SqlFormatter(sql);
+		expected =
+			"SELECT 1,\n" +
+			"       CASE\n" +
+			"         WHEN 1 THEN 2\n" +
+			"         WHEN 2 THEN 3\n" +
+			"       END\n" +
+			"FROM foo";
+		formatted = f.getFormattedSql();
+//		System.out.println("----------------\n" + expected + "\n*************\n" + formatted + "\n==================");
+		assertEquals(expected, formatted);
+
+	}
+
 
 	@Test
 	public void testCommaAtStart()
@@ -738,8 +824,7 @@ public class SqlFormatterTest
 					"         WHEN 1 THEN d.dname \n" +
 					"         ELSE NULL \n" +
 					"       END AS department \n" +
-					"FROM emp e\n" +
-					"     INNER JOIN dept d ON (e.deptno = d.deptno) \n" +
+					"FROM emp e  INNER JOIN dept d ON (e.deptno = d.deptno) \n" +
 					"ORDER BY d.deptno, \n" +
 					"         e.empno";
 
@@ -757,7 +842,7 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		String formatted = f.getFormattedSql();
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//		System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals(expected, formatted);
 	}
 
@@ -838,9 +923,13 @@ public class SqlFormatterTest
 	public void testFormatInsert()
 		throws Exception
 	{
+		boolean oldComma = Settings.getInstance().getFormatterCommaAfterLineBreak();
+		boolean oldSpace = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		try
 		{
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
+			Settings.getInstance().setFormatterCommaAfterLineBreak(false);
+
 			String sql = "insert into x ( col1,col2,col3) values (1,2,3)";
 			String expected = "INSERT INTO x\n  (col1, col2, col3)\nVALUES\n  (1, 2, 3)";
 			SqlFormatter f = new SqlFormatter(sql, 100);
@@ -853,6 +942,31 @@ public class SqlFormatterTest
 			expected = "INSERT INTO x\n  (col1, col2, col3,\n   col4, col5)\nVALUES\n  (1, 2, 3,\n   4, 5)";
 			f = new SqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+
+			Settings.getInstance().setFormatterMaxColumnsInInsert(1);
+			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
+			expected = "INSERT INTO x\n(\n  col1,\n  col2,\n  col3,\n  col4,\n  col5\n)\nVALUES\n(\n  1,\n  2,\n  3,\n  4,\n  5\n)";
+			f = new SqlFormatter(sql, 100);
+			formatted = f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+
+			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
+			expected = "INSERT INTO x\n(\n  col1\n  ,col2\n  ,col3\n  ,col4\n  ,col5\n)\nVALUES\n(\n  1\n  ,2\n  ,3\n  ,4\n  ,5\n)";
+			f = new SqlFormatter(sql, 100);
+			f.setCommaAfterLineBreak(true);
+			f.setAddSpaceAfterLineBreakComma(false);
+			formatted = f.getFormattedSql();
+//			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
+			assertEquals(expected, formatted);
+
+			f = new SqlFormatter(sql, 100);
+			f.setCommaAfterLineBreak(true);
+			f.setAddSpaceAfterLineBreakComma(true);
+			formatted = f.getFormattedSql();
+			expected = "INSERT INTO x\n(\n  col1\n  , col2\n  , col3\n  , col4\n  , col5\n)\nVALUES\n(\n  1\n  , 2\n  , 3\n  , 4\n  , 5\n)";
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 

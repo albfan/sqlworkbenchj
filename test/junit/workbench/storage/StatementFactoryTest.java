@@ -77,9 +77,12 @@ public class StatementFactoryTest
 			StatementFactory factory = new StatementFactory(info, null);
 			factory.setTestSettings(forTest);
 			DmlStatement dml = factory.createUpdateStatement(row, false, "\n");
-			assertEquals("UPDATE inet_test SET ip_address = inet '127.0.0.2', id = ? WHERE ip_address = inet '127.0.0.1'", dml.getSql());
+			String sql = dml.getSql();
+			String expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = ? WHERE ip_address = inet '127.0.0.1'";
+//			System.out.println("----------------\n" + sql + "\n---------\n" + expected);
+			assertEquals(expected, sql);
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			String expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = 43 WHERE ip_address = inet '127.0.0.1'";
+			expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = 43 WHERE ip_address = inet '127.0.0.1'";
 			String result = dml.getExecutableStatement(formatter, null).toString();
 			assertEquals(expected, result);
 		}
@@ -143,7 +146,7 @@ public class StatementFactoryTest
 
 		SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 		sql = stmt.getExecutableStatement(formatter).toString();
-		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
+		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42,'Zaphod','Beeblebrox')") > -1);
 	}
 
 	@Test
@@ -171,18 +174,18 @@ public class StatementFactoryTest
 
 		SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 		sql = stmt.getExecutableStatement(formatter).toString();
-		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES ('Zaphod', 'Beeblebrox')") > -1);
+		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES ('Zaphod','Beeblebrox')") > -1);
 
 		Settings.getInstance().setFormatInsertIgnoreIdentity(false);
 		stmt = factory.createInsertStatement(data, false, "\n");
 		sql = stmt.getExecutableStatement(formatter).toString();
-		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42, 'Zaphod', 'Beeblebrox')") > -1);
+		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42,'Zaphod','Beeblebrox')") > -1);
 	}
 
 	@Test
 	public void testCreateDeleteStatement()
 	{
-		String[] cols = new String[] { "key", "value", "firstname", "lastname" };
+		String[] cols = new String[] { "keycol", "value", "firstname", "lastname" };
 		int[] types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR };
 
 		ResultInfo info = new ResultInfo(cols, types, null);
@@ -205,7 +208,7 @@ public class StatementFactoryTest
 
 		SqlLiteralFormatter formatter = new SqlLiteralFormatter();
 		sql = stmt.getExecutableStatement(formatter).toString();
-		assertEquals("Wrong WHERE clause created", true, sql.indexOf("key = 42") > -1);
+		assertEquals("Wrong WHERE clause created", true, sql.indexOf("keycol = 42") > -1);
 		assertEquals("Wrong WHERE clause created", true, sql.indexOf("value = 'otherkey'") > -1);
 	}
 }

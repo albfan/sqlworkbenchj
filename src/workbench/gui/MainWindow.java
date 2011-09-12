@@ -1631,6 +1631,8 @@ public class MainWindow
 		showDisconnectInfo();
 		try
 		{
+			final List<WbConnection> toAbort = new ArrayList<WbConnection>();
+
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
 			{
 				final MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
@@ -1639,14 +1641,27 @@ public class MainWindow
 					((SqlPanel)sql).forceAbort();
 				}
 				sql.disconnect();
+				WbConnection con = sql.getConnection();
+				if (con != null)
+				{
+					toAbort.add(con);
+				}
+				for (ToolWindow w : explorerWindows)
+				{
+					WbConnection conn = w.getConnection();
+					if (conn != this.currentConnection)
+					{
+						toAbort.add(conn);
+					}
+				}
 			}
-			closeExplorerWindows();
+			closeExplorerWindows(false);
 			WbThread abort = new WbThread("Abort connections")
 			{
 				@Override
 				public void run()
 				{
-					ConnectionMgr.getInstance().abortAll();
+					ConnectionMgr.getInstance().abortAll(toAbort);
 				}
 			};
 			abort.start();
@@ -1661,7 +1676,7 @@ public class MainWindow
 				@Override
 				public void run()
 				{
-					disconnected(false);
+					disconnected(true);
 				}
 			});
 		}
@@ -1730,7 +1745,7 @@ public class MainWindow
 					mgr.disconnect(conn);
 				}
 			}
-			closeExplorerWindows();
+			closeExplorerWindows(true);
 		}
 		finally
 		{
@@ -2093,12 +2108,12 @@ public class MainWindow
 		return Collections.unmodifiableList(explorerWindows);
 	}
 
-	public void closeExplorerWindows()
+	public void closeExplorerWindows(boolean doDisconnect)
 	{
 		for (ToolWindow w : explorerWindows)
 		{
 			WbConnection conn = w.getConnection();
-			if (conn != this.currentConnection)
+			if (doDisconnect && conn != this.currentConnection)
 			{
 				ConnectionMgr.getInstance().disconnect(conn);
 			}

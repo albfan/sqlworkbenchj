@@ -42,6 +42,7 @@ import org.xml.sax.InputSource;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
@@ -61,6 +62,9 @@ import workbench.util.WbFile;
  */
 public class TestUtil
 {
+	private boolean oldDel;
+	private boolean oldIns;
+	private boolean oldUpd;
 
 	private String basedir;
 	private String testName;
@@ -310,6 +314,24 @@ public class TestUtil
 		return runner;
 	}
 
+	public void restoreSqlFormatting()
+	{
+		Settings.getInstance().setDoFormatDeletes(oldDel);
+		Settings.getInstance().setDoFormatInserts(oldIns);
+		Settings.getInstance().setDoFormatUpdates(oldUpd);
+	}
+	
+	public void disableSqlFormatting()
+	{
+		oldDel = Settings.getInstance().getDoFormatDeletes();
+		oldIns = Settings.getInstance().getDoFormatInserts();
+		oldUpd = Settings.getInstance().getDoFormatUpdates();
+
+		Settings.getInstance().setDoFormatDeletes(false);
+		Settings.getInstance().setDoFormatInserts(false);
+		Settings.getInstance().setDoFormatUpdates(false);
+
+	}
 	public String getBaseDir()
 	{
 		return this.basedir;

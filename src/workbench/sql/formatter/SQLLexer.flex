@@ -451,7 +451,9 @@ keyword=(
 "WORK"|
 "WRITE"|
 "YEAR"|
-"ZONE"
+"ZONE"|
+"\$BLOBFILE"|
+"\$CLOBFILE"
 )
 
 whitespace=([ \r\n\t\f])

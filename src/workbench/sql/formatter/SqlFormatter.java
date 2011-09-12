@@ -378,6 +378,7 @@ public class SqlFormatter
 
 		if (DATE_LITERALS.contains(lastText) && current.isLiteral()) return true;
 		if (lastText.endsWith("'") && currentText.equals("''")) return false;
+		if (lastText.endsWith("'") && currentText.equals("}")) return false;
 		if (lastText.equals("''") && currentText.startsWith("'")) return false;
 
 		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
@@ -617,6 +618,12 @@ public class SqlFormatter
 			{
 				this.appendText(" *");
 			}
+			else if (isLobParameter(text))
+			{
+				this.appendText(' ');
+				this.appendText(text);
+				t = processLobParameter();
+			}
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
@@ -624,6 +631,23 @@ public class SqlFormatter
 			}
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
+		}
+		return null;
+	}
+
+	private SQLToken processLobParameter()
+	{
+		SQLToken t = lexer.getNextToken(false, true);
+		while (t != null)
+		{
+			String text = t.getText();
+			if (text.equals("}"))
+			{
+				appendText(text);
+				return t;
+			}
+			appendText(text);
+			t = lexer.getNextToken(false, true);
 		}
 		return null;
 	}
@@ -795,19 +819,23 @@ public class SqlFormatter
 				// the CASE statement ist not yet ended and we have to add the AS keyword
 				// and the alias that was given before returning to the caller
 				t = this.lexer.getNextToken(true, false);
-				if (t != null && t.getContents().equals("AS"))
+				if (t != null && (t.isIdentifier() || t.getContents().equals("AS")))
 				{
+					boolean aliasWithAs = t.getContents().equals("AS");
 					this.appendText(' ');
 					this.appendText(t.getContents());
 					t = this.lexer.getNextToken(true, false);
-					if (t != null)
+					if (aliasWithAs)
 					{
-						this.appendText(' ');
-						this.appendText(t.getContents());
-						t = this.lexer.getNextToken(true, false);
+						// the next token is the actual alias
+						if (t != null)
+						{
+							this.appendText(' ');
+							this.appendText(t.getContents());
+							t = this.lexer.getNextToken(true, false);
+						}
 					}
 				}
-//				this.appendNewline();
 				return t;
 			}
 			else if (t.isComment())
@@ -964,18 +992,29 @@ public class SqlFormatter
 			}
 			else if (text.equals(","))
 			{
-				this.appendText(",");
-				elementCount ++;
-				if (elementCount >= elementsPerLine)
+				if (commaAfterLineBreak && (elementCount == 0 || elementCount >= elementsPerLine))
 				{
 					this.appendNewline();
 					this.indent(b);
 					elementCount = 0;
 				}
-				else
+				this.appendText(",");
+				elementCount ++;
+				if (!commaAfterLineBreak && elementCount >= elementsPerLine)
+				{
+					this.appendNewline();
+					this.indent(b);
+					elementCount = 0;
+				}
+				else if (!commaAfterLineBreak || (commaAfterLineBreak && addSpaceAfterLineBreakComma))
 				{
 					this.appendText(' ');
 				}
+			}
+			else if (isLobParameter(text))
+			{
+				this.appendText(text);
+				t = processLobParameter();
 			}
 			else if (!t.isWhiteSpace())
 			{
@@ -990,6 +1029,14 @@ public class SqlFormatter
 			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
+	}
+
+	private boolean isLobParameter(String text)
+	{
+		return text.equalsIgnoreCase("{$blobfile") ||
+			     text.equalsIgnoreCase("{$clobfile") ||
+			     text.equalsIgnoreCase("$clobfile") ||
+			     text.equalsIgnoreCase("$blobfile");
 	}
 
 	private SQLToken processInList(SQLToken current)

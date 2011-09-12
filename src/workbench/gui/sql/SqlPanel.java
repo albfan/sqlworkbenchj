@@ -1711,7 +1711,7 @@ public class SqlPanel
 			{
 				try
 				{
-					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 30000));
+					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 5000));
 				}
 				catch (InterruptedException ex)
 				{

@@ -77,7 +77,7 @@ public class StatementFactory
 		ArrayList<ColumnData> values = new ArrayList<ColumnData>(cols);
 		StringBuilder sql = new StringBuilder("UPDATE ");
 		sql.append(getTableNameToUse());
-		sql.append("\n  SET ");
+		sql.append(" SET ");
 		first = true;
 
 		for (int col=0; col < cols; col ++)
@@ -95,7 +95,7 @@ public class StatementFactory
 				}
 				else
 				{
-					sql.append(",\n       ");
+					sql.append(", ");
 				}
 				String colName = adjustColumnName(this.resultInfo.getColumnName(col));
 
@@ -121,7 +121,7 @@ public class StatementFactory
 				}
 			}
 		}
-		sql.append("\nWHERE ");
+		sql.append(" WHERE ");
 		first = true;
 		int count = this.resultInfo.getColumnCount();
 		for (int j=0; j < count; j++)
@@ -220,7 +220,7 @@ public class StatementFactory
 		StringBuilder sql = new StringBuilder(250);
     sql.append("INSERT INTO ");
 		sql.append(getTableNameToUse());
-		sql.append(" ( ");
+		sql.append(" (");
 
 		StringBuilder valuePart = new StringBuilder(250);
 
@@ -281,6 +281,7 @@ public class StatementFactory
 		}
 		sql.append(") VALUES (");
 		sql.append(valuePart);
+		sql.append(')');
 		dml = new DmlStatement(sql, values);
 		return dml;
 	}

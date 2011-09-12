@@ -133,6 +133,7 @@ public class SqlRowDataConverterTest
 			String verb = SqlUtil.getSqlVerb(line);
 			assertEquals("No insert generated", "INSERT", verb);
 
+//			System.out.println(line);
 			assertEquals("JDBC date literal not found", true, line.indexOf("{d '2006-10-26'}") > -1);
 			assertEquals("JDBC timestamp literal not found", true, line.indexOf("{ts '2006-10-26 ") > -1);
 

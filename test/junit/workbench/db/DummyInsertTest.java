@@ -15,7 +15,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.TestUtil;
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -47,7 +46,7 @@ public class DummyInsertTest
 
 			String verb = SqlUtil.getSqlVerb(sql);
 			assertEquals("INSERT", verb);
-			assertTrue(sql.indexOf("(NR_value, 'FIRSTNAME_value', 'LASTNAME_value')") > -1);
+			assertTrue(sql.indexOf("(\n  NR_value,\n  'FIRSTNAME_value',\n  'LASTNAME_value'") > -1);
 		}
 		catch (Exception e)
 		{
@@ -79,8 +78,7 @@ public class DummyInsertTest
 			DummyInsert insert = new DummyInsert(person, cols);
 			String sql = insert.getSource(con).toString();
 //			System.out.println("*********\n"+sql);
-			String le = Settings.getInstance().getInternalEditorLineEnding();
-			assertTrue(sql.trim().equals("INSERT INTO PERSON" + le + "(NR)" + le + "VALUES" + le + "(NR_value);"));
+			assertTrue(sql.trim().equals("INSERT INTO PERSON\n(\n  NR\n)\nVALUES\n(\n  NR_value\n);"));
 		}
 		finally
 		{

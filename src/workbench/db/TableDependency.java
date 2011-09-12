@@ -261,7 +261,15 @@ public class TableDependency
 				return;
 			}
 
-			if (directChildrenOnly && level == 1) return;
+			if (directChildrenOnly && level == 0)
+			{
+				List<DependencyNode> children = parent.getChildren();
+				for (DependencyNode child : children)
+				{
+					leafs.add(child);
+				}
+				return;
+			}
 
 			List<DependencyNode> children = parent.getChildren();
 

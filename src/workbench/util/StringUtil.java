@@ -886,7 +886,7 @@ public class StringUtil
 	public static String getMaxSubstring(String s, int maxLen, String add)
 	{
 		if (maxLen < 1) return s;
-		if (s == null) return null;
+		if (s == null) return "";
 		if (s.length() < maxLen) return s;
 		if (add == null)
 		{

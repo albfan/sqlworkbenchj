@@ -209,7 +209,7 @@ public class DmlStatement
 	{
 		return getExecutableStatement(literalFormatter, null);
 	}
-	
+
 	public CharSequence getExecutableStatement(SqlLiteralFormatter literalFormatter, WbConnection con)
 	{
 		CharSequence toUse = this.sql;
@@ -242,15 +242,18 @@ public class DmlStatement
 			toUse = result;
 		}
 
-		if (Settings.getInstance().getDoFormatInserts())
+		boolean isInsert = toUse.subSequence(0, "INSERT".length()).equals("INSERT");
+		boolean isUpdate = !isInsert && toUse.subSequence(0, "UPDATE".length()).equals("UPDATE");
+		boolean isDelete = !isUpdate && !isInsert && toUse.subSequence(0, "DELETE".length()).equals("DELETE");
+
+		if ((isInsert && Settings.getInstance().getDoFormatInserts()) ||
+			  (isUpdate && Settings.getInstance().getDoFormatInserts()) ||
+			  (isDelete && Settings.getInstance().getDoFormatDeletes()))
 		{
 			SqlFormatter f = new SqlFormatter(toUse, con == null ? null : con.getDbId());
 			return f.getFormattedSql();
 		}
-		else
-		{
-			return toUse;
-		}
+		return toUse;
 	}
 
 	private CharSequence createInsertString(CharSequence aValue)

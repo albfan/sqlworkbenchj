@@ -448,6 +448,12 @@ public class ConnectionMgr
 		this.activeConnections.clear();
 	}
 
+	public void abortAll()
+	{
+			List<WbConnection> current = new ArrayList<WbConnection>(activeConnections.values());
+			abortAll(current);
+	}
+
 	/**
 	 * Close all connections in a background thread.
 	 *
@@ -455,14 +461,16 @@ public class ConnectionMgr
 	 * calling this method, will create a new physical connection, even if the current ones
 	 * have not all been disconnected.
 	 */
-	public void abortAll()
+	public void abortAll(List<WbConnection> toAbort)
 	{
 		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to close all connections");
 
-		Map<String, WbConnection> current = new HashMap<String, WbConnection>(activeConnections);
-		activeConnections.clear();
+		for (WbConnection con : toAbort)
+		{
+			activeConnections.remove(con.getId());
+		}
 
-		for (final WbConnection con : current.values())
+		for (final WbConnection con : toAbort)
 		{
 			WbThread disc = new WbThread("Disconnect for " + con.getId())
 			{
@@ -485,10 +493,11 @@ public class ConnectionMgr
 			StringBuilder msg = new StringBuilder(activeConnections.size() * 20);
 			for (WbConnection conn : activeConnections.values())
 			{
-				msg.append("Active connection: " + (conn == null ? "(null)" : conn.toString()));
+				msg.append("Active connection: ");
+				msg.append((conn == null ? "(null)" : conn.toString()));
 				msg.append('\n');
 			}
-			
+
 			if (msg.length() > 0)
 			{
 				LogMgr.logDebug("ConnectionMgr.dumpConnections()", msg.toString().trim());

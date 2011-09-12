@@ -232,7 +232,7 @@ public final class WbManager
 
 			if (this.toolWindows.isEmpty() && this.mainWindows.isEmpty())
 			{
-				this.exitWorkbench(toolWindow.getWindow());
+				this.exitWorkbench(toolWindow.getWindow(), false);
 			}
 		}
 	}
@@ -385,19 +385,18 @@ public final class WbManager
 		}
 	}
 
-	public void exitWorkbench()
+	public void exitWorkbench(boolean forceAbort)
 	{
 		JFrame w = this.getCurrentWindow();
-		this.exitWorkbench(w);
+		this.exitWorkbench(w, forceAbort);
 	}
 
-	public boolean exitWorkbench(JFrame window)
+	public boolean exitWorkbench(final JFrame window, final boolean forceAbort)
 	{
-		// saveSettings() will also prompt if any modified
+		// canExit() will also prompt if any modified
 		// files should be changed
 		if (!canExit())
 		{
-			LogMgr.logInfo("WbManaer.exitWorkbench()", "Exiting application was cancelled during saveWindowSettings()");
 			return false;
 		}
 
@@ -412,10 +411,17 @@ public final class WbManager
 		// takes some time. Because of this, a small window is displayed
 		// that the disconnect takes place, and the actual disconnect is
 		// carried out in a different thread to not block the AWT thread.
-
 		// If it takes too long the user can still abort the JVM ...
-		this.createCloseMessageWindow(window);
-		if (this.closeMessage != null) this.closeMessage.setVisible(true);
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				createCloseMessageWindow(window);
+				if (closeMessage != null) closeMessage.setVisible(true);
+			}
+		});
 
 		MacroManager.getInstance().save();
 		Thread t = new WbThread("WbManager disconnect")
@@ -423,7 +429,7 @@ public final class WbManager
 			@Override
 			public void run()
 			{
-				disconnectWindows();
+				disconnectWindows(forceAbort);
 				ConnectionMgr.getInstance().disconnectAll();
 				disconnected();
 			}
@@ -469,13 +475,20 @@ public final class WbManager
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
 
-	private void disconnectWindows()
+	private void disconnectWindows(boolean forceAbort)
 	{
 		for (MainWindow w : mainWindows)
 		{
 			if (w == null) continue;
-			w.abortAll();
-			w.disconnect(false, true, false);
+			if (forceAbort)
+			{
+				w.forceDisconnect();
+			}
+			else
+			{
+				w.abortAll();
+				w.disconnect(false, true, false);
+			}
 		}
 	}
 
@@ -539,7 +552,7 @@ public final class WbManager
 		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
-		// The property workbench.system.doexit can be used to embedd the workbench.jar
+		// The property workbench.system.doexit can be used to embedd the sqlworkbench.jar
 		// in other applications and still be able to call doShutdown()
 		boolean doExit = "true".equals(System.getProperty("workbench.system.doexit", "true"));
 		if (doExit) System.exit(errorCode);
@@ -579,7 +592,7 @@ public final class WbManager
 		if (this.mainWindows.size() == 1)
 		{
 			// If only one window is present, shut down the application
-			this.exitWorkbench(win);
+			this.exitWorkbench(win, false);
 		}
 		else if (win != null)
 		{
@@ -596,7 +609,7 @@ public final class WbManager
 					// third parameter tells the window not to save the workspace
 					// this does not need to happen on the EDT
 					win.disconnect(false, false, false);
-					
+
 					win.setVisible(false);
 					win.dispose();
 					ConnectionMgr.getInstance().dumpConnections();

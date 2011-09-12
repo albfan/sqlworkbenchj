@@ -100,7 +100,7 @@ public class MacOSHelper
 				// in order to be able to cancel exiting.
 				// See http://developer.apple.com/samplecode/OSXAdapter/listing2.html
 				setHandled(args[0], false);
-				WbManager.getInstance().exitWorkbench();
+				WbManager.getInstance().exitWorkbench(true);
 			}
 			else if ("handleAbout".equals(methodName))
 			{

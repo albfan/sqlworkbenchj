@@ -14,9 +14,12 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 
 /**
- * Exit and close the application
+ * Exit and close the application.
+ * 
  * @see workbench.WbManager#exitWorkbench()
  *
  * @author  Thomas Kellerer
@@ -30,8 +33,15 @@ public class FileExitAction
 		this.initMenuDefinition("MnuTxtExit");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().exitWorkbench();
+		boolean forceShutdown = false;
+		if (isCtrlPressed(e))
+		{
+			forceShutdown = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgAbortWarning"));
+		}
+
+		WbManager.getInstance().exitWorkbench(forceShutdown);
 	}
 }

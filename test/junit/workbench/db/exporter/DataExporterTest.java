@@ -32,6 +32,7 @@ import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import static org.junit.Assert.*;
+import workbench.resource.Settings;
 
 /**
  *
@@ -318,6 +319,8 @@ public class DataExporterTest
 	{
 		TestUtil util = new TestUtil("DataExporterTest");
 		util.emptyBaseDirectory();
+
+		util.disableSqlFormatting();
 		try
 		{
 			WbConnection con = util.getConnection();
@@ -362,10 +365,10 @@ public class DataExporterTest
 			assertEquals(5, p.getSize()); // 4 inserts + 1 commit
 			String sql = SqlUtil.makeCleanSql(p.getCommand(0), false);
 			assertTrue(sql.contains("(FIRSTNAME)"));
-
 		}
 		finally
 		{
+			util.restoreSqlFormatting();
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}

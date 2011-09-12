@@ -1239,39 +1239,30 @@ FROM person;</programlisting>
 		<title>SQL Generation</title>
 
 		<section id="options-generated-update">
-			<title>Generated UPDATE statements</title>
+			<title>Format UPDATEs</title>
 			<para>
 				If formatting of <literal>UPDATE</literal> statements is enabled,
-				the threshold defines how many columns have to be present for a single
-				<literal>UPDATE</literal> statement in order to put each column
-				into a separate line. If the number of columns is lower then this value
-				they will remain on one line. The keywords (UPDATE, WHERE) will
-				still be formatted into new lines.
+        generated <literal>UPDATE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
 			</para>
 		</section>
 
 		<section id="options-generated-insert">
-			<title>Generated INSERT statements</title>
+			<title>Format INSERTs</title>
 			<para>
 				If formatting of <literal>INSERT</literal> is enabled, the way they
-				are formatted can be controlled with several values.
+        generated <literal>INSERT</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
 			</para>
-			<section id="opt-sql-generate-column-threshold">
-				<title>Column threshold</title>
-				<para>
-					If the number of columns in the statement exceeds this value, the columns
-					will be spread over several lines. The number of columns that are put
-					into each line is controlled using the option "Columns per line".
-				</para>
-			</section>
+		</section>
 
-			<section id="opt-sql-generate-columns-perline">
-				<title>Columns per line</title>
-				<para>
-					If the number of columns in the option "Column threshold" is exceeded,
-					this option controls how many columns are put into each line
-				</para>
-			</section>
+		<section id="options-generated-insert">
+			<title>Format DELETEs</title>
+			<para>
+				If formatting of <literal>DELETE</literal> is enabled, the way they
+        generated <literal>DELETE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
 		</section>
 
 		<section id="opt-sql-export-include-owner">

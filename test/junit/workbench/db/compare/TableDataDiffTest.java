@@ -25,6 +25,7 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
 import workbench.db.ConnectionMgr;
+import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.util.CollectionUtil;
 
@@ -251,44 +252,60 @@ public class TableDataDiffTest
 			"commit;\n";
 		TestUtil.executeScript(target, insert2);
 
-		TableDataDiff diff = new TableDataDiff(source, target);
-		StringWriter updates = new StringWriter(2500);
-		StringWriter inserts = new StringWriter(2500);
-		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
-		Map<String, Set<String>> alternatePk = new HashMap<String, Set<String>>();
-		alternatePk.put("person", CollectionUtil.caseInsensitiveSet("firstname", "lastname"));
-		diff.setAlternateKeys(alternatePk);
+		boolean oldDel = Settings.getInstance().getDoFormatDeletes();
+		boolean oldIns = Settings.getInstance().getDoFormatInserts();
+		boolean oldUpd = Settings.getInstance().getDoFormatUpdates();
 
-		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
-		diff.setExcludeRealPK(false);
-		diff.doSync();
-//		System.out.println(updates.toString());
-//		System.out.println(inserts.toString());
-		ScriptParser p = new ScriptParser(updates.toString());
-		assertEquals(1, p.getSize());
-		String sync = p.getCommand(0);
-		assertTrue(sync.indexOf("SET SOME_DATA = 'nothing'") > -1);
-		assertTrue(sync.indexOf("WHERE FIRSTNAME = 'Tricia' AND LASTNAME = 'McMillian'") > -1);
+		try
+		{
+			Settings.getInstance().setDoFormatDeletes(false);
+			Settings.getInstance().setDoFormatInserts(false);
+			Settings.getInstance().setDoFormatUpdates(false);
+			TableDataDiff diff = new TableDataDiff(source, target);
+			StringWriter updates = new StringWriter(2500);
+			StringWriter inserts = new StringWriter(2500);
+			diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
+			Map<String, Set<String>> alternatePk = new HashMap<String, Set<String>>();
+			alternatePk.put("person", CollectionUtil.caseInsensitiveSet("firstname", "lastname"));
+			diff.setAlternateKeys(alternatePk);
 
-		p = new ScriptParser(inserts.toString());
-		assertEquals(1, p.getSize());
-		sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
-		assertTrue(sync.startsWith("INSERT INTO PERSON"));
-		assertTrue(sync.endsWith("(42, 'Prostetnic', 'Jeltz', 'something')"));
+			diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
+			diff.setExcludeRealPK(false);
+			diff.doSync();
+	//		System.out.println(updates.toString());
+	//		System.out.println(inserts.toString());
+			ScriptParser p = new ScriptParser(updates.toString());
+			assertEquals(1, p.getSize());
+			String sync = p.getCommand(0);
+			assertTrue(sync.indexOf("SET SOME_DATA = 'nothing'") > -1);
+			assertTrue(sync.indexOf("WHERE FIRSTNAME = 'Tricia' AND LASTNAME = 'McMillian'") > -1);
 
-		diff = new TableDataDiff(source, target);
-		updates = new StringWriter(2500);
-		inserts = new StringWriter(2500);
-		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
-		diff.setExcludeRealPK(true);
-		diff.setAlternateKeys(alternatePk);
-		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
-		diff.doSync();
+			p = new ScriptParser(inserts.toString());
+			assertEquals(1, p.getSize());
+			sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
+			assertTrue(sync.startsWith("INSERT INTO PERSON"));
+			assertTrue(sync.endsWith("(42,'Prostetnic','Jeltz','something')"));
 
-		p = new ScriptParser(inserts.toString());
-		sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
-		assertTrue(sync.startsWith("INSERT INTO PERSON"));
-		assertTrue(sync.endsWith("('Prostetnic', 'Jeltz', 'something')"));
+			diff = new TableDataDiff(source, target);
+			updates = new StringWriter(2500);
+			inserts = new StringWriter(2500);
+			diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
+			diff.setExcludeRealPK(true);
+			diff.setAlternateKeys(alternatePk);
+			diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
+			diff.doSync();
+
+			p = new ScriptParser(inserts.toString());
+			sync = SqlUtil.makeCleanSql(p.getCommand(0), false, false);
+			assertTrue(sync.startsWith("INSERT INTO PERSON"));
+			assertTrue(sync.endsWith("('Prostetnic','Jeltz','something')"));
+		}
+		finally
+		{
+			Settings.getInstance().setDoFormatDeletes(oldDel);
+			Settings.getInstance().setDoFormatInserts(oldIns);
+			Settings.getInstance().setDoFormatUpdates(oldUpd);
+		}
 
 	}
 }

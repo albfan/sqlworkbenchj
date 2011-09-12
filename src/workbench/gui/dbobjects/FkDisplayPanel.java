@@ -13,7 +13,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.sql.SQLException;
-import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -102,7 +101,7 @@ public class FkDisplayPanel
 	{
 		return retrieveAll.isSelected();
 	}
-	
+
 	public void setRetrieveAll(boolean flag)
 	{
 		retrieveAll.setSelected(flag);

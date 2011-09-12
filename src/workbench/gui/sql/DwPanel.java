@@ -1059,7 +1059,7 @@ public class DwPanel
 			rowCountChanged();
 			if (needClear)
 			{
-				// for same strange reason all rows are selected when
+				// for some strange reason all rows are selected when
 				// the last row is selected and deleted
 				// something must try to restore the selection
 				// but as that row does not longer exist, it results in
@@ -1237,33 +1237,8 @@ public class DwPanel
 	@Override
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
-		String msg = ResourceMgr.getString("ErrUpdateSqlError");
-		try
-		{
-			String d = "";
-			if (data != null)
-			{
-				if (data.length() > 50)
-					d = data.substring(0, 50) + "...";
-				else
-					d = data;
-			}
-
-			msg = StringUtil.replace(msg,"%statement%", d);
-			msg = StringUtil.replace(msg,"%message%", errorMessage);
-
-			String r = "";
-			if (errorRow > -1)
-			{
-				r = ResourceMgr.getString("TxtErrorRow").replace("%row%", NumberStringCache.getNumberString(errorRow));
-			}
-			msg = StringUtil.replace(msg, "%row%", r);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DwPanel.getActionOnError()", "Error while building error message", e);
-			msg = "An error occurred during update: \n" + errorMessage;
-		}
+		String msg = ResourceMgr.getFormattedString("ErrUpdateSqlError", NumberStringCache.getNumberString(errorRow),
+			StringUtil.getMaxSubstring(data, 50),errorMessage);
 
 		Window w = SwingUtilities.getWindowAncestor(this);
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(w, msg);
@@ -1337,25 +1312,32 @@ public class DwPanel
 	}
 
 	/**
-	 *	Starts the "edit" mode of the table. It will not start the edit
-	 *  mode, if the table is "read only" meaning if no update table (=database
-	 *  table) is defined.
-	 *  The following actions are carried out:
-	 *	<ul>
-	 *	<li>if the updateable flag is not yet set, try to find out which table to update</li>
+	 *	Starts the "edit" mode of the table.
+	 *
+	 * It will not start the edit mode, if the table is "read only"
+	 * meaning if no update table (=database table) is defined.
+	 *
+	 * The following actions are carried out:
+	 * <ul>
+	 *  <li>if the updateable flag is not yet set, try to find out which table to update</li>
 	 *  <li>the status column is displayec</li>
 	 *  <li>the corresponding actions (insert row, delete row) are enabled</li>
-	 *  <li>the startEdit action is turned to "switched on"</li>
-	 *  </ul>
+	 * <li>the startEdit action is turned to "switched on"</li>
+	 * </ul>
 	 * @param restoreSelection if true the selected rows before starting the edit mode are restored
 	 */
 	public boolean startEdit(boolean restoreSelection)
 	{
 		if (this.readOnly) return false;
 
-		final int[] selectedRows = this.dataTable.getSelectedRows();
-		final int currentRow = this.dataTable.getEditingRow();
-		final int currentColumn = this.dataTable.getEditingColumn();
+
+		int[] selectedRows = this.dataTable.getSelectedRows();
+		int currentRow = this.dataTable.getEditingRow();
+
+		// The offset is necessary because if the status column is shown,
+		// the current editing column will change (but only if the status column is not already shown)
+		int offset = dataTable.getShowStatusColumn() ? 0 : 1;
+		int currentColumn = this.dataTable.getEditingColumn() + offset;
 
 		Window w = SwingUtilities.getWindowAncestor(this);
 
@@ -1409,7 +1391,7 @@ public class DwPanel
 			{
 				if (currentRow > -1 && currentColumn > -1)
 				{
-					dataTable.selectCell(currentRow, currentColumn + 1);
+					dataTable.selectCell(currentRow, currentColumn);
 					dataTable.setColumnSelectionAllowed(false);
 				}
 				else if (currentRow > -1)

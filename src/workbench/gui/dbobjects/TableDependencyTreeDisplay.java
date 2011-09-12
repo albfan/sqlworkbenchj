@@ -171,7 +171,7 @@ public class TableDependencyTreeDisplay
 			{
 				DefaultTreeModel model = new DefaultTreeModel(root, false);
 				tree.setModel(model);
-				expandNodes(tree);
+				expandNodes();
 			}
 		});
 	}
@@ -194,6 +194,8 @@ public class TableDependencyTreeDisplay
 	private void buildTree(DependencyNode parent, DefaultMutableTreeNode treeParent)
 	{
 		String parenttable = parent.getTable().getTableName();
+
+		this.nodesToExpand = new ArrayList<TreeNode[]>();
 
 		DependencyNode child = null;
 		DefaultMutableTreeNode treeNode = null;
@@ -254,13 +256,16 @@ public class TableDependencyTreeDisplay
 			{
 				this.buildTree(child, treeNode);
 				TreeNode[] path = treeNode.getPath();
-				if (this.nodesToExpand == null) this.nodesToExpand = new ArrayList<TreeNode[]>();
 				this.nodesToExpand.add(path);
+			}
+			else if (!retrieveAll)
+			{
+				nodesToExpand.add(treeNode.getPath());
 			}
 		}
 	}
 
-	private void expandNodes(JTree tree)
+	private void expandNodes()
 	{
 		if (this.nodesToExpand == null) return;
 		for (TreeNode[] nodes : nodesToExpand)
