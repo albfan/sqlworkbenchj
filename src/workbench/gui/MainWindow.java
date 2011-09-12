@@ -186,6 +186,8 @@ public class MainWindow
 	private NextTabAction nextTab;
 	private PrevTabAction prevTab;
 
+	private boolean resultForWorkspaceClose;
+
 	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
@@ -577,7 +579,6 @@ public class MainWindow
 
 		WbAction vTb = new ViewToolbarAction();
 		vTb.addToMenu(viewMenu);
-
 
 		if (panel instanceof SqlPanel)
 		{
@@ -1425,21 +1426,10 @@ public class MainWindow
 		}
 	}
 
-	private void loadDefaultWorkspace()
-	{
-		if (!this.loadWorkspace(DEFAULT_WORKSPACE, false))
-		{
-			resetWorkspace();
-			this.currentWorkspaceFile = DEFAULT_WORKSPACE;
-		}
-	}
-
 	private void resetWorkspace()
 	{
 		this.closeWorkspace(false);
 	}
-
-	private boolean resultForWorkspaceClose;
 
 	private String getRealWorkspaceFilename(String filename)
 	{
@@ -1562,10 +1552,12 @@ public class MainWindow
 		String realFilename = null;
 		try
 		{
+			boolean useDefault = false;
 			String workspaceFilename = aProfile.getWorkspaceFile();
 			if (StringUtil.isBlank(workspaceFilename))
 			{
 				workspaceFilename = DEFAULT_WORKSPACE;
+				useDefault = true;
 			}
 			else if (!workspaceFilename.endsWith(".wksp"))
 			{
@@ -1574,13 +1566,11 @@ public class MainWindow
 
 			realFilename = getRealWorkspaceFilename(workspaceFilename);
 
-			if (realFilename == null) realFilename = DEFAULT_WORKSPACE;
-
 			WbFile f = new WbFile(realFilename);
 
 			if (realFilename.length() > 0 && !f.exists())
 			{
-				int action = this.checkNonExistingWorkspace();
+				int action = useDefault ? CREATE_WORKSPACE : this.checkNonExistingWorkspace();
 				if (action == LOAD_OTHER_WORKSPACE)
 				{
 					FileDialogUtil util = new FileDialogUtil();
@@ -1605,10 +1595,6 @@ public class MainWindow
 				// loadWorkspace will replace the %ConfigDir% placeholder,
 				// so we need to pass the original filename
 				this.loadWorkspace(workspaceFilename, false);
-			}
-			else
-			{
-				this.loadDefaultWorkspace();
 			}
 		}
 		catch (Throwable e)

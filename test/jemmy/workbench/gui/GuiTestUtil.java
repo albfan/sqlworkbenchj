@@ -78,7 +78,7 @@ public class GuiTestUtil
 			{
 				name = c.getClass().getName();
 			}
-			result.append(c.getName());
+			result.append(name);
 			result.append('\n');
 			if (c instanceof Container)
 			{

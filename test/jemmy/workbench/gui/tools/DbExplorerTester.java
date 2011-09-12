@@ -48,7 +48,7 @@ public class DbExplorerTester
 		// wait until the table list has been retrieved
 		do
 		{
-			Thread.sleep(500);
+			Thread.sleep(150);
 		} while (tPanel.isBusy());
 
 		chooser.setName("dbtablelist");
@@ -75,7 +75,7 @@ public class DbExplorerTester
 		TableDefinitionPanel defPanel = (TableDefinitionPanel)defComp.getSource();
 		do
 		{
-			Thread.sleep(250);
+			Thread.sleep(150);
 		} while (defPanel.isBusy());
 
 		DataStore ds = defPanel.getDataStore();
@@ -111,7 +111,7 @@ public class DbExplorerTester
 		DbObjectSourcePanel source = (DbObjectSourcePanel)tabbedPane.getSelectedComponent();
 		do
 		{
-			Thread.sleep(250);
+			Thread.sleep(150);
 		} while (tPanel.isBusy());
 		String sql = source.getText();
 		assertTrue(sql.indexOf("CREATE TABLE PERSON") > -1);
@@ -123,7 +123,7 @@ public class DbExplorerTester
 
 		do
 		{
-			Thread.sleep(250);
+			Thread.sleep(150);
 		} while (dataPanel.isRetrieving());
 
 		WbTable table = dataPanel.getData();
@@ -133,7 +133,7 @@ public class DbExplorerTester
 		tabbedPane.setSelectedIndex(3);
 		do
 		{
-			Thread.sleep(250);
+			Thread.sleep(150);
 		} while (tPanel.isBusy());
 
 		chooser.setName("indexlist");
