@@ -58,7 +58,7 @@ public class GuiTestUtil
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
 	}
-	
+
 	public void execute(Runnable r)
 	{
 		tool.invokeAndWait(r);
@@ -93,7 +93,7 @@ public class GuiTestUtil
 		printAllComponents(c, result, "");
 		System.out.println("********* \n" + result.toString() + "\n*****************");
 	}
-	
+
 	public void waitWhileBusy(SqlPanel panel)
 	{
 		int count = 0;
@@ -105,7 +105,7 @@ public class GuiTestUtil
 			if (count * sleepTime > 30000) break;
 		}
 	}
-	
+
 	public void waitUntilConnected(SqlPanel panel)
 	{
 		int count = 0;
@@ -117,9 +117,9 @@ public class GuiTestUtil
 			if (count * sleepTime > 5000) break;
 		}
 	}
-	
+
 	public void stopApplication()
 	{
-		WbManager.getInstance().exitWorkbench(null);
+		WbManager.getInstance().exitWorkbench(null, false);
 	}
 }
