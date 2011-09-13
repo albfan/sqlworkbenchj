@@ -2,6 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-12-11">
+    <entry dev-build="9" type="enh">A new option to generate a script to drop a table and all incoming (referencing) foreign keys is available in the DbExplorer</entry>
+    <entry dev-build="9" type="enh">If enabled, the formatting of internally generated SQL statements is now done by the SQL formatter (and thus uses the same settings as the formatter)</entry>
+    <entry dev-build="9" type="enh">The dependency tree in the DbExplorer can now be limited to the direct children only.</entry>
     <entry dev-build="8" type="enh">A new option for WbDataDiff is available to define alternat key columns for each table. See the manual for details.</entry>
     <entry dev-build="8" type="enh">"Help -&gt; Show DBMS Manual" now displays the online manual corresponding to the version of the DBMS</entry>
     <entry dev-build="8" type="enh">For Oracle a subset of the SQL*Plus SHOW command is now supported</entry>
@@ -17,6 +20,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="9" type="fix">A CASE statement with a column alias not using the AS keyword word was not always formatted correctly.</entry>
     <entry dev-build="8" type="fix">When specifying a non-existing table using -sourceTable for WbExport no proper error message was shown.</entry>
     <entry dev-build="8" type="fix">Fixed a problem with displaying the menus if the editor tabs ran over more than one line</entry>
     <entry dev-build="7" type="fix">Implemented a workaround for the Vertica JDBC driver to allow running DML statements.</entry>
