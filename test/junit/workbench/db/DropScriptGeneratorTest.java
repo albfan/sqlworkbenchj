@@ -12,10 +12,12 @@ package workbench.db;
 
 import java.util.List;
 import org.junit.*;
+import workbench.sql.ScriptParser;
 import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -58,7 +60,7 @@ public class DropScriptGeneratorTest
 		generator.setTable(cust);
 //		String result = generator.getScript();
 //		System.out.println(result);
-		List<String> drop = generator.getStatements(cust);
+		List<String> drop = generator.getDropConstraintStatements(cust);
 		assertEquals(1, drop.size());
 		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST;", drop.get(0));
 
@@ -72,7 +74,7 @@ public class DropScriptGeneratorTest
 //		String ordersScript = generator.getScript();
 //		System.out.println(ordersScript);
 
-		drop = generator.getStatements(orders);
+		drop = generator.getDropConstraintStatements(orders);
 		assertEquals(2, drop.size());
 		assertEquals("ALTER TABLE INVOICE DROP CONSTRAINT FK_INV_ORDER;", drop.get(0));
 		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS;", drop.get(1));
@@ -89,7 +91,7 @@ public class DropScriptGeneratorTest
 //		String itemScript = generator.getScript();
 //		System.out.println(itemScript);
 
-		drop = generator.getStatements(orderItem);
+		drop = generator.getDropConstraintStatements(orderItem);
 		assertEquals(1, drop.size());
 		assertEquals("ALTER TABLE DELIVERY DROP CONSTRAINT FK_DEL_OI;", drop.get(0));
 
@@ -103,6 +105,19 @@ public class DropScriptGeneratorTest
 
 		assertTrue(restore.get(2).startsWith("ALTER TABLE ORDER_ITEM"));
 		assertTrue(restore.get(2).contains("ADD CONSTRAINT FK_OI_ORDERS FOREIGN KEY (ORDER_ID)"));
+
+		generator.setTables(CollectionUtil.arrayList(cust,orders,orderItem));
+		String custScript = generator.getScriptFor(cust);
+		System.out.println(custScript);
+
+		ScriptParser p = new ScriptParser(custScript);
+		p.setScript(custScript);
+		int count = p.getSize();
+		assertEquals(3, count);
+		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST;", p.getCommand(0));
+		assertEquals("DROP TABLE CUSTOMER;", p.getCommand(1));
+		assertTrue(p.getCommand(2).startsWith("ALTER TABLE ORDERS"));
+		assertTrue(p.getCommand(2).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
 	}
 
 }

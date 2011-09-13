@@ -15,6 +15,8 @@ import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 
 /**
  * Exit and close the application
@@ -34,6 +36,7 @@ public class FileCloseAction
 		this.initMenuDefinition("MnuTxtFileCloseWin");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().closeMainWindow(window);

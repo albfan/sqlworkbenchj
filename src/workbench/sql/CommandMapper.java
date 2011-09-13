@@ -104,6 +104,7 @@ public class CommandMapper
 
 		addCommand(new WbStoreProfile());
 		addCommand(new WbDeleteProfile());
+		addCommand(new WbGenDrop());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
@@ -181,7 +182,7 @@ public class CommandMapper
 		if (metaData.isOracle())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
-			
+
 			this.cmdDispatch.put(WbCall.EXEC_VERB_LONG, wbcall);
 			this.cmdDispatch.put(WbCall.EXEC_VERB_SHORT, wbcall);
 

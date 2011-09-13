@@ -1627,32 +1627,42 @@ public class SqlPanel
 		}
 	}
 
-	public boolean abortExecution()
+	/**
+	 * Try to abort the currently running statement by interrupting the execution thread.
+	 *
+	 * This method will wait join the execution thread and will wait until it's finished
+	 * but only for a default of 5 seconds.
+	 */
+	public void abortExecution()
 	{
-		if (!this.isBusy()) return true;
-		if (this.executionThread == null) return true;
+		if (this.isCancelling())
+		{
+			// if we are already trying to cancel the statement, there is not much
+			// hope that it will succeed (otherwise the user wouldn't have closed the windw)
+			forceAbort();
+			return;
+		}
 
-		boolean success = false;
-		long wait = Settings.getInstance().getIntProperty(this.getClass().getName() + ".abortwait", 1);
+		if (!this.isBusy()) return;
+		if (this.executionThread == null) return;
+		long wait = Settings.getInstance().getIntProperty(this.getClass().getName() + ".abortwait", 5);
 		try
 		{
 			LogMgr.logDebug("SqlPanel.abortExecution()", "Interrupting SQL Thread...");
+			this.cancelExecution = true;
 			this.executionThread.interrupt();
 			this.executionThread.join(wait * 1000);
 			if (this.isBusy())
 			{
+				// execution could not be interrupted --> force a stop of the command
+				this.stmtRunner.abort();
 				LogMgr.logDebug("SqlPanel.abortExecution()", "SQL Thread still running after " + wait +"s!");
-			}
-			else
-			{
-				success = true;
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlPanel.abortExecution()", "Error when interrupting SQL thread", e);
 		}
-		return success;
 	}
 
 	@Override
@@ -1700,6 +1710,12 @@ public class SqlPanel
 		}
 	}
 
+	@Override
+	public boolean isCancelling()
+	{
+		return cancelExecution;
+	}
+
 	protected void cancelRetrieve()
 	{
 		try
@@ -1709,15 +1725,20 @@ public class SqlPanel
 			stmtRunner.cancel();
 			if (this.executionThread != null)
 			{
+				// Wait for the execution thread to finish because of the cancel() call.
+				// but wait at most 5 seconds (configurable) for the statement to respond
+				// to the cancel() call. Depending on the sate of the statement, calling Statement.cancel()
+				// might not have any effect.
 				try
 				{
-					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 5000));
+					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
 				}
 				catch (InterruptedException ex)
 				{
 					LogMgr.logDebug("SqlPanel.cancelRetrieve()", "Error when waiting for cancel to finish", ex);
 				}
 			}
+			// Apparently cancelling the SQL statement did not work, so kill it the brutal way...
 			if (this.executionThread != null && executionThread.isAlive())
 			{
 				executionThread.interrupt();
@@ -1869,6 +1890,7 @@ public class SqlPanel
 			this.setBusy(false);
 			this.selectEditorLater();
 			this.executionThread = null;
+			this.cancelExecution = false;
 		}
 	}
 

@@ -100,6 +100,7 @@ public class CommandTester
 		commands.add(WbSysExec.VERB);
 		commands.add(WbSysProps.VERB);
 		commands.add(WbOraShow.VERB);
+		commands.add(WbGenDrop.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -139,6 +140,7 @@ public class CommandTester
 			formattedWords.put(WbIsolationLevel.VERB, "WbIsolationLevel");
 			formattedWords.put(WbConnInfo.VERB, "WbConnInfo");
 			formattedWords.put(WbSysExec.VERB, "WbSysExec");
+			formattedWords.put(WbGenDrop.VERB, "WbGenerateDrop");
 		}
 		return formattedWords;
 	}

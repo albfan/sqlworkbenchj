@@ -1608,10 +1608,7 @@ public class MainWindow
 	{
 		if (this.isConnectInProgress()) return;
 
-		if (!saveWorkspace(true))
-		{
-			return;
-		}
+		saveWorkspace(false);
 
 		setConnectIsInProgress();
 		showDisconnectInfo();
@@ -2346,6 +2343,17 @@ public class MainWindow
 		}
 	}
 
+	public boolean isCancelling()
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p.isCancelling()) return true;
+		}
+		return false;
+
+	}
 	/**
 	 *	Returns true if at least one of the SQL panels is currently
 	 *  executing a SQL statement.

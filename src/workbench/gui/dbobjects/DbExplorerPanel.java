@@ -281,6 +281,12 @@ public class DbExplorerPanel
 	}
 
 	@Override
+	public boolean isCancelling()
+	{
+		return false;
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (!this.isVisible()) return;
@@ -672,7 +678,7 @@ public class DbExplorerPanel
 			}
 
 			this.catalogSelector.setSelectedIndex(indexToSelect);
-			
+
 			this.catalogSelector.addActionListener(this);
 			this.catalogSelector.setVisible(true);
 			this.catalogSelector.setEnabled(true);

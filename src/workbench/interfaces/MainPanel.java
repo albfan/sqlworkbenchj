@@ -46,6 +46,7 @@ public interface MainPanel
 	String getId();
 	boolean isConnected();
 	boolean isBusy();
+	boolean isCancelling();
 	void dispose();
 	void panelSelected();
 	void readFromWorkspace(WbWorkspace w, int index) throws IOException;

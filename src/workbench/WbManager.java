@@ -592,11 +592,24 @@ public final class WbManager
 		if (this.mainWindows.size() == 1)
 		{
 			// If only one window is present, shut down the application
-			this.exitWorkbench(win, false);
+			this.exitWorkbench(win, win.isBusy());
 		}
 		else if (win != null)
 		{
+			final boolean abort;
+
+			if (win.isBusy())
+			{
+				if (!checkAbort(win)) return;
+				abort = true;
+			}
+			else
+			{
+				abort = false;
+			}
+
 			if (!win.saveWorkspace()) return;
+
 			this.mainWindows.remove(win);
 			WbThread t = new WbThread(win.getWindowId() + " Disconnect")
 			{
@@ -609,7 +622,6 @@ public final class WbManager
 					// third parameter tells the window not to save the workspace
 					// this does not need to happen on the EDT
 					win.disconnect(false, false, false);
-
 					win.setVisible(false);
 					win.dispose();
 					ConnectionMgr.getInstance().dumpConnections();

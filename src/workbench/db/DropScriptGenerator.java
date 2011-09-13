@@ -15,6 +15,7 @@ import java.util.*;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.sql.ScriptParser;
+import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -30,7 +31,8 @@ public class DropScriptGenerator
 {
 	private WbConnection connection;
 	private List<TableIdentifier> tables;
-	private ScriptGenerationMonitor monitor;
+	private ScriptGenerationMonitor scriptMonitor;
+	private RowActionMonitor rowMonitor;
 	private Map<TableIdentifier, List<String>> dropConstraints = new HashMap<TableIdentifier, List<String>>();
 	private Map<TableIdentifier, List<String>> restoreConstraints = new HashMap<TableIdentifier, List<String>>();
 	private Map<TableIdentifier, String> dropTableStatements = new HashMap<TableIdentifier, String>();
@@ -90,10 +92,6 @@ public class DropScriptGenerator
 		dependency.readDependencyTree(true);
 		dependency.setRetrieveDirectChildrenOnly(true);
 		List<DependencyNode> leafs = dependency.getRootNode().getChildren();
-		if (monitor != null)
-		{
-			monitor.setCurrentObject(table.getTableName());
-		}
 
 		List<String> drop = new ArrayList<String>();
 		List<String> restore = new ArrayList<String>();
@@ -159,10 +157,15 @@ public class DropScriptGenerator
 		return SqlUtil.addSemicolon(drop);
 	}
 
-	@Override
-	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
+	public void setRowMonitor(RowActionMonitor monitor)
 	{
-		this.monitor = aMonitor;
+		this.rowMonitor = monitor;
+	}
+
+	@Override
+	public void setProgressMonitor(ScriptGenerationMonitor monitor)
+	{
+		this.scriptMonitor = monitor;
 	}
 
 	@Override
@@ -174,20 +177,20 @@ public class DropScriptGenerator
 		}
 		StringBuilder script = new StringBuilder(dropConstraints.size() * 30);
 
+		boolean includeMarkers = tables.size() > 1;
 		for (TableIdentifier table : tables)
 		{
-			appendTable(script, table);
+			appendTable(script, table, includeMarkers);
 		}
-
 		return script.toString();
 	}
 
-	private void appendTable(StringBuilder script, TableIdentifier table)
+	private void appendTable(StringBuilder script, TableIdentifier table, boolean includeMarkers)
 	{
 		List<String> drop = dropConstraints.get(table);
 		if (drop == null) return;
 
-		if (this.tables.size() > 1)
+		if (includeMarkers)
 		{
 			script.append("--- BEGIN ");
 			script.append(table.getTableName());
@@ -209,7 +212,7 @@ public class DropScriptGenerator
 			script.append(dml);
 			script.append('\n');
 		}
-		if (this.tables.size() > 1)
+		if (includeMarkers)
 		{
 			script.append("--- END ");
 			script.append(table.getTableName());
@@ -221,13 +224,48 @@ public class DropScriptGenerator
 	public void generateScript()
 	{
 		reset();
+		if (rowMonitor != null)
+		{
+			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
+		}
+		int count = tables.size();
+		int currentTable = 1;
 		for (TableIdentifier table : tables)
 		{
+			if (rowMonitor != null)
+			{
+				rowMonitor.setCurrentObject(table.getTableName(), currentTable, count);
+			}
+			if (scriptMonitor != null)
+			{
+				scriptMonitor.setCurrentObject(table.getTableName());
+			}
 			createStatementsForTable(table);
+			currentTable ++;
+		}
+		if (rowMonitor != null)
+		{
+			rowMonitor.jobFinished();
 		}
 	}
 
-	public List<String> getStatements(TableIdentifier table)
+	public List<TableIdentifier> getTables()
+	{
+		return Collections.unmodifiableList(this.tables);
+	}
+
+	public String getScriptFor(TableIdentifier table)
+	{
+		if (CollectionUtil.isEmpty(dropConstraints))
+		{
+			generateScript();
+		}
+		StringBuilder result = new StringBuilder(250);
+		appendTable(result, table, false);
+		return result.toString();
+	}
+
+	public List<String> getDropConstraintStatements(TableIdentifier table)
 	{
 		if (CollectionUtil.isEmpty(dropConstraints))
 		{

@@ -472,6 +472,8 @@ public class WbConnection
 	public void rollback(Savepoint sp)
 	{
 		if (sp == null) return;
+		if (this.sqlConnection == null) return;
+		
 		try
 		{
 			this.sqlConnection.rollback(sp);

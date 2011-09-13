@@ -829,8 +829,7 @@ public class WbExport
 
 		if (!outdir.isDirectory())
 		{
-			String msg = ResourceMgr.getString("ErrExportOutputDirNotDir");
-			msg = msg.replace("%dir%", outdir.getAbsolutePath());
+			String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotDir", outdir.getAbsolutePath());
 			result.addMessage(msg);
 			result.setFailure();
 			return;
