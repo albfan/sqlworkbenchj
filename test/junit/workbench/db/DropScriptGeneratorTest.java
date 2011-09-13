@@ -108,14 +108,14 @@ public class DropScriptGeneratorTest
 
 		generator.setTables(CollectionUtil.arrayList(cust,orders,orderItem));
 		String custScript = generator.getScriptFor(cust);
-		System.out.println(custScript);
+//		System.out.println(custScript);
 
 		ScriptParser p = new ScriptParser(custScript);
 		p.setScript(custScript);
 		int count = p.getSize();
 		assertEquals(3, count);
-		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST;", p.getCommand(0));
-		assertEquals("DROP TABLE CUSTOMER;", p.getCommand(1));
+		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", p.getCommand(0));
+		assertEquals("DROP TABLE CUSTOMER", p.getCommand(1));
 		assertTrue(p.getCommand(2).startsWith("ALTER TABLE ORDERS"));
 		assertTrue(p.getCommand(2).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
 	}
