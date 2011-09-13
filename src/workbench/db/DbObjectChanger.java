@@ -25,8 +25,6 @@ public class DbObjectChanger
 {
 	public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
 	public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
-	public static final String PARAM_CONSTRAINT_NAME = "%constraint_name%";
-	public static final String PARAM_TABLE_NAME = MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
 
 	private WbConnection dbConnection;
 	private DbSettings settings;
@@ -44,7 +42,7 @@ public class DbObjectChanger
 
 	/**
 	 * For testing purposes
-	 * 
+	 *
 	 * @param dbSettings
 	 */
 	DbObjectChanger(DbSettings dbSettings)
@@ -84,7 +82,7 @@ public class DbObjectChanger
 		}
 		return result.toString();
 	}
-	
+
 	public String getRename(DbObject oldTable, DbObject newTable)
 	{
 		if (newTable == null || oldTable == null) return null;
@@ -92,7 +90,7 @@ public class DbObjectChanger
 		String type = oldTable.getObjectType();
 		String sql = getRenameObjectSql(type);
 		if (sql == null) return null;
-		
+
 		String oldName = oldTable.getObjectName();
 		String newName = newTable.getObjectName();
 
@@ -116,7 +114,7 @@ public class DbObjectChanger
 
 		String schema = oldDefinition.getSchema();
 		if (schema == null) schema = "";
-		
+
 		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
 		String oldname = oldDefinition.getObjectName(dbConnection);
 		if (oldname == null) oldname = "";
@@ -128,7 +126,7 @@ public class DbObjectChanger
 		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
 		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldDefinition.getObjectName());
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, schema);
-		
+
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
 		return sql;
 	}
@@ -186,11 +184,11 @@ public class DbObjectChanger
 		}
 
 		if (sql == null) return null;
-		
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConnection));
+
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
 		if (pkConstraint != null)
 		{
-			sql = sql.replace(PARAM_CONSTRAINT_NAME, pkConstraint);
+			sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkConstraint);
 		}
 		return sql;
 	}
@@ -227,7 +225,7 @@ public class DbObjectChanger
 	 * @param table the table for which to create the PK
 	 * @param pkCols the (new) PK columns (the isPK() attribute for the columns is not checked or modified)
 	 * @return null if adding a PK is not possible, the necessary statement otherwise
-	 * @see #getAddPKScript(workbench.db.TableIdentifier, java.util.List) 
+	 * @see #getAddPKScript(workbench.db.TableIdentifier, java.util.List)
 	 */
 	public String getAddPK(TableIdentifier table, List<ColumnIdentifier> pkCols)
 	{
@@ -241,11 +239,11 @@ public class DbObjectChanger
 		{
 			pkName = pkName.toLowerCase();
 		}
-		
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConnection));
+
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
 		if (pkName != null)
 		{
-			sql = sql.replace(PARAM_CONSTRAINT_NAME, pkName);
+			sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);
 		}
 
 		StringBuilder cols = new StringBuilder(pkCols.size() * 5);

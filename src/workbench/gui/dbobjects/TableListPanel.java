@@ -59,6 +59,7 @@ import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
@@ -465,6 +466,9 @@ public class TableListPanel
 
 		DropDbObjectAction dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
 		tableList.addPopupAction(dropAction, true);
+
+		CreateDropScriptAction dropScript = new CreateDropScriptAction(this, tableList.getSelectionModel());
+		this.tableList.addPopupAction(dropScript, false);
 
 		tableList.addPopupAction(new DeleteTablesAction(this, tableList.getSelectionModel(), this.tableData), false);
 		tableList.addPopupAction(renameAction, true);

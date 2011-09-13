@@ -5,7 +5,7 @@
   <void method="put">
    <string>Oracle</string>
    <string>ALTER TABLE %table_name%
-  ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
+  ADD CONSTRAINT %constraint_name% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
   %fk_delete_rule%
   %deferrable%</string>
@@ -14,7 +14,7 @@
   <void method="put">
    <string>All</string>
    <string>ALTER TABLE %table_name%
-  ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
+  ADD CONSTRAINT %constraint_name% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
   %fk_update_rule%
   %fk_delete_rule%

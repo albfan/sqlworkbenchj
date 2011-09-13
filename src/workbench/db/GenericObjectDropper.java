@@ -38,6 +38,16 @@ public class GenericObjectDropper
 	private TableIdentifier objectTable;
 	private RowActionMonitor monitor;
 	private boolean cancel;
+	private boolean transactional = true;
+
+	public GenericObjectDropper()
+	{
+	}
+
+	public void setUseTransaction(boolean flag)
+	{
+		transactional = flag;
+	}
 
 	@Override
 	public List<? extends DbObject> getObjects()
@@ -122,7 +132,7 @@ public class GenericObjectDropper
 		if (this.connection == null) throw new NullPointerException("No connection!");
 		if (this.objects == null || this.objects.isEmpty()) return null;
 
-		boolean needCommit = this.connection.shouldCommitDDL();
+		boolean needCommit = transactional && this.connection.shouldCommitDDL();
 		int count = this.objects.size();
 		StringBuffer result = new StringBuffer(count * 40);
 		for (int i=0; i < count; i++)

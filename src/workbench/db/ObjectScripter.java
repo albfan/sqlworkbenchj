@@ -133,7 +133,7 @@ public class ObjectScripter
 		}
 		boolean first = true;
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
-		
+
 		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
@@ -147,7 +147,8 @@ public class ObjectScripter
 			{
 				if (first)
 				{
-					this.script.append("-- BEGIN FOREIGN KEYS --" + nl);
+					this.script.append("-- BEGIN FOREIGN KEYS --");
+					this.script.append(nl);
 					first = false;
 				}
 				script.append(source);
@@ -156,7 +157,9 @@ public class ObjectScripter
 		if (!first)
 		{
 			// no table was found, so no FK was added --> do not add separator
-			this.script.append("-- END FOREIGN KEYS --" + nl + nl);
+			this.script.append("-- END FOREIGN KEYS --");
+			this.script.append(nl);
+			this.script.append(nl);
 		}
 	}
 

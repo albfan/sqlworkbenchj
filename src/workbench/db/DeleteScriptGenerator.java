@@ -80,12 +80,14 @@ public class DeleteScriptGenerator
 		this.columnValues = colValues;
 	}
 
+	@Override
 	public boolean isCancelled()
 	{
 		// not implemented yet
 		return false;
 	}
 
+	@Override
 	public void cancel()
 	{
 		// not implemented yet
@@ -259,11 +261,13 @@ public class DeleteScriptGenerator
 		ui.show(WbManager.getInstance().getCurrentWindow());
 	}
 
+	@Override
 	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
 	{
 		this.monitor = aMonitor;
 	}
 
+	@Override
 	public String getScript()
 	{
 		if (this.statements.isEmpty())
@@ -298,6 +302,7 @@ public class DeleteScriptGenerator
 		return Collections.unmodifiableList(statements);
 	}
 
+	@Override
 	public void generateScript()
 	{
 		if (this.sourceTable == null) return;

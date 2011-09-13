@@ -533,7 +533,7 @@ public class TableSourceBuilder
 	 *	@param table the tablename for which the foreign keys should be created
 	 *  @param aFkDef a DataStore with the FK definition as returned by #getForeignKeys()
 	 *
-	 *	@return a SQL statement to add the foreign key definitions to the given table
+	 *	@return a SQL statement to add the foreign key definitions to the given table, never null
 	 */
 	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse, boolean forInlineUse)
 	{

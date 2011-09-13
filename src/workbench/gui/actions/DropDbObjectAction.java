@@ -104,6 +104,7 @@ public class DropDbObjectAction
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
