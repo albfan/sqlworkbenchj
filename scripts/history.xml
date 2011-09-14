@@ -20,6 +20,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="10" type="fix">Adding a new column in the DbExplorer was not working for DBMS that do not support renaming of columns.</entry>
     <entry dev-build="9" type="fix">A CASE statement with a column alias not using the AS keyword word was not always formatted correctly.</entry>
     <entry dev-build="8" type="fix">When specifying a non-existing table using -sourceTable for WbExport no proper error message was shown.</entry>
     <entry dev-build="8" type="fix">Fixed a problem with displaying the menus if the editor tabs ran over more than one line</entry>
