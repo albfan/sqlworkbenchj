@@ -11,11 +11,12 @@
  */
 package workbench.gui.dbobjects;
 
-import javax.swing.table.TableModel;
 import workbench.db.ColumnChanger;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.WbConnection;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.storage.InputValidator;
+import workbench.storage.RowData;
 
 /**
  *
@@ -25,16 +26,21 @@ public class ColumnChangeValidator
 	implements InputValidator
 {
 	private ColumnChanger changer;
-	
+
 	public ColumnChangeValidator()
 	{
 	}
 
 	@Override
-	public boolean isValid(Object newValue, int row, int col, TableModel source)
+	public boolean isValid(Object newValue, int row, int col, DataStoreTableModel source)
 	{
 		if (changer == null) return false;
 
+		if (source.getDataStore().getRowStatus(row) == RowData.NEW)
+		{
+			return changer.canAddColumn();
+		}
+		
 		switch (col)
 		{
 			case TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE:

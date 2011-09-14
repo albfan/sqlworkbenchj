@@ -11,10 +11,10 @@
  */
 package workbench.gui.dbobjects;
 
-import javax.swing.table.TableModel;
 import workbench.db.DbMetadata;
 import workbench.db.DbObjectChanger;
 import workbench.db.WbConnection;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.storage.InputValidator;
 
 /**
@@ -25,16 +25,16 @@ public class TableChangeValidator
 	implements InputValidator
 {
 	private DbObjectChanger changer;
-	
+
 	public TableChangeValidator()
 	{
 	}
 
 	@Override
-	public boolean isValid(Object newValue, int row, int col, TableModel source)
+	public boolean isValid(Object newValue, int row, int col, DataStoreTableModel source)
 	{
 		if (changer == null) return false;
-		
+
 		String type = (String)source.getValueAt(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 		if (col == DbMetadata.COLUMN_IDX_TABLE_LIST_NAME)
 		{

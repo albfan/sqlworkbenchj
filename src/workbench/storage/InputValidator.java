@@ -11,7 +11,7 @@
  */
 package workbench.storage;
 
-import javax.swing.table.TableModel;
+import workbench.gui.components.DataStoreTableModel;
 
 /**
  *
@@ -19,5 +19,5 @@ import javax.swing.table.TableModel;
  */
 public interface InputValidator
 {
-	boolean isValid(Object newValue, int row, int col, TableModel source);
+	boolean isValid(Object newValue, int row, int col, DataStoreTableModel source);
 }
