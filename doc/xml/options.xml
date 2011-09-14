@@ -1256,7 +1256,7 @@ FROM person;</programlisting>
 			</para>
 		</section>
 
-		<section id="options-generated-insert">
+		<section id="options-generated-delete">
 			<title>Format DELETEs</title>
 			<para>
 				If formatting of <literal>DELETE</literal> is enabled, the way they
