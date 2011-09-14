@@ -366,7 +366,7 @@ public class TableDefinitionPanel
 				});
 				alterColumnsAction.setSourceTable(dbConnection, currentTable);
 				alterColumnsAction.setEnabled(false);
-				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null;
+				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null && GuiSettings.allowAlterInDbExplorer();
 				addColumn.setEnabled(canAddColumn && isTable());
 			}
 			catch (SQLException e)
@@ -634,7 +634,7 @@ public class TableDefinitionPanel
 			createPKAction.setEnabled(rowsSelected && isTable && !hasPk);
 			dropPKAction.setEnabled(isTable && hasPk);
 			createIndexAction.setEnabled(rowsSelected && isTable);
-			deleteColumn.setEnabled(rowsSelected && isTable);
+			deleteColumn.setEnabled(rowsSelected && isTable && GuiSettings.allowAlterInDbExplorer());
 		}
 	}
 
