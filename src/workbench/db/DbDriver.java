@@ -469,6 +469,7 @@ public class DbDriver
 			if (PostgresUtil.supportsAppInfoProperty(this.driverClassInstance.getClass()))
 			{
 				appNameProperty = PostgresUtil.APP_NAME_PROPERTY;
+				prgName += " (" + id + ")";
 			}
 		}
 		if (url.startsWith("jdbc:oracle:thin"))
