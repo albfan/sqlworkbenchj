@@ -32,7 +32,7 @@ public class MacroMenuBuilder
 	{
 		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getVisibleGroups();
 
-		if (groups == null || groups.size() == 0) return;
+		if (groups == null || groups.isEmpty()) return;
 
 		macroMenu.addSeparator();
 

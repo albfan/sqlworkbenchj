@@ -261,7 +261,7 @@ public class DataCopier
 				}
 				catch (SQLException e)
 				{
-					String msg = ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",toDrop.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e));
+					String msg = ResourceMgr.getFormattedString("MsgCopyErrorDropTable",toDrop.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e));
 					if (ignoreError)
 					{
 						this.addMessage(msg);

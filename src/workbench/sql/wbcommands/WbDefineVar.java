@@ -76,7 +76,7 @@ public class WbDefineVar
 
 		if (file != null && contentFile != null)
 		{
-			result.addMessageByKey("MsgVarFileWrong");
+			result.addMessageByKey("ErrVarFileWrong");
 			result.setFailure();
 			return result;
 		}
@@ -253,7 +253,7 @@ public class WbDefineVar
 		String varname = cmdLine.getValue("variable");
 		if (StringUtil.isBlank(varname))
 		{
-			result.addMessageByKey("MsgVarNoName");
+			result.addMessageByKey("ErrVarNoName");
 			result.setFailure();
 			return;
 		}
