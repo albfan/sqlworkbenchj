@@ -200,7 +200,7 @@ public class TableDiff
 		String pkTagToUse = null;
 		String[] attr = new String[] { "name" };
 		String[] value = new String[1];
-		List pkcols = null;
+		List<String> pkcols = null;
 
 		if (refPk.isEmpty() && tPk.size() > 0)
 		{
@@ -221,15 +221,14 @@ public class TableDiff
 			pkcols = this.referenceTable.getPrimaryKeyColumns();
 		}
 
-		if (pkcols != null)
+		if (CollectionUtil.isNonEmpty(pkcols))
 		{
 			writer.appendOpenTag(result, myindent, pkTagToUse, attr, value);
 			result.append('\n');
 			myindent.append("  ");
-			Iterator itr = pkcols.iterator();
-			while (itr.hasNext())
+			for (String col : pkcols)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, (String)itr.next());
+				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, StringUtil.trimQuotes(col));
 			}
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, pkTagToUse);
@@ -307,7 +306,7 @@ public class TableDiff
 		optionWritten = false;
 		for (ObjectOption targetOption : targetOptions)
 		{
-			if (!refOptions.contains(targetOptions))
+			if (!refOptions.contains(targetOption))
 			{
 				if (firstOption)
 				{
@@ -516,18 +515,17 @@ public class TableDiff
 		return false;
 	}
 
-	private void appendAddColumns(StrBuffer result, List colsToAdd)
+	private void appendAddColumns(StrBuffer result, List<ReportColumn> colsToAdd)
 	{
-		Iterator itr = colsToAdd.iterator();
-		if (!itr.hasNext()) return;
+		if (colsToAdd.isEmpty()) return;
+
 		StrBuffer myindent = new StrBuffer(this.indent);
 		myindent.append("  ");
 		writer.appendOpenTag(result, myindent, TAG_ADD_COLUMN);
 		result.append('\n');
 		myindent.append("  ");
-		while (itr.hasNext())
+		for (ReportColumn col : colsToAdd)
 		{
-			ReportColumn col = (ReportColumn)itr.next();
 			col.appendXml(result, myindent, false);
 		}
 		myindent.removeFromEnd(2);
@@ -544,7 +542,7 @@ public class TableDiff
 		while (itr.hasNext())
 		{
 			ReportColumn col = (ReportColumn)itr.next();
-			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", col.getColumn().getColumnName());
+			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", StringUtil.trimQuotes(col.getColumn().getColumnName()));
 			result.append('\n');
 		}
 	}

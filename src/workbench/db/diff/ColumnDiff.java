@@ -202,7 +202,7 @@ public class ColumnDiff
 			  fkNameDifferent || fkDefinitionDifferent ||
 			  computedColIsDifferent || collationsDifferent)
 		{
-			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
+			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", StringUtil.trimQuotes(tId.getColumnName()));
 			result.append('\n');
 
 			// for some DBMS the full definition of the column must be used in order
@@ -255,7 +255,6 @@ public class ColumnDiff
 				{
 					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, scomm);
 				}
-
 			}
 
 			if (computedColIsDifferent)
@@ -267,7 +266,7 @@ public class ColumnDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COLLATION, sId.getCollation());
 			}
-			
+
 			if (fkDefinitionDifferent)
 			{
 				StrBuffer refIndent = new StrBuffer(myindent);
