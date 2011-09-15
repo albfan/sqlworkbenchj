@@ -1213,12 +1213,23 @@ public class MainWindow
 	@Override
 	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
+		if (this.isBusy() || this.isCancelling())
+		{
+			WbSwingUtilities.showErrorMessageKey(this, "MsgDisconnectBusy");
+			return false;
+		}
+
 		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			if (!this.saveWorkspace(this.currentWorkspaceFile, true))
 			{
 				return false;
 			}
+		}
+
+		if (this.isConnected())
+		{
+			showDisconnectInfo();
 		}
 		disconnect(false, false, false);
 
@@ -2354,6 +2365,22 @@ public class MainWindow
 		return false;
 
 	}
+
+	public boolean isConnected()
+	{
+		if (this.currentConnection != null)
+		{
+			return true;
+		}
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p.isConnected()) return true;
+		}
+		return false;
+	}
+
 	/**
 	 *	Returns true if at least one of the SQL panels is currently
 	 *  executing a SQL statement.

@@ -241,7 +241,7 @@ public class ExportFileDialog
 			chooser.addPropertyChangeListener("fileFilterChanged", this);
 			chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
 		}
-		
+
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
 
@@ -253,6 +253,7 @@ public class ExportFileDialog
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					checkSqlOptions();
@@ -260,7 +261,7 @@ public class ExportFileDialog
 			});
 		}
 		int answer = chooser.showSaveDialog(parentWindow);
-		
+
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			String filename = null;
@@ -398,6 +399,7 @@ public class ExportFileDialog
 
 		Runnable task = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_checkSqlOptions();
@@ -420,6 +422,7 @@ public class ExportFileDialog
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (!includeSqlUpdate)
@@ -438,7 +441,7 @@ public class ExportFileDialog
 	protected void _checkSqlOptions()
 	{
 		if (source == null) return;
-		
+
 		try
 		{
 			sqlChecked = true;
@@ -463,6 +466,7 @@ public class ExportFileDialog
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (this.exportOptions == null) return;

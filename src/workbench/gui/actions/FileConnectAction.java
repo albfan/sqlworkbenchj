@@ -35,6 +35,7 @@ public class FileConnectAction
 		this.initMenuDefinition("MnuTxtConnect", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.window.selectConnection();

@@ -114,7 +114,6 @@ public class ConnectionSelector
 			@Override
 			public void run()
 			{
-				showPopupMessagePanel("");
 				doConnect(aProfile, showDialogOnError);
 			}
 		};

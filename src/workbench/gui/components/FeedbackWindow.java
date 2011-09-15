@@ -98,8 +98,8 @@ public class FeedbackWindow
 
 	public void forceRepaint()
 	{
-		WbSwingUtilities.invoke(new Runnable() {
-
+		WbSwingUtilities.invoke(new Runnable()
+		{
 			@Override
 			public void run()
 			{

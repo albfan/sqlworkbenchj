@@ -11,9 +11,7 @@
  */
 package workbench;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,17 +25,14 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.FocusManager;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
 import workbench.gui.WbFocusManager;
 import workbench.gui.WbSwingUtilities;
@@ -442,36 +437,16 @@ public final class WbManager
 	private void createCloseMessageWindow(JFrame parent)
 	{
 		if (parent == null) return;
-		this.closeMessage = new JDialog(parent, false);
-		this.closeMessage.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.getBevelBorderRaised());
-		p.setLayout(new BorderLayout());
-		JLabel l = new JLabel(ResourceMgr.getString("MsgClosingConnections"));
-		l.setFont(l.getFont().deriveFont(Font.BOLD));
-		l.setHorizontalAlignment(SwingConstants.CENTER);
-		p.add(l, BorderLayout.CENTER);
-
-		JButton b = new JButton(ResourceMgr.getString("MsgAbortImmediately"));
-		b.setToolTipText(ResourceMgr.getDescription("MsgAbortImmediately"));
-		b.addActionListener(new ActionListener()
-			{
+		ActionListener abort = new ActionListener()
+		{
 			@Override
-				public void actionPerformed(ActionEvent evt)
-				{
-					doShutdown(0);
-				}
-			});
-
-		JPanel p2 = new JPanel();
-		p2.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
-		p2.add(b);
-		p.add(p2, BorderLayout.SOUTH);
-		this.closeMessage.getContentPane().setLayout(new BorderLayout());
-		this.closeMessage.getContentPane().add(p, BorderLayout.CENTER);
-		this.closeMessage.setUndecorated(true);
-		this.closeMessage.setSize(210,80);
+			public void actionPerformed(ActionEvent evt)
+			{
+				doShutdown(0);
+			}
+		};
+		
+		this.closeMessage = new DisconnectInfo(parent, abort, "MsgAbortImmediately");
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
 
@@ -596,16 +571,9 @@ public final class WbManager
 		}
 		else if (win != null)
 		{
-			final boolean abort;
-
 			if (win.isBusy())
 			{
 				if (!checkAbort(win)) return;
-				abort = true;
-			}
-			else
-			{
-				abort = false;
 			}
 
 			if (!win.saveWorkspace()) return;
