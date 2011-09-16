@@ -1550,6 +1550,8 @@ public class SqlUtil
 
 	public static CharSequence getWarnings(WbConnection con, Statement stmt)
 	{
+		if (con == null) return null;
+
 		try
 		{
 			// some DBMS return warnings on the connection rather then on the
@@ -1590,7 +1592,7 @@ public class SqlUtil
 				warn = warn.getNextWarning();
 			}
 
-			warn = (con == null ? null : con.getSqlConnection().getWarnings());
+			warn = con.getSqlConnection().getWarnings();
 			hasWarnings = hasWarnings || (warn != null);
 			count = 0;
 			while (warn != null)
@@ -1618,7 +1620,7 @@ public class SqlUtil
 
 			// make sure the warnings are cleared from both objects!
 			con.clearWarnings();
-			stmt.clearWarnings();
+			if (stmt != null) stmt.clearWarnings();
 			StringUtil.trimTrailingWhitespace(msg);
 			return msg;
 		}
