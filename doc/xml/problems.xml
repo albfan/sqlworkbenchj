@@ -449,7 +449,7 @@ SELECT 42 FROM dual;</programlisting>
       <title>DB2 commands like REORG cannot be run</title>
       <para>
         REORG, RUNSTATS and other db2 command line commands cannot be be run directly through a JDBC interface because
-        those are not SQL statements, but DB2 commands. To run such a command from with &wb-productname; you have to use the
+        those are not SQL statements, but DB2 commands. To run such a command within &wb-productname; you have to use the
         function <literal>sysproc.admin_cmd()</literal>. To run e.g. a REORG on a table you have to run the following statement:
       </para>
       <programlisting>call sysproc.admin_cmd('REORG TABLE my_table');</programlisting>
