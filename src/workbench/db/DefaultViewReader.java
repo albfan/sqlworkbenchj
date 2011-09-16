@@ -104,7 +104,7 @@ public class DefaultViewReader
 		// therefor the verb is compared with startsWith() rather than equals()
 		if (verb.startsWith("CREATE"))
 		{
-			if (includeDrop)
+			if (includeDrop && !verb.equals("CREATE OR REPLACE"))
 			{
 				String type = SqlUtil.getCreateType(source);
 				result.append("DROP ");
