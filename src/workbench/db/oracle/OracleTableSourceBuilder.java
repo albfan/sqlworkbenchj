@@ -30,8 +30,7 @@ import workbench.util.StringUtil;
 public class OracleTableSourceBuilder
 	extends TableSourceBuilder
 {
-
-	private final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
+	private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
 	private String defaultTablespace;
 
 	public OracleTableSourceBuilder(WbConnection con)
@@ -95,6 +94,15 @@ public class OracleTableSourceBuilder
 			}
 		}
 
+		if (StringUtil.isNonEmpty(table.getTableConfigOptions()))
+		{
+			if (result.length() > 0)
+			{
+				result.append('\n');
+			}
+			result.append(table.getTableConfigOptions());
+		}
+
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true))
 		{
 			String tablespace = table.getTablespace();
@@ -113,7 +121,8 @@ public class OracleTableSourceBuilder
 
 
 	/**
-	 * Read additional options for the CREATE TABLE part
+	 * Read additional options for the CREATE TABLE part.
+	 *
 	 * @param tbl
 	 */
 	@Override
@@ -122,7 +131,7 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select tablespace_name \n" +
+			"select tablespace_name, degree, row_movement \n" +
 			"from all_tables  \n" +
 			"where owner = ? \n" +
 			"and table_name = ? ";
@@ -137,12 +146,35 @@ public class OracleTableSourceBuilder
 				LogMgr.logDebug("OracleTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
 			}
 
+			String options = "";
+
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				String tablespace = rs.getString(1);
 				tbl.setTablespace(tablespace);
+				String degree = rs.getString(2);
+				if (degree != null) degree = degree.trim();
+				if (!StringUtil.equalString("1", degree))
+				{
+					if ("DEFAULT".equals(degree))
+					{
+						options = "PARALLEL";
+					}
+					else
+					{
+						options = "PARALLEL " + degree;
+					}
+				}
+				String movement = rs.getString(3);
+				if (movement != null) movement = movement.trim();
+				if (StringUtil.equalString("ENABLED", movement))
+				{
+					if (options.length() > 0) options += "\n";
+					options += "ENABLE ROW MOVEMENT";
+				}
 			}
+			tbl.setTableConfigOptions(options);
 		}
 		catch (SQLException e)
 		{

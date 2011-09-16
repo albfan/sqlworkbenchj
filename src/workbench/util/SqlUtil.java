@@ -539,7 +539,7 @@ public class SqlUtil
 				String v = t.getContents();
 				if (v.charAt(0) == '@') return "@";
 
-				return t.getContents().toUpperCase();
+				return t.getContents();
 			}
 			catch (Exception e)
 			{
@@ -1776,7 +1776,7 @@ public class SqlUtil
 				return "unknown";
 		}
 	}
-	
+
 	public static String replaceParameters(String sql, Object ... values)
 	{
 		if (values == null) return sql;
