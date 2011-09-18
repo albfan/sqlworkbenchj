@@ -37,4 +37,18 @@ public class H2TestTrigger
 		// nothing to do
 	}
 
+	@Override
+	public void close()
+		throws SQLException
+	{
+		// nothing to do
+	}
+
+	@Override
+	public void remove()
+		throws SQLException
+	{
+		// nothing to do
+	}
+
 }
