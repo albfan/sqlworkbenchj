@@ -356,6 +356,7 @@ public class BatchRunner
 		}
 		else
 		{
+			LogMgr.logWarning("BatchRunner.setErrorScript()", "File '" + aFilename + "' specified for success script not found. No success script is used!");
 			this.successScript = null;
 		}
 	}
@@ -370,6 +371,7 @@ public class BatchRunner
 		}
 		else
 		{
+			LogMgr.logWarning("BatchRunner.setErrorScript()", "File '" + aFilename + "' specified for error script not found. No error script is used!");
 			this.errorScript = null;
 		}
 	}
@@ -487,13 +489,13 @@ public class BatchRunner
 				if (this.errorScript != null)
 				{
 					WbFile f = new WbFile(errorScript);
-					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + " " + f.getFullPath());
+					LogMgr.logInfo("BatchRunner.runFiles()", ResourceMgr.getString("MsgBatchExecutingErrorScript") + " " + f.getFullPath());
 					this.executeScript(f);
 				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.errorScript, e);
+				LogMgr.logError("BatchRunner.runFiles()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.errorScript, e);
 			}
 		}
 		else
@@ -504,13 +506,13 @@ public class BatchRunner
 				if (this.successScript != null)
 				{
 					WbFile f = new WbFile(successScript);
-					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + " " + f.getFullPath());
+					LogMgr.logInfo("BatchRunner.runFiles()", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + " " + f.getFullPath());
 					this.executeScript(f);
 				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.successScript, e);
+				LogMgr.logError("BatchRunner.runFiles()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.successScript, e);
 			}
 		}
 	}

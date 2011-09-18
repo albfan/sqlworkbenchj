@@ -1235,13 +1235,21 @@ public class DataStore
 
 	/**
 	 * Define the (SELECT) statement that was used to produce this
-	 * DataStore's result set. This is used to find the update table later
+	 * DataStore's result set.
+	 *
+	 * This is used to find the update table later. The passed SQL is also checked
+	 * for a definition of the result name (using @wbresult), but only if no
+	 * result name was already defined
+	 *
 	 */
 	public void setGeneratingSql(String aSql)
 	{
 		this.sql = aSql;
 		ResultNameParser parser = new ResultNameParser();
-		setResultName(parser.getResultName(sql));
+		if (resultName == null)
+		{
+			setResultName(parser.getResultName(sql));
+		}
 	}
 
 	/**

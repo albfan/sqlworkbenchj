@@ -8,41 +8,41 @@
 		other SQL queries or statements.
 	</para>
 	<para>
-		To start &wb-productname; in batch mode, either the 
-		<link linkend="scripting-scriptfile">-script</link> or  
+		To start &wb-productname; in batch mode, either the
+		<link linkend="scripting-scriptfile">-script</link> or
 		<link linkend="scripting-command">-command</link> must be passed as an argument on
-		the commandline. 
+		the commandline.
 	</para>
 	<para>
 		If neither of these parameters is present, &wb-productname; will run in GUI mode.
 	</para>
-	
+
 	<important><para>
-		When running &wb-productname; on Windows, you either need to use <literal>sqlwbconsole</literal> 
+		When running &wb-productname; on Windows, you either need to use <literal>sqlwbconsole</literal>
     or start &wb-productname; using the Java command.
-		You <emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link> 
+		You <emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>
     <literal>SQLWorkbench.exe</literal>, as it will run in the background without a console window, and thus
     you will not see any output from the batch run.
 	</para></important>
-	
+
 	<para>
 		Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
 		on how to start &wb-productname; with the <literal>java</literal> command.
 	</para>
 
 	<para>
-		When you need to quote parameters inside batch or shell scripts, you have to use single quotes 
-		(<literal>&apos;test-script.sql&apos;</literal>) to quote these values. Most command line shells 
-		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not 
+		When you need to quote parameters inside batch or shell scripts, you have to use single quotes
+		(<literal>&apos;test-script.sql&apos;</literal>) to quote these values. Most command line shells
+		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not
 		be evaluated correctly by &wb-productname;
 	</para>
 
 	<para>
-		If you want to start the application from within another program (e.g. an 
-		<literal><ulink url="http://ant.apache.org">Ant</ulink></literal> script or your own program), 
+		If you want to start the application from within another program (e.g. an
+		<literal><ulink url="http://ant.apache.org">Ant</ulink></literal> script or your own program),
 		you will need to start &wb-productname;'s main class directly.
 	</para>
-	
+
 	<programlisting>java -cp sqlworkbench.jar workbench.WbStarter</programlisting>
 	<para>
 		Inside an Ant build script this would need to be done like this:
@@ -61,15 +61,15 @@
 	<section id="scripting-connecting">
 		<title>Specifying the connection</title>
     <indexterm><primary>Batch files</primary><secondary>connecting</secondary></indexterm>
-		
+
 		<para>
-			When running &wb-productname; in batch mode, you can define the connection 
-			using a <link linkend="commandline-connect-profile">profile name</link> or specifying the connection 
+			When running &wb-productname; in batch mode, you can define the connection
+			using a <link linkend="commandline-connect-profile">profile name</link> or specifying the connection
 			properties <link linkend="commandline-connect-noprofile">directly </link>.
 		</para>
-		
+
 	</section>
-	
+
 	<section id="scripting-scriptfile">
 		<title>Specifying the script file(s)</title>
 		<indexterm><primary>Batch files</primary><secondary>specify SQL script</secondary></indexterm>
@@ -78,7 +78,7 @@
 			The script that should be run is specified with the parameter <literal>-script=&#60;filename&#62;</literal>
 			Multiple scripts can be specified by separating them with a comma. The scripts will then be executed in the
 			order in which they appear in the commandline. If the filenames contain spaces
-			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted. 
+			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted.
 		</para>
 		<para>
 			You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WbInclude</literal></link>
@@ -106,42 +106,42 @@
 	<section id="scripting-delimiter">
 		<title>Specifying a delimiter</title>
 		<para>
-			If your script files use a non-standard delimiter for the statements, you can 
+			If your script files use a non-standard delimiter for the statements, you can
 			specify an alternate delimiter through the profile or through the <literal>-altDelimiter</literal>
 			parameter. The alternate delimiter should be used if you have several scripts that use
-			the regular semicolon and the alternate delimiter. If your scripts exceed a certain size, 
+			the regular semicolon and the alternate delimiter. If your scripts exceed a certain size,
 			they won't be processed in memory and detecting the alternate delimiter does not work in that case.
-			If this is the case you can use the <literal>-delimiter</literal> switch to change 
+			If this is the case you can use the <literal>-delimiter</literal> switch to change
 			the default delimiter for all scripts. The usage of the alternate delimiter will be
 			disabled if this parameter is specified.
 		</para>
 	</section>
-	
+
 	<section id="scripting-encoding">
 		<title>Specifying an encoding for the file(s)</title>
-		
+
 		<para>
-			In case your script files are not using the default encoding, you can specify the 
-			encoding of your script files with the <literal>-encoding</literal> parameter. Note that this will set for all 
-			script files passed on the commandline. If you need to run several scriptfiles with different encodings, 
+			In case your script files are not using the default encoding, you can specify the
+			encoding of your script files with the <literal>-encoding</literal> parameter. Note that this will set for all
+			script files passed on the commandline. If you need to run several scriptfiles with different encodings,
 			you have to create one "master" file, which calls the individual files using the <link linkend="command-wbinclude">WbInclude</link>
 			command together with its <literal>-encoding</literal> parameter.
 		</para>
 	</section>
-	
+
 	<section id="scripting-logfile">
 		<title>Specifying a logfile</title>
-		
+
 		<para>
 			If you don't want to write the messages to the default logfile
 			which is defined in <filename>workbench.settings</filename>
 			an alternate logfile can be specified with <literal>-logfile</literal>
 		</para>
 	</section>
-	
+
 	<section id="scripting-handling-errors">
 		<title>Handling errors</title>
-		
+
 		<para>
 			To control the behavior when errors occur during
 			script execution, you can use the parameter <literal>-abortOnError=[true|false]</literal>.
@@ -150,108 +150,114 @@
 			The only script which will be executed after that point is the script specified
 			with the parameter <literal>-cleanupError</literal>.
 		</para>
-		
+
 		<para>
 			If <literal>-abortOnError</literal> is false all statements in all
 			scripts are executed regardless of any errors. As no error information is
 			evaluated the script specified in -cleanupSuccess will be executed at
 			the end.
 		</para>
-		
+
 		<para>
 			If this parameter is not supplied it defaults to true, meaning
 			that the script will be aborted when an error occurs.
 		</para>
-		
+
 		<para>
 			You can also specify whether errors from <literal>DROP</literal> commands
 			should be ignored. To enable this, pass the parameter <literal>-ignoreDropErrors=true</literal>
 			on the commandline. This works when connecting through a profile or through a full
 			connection specification. If this parameter is set to <literal>true</literal>
-			only a warning will be issued, but any error reported from the DBMS when 
+			only a warning will be issued, but any error reported from the DBMS when
 			executing a DROP command will be ignored.
 		</para>
-		
+
 		<para>
-			Note that this will not always have the desired effect. When using e.g. PostgreSQL 
+			Note that this will not always have the desired effect. When using e.g. PostgreSQL
 			with autocommit off, the current transaction will be aborted by PostgreSQL until
-			a <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is issued. So even if the 
-			error during the <literal>DROP</literal> is ignored, subsequent statements will 
+			a <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is issued. So even if the
+			error during the <literal>DROP</literal> is ignored, subsequent statements will
 			fail nevertheless.
 		</para>
-		
+
 	</section>
-	
+
 	<section id="script-success">
 		<title>Specify a script to be executed on successful completion</title>
-		
+
 		<para>
 			The script specified with the parameter <literal>-cleanupSuccess=&#60;filename&#62;</literal>
 			is executed as the last script if either no error occurred or AbortOnError is set to false.
 		</para>
 		<para>
 			If you update data in the database, this script usually contains a <literal>COMMIT</literal>
-			command to make all changes permanent. The abort script usually contains a <literal>ROLLBACK</literal>
-			command.
+			command to make all changes permanent.
 		</para>
+    <para>
+      If the filename is specified as a relative file, it is assumed to be in the current working directory.
+    </para>
 	</section>
-	
+
 	<section id="script-failure">
 		<title>Specify a script to be executed after an error</title>
-		
+
 		<para>
 			The script specified with the parameter <literal>-cleanupError=&#60;filename&#62;</literal>
 			is executed as the last script if <literal>AbortOnError</literal> is set to true and an error occurred
 			during script execution.
 		</para>
-		
+
 		<para>
-			The failure script usually contains a <literal>ROLLBACK</literal> command
-			to undo any changes to the database in case an error occured.
+			The failure script usually contains a <literal>ROLLBACK</literal> command to undo any changes to the database in
+      case an error occured.
 		</para>
+
+    <para>
+      If the filename is specified as a relative file, it is assumed to be in the current working directory.
+    </para>
 	</section>
 
 	<section id="script-ignoredrop">
 		<title>Ignoring errors from DROP statements</title>
-		
+
 		<para>
-			When connecting <link linkend="commandline-connect-noprofile">without a profile</link>, 
+			When connecting <link linkend="commandline-connect-noprofile">without a profile</link>,
 			you can use the switch <literal>-ignoreDropErrors=[true|false]</literal> to ignore errors that are reported from <literal>DROP</literal>
-			statements. This has the same effect as connecting with a profile where the 
+			statements. This has the same effect as connecting with a profile where the
 			<link linkend="profile-ignore-drop-error">Ignore DROP errors</link> property is enabled.
 		</para>
 	</section>
 
 	<section id="script-change-connection">
 		<title>Changing the connection</title>
-		
+
 		<para>
-			You can change the current connection inside a script using the command 
+			You can change the current connection inside a script using the command
 			<link linkend="command-connect"><literal>WbConnect</literal></link>.
 		</para>
 
 	</section>
-	
+
 	<section id="script-display">
 		<title>Controlling console output during batch execution</title>
-		
+
 		<para>
 			Any output generated by &wb-productname; during batch execution is sent to the standard
 			output (stdout, System.out) and can be redirected if desired.
 		</para>
-		
+
 		<section id="script-resultset-display">
 			<title>Displaying result sets</title>
 			<para>
-				If you are running <literal>SELECT</literal> statements in your script without "consuming" 
+				If you are running <literal>SELECT</literal> statements in your script without "consuming"
 				the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
-				you can optionally display the results to the console using the parameter 
+				you can optionally display the results to the console using the parameter
 				<literal>-displayResult=true</literal>. If this parameter is not passed or set
 				to false, results sets will not be visible (for a <literal>SELECT</literal> statement
 				you will simply see the message '<literal>SELECT executed successfully</literal>'.
 			</para>
 		</section>
-		
+
 		<section id="cmdline-parameter-feedback">
 			<title>Controlling execution feedback</title>
 
@@ -259,11 +265,11 @@
 				When running statements, &wb-productname; reports success or failure
 				of each statement. Inside a SQL script the <link linkend="command-wbfeedback">WbFeedback</link> command
 				can be used to control this feedback. If you don't want to add a <literal>WbFeedback</literal> command
-				to your scripts, you can control the feedback using the <literal>-feedback</literal> switch on the 
-				command line. Passing <literal>-feedback=false</literal> has the same effect as putting a 
+				to your scripts, you can control the feedback using the <literal>-feedback</literal> switch on the
+				command line. Passing <literal>-feedback=false</literal> has the same effect as putting a
 				<literal>WbFeedback off</literal> in your script.
 			</para>
-			
+
 			<para>
 				As displaying the feedback can be quite some overhead especially when executing
 				thousands of statements in a script file, it is recommended to turn off the result logging
@@ -271,12 +277,12 @@
 			</para>
 
 			<para>
-				To only log a summary of the script execution (per script file), specify 
+				To only log a summary of the script execution (per script file), specify
 				the parameter <literal>-consolidateMessages=true</literal>. This will then display
-				the number of statements executed, the number of failed statements and the total 
+				the number of statements executed, the number of failed statements and the total
 				number of rows affected (updated, deleted or inserted).
 			</para>
-			
+
 			<para>
 				When using <literal>-feedback=false</literal>, informational messages like the total
 				number of statements executed, or a successful connection are not logged either.
@@ -295,16 +301,16 @@
 			</para>
 		</section>
 		-->
-		
+
 		<section id="cmdline-parameter-progress">
 			<title>Controlling statement progress information</title>
 			<para>
-				Several commands (like <literal>WbExport</literal>) show progress information in the statusbar. 
+				Several commands (like <literal>WbExport</literal>) show progress information in the statusbar.
 				When running in batch mode, this information is usually not shown. When you specifiy <literal>-showProgress=true</literal>
 				these messages will also be displayed on the console.
 			</para>
 		</section>
-		
+
 	</section>
 
 	<section id="script-interactive">
@@ -329,7 +335,7 @@
 		</para>
 		<programlisting>java -Dworkbench.log.level=DEBUG -jar sqlworkbench.jar </programlisting>
 	</section>
-	
+
 	<section id="scripting-examples">
 		<title>Examples</title>
 
@@ -341,13 +347,13 @@
 			extend a single command over more then one input line.
 		</para>
 		</note>
-		
+
 		<para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
 		<programlisting>java -jar sqlworkbench.jar -url=jdbc:postgresql:/dbserver/mydb
      -driver=org.postgresql.Driver
      -username=zaphod
      -password=vogsphere
-     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
+     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar
      -script='test-script.sql'</programlisting>
 
 		<para id="batch-quote">
@@ -380,7 +386,7 @@
 		<para>
 			The following example shows how to run two different SQL statements without using the -script parameter:
 		</para>
-		<programlisting>java -jar sqlworkbench.jar 
+		<programlisting>java -jar sqlworkbench.jar
      -profile='TestData'
      -command='delete from person; commit;'</programlisting>
 

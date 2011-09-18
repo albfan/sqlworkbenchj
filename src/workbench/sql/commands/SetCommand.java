@@ -235,7 +235,7 @@ public class SetCommand
 		if ("off".equalsIgnoreCase(parameter))
 		{
 			runner.removeSessionProperty("autotrace");
-			result.addMessage("Autotrace disabled.");
+			result.addMessageByKey("MsgAutoTraceOff");
 			return result;
 		}
 		List<String> flags = StringUtil.stringToList(parameter.toLowerCase(), " ");
@@ -243,7 +243,7 @@ public class SetCommand
 		if (flags.contains("on") || flags.contains("traceonly"))
 		{
 			runner.setSessionProperty("autotrace", StringUtil.listToString(flags, ','));
-			result.addMessage("Autotrace enabled.");
+			result.addMessageByKey("MsgAutoTraceOn");
 		}
 		return result;
 	}

@@ -402,8 +402,8 @@ public class StatementRunner
 		currentHook.preExec(this, realSql);
 
 		long sqlExecStart = System.currentTimeMillis();
+
 		this.result = this.currentCommand.execute(realSql);
-		currentHook.postExec(this, realSql, result);
 
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
@@ -416,6 +416,7 @@ public class StatementRunner
 			this.result = this.batchCommand.executeBatch();
 		}
 		long time = (System.currentTimeMillis() - sqlExecStart);
+		currentHook.postExec(this, realSql, result);
 		result.setExecutionTime(time);
 	}
 

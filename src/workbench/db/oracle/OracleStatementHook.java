@@ -23,6 +23,8 @@ import workbench.resource.Settings;
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -52,7 +54,10 @@ public class OracleStatementHook
 			"               'bytes received via SQL*Net from client', \n" +
 			"               'SQL*Net roundtrips to/from client', \n" +
 			"               'sorts (memory)', \n" +
-			"               'sorts (disk)', 'rows fetched via callback'";
+			"               'sorts (disk)', 'db block changes'";
+
+	private static final Set<String> explainVerbs = CollectionUtil.caseInsensitiveSet(
+		"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
 
 	private Map<String, Long> values;
 	private boolean statisticViewsAvailable;
@@ -65,7 +70,7 @@ public class OracleStatementHook
 	public void preExec(StatementRunner runner, String sql)
 	{
 		retrieveSessionState(runner);
-		if (!autotrace)
+		if (!autotrace || !traceStatement(sql))
 		{
 			return;
 		}
@@ -117,7 +122,10 @@ public class OracleStatementHook
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
-		if (!autotrace) return;
+		if (!autotrace || !traceStatement(sql))
+		{
+			return;
+		}
 
 		// Retrieving statistics MUST be called before retrieving the execution plan!
 		// Otherwise the statistics for retrieving the plan will be counted as well!
@@ -145,8 +153,26 @@ public class OracleStatementHook
 		}
 	}
 
+	private boolean traceStatement(String sql)
+	{
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken verb = lexer.getNextToken(false, false);
+		if (verb == null) return false;
+		String sqlVerb = verb.getContents();
+		if ("SET".equalsIgnoreCase(sqlVerb))
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	private DataStore retrieveExecutionPlan(StatementRunner runner, String sql)
 	{
+		if (!canExplain(sql))
+		{
+			return null;
+		}
+
 		WbConnection con = runner.getConnection();
 
 		String explainSql = "EXPLAIN PLAN FOR " + sql;
@@ -161,8 +187,8 @@ public class OracleStatementHook
 			stmt.execute(explainSql);
 			rs = stmt.executeQuery(retrievePlan);
 			result = new DataStore(rs, true);
-			result.setResultName("Execution plan");
 			result.setGeneratingSql(sql);
+			result.setResultName("Execution plan");
 		}
 		catch (SQLException ex)
 		{
@@ -212,6 +238,33 @@ public class OracleStatementHook
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return statValues;
+	}
+
+	private boolean canExplain(String sql)
+	{
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken verb = lexer.getNextToken(false, false);
+		if (verb == null) return false;
+
+		if (!explainVerbs.contains(verb.getContents())) return false;
+
+		String sqlVerb = verb.getContents();
+		if ("CREATE".equalsIgnoreCase(sqlVerb))
+		{
+			SQLToken type = lexer.getNextToken(false, false);
+			if (type == null) return false;
+			String typeName = type.getContents();
+			return typeName.equalsIgnoreCase("TABLE") || typeName.equalsIgnoreCase("INDEX");
+		}
+		if ("ALTER".equalsIgnoreCase(sqlVerb))
+		{
+			SQLToken token = lexer.getNextToken(false, false);
+			if (token == null) return false;
+			token = lexer.getNextToken(false, false);
+			if (token == null) return false;
+			return "REBUILD".equalsIgnoreCase(token.getContents());
+		}
+		return true;
 	}
 
 	@Override
