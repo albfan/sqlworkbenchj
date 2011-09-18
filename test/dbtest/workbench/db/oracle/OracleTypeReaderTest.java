@@ -1,11 +1,11 @@
 /*
  * OracleTypeReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2011, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -58,7 +58,7 @@ public class OracleTypeReaderTest
 			"CREATE TYPE BODY TYP1 IS    \n" +
 			"  MEMBER FUNCTION get_value(add_to NUMBER) RETURN NUMBER  IS  \n" +
 			"  BEGIN  \n" +
-			"     RETURN (my_data + add_to) \n" +
+			"     RETURN (my_data + add_to); \n" +
 			"  END;  \n" +
 			"END;  \n" +
 			"/";
@@ -89,7 +89,7 @@ public class OracleTypeReaderTest
 		assertEquals(2, types.size());
 
 		// List is sorted by name, so the first must be the address_type
-		OracleObjectType address = types.get(0); 
+		OracleObjectType address = types.get(0);
 		assertEquals("ADDRESS_TYPE", address.getObjectName());
 		assertEquals(3, address.getNumberOfAttributes());
 		assertEquals(0, address.getNumberOfMethods());

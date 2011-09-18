@@ -13,6 +13,7 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.List;
 import java.util.Set;
 
 import workbench.db.WbConnection;
@@ -40,7 +41,8 @@ import workbench.util.StringUtil;
  *
  * @author  Thomas Kellerer
  */
-public class SetCommand extends SqlCommand
+public class SetCommand
+	extends SqlCommand
 {
 	public static final String VERB = "SET";
 
@@ -54,13 +56,18 @@ public class SetCommand extends SqlCommand
 		try
 		{
 			String command = null;
+			int commandEnd = -1;
 			String param = null;
 			try
 			{
 				SQLLexer l = new SQLLexer(aSql);
 				SQLToken t = l.getNextToken(false, false); // ignore the verb
 				t = l.getNextToken(false, false);
-				if (t != null) command = t.getContents();
+				if (t != null)
+				{
+					command = t.getContents();
+					commandEnd = t.getCharEnd();
+				}
 				t = l.getNextToken(false, false);
 
 				// Ignore a possible equal sign
@@ -95,15 +102,25 @@ public class SetCommand extends SqlCommand
 				}
 				else if (currentConnection.getMetadata().isOracle())
 				{
+					execSql = false;
 					if (command.equalsIgnoreCase("serveroutput"))
 					{
 						result = this.setServeroutput(currentConnection, param);
-						execSql = false;
 					}
 					else if (command.equalsIgnoreCase("feedback"))
 					{
 						result = this.setFeedback(param);
-						execSql = false;
+					}
+					else if (command.equalsIgnoreCase("autotrace"))
+					{
+						result = handleAutotrace(aSql.substring(commandEnd).trim());
+					}
+					else
+					{
+						result = new StatementRunnerResult();
+						String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", aSql);
+						result.addMessage(msg);
+						result.setSuccess();
 					}
 				}
 				else if (command.equalsIgnoreCase("maxrows"))
@@ -208,6 +225,26 @@ public class SetCommand extends SqlCommand
 			this.done();
 		}
 
+		return result;
+	}
+
+	private StatementRunnerResult handleAutotrace(String parameter)
+	{
+		StatementRunnerResult result = new StatementRunnerResult();
+		result.setSuccess();
+		if ("off".equalsIgnoreCase(parameter))
+		{
+			runner.removeSessionProperty("autotrace");
+			result.addMessage("Autotrace disabled.");
+			return result;
+		}
+		List<String> flags = StringUtil.stringToList(parameter.toLowerCase(), " ");
+
+		if (flags.contains("on") || flags.contains("traceonly"))
+		{
+			runner.setSessionProperty("autotrace", StringUtil.listToString(flags, ','));
+			result.addMessage("Autotrace enabled.");
+		}
 		return result;
 	}
 

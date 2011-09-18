@@ -11,13 +11,13 @@
 package workbench.db.oracle;
 
 import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  *
@@ -40,7 +40,7 @@ public class OracleMViewReaderTest
 	}
 
 	@After
-	public void tearDownClass()
+	public void tearDownTest()
 		throws Exception
 	{
 		OracleTestUtil.cleanUpTestCase();

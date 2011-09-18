@@ -14,14 +14,14 @@ import workbench.WbTestCase;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import java.util.Collection;
-import workbench.db.SynonymReader;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import workbench.db.SynonymReader;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.db.SynonymDDLHandler;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  *
@@ -100,7 +100,7 @@ public class OracleSynonymReaderTest
 		assertTrue(sql.contains("CREATE TABLE PERSON"));
 
 		sql = handler.getSynonymSource(con, syn, false);
-		System.out.println(sql);
+//		System.out.println(sql);
 		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
 		assertFalse(sql.contains("CREATE TABLE PERSON"));
 	}

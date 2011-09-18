@@ -15,24 +15,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.WbConnection;
+import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
+import workbench.interfaces.ResultSetConsumer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.storage.RowActionMonitor;
-import workbench.db.WbConnection;
-import workbench.interfaces.ExecutionController;
-import workbench.interfaces.ResultSetConsumer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 
 /**
@@ -50,6 +48,7 @@ public class StatementRunner
 	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
+	private StatementHook currentHook;
 	private ResultSetConsumer currentConsumer;
 	private String baseDir;
 
@@ -71,6 +70,7 @@ public class StatementRunner
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
+	private Map<String, String> sessionAttributes = new TreeMap<String, String>();
 
 	public StatementRunner()
 	{
@@ -102,6 +102,21 @@ public class StatementRunner
 		{
 			l.propertyChange(evt);
 		}
+	}
+
+	public void setSessionProperty(String name, String value)
+	{
+		sessionAttributes.put(name, value);
+	}
+
+	public void removeSessionProperty(String name)
+	{
+		sessionAttributes.remove(name);
+	}
+
+	public String getSessionAttribute(String name)
+	{
+		return sessionAttributes.get(name);
 	}
 
 	@Override
@@ -382,9 +397,13 @@ public class StatementRunner
 			LogMgr.logInfo("StatementRunner.execute()", "Executing: " + realSql);
 		}
 
-		long sqlExecStart = System.currentTimeMillis();
 
+		currentHook = StatementHookFactory.getStatementHook(this);
+		currentHook.preExec(this, realSql);
+
+		long sqlExecStart = System.currentTimeMillis();
 		this.result = this.currentCommand.execute(realSql);
+		currentHook.postExec(this, realSql, result);
 
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
@@ -398,6 +417,12 @@ public class StatementRunner
 		}
 		long time = (System.currentTimeMillis() - sqlExecStart);
 		result.setExecutionTime(time);
+	}
+
+	public boolean processResults()
+	{
+		if (currentHook == null) return true;
+		return currentHook.processResults();
 	}
 
 	public ResultSetConsumer getConsumer()
@@ -461,7 +486,7 @@ public class StatementRunner
 			mainConnection = null;
 		}
 	}
-	
+
 	public void done()
 	{
 		if (this.result != null) this.result.clear();

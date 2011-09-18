@@ -360,6 +360,11 @@ public class SqlCommand
 		// to do any harm for other DBMS as well.
 		appendWarnings(result);
 
+		if (!runner.processResults())
+		{
+			return;
+		}
+		
 		int updateCount = -1;
 		boolean moreResults = false;
 
