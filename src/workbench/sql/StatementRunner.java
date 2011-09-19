@@ -48,7 +48,7 @@ public class StatementRunner
 	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
-	private StatementHook currentHook;
+	private StatementHook statementHook;
 	private ResultSetConsumer currentConsumer;
 	private String baseDir;
 
@@ -280,8 +280,8 @@ public class StatementRunner
 
 		DbMetadata meta = this.currentConnection.getMetadata();
 		DbSettings db = (meta != null ? meta.getDbSettings() : null);
-
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
+		statementHook = StatementHookFactory.getStatementHook(this);
 	}
 
 	public StatementRunnerResult getResult()
@@ -397,9 +397,7 @@ public class StatementRunner
 			LogMgr.logInfo("StatementRunner.execute()", "Executing: " + realSql);
 		}
 
-
-		currentHook = StatementHookFactory.getStatementHook(this);
-		currentHook.preExec(this, realSql);
+		statementHook.preExec(this, realSql);
 
 		long sqlExecStart = System.currentTimeMillis();
 
@@ -416,14 +414,14 @@ public class StatementRunner
 			this.result = this.batchCommand.executeBatch();
 		}
 		long time = (System.currentTimeMillis() - sqlExecStart);
-		currentHook.postExec(this, realSql, result);
+		statementHook.postExec(this, realSql, result);
 		result.setExecutionTime(time);
 	}
 
 	public boolean processResults()
 	{
-		if (currentHook == null) return true;
-		return currentHook.processResults();
+		if (statementHook == null) return true;
+		return statementHook.processResults();
 	}
 
 	public ResultSetConsumer getConsumer()
