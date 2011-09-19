@@ -282,6 +282,7 @@ public class StatementRunner
 		DbSettings db = (meta != null ? meta.getDbSettings() : null);
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 		statementHook = StatementHookFactory.getStatementHook(this);
+		sessionAttributes.clear();
 	}
 
 	public StatementRunnerResult getResult()
