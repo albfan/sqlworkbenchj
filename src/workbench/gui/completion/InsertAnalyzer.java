@@ -30,6 +30,7 @@ public class InsertAnalyzer
 		super(conn, statement, cursorPos);
 	}
 
+	@Override
 	public void checkContext()
 	{
 		SQLLexer lexer = new SQLLexer(this.sql);

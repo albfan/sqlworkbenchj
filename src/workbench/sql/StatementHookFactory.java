@@ -20,6 +20,8 @@ import workbench.db.oracle.OracleStatementHook;
 public class StatementHookFactory
 {
 
+	public static StatementHook DEFAULT_HOOK = new DefaultStatementHook();
+
 	public static StatementHook getStatementHook(StatementRunner runner)
 	{
 		WbConnection conn = runner.getConnection();
@@ -27,6 +29,6 @@ public class StatementHookFactory
 		{
 			return new OracleStatementHook();
 		}
-		return new DefaultStatementHook();
+		return DEFAULT_HOOK;
 	}
 }

@@ -24,16 +24,17 @@ import workbench.util.StringUtil;
 public class CreateAnalyzer
 	extends BaseAnalyzer
 {
-	
+
 	public CreateAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		super(conn, statement, cursorPos);
 	}
-	
+
+	@Override
 	protected void checkContext()
 	{
 		SQLLexer lexer = new SQLLexer(this.sql);
-		
+
 		boolean isCreateIndex = false;
 		boolean showColumns = false;
 		boolean showTables = false;
@@ -41,7 +42,7 @@ public class CreateAnalyzer
 		int tableEndPos = -1;
 		int tokenCount = 0;
 		boolean afterCreate = true;
-		
+
 		try
 		{
 			SQLToken token = lexer.getNextToken(false, false);
@@ -53,12 +54,12 @@ public class CreateAnalyzer
 				{
 					afterCreate = (token.getCharBegin() > this.cursorPos);
 				}
-				
+
 				if (isCreateIndex)
 				{
 					if ("ON".equalsIgnoreCase(t))
 					{
-						if (this.cursorPos > token.getCharEnd()) 
+						if (this.cursorPos > token.getCharEnd())
 						{
 							showTables = true;
 							showColumns = false;
@@ -87,7 +88,7 @@ public class CreateAnalyzer
 				{
 					isCreateIndex = true;
 				}
-				
+
 				token = lexer.getNextToken(false, false);
 			}
 		}
@@ -95,7 +96,7 @@ public class CreateAnalyzer
 		{
 			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
 		}
-		
+
 		if (showTables)
 		{
 			context = CONTEXT_TABLE_LIST;
@@ -122,5 +123,5 @@ public class CreateAnalyzer
 			this.keywordFile = "create_types.txt";
 		}
 	}
-	
+
 }

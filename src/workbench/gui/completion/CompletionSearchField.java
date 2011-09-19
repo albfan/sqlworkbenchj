@@ -39,10 +39,12 @@ public class CompletionSearchField
 		this.getDocument().addDocumentListener(this);
 	}
 
+	@Override
 	public void keyTyped(KeyEvent e)
 	{
 	}
 
+	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
@@ -61,20 +63,24 @@ public class CompletionSearchField
 		}
 	}
 
+	@Override
 	public void keyReleased(KeyEvent e)
 	{
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.parent.selectMatchingEntry(this.getText());
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.parent.selectMatchingEntry(this.getText());
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.parent.selectMatchingEntry(this.getText());

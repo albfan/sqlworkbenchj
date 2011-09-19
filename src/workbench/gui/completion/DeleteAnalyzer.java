@@ -26,20 +26,21 @@ public class DeleteAnalyzer
 	extends BaseAnalyzer
 {
 	public DeleteAnalyzer(WbConnection conn, String statement, int cursorPos)
-	{	
+	{
 		super(conn, statement, cursorPos);
 	}
-	
+
+	@Override
 	protected void checkContext()
 	{
 		this.context = -1;
 
 		int wherePos = SqlUtil.getKeywordPosition("WHERE", sql);
 		checkOverwrite();
-		
+
 		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)
 		{
-			
+
 			context = CONTEXT_TABLE_LIST;
 			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
@@ -53,6 +54,7 @@ public class DeleteAnalyzer
 		}
 	}
 
+	@Override
 	public List<TableAlias> getTables()
 	{
 		String table = SqlUtil.getDeleteTable(this.sql);

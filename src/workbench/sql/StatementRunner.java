@@ -48,7 +48,7 @@ public class StatementRunner
 	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
-	private StatementHook statementHook;
+	private StatementHook statementHook = StatementHookFactory.DEFAULT_HOOK;
 	private ResultSetConsumer currentConsumer;
 	private String baseDir;
 
@@ -419,9 +419,8 @@ public class StatementRunner
 		result.setExecutionTime(time);
 	}
 
-	public boolean processResults()
+	public boolean doProcessResults()
 	{
-		if (statementHook == null) return true;
 		return statementHook.processResults();
 	}
 

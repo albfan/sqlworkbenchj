@@ -43,6 +43,8 @@ public class StringUtil
 
 	public static StringBuilder emptyBuffer() { return new StringBuilder(0); }
 
+	private static final char[] hexDigit = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
 	public static String getCurrentTimestampWithTZString()
 	{
 		synchronized (ISO_TZ_TIMESTAMP_FORMATTER)
@@ -311,7 +313,7 @@ public class StringUtil
 	}
 
 	/**
-	 * Remove all characters that might not be allowed in a filename from the input string.
+	 * Remove all characters  from the input string that might not be allowed in a filename.
 	 * @param input the value to be used as a filename
 	 * @return input value without any characters that might not be allowed for a filename converted to lowercase
 	 */
@@ -326,6 +328,7 @@ public class StringUtil
 	/**
 	 * Replacement for StringBuilder.lastIndexOf() which does
 	 * a lot of object creation and copying to achieve this.
+	 * 
 	 * This implementation should be a lot faster for StringBuilder
 	 * and StringBuffer, and will basically be the same for String
 	 * objects.
@@ -1385,10 +1388,6 @@ public class StringUtil
 	{
 		return hexDigit[(nibble & 0xF)];
 	}
-
-	private static final char[] hexDigit = {
-		'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
-	};
 
 	public static boolean containsWords(CharSequence toSearch, List<String> searchValues, boolean matchAll, boolean ignoreCase)
 	{

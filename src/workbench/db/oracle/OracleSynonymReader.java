@@ -84,6 +84,7 @@ public class OracleSynonymReader
 		return result;
 	}
 
+	@Override
 	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{

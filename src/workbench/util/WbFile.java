@@ -33,8 +33,9 @@ public class WbFile
 	 * Variables in the names are replaced with the value of the corresponding
 	 * system property (e.g. ${user.home})
 	 *
-	 * @param parent
-	 * @param filename
+	 * @param parent     the directory name
+	 * @param filename   the filename
+	 *
 	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String)
 	 */
 	public WbFile(String parent, String filename)
@@ -42,6 +43,17 @@ public class WbFile
 		super(StringUtil.replaceProperties(parent), StringUtil.replaceProperties(filename));
 	}
 
+	/**
+	 * Create a new file object.
+	 *
+	 * Variables in the filename are replaced with the value of the corresponding
+	 * system property (e.g. ${user.home})
+	 *
+	 * @param parent     the directory
+	 * @param filename   the filename
+	 *
+	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String)
+	 */
 	public WbFile(File parent, String filename)
 	{
 		super(parent, StringUtil.replaceProperties(filename));
@@ -52,6 +64,16 @@ public class WbFile
 		super(f.getAbsolutePath());
 	}
 
+	/**
+	 * Create a new file object.
+	 *
+	 * Variables in the filename are replaced with the value of the corresponding
+	 * system property (e.g. ${user.home})
+	 *
+	 * @param filename   the filename
+	 *
+	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String)
+	 */
 	public WbFile(String filename)
 	{
 		super(StringUtil.replaceProperties(filename));
@@ -144,10 +166,6 @@ public class WbFile
 		try
 		{
 			out = new FileOutputStream(this);
-		}
-		catch (IOException e)
-		{
-			throw e;
 		}
 		finally
 		{

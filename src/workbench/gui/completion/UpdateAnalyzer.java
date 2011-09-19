@@ -32,6 +32,7 @@ public class UpdateAnalyzer
 		super(conn, statement, cursorPos);
 	}
 
+	@Override
 	protected void checkContext()
 	{
 		checkOverwrite();
@@ -95,6 +96,7 @@ public class UpdateAnalyzer
 		}
 	}
 
+	@Override
 	public List<TableAlias> getTables()
 	{
 		String table = SqlUtil.getUpdateTable(this.sql);
