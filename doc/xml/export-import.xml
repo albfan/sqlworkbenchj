@@ -1,9 +1,9 @@
 
 <section id="export">
 	<title>Export result data</title>
+  <indexterm><primary>Export</primary><secondary>result set</secondary></indexterm>
 	<para>
-    You can export the data of the <emphasis role="strong"><indexterm><primary>Export</primary><secondary>result set</secondary></indexterm></emphasis>
-		into local files of the following formats:
+    You can export the data of the result set into local files of the following formats:
 	</para>
 
 	<itemizedlist>
@@ -57,10 +57,9 @@
 
 <section id="export-clipboard">
 	<title>Copy data to the clipboard</title>
+  <indexterm><primary>Export</primary><secondary>clipboard</secondary></indexterm>
 	<para>
-    You can also copy the data from the result into the system <indexterm><primary>Export</primary><secondary>clipboard</secondary></indexterm>
-		in four different formats. In any case default settings are used
-		for the various options of the respective format.
+    You can also copy the data from the result into the system clipboard in four different formats.
 		<itemizedlist>
 			<listitem>
 				<para>Text (tab separated)</para>

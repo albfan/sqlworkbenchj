@@ -41,7 +41,7 @@
 
     <para>
       When using databases that support timestamps or time data with a timezone, the display in &wb-productname; might not
-      always be correct, especially when daylight savings time (DST) is in effect.
+      always be correct. Especially when daylight savings time (DST) is in effect.
     </para>
     <para>
       This is caused by the handling of time data in Java and is usually <emphasis>not</emphasis> caused by the database, the driver or &wb-productname;
@@ -94,6 +94,7 @@
     </para>
   </section>
 
+  <!--
   <section id="no-ddraw">
     <title>Display problems when running under Windows&reg;</title>
 
@@ -122,7 +123,8 @@
     </para>
 
   </section>
-
+  -->
+  
   <section id="hi-cpu-usage">
     <title>High CPU usage when executing statements</title>
 

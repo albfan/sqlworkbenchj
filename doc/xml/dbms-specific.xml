@@ -1,0 +1,62 @@
+<section id="dbms-specific">
+	<title>DBMS specific features</title>
+
+  <section id="dbms-specific-postgres">
+     <title>PostgreSQL specific features</title>
+
+     <section id="postgres-open-trans">
+       <indexterm><primary>PostgreSQL</primary><secondary>check for pending transactions</secondary></indexterm>
+       <title>Checking for un-committed changes</title>
+       <para>
+         Before a SQL panel (or the application) is closed, &wb-productname; will check if the current connection
+         has any un-committed changes (e.g. an <literal>INSERT</literal> without a <literal>COMMIT</literal>).
+         This is done by checking the <ulink url="http://www.postgresql.org/docs/current/static/view-pg-locks.html"><literal>pg_locks</literal></ulink>
+         system view. The information in this view might not always be 100% correct and can report open transactions even though
+         there are none.
+       </para>
+       <para>
+         The checking for un-committed changes can be disabled by setting the property:
+         <literal>workbench.db.postgresql.opentransaction.check=false</literal> in <literal>workbench.settings</literal>
+       </para>
+     </section>
+  </section>
+
+  <section id="dbms-specific-oracle">
+     <title>Oracle specific features</title>
+     <section id="oracle-open-trans">
+       <indexterm><primary>Oracle</primary><secondary>check for pending transactions</secondary></indexterm>
+       <title>Checking for un-committed changes</title>
+       <para>
+         Before a SQL panel (or the application) is closed, &wb-productname; will check if the current connection
+         has any un-committed changes (e.g. an <literal>INSERT</literal> without a <literal>COMMIT</literal>).
+         This is done by checking the <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e25513/dynviews_3114.htm"><literal>V$TRANSACTION</literal></ulink>
+         system view.
+       </para>
+       <para>
+         <note>By default a regular user does not have <literal>SELECT</literal> privilege on <literal>V$TRANSACTION</literal>,
+         therefor this features is disabled for Oracle.</note>
+       </para>
+       <para>
+         The checking for un-committed changes can be enabled by setting the property:
+         <literal>workbench.db.oracle.opentransaction.check=true</literal> in <literal>workbench.settings</literal>.
+       </para>
+     </section>
+
+     <section id="oracle-autotrace">
+       <indexterm><primary>Oracle</primary><secondary>autotrace</secondary></indexterm>
+       <title>SQL*Plus autotrace mode</title>
+
+       <para>
+         &wb-productname; supports the a mode similar to SQL*Plus' <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_twelve040.htm#i2698680">"autotrace"</ulink> mode.
+         The command to turn on autotrace is the same as in SQL*Plus and supports the same options.
+       </para>
+       <para>
+         The current user needs to have the <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_eight.htm#i1037226"><literal>PLUSTRACE</literal></ulink> role in order to
+         be able to use autotrace mode (which is required by SQL*Plus as well). The <literal>PLUSTRACE</literal> role grants the <literal>SELECT</literal>
+         privilege on the system views: <literal>V$SESSTAT</literal>, <literal>V$STATNAME</literal> and <literal>V$MYSTAT</literal>.
+       </para>
+     </section>
+
+  </section>
+
+</section>

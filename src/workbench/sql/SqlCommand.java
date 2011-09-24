@@ -360,11 +360,6 @@ public class SqlCommand
 		// to do any harm for other DBMS as well.
 		appendWarnings(result);
 
-		if (!runner.doProcessResults())
-		{
-			return;
-		}
-
 		int updateCount = -1;
 		boolean moreResults = false;
 
@@ -456,9 +451,15 @@ public class SqlCommand
 				}
 				else
 				{
+					RowActionMonitor monitorToUse = null;
+					if (showDataLoading && runner.doProcessResults())
+					{
+						monitorToUse = this.rowMonitor;
+					}
+
 					// we have to use an instance variable for the retrieval, otherwise the retrieval
 					// cannot be cancelled!
-					this.currentRetrievalData = new DataStore(rs, false, (showDataLoading ? this.rowMonitor : null), maxRows, this.currentConnection);
+					this.currentRetrievalData = new DataStore(rs, false, monitorToUse, maxRows, this.currentConnection);
 					try
 					{
 						// Not reading the data in the constructor enables us
@@ -491,7 +492,13 @@ public class SqlCommand
 					{
 						SqlUtil.closeResult(rs);
 					}
-					result.addDataStore(this.currentRetrievalData);
+
+					if (runner.doProcessResults())
+					{
+						result.addDataStore(this.currentRetrievalData);
+					}
+					result.addRowsProcessed(currentRetrievalData.getRowCount());
+					
 				}
 			}
 

@@ -25,6 +25,7 @@
 	<!ENTITY wbimport SYSTEM "wbimport.xml">
 	<!ENTITY comparedb SYSTEM "compare.xml">
 	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
+  <!ENTITY dbms-specific SYSTEM "dbms-specific.xml">
 	<!ENTITY progress-parameter SYSTEM "progress.xml">
 	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
   <!ENTITY table-statements SYSTEM "table-statements.xml">
@@ -41,6 +42,7 @@
 &profiles;
 &editor;
 &using;
+&dbms-specific;
 &variables;
 &scripting;
 &console-mode;

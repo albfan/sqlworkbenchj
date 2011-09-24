@@ -44,6 +44,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
 import workbench.db.DbSettings;
+import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
@@ -1281,6 +1282,18 @@ public class SqlPanel
 		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", title);
 	}
 
+	private boolean confirmDiscardTransaction()
+	{
+		WbConnection con = getConnection();
+		if (con == null) return true;
+		TransactionChecker checker = con.getTransactionChecker();
+		if (checker.hasUncommittedChanges(con))
+		{
+			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", getRealTabTitle());
+		}
+		return true;
+	}
+
 	/**
 	 *  Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
@@ -1290,7 +1303,7 @@ public class SqlPanel
 	@Override
 	public boolean canClosePanel()
 	{
-		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
+		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1) && confirmDiscardTransaction();
 		return fileOk;
 	}
 

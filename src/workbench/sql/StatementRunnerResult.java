@@ -36,6 +36,7 @@ public class StatementRunnerResult
 {
 	private List<ResultSet> results;
 	private long totalUpdateCount;
+	private long totalRowsProcessed;
 	private MessageBuffer messages;
 	private List<DataStore> datastores;
 	private String sourceCommand;
@@ -60,14 +61,50 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
-	public boolean stopScript() { return stopScriptExecution; }
-	public void setStopScript(boolean flag) { this.stopScriptExecution = flag; }
+	public void setRowsProcessed(long rows)
+	{
+		this.totalRowsProcessed = rows;
+	}
 
-	public boolean promptingWasCancelled() { return wasCancelled; }
-	public void setPromptingWasCancelled() { this.wasCancelled = true; }
+	public long getRowsProcessed()
+	{
+		return this.totalRowsProcessed;
+	}
 
-	public void setExecutionTime(long t) { this.executionTime = t; }
-	public long getExecutionTime() { return this.executionTime; }
+	public void addRowsProcessed(long rows)
+	{
+		this.totalRowsProcessed += rows;
+	}
+	
+	public boolean stopScript()
+	{
+		return stopScriptExecution;
+	}
+
+	public void setStopScript(boolean flag)
+	{
+		this.stopScriptExecution = flag;
+	}
+
+	public boolean promptingWasCancelled()
+	{
+		return wasCancelled;
+	}
+
+	public void setPromptingWasCancelled()
+	{
+		this.wasCancelled = true;
+	}
+
+	public void setExecutionTime(long t)
+	{
+		this.executionTime = t;
+	}
+
+	public long getExecutionTime()
+	{
+		return this.executionTime;
+	}
 
 	public void setShowRowCount(boolean flag)
 	{

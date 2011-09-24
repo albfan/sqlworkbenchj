@@ -184,23 +184,6 @@
         Note that you need to specify the full path to the <literal>jvm.dll</literal>, not the directory where the Java runtime is installed.
       </para>
     </section>
-
-    <!--
-    <section id="launcher-vista">
-      <title>Windows Vista</title>
-      <para>
-        With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
-        is loaded. This affects the &wb-productname; launcher due to the (new?) Microsoft C runtime distribution model.
-        If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
-        into the directory where <literal>SQLWorkbench.exe</literal> is located.
-      </para>
-      <para>
-        This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal>
-        (usually this is <literal>c:\Windows\System32\msvcr71.dll</literal>)
-      </para>
-      <para>Thanks to Jon for this tip.</para>
-    </section>
-    -->
   </section>
 
 

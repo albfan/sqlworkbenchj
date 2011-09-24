@@ -1405,6 +1405,16 @@ public class DbSettings
 	public boolean objectInfoWithFK()
 	{
 		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.includefk", false);
-		return Settings.getInstance().getBoolProperty(prefix + ".objectinfo.includefk", global);
+		return Settings.getInstance().getBoolProperty(prefix + "objectinfo.includefk", global);
+	}
+
+	public boolean checkOpenTransactions()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "opentransaction.check", true);
+	}
+
+	public String checkOpenTransactionsQuery()
+	{
+		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);
 	}
 }

@@ -31,7 +31,6 @@ public class OracleTablePartitionTest
 {
 	private static boolean partitioningAvailable;
 
-	// More examples: http://psoug.org/reference/partitions.html
 	public OracleTablePartitionTest()
 	{
 		super("OraclePartitionReaderTest");
@@ -41,6 +40,7 @@ public class OracleTablePartitionTest
 	public static void setUpClass()
 		throws Exception
 	{
+		// More examples: http://psoug.org/reference/partitions.html
 		String sql =
 			"CREATE TABLE wb_list_partition_test \n" +
 			"( \n" +

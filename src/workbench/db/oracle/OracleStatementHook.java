@@ -139,6 +139,10 @@ public class OracleStatementHook
 			DataStore stats = retrieveStatistics(runner);
 			if (stats != null)
 			{
+				long rows = runner.getResult().getRowsProcessed();
+				int row = stats.addRow();
+				stats.setValue(row, 0, "rows processed");
+				stats.setValue(row, 1, Long.valueOf(rows));
 				stats.setGeneratingSql(sql);
 				result.addDataStore(stats);
 			}
@@ -165,7 +169,7 @@ public class OracleStatementHook
 		}
 		return true;
 	}
-	
+
 	private DataStore retrieveExecutionPlan(StatementRunner runner, String sql)
 	{
 		if (!canExplain(sql))
