@@ -2,8 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-12-18">
-    <entry dev-build="10" type="enh">For Oracle and Postgres it is now checked if there are un-committed changes before closing a window (although it is disabled by default for Oracle because the necessary system views are usually not accessible to regular users)</entry>
-    <entry dev-build="10" type="enh">For Oracle, the "autotrace" mode from SQL*Plus is now supported. It is enabled with "SET AUTOTRACE" the same as in SQL*Plus.</entry>
+    <entry dev-build="10" type="enh">For Oracle and Postgres a check for uncommitted changes can be enabled in the connection profile (for Oracle this requires the SELECT privileges on V$TRANSACTION)</entry>
+    <entry dev-build="10" type="enh">For Oracle, the "autotrace" mode from SQL*Plus is now supported. It is enabled with "SET AUTOTRACE" the same as in SQL*Plus (and requires the PLUSTRACE role like SQL*Plus)</entry>
     <entry dev-build="9" type="enh">A new option to generate a script to drop a table and all incoming (referencing) foreign keys is available in the DbExplorer. This functionality is also available through the WbGenerateDrop command</entry>
     <entry dev-build="9" type="enh">If enabled, the formatting of internally generated SQL statements is now done by the SQL formatter (and thus uses the same settings as the formatter)</entry>
     <entry dev-build="9" type="enh">The dependency tree in the DbExplorer can now be limited to the direct children only.</entry>
