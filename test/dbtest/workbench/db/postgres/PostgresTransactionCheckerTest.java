@@ -62,11 +62,9 @@ public class PostgresTransactionCheckerTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		boolean oldFlag = Settings.getInstance().getBoolProperty("workbench.db.postgresql.opentransaction.check");
-
 		try
 		{
-			Settings.getInstance().setProperty("workbench.db.postgresql.opentransaction.check", true);
+			con.getProfile().setDetectOpenTransaction(true);
 			TransactionChecker checker = con.getTransactionChecker();
 			assertFalse(checker == TransactionChecker.NO_CHECK);
 			assertTrue(checker instanceof DefaultTransactionChecker);
@@ -81,7 +79,6 @@ public class PostgresTransactionCheckerTest
 		}
 		finally
 		{
-			Settings.getInstance().setProperty("workbench.db.postgresql.opentransaction.check", oldFlag);
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}

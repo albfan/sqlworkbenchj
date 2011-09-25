@@ -38,6 +38,7 @@ import workbench.util.StringUtil;
 public class OracleStatementHook
 	implements StatementHook
 {
+
 	private static final String sql =
 			"select a.name, s.value, s.statistic# \n" +
 			"from v$sesstat s \n" +
@@ -45,20 +46,27 @@ public class OracleStatementHook
 			"where sid = userenv('SID') \n" +
 			"and a.name in";
 
-	private static final String defaultStats = "'recursive calls', \n" +
-			"               'db block gets', \n" +
-			"               'consistent gets', \n" +
-			"               'physical reads', \n" +
-			"               'redo size', \n" +
-			"               'bytes sent via SQL*Net to client', \n" +
-			"               'bytes received via SQL*Net from client', \n" +
-			"               'SQL*Net roundtrips to/from client', \n" +
-			"               'sorts (memory)', \n" +
-			"               'sorts (disk)', 'db block changes'";
+	/**
+	 * A list of statistic names formatted to be used inside an IN clause.
+	 */
+	private static final String defaultStats =
+		"'recursive calls', \n" +
+		"'db block gets', \n" +
+		"'consistent gets', \n" +
+		"'physical reads', \n" +
+		"'redo size', \n" +
+		"'bytes sent via SQL*Net to client', \n" +
+		"'bytes received via SQL*Net from client', \n" +
+		"'SQL*Net roundtrips to/from client', \n" +
+		"'sorts (memory)', \n" +
+		"'sorts (disk)', 'db block changes'";
 
-	private static final Set<String> explainVerbs = CollectionUtil.caseInsensitiveSet(
-		"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
+	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
+	private static final Set<String> explainVerbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
 
+	/**
+	 * Stores the statistic values before the execution of the statement.
+	 */
 	private Map<String, Long> values;
 	private boolean statisticViewsAvailable;
 	private boolean autotrace;
@@ -111,6 +119,7 @@ public class OracleStatementHook
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
 	private String buildQuery()
 	{
 		String stats = Settings.getInstance().getProperty("workbench.db.oracle.autotrace.statname", defaultStats);
@@ -244,6 +253,14 @@ public class OracleStatementHook
 		return statValues;
 	}
 
+	/**
+	 * Check if the SQL can be EXPLAIN'ed.
+	 *
+	 * See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
+
+	 * @param sql the sql to run
+	 * @return true if EXPLAIN PLAN supports the statement.
+	 */
 	private boolean canExplain(String sql)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
@@ -272,10 +289,21 @@ public class OracleStatementHook
 	}
 
 	@Override
-	public boolean processResults()
+	public boolean displayResults()
 	{
 		if (!autotrace) return true;
 		return !traceOnly;
+	}
+
+	@Override
+	public boolean fetchResults()
+	{
+		if (!autotrace) return true;
+		if (traceOnly)
+		{
+			return showStatistics;
+		}
+		return true;
 	}
 
 	private void retrieveSessionState(StatementRunner runner)
@@ -289,9 +317,9 @@ public class OracleStatementHook
 		Set<String> flags = CollectionUtil.caseInsensitiveSet();
 		flags.addAll(StringUtil.stringToList(trace, ",", true, true, false, false));
 		this.traceOnly = flags.contains("traceonly");
-		this.showExecutionPlan = flags.contains("on") || (flags.contains("explain") && traceOnly) || (traceOnly && flags.size() == 1);
-		this.showStatistics = flags.contains("on") || (flags.contains("statistics") && traceOnly) || (traceOnly && flags.size() == 1);
-		this.autotrace = showExecutionPlan || showStatistics;
+		this.autotrace = flags.contains("on") || traceOnly;
+		this.showExecutionPlan =  flags.contains("explain") || (autotrace && flags.size() == 1);
+		this.showStatistics = flags.contains("statistics")  || (autotrace && flags.size() == 1);
 	}
 
 	private DataStore createResult()
@@ -301,6 +329,5 @@ public class OracleStatementHook
 		DataStore result = new DataStore(columnNames, types);
 		return result;
 	}
-
 
 }

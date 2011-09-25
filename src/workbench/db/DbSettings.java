@@ -1408,11 +1408,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "objectinfo.includefk", global);
 	}
 
-	public boolean checkOpenTransactions()
-	{
-		return Settings.getInstance().getBoolProperty(prefix + "opentransaction.check", true);
-	}
-
 	public String checkOpenTransactionsQuery()
 	{
 		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);

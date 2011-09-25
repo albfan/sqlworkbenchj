@@ -55,6 +55,7 @@ public class ConnectionProfile
 	private boolean trimCharData;
 	private boolean temporaryProfile;
 	private boolean oracleSysDBA;
+	private boolean detectOpenTransaction;
 
 	private boolean readOnly;
 	private Boolean sessionReadOnly;
@@ -106,6 +107,17 @@ public class ConnectionProfile
 		cp.setStoreExplorerSchema(true);
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
+	}
+
+	public boolean getDetectOpenTransaction()
+	{
+		return detectOpenTransaction;
+	}
+
+	public void setDetectOpenTransaction(boolean flag)
+	{
+		changed = (flag != detectOpenTransaction);
+		detectOpenTransaction = flag;
 	}
 
 	public boolean isTemporaryProfile()
@@ -775,6 +787,7 @@ public class ConnectionProfile
 		result.setRemoveComments(this.removeComments);
 		result.setCatalogFilter(this.catalogFilter == null ? null : catalogFilter.createCopy());
 		result.setSchemaFilter(this.schemaFilter == null ? null : schemaFilter.createCopy());
+		result.setDetectOpenTransaction(this.detectOpenTransaction);
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();
@@ -813,7 +826,7 @@ public class ConnectionProfile
 
 	public void setIgnoreDropErrors(boolean aFlag)
 	{
-		if (aFlag != this.ignoreDropErrors) changed = true;
+		changed = aFlag != this.ignoreDropErrors;
 		this.ignoreDropErrors = aFlag;
 	}
 

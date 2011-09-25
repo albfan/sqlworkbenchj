@@ -1085,7 +1085,8 @@ Done.</programlisting>
 		</para>
 		<para>
 			Consider the following tables:
-			<simplelist columns="1">				<member>Referenced rows</member>
+			<simplelist columns="1">
+        <member>Referenced rows</member>
 				<member>Referencing rows</member>
 				<member><literal>BASE</literal> (b_id, name)</member>
 				<member><literal>DETAIL</literal> (d_id, base_id, description) with <literal>base_id</literal>

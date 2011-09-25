@@ -50,6 +50,7 @@ public class AppArguments
 	public static final String ARG_CONN_SEPARATE = "separateConnection";
 	public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
 	public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
+	public static final String ARG_CONN_CHECK_OPEN_TRANS = "checkUncommitted";
 	public static final String ARG_CONN_TRIM_CHAR = "trimCharData";
 	public static final String ARG_CONN_FETCHSIZE = "fetchSize";
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
@@ -123,6 +124,7 @@ public class AppArguments
 		addArgument(ARG_CONN_EMPTYNULL, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_REMOVE_COMMENTS, ArgumentType.BoolArgument);
+		addArgument(ARG_CONN_CHECK_OPEN_TRANS, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOW_PUMPER, ArgumentType.BoolArgument);
 		addArgument(ARG_IGNORE_DROP, ArgumentType.BoolArgument);

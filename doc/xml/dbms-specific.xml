@@ -15,8 +15,7 @@
          there are none.
        </para>
        <para>
-         The checking for un-committed changes can be disabled by setting the property:
-         <literal>workbench.db.postgresql.opentransaction.check=false</literal> in <literal>workbench.settings</literal>
+         The checking for un-committed changes can be controlled through the <link linkend="profile-open-trans">connection profile</link>.
        </para>
      </section>
   </section>
@@ -34,11 +33,10 @@
        </para>
        <para>
          <note>By default a regular user does not have <literal>SELECT</literal> privilege on <literal>V$TRANSACTION</literal>,
-         therefor this features is disabled for Oracle.</note>
+         please grant the privilege before enabling this feature.</note>
        </para>
        <para>
-         The checking for un-committed changes can be enabled by setting the property:
-         <literal>workbench.db.oracle.opentransaction.check=true</literal> in <literal>workbench.settings</literal>.
+         The checking for un-committed changes can be controlled through the <link linkend="profile-open-trans">connection profile</link>.
        </para>
      </section>
 
@@ -47,8 +45,9 @@
        <title>SQL*Plus autotrace mode</title>
 
        <para>
-         &wb-productname; supports the a mode similar to SQL*Plus' <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_twelve040.htm#i2698680">"autotrace"</ulink> mode.
+         &wb-productname; supports the a mode similar to <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_twelve040.htm#i2698680">"autotrace"</ulink> mode in SQL*Plus.
          The command to turn on autotrace is the same as in SQL*Plus and supports the same options.
+         For details see the description of the <link linkend="command-set-autotrace">SET</link> command.
        </para>
        <para>
          The current user needs to have the <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_eight.htm#i1037226"><literal>PLUSTRACE</literal></ulink> role in order to

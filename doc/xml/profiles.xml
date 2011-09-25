@@ -430,24 +430,6 @@
 			</para>
 		</section>
 
-		<section id="profile-hide-warnings">
-			<title>Hide warnings</title>
-			<para>
-				When a SQL statement returns warnings from the DBMS, these are usually displayed
-				after the SQL statement has finished. By enabling this option, warnings that are
-				returned from the DBMS are never displayed.
-			</para>
-			<para>
-				Note that for some DBMS (e.g. MS SQL Server) server messages
-				(<literal>PRINT 'Hello, world'</literal>) are also returned	as a warning by the driver.
-				If you disable this property, those messages will also not be displayed.
-			</para>
-			<para>
-				If you hide warnings when connected to a PostgreSQL server, you will also not see
-				messages that are returned e.g. by the <literal>VACUUM</literal> command.
-			</para>
-		</section>
-
 		<section id="options-explorer-remember-schema" xreflabel="Remember DbExplorer Schema">
 			<title>Remember DbExplorer Schema</title>
 
@@ -471,6 +453,38 @@
 				spaces from the values retrieved from the database. When running &wb-productname;
 				in batch mode, this flag can be enabled using the <literal>-trimCharData</literal> switch.
 			</para>
+		</section>
+
+		<section id="profile-hide-warnings">
+			<title>Hide warnings</title>
+			<para>
+				When a SQL statement returns warnings from the DBMS, these are usually displayed
+				after the SQL statement has finished. By enabling this option, warnings that are
+				returned from the DBMS are never displayed.
+			</para>
+			<para>
+				Note that for some DBMS (e.g. MS SQL Server) server messages
+				(<literal>PRINT 'Hello, world'</literal>) are also returned	as a warning by the driver.
+				If you disable this property, those messages will also not be displayed.
+			</para>
+			<para>
+				If you hide warnings when connected to a PostgreSQL server, you will also not see
+				messages that are returned e.g. by the <literal>VACUUM</literal> command.
+			</para>
+		</section>
+
+		<section id="profile-open-trans">
+			<title>Check for uncommitted changes</title>
+			<para>
+        This option is (currently) only available for Oracle and PostgreSQL.
+			</para>
+			<para>
+        When closing the application (or a SQL panel) &wb-productname; will check if the current
+        transaction has changes that were not committed and will issue a warning.
+			</para>
+      <para>
+        For more details see the description of <link linkend="dbms-specific">DBMS specific features</link>.
+      </para>
 		</section>
 
 		<section id="profile-info-background">

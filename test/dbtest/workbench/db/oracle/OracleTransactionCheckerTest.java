@@ -62,7 +62,7 @@ public class OracleTransactionCheckerTest
 
 		try
 		{
-			Settings.getInstance().setProperty("workbench.db.oracle.opentransaction.check", true);
+			con.getProfile().setDetectOpenTransaction(true);
 			TransactionChecker checker = con.getTransactionChecker();
 			assertFalse(checker == TransactionChecker.NO_CHECK);
 			assertTrue(checker instanceof DefaultTransactionChecker);
@@ -77,7 +77,6 @@ public class OracleTransactionCheckerTest
 		}
 		finally
 		{
-			Settings.getInstance().setProperty("workbench.db.oracle.opentransaction.check", false);
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}

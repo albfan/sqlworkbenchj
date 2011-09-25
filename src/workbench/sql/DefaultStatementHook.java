@@ -30,9 +30,14 @@ public class DefaultStatementHook
 	}
 
 	@Override
-	public boolean processResults()
+	public boolean displayResults()
 	{
 		return true;
 	}
 
+	@Override
+	public boolean fetchResults()
+	{
+		return true;
+	}
 }

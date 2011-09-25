@@ -39,8 +39,17 @@
   <entry>If this parameter is set to true, a
     <literal>ROLLBACK</literal> will
 	be sent to the DBMS before the connection is closed. This setting is
-	also available in the
-    <link linkend="profile-rollback-before-disconnect">connection profile</link>.
+	also available in the <link linkend="profile-rollback-before-disconnect">connection profile</link>.
+  </entry>
+</row>
+
+<row>
+  <entry>-checkUncommitted</entry>
+  <entry>
+    If this parameter is set to true, &wb-productname; will try to <link linkend="profile-open-trans">detect uncommitted changes</link>
+    in the current transaction when the main window (or an editor panel) is closed. If the DBMS
+    does not support this, this argument is ignored. It also has no effect when running in batch or
+    console mode.
   </entry>
 </row>
 

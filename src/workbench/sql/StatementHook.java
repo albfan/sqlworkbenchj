@@ -24,5 +24,16 @@ public interface StatementHook
 	 */
 	void preExec(StatementRunner runner, String sql);
 	void postExec(StatementRunner runner, String sql, StatementRunnerResult result);
-	boolean processResults();
+
+	/**
+	 * If true, results should be displayed (and processed)
+	 * @see #fetchResults() 
+	 */
+	boolean displayResults();
+
+	/**
+	 * If true, results should be processed (but maybe not displayed)
+	 * @see #displayResults()
+	 */
+	boolean fetchResults();
 }

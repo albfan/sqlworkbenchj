@@ -1006,14 +1006,6 @@ WHERE id=42;</programlisting>
       </para>
     </section>
 
-    <section id="command-set-serveroutput">
-      <title>SERVEROUTPUT</title>
-      <para>
-				<literal>SET serveroutput on</literal> is equivalent to the <link linkend="command-dbms-output">ENABLEOUT</link>
-				command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-dbms-output">DISABLEOUT</link> command.
-      </para>
-    </section>
-
     <section id="command-set-autocommit">
       <title>AUTOCOMMIT</title>
       <para>
@@ -1036,6 +1028,82 @@ WHERE id=42;</programlisting>
       <para>
         In GUI mode, the maxrows setting is only in effect for the script currently being executed and
         will only temporarily overwrite any value entered in the "Max. Rows" field.
+      </para>
+    </section>
+  </section>
+
+  <section id="set-oracle">
+    <title>Changing Oracle session behaviour - SET</title>
+    <para>
+      The following options for the SET command are only available when being connected to an Oracle database.
+    </para>
+    <section id="command-set-serveroutput">
+      <title>SERVEROUTPUT</title>
+      <para>
+        <literal>SET serveroutput on</literal> is equivalent to the <link linkend="command-dbms-output">ENABLEOUT</link>
+        command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-dbms-output">DISABLEOUT</link> command.
+      </para>
+    </section>
+
+    <section id="command-set-autotrace">
+      <title>AUTOTRACE</title>
+      <para>
+        This enables or disables the <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_twelve040.htm#i2698680">"autotrace"</ulink> feature similar to the one in SQL*Plus.
+        The syntax is equivalent to the SQL*Plus command and supports the following options:
+        <informaltable frame="all">
+          <tgroup cols="2" align="left">
+            <colspec colname="c1"  colwidth="2.5cm" />
+            <colspec colname="c2"/>
+            <thead>
+              <row>
+                <entry>Option</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody valign="top">
+              <row>
+                <entry>ON</entry>
+                <entry>
+                  <para>
+                    Turns on autotrace mode. After running a statement, the statement result (if it
+                    is a query), the statistics and the execution plan for that statement are displayed as separate result tabs.
+                  </para>
+                </entry>
+              </row>
+              <row>
+                <entry>OFF</entry>
+                <entry>
+                  <para>
+                    Turns off the autotrace mode.
+                  </para>
+                </entry>
+              </row>
+              <row>
+                <entry>TRACEONLY</entry>
+                <entry>
+                  <para>
+                    Like <literal>ON</literal>, but does not display the result of a  query.
+                  </para>
+                </entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+        </para>
+      <para>
+        The information shown in autotrace mode can be controlled with two options after the <literal>ON</literal> or <literal>TRACEONLY</literal>
+        parameter. <literal>STATISTICS</literal> will fetch the statistics about the execution and <literal>EXPLAIN</literal>
+        which will display the execution plan for the statement. If not additional parameter is specified, <literal>EXPLAIN STATISTICS</literal> is used.
+      </para>
+      <para>
+        If statistics are requested, any query result will be fetched from the database server but it will not be displayed.
+      </para>
+      <para>
+        Unlike SQL*Plus, the keywords (<literal>AUTOTRACE, STATISTICS, EXPLAIN</literal>) cannot be abbreviated!
+      </para>
+      <para>
+        For more information about the prerequisites for the autotrace mode, see the description of
+        <link linkend="oracle-autotrace">DBMS specific features</link>.
       </para>
     </section>
   </section>

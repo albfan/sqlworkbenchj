@@ -10,6 +10,10 @@
  */
 package workbench.db;
 
+import java.util.List;
+import workbench.resource.Settings;
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -41,6 +45,7 @@ public interface TransactionChecker
 	 *
 	 * @see DbSettings#checkOpenTransactionsQuery()
 	 * @see DefaultTransactionChecker
+	 * @see ConnectionProfile#getDetectOpenTransaction()
 	 */
 	public static class Factory
 	{
@@ -56,11 +61,24 @@ public interface TransactionChecker
 
 			String sql = con.getDbSettings().checkOpenTransactionsQuery();
 
-			if (sql != null && con.getDbSettings().checkOpenTransactions())
+			if (sql != null && con.getProfile().getDetectOpenTransaction())
 			{
 				return new DefaultTransactionChecker();
 			}
 			return NO_CHECK;
+		}
+
+		/**
+		 * Checks if the given DriverClass supports detecting uncommitted changes.
+		 *
+		 * @param driverClass the driver to check
+		 * @return true if detecting uncommitted changes is supported.
+		 */
+		public static boolean supportsTransactionCheck(String driverClass)
+		{
+			if (StringUtil.isBlank(driverClass)) return false;
+			List<String> drivers = Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check", false);
+			return drivers.contains(driverClass);
 		}
 	}
 }

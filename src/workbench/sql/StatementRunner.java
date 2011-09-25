@@ -419,11 +419,11 @@ public class StatementRunner
 		result.setExecutionTime(time);
 	}
 
-	public boolean doProcessResults()
+	public StatementHook getStatementHook()
 	{
-		return statementHook.processResults();
+		return statementHook;
 	}
-
+	
 	public ResultSetConsumer getConsumer()
 	{
 		return currentConsumer;

@@ -84,7 +84,8 @@ public class ConnectionInfoBuilder
 				s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
 			}
 			content.append(space + boldStart + s + ":" + boldEnd + nvl(conn.getCurrentCatalog()) + newLine);
-			content.append(space + boldStart + "Workbench DBID:" + boldEnd + wbmeta.getDbId());
+			content.append(space + boldStart + "Workbench DBID:" + boldEnd + wbmeta.getDbId() + newLine);
+			content.append(space + boldStart + "Connection ID:" + boldEnd + conn.getId());
 			if (useHtml) content.append("</html>");
 			return content.toString();
 		}

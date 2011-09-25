@@ -360,6 +360,11 @@ public class SqlCommand
 		// to do any harm for other DBMS as well.
 		appendWarnings(result);
 
+		if (!runner.getStatementHook().fetchResults())
+		{
+			return;
+		}
+
 		int updateCount = -1;
 		boolean moreResults = false;
 
@@ -452,7 +457,7 @@ public class SqlCommand
 				else
 				{
 					RowActionMonitor monitorToUse = null;
-					if (showDataLoading && runner.doProcessResults())
+					if (showDataLoading && runner.getStatementHook().displayResults())
 					{
 						monitorToUse = this.rowMonitor;
 					}
@@ -493,12 +498,11 @@ public class SqlCommand
 						SqlUtil.closeResult(rs);
 					}
 
-					if (runner.doProcessResults())
+					if (runner.getStatementHook().displayResults())
 					{
 						result.addDataStore(this.currentRetrievalData);
 					}
 					result.addRowsProcessed(currentRetrievalData.getRowCount());
-					
 				}
 			}
 
