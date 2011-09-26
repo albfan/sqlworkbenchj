@@ -47,7 +47,6 @@ public class TextAreaPainter
 	Token currentLineTokens;
 	private Segment currentLine;
 
-	// protected members
 	protected JEditTextArea textArea;
 	protected SyntaxStyle[] styles;
 	protected Color caretColor;
@@ -63,7 +62,7 @@ public class TextAreaPainter
 	protected int tabSize = -1;
 	protected FontMetrics fm;
 
-	protected boolean showLineNumbers = false;
+	protected boolean showLineNumbers;
 	protected int gutterWidth = 0;
 	protected int gutterCharWidth = 0;
 
@@ -581,7 +580,7 @@ public class TextAreaPainter
 		gfx.setFont(defaultFont);
 		gfx.setColor(defaultColor);
 
-		y += fm.getHeight() + fm.getDescent();
+		y += fm.getHeight();
 		Utilities.drawTabbedText(currentLine, x, y, gfx, this, 0);
 	}
 

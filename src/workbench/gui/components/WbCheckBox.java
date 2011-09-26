@@ -20,17 +20,18 @@ import javax.swing.JCheckBox;
 public class WbCheckBox
 	extends JCheckBox
 {
-	
+
 	public WbCheckBox()
 	{
 		super();
 	}
-	
+
 	public WbCheckBox(String text)
 	{
 		super(text);
 	}
 
+	@Override
 	public void setText(String newText)
 	{
 		int pos = newText.indexOf('&');
@@ -42,5 +43,5 @@ public class WbCheckBox
 		}
 		super.setText(newText);
 	}
-	
+
 }

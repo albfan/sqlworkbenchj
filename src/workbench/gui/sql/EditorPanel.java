@@ -299,9 +299,9 @@ public class EditorPanel
 	public UndoAction getUndoAction() { return this.undo; }
 	public RedoAction getRedoAction() { return this.redo; }
 
-	protected FindAction getFindAction() { return this.replacer.getFindAction(); }
-	protected FindAgainAction getFindAgainAction() { return this.replacer.getFindAgainAction(); }
-	protected ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }
+	protected final FindAction getFindAction() { return this.replacer.getFindAction(); }
+	protected final FindAgainAction getFindAgainAction() { return this.replacer.getFindAgainAction(); }
+	protected final ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }
 
 	public SearchAndReplace getReplacer() { return this.replacer; }
 
@@ -350,7 +350,7 @@ public class EditorPanel
 		f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
 	}
 
-	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
+	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)
 		{

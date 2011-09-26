@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.db.ConnectionProfile;
@@ -39,8 +40,11 @@ public class EditConnectionFiltersPanel
 {
 	private EditorPanel schemaFilterEditor;
 	private EditorPanel catalogFilterEditor;
+	private JCheckBox catalogInclusionFlag;
+	private JCheckBox schemaInclusionFlag;
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
+
 
 	public EditConnectionFiltersPanel(ConnectionProfile profile)
 	{
@@ -57,6 +61,9 @@ public class EditConnectionFiltersPanel
 		showFilter(schemaFilter, schemaFilterEditor);
 		Dimension d = new Dimension(200,200);
 		schemaFilterEditor.setPreferredSize(d);
+		schemaInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
+		schemaInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
+		p1.add(schemaInclusionFlag, BorderLayout.SOUTH);
 		p1.add(l1, BorderLayout.NORTH);
 		p1.add(schemaFilterEditor, BorderLayout.CENTER);
 
@@ -66,6 +73,9 @@ public class EditConnectionFiltersPanel
 		showFilter(catalogFilter, catalogFilterEditor);
 		catalogFilterEditor.setPreferredSize(d);
 		catalogFilterEditor.setCaretVisible(false);
+		catalogInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
+		catalogInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
+		p2.add(catalogInclusionFlag, BorderLayout.SOUTH);
 		p2.add(catalogFilterEditor, BorderLayout.CENTER);
 		p2.add(l2, BorderLayout.NORTH);
 
@@ -89,16 +99,18 @@ public class EditConnectionFiltersPanel
 		c.anchor = GridBagConstraints.NORTH;
 		JLabel l = new JLabel(ResourceMgr.getString("TxtSchemCatFilterHelp"));
 		add(l, c);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.addComponent(this.schemaFilterEditor);
 		pol.addComponent(this.catalogFilterEditor);
+		pol.addComponent(this.schemaInclusionFlag);
+		pol.addComponent(this.catalogInclusionFlag);
 		pol.setDefaultComponent(this.schemaFilterEditor);
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 	}
 
-	protected void showFilter(ObjectNameFilter filter, EditorPanel editor)
+	private void showFilter(ObjectNameFilter filter, EditorPanel editor)
 	{
 		editor.setText("");
 		if (filter == null) return;
@@ -113,21 +125,29 @@ public class EditConnectionFiltersPanel
 	{
 		int lines = catalogFilterEditor.getLineCount();
 		String text = catalogFilterEditor.getText().trim();
-		if (catalogFilter != null) catalogFilter.clear();
-		if (lines <= 0 || text.length() == 0)
+
+		if (lines <= 0 || text.isEmpty())
 		{
-			return catalogFilter;
+			return null;
 		}
+
 		if (catalogFilter == null)
 		{
 			catalogFilter = new ObjectNameFilter();
 		}
+		else
+		{
+			catalogFilter.removeExpressions();
+		}
+
+		catalogFilter.setIsInclusionFilter(catalogInclusionFlag.isSelected());
 
 		for (int i=0; i < lines; i++)
 		{
-			String l = catalogFilterEditor.getLineText(i);
-			catalogFilter.addExpression(convertSQLExpression(l));
+			String line = catalogFilterEditor.getLineText(i);
+			catalogFilter.addExpression(convertSQLExpression(line));
 		}
+
 		return catalogFilter;
 	}
 
@@ -135,42 +155,51 @@ public class EditConnectionFiltersPanel
 	{
 		int lines = schemaFilterEditor.getLineCount();
 		String text = schemaFilterEditor.getText().trim();
-		if (schemaFilter != null) schemaFilter.clear();
-		if (lines <= 0 || text.length() == 0)
+
+		if (lines <= 0 || text.isEmpty())
 		{
-			return schemaFilter;
+			return null;
 		}
 
 		if (schemaFilter == null)
 		{
 			schemaFilter = new ObjectNameFilter();
 		}
+		else
+		{
+			schemaFilter.removeExpressions();
+		}
+		schemaFilter.setIsInclusionFilter(schemaInclusionFlag.isSelected());
 
 		for (int i=0; i < lines; i++)
 		{
-			String l = schemaFilterEditor.getLineText(i);
-			schemaFilter.addExpression(convertSQLExpression(l));
+			String line = schemaFilterEditor.getLineText(i);
+			schemaFilter.addExpression(convertSQLExpression(line));
 		}
 		return schemaFilter;
 	}
 
-	private String convertSQLExpression(String input) {
-		if (input.endsWith("%")) {
+	private String convertSQLExpression(String input)
+	{
+		if (input.endsWith("%"))
+		{
 			input = input.substring(0, input.length() - 1) + ".*";
-			if (!input.startsWith("^")) {
+			if (!input.startsWith("^"))
+			{
 				input = "^" + input;
 			}
 		}
 		return input;
 	}
+
 	public static boolean editFilter(Dialog owner, ConnectionProfile profile)
 	{
-		EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);
+		final EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);
 		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblSchemaFilterBtn"), p);
 		boolean hasSize = Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectionfilter.window");
 		if (!hasSize)
 		{
-				d.setSize(400,350);
+				d.setSize(400,450);
 		}
 		WbSwingUtilities.center(d, owner);
 		d.setVisible(true);
@@ -182,15 +211,18 @@ public class EditConnectionFiltersPanel
 		return true;
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				schemaFilterEditor.requestFocusInWindow();

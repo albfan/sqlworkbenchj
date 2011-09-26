@@ -30,8 +30,31 @@ public class ObjectNameFilter
 	private Set<Pattern> filterExpressions;
 	private boolean modified;
 
+	/**
+	 * If true, the filter defines the objects to include instead of names to exclude.
+	 */
+	private boolean inclusionFilter;
+
 	public ObjectNameFilter()
 	{
+	}
+
+	/**
+	 * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
+	 */
+	public void setIsInclusionFilter(boolean flag)
+	{
+		modified = flag != inclusionFilter;
+		inclusionFilter = flag;
+	}
+
+	/**
+	 * If true, the filter defines the objects to include instead of names to exclude.
+	 * @see #setIsInclusionFilter(boolean)
+	 */
+	public boolean getIsInclusionFilter()
+	{
+		return inclusionFilter;
 	}
 
 	/**
@@ -81,7 +104,7 @@ public class ObjectNameFilter
 		modified = false;
 	}
 
-	public void clear()
+	public void removeExpressions()
 	{
 		if (CollectionUtil.isNonEmpty(filterExpressions))
 		{
@@ -134,14 +157,15 @@ public class ObjectNameFilter
 
 	public boolean isExcluded(String name)
 	{
-		if (name == null) return true;
-		if (CollectionUtil.isEmpty(filterExpressions)) return false;
+		if (name == null) return !inclusionFilter;
+
+		if (CollectionUtil.isEmpty(filterExpressions)) return inclusionFilter;
 
 		for (Pattern p : filterExpressions)
 		{
-			if (p.matcher(name).matches()) return true;
+				if (p.matcher(name).matches()) return !inclusionFilter;
 		}
-		return false;
+		return inclusionFilter;
 	}
 
 	public int getSize()
@@ -153,6 +177,7 @@ public class ObjectNameFilter
 	{
 		ObjectNameFilter copy = new ObjectNameFilter();
 		copy.modified = this.modified;
+		copy.inclusionFilter = this.inclusionFilter;
 		if (this.filterExpressions != null)
 		{
 			copy.filterExpressions = new HashSet<Pattern>(this.filterExpressions);

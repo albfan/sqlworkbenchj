@@ -43,6 +43,7 @@ public class ConnectionProfileTest
 		old.setConnectionTimeout(42);
 		old.setEmptyStringIsNull(true);
 		old.setUseSeparateConnectionPerTab(true);
+		old.setDetectOpenTransaction(true);
 		old.setIgnoreDropErrors(true);
 		old.setStoreExplorerSchema(true);
 		old.setName("First");
@@ -65,6 +66,7 @@ public class ConnectionProfileTest
 		ConnectionProfile copy = old.createCopy();
 		assertFalse(copy.getAutocommit());
 		assertTrue(copy.getConfirmUpdates());
+		assertTrue(copy.getDetectOpenTransaction());
 		assertEquals("Postgres", copy.getDriverName());
 		assertEquals("First", copy.getName());
 		assertTrue(copy.getStorePassword());
@@ -80,7 +82,7 @@ public class ConnectionProfileTest
 		assertEquals(42, copy.getIdleTime());
 		assertEquals(filter, copy.getCatalogFilter());
 		assertEquals(Integer.valueOf(42), copy.getConnectionTimeout());
-		
+
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
 		assertTrue(copy.isHideWarnings());
@@ -122,7 +124,7 @@ public class ConnectionProfileTest
 		assertTrue(profile.confirmUpdatesInSession());
 		assertFalse(profile.getConfirmUpdates());
 	}
-	
+
 	@Test
 	public void testProps()
 		throws Exception

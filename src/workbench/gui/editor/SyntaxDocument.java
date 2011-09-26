@@ -53,7 +53,7 @@ public class SyntaxDocument
 		return evt;
 	}
 
-	protected void initDefaultProperties()
+	protected final void initDefaultProperties()
 	{
 		this.putProperty("filterNewlines", Boolean.FALSE);
 		this.putProperty(PlainDocument.tabSizeAttribute,Integer.valueOf(Settings.getInstance().getEditorTabWidth()));
@@ -221,6 +221,7 @@ public class SyntaxDocument
 		return this.maxLineLength;
 	}
 
+	@Override
 	public synchronized void undoableEditHappened(UndoableEditEvent e)
 	{
 		if (undoSuspended) return;
@@ -301,6 +302,7 @@ public class SyntaxDocument
 	 * state immediately so that any event listeners get a
 	 * consistent token marker.
 	 */
+	@Override
 	protected void fireInsertUpdate(DocumentEvent evt)
 	{
 		if (tokenMarker != null)
@@ -322,6 +324,7 @@ public class SyntaxDocument
 	 * state immediately so that any event listeners get a
 	 * consistent token marker.
 	 */
+	@Override
 	protected void fireRemoveUpdate(DocumentEvent evt)
 	{
 		if (tokenMarker != null)
