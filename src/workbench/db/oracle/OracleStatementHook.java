@@ -153,6 +153,7 @@ public class OracleStatementHook
 				stats.setValue(row, 0, "rows processed");
 				stats.setValue(row, 1, Long.valueOf(rows));
 				stats.setGeneratingSql(sql);
+				stats.resetStatus();
 				result.addDataStore(stats);
 			}
 		}
@@ -202,6 +203,7 @@ public class OracleStatementHook
 			result = new DataStore(rs, true);
 			result.setGeneratingSql(sql);
 			result.setResultName("Execution plan");
+			result.resetStatus();
 		}
 		catch (SQLException ex)
 		{
