@@ -212,12 +212,12 @@ public class SqlServerColumnEnhancer
 		HashMap<String, String> collations = new HashMap<String, String>(table.getColumnCount());
 
 		String sql =
-			"SELECT column_name, \n" +
-			"       collation_name \n" +
-			"FROM information_schema.columns \n" +
-			"WHERE table_name = ? \n" +
-			"  AND table_schema = ? \n " +
-			"  AND table_catalog = ?";
+			"SELECT COLUMN_NAME, \n" +
+			"       COLLATION_NAME \n" +
+			"FROM INFORMATION_SCHEMA.COLUMNS \n" +
+			"WHERE TABLE_NAME = ? \n" +
+			"  AND TABLE_SCHEMA = ? \n " +
+			"  AND TABLE_CATALOG = ?";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
