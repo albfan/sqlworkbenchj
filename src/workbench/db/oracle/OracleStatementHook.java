@@ -46,7 +46,7 @@ public class OracleStatementHook
 {
 
 	private static final String sql =
-			"select a.name, s.value, s.statistic# \n" +
+			"select s.value, a.name, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
 			"where sid = userenv('SID') \n" +
@@ -70,6 +70,9 @@ public class OracleStatementHook
 	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
 	private static final Set<String> explainable = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
 
+	/**
+	 * A list of SQL commands where no statistics should be shown.
+	 */
 	private static final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(
 		WbFetchSize.VERB, WbAbout.VERB, WbConfirm.VERB, WbConnInfo.VERB, WbDefinePk.VERB, WbDefineVar.VERB,
 		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
@@ -112,9 +115,13 @@ public class OracleStatementHook
 		{
 			stmt = con.createStatementForQuery();
 			rs = stmt.executeQuery(buildQuery());
+
+			int valueCol = getValueColIndex();
+			int nameCol = getNameColIndex();
+
 			while (rs.next())
 			{
-				values.put(rs.getString(1), Long.valueOf(rs.getLong(2)));
+				values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
 			}
 			statisticViewsAvailable = true;
 			LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
@@ -136,9 +143,23 @@ public class OracleStatementHook
 	private String buildQuery()
 	{
 		String stats = Settings.getInstance().getProperty("workbench.db.oracle.autotrace.statname", defaultStats);
-		String query = sql + " (" + stats + ")";
+		String query = null;
+		if (showStatvalueFirst())
+		{
+			query = sql + " (" + stats + ")";
+		}
+		else
+		{
+			query = sql.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
+		}
+
 		LogMgr.logDebug("OracleStatementHook.buildQuery()", "Using SQL=" + query);
 		return query;
+	}
+
+	private boolean showStatvalueFirst()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 	}
 
 	@Override
@@ -161,10 +182,13 @@ public class OracleStatementHook
 			DataStore stats = retrieveStatistics(runner, sql);
 			if (stats != null)
 			{
+				int valueCol = getValueColIndex();
+				int nameCol = getNameColIndex();
+
 				long rows = runner.getResult().getRowsProcessed();
 				int row = stats.addRow();
-				stats.setValue(row, 0, "rows processed");
-				stats.setValue(row, 1, Long.valueOf(rows));
+				stats.setValue(row, nameCol, "rows processed");
+				stats.setValue(row, valueCol, Long.valueOf(rows));
 				stats.setGeneratingSql(sql);
 				stats.resetStatus();
 				result.addDataStore(stats);
@@ -229,6 +253,16 @@ public class OracleStatementHook
 		return result;
 	}
 
+	private int getNameColIndex()
+	{
+		return showStatvalueFirst() ? 1 : 0;
+	}
+
+	private int getValueColIndex()
+	{
+		return showStatvalueFirst() ? 0 : 1;
+	}
+
 	private DataStore retrieveStatistics(StatementRunner runner, String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
@@ -241,22 +275,26 @@ public class OracleStatementHook
 		Statement stmt = null;
 		ResultSet rs = null;
 		DataStore statValues = createResult();
+
+		int valueCol = getValueColIndex();
+		int nameCol = getNameColIndex();
+
 		try
 		{
 			stmt = con.createStatementForQuery();
 			rs = stmt.executeQuery(buildQuery());
 			while (rs.next())
 			{
-				String statName = rs.getString(1);
-				Long value = rs.getLong(2);
+				String statName = rs.getString(nameCol + 1);
+				Long value = rs.getLong(valueCol + 1);
 				if (statName != null && value != null)
 				{
 					Long startValue = values.get(statName);
 					if (startValue != null)
 					{
 						int row = statValues.addRow();
-						statValues.setValue(row, 0, statName);
-						statValues.setValue(row, 1, (value - startValue));
+						statValues.setValue(row, nameCol, statName);
+						statValues.setValue(row, valueCol, (value - startValue));
 					}
 				}
 			}
@@ -344,9 +382,19 @@ public class OracleStatementHook
 
 	private DataStore createResult()
 	{
-		String[] columnNames = new String[] {"STATISTIC", "VALUE" };
-		int[] types = new int[] {Types.VARCHAR, Types.BIGINT };
-		DataStore result = new DataStore(columnNames, types);
+		DataStore result = null;
+		if (showStatvalueFirst())
+		{
+			String[] columnNames = new String[] { "VALUE", "STATISTIC" };
+			int[] types = new int[] { Types.BIGINT, Types.VARCHAR };
+			result = new DataStore(columnNames, types);
+		}
+		else
+		{
+			String[] columnNames = new String[] { "STATISTIC", "VALUE" };
+			int[] types = new int[] { Types.VARCHAR, Types.BIGINT };
+			result = new DataStore(columnNames, types);
+		}
 		return result;
 	}
 
