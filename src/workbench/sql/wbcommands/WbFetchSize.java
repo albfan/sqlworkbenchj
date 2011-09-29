@@ -48,7 +48,7 @@ public class WbFetchSize
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String value = super.getCommandLine(sql);
+		String value = getCommandLine(sql);
 		int size = -1;
 
 		try

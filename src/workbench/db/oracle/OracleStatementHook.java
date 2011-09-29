@@ -25,6 +25,12 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.sql.wbcommands.*;
+import workbench.sql.wbcommands.console.WbAbout;
+import workbench.sql.wbcommands.console.WbDeleteProfile;
+import workbench.sql.wbcommands.console.WbDisconnect;
+import workbench.sql.wbcommands.console.WbDisplay;
+import workbench.sql.wbcommands.console.WbStoreProfile;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -62,7 +68,14 @@ public class OracleStatementHook
 		"'sorts (disk)', 'db block changes'";
 
 	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
-	private static final Set<String> explainVerbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
+	private static final Set<String> explainable = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
+
+	private static final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(
+		WbFetchSize.VERB, WbAbout.VERB, WbConfirm.VERB, WbConnInfo.VERB, WbDefinePk.VERB, WbDefineVar.VERB,
+		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
+		WbDisableOraOutput.VERB, WbEnableOraOutput.VERB, WbStartBatch.VERB, WbEndBatch.VERB, WbHelp.VERB,
+		WbIsolationLevel.VERB, WbLoadPkMapping.VERB, WbListPkDef.VERB, WbMode.VERB, WbListVars.VERB, WbSetProp.VERB,
+		WbSysProps.VERB, WbXslt.VERB);
 
 	/**
 	 * Stores the statistic values before the execution of the statement.
@@ -145,7 +158,7 @@ public class OracleStatementHook
 				result.addMessageByKey("ErrNoAutoTrace");
 				return;
 			}
-			DataStore stats = retrieveStatistics(runner);
+			DataStore stats = retrieveStatistics(runner, sql);
 			if (stats != null)
 			{
 				long rows = runner.getResult().getRowsProcessed();
@@ -216,8 +229,13 @@ public class OracleStatementHook
 		return result;
 	}
 
-	private DataStore retrieveStatistics(StatementRunner runner)
+	private DataStore retrieveStatistics(StatementRunner runner, String sql)
 	{
+		String verb = SqlUtil.getSqlVerb(sql);
+		if (noStatistics.contains(verb))
+		{
+			return null;
+		}
 		WbConnection con = runner.getConnection();
 
 		Statement stmt = null;
@@ -269,7 +287,7 @@ public class OracleStatementHook
 		SQLToken verb = lexer.getNextToken(false, false);
 		if (verb == null) return false;
 
-		if (!explainVerbs.contains(verb.getContents())) return false;
+		if (!explainable.contains(verb.getContents())) return false;
 
 		String sqlVerb = verb.getContents();
 		if ("CREATE".equalsIgnoreCase(sqlVerb))
