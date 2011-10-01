@@ -96,10 +96,7 @@ public class MacOSHelper
 			LogMgr.logDebug("MacOSHelper.invoke()", "ApplicationEvent [" + methodName + "] received.");
 			if ("handleQuit".equals(methodName))
 			{
-				// According to the Apple docs, one should call ApplicationEvent.setHandled(false);
-				// in order to be able to cancel exiting.
-				// See http://developer.apple.com/samplecode/OSXAdapter/listing2.html
-				setHandled(args[0], false);
+				setHandled(args[0], true);
 				WbManager.getInstance().exitWorkbench(true);
 			}
 			else if ("handleAbout".equals(methodName))
