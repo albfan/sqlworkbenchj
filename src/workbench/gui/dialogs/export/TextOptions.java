@@ -11,6 +11,8 @@
  */
 package workbench.gui.dialogs.export;
 
+import java.util.Set;
+import workbench.db.exporter.ControlFileFormat;
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
 
@@ -35,4 +37,5 @@ public interface TextOptions
 	void setDecimalSymbol(String decimal);
 	String getDecimalSymbol();
 	QuoteEscapeType getQuoteEscaping();
+	Set<ControlFileFormat> getControlFiles();
 }

@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
@@ -71,9 +72,13 @@ public class OracleControlFileWriter
 			String table = exporter.getTableName();
 			if (table == null)
 			{
-				table = resultInfo.getUpdateTable().getTableName();
+				TableIdentifier id = resultInfo.getUpdateTable();
+				if (id != null)
+				{
+					table = id.getTableName();
+				}
 			}
-			out.println(table);
+			out.println(table == null ? "(no table defined)" : table);
 			out.print("FIELDS TERMINATED BY '");
 			out.print(StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL));
 			out.println("' TRAILING NULLCOLS");

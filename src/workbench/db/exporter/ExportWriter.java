@@ -132,7 +132,7 @@ public abstract class ExportWriter
 		this.converter.setResultInfo(info);
 		converter.setColumnsToExport(columnsToExport);
 
-		if (this.converter.needsUpdateTable())
+		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
 		{
 			ds.checkUpdateTable();
 		}

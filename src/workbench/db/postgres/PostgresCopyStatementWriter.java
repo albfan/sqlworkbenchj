@@ -13,6 +13,7 @@ package workbench.db.postgres;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
@@ -33,6 +34,7 @@ public class PostgresCopyStatementWriter
 	implements FormatFileWriter
 {
 
+	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();
@@ -46,7 +48,16 @@ public class PostgresCopyStatementWriter
 		{
 			out = new PrintWriter(new FileWriter(ctl));
 			out.print("\\copy ");
-			out.print(resultInfo.getUpdateTable().getTableName());
+			String table = exporter.getTableName();
+			if (table == null)
+			{
+				TableIdentifier id = resultInfo.getUpdateTable();
+				if (id != null)
+				{
+					table = id.getTableName();
+				}
+			}
+			out.print(table == null ? "(not table defined)" : table);
 			out.print(" (");
 			for (int i=0; i < resultInfo.getColumnCount(); i++)
 			{

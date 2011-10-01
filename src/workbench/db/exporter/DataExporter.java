@@ -582,7 +582,7 @@ public class DataExporter
 	/**
 	 * Set if the (text) export should contain header row.
 	 */
-	public void setExportHeaders(boolean aFlag)
+	public final void setExportHeaders(boolean aFlag)
 	{
 		this.exportHeaders = aFlag;
 	}
@@ -1319,6 +1319,8 @@ public class DataExporter
 		this.setLineEnding(text.getLineEnding());
 		this.exportWriter.configureConverter();
 		setQuoteEscaping(text.getQuoteEscaping());
+		controlFiles.clear();
+		addControlFileFormats(text.getControlFiles());
 	}
 
 	public void setXlsXOptions(SpreadSheetOptions xlsOptions)

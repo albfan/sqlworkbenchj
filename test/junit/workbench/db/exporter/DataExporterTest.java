@@ -15,7 +15,9 @@ import org.junit.Test;
 import workbench.WbTestCase;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import workbench.TestUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -32,7 +34,6 @@ import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import static org.junit.Assert.*;
-import workbench.resource.Settings;
 
 /**
  *
@@ -184,6 +185,13 @@ public class DataExporterTest
 			{
 				return QuoteEscapeType.none;
 			}
+
+			@Override
+			public Set<ControlFileFormat> getControlFiles()
+			{
+				return Collections.emptySet();
+			}
+
 		};
 	}
 

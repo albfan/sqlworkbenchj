@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
 import workbench.db.DbSettings;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
@@ -120,9 +121,13 @@ public class Db2FormatFileWriter
 			String table = exporter.getTableName();
 			if (table == null)
 			{
-				table = resultInfo.getUpdateTable().getTableName();
+				TableIdentifier id = resultInfo.getUpdateTable();
+				if (id != null)
+				{
+					table = id.getTableName();
+				}
 			}
-			out.println(table);
+			out.println(table == null ? "(no table defined)" : table);
 			out.println(";");
 		}
 		catch (IOException io)

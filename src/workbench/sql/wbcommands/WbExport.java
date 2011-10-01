@@ -434,7 +434,7 @@ public class WbExport
 
 			try
 			{
-				Set<ControlFileFormat> formats =ControlFileFormat.parseCommandLine(cmdLine.getValue(ARG_FORMATFILE));
+				Set<ControlFileFormat> formats = ControlFileFormat.parseCommandLine(cmdLine.getValue(ARG_FORMATFILE));
 				exporter.addControlFileFormats(formats);
 			}
 			catch (WrongFormatFileException wf)
