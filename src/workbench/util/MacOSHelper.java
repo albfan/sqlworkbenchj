@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.awt.EventQueue;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -97,7 +98,14 @@ public class MacOSHelper
 			if ("handleQuit".equals(methodName))
 			{
 				setHandled(args[0], true);
-				WbManager.getInstance().exitWorkbench(true);
+				EventQueue.invokeLater(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						WbManager.getInstance().exitWorkbench(true);
+					}
+				});
 			}
 			else if ("handleAbout".equals(methodName))
 			{
