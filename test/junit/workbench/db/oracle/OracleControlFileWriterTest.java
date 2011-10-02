@@ -76,6 +76,12 @@ public class OracleControlFileWriterTest
 			{
 				return "\"";
 			}
+
+			@Override
+			public String getTableNameToUse()
+			{
+				return "person";
+			}
 		};
 
 		exporter.setTimestampFormat("yyyy_MM_dd");

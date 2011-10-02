@@ -427,6 +427,26 @@ public class DataExporter
 		return this.tableName;
 	}
 
+	/**
+	 * Return the table name to be used for this export.
+	 *
+	 * @return the table name or an empty string if no table can be identified.
+	 */
+	public String getTableNameToUse()
+	{
+		if (this.tableName != null) return this.tableName;
+		ResultInfo resultInfo = exportWriter.getConverter().getResultInfo();
+		if (resultInfo != null)
+		{
+			TableIdentifier tbl = resultInfo.getUpdateTable();
+			if (tbl != null)
+			{
+				return tbl.getTableName();
+			}
+		}
+		return "";
+	}
+
 	public void setEncoding(String enc)
 	{
 		this.encoding = enc;

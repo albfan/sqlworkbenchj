@@ -48,16 +48,8 @@ public class PostgresCopyStatementWriter
 		{
 			out = new PrintWriter(new FileWriter(ctl));
 			out.print("\\copy ");
-			String table = exporter.getTableName();
-			if (table == null)
-			{
-				TableIdentifier id = resultInfo.getUpdateTable();
-				if (id != null)
-				{
-					table = id.getTableName();
-				}
-			}
-			out.print(table == null ? "(not table defined)" : table);
+			String table = exporter.getTableNameToUse();
+			out.print(table);
 			out.print(" (");
 			for (int i=0; i < resultInfo.getColumnCount(); i++)
 			{

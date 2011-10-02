@@ -118,16 +118,8 @@ public class Db2FormatFileWriter
 			}
 			out.println(")");
 			out.print("  INSERT INTO ");
-			String table = exporter.getTableName();
-			if (table == null)
-			{
-				TableIdentifier id = resultInfo.getUpdateTable();
-				if (id != null)
-				{
-					table = id.getTableName();
-				}
-			}
-			out.println(table == null ? "(no table defined)" : table);
+			String table = exporter.getTableNameToUse();
+			out.println(table);
 			out.println(";");
 		}
 		catch (IOException io)

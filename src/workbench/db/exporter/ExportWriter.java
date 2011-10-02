@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
@@ -28,6 +29,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataFactory;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.WbFile;
 
@@ -183,6 +185,15 @@ public abstract class ExportWriter
 		this.cancel = false;
 		this.rows = 0;
 
+		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
+		{
+			List<String> tables = SqlUtil.getTables(query);
+			if (tables.size() > 0)
+			{
+				info.setUpdateTable(new TableIdentifier(tables.get(0)));
+			}
+		}
+
 		int colCount = info.getColumnCount();
 		startProgress();
 
@@ -316,5 +327,10 @@ public abstract class ExportWriter
 			FormatFileWriter writer = ControlFileFormat.createFormatWriter(format);
 			writer.writeFormatFile(exporter, converter);
 		}
+	}
+
+	public RowDataConverter getConverter()
+	{
+		return converter;
 	}
 }

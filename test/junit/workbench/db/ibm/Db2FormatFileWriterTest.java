@@ -51,31 +51,15 @@ public class Db2FormatFileWriterTest
 
 		ColumnIdentifier blob = new ColumnIdentifier("BINARY_DATA", java.sql.Types.BLOB);
 		id.setDbmsType("BLOB");
-		
+
 		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, name, blob} );
 		info.setUpdateTable(new TableIdentifier("SOME_TABLE"));
-		
+
 		TestUtil util = new TestUtil("TestDb2Format");
 		String dir = util.getBaseDir();
 		final WbFile exportFile = new WbFile(dir, "test_export.txt");
 
-		DataExporter exporter = new DataExporter(null)
-		{
-			@Override
-			public String getFullOutputFilename()
-			{
-				return exportFile.getFullPath();
-			}
-		};
-		
-		exporter.setTextDelimiter("\t");
-		exporter.setDecimalSymbol(",");
-		exporter.setEncoding("ISO-8859-1");
-		exporter.setDateFormat("dd.mm.yyyy");
-		exporter.setTableName("UNIT.TEST_TABLE");
-		exporter.setWriteClobAsFile(false);
-		
-		RowDataConverter converter = new RowDataConverter()
+		final RowDataConverter converter = new RowDataConverter()
 		{
 			@Override
 			public StrBuffer convertRowData(RowData row, long rowIndex)
@@ -94,10 +78,38 @@ public class Db2FormatFileWriterTest
 			{
 				return null;
 			}
+
 		};
+
+		final DataExporter exporter = new DataExporter(null)
+		{
+			@Override
+			public String getFullOutputFilename()
+			{
+				return exportFile.getFullPath();
+			}
+
+			@Override
+			public String getTableNameToUse()
+			{
+				if (getTableName() != null)
+				{
+					return getTableName();
+				}
+				return converter.getResultInfo().getUpdateTable().getTableName();
+			}
+		};
+
+		exporter.setTextDelimiter("\t");
+		exporter.setDecimalSymbol(",");
+		exporter.setEncoding("ISO-8859-1");
+		exporter.setDateFormat("dd.mm.yyyy");
+		exporter.setTableName("UNIT.TEST_TABLE");
+		exporter.setWriteClobAsFile(false);
+
 		converter.setResultInfo(info);
 		Db2FormatFileWriter instance = new Db2FormatFileWriter();
-		
+
 		instance.writeFormatFile(exporter, converter);
 		WbFile controlFile = new WbFile(dir, "test_export.clp");
 		assertTrue(controlFile.exists());
@@ -108,7 +120,7 @@ public class Db2FormatFileWriterTest
 		assertTrue(content.indexOf("INTO UNIT.TEST_TABLE") > -1);
 		assertTrue(content.indexOf("decpt=,") > -1);
 		assertTrue(content.indexOf("codepage=819") > -1);
-		
+
 		exporter.setTableName(null);
 		exporter.setEncoding("UTF-8");
 		info = new ResultInfo(new ColumnIdentifier[] { id, name, } );
