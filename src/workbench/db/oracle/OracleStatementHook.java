@@ -177,23 +177,27 @@ public class OracleStatementHook
 			if (!statisticViewsAvailable)
 			{
 				result.addMessageByKey("ErrNoAutoTrace");
-				return;
+				result.setWarning(true);
 			}
-			DataStore stats = retrieveStatistics(runner, sql);
-			if (stats != null)
+			else
 			{
-				int valueCol = getValueColIndex();
-				int nameCol = getNameColIndex();
+				DataStore stats = retrieveStatistics(runner, sql);
+				if (stats != null)
+				{
+					int valueCol = getValueColIndex();
+					int nameCol = getNameColIndex();
 
-				long rows = runner.getResult().getRowsProcessed();
-				int row = stats.addRow();
-				stats.setValue(row, nameCol, "rows processed");
-				stats.setValue(row, valueCol, Long.valueOf(rows));
-				stats.setGeneratingSql(sql);
-				stats.resetStatus();
-				result.addDataStore(stats);
+					long rows = runner.getResult().getRowsProcessed();
+					int row = stats.addRow();
+					stats.setValue(row, nameCol, "rows processed");
+					stats.setValue(row, valueCol, Long.valueOf(rows));
+					stats.setGeneratingSql(sql);
+					stats.resetStatus();
+					result.addDataStore(stats);
+				}
 			}
 		}
+		
 		if (showExecutionPlan)
 		{
 			DataStore plan = retrieveExecutionPlan(runner, sql);

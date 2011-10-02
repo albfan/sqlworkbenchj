@@ -75,6 +75,12 @@ public class PostgresCopyStatementWriterTest
 			{
 				return "UTF-8";
 			}
+
+			@Override
+			public String getTableNameToUse()
+			{
+				return "person";
+			}
 		};
 
 		ColumnIdentifier id = new ColumnIdentifier("id" ,Types.INTEGER, true);
