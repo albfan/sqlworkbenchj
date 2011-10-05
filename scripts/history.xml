@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2011-12-30">
+    <entry dev-build="11" type="enh">Code completion now honors the setting of search_path PostgreSQL</entry>
     <entry dev-build="10" type="enh">The schema and catalog filters in a connection profile can not be defined as "inclusion" filters that define the list of names to be displayed (rather than a list of names to be excluded)</entry>
     <entry dev-build="10" type="enh">For Oracle and Postgres a check for uncommitted changes can be enabled in the connection profile (for Oracle this requires the SELECT privileges on V$TRANSACTION)</entry>
     <entry dev-build="10" type="enh">For Oracle, the "autotrace" mode from SQL*Plus is now supported. It is enabled with "SET AUTOTRACE" the same as in SQL*Plus (and requires the PLUSTRACE role like SQL*Plus)</entry>
