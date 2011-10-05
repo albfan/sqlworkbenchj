@@ -14,17 +14,18 @@ package workbench.gui.completion;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import workbench.TestUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import workbench.WbTestCase;
 
 /**
  *
@@ -33,7 +34,6 @@ import workbench.WbTestCase;
 public class StatementContextTest
 	extends WbTestCase
 {
-	private TestUtil util;
 	private WbConnection con;
 
 	public StatementContextTest()
@@ -45,8 +45,7 @@ public class StatementContextTest
 	public void setUp()
 		throws Exception
 	{
-		util = new TestUtil("InsertAnalyzerTest");
-		con = util.getConnection("completion_test");
+		con = getTestUtil().getConnection();
 		prepareDatabase(con);
 	}
 
@@ -54,7 +53,7 @@ public class StatementContextTest
 	public void tearDown()
 		throws Exception
 	{
-		util.emptyBaseDirectory();
+		getTestUtil().emptyBaseDirectory();
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 

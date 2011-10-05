@@ -61,7 +61,7 @@ public class DbObjectCache
 
 	public Set<TableIdentifier> getTables(String schema)
 	{
-		return objectCache.getTables(dbConnection, schema);
+		return objectCache.getTables(dbConnection, schema, null);
 	}
 
 	public Set<TableIdentifier> getTables(String schema, List<String> type)
@@ -73,4 +73,20 @@ public class DbObjectCache
 	{
 		objectCache.removeTable(tbl);
 	}
+
+	public boolean supportsSearchPath()
+	{
+		return (dbConnection != null && dbConnection.getMetadata().isPostgres());
+	}
+
+	public List<String> getSearchPath(String defaultSchema)
+	{
+		return objectCache.getSearchPath(dbConnection, defaultSchema);
+	}
+
+	public TableIdentifier getTable(TableIdentifier table)
+	{
+		return objectCache.findEntry(table);
+	}
+
 }

@@ -11,9 +11,12 @@
 package workbench.db.postgres;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import workbench.db.JdbcUtils;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
@@ -97,6 +100,45 @@ public class PostgresUtil
 		{
 			return false;
 		}
+	}
+
+	/**
+	 * Returns the current search path defined in the session (or the user).
+	 * <br/>
+	 * This uses the Postgres function <tt>current_schemas()</tt>
+	 * <br/>
+	 * @param con the connection for which the search path should be retrieved
+	 * @return the list of schemas in the search path.
+	 */
+	public static List<String> getSearchPath(WbConnection con)
+	{
+		if (con == null) return Collections.emptyList();
+		List<String> result = new ArrayList<String>();
+
+		ResultSet rs = null;
+		Statement stmt = null;
+		Savepoint sp = null;
+		try
+		{
+			sp = con.setSavepoint();
+			stmt = con.createStatementForQuery();
+			rs = stmt.executeQuery("select unnest(current_schemas(false))");
+			while (rs.next())
+			{
+				result.add(rs.getString(1));
+			}
+		}
+		catch (SQLException sql)
+		{
+			con.rollback(sp);
+			LogMgr.logError("PostgresUtil.getSearchPath()", "Could not read search path", sql);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+
+		return result;
 	}
 
 }

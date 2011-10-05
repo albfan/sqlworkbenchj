@@ -22,6 +22,7 @@ import java.util.Set;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.objectcache.DbObjectCache;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.util.EncodingUtil;
@@ -367,8 +368,9 @@ public abstract class BaseAnalyzer
 	@SuppressWarnings("unchecked")
 	private void retrieveTables()
 	{
-		Set<TableIdentifier> tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
-		if (schemaForTableList == null)
+		DbObjectCache cache = this.dbConnection.getObjectCache();
+		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, typeFilter);
+		if (schemaForTableList == null || cache.getSearchPath(schemaForTableList).size() > 1)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListTables");
 		}
@@ -398,17 +400,20 @@ public abstract class BaseAnalyzer
 	{
 		if (tableForColumnList == null) return false;
 
-		String s = tableForColumnList.getSchema();
-		if (s == null)
-		{
-			tableForColumnList.setSchema(this.dbConnection.getMetadata().getCurrentSchema());
-		}
+		DbObjectCache cache = this.dbConnection.getObjectCache();
 		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
-		List<ColumnIdentifier> cols = this.dbConnection.getObjectCache().getColumns(toCheck);
+		List<ColumnIdentifier> cols = cache.getColumns(toCheck);
 		if (cols != null && cols.size() > 0)
 		{
-			this.title = tableForColumnList.getTableName() + ".*";
-
+			if (cache.supportsSearchPath())
+			{
+				TableIdentifier tbl = cache.getTable(tableForColumnList);
+				this.title = (tbl == null ? tableForColumnList.getTableName() : tbl.getTableExpression()) + ".*";
+			}
+			else
+			{
+				this.title = tableForColumnList.getTableName() + ".*";
+			}
 			this.elements = new ArrayList(cols.size() + 1);
 			this.elements.addAll(cols);
 			if (GuiSettings.getSortCompletionColumns())

@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +30,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableNameSorter;
 import workbench.db.WbConnection;
+import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -38,12 +38,12 @@ import workbench.util.CollectionUtil;
 
 /**
  * A cache for database objects to support Auto-completion in the editor
- * 
+ *
  * @author  Thomas Kellerer
  */
 class ObjectCache
 {
-	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
+	private static final String NULL_SCHEMA = "-$$wb-null-schema$$-";
 	private boolean retrieveOraclePublicSynonyms;
 
 	private Set<String> schemasInCache;
@@ -76,48 +76,62 @@ class ObjectCache
 		}
 	}
 
-	Set<TableIdentifier> getTables(WbConnection dbConnection, String schema)
-	{
-		return getTables(dbConnection, schema, null);
-	}
-
 	private String getSchemaToUse(WbConnection dbConnection, String schema)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
 		return meta.adjustSchemaNameCase(schema);
 	}
 
+	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
+	{
+		if (dbConn == null || !dbConn.getMetadata().isPostgres())
+		{
+			return Collections.singletonList(getSchemaToUse(dbConn, defaultSchema));
+		}
+		return PostgresUtil.getSearchPath(dbConn);
+	}
+
+	private boolean isSchemaCached(String schema)
+	{
+		return (schemasInCache.contains(schema == null ? NULL_SCHEMA : schema));
+	}
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
+	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
 	{
-		String schemaToUse = getSchemaToUse(dbConnection, schema);
-		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse)))
+		List<String> searchPath = getSearchPath(dbConnection, schema);
+		String[] selectableTypes = dbConnection.getMetadata().getSelectableTypes();
+
+		for (String checkSchema  : searchPath)
 		{
-			try
+			if (this.objects.size() == 0 || !isSchemaCached(checkSchema))
 			{
-				DbMetadata meta = dbConnection.getMetadata();
-				List<TableIdentifier> tables = meta.getSelectableObjectsList(null, schemaToUse);
-				for (TableIdentifier tbl : tables)
+				try
 				{
-					tbl.checkQuotesNeeded(dbConnection);
+					DbMetadata meta = dbConnection.getMetadata();
+					List<TableIdentifier> tables = meta.getObjectList(null, checkSchema, selectableTypes, false);
+					for (TableIdentifier tbl : tables)
+					{
+						tbl.checkQuotesNeeded(dbConnection);
+					}
+					this.setTables(tables);
+					this.schemasInCache.add(checkSchema == null ? NULL_SCHEMA : checkSchema);
 				}
-				this.setTables(tables);
-				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schemaToUse);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbObjectCache.getTables()", "Could not retrieve table list", e);
+				catch (Exception e)
+				{
+					LogMgr.logError("DbObjectCache.getTables()", "Could not retrieve table list", e);
+				}
 			}
 		}
+
 		if (type != null)
 		{
-			return filterTablesByType(dbConnection, schemaToUse, type);
+			return filterTablesByType(dbConnection, searchPath, type);
 		}
 		else
 		{
-			return filterTablesBySchema(dbConnection, schemaToUse);
+			return filterTablesBySchema(dbConnection, searchPath);
 		}
 	}
 
@@ -150,62 +164,86 @@ class ObjectCache
 		return procs;
 	}
 
-	private Set<TableIdentifier> filterTablesByType(WbConnection dbConnection, String schema, List<String> type)
+	private Set<TableIdentifier> filterTablesByType(WbConnection conn, List<String> schemas, List<String> requestedTypes)
 	{
-		this.getTables(dbConnection, schema);
-		String schemaToUse = getSchemaToUse(dbConnection, schema);
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter());
+		String currentSchema = null;
+		if (schemas.size() == 1)
+		{
+			currentSchema = schemas.get(0);
+		}
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
-			if ( type.contains(ttype) &&
-				   ((schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema)))
-				 )
+			if ( (requestedTypes.contains(ttype) && schemas.contains(tSchema)) || tSchema == null || "public".equalsIgnoreCase(tSchema) )
 			{
 				TableIdentifier copy = tbl.createCopy();
-				if (tSchema != null && tSchema.equals(tbl.getSchema())) copy.setSchema(null);
+				if (tSchema != null && currentSchema != null && conn.getMetadata().ignoreSchema(tSchema, currentSchema))
+				{
+					copy.setSchema(null);
+				}
 				result.add(copy);
 			}
 		}
 		return result;
 	}
 
-	private Set<TableIdentifier> filterTablesBySchema(WbConnection dbConnection, String schema)
+	private Set<TableIdentifier> filterTablesBySchema(WbConnection dbConnection, List<String> schemas)
 	{
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter(true));
 		DbMetadata meta = dbConnection.getMetadata();
-		String schemaToUse = getSchemaToUse(dbConnection, schema);
 
-		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion();
+		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion() || schemas.size() > 1;
 		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
 
-		String currentSchema = meta.getCurrentSchema();
+		String currentSchema = null;
+		if (schemas.size() == 1)
+		{
+			currentSchema = meta.getCurrentSchema();
+		}
 
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String tSchema = tbl.getSchema();
 
-			// meta.ignoreSchema() needs to be tested, because if that is true
-			// the returned Tables will not contain the schema...
-			boolean ignoreSchema = meta.ignoreSchema(schemaToUse, currentSchema);
-
-			if (schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || ignoreSchema)
+			if (schemas.contains(tSchema))
 			{
-				TableIdentifier copy = tbl.createCopy();
-				if (ignoreSchema && !alwaysUseSchema)
-				{
-					copy.setSchema(null);
-				}
+				// meta.ignoreSchema() needs to be tested, because if that is true
+				// the returned Tables will not contain the schema...
+				boolean ignoreSchema = !alwaysUseSchema && currentSchema != null && meta.ignoreSchema(tSchema, currentSchema);
 
-				if (meta.ignoreCatalog(copy.getCatalog()) && !alwaysUseCatalog)
+				TableIdentifier copy = tbl.createCopy();
+				if (ignoreSchema)
+				{
+					if (ignoreSchema)
+					{
+						copy.setSchema(null);
+					}
+				}
+				if (!alwaysUseCatalog && meta.ignoreCatalog(copy.getCatalog()))
 				{
 					copy.setCatalog(null);
 				}
 				result.add(copy);
 			}
 		}
+
 		return result;
+	}
+
+	private TableIdentifier searchTableDefinition(WbConnection dbConnection, List<String> schemas, TableIdentifier toSearch)
+	{
+		if (toSearch == null) return null;
+
+		for (String schema : schemas)
+		{
+			TableIdentifier toRead = toSearch.createCopy();
+			toRead.setSchema(schema);
+			TableIdentifier def = dbConnection.getMetadata().findSelectableObject(toRead);
+			if (def != null) return def;
+		}
+		return null;
 	}
 
 	/**
@@ -219,27 +257,38 @@ class ObjectCache
 	public synchronized List<ColumnIdentifier> getColumns(WbConnection dbConnection, TableIdentifier tbl)
 	{
 		String schema = getSchemaToUse(dbConnection, tbl.getSchema());
+		List<String> schemas = getSearchPath(dbConnection, schema);
 
-		TableIdentifier toSearch = tbl.createCopy();
-		toSearch.adjustCase(dbConnection);
-		if (toSearch.getSchema() == null)
+		TableIdentifier toSearch = null;
+		List<ColumnIdentifier> cols = null;
+
+		if (tbl.getSchema() == null)
 		{
-			toSearch.setSchema(schema);
+			for (String searchSchema : schemas)
+			{
+				TableIdentifier table = tbl.createCopy();
+				table.adjustCase(dbConnection);
+				table.setSchema(searchSchema);
+				cols = this.objects.get(table);
+				if (cols != null)
+				{
+					toSearch = table;
+					break;
+				}
+			}
+		}
+		else
+		{
+			toSearch = tbl.createCopy();
+			toSearch.adjustCase(dbConnection);
+			cols = this.objects.get(toSearch);
 		}
 
-		List<ColumnIdentifier> cols = this.objects.get(toSearch);
 		if (cols == null)
 		{
-			try
-			{
-				TableDefinition def = dbConnection.getMetadata().getTableDefinition(toSearch);
-				addTable(def);
-			}
-			catch (SQLException sql)
-			{
-				LogMgr.logWarning("DbObjectCache.getColumns()", "Error retrieving table definition", sql);
-				return null;
-			}
+			toSearch = searchTableDefinition(dbConnection, schemas, toSearch == null ? tbl : toSearch);
+			if (toSearch == null) return null;
+			cols = this.objects.get(toSearch);
 		}
 
 		// To support Oracle public synonyms, try to find a table with that name but without a schema
@@ -251,7 +300,7 @@ class ObjectCache
 			if (cols == null)
 			{
 				// retrieve Oracle PUBLIC synonyms
-				this.getTables(dbConnection, "PUBLIC");
+				this.getTables(dbConnection, "PUBLIC", null);
 				cols = this.objects.get(toSearch);
 			}
 		}
@@ -311,22 +360,9 @@ class ObjectCache
 
 	synchronized void addTableList(WbConnection dbConnection, DataStore tables, String schema)
 	{
-		if (schema == null || "*".equals(schema) || "%".equals(schema)) return;
 		Set<String> selectable = dbConnection.getMetadata().getObjectsWithData();
 
 		int count = 0;
-
-		// remove all tables for this schema otherwise we cannot get rid of
-		// tables that might have been dropped.
-		Iterator<TableIdentifier> itr = objects.keySet().iterator();
-		while (itr.hasNext())
-		{
-			TableIdentifier tbl = itr.next();
-			if (schema.equalsIgnoreCase(tbl.getSchema()))
-			{
-				itr.remove();
-			}
-		}
 
 		for (int row = 0; row < tables.getRowCount(); row++)
 		{
@@ -342,8 +378,19 @@ class ObjectCache
 				}
 			}
 		}
+
 		this.schemasInCache.add(schema);
 		LogMgr.logDebug("DbObjectCach.addTableList()", "Added " + count + " objects");
+	}
+
+	private Set<String> getSchemas(DataStore tables)
+	{
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		for (int row = 0; row < tables.getRowCount(); row++)
+		{
+			result.add(tables.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA));
+		}
+		return result;
 	}
 
 	private TableIdentifier createIdentifier(DataStore tableList, int row)
@@ -382,11 +429,12 @@ class ObjectCache
 
 	/**
 	 * Return the stored key according to the passed
-	 * TableIdentifier. The stored key might carry additional
-	 * properties that the passed key does not have (even
-	 * though they are equal)
+	 * TableIdentifier.
+	 *
+	 * The stored key might carry additional properties that the passed key does not have
+	 * (even though they are equal)
 	 */
-	private TableIdentifier findEntry(TableIdentifier key)
+	TableIdentifier findEntry(TableIdentifier key)
 	{
 		if (key == null) return null;
 

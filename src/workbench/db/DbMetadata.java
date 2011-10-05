@@ -451,6 +451,11 @@ public class DbMetadata
 
 	}
 
+	public String[] getSelectableTypes()
+	{
+		return tableTypesSelectable;
+	}
+	
 	public ProcedureReader getProcedureReader()
 	{
 		synchronized (readerLock)

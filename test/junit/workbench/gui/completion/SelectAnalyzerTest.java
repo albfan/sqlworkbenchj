@@ -12,13 +12,13 @@
 package workbench.gui.completion;
 
 import java.util.List;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.util.TableAlias;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
