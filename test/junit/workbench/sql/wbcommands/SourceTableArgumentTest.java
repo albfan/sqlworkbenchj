@@ -62,7 +62,7 @@ public class SourceTableArgumentTest
 				"commit;\n";
 			TestUtil.executeScript(con, script);
 
-      SourceTableArgument parser = new SourceTableArgument("t%", "ta%", "TABLE", con);
+      SourceTableArgument parser = new SourceTableArgument("t%", "ta%", null, new String[] { "TABLE" }, con);
       List<TableIdentifier> tables = parser.getTables();
       assertEquals(4, tables.size());
     }
@@ -101,7 +101,7 @@ public class SourceTableArgumentTest
 				"commit;\n";
 			TestUtil.executeScript(con, script);
 
-      SourceTableArgument parser = new SourceTableArgument("t%", "T2,T3", "TABLE", con);
+      SourceTableArgument parser = new SourceTableArgument("t%", "T2,T3", null, new String[] { "TABLE" }, con);
       List<TableIdentifier> tables = parser.getTables();
       assertEquals("Wrong number of table", 5, tables.size());
 			for (TableIdentifier tbl : tables)

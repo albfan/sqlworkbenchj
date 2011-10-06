@@ -152,7 +152,7 @@ public class CommonDiffParameters
 
 			if (StringUtil.isNonBlank(refTableNames))
 			{
-				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn.getMetadata().getTableTypesArray(), referenceConn);
+				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn);
 				refTables = refArg.getTables();
 			}
 			else
@@ -162,7 +162,7 @@ public class CommonDiffParameters
 
 			if (StringUtil.isNonBlank(targetTableNames))
 			{
-				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon.getMetadata().getTableTypesArray(), targetCon);
+				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon);
 				targetTables = targetArg.getTables();
 			}
 			else

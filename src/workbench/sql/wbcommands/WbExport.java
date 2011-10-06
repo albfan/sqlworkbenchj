@@ -613,8 +613,8 @@ public class WbExport
 		try
 		{
 			String excluded = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
-			String types = cmdLine.getValue(CommonArgs.ARG_TYPES);
-			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, types, this.currentConnection);
+			String[] types = SourceTableArgument.parseTypes(cmdLine.getValue(CommonArgs.ARG_TYPES), currentConnection);
+			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, null, types, this.currentConnection);
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && cmdLine.isArgPresent(ARG_SOURCETABLE))
 			{

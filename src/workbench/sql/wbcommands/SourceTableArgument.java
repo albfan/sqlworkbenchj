@@ -40,12 +40,6 @@ public class SourceTableArgument
 		initTableList(includeTables, null, null, dbConn.getMetadata().getTableTypesArray(), dbConn);
 	}
 
-	public SourceTableArgument(String includeTables, String excludeTables, String types, WbConnection dbConn)
-		throws SQLException
-	{
-		this(includeTables, excludeTables, null, types, dbConn);
-	}
-
 	/**
 	 *
 	 * @param includeTables the parameter value to include tables
@@ -54,6 +48,16 @@ public class SourceTableArgument
 	 * @param dbConn the connection to use
 	 * @throws SQLException
 	 */
+	public SourceTableArgument(String includeTables, String excludeTables, String schema, WbConnection dbConn)
+		throws SQLException
+	{
+		if (StringUtil.isEmptyString(includeTables)) return;
+		if (dbConn == null) return;
+
+		String[] types = dbConn.getMetadata().getTableTypesArray();
+		initTableList(includeTables, excludeTables, schema, types, dbConn);
+	}
+
 	public SourceTableArgument(String includeTables, String excludeTables, String schema, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
@@ -61,16 +65,6 @@ public class SourceTableArgument
 		if (dbConn == null) return;
 
 		initTableList(includeTables, excludeTables, schema, types, dbConn);
-	}
-
-	public SourceTableArgument(String includeTables, String excludeTables, String schema, String types, WbConnection dbConn)
-		throws SQLException
-	{
-		if (StringUtil.isEmptyString(includeTables)) return;
-		if (dbConn == null) return;
-
-		String[] typeList = parseTypes(types, dbConn);
-		initTableList(includeTables, excludeTables, schema, typeList, dbConn);
 	}
 
 	private void initTableList(String includeTables, String excludeTables, String schema, String[] types, WbConnection dbConn)
@@ -85,7 +79,7 @@ public class SourceTableArgument
 		}
 	}
 
-	private String[] parseTypes(String types, WbConnection conn)
+	public static String[] parseTypes(String types, WbConnection conn)
 	{
 		if (StringUtil.isBlank(types)) return conn.getMetadata().getTableTypesArray();
 

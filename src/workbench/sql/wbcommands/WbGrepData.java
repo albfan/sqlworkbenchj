@@ -115,8 +115,8 @@ public class WbGrepData
 			tableNames = "%";
 		}
 
-		String types = cmdLine.getValue(CommonArgs.ARG_TYPES);
-		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, types, currentConnection);
+		String[] types = SourceTableArgument.parseTypes(cmdLine.getValue(CommonArgs.ARG_TYPES), currentConnection) ;
+		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, null, types, currentConnection);
 
 		tables = parser.getTables();
 
