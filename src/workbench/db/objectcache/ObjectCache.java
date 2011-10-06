@@ -347,11 +347,31 @@ class ObjectCache
 		return Collections.unmodifiableList(cols);
 	}
 
-	synchronized void removeTable(TableIdentifier tbl)
+	synchronized void removeTable(WbConnection dbConn, TableIdentifier tbl)
 	{
 		if (tbl == null) return;
 
-		boolean removed = this.objects.remove(tbl) != null;
+		boolean removed = false;
+		if (tbl.getSchema() == null)
+		{
+			List<String> schemas = getSearchPath(dbConn, dbConn.getCurrentSchema());
+			for (String schema : schemas)
+			{
+				TableIdentifier copy = tbl.createCopy();
+				copy.setSchema(schema);
+				TableIdentifier toRemove = findEntry(copy);
+				if (toRemove != null)
+				{
+					removed = this.objects.remove(toRemove) != null;
+					break;
+				}
+			}
+		}
+		else
+		{
+			removed = this.objects.remove(tbl) != null;
+		}
+
 		if (removed)
 		{
 			LogMgr.logDebug("DbObjectCach.addTableList()", "Removed " + tbl.getTableName() + " from the cache");
@@ -381,16 +401,6 @@ class ObjectCache
 
 		this.schemasInCache.add(schema);
 		LogMgr.logDebug("DbObjectCach.addTableList()", "Added " + count + " objects");
-	}
-
-	private Set<String> getSchemas(DataStore tables)
-	{
-		Set<String> result = CollectionUtil.caseInsensitiveSet();
-		for (int row = 0; row < tables.getRowCount(); row++)
-		{
-			result.add(tables.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA));
-		}
-		return result;
 	}
 
 	private TableIdentifier createIdentifier(DataStore tableList, int row)

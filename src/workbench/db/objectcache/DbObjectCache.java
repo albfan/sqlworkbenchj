@@ -71,7 +71,7 @@ public class DbObjectCache
 
 	public void removeTable(TableIdentifier tbl)
 	{
-		objectCache.removeTable(tbl);
+		objectCache.removeTable(dbConnection, tbl);
 	}
 
 	public boolean supportsSearchPath()
