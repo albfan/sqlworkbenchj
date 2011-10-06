@@ -438,8 +438,8 @@ public class SchemaDiff
 			types = this.referenceDb.getMetadata().getTableTypesArray();
 		}
 
-		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(null, this.referenceSchema, types, false);
-		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(null, this.targetSchema, types, false);
+		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(null, this.referenceSchema, types);
+		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(null, this.targetSchema, types);
 
 		if (treatViewAsTable)
 		{

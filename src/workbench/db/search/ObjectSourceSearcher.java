@@ -317,7 +317,7 @@ public class ObjectSourceSearcher
 			for (String name : names)
 			{
 				if (cancelSearch) return null;
-				List<TableIdentifier> objects = connection.getMetadata().getObjectList(name, schema, typeNames, false);
+				List<TableIdentifier> objects = connection.getMetadata().getObjectList(name, schema, typeNames);
 				result.addAll(objects);
 			}
 		}

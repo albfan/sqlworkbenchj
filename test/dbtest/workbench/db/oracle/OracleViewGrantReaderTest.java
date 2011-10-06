@@ -60,7 +60,7 @@ public class OracleViewGrantReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		List<TableIdentifier> views = con.getMetadata().getObjectList(null, "WBJUNIT", new String[] { "VIEW" }, false);
+		List<TableIdentifier> views = con.getMetadata().getObjectList(null, "WBJUNIT", new String[] { "VIEW" });
 		assertEquals(1, views.size());
 		TableIdentifier v = views.get(0);
 		assertEquals("VIEW", v.getType());

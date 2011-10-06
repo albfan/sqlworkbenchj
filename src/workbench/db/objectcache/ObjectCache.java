@@ -12,24 +12,8 @@
 package workbench.db.objectcache;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
-import workbench.db.ProcedureDefinition;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.TableNameSorter;
-import workbench.db.WbConnection;
+import java.util.*;
+import workbench.db.*;
 import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -47,7 +31,7 @@ class ObjectCache
 	private boolean retrieveOraclePublicSynonyms;
 
 	private Set<String> schemasInCache;
-	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;
+	private Map<TableIdentifier, List<ColumnIdentifier>> objects;
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 
 	ObjectCache(WbConnection conn)
@@ -59,7 +43,7 @@ class ObjectCache
 	private void createCache()
 	{
 		schemasInCache = CollectionUtil.caseInsensitiveSet();
-		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>(new TableNameSorter(true));
+		objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
 	}
 
 	/**
@@ -105,12 +89,12 @@ class ObjectCache
 
 		for (String checkSchema  : searchPath)
 		{
-			if (this.objects.size() == 0 || !isSchemaCached(checkSchema))
+			if (this.objects.isEmpty() || !isSchemaCached(checkSchema))
 			{
 				try
 				{
 					DbMetadata meta = dbConnection.getMetadata();
-					List<TableIdentifier> tables = meta.getObjectList(null, checkSchema, selectableTypes, false);
+					List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema);
 					for (TableIdentifier tbl : tables)
 					{
 						tbl.checkQuotesNeeded(dbConnection);
@@ -209,18 +193,14 @@ class ObjectCache
 
 			if (schemas.contains(tSchema))
 			{
-				// meta.ignoreSchema() needs to be tested, because if that is true
-				// the returned Tables will not contain the schema...
 				boolean ignoreSchema = !alwaysUseSchema && currentSchema != null && meta.ignoreSchema(tSchema, currentSchema);
 
 				TableIdentifier copy = tbl.createCopy();
 				if (ignoreSchema)
 				{
-					if (ignoreSchema)
-					{
-						copy.setSchema(null);
-					}
+					copy.setSchema(null);
 				}
+
 				if (!alwaysUseCatalog && meta.ignoreCatalog(copy.getCatalog()))
 				{
 					copy.setCatalog(null);
@@ -232,7 +212,7 @@ class ObjectCache
 		return result;
 	}
 
-	private TableIdentifier searchTableDefinition(WbConnection dbConnection, List<String> schemas, TableIdentifier toSearch)
+	private TableIdentifier findTableInDb(WbConnection dbConnection, List<String> schemas, TableIdentifier toSearch)
 	{
 		if (toSearch == null) return null;
 
@@ -259,36 +239,18 @@ class ObjectCache
 		String schema = getSchemaToUse(dbConnection, tbl.getSchema());
 		List<String> schemas = getSearchPath(dbConnection, schema);
 
-		TableIdentifier toSearch = null;
+		TableIdentifier toSearch = findEntry(dbConnection, tbl);
 		List<ColumnIdentifier> cols = null;
 
-		if (tbl.getSchema() == null)
+		if (toSearch != null)
 		{
-			for (String searchSchema : schemas)
-			{
-				TableIdentifier table = tbl.createCopy();
-				table.adjustCase(dbConnection);
-				table.setSchema(searchSchema);
-				cols = this.objects.get(table);
-				if (cols != null)
-				{
-					toSearch = table;
-					break;
-				}
-			}
-		}
-		else
-		{
-			toSearch = tbl.createCopy();
-			toSearch.adjustCase(dbConnection);
 			cols = this.objects.get(toSearch);
 		}
 
 		if (cols == null)
 		{
-			toSearch = searchTableDefinition(dbConnection, schemas, toSearch == null ? tbl : toSearch);
+			toSearch = findTableInDb(dbConnection, schemas, toSearch == null ? tbl : toSearch);
 			if (toSearch == null) return null;
-			cols = this.objects.get(toSearch);
 		}
 
 		// To support Oracle public synonyms, try to find a table with that name but without a schema
@@ -307,40 +269,19 @@ class ObjectCache
 
 		if (CollectionUtil.isEmpty(cols))
 		{
-			TableIdentifier tblToUse = null;
-
-			// use the stored key because that might carry the correct type attribute
-			// TabelIdentifier.equals() doesn't compare the type, only the expression
-			// so we'll get a containsKey() == true even if the type is different
-			// (which is necessary because the TableIdentifier passed to this
-			// method will never contain a type!)
-			// only using objects.get() would not return anything!
-			if (objects.containsKey(toSearch))
-			{
-				// we have already retrieved the list of tables, but not the columns for this table
-				// the table identifier in the object map contains correct type and schema information, so we need
-				// to use that
-				tblToUse = findEntry(toSearch);
-			}
-			else
-			{
-				// retrieve the real table identifier based on the table name
-				tblToUse = dbConnection.getMetadata().findObject(toSearch);
-			}
-
 			try
 			{
-				cols = dbConnection.getMetadata().getTableColumns(tblToUse);
+				cols = dbConnection.getMetadata().getTableColumns(toSearch);
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + tblToUse, e);
+				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + toSearch, e);
 				cols = null;
 			}
 
-			if (tblToUse != null && CollectionUtil.isNonEmpty(cols))
+			if (toSearch != null && CollectionUtil.isNonEmpty(cols))
 			{
-				this.objects.put(tblToUse, cols);
+				this.objects.put(toSearch, cols);
 			}
 
 		}
@@ -351,25 +292,12 @@ class ObjectCache
 	{
 		if (tbl == null) return;
 
+		TableIdentifier toRemove = findEntry(dbConn, tbl);
 		boolean removed = false;
-		if (tbl.getSchema() == null)
+		if (toRemove != null)
 		{
-			List<String> schemas = getSearchPath(dbConn, dbConn.getCurrentSchema());
-			for (String schema : schemas)
-			{
-				TableIdentifier copy = tbl.createCopy();
-				copy.setSchema(schema);
-				TableIdentifier toRemove = findEntry(copy);
-				if (toRemove != null)
-				{
-					removed = this.objects.remove(toRemove) != null;
-					break;
-				}
-			}
-		}
-		else
-		{
-			removed = this.objects.remove(tbl) != null;
+			this.objects.remove(toRemove);
+			removed = true;
 		}
 
 		if (removed)
@@ -444,16 +372,30 @@ class ObjectCache
 	 * The stored key might carry additional properties that the passed key does not have
 	 * (even though they are equal)
 	 */
-	TableIdentifier findEntry(TableIdentifier key)
+	synchronized TableIdentifier findEntry(WbConnection con, TableIdentifier toSearch)
 	{
-		if (key == null) return null;
+		if (toSearch == null) return null;
 
-		// as contains() is using the comparator as well, we have to use it here also!
-		Comparator<? super TableIdentifier> comparator = objects.comparator();
+		TableIdentifier key = toSearch.createCopy();
+		key.adjustCase(con);
 
-		for (TableIdentifier tbl : objects.keySet())
+		if (key.getSchema() == null)
 		{
-			if (comparator.compare(key, tbl) == 0) return tbl;
+			List<String> schemas = getSearchPath(con, con.getCurrentSchema());
+			for (String schema : schemas)
+			{
+				TableIdentifier copy = key.createCopy();
+				copy.setSchema(schema);
+				TableIdentifier tbl = findEntry(con, copy);
+				if (tbl != null) return tbl;
+			}
+		}
+		else
+		{
+			for (TableIdentifier tbl : objects.keySet())
+			{
+				if (tbl.equals(key)) return tbl;
+			}
 		}
 		return null;
 	}

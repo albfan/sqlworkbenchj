@@ -455,7 +455,7 @@ public class DbMetadata
 	{
 		return tableTypesSelectable;
 	}
-	
+
 	public ProcedureReader getProcedureReader()
 	{
 		synchronized (readerLock)
@@ -2211,7 +2211,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getObjectList(null, getCurrentSchema(), tableTypes, false);
+		return getObjectList(null, getCurrentSchema(), tableTypes);
 	}
 
 	public List<TableIdentifier> getObjectList(String schema, String[] types)
@@ -2219,13 +2219,6 @@ public class DbMetadata
 	{
 		if (schema == null) schema = this.getCurrentSchema();
 		return getObjectList(null, schema, types);
-	}
-
-	public List<TableIdentifier> getObjectList(String schema, String[] types, boolean cleanupSchema)
-		throws SQLException
-	{
-		if (schema == null) schema = this.getCurrentSchema();
-		return getObjectList(null, schema, types, cleanupSchema);
 	}
 
 	public List<TableIdentifier> getTableList(String table, String schema)
@@ -2258,31 +2251,12 @@ public class DbMetadata
 	public List<TableIdentifier> getObjectList(String table, String schema, String[] types)
 		throws SQLException
 	{
-		return getObjectList(table, schema, types, true);
-	}
-
-	public List<TableIdentifier> getObjectList(String table, String schema, String[] types, boolean cleanupSchema)
-		throws SQLException
-	{
 		DataStore ds = getObjects(null, schema, table, types);
 		int count = ds.getRowCount();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
-		String currentSchema = getCurrentSchema();
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = buildTableIdentifierFromDs(ds, i);
-			if (cleanupSchema)
-			{
-				if (ignoreSchema(tbl.getSchema(), currentSchema))
-				{
-					tbl.setSchema(null);
-				}
-
-				if (ignoreCatalog(tbl.getCatalog()))
-				{
-					tbl.setCatalog(null);
-				}
-			}
 			tables.add(tbl);
 		}
 		return tables;

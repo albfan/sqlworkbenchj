@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -64,77 +65,91 @@ public class AutotraceTest
 	public void testAutotrace()
 		throws Exception
 	{
-		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
-		StatementRunner runner = new StatementRunner();
-		runner.setConnection(con);
-		StatementHook hook = runner.getStatementHook();
-		assertTrue(hook instanceof OracleStatementHook);
-		
-		runner.runStatement("set autotrace on");
-		StatementRunnerResult result = runner.getResult();
-		assertTrue(result.isSuccess());
-		String attr = runner.getSessionAttribute("autotrace");
-		assertNotNull(attr);
-		assertEquals("on", attr);
 
-		runner.runStatement("select id, some_data from some_table order by id");
-		result = runner.getResult();
-		List<DataStore> data = result.getDataStores();
-		assertEquals(3, data.size());
+		boolean oldFlag = Settings.getInstance().getBoolProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 
-		// result of the select
-		DataStore table = data.get(0);
-		assertEquals(2, table.getRowCount());
-		assertEquals(1, table.getValueAsInt(0, 0, -1));
-		assertEquals("foo", table.getValueAsString(0, 1));
+		try
+		{
 
-		assertEquals("Statistics", data.get(1).getResultName());
-		DataStore stat = data.get(1);
+			WbConnection con = OracleTestUtil.getOracleConnection();
+			if (con == null) return;
 
-		assertEquals(12, stat.getRowCount());
-		int rows = stat.getValueAsInt(11, 1, -1); // rows processed property
-		assertEquals(2, rows);
+			Settings.getInstance().setProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 
-		assertEquals("Execution plan", data.get(2).getResultName());
+			StatementRunner runner = new StatementRunner();
+			runner.setConnection(con);
+			StatementHook hook = runner.getStatementHook();
+			assertTrue(hook instanceof OracleStatementHook);
 
-		runner.runStatement("set autotrace traceonly");
-		runner.runStatement("select id, some_data from some_table order by id");
-		result = runner.getResult();
-		data = result.getDataStores();
-		assertEquals(2, data.size());
-		assertEquals("Statistics", data.get(0).getResultName());
-		assertEquals("Execution plan", data.get(1).getResultName());
+			runner.runStatement("set autotrace on");
+			StatementRunnerResult result = runner.getResult();
+			assertTrue(result.isSuccess());
+			String attr = runner.getSessionAttribute("autotrace");
+			assertNotNull(attr);
+			assertEquals("on", attr);
 
-		runner.runStatement("set autotrace on statistics");
-		runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-		result = runner.getResult();
-		data = result.getDataStores();
-		assertEquals(2, data.size());
-		assertEquals("tabledata", data.get(0).getResultName());
-		assertEquals("Statistics", data.get(1).getResultName());
-		stat = data.get(1);
-		assertEquals(12, stat.getRowCount());
-		rows = stat.getValueAsInt(11, 1, -1); // rows processed property
-		assertEquals(2, rows);
+			runner.runStatement("select id, some_data from some_table order by id");
+			result = runner.getResult();
+			List<DataStore> data = result.getDataStores();
+			assertEquals(3, data.size());
 
-		runner.runStatement("set autotrace traceonly statistics");
-		runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-		result = runner.getResult();
-		data = result.getDataStores();
-		assertEquals(1, data.size());
-		assertEquals("Statistics", data.get(0).getResultName());
-		stat = data.get(0);
-		assertEquals(12, stat.getRowCount());
-		rows = stat.getValueAsInt(11, 1, -1); // rows processed property
-		assertEquals(2, rows);
+			// result of the select
+			DataStore table = data.get(0);
+			assertEquals(2, table.getRowCount());
+			assertEquals(1, table.getValueAsInt(0, 0, -1));
+			assertEquals("foo", table.getValueAsString(0, 1));
 
-		runner.runStatement("set autotrace on explain");
-		runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-		result = runner.getResult();
-		data = result.getDataStores();
-		assertEquals(2, data.size());
-		assertEquals("tabledata", data.get(0).getResultName());
-		assertEquals("Execution plan", data.get(1).getResultName());
+			assertEquals("Statistics", data.get(1).getResultName());
+			DataStore stat = data.get(1);
+
+			assertEquals(12, stat.getRowCount());
+			int rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(2, rows);
+
+			assertEquals("Execution plan", data.get(2).getResultName());
+
+			runner.runStatement("set autotrace traceonly");
+			runner.runStatement("select id, some_data from some_table order by id");
+			result = runner.getResult();
+			data = result.getDataStores();
+			assertEquals(2, data.size());
+			assertEquals("Statistics", data.get(0).getResultName());
+			assertEquals("Execution plan", data.get(1).getResultName());
+
+			runner.runStatement("set autotrace on statistics");
+			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
+			result = runner.getResult();
+			data = result.getDataStores();
+			assertEquals(2, data.size());
+			assertEquals("tabledata", data.get(0).getResultName());
+			assertEquals("Statistics", data.get(1).getResultName());
+			stat = data.get(1);
+			assertEquals(12, stat.getRowCount());
+			rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(2, rows);
+
+			runner.runStatement("set autotrace traceonly statistics");
+			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
+			result = runner.getResult();
+			data = result.getDataStores();
+			assertEquals(1, data.size());
+			assertEquals("Statistics", data.get(0).getResultName());
+			stat = data.get(0);
+			assertEquals(12, stat.getRowCount());
+			rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(2, rows);
+
+			runner.runStatement("set autotrace on explain");
+			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
+			result = runner.getResult();
+			data = result.getDataStores();
+			assertEquals(2, data.size());
+			assertEquals("tabledata", data.get(0).getResultName());
+			assertEquals("Execution plan", data.get(1).getResultName());
+		}
+		finally
+		{
+			Settings.getInstance().setProperty("workbench.db.oracle.autotrace.statistics.valuefirst", oldFlag);
+		}
 	}
 }

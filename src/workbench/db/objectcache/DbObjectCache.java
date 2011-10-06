@@ -86,7 +86,7 @@ public class DbObjectCache
 
 	public TableIdentifier getTable(TableIdentifier table)
 	{
-		return objectCache.findEntry(table);
+		return objectCache.findEntry(dbConnection, table);
 	}
 
 }

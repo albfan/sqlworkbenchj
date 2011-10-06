@@ -253,6 +253,7 @@ public class TableSelectorPanel
 		}
 	}
 
+	@Override
 	public void setEnabled(boolean enable)
 	{
 		super.setEnabled(enable);
@@ -347,6 +348,7 @@ public class TableSelectorPanel
 		}
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getStateChange() != ItemEvent.SELECTED) return;
@@ -374,6 +376,7 @@ public class TableSelectorPanel
 			}
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					firePropertyChange(old, currentTable);
@@ -392,6 +395,7 @@ public class TableSelectorPanel
 		this.client.propertyChange(evt);
 	}
 
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.editNewTableNameButton)

@@ -122,7 +122,7 @@ public class SourceTableArgument
 					tbl.setSchema(schemaToUse);
 				}
 				tbl.adjustCase(dbConn);
-				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types, false);
+				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
 				result.addAll(l);
 			}
 			else

@@ -157,17 +157,17 @@ public class CommonDiffParameters
 			}
 			else
 			{
-				refTables = referenceConn.getMetadata().getObjectList(null, refSchema, referenceConn.getMetadata().getTableTypesArray(), false);
+				refTables = referenceConn.getMetadata().getTableList(null, refSchema);
 			}
 
 			if (StringUtil.isNonBlank(targetTableNames))
 			{
-				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, referenceConn.getMetadata().getTableTypesArray(), targetCon);
+				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon.getMetadata().getTableTypesArray(), targetCon);
 				targetTables = targetArg.getTables();
 			}
 			else
 			{
-				targetTables = targetCon.getMetadata().getObjectList(null, targetSchema, referenceConn.getMetadata().getTableTypesArray(), false);
+				targetTables = targetCon.getMetadata().getTableList(null, targetSchema);
 				matchNames = true;
 			}
 		}
