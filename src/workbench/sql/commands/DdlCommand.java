@@ -14,10 +14,12 @@ package workbench.sql.commands;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -87,7 +89,8 @@ public class DdlCommand
 				this.ddlSavepoint = currentConnection.setSavepoint();
 			}
 
-			if (isDropCommand(sql) && this.runner.getIgnoreDropErrors())
+			boolean isDrop = isDropCommand(sql);
+			if (isDrop && this.runner.getIgnoreDropErrors())
 			{
 				try
 				{
@@ -127,6 +130,15 @@ public class DdlCommand
 				}
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
+
+			if (isDrop && result.isSuccess())
+			{
+				Set<String> types = currentConnection.getMetadata().getObjectsWithData();
+				if (types.contains(info.objectType))
+				{
+					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.objectName));
+				}
+			}
 		}
 		catch (Exception e)
 		{
