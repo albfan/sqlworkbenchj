@@ -68,11 +68,7 @@ class ObjectCache
 
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 	{
-		if (dbConn == null || !dbConn.getMetadata().isPostgres())
-		{
-			return Collections.singletonList(getSchemaToUse(dbConn, defaultSchema));
-		}
-		return PostgresUtil.getSearchPath(dbConn);
+		return DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
 	}
 
 	private boolean isSchemaCached(String schema)

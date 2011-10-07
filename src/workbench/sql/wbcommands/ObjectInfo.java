@@ -70,7 +70,23 @@ public class ObjectInfo
 		tbl.adjustCase(connection);
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
-		TableIdentifier toDescribe = connection.getMetadata().findObject(tbl, true, searchAllSchemas);
+		TableIdentifier toDescribe = null;
+		if (tbl.getSchema() == null)
+		{
+			List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+			for (String schema : searchPath)
+			{
+				TableIdentifier tb = tbl.createCopy();
+				tb.setSchema(schema);
+				toDescribe = connection.getMetadata().findObject(tb, true, searchAllSchemas);
+				if (toDescribe != null) break;
+			}
+		}
+		else
+		{
+			toDescribe = connection.getMetadata().findObject(tbl, true, searchAllSchemas);
+		}
+
 		if (toDescribe == null)
 		{
 			TableIdentifier adjusted = tbl.createCopy();
