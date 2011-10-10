@@ -47,7 +47,7 @@ public class DbObjectCacheFactory
 		this.caches = new HashMap<String, ObjectCache>();
 	}
 
-	public synchronized DbObjectCache getCache(WbConnection connection)
+	public DbObjectCache getCache(WbConnection connection)
 	{
 		if (connection == null) return null;
 
