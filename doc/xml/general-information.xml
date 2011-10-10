@@ -4,14 +4,14 @@
   <section id="license">
     <title>Software license</title>
 
-    <para>Copyright (c) 2002-2010, Thomas Kellerer</para>
+    <para>Copyright (c) 2002-2012, Thomas Kellerer</para>
 
     <para>
       Permission is hereby granted, free of charge, to any person
       obtaining a copy of this software and associated documentation files (the
       &#34;Software&#34;), to deal in the Software without restriction,
-      including without limitation the rights to use, copy, publish, distribute, 
-      and to permit persons to whom the Software is furnished to do so, 
+      including without limitation the rights to use, copy, publish, distribute,
+      and to permit persons to whom the Software is furnished to do so,
       subject to the following conditions:
     </para>
 
@@ -43,12 +43,12 @@
         otherwise) arising in any way out of the use of this software, even if advised of the
         possibility of such damage.
       </para></blockquote>
-        
+
       <para>
         In other words: use it at your own risk, and don't blame me if you accidently delete your database!
       </para>
     </simplesect>
-    
+
   </section>
 
 
@@ -57,7 +57,7 @@
 
     <para>This document describes build @BUILD_NUMBER@ of &wb-productname;</para>
   </section>
-  
+
   <section id="general-contact">
     <title>Feedback and support</title>
     <para>Feedback regarding this program is more then welcome. Please report
@@ -70,12 +70,12 @@
       <ulink url="http://groups.google.com/group/sql-workbench">http://groups.google.com/group/sql-workbench</ulink>
     </para>
   </section>
-  
+
   <section id="credits">
     <title>Credits and thanks</title>
     <para>
       Thanks to Christian (and his team) for his thorough testing, his patience and his continous
-      ideas to improve this tool. His input has influenced and driven a lot of 
+      ideas to improve this tool. His input has influenced and driven a lot of
       features and has helped reduce the number of bugs drastically!
     </para>
   </section>
@@ -148,6 +148,6 @@
       <para>Some icons are taken from KDE Crystal project: <ulink url="http://www.everaldo.com/crystal/"/></para>
       <para>The DbExplorer icon is from the icon set "Mantra" by Umar Irshad: <ulink url="http://umar123.deviantart.com/"/></para>
     </section>
-    
+
   </section>
 </section>
