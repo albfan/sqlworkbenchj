@@ -142,6 +142,17 @@
       </para>
     </section>
 
+    <section id="jedit-license">
+      <title>Editor</title>
+      <para>
+        The editor is based on the JEdit Syntax package: <ulink url="http://sourceforge.net/projects/jedit-syntax/"/>
+      </para>
+      <para>
+        The jEdit 2.2.1 syntax highlighting package contains code that is Copyright 1998-1999 Slava Pestov,
+        Artur Biesiadowski, Clancy Malcolm, Jonathan Revusky, Juha Lindfors and Mike Dillon.
+      </para>
+    </section>
+
     <section id="icons">
       <title>Icons</title>
       <para>Some icons are taken from Tango project: <ulink url="http://tango.freedesktop.org/Tango_Icon_Library"/></para>
