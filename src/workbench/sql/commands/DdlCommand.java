@@ -131,7 +131,7 @@ public class DdlCommand
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
 
-			if (isDrop && result.isSuccess())
+			if (isDrop && result.isSuccess() && info != null)
 			{
 				Set<String> types = currentConnection.getMetadata().getObjectsWithData();
 				if (types.contains(info.objectType))
