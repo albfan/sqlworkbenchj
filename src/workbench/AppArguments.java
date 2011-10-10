@@ -223,7 +223,8 @@ public class AppArguments
 		for (String arg : args)
 		{
 			ArgumentType type = getArgumentType(arg);
-			msg.append("-" + arg);
+			msg.append('-');
+			msg.append(arg);
 			if (type == ArgumentType.BoolArgument)
 			{
 				msg.append(" (true/false)");

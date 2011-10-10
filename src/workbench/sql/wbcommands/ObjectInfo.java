@@ -71,9 +71,9 @@ public class ObjectInfo
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
 		TableIdentifier toDescribe = null;
-		if (tbl.getSchema() == null)
+		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+		if (tbl.getSchema() == null && !searchPath.isEmpty())
 		{
-			List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
 			for (String schema : searchPath)
 			{
 				TableIdentifier tb = tbl.createCopy();

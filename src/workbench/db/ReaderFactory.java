@@ -13,6 +13,7 @@ package workbench.db;
 
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.firebird.FirebirdConstraintReader;
+import workbench.db.firebird.FirebirdIndexReader;
 import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
@@ -84,6 +85,10 @@ public class ReaderFactory
 		if (meta.isH2())
 		{
 			return new H2IndexReader(meta);
+		}
+		if (meta.isFirebird() && JdbcUtils.hasMinimumServerVersion(meta.getWbConnection(), "2.5"))
+		{
+			return new FirebirdIndexReader(meta);
 		}
 		return new JdbcIndexReader(meta);
 	}

@@ -172,6 +172,11 @@ public class PostgresIndexReader
 			hasSchema = true;
 		}
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresIndexReader.getIndexSource()", "Using SQL:\n " + sql);
+		}
+
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql.toString());

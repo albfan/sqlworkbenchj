@@ -30,7 +30,7 @@ public class FirebirdTestUtil
 
 	public static final String TEST_USER = "wbjunit";
 	public static final String TEST_PWD = "wbjunit";
-	
+
 
 	/**
 	 * Return a connection to a locally running Firebird database
@@ -44,7 +44,7 @@ public class FirebirdTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:firebirdsql://localhost:3050/wbjunit' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=org.firebirdsql.jdbc.FBDriver");
+			parser.parse("-url='jdbc:firebirdsql://localhost:3050/wbjunit' -autocommit=false -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=org.firebirdsql.jdbc.FBDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitFirebird");
 			ConnectionMgr.getInstance().addProfile(prof);

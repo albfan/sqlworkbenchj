@@ -31,6 +31,7 @@ public class IndexDefinition
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	private String comment;
 	private String uniqueConstraintName;
+	private String indexExpression;
 
 	public IndexDefinition(TableIdentifier table, String name)
 	{
@@ -61,6 +62,22 @@ public class IndexDefinition
 	{
 		return null;
 	}
+
+	public boolean isNonStandardExpression()
+	{
+		return indexExpression != null;
+	}
+	
+	public String getIndexExpression()
+	{
+		return indexExpression;
+	}
+
+	public void setIndexExpression(String expression)
+	{
+		this.indexExpression = expression;
+	}
+
 
 	public boolean isUniqueConstraint()
 	{
@@ -169,6 +186,11 @@ public class IndexDefinition
 
 	public String getExpression()
 	{
+		if (indexExpression != null)
+		{
+			return indexExpression;
+		}
+
 		StringBuilder result = new StringBuilder(this.columns.size() * 10);
 		for (int i=0; i < this.columns.size(); i++)
 		{

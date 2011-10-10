@@ -32,6 +32,10 @@ public interface DbSearchPath
 			{
 				defaultSchema = dbConn.getCurrentSchema();
 			}
+			if (defaultSchema == null)
+			{
+				return Collections.emptyList();
+			}
 			return Collections.singletonList(defaultSchema);
 		}
 	};

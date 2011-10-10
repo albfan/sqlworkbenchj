@@ -220,7 +220,16 @@ public class JdbcIndexReader
 			sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
 		}
 
-		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getExpression());
+
+		String expr = indexDefinition.getExpression();
+		if (indexDefinition.isNonStandardExpression()) // currently only Firebird
+		{
+			sql = StringUtil.replace(sql, "(" + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + ")", expr);
+		}
+		else
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, expr);
+		}
 		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
 		idx.append(sql);
 		String options = getIndexOptions(indexDefinition);
@@ -254,10 +263,10 @@ public class JdbcIndexReader
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 *
-	 * 	@param aTable - The table name for which the index should be constructed
-	 * 	@param indexName - The name of the Index
-	 * 	@param unique - Should the index be unique
-	 *  @param columnList - The columns that should build the index
+	 * 	@param aTable      The table name for which the index should be constructed
+	 * 	@param indexName   The name of the Index
+	 * 	@param unique      unique index yes/no
+	 *  @param columnList  The columns that should build the index
 	 *
 	 *  @return the SQL statement to create the index
 	 */
@@ -294,19 +303,21 @@ public class JdbcIndexReader
 	}
 
 	/**
+	 * A hook to post-process the index definitions after they are full retrieved.
 	 *
-	 * @param table
-	 * @param indexDefinitions
+	 * @param table     the table for which the indexlist was retrieved (never null)
+	 * @param indexList the indexes retrieved (never null)
 	 */
 	@Override
-	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions)
+	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexList)
 	{
 		// Nothing implemented
 	}
 
 	/**
-	 * Return the index information for a table as a DataStore. This is
-	 * delegated to getTableIndexList() and from the resulting collection
+	 * Return the index information for a table as a DataStore.
+	 *
+	 * This is delegated to getTableIndexList() and from the resulting collection
 	 * the datastore is created.
 	 *
 	 * @param table the table to get the indexes for
@@ -399,13 +410,14 @@ public class JdbcIndexReader
 	{
 		// This will map an indexname to an IndexDefinition object
 		// getIndexInfo() returns one row for each column
+		// so the columns of the index are collected in the IndexDefinition
 		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
 
 		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
 
 		while (idxRs != null && idxRs.next())
 		{
-			boolean unique = idxRs.getBoolean("NON_UNIQUE");
+			boolean nonUniqueFlag = idxRs.getBoolean("NON_UNIQUE");
 			String indexName = idxRs.getString("INDEX_NAME");
 			if (idxRs.wasNull()) continue;
 			if (indexName == null) continue;
@@ -416,7 +428,7 @@ public class JdbcIndexReader
 			if (def == null)
 			{
 				def = new IndexDefinition(tbl, indexName);
-				def.setUnique(!unique);
+				def.setUnique(!nonUniqueFlag);
 				if (metaData.getDbSettings().pkIndexHasTableName())
 				{
 					def.setPrimaryKeyIndex(indexName.equals(tbl.getTableName()));

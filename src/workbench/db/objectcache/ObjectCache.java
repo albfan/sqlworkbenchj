@@ -14,7 +14,6 @@ package workbench.db.objectcache;
 import java.sql.SQLException;
 import java.util.*;
 import workbench.db.*;
-import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -81,7 +80,6 @@ class ObjectCache
 	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
 	{
 		List<String> searchPath = getSearchPath(dbConnection, schema);
-		String[] selectableTypes = dbConnection.getMetadata().getSelectableTypes();
 
 		for (String checkSchema  : searchPath)
 		{
@@ -375,9 +373,15 @@ class ObjectCache
 		TableIdentifier key = toSearch.createCopy();
 		key.adjustCase(con);
 
+		List<String> schemas = Collections.emptyList();
+
 		if (key.getSchema() == null)
 		{
-			List<String> schemas = getSearchPath(con, con.getCurrentSchema());
+			schemas = getSearchPath(con, con.getCurrentSchema());
+		}
+
+		if (!schemas.isEmpty())
+		{
 			for (String schema : schemas)
 			{
 				TableIdentifier copy = key.createCopy();
