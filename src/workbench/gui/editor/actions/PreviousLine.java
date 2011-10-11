@@ -36,6 +36,7 @@ public class PreviousLine
 		super(resourceKey, key, modifier);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

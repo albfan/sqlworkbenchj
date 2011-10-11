@@ -28,7 +28,8 @@ public interface TransactionChecker
 	public static final TransactionChecker NO_CHECK = new TransactionChecker()
 	{
 		/**
-		 * Always returns false
+		 * Always returns false.
+		 * @return false
 		 */
 		@Override
 		public boolean hasUncommittedChanges(WbConnection con)
@@ -63,13 +64,17 @@ public interface TransactionChecker
 
 			if (sql != null && con.getProfile().getDetectOpenTransaction())
 			{
-				return new DefaultTransactionChecker();
+				return new DefaultTransactionChecker(sql);
 			}
 			return NO_CHECK;
 		}
 
 		/**
 		 * Checks if the given DriverClass supports detecting uncommitted changes.
+		 *
+		 * This is used to hide/show the profile checkbox in the connection dialog.
+		 * Before a connection is made no DbSettings are available, therefor
+		 * the presence of the configured SQL statement cannot be checked.
 		 *
 		 * @param driverClass the driver to check
 		 * @return true if detecting uncommitted changes is supported.

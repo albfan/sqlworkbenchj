@@ -25,7 +25,7 @@ public class LineStart
 	extends EditorAction
 {
 	protected boolean select;
-	
+
 	public LineStart()
 	{
 		super("TxtEdLineStart", PlatformShortcuts.getDefaultStartOfLine(false));
@@ -37,6 +37,7 @@ public class LineStart
 		super(resourceKey, key);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

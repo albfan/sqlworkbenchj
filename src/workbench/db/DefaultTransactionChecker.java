@@ -25,13 +25,10 @@ public class DefaultTransactionChecker
 	implements TransactionChecker
 {
 
-	public DefaultTransactionChecker()
+	private String query;
+	public DefaultTransactionChecker(String sql)
 	{
-	}
-
-	protected String getQuery(WbConnection con)
-	{
-		return con.getDbSettings().checkOpenTransactionsQuery();
+		query = sql;
 	}
 
 	@Override
@@ -48,7 +45,7 @@ public class DefaultTransactionChecker
 				sp = con.setSavepoint();
 			}
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(getQuery(con));
+			rs = stmt.executeQuery(query);
 			if (rs.next())
 			{
 				count = rs.getInt(1);

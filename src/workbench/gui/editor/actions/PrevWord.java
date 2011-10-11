@@ -38,6 +38,7 @@ public class PrevWord
 		super(resourceKey, key);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

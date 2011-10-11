@@ -1814,35 +1814,19 @@ public class JEditTextArea
 					start = tmp;
 				}
 
-				int lastNewline = 0;
-				int currNewline = 0;
-
 				for (int i = selectionStartLine; i <= selectionEndLine; i++)
 				{
 					Element lineElement = map.getElement(i);
 					int lineStart = lineElement.getStartOffset();
 					int lineEnd = lineElement.getEndOffset() - 1;
-					int rectStart = Math.min(lineEnd,lineStart + start);
+					int rectStart = Math.min(lineEnd, lineStart + start);
 
-					document.remove(rectStart,Math.min(lineEnd - rectStart,end - start));
+					document.remove(rectStart, Math.min(lineEnd - rectStart, end - start));
 
-					if (selectedText == null) continue;
-
-					currNewline = selectedText.indexOf('\n',lastNewline);
-					if (currNewline == -1)
+					if (selectedText != null)
 					{
-						currNewline = selectedText.length();
+						document.insertString(rectStart,selectedText,null);
 					}
-					document.insertString(rectStart,selectedText.substring(lastNewline,currNewline),null);
-
-					lastNewline = Math.min(selectedText.length(),currNewline + 1);
-				}
-
-				if (selectedText != null && currNewline != selectedText.length())
-				{
-					int offset = map.getElement(selectionEndLine).getEndOffset() - 1;
-					document.insertString(offset,"\n",null);
-					document.insertString(offset + 1,selectedText.substring(currNewline + 1),null);
 				}
 			}
 			else
@@ -1879,7 +1863,22 @@ public class JEditTextArea
 		}
 
 		updateScrollBars();
-		setCaretPosition(selectionEnd);
+		if (rectSelect)
+		{
+			selectionStart ++;
+			if (overwrite)
+			{
+				selectionEnd ++;
+			}
+			else
+			{
+				if (selectionStart > selectionEnd) selectionEnd ++;
+			}
+		}
+		else
+		{
+			setCaretPosition(selectionEnd);
+		}
 		int startLine = getLineOfOffset(selectionStart);
 		int endLine = getLineOfOffset(selectionStart + selectedText.length());
 		painter.invalidateLineRange(startLine, endLine);

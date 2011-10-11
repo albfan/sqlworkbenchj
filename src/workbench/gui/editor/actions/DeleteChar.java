@@ -29,6 +29,7 @@ public class DeleteChar
 		super("TxtEdDelChar", KeyEvent.VK_DELETE, 0);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

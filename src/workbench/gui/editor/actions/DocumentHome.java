@@ -29,6 +29,7 @@ public class DocumentHome
 		super("TxtEdDocHome", PlatformShortcuts.getDefaultStartOfDoc(false));
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

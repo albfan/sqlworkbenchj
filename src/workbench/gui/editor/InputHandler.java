@@ -159,7 +159,7 @@ public class InputHandler
 	/**
 	 * Adds the default key bindings to this input handler.
 	 */
-	public void initKeyBindings()
+	public final void initKeyBindings()
 	{
 		bindings = new HashMap<KeyStroke, ActionListener>();
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), BACKSPACE);
@@ -174,6 +174,8 @@ public class InputHandler
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, KeyEvent.SHIFT_MASK), SHIFT_TAB);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), OVERWRITE);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), new cancel_rectangle_select());
 
 		addKeyBinding(LINE_START);
 		addKeyBinding(SELECT_LINE_START);
@@ -251,6 +253,7 @@ public class InputHandler
 		bindings.clear();
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		initKeyBindings();
@@ -281,6 +284,7 @@ public class InputHandler
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					JEditTextArea area = getTextArea(evt);
@@ -495,6 +499,7 @@ public class InputHandler
 
 	public static class backspace implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
@@ -528,6 +533,7 @@ public class InputHandler
 
 	public static class insert_break implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
@@ -543,6 +549,7 @@ public class InputHandler
 	}
 	public static class shift_tab implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
@@ -564,6 +571,7 @@ public class InputHandler
 	}
 	public static class insert_tab implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
@@ -608,6 +616,7 @@ public class InputHandler
 
 	public static class overwrite implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
@@ -615,9 +624,25 @@ public class InputHandler
 		}
 	}
 
+	public static class cancel_rectangle_select
+		implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+			if (textArea.isSelectionRectangular())
+			{
+				// re-setting the position will clear the selection
+				textArea.setCaretPosition(textArea.getCaretPosition());
+			}
+		}
+	}
+
 	public static class insert_char
 		implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);

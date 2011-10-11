@@ -30,6 +30,7 @@ public class DeleteWord
 		super("TxtEdDelWord", KeyEvent.VK_DELETE, KeyEvent.CTRL_MASK);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);

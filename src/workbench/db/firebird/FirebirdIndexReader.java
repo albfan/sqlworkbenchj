@@ -92,6 +92,8 @@ public class FirebirdIndexReader
 			boolean isComputed = false;
 			for (IndexColumn col : columns)
 			{
+				// Firebird allows only a single expression for a function based index.
+				// So the first column with a null direction is also the only one.
 				isComputed = col.getDirection() == null;
 				if (isComputed) break;
 			}
