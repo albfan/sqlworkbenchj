@@ -74,7 +74,7 @@ public class DataStoreTableModel
 		return this.dataCache;
 	}
 
-	public void setDataStore(DataStore newData)
+	public final void setDataStore(DataStore newData)
 	{
 		this.dispose();
 		this.dataCache = newData;

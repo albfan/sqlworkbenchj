@@ -26,13 +26,13 @@ public class NumberUtilTest
 	@Test
 	public void testValuesAreEquals()
 	{
-		assertTrue(NumberUtil.valuesAreEquals(new Integer(42), new Long(42)));
-		assertTrue(NumberUtil.valuesAreEquals(new Short((short)5), new BigDecimal(5)));
-		assertTrue(NumberUtil.valuesAreEquals(new Long(5), new Double(5)));
-		assertTrue(NumberUtil.valuesAreEquals(BigInteger.valueOf(42), new BigDecimal(42)));
-		assertTrue(NumberUtil.valuesAreEquals(new Integer(42), BigInteger.valueOf(42)));
-		assertFalse(NumberUtil.valuesAreEquals(BigInteger.valueOf(43), new BigDecimal(42)));
-		assertFalse(NumberUtil.valuesAreEquals(new Integer(42), BigInteger.valueOf(2)));
+		assertTrue(NumberUtil.valuesAreEqual(new Integer(42), new Long(42)));
+		assertTrue(NumberUtil.valuesAreEqual(new Short((short)5), new BigDecimal(5)));
+		assertTrue(NumberUtil.valuesAreEqual(new Long(5), new Double(5)));
+		assertTrue(NumberUtil.valuesAreEqual(BigInteger.valueOf(42), new BigDecimal(42)));
+		assertTrue(NumberUtil.valuesAreEqual(new Integer(42), BigInteger.valueOf(42)));
+		assertFalse(NumberUtil.valuesAreEqual(BigInteger.valueOf(43), new BigDecimal(42)));
+		assertFalse(NumberUtil.valuesAreEqual(new Integer(42), BigInteger.valueOf(2)));
 	}
 
 }

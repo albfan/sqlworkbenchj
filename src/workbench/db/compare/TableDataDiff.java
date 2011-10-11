@@ -373,7 +373,7 @@ public class TableDataDiff
 				if (cancelExecution) break;
 
 				RowData row = new RowData(cols);
-				row.read(rs, info);
+				row.read(rs, info, false);
 				packetRows.add(row);
 
 				if (packetRows.size() == chunkSize)
@@ -417,7 +417,7 @@ public class TableDataDiff
 			while (rs.next())
 			{
 				RowData r = RowDataFactory.createRowData(ri, toSync);
-				r.read(rs, ri);
+				r.read(rs, ri, false);
 				checkRows.add(r);
 				if (cancelExecution) break;
 			}

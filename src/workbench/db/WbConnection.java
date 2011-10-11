@@ -112,7 +112,7 @@ public class WbConnection
 	{
 		return TransactionChecker.Factory.createChecker(this);
 	}
-	
+
 	public ObjectNameFilter getCatalogFilter()
 	{
 		return profile == null ? null : profile.getCatalogFilter();
@@ -237,6 +237,12 @@ public class WbConnection
 	public ConnectionProfile getProfile()
 	{
 		return this.profile;
+	}
+
+	public boolean trimCharData()
+	{
+		if (profile == null) return false;
+		return this.profile.getTrimCharData();
 	}
 
 	void runPreDisconnectScript()

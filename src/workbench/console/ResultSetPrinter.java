@@ -122,7 +122,7 @@ public class ResultSetPrinter
 			int count = 0;
 			while (data.next())
 			{
-				row.read(data, info);
+				row.read(data, info, false);
 				printRow(pw, row, count);
 				count ++;
 			}

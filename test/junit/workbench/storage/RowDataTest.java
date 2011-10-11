@@ -60,17 +60,15 @@ public class RowDataTest
 			rs = stmt.executeQuery("select char_data, vchar from char_test");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
 			RowData row = new RowData(info);
-			row.setTrimCharData(true);
 			rs.next();
-			row.read(rs, info);
+			row.read(rs, info, true);
 			String v = (String)row.getValue(0);
 			assertEquals("1", v);
 			v = (String)row.getValue(1);
 			assertEquals("1    ", v);
 
-			row.setTrimCharData(false);
 			rs.next();
-			row.read(rs, info);
+			row.read(rs, info, false);
 			v = (String)row.getValue(0);
 			assertEquals("12   ", v);
 		}
@@ -135,7 +133,7 @@ public class RowDataTest
 			RowData row = new RowData(info);
 			row.setConverter(trim);
 			rs.next();
-			row.read(rs, info);
+			row.read(rs, info, false);
 			String v = (String)row.getValue(0);
 			assertEquals("1", v);
 			v = (String)row.getValue(1);

@@ -20,8 +20,10 @@ import workbench.resource.Settings;
 /**
  * A factory to create instances of RowData.
  * <br>
- * When creating a new instance a possible converter is automatically registered
- * with the created instance.
+ * When creating a new RowData instance a DataConverter is automatically registered
+ * if one is available for the current connection.
+ * <br/>
+ * This is done by re-using singleton converters to minimize the memory used during data retrieval.
  *
  * @author Thomas Kellerer
  */
@@ -44,18 +46,20 @@ public class RowDataFactory
 
 	/**
 	 * Creates instances of necessary DataConverters.
-	 *
+	 * <br/>
 	 * The following datatypes are currently supported:
 	 * <ul>
 	 * <li>For SQL Server's timestamp type</li>
 	 * <li>For Oracle: RAW and ROWID types</li>
 	 * </ul>
 	 *
-	 * @see workbench.resource.Settings#getFixSqlServerTimestampDisplay()
-	 * @see workbench.resource.Settings#getConvertOracleTypes()
-	 *
 	 * @param conn the connection for which to create the DataConverter
 	 * @return a suitable converter or null if nothing should be converted
+	 *
+	 * @see workbench.resource.Settings#getFixSqlServerTimestampDisplay()
+	 * @see workbench.resource.Settings#getConvertOracleTypes()
+	 * @see workbench.db.oracle.OracleDataConverter
+	 * @see workbench.db.mssql.SqlServerDataConverter
 	 */
 	public static DataConverter getConverterInstance(WbConnection conn)
 	{
@@ -64,13 +68,13 @@ public class RowDataFactory
 		DbMetadata meta = conn.getMetadata();
 		if (meta == null) return null;
 
-		if (meta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
-		{
-			return SqlServerDataConverter.getInstance();
-		}
 		if (meta.isOracle() && Settings.getInstance().getConvertOracleTypes())
 		{
 			return OracleDataConverter.getInstance();
+		}
+		if (meta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
+		{
+			return SqlServerDataConverter.getInstance();
 		}
 		return null;
 	}

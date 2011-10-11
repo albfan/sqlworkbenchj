@@ -1412,4 +1412,5 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);
 	}
+	
 }

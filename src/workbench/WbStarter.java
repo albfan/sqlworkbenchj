@@ -100,6 +100,7 @@ public class WbStarter
 				JButton b = new JButton("Close");
 				b.addActionListener(new ActionListener()
 				{
+					@Override
 					public void actionPerformed(ActionEvent e)
 					{
 						d.setVisible(false);

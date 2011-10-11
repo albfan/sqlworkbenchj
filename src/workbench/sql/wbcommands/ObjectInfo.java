@@ -70,6 +70,7 @@ public class ObjectInfo
 		tbl.adjustCase(connection);
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
+		boolean showSchema = false;
 		TableIdentifier toDescribe = null;
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
 		if (tbl.getSchema() == null && !searchPath.isEmpty())
@@ -87,18 +88,6 @@ public class ObjectInfo
 			toDescribe = connection.getMetadata().findObject(tbl, true, searchAllSchemas);
 		}
 
-		if (toDescribe == null)
-		{
-			TableIdentifier adjusted = tbl.createCopy();
-			adjusted.adjustCase(connection);
-			if (!adjusted.getTableName().equals(tbl.getTableName()))
-			{
-				// try again with the same case as entered by the user, but only if adjusting
-				// the case of the name changed anything. This is just a minor performance improvement
-				toDescribe = connection.getMetadata().findObject(tbl, false, searchAllSchemas);
-			}
-		}
-
 		DbSettings dbs = connection.getDbSettings();
 		TableIdentifier synonymTarget = null;
 		if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()))
@@ -108,11 +97,10 @@ public class ObjectInfo
 				synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
 				if (synonymTarget != null)
 				{
-					String msg =
-						"--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
-						toDescribe.getObjectExpression(connection) + " --> " +
-						synonymTarget.getTableExpression(connection) + " (" +
-						synonymTarget.getObjectType() + ")";
+					String msg = "--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
+							toDescribe.getTableExpression() + " --> " +
+							synonymTarget.getTableExpression() + " (" +
+							synonymTarget.getObjectType() + ")";
 
 					result.addMessage(msg + "\n");
 					result.setSourceCommand(msg);
@@ -132,9 +120,9 @@ public class ObjectInfo
 				SequenceReader seqReader = connection.getMetadata().getSequenceReader();
 				if (seqReader != null)
 				{
-					String schema = (toDescribe == null ? tbl.getSchema() : toDescribe.getSchema());
-					String name = (toDescribe == null ? tbl.getObjectName() : toDescribe.getObjectName());
-					String catalog = (toDescribe == null ? tbl.getCatalog() : toDescribe.getCatalog());
+					String schema = toDescribe.getSchema();
+					String name = toDescribe.getObjectName();
+					String catalog = toDescribe.getCatalog();
 					SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
 					if (seq != null)
 					{
@@ -247,13 +235,13 @@ public class ObjectInfo
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
-			displayName = synonymTarget.getObjectExpression(connection);
+			displayName = synonymTarget.getTableExpression();
 		}
 		else if (dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
-			displayName = def.getTable().getObjectExpression(connection);
+			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
 		}
 		else if (isExtended)
 		{
@@ -263,7 +251,7 @@ public class ObjectInfo
 
 		ColumnRemover remover = new ColumnRemover(details);
 		DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-		cols.setResultName(toDescribe.getObjectExpression(connection));
+		cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
 		result.setSuccess();
 		result.addDataStore(cols);
 

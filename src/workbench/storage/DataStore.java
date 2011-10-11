@@ -1185,8 +1185,7 @@ public class DataStore
 				}
 
 				RowData row = RowDataFactory.createRowData(cols, this.originalConnection);
-				row.setTrimCharData(trimCharData);
-				row.read(aResultSet, this.resultInfo);
+				row.read(aResultSet, this.resultInfo, trimCharData);
 				this.data.add(row);
 
 				if (maxRows > 0 && rowCount > maxRows) break;

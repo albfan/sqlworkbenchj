@@ -37,12 +37,12 @@ import workbench.util.SqlUtil;
  * </ol>
  *
  * For Views, the view definiton and the view source is returned.
- * 
+ *
  * @author  Thomas Kellerer
  * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
  * @see workbench.db.IndexReader#getTableIndexInformation(workbench.db.TableIdentifier)
  * @see workbench.db.TriggerReader#getTableTriggers(workbench.db.TableIdentifier)
- * @see workbench.db.ViewReader#getExtendedViewSource(workbench.db.TableIdentifier, boolean) 
+ * @see workbench.db.ViewReader#getExtendedViewSource(workbench.db.TableIdentifier, boolean)
  */
 public class WbDescribeObject
 	extends SqlCommand
@@ -51,7 +51,7 @@ public class WbDescribeObject
 	public static final String VERB_LONG = "DESCRIBE";
 	public static final String ARG_DEPEND = "dependencies";
 	public static final String ARG_OBJECT = "object";
-	
+
 	public WbDescribeObject()
 	{
 		super();

@@ -91,7 +91,7 @@ public class QueryCopySource
 		this.keepRunning = true;
 		this.regularStop = false;
 		Savepoint sp = null;
-		
+
 		try
 		{
 			if (this.sourceConnection.getDbSettings().selectStartsTransaction())
@@ -113,7 +113,7 @@ public class QueryCopySource
 				// more flexible when copying from Oracle
 				// to other systems
 				// That's why I'm reading the result set into a RowData object
-				currentRow.read(rs, info);
+				currentRow.read(rs, info, false);
 				if (!keepRunning) break;
 
 				try

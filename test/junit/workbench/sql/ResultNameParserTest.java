@@ -33,6 +33,10 @@ public class ResultNameParserTest
 		name = p.getResultName(sql);
 		assertEquals("all rows", name);
 
+		sql = "-- @WbResult all rows\nSELECT * FROM dummy;";
+		name = p.getResultName(sql);
+		assertEquals("all rows", name);
+
 		sql = "/* @wbresult result for my select\nanother line */\nSELECT * FROM dummy;";
 		name = p.getResultName(sql);
 		assertEquals("result for my select", name);

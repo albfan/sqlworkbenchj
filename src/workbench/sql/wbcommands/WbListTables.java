@@ -84,8 +84,7 @@ public class WbListTables extends SqlCommand
 			List<String> typeList = cmdLine.getListValue("types");
 			if (typeList.size() > 0)
 			{
-				types = new String[typeList.size()];
-				typeList.toArray(types);
+				types = StringUtil.toArray(typeList, true);
 			}
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);

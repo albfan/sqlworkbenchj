@@ -435,7 +435,6 @@ public class ResultInfo
 
 	public int getColumnType(int i)
 	{
-		if (i >= this.columns.length) return Types.OTHER;
 		return this.columns[i].getDataType();
 	}
 

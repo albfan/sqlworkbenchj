@@ -176,19 +176,13 @@ public class ClientSideTableSearcher
 			result.setResultName(table.getTableName());
 			result.setUpdateTableToBeUsed(table);
 
-			boolean trimCharData = false;
-			ConnectionProfile prof = this.connection.getProfile();
-			if (prof != null)
-			{
-				trimCharData = prof.getTrimCharData();
-			}
+			boolean trimCharData = this.connection.trimCharData();
 
 			while (rs.next())
 			{
 				if (cancelSearch) break;
 				RowData row = new RowData(info.getColumnCount());
-				row.setTrimCharData(trimCharData);
-				row.read(rs, info);
+				row.read(rs, info, trimCharData);
 				if (searcher.isSearchStringContained(row, info))
 				{
 					result.addRow(row);

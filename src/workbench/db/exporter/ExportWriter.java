@@ -153,7 +153,6 @@ public abstract class ExportWriter
 
 			updateProgress(rows);
 			RowData row = ds.getRow(i);
-			row.setTrimCharData(trimCharData);
 			writeRow(row, rows);
 			rows ++;
 		}
@@ -213,8 +212,7 @@ public abstract class ExportWriter
 
 			//RowData row = new RowData(colCount);
 			RowData row = RowDataFactory.createRowData(colCount, exporter.getConnection());
-			row.setTrimCharData(trimCharData);
-			row.read(rs, info);
+			row.read(rs, info, trimCharData);
 			writeRow(row, rows);
 			rows ++;
 		}

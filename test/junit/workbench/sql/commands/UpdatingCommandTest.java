@@ -90,7 +90,7 @@ public class UpdatingCommandTest
 			{
 				ResultInfo info = new ResultInfo(rs.getMetaData(), this.connection);
 				RowData data = new RowData(2);
-				data.read(rs, info);
+				data.read(rs, info, false);
 
 				Object value = data.getValue(0);
 				int nr = ((Integer)value).intValue();

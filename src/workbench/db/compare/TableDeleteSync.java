@@ -285,7 +285,7 @@ public class TableDeleteSync
 				{
 					monitor.setCurrentRow(rowNumber, -1);
 				}
-				row.read(rs, info);
+				row.read(rs, info, false);
 				packetRows.add(row);
 
 				if (packetRows.size() == chunkSize)
@@ -344,7 +344,7 @@ public class TableDeleteSync
 			{
 				if (cancelExecution) break;
 				RowData r = RowDataFactory.createRowData(ri, reference);
-				r.read(rs, ri);
+				r.read(rs, ri, false);
 				checkRows.add(r);
 			}
 

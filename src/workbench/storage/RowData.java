@@ -31,23 +31,22 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *	A class to hold the data for a single row retrieved from the database.
- *	It will also save the originally retrieved information in case the
- *  data is changed.
- * <br><<br/>
- *
- *	A row can be in three different status:<br/>
- *  <br/>
- *	NEW          - the row has not been retrieved from the database (i.e. was created on the client)<br/>
- *  MODIFIED     - the row has been retrieved but has been changed since then<br/>
- *  NOT_MODIFIED - The row has not been changed since it has been retrieved<br/>
- *
+ * A class to hold the data for a single row retrieved from the database.
+ * <br/>
+ * It will also save the originally retrieved information in case the data is changed. <br/>
+ * <br/>
+ * A row can be in one of three different statuses:<br/>
+ * <ul>
+ * <li><tt>NEW</tt> - the row has not been retrieved from the database (i.e. was created on the client)</li>
+ * <li><tt>MODIFIED</tt> - the row has been retrieved but has been changed since then</li>
+ * <li><tt>NOT_MODIFIED</tt> - The row has not been changed since it has been retrieved</li>
+ * </ul>
  * @author Thomas Kellerer
  */
 public class RowData
 {
 	/**
-	 * The row has not been modified since retrieval
+	 * The row has not been modified since retrieval.
 	 */
 	public static final int NOT_MODIFIED = 0;
 
@@ -61,19 +60,19 @@ public class RowData
 	 */
 	public static final int NEW = 2;
 
-	private Object NO_CHANGE_MARKER = new Object();
+	private static final Object NO_CHANGE_MARKER = new Object();
 
 	private int status = NOT_MODIFIED;
 
 	/**
+	 * Mark this row have beeing sent to the database.
+	 *
 	 * This flag will be used by the {@link DataStore}
 	 * to store the information for which rows the SQL statements
 	 * have been sent to the database during the update process
 	 * @see #setDmlSent(boolean)
 	 */
 	private boolean dmlSent;
-
-	private boolean trimCharData;
 
 	private Object[] colData;
 	private Object[] originalData;
@@ -96,11 +95,6 @@ public class RowData
 		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 	}
 
-	public void setTrimCharData(boolean flag)
-	{
-		this.trimCharData = flag;
-	}
-
 	public Object[] getData()
 	{
 		return this.colData;
@@ -110,15 +104,11 @@ public class RowData
 	 * Define a converter that may convert the data read from the database
 	 * to e.g. a more readable format.
 	 * <br/>
-	 * Currently only one converter is used to make SQL Server's "timestamp" data type (which
-	 * is some kind of binary data but <b>not</b> a timestamp) look similar to the display in
-	 * Microsoft's tools.
-	 * <br/><br/>
 	 * As potentially a large number of rows can be created the registered converter
 	 * should be a singleton so that the memory used for retrieving the data is not increased
 	 * too much.
 	 * <br/>
-	 * @param conv the converte to be used.
+	 * @param conv the converter to be used.
 	 *
 	 * @see workbench.db.mssql.SqlServerDataConverter
 	 * @see workbench.db.oracle.OracleDataConverter
@@ -147,7 +137,6 @@ public class RowData
 	 * <br/>
 	 * It is assumed that ResultSet.next() has already been called on the ResultSet.
 	 * <br/>
-	 *
 	 * BLOBs (and similar datatypes) will be read into a byte array. CLOBs (and similar datatypes)
 	 * will be converted into a String object.
 	 * <br/>
@@ -155,16 +144,20 @@ public class RowData
 	 * timestamp and date to work around issues with the Oracle driver.
 	 * <br/>
 	 * If the driver returns a java.sql.Struct, this will be converted into a String
-	 * using SqlUtil.getStructDisplay()
+	 * using {@linkplain StructConverter#getStructDisplay(java.sql.Struct)}
 	 * <br/>
 	 * After retrieving the value from the ResultSet it is passed to a registered DataConverter.
 	 * If a converter is registered, no further processing will be done with the column's value
 	 * <br/>
 	 * The status of this RowData will be reset (NOT_MODIFIED) after the data has been retrieved.
 	 *
+	 * @param rs the ResultSet that is positioned to the correct row
+	 * @param info the resultInfo for the data currently retrieved
+	 * @param trimCharData if true, values for Types.CHAR columns will be trimmed.
+	 *
 	 * @see #setConverter(workbench.storage.DataConverter)
 	 */
-	public void read(ResultSet rs, ResultInfo info)
+	public void read(ResultSet rs, ResultInfo info, boolean trimCharData)
 		throws SQLException
 	{
 		int colCount = this.colData.length;
@@ -174,7 +167,7 @@ public class RowData
 		boolean useGetStringForBit = info.useGetStringForBit();
 		boolean useGetXML = info.useGetXML();
 
-		Object value = null;
+		Object value;
 
 		for (int i=0; i < colCount; i++)
 		{
@@ -193,15 +186,19 @@ public class RowData
 
 			try
 			{
-				if (type == java.sql.Types.TIMESTAMP)
+				if (type == Types.VARCHAR || type == Types.NVARCHAR)
+				{
+					value = rs.getString(i+1);
+				}
+				else if (type == Types.TIMESTAMP)
 				{
 					value = rs.getTimestamp(i+1);
 				}
-				else if (type == java.sql.Types.DATE)
+				else if (type == Types.DATE)
 				{
 					value = rs.getDate(i+1);
 				}
-				else if (useGetStringForBit && type == java.sql.Types.BIT)
+				else if (useGetStringForBit && type == Types.BIT)
 				{
 					value = rs.getString(i + 1);
 				}
@@ -248,7 +245,7 @@ public class RowData
 						}
 					}
 				}
-				else if (SqlUtil.isXMLType(type))
+				else if (type == Types.SQLXML)
 				{
 					value = readXML(rs, i+1, useGetXML);
 				}
@@ -263,10 +260,10 @@ public class RowData
 						value = readCharacterStream(rs, i + 1);
 					}
 				}
-				else
+				else if (type == Types.CHAR || type == Types.NCHAR)
 				{
-					value = rs.getObject(i + 1);
-					if (trimCharData && type == Types.CHAR && value != null)
+					value = rs.getString(i+1);
+					if (trimCharData && value != null)
 					{
 						try
 						{
@@ -277,6 +274,10 @@ public class RowData
 							LogMgr.logError("RowData.read()", "Error trimming CHAR data", th);
 						}
 					}
+				}
+				else
+				{
+					value = rs.getObject(i + 1);
 				}
 			}
 			catch (SQLException e)
@@ -346,8 +347,10 @@ public class RowData
 		return value;
 	}
 	/**
-	 *	Create a deep copy of this object.
-	 *	The status of the new row will be <tt>NEW</tt>
+	 * Create a deep copy of this object.
+	 * <br/>
+	 * The status of the new row will be <tt>NEW</tt>, which means that the "original" data will
+	 * be lost after creating the copy.
 	 */
 	public RowData createCopy()
 	{
@@ -424,7 +427,9 @@ public class RowData
 
 	/**
 	 * Returns the value from the specified column as it was retrieved from
-	 * the database. If the column was not modified or this row is new
+	 * the database.
+	 * <br/>
+	 * If the column was not modified or this row is new
 	 * then the current value is returned.
 	 */
 	public Object getOriginalValue(int aColumn)
@@ -439,7 +444,7 @@ public class RowData
 
 	/**
 	 * Restore the value of a specific column to its original value.
-	 *
+	 * <br/>
 	 * If the column has not been changed, nothing happens
 	 *
 	 * @param column the column to restore
@@ -454,7 +459,10 @@ public class RowData
 	}
 
 	/**
-	 * Restore the values read from the database
+	 * Restore the values to the ones initially retrieved from the database.
+	 * <br/>
+	 * After calling this, the status of this row will be <tt>NOT_MODIFIED</tt>
+	 *
 	 * @return true if there were original values
 	 *         false if nothing was restored
 	 */
@@ -491,7 +499,7 @@ public class RowData
 
 	/**
 	 * Returns true if the indicated column has been modified since the
-	 * initial retrieve (i.e. since the last time resetStatus() was called
+	 * initial retrieve. (i.e. since the last time resetStatus() was called
 	 *
 	 */
 	public boolean isColumnModified(int aColumn)
@@ -628,6 +636,23 @@ public class RowData
 		return true;
 	}
 
+	/**
+	 * Compares the two values.
+	 * <br/>
+	 * Byte arrays are compared using Arrays.equals.
+	 * Numbers are compared using {@link NumberUtil#valuesAreEqual(java.lang.Number, java.lang.Number) }
+	 * which "normalized" that object's classes to compare the real values.
+	 * <br/>
+	 * For all other values, the equals() method is used.
+	 * <br/>
+	 *
+	 * @param one one value
+	 * @param other the other value
+	 *
+	 * @return true if they are equal
+	 *
+	 * @see NumberUtil#valuesAreEqual(java.lang.Number, java.lang.Number)
+	 */
 	public static boolean objectsAreEqual(Object one, Object other)
 	{
 		if (one == null && other == null) return true;
@@ -640,7 +665,7 @@ public class RowData
 		}
 		if (one instanceof Number && other instanceof Number)
 		{
-			return NumberUtil.valuesAreEquals((Number)one, (Number)other);
+			return NumberUtil.valuesAreEqual((Number)one, (Number)other);
 		}
 		return one.equals(other);
 	}

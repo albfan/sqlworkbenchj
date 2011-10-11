@@ -30,13 +30,16 @@ public class NumberUtil
 	 * that are "equal" might otherwise not be considered equal e.g. an ID=42 in Oracle
 	 * stored as NUMBER(38) would not be equal to an ID=42 stored in an integer column
 	 * in Postgres as both drivers use a different representation class.
+	 * <br/>
+	 * The comparison is done by converting both values to BigDecimal and then using equals()
+	 * on those instances.
 	 *
-	 * @param one
-	 * @param other
+	 * @param one   the first value
+	 * @param other the second value
 	 *
 	 * @return true, if both numbers are equals
 	 */
-	public static boolean valuesAreEquals(Number one, Number other)
+	public static boolean valuesAreEqual(Number one, Number other)
 	{
 		if (one.getClass() == other.getClass())
 		{

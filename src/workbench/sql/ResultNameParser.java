@@ -19,13 +19,13 @@ import workbench.util.StringUtil;
 /**
  * A class to extract a "result name" from a statement's comment, similar
  * to Javadoc tags.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ResultNameParser
 {
 	public final String resultKeyword = "@wbresult";
-	
+
 	public ResultNameParser()
 	{
 	}
@@ -41,7 +41,7 @@ public class ResultNameParser
 
 			String comment = token.getText();
 			comment = stripCommentChars(comment.trim());
-			int pos = comment.indexOf(resultKeyword);
+			int pos = comment.toLowerCase().indexOf(resultKeyword);
 			if (pos == -1) return null;
 
 			pos += resultKeyword.length();

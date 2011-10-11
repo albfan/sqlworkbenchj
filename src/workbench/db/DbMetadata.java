@@ -148,8 +148,8 @@ public class DbMetadata
 	private String baseTableTypeName;
 
 	private Set<String> tableTypesList;
-	private String[] tableTypes;
-	private String[] tableTypesSelectable;
+	private String[] tableTypesArray;
+	private String[] selectableTypes;
 	private Set<String> schemasToIgnore;
 	private Set<String> catalogsToIgnore;
 
@@ -399,9 +399,9 @@ public class DbMetadata
 		tableTypesList = CollectionUtil.caseInsensitiveSet();
 		tableTypesList.addAll(ttypes);
 
-		tableTypes = tableTypesList.toArray(new String[]{});
+		tableTypesArray = StringUtil.toArray(tableTypesList, true);
 
-		// The tableTypesSelectable array will be used
+		// The selectableTypes array will be used
 		// to fill the completion cache. In that case
 		// we do not want system tables included (which
 		// is done for the objectsWithData as that
@@ -421,7 +421,7 @@ public class DbMetadata
 			}
 		}
 
-		tableTypesSelectable = StringUtil.toArray(types, true);
+		selectableTypes = StringUtil.toArray(types, true);
 
 		String pattern = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectinto.pattern", null);
 		if (pattern != null)
@@ -449,11 +449,6 @@ public class DbMetadata
 			LogMgr.logDebug("DbMetadata.<init>", "Could not read SQL keywords from driver", sql);
 		}
 
-	}
-
-	public String[] getSelectableTypes()
-	{
-		return tableTypesSelectable;
 	}
 
 	public ProcedureReader getProcedureReader()
@@ -492,7 +487,7 @@ public class DbMetadata
 
 	public String[] getTableTypesArray()
 	{
-		return tableTypesList.toArray(EMPTY_STRING_ARRAY);
+		return Arrays.copyOf(tableTypesArray, tableTypesArray.length);
 	}
 
 	public String[] getTablesAndViewTypes()
@@ -1678,7 +1673,7 @@ public class DbMetadata
 	 */
 	public boolean tableExists(TableIdentifier aTable)
 	{
-		return objectExists(aTable, tableTypes);
+		return objectExists(aTable, tableTypesArray);
 	}
 
 	public boolean objectExists(TableIdentifier aTable, String type)
@@ -1698,17 +1693,17 @@ public class DbMetadata
 
 	public TableIdentifier findSelectableObject(TableIdentifier tbl)
 	{
-		return findTable(tbl, tableTypesSelectable, false);
+		return findTable(tbl, selectableTypes, false);
 	}
 
 	public TableIdentifier findTable(TableIdentifier tbl, boolean searchAllSchemas)
 	{
-		return findTable(tbl, tableTypes, searchAllSchemas);
+		return findTable(tbl, tableTypesArray, searchAllSchemas);
 	}
 
 	public TableIdentifier findTable(TableIdentifier tbl)
 	{
-		return findTable(tbl, tableTypes, false);
+		return findTable(tbl, tableTypesArray, false);
 	}
 
 	private TableIdentifier findTable(TableIdentifier tbl, String[] types, boolean searchAllSchemas)
@@ -2211,7 +2206,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getObjectList(null, getCurrentSchema(), tableTypes);
+		return getObjectList(null, getCurrentSchema(), tableTypesArray);
 	}
 
 	public List<TableIdentifier> getObjectList(String schema, String[] types)
@@ -2224,7 +2219,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
-		return getObjectList(table, schema, tableTypes);
+		return getObjectList(table, schema, tableTypesArray);
 	}
 
 	/**
@@ -2239,7 +2234,7 @@ public class DbMetadata
 	public List<TableIdentifier> getSelectableObjectsList(String name, String schema)
 		throws SQLException
 	{
-		return getObjectList(name, schema, tableTypesSelectable);
+		return getObjectList(name, schema, selectableTypes);
 	}
 
 	/**
