@@ -89,6 +89,7 @@ public class InformixSequenceReader
 		return result;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
 		String sql = baseQuery;
@@ -191,7 +192,7 @@ public class InformixSequenceReader
 		if (doFormat) result.append(nl + "      ");
 
 		boolean hasMinValue = minvalue != null && minvalue.longValue() != 1;
-		
+
 		if (hasMinValue)
 		{
 			result.append(" MINVALUE ");
@@ -226,5 +227,5 @@ public class InformixSequenceReader
 
 		return result;
 	}
-	
+
 }

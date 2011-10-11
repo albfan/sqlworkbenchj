@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  * A ProcedureReader for MySQL
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class MySqlProcedureReader
@@ -36,11 +36,12 @@ public class MySqlProcedureReader
 		super(con);
 	}
 
+	@Override
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StringBuilder source = new StringBuilder(150);
-		
-		String sql = 
+
+		String sql =
 			"SELECT routine_type, dtd_identifier \n" +
 			"FROM information_schema.routines \n" +
 			" WHERE routine_schema like ? \n" +
@@ -50,7 +51,7 @@ public class MySqlProcedureReader
 		{
 			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" + SqlUtil.replaceParameters(sql, (aSchema == null ? "%" : aSchema), aProcname));
 		}
-						 
+
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -66,7 +67,7 @@ public class MySqlProcedureReader
 			{
 				proctype = rs.getString(1);
 				returntype = rs.getString(2);
-			}		
+			}
 			source.append("DROP ");
 			source.append(proctype);
 			source.append(' ');
@@ -81,7 +82,7 @@ public class MySqlProcedureReader
 			source.append(' ');
 			source.append(aProcname);
 			source.append(" (");
-			
+
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			int count = ds.getRowCount();
 			int added = 0;

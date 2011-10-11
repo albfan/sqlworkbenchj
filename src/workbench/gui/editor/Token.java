@@ -35,7 +35,7 @@ public class Token
 	 */
 	public static final byte COMMENT2 = 2;
 
-	
+
 	/**
 	 * Literal 1 token id. This can be used to mark a string
 	 * literal (eg, C mode uses this to mark "..." literals)
@@ -106,7 +106,7 @@ public class Token
 	public static final byte INTERNAL_LAST = 126;
 
 	private char pendingChar = 0;
-	
+
 	/**
 	 * The length of this token.
 	 */
@@ -137,17 +137,17 @@ public class Token
 	{
 		return isLiteral(this.id);
 	}
-	
+
 	public boolean isMultiline()
 	{
 		return this.pendingChar != 0;
 	}
-	
+
 	public void setPendingLiteralChar(char c)
 	{
 		this.pendingChar = c;
 	}
-	
+
 	public char getPendingLiteralChar()
 	{
 		return this.pendingChar;
@@ -157,12 +157,12 @@ public class Token
 	{
 		return (tokenId == LITERAL1 || tokenId == LITERAL2);
 	}
-	
+
 	public String typeString()
 	{
 		return typeString(this.id);
 	}
-	
+
 	public static String typeString(int id)
 	{
 		String type = "NULL";
@@ -201,10 +201,11 @@ public class Token
 		}
 		return type;
 	}
-	
+
 	/**
 	 * Returns a string representation of this token.
 	 */
+	@Override
 	public String toString()
 	{
 		return "[type=" + typeString() + ",length=" + length + "]";

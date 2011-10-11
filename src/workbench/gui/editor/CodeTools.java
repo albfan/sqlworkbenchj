@@ -19,10 +19,10 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class CodeTools 
+public class CodeTools
 {
 	private JEditTextArea editor;
-	
+
 	public CodeTools(JEditTextArea client)
 	{
 		this.editor = client;
@@ -59,7 +59,7 @@ public class CodeTools
 		int count = (endline - startline + 1);
 		final StringBuilder newText = new StringBuilder(count * 80);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+
 		try
 		{
 			// make sure at least one character from the last line is selected
@@ -72,7 +72,7 @@ public class CodeTools
 		{
 			// ignore it
 		}
-		
+
 		int maxElementsPerLine = 5;
 		if (quoteElements)
 		{
@@ -83,14 +83,14 @@ public class CodeTools
 			maxElementsPerLine = Settings.getInstance().getMaxNumInListElements();
 		}
 		int elements = 0;
-		
+
 		boolean newLinePending = false;
-		
+
 		for (int i=startline; i <= endline; i++)
 		{
 			String line = editor.getLineText(i);
 			if (StringUtil.isEmptyString(line)) continue;
-			
+
 			if (i == startline)
 			{
 				newText.append('(');
@@ -111,7 +111,7 @@ public class CodeTools
 			elements ++;
 			if (i < endline)
 			{
-				if ((elements & maxElementsPerLine) == maxElementsPerLine) 
+				if ((elements & maxElementsPerLine) == maxElementsPerLine)
 				{
 					newLinePending = true;
 					elements = 0;
@@ -122,11 +122,12 @@ public class CodeTools
 		newText.append(nl);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				editor.setSelectedText(newText.toString());
 			}
 		});
 	}
-	
+
 }

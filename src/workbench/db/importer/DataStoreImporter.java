@@ -69,38 +69,45 @@ public class DataStoreImporter
 		}
 	}
 
+	@Override
 	public void setTableList(List<TableIdentifier> targetTables)
 	{
 		// Nothing to do as only one table can be imported
 	}
 
+	@Override
 	public void deleteTargetTables()
 		throws SQLException
 	{
 		// Nothing to do as only one table can be imported
 	}
 
+	@Override
 	public void beginMultiTable()
 		throws SQLException
 	{
 		// Nothing to do as only one table can be imported
 	}
 
+	@Override
 	public void endMultiTable()
 	{
 		// Nothing to do as only one table can be imported
 	}
 
+	@Override
 	public boolean getCreateTarget()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean shouldProcessNextRow()
 	{
 		return true;
 	}
 
+	@Override
 	public void nextRowSkipped()
 	{
 	}
@@ -154,6 +161,7 @@ public class DataStoreImporter
 		return this.source.getMessages();
 	}
 
+	@Override
 	public void processRow(Object[] row) throws SQLException
 	{
 		RowData data = new RowData(row.length);
@@ -166,19 +174,23 @@ public class DataStoreImporter
 		if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);
 	}
 
+	@Override
 	public void recordRejected(String record, long importRow, Throwable error)
 	{
 
 	}
 
+	@Override
 	public void setTableCount(int total)
 	{
 	}
 
+	@Override
 	public void setCurrentTable(int current)
 	{
 	}
 
+	@Override
 	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
 		throws SQLException
 	{
@@ -189,29 +201,35 @@ public class DataStoreImporter
 		}
 	}
 
+	@Override
 	public void tableImportFinished()
 		throws SQLException
 	{
 
 	}
 
+	@Override
 	public void importFinished()
 	{
 	}
 
+	@Override
 	public void importCancelled()
 	{
 	}
 
+	@Override
 	public void tableImportError()
 	{
 	}
 
+	@Override
 	public void cancelExecution()
 	{
 		this.source.cancel();
 	}
 
+	@Override
 	public boolean confirmCancel()
 	{
 		return true;

@@ -54,7 +54,7 @@ public class SyntaxStyle
 		lastStyledFont = null;
 		fontMetrics = null;
 	}
-	
+
 	/**
 	 * Returns the color specified in this style.
 	 */
@@ -133,6 +133,7 @@ public class SyntaxStyle
 	/**
 	 * Returns a string representation of this object.
 	 */
+	@Override
 	public String toString()
 	{
 		return getClass().getName() + "[color=" + color + (italic ? ",italic" : "") + (bold ? ",bold" : "") + "]";

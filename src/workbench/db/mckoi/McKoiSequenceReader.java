@@ -39,6 +39,7 @@ public class McKoiSequenceReader
 		this.connection = con;
 	}
 
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
@@ -52,6 +53,7 @@ public class McKoiSequenceReader
 		return result;
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
@@ -60,6 +62,7 @@ public class McKoiSequenceReader
 		return def;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		String sql = "SELECT si.name, " +
@@ -122,6 +125,7 @@ public class McKoiSequenceReader
 		return result;
 	}
 
+	@Override
 	public CharSequence getSequenceSource(String catalog, String owner, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
@@ -129,6 +133,7 @@ public class McKoiSequenceReader
 		return def.getSource();
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		StringBuilder result = new StringBuilder(200);

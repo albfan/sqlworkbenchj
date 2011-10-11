@@ -80,6 +80,7 @@ public class SearchAndReplace
 	 * @return -1 if nothing was found,
 	 *            the position of the found text otherwise
 	 */
+	@Override
 	public int find()
 	{
 		boolean showDialog = true;
@@ -118,6 +119,7 @@ public class SearchAndReplace
 		return pos;
 	}
 
+	@Override
 	public int findNext()
 	{
 		if (this.lastSearchPattern == null) return -1;
@@ -142,12 +144,14 @@ public class SearchAndReplace
 		return this.lastSearchPos;
 	}
 
+	@Override
 	public int findFirst(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		int pos = this.findText(aValue, ignoreCase, wholeWord, useRegex);
 		return pos;
 	}
 
+	@Override
 	public void replace()
 	{
 		if (this.replacePanel == null)
@@ -160,6 +164,7 @@ public class SearchAndReplace
 	/**
 	 *	Find and replace the next occurance of the current search string
 	 */
+	@Override
 	public boolean replaceNext(String aReplacement, boolean useRegex)
 	{
 		try
@@ -183,6 +188,7 @@ public class SearchAndReplace
 		}
 	}
 
+	@Override
 	public boolean isTextSelected()
 	{
 		int selStart = this.editor.getSelectionStart();
@@ -208,6 +214,7 @@ public class SearchAndReplace
 		return fixed;
 	}
 
+	@Override
 	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String old = null;
@@ -253,6 +260,7 @@ public class SearchAndReplace
 		return 0;
 	}
 
+	@Override
 	public boolean replaceCurrent(String replacement, boolean useRegex)
 	{
 		if (this.searchPatternMatchesSelectedText())

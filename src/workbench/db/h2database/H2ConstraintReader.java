@@ -17,7 +17,7 @@ import workbench.db.AbstractConstraintReader;
 
 /**
  * Constraint reader for <a href="http://www.h2database.com">H2 Database</a>
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class H2ConstraintReader
@@ -32,22 +32,26 @@ public class H2ConstraintReader
 		"and table_schema = ?";
 
 	private Pattern systemNamePattern = Pattern.compile("^(CONSTRAINT_[0-9A-F][0-9A-F])");
-	
+
+	@Override
 	public int getIndexForSchemaParameter()
 	{
 		return 2;
 	}
 
+	@Override
 	public int getIndexForTableNameParameter()
 	{
 		return 1;
 	}
 
+	@Override
 	public String getColumnConstraintSql()
 	{
 		return null;
 	}
 
+	@Override
 	public String getTableConstraintSql()
 	{
 		return this.TABLE_SQL;

@@ -29,12 +29,12 @@ public class ColumnReference
 	private ForeignKeyDefinition fkDefinition;
 	private String foreignColumn;
 	private TagWriter tagWriter = new TagWriter();
-	
+
 	public ColumnReference(ForeignKeyDefinition fk)
 	{
 		this.fkDefinition = fk;
 	}
-	
+
 	public String getFkName()
 	{
 		return fkDefinition.getFkName();
@@ -49,12 +49,12 @@ public class ColumnReference
 	{
 		return fkDefinition.getForeignTable();
 	}
-	
+
 	public String getDeleteRule()
 	{
 		return fkDefinition.getDeleteRule();
 	}
-	
+
 	public String getUpdateRule()
 	{
 		return fkDefinition.getUpdateRule();
@@ -64,17 +64,18 @@ public class ColumnReference
 	{
 		this.foreignColumn = col;
 	}
-	
+
 	public String getForeignColumn()
 	{
 		return foreignColumn;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return this.getFkName();
 	}
-	
+
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer result = new StrBuffer(250);
@@ -84,9 +85,9 @@ public class ColumnReference
 		result.append('\n');
 
 		result.append(getInnerXml(myindent));
-		
+
 		tagWriter.appendCloseTag(result, indent, TAG_REFERENCE);
-		
+
 		return result;
 	}
 
@@ -110,7 +111,8 @@ public class ColumnReference
 		hash = 83 * hash + (this.foreignColumn != null ? this.foreignColumn.hashCode() : 0);
 		return hash;
 	}
-	
+
+	@Override
 	public boolean equals(Object o)
 	{
 		if (o == null) return false;
@@ -122,12 +124,12 @@ public class ColumnReference
 	{
 		return this.foreignColumn.equalsIgnoreCase(ref.foreignColumn);
 	}
-	
+
 	public boolean isFkNameEqual(ColumnReference ref)
 	{
 		return this.fkDefinition.isNameEqual(ref.fkDefinition);
 	}
-	
+
 	public boolean isFkDefinitionEqual(ColumnReference ref)
 	{
 		return this.fkDefinition.isDefinitionEqual(ref.fkDefinition);

@@ -64,41 +64,49 @@ public class PostgresRule
 		return ruleTable;
 	}
 
+	@Override
 	public String getCatalog()
 	{
 		return catalog;
 	}
 
+	@Override
 	public String getSchema()
 	{
 		return schema;
 	}
 
+	@Override
 	public String getObjectType()
 	{
 		return objectType;
 	}
 
+	@Override
 	public String getObjectName()
 	{
 		return ruleName;
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return ruleName;
 	}
 
+	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(null, catalog, schema, ruleName);
 	}
 
+	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
 		return ruleName;
 	}
 
+	@Override
 	public String toString()
 	{
 		return getObjectName();
@@ -114,6 +122,7 @@ public class PostgresRule
 		return source;
 	}
 
+	@Override
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -139,16 +148,19 @@ public class PostgresRule
 		return sql.toString();
 	}
 
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);
 	}
 
+	@Override
 	public String getComment()
 	{
 		return remarks;
 	}
 
+	@Override
 	public void setComment(String cmt)
 	{
 		remarks = cmt;

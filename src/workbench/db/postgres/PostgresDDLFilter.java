@@ -41,6 +41,7 @@ public class PostgresDDLFilter
 	 * This class is only used when the driver is version 8.2 or earlier.
 	 * Newer drivers can handle dollar quoting without problems.
 	 */
+	@Override
 	public String adjustDDL(String sql)
 	{
 		int bodyStart = -1;

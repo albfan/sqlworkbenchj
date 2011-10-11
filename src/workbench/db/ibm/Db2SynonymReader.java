@@ -25,25 +25,27 @@ import workbench.util.SqlUtil;
 
 /**
  * A class to retrieve synonym definitions from a DB2 database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class Db2SynonymReader
 	implements SynonymReader
 {
-	
+
 	/**
-	 * Returns an empty list, as the standard JDBC driver 
+	 * Returns an empty list, as the standard JDBC driver
 	 * alread returns synonyms in the getObjects() method.
-	 * 
+	 *
 	 * @return an empty list
 	 */
+	@Override
 	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
 		return Collections.emptyList();
 	}
 
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -101,6 +103,7 @@ public class Db2SynonymReader
 		return result;
 	}
 
+	@Override
 	public String getSynonymSource(WbConnection con, String synonymSchema, String synonymName)
 		throws SQLException
 	{
@@ -113,7 +116,7 @@ public class Db2SynonymReader
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);
-		
+
 		return result.toString();
 	}
 

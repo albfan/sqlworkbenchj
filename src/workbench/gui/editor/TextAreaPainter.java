@@ -301,10 +301,11 @@ public class TextAreaPainter
 
 	/**
 	 * Enables or disables bracket highlighting.
-	 * When bracket highlighting is enabled, the bracket matching the
-	 * one before the caret (if any) is highlighted.
-	 * @param bracketHighlight True if bracket highlighting should be
-	 * enabled, false otherwise
+	 *
+	 * When bracket highlighting is enabled, the bracket matching the one before
+	 * the caret (if any) is highlighted.
+	 *
+	 * @param bracketHighlight True if bracket highlighting should be enabled, false otherwise
 	 */
 	public final void setBracketHighlightEnabled(boolean bracketHighlight)
 	{
@@ -325,8 +326,10 @@ public class TextAreaPainter
 	}
 
 	/**
-	 * Sets the font for this component. This is overridden to update the
-	 * cached font metrics and to recalculate which lines are visible.
+	 * Sets the font for this component.
+	 *
+	 * This is overridden to update the cached font metrics and to recalculate which lines are visible.
+	 * 
 	 * @param font The font
 	 */
 	@Override

@@ -118,6 +118,7 @@ public class H2ConstantReader
 		return result;
 	}
 
+	@Override
 	public H2Constant getObjectDefinition(WbConnection connection, DbObject object)
 	{
 		List<H2Constant> constants = getConstantsList(connection, object.getSchema(), object.getObjectName());
@@ -144,6 +145,7 @@ public class H2ConstantReader
 		return result.toString();
 	}
 
+	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("CONSTANT", requestedTypes)) return false;
@@ -163,11 +165,13 @@ public class H2ConstantReader
 		return true;
 	}
 
+	@Override
 	public boolean handlesType(String type)
 	{
 		return StringUtil.equalStringIgnoreCase("CONSTANT", type);
 	}
 
+	@Override
 	public boolean handlesType(String[] types)
 	{
 		if (types == null) return true;
@@ -178,6 +182,7 @@ public class H2ConstantReader
 		return false;
 	}
 
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -199,11 +204,13 @@ public class H2ConstantReader
 		return result;
 	}
 
+	@Override
 	public List<String> supportedTypes()
 	{
 		return Collections.singletonList("CONSTANT");
 	}
 
+	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		return getConstantSource(getObjectDefinition(con, object));

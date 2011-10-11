@@ -83,7 +83,7 @@ public class PostgresRuleReader
 
 		if (StringUtil.isNonBlank(ruleSchemaPattern))
 		{
-			if (!whereAdded) 
+			if (!whereAdded)
 			{
 				sql.append("\n WHERE ");
 				whereAdded = true;
@@ -204,7 +204,8 @@ public class PostgresRuleReader
 		}
 		return null;
 	}
-	
+
+	@Override
 	public PostgresRule getObjectDefinition(WbConnection connection, DbObject object)
 	{
 		List<PostgresRule> rules = getRuleList(connection, object.getSchema(), object.getObjectName(), null);
@@ -212,6 +213,7 @@ public class PostgresRuleReader
 		return rules.get(0);
 	}
 
+	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objectNamePattern, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("RULE", requestedTypes)) return false;
@@ -231,11 +233,13 @@ public class PostgresRuleReader
 		return true;
 	}
 
+	@Override
 	public boolean handlesType(String type)
 	{
 		return StringUtil.equalStringIgnoreCase("RULE", type);
 	}
 
+	@Override
 	public boolean handlesType(String[] types)
 	{
 		if (types == null) return true;
@@ -246,6 +250,7 @@ public class PostgresRuleReader
 		return false;
 	}
 
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -267,11 +272,13 @@ public class PostgresRuleReader
 		return result;
 	}
 
+	@Override
 	public List<String> supportedTypes()
 	{
 		return CollectionUtil.arrayList("RULE");
 	}
 
+	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		PostgresRule rule = getObjectDefinition(con, object);

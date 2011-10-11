@@ -45,6 +45,7 @@ public class H2SequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
+	@Override
 	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
@@ -52,6 +53,7 @@ public class H2SequenceReader
 		return def.getSource();
 	}
 
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
@@ -65,6 +67,7 @@ public class H2SequenceReader
 		return result;
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
     DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
@@ -94,6 +97,7 @@ public class H2SequenceReader
 		return result;
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
@@ -131,6 +135,7 @@ public class H2SequenceReader
 		return;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		Statement stmt = null;

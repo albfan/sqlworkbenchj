@@ -27,6 +27,7 @@ public class RegexModifier
 {
 	public Map<ColumnIdentifier, RegexDef> limits = new HashMap<ColumnIdentifier, RegexDef>();
 
+	@Override
 	public int getSize()
 	{
 		return limits.size();
@@ -47,6 +48,7 @@ public class RegexModifier
 		this.limits.put(col.createCopy(), def);
 	}
 
+	@Override
 	public String modifyValue(ColumnIdentifier col, String value)
 	{
 		if (value == null) return null;

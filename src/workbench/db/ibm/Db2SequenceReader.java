@@ -44,6 +44,7 @@ public class Db2SequenceReader
 		dbid = useId;
 	}
 
+	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
@@ -56,6 +57,7 @@ public class Db2SequenceReader
 		return result;
 	}
 
+	@Override
 	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
@@ -69,7 +71,7 @@ public class Db2SequenceReader
 		if (o == null) return null;
 		return o.toString();
 	}
-	
+
 	private Object getDSValue(DataStore ds, int row, String ... colNames)
 	{
 		if (colNames == null) return null;
@@ -82,7 +84,7 @@ public class Db2SequenceReader
 		}
 		return null;
 	}
-	
+
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
 		String name = getDSValueString(ds, row, "SEQNAME", "NAME", "SEQUENCE_NAME");
@@ -103,17 +105,18 @@ public class Db2SequenceReader
 		{
 			result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
 		}
-		
+
 		if (ds.getColumnIndex("DATA_TYPE") > -1)
 		{
 			result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		}
-		
+
 		result.setComment(getDSValueString(ds, row, "REMARKS", "LONG_COMMENT"));
 		readSequenceSource(result);
 		return result;
 	}
 
+	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
 		String sql = null;
@@ -150,7 +153,7 @@ public class Db2SequenceReader
 		else if (dbid.equals("db2h"))
 		{
 			// Host system on z/OS
-			sql = 
+			sql =
 			"SELECT NAME AS SEQNAME, \n" +
 			"       SCHEMA AS SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
@@ -248,6 +251,7 @@ public class Db2SequenceReader
 		return result;
 	}
 
+	@Override
 	public CharSequence getSequenceSource(String catalog, String schema, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, schema, sequence);
@@ -255,6 +259,7 @@ public class Db2SequenceReader
 		return def.getSource();
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		StringBuilder result = new StringBuilder(100);
@@ -338,7 +343,7 @@ public class Db2SequenceReader
 				result.append(maxvalue);
 			}
 		}
-		else if (doFormat) 
+		else if (doFormat)
 		{
 			result.append(" NO MAXVALUE");
 		}

@@ -48,6 +48,7 @@ public class WbCompoundEdit
 		return edits.get(edits.size() - 1);
 	}
 
+	@Override
 	public void undo()
 		throws CannotUndoException
 	{
@@ -59,6 +60,7 @@ public class WbCompoundEdit
 		}
 	}
 
+	@Override
 	public boolean canUndo()
 	{
 		if (edits.size() == 0) return false;
@@ -70,6 +72,7 @@ public class WbCompoundEdit
 		return true;
 	}
 
+	@Override
 	public void redo()
 		throws CannotRedoException
 	{
@@ -82,6 +85,7 @@ public class WbCompoundEdit
 		}
 	}
 
+	@Override
 	public boolean canRedo()
 	{
 		if (edits.size() == 0) return false;
@@ -92,6 +96,7 @@ public class WbCompoundEdit
 		return true;
 	}
 
+	@Override
 	public void die()
 	{
 		for (UndoableEdit edit : edits)
@@ -100,17 +105,20 @@ public class WbCompoundEdit
 		}
 	}
 
+	@Override
 	public boolean addEdit(UndoableEdit anEdit)
 	{
 		if (!acceptNew) return false;
 		return edits.add(anEdit);
 	}
 
+	@Override
 	public boolean replaceEdit(UndoableEdit anEdit)
 	{
 		return false;
 	}
 
+	@Override
 	public boolean isSignificant()
 	{
 		for (UndoableEdit edit : edits)
@@ -120,6 +128,7 @@ public class WbCompoundEdit
 		return false;
 	}
 
+	@Override
 	public String getPresentationName()
 	{
 		UndoableEdit edit = getLast();
@@ -127,6 +136,7 @@ public class WbCompoundEdit
 		return edit.getPresentationName();
 	}
 
+	@Override
 	public String getUndoPresentationName()
 	{
 		UndoableEdit edit = getLast();
@@ -134,6 +144,7 @@ public class WbCompoundEdit
 		return edit.getUndoPresentationName();
 	}
 
+	@Override
 	public String getRedoPresentationName()
 	{
 		UndoableEdit edit = getLast();

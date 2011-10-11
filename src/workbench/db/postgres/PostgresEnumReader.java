@@ -50,6 +50,7 @@ public class PostgresEnumReader
              "   join pg_enum e on t.oid = e.enumtypid  \n" +
              "   join pg_catalog.pg_namespace n ON n.oid = t.typnamespace";
 
+	@Override
 	public EnumIdentifier getObjectDefinition(WbConnection con, DbObject obj)
 	{
 		if (obj == null) return null;
@@ -190,6 +191,7 @@ public class PostgresEnumReader
 		return enums;
 	}
 
+	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!handlesType(requestedTypes)) return false;
@@ -197,7 +199,7 @@ public class PostgresEnumReader
 
 		Collection<EnumIdentifier> enums = getDefinedEnums(con, schema, objects);
 		if (CollectionUtil.isEmpty(enums)) return false;
-		
+
 		for (EnumIdentifier enumDef : enums)
 		{
 			int row = result.addRow();
@@ -211,16 +213,19 @@ public class PostgresEnumReader
 		return true;
 	}
 
+	@Override
 	public List<String> supportedTypes()
 	{
 		return Collections.singletonList("ENUM");
 	}
 
+	@Override
 	public boolean handlesType(String type)
 	{
 		return StringUtil.equalStringIgnoreCase("ENUM", type);
 	}
 
+	@Override
 	public boolean handlesType(String[] types)
 	{
 		if (types == null) return true;
@@ -231,6 +236,7 @@ public class PostgresEnumReader
 		return false;
 	}
 
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		EnumIdentifier id = getObjectDefinition(con, object);
@@ -247,6 +253,7 @@ public class PostgresEnumReader
 		return result;
 	}
 
+	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;

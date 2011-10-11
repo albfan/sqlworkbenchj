@@ -24,6 +24,7 @@ public class SQLTokenMarker
 	protected KeywordMap keywords;
 	private char literalChar = 0;
 
+	@Override
 	public char getPendingLiteralChar()
 	{
 		return literalChar;
@@ -43,6 +44,7 @@ public class SQLTokenMarker
 		return 0;
 	}
 
+	@Override
 	public void markTokensImpl(Token lastToken, Segment line, int lineIndex)
 	{
 		byte token = Token.NULL;
