@@ -23,7 +23,7 @@ import workbench.util.StringUtil;
  * through the GUI.
  * <br/>
  * Groups can be hidden from the menu.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class MacroGroup
@@ -55,17 +55,20 @@ public class MacroGroup
 		this.showInMenu = flag;
 	}
 
+	@Override
 	public int getSortOrder()
 	{
 		return sortOrder;
 	}
 
+	@Override
 	public void setSortOrder(int order)
 	{
 		this.modified = modified || sortOrder != order;
 		this.sortOrder = order;
 	}
 
+	@Override
 	public String toString()
 	{
 		return name;
@@ -107,8 +110,8 @@ public class MacroGroup
 	 * returns true.
 	 * <br/>
 	 * This ignores the isVisibleInMenu() setting of this group.
-	 * 
-	 * @see #getVisibleMacroSize() 
+	 *
+	 * @see #getVisibleMacroSize()
 	 */
 	public synchronized List<MacroDefinition> getVisibleMacros()
 	{
@@ -128,7 +131,7 @@ public class MacroGroup
 	 *
 	 * This method is only here to make the class serializable for the XMLEncoder and should
 	 * not be used directly.
-	 * 
+	 *
 	 * @param newMacros
 	 */
 	public synchronized void setMacros(List<MacroDefinition> newMacros)
@@ -143,7 +146,7 @@ public class MacroGroup
 	{
 		return macros;
 	}
-	
+
 	public synchronized void removeMacro(MacroDefinition macro)
 	{
 		macros.remove(macro);
@@ -157,7 +160,7 @@ public class MacroGroup
 	 *
 	 * The copy will be marked as "not modified" (i.e. isModified() will
 	 * return false on the copy), even if this group is modified.
-	 * 
+	 *
 	 * @return a deep copy of this group
 	 * @see MacroDefinition#createCopy()
 	 */
@@ -210,9 +213,9 @@ public class MacroGroup
 
 	/**
 	 * Returns the number of macros in this groups that should be displayed in the menu.
-	 * 
+	 *
 	 * This returns a non-zero count even if isVisibleInMenu() returns false!
-	 * @see #getVisibleMacros() 
+	 * @see #getVisibleMacros()
 	 */
 	public int getVisibleMacroSize()
 	{
@@ -223,7 +226,7 @@ public class MacroGroup
 		}
 		return size;
 	}
-	
+
 	public int getSize()
 	{
 		return macros.size();

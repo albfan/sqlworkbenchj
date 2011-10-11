@@ -20,7 +20,7 @@ import workbench.util.StringUtil;
  * Each Macro defines a sort order (that is maintained through the GUI).
  * A macro can have a keyboard shortcut assigned and can be hidden from the
  * menu.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class MacroDefinition
@@ -32,7 +32,7 @@ public class MacroDefinition
 	private boolean modified;
 	private StoreableKeyStroke shortcut;
 	private boolean showInMenu = true;
-	
+
 	public MacroDefinition()
 	{
 	}
@@ -52,12 +52,14 @@ public class MacroDefinition
 	{
 		this.showInMenu = flag;
 	}
-	
+
+	@Override
 	public int getSortOrder()
 	{
 		return sortOrder;
 	}
 
+	@Override
 	public void setSortOrder(int order)
 	{
 		modified = modified || (order != sortOrder);
@@ -94,7 +96,7 @@ public class MacroDefinition
 		def.shortcut = this.shortcut;
 		return def;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj)
 	{
@@ -132,6 +134,7 @@ public class MacroDefinition
 		modified = false;
 	}
 
+	@Override
 	public String toString()
 	{
 		return name;

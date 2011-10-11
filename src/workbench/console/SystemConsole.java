@@ -50,7 +50,8 @@ public class SystemConsole
 		{
 			return System.console().readLine(prompt);
 		}
-		// Fallback in case console() is not available;
+		// Fallback in case console() is not available
+		// this might also be the case e.g. inside NetBeans
 		System.out.print(prompt);
 		Scanner inputScanner = new Scanner(System.in);
 		String line = inputScanner.nextLine();
