@@ -43,6 +43,11 @@ public class DeleteChar
 		if (textArea.getSelectionStart() != textArea.getSelectionEnd())
 		{
 			textArea.setSelectedText("");
+			if (textArea.isSelectionRectangular())
+			{
+				int caret = textArea.getCaretPosition();
+				textArea.setCaretPosition(caret);
+			}
 		}
 		else
 		{

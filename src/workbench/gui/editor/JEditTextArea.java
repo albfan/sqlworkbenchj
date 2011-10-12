@@ -1823,9 +1823,9 @@ public class JEditTextArea
 
 					document.remove(rectStart, Math.min(lineEnd - rectStart, end - start));
 
-					if (selectedText != null)
+					if (StringUtil.isNonEmpty(selectedText))
 					{
-						document.insertString(rectStart,selectedText,null);
+						document.insertString(rectStart, selectedText, null);
 					}
 				}
 			}
