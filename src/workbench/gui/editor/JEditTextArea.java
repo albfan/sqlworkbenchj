@@ -38,7 +38,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.lang.IllegalStateException;
 
 import java.util.ArrayList;
 import java.util.List;
