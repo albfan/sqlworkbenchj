@@ -659,7 +659,7 @@ public class TableIdentifier
 	{
 		if (other instanceof TableIdentifier)
 		{
-			boolean result = false;
+			boolean result;
 			TableIdentifier t = (TableIdentifier)other;
 			if (this.isNewTable && t.isNewTable)
 			{
@@ -686,7 +686,7 @@ public class TableIdentifier
 	 */
 	public boolean compareNames(TableIdentifier other)
 	{
-		boolean result = false;
+		boolean result;
 		if (this.isNewTable && other.isNewTable)
 		{
 			result = true;
@@ -734,7 +734,7 @@ public class TableIdentifier
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
-		CharSequence source = null;
+		CharSequence source;
 		DbMetadata meta = con.getMetadata();
 		if (meta.isExtendedObject(this))
 		{

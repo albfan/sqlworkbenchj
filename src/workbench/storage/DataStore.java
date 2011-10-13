@@ -529,7 +529,7 @@ public class DataStore
 	{
 		RowData row = new RowData(this.resultInfo);
 		anIndex ++;
-		int newIndex = -1;
+		int newIndex;
 
 		if (anIndex > this.data.size() || anIndex < 0)
 		{
@@ -991,7 +991,7 @@ public class DataStore
 	 */
 	public boolean restoreOriginalValues()
 	{
-		RowData row = null;
+		RowData row;
 		int rows = 0;
 		if (this.deletedRows != null)
 		{
@@ -1431,8 +1431,8 @@ public class DataStore
 		List<DmlStatement> stmtList = new LinkedList<DmlStatement>();
 		this.resetUpdateRowCounters();
 
-		DmlStatement dml = null;
-		RowData row = null;
+		DmlStatement dml;
+		RowData row;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
@@ -1500,7 +1500,6 @@ public class DataStore
 					SqlUtil.closeStatement(stmt);
 				}
 			}
-			delete = null;
 			rowsUpdated = dml.execute(aConnection);
 			row.setDmlSent(true);
 		}
@@ -1558,7 +1557,7 @@ public class DataStore
 		throws SQLException
 	{
 		int rows = 0;
-		RowData row = null;
+		RowData row;
 		this.cancelUpdate = false;
 		this.updatePkInformation();
 		int totalRows = this.getModifiedCount();
@@ -1884,7 +1883,7 @@ public class DataStore
 	private RowData getNextChangedRow()
 	{
 		if (this.currentUpdateRow >= this.getRowCount()) return null;
-		RowData row = null;
+		RowData row;
 
 		int count = this.getRowCount();
 
@@ -1920,7 +1919,7 @@ public class DataStore
 
 		if (this.currentDeleteRow > count) return null;
 
-		RowData row = null;
+		RowData row;
 
 		while (this.currentDeleteRow < count)
 		{
@@ -1936,7 +1935,7 @@ public class DataStore
 		int count = this.getRowCount();
 		if (this.currentInsertRow >= count) return null;
 
-		RowData row = null;
+		RowData row;
 
 		while (this.currentInsertRow < count)
 		{

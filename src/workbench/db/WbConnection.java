@@ -372,7 +372,7 @@ public class WbConnection
 			StringBuilder msg = new StringBuilder(200);
 			if (!StringUtil.isEmptyString(this.scriptError)) msg.append(this.scriptError);
 
-			String s = null;
+			String s;
 			while (warn != null)
 			{
 				s = warn.getMessage();
@@ -760,7 +760,7 @@ public class WbConnection
 	public Statement createStatementForQuery()
 		throws SQLException
 	{
-		Statement stmt = null;
+		Statement stmt;
 		if (getDbSettings().allowsExtendedCreateStatement())
 		{
 			stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -911,7 +911,7 @@ public class WbConnection
 	 */
 	public String getDisplayString()
 	{
-		String displayString = null;
+		String displayString;
 		try
 		{
 			DbMetadata meta = getMetadata();
@@ -1041,7 +1041,7 @@ public class WbConnection
 
 	public String getDriverVersion()
 	{
-		DatabaseMetaData db = null;
+		DatabaseMetaData db ;
 		try
 		{
 			db = this.sqlConnection.getMetaData();
@@ -1061,7 +1061,7 @@ public class WbConnection
 	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent)
 	{
 		StrBuffer dbInfo = new StrBuffer(200);
-		DatabaseMetaData db = null;
+		DatabaseMetaData db;
 		try
 		{
 			db = this.sqlConnection.getMetaData();
@@ -1072,7 +1072,7 @@ public class WbConnection
 		}
 
 		TagWriter tagWriter = new TagWriter();
-		String value = null;
+		String value;
 
 
 		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());

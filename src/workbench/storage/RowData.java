@@ -224,7 +224,7 @@ public class RowData
 					else
 					{
 						// BLOB columns are always converted to byte[] internally
-						InputStream in = null;
+						InputStream in;
 						try
 						{
 							in = rs.getBinaryStream(i+1);
@@ -324,8 +324,8 @@ public class RowData
 	private Object readCharacterStream(ResultSet rs, int column)
 		throws SQLException
 	{
-		Object value = null;
-		Reader in = null;
+		Object value;
+		Reader in;
 		try
 		{
 			in = rs.getCharacterStream(column);

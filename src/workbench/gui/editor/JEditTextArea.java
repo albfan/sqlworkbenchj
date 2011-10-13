@@ -1767,10 +1767,9 @@ public class JEditTextArea
 				Element lineElement = map.getElement(i);
 				int lineStart = lineElement.getStartOffset();
 				int lineEnd = lineElement.getEndOffset() - 1;
-				int lineLen = lineEnd - lineStart;
 
-				lineStart = Math.min(lineStart + start,lineEnd);
-				lineLen = Math.min(end - start,lineEnd - lineStart);
+				lineStart = Math.min(lineStart + start, lineEnd);
+				int lineLen = Math.min(end - start, lineEnd - lineStart);
 
 				getText(lineStart,lineLen,seg);
 				buf.append(seg.array,seg.offset,seg.count);
