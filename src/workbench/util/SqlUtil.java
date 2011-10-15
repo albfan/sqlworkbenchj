@@ -348,8 +348,10 @@ public class SqlUtil
 	{
 		if (name == null) return null;
 		if (name.indexOf('_') == -1) return name;
+		if (conn == null) return name;
+		if (!conn.getDbSettings().doEscapeSearchString()) return name;
 
-		String escape = (conn == null ? null : conn.getSearchStringEscape());
+		String escape = conn.getSearchStringEscape();
 		return escapeUnderscore(name, escape);
 	}
 

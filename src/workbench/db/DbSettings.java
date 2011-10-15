@@ -1387,6 +1387,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "parameter.metadata.supported", true);
 	}
 
+	public boolean doEscapeSearchString()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "escape.searchstrings", true);
+	}
+	
 	public String getSearchStringEscape()
 	{
 		return Settings.getInstance().getProperty(prefix + "searchstringescape", null);
@@ -1412,5 +1417,5 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);
 	}
-	
+
 }
