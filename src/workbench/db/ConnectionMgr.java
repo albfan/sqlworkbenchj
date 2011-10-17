@@ -463,7 +463,7 @@ public class ConnectionMgr
 	 */
 	public void abortAll(List<WbConnection> toAbort)
 	{
-		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to close all connections");
+		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to abort all connections");
 
 		for (WbConnection con : toAbort)
 		{

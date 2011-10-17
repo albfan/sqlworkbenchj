@@ -835,7 +835,6 @@ public class DwPanel
 	{
 		if (sql == null)
 		{
-			LogMgr.logDebug("DwPanel.showGeneratingSQLAsTooltip()", "No generating SQL defined!");
 			return;
 		}
 		JTabbedPane tab = getTabParent();
