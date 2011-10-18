@@ -38,6 +38,11 @@ public class IndexColumn
 		return this.column;
 	}
 
+	public void setDirection(String dir)
+	{
+		this.direction = dir;
+	}
+	
 	public String getDirection()
 	{
 		if (this.direction == null) return null;

@@ -31,6 +31,7 @@ public class MetaDataSqlManager
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String PK_INLINE_DEFINITION = "%pk_definition%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key%";
+	public static final String IDX_DIRECTION_PLACEHOLDER = "%idx_dir%";
 	public static final String COLUMN_NAME_PLACEHOLDER = "%column_name%";
 	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";
 	public static final String CONSTRAINT_NAME_PLACEHOLDER = "%constraint_name%";
@@ -158,7 +159,7 @@ public class MetaDataSqlManager
 
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{
-		String s = null;
+		String s;
 		if (withNL)
 		{
 			StringBuilder b = new StringBuilder(placeholder.length() + 10);
