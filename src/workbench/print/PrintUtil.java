@@ -46,8 +46,8 @@ public class PrintUtil
 		attr.add(att);
 		att = new MediaPrintableArea((float)format.getImageableX(),
 		                             (float)format.getImageableY(),
-																 (float)format.getImageableWidth(),
-																 (float)format.getImageableHeight(), MediaPrintableArea.INCH);
+		                             (float)format.getImageableWidth(),
+		                             (float)format.getImageableHeight(), MediaPrintableArea.INCH);
 		attr.add(att);
 
 		return attr;

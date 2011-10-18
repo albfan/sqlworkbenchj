@@ -628,12 +628,12 @@ public class PrintPreview
 		protected Image m_source;
 		protected Image m_img;
 
-		public PagePreview()
+		PagePreview()
 		{
 			super();
 		}
 
-		public PagePreview(int w, int h, Image source)
+		PagePreview(int w, int h, Image source)
 		{
 			super();
 			this.setImage(w, h, source);

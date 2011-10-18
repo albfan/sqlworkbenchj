@@ -182,7 +182,7 @@ public class TablePrintPage
 		pg.drawLine(0, 1, x, 1);
 		if (s != null) pg.setStroke(s);
 		fm = pg.getFontMetrics(dataFont);
-    lineHeight = fm.getHeight();
+		lineHeight = fm.getHeight();
 
 		pg.setTransform(oldTransform);
 		y += (lineHeight + lineSpacing);

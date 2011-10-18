@@ -305,7 +305,7 @@ public class TablePrinter
 			for (int pa = 0; pa < pagesAcross; pa++)
 			{
 				int startCol = horizontalBrakeColumns.get(pa);
-				int endCol = 0;
+				int endCol;
 
 				if (pa + 1 >= pagesAcross)
 				{
@@ -343,19 +343,19 @@ public class TablePrinter
 		throws PrinterException
 	{
 		Graphics2D pg = (Graphics2D)g;
-    if (pageIndex >= this.pageCount) return NO_SUCH_PAGE;
+		if (pageIndex >= this.pageCount) return NO_SUCH_PAGE;
 
-    double startx = pageFormat.getImageableX();
+		double startx = pageFormat.getImageableX();
 		double starty = pageFormat.getImageableY();
 
-    int wPage = (int)pageFormat.getImageableWidth();
-    int hPage = (int)pageFormat.getImageableHeight();
+		int wPage = (int) pageFormat.getImageableWidth();
+		int hPage = (int) pageFormat.getImageableHeight();
 
-		pg.setClip((int)startx, (int)starty, wPage, hPage);
+		pg.setClip((int) startx, (int) starty, wPage, hPage);
 		pg.translate(startx, starty);
-		AffineTransform oldTransform= pg.getTransform();
+		AffineTransform oldTransform = pg.getTransform();
 
-    pg.setColor(Color.BLACK);
+		pg.setColor(Color.BLACK);
 		pg.setFont(this.printFont);
 		TablePrintPage currentPage = this.pages[pageIndex];
 
@@ -364,24 +364,22 @@ public class TablePrinter
 		{
 			footer.append(ResourceMgr.getFormattedString("TxtPageFooterHor",
 				currentPage.getPageNumberAcross(), this.pagesAcross,
-				currentPage.getPageNumberDown(), this.pagesDown
-			));
+				currentPage.getPageNumberDown(), this.pagesDown));
 		}
 		else
 		{
-			footer.append(ResourceMgr.getFormattedString("TxtPageFooterNormal",currentPage.getPageIndex(),this.pageCount));
+			footer.append(ResourceMgr.getFormattedString("TxtPageFooterNormal", currentPage.getPageIndex(), this.pageCount));
 		}
 
 		FontMetrics fm = pg.getFontMetrics(this.printFont);
 		Rectangle2D bounds = fm.getStringBounds(footer.toString(), pg);
 		double len = bounds.getWidth();
 
-    pg.drawString(footer.toString(), (int)((wPage - len)/2), hPage - fm.getDescent());
+		pg.drawString(footer.toString(), (int) ((wPage - len) / 2), hPage - fm.getDescent());
 
 		if (this.headerText != null)
 		{
 			bounds = fm.getStringBounds(this.headerText, pg);
-			len = bounds.getWidth();
 			pg.drawString(this.headerText, 0, fm.getAscent());
 			pg.translate(0, lineSpacing + fm.getAscent() + 5);
 		}
@@ -391,7 +389,7 @@ public class TablePrinter
 		pg.setClip(null);
 
 		return PAGE_EXISTS;
-  }
+	}
 
 	@Override
 	public int getNumberOfPages()
