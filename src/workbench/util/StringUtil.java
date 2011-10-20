@@ -45,9 +45,17 @@ public class StringUtil
 
 	private static final char[] hexDigit = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
+	public static String getCurrentTimestamp()
+	{
+		synchronized (ISO_TIMESTAMP_FORMAT)
+		{
+			return ISO_TIMESTAMP_FORMATTER.format(now());
+		}
+	}
+	
 	public static String getCurrentTimestampWithTZString()
 	{
-		synchronized (ISO_TZ_TIMESTAMP_FORMATTER)
+		synchronized (ISO_TZ_TIMESTAMP_FORMAT)
 		{
 			return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
 		}
@@ -328,7 +336,7 @@ public class StringUtil
 	/**
 	 * Replacement for StringBuilder.lastIndexOf() which does
 	 * a lot of object creation and copying to achieve this.
-	 * 
+	 *
 	 * This implementation should be a lot faster for StringBuilder
 	 * and StringBuffer, and will basically be the same for String
 	 * objects.

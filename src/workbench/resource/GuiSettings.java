@@ -129,6 +129,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.query.retrieve.comments", flag);
 	}
 
+	public static boolean useSystemTrayForAlert()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.script.alert.systemtray", false);
+	}
+
+	public static void setUseSystemTrayForAlert(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.script.alert.systemtray", flag);
+	}
+
 	public static boolean showScriptFinishedAlert()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.script.alert", false);

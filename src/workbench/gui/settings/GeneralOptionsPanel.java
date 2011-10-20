@@ -14,6 +14,7 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.SystemTray;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -70,6 +71,7 @@ public class GeneralOptionsPanel
 			ResourceMgr.getString("LblUpdCheck30")
 		};
 		checkInterval.setModel(new DefaultComboBoxModel(updTypes));
+		useSystemTray.setVisible(SystemTray.isSupported());
 	}
 
 	@Override
@@ -131,6 +133,10 @@ public class GeneralOptionsPanel
 		closeButtonRightSide.setSelected(GuiSettings.getShowCloseButtonOnRightSide());
 		tabLRUclose.setSelected(GuiSettings.getUseLRUForTabs());
 		showFinishAlert.setSelected(GuiSettings.showScriptFinishedAlert());
+		if (SystemTray.isSupported())
+		{
+			useSystemTray.setSelected(GuiSettings.useSystemTrayForAlert());
+		}
 		long duration = GuiSettings.getScriptFinishedAlertDuration();
 		String durationDisplay = KeepAliveDaemon.getTimeDisplay(duration);
 		alertDuration.setText(durationDisplay);
@@ -199,6 +205,10 @@ public class GeneralOptionsPanel
 		long duration = KeepAliveDaemon.parseTimeInterval(v);
 		GuiSettings.setScriptFinishedAlertDuration(duration);
 		set.setSaveProfilesImmediately(autoSaveProfiles.isSelected());
+		if (SystemTray.isSupported())
+		{
+			GuiSettings.setUseSystemTrayForAlert(useSystemTray.isSelected());
+		}
 	}
 
 	private Locale getSelectedLanguage()
@@ -246,6 +256,7 @@ public class GeneralOptionsPanel
         showFinishAlert = new JCheckBox();
         jLabel2 = new JLabel();
         alertDuration = new JTextField();
+        useSystemTray = new JCheckBox();
         jPanel5 = new JPanel();
         langLabel = new JLabel();
         languageDropDown = new JComboBox();
@@ -517,24 +528,33 @@ public class GeneralOptionsPanel
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(0, 10, 7, 0);
+        gridBagConstraints.insets = new Insets(0, 10, 0, 0);
         jPanel4.add(showFinishAlert, gridBagConstraints);
 
         jLabel2.setText(ResourceMgr.getString("LblScriptEndAlertDuration"));         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.insets = new Insets(0, 11, 0, 0);
+        gridBagConstraints.insets = new Insets(7, 11, 0, 0);
         jPanel4.add(jLabel2, gridBagConstraints);
 
         alertDuration.setColumns(8);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(0, 10, 0, 0);
+        gridBagConstraints.insets = new Insets(5, 10, 0, 0);
         jPanel4.add(alertDuration, gridBagConstraints);
+
+        useSystemTray.setText(ResourceMgr.getString("LblAlertSysTray"));         useSystemTray.setBorder(null);
+        useSystemTray.setMargin(new Insets(0, 0, 0, 0));
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new Insets(4, 26, 0, 0);
+        jPanel4.add(useSystemTray, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -655,6 +675,7 @@ public class GeneralOptionsPanel
     private JCheckBox singlePageHelp;
     private JCheckBox tabLRUclose;
     private JCheckBox useEncryption;
+    private JCheckBox useSystemTray;
     // End of variables declaration//GEN-END:variables
 
 }

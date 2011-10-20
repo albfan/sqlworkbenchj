@@ -11,21 +11,30 @@
  */
 package workbench.gui.components;
 
+import java.awt.AWTException;
 import java.awt.Frame;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  * @author Thomas Kellerer
  */
 public class RunningJobIndicator
+	implements ActionListener
 {
 	private JFrame clientWindow;
 	private int runningJobs = 0;
 	public static final String TITLE_PREFIX = "\u00bb ";
 	private long startTime;
+	private TrayIcon trayIcon;
 
 	public RunningJobIndicator(JFrame client)
 	{
@@ -70,28 +79,51 @@ public class RunningJobIndicator
 	{
 		if (runningJobs > 0) runningJobs --;
 		updateTitle();
-		if (runningJobs == 0 && GuiSettings.showScriptFinishedAlert())
+		if (runningJobs > 0 || !GuiSettings.showScriptFinishedAlert()) return;
+
+		long minDuration = GuiSettings.getScriptFinishedAlertDuration();
+		long duration = System.currentTimeMillis() - startTime;
+		if (minDuration == 0 || duration > minDuration)
 		{
-			long minDuration = GuiSettings.getScriptFinishedAlertDuration();
-			long duration = System.currentTimeMillis() - startTime;
-			if (minDuration == 0 || duration > minDuration)
+			String msg = ResourceMgr.getString("TxtScriptFinished");
+
+			boolean useTray = GuiSettings.useSystemTrayForAlert() && SystemTray.isSupported();
+
+			if (!useTray && clientWindow != null)
 			{
-				if (clientWindow != null)
+				WbSwingUtilities.invoke(new Runnable()
 				{
-					WbSwingUtilities.invoke(new Runnable()
+					@Override
+					public void run()
 					{
-						@Override
-						public void run()
+						if (clientWindow.getState() == Frame.ICONIFIED)
 						{
-							if (clientWindow.getState() == Frame.ICONIFIED)
-							{
-								clientWindow.setState(Frame.NORMAL);
-							}
-							clientWindow.setVisible(true);
+							clientWindow.setState(Frame.NORMAL);
 						}
-					});
+						clientWindow.setVisible(true);
+					}
+				});
+				WbSwingUtilities.showMessage(clientWindow, msg);
+			}
+
+			if (useTray)
+			{
+				SystemTray tray = SystemTray.getSystemTray();
+				try
+				{
+					if (trayIcon == null)
+					{
+						trayIcon = new TrayIcon(ResourceMgr.getPng("workbench16").getImage());
+						trayIcon.addActionListener(this);
+						trayIcon.setToolTip(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
+						tray.add(trayIcon);
+					}
+					trayIcon.displayMessage(ResourceMgr.TXT_PRODUCT_NAME, msg, TrayIcon.MessageType.INFO);
 				}
-				WbSwingUtilities.showMessage(clientWindow, ResourceMgr.getString("TxtScriptFinished"));
+				catch (AWTException ex)
+				{
+					LogMgr.logWarning("RunningJobIndicator.jobEnded()", "Could not install tray icon", ex);
+				}
 			}
 		}
 	}
@@ -101,4 +133,18 @@ public class RunningJobIndicator
 		runningJobs = 0;
 		updateTitle();
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() != this.trayIcon) return;
+		if (SystemTray.isSupported())
+		{
+			LogMgr.logWarning("RunningJobIndicator.actionPerformed()", "Removing system tray icon");
+			SystemTray tray = SystemTray.getSystemTray();
+			tray.remove(trayIcon);
+			trayIcon = null;
+		}
+	}
+
 }
