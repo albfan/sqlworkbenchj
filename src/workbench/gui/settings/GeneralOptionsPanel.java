@@ -635,6 +635,7 @@ public class GeneralOptionsPanel
 	private void showFinishAlertActionPerformed(ActionEvent evt)//GEN-FIRST:event_showFinishAlertActionPerformed
 	{//GEN-HEADEREND:event_showFinishAlertActionPerformed
 		this.alertDuration.setEnabled(showFinishAlert.isSelected());
+		this.useSystemTray.setEnabled(showFinishAlert.isSelected());
 	}//GEN-LAST:event_showFinishAlertActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
