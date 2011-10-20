@@ -89,23 +89,6 @@ public class RunningJobIndicator
 
 			boolean useTray = GuiSettings.useSystemTrayForAlert() && SystemTray.isSupported();
 
-			if (!useTray && clientWindow != null)
-			{
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (clientWindow.getState() == Frame.ICONIFIED)
-						{
-							clientWindow.setState(Frame.NORMAL);
-						}
-						clientWindow.setVisible(true);
-					}
-				});
-				WbSwingUtilities.showMessage(clientWindow, msg);
-			}
-
 			if (useTray)
 			{
 				SystemTray tray = SystemTray.getSystemTray();
@@ -125,6 +108,23 @@ public class RunningJobIndicator
 					LogMgr.logWarning("RunningJobIndicator.jobEnded()", "Could not install tray icon", ex);
 				}
 			}
+			else if (clientWindow != null)
+			{
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (clientWindow.getState() == Frame.ICONIFIED)
+						{
+							clientWindow.setState(Frame.NORMAL);
+						}
+						clientWindow.setVisible(true);
+					}
+				});
+				WbSwingUtilities.showMessage(clientWindow, msg);
+			}
+
 		}
 	}
 
