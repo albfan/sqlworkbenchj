@@ -38,6 +38,14 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testDb2Parsing()
+	{
+		String select = "select * from wagner/atlas04pf where belegid=20100234";
+		List<String> tables = SqlUtil.getTables(select, true, '/');
+		assertEquals(1, tables.size());
+		assertEquals("wagner/atlas04pf", tables.get(0));
+	}
+	@Test
 	public void testEscapeWildcards()
 	{
 		String name = "test_table";
@@ -181,6 +189,8 @@ public class SqlUtilTest
 
 		p = Settings.getInstance().getProperty("workbench.db.informix-online.selectinto.pattern", null);
 		selectIntoPattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
+		sql = "select * from old_table into new_table";
+		assertTrue(SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
 	}
 
 	@Test

@@ -156,6 +156,7 @@ public class DbMetadata
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
 	private List<String> driverKeywords;
+	private char catalogSeparator;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -449,6 +450,24 @@ public class DbMetadata
 			LogMgr.logDebug("DbMetadata.<init>", "Could not read SQL keywords from driver", sql);
 		}
 
+		String sep = getDbSettings().getCatalogSeparator();
+		if (sep == null)
+		{
+			sep = metaData.getCatalogSeparator();
+		}
+		if (StringUtil.isEmptyString(sep))
+		{
+			catalogSeparator = '.';
+		}
+		else
+		{
+			catalogSeparator = sep.charAt(0);
+		}
+	}
+
+	public char getCatalogSeparator()
+	{
+		return catalogSeparator;
 	}
 
 	public ProcedureReader getProcedureReader()

@@ -127,6 +127,7 @@ public class PostgresUtil
 			{
 				result.add(rs.getString(1));
 			}
+			con.releaseSavepoint(sp);
 		}
 		catch (SQLException sql)
 		{

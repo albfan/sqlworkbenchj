@@ -27,6 +27,7 @@ import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
+import workbench.db.DbSearchPath;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -567,7 +568,7 @@ public class DataStore
 		}
 		else
 		{
-			TableIdentifier tbl = new TableIdentifier(aTablename);
+			TableIdentifier tbl = new TableIdentifier(aTablename, aConn.getMetadata().getCatalogSeparator());
 			tbl.setPreserveQuotes(true);
 			setUpdateTable(tbl, aConn);
 		}
@@ -631,7 +632,7 @@ public class DataStore
 
 			// Look up the table in the database to make sure
 			// we get the name correct (upper/lowercase etc)
-			this.updateTable = meta.findSelectableObject(tbl);
+			this.updateTable = findTable(conn, tbl);
 
 			// No table found --> nothing to do.
 			if (updateTable == null) return;
@@ -684,7 +685,30 @@ public class DataStore
 			this.updateTable = null;
 			LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
 		}
+	}
 
+	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)
+	{
+		DbMetadata meta = conn.getMetadata();
+		if (table.getSchema() != null)
+		{
+			return meta.findSelectableObject(table);
+		}
+
+		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(conn).getSearchPath(conn, table.getSchema());
+
+		for (String checkSchema  : searchPath)
+		{
+			TableIdentifier toSearch = table.createCopy();
+			toSearch.setSchema(checkSchema);
+
+			TableIdentifier found = meta.findSelectableObject(toSearch);
+			if (found != null)
+			{
+				return found;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -1290,7 +1314,7 @@ public class DataStore
 		else
 		{
 			if (this.sql == null) return false;
-			List<String> tables = SqlUtil.getTables(this.sql);
+			List<String> tables = SqlUtil.getTables(this.sql, false, aConn.getMetadata().getCatalogSeparator());
 			if (tables.size() != 1) return false;
 			String table = tables.get(0);
 			this.setUpdateTable(table, aConn);

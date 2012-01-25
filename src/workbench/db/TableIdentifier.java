@@ -64,6 +64,13 @@ public class TableIdentifier
 		this.setTable(aName);
 	}
 
+	public TableIdentifier(String aName, char catalogSeparator)
+	{
+		this.expression = null;
+		this.isNewTable = false;
+		this.setTable(aName, catalogSeparator);
+	}
+
 	public TableIdentifier(String aName, WbConnection conn)
 	{
 		this.expression = null;
@@ -478,6 +485,10 @@ public class TableIdentifier
 
 	public final void setTable(String aTable)
 	{
+		setTable(aTable, '.');
+	}
+	public final void setTable(String aTable, char catalogSeparator)
+	{
 		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
 			throw new IllegalArgumentException("Table name may not be null");
 
@@ -490,7 +501,7 @@ public class TableIdentifier
 		}
 
 		List<String> elements = new ArrayList<String>(4);
-		WbStringTokenizer tok = new WbStringTokenizer('.', "\"", true);
+		WbStringTokenizer tok = new WbStringTokenizer(catalogSeparator, "\"", true);
 		tok.setSourceString(aTable);
 		while (tok.hasMoreTokens())
 		{

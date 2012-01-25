@@ -1391,7 +1391,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "escape.searchstrings", true);
 	}
-	
+
 	public String getSearchStringEscape()
 	{
 		return Settings.getInstance().getProperty(prefix + "searchstringescape", null);
@@ -1416,6 +1416,11 @@ public class DbSettings
 	public String checkOpenTransactionsQuery()
 	{
 		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);
+	}
+
+	public String getCatalogSeparator()
+	{
+		return Settings.getInstance().getProperty(prefix + "separator.catalog", null);
 	}
 
 }

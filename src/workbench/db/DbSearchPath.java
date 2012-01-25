@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.util.Collections;
 import java.util.List;
+import workbench.db.ibm.Db2SearchPath;
 import workbench.db.postgres.PostgresUtil;
 
 /**
@@ -56,6 +57,10 @@ public interface DbSearchPath
 			if (con != null && con.getMetadata().isPostgres())
 			{
 				return PG_HANDLER;
+			}
+			else if (con.getDbId().equals("db2i"))
+			{
+				return new Db2SearchPath();
 			}
 			return DEFAULT_HANDLER;
 		}
