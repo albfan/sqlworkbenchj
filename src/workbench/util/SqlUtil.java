@@ -900,6 +900,11 @@ public class SqlUtil
 	 */
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
+		return getTables(sql, includeAlias, '.');
+	}
+
+	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator)
+	{
 		String from = getFromPart(sql);
 		if (StringUtil.isBlank(from)) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
@@ -965,7 +970,10 @@ public class SqlUtil
 					else if (collectTable && !s.equals("("))
 					{
 						int size = currentTable.length();
-						if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
+						if (size > 0 && s.charAt(0) != catalogSeparator && currentTable.charAt(size-1) != catalogSeparator)
+						{
+							currentTable.append(' ');
+						}
 						currentTable.append(s);
 					}
 				}
