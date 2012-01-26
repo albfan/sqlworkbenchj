@@ -57,12 +57,7 @@ public class DeleteWord
 		}
 		else
 		{
-			boolean whitespace = Character.isWhitespace(lineText.charAt(caret));
 			caret = TextUtilities.findWordEnd(lineText, caret);
-			if (whitespace && caret > 1)
-			{
-				caret--;
-			}
 		}
 
 		try

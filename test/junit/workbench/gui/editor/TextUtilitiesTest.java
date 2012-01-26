@@ -75,6 +75,9 @@ public class TextUtilitiesTest
 		start = TextUtilities.findWordStart(line, 14);
 		assertEquals(10, start);
 
+		line = "xyz   ";
+		start = TextUtilities.findWordStart(line, line.length() - 1);
+		assertEquals(line.indexOf('z') + 1, start);
 	}
 
 	@Test
@@ -92,6 +95,14 @@ public class TextUtilitiesTest
 
 		end = TextUtilities.findWordEnd(line, 10);
 		assertEquals(14, end);
+
+		line = "   (test)";
+		end = TextUtilities.findWordEnd(line, 0);
+		assertEquals(line.indexOf('('), end);
+
+		line = "   test";
+		end = TextUtilities.findWordEnd(line, 0);
+		assertEquals(line.indexOf('t'), end);
 
 	}
 }

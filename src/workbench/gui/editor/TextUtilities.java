@@ -12,6 +12,7 @@ package workbench.gui.editor;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * Class with several utility functions used by the text area component.
@@ -20,6 +21,7 @@ import workbench.resource.Settings;
  */
 public class TextUtilities
 {
+	private static final String SEPARATOR_CHARS = "()/";
 	/**
 	 * Returns the offset of the bracket matching the one at the
 	 * specified offset of the document, or -1 if the bracket is
@@ -162,6 +164,10 @@ public class TextUtilities
 		char ch = line.charAt(pos - 1);
 
 		String noWordSep = Settings.getInstance().getEditorNoWordSep();
+		if (Character.isWhitespace(ch))
+		{
+			return findWhitespaceBackwards(line, pos - 1);
+		}
 
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& noWordSep.indexOf(ch) == -1);
 
@@ -179,6 +185,24 @@ public class TextUtilities
 		return wordStart;
 	}
 
+	private static int findWhitespaceBackwards(CharSequence line, int startPos)
+	{
+		if (line == null) return -1;
+		int len = line.length();
+		if (len == 0) return -1;
+		if (startPos < 1) return -1;
+
+		int pos = startPos;
+
+		char c = line.charAt(pos);
+		while (pos > 1)
+		{
+			if (c > ' ') return pos + 1;
+			pos --;
+			c = line.charAt(pos);
+		}
+		return -1;
+	}
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
@@ -189,14 +213,20 @@ public class TextUtilities
 		if(pos >= line.length()) return line.length();
 		char ch = line.charAt(pos);
 
-		String noWordSep = Settings.getInstance().getEditorNoWordSep();
-		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1);
+		if (Character.isWhitespace(ch))
+		{
+			return StringUtil.findFirstNonWhitespace(line, pos);
+		}
+
+		String wordCharacters = Settings.getInstance().getEditorNoWordSep();
+
+		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && wordCharacters.indexOf(ch) == -1);
 
 		int wordEnd = line.length();
 		for (int i = pos; i < line.length(); i++)
 		{
 			ch = line.charAt(i);
-			if (selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
+			if (selectNoLetter ^ (!Character.isLetterOrDigit(ch) && wordCharacters.indexOf(ch) == -1))
 			{
 				wordEnd = i;
 				break;
