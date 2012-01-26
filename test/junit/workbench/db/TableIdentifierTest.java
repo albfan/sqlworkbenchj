@@ -45,6 +45,18 @@ public class TableIdentifierTest
 	}
 
 	@Test
+	public void testAlternateSeparator()
+	{
+		TableIdentifier tbl = new TableIdentifier("somelib/sometable", '/');
+		assertEquals("somelib", tbl.getSchema());
+		assertEquals("sometable", tbl.getTableName());
+
+		tbl = new TableIdentifier("somelib/sometable", '.');
+		assertNull(tbl.getSchema());
+		assertEquals("somelib/sometable", tbl.getTableName());
+	}
+
+	@Test
 	public void testRemoveCollection()
 	{
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
