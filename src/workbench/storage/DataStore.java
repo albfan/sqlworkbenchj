@@ -696,6 +696,7 @@ public class DataStore
 		}
 
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(conn).getSearchPath(conn, table.getSchema());
+		LogMgr.logDebug("DataStore.findTable()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
 
 		for (String checkSchema  : searchPath)
 		{
@@ -705,6 +706,7 @@ public class DataStore
 			TableIdentifier found = meta.findSelectableObject(toSearch);
 			if (found != null)
 			{
+				LogMgr.logDebug("DataStore.findTable()", "Found table " + found.getTableExpression());
 				return found;
 			}
 		}
@@ -1317,6 +1319,7 @@ public class DataStore
 			List<String> tables = SqlUtil.getTables(this.sql, false, aConn.getMetadata().getCatalogSeparator());
 			if (tables.size() != 1) return false;
 			String table = tables.get(0);
+			LogMgr.logDebug("DataStore.checkUpdateTable()", "Using table name: " + table);
 			this.setUpdateTable(table, aConn);
 		}
 		return true;

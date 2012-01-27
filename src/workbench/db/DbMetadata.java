@@ -463,6 +463,7 @@ public class DbMetadata
 		{
 			catalogSeparator = sep.charAt(0);
 		}
+		LogMgr.logDebug("DbMetadata.<init>", "Using catalog separator: [" + catalogSeparator + "]");
 	}
 
 	public char getCatalogSeparator()
