@@ -1162,7 +1162,7 @@ public class ConnectionEditorPanel
 
 	private void checkUncommitted()
 	{
-		String drvClass = getCurrentDriver().getDriverClass();
+		String drvClass = getCurrentDriver() == null ? null : getCurrentDriver().getDriverClass();
 		boolean canCheck = TransactionChecker.Factory.supportsTransactionCheck(drvClass);
 		GridBagLayout layout = (GridBagLayout)getLayout();
 		GridBagConstraints hideCons = layout.getConstraints(hideWarnings);

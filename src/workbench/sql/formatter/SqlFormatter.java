@@ -84,6 +84,7 @@ public class SqlFormatter
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
 	private String dbId;
+	private char catalogSeparator = '.';
 
 	SqlFormatter(CharSequence aScript)
 	{
@@ -103,6 +104,11 @@ public class SqlFormatter
 	SqlFormatter(CharSequence aScript, int maxLength)
 	{
 		this(aScript, 0, maxLength, null);
+	}
+
+	public void setCatalogSeparator(char separator)
+	{
+		this.catalogSeparator = separator;
 	}
 
 	private SqlFormatter(CharSequence aScript, int indentCount, int maxLength, String dbId)
@@ -371,6 +377,7 @@ public class SqlFormatter
 		String currentText = current.getContents();
 		char lastChar = lastText.charAt(0);
 		char currChar = currentText.charAt(0);
+		if (currChar == catalogSeparator) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		boolean isCurrentOpenBracket = "(".equals(currentText);
 		boolean isLastOpenBracket = "(".equals(lastText);
@@ -397,9 +404,9 @@ public class SqlFormatter
 		if (lastChar == '=') return true;
 		if (lastChar == '[' && !last.isIdentifier()) return false;
 
-		if (lastChar == '.' && current.isIdentifier()) return false;
-		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
-		if (lastChar == '.' && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
+		if (lastChar == catalogSeparator && current.isIdentifier()) return false;
+		if (lastChar == catalogSeparator && currChar == '*') return true; // e.g. person.*
+		if (lastChar == catalogSeparator && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
 		if (isLastOpenBracket && isKeyword(currentText)) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;
 		if ((last.isIdentifier() || last.isLiteral()) && current.isOperator()) return true;

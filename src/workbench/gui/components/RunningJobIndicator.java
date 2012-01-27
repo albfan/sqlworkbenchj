@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.AWTException;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -19,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -115,17 +117,23 @@ public class RunningJobIndicator
 					@Override
 					public void run()
 					{
-						if (clientWindow.getState() == Frame.ICONIFIED)
-						{
-							clientWindow.setState(Frame.NORMAL);
-						}
-						clientWindow.setVisible(true);
+						showClient();
 					}
 				});
 				WbSwingUtilities.showMessage(clientWindow, msg);
 			}
-
 		}
+	}
+
+	private void showClient()
+	{
+		if (clientWindow == null) return;
+
+		if (clientWindow.getState() == Frame.ICONIFIED)
+		{
+			clientWindow.setState(Frame.NORMAL);
+		}
+		clientWindow.setVisible(true);
 	}
 
 	public synchronized void allJobsEnded()
@@ -140,10 +148,20 @@ public class RunningJobIndicator
 		if (e.getSource() != this.trayIcon) return;
 		if (SystemTray.isSupported())
 		{
-			LogMgr.logWarning("RunningJobIndicator.actionPerformed()", "Removing system tray icon");
 			SystemTray tray = SystemTray.getSystemTray();
 			tray.remove(trayIcon);
 			trayIcon = null;
+			if (WbAction.isCtrlPressed(e) && clientWindow != null)
+			{
+				EventQueue.invokeLater(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						showClient();
+					}
+				});
+			}
 		}
 	}
 

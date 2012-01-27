@@ -1653,6 +1653,18 @@ public class SqlUtil
 		return buildExpression(conn, object.getCatalog(), object.getSchema(), object.getObjectName());
 	}
 
+	/**
+	 * Get a fully qualified expression for the given table.
+	 *
+	 * The individual parts will be quoted if this is required.
+	 *
+	 * @param conn     the connection to use, may be null
+	 * @param catalog  the catalog to use, may be null
+	 * @param schema   the schema to use, may be null
+	 * @param name     the object name. Must not be null
+	 *
+	 * @return a full qualfied name with all non-null elements and optionally quoted.
+	 */
 	public static String buildExpression(WbConnection conn, String catalog, String schema, String name)
 	{
 		StringBuilder result = new StringBuilder(30);
@@ -1673,15 +1685,16 @@ public class SqlUtil
 		}
 		else
 		{
+			char separator = meta.getCatalogSeparator();
 			if (StringUtil.isNonEmpty(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
 			{
 				result.append(meta.quoteObjectname(catalog));
-				result.append('.');
+				result.append(separator);
 			}
 			if (StringUtil.isNonEmpty(schema) && !conn.getMetadata().ignoreSchema(schema))
 			{
 				result.append(meta.quoteObjectname(schema));
-				result.append('.');
+				result.append(separator);
 			}
 			result.append(meta.quoteObjectname(name));
 		}

@@ -189,13 +189,13 @@ public class TableIdentifier
 	@Override
 	public String getFullyQualifiedName(WbConnection con)
 	{
-		if (con ==null)
+		if (con == null)
 		{
 			return SqlUtil.buildExpression(null, catalog, schema, tablename);
 		}
 		String cat = con.getDbSettings().supportsCatalogs() ? catalog : null;
 		String schem = con.getDbSettings().supportsSchemas() ? schema : null;
-		return SqlUtil.buildExpression(null, cat, schem, tablename);
+		return SqlUtil.buildExpression(con, cat, schem, tablename);
 	}
 
 	@Override
@@ -322,12 +322,13 @@ public class TableIdentifier
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
 			String catalogToUse = getCatalogToUse(conn);
+			char separator = meta.getCatalogSeparator();
 			boolean hasCatalog = false;
 			if (StringUtil.isNonBlank(catalogToUse))
 			{
 				hasCatalog = true;
 				result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
-				result.append('.');
+				result.append(separator);
 			}
 
 			// if a catalog is present we always need the schema as the combination catalog.tablename is not valid
@@ -336,7 +337,7 @@ public class TableIdentifier
 			if (StringUtil.isNonBlank(schemaToUse))
 			{
 				result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
-				result.append('.');
+				result.append(separator);
 			}
 			result.append(meta.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}

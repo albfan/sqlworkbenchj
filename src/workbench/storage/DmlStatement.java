@@ -251,6 +251,10 @@ public class DmlStatement
 			  (isDelete && Settings.getInstance().getDoFormatDeletes()))
 		{
 			SqlFormatter f = new SqlFormatter(toUse, con == null ? null : con.getDbId());
+			if (con != null)
+			{
+				f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());
+			}
 			return f.getFormattedSql();
 		}
 		return toUse;

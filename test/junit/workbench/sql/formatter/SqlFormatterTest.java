@@ -42,6 +42,17 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testAlternateSeparator()
+	{
+		String sql = "select * from mylib/sometable";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setCatalogSeparator('/');
+		String formatted = f.getFormattedSql();
+		String expected = "SELECT *\nFROM mylib/sometable";
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testLobParameter()
 	{
 		String sql = "insert into test (some_col) values ( {$blobfile='/temp/picture.jpg'})";
