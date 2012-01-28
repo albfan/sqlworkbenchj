@@ -54,8 +54,7 @@ public class PostgresSchemaDiffTest
 	public void afterTest()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(REFERENCE_SCHEMA);
-		PostgresTestUtil.cleanUpTestCase(TARGET_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

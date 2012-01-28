@@ -1,11 +1,11 @@
 /*
  * PostgresViewReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -28,7 +28,7 @@ public class PostgresViewReaderTest
 {
 
 	private static final String TEST_SCHEMA = "viewreadertest";
-	
+
 	public PostgresViewReaderTest()
 	{
 		super("PostgresViewReaderTeEst");
@@ -51,7 +51,7 @@ public class PostgresViewReaderTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

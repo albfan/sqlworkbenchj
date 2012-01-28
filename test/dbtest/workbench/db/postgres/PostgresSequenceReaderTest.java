@@ -57,7 +57,7 @@ public class PostgresSequenceReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class PostgresSequenceReaderTest
              "       NO CYCLE;\n\n" +
 						 "ALTER SEQUENCE seq_one OWNER TO seq_table.id;";
 //		System.out.println(sql + "\n-------------\n" + expected);
-		
+
 		assertEquals(expected, sql.trim());
 
 		seq = objects.get(1);

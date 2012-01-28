@@ -55,7 +55,7 @@ public class ExplainPostgresTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

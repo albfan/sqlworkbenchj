@@ -50,7 +50,7 @@ public class PostgresIndexReaderTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TESTID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

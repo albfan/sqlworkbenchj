@@ -98,7 +98,7 @@ public class WbCallPostgresTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

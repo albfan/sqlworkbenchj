@@ -79,7 +79,7 @@ public class PostgresTestUtil
 				schema = schema.toLowerCase();
 			}
 
-			dropAllObjects(con, schema);
+			dropAllObjects(con);
 
 			stmt.execute("create schema "+ schema);
 			stmt.execute("set session schema '" + schema + "'");
@@ -96,14 +96,14 @@ public class PostgresTestUtil
 		}
 	}
 
-	public static void cleanUpTestCase(String schema)
+	public static void cleanUpTestCase()
 	{
 		WbConnection con = getPostgresConnection();
-		dropAllObjects(con, schema);
+		dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
-	public static void dropAllObjects(WbConnection con, String schema)
+	public static void dropAllObjects(WbConnection con)
 	{
 		if (con == null) return;
 

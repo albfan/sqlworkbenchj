@@ -57,7 +57,7 @@ public class PostgresTypeReaderTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

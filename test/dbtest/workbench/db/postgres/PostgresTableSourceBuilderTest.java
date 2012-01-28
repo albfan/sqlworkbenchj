@@ -56,7 +56,7 @@ public class PostgresTableSourceBuilderTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -109,5 +109,5 @@ public class PostgresTableSourceBuilderTest
 		String source = tbl.getSource(con).toString();
 		assertTrue(source.indexOf("CREATE UNLOGGED TABLE") > -1);
 	}
-	
+
 }

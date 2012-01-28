@@ -56,7 +56,7 @@ public class SqlCommandPostgresTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Before

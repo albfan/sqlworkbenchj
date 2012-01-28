@@ -62,7 +62,7 @@ public class PostgresDomainReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test

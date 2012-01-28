@@ -51,7 +51,7 @@ public class PostgresResolveDataTypesTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		TestUtil.executeScript(con, 
+		TestUtil.executeScript(con,
 			"create table some_table (simple_bit bit, three_bits bit(3), bit_var bit varying(8), some_flag boolean);\n" +
 			"insert into some_table (simple_bit, three_bits, bit_var, some_flag) " +
 			" values " +
@@ -64,7 +64,7 @@ public class PostgresResolveDataTypesTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class PostgresResolveDataTypesTest
 		assertNotNull(tbl);
 		List<ColumnIdentifier> cols = tbl.getColumns();
 		assertEquals(4, cols.size());
-		
+
 		ColumnIdentifier simple = cols.get(0);
 		assertEquals("bit(1)", simple.getDbmsType());
 		assertEquals(Types.BIT, simple.getDataType());
@@ -103,7 +103,7 @@ public class PostgresResolveDataTypesTest
 			DataStore ds = new DataStore(rs, con, true);
 			ResultInfo info = ds.getResultInfo();
 			assertEquals(3, info.getColumnCount());
-			
+
 			simple = info.getColumn(0);
 			assertEquals("bit(1)", simple.getDbmsType());
 			assertEquals(Types.BIT, simple.getDataType());
@@ -114,7 +114,7 @@ public class PostgresResolveDataTypesTest
 			assertEquals("java.lang.String", simple.getColumnClassName());
 			Object o = ds.getValue(0, 1);
 			assertEquals("101", o);
-			
+
 			varBits = info.getColumn(2);
 			assertEquals("bit varying(8)", varBits.getDbmsType());
 			Object o2 = ds.getValue(0, 2);

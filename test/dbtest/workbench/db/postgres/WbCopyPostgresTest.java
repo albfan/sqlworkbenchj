@@ -67,7 +67,7 @@ public class WbCopyPostgresTest
 		throws Exception
 	{
 		Settings.getInstance().setProperty("workbench.sql.ignoreschema.postgresql", "public");
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class WbCopyPostgresTest
 
 			StatementRunnerResult result = copyCmd.execute(sql);
 			String msg = result.getMessageBuffer().toString();
-			
+
 			// has to fail because the FK exception should not be ignored!
 			assertEquals(msg, false, result.isSuccess());
 

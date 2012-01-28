@@ -47,14 +47,14 @@ public class TableCreatorPostgresTest
 	public void setUp()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@AfterClass
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class TableCreatorPostgresTest
 	{
 		try
 		{
-			PostgresTestUtil.cleanUpTestCase(TEST_ID);
+			PostgresTestUtil.cleanUpTestCase();
 
 			WbConnection con = PostgresTestUtil.getPostgresConnection();
 			if (con == null) return;
