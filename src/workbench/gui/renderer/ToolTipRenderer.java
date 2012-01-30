@@ -31,6 +31,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -181,11 +182,12 @@ public class ToolTipRenderer
 
 	private boolean doModificationHighlight(WbTable table, int row, int col)
 	{
-		if (this.rendererSetup.modifiedColor == null)
-		{
-			return false;
-		}
-		return table.getDataStoreTableModel().isColumnModified(row, col);
+		if (this.rendererSetup.modifiedColor == null) return false;
+		if (table == null) return false;
+		DataStoreTableModel model = table.getDataStoreTableModel();
+		if (model == null) return false;
+
+		return model.isColumnModified(row, col);
 	}
 
 	protected void initDisplay(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
@@ -236,7 +238,7 @@ public class ToolTipRenderer
 		{
 			this.setFont(table.getFont());
 		}
-		
+
 		if (value != null)
 		{
 			prepareDisplay(value);
