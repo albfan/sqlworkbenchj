@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -131,6 +132,12 @@ public class IndexDefinition
 		this.columns.add(new IndexColumn(column, direction));
 	}
 
+	public void setColumns(List<IndexColumn> indexCols)
+	{
+		this.columns = new ArrayList<IndexColumn>(indexCols);
+		Collections.sort(this.columns, IndexColumn.getSequenceSorter());
+	}
+
 	public void setIndexType(String type)
 	{
 		if (type == null)
@@ -187,6 +194,7 @@ public class IndexDefinition
 
 	public List<IndexColumn> getColumns()
 	{
+		if (columns == null) return Collections.emptyList();
 		return columns;
 	}
 

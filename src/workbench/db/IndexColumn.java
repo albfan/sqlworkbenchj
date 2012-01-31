@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.util.Comparator;
 import workbench.util.StringUtil;
 
 /**
@@ -21,6 +22,13 @@ public class IndexColumn
 {
 	private String column;
 	private String direction;
+	private int sequence;
+
+  public IndexColumn(String col, int colSequence)
+  {
+		this.column = col;
+		this.sequence = colSequence;
+  }
 
   public IndexColumn(String col, String dir)
   {
@@ -42,7 +50,7 @@ public class IndexColumn
 	{
 		this.direction = dir;
 	}
-	
+
 	public String getDirection()
 	{
 		if (this.direction == null) return null;
@@ -88,4 +96,17 @@ public class IndexColumn
 		hash = 73 * hash + (this.direction != null ? this.direction.hashCode() : 0);
 		return hash;
 	}
+
+	public static Comparator<IndexColumn> getSequenceSorter()
+	{
+		return new Comparator<IndexColumn>()
+		{
+			@Override
+			public int compare(IndexColumn o1, IndexColumn o2)
+			{
+				return o1.sequence - o2.sequence;
+			}
+		};
+	}
+
 }

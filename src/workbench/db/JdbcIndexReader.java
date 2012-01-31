@@ -85,39 +85,65 @@ public class JdbcIndexReader
 	 * @param tbl
 	 */
 	@Override
-	public String getPrimaryKeyIndex(TableIdentifier tbl)
+	public IndexDefinition getPrimaryKeyIndex(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
-		if (metaData.getDbSettings().isViewType(tbl.getType())) return StringUtil.EMPTY_STRING;
+		if (metaData.getDbSettings().isViewType(tbl.getType())) return null;
 
 		// Retrieve the name of the PK index
-		String pkName = "";
+		String pkName = null;
+		IndexDefinition index = null;
 
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
 			String catalog = tbl.getCatalog();
 			String schema = tbl.getSchema();
+			List<IndexColumn> cols = new ArrayList<IndexColumn>();
 
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(catalog, schema, tbl.getTableName());
+				keysRs = getPrimaryKeys(catalog, schema, tbl.getTableName());
 				while (keysRs.next())
 				{
-					pkName = keysRs.getString("PK_NAME");
+					if (pkName == null)
+					{
+						pkName = keysRs.getString("PK_NAME");
+					}
+					String colName = keysRs.getString("COLUMN_NAME");
+					int sequence = keysRs.getInt("KEY_SEQ");
+					cols.add(new IndexColumn(colName, sequence));
 				}
 			}
 			catch (Exception e)
 			{
 				LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Error retrieving PK information", e);
-				pkName = "";
+				index = null;
 			}
 			finally
 			{
 				SqlUtil.closeResult(keysRs);
+				primaryKeysResultDone();
+			}
+			if (pkName != null && cols.size() > 0)
+			{
+				index = new IndexDefinition(tbl, pkName);
+				index.setColumns(cols);
+				index.setUnique(true);
+				index.setPrimaryKeyIndex(true);
 			}
 		}
-		return pkName;
+		return index;
+	}
+
+	protected void primaryKeysResultDone()
+	{
+	}
+
+	protected ResultSet getPrimaryKeys(String catalog, String schema, String tableName)
+		throws SQLException
+	{
+		return this.metaData.getJdbcMetaData().getPrimaryKeys(catalog, schema, tableName);
 	}
 
 	/**
@@ -393,10 +419,10 @@ public class JdbcIndexReader
 
 		try
 		{
-			String pkName = getPrimaryKeyIndex(tbl);
+			IndexDefinition pkIndex = getPrimaryKeyIndex(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
-			result = processIndexResult(idxRs, pkName, tbl);
+			result = processIndexResult(idxRs, pkIndex, tbl);
 		}
 		catch (Exception e)
 		{
@@ -421,7 +447,7 @@ public class JdbcIndexReader
 		// nothing to do
 	}
 
-	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, String pkName, TableIdentifier tbl)
+	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, IndexDefinition pkIndex, TableIdentifier tbl)
 		throws SQLException
 	{
 		// This will map an indexname to an IndexDefinition object
@@ -437,6 +463,7 @@ public class JdbcIndexReader
 			String indexName = idxRs.getString("INDEX_NAME");
 			if (idxRs.wasNull()) continue;
 			if (indexName == null) continue;
+
 			String colName = idxRs.getString("COLUMN_NAME");
 			String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
 
@@ -448,10 +475,6 @@ public class JdbcIndexReader
 				if (metaData.getDbSettings().pkIndexHasTableName())
 				{
 					def.setPrimaryKeyIndex(indexName.equals(tbl.getTableName()));
-				}
-				else
-				{
-					def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
 				}
 				defs.put(indexName, def);
 
@@ -468,7 +491,33 @@ public class JdbcIndexReader
 		}
 
 		Collection<IndexDefinition> indexes = defs.values();
+
+		for (IndexDefinition index : indexes)
+		{
+			if (!index.isPrimaryKeyIndex())
+			{
+				boolean isPK = isPkIndex(index, pkIndex);
+				index.setPrimaryKeyIndex(isPK);
+			}
+		}
+
 		processIndexList(tbl, indexes);
 		return new ArrayList<IndexDefinition>(indexes);
+	}
+
+	private boolean isPkIndex(IndexDefinition toCheck, IndexDefinition pkIndex)
+	{
+		if (toCheck == null || pkIndex == null) return false;
+		if (toCheck.getName().equals(pkIndex.getName())) return true;
+		// not the same name, check if they have the same definition
+		List<IndexColumn> checkCols = toCheck.getColumns();
+		List<IndexColumn> pkCols = pkIndex.getColumns();
+		int count = pkCols.size();
+		if (checkCols.size() != count) return false;
+		for (int col=0; col<count; col++)
+		{
+			if (!checkCols.get(col).getColumn().equals(pkCols.get(col).getColumn())) return false;
+		}
+		return true;
 	}
 }

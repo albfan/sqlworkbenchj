@@ -1,11 +1,11 @@
 /*
  * H2IndexReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.h2database;
@@ -15,6 +15,7 @@ import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
+import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -50,7 +51,7 @@ public class H2IndexReaderTest
 		TableIdentifier tbl = new TableIdentifier("PERSON");
 		IndexReader reader = con.getMetadata().getIndexReader();
 		assertTrue(reader instanceof H2IndexReader);
-		String pkname = reader.getPrimaryKeyIndex(tbl);
-		assertNotNull(pkname);
+		IndexDefinition pkIndex = reader.getPrimaryKeyIndex(tbl);
+		assertNotNull(pkIndex);
 	}
 }

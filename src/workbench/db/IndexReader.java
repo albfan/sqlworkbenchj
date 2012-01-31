@@ -106,7 +106,7 @@ public interface IndexReader
 	/**
 	 * Returns the name of the index that supports the Primary Key
 	 */
-	String getPrimaryKeyIndex(TableIdentifier table);
+	IndexDefinition getPrimaryKeyIndex(TableIdentifier table);
 
 	/**
 	 * Return any addition option that should be appended to a CREATE INDEX statement

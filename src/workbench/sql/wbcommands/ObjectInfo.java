@@ -74,6 +74,7 @@ public class ObjectInfo
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
 		if (tbl.getSchema() == null && !searchPath.isEmpty())
 		{
+			LogMgr.logDebug("ObjectInfo.getObjectInfo()", "Searching schemas: " + searchPath + " for " + objectName);
 			showSchema = true;
 			for (String schema : searchPath)
 			{

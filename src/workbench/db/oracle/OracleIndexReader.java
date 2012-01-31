@@ -47,6 +47,7 @@ public class OracleIndexReader
 	extends JdbcIndexReader
 {
 	private PreparedStatement indexStatement;
+	private PreparedStatement pkStament;
 	private boolean useJDBCRetrieval;
 
 	public OracleIndexReader(DbMetadata meta)
@@ -170,8 +171,8 @@ public class OracleIndexReader
 		try
 		{
 			rs = getIndexInfo(table, indexName, indexSchema, false);
-			String pkName = getPrimaryKeyIndex(table);
-			List<IndexDefinition> result = processIndexResult(rs, pkName, table);
+			IndexDefinition pkIndex = getPrimaryKeyIndex(table);
+			List<IndexDefinition> result = processIndexResult(rs, pkIndex, table);
 			if (result.isEmpty())
 			{
 				return null;
@@ -407,30 +408,38 @@ public class OracleIndexReader
 	 * But in Oracle one can create a PK that is supported by an existing index and thus those two names
 	 * do not need to be identical.
 	 *
-	 * @param tbl - the table to check.
+	 * @param catalog  the table's catalog (ignored)
+	 * @param schema   the table's schema
+	 * @param table    the tablename
 	 *
 	 * @return the name of the index supporting the primary key
 	 */
 	@Override
-	public String getPrimaryKeyIndex(TableIdentifier tbl)
+	protected ResultSet getPrimaryKeys(String catalog, String schema, String table)
+		throws SQLException
 	{
-		if (metaData.getDbSettings().isViewType(tbl.getType())) return StringUtil.EMPTY_STRING;
-
+			String sql =
+				"select nvl(cons.index_name, cons.constraint_name) as pk_name, \n" +
+				"       cols.column_name, \n" +
+				"       cols.position as key_seq \n" +
+				"from all_cons_columns cols \n" +
+				"  join all_constraints cons on cols.constraint_name = cons.constraint_name and cols.owner = cons.owner \n" +
+				"where cons.constraint_type = 'P' \n" +
+				" and cons.owner = ? \n" +
+				" and cons.table_name = ? ";
 		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
+
 		if (useJDBC)
 		{
-			return super.getPrimaryKeyIndex(tbl);
+			return super.getPrimaryKeys(catalog, schema, table);
 		}
 
-		String pkName = StringUtil.EMPTY_STRING;
-		String sql =
-			"select nvl(index_name, constraint_name)  \n" +
-			"  from all_constraints \n" +
-			"where owner = ? \n" +
-			"  and table_name = ? \n" +
-			"  and constraint_type = 'P'";
+		if (pkStament != null)
+		{
+			LogMgr.logWarning("OracleIndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
+			primaryKeysResultDone();
+		}
 
-		String schema = tbl.getSchema();
 		if (schema == null)
 		{
 			schema = this.metaData.getWbConnection().getCurrentSchema();
@@ -438,32 +447,20 @@ public class OracleIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyIndex()", "Using SQL=" + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+			LogMgr.logDebug("OracleIndexReader.getPrimaryKeys()", "Using SQL=" + SqlUtil.replaceParameters(sql, schema, table));
 		}
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = metaData.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, tbl.getTableName());
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				pkName = rs.getString(1);
-			}
-		}
-		catch (SQLException sqle)
-		{
-			LogMgr.logError("OracleIndexReader.getPrimaryKeyIndex()", "Could not read PK index name", sqle);
-			return super.getPrimaryKeyIndex(tbl);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return pkName;
+		pkStament = metaData.getSqlConnection().prepareStatement(sql);
+		pkStament.setString(1, schema);
+		pkStament.setString(2, table);
+		return pkStament.executeQuery();
+	}
+
+	@Override
+	protected void primaryKeysResultDone()
+	{
+		SqlUtil.closeStatement(pkStament);
+		pkStament = null;
 	}
 
 }

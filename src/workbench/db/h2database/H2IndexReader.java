@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
@@ -25,11 +26,11 @@ import workbench.util.StringUtil;
 
 /**
  * The newer versions of H2 correctly return the defined name for a Primary key
- * in the getPrimaryKeys() call. Because of that, the name of the primary
- * key might not match the index supporting that primary key.
+ * in the getPrimaryKeys() call.
+ *
+ * Because of that, the name of the primary key might not match the index supporting that primary key.
  * <br/>
- * Therefor a separate class to read the name of the index supporting the PK
- * is necessary.
+ * Therefor a separate class to read the name of the index supporting the PK is necessary.
  * <br/>
  * For versions before 1.106 this works as well. In this case the name of the primary
  * key is always identical to the index name.
@@ -39,54 +40,49 @@ import workbench.util.StringUtil;
 public class H2IndexReader
 	extends JdbcIndexReader
 {
+	private Statement primaryKeysStatement;
+
 	public H2IndexReader(DbMetadata meta)
 	{
 		super(meta);
 	}
 
 	@Override
-	public String getPrimaryKeyIndex(TableIdentifier tbl)
+	protected ResultSet getPrimaryKeys(String catalog, String schema, String table)
+		throws SQLException
 	{
-		String pkName = null;
+		if (primaryKeysStatement != null)
+		{
+			LogMgr.logWarning("H2IndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
+			primaryKeysResultDone();
+		}
 
 		String sql = "" +
-			"SELECT index_name  \n" +
+			"SELECT index_name as pk_name, \n" +
+			"       column_name, \n " +
+			"       ordinal_position as key_seq\n " +
       "FROM information_schema.indexes \n" +
       "WHERE index_type_name = 'PRIMARY KEY' \n";
 
+		primaryKeysStatement = this.metaData.getSqlConnection().createStatement();
+		if (StringUtil.isNonBlank(schema))
+		{
+			sql += " AND table_schema = '" + StringUtil.trimQuotes(schema) + "' ";
+		}
+		sql += " AND table_name = '" + StringUtil.trimQuotes(table) + "'";
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("H2IndexReader.getPrimaryKeyIndex()", "Using query=\n" + sql);
+			LogMgr.logInfo("H2IndexReader.getPrimaryKeys()", "Using query=\n" + sql);
 		}
+		return primaryKeysStatement.executeQuery(sql);
+	}
 
-		ResultSet rs = null;
-		Statement stmt = null;
-		try
-		{
-			stmt = this.metaData.getSqlConnection().createStatement();
-			if (StringUtil.isNonBlank(tbl.getSchema()))
-			{
-				String schema = StringUtil.trimQuotes(tbl.getSchema());
-				sql += " AND table_schema = '" + schema + "' ";
-			}
-			sql += " AND table_name = '" + StringUtil.trimQuotes(tbl.getTableName()) + "'";
-
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				pkName = rs.getString(1);
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("H2IndexReader.getPrimaryKeyIndex()", "Error reading index name", e);
-			pkName = null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return pkName;
+	@Override
+	protected void primaryKeysResultDone()
+	{
+		SqlUtil.closeStatement(primaryKeysStatement);
+		primaryKeysStatement = null;
 	}
 
 }
