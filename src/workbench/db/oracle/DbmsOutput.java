@@ -62,7 +62,7 @@ public class DbmsOutput
 			enableStatement.executeUpdate();
 			this.enabled = true;
 			this.lastSize = size;
-			LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (max size=" + size + ")");
+			LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (max size=" + (size > 0 ? Long.toString(size) : "unlimited") + ")");
 		}
 		finally
 		{
