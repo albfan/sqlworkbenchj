@@ -690,27 +690,7 @@ public class DataStore
 	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)
 	{
 		DbMetadata meta = conn.getMetadata();
-		if (table.getSchema() != null)
-		{
-			return meta.findSelectableObject(table);
-		}
-
-		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(conn).getSearchPath(conn, table.getSchema());
-		LogMgr.logDebug("DataStore.findTable()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
-
-		for (String checkSchema  : searchPath)
-		{
-			TableIdentifier toSearch = table.createCopy();
-			toSearch.setSchema(checkSchema);
-
-			TableIdentifier found = meta.findSelectableObject(toSearch);
-			if (found != null)
-			{
-				LogMgr.logDebug("DataStore.findTable()", "Found table " + found.getTableExpression());
-				return found;
-			}
-		}
-		return null;
+		return meta.searchTableOnPath(table);
 	}
 
 	/**

@@ -23,6 +23,8 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import static org.junit.Assert.*;
 import workbench.db.ColumnIdentifier;
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.wbcommands.ObjectInfo;
 import workbench.util.SqlUtil;
 /**
  *
@@ -123,4 +125,30 @@ public class PostgresSearchPathTest
 		assertEquals("id2", columns.get(0).getColumnName());
 		assertEquals("c2", columns.get(1).getColumnName());
 	}
+
+	@Test
+	public void testObjectInfo()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+
+		TestUtil.executeScript(con, "set search_path=path_2,path_1");
+
+		ObjectInfo info = new ObjectInfo();
+		StatementRunnerResult result = info.getObjectInfo(con, "t1", false);
+
+		assertNotNull(result);
+		assertTrue(result.hasDataStores());
+		assertEquals(1, result.getDataStores().size());
+		assertEquals("path_1.t1", result.getDataStores().get(0).getResultName());
+
+		result = info.getObjectInfo(con, "t2", false);
+
+		assertNotNull(result);
+		assertTrue(result.hasDataStores());
+		assertEquals(1, result.getDataStores().size());
+		assertEquals("path_2.t2", result.getDataStores().get(0).getResultName());
+	}
+	
 }

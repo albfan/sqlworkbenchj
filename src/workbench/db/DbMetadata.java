@@ -1716,6 +1716,31 @@ public class DbMetadata
 		return findTable(tbl, selectableTypes, false);
 	}
 
+	public TableIdentifier searchTableOnPath(TableIdentifier table)
+	{
+		if (table.getSchema() != null)
+		{
+			return findTable(table);
+		}
+
+		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(this.dbConnection).getSearchPath(this.dbConnection, null);
+		LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
+
+		for (String checkSchema  : searchPath)
+		{
+			TableIdentifier toSearch = table.createCopy();
+			toSearch.setSchema(checkSchema);
+
+			TableIdentifier found = findTable(toSearch);
+			if (found != null)
+			{
+				LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Found table " + found.getTableExpression());
+				return found;
+			}
+		}
+		return null;
+	}
+
 	public TableIdentifier findTable(TableIdentifier tbl, boolean searchAllSchemas)
 	{
 		return findTable(tbl, tableTypesArray, searchAllSchemas);

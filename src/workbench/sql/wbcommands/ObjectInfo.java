@@ -67,7 +67,6 @@ public class ObjectInfo
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		TableIdentifier tbl = new TableIdentifier(objectName);
-		tbl.adjustCase(connection);
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
 		boolean showSchema = false;
@@ -75,6 +74,7 @@ public class ObjectInfo
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
 		if (tbl.getSchema() == null && !searchPath.isEmpty())
 		{
+			showSchema = true;
 			for (String schema : searchPath)
 			{
 				TableIdentifier tb = tbl.createCopy();
