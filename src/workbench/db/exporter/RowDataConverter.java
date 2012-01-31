@@ -757,7 +757,7 @@ public abstract class RowDataConverter
 				// this fix in here.
 				if (this.defaultTimestampFormatter == null)
 				{
-					result = StringUtil.ISO_TIMESTAMP_FORMATTER.format(value);
+					result = StringUtil.getIsoTimestampFormatter().format(value);
 				}
 				else
 				{

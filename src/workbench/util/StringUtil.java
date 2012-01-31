@@ -38,12 +38,17 @@ public class StringUtil
 	public static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	public static final String ISO_TZ_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
 
-	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
-	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
+	private static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
+	private static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
 	public static StringBuilder emptyBuffer() { return new StringBuilder(0); }
 
 	private static final char[] hexDigit = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
+	public static SimpleDateFormat getIsoTimestampFormatter()
+	{
+		return new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
+	}
 
 	public static String getCurrentTimestamp()
 	{
@@ -52,7 +57,7 @@ public class StringUtil
 			return ISO_TIMESTAMP_FORMATTER.format(now());
 		}
 	}
-	
+
 	public static String getCurrentTimestampWithTZString()
 	{
 		synchronized (ISO_TZ_TIMESTAMP_FORMAT)

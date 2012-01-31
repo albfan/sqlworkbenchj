@@ -17,13 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
-import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
-import workbench.db.IndexColumn;
-import workbench.db.IndexDefinition;
-import workbench.db.JdbcIndexReader;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
@@ -171,7 +165,7 @@ public class OracleIndexReader
 		try
 		{
 			rs = getIndexInfo(table, indexName, indexSchema, false);
-			IndexDefinition pkIndex = getPrimaryKeyIndex(table);
+			PkDefinition pkIndex = getPrimaryKey(table);
 			List<IndexDefinition> result = processIndexResult(rs, pkIndex, table);
 			if (result.isEmpty())
 			{

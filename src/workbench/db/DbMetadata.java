@@ -683,7 +683,7 @@ public class DbMetadata
 		return this.dbId;
 	}
 
-	public DbSettings getDbSettings()
+	public final DbSettings getDbSettings()
 	{
 		return this.dbSettings;
 	}

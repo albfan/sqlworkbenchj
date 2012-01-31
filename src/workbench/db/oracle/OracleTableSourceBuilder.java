@@ -202,9 +202,13 @@ public class OracleTableSourceBuilder
 	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		IndexDefinition pkIndex = reader.getPrimaryKeyIndex(table);
+		PkDefinition pk = reader.getPrimaryKey(table);
+
 		String sql = super.getPkSource(table, pkCols, pkName).toString();
-		IndexDefinition idx = getIndexDefinition(table, pkIndex.getName());
+
+		// The name used by the index is not necessarily the same as the one used by the constraint.
+		String pkIndexName = pk == null ? null : pk.getPkName();
+		IndexDefinition idx = getIndexDefinition(table, pkIndexName);
 		boolean isPartitioned = false;
 
 		try
@@ -218,7 +222,7 @@ public class OracleTableSourceBuilder
 			isPartitioned = false;
 		}
 
-		if (pkIndex.getName().equals(pkName) && !isPartitioned)
+		if (pkIndexName.equals(pkName) && !isPartitioned)
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, "");
 		}

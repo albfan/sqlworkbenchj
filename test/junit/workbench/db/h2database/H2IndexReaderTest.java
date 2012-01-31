@@ -15,11 +15,11 @@ import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
-import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.*;
 
 /**
  *
@@ -51,7 +51,10 @@ public class H2IndexReaderTest
 		TableIdentifier tbl = new TableIdentifier("PERSON");
 		IndexReader reader = con.getMetadata().getIndexReader();
 		assertTrue(reader instanceof H2IndexReader);
-		IndexDefinition pkIndex = reader.getPrimaryKeyIndex(tbl);
-		assertNotNull(pkIndex);
+		PkDefinition pk = reader.getPrimaryKey(tbl);
+		assertNotNull(pk);
+		assertEquals(1, pk.getColumns().size());
+		assertEquals("ID", pk.getColumns().get(0));
+		assertTrue(pk.getPkName().startsWith("PRIMARY_KEY"));
 	}
 }

@@ -91,7 +91,7 @@ public class XmlRowDataConverterTest
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='3']/@longValue");
 		l = Long.valueOf(colValue);
 		Timestamp ts2 = new Timestamp(l);
-		assertEquals("2008-07-23 13:42:01.000", StringUtil.ISO_TIMESTAMP_FORMATTER.format(ts2));
+		assertEquals("2008-07-23 13:42:01.000", StringUtil.getIsoTimestampFormatter().format(ts2));
 		assertEquals(ts1, ts2);
 
 		String head = converter.getStart().toString();

@@ -80,7 +80,7 @@ public class ObjectInfo
 			{
 				TableIdentifier tb = tbl.createCopy();
 				tb.setSchema(schema);
-				toDescribe = connection.getMetadata().findObject(tb, true, searchAllSchemas);
+				toDescribe = connection.getMetadata().findObject(tb, true, false);
 				if (toDescribe != null) break;
 			}
 		}

@@ -85,14 +85,14 @@ public class JdbcIndexReader
 	 * @param tbl
 	 */
 	@Override
-	public IndexDefinition getPrimaryKeyIndex(TableIdentifier tbl)
+	public PkDefinition getPrimaryKey(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
 		if (metaData.getDbSettings().isViewType(tbl.getType())) return null;
 
 		// Retrieve the name of the PK index
 		String pkName = null;
-		IndexDefinition index = null;
+		PkDefinition pk = null;
 
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
@@ -112,13 +112,16 @@ public class JdbcIndexReader
 					}
 					String colName = keysRs.getString("COLUMN_NAME");
 					int sequence = keysRs.getInt("KEY_SEQ");
+					if (sequence < 1)
+					{
+						LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Invalid column sequence '" + sequence + "' for table " + tbl.getTableName() + " received!");
+					}
 					cols.add(new IndexColumn(colName, sequence));
 				}
 			}
 			catch (Exception e)
 			{
 				LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Error retrieving PK information", e);
-				index = null;
 			}
 			finally
 			{
@@ -127,13 +130,10 @@ public class JdbcIndexReader
 			}
 			if (pkName != null && cols.size() > 0)
 			{
-				index = new IndexDefinition(tbl, pkName);
-				index.setColumns(cols);
-				index.setUnique(true);
-				index.setPrimaryKeyIndex(true);
+				pk = new PkDefinition(tbl, pkName, cols);
 			}
 		}
-		return index;
+		return pk;
 	}
 
 	protected void primaryKeysResultDone()
@@ -419,10 +419,10 @@ public class JdbcIndexReader
 
 		try
 		{
-			IndexDefinition pkIndex = getPrimaryKeyIndex(tbl);
+			PkDefinition pk = getPrimaryKey(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
-			result = processIndexResult(idxRs, pkIndex, tbl);
+			result = processIndexResult(idxRs, pk, tbl);
 		}
 		catch (Exception e)
 		{
@@ -447,7 +447,7 @@ public class JdbcIndexReader
 		// nothing to do
 	}
 
-	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, IndexDefinition pkIndex, TableIdentifier tbl)
+	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, PkDefinition pkIndex, TableIdentifier tbl)
 		throws SQLException
 	{
 		// This will map an indexname to an IndexDefinition object
@@ -505,18 +505,19 @@ public class JdbcIndexReader
 		return new ArrayList<IndexDefinition>(indexes);
 	}
 
-	private boolean isPkIndex(IndexDefinition toCheck, IndexDefinition pkIndex)
+	private boolean isPkIndex(IndexDefinition toCheck, PkDefinition pkIndex)
 	{
 		if (toCheck == null || pkIndex == null) return false;
-		if (toCheck.getName().equals(pkIndex.getName())) return true;
-		// not the same name, check if they have the same definition
+		if (toCheck.getName().equals(pkIndex.getPkName())) return true;
+
+		// not the same name, check if they have the same definition (same columns at the same position)
 		List<IndexColumn> checkCols = toCheck.getColumns();
-		List<IndexColumn> pkCols = pkIndex.getColumns();
+		List<String> pkCols = pkIndex.getColumns();
 		int count = pkCols.size();
 		if (checkCols.size() != count) return false;
 		for (int col=0; col<count; col++)
 		{
-			if (!checkCols.get(col).getColumn().equals(pkCols.get(col).getColumn())) return false;
+			if (!checkCols.get(col).getColumn().equals(pkCols.get(col))) return false;
 		}
 		return true;
 	}
