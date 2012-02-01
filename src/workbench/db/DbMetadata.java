@@ -129,7 +129,6 @@ public class DbMetadata
 
 	private boolean isOracle;
 	private boolean isPostgres;
-	private boolean isFirstSql;
 	private boolean isHsql;
 	private boolean isFirebird;
 	private boolean isSqlServer;
@@ -334,10 +333,6 @@ public class DbMetadata
 		else if (productLower.indexOf("sqlite") > -1)
 		{
 			dataTypeResolver = new SQLiteDataTypeResolver();
-		}
-		else if (productLower.indexOf("firstsql") > -1)
-		{
-			isFirstSql = true;
 		}
 		else if (productLower.indexOf("excel") > -1)
 		{
@@ -723,7 +718,6 @@ public class DbMetadata
   public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
-	public boolean isFirstSql() { return this.isFirstSql; }
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 	public boolean isH2() { return this.isH2; }

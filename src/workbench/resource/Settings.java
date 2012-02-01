@@ -1932,12 +1932,6 @@ public class Settings
 		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
 	}
 
-	public List<String> getServersWithInlineConstraints()
-	{
-		String list = getProperty("workbench.db.inlineconstraints", "");
-		return StringUtil.stringToList(list, ",");
-	}
-
 	/**
 	 * Returns a list of DBIDs of servers that do not accept the NULL keyword
 	 * in a column definition.

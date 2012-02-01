@@ -30,7 +30,6 @@ import workbench.util.StringUtil;
 /**
  * Re-Create the source SQL for a given TableIdentifier.
  *
- *
  * This class should not be instantiated directly. Use
  * TableSourceBuilderFactory.getBuilder() instead
  *
@@ -46,14 +45,22 @@ public class TableSourceBuilder
    * TableSourceBuilderFactory.getBuilder() instead.
 	 *
 	 * @param con the connection to be used
-	 *
 	 * @see TableSourceBuilderFactory#getBuilder(workbench.db.WbConnection)
 	 */
 	protected TableSourceBuilder(WbConnection con)
 	{
 		dbConnection = con;
-		String productName = dbConnection.getMetadata().getProductName();
-		this.createInlineConstraints = Settings.getInstance().getServersWithInlineConstraints().contains(productName);
+		this.createInlineConstraints = dbConnection.getDbSettings().createInlineConstraints();
+	}
+
+	/**
+	 * Change the flag if table constraints (FK, PK) should be created "inline".
+	 *
+	 * If false they will be generated as a separate ALTER TABLE statement (the default).
+	 */
+	public void setCreateInlineConstraints(boolean flag)
+	{
+		this.createInlineConstraints = flag;
 	}
 
 	protected ViewReader getViewReader()
@@ -245,8 +252,7 @@ public class TableSourceBuilder
 			result.append("   ");
 			result.append(quotedColName);
 
-			boolean isFirstSql = meta.isFirstSql();
-			if (column.isPkColumn() || (isFirstSql && "sequence".equals(type)))
+			if (column.isPkColumn())
 			{
 				pkCols.add(colName.trim());
 			}
@@ -255,17 +261,19 @@ public class TableSourceBuilder
 			String coldef = getColumnSQL(column, maxTypeLength, columnConstraints.get(column.getColumnName()));
 
 			result.append(coldef);
-			if (itr.hasNext()) result.append(',');
-			result.append(lineEnding);
+			if (itr.hasNext())
+			{
+				result.append(',');
+				result.append(lineEnding);
+			}
 		}
-
 
 		String cons = meta.getTableConstraintSource(table, "   ");
 		if (StringUtil.isNonBlank(cons))
 		{
+			result.append(lineEnding);
 			result.append("   ,");
 			result.append(cons);
-			result.append(lineEnding);
 		}
 
 		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(indexList);
@@ -275,6 +283,7 @@ public class TableSourceBuilder
 			// but the PK index is detected by SQL Workbench
 			pkCols = getPKColsFromIndex(indexList, pkname);
 		}
+
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
 			result.append(lineEnding);
@@ -290,18 +299,19 @@ public class TableSourceBuilder
 
 			result.append(StringUtil.listToString(pkCols, ", ", false));
 			result.append(")");
-			result.append(lineEnding);
 
 			if (includeFk)
 			{
 				StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, createInlineConstraints);
 				if (fk.length() > 0)
 				{
+					result.append(lineEnding);
 					result.append(fk);
 				}
 			}
 		}
 
+		result.append(lineEnding);
 		result.append(")");
 		String options = getAdditionalTableOptions(table, columns, indexList);
 		if (options != null)
@@ -372,14 +382,6 @@ public class TableSourceBuilder
 		StringBuilder result = new StringBuilder(50);
 
 		ColumnIdentifier toUse = column;
-		String type = column.getDbmsType();
-
-		if (meta.isFirstSql() && "sequence".equals(type))
-		{
-			toUse = column.createCopy();
-			// with FirstSQL a column of type "sequence" is always the primary key
-			toUse.setDbmsType(type + " PRIMARY KEY");
-		}
 
 		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate(meta.getDbId());
 		tmpl.setFixDefaultValues(!dbConnection.getDbSettings().returnsValidDefaultExpressions());

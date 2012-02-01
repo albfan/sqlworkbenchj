@@ -111,6 +111,11 @@ public class TableSourceBuilderTest
 			DataStore indexList = con.getMetadata().getIndexReader().getTableIndexInformation(def.getTable());
 			String sql = builder.getTableSource(def.getTable(), cols, indexList, null, false, null, true);
 			assertTrue(sql.trim().endsWith("PRIMARY KEY (ID);"));
+
+			builder.setCreateInlineConstraints(true);
+			sql = builder.getTableSource(def.getTable(), cols, indexList, null, false, null, true);
+			assertFalse(sql.contains("ALTER TABLE"));
+			assertTrue(sql.contains("PRIMARY KEY (ID)"));
 		}
 		finally
 		{

@@ -132,7 +132,7 @@ public class ReaderFactory
 		{
 			return new DerbyConstraintReader();
 		}
-		if (meta.isFirstSql())
+		if (dbid.startsWith("firstsql"))
 		{
 			return new FirstSqlConstraintReader();
 		}
