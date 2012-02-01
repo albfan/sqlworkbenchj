@@ -14,6 +14,7 @@ package workbench.db.oracle;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -50,13 +51,13 @@ public class DbmsOutput
 		CallableStatement enableStatement = null;
 		try
 		{
+			enableStatement = conn.prepareCall( "{call dbms_output.enable(?) }" );
 			if (size < 0)
 			{
-				enableStatement = conn.prepareCall( "{call dbms_output.enable}" );
+				enableStatement.setNull(1, Types.BIGINT);
 			}
 			else
 			{
-				enableStatement = conn.prepareCall( "{call dbms_output.enable(?) }" );
 				enableStatement.setLong(1, size);
 			}
 			enableStatement.executeUpdate();
