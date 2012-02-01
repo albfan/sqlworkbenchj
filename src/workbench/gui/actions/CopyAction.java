@@ -18,7 +18,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of an entry field into the clipboard
- * 
+ *
  *	@author  Thomas Kellerer
  */
 public class CopyAction
@@ -35,6 +35,7 @@ public class CopyAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.copy();

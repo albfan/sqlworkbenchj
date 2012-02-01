@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import workbench.gui.actions.CopyAction;
 import workbench.gui.fontzoom.FontZoomer;
 import java.awt.Color;
 import java.awt.Component;
@@ -312,7 +313,6 @@ public class WbTable
 
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
-		this.replacer.getFindAction().addToInputMap(im, am);
 		this.replacer.getFindAgainAction().addToInputMap(im, am);
 		this.copyAsTextAction.addToInputMap(im, am);
 		this.saveDataAsAction.addToInputMap(im, am);
@@ -345,6 +345,26 @@ public class WbTable
 
 		ResetFontSize reset = new ResetFontSize(zoomer);
 		reset.addToInputMap(im, am);
+		fixCopyShortcut();
+	}
+
+	private void fixCopyShortcut()
+	{
+		InputMap im = this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		KeyStroke ctlrC = KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK);
+
+		CopyAction action = new CopyAction(null);
+		KeyStroke copyShortcut = action.getAccelerator();
+
+		Object uiAction = im.get(ctlrC);
+
+		if (uiAction != null)
+		{
+			if (!ctlrC.equals(copyShortcut))
+			{
+				im.put(copyShortcut, uiAction);
+			}
+		}
 	}
 
 	@Override
