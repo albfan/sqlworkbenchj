@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -188,7 +189,7 @@ public class TableSourceBuilder
 	 *
 	 * @param table the table name
 	 * @param columns the columns of the table
-	 * @param indexDefinition defined indexes for the table (may be null)
+	 * @param indexList defined indexes for the table (may be null)
 	 * @param fkDefinitions defined foreign keys for the table (may be null)
 	 * @param includeDrop if true, a DROP TABLE will be added before the CREATE TABLE
 	 * @param tableNameToUse an alternate name to use (instead of the one in the table parameter)
@@ -196,7 +197,7 @@ public class TableSourceBuilder
 	 *
 	 * @return the CREATE TABLE statement for the table
 	 */
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore indexDefinition, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore indexList, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -267,8 +268,13 @@ public class TableSourceBuilder
 			result.append(lineEnding);
 		}
 
-		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(indexDefinition);
-
+		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(indexList);
+		if (pkname != null && pkCols.isEmpty())
+		{
+			// this can happen in DB2 iSeries. Apparently the columns are not always marked as PK
+			// but the PK index is detected by SQL Workbench
+			pkCols = getPKColsFromIndex(indexList, pkname);
+		}
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
 			result.append(lineEnding);
@@ -297,7 +303,7 @@ public class TableSourceBuilder
 		}
 
 		result.append(")");
-		String options = getAdditionalTableOptions(table, columns, indexDefinition);
+		String options = getAdditionalTableOptions(table, columns, indexList);
 		if (options != null)
 		{
 			result.append(lineEnding);
@@ -310,7 +316,7 @@ public class TableSourceBuilder
 		// end of CREATE TABLE
 
 		// Add additional column information provided by any specialized descendant class
-		String colInfo = getAdditionalColumnSql(table, columns, indexDefinition);
+		String colInfo = getAdditionalColumnSql(table, columns, indexList);
 		if (StringUtil.isNonBlank(colInfo))
 		{
 			result.append(colInfo);
@@ -328,6 +334,24 @@ public class TableSourceBuilder
 		return result;
 	}
 
+
+	private List<String> getPKColsFromIndex(DataStore indexList, String pkname)
+	{
+		List<String> columns = new ArrayList<String>();
+		int count = indexList.getRowCount();
+		for (int row = 0; row < count; row ++)
+		{
+			IndexDefinition index = (IndexDefinition)indexList.getRow(row).getUserObject();
+			if (index != null && index.isPrimaryKeyIndex())
+			{
+				for (IndexColumn col : index.getColumns())
+				{
+					columns.add(col.getColumn());
+				}
+			}
+		}
+		return columns;
+	}
 	/**
 	 * Read additional options for the CREATE TABLE part.
 	 *
