@@ -336,7 +336,7 @@ public class WbTable
 		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
 		this.getActionMap().put("wbtable-stop-editing", a);
-		zoomer = new FontZoomer(this);
+		this.zoomer = new FontZoomer(this);
 		IncreaseFontSize inc = new IncreaseFontSize(zoomer);
 		inc.addToInputMap(im, am);
 
@@ -351,19 +351,20 @@ public class WbTable
 	private void fixCopyShortcut()
 	{
 		InputMap im = this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		KeyStroke ctlrC = KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK);
-
 		CopyAction action = new CopyAction(null);
 		KeyStroke copyShortcut = action.getAccelerator();
 
-		Object uiAction = im.get(ctlrC);
+		Object uiAction = im.get(copyShortcut);
+
+		// nothing to fix, already mapped correctly.
+		if (uiAction != null) return;
+
+		KeyStroke ctlrC = KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK);
+		uiAction = im.get(ctlrC);
 
 		if (uiAction != null)
 		{
-			if (!ctlrC.equals(copyShortcut))
-			{
-				im.put(copyShortcut, uiAction);
-			}
+			im.put(copyShortcut, uiAction);
 		}
 	}
 

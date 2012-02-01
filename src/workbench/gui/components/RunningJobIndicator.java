@@ -134,6 +134,7 @@ public class RunningJobIndicator
 			clientWindow.setState(Frame.NORMAL);
 		}
 		clientWindow.setVisible(true);
+		clientWindow.requestFocus();
 	}
 
 	public synchronized void allJobsEnded()
