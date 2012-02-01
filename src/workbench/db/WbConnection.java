@@ -912,6 +912,7 @@ public class WbConnection
 	public String getDisplayString()
 	{
 		String displayString;
+		boolean isBusy = this.isBusy();
 		try
 		{
 			DbMetadata meta = getMetadata();
@@ -921,7 +922,7 @@ public class WbConnection
 			buff.append('=');
 			buff.append(user);
 
-			String catalog = meta.getCurrentCatalog();
+			String catalog = isBusy ? null : meta.getCurrentCatalog();
 			if (catalog != null && catalog.length() > 0)
 			{
 				String catName = meta.getCatalogTerm();
@@ -931,7 +932,7 @@ public class WbConnection
 				buff.append(catalog);
 			}
 
-			String schema = meta.getSchemaToUse();
+			String schema = isBusy ? null : meta.getSchemaToUse();
 			if (schema != null && !schema.equalsIgnoreCase(user))
 			{
 				String schemaName = meta.getSchemaTerm();
