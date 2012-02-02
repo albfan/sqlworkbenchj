@@ -83,8 +83,13 @@ public class JdbcIndexReader
 	}
 
 	/**
-	 * Return the name of the index supporting the primary key.
-	 * @param tbl
+	 * Return the primary key definition for the table.
+	 *
+	 * The definition contains the name of the primary key constraint,
+	 * and optionally the name of the index supporting the primary key. It also contains
+	 * all the columns that make up the primary key.
+	 *
+	 * @param tbl the table for which the PK should be retrieved
 	 */
 	@Override
 	public PkDefinition getPrimaryKeyIndex(TableIdentifier tbl)
@@ -431,7 +436,8 @@ public class JdbcIndexReader
 
 		try
 		{
-			PkDefinition pk = getPrimaryKeyIndex(tbl);
+			PkDefinition pk = tbl.getPrimaryKey();
+			if (pk == null) pk = getPrimaryKeyIndex(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
 			result = processIndexResult(idxRs, pk, tbl);
