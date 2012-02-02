@@ -46,7 +46,7 @@ public class H2IndexReader
 	}
 
 	@Override
-	protected ResultSet getPrimaryKeys(String catalog, String schema, String table)
+	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String table)
 		throws SQLException
 	{
 		if (primaryKeysStatement != null)

@@ -37,10 +37,12 @@ public class JdbcIndexReader
 	implements IndexReader
 {
 	protected DbMetadata metaData;
+	protected boolean separatePkIndexName;
 
 	public JdbcIndexReader(DbMetadata meta)
 	{
 		this.metaData = meta;
+		separatePkIndexName = false;
 	}
 
 	/**
@@ -85,13 +87,14 @@ public class JdbcIndexReader
 	 * @param tbl
 	 */
 	@Override
-	public PkDefinition getPrimaryKey(TableIdentifier tbl)
+	public PkDefinition getPrimaryKeyIndex(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
 		if (metaData.getDbSettings().isViewType(tbl.getType())) return null;
 
 		// Retrieve the name of the PK index
 		String pkName = null;
+		String pkIndexName = null;
 		PkDefinition pk = null;
 
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
@@ -103,12 +106,16 @@ public class JdbcIndexReader
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = getPrimaryKeys(catalog, schema, tbl.getTableName());
+				keysRs = getPrimaryKeyIndex(catalog, schema, tbl.getTableName());
 				while (keysRs.next())
 				{
 					if (pkName == null)
 					{
 						pkName = keysRs.getString("PK_NAME");
+					}
+					if (separatePkIndexName && pkIndexName == null)
+					{
+						pkIndexName = keysRs.getString("PK_INDEX_NAME");
 					}
 					String colName = keysRs.getString("COLUMN_NAME");
 					int sequence = keysRs.getInt("KEY_SEQ");
@@ -130,7 +137,12 @@ public class JdbcIndexReader
 			}
 			if (pkName != null && cols.size() > 0)
 			{
-				pk = new PkDefinition(tbl, pkName, cols);
+				pk = new PkDefinition(pkName, cols);
+				pk.setPkIndexName(pkIndexName);
+				if (tbl.getPrimaryKey() == null)
+				{
+					tbl.setPrimaryKey(pk);
+				}
 			}
 		}
 		return pk;
@@ -140,7 +152,7 @@ public class JdbcIndexReader
 	{
 	}
 
-	protected ResultSet getPrimaryKeys(String catalog, String schema, String tableName)
+	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String tableName)
 		throws SQLException
 	{
 		return this.metaData.getJdbcMetaData().getPrimaryKeys(catalog, schema, tableName);
@@ -419,7 +431,7 @@ public class JdbcIndexReader
 
 		try
 		{
-			PkDefinition pk = getPrimaryKey(tbl);
+			PkDefinition pk = getPrimaryKeyIndex(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
 			result = processIndexResult(idxRs, pk, tbl);
@@ -508,7 +520,7 @@ public class JdbcIndexReader
 	private boolean isPkIndex(IndexDefinition toCheck, PkDefinition pkIndex)
 	{
 		if (toCheck == null || pkIndex == null) return false;
-		if (toCheck.getName().equals(pkIndex.getPkName())) return true;
+		if (toCheck.getName().equals(pkIndex.getPkIndexName())) return true;
 
 		// not the same name, check if they have the same definition (same columns at the same position)
 		List<IndexColumn> checkCols = toCheck.getColumns();

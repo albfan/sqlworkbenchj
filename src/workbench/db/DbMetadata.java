@@ -2180,33 +2180,14 @@ public class DbMetadata
 			}
 		}
 
-		List<String> keys = new ArrayList<String>();
-		String pkname = null;
+		PkDefinition pk = getIndexReader().getPrimaryKeyIndex(table);
 
-		if (dbSettings.supportsGetPrimaryKeys())
+		if (pk != null)
 		{
-			ResultSet keysRs = null;
-			try
-			{
-				keysRs = metaData.getPrimaryKeys(catalog, schema, tablename);
-				while (keysRs.next())
-				{
-					keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
-					pkname = keysRs.getString("PK_NAME");
-				}
-			}
-			catch (Throwable e)
-			{
-				LogMgr.logWarning("JdbcTableDefinitionReader.getTableDefinition()", "Error retrieving key columns: " + e.getMessage());
-			}
-			finally
-			{
-				SqlUtil.closeResult(keysRs);
-			}
+			table.setPrimaryKey(pk);
 		}
-		table.setPrimaryKeyName(pkname);
 
-		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, keys, dbConnection, dataTypeResolver);
+		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, pk, dbConnection, dataTypeResolver);
 
 		table.setNewTable(false);
 		TableDefinition result = new TableDefinition(table, columns);

@@ -653,7 +653,7 @@ public class Settings
 
 	public boolean getFixSqlServerTimestampDisplay()
 	{
-		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
+		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", false);
 	}
 
 	public boolean getConvertOracleTypes()

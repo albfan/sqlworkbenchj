@@ -32,6 +32,7 @@ import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcUtils;
+import workbench.db.PkDefinition;
 import workbench.db.TableDefinitionReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -227,13 +228,19 @@ public class OracleMetadata
 	}
 
 	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, List<String> primaryKeyColumns, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, PkDefinition primaryKey, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
+		List<String> pkColumns = Collections.emptyList();
+		if (primaryKey != null)
+		{
+			pkColumns = primaryKey.getColumns();
+		}
+
 		if (!useOwnSql)
 		{
 			JdbcTableDefinitionReader reader = new JdbcTableDefinitionReader();
-			return reader.getTableColumns(table, primaryKeyColumns, dbConnection, typeResolver);
+			return reader.getTableColumns(table, primaryKey, dbConnection, typeResolver);
 		}
 
 		DbSettings dbSettings = dbConnection.getDbSettings();
@@ -299,7 +306,7 @@ public class OracleMetadata
 				String display = getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
 
 				col.setDbmsType(display);
-				col.setIsPkColumn(primaryKeyColumns.contains(colName.toLowerCase()));
+				col.setIsPkColumn(pkColumns.contains(colName));
 				col.setIsNullable("YES".equalsIgnoreCase(nullable));
 
 				if (isVirtual)

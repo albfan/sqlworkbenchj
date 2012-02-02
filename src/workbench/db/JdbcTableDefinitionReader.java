@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -42,7 +43,7 @@ public class JdbcTableDefinitionReader
 	 * @see TableColumnsDatastore
 	 */
 	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, List<String> primaryKeyColumns, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, PkDefinition primaryKey, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
 		DbSettings dbSettings = dbConnection.getDbSettings();
@@ -54,6 +55,16 @@ public class JdbcTableDefinitionReader
 
 		ResultSet rs = null;
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+		List<String> primaryKeyColumns = Collections.emptyList();
+		if (primaryKey == null)
+		{
+			primaryKey = table.getPrimaryKey();
+		}
+		
+		if (primaryKey != null)
+		{
+			primaryKeyColumns = primaryKey.getColumns();
+		}
 
 		try
 		{
@@ -116,7 +127,7 @@ public class JdbcTableDefinitionReader
 
 				col.setDbmsType(display);
 				col.setIsAutoincrement(autoincrement);
-				col.setIsPkColumn(primaryKeyColumns.contains(colName.toLowerCase()));
+				col.setIsPkColumn(primaryKeyColumns.contains(colName));
 				col.setIsNullable("YES".equalsIgnoreCase(nullable));
 				col.setDefaultValue(defaultValue);
 				col.setComment(remarks);

@@ -65,7 +65,7 @@ public class OracleTableSourceBuilderTest
 		assertNotNull(table);
 		String sql = table.getSource(con).toString();
 
-		//System.out.println(sql);
+//		System.out.println(sql);
 		//assertTrue(sql.indexOf("USING INDEX (") > 0);
 		ScriptParser p = new ScriptParser(sql);
 		assertEquals(2, p.getSize());

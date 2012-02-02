@@ -77,7 +77,8 @@ public class DbObjectChangerTest
 		assertNotNull(sql);
 		assertTrue(sql.contains("PRIMARY KEY (person_id, address_id)"));
 
-		table.setPrimaryKeyName("pk_person_address");
+		PkDefinition pk = new PkDefinition("pk_person_address", CollectionUtil.arrayList(new IndexColumn("person_id", 1)));
+		table.setPrimaryKey(pk);
 		sql = changer.getDropPK(table);
 		assertEquals("ALTER TABLE person_address DROP CONSTRAINT pk_person_address CASCADE", sql);
 
@@ -101,5 +102,5 @@ public class DbObjectChangerTest
 		assertEquals("ALTER TABLE person_address RENAME TO pers_addr", p.getCommand(1));
 		assertEquals("COMMIT", p.getCommand(2));
 	}
-	
+
 }

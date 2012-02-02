@@ -276,7 +276,9 @@ public class TableSourceBuilder
 			result.append(cons);
 		}
 
-		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(indexList);
+		String pkIndexName = getPKName(indexList);
+		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : pkIndexName;
+		
 		if (pkname != null && pkCols.isEmpty())
 		{
 			// this can happen in DB2 iSeries. Apparently the columns are not always marked as PK

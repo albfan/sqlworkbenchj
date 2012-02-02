@@ -37,7 +37,7 @@ public class TableIdentifier
 	private boolean serverWasQuoted;
 	private boolean catalogWasQuoted;
 	private boolean schemaWasQuoted;
-	private String pkName;
+	private PkDefinition primaryKey;
 	private String type;
 	private boolean neverAdjustCase;
 	private boolean preserveQuotes;
@@ -247,7 +247,7 @@ public class TableIdentifier
 	{
 		TableIdentifier copy = new TableIdentifier();
 		copy.isNewTable = this.isNewTable;
-		copy.pkName = this.pkName;
+		copy.primaryKey = this.primaryKey == null ? null : this.primaryKey.createCopy();
 		copy.schema = this.schema;
 		copy.tablename = this.tablename;
 		copy.catalog = this.catalog;
@@ -724,12 +724,18 @@ public class TableIdentifier
 
 	public String getPrimaryKeyName()
 	{
-		return this.pkName;
+		if (this.primaryKey == null) return null;
+		return this.primaryKey.getPkName();
 	}
 
-	public void setPrimaryKeyName(String name)
+	public PkDefinition getPrimaryKey()
 	{
-		this.pkName = name;
+		return this.primaryKey;
+	}
+	
+	public void setPrimaryKey(PkDefinition pk)
+	{
+		this.primaryKey = pk;
 	}
 
 	public String getType()

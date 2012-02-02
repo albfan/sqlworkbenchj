@@ -53,7 +53,10 @@ public class Db2SearchPath
 			while (rs.next())
 			{
 				String row = rs.getString(1);
-				result.add(row);
+				if (StringUtil.isNonBlank(row))
+				{
+					result.add(row);
+				}
 			}
 		}
 		catch (SQLException ex)
@@ -70,13 +73,16 @@ public class Db2SearchPath
 		List<String> searchPath = new ArrayList<String>();
 		for (String line : result)
 		{
-			searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
+			if (!line.startsWith("*"))
+			{
+				searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
+			}
 		}
 		if (defaultSchema != null && searchPath.isEmpty())
 		{
 			searchPath.add(defaultSchema);
 		}
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + result.toString());
+		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: [" + result.toString() + "]");
 		return searchPath;
 	}
 }

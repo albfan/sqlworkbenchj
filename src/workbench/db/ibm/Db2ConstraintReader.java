@@ -14,6 +14,7 @@ package workbench.db.ibm;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.AbstractConstraintReader;
+import workbench.db.WbConnection;
 
 /**
  * Constraint reader for the Derby database
@@ -46,11 +47,14 @@ public class Db2ConstraintReader
 	private final boolean isAS400; // aka iSeries
 
 	private Pattern sysname = Pattern.compile("^SQL[0-9]+");
+	private char catalogSeparator;
 
-	public Db2ConstraintReader(String dbid)
+	public Db2ConstraintReader(WbConnection conn)
 	{
+		String dbid = conn.getDbId();
 		isHostDB2 = dbid.equals("db2h");
 		isAS400 = dbid.equals("db2i");
+		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public class Db2ConstraintReader
 	public String getTableConstraintSql()
 	{
 		if (isHostDB2) return HOST_TABLE_SQL;
-		if (isAS400) return AS400_TABLE_SQL;
+		if (isAS400) return AS400_TABLE_SQL.replace("qsys2.", "qsys2" + catalogSeparator);
 		return LUW_TABLE_SQL;
 	}
 

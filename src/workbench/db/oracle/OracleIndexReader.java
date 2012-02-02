@@ -48,6 +48,8 @@ public class OracleIndexReader
 	{
 		super(meta);
 		useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.usejdbc", false);
+		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
+		separatePkIndexName = !useJDBC;
 	}
 
 	@Override
@@ -165,7 +167,12 @@ public class OracleIndexReader
 		try
 		{
 			rs = getIndexInfo(table, indexName, indexSchema, false);
-			PkDefinition pkIndex = getPrimaryKey(table);
+
+			PkDefinition pkIndex = table.getPrimaryKey();
+			if (pkIndex == null)
+			{
+				pkIndex = getPrimaryKeyIndex(table);
+			}
 			List<IndexDefinition> result = processIndexResult(rs, pkIndex, table);
 			if (result.isEmpty())
 			{
@@ -409,13 +416,14 @@ public class OracleIndexReader
 	 * @return the name of the index supporting the primary key
 	 */
 	@Override
-	protected ResultSet getPrimaryKeys(String catalog, String schema, String table)
+	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String table)
 		throws SQLException
 	{
 			String sql =
-				"select nvl(cons.index_name, cons.constraint_name) as pk_name, \n" +
+				"select cons.constraint_name as pk_name, \n" +
 				"       cols.column_name, \n" +
-				"       cols.position as key_seq \n" +
+				"       cols.position as key_seq, \n" +
+				"       cons.index_name as pk_index_name \n" +
 				"from all_cons_columns cols \n" +
 				"  join all_constraints cons on cols.constraint_name = cons.constraint_name and cols.owner = cons.owner \n" +
 				"where cons.constraint_type = 'P' \n" +
@@ -425,7 +433,7 @@ public class OracleIndexReader
 
 		if (useJDBC)
 		{
-			return super.getPrimaryKeys(catalog, schema, table);
+			return super.getPrimaryKeyIndex(catalog, schema, table);
 		}
 
 		if (pkStament != null)

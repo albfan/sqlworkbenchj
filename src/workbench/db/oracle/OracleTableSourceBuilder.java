@@ -202,12 +202,16 @@ public class OracleTableSourceBuilder
 	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		PkDefinition pk = reader.getPrimaryKey(table);
+		PkDefinition pk = table.getPrimaryKey();
+		if (pk == null)
+		{
+			pk = reader.getPrimaryKeyIndex(table);
+		}
 
 		String sql = super.getPkSource(table, pkCols, pkName).toString();
 
 		// The name used by the index is not necessarily the same as the one used by the constraint.
-		String pkIndexName = pk == null ? null : pk.getPkName();
+		String pkIndexName = pk == null ? null : pk.getPkIndexName();
 		IndexDefinition idx = getIndexDefinition(table, pkIndexName);
 		boolean isPartitioned = false;
 

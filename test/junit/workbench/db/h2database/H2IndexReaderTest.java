@@ -51,7 +51,7 @@ public class H2IndexReaderTest
 		TableIdentifier tbl = new TableIdentifier("PERSON");
 		IndexReader reader = con.getMetadata().getIndexReader();
 		assertTrue(reader instanceof H2IndexReader);
-		PkDefinition pk = reader.getPrimaryKey(tbl);
+		PkDefinition pk = reader.getPrimaryKeyIndex(tbl);
 		assertNotNull(pk);
 		assertEquals(1, pk.getColumns().size());
 		assertEquals("ID", pk.getColumns().get(0));

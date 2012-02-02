@@ -114,7 +114,7 @@ public class ReaderFactory
 		}
 		if (dbid.startsWith("db2"))
 		{
-			return new Db2ConstraintReader(dbid);
+			return new Db2ConstraintReader(meta.getWbConnection());
 		}
 		if ("firebird".equals(dbid))
 		{
@@ -136,7 +136,6 @@ public class ReaderFactory
 		{
 			return new FirstSqlConstraintReader();
 		}
-
 		return null;
 	}
 }

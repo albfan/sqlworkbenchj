@@ -262,7 +262,6 @@ public abstract class AbstractOraclePartition
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
-		return;
 	}
 
 	private void retrieveSubColumns(DbObject dbObject, WbConnection conn)

@@ -20,14 +20,12 @@ import java.util.List;
  */
 public class PkDefinition
 {
-
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	private String pkName;
-	private TableIdentifier table;
+	private String pkIndexName;
 
-	public PkDefinition(TableIdentifier baseTable, String name, List<IndexColumn> columns)
+	public PkDefinition(String name, List<IndexColumn> columns)
 	{
-		this.table = baseTable;
 		this.pkName = name;
 		if (columns != null)
 		{
@@ -35,9 +33,15 @@ public class PkDefinition
 		}
 	}
 
-	public TableIdentifier getTable()
+	public String getPkIndexName()
 	{
-		return table;
+		if (pkIndexName == null) return pkName;
+		return pkIndexName;
+	}
+
+	public void setPkIndexName(String name)
+	{
+		this.pkIndexName = name;
 	}
 
 	public String getPkName()
@@ -61,4 +65,10 @@ public class PkDefinition
 		this.columns.add(col);
 	}
 
+	public PkDefinition createCopy()
+	{
+		PkDefinition copy = new PkDefinition(this.pkName, this.columns);
+		copy.pkIndexName = this.pkIndexName;
+		return copy;
+	}
 }

@@ -66,7 +66,7 @@ public class ObjectInfo
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		TableIdentifier tbl = new TableIdentifier(objectName);
+		TableIdentifier tbl = new TableIdentifier(objectName, connection.getMetadata().getCatalogSeparator());
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
 		boolean showSchema = false;

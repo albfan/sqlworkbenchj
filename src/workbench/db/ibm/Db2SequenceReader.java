@@ -37,11 +37,13 @@ public class Db2SequenceReader
 	private WbConnection connection;
 	private final String dbid;
 	private boolean quoteKeyword;
+	private char catalogSeparator;
 
 	public Db2SequenceReader(WbConnection conn, String useId)
 	{
 		this.connection = conn;
 		dbid = useId;
+		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 	}
 
 	@Override
@@ -145,7 +147,7 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       data_type, \n" +
 			"       long_comment as remarks \n" +
-			"FROM   qsys2.syssequences \n";
+			"FROM   qsys2" + catalogSeparator + "syssequences \n";
 
 			nameCol = "sequence_name";
 			schemaCol = "sequence_schema";
