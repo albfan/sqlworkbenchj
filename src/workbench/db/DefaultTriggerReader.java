@@ -126,6 +126,10 @@ public class DefaultTriggerReader
 
 		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = sql.getSql();
+		if (dbMeta.getDbId().equals("db2i"))
+		{
+			query = fixDB2Separator(query);
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -184,6 +188,15 @@ public class DefaultTriggerReader
 		return result;
 	}
 
+	private String fixDB2Separator(String query)
+	{
+		char separator = dbMeta.getCatalogSeparator();
+		if (separator == '.') return query;
+
+		return query.replace("qsys2.", "qsys2" + separator);
+	}
+
+
 	@Override
 	public TriggerDefinition findTrigger(String catalog, String schema, String name)
 		throws SQLException
@@ -239,6 +252,10 @@ public class DefaultTriggerReader
 		}
 		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = sql.getSql();
+		if (dbMeta.getDbId().equals("db2i"))
+		{
+			query = fixDB2Separator(query);
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
