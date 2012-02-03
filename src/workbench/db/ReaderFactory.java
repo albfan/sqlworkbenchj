@@ -12,23 +12,31 @@
 package workbench.db;
 
 import workbench.db.derby.DerbyConstraintReader;
+import workbench.db.derby.DerbySequenceReader;
 import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.firebird.FirebirdIndexReader;
 import workbench.db.firebird.FirebirdProcedureReader;
+import workbench.db.firebird.FirebirdSequenceReader;
 import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2IndexReader;
+import workbench.db.h2database.H2SequenceReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
+import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
+import workbench.db.ibm.Db2SequenceReader;
+import workbench.db.mckoi.McKoiSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleProcedureReader;
+import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresProcedureReader;
+import workbench.db.postgres.PostgresSequenceReader;
 import workbench.resource.Settings;
 
 /**
@@ -70,6 +78,44 @@ public class ReaderFactory
 		}
 
 		return new JdbcProcedureReader(meta.getWbConnection());
+	}
+
+	public static SequenceReader getSequenceReader(WbConnection con)
+	{
+		DbMetadata meta = con.getMetadata();
+		if (meta.isPostgres())
+		{
+			return new PostgresSequenceReader(con);
+		}
+		if (meta.isOracle())
+		{
+			return new OracleSequenceReader(con);
+		}
+		if (meta.isHsql())
+		{
+			return new HsqlSequenceReader(con.getSqlConnection());
+		}
+		if (meta.isApacheDerby() && JdbcUtils.hasMinimumServerVersion(con, "10.6"))
+		{
+			return new DerbySequenceReader(con);
+		}
+		if (meta.isH2())
+		{
+			return new H2SequenceReader(con.getSqlConnection());
+		}
+		if (meta.isFirebird())
+		{
+			return new FirebirdSequenceReader(con);
+		}
+		if (meta.getDbId().startsWith("db2"))
+		{
+			return new Db2SequenceReader(con, meta.getDbId());
+		}
+		if (meta.getDbId().contains("mcckoi"))
+		{
+			return new McKoiSequenceReader(con.getSqlConnection());
+		}
+		return null;
 	}
 
 	public static IndexReader getIndexReader(DbMetadata meta)

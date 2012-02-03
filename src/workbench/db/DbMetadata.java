@@ -205,7 +205,6 @@ public class DbMetadata
 		if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
-			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.dataTypeResolver = new PostgresDataTypeResolver();
 
 			// Starting with the version 8.2 the driver supports the dollar quoting
@@ -225,7 +224,6 @@ public class DbMetadata
 			isOracle = true;
 			oracleMetaData = new OracleMetadata(this.dbConnection);
 			synonymReader = new OracleSynonymReader();
-			sequenceReader = new OracleSequenceReader(this.dbConnection);
 			errorInfoReader = oracleMetaData;
 			dataTypeResolver = oracleMetaData;
 			definitionReader = oracleMetaData;
@@ -243,7 +241,6 @@ public class DbMetadata
 				productName += " 2.0";
 				columnEnhancer = new HsqlColumnEnhancer();
 			}
-			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firebird") > -1)
 		{
@@ -254,7 +251,6 @@ public class DbMetadata
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			productName = "Firebird";
-			sequenceReader = new FirebirdSequenceReader(dbConnection);
 			extenders.add(new FirebirdDomainReader());
 			columnEnhancer = new FirebirdColumnEnhancer();
 		}
@@ -282,7 +278,6 @@ public class DbMetadata
 		else if (productLower.indexOf("db2") > -1)
 		{
 			synonymReader = new Db2SynonymReader();
-			sequenceReader = new Db2SequenceReader(dbConnection, getDbId());
 			procedureReader = new Db2ProcedureReader(dbConnection, getDbId());
 
 			// Generated columns are not available on the host version...
@@ -297,7 +292,6 @@ public class DbMetadata
 			this.isMySql = true;
 			columnEnhancer = new MySQLColumnEnhancer();
 			objectListEnhancer = new MySQLTableCommentReader();
-
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
@@ -309,7 +303,6 @@ public class DbMetadata
 			this.synonymReader = new DerbySynonymReader();
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.6"))
 			{
-				sequenceReader = new DerbySequenceReader(dbConnection);
 				extenders.add(new DerbyTypeReader());
 			}
 			columnEnhancer = new DerbyColumnEnhancer();
@@ -328,7 +321,6 @@ public class DbMetadata
 			int pos = this.productName.indexOf('(');
 			if (pos == -1) pos = this.productName.length() - 1;
 			productName = this.productName.substring(0, pos).trim();
-			sequenceReader = new McKoiSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("sqlite") > -1)
 		{
@@ -345,7 +337,6 @@ public class DbMetadata
 		else if (productLower.equals("h2"))
 		{
 			isH2 = true;
-			sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
 			columnEnhancer = new H2ColumnEnhancer();
@@ -1512,11 +1503,12 @@ public class DbMetadata
 
 		boolean sortNeeded = false;
 
-		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
+		SequenceReader seqReader = this.getSequenceReader();
+		if (seqReader != null && typeIncluded("SEQUENCE", types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
-			List<SequenceDefinition> sequences = sequenceReader.getSequences(catalogPattern, schemaPattern, namePattern);
+			List<SequenceDefinition> sequences = seqReader.getSequences(catalogPattern, schemaPattern, namePattern);
 			for (SequenceDefinition sequence : sequences)
 			{
 				int row = result.addRow();
@@ -2541,7 +2533,7 @@ public class DbMetadata
 			result.add("SYNONYM");
 		}
 
-		if (sequenceReader != null)
+		if (getSequenceReader() != null)
 		{
 			result.add("SEQUENCE");
 		}
@@ -2566,7 +2558,14 @@ public class DbMetadata
 
 	public SequenceReader getSequenceReader()
 	{
-		return this.sequenceReader;
+		synchronized (this.readerLock)
+		{
+			if (sequenceReader == null)
+			{
+				sequenceReader = ReaderFactory.getSequenceReader(this.dbConnection);
+			}
+			return this.sequenceReader;
+		}
 	}
 
 	public boolean isTableType(String type)
