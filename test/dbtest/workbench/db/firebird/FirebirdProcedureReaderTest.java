@@ -1,11 +1,11 @@
 /*
  * FirebirdProcedureReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.firebird;
@@ -51,6 +51,8 @@ public class FirebirdProcedureReaderTest
 			"BEGIN \n" +
 			"  the_answer = 42; \n" +
 			"END;  \n" +
+			"/\n" +
+			"COMMIT;\n" +
 			"/";
 
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
@@ -61,6 +63,10 @@ public class FirebirdProcedureReaderTest
 		throws Exception
 	{
 		FirebirdTestUtil.cleanUpTestCase();
+		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
+		if (con == null) return;
+
+		TestUtil.executeScript(con, "drop procedure answer;");
 	}
 
 	@Test
