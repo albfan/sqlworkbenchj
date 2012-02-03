@@ -44,6 +44,7 @@ public class FirebirdProcedureReaderTest
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		if (con == null) return;
 
+		con.setAutoCommit(true);
 		String sql =
 			"CREATE PROCEDURE answer(a integer) \n" +
 			"RETURNS (the_answer   integer)  \n" +
@@ -51,11 +52,10 @@ public class FirebirdProcedureReaderTest
 			"BEGIN \n" +
 			"  the_answer = 42; \n" +
 			"END;  \n" +
-			"/\n" +
-			"COMMIT;\n" +
-			"/";
+			"/\n";
 
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		con.setAutoCommit(false);
 	}
 
 	@AfterClass
@@ -66,6 +66,7 @@ public class FirebirdProcedureReaderTest
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		if (con == null) return;
 
+		con.setAutoCommit(true);
 		TestUtil.executeScript(con, "drop procedure answer;");
 	}
 
@@ -98,7 +99,7 @@ public class FirebirdProcedureReaderTest
 		assertEquals("IN", type);
 
 		String sql = proc.getSource(con).toString();
-		System.out.println(sql);
+//		System.out.println(sql);
 		assertTrue(sql.startsWith("CREATE PROCEDURE ANSWER (A INTEGER)"));
 		assertTrue(sql.contains("THE_ANSWER INTEGER"));
 		assertTrue(sql.contains("the_answer = 42;"));
