@@ -101,13 +101,13 @@ public class WbListTables extends SqlCommand
 			objects = "%";
 		}
 
-		List<String> objectFilters = StringUtil.stringToList(objects);
-
+		List<String> objectFilters = StringUtil.stringToList(objects, ",", true, true, false, true);
+		
 		for (String filter : objectFilters)
 		{
 			// Create a tableidentifier for parsing e.g. parameters
 			// like -tables=public.*
-			TableIdentifier tbl = new TableIdentifier(filter);
+			TableIdentifier tbl = new TableIdentifier(currentConnection.getMetadata().adjustObjectnameCase(filter));
 			String tschema = tbl.getSchema();
 			if (StringUtil.isBlank(tschema))
 			{
