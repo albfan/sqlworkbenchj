@@ -202,6 +202,18 @@ public class StringUtil
 		return true;
 	}
 
+	/**
+	 * Null safe trim().
+	 *
+	 * @param toTrim
+	 * @return
+	 */
+	public static String trim(String toTrim)
+	{
+		if (toTrim == null) return toTrim;
+		return toTrim.trim();
+	}
+
 	public static String rtrim(String s)
 	{
 		if (s == null) return s;
@@ -209,9 +221,9 @@ public class StringUtil
 		if (pos == 0) return s;
 
 		char last = s.charAt(pos - 1);
-		if (!Character.isWhitespace(last)) return s;
+		if (last > ' ') return s;
 
-		while (pos > 0 && Character.isWhitespace(s.charAt(pos - 1)))
+		while (pos > 0 && s.charAt(pos - 1) <= ' ')
 		{
 			pos --;
 		}
