@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import workbench.db.WbConnection;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.fontzoom.FontZoomer;
 import java.awt.Color;
@@ -2209,7 +2210,9 @@ public class WbTable
 		if (this.getDataStore() == null) return null;
 
 		String csql = this.getDataStore().getGeneratingSql();
-		List<String> tables = SqlUtil.getTables(csql, false);
+		WbConnection conn = this.getDataStore().getOriginalConnection();
+		List<String> tables = SqlUtil.getTables(csql, false, conn);
+
 		TableIdentifier table = null;
 
 		if (tables.size() > 1)
@@ -2224,7 +2227,7 @@ public class WbTable
 			}
 			if (selectedTable != null)
 			{
-				table = new TableIdentifier(selectedTable);
+				table = new TableIdentifier(selectedTable, conn);
 			}
 		}
 		else if (tables.size() == 1)
@@ -2232,7 +2235,7 @@ public class WbTable
 			table = getDataStore().getUpdateTable();
 			if (table == null)
 			{
-				table = new TableIdentifier(tables.get(0));
+				table = new TableIdentifier(tables.get(0), conn);
 			}
 		}
 		return table;

@@ -136,7 +136,7 @@ public class DdlCommand
 				Set<String> types = currentConnection.getMetadata().getObjectsWithData();
 				if (types.contains(info.objectType))
 				{
-					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.objectName));
+					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.objectName, currentConnection));
 				}
 			}
 		}

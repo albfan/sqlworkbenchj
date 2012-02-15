@@ -1319,7 +1319,7 @@ public class DataStore
 		else
 		{
 			if (this.sql == null) return false;
-			List<String> tables = SqlUtil.getTables(this.sql, false, aConn.getMetadata().getCatalogSeparator());
+			List<String> tables = SqlUtil.getTables(this.sql, false, aConn);
 			if (tables.size() != 1) return false;
 			String table = tables.get(0);
 			LogMgr.logDebug("DataStore.checkUpdateTable()", "Using table name: " + table);
@@ -1330,7 +1330,8 @@ public class DataStore
 
 	/**
 	 *	Return the table that should be used when generating INSERTs
-	 *  ("copy as INSERT")
+	 *  ("copy as INSERT").
+	 *
 	 *	Normally this is the update table. If no update table
 	 *	is defined, the table from the SQL statement will be used
 	 *	but no checking for key columns takes place (which might take long)
@@ -1341,9 +1342,9 @@ public class DataStore
 		if (this.updateTableToBeUsed != null) return this.updateTableToBeUsed.getTableExpression();
 		if (this.sql == null) return null;
 		if (!this.sqlHasUpdateTable()) return null;
-		List tables = SqlUtil.getTables(this.sql);
+		List<String> tables = SqlUtil.getTables(this.sql, false, originalConnection);
 		if (tables.size() != 1) return null;
-		String table = (String)tables.get(0);
+		String table = tables.get(0);
 		return table;
 	}
 
@@ -1375,7 +1376,7 @@ public class DataStore
 	{
 		if (this.updateTable != null) return true;
 		if (this.sql == null) return false;
-		List tables = SqlUtil.getTables(this.sql);
+		List<String> tables = SqlUtil.getTables(this.sql, false, this.originalConnection);
 		return (tables.size() == 1);
 	}
 

@@ -24,7 +24,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * Display the source code of a trigger.
- * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition) 
+ * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition)
  *
  * @author Thomas Kellerer
  */
@@ -53,7 +53,7 @@ public class WbTriggerSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		DbObject object = new TableIdentifier(args);
+		DbObject object = new TableIdentifier(args, currentConnection);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());

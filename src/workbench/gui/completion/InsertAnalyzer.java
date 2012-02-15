@@ -106,7 +106,7 @@ public class InsertAnalyzer
 		TableIdentifier table = null;
 		if (tableName != null)
 		{
-			table = new TableIdentifier(tableName);
+			table = new TableIdentifier(tableName, dbConnection);
 		}
 
 		if (cursorPos > intoStart && cursorPos < intoEnd)

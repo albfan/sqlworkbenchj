@@ -121,7 +121,7 @@ public class SourceTableArgument
 			}
 			else
 			{
-				TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t));
+				TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t, dbConn));
 				if (tbl != null)
 				{
 					result.add(tbl);

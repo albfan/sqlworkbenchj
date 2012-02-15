@@ -73,7 +73,7 @@ public class WbListProcedures
 		}
 		else if (StringUtil.isNonBlank(args))
 		{
-			DbObject db = new TableIdentifier(args);
+			DbObject db = new TableIdentifier(args, currentConnection);
 			schema = db.getSchema();
 			catalog = db.getCatalog();
 			name = db.getObjectName();

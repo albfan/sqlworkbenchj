@@ -75,7 +75,7 @@ public class TableIdentifier
 	{
 		this.expression = null;
 		this.isNewTable = false;
-		this.setTable(aName);
+		this.setTable(aName, conn == null ? '.' : conn.getMetadata().getCatalogSeparator());
 		this.adjustCase(conn);
 	}
 
@@ -480,10 +480,13 @@ public class TableIdentifier
 	{
 		setTable(aTable, '.');
 	}
+
 	public final void setTable(String aTable, char catalogSeparator)
 	{
 		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
+		{
 			throw new IllegalArgumentException("Table name may not be null");
+		}
 
 		if (aTable == null)
 		{

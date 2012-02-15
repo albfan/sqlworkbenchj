@@ -91,7 +91,7 @@ public class UpdateAnalyzer
 			if (table != null)
 			{
 				context = CONTEXT_COLUMN_LIST;
-				tableForColumnList = new TableIdentifier(table);
+				tableForColumnList = new TableIdentifier(table, dbConnection);
 			}
 		}
 	}

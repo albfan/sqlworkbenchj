@@ -66,7 +66,7 @@ public class SelectAnalyzer
 		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
 
 		// find the tables from the FROM clause
-		List<String> tables = SqlUtil.getTables(sql, true);
+		List<String> tables = SqlUtil.getTables(sql, true, dbConnection);
 
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
@@ -117,7 +117,7 @@ public class SelectAnalyzer
 			if (fromPos < 0 && q != null)
 			{
 				context = CONTEXT_TABLE_OR_COLUMN_LIST;
-				this.tableForColumnList = new TableIdentifier(q);
+				this.tableForColumnList = new TableIdentifier(q, dbConnection);
 			}
 			else
 			{
@@ -342,7 +342,7 @@ public class SelectAnalyzer
 	@Override
 	public List<TableAlias> getTables()
 	{
-		List<String> tables = SqlUtil.getTables(sql, true);
+		List<String> tables = SqlUtil.getTables(sql, true, dbConnection);
 		List<TableAlias> result = new ArrayList<TableAlias>(tables.size());
 		for (String s : tables)
 		{

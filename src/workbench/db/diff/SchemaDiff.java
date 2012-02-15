@@ -245,9 +245,9 @@ public class SchemaDiff
 		for (int i=0; i < referenceList.size(); i++)
 		{
 			String rname = referenceList.get(i);
-			TableIdentifier rtbl = referenceDb.getMetadata().findTable(new TableIdentifier(rname), false);
+			TableIdentifier rtbl = referenceDb.getMetadata().findTable(new TableIdentifier(rname, referenceDb), false);
 			String tname = targetList.get(i);
-			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname), false);
+			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname, targetDb), false);
 			if (rtbl != null && ttbl != null)
 			{
 				reference.add(rtbl);
@@ -1177,7 +1177,7 @@ class DiffEntry
 {
 	TableIdentifier reference;
 	TableIdentifier target;
-	
+
 	DiffEntry(TableIdentifier ref, TableIdentifier tar)
 	{
 		reference = ref;

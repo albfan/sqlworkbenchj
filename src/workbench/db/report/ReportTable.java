@@ -81,11 +81,7 @@ public class ReportTable
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
 	private List<ObjectOption> dbmsOptions;
-
-	public ReportTable(TableIdentifier tbl)
-	{
-		this.table = tbl;
-	}
+	private char catalogSeparator;
 
 	/**
 	 * Initialize this ReportTable.
@@ -98,7 +94,7 @@ public class ReportTable
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.ConstraintReader#getTableConstraints(workbench.db.WbConnection, workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportTable(TableIdentifier tbl, WbConnection conn,
+	public ReportTable(TableIdentifier tbl, WbConnection conn, 
 			boolean includeIndex,
 			boolean includeFk,
 			boolean includePk,
@@ -108,6 +104,7 @@ public class ReportTable
 		throws SQLException
 	{
 		this.includePrimaryKey = includePk;
+		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 
 		// By using getTableDefinition() the TableIdentifier is completely initialized
 		// (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
@@ -174,6 +171,12 @@ public class ReportTable
 			}
 		}
 		retrieveOptions(conn);
+	}
+
+	private ReportTable(TableIdentifier tbl, char catSep)
+	{
+		this.table = tbl;
+		this.catalogSeparator = catSep;
 	}
 
 	public List<ObjectOption> getDbmsOptions()
@@ -309,7 +312,7 @@ public class ReportTable
 				}
 				if (def.getForeignTable() == null)
 				{
-					def.setForeignTable(new ReportTable(new TableIdentifier(reftable)));
+					def.setForeignTable(new ReportTable(new TableIdentifier(reftable, catalogSeparator), catalogSeparator));
 				}
 				def.addReferenceColumn(col, refcolumn);
 				rcol.setForeignKeyReference(def.getColumnReference(col));

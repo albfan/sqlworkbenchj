@@ -75,7 +75,7 @@ public class SqlExportWriter
 		String table = exporter.getTableName();
 		if (table != null)
 		{
-			conv.setAlternateUpdateTable(new TableIdentifier(table));
+			conv.setAlternateUpdateTable(new TableIdentifier(table, exporter.getConnection()));
 		}
 		conv.setCreateTable(exporter.isIncludeCreateTable());
 

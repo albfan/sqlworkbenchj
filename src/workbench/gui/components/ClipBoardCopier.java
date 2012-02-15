@@ -293,7 +293,7 @@ public class ClipBoardCopier
 				if (data.getResultInfo().getUpdateTable() == null)
 				{
 					String tbl = data.getInsertTable();
-					TableIdentifier table = new TableIdentifier(tbl);
+					TableIdentifier table = new TableIdentifier(tbl, data.getOriginalConnection());
 					converter.setAlternateUpdateTable(table);
 				}
 			}

@@ -50,7 +50,7 @@ public class WbProcSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		TableIdentifier object = new TableIdentifier(args);
+		TableIdentifier object = new TableIdentifier(args, currentConnection);
 		object.adjustCase(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
@@ -66,7 +66,7 @@ public class WbProcSource
 			result.addMessage(ResourceMgr.getFormattedString("ErrProcNotFound", args));
 			result.setFailure();
 		}
-		
+
 		return result;
 	}
 

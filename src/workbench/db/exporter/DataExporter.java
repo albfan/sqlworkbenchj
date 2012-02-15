@@ -875,7 +875,7 @@ public class DataExporter
 
 	public void addQueryJob(String query, WbFile outputFile, String where)
 	{
-		ExportJobEntry entry = new ExportJobEntry(outputFile, query, where);
+		ExportJobEntry entry = new ExportJobEntry(outputFile, query, where, getConnection());
 		this.jobQueue.add(entry);
 	}
 

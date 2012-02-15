@@ -50,7 +50,7 @@ public class DeleteAnalyzer
 			// so we'll need a column list
 			context = CONTEXT_COLUMN_LIST;
 			String table = SqlUtil.getDeleteTable(sql);
-			if (table != null) tableForColumnList = new TableIdentifier(table);
+			if (table != null) tableForColumnList = new TableIdentifier(table, dbConnection);
 		}
 	}
 

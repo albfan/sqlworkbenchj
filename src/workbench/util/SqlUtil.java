@@ -642,11 +642,11 @@ public class SqlUtil
 			}
 
 			result = new ResultInfo(meta, conn);
-			List tables = getTables(sql, false);
+			List<String> tables = getTables(sql, false, conn);
 			if (tables.size() == 1)
 			{
-				String table = (String)tables.get(0);
-				TableIdentifier tbl = new TableIdentifier(table);
+				String table = tables.get(0);
+				TableIdentifier tbl = new TableIdentifier(table, conn);
 				result.setUpdateTable(tbl);
 			}
 			conn.releaseSavepoint(sp);
@@ -901,6 +901,12 @@ public class SqlUtil
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
 		return getTables(sql, includeAlias, '.');
+	}
+
+	public static List<String> getTables(String sql, boolean includeAlias, WbConnection conn)
+	{
+		char separator = conn == null ? '.' : conn.getMetadata().getCatalogSeparator();
+		return getTables(sql, includeAlias, separator);
 	}
 
 	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator)

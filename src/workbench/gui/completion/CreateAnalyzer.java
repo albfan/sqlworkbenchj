@@ -115,7 +115,7 @@ public class CreateAnalyzer
 			context = CONTEXT_COLUMN_LIST;
 			if (tableEndPos == -1) tableEndPos = this.sql.length() - 1;
 			String table = this.sql.substring(tableStartPos, tableEndPos).trim();
-			this.tableForColumnList = new TableIdentifier(table);
+			this.tableForColumnList = new TableIdentifier(table, dbConnection);
 		}
 		else if (afterCreate)
 		{

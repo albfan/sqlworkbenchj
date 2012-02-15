@@ -41,6 +41,14 @@ public class TableAliasTest
 	}
 
 	@Test
+	public void testDB2Separator()
+	{
+		String value = "mylib/table1";
+		TableAlias ta = new TableAlias(value);
+		assertEquals("mylib/table1", ta.getObjectName());
+	}
+
+	@Test
 	public void testCompare()
 	{
 		String value = "table1";

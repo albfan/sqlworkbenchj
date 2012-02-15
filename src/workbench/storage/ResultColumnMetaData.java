@@ -52,7 +52,7 @@ public class ResultColumnMetaData
 		connection = conn;
 		if (StringUtil.isBlank(sql)) return;
 
-		tables = SqlUtil.getTables(sql, true);
+		tables = SqlUtil.getTables(sql, true, conn);
 		if (CollectionUtil.isEmpty(tables)) return;
 
 		columns = SqlUtil.getSelectColumns(sql, true);
@@ -63,6 +63,7 @@ public class ResultColumnMetaData
 	{
 		retrieveColumnRemarks(info, null);
 	}
+
 	public void retrieveColumnRemarks(ResultInfo info, TableDefinition tableDef)
 		throws SQLException
 	{
@@ -80,8 +81,7 @@ public class ResultColumnMetaData
 			else
 			{
 				TableAlias alias = new TableAlias(table);
-				TableIdentifier tbl = alias.getTable();
-				tbl.adjustCase(connection);
+				TableIdentifier tbl = new TableIdentifier(alias.getObjectName(), meta.getCatalogSeparator());
 				TableDefinition def = meta.getTableDefinition(tbl);
 				tableDefs.put(alias.getNameToUse().toLowerCase(), def);
 			}

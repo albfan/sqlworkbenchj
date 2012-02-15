@@ -186,10 +186,10 @@ public abstract class ExportWriter
 
 		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
 		{
-			List<String> tables = SqlUtil.getTables(query);
+			List<String> tables = SqlUtil.getTables(query, false, this.exporter.getConnection());
 			if (tables.size() > 0)
 			{
-				info.setUpdateTable(new TableIdentifier(tables.get(0)));
+				info.setUpdateTable(new TableIdentifier(tables.get(0), exporter.getConnection()));
 			}
 		}
 

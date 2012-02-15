@@ -414,7 +414,7 @@ public class TriggerListPanel
 				TableIdentifier tbl = null;
 				if (tableName != null)
 				{
-					tbl = new TableIdentifier(tableName);
+					tbl = new TableIdentifier(tableName, dbConnection);
 					if (tbl.getCatalog() == null) tbl.setCatalog(currentCatalog);
 					if (tbl.getSchema() == null) tbl.setSchema(currentSchema);
 				}
@@ -489,7 +489,7 @@ public class TriggerListPanel
 			String tableName = triggerList.getValueAsString(rows[i], TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 			if (tableName != null)
 			{
-				trg.setRelatedTable(new TableIdentifier(tableName));
+				trg.setRelatedTable(new TableIdentifier(tableName, dbConnection));
 			}
 			objects.add(trg);
 		}

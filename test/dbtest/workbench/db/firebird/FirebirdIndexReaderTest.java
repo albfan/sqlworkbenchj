@@ -58,8 +58,9 @@ public class FirebirdIndexReaderTest
 			assertNotNull(index);
 			assertEquals("COMPUTED BY (upper(last_name))", index.getExpression());
 			String create = index.getSource(conn).toString().trim();
+//			System.out.println("********\n" + create);
 			String expected =
-				"CREATE UNIQUE INDEX IDX_UPPER_NAME\n" +
+				"CREATE INDEX IDX_UPPER_NAME\n" +
 				"   ON PERSON COMPUTED BY (upper(last_name));";
 			assertEquals(expected, create);
 		}

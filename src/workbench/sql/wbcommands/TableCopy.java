@@ -89,13 +89,13 @@ class TableCopy
 		TableIdentifier targetId = null;
 		if (createTable)
 		{
-			targetId = new TableIdentifier(targettable);
+			targetId = new TableIdentifier(targettable, targetConnection);
 			targetId.setNewTable(true);
 			createTableType = cmdLine.getValue(WbCopy.PARAM_TABLE_TYPE, DbSettings.DEFAULT_CREATE_TABLE_TYPE);
 		}
 		else
 		{
-			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable), false);
+			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable, targetConnection), false);
 		}
 
 		if (targetId == null && !skipTargetCheck)
@@ -105,12 +105,12 @@ class TableCopy
 
 		if (targetId == null && skipTargetCheck)
 		{
-			targetId = new TableIdentifier(targettable);
+			targetId = new TableIdentifier(targettable, targetConnection);
 		}
 
 		if (sourcetable != null)
 		{
-			TableIdentifier srcTable = new TableIdentifier(sourcetable);
+			TableIdentifier srcTable = new TableIdentifier(sourcetable, sourceConnection);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
 

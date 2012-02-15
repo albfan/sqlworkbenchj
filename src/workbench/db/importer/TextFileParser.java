@@ -1208,7 +1208,7 @@ public class TextFileParser
 
 	private TableIdentifier createTargetTableId()
 	{
-		TableIdentifier table = new TableIdentifier(this.tableName);
+		TableIdentifier table = new TableIdentifier(this.tableName, this.connection);
 		table.setPreserveQuotes(true);
 		if (this.targetSchema != null)
 		{

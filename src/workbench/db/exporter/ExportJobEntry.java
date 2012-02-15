@@ -32,15 +32,15 @@ public class ExportJobEntry
 	private String query;
 	private TableIdentifier baseTable;
 	private ResultInfo resultInfo;
-	
-	public ExportJobEntry(File file, String sql, String where)
+
+	public ExportJobEntry(File file, String sql, String where, WbConnection conn)
 	{
 		outputFile = new WbFile(file);
 		query = sql;
-		List<String> tables = SqlUtil.getTables(query);
+		List<String> tables = SqlUtil.getTables(query, false, conn);
 		if (tables.size() == 1)
 		{
-			this.baseTable = new TableIdentifier(tables.get(0)); 
+			this.baseTable = new TableIdentifier(tables.get(0), conn);
 		}
 		appendWhere(where);
 	}
@@ -79,7 +79,7 @@ public class ExportJobEntry
 			query += SqlUtil.trimSemicolon(where);
 		}
 	}
-	
+
 	public WbFile getOutputFile()
 	{
 		return outputFile;
@@ -89,7 +89,7 @@ public class ExportJobEntry
 	{
 		return resultInfo;
 	}
-	
+
 	public TableIdentifier getTable()
 	{
 		if (resultInfo != null)
@@ -98,7 +98,7 @@ public class ExportJobEntry
 		}
 		return baseTable;
 	}
-	
+
 	public String getQuerySql()
 	{
 		return query;
