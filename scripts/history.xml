@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-01-23">
+    <entry dev-build="13" type="enh">For Oracle the SQL for temporary tables is now generated correctly.</entry>
     <entry dev-build="12" type="enh">The notification about a finished (long running) script can now optionally be done using the system tray.</entry>
     <entry dev-build="11" type="enh">Enhanced the behaviour of the editor when when typing while a rectangular selection is active.</entry>
     <entry dev-build="11" type="enh">Implemented a workaround for Firebird JDBC driver which does not return function based indexes (and thus they were not shown in the DbExplorer)</entry>
@@ -27,6 +28,8 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="13" type="fix">"Delete word" would delete too much if the caret was located at a whitespace</entry>
+    <entry dev-build="13" type="fix">Fixed a problem with detecting tables for DB2 iSeries and the library search path.</entry>
     <entry dev-build="12" type="fix">No columns were shown in the DbExplorer for Vertica when the table or view name contained an underscore.</entry>
     <entry dev-build="10" type="fix">For DB2, the source code for views created using CREATE OR REPLACE was not shown correctly.</entry>
     <entry dev-build="10" type="fix">Adding a new column in the DbExplorer was not working for DBMS that do not support renaming of columns.</entry>
