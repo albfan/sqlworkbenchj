@@ -72,6 +72,7 @@ import javax.swing.table.TableModel;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyAllColumnNamesAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
@@ -1918,6 +1919,7 @@ public class WbTable
 		headerPopup.add(optimizeAllCol.getMenuItem());
 		headerPopup.add(setColWidth.getMenuItem());
 		headerPopup.add(new CopyColumnNameAction(WbTable.this));
+		headerPopup.add(new CopyAllColumnNamesAction(WbTable.this));
 		headerPopup.addSeparator();
 		headerPopup.add(new ScrollToColumnAction(WbTable.this));
 		headerPopup.addSeparator();
