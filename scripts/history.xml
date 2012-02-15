@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-01-23">
+    <entry dev-build="13" type="enh">A new option to copy all column names of a result is available (thanks Andreas)</entry>
     <entry dev-build="13" type="enh">For Oracle the SQL for temporary tables is now generated correctly.</entry>
     <entry dev-build="12" type="enh">The notification about a finished (long running) script can now optionally be done using the system tray.</entry>
     <entry dev-build="11" type="enh">Enhanced the behaviour of the editor when when typing while a rectangular selection is active.</entry>

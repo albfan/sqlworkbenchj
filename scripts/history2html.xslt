@@ -18,13 +18,14 @@
           />
 
   <xsl:include href="get_builds_from_history.xslt"/>
-	
+
   <xsl:template match="history">
-  
+
     <html>
+    <head>
       <title>SQL Workbench/J Change Log</title>
-    <style>
-      
+      <style>
+
       body {
         font-size:13px;
         margin-left:5%;
@@ -68,7 +69,7 @@
       }
 
       </style>
-    </html>
+    </head>
     <body>
       <h1 style="font-size:18px">SQL Workbench/J Change Log</h1>
 
@@ -87,7 +88,7 @@
         </xsl:variable>
 
         <h2 class="build-nr">Build <xsl:value-of select="$display-build"/> (<xsl:value-of select="@date"/>)</h2>
-        
+
         <xsl:if test="count(entry[@type='enh']) &gt; 0">
           <h3 class="history-entry">Enhancements</h3>
           <ul>
@@ -110,7 +111,8 @@
 
       </xsl:for-each>
     </body>
-    
+    </html>
+
   </xsl:template>
 
 </xsl:stylesheet>
