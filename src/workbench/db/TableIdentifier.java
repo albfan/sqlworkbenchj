@@ -136,7 +136,8 @@ public class TableIdentifier
 
 	/**
 	 * Return an expression that should be used in the CREATE TABLE statement to specify
-	 * an optional table type (e.g. CREATE UNLOGGED TABLE for Postgres)
+	 * an optional table type.
+	 * (e.g. CREATE UNLOGGED TABLE for Postgres, or GLOBAL TEMPORARY for Oracle
 	 */
 	public String getTableTypeOption()
 	{
@@ -349,17 +350,8 @@ public class TableIdentifier
 		DbMetadata meta = conn.getMetadata();
 		if (meta.needSchemaInDML(this))
 		{
-			String schemaToUse = this.schema;
-			if (schemaToUse == null)
-			{
-				schemaToUse = meta.getSchemaToUse();
-			}
-
-			if (schemaToUse != null && !meta.ignoreSchema(schemaToUse))
-			{
-				return schemaToUse;
-			}
-			return this.schema;
+			if (this.schema != null) return this.schema;
+			return meta.getSchemaToUse();
 		}
 		return null;
 	}
@@ -732,7 +724,7 @@ public class TableIdentifier
 	{
 		return this.primaryKey;
 	}
-	
+
 	public void setPrimaryKey(PkDefinition pk)
 	{
 		this.primaryKey = pk;

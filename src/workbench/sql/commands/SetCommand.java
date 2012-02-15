@@ -245,6 +245,11 @@ public class SetCommand
 			runner.setSessionProperty("autotrace", StringUtil.listToString(flags, ','));
 			result.addMessageByKey("MsgAutoTraceOn");
 		}
+		else
+		{
+			result.addMessageByKey("MsgAutoTraceUsage");
+			result.setFailure();
+		}
 		return result;
 	}
 

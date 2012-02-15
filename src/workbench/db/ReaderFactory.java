@@ -52,17 +52,14 @@ public class ReaderFactory
 		{
 			return new OracleProcedureReader(meta.getWbConnection());
 		}
-
 		if (meta.isPostgres())
 		{
 			return new PostgresProcedureReader(meta.getWbConnection());
 		}
-
 		if (meta.isFirebird())
 		{
 			return new FirebirdProcedureReader(meta.getWbConnection());
 		}
-
 		if (meta.isSqlServer())
 		{
 			boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", false);
@@ -71,12 +68,10 @@ public class ReaderFactory
 				return new SqlServerProcedureReader(meta.getWbConnection());
 			}
 		}
-
 		if (meta.isMySql())
 		{
 			return new MySqlProcedureReader(meta.getWbConnection());
 		}
-
 		return new JdbcProcedureReader(meta.getWbConnection());
 	}
 
@@ -162,7 +157,7 @@ public class ReaderFactory
 		{
 			return new Db2ConstraintReader(meta.getWbConnection());
 		}
-		if ("firebird".equals(dbid))
+		if (meta.isFirebird())
 		{
 			return new FirebirdConstraintReader();
 		}

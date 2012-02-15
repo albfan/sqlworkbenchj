@@ -172,17 +172,16 @@ public class JdbcIndexReader
 	 * @return SQL Script to create indexes
 	 */
 	@Override
-	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList, String tableNameToUse)
 	{
-		if (indexDefinition == null) return null;
-		int count = indexDefinition.getRowCount();
+		if (indexList == null) return null;
+		int count = indexList.size();
 		if (count == 0) return StringUtil.emptyBuffer();
 
 		StringBuilder result = new StringBuilder(count * 100);
 
-		for (int i = 0; i < count; i++)
+		for (IndexDefinition definition : indexList)
 		{
-			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them
@@ -492,7 +491,7 @@ public class JdbcIndexReader
 				def.setUnique(!nonUniqueFlag);
 				if (metaData.getDbSettings().pkIndexHasTableName())
 				{
-					def.setPrimaryKeyIndex(indexName.equals(tbl.getTableName()));
+					def.setPrimaryKeyIndex(indexName.equals(tbl.getRawTableName()));
 				}
 				defs.put(indexName, def);
 

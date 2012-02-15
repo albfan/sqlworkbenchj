@@ -99,30 +99,27 @@ public class TableSourceBuilder
 
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
-		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(def.getTable());
+		List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(def.getTable());
 		DataStore fkDef = null;
 		if (includeFk)
 		{
 			FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 			fkDef = fk.getForeignKeys(def.getTable(), false);
 		}
-
-		// getTableDefinition() has already retrieved the necessary PK information
-		// there is no need to retrieve the index definition to get the PK information
 		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, null, includeFk);
 		return source;
 	}
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
 	{
-		DataStore indexInfo = getIndexReader().getTableIndexInformation(table);
+		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table);
 		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		StringBuilder result = new StringBuilder(250);
-		result.append(getCreateTable(table, columns, aIndexDef, aFkDef, includeDrop, tableNameToUse, includeFk));
+		result.append(getCreateTable(table, columns, indexList, aFkDef, includeDrop, tableNameToUse, includeFk));
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
@@ -138,7 +135,7 @@ public class TableSourceBuilder
 
 		if (dbConnection.getDbSettings().getGenerateTableIndexSource())
 		{
-			StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, tableNameToUse);
+			StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList, tableNameToUse);
 			if (StringUtil.isNonBlank(indexSource))
 			{
 				result.append(lineEnding);
@@ -204,7 +201,7 @@ public class TableSourceBuilder
 	 *
 	 * @return the CREATE TABLE statement for the table
 	 */
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore indexList, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -278,7 +275,7 @@ public class TableSourceBuilder
 
 		String pkIndexName = getPKName(indexList);
 		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : pkIndexName;
-		
+
 		if (pkname != null && pkCols.isEmpty())
 		{
 			// this can happen in DB2 iSeries. Apparently the columns are not always marked as PK
@@ -347,13 +344,11 @@ public class TableSourceBuilder
 	}
 
 
-	private List<String> getPKColsFromIndex(DataStore indexList, String pkname)
+	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList, String pkname)
 	{
 		List<String> columns = new ArrayList<String>();
-		int count = indexList.getRowCount();
-		for (int row = 0; row < count; row ++)
+		for (IndexDefinition index : indexList)
 		{
-			IndexDefinition index = (IndexDefinition)indexList.getRow(row).getUserObject();
 			if (index != null && index.isPrimaryKeyIndex())
 			{
 				for (IndexColumn col : index.getColumns())
@@ -398,32 +393,27 @@ public class TableSourceBuilder
 		return result.toString();
 	}
 
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		return null;
 	}
 
-	protected String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	protected String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		return null;
 	}
 
-	private String getPKName(DataStore anIndexDef)
+	private String getPKName(List<IndexDefinition> indexList)
 	{
-		if (anIndexDef == null) return null;
-		int count = anIndexDef.getRowCount();
-
-		String name = null;
-		for (int row = 0; row < count; row ++)
+		if (indexList == null) return null;
+		for (IndexDefinition index : indexList)
 		{
-			String is_pk = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
-			if ("YES".equalsIgnoreCase(is_pk))
+			if (index.isPrimaryKeyIndex())
 			{
-				name = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
-				break;
+				return index.getName();
 			}
 		}
-		return name;
+		return null;
 	}
 
 	public String getNativeTableSource(TableIdentifier table, boolean includeDrop)

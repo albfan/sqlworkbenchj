@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.actions.SelectionFilterAction;
@@ -583,24 +584,13 @@ public class TableDataPanel
 		return sql.toString();
 	}
 
-	private String buildSqlForTable()
+	private String buildSqlForTable(TableDefinition tableDef)
 	{
-		if (this.table == null) return null;
+		if (tableDef == null) return null;
 
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection);
-		try
-		{
-			String sql = builder.getSelectForTable(this.table);
-			return sql;
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("TableDataPanel.buildSqlForTable()", "Error building sql", e);
-			StringBuilder sql = new StringBuilder(100);
-			sql.append("SELECT * FROM ");
-			sql.append(this.table.getTableExpression(this.dbConnection));
-			return sql.toString();
-		}
+		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
+		return sql;
 	}
 
 	private void clearLoadingImage()
@@ -730,7 +720,18 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 
-		String sql = this.buildSqlForTable();
+		final TableDefinition tableDef;
+		try
+		{
+			tableDef = dbConnection.getMetadata().getTableDefinition(table);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("TableDataPanel.doRetrieve()", "Could not retrieve table definition", sql);
+			return;
+		}
+
+		String sql = this.buildSqlForTable(tableDef);
 		if (sql == null) return;
 
 		this.retrieveStart();
@@ -760,7 +761,7 @@ public class TableDataPanel
 
 			if (GuiSettings.getRetrieveQueryComments())
 			{
-				dataDisplay.readColumnComments();
+				dataDisplay.readColumnComments(tableDef);
 			}
 
 			// By directly setting the update table, we avoid
@@ -771,7 +772,7 @@ public class TableDataPanel
 				@Override
 				public void run()
 				{
-					dataDisplay.setUpdateTableToBeUsed(table);
+					dataDisplay.defineUpdateTable(tableDef);
 					dataDisplay.getSelectKeysAction().setEnabled(true);
 					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 					dataDisplay.setPrintHeader(header);

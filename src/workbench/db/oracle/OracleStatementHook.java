@@ -45,7 +45,7 @@ public class OracleStatementHook
 	implements StatementHook
 {
 
-	private static final String sql =
+	private static final String retrieveStats =
 			"select s.value, a.name, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
@@ -146,11 +146,11 @@ public class OracleStatementHook
 		String query = null;
 		if (showStatvalueFirst())
 		{
-			query = sql + " (" + stats + ")";
+			query = retrieveStats + " (" + stats + ")";
 		}
 		else
 		{
-			query = sql.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
+			query = retrieveStats.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
 		}
 
 		LogMgr.logDebug("OracleStatementHook.buildQuery()", "Using SQL=" + query);
@@ -197,7 +197,7 @@ public class OracleStatementHook
 				}
 			}
 		}
-		
+
 		if (showExecutionPlan)
 		{
 			DataStore plan = retrieveExecutionPlan(runner, sql);

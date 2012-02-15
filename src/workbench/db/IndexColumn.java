@@ -32,13 +32,13 @@ public class IndexColumn
 
   public IndexColumn(String col, String dir)
   {
-		this.column = col;
+		this.column = StringUtil.trim(col);
 		this.direction = dir;
   }
 
 	public void setColumn(String newName)
 	{
-		this.column = newName;
+		this.column = StringUtil.trim(newName);
 	}
 
 	public String getColumn()
@@ -107,6 +107,12 @@ public class IndexColumn
 				return o1.sequence - o2.sequence;
 			}
 		};
+	}
+
+	@Override
+	public String toString()
+	{
+		return column;
 	}
 
 }

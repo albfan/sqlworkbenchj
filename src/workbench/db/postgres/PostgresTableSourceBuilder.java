@@ -19,17 +19,10 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DomainIdentifier;
-import workbench.db.EnumIdentifier;
-import workbench.db.JdbcUtils;
-import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -48,7 +41,7 @@ public class PostgresTableSourceBuilder
 	}
 
 	@Override
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		if (table == null) return null;
 
@@ -277,11 +270,11 @@ public class PostgresTableSourceBuilder
 	 *
 	 * @param table
 	 * @param columns
-	 * @param aIndexDef
+	 * @param indexList
 	 * @return
 	 */
 	@Override
-	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		String schema = table.getSchemaToUse(this.dbConnection);
 		CharSequence enums = getEnumInformation(columns, schema);
@@ -336,7 +329,8 @@ public class PostgresTableSourceBuilder
 					if (StringUtil.isNonBlank(seq))
 					{
 						String msg = ResourceMgr.getFormattedString("TxtSequenceCol", col.getColumnName(), seq);
-						b.append("\n-- " + msg);
+						b.append("\n-- ");
+						b.append(msg);
 					}
 				}
 			}
@@ -368,7 +362,9 @@ public class PostgresTableSourceBuilder
 			EnumIdentifier enumDef = enums.get(dbType);
 			if (enumDef != null)
 			{
-				result.append("\n-- enum '" + dbType + "': ");
+				result.append("\n-- enum '");
+				result.append(dbType);
+				result.append("': ");
 				result.append(StringUtil.listToString(enumDef.getValues(), ",", true, '\''));
 			}
 		}
@@ -389,7 +385,9 @@ public class PostgresTableSourceBuilder
 			DomainIdentifier domain = domains.get(dbType);
 			if (domain != null)
 			{
-				result.append("\n-- domain '" + dbType + "': ");
+				result.append("\n-- domain '");
+				result.append(dbType);
+				result.append("': ");
 				result.append(domain.getSummary());
 			}
 		}

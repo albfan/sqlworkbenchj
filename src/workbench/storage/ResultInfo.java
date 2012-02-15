@@ -494,7 +494,7 @@ public class ResultInfo
 
 		if (!found)
 		{
-			found = readPkColumnsFromMapping();
+			readPkColumnsFromMapping();
 		}
 	}
 

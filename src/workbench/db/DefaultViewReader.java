@@ -17,7 +17,6 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -171,8 +170,8 @@ public class DefaultViewReader
 
 		// Oracle and MS SQL Server support materialized views. For those
 		// the index definitions are of interest as well.
-		DataStore indexInfo = connection.getMetadata().getIndexReader().getTableIndexInformation(viewTable);
-		if (indexInfo.getRowCount() > 0)
+		List<IndexDefinition> indexInfo = connection.getMetadata().getIndexReader().getTableIndexList(viewTable);
+		if (indexInfo.size() > 0)
 		{
 			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(viewTable, indexInfo, null);
 			if (idx != null && idx.length() > 0)

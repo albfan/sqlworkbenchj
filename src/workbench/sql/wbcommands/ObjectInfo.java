@@ -66,19 +66,19 @@ public class ObjectInfo
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		TableIdentifier tbl = new TableIdentifier(objectName, connection.getMetadata().getCatalogSeparator());
+		TableIdentifier dbObject = new TableIdentifier(objectName, connection.getMetadata().getCatalogSeparator());
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
 		boolean showSchema = false;
 		TableIdentifier toDescribe = null;
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
-		if (tbl.getSchema() == null && !searchPath.isEmpty())
+		if (dbObject.getSchema() == null && !searchPath.isEmpty())
 		{
 			LogMgr.logDebug("ObjectInfo.getObjectInfo()", "Searching schemas: " + searchPath + " for " + objectName);
 			showSchema = true;
 			for (String schema : searchPath)
 			{
-				TableIdentifier tb = tbl.createCopy();
+				TableIdentifier tb = dbObject.createCopy();
 				tb.setSchema(schema);
 				toDescribe = connection.getMetadata().findObject(tb, true, false);
 				if (toDescribe != null) break;
@@ -86,7 +86,7 @@ public class ObjectInfo
 		}
 		else
 		{
-			toDescribe = connection.getMetadata().findObject(tbl, true, searchAllSchemas);
+			toDescribe = connection.getMetadata().findObject(dbObject, true, searchAllSchemas);
 		}
 
 		DbSettings dbs = connection.getDbSettings();
@@ -164,8 +164,9 @@ public class ObjectInfo
 			try
 			{
 				// No table or something similar found, try to find a procedure with that name
+				dbObject.adjustCase(connection);
 				ProcedureReader reader = connection.getMetadata().getProcedureReader();
-				List<ProcedureDefinition> procs = reader.getProcedureList(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+				List<ProcedureDefinition> procs = reader.getProcedureList(dbObject.getCatalog(), dbObject.getSchema(), dbObject.getObjectName());
 
 				if (procs.size() == 1)
 				{
@@ -187,7 +188,7 @@ public class ObjectInfo
 			{
 				// No procedure found, try to find a trigger.
 				TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
-				TriggerDefinition trg = trgReader.findTrigger(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+				TriggerDefinition trg = trgReader.findTrigger(dbObject.getCatalog(), dbObject.getSchema(), dbObject.getObjectName());
 				String source = null;
 				if (trg != null)
 				{
@@ -195,7 +196,7 @@ public class ObjectInfo
 				}
 				if (StringUtil.isNonBlank(source))
 				{
-					result.addMessage("--------[ Trigger: " + tbl.getObjectName() + " ]--------");
+					result.addMessage("--------[ Trigger: " + dbObject.getObjectName() + " ]--------");
 					result.addMessage(source);
 					result.addMessage("--------");
 					result.setSuccess();

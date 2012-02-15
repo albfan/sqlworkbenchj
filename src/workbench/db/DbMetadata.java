@@ -32,25 +32,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.derby.DerbyColumnEnhancer;
-import workbench.db.derby.DerbySequenceReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.derby.DerbyTypeReader;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
-import workbench.db.firebird.FirebirdSequenceReader;
 import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
-import workbench.db.h2database.H2SequenceReader;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
-import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
-import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
-import workbench.db.mckoi.McKoiSequenceReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
@@ -61,7 +55,6 @@ import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetadata;
-import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
@@ -71,7 +64,6 @@ import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
-import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.log.LogMgr;
@@ -2157,7 +2149,7 @@ public class DbMetadata
 
 		TableIdentifier retrieve = table;
 
-		if ("SYNONYM".equalsIgnoreCase(table.getType()))
+		if (dbConnection.getDbSettings().isSynonymType(table.getType()))
 		{
 			TableIdentifier id = getSynonymTable(schema, tablename);
 			if (id != null)
@@ -2172,17 +2164,13 @@ public class DbMetadata
 			}
 		}
 
-		PkDefinition pk = getIndexReader().getPrimaryKeyIndex(table);
+		PkDefinition pk = getIndexReader().getPrimaryKeyIndex(retrieve);
+		retrieve.setPrimaryKey(pk);
 
-		if (pk != null)
-		{
-			table.setPrimaryKey(pk);
-		}
+		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, dbConnection, dataTypeResolver);
 
-		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, pk, dbConnection, dataTypeResolver);
-
-		table.setNewTable(false);
-		TableDefinition result = new TableDefinition(table, columns);
+		retrieve.setNewTable(false);
+		TableDefinition result = new TableDefinition(retrieve, columns);
 		if (columnEnhancer != null)
 		{
 			columnEnhancer.updateColumnDefinition(result, dbConnection);
@@ -2634,7 +2622,7 @@ public class DbMetadata
 		return this.synonymReader;
 	}
 
-	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, boolean includeDrop)
+	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, boolean includeDrop)
 	{
 		StringBuilder result = new StringBuilder(250);
 
@@ -2649,7 +2637,7 @@ public class DbMetadata
 		}
 		result.append("\n\n");
 
-		StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, table.getTableName());
+		StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList, table.getTableName());
 
 		if (indexSource != null) result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())

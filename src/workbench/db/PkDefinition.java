@@ -13,6 +13,7 @@ package workbench.db;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -26,7 +27,7 @@ public class PkDefinition
 
 	public PkDefinition(String name, List<IndexColumn> columns)
 	{
-		this.pkName = name;
+		this.pkName = StringUtil.trim(name);
 		if (columns != null)
 		{
 			this.columns = new ArrayList<IndexColumn>(columns);
@@ -41,7 +42,7 @@ public class PkDefinition
 
 	public void setPkIndexName(String name)
 	{
-		this.pkIndexName = name;
+		this.pkIndexName = StringUtil.trim(name);
 	}
 
 	public String getPkName()
@@ -51,7 +52,10 @@ public class PkDefinition
 
 	public List<String> getColumns()
 	{
-		Collections.sort(this.columns, IndexColumn.getSequenceSorter());
+		if (columns.size() > 1)
+		{
+			Collections.sort(this.columns, IndexColumn.getSequenceSorter());
+		}
 		List<String> result = new ArrayList<String>(columns.size());
 		for (IndexColumn col : columns)
 		{
@@ -70,5 +74,11 @@ public class PkDefinition
 		PkDefinition copy = new PkDefinition(this.pkName, this.columns);
 		copy.pkIndexName = this.pkIndexName;
 		return copy;
+	}
+
+	@Override
+	public String toString()
+	{
+		return pkName + " " + columns;
 	}
 }

@@ -56,12 +56,12 @@ public interface IndexReader
 	void indexInfoProcessed();
 
 	/**
-	 * Get the SQL source for all indexes defined in indexDefinition.
+	 * Get the SQL source for all indexes defined in indexList.
 	 *
 	 * If tableNameToUse is non-null then that name will be used instead
 	 * of the name of the TableIdentifier
 	 */
-	StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
+	StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList, String tableNameToUse);
 
 	/**
 	 * Return the CREATE INDEX for a single index

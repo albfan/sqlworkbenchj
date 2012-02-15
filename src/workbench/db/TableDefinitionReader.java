@@ -12,7 +12,6 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.PkDefinition;
 
 /**
  *
@@ -26,15 +25,16 @@ public interface TableDefinitionReader
 	 * To display the columns for a table in a DataStore create an
 	 * instance of {@link TableColumnsDatastore}.
 	 *
-	 * @param toRead The table for which the definition should be retrieved
-	 * @param primaryKeyColumns the primary key columns of the table
+	 * @param toRead The table for which the definition should be retrieved (it should have a PK assigned)
 	 * @param dbConnection the connection to use
 	 * @param typeResolver the data type resolver that should be used to "clean up" data types returned from the driver
 	 *
 	 * @throws SQLException
 	 * @return the definition of the table. If toRead was null, null is returned
+	 *
 	 * @see TableColumnsDatastore
+	 * @see TableIdentifier#getPrimaryKey()
 	 */
-	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, PkDefinition primaryKey, WbConnection dbConnection, DataTypeResolver typeResolver)
+	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException;
 }

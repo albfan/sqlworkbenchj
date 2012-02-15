@@ -197,7 +197,7 @@ public class ClientSideTableSearcher
 			}
 			connection.releaseSavepoint(sp);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("ClientSideTableSearcher.searchTable", "Error searching table", e);
 			connection.rollback(sp);

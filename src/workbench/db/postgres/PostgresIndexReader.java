@@ -15,15 +15,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
-import workbench.db.IndexReader;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -55,10 +55,9 @@ public class PostgresIndexReader
 	 * @return
 	 */
 	@Override
-	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
+	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList, String tableNameToUse)
 	{
-		if (indexDefinition == null) return null;
-		if (indexDefinition.getRowCount() == 0) return null;
+		if (CollectionUtil.isEmpty(indexList)) return null;
 
 		WbConnection con = this.metaData.getWbConnection();
 		Statement stmt = null;
@@ -68,12 +67,13 @@ public class PostgresIndexReader
 		// index. So all we need to do, is retrieve the indexdef value
 		// from that table for all indexes defined for this table.
 
-		StringBuilder sql = new StringBuilder(50 + indexDefinition.getRowCount() * 20);
+		int count = indexList.size();
+		if (count == 0) return StringUtil.emptyBuffer();
+
+		StringBuilder sql = new StringBuilder(50 + count * 20);
 		sql.append("SELECT indexdef FROM pg_indexes WHERE indexname in (");
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		int count = indexDefinition.getRowCount();
-		if (count == 0) return StringUtil.emptyBuffer();
 
 		StringBuilder source = new StringBuilder(count * 50);
 
@@ -81,18 +81,16 @@ public class PostgresIndexReader
 		int indexCount = 0;
 		try
 		{
-			for (int i = 0; i < count; i++)
+			for (IndexDefinition index : indexList)
 			{
-				String idxName = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-				String pk = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
+				String idxName = index.getName();
 
-				IndexDefinition def = (IndexDefinition)indexDefinition.getRow(i).getUserObject();
-				if ("YES".equalsIgnoreCase(pk)) continue;
+				if (index.isPrimaryKeyIndex()) continue;
 				if (indexCount > 0) sql.append(',');
 
-				if (def != null && def.isUniqueConstraint())
+				if (index.isUniqueConstraint())
 				{
-					String constraint = getUniqueConstraint(table, def);
+					String constraint = getUniqueConstraint(table, index);
 					source.append(constraint);
 					source.append(';');
 					source.append(nl);

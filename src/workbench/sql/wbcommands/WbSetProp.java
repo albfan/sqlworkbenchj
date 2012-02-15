@@ -12,16 +12,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
 import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
-import workbench.util.StringUtil;
 
 
 /**
@@ -82,20 +78,6 @@ public class WbSetProp
 					result.addMessage(prop  + " set to "  + value);
 				}
 			}
-		}
-		else if (StringUtil.isBlank(args))
-		{
-			List<String> keys = Settings.getInstance().getKeysLike("workbench");
-			DataStore ds = new DataStore(new String[] {"PROPERTY", "VALUE"}, new int[] { Types.VARCHAR, Types.VARCHAR} );
-			for (String key : keys)
-			{
-				int row = ds.addRow();
-				ds.setValue(row, 0, key);
-				ds.setValue(row, 1, Settings.getInstance().getProperty(key, null));
-			}
-			ds.sortByColumn(0, true);
-			ds.resetStatus();
-			result.addDataStore(ds);
 		}
 		else if (args.indexOf('=') > -1)
 		{

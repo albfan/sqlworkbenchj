@@ -14,9 +14,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import workbench.log.LogMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -43,7 +44,7 @@ public class JdbcTableDefinitionReader
 	 * @see TableColumnsDatastore
 	 */
 	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, PkDefinition primaryKey, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
 		DbSettings dbSettings = dbConnection.getDbSettings();
@@ -55,15 +56,14 @@ public class JdbcTableDefinitionReader
 
 		ResultSet rs = null;
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
-		List<String> primaryKeyColumns = Collections.emptyList();
-		if (primaryKey == null)
-		{
-			primaryKey = table.getPrimaryKey();
-		}
-		
+
+		PkDefinition primaryKey = table.getPrimaryKey();
+		Set<String> primaryKeyColumns = CollectionUtil.caseInsensitiveSet();
+
+		LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "PK table " + table.getTableName() + ": " + primaryKey);
 		if (primaryKey != null)
 		{
-			primaryKeyColumns = primaryKey.getColumns();
+			primaryKeyColumns.addAll(primaryKey.getColumns());
 		}
 
 		try
@@ -83,11 +83,10 @@ public class JdbcTableDefinitionReader
 
 			while (rs != null && rs.next())
 			{
-				String colName = rs.getString("COLUMN_NAME");
+				String colName = StringUtil.trim(rs.getString("COLUMN_NAME"));
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
 				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), typeResolver.fixColumnType(sqlType, typeName));
-
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = -1;

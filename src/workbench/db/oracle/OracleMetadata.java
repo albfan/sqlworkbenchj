@@ -39,6 +39,7 @@ import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -228,19 +229,21 @@ public class OracleMetadata
 	}
 
 	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, PkDefinition primaryKey, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
-		List<String> pkColumns = Collections.emptyList();
-		if (primaryKey != null)
-		{
-			pkColumns = primaryKey.getColumns();
-		}
-
 		if (!useOwnSql)
 		{
 			JdbcTableDefinitionReader reader = new JdbcTableDefinitionReader();
-			return reader.getTableColumns(table, primaryKey, dbConnection, typeResolver);
+			return reader.getTableColumns(table, dbConnection, typeResolver);
+		}
+
+		PkDefinition primaryKey = table.getPrimaryKey();
+		Set<String> pkColumns = CollectionUtil.caseInsensitiveSet();
+
+		if (primaryKey != null)
+		{
+			pkColumns.addAll(primaryKey.getColumns());
 		}
 
 		DbSettings dbSettings = dbConnection.getDbSettings();

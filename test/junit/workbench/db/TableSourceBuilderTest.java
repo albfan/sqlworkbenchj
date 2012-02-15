@@ -17,7 +17,6 @@ import workbench.WbTestCase;
 import workbench.resource.Settings;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 
 /**
@@ -81,41 +80,6 @@ public class TableSourceBuilderTest
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
 			assertTrue(sql.indexOf("FIRSTNAME  VARCHAR(20)   DEFAULT 'Arthur'") > -1);
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-			ConnectionMgr.getInstance().clearProfiles();
-		}
-	}
-
-	@Test
-	public void testNoPKColumns()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbConnection con = util.getConnection();
-		try
-		{
-			TestUtil.executeScript(con,
-				"CREATE TABLE person (id integer not null primary key, firstname varchar(20), lastname varchar(20));\n" +
-				"COMMIT;\n");
-			TableSourceBuilder builder = new TableSourceBuilder(con);
-			TableIdentifier tbl = new TableIdentifier("PERSON");
-			TableDefinition def = con.getMetadata().getTableDefinition(tbl);
-			List<ColumnIdentifier> cols = def.getColumns();
-
-			// Simulate DB2 iSeries where the pk columns are not marked as such
-			// but as an index that is identified as a PK index is available the table should still be created with a PK
-			cols.get(0).setIsPkColumn(false);
-			DataStore indexList = con.getMetadata().getIndexReader().getTableIndexInformation(def.getTable());
-			String sql = builder.getTableSource(def.getTable(), cols, indexList, null, false, null, true);
-			assertTrue(sql.trim().endsWith("PRIMARY KEY (ID);"));
-
-			builder.setCreateInlineConstraints(true);
-			sql = builder.getTableSource(def.getTable(), cols, indexList, null, false, null, true);
-			assertFalse(sql.contains("ALTER TABLE"));
-			assertTrue(sql.contains("PRIMARY KEY (ID)"));
 		}
 		finally
 		{

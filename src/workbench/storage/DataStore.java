@@ -27,8 +27,8 @@ import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
-import workbench.db.DbSearchPath;
 import workbench.db.DeleteScriptGenerator;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -684,6 +684,29 @@ public class DataStore
 		{
 			this.updateTable = null;
 			LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
+		}
+	}
+
+	public void setUpdateTable(TableDefinition tableDef)
+	{
+		this.updateTable = tableDef.getTable();
+		this.resultInfo.setUpdateTable(updateTable);
+		this.missingPkcolumns = new ArrayList<ColumnIdentifier>(0);
+
+		List<ColumnIdentifier> columns = tableDef.getColumns();
+		for (ColumnIdentifier column : columns)
+		{
+			int index = this.findColumn(column.getColumnName());
+			if (index > -1)
+			{
+				this.resultInfo.setUpdateable(index, true);
+				this.resultInfo.setIsPkColumn(index, column.isPkColumn());
+				this.resultInfo.setIsNullable(index, column.isNullable());
+			}
+			else
+			{
+				LogMgr.logError("DataStore.setUpdateTable()", "Could not find column " + column + " from table definition in ResultInfo!", null);
+			}
 		}
 	}
 
@@ -1887,7 +1910,7 @@ public class DataStore
 		currentDeleteRow = 0;
 	}
 
-	private RowData getNextChangedRow()
+	protected RowData getNextChangedRow()
 	{
 		if (this.currentUpdateRow >= this.getRowCount()) return null;
 		RowData row;
@@ -1937,7 +1960,7 @@ public class DataStore
 		return null;
 	}
 
-	private RowData getNextInsertedRow()
+	protected RowData getNextInsertedRow()
 	{
 		int count = this.getRowCount();
 		if (this.currentInsertRow >= count) return null;

@@ -14,12 +14,13 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import workbench.db.IndexReader;
+import java.util.Iterator;
+import java.util.List;
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -31,14 +32,13 @@ import workbench.util.StringUtil;
  */
 public class OracleMViewReader
 {
-
 	private String pkIndex;
 
 	public OracleMViewReader()
 	{
 	}
 
-	public CharSequence getMViewSource(WbConnection dbConnection, TableIdentifier table, DataStore indexDefinition, boolean includeDrop)
+	public CharSequence getMViewSource(WbConnection dbConnection, TableIdentifier table, List<IndexDefinition> indexList, boolean includeDrop)
 	{
 		boolean alwaysUseDbmsMeta = dbConnection.getDbSettings().getUseOracleDBMSMeta("mview");
 
@@ -90,31 +90,28 @@ public class OracleMViewReader
 		}
 		result.append("\n\n");
 
-		if (indexDefinition == null)
+		if (indexList == null)
 		{
-			indexDefinition = dbConnection.getMetadata().getIndexReader().getTableIndexInformation(table);
+			indexList = dbConnection.getMetadata().getIndexReader().getTableIndexList(table);
 		}
 
 		// The source for the auto-generated index that is created when using the WITH PRIMARY KEY option
 		// does not need to be included in the generated SQL
 		if (pkIndex != null)
 		{
-			int toDelete = -1;
-			for (int row = 0; row < indexDefinition.getRowCount(); row++)
+			Iterator<IndexDefinition> itr = indexList.iterator();
+			while (itr.hasNext())
 			{
-				String name = indexDefinition.getValueAsString(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+				IndexDefinition index = itr.next();
+				String name = index.getName();
 				if (name.equals(pkIndex))
 				{
-					toDelete = row;
+					itr.remove();
 					break;
 				}
 			}
-			if (toDelete > -1)
-			{
-				indexDefinition.deleteRow(toDelete);
-			}
 		}
-		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexDefinition, table.getTableName());
+		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexList, table.getTableName());
 
 		if (indexSource != null) result.append(indexSource);
 		return result.toString();

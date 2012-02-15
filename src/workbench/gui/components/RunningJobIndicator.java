@@ -38,17 +38,20 @@ public class RunningJobIndicator
 	private long startTime;
 	private TrayIcon trayIcon;
 
+	private final Object iconMonitor = new Object();
+	private final Object counterMonitor = new Object();
+
 	public RunningJobIndicator(JFrame client)
 	{
 		this.clientWindow = client;
 	}
 
-	public synchronized void baseTitleChanged()
+	public void baseTitleChanged()
 	{
 		updateTitle();
 	}
 
-	private synchronized void updateTitle()
+	private void updateTitle()
 	{
 		String title = this.clientWindow.getTitle();
 		if (runningJobs > 0)
@@ -67,48 +70,48 @@ public class RunningJobIndicator
 		}
 	}
 
-	public synchronized void jobStarted()
+	public void jobStarted()
 	{
-		if (runningJobs == 0)
+		synchronized (counterMonitor)
 		{
-			startTime = System.currentTimeMillis();
+			if (runningJobs == 0)
+			{
+				startTime = System.currentTimeMillis();
+				removeTrayIcon();
+			}
+			runningJobs ++;
+			updateTitle();
 		}
-		runningJobs ++;
-		updateTitle();
 	}
 
-	public synchronized void jobEnded()
+	public void allJobsEnded()
 	{
-		if (runningJobs > 0) runningJobs --;
-		updateTitle();
-		if (runningJobs > 0 || !GuiSettings.showScriptFinishedAlert()) return;
+		synchronized (counterMonitor)
+		{
+			runningJobs = 0;
+			updateTitle();
+		}
+	}
+	public void jobEnded()
+	{
+		long duration = 0;
+		synchronized (counterMonitor)
+		{
+			if (runningJobs > 0) runningJobs --;
+			updateTitle();
+			duration = System.currentTimeMillis() - startTime;
+			if (runningJobs > 0 || !GuiSettings.showScriptFinishedAlert()) return;
+		}
 
 		long minDuration = GuiSettings.getScriptFinishedAlertDuration();
-		long duration = System.currentTimeMillis() - startTime;
 		if (minDuration == 0 || duration > minDuration)
 		{
 			String msg = ResourceMgr.getString("TxtScriptFinished");
-
 			boolean useTray = GuiSettings.useSystemTrayForAlert() && SystemTray.isSupported();
 
 			if (useTray)
 			{
-				SystemTray tray = SystemTray.getSystemTray();
-				try
-				{
-					if (trayIcon == null)
-					{
-						trayIcon = new TrayIcon(ResourceMgr.getPng("workbench16").getImage());
-						trayIcon.addActionListener(this);
-						trayIcon.setToolTip(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
-						tray.add(trayIcon);
-					}
-					trayIcon.displayMessage(ResourceMgr.TXT_PRODUCT_NAME, msg, TrayIcon.MessageType.INFO);
-				}
-				catch (AWTException ex)
-				{
-					LogMgr.logWarning("RunningJobIndicator.jobEnded()", "Could not install tray icon", ex);
-				}
+				showTrayIcon(msg);
 			}
 			else if (clientWindow != null)
 			{
@@ -125,6 +128,42 @@ public class RunningJobIndicator
 		}
 	}
 
+	private void showTrayIcon(String msg)
+	{
+		synchronized (iconMonitor)
+		{
+			SystemTray tray = SystemTray.getSystemTray();
+			try
+			{
+				if (trayIcon == null)
+				{
+					trayIcon = new TrayIcon(ResourceMgr.getPng("workbench16").getImage());
+					trayIcon.addActionListener(this);
+					trayIcon.setToolTip(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
+					tray.add(trayIcon);
+				}
+				trayIcon.displayMessage(ResourceMgr.TXT_PRODUCT_NAME, msg, TrayIcon.MessageType.INFO);
+			}
+			catch (AWTException ex)
+			{
+				LogMgr.logWarning("RunningJobIndicator.jobEnded()", "Could not install tray icon", ex);
+			}
+		}
+	}
+
+	private void removeTrayIcon()
+	{
+		synchronized (iconMonitor)
+		{
+			if (SystemTray.isSupported())
+			{
+				SystemTray tray = SystemTray.getSystemTray();
+				tray.remove(trayIcon);
+				trayIcon = null;
+			}
+		}
+	}
+
 	private void showClient()
 	{
 		if (clientWindow == null) return;
@@ -137,33 +176,22 @@ public class RunningJobIndicator
 		clientWindow.requestFocus();
 	}
 
-	public synchronized void allJobsEnded()
-	{
-		runningJobs = 0;
-		updateTitle();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() != this.trayIcon) return;
-		if (SystemTray.isSupported())
+		removeTrayIcon();
+		if (WbAction.isCtrlPressed(e) && clientWindow != null)
 		{
-			SystemTray tray = SystemTray.getSystemTray();
-			tray.remove(trayIcon);
-			trayIcon = null;
-			if (WbAction.isCtrlPressed(e) && clientWindow != null)
+			EventQueue.invokeLater(new Runnable()
 			{
-				EventQueue.invokeLater(new Runnable()
+				@Override
+				public void run()
 				{
-					@Override
-					public void run()
-					{
-						showClient();
-					}
-				});
-			}
+					showClient();
+				}
+			});
 		}
 	}
+
 
 }

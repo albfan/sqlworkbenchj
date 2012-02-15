@@ -1154,7 +1154,7 @@ class SequenceDiffEntry
 	SequenceDefinition reference;
 	SequenceDefinition target;
 
-	public SequenceDiffEntry(SequenceDefinition ref, SequenceDefinition tar)
+	SequenceDiffEntry(SequenceDefinition ref, SequenceDefinition tar)
 	{
 		reference = ref;
 		target = tar;
@@ -1165,7 +1165,8 @@ class ProcDiffEntry
 {
 	ProcedureDefinition reference;
 	ProcedureDefinition target;
-	public ProcDiffEntry(ProcedureDefinition ref, ProcedureDefinition tar)
+
+	ProcDiffEntry(ProcedureDefinition ref, ProcedureDefinition tar)
 	{
 		reference = ref;
 		target = tar;
@@ -1176,7 +1177,8 @@ class DiffEntry
 {
 	TableIdentifier reference;
 	TableIdentifier target;
-	public DiffEntry(TableIdentifier ref, TableIdentifier tar)
+	
+	DiffEntry(TableIdentifier ref, TableIdentifier tar)
 	{
 		reference = ref;
 		target = tar;

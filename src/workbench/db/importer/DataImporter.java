@@ -181,10 +181,11 @@ public class DataImporter
 
 		// apparently the JDBC/ODBC bridge does not support setObject(x, null) so always use setNull()
 		// regardless of the DBMS
-		if (dbConn.getProfile().getDriverclass().equals("sun.jdbc.odbc.JdbcOdbcDriver")) {
+		if (dbConn.getProfile().getDriverclass().equals("sun.jdbc.odbc.JdbcOdbcDriver"))
+		{
 			this.useSetNull = true;
 		}
-		
+
 		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
 	}
 
@@ -1253,7 +1254,7 @@ public class DataImporter
 					pstmt.setObject(colIndex, null);
 				}
 			}
-			else if ( SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()))
+			else if (SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()))
 			{
 				Reader in = null;
 				int size = -1;

@@ -19,7 +19,6 @@ import java.util.List;
 import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -46,7 +45,7 @@ public class OracleTableSourceBuilder
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
-		String sql = "select default_tablespace from user_users";
+		String sql = "select /* SQLWorkbench */ default_tablespace from user_users";
 
 		try
 		{
@@ -73,7 +72,7 @@ public class OracleTableSourceBuilder
 	}
 
 	@Override
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		StringBuilder result = new StringBuilder(100);
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_partitions", true))
@@ -131,7 +130,7 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select tablespace_name, degree, row_movement \n" +
+			"select /* SQLWorkbench*/ tablespace_name, degree, row_movement, temporary, duration \n" +
 			"from all_tables  \n" +
 			"where owner = ? \n" +
 			"and table_name = ? ";
@@ -172,6 +171,22 @@ public class OracleTableSourceBuilder
 				{
 					if (options.length() > 0) options += "\n";
 					options += "ENABLE ROW MOVEMENT";
+				}
+
+				String tempTable = rs.getString(4);
+				String duration = rs.getString(5);
+				if (StringUtil.equalString("Y", tempTable))
+				{
+					tbl.setTableTypeOption("GLOBAL TEMPORARY");
+					if (options.length() > 0) options += "\n";
+					if (StringUtil.equalString("SYS$TRANSACTION", duration))
+					{
+						options += "ON COMMIT DELETE ROWS";
+					}
+					else if (StringUtil.equalString("SYS$SESSION", duration))
+					{
+						options += "ON COMMIT PRESERVE ROWS";
+					}
 				}
 			}
 			tbl.setTableConfigOptions(options);

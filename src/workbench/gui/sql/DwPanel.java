@@ -37,6 +37,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
@@ -424,6 +425,24 @@ public class DwPanel
 		this.duplicateRow.setEnabled(false);
 		this.deleteRow.setEnabled(false);
 		this.deleteDependentRow.setEnabled(false);
+	}
+
+	/**
+	 * Pass the full table definition to be used for future updates to the underlying
+	 * DataStore.
+	 * This will also reset the internal cache of the ReferenceTableNavigator.
+	 *
+	 * @see workbench.gui.sql.ReferenceTableNavigator#reset()
+	 * @see workbench.storage.DataStore#setUpdateTableToBeUsed(workbench.db.TableIdentifier)
+	 */
+	public void defineUpdateTable(TableDefinition table)
+	{
+		DataStore ds = this.dataTable.getDataStore();
+		if (ds != null)
+		{
+			ds.setUpdateTable(table);
+		}
+		if (referenceNavigator != null) referenceNavigator.reset();
 	}
 
 	/**
@@ -892,13 +911,18 @@ public class DwPanel
 
 	public void readColumnComments()
 	{
+		readColumnComments(null);
+	}
+
+	public void readColumnComments(TableDefinition tableDef)
+	{
 		DataStore ds = getDataStore();
 		if (ds == null) return;
 		try
 		{
 			setStatusMessage(ResourceMgr.getString("MsgRetrievingColComments"));
 			ResultColumnMetaData meta = new ResultColumnMetaData(ds);
-			meta.retrieveColumnRemarks(ds.getResultInfo());
+			meta.retrieveColumnRemarks(ds.getResultInfo(), tableDef);
 		}
 		catch (Exception e)
 		{

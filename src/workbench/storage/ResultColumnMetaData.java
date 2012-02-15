@@ -61,6 +61,11 @@ public class ResultColumnMetaData
 	public void retrieveColumnRemarks(ResultInfo info)
 		throws SQLException
 	{
+		retrieveColumnRemarks(info, null);
+	}
+	public void retrieveColumnRemarks(ResultInfo info, TableDefinition tableDef)
+		throws SQLException
+	{
 		if (CollectionUtil.isEmpty(columns)) return;
 
 		DbMetadata meta = connection.getMetadata();
@@ -68,11 +73,18 @@ public class ResultColumnMetaData
 		Map<String, TableDefinition> tableDefs = new HashMap<String, TableDefinition>(tables.size());
 		for (String table : tables)
 		{
-			TableAlias alias = new TableAlias(table);
-			TableIdentifier tbl = alias.getTable();
-			tbl.adjustCase(connection);
-			TableDefinition def = meta.getTableDefinition(tbl);
-			tableDefs.put(alias.getNameToUse().toLowerCase(), def);
+			if (tableDef != null && tableDef.getTable().getTableName().equals(table))
+			{
+				tableDefs.put(tableDef.getTable().getTableName().toLowerCase(), tableDef);
+			}
+			else
+			{
+				TableAlias alias = new TableAlias(table);
+				TableIdentifier tbl = alias.getTable();
+				tbl.adjustCase(connection);
+				TableDefinition def = meta.getTableDefinition(tbl);
+				tableDefs.put(alias.getNameToUse().toLowerCase(), def);
+			}
 		}
 
 		for (String col : columns)
