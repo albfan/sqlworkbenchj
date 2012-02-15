@@ -6,7 +6,7 @@
     <pathelement location="commons-logging-1.1.jar"/>
     <pathelement location="js.jar"/>
   </path>
-  
+
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="../scripts/xmltask-v1.15.jar"/>
 
   <property file="..\scripts\release.property"/>
@@ -37,9 +37,9 @@
         ]]>
       </insert>
     </xmltask>
-    
+
     <!-- <delete file="history_rss.txt"/> -->
-    
+
   </target>
 
   <scriptdef name="getfs" language="javascript" classpathref="script.path">
@@ -103,7 +103,7 @@
 
   <target name="release" depends="set-release-build, makeHTML, updateRss, updatePad"/>
   <target name="dev-release" depends="set-dev-build, makeHTML, updateRss"/>
-  
+
   <target name="noDev" depends="set-release-build, makeHTML"/>
   <target name="withDev" depends="set-dev-build, makeHTML"/>
 
@@ -123,7 +123,7 @@
 
   <target name="makeHTML" depends="clean">
     <tstamp>
-      <format pattern="yyyy-mm-dd" property="currentDate"/>
+      <format pattern="yyyy-MM-dd" property="currentDate"/>
     </tstamp>
     <dirname property="current.dir" file="build.xml"/>
     <xslt in="workbench.xml" out="${current.dir}/index.html" destdir="${current.dir}" style="workbench.xslt" force="true">

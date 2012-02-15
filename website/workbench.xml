@@ -79,9 +79,18 @@ VALUES
         the DBMS. It is only limited by the level of JDBC compliance of the driver.
       </p>
       <p>
-        <a href="manual/wb-commands.html#command-export"><tt>WbExport</tt></a> and
-        <a href="manual/wb-commands.html#command-import"><tt>WbImport</tt></a> fully support BLOB columns when
-        exporting to text ("flat files") or XML files.
+      To retrieve the contents of a LOB column for a single row and write the data to a file on the client,
+      the command <tt><a href="manual/wb-commands.html#command-selectblob">WbSelectBlob</a></tt>
+      can be used:
+      <p class="programlisting">WbSelectBlob blob_column
+INTO c:/temp/image.bmp
+FROM theTable
+WHERE id=42;</p>
+      </p>
+      <p>
+      To write LOB data from more than one row, <a href="manual/wb-commands.html#command-export"><tt>WbExport</tt></a> can be used.<br/>
+      <a href="manual/wb-commands.html#command-import"><tt>WbImport</tt></a> fully supports reading LOB data when
+        importing text or XML files.
       </p>
       <p>For more details, please read the <a href="manual/using.html#blob-support">manual</a>.</p>
     </content>

@@ -52,6 +52,9 @@
         <li class="toclist" id="manual">
           <a class="list" title="Display the online manual of the current stable release" href="manual/workbench-manual.html">Manual</a>
         </li>
+        <li class="toclist" id="problems">
+          <a class="list" title="FAQ, Problems" href="manual/troubleshooting.html">Common Problems</a>
+        </li>
       </ul>
 
       <ul class="toc" id="google">
@@ -177,6 +180,7 @@
     <xsl:param name="imageName"/>
     <xsl:param name="imageTitle"/>
     <xsl:param name="subTitle"/>
+    <xsl:param name="description"/>
 
     <html>
       <head>
@@ -188,7 +192,16 @@
         <meta http-equiv="Expires" content="-1"/>
         <link rel="SHORTCUT ICON" href="favicon.ico"/>
         <link rel="alternate" type="application/rss+xml" title="SQL Workbench/J" href="/wb_news.xml"/>
-        <meta name="description" content="A free SQL query, import, export and diff tool for various DBMS"/>
+        <xsl:if test="$pageName='index'">
+            <meta name="description" content="A free SQL query tool various DBMS (PostgreSQL, Oracle, DB2, HyberSQL and others)"/>
+        </xsl:if>
+        <xsl:if test="$pageName != 'index'">
+            <meta name="description">
+                <xsl:attribute name="content">
+                    <xsl:value-of select="concat('SQL Workbench/J - ', @title)"/>
+                </xsl:attribute>
+            </meta>
+        </xsl:if>
         <meta name="keywords" lang="en" content="sql,query,tool,analyzer,gui,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlplus,replacement,import,export,csv,unload,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
         <meta name="date">
           <xsl:attribute name="content">
@@ -316,14 +329,14 @@
       <ul>
       <xsl:for-each select="entry[@type='enh']">
         <xsl:sort select="@dev-build" order="descending"  data-type="number"/>
-        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>) <xsl:copy-of select="."/></li>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>) <xsl:value-of select="."/></li>
       </xsl:for-each>
       </ul>
       <h2 class="history-entry">Bug fixes</h2>
       <ul>
       <xsl:for-each select="entry[@type='fix']">
         <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>) <xsl:copy-of select="."/></li>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>) <xsl:value-of select="."/></li>
       </xsl:for-each>
       </ul>
 
