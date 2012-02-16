@@ -25,6 +25,7 @@ public class PlacementChooser
 	extends JComboBox
 {
 	public static final String PLACEMENT_PROPERTY = "workbench.gui.dbobjects.tabletabs";
+
 	public PlacementChooser()
 	{
 		super();
@@ -78,6 +79,10 @@ public class PlacementChooser
 		else if (tabLocation.equalsIgnoreCase("right"))
 		{
 			location = JTabbedPane.RIGHT;
+		}
+		else if (tabLocation.equalsIgnoreCase("bottom"))
+		{
+			location = JTabbedPane.BOTTOM;
 		}
 		return location;
 	}
