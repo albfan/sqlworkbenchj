@@ -113,7 +113,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = headRow.createCell(column);
-					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnName(c)), true);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnDisplayName(c)), true);
 					column ++;
 				}
 			}

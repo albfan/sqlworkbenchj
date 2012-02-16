@@ -167,7 +167,7 @@ public class HtmlRowDataConverter
 			if (!includeColumnInExport(c)) continue;
 			result.append("      <th>");
 			result.append("<b>");
-			result.append(this.metaData.getColumnName(c));
+			result.append(this.metaData.getColumnDisplayName(c));
 			result.append("</b>");
 			String comment = metaData.getColumn(c).getComment();
 			if (includeColumnComments && StringUtil.isNonBlank(comment))

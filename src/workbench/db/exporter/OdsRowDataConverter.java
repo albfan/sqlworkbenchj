@@ -121,7 +121,7 @@ public class OdsRowDataConverter
 				{
 					if (!this.includeColumnInExport(i))	continue;
 
-					String colname = StringUtil.trimQuotes(this.metaData.getColumnName(i));
+					String colname = StringUtil.trimQuotes(this.metaData.getColumnDisplayName(i));
 
 					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
 					content.write("    <text:p>");

@@ -20,8 +20,9 @@ public class DefaultStatementHook
 {
 
 	@Override
-	public void preExec(StatementRunner runner, String sql)
+	public String preExec(StatementRunner runner, String sql)
 	{
+		return sql;
 	}
 
 	@Override

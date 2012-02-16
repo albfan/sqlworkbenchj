@@ -17,6 +17,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -45,8 +46,10 @@ public class OracleStatementHook
 	implements StatementHook
 {
 
+	private static final String wbSelectMarker = "select /* sqlwb_statistics */";
+
 	private static final String retrieveStats =
-			"select s.value, a.name, s.statistic# \n" +
+			wbSelectMarker + " s.value, a.name, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
 			"where sid = userenv('SID') \n" +
@@ -78,89 +81,50 @@ public class OracleStatementHook
 		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
 		WbDisableOraOutput.VERB, WbEnableOraOutput.VERB, WbStartBatch.VERB, WbEndBatch.VERB, WbHelp.VERB,
 		WbIsolationLevel.VERB, WbLoadPkMapping.VERB, WbListPkDef.VERB, WbMode.VERB, WbListVars.VERB, WbSetProp.VERB,
-		WbSysProps.VERB, WbXslt.VERB);
+		WbSysProps.VERB, WbXslt.VERB, "SET");
 
 	/**
 	 * Stores the statistic values before the execution of the statement.
 	 */
 	private Map<String, Long> values;
+
+	/** flag to indicate if the statisticsviews are available */
 	private boolean statisticViewsAvailable;
+
+	/** if true, autotrace is turned on */
 	private boolean autotrace;
+
 	private boolean traceOnly;
 	private boolean showExecutionPlan;
+	private boolean showRealPlan;
 	private boolean showStatistics;
 
+	private String lastExplainID;
+
 	@Override
-	public void preExec(StatementRunner runner, String sql)
+	public String preExec(StatementRunner runner, String sql)
 	{
 		retrieveSessionState(runner);
 		if (!autotrace || !traceStatement(sql))
 		{
-			return;
+			return sql;
+		}
+
+		if (showRealPlan)
+		{
+			lastExplainID = UUID.randomUUID().toString();
+			sql = getIDPrefix() + " " + sql;
+			enableStatistics(runner);
 		}
 
 		if (showStatistics)
 		{
 			storeSessionStats(runner);
 		}
+
+		return sql;
 	}
 
-	private void storeSessionStats(StatementRunner runner)
-	{
-		WbConnection con = runner.getConnection();
-		values = new HashMap<String, Long>(10);
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(buildQuery());
-
-			int valueCol = getValueColIndex();
-			int nameCol = getNameColIndex();
-
-			while (rs.next())
-			{
-				values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
-			}
-			statisticViewsAvailable = true;
-			LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
-		}
-		catch (SQLException ex)
-		{
-			if (ex.getErrorCode() == 942)
-			{
-				statisticViewsAvailable = false;
-			}
-			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve session statistics", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
-
-	private String buildQuery()
-	{
-		String stats = Settings.getInstance().getProperty("workbench.db.oracle.autotrace.statname", defaultStats);
-		String query = null;
-		if (showStatvalueFirst())
-		{
-			query = retrieveStats + " (" + stats + ")";
-		}
-		else
-		{
-			query = retrieveStats.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
-		}
-
-		LogMgr.logDebug("OracleStatementHook.buildQuery()", "Using SQL=" + query);
-		return query;
-	}
-
-	private boolean showStatvalueFirst()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
-	}
 
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
@@ -198,14 +162,84 @@ public class OracleStatementHook
 			}
 		}
 
-		if (showExecutionPlan)
+		DataStore plan = null;
+		if (showRealPlan && lastExplainID != null)
 		{
-			DataStore plan = retrieveExecutionPlan(runner, sql);
-			if (plan != null)
-			{
-				result.addDataStore(plan);
-			}
+			plan = retrieveRealExecutionPlan(runner, sql);
 		}
+
+		if (showExecutionPlan && plan == null)
+		{
+			plan = retrieveExecutionPlan(runner, sql);
+		}
+
+		if (plan != null)
+		{
+			result.addDataStore(plan);
+		}
+	}
+
+	private String getIDPrefix() {
+		if (lastExplainID == null)
+		{
+			return "";
+		}
+		return "/* wb_" + lastExplainID + " */";
+	}
+
+	private void storeSessionStats(StatementRunner runner)
+	{
+		WbConnection con = runner.getConnection();
+		values = new HashMap<String, Long>(10);
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = con.createStatementForQuery();
+			rs = stmt.executeQuery(buildStatisticsQuery());
+
+			int valueCol = getValueColIndex();
+			int nameCol = getNameColIndex();
+
+			while (rs.next())
+			{
+				values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
+			}
+			statisticViewsAvailable = true;
+			LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
+		}
+		catch (SQLException ex)
+		{
+			if (ex.getErrorCode() == 942)
+			{
+				statisticViewsAvailable = false;
+			}
+			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve session statistics", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+	private String buildStatisticsQuery()
+	{
+		String stats = Settings.getInstance().getProperty("workbench.db.oracle.autotrace.statname", defaultStats);
+		String query = null;
+		if (showStatvalueFirst())
+		{
+			query = retrieveStats + " (" + stats + ")";
+		}
+		else
+		{
+			query = retrieveStats.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
+		}
+		return query;
+	}
+
+	private boolean showStatvalueFirst()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 	}
 
 	private boolean traceStatement(String sql)
@@ -219,6 +253,74 @@ public class OracleStatementHook
 			return false;
 		}
 		return true;
+	}
+
+	private DataStore retrieveRealExecutionPlan(StatementRunner runner, String sql)
+	{
+		WbConnection con = runner.getConnection();
+
+		String sqlId = null;
+		int childNumber = 0;
+
+		String findSql
+			= wbSelectMarker + " sql.sql_id, sql.child_number \n" +
+				"from v$sql sql \n" +
+				"where sql_text like '" + getIDPrefix() + "%' \n" +
+				"order by last_active_time desc";
+
+		String retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(:sqlid, :child, format=>'ALLSTATS LAST'))";
+
+		Statement stmt = null;
+		ResultSet rs = null;
+		DataStore result = null;
+		try
+		{
+			stmt = con.createStatementForQuery();
+			rs = stmt.executeQuery(findSql);
+			if (rs.next())
+			{
+				sqlId = rs.getString(1);
+				childNumber = rs.getInt(2);
+				retrievePlan = retrievePlan.replace(":sqlid", "'"  + sqlId + "'");
+				retrievePlan = retrievePlan.replace(":child", Integer.toString(childNumber));
+
+				SqlUtil.closeResult(rs);
+				rs = stmt.executeQuery(retrievePlan);
+				result = new DataStore(rs, true);
+				result.setGeneratingSql(sql);
+				result.setResultName("Execution plan");
+				result.resetStatus();
+			}
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve real execution plan", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+
+	private void enableStatistics(StatementRunner runner)
+	{
+		WbConnection con = runner.getConnection();
+
+		Statement stmt = null;
+		try
+		{
+			stmt = con.createStatement();
+			stmt.execute("alter session set statistics_level=all");
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("OracleStatementHook.preExec()", "Could not enable statistics level", ex);
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
 	}
 
 	private DataStore retrieveExecutionPlan(StatementRunner runner, String sql)
@@ -286,7 +388,7 @@ public class OracleStatementHook
 		try
 		{
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(buildQuery());
+			rs = stmt.executeQuery(buildStatisticsQuery());
 			while (rs.next())
 			{
 				String statName = rs.getString(nameCol + 1);
@@ -382,6 +484,12 @@ public class OracleStatementHook
 		this.autotrace = flags.contains("on") || traceOnly;
 		this.showExecutionPlan =  flags.contains("explain") || (autotrace && flags.size() == 1);
 		this.showStatistics = flags.contains("statistics")  || (autotrace && flags.size() == 1);
+		this.showRealPlan =  autotrace && flags.contains("realplan");
+		if (showRealPlan)
+		{
+			// enable execution plan in case retrieving the real plan doesn't work
+			showExecutionPlan = showRealPlan;
+		}
 	}
 
 	private DataStore createResult()

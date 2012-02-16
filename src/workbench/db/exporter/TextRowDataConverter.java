@@ -249,7 +249,7 @@ public class TextRowDataConverter
 		{
 			int colIndex = getRealIndex(c, colMap);
 			if (!this.includeColumnInExport(colIndex)) continue;
-			String name = this.metaData.getColumnName(colIndex);
+			String name = this.metaData.getColumnDisplayName(colIndex);
 
 			if (first)
 			{

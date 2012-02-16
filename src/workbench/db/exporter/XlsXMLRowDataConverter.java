@@ -86,7 +86,7 @@ public class XlsXMLRowDataConverter
 			{
 				if (!this.includeColumnInExport(i)) continue;
 				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
-				out.append(StringUtil.trimQuotes(metaData.getColumnName(i)));
+				out.append(StringUtil.trimQuotes(metaData.getColumnDisplayName(i)));
 				out.append("</Data></Cell>\n");
 			}
 			out.append("</Row>");

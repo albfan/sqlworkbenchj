@@ -22,12 +22,12 @@ public interface StatementHook
 	 * @param runner   the statementRunner running the statement
 	 * @param sql      the statement to be executed (after replacing possible macros)
 	 */
-	void preExec(StatementRunner runner, String sql);
+	String preExec(StatementRunner runner, String sql);
 	void postExec(StatementRunner runner, String sql, StatementRunnerResult result);
 
 	/**
 	 * If true, results should be displayed (and processed)
-	 * @see #fetchResults() 
+	 * @see #fetchResults()
 	 */
 	boolean displayResults();
 

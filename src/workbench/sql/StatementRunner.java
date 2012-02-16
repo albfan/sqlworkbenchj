@@ -398,7 +398,7 @@ public class StatementRunner
 			LogMgr.logInfo("StatementRunner.execute()", "Executing: " + realSql);
 		}
 
-		statementHook.preExec(this, realSql);
+		realSql = statementHook.preExec(this, realSql);
 
 		long sqlExecStart = System.currentTimeMillis();
 
@@ -423,7 +423,7 @@ public class StatementRunner
 	{
 		return statementHook;
 	}
-	
+
 	public ResultSetConsumer getConsumer()
 	{
 		return currentConsumer;
