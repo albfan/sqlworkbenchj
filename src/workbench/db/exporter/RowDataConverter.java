@@ -463,10 +463,15 @@ public abstract class RowDataConverter
 		dirName.append("_lobs_");
 		int dirNumber = (int)(blobsWritten / maxBlobFilesPerDir) + 1;
 		dirName.append(StringUtil.formatInt(dirNumber, 6));
-		File blobDir = new File(getBaseDir(), dirName.toString());
+		WbFile blobDir = new WbFile(getBaseDir(), dirName.toString());
 		if (!blobDir.exists())
 		{
-			blobDir.mkdirs();
+			boolean created = blobDir.mkdirs();
+			if (!created)
+			{
+				LogMgr.logError("RowDataConverter.getBlobDir()", "Could not create directory: " + blobDir.getFullPath(), null);
+				throw new IOException("Could not create directory " + blobDir.getFullPath());
+			}
 		}
 		return blobDir;
 	}
