@@ -263,6 +263,11 @@ public class StatementRunner
 
 	public void setConnection(WbConnection aConn)
 	{
+		if (statementHook != null)
+		{
+			statementHook.close();
+		}
+
 		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
 		this.currentConnection = aConn;

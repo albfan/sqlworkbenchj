@@ -41,4 +41,9 @@ public class DefaultStatementHook
 	{
 		return true;
 	}
+
+	@Override
+	public void close()
+	{
+	}
 }

@@ -10,6 +10,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -101,6 +102,9 @@ public class OracleStatementHook
 
 	private String lastExplainID;
 
+	private PreparedStatement statisticsStmt;
+	private final Object lock = new Object();
+
 	@Override
 	public String preExec(StatementRunner runner, String sql)
 	{
@@ -191,22 +195,25 @@ public class OracleStatementHook
 	{
 		WbConnection con = runner.getConnection();
 		values = new HashMap<String, Long>(10);
-		Statement stmt = null;
+
 		ResultSet rs = null;
 		try
 		{
-			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(buildStatisticsQuery());
-
-			int valueCol = getValueColIndex();
-			int nameCol = getNameColIndex();
-
-			while (rs.next())
+			synchronized (lock)
 			{
-				values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
+				prepareStatisticsStatement(con);
+				rs = statisticsStmt.executeQuery();
+
+				int valueCol = getValueColIndex();
+				int nameCol = getNameColIndex();
+
+				while (rs.next())
+				{
+					values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
+				}
+				statisticViewsAvailable = true;
+				LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
 			}
-			statisticViewsAvailable = true;
-			LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
 		}
 		catch (SQLException ex)
 		{
@@ -218,7 +225,7 @@ public class OracleStatementHook
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeResult(rs);
 		}
 	}
 
@@ -369,6 +376,15 @@ public class OracleStatementHook
 		return showStatvalueFirst() ? 0 : 1;
 	}
 
+	private void prepareStatisticsStatement(WbConnection con)
+		throws SQLException
+	{
+		if (statisticsStmt == null)
+		{
+			statisticsStmt = con.getSqlConnection().prepareStatement(buildStatisticsQuery());
+		}
+	}
+
 	private DataStore retrieveStatistics(StatementRunner runner, String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
@@ -376,9 +392,9 @@ public class OracleStatementHook
 		{
 			return null;
 		}
+
 		WbConnection con = runner.getConnection();
 
-		Statement stmt = null;
 		ResultSet rs = null;
 		DataStore statValues = createResult();
 
@@ -387,20 +403,23 @@ public class OracleStatementHook
 
 		try
 		{
-			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(buildStatisticsQuery());
-			while (rs.next())
+			synchronized (lock)
 			{
-				String statName = rs.getString(nameCol + 1);
-				Long value = rs.getLong(valueCol + 1);
-				if (statName != null && value != null)
+				prepareStatisticsStatement(con);
+				rs = statisticsStmt.executeQuery();
+				while (rs.next())
 				{
-					Long startValue = values.get(statName);
-					if (startValue != null)
+					String statName = rs.getString(nameCol + 1);
+					Long value = rs.getLong(valueCol + 1);
+					if (statName != null && value != null)
 					{
-						int row = statValues.addRow();
-						statValues.setValue(row, nameCol, statName);
-						statValues.setValue(row, valueCol, (value - startValue));
+						Long startValue = values.get(statName);
+						if (startValue != null)
+						{
+							int row = statValues.addRow();
+							statValues.setValue(row, nameCol, statName);
+							statValues.setValue(row, valueCol, (value - startValue));
+						}
 					}
 				}
 			}
@@ -412,7 +431,7 @@ public class OracleStatementHook
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeResult(rs);
 		}
 		return statValues;
 	}
@@ -508,6 +527,13 @@ public class OracleStatementHook
 			result = new DataStore(columnNames, types);
 		}
 		return result;
+	}
+
+	@Override
+	public void close()
+	{
+		SqlUtil.closeStatement(statisticsStmt);
+		statisticsStmt = null;
 	}
 
 }

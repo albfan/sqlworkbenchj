@@ -368,7 +368,7 @@ public class DbDriver
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws ClassNotFoundException, SQLException
 	{
-		Connection c = null;
+		Connection conn = null;
 		try
 		{
 			loadDriverClass();
@@ -394,8 +394,8 @@ public class DbDriver
 
 			setAppInfo(props, url.toLowerCase(), id, user);
 
-			c = this.driverClassInstance.connect(url, props);
-			if (c == null)
+			conn = this.driverClassInstance.connect(url, props);
+			if (conn == null)
 			{
 				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
 				throw new SQLException("Driver did not return a connection for url=" + url);
@@ -411,9 +411,8 @@ public class DbDriver
 			// PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
 			if (doSetAppName() && url.startsWith("jdbc:postgresql") && !props.containsKey(PostgresUtil.APP_NAME_PROPERTY))
 			{
-				PostgresUtil.setApplicationName(c, getProgramName() + " (" + id + ")");
+				PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
 			}
-
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -429,7 +428,26 @@ public class DbDriver
 			throw new SQLException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
 		}
 
-		return c;
+		return conn;
+	}
+
+	public void releaseDriverInstance()
+	{
+		LogMgr.logDebug("DbDriver.releaseDriverInstance()", "Releasing classloader and driver");
+		Thread.currentThread().setContextClassLoader(null);
+		this.classLoader = null;
+		if (this.driverClassInstance != null)
+		{
+			try
+			{
+				DriverManager.deregisterDriver(this.driverClassInstance);
+			}
+			catch (SQLException sql)
+			{
+				LogMgr.logWarning("DbDriver.releaseDriverInstance()", "Could not de-register driver", sql);
+			}
+			this.driverClassInstance = null;
+		}
 	}
 
 	private String getProgramName()

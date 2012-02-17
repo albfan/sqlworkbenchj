@@ -18,8 +18,10 @@ import workbench.db.WbConnection;
  *
  * @author Thomas Kellerer
  */
-public interface DbShutdownHook 
+public interface DbShutdownHook
 {
 	void shutdown(WbConnection con)
 		throws SQLException;
+
+	boolean unloadClassloaderRequired(String url);
 }

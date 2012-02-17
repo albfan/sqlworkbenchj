@@ -36,4 +36,6 @@ public interface StatementHook
 	 * @see #displayResults()
 	 */
 	boolean fetchResults();
+
+	void close();
 }
