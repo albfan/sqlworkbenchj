@@ -102,6 +102,7 @@ class ShortcutDisplay
 		this.resetToDefault = true;
 	}
 
+	@Override
 	public String toString()
 	{
 		StoreableKeyStroke key = null;

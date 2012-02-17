@@ -60,6 +60,7 @@ public class WbAction
 	private String iconKey;
 	private List<JMenuItem> createdItems = new LinkedList<JMenuItem>();
 	protected boolean isConfigurable = true;
+	private String descriptiveName;
 
 	public WbAction()
 	{
@@ -303,6 +304,20 @@ public class WbAction
 				item.setAccelerator(key);
 			}
 		}
+	}
+
+	public String getDescriptiveName()
+	{
+		if (this.descriptiveName == null)
+		{
+			return getMenuLabel();
+		}
+		return this.descriptiveName;
+	}
+
+	protected void setDescriptiveName(String name)
+	{
+		this.descriptiveName = name;
 	}
 
 	public KeyStroke getAccelerator()

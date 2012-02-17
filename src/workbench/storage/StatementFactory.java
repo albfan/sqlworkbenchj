@@ -36,6 +36,7 @@ public class StatementFactory
 	private WbConnection dbConnection;
 	private boolean emptyStringIsNull;
 	private boolean includeNullInInsert = true;
+	private boolean useColumnLabel;
 
 	// DbSettings is only used by the unit tests
 	private DbSettings testSettings;
@@ -48,6 +49,16 @@ public class StatementFactory
 	{
 		this.resultInfo = metaData;
 		this.setCurrentConnection(conn);
+	}
+
+
+	/**
+	 * Controls if the column name or the column's display name should be used
+	 * to generate the SQL statement.
+	 */
+	public void setUseColumnLabel(boolean flag)
+	{
+		this.useColumnLabel = flag;
 	}
 
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
@@ -97,7 +108,8 @@ public class StatementFactory
 				{
 					sql.append(", ");
 				}
-				String colName = adjustColumnName(this.resultInfo.getColumnName(col));
+
+				String colName = getColumnName(col);
 
 				sql.append(colName);
 				Object value = aRow.getValue(col);
@@ -135,7 +147,7 @@ public class StatementFactory
 			{
 				sql.append(" AND ");
 			}
-			String colName = adjustColumnName(this.resultInfo.getColumnName(j));
+			String colName = getColumnName(j);
 			sql.append(colName);
 
 			Object value = aRow.getOriginalValue(j);
@@ -161,6 +173,12 @@ public class StatementFactory
 
 		dml = new DmlStatement(sql, values);
 		return dml;
+	}
+
+	private String getColumnName(int column)
+	{
+		String name = this.useColumnLabel ? this.resultInfo.getColumnDisplayName(column) : this.resultInfo.getColumnName(column);
+		return adjustColumnName(name);
 	}
 
 	/**
@@ -263,9 +281,7 @@ public class StatementFactory
 					first = false;
 				}
 
-				colName = adjustColumnName(this.resultInfo.getColumnName(col));
-
-				sql.append(colName);
+				sql.append(getColumnName(col));
 				String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
 				if (literal != null)
 				{
@@ -326,8 +342,7 @@ public class StatementFactory
 			{
 				sql.append(" AND ");
 			}
-			String colName = adjustColumnName(this.resultInfo.getColumnName(j));
-			sql.append(colName);
+			sql.append(getColumnName(j));
 
 			Object value = row.getOriginalValue(j);
 			if (isNull(value)) value = null;

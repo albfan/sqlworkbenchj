@@ -25,6 +25,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
+import java.util.Collection;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -199,7 +200,7 @@ public class ShortcutEditor
 	private void createModel()
 	{
 		ShortcutManager mgr = ShortcutManager.getInstance();
-		ShortcutDefinition[] keys = mgr.getDefinitions();
+		Collection<ShortcutDefinition> keys = mgr.getDefinitions();
 
 		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"),
                                    ResourceMgr.getString("LblKeyDefKeyCol"),
@@ -208,17 +209,16 @@ public class ShortcutEditor
 
 		this.definitions = new DataStore(cols, types);
 
-
-		for (int i=0; i < keys.length; i++)
+		for (ShortcutDefinition key : keys)
 		{
 			int row = this.definitions.addRow();
-			String cls = keys[i].getActionClass();
+			String cls = key.getActionClass();
 			String title = mgr.getActionNameForClass(cls);
 			String tooltip = mgr.getTooltip(cls);
 			ActionDisplay disp = new ActionDisplay(title, tooltip);
 			this.definitions.setValue(row, 0, disp);
-			this.definitions.setValue(row, 1, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_PRIMARY_KEY));
-			this.definitions.setValue(row, 2, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_DEFAULT_KEY));
+			this.definitions.setValue(row, 1, new ShortcutDisplay(key, ShortcutDisplay.TYPE_PRIMARY_KEY));
+			this.definitions.setValue(row, 2, new ShortcutDisplay(key, ShortcutDisplay.TYPE_DEFAULT_KEY));
 		}
 		this.definitions.sortByColumn(0, true);
 		this.definitions.resetStatus();
@@ -311,6 +311,7 @@ public class ShortcutEditor
 		this.window.dispose();
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		boolean enabled = (e.getFirstIndex() >= 0);
@@ -405,35 +406,43 @@ public class ShortcutEditor
 		return -1;
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		this.closeWindow();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getSource() == this.keysTable &&
@@ -444,18 +453,22 @@ public class ShortcutEditor
 		}
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}

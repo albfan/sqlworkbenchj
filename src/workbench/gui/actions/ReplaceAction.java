@@ -34,8 +34,10 @@ public class ReplaceAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtReplace",KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.replace();

@@ -35,6 +35,7 @@ public class FindAgainAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFindAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
 	}
 
 	@Override

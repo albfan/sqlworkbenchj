@@ -84,6 +84,7 @@ public class SqlRowDataConverter
 	{
 		super.setResultInfo(meta);
 		this.statementFactory = new StatementFactory(meta, this.originalConnection);
+		this.statementFactory.setUseColumnLabel(true);
 		this.needsUpdateTable = meta.getUpdateTable() == null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		this.statementFactory.setTableToUse(this.alternateUpdateTable);

@@ -514,8 +514,17 @@ public class XmlRowDataConverter
 			result.append("\">");
 			result.append(this.lineEnding);
 
+			String colname = this.metaData.getColumnName(i);
+
 			result.append(indent);
-			appendTag(result, "    ", COLUMN_NAME_TAG, StringUtil.trimQuotes(this.metaData.getColumnName(i)));
+			appendTag(result, "    ", COLUMN_NAME_TAG, StringUtil.trimQuotes(colname));
+
+			String label = this.metaData.getColumnDisplayName(i);
+			if (!label.equals(colname))
+			{
+				result.append(indent);
+				appendTag(result, "    ", "column-label", StringUtil.trimQuotes(label));
+			}
 
 			String comment = this.metaData.getColumn(i).getComment();
 			if (StringUtil.isNonBlank(comment))

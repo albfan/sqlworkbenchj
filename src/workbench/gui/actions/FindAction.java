@@ -35,8 +35,10 @@ public class FindAction extends WbAction
 		this.setIcon("Find");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setCreateToolbarSeparator(true);
+		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.find();

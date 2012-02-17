@@ -30,8 +30,10 @@ public class InsertTabAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.initMenuDefinition("MnuTxtInsTab");
 		this.setIcon(null);
+		setDescriptiveName(ResourceMgr.getString("MnuTxtInsTabEx"));
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.insertTab();

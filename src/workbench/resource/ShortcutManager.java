@@ -12,15 +12,9 @@
 package workbench.resource;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
-import java.util.Set;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
@@ -44,11 +38,9 @@ public class ShortcutManager
 	// key to the map is the action's class name,
 	private Map<String, ShortcutDefinition> keyMap;
 
-	private Map<String, String> actionNames;
-
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action in the customization dialog
-	private List<WbAction> allActions = new LinkedList<WbAction>();
+	private List<WbAction> allActions = new ArrayList<WbAction>(100);
 
 	private Map<KeyStroke, WbAction> keyDebugMap;
 
@@ -63,7 +55,7 @@ public class ShortcutManager
 	protected ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
-//		LogMgr.logDebug("ShortcutManager", "Using file: " + filename);
+
 		try
 		{
 			WbPersistence reader = new WbPersistence(this.filename);
@@ -77,11 +69,6 @@ public class ShortcutManager
 		if (this.keyMap == null)
 		{
 			this.keyMap = new HashMap<String, ShortcutDefinition>(30);
-			this.actionNames = new HashMap<String, String>(30);
-		}
-		else
-		{
-			this.actionNames = new HashMap<String, String>(this.keyMap.size());
 		}
 	}
 
@@ -123,21 +110,11 @@ public class ShortcutManager
 	{
 		String clazz = anAction.getClass().getName();
 		ShortcutDefinition def = this.getDefinition(clazz);
+
 		if (def == null)
 		{
 			def = new ShortcutDefinition(clazz);
 			this.keyMap.put(clazz, def);
-		}
-
-		if (!actionNames.containsKey(clazz))
-		{
-			String label = anAction.getMenuLabel();
-
-			if (label == null) label = anAction.getActionName();
-			if (label != null)
-			{
-				this.actionNames.put(clazz, label);
-			}
 		}
 
 		if (!def.hasDefault())
@@ -175,10 +152,8 @@ public class ShortcutManager
 
 	public String getTooltip(String clazz)
 	{
-		Iterator itr = allActions.iterator();
-		while (itr.hasNext())
+		for (WbAction action : allActions)
 		{
-			WbAction action = (WbAction)itr.next();
 			String actionClass = action.getClass().getName();
 			if (actionClass.equals(clazz))
 			{
@@ -218,17 +193,23 @@ public class ShortcutManager
 		return clazz;
 	}
 
+	/**
+	 * Returns a descriptive name for the action mapped to the corresponding key.
+	 *
+	 * @param key the key to check
+	 * @return the action's title or null if the keystroke is not mapped
+	 * @see WbAction#getDescriptiveName()
+	 */
 	public String getActionNameForKey(KeyStroke key)
 	{
 		String clazz = this.getActionClassForKey(key);
-		String name = null;
 
-		if (clazz != null)
+		WbAction action = getActionForClass(clazz);
+		if (action != null)
 		{
-			name = this.actionNames.get(clazz);
-			if (name == null) name = clazz;
+			return action.getDescriptiveName();
 		}
-		return name;
+		return clazz;
 	}
 
 	public void resetToDefault(String actionClass)
@@ -266,12 +247,23 @@ public class ShortcutManager
 		}
 	}
 
+	/**
+	 * Returns the descriptive name for the action identified by the classname.
+	 *
+	 * @param className the class name to check
+	 * @return the action's title or null if the action is not found
+	 * @see WbAction#getDescriptiveName()
+	 */
 	public String getActionNameForClass(String className)
 	{
-		return this.actionNames.get(className);
+		WbAction action = getActionForClass(className);
+		if (action == null) return null;
+		return action.getDescriptiveName();
 	}
+
 	/**
 	 * Saves the current key assignments into an external file.
+	 *
 	 * Only mappings which are different from the default are saved.
 	 * If a definition file exists, and the current map contains only
 	 * default mappings, then the existing file is deleted.
@@ -313,21 +305,14 @@ public class ShortcutManager
 		}
 	}
 
-	public ShortcutDefinition[] getDefinitions()
+	public Collection<ShortcutDefinition> getDefinitions()
 	{
-		ShortcutDefinition[] list = new ShortcutDefinition[this.keyMap.size()];
-		int i = 0;
-		for (ShortcutDefinition def : keyMap.values())
-		{
-			list[i] = def;
-			i++;
-		}
-		return list;
+		return Collections.unmodifiableCollection(keyMap.values());
 	}
 
 	public KeyStroke getCustomizedKeyStroke(Action anAction)
 	{
-		ShortcutDefinition def = this.getDefinition(anAction);
+		ShortcutDefinition def = this.getDefinition(anAction.getClass().getName());
 		if (def == null) return null;
 		return def.getActiveKeyStroke();
 	}
@@ -345,16 +330,10 @@ public class ShortcutManager
 		def.assignKey(aKey);
 		modified = true;
 	}
-
-	private ShortcutDefinition getDefinition(Action anAction)
-	{
-		return this.getDefinition(anAction.getClass().getName());
-	}
-
+	
 	private ShortcutDefinition getDefinition(String aClassname)
 	{
-		ShortcutDefinition def = this.keyMap.get(aClassname);
-		return def;
+		return this.keyMap.get(aClassname);
 	}
 
 }

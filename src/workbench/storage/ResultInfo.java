@@ -145,7 +145,6 @@ public class ResultInfo
 			{
 				col.setColumnAlias(alias);
 			}
-			LogMgr.logDebug("ResultInfo.<init>", "Got column name: " + name + ", label=" + alias);
 
 			col.setUpdateable(realColumn);
 			try

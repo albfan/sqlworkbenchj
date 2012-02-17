@@ -223,7 +223,6 @@ public class ToolTipRenderer
 			unselectedForeground = table.getForeground();
 			unselectedBackground = table.getBackground();
 		}
-
 	}
 
 	@Override
