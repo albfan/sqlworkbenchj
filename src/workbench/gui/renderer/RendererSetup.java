@@ -20,6 +20,8 @@ import workbench.resource.GuiSettings;
 public class RendererSetup
 {
 
+	// These are package visible for performance reasons
+	// those values are accessed from within the renderers where every nanosecond counts
 	Color alternateBackground;
 	boolean useAlternatingColors;
 	Color nullColor;
@@ -46,6 +48,13 @@ public class RendererSetup
 			nullColor = null;
 			modifiedColor = null;
 		}
+	}
+
+	public static RendererSetup getBaseSetup()
+	{
+		RendererSetup setup = new RendererSetup();
+		setup.nullColor = null;
+		return setup;
 	}
 
 	public void setAlternateBackground(Color backgroundColor)

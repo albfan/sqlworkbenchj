@@ -49,6 +49,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
@@ -124,6 +125,7 @@ public class TableDefinitionPanel
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
 		this.tableDefinition.getExportAction().setEnabled(true);
+		this.tableDefinition.setRendererSetup(RendererSetup.getBaseSetup());
 
 		tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_ALLOW_ALTER_TABLE);

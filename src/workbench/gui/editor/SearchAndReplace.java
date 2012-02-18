@@ -17,7 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindAction;
-import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.FindNextAction;
+import workbench.gui.actions.FindPreviousAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
@@ -47,11 +48,13 @@ public class SearchAndReplace
 	private Container parent;
 
 	private FindAction findAction;
-	private FindAgainAction findAgainAction;
+	private FindPreviousAction findPreviousAction;
+	private FindNextAction findNextAction;
 	private ReplaceAction replaceAction;
 
 	/**
 	 * Create a new SearchAndReplace support.
+	 *
 	 * @param parentContainer the parent of the textcontainer, needed for displaying dialogs
 	 * @param text the container holding the text
 	 */
@@ -60,20 +63,49 @@ public class SearchAndReplace
 		this.editor = text;
 		this.parent = parentContainer;
 		this.findAction = new FindAction(this);
+		this.findPreviousAction = new FindPreviousAction(this);
+		this.findPreviousAction.setEnabled(false);
 		this.findAction.setEnabled(true);
-		this.findAgainAction = new FindAgainAction(this);
-		this.findAgainAction.setEnabled(false);
+		this.findNextAction = new FindNextAction(this);
+		this.findNextAction.setEnabled(false);
 		this.replaceAction = new ReplaceAction(this);
 		this.replaceAction.setEnabled(true);
 	}
 
-	public ReplaceAction getReplaceAction() { return this.replaceAction; }
-	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
-	public FindAction getFindAction() { return this.findAction; }
+	public ReplaceAction getReplaceAction()
+	{
+		return this.replaceAction;
+	}
 
-	private String getText() { return editor.getText(); }
-	private String getSelectedText() { return editor.getSelectedText();  }
-	private int getCaretPosition() { return editor.getCaretPosition(); }
+	public FindPreviousAction getFindPreviousAction()
+	{
+		return this.findPreviousAction;
+	}
+
+	public FindNextAction getFindNextAction()
+	{
+		return this.findNextAction;
+	}
+
+	public FindAction getFindAction()
+	{
+		return this.findAction;
+	}
+
+	private String getText()
+	{
+		return editor.getText();
+	}
+
+	private String getSelectedText()
+	{
+		return editor.getSelectedText();
+	}
+
+	private int getCaretPosition()
+	{
+		return editor.getCaretPosition();
+	}
 
 	/**
 	 * Show the find dialog and start searching.
@@ -104,10 +136,12 @@ public class SearchAndReplace
 			try
 			{
 				this.lastSearchCriteria = criteria;
-				this.findAgainAction.setEnabled(false);
+				this.findNextAction.setEnabled(false);
+				this.findPreviousAction.setEnabled(false);
 				pos = this.findText(criteria, ignoreCase, wholeWord, useRegex);
 				showDialog = false;
-				this.findAgainAction.setEnabled(pos > -1);
+				this.findNextAction.setEnabled(pos > -1);
+				this.findPreviousAction.setEnabled(pos > -1);
 			}
 			catch (Exception e)
 			{
@@ -117,6 +151,38 @@ public class SearchAndReplace
 			}
 		}
 		return pos;
+	}
+
+	@Override
+	public int findPrevious()
+	{
+		if (this.lastSearchPattern == null) return -1;
+		if (this.lastSearchPos == -1) return -1;
+
+		Matcher m = this.lastSearchPattern.matcher(this.getText());
+		int startPos = 0;
+		int lastFound = -1;
+		int lastEnd = -1;
+		while (m.find(startPos))
+		{
+			int foundPos = m.start();
+			if (foundPos >= this.lastSearchPos)
+			{
+				if (lastFound == -1)
+				{
+					lastFound = foundPos;
+					lastEnd = m.end();
+					Toolkit.getDefaultToolkit().beep();
+				}
+				lastSearchPos = lastFound;
+				this.editor.select(this.lastSearchPos, lastEnd);
+				return lastFound;
+			}
+			lastFound = foundPos;
+			lastEnd = m.end();
+			startPos = m.end() + 1;
+		}
+		return -1;
 	}
 
 	@Override

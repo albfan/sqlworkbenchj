@@ -1,5 +1,5 @@
 /*
- * FindAgainAction.java
+ * FindPreviousAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -17,23 +17,22 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Searchable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
-
 /**
- *	Find the next occurance of a search string.
- *	@author  Thomas Kellerer
+ *	@author Thomas Kellerer
  */
-public class FindAgainAction
+public class FindPreviousAction
 	extends WbAction
 {
 	private Searchable client;
 
-	public FindAgainAction(Searchable aClient)
+	public FindPreviousAction(Searchable aClient)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFindAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+		this.initMenuDefinition("MnuTxtFindPrevious", KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
 	}
@@ -41,6 +40,6 @@ public class FindAgainAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.findNext();
+		this.client.findPrevious();
 	}
 }

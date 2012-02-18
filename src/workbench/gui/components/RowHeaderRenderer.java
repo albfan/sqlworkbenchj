@@ -80,7 +80,7 @@ public class RowHeaderRenderer
 		calculateWidth();
 	}
 
-	public void calculateWidth()
+	public final void calculateWidth()
 	{
 		FontMetrics fm = getFontMetrics(getFont());
 		int width = 12;

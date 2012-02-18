@@ -42,7 +42,7 @@ public class DateColumnRenderer
 		this.setFormat(aDateFormat);
 	}
 
-	public void setFormat(String aDateFormat)
+	public final void setFormat(String aDateFormat)
 	{
 		try
 		{

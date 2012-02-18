@@ -659,7 +659,8 @@ public class SqlPanel
 		FindAction f = this.editor.getFindAction();
 		f.setCreateMenuSeparator(true);
 		this.actions.add(f);
-		this.actions.add(this.editor.getFindAgainAction());
+		this.actions.add(this.editor.getFindNextAction());
+		this.actions.add(this.editor.getFindPreviousAction());
 		this.actions.add(this.editor.getReplaceAction());
 
 		IndentSelection indent = new IndentSelection(editor);

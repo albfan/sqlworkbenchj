@@ -28,6 +28,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
+import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
@@ -54,7 +55,7 @@ public class TriggerDisplayPanel
 	{
 		super(new BorderLayout());
 		triggers = new WbTable();
-
+		triggers.setRendererSetup(RendererSetup.getBaseSetup());
 		source = EditorPanel.createSqlEditor();
 		source.setEditable(false);
 		source.setBorder(WbSwingUtilities.EMPTY_BORDER);

@@ -99,6 +99,7 @@ import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.components.WbTabbedPane;
+import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
@@ -234,6 +235,7 @@ public class TableListPanel
 		};
 
 		this.indexes = new WbTable();
+		this.indexes.setRendererSetup(RendererSetup.getBaseSetup());
 		this.indexes.setName("indexlist");
 		this.indexes.setAdjustToColumnLabel(false);
 		this.indexes.setSelectOnRightButtonClick(true);

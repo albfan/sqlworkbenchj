@@ -22,6 +22,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.gui.actions.ResetColOrderAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.WbTable;
+import workbench.gui.renderer.RendererSetup;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 
@@ -44,6 +45,7 @@ public class DbObjectTable
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(true);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		setRendererSetup(RendererSetup.getBaseSetup());
 	}
 
 	public void setRememberColumnOrder(boolean flag)

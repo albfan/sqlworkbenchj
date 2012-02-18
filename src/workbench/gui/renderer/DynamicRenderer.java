@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
  * from the object retrieved from the database.
  * <br/>
  * Currently not used.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DynamicRenderer
@@ -38,6 +38,7 @@ public class DynamicRenderer
 	}
 
 	@SuppressWarnings(value = "unchecked")
+	@Override
 	public void prepareDisplay(Object aValue)
 	{
 		// ToolTipRenderer will never pass null

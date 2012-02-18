@@ -63,7 +63,6 @@ public class TextAreaRenderer
 		textDisplay.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
-
 	@Override
 	public int getHorizontalAlignment()
 	{

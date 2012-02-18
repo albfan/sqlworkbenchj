@@ -1,5 +1,5 @@
 /*
- * FindDataAgainAction.java
+ * FindAgainAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -12,7 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -22,21 +21,21 @@ import workbench.resource.ResourceMgr;
 
 
 /**
- *	Search the next occurance in the result set.
+ *	Find the next occurance of a search string.
  *	@author  Thomas Kellerer
  */
-public class FindDataAgainAction extends WbAction
+public class FindNextAction
+	extends WbAction
 {
 	private Searchable client;
 
-	public FindDataAgainAction(Searchable aClient)
+	public FindNextAction(Searchable aClient)
 	{
 		super();
 		this.client = aClient;
-
-		this.initMenuDefinition("MnuTxtFindInTableDataAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.CTRL_MASK));
-		this.setIcon("FindAgain");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.initMenuDefinition("MnuTxtFindAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
 	}
 
 	@Override

@@ -61,10 +61,28 @@ public class TableReplacer
 		this.replaceAction.setEnabled(false);
 	}
 
-	public FindDataAction getFindAction() { return this.findAction; }
-	public FindDataAgainAction getFindAgainAction() { return this.findAgainAction; }
-	public ReplaceDataAction getReplaceAction() { return this.replaceAction; }
+	public FindDataAction getFindAction()
+	{
+		return this.findAction;
+	}
 
+	public FindDataAgainAction getFindAgainAction()
+	{
+		return this.findAgainAction;
+	}
+
+	public ReplaceDataAction getReplaceAction()
+	{
+		return this.replaceAction;
+	}
+
+	@Override
+	public int findPrevious()
+	{
+		return -1;
+	}
+
+	@Override
 	public int find()
 	{
 		boolean showDialog = true;
@@ -132,6 +150,7 @@ public class TableReplacer
 		final int realCol = (this.client.getShowStatusColumn() ? col + 1 : col);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				client.clearSelection();
@@ -143,6 +162,7 @@ public class TableReplacer
 		});
 	}
 
+	@Override
 	public int findNext()
 	{
 		Position pos = this.replacer.findNext();
@@ -150,6 +170,7 @@ public class TableReplacer
 		return pos.getRow();
 	}
 
+	@Override
 	public void replace()
 	{
 		if (this.client == null) return;
@@ -166,6 +187,7 @@ public class TableReplacer
 	/**
 	 * Called by the ReplacePanel.
 	 */
+	@Override
 	public int findFirst(String text, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		this.replacer.reset();
@@ -174,6 +196,7 @@ public class TableReplacer
 		return pos.getRow();
 	}
 
+	@Override
 	public boolean replaceCurrent(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
@@ -194,6 +217,7 @@ public class TableReplacer
 		return replaced;
 	}
 
+	@Override
 	public boolean replaceNext(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
@@ -220,6 +244,7 @@ public class TableReplacer
 		}
 	}
 
+	@Override
 	public int replaceAll(String value, String replacement, boolean selectedText,
 		boolean ignoreCase, boolean wholeWord,
 		boolean useRegex)
@@ -246,11 +271,13 @@ public class TableReplacer
 		return replaced;
 	}
 
+	@Override
 	public boolean isTextSelected()
 	{
 		return (this.client.getSelectedColumnCount() > 0);
 	}
 
+	@Override
 	public void tableChanged(TableModelEvent arg0)
 	{
 		if (tableChanging) return;
@@ -263,13 +290,13 @@ public class TableReplacer
 		final boolean hasData = (client.getRowCount() > 0);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				findAction.setEnabled(hasData);
 				replaceAction.setEnabled(hasData && !readOnly);
 			}
 		});
-
 	}
 
 }

@@ -31,6 +31,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
@@ -66,6 +67,7 @@ public class FkDisplayPanel
 		super(new BorderLayout());
 		this.keys = new WbTable();
 		this.keys.setAdjustToColumnLabel(false);
+		this.keys.setRendererSetup(RendererSetup.getBaseSetup());
 		WbScrollPane scroll = new WbScrollPane(this.keys);
 		this.splitPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.splitPanel.setDividerLocation(100);

@@ -51,6 +51,7 @@ import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
@@ -114,6 +115,7 @@ public class TriggerListPanel
 
 		Reloadable sourceReload = new Reloadable()
 		{
+			@Override
 			public void reload()
 			{
 				if (dbConnection == null) return;
@@ -136,6 +138,7 @@ public class TriggerListPanel
 		this.statusRenderer = new ProcStatusRenderer();
 		this.triggerList = new WbTable(true, false, false);
 
+		this.triggerList.setRendererSetup(RendererSetup.getBaseSetup());
 		this.triggerList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.triggerList.setCellSelectionEnabled(false);
 		this.triggerList.setColumnSelectionAllowed(false);
@@ -209,6 +212,7 @@ public class TriggerListPanel
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				triggerList.reset();
@@ -272,6 +276,7 @@ public class TriggerListPanel
 
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					int rows = model.getRowCount();
@@ -298,6 +303,7 @@ public class TriggerListPanel
 
 	}
 
+	@Override
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -370,6 +376,7 @@ public class TriggerListPanel
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
@@ -390,6 +397,7 @@ public class TriggerListPanel
 		final String comment = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				retrieveTriggerSource(trigger, table, comment);
@@ -436,6 +444,7 @@ public class TriggerListPanel
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				source.setCaretPosition(0, false);
@@ -444,21 +453,25 @@ public class TriggerListPanel
 		});
 	}
 
+	@Override
 	public TableIdentifier getObjectTable()
 	{
 		return null;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return this;
 	}
 
+	@Override
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
+	@Override
 	public List<DbObject> getSelectedObjects()
 	{
 		if (!initialized) return null;
@@ -496,6 +509,7 @@ public class TriggerListPanel
 		return objects;
 	}
 
+	@Override
 	public void reload()
 	{
 		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;

@@ -12,6 +12,9 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
@@ -42,6 +45,16 @@ public class DataDisplayOptions
 	{
 		super();
 		initComponents();
+		Font font = selectionBlend.getFont();
+		if (font != null)
+		{
+			FontMetrics fm = selectionBlend.getFontMetrics(font);
+			int width = fm.stringWidth("0");
+			Dimension current = selectionBlend.getPreferredSize();
+			Dimension d = new Dimension(width * 5, current.height);
+			selectionBlend.setPreferredSize(d);
+			alternateBlend.setPreferredSize(d);
+		}
 	}
 
 	@Override
@@ -74,6 +87,8 @@ public class DataDisplayOptions
 		modifiedColor.setSelectedColor(GuiSettings.getColumnModifiedColor());
 		showRowNumbers.setSelected(GuiSettings.getShowTableRowNumbers());
 		showMaxRowsWarn.setSelected(GuiSettings.getShowMaxRowsReached());
+		selectionBlend.setText(Settings.getInstance().getProperty("workbench.gui.renderer.blend.selection", ""));
+		alternateBlend.setText(Settings.getInstance().getProperty("workbench.gui.renderer.blend.alternate", ""));
 		fillLanguageDropDown();
 	}
 
@@ -109,6 +124,8 @@ public class DataDisplayOptions
 		Settings.getInstance().setColor("workbench.gui.table.foreground", textColor.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.selection.background", selectionColor.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.selection.foreground", selectedTextColor.getSelectedColor());
+		Settings.getInstance().setProperty("workbench.gui.renderer.blend.selection",selectionBlend.getText().trim());
+		Settings.getInstance().setProperty("workbench.gui.renderer.blend.alternate",alternateBlend.getText().trim());
 	}
 
 	public static void clearLocales()
@@ -226,6 +243,11 @@ public class DataDisplayOptions
         selectedTextColor = new WbColorPicker(true);
         jLabel7 = new javax.swing.JLabel();
         modifiedColor = new WbColorPicker(true);
+        jPanel7 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        selectionBlend = new javax.swing.JTextField();
+        alternateBlend = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         localeDropDown = new javax.swing.JComboBox();
         jPanel5 = new javax.swing.JPanel();
@@ -429,8 +451,9 @@ public class DataDisplayOptions
         jPanel2.add(nullColor, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         jPanel2.add(jPanel1, gridBagConstraints);
@@ -521,8 +544,8 @@ public class DataDisplayOptions
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(8, 4, 0, 0);
         jPanel2.add(jLabel7, gridBagConstraints);
 
         modifiedColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -533,6 +556,52 @@ public class DataDisplayOptions
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         jPanel2.add(modifiedColor, gridBagConstraints);
+
+        jPanel7.setLayout(new java.awt.GridBagLayout());
+
+        jLabel8.setText(ResourceMgr.getString("LblSelectionBlend")); // NOI18N
+        jLabel8.setToolTipText(ResourceMgr.getString("d_LblSelectionBlend")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel7.add(jLabel8, gridBagConstraints);
+
+        selectionBlend.setToolTipText(ResourceMgr.getString("d_LblSelectionBlend")); // NOI18N
+        selectionBlend.setMinimumSize(new java.awt.Dimension(40, 20));
+        selectionBlend.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        jPanel7.add(selectionBlend, gridBagConstraints);
+
+        alternateBlend.setToolTipText(ResourceMgr.getString("d_LblAlternateBlend")); // NOI18N
+        alternateBlend.setMinimumSize(new java.awt.Dimension(40, 20));
+        alternateBlend.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        jPanel7.add(alternateBlend, gridBagConstraints);
+
+        jLabel9.setText(ResourceMgr.getString("LblAlternateBlend")); // NOI18N
+        jLabel9.setToolTipText(ResourceMgr.getString("d_LblAlternateBlend")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel7.add(jLabel9, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(8, 14, 0, 0);
+        jPanel2.add(jPanel7, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -661,6 +730,7 @@ public class DataDisplayOptions
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField alternateBlend;
     private workbench.gui.components.WbColorPicker alternateColor;
     private javax.swing.JLabel alternateColorLabel;
     private javax.swing.JCheckBox autoColWidth;
@@ -676,12 +746,15 @@ public class DataDisplayOptions
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JComboBox localeDropDown;
     private javax.swing.JTextField maxColSizeField;
     private javax.swing.JLabel maxColSizeLabel;
@@ -698,6 +771,7 @@ public class DataDisplayOptions
     private javax.swing.JCheckBox selectSummary;
     private workbench.gui.components.WbColorPicker selectedTextColor;
     private javax.swing.JLabel selectedTextColorLabel;
+    private javax.swing.JTextField selectionBlend;
     private workbench.gui.components.WbColorPicker selectionColor;
     private javax.swing.JLabel selectionColorLabel;
     private javax.swing.JCheckBox showMaxRowsWarn;

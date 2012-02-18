@@ -70,6 +70,11 @@ public class ToolTipRenderer
 	private RendererSetup rendererSetup;
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
+
+	private static final int DEFAULT_BLEND = 0;
+	protected int selectionBlendFactor = DEFAULT_BLEND;
+	protected int alternateBlendFactor = DEFAULT_BLEND;
+
 	protected int editingRow = -1;
 	private boolean isEditing;
 	private boolean[] highlightCols;
@@ -109,6 +114,18 @@ public class ToolTipRenderer
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 		showTooltip = Settings.getInstance().getBoolProperty("workbench.gui.renderer.showtooltip", true);
+		selectionBlendFactor = retrieveBlendFactor("selection");
+		alternateBlendFactor = retrieveBlendFactor("alternate");
+	}
+
+	private int retrieveBlendFactor(String type)
+	{
+		int value = Settings.getInstance().getIntProperty("workbench.gui.renderer.blend." + type, DEFAULT_BLEND);
+		if (value < 0 || value > 256)
+		{
+			value = DEFAULT_BLEND;
+		}
+		return value;
 	}
 
 	static Insets getDefaultInsets()
@@ -138,11 +155,6 @@ public class ToolTipRenderer
 			result = new Insets(1,1,1,1);
 		}
 		return result;
-	}
-
-	public int getLineCount()
-	{
-		return 1;
 	}
 
 	@Override
@@ -178,7 +190,6 @@ public class ToolTipRenderer
 	{
 		this.highlightBackground = c;
 	}
-
 
 	private boolean doModificationHighlight(WbTable table, int row, int col)
 	{
@@ -284,6 +295,21 @@ public class ToolTipRenderer
 			return unselectedBackground;
 		}
 
+		Color c = getColumnHighlightColor();
+		if (isSelected)
+		{
+			return ColorUtils.blend(selectedBackground, c, selectionBlendFactor);
+		}
+		else if (isAlternatingRow)
+		{
+			return ColorUtils.blend(rendererSetup.alternateBackground, c, alternateBlendFactor);
+		}
+		if (c != null) return c;
+		return unselectedBackground;
+	}
+
+	protected Color getColumnHighlightColor()
+	{
 		if (isEditing)
 		{
 			if (isHighlightColumn(currentColumn))
@@ -296,35 +322,20 @@ public class ToolTipRenderer
 			}
 		}
 
-		if (isSelected)
-		{
-			return selectedBackground;
-		}
-
 		if (checkHighlightExpression())
 		{
 			return filterHighlightColor;
 		}
-
 		if (isModifiedColumn)
 		{
-			return rendererSetup.modifiedColor;
+			return rendererSetup.modifiedColor; // might be null which is OK
 		}
-		else if (displayValue == null && rendererSetup.nullColor != null)
+		else if (displayValue == null)
 		{
-			return rendererSetup.nullColor;
+			return rendererSetup.nullColor; // might be null which is OK
 		}
-		else
-		{
-			if (isAlternatingRow)
-			{
-				return rendererSetup.alternateBackground;
-			}
-			else
-			{
-				return unselectedBackground;
-			}
-		}
+		// null means "default" color
+		return null;
 	}
 
 	@Override

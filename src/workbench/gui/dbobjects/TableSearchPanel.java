@@ -50,6 +50,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
@@ -146,6 +147,7 @@ public class TableSearchPanel
 		buttonPanel.add(startButton);
 
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		((WbTable)tableNames).setRendererSetup(RendererSetup.getBaseSetup());
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
 		tables.getSelectionModel().addListSelectionListener(this);
 		this.startButton.setEnabled(false);
@@ -256,7 +258,7 @@ public class TableSearchPanel
 						f = f.deriveFont(Font.BOLD);
 						b.setTitleFont(f);
 					}
-					
+
 					GridBagConstraints constraints = new GridBagConstraints();
 					constraints.gridx = 0;
 					constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -568,7 +570,7 @@ public class TableSearchPanel
 	{
 		private Dimension preferredSize = new Dimension(0,0);
 
-		public ParentWidthScrollPane(Component view)
+		ParentWidthScrollPane(Component view)
 		{
 			super(view);
 		}

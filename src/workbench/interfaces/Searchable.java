@@ -19,4 +19,5 @@ public interface Searchable
 {
 	int find();
 	int findNext();
+	int findPrevious();
 }

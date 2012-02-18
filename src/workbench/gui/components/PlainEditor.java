@@ -77,7 +77,7 @@ public class PlainEditor
 		}
 		SearchAndReplace replacer = new SearchAndReplace(this, this);
 		l.addAction(replacer.getFindAction());
-		l.addAction(replacer.getFindAgainAction());
+		l.addAction(replacer.getFindNextAction());
 		l.addAction(replacer.getReplaceAction());
 	}
 

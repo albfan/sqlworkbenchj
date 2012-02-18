@@ -36,7 +36,7 @@ public class SearchableTextPane
 		SearchAndReplace searcher = new SearchAndReplace(owner, this);
 		TextComponentMouseListener l = new TextComponentMouseListener(this);
 		l.addAction(searcher.getFindAction());
-		l.addAction(searcher.getFindAgainAction());
+		l.addAction(searcher.getFindNextAction());
 	}
 
 	@Override

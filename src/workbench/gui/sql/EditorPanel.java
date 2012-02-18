@@ -50,21 +50,7 @@ import javax.swing.text.GapContent;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.ColumnSelectionAction;
-import workbench.gui.actions.CommentAction;
-import workbench.gui.actions.FileOpenAction;
-import workbench.gui.actions.FileReloadAction;
-import workbench.gui.actions.FileSaveAction;
-import workbench.gui.actions.FileSaveAsAction;
-import workbench.gui.actions.FindAction;
-import workbench.gui.actions.FindAgainAction;
-import workbench.gui.actions.FormatSqlAction;
-import workbench.gui.actions.MatchBracketAction;
-import workbench.gui.actions.RedoAction;
-import workbench.gui.actions.ReplaceAction;
-import workbench.gui.actions.UnCommentAction;
-import workbench.gui.actions.UndoAction;
-import workbench.gui.actions.WbAction;
+import workbench.gui.actions.*;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
@@ -170,7 +156,8 @@ public class EditorPanel
 
 		this.replacer = new SearchAndReplace(this, this);
 		this.addKeyBinding(this.getFindAction());
-		this.addKeyBinding(this.getFindAgainAction());
+		this.addKeyBinding(this.getFindPreviousAction());
+		this.addKeyBinding(this.getFindNextAction());
 		this.addKeyBinding(this.getReplaceAction());
 
 		if (aMarker != null) this.setTokenMarker(aMarker);
@@ -282,7 +269,7 @@ public class EditorPanel
 	public void showFindOnPopupMenu()
 	{
 		this.addPopupMenuItem(this.getFindAction(), true);
-		this.addPopupMenuItem(this.getFindAgainAction(), false);
+		this.addPopupMenuItem(this.getFindNextAction(), false);
 		this.addPopupMenuItem(this.getReplaceAction(), false);
 	}
 
@@ -299,8 +286,9 @@ public class EditorPanel
 	public UndoAction getUndoAction() { return this.undo; }
 	public RedoAction getRedoAction() { return this.redo; }
 
+	protected final FindPreviousAction getFindPreviousAction() { return this.replacer.getFindPreviousAction(); }
 	protected final FindAction getFindAction() { return this.replacer.getFindAction(); }
-	protected final FindAgainAction getFindAgainAction() { return this.replacer.getFindAgainAction(); }
+	protected final FindNextAction getFindNextAction() { return this.replacer.getFindNextAction(); }
 	protected final ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }
 
 	public SearchAndReplace getReplacer() { return this.replacer; }
