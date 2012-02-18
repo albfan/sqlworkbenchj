@@ -1785,6 +1785,42 @@ public class JEditTextArea
 
 	}
 
+	public boolean isEmptyRectangleSelection()
+	{
+		if (!rectSelect) return false;
+
+		Element map = document.getDefaultRootElement();
+		int start = selectionStart - map.getElement(selectionStartLine).getStartOffset();
+		int end = selectionEnd - map.getElement(selectionEndLine).getStartOffset();
+
+		// Certain rectangles satisfy this condition...
+		if (end < start)
+		{
+			int tmp = end;
+			end = start;
+			start = tmp;
+		}
+
+		Element lineElement = map.getElement(selectionStartLine);
+		int lineStart = lineElement.getStartOffset();
+		int lineEnd = lineElement.getEndOffset() - 1;
+		int rectStart = Math.min(lineEnd, lineStart + start);
+		int caret = getCaretPositionInLine(getCaretLine());
+		return rectStart == caret;
+	}
+
+	public void doRectangleDeleteChar()
+	{
+		selectionStart ++;
+		setSelectedText("");
+	}
+
+	public void doRectangleBackspace()
+	{
+		selectionStart --;
+		setSelectedText("");
+	}
+
 	/**
 	 * Replaces the selection with the specified text.
 	 * @param selectedText The replacement text for the selection

@@ -511,7 +511,14 @@ public class InputHandler
 
 			if (textArea.getSelectionStart() != textArea.getSelectionEnd())
 			{
-				textArea.setSelectedText("");
+				if (textArea.isEmptyRectangleSelection())
+				{
+					textArea.doRectangleBackspace();
+				}
+				else
+				{
+					textArea.setSelectedText("");
+				}
 			}
 			else
 			{

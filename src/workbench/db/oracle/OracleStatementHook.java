@@ -69,7 +69,8 @@ public class OracleStatementHook
 		"'bytes received via SQL*Net from client', \n" +
 		"'SQL*Net roundtrips to/from client', \n" +
 		"'sorts (memory)', \n" +
-		"'sorts (disk)', 'db block changes'";
+		"'sorts (disk)'\n, " +
+		"'db block changes'";
 
 	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
 	private static final Set<String> explainable = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
@@ -105,27 +106,36 @@ public class OracleStatementHook
 	private PreparedStatement statisticsStmt;
 	private final Object lock = new Object();
 
+	private boolean useStatisticsHint = true;
+
+	public OracleStatementHook()
+	{
+		useStatisticsHint = Settings.getInstance().getBoolProperty("workbench.db.oracle.realplan.usehint", true);
+	}
+
 	@Override
 	public String preExec(StatementRunner runner, String sql)
 	{
-		retrieveSessionState(runner);
 		if (!autotrace || !traceStatement(sql))
 		{
 			return sql;
 		}
 
+		lastExplainID = null;
+
 		if (showRealPlan)
 		{
-			lastExplainID = UUID.randomUUID().toString();
-			sql = getIDPrefix() + " " + sql;
-			enableStatistics(runner);
+			sql = adjustSql(sql);
+			if (!useStatisticsHint)
+			{
+				enableStatistics(runner);
+			}
 		}
 
 		if (showStatistics)
 		{
 			storeSessionStats(runner);
 		}
-
 		return sql;
 	}
 
@@ -133,6 +143,7 @@ public class OracleStatementHook
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
+		checkRunnerSession(runner);
 		if (!autotrace || !traceStatement(sql))
 		{
 			return;
@@ -183,12 +194,40 @@ public class OracleStatementHook
 		}
 	}
 
+	/**
+	 * Change the SQL to be executed so that it can be found in V$SQL later.
+	 *
+	 * In order to be able to find the SQL statement in postExec() a comment with a unique marker string is added to the
+	 * front of the statement so that it can correctly found in V$SQL and V$SQL_PLAN.
+	 *
+	 * Additionally the gather_plan_statistics hint is added to get detailed information
+	 * in the generated plan.
+	 *
+	 * @param sql  the sql to execute
+	 * @return the changed sql
+	 * @see #getIDPrefix()
+	 */
+	private String adjustSql(String sql)
+	{
+		lastExplainID = UUID.randomUUID().toString();
+		if (!useStatisticsHint)
+		{
+			return getIDPrefix() + "  " + sql;
+		}
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken verb = lexer.getNextToken(false, false);
+		if (verb == null) return sql;
+		int pos = verb.getCharEnd();
+		sql = getIDPrefix() + "  " + sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
+		return sql;
+	}
+
 	private String getIDPrefix() {
 		if (lastExplainID == null)
 		{
 			return "";
 		}
-		return "/* wb_" + lastExplainID + " */";
+		return "/* wb$" + lastExplainID + " */";
 	}
 
 	private void storeSessionStats(StatementRunner runner)
@@ -212,7 +251,6 @@ public class OracleStatementHook
 					values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
 				}
 				statisticViewsAvailable = true;
-				LogMgr.logDebug("OracleStatementHook.preExec()", "Retrieved " + values.size() + " statistic values");
 			}
 		}
 		catch (SQLException ex)
@@ -266,33 +304,32 @@ public class OracleStatementHook
 	{
 		WbConnection con = runner.getConnection();
 
-		String sqlId = null;
-		int childNumber = 0;
-
 		String findSql
 			= wbSelectMarker + " sql.sql_id, sql.child_number \n" +
 				"from v$sql sql \n" +
 				"where sql_text like '" + getIDPrefix() + "%' \n" +
 				"order by last_active_time desc";
 
-		String retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(:sqlid, :child, format=>'ALLSTATS LAST'))";
-
+		PreparedStatement planStatement = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
 		try
 		{
+			String retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(?, ?, 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+			planStatement = con.getSqlConnection().prepareStatement(retrievePlan);
+
 			stmt = con.createStatementForQuery();
 			rs = stmt.executeQuery(findSql);
 			if (rs.next())
 			{
-				sqlId = rs.getString(1);
-				childNumber = rs.getInt(2);
-				retrievePlan = retrievePlan.replace(":sqlid", "'"  + sqlId + "'");
-				retrievePlan = retrievePlan.replace(":child", Integer.toString(childNumber));
+				String sqlId = rs.getString(1);
+				int childNumber = rs.getInt(2);
+				planStatement.setString(1, sqlId);
+				planStatement.setInt(2, childNumber);
 
 				SqlUtil.closeResult(rs);
-				rs = stmt.executeQuery(retrievePlan);
+				rs = planStatement.executeQuery();
 				result = new DataStore(rs, true);
 				result.setGeneratingSql(sql);
 				result.setResultName("Execution plan");
@@ -301,10 +338,11 @@ public class OracleStatementHook
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve real execution plan", ex);
+			LogMgr.logError("OracleStatementHook.retrieveRealExecutionPlan()", "Could not retrieve real execution plan", ex);
 		}
 		finally
 		{
+			SqlUtil.closeStatement(planStatement);
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
@@ -357,7 +395,7 @@ public class OracleStatementHook
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve session statistics", ex);
+			LogMgr.logError("OracleStatementHook.retrieveExecutionPlan()", "Could not retrieve session statistics", ex);
 		}
 		finally
 		{
@@ -427,7 +465,7 @@ public class OracleStatementHook
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("OracleStatementHook.preExec()", "Could not retrieve session statistics", ex);
+			LogMgr.logError("OracleStatementHook.retrieveStatistics()", "Could not retrieve session statistics", ex);
 		}
 		finally
 		{
@@ -489,11 +527,16 @@ public class OracleStatementHook
 		return true;
 	}
 
-	private void retrieveSessionState(StatementRunner runner)
+	private void checkRunnerSession(StatementRunner runner)
 	{
 		String trace = runner.getSessionAttribute("autotrace");
 		if (trace == null)
 		{
+			if (autotrace)
+			{
+				// autotrace was turned off, so close the statistics statement.
+				close();
+			}
 			autotrace = false;
 			return;
 		}
@@ -506,7 +549,7 @@ public class OracleStatementHook
 		this.showRealPlan =  autotrace && flags.contains("realplan");
 		if (showRealPlan)
 		{
-			// enable execution plan in case retrieving the real plan doesn't work
+			// enable "regular" explain plan as well in case retrieving the real plan doesn't work for some reason
 			showExecutionPlan = showRealPlan;
 		}
 	}

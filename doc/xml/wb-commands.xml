@@ -690,6 +690,52 @@ $$ LANGUAGE plpgsql;
     <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
   </section>
 
+  <section id="command-wbgendrop">
+    <title>Generate a script to drop a table and its foreign key constraints - WbGenDrop</title>
+    <para>
+      <literal>WbGenDrop</literal> will generate a script with the statements to drop all incoming foreign keys to a table,
+      drop the table and re-recreate all foreign keys on that table again.
+    </para>
+    <para>The command supports the following parameters:</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+        <colspec colname="c1" colwidth="4cm" />
+        <colspec colname="c2" />
+        <thead>
+          <row>
+            <entry>Parameter</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody valign="top">
+          <row>
+            <entry>-tables</entry>
+            <entry>A list of tables for which the DROP statements should be generated.</entry>
+          </row>
+
+          <row>
+            <entry>-outputFile</entry>
+            <entry>
+              The file into which the statements should be written. If this parameter is specified,
+              the statements for all tables are written into a single file.
+            </entry>
+          </row>
+
+          <row>
+            <entry>-outputDir</entry>
+            <entry>
+              The directory into which the generated scripts should be written. If this parameter
+              is specified, one script for each table will be created.
+              In this case the <literal>-outputFile</literal> parameter will be ignored
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+  </section>
   <section id="command-wbrunlb">
      <title>Extract and run SQL from a Liquibase ChangeLog - WbRunLB</title>
     <indexterm><primary>Liquibase</primary><secondary>Run SQL from Liquibase file</secondary></indexterm>

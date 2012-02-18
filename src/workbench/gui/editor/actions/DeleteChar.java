@@ -42,7 +42,14 @@ public class DeleteChar
 
 		if (textArea.getSelectionStart() != textArea.getSelectionEnd())
 		{
-			textArea.setSelectedText("");
+			if (textArea.isEmptyRectangleSelection())
+			{
+				textArea.doRectangleDeleteChar();
+			}
+			else
+			{
+				textArea.setSelectedText("");
+			}
 		}
 		else
 		{
