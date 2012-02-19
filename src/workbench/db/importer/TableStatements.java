@@ -23,23 +23,25 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to manage and run table-level statements for the DataImporter
+ * A class to manage and run table-level statements for the DataImporter.
+ *
  * @see DataImporter#setPerTableStatements(TableStatements)
- * 
+ *
  * @author Thomas Kellerer
  */
-public class TableStatements 
+public class TableStatements
 {
 	private String preStatement;
 	private String postStatement;
 	private boolean ignoreErrors;
-	
+	private boolean success;
+
 	public TableStatements(String pre, String post)
 	{
 		this.preStatement = pre;
 		this.postStatement = post;
 	}
-	
+
 	/**
 	 * Initialize this TableStatement using the given commandline
 	 * @param cmdLine
@@ -52,24 +54,24 @@ public class TableStatements
 		{
 			this.preStatement = sql;
 		}
-		
+
 		sql = cmdLine.getValue(CommonArgs.ARG_POST_TABLE_STMT);
 		if (!StringUtil.isBlank(sql))
 		{
 			this.postStatement = sql;
 		}
-		
+
 		this.ignoreErrors = cmdLine.getBoolean(CommonArgs.ARG_IGNORE_TABLE_STMT_ERRORS, true);
 	}
-	
+
 	public boolean hasStatements()
 	{
 		return (this.preStatement != null || this.postStatement != null);
 	}
-	
+
 	/**
 	 * Run the statement that is defined as the pre-processing statement
-	 * 
+	 *
 	 * @param con the connection on which to run the statement
 	 * @param tbl the table for which to run the statement
 	 * @throws java.sql.SQLException
@@ -83,7 +85,7 @@ public class TableStatements
 
 	/**
 	 * Run the statement that is defined as the post-processing statement
-	 * 
+	 *
 	 * @param con the connection on which to run the statement
 	 * @param tbl the table for which to run the statement
 	 * @throws java.sql.SQLException
@@ -94,10 +96,10 @@ public class TableStatements
 	{
 		runStatement(con, tbl, getPostStatement(tbl));
 	}
-	
+
 	/**
 	 * Runs the given SQL for the given Table.
-	 * 
+	 *
 	 * @param con the connection to be used when running the statement
 	 * @param tbl the table for which to run the statement
 	 * @param sql
@@ -108,25 +110,38 @@ public class TableStatements
 	protected void runStatement(WbConnection con, TableIdentifier tbl, String sql)
 		throws SQLException
 	{
-		if (StringUtil.isBlank(sql)) return;
-		
+		if (StringUtil.isBlank(sql))
+		{
+			success = true;
+			return;
+		}
+
 		Savepoint sp = null;
 		Statement stmt = null;
 		boolean useSavepoint = con.getDbSettings().useSavepointForImport();
-		
+
+		success = false;
 		try
 		{
 			if (useSavepoint && !con.getAutoCommit()) sp = con.setSavepoint();
 			stmt = con.createStatement();
-			LogMgr.logDebug("TableStatements.runStatement", "Executing statement: " + sql);			
+			LogMgr.logDebug("TableStatements.runStatement", "Executing statement: " + sql);
 			stmt.execute(sql);
 			con.releaseSavepoint(sp);
+			success = true;
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("TableStatements.runStatement", "Error running statement: " + sql, e);
 			con.rollback(sp);
-			if (!ignoreErrors) throw e;
+			if (ignoreErrors)
+			{
+				LogMgr.logWarning("TableStatements.runStatement", "Error running statement: [" + sql + "]: " + e.getMessage());
+			}
+			else
+			{
+				LogMgr.logError("TableStatements.runStatement", "Error running statement: " + sql, e);
+				throw e;
+			}
 		}
 		catch (Throwable th)
 		{
@@ -139,14 +154,19 @@ public class TableStatements
 		}
 	}
 
+	public boolean wasSuccess()
+	{
+		return success;
+	}
+
 	/**
 	 * Return the post-processing SQL for the passed table.
-	 * 
+	 *
 	 * Placeholders ${table.name} and ${table.expression} are replaced
-	 * before running the statement. 
-	 * 
+	 * before running the statement.
+	 *
 	 * @param tbl the table for which the statement should be returned.
-	 * 
+	 *
 	 * @see workbench.db.TableIdentifier#getTableName()
 	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
 	 */
@@ -154,15 +174,15 @@ public class TableStatements
 	{
 		return getTableStatement(postStatement, tbl);
 	}
-	
+
 	/**
 	 * Return the post-processing SQL for the passed table.
-	 * 
+	 *
 	 * Placeholders ${table.name} and ${table.expression} are replaced
-	 * before running the statement. 
-	 * 
+	 * before running the statement.
+	 *
 	 * @param tbl the table for which the statement should be returned.
-	 * 
+	 *
 	 * @see workbench.db.TableIdentifier#getTableName()
 	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
 	 */
@@ -170,7 +190,7 @@ public class TableStatements
 	{
 		return getTableStatement(preStatement, tbl);
 	}
-	
+
 	private String getTableStatement(String source, TableIdentifier tbl)
 	{
 		if (source == null) return null;

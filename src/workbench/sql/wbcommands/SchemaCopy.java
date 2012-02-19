@@ -64,7 +64,7 @@ class SchemaCopy
 	private boolean doSyncDelete = false;
 	private String cmdLineMode = null;
 
-	public SchemaCopy(List<TableIdentifier> tables)
+	SchemaCopy(List<TableIdentifier> tables)
 	{
 		this.sourceTables = tables;
 	}

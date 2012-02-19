@@ -24,13 +24,13 @@
   </entry>
 </row>
 <row>
-  <entry>-ignorePrePostErrors=false</entry>
+  <entry>-ignorePrePostErrors</entry>
   <entry>
     <para>
       Controls handling of errors for the <literal>-preTableStatement</literal> and
       <literal>-postTableStatement</literal> parameters.
-      If this is set to false, errors resulting from executing the
-      supplied parameters are ignored. If set to true (default) then error handling
+      If this is set to true (the default), errors resulting from executing the
+      supplied statements are ignored. If set to false then error handling
       depends on the parameter <literal>-continueOnError</literal>.
     </para>
   </entry>

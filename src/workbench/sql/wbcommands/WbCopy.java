@@ -230,12 +230,12 @@ public class WbCopy
 		boolean schemaCopy = tablesToExport.size() > 1;
 
 		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
-		if (targettable == null && !schemaCopy)
-		{
-			result.addMessage(ResourceMgr.getString("ErrCopyNoTarget"));
-			addWrongParams(result);
-			return result;
-		}
+//		if (targettable == null && !schemaCopy)
+//		{
+//			result.addMessage(ResourceMgr.getString("ErrCopyNoTarget"));
+//			addWrongParams(result);
+//			return result;
+//		}
 
 		if (schemaCopy)
 		{

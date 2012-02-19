@@ -1796,8 +1796,8 @@ public class DataImporter
 			this.retrieveKeyColumns();
 			if (!this.hasKeyColumns())
 			{
+				if (messages.getLength() > 0) this.messages.appendNewLine();
 				this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
-				this.messages.appendNewLine();
 				throw new SQLException("No key columns defined for update mode");
 			}
 		}
@@ -1981,7 +1981,7 @@ public class DataImporter
 
 			closeStatements();
 
-			if (this.tableStatements != null)
+			if (this.tableStatements != null && this.tableStatements.wasSuccess())
 			{
 				this.tableStatements.runPostTableStatement(dbConn, targetTable);
 			}

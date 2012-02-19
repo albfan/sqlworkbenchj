@@ -55,6 +55,10 @@ class TableCopy
 		String sourcetable = cmdLine.getValue(WbCopy.PARAM_SOURCETABLE);
 		String sourcequery = SqlUtil.trimSemicolon(cmdLine.getValue(WbCopy.PARAM_SOURCEQUERY));
 		String targettable = cmdLine.getValue(WbCopy.PARAM_TARGETTABLE);
+		if (targettable == null)
+		{
+			targettable = sourcetable;
+		}
 
 		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 
