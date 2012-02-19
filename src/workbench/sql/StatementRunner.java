@@ -265,7 +265,7 @@ public class StatementRunner
 	{
 		if (statementHook != null)
 		{
-			statementHook.close();
+			statementHook.close(aConn);
 		}
 
 		this.releaseSavepoint();

@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-02-18">
+    <entry dev-build="14" type="enh">The editor now supports "Find previous"</entry>
+    <entry dev-build="14" type="enh">A new option to blend the selection color with column highlighting in the result set is available</entry>
     <entry dev-build="13" type="enh">A new option to copy all column names of a result is available (thanks Andreas)</entry>
     <entry dev-build="13" type="enh">For Oracle the SQL for temporary tables is now generated correctly.</entry>
     <entry dev-build="12" type="enh">The notification about a finished (long running) script can now optionally be done using the system tray.</entry>
@@ -44,7 +46,7 @@
     <entry dev-build="3" type="fix">Running more than one DataPumper or WbCopy command in parallel did not work.</entry>
     <entry dev-build="2" type="fix">Displaying the source code for functions did not always work properly in PostgreSQL</entry>
     <entry dev-build="1" type="fix">Copy as SQL UPDATE did not work properly</entry>
-    <entry dev-build="1" type="fix">If more than one statement was selected reformatting the SQL would remove the delimiter</entry>
+    <entry dev-build="1" type="fix">If more than one statement was selected, reformatting the SQL would remove the delimiter</entry>
     <entry dev-build="1" type="fix">Implemented a workaround for a bug in old MySQL drivers that would cause an error when processing the result of a SELECT statement</entry>
   </release>
 

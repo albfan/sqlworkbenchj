@@ -10,11 +10,7 @@
  */
 package workbench.db.oracle;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -103,6 +99,8 @@ public class OracleStatementHook
 
 	private String lastExplainID;
 
+	private String lastStatisticsLevel;
+
 	private PreparedStatement statisticsStmt;
 	private final Object lock = new Object();
 
@@ -128,7 +126,11 @@ public class OracleStatementHook
 			sql = adjustSql(sql);
 			if (!useStatisticsHint)
 			{
-				enableStatistics(runner);
+				if (this.lastStatisticsLevel == null)
+				{
+					this.lastStatisticsLevel = retrieveStatisticsLevel(runner.getConnection());
+				}
+				changeStatisticsLevel(runner.getConnection(), "ALL");
 			}
 		}
 
@@ -348,19 +350,18 @@ public class OracleStatementHook
 		return result;
 	}
 
-	private void enableStatistics(StatementRunner runner)
+	private void changeStatisticsLevel(WbConnection con, String newLevel)
 	{
-		WbConnection con = runner.getConnection();
-
 		Statement stmt = null;
 		try
 		{
+			LogMgr.logDebug("OracleStatementHook.preExec()", "Setting STATISTICS_LEVEL to " + newLevel);
 			stmt = con.createStatement();
-			stmt.execute("alter session set statistics_level=all");
+			stmt.execute("alter session set statistics_level=" + newLevel);
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("OracleStatementHook.preExec()", "Could not enable statistics level", ex);
+			LogMgr.logError("OracleStatementHook.preExec()", "Could not enable statistics level: " + newLevel, ex);
 		}
 		finally
 		{
@@ -535,7 +536,7 @@ public class OracleStatementHook
 			if (autotrace)
 			{
 				// autotrace was turned off, so close the statistics statement.
-				close();
+				close(runner.getConnection());
 			}
 			autotrace = false;
 			return;
@@ -573,10 +574,37 @@ public class OracleStatementHook
 	}
 
 	@Override
-	public void close()
+	public void close(WbConnection conn)
 	{
 		SqlUtil.closeStatement(statisticsStmt);
 		statisticsStmt = null;
+		lastExplainID = null;
+		if (lastStatisticsLevel != null && conn != null)
+		{
+			changeStatisticsLevel(conn, lastStatisticsLevel);
+			lastStatisticsLevel = null;
+		}
 	}
 
+	private String retrieveStatisticsLevel(WbConnection conn)
+	{
+		CallableStatement cstmt = null;
+		String level = null;
+		String call = "{? = call dbms_utility.get_parameter_value('STATISTICS_LEVEL', ?, ?)}";
+		try
+		{
+			cstmt = conn.getSqlConnection().prepareCall(call);
+			cstmt.registerOutParameter(1, Types.INTEGER);
+			cstmt.registerOutParameter(2, Types.INTEGER);
+			cstmt.registerOutParameter(3, Types.VARCHAR);
+			cstmt.execute();
+			level = cstmt.getString(3);
+			LogMgr.logDebug("OracleStatementHook.retrieveStatisticsLevel()", "Current level: " + level);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("OracleStatementHook.retrieveStatisticsLevel()", "Could not retrieve STATISTICS_LEVEL", sql);
+		}
+		return level;
+	}
 }

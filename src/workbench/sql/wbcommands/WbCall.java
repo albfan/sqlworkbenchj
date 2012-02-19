@@ -514,7 +514,7 @@ public class WbCall
 		}
 
 		inputParameters.clear();
-		
+
 		if (definedParamCount > 0)
 		{
 			int realParamIndex = 1 + parameterIndexOffset;
@@ -543,6 +543,8 @@ public class WbCall
 
 				if (resultType.equals("INOUT"))
 				{
+					// an INOUT paramter needs to be presented in the variables dialog only if it's not a ref cursor
+					// (a ref cursor cannot be entered by the user)
 					needsInput = !isRefCursorParam;
 				}
 
@@ -556,6 +558,12 @@ public class WbCall
 						if (sqlParams.get(inputIndex).equals("?"))
 						{
 							inputParameters.add(def);
+							if (resultType.equals("INOUT"))
+							{
+								// INOUT paramters need to ber registered as well to get the returned value
+								parameterNames.add(def);
+								cstmt.registerOutParameter(realParamIndex, dataType);
+							}
 							realParamIndex ++;
 						}
 					}

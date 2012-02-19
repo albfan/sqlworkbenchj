@@ -286,25 +286,33 @@ public class OracleProcedureReader
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
 		String pkgProcs =
-				"select aa.package_name, \n" +
-				"       ao.owner as procedure_owner, \n" +
-				"       aa.object_name as procedure_name, \n" +
-				"       aa.overload as overload_index, \n" +
-				"       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
-				"       case  \n" +
-				"         when aa.in_out = 'OUT' and argument_name is null then 2 \n" +
-				"         when aa.in_out = 'OUT' and argument_name is not null then 1 \n" +
-				"         when aa.in_out = 'IN' then 1 \n" +
-				"         else 0 \n" +
-				"       end  as PROCEDURE_TYPE, \n" +
-			  "       ao.status \n" +
-				"from all_arguments aa \n" +
-				"  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE') \n" +
-				"where aa.package_name IS NOT NULL \n" +
-				"and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
-				"      OR (aa.position = 1 and aa.sequence = 1) \n" +
-				"      OR (aa.position = 1 and aa.sequence = 0) \n" +
-				"    )";
+			"select aa.package_name,  \n" +
+			"       ao.owner as procedure_owner,  \n" +
+			"       aa.object_name as procedure_name,  \n" +
+			"       aa.overload as overload_index,  \n" +
+			"       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks,  \n" +
+			"       case   \n" +
+			"         when aa.in_out = 'OUT' and argument_name is null then 2  \n" +
+			"         when aa.in_out = 'OUT' and argument_name is not null then 1  \n" +
+			"         when aa.in_out = 'IN' then 1  \n" +
+			"         else 0  \n" +
+			"       end  as PROCEDURE_TYPE,  \n" +
+			"       ao.status  \n" +
+			"from all_arguments aa  \n" +
+			"  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner  \n" +
+			"where aa.package_name IS NOT NULL  \n" +
+			"and ( ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE')  \n" + /* regular packages that do have a package body */
+			"      or ao.object_type = 'PACKAGE'  \n" + /* packages that do not have a package body (e.g. system packages)*/
+			"         and not exists (SELECT 1  \n" +
+			"                         FROM all_objects ao2  \n" +
+			"                         WHERE ao2.owner = ao.owner  \n" +
+			"                           AND ao2.object_name = ao.object_name \n" +
+			"                           AND ao2.object_type = 'PACKAGE BODY') \n" +
+			"    ) \n" +
+			"and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT')  \n" +
+			"      OR (aa.position = 1 and aa.sequence = 1)  \n" +
+			"      OR (aa.position = 1 and aa.sequence = 0)  \n" +
+			"    )";
 
 		if (StringUtil.isNonBlank(schema))
 		{

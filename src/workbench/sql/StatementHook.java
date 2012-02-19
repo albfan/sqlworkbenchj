@@ -10,6 +10,8 @@
  */
 package workbench.sql;
 
+import workbench.db.WbConnection;
+
 /**
  *
  * @author Thomas Kellerer
@@ -37,5 +39,5 @@ public interface StatementHook
 	 */
 	boolean fetchResults();
 
-	void close();
+	void close(WbConnection conn);
 }

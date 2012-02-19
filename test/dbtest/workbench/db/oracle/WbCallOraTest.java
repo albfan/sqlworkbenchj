@@ -536,4 +536,57 @@ public class WbCallOraTest
 			}
 		}
 	}
+
+	@Test
+	public void testSystemProcedure()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
+		assertEquals(1, procs.size());
+
+		StatementParameterPrompter prompter = new StatementParameterPrompter()
+		{
+			@Override
+			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+			{
+				prompterCalled = true;
+				return true;
+			}
+		};
+
+		WbCall call = new WbCall();
+		prompterCalled = false;
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		call.setParameterPrompter(prompter);
+
+		String cmd = "wbcall dbms_utility.get_parameter_value('STATISTICS_LEVEL', ?, ?, 1)";
+		StatementRunnerResult result = call.execute(cmd);
+		assertTrue(prompterCalled);
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		List<DataStore> results = result.getDataStores();
+		assertEquals(1, results.size());
+		DataStore ds = results.get(0);
+		assertNotNull(ds);
+		assertEquals(3, ds.getRowCount());
+		for (int row = 0; row < ds.getRowCount(); row ++)
+		{
+			String name = ds.getValueAsString(row, 0);
+			if ("RETURN".equals(name))
+			{
+				int value = ds.getValueAsInt(row, 1, -1);
+				assertEquals(1,value);
+			}
+			if ("STRVAL".equals(name))
+			{
+				assertEquals("TYPICAL", ds.getValueAsString(row, 1));
+			}
+		}
+	}
 }

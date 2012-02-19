@@ -320,6 +320,12 @@ public class JdbcProcedureReader
 			scale = -1;
 		}
 
+		if (sqlType == Types.OTHER && typeName.equals("BINARY_INTEGER"))
+		{
+			// workaround for Oracle
+			sqlType = Types.INTEGER;
+		}
+
 		int size = 0;
 		int digits = 0;
 

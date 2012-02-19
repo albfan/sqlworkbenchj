@@ -10,6 +10,8 @@
  */
 package workbench.sql;
 
+import workbench.db.WbConnection;
+
 /**
  * Empty implementation of the StatementHook interface.
  *
@@ -43,7 +45,7 @@ public class DefaultStatementHook
 	}
 
 	@Override
-	public void close()
+	public void close(WbConnection conn)
 	{
 	}
 }
