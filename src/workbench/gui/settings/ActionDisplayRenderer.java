@@ -27,7 +27,7 @@ public class ActionDisplayRenderer
 {
 	private boolean useAlternateColors = false;
 	private Color alternateBackground = null;
-	
+
 	public ActionDisplayRenderer()
 	{
 		super();
@@ -35,6 +35,7 @@ public class ActionDisplayRenderer
 		useAlternateColors = GuiSettings.getUseAlternateRowColor();
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
 		try
@@ -65,27 +66,29 @@ public class ActionDisplayRenderer
 		{
 			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
-		
+
 	}
 
 	public int getDisplayWidth()
 	{
 		return getText().length();
 	}
-	
+
+	@Override
 	public String getDisplayValue()
 	{
 		return getText();
 	}
-	
+
 	public void setUseAlternatingColors(boolean flag)
 	{
 		this.useAlternateColors = flag;
 	}
 
+	@Override
 	public void prepareDisplay(Object value)
 	{
-		
+
 	}
-	
+
 }

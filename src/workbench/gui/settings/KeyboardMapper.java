@@ -46,16 +46,19 @@ public class KeyboardMapper
 		this.add(display);
 	}
 
+	@Override
 	public void grabFocus()
 	{
 		this.display.grabFocus();
 		this.display.requestFocusInWindow();
 	}
 
+	@Override
 	public void keyPressed(KeyEvent e)
 	{
 	}
 
+	@Override
 	public void keyReleased(KeyEvent e)
 	{
 		int modifier = e.getModifiers();
@@ -84,6 +87,7 @@ public class KeyboardMapper
 		return this.newkey;
 	}
 
+	@Override
 	public void keyTyped(KeyEvent e)
 	{
 	}
@@ -93,6 +97,7 @@ public class KeyboardMapper
 		final KeyboardMapper mapper = new KeyboardMapper();
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				mapper.grabFocus();

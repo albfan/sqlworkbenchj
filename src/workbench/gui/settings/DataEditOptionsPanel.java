@@ -38,6 +38,7 @@ public class DataEditOptionsPanel
 		initComponents();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		pkMapFile.setCaretPosition(0);
@@ -50,6 +51,7 @@ public class DataEditOptionsPanel
 		inputLines.setText(Integer.toString(GuiSettings.getDefaultFormFieldLines()));
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		GuiSettings.setRequiredFieldColor(requiredFieldColor.getSelectedColor());

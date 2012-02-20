@@ -78,6 +78,7 @@ public class LnFDefinitionPanel
 		libraryPath.setLastDirProperty("workbench.lnf.lastdir");
 		tfName.addFocusListener(new FocusAdapter()
 		{
+			@Override
 			public void focusLost(FocusEvent evt)
 			{
 				nameFieldFocusLost(evt);
@@ -99,6 +100,7 @@ public class LnFDefinitionPanel
 		libraryPath.addPropertyChangeListener("filename", this);
 		libraryPath.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				selectClass();
@@ -120,6 +122,7 @@ public class LnFDefinitionPanel
 		}
 	}
 
+	@Override
 	public void setEnabled(boolean flag)
 	{
 		this.tfClassName.setEnabled(flag);
@@ -157,7 +160,8 @@ public class LnFDefinitionPanel
 		gui.setClassPath(libs);
 		gui.startCheck();
 	}
-	
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (ignoreChange) return;
@@ -394,6 +398,7 @@ public class LnFDefinitionPanel
 	static class HtmlLabel
 		extends JLabel
 	{
+		@Override
 		public void setText(String name)
 		{
 			setBackground(Color.WHITE);

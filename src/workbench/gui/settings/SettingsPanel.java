@@ -90,6 +90,7 @@ public class SettingsPanel
 		initComponents();
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
@@ -122,11 +123,13 @@ public class SettingsPanel
 	{
 		ListModel model = new AbstractListModel()
 		{
+			@Override
 			public Object getElementAt(int index)
 			{
 				return pages.get(index);
 			}
 
+			@Override
 			public int getSize()
 			{
 				return pages.size();
@@ -212,6 +215,7 @@ public class SettingsPanel
 		WbSwingUtilities.center(this.dialog, aReference);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				pageList.setSelectedIndex(0);
@@ -230,6 +234,7 @@ public class SettingsPanel
 		this.dialog = null;
 	}
 
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == escAction || e.getSource() == cancelButton)
@@ -250,31 +255,38 @@ public class SettingsPanel
 		}
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		closeWindow();
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 		// readLocales() will read the available locales in a background
@@ -285,6 +297,7 @@ public class SettingsPanel
 		DataDisplayOptions.readLocales();
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		for (int i=0; i < pages.size(); i++)
@@ -295,6 +308,7 @@ public class SettingsPanel
 			{
 				SwingUtilities.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						pageList.setSelectedIndex(index);
@@ -306,6 +320,7 @@ public class SettingsPanel
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 	}

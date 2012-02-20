@@ -42,6 +42,7 @@ public class OptionPanelPage
 		this.pageClass = "workbench.gui.settings." + clz;
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.label;

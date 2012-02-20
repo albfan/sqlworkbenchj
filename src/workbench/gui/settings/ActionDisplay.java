@@ -14,7 +14,7 @@ package workbench.gui.settings;
 /**
  * A wrapper class to display an Action for the {@link ShortcutEditor}
  * It simply holds a text and a tooltip
- * 
+ *
  * @see ActionDisplayRenderer
  * @see ShortcutEditor
  * @author Thomas Kellerer
@@ -22,22 +22,24 @@ package workbench.gui.settings;
 public class ActionDisplay
 	implements Comparable
 {
-	
+
 	public String text;
 	public String tooltip;
-	
+
 	public ActionDisplay(String txt, String tip)
 	{
 		text = txt;
 		tooltip = tip;
 	}
-	
+
+	@Override
 	public int compareTo(Object other)
 	{
 		ActionDisplay a = (ActionDisplay)other;
 		return text.compareToIgnoreCase(a.text);
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return text;

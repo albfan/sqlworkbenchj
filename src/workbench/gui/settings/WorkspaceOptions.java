@@ -50,6 +50,7 @@ public class WorkspaceOptions
 		fileHandling.setModel(new DefaultComboBoxModel(types));
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		createBackup.setSelected(Settings.getInstance().getCreateWorkspaceBackup());
@@ -74,6 +75,7 @@ public class WorkspaceOptions
 		}
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();

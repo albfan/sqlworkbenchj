@@ -34,6 +34,7 @@ public class DataFormattingOptionsPanel
 		initComponents();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		dateFormatTextField.setText(Settings.getInstance().getDefaultDateFormat());
@@ -45,6 +46,7 @@ public class DataFormattingOptionsPanel
 		maxDigitsField.setText(Integer.toString(Settings.getInstance().getMaxFractionDigits()));
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings.getInstance().setDefaultDateFormat(this.dateFormatTextField.getText());
@@ -56,6 +58,7 @@ public class DataFormattingOptionsPanel
 	}
 
 
+	@Override
 	public boolean validateInput()
 	{
 		String format = dateFormatTextField.getText();
@@ -97,11 +100,12 @@ public class DataFormattingOptionsPanel
 
 		return true;
 	}
-	
+
+	@Override
 	public void componentDisplayed()
 	{
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

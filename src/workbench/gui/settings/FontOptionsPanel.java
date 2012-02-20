@@ -40,6 +40,7 @@ public class FontOptionsPanel
 		msgLogFont.setAllowFontReset(true);
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		editorFont.setSelectedFont(Settings.getInstance().getEditorFont(false));
@@ -48,6 +49,7 @@ public class FontOptionsPanel
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		Settings.getInstance().setEditorFont(editorFont.getSelectedFont());
@@ -55,7 +57,7 @@ public class FontOptionsPanel
 		Settings.getInstance().setStandardFont(standardFont.getSelectedFont());
 		Settings.getInstance().setMsgLogFont(msgLogFont.getSelectedFont());
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

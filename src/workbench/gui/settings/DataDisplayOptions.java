@@ -11,17 +11,17 @@
  */
 package workbench.gui.settings;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbColorPicker;
 import workbench.interfaces.Restoreable;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -36,7 +36,7 @@ import workbench.util.WbThread;
  */
 public class DataDisplayOptions
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ValidatingComponent
 {
 	private static Locale[] locales;
 	private static final Object localeLock = new Object();
@@ -126,6 +126,56 @@ public class DataDisplayOptions
 		Settings.getInstance().setColor("workbench.gui.table.selection.foreground", selectedTextColor.getSelectedColor());
 		Settings.getInstance().setProperty("workbench.gui.renderer.blend.selection",selectionBlend.getText().trim());
 		Settings.getInstance().setProperty("workbench.gui.renderer.blend.alternate",alternateBlend.getText().trim());
+	}
+
+	@Override
+	public void componentDisplayed()
+	{
+	}
+
+	@Override
+	public boolean validateInput()
+	{
+		if (!validateTextField(selectionBlend))
+		{
+			return false;
+		}
+		if (!validateTextField(alternateBlend))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private boolean validateTextField(final JTextField field)
+	{
+		if (StringUtil.isEmptyString(field.getText().trim())) return true;
+		String errMsg = ResourceMgr.getString("ErrInvalidBlend");
+
+		int blend = -1;
+		try
+		{
+			blend = Integer.parseInt(field.getText().trim());
+		}
+		catch (Exception ex)
+		{
+			blend = -1;
+		}
+
+		if (blend < 0 || blend > 256)
+		{
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), errMsg);
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					field.requestFocusInWindow();
+				}
+			});
+			return false;
+		}
+		return true;
 	}
 
 	public static void clearLocales()

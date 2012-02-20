@@ -80,11 +80,13 @@ public class LnFOptionsPanel
 		lnfList.addListSelectionListener(this);
 	}
 
+	@Override
 	public void saveSettings()
 	{
 		manager.saveLookAndFeelDefinitions();
 	}
 
+	@Override
 	public void restoreSettings()
 	{
 		LnFDefinition clnf = manager.getCurrentLnF();
@@ -92,6 +94,7 @@ public class LnFOptionsPanel
 		definitionPanel.setCurrentLookAndFeeld(clnf);
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		LnFDefinition def = (LnFDefinition)lnfList.getSelectedValue();
@@ -102,10 +105,12 @@ public class LnFOptionsPanel
 		}
 	}
 
+	@Override
 	public void saveItem() throws Exception
 	{
 	}
 
+	@Override
 	public void deleteItem() throws Exception
 	{
 		LnFDefinition def = (LnFDefinition)lnfList.getSelectedValue();
@@ -127,6 +132,7 @@ public class LnFOptionsPanel
 		lnfList.repaint();
 	}
 
+	@Override
 	public void newItem(boolean copyCurrent) throws Exception
 	{
 		try
@@ -154,6 +160,7 @@ public class LnFOptionsPanel
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals("name"))
@@ -165,11 +172,13 @@ public class LnFOptionsPanel
 	class LnfList
 		extends AbstractListModel
 	{
+		@Override
 		public Object getElementAt(int index)
 		{
 			return manager.getAvailableLookAndFeels().get(index);
 		}
 
+		@Override
 		public int getSize()
 		{
 			return manager.getAvailableLookAndFeels().size();
