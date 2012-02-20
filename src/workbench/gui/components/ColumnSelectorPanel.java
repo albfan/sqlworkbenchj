@@ -246,6 +246,8 @@ public class ColumnSelectorPanel
 			}
 		}
 	}
+
+	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (this.model == null) return;
@@ -261,7 +263,6 @@ public class ColumnSelectorPanel
 		TableModelEvent evt = new TableModelEvent(model);
 		this.selectTable.tableChanged(evt);
 	}
-
 }
 
 class ColumnSelectTableModel
@@ -281,16 +282,23 @@ class ColumnSelectTableModel
 		this.selected = new boolean[this.rows];
 	}
 
+	@Override
 	public int getColumnCount()
 	{
 		return 2;
 	}
 
+	@Override
 	public Object getValueAt(int row, int column)
 	{
 		if (column == 0)
 		{
-			return this.columns[row].getColumnName();
+			String name = this.columns[row].getColumnAlias();
+			if (name == null)
+			{
+				name = this.columns[row].getColumnName();
+			}
+			return name;
 		}
 		else if (column == 1)
 		{
@@ -317,37 +325,43 @@ class ColumnSelectTableModel
 		}
 	}
 
-
+	@Override
 	public int getRowCount()
 	{
 		return this.rows;
 	}
 
+	@Override
 	public void addTableModelListener(javax.swing.event.TableModelListener l)
 	{
 	}
 
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		if (columnIndex == 0) return String.class;
 		else return Boolean.class;
 	}
 
+	@Override
 	public String getColumnName(int columnIndex)
 	{
 		if (columnIndex == 0) return this.colLabel;
 		return this.selectLabel;
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		return (columnIndex == 1);
 	}
 
+	@Override
 	public void removeTableModelListener(javax.swing.event.TableModelListener l)
 	{
 	}
 
+	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 1 && aValue instanceof Boolean)

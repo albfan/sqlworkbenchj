@@ -355,6 +355,11 @@ public class OracleStatementHook
 		Statement stmt = null;
 		try
 		{
+			if (StringUtil.isEmptyString(newLevel))
+			{
+				// should not happen, but just in case.
+				newLevel = "TYPICAL";
+			}
 			LogMgr.logDebug("OracleStatementHook.preExec()", "Setting STATISTICS_LEVEL to " + newLevel);
 			stmt = con.createStatement();
 			stmt.execute("alter session set statistics_level=" + newLevel);
