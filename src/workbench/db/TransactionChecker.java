@@ -59,8 +59,10 @@ public interface TransactionChecker
 		public static TransactionChecker createChecker(WbConnection con)
 		{
 			if (con == null) return NO_CHECK;
+			DbSettings db = con.getDbSettings();
+			if (db == null) return NO_CHECK;
 
-			String sql = con.getDbSettings().checkOpenTransactionsQuery();
+			String sql = db.checkOpenTransactionsQuery();
 
 			if (sql != null && con.getProfile().getDetectOpenTransaction())
 			{
