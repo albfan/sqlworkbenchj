@@ -17,7 +17,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Searchable;
-import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
