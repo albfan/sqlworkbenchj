@@ -104,11 +104,8 @@ public class OracleStatementHook
 	private PreparedStatement statisticsStmt;
 	private final Object lock = new Object();
 
-	private boolean useStatisticsHint = true;
-
 	public OracleStatementHook()
 	{
-		useStatisticsHint = Settings.getInstance().getBoolProperty("workbench.db.oracle.realplan.usehint", true);
 	}
 
 	@Override
@@ -124,7 +121,9 @@ public class OracleStatementHook
 		if (showRealPlan)
 		{
 			sql = adjustSql(sql);
-			if (!useStatisticsHint)
+			LogMgr.logDebug("OracleStatementHook.preExec()", "Using sql:\n" + sql);
+
+			if (!useStatisticsHint())
 			{
 				if (this.lastStatisticsLevel == null)
 				{
@@ -141,6 +140,10 @@ public class OracleStatementHook
 		return sql;
 	}
 
+	private boolean useStatisticsHint()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.realplan.usehint", true);
+	}
 
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
@@ -212,14 +215,21 @@ public class OracleStatementHook
 	private String adjustSql(String sql)
 	{
 		lastExplainID = UUID.randomUUID().toString();
-		if (!useStatisticsHint)
+		if (!useStatisticsHint())
 		{
 			return getIDPrefix() + "  " + sql;
 		}
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
-		if (verb == null) return sql;
+
+		if (verb == null) return getIDPrefix() + "  " + sql;
 		int pos = verb.getCharEnd();
+
+		if (pos < 0)
+		{
+			LogMgr.logWarning("OracleStatementHook.adjustSql()", "Wrong char end " + pos + " for first SQL verb: " + verb);
+			return getIDPrefix() + "  " + sql;
+		}
 		sql = getIDPrefix() + "  " + sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
 		return sql;
 	}

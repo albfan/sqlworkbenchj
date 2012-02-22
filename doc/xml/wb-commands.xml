@@ -1158,14 +1158,14 @@ WHERE id=42;</programlisting>
     <title>Changing read only mode - WbMode</title>
     <para>
       In the <link linkend="profile-confirm-updates">connection profile</link> two options can be specified
-      to define the behaviour when running commands that might change the update: a "read only" mode
-      that ignores such commands and a "confirm all" mode, where you need to confirm any statement
-      that might change the database.
+      to define the behaviour when running commands that might change or update the database: a "read only" mode
+      that ignores such commands and a "confirm all" mode, where you need to confirm any statement that might change
+      the database.
     </para>
     <para>
-      These states can temporarily be changed without actually changing the profile
-      using the <literal>WbMode</literal> command.
+      These states can temporarily be changed without changing the profile using the <literal>WbMode</literal> command.
     </para>
+    
     <note>
       <para>This changes the mode for all editor tabs, not only for the
       one where you run the command.</para>

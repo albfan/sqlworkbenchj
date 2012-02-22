@@ -53,7 +53,7 @@ import workbench.util.WbThread;
 public class ConnectionMgr
 	implements PropertyChangeListener
 {
-	private Map<String, WbConnection> activeConnections = new HashMap<String, WbConnection>();
+	private Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<String, WbConnection>());
 
 	private List<ConnectionProfile> profiles;
 	private List<DbDriver> drivers;
@@ -62,6 +62,9 @@ public class ConnectionMgr
 	private boolean templatesImported;
 	private List<PropertyChangeListener> driverChangeListener;
 	private static ConnectionMgr instance = new ConnectionMgr();
+
+	private final Object driverLock = new Object();
+	private final Object profileLock = new Object();
 
 	private ConnectionMgr()
 	{
@@ -108,6 +111,7 @@ public class ConnectionMgr
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
+
 		this.disconnect(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
 		WbConnection conn = this.connect(aProfile, anId);
@@ -335,7 +339,7 @@ public class ConnectionMgr
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
 	 */
-	public synchronized List<DbDriver> getDrivers()
+	public List<DbDriver> getDrivers()
 	{
 		if (this.drivers == null)
 		{
@@ -392,9 +396,12 @@ public class ConnectionMgr
 	 */
 	public ConnectionProfile getProfile(ProfileKey key)
 	{
-		if (key == null) return null;
-		if (this.profiles == null) this.readProfiles();
-		return findProfile(profiles, key);
+		synchronized (profileLock)
+		{
+			if (key == null) return null;
+			if (this.profiles == null) this.readProfiles();
+			return findProfile(profiles, key);
+		}
 	}
 
 	public void addDriverChangeListener(PropertyChangeListener l)
@@ -413,25 +420,31 @@ public class ConnectionMgr
 	 * Return a list with profile keys that can be displayed to the user.
 	 * The returned list is already sorted.
 	 */
-	public synchronized List<String> getProfileKeys()
+	public List<String> getProfileKeys()
 	{
-		if (profiles == null) readProfiles();
-		List<String> result = new ArrayList(profiles.size());
-		for (ConnectionProfile profile : profiles)
+		synchronized (profileLock)
 		{
-			result.add(profile.getKey().toString());
+			if (profiles == null) readProfiles();
+			List<String> result = new ArrayList(profiles.size());
+			for (ConnectionProfile profile : profiles)
+			{
+				result.add(profile.getKey().toString());
+			}
+			Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
+			return result;
 		}
-		Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
-		return result;
 	}
 
 	/**
 	 *	Returns a List with the current profiles.
 	 */
-	public synchronized List<ConnectionProfile> getProfiles()
+	public List<ConnectionProfile> getProfiles()
 	{
-		if (this.profiles == null) this.readProfiles();
-		return Collections.unmodifiableList(this.profiles);
+		synchronized (profileLock)
+		{
+			if (this.profiles == null) this.readProfiles();
+			return Collections.unmodifiableList(this.profiles);
+		}
 	}
 
 	/**
@@ -446,12 +459,6 @@ public class ConnectionMgr
 			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
-	}
-
-	public void abortAll()
-	{
-			List<WbConnection> current = new ArrayList<WbConnection>(activeConnections.values());
-			abortAll(current);
 	}
 
 	/**
@@ -470,6 +477,11 @@ public class ConnectionMgr
 			activeConnections.remove(con.getId());
 		}
 
+		if (LogMgr.isDebugEnabled())
+		{
+			dumpConnections();
+		}
+
 		for (final WbConnection con : toAbort)
 		{
 			WbThread disc = new WbThread("Disconnect for " + con.getId())
@@ -486,7 +498,7 @@ public class ConnectionMgr
 		LogMgr.logWarning("ConnectionMgr.abortAll()", "Aborting all connections finished");
 	}
 
-	public synchronized void dumpConnections()
+	public void dumpConnections()
 	{
 		if (LogMgr.isDebugEnabled())
 		{
@@ -509,18 +521,21 @@ public class ConnectionMgr
 		}
 	}
 
-	public synchronized void disconnect(WbConnection con)
+	public void disconnect(WbConnection con)
 	{
 		if (con == null) return;
+		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to remove connection with id=" + con.getId());
 		this.activeConnections.remove(con.getId());
+		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to physically close the connection with id=" + con.getId());
 		this.closeConnection(con);
 	}
 
 	/**
 	 *	Disconnect the connection with the given id
 	 */
-	public synchronized void disconnect(String anId)
+	public void disconnect(String anId)
 	{
+		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to disconnect connection with id=" + anId);
 		WbConnection con = this.activeConnections.get(anId);
 		disconnect(con);
 	}
@@ -529,7 +544,7 @@ public class ConnectionMgr
 	 * Disconnect the given connection.
 	 * @param conn the connection to disconnect.
 	 */
-	private synchronized void closeConnection(WbConnection conn)
+	private void closeConnection(WbConnection conn)
 	{
 		if (conn == null) return;
 		if (conn.isClosed()) return;
@@ -643,33 +658,36 @@ public class ConnectionMgr
 	@SuppressWarnings("unchecked")
 	private void readDrivers()
 	{
-		try
+		synchronized (driverLock)
 		{
-			WbPersistence reader = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
-			Object result = reader.readObject();
-			if (result == null)
+			try
 			{
-				this.drivers = new ArrayList<DbDriver>();
+				WbPersistence reader = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
+				Object result = reader.readObject();
+				if (result == null)
+				{
+					this.drivers = Collections.synchronizedList(new ArrayList<DbDriver>());
+				}
+				else if (result instanceof ArrayList)
+				{
+					this.drivers = Collections.synchronizedList((List<DbDriver>) result);
+				}
 			}
-			else if (result instanceof ArrayList)
+			catch (FileNotFoundException fne)
 			{
-				this.drivers = (List<DbDriver>)result;
+				LogMgr.logDebug("ConnectionMgr.readDrivers()", "WbDrivers.xml not found. Using defaults.");
+				this.drivers = null;
 			}
-		}
-		catch (FileNotFoundException fne)
-		{
-			LogMgr.logDebug("ConnectionMgr.readDrivers()", "WbDrivers.xml not found. Using defaults.");
-			this.drivers = null;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logDebug(this, "Could not load driver definitions. Creating new one...", e);
-			this.drivers = null;
-		}
+			catch (Exception e)
+			{
+				LogMgr.logDebug(this, "Could not load driver definitions. Creating new one...", e);
+				this.drivers = null;
+			}
 
-		if (this.drivers == null)
-		{
-			this.drivers = new ArrayList<DbDriver>();
+			if (this.drivers == null)
+			{
+				this.drivers = Collections.synchronizedList(new ArrayList<DbDriver>());
+			}
 		}
 		if (this.readTemplates)
 		{
@@ -687,33 +705,36 @@ public class ConnectionMgr
 	{
 		if (this.templatesImported) return;
 
-		if (this.drivers == null) this.readDrivers();
-
-		// now read the templates and append them to the driver list
-		InputStream in = null;
-		try
+		synchronized (driverLock)
 		{
-			in = getDriverTemplates();
+			if (this.drivers == null) this.readDrivers();
 
-			WbPersistence reader = new WbPersistence();
-			ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
-
-			for (int i=0; i < templates.size(); i++)
+			// now read the templates and append them to the driver list
+			InputStream in = null;
+			try
 			{
-				DbDriver drv = templates.get(i);
-				if (!this.isNameUsed(drv.getName()))
+				in = getDriverTemplates();
+
+				WbPersistence reader = new WbPersistence();
+				ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
+
+				for (int i=0; i < templates.size(); i++)
 				{
-					this.drivers.add(drv);
+					DbDriver drv = templates.get(i);
+					if (!this.isNameUsed(drv.getName()))
+					{
+						this.drivers.add(drv);
+					}
 				}
 			}
-		}
-		catch (Throwable io)
-		{
-			LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!", io);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
+			catch (Throwable io)
+			{
+				LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!", io);
+			}
+			finally
+			{
+				FileUtil.closeQuietely(in);
+			}
 		}
 		this.templatesImported = true;
 	}
@@ -737,8 +758,10 @@ public class ConnectionMgr
 	 */
 	public synchronized void clearProfiles()
 	{
-		if (this.profiles == null) return;
-		this.profiles.clear();
+		if (this.profiles != null)
+		{
+			this.profiles.clear();
+		}
 	}
 
 	/**
@@ -766,24 +789,27 @@ public class ConnectionMgr
 			result = null;
 		}
 
-		this.profiles = new ArrayList<ConnectionProfile>();
+		synchronized (profileLock)
+		{
+			this.profiles = new ArrayList<ConnectionProfile>();
 
-		if (result instanceof Collection)
-		{
-			Collection c = (Collection)result;
-			this.profiles.addAll(c);
-		}
-		else if (result instanceof Object[])
-		{
-			// This is to support the very first version of the profile storage
-			// probably obsolete by know, but you never know...
-			Object[] l = (Object[])result;
-			for (Object prof : l)
+			if (result instanceof Collection)
 			{
-				this.profiles.add((ConnectionProfile)prof);
+				Collection c = (Collection)result;
+				this.profiles.addAll(c);
 			}
+			else if (result instanceof Object[])
+			{
+				// This is to support the very first version of the profile storage
+				// probably obsolete by know, but you never know...
+				Object[] l = (Object[])result;
+				for (Object prof : l)
+				{
+					this.profiles.add((ConnectionProfile)prof);
+				}
+			}
+			this.resetProfiles();
 		}
-		this.resetProfiles();
 	}
 
 
@@ -792,7 +818,7 @@ public class ConnectionMgr
 	 *
 	 * Called after saving the profiles.
 	 */
-	private synchronized void resetProfiles()
+	private void resetProfiles()
 	{
 		if (this.profiles != null)
 		{
@@ -814,23 +840,26 @@ public class ConnectionMgr
 	 * @see workbench.resource.Settings#getProfileStorage()
 	 * @see WbPersistence#writeObject(Object)
 	 */
-	public synchronized void saveProfiles()
+	public void saveProfiles()
 	{
-		if (this.profiles != null)
+		synchronized (profileLock)
 		{
-			WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
-			WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
-			WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
+			if (this.profiles != null)
+			{
+				WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
+				WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
+				WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
 
-			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
-			try
-			{
-				writer.writeObject(this.profiles);
-				this.resetProfiles();
-			}
-			catch (IOException e)
-			{
-				LogMgr.logError("ConnectionMgr.saveProfiles()", "Error saving profiles", e);
+				WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
+				try
+				{
+					writer.writeObject(this.profiles);
+					this.resetProfiles();
+				}
+				catch (IOException e)
+				{
+					LogMgr.logError("ConnectionMgr.saveProfiles()", "Error saving profiles", e);
+				}
 			}
 		}
 	}
@@ -842,51 +871,64 @@ public class ConnectionMgr
 	public boolean profilesAreModified()
 	{
 		if (this.profilesChanged) return true;
-		if (this.profiles == null) return false;
-		for (ConnectionProfile profile : this.profiles)
+		synchronized (profileLock)
 		{
-			if (profile.isChanged())
+			if (this.profiles == null) return false;
+			for (ConnectionProfile profile : this.profiles)
 			{
-				return true;
+				if (profile.isChanged())
+				{
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 
-	public synchronized void applyProfiles(List<ConnectionProfile> newProfiles)
+	public void applyProfiles(List<ConnectionProfile> newProfiles)
 	{
 		if (newProfiles == null) return;
 
-		this.profilesChanged = (profiles.size() != newProfiles.size());
-
-		this.profiles.clear();
-		for (ConnectionProfile profile : newProfiles)
+		synchronized (profileLock)
 		{
-			this.profiles.add(profile.createStatefulCopy());
+			this.profilesChanged = (profiles.size() != newProfiles.size());
+
+			this.profiles.clear();
+			for (ConnectionProfile profile : newProfiles)
+			{
+				this.profiles.add(profile.createStatefulCopy());
+			}
 		}
 	}
 
-	public synchronized void addProfile(ConnectionProfile aProfile)
+	public void addProfile(ConnectionProfile aProfile)
 	{
-		if (this.profiles == null)
+		synchronized (profileLock)
 		{
-			this.readProfiles();
-		}
 
-		this.profiles.remove(aProfile);
-		this.profiles.add(aProfile);
-		this.profilesChanged = true;
-	}
+			if (this.profiles == null)
+			{
+				this.readProfiles();
+			}
 
-	public synchronized void removeProfile(ConnectionProfile aProfile)
-	{
-		if (this.profiles == null) return;
-
-		this.profiles.remove(aProfile);
-		// deleting a new profile should not change the status to changed
-		if (!aProfile.isNew())
-		{
+			this.profiles.remove(aProfile);
+			this.profiles.add(aProfile);
 			this.profilesChanged = true;
+		}
+	}
+
+	public void removeProfile(ConnectionProfile aProfile)
+	{
+		synchronized (profileLock)
+		{
+			if (this.profiles == null) return;
+
+			this.profiles.remove(aProfile);
+			// deleting a new profile should not change the status to changed
+			if (!aProfile.isNew())
+			{
+				this.profilesChanged = true;
+			}
 		}
 	}
 

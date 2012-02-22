@@ -72,7 +72,7 @@ public class SQLTokenMarker
 			switch (array[i])
 			{
 				case '*':
-					if (token == Token.COMMENT1 && currentLength - i >= 1 && array[i1] == '/')
+					if (token == Token.COMMENT1 && currentLength - i >= 1 && i1 < array.length && array[i1] == '/')
 					{
 						token = Token.NULL;
 						i++;
@@ -153,7 +153,7 @@ public class SQLTokenMarker
 				case '/':
 					if (token == Token.NULL)
 					{
-						if (currentLength - i >= 2 && array[i1] == '*')
+						if (currentLength - i >= 2 && i1 < array.length && array[i1] == '*')
 						{
 							searchBack(lineIndex, line, i, true);
 							token = Token.COMMENT1;
@@ -171,7 +171,7 @@ public class SQLTokenMarker
 				case '-':
 					if (token == Token.NULL)
 					{
-						if (currentLength - i >= 2 && array[i1] == '-')
+						if (currentLength - i >= 2 && i1 < array.length && array[i1] == '-')
 						{
 							searchBack(lineIndex, line, i, true);
 							addToken(lineIndex, currentLength - i, Token.COMMENT2);

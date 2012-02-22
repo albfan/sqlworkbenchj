@@ -24,6 +24,7 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import workbench.db.objectcache.DbObjectCacheFactory;
 
@@ -61,7 +62,7 @@ public class WbConnection
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
-	private List<PropertyChangeListener> listeners;
+	private List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
 
 	private Method clearSettings;
 	private Object dbAccess;
@@ -833,6 +834,7 @@ public class WbConnection
 
 	public DbSettings getDbSettings()
 	{
+		if (metaData == null) return null;
 		return this.metaData.getDbSettings();
 	}
 
@@ -1145,29 +1147,29 @@ public class WbConnection
 	}
 
 
-	public synchronized void addChangeListener(PropertyChangeListener l)
+	public void addChangeListener(PropertyChangeListener l)
 	{
-		if (this.listeners == null) this.listeners = new ArrayList<PropertyChangeListener>();
-		if (!this.listeners.contains(l)) this.listeners.add(l);
+		if (!this.listeners.contains(l))
+		{
+			this.listeners.add(l);
+		}
 	}
 
-	public synchronized void removeChangeListener(PropertyChangeListener l)
+	public void removeChangeListener(PropertyChangeListener l)
 	{
-		if (this.listeners == null) return;
 		this.listeners.remove(l);
 	}
 
 	private void fireConnectionStateChanged(String property, String oldValue, String newValue)
 	{
-		if (this.listeners != null)
+		int count = this.listeners.size();
+		if (count == 0) return;
+
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
+		for (int i=0; i < count; i++)
 		{
-			int count = this.listeners.size();
-			PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
-			for (int i=0; i < count; i++)
-			{
-				PropertyChangeListener l = this.listeners.get(i);
-				l.propertyChange(evt);
-			}
+			PropertyChangeListener l = this.listeners.get(i);
+			l.propertyChange(evt);
 		}
 	}
 
