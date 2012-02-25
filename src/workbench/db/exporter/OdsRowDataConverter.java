@@ -35,9 +35,15 @@ public class OdsRowDataConverter
 	extends RowDataConverter
 {
 	private Writer content;
+
+	// The formatters used for the interal date/time formats in the cell values
 	private SimpleDateFormat tFormat = new SimpleDateFormat("HH:mm:ss");
 	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+	private String dateStyle = "ce2";
+	private String tsStyle = "ce3";
+	private String timeStyle = "ce4";
 
 	@Override
 	public StrBuffer getStart()
@@ -85,7 +91,21 @@ public class OdsRowDataConverter
 			{
 				if (includeColumnInExport(i))
 				{
-					content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
+					int type = getResultInfo().getColumnType(i);
+					String defaultStyle = "Default";
+					if (type == Types.DATE)
+					{
+						defaultStyle = dateStyle;
+					}
+					else if (type == Types.TIMESTAMP)
+					{
+						defaultStyle = tsStyle;
+					}
+					else if (type == Types.TIME)
+					{
+						defaultStyle = timeStyle;
+					}
+					content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"" + defaultStyle + "\"/>\n");
 				}
 			}
 
@@ -240,22 +260,66 @@ public class OdsRowDataConverter
 		{
 			//int size = metaData.getColumnSize(i) * 2;
 			//style:column-width=\"" + (size)+  "pt\"
-			content.write("<style:style style:name=\"co" + (i+1) + "\" style:family=\"table-column\"> \n");
-			content.write("  <style:table-column-properties style:use-optimal-column-width=\"true\"/> \n");
-			content.write("</style:style> \n");
+			content.write("  <style:style style:name=\"co" + (i+1) + "\" style:family=\"table-column\"> \n");
+			content.write("    <style:table-column-properties style:use-optimal-column-width=\"true\"/> \n");
+			content.write("  </style:style> \n");
 		}
+
+		String tsStyleDef = timestampIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimestampFormatter), tsStyle, "N50") : "";
+		String dateStyleDef = dateIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultDateFormatter), dateStyle, "N60") : "";
+		String timeStyleDef = timeIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimeFormatter), dateStyle, "N80") : "";
+
 		String styles =
-			"<style:style style:name=\"ro1\" style:family=\"table-row\"> \n" +
-			"  <style:table-row-properties fo:break-before=\"auto\" style:use-optimal-row-height=\"true\"/> \n" +
-			"</style:style> \n" +
-			"<style:style style:name=\"ta1\" style:family=\"table\" style:master-page-name=\"Default\"> \n" +
-			"  <style:table-properties table:display=\"true\" style:writing-mode=\"lr-tb\"/> \n" +
-			"</style:style> \n" +
-			"<style:style style:name=\"ce1\" style:family=\"table-cell\" style:parent-style-name=\"Default\"> \n" +
-			"  <style:text-properties fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/> \n" +
-			"</style:style> \n" +
+			"  <style:style style:name=\"ro1\" style:family=\"table-row\"> \n" +
+			"    <style:table-row-properties fo:break-before=\"auto\" style:use-optimal-row-height=\"true\"/> \n" +
+			"  </style:style> \n" +
+			"  <style:style style:name=\"ta1\" style:family=\"table\" style:master-page-name=\"Default\"> \n" +
+			"    <style:table-properties table:display=\"true\" style:writing-mode=\"lr-tb\"/> \n" +
+			"  </style:style> \n" +
+			"  <style:style style:name=\"ce1\" style:family=\"table-cell\" style:parent-style-name=\"Default\"> \n" +
+			"    <style:text-properties fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/> \n" +
+			"  </style:style> \n" +
+			dateStyleDef +
+			tsStyleDef +
+			timeStyleDef +
 			"</office:automatic-styles>\n";
 		content.write(styles);
+	}
+
+	private boolean timestampIncluded()
+	{
+		return typeStyleNeeded(Types.TIMESTAMP);
+	}
+
+	private boolean dateIncluded()
+	{
+		return typeStyleNeeded(Types.DATE);
+	}
+
+	private boolean timeIncluded()
+	{
+		return typeStyleNeeded(Types.TIME);
+	}
+
+	private boolean typeStyleNeeded(int typeToCheck)
+	{
+		int colCount = this.metaData.getColumnCount();
+		for (int i = 0; i < colCount; i++)
+		{
+			if (includeColumnInExport(i))
+			{
+				int type = getResultInfo().getColumnType(i);
+				if (type == typeToCheck) return true;
+			}
+		}
+		return false;
+	}
+
+	private String buildDateStyle(OdsDateStyleBuilder builder, String name, String baseName)
+	{
+		String style = "  <number:date-style style:name=\"" + baseName + "\">\n" + builder.getXML("    ") + "  </number:date-style>\n";
+		style += "  <style:style style:name=\"" + name + "\" style:family=\"table-cell\" style:parent-style-name=\"Default\" style:data-style-name=\"" + baseName + "\"/>\n";
+		return style;
 	}
 
 	@Override
@@ -390,8 +454,7 @@ public class OdsRowDataConverter
 		}
 		else if (type == Types.DATE)
 		{
-			attr.append("\"date\" ");
-			attr.append(" office:date-value=\"");
+			attr.append("\"date\" table:style-name=\"" + dateStyle + "\" office:date-value=\"");
 			if (data instanceof Date)
 			{
 				Date d = (Date)data;
@@ -401,8 +464,7 @@ public class OdsRowDataConverter
 		}
 		else if (type == Types.TIMESTAMP)
 		{
-			attr.append("\"date\" ");
-			attr.append(" office:date-value=\"");
+			attr.append("\"date\" table:style-name=\"" + tsStyle + "\" office:date-value=\"");
 			if (data instanceof Date)
 			{
 				Date d = (Date)data;
@@ -412,8 +474,7 @@ public class OdsRowDataConverter
 		}
 		else if (type == Types.TIME)
 		{
-			attr.append("\"date\" ");
-			attr.append(" office:time-value=\"");
+			attr.append("\"date\" office:time-value=\"");
 			if (data instanceof Date)
 			{
 				Date d = (Date)data;
@@ -425,6 +486,7 @@ public class OdsRowDataConverter
 		{
 			attr.append("\"string\"");
 		}
+
 		return attr;
 	}
 
