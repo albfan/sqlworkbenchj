@@ -3,7 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-02-22">
     <entry dev-build="14" type="enh">The editor now supports "Find previous"</entry>
-    <entry dev-build="14" type="enh">A new option to blend the selection color with column highlighting in the result set is available</entry>
+    <entry dev-build="14" type="enh">A new option to blend the selection color with the column highlight color is available</entry>
     <entry dev-build="13" type="enh">A new option to copy all column names of a result is available (thanks Andreas)</entry>
     <entry dev-build="13" type="enh">For Oracle the SQL for temporary tables is now generated correctly.</entry>
     <entry dev-build="12" type="enh">The notification about a finished (long running) script can now optionally be done using the system tray.</entry>
@@ -31,6 +31,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="14" type="fix">Date and timestamp columns where not properly formatted when exported to OpenOffice</entry>
     <entry dev-build="13" type="fix">If a column alias was used, the alias name was not used when exporting the result (WbExport or using Save Data As)</entry>
     <entry dev-build="13" type="fix">"Delete word" would delete too much if the caret was located at a whitespace</entry>
     <entry dev-build="13" type="fix">Fixed a problem with detecting tables for DB2 iSeries and the library search path.</entry>
