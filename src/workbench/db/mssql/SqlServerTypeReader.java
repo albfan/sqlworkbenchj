@@ -18,12 +18,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import workbench.db.DbMetadata;
-import workbench.db.DbObject;
-import workbench.db.DomainIdentifier;
-import workbench.db.JdbcUtils;
-import workbench.db.ObjectListExtender;
-import workbench.db.WbConnection;
+import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -72,7 +67,7 @@ public class SqlServerTypeReader
 		for (DomainIdentifier type : types)
 		{
 			int row = result.addRow();
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, type.getCatalog());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
@@ -141,32 +136,37 @@ public class SqlServerTypeReader
 		DomainIdentifier domain = new DomainIdentifier(cat, schema, name);
 		domain.setObjectType("TYPE");
 
-		String datatype = rs.getString("data_type");
-		int maxLength = rs.getInt("max_length");
+		String typeName = rs.getString("data_type");
+		int size = rs.getInt("max_length");
 		int scale = rs.getInt("scale");
 		int precision = rs.getInt("precision");
 		boolean nullable = rs.getBoolean("is_nullable");
 
-		StringBuilder displayType = new StringBuilder(datatype.length() + 5);
-		displayType.append(datatype);
-		if (maxLengthTypes.contains(datatype))
+		domain.setDataType(getDataTypeDefinition(typeName, size, scale, precision));
+		domain.setNullable(nullable);
+		return domain;
+	}
+
+	private String getDataTypeDefinition(String typeName, int size, int scale, int precision)
+	{
+		StringBuilder displayType = new StringBuilder(typeName.length() + 5);
+		displayType.append(typeName);
+		if (maxLengthTypes.contains(typeName))
 		{
-			if (maxLength == -1)
+			if (size == -1)
 			{
 				displayType.append("(max)");
 			}
 			else
 			{
-				displayType.append("(" + maxLength + ")");
+				displayType.append("(" + size + ")");
 			}
 		}
-		else if (numericTypes.contains(datatype))
+		else if (numericTypes.contains(typeName))
 		{
 			displayType.append("(" + precision + "," + scale + ")");
 		}
-		domain.setDataType(displayType.toString());
-		domain.setNullable(nullable);
-		return domain;
+		return displayType.toString();
 	}
 
 	@Override
@@ -241,10 +241,79 @@ public class SqlServerTypeReader
 		return result;
 	}
 
+	private String getTableTypeSource(WbConnection con, DomainIdentifier type)
+	{
+		String sql =
+			"select col.name,  \n" +
+			"       type_name(col.system_type_id) as data_type, \n" +
+			"       col.is_nullable, \n" +
+			"       col.max_length, \n" +
+			"       col.precision,  \n" +
+			"       col.scale, \n" +
+			"       def.definition as default_value \n" +
+			"from sys.all_columns col \n" +
+			"  join sys.table_types tt on tt.type_table_object_id = col.object_id \n" +
+			"  join sys.schemas s on tt.schema_id = s.schema_id \n" +
+			"  left join sys.default_constraints def on def.object_id = col.default_object_id and def.parent_column_id = col.column_id \n";
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		if (StringUtil.isNonBlank(type.getSchema()))
+		{
+			sql += " AND s.name = '" + type.getSchema() + "' \n";
+		}
+		sql += "order by col.column_id";
+		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+
+		try
+		{
+			stmt = con.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			while (rs.next())
+			{
+				String colname = rs.getString("name");
+				String typeName = rs.getString("data_type");
+				int size = rs.getInt("max_length");
+				int scale = rs.getInt("scale");
+				int precision = rs.getInt("precision");
+				boolean nullable = rs.getBoolean("is_nullable");
+				String defaultValue = rs.getString("default_value");
+				ColumnIdentifier col = new ColumnIdentifier(colname);
+				col.setDbmsType(getDataTypeDefinition(typeName, size, scale, precision));
+				col.setIsNullable(nullable);
+				col.setDefaultValue(defaultValue);
+				columns.add(col);
+			}
+
+			StringBuilder source = new StringBuilder(columns.size() * 20 + 50);
+			source.append("CREATE TYPE ");
+			source.append(type.getObjectExpression(con));
+			source.append("\nAS\nTABLE\n(\n");
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+			builder.appendColumnDefinitions(source, columns, con.getMetadata());
+			source.append("\n);\n");
+			return source.toString();
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("SqlServerTypeReader.getTableTypeSource()", "Could not read type columns", ex);
+			return "";
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
 		DomainIdentifier type = getObjectDefinition(con, object);
+		if (type.getDataType().equalsIgnoreCase("table type"))
+		{
+			return getTableTypeSource(con, type);
+		}
 		StringBuilder result = new StringBuilder(50);
 		result.append("CREATE TYPE ");
 		result.append(type.getObjectExpression(con));

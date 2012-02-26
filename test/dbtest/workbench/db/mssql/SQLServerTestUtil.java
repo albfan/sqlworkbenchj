@@ -32,7 +32,7 @@ public class SQLServerTestUtil
 	public static final String DB_NAME = "wbjunit";
 
 	/**
-	 * Return a connection to a locally running SQL Server database on port 2068
+	 * Return a connection to a locally running SQL Server database on port 1433
 	 */
 	public static WbConnection getSQLServerConnection()
 	{
@@ -42,7 +42,7 @@ public class SQLServerTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:sqlserver://localhost:2068;databaseName=" + DB_NAME + "' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			parser.parse("-url='jdbc:sqlserver://localhost:1433;databaseName=" + DB_NAME + "' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName(PROFILE_NAME);
 			ConnectionMgr.getInstance().addProfile(prof);

@@ -45,6 +45,7 @@ public class Db2TestUtil
 		}
 		return value;
 	}
+	
 	/**
 	 * Return a connection to a locally running DB2 database.
 	 *
@@ -57,7 +58,7 @@ public class Db2TestUtil
 	 * </ul>
 	 * The build script (build.xml) will set those system properties from a
 	 * file called <tt>db2.test.properties</tt> if it is present.
-	 * 
+	 *
 	 * @return null if DB2 is not available
 	 */
 	public static WbConnection getDb2Connection()
@@ -97,7 +98,7 @@ public class Db2TestUtil
 		util.prepareEnvironment();
 
 		if (!isAvailable) return;
-		
+
 		WbConnection con = getDb2Connection();
 		if (con == null)
 		{

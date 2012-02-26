@@ -14,12 +14,7 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -220,61 +215,19 @@ public class TableSourceBuilder
 		result.append(meta.generateCreateObject(includeDrop, table, table.getTableTypeOption()));
 		result.append("\n(\n");
 
-		List<String> pkCols = new LinkedList<String>();
-		int maxColLength = 0;
-		int maxTypeLength = 0;
-
-		// calculate the longest column name, so that the display can be formatted
-		for (ColumnIdentifier column : columns)
-		{
-			String colName = meta.quoteObjectname(column.getColumnName());
-			String type = column.getDbmsType();
-			maxColLength = Math.max(maxColLength, colName.length());
-			maxTypeLength = Math.max(maxTypeLength, (type != null ? type.length() : 0));
-		}
-		maxColLength += 2;
-		maxTypeLength += 2;
-
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-
-		Iterator<ColumnIdentifier> itr = columns.iterator();
-		while (itr.hasNext())
-		{
-			ColumnIdentifier column = itr.next();
-			String colName = column.getColumnName();
-			String quotedColName = meta.quoteObjectname(colName);
-			String type = column.getDbmsType();
-			if (type == null) type = "";
-
-			result.append("   ");
-			result.append(quotedColName);
-
-			if (column.isPkColumn())
-			{
-				pkCols.add(colName.trim());
-			}
-
-			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
-			String coldef = getColumnSQL(column, maxTypeLength, columnConstraints.get(column.getColumnName()));
-
-			result.append(coldef);
-			if (itr.hasNext())
-			{
-				result.append(',');
-				result.append(lineEnding);
-			}
-		}
+		appendColumnDefinitions(result, columns, meta, columnConstraints);
 
 		String cons = meta.getTableConstraintSource(table, "   ");
 		if (StringUtil.isNonBlank(cons))
 		{
-			result.append(lineEnding);
-			result.append("   ,");
+			result.append("\n   ,");
 			result.append(cons);
 		}
 
 		String pkIndexName = getPKName(indexList);
 		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : pkIndexName;
+
+		List<String> pkCols = findPkColumns(columns);
 
 		if (pkname != null && pkCols.isEmpty())
 		{
@@ -285,8 +238,7 @@ public class TableSourceBuilder
 
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
-			result.append(lineEnding);
-			result.append("   ,");
+			result.append("\n   ,");
 			if (StringUtil.isNonBlank(pkname))
 			{
 				result.append("CONSTRAINT ");
@@ -304,24 +256,23 @@ public class TableSourceBuilder
 				StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, createInlineConstraints);
 				if (fk.length() > 0)
 				{
-					result.append(lineEnding);
+					result.append('\n');
 					result.append(fk);
 				}
 			}
 		}
 
-		result.append(lineEnding);
+		result.append('\n');
 		result.append(")");
 		String options = getAdditionalTableOptions(table, columns, indexList);
 		if (options != null)
 		{
-			result.append(lineEnding);
+			result.append('\n');
 			result.append(options);
-			result.append(lineEnding);
+			result.append('\n');
 		}
 		StringUtil.trimTrailingWhitespace(result);
-		result.append(';');
-		result.append(lineEnding);
+		result.append(";\n");
 		// end of CREATE TABLE
 
 		// Add additional column information provided by any specialized descendant class
@@ -329,21 +280,76 @@ public class TableSourceBuilder
 		if (StringUtil.isNonBlank(colInfo))
 		{
 			result.append(colInfo);
-			result.append(lineEnding);
-			result.append(lineEnding);
+			result.append("\n\n");
 		}
 
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
 			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, pkname);
-			result.append(lineEnding);
+			result.append('\n');
 			result.append(pkSource);
 		}
 
 		return result;
 	}
 
+	private List<String> findPkColumns(List<ColumnIdentifier> columns)
+	{
+		List<String> result = new ArrayList<String>(2);
+		for (ColumnIdentifier column : columns)
+		{
+			if (column.isPkColumn())
+			{
+				result.add(column.getColumnName());
+			}
+		}
+		return result;
+	}
+	
+	public void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta)
+	{
+		appendColumnDefinitions(result, columns, meta, new HashMap<String, String>());
+	}
 
+	protected void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta, Map<String, String> constraints)
+	{
+		int maxColLength = 0;
+		int maxTypeLength = 0;
+
+		// calculate the longest column name, so that the display can be formatted
+		for (ColumnIdentifier column : columns)
+		{
+			String colName = meta.quoteObjectname(column.getColumnName());
+			String type = column.getDbmsType();
+			maxColLength = Math.max(maxColLength, colName.length());
+			maxTypeLength = Math.max(maxTypeLength, (type != null ? type.length() : 0));
+		}
+		maxColLength += 2;
+		maxTypeLength += 2;
+
+		Iterator<ColumnIdentifier> itr = columns.iterator();
+		while (itr.hasNext())
+		{
+			ColumnIdentifier column = itr.next();
+			String colName = column.getColumnName();
+			String quotedColName = meta.quoteObjectname(colName);
+			String type = column.getDbmsType();
+			if (type == null) type = "";
+
+			result.append("   ");
+			result.append(quotedColName);
+
+			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
+			String coldef = getColumnSQL(column, maxTypeLength, constraints.get(column.getColumnName()));
+
+			result.append(coldef);
+			if (itr.hasNext())
+			{
+				result.append(",\n");
+			}
+		}
+
+	}
 	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList, String pkname)
 	{
 		List<String> columns = new ArrayList<String>();
@@ -371,7 +377,7 @@ public class TableSourceBuilder
 		// nothing here
 	}
 
-	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
+	public String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
 		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
