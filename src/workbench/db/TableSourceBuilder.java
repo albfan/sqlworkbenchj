@@ -305,7 +305,7 @@ public class TableSourceBuilder
 		}
 		return result;
 	}
-	
+
 	public void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta)
 	{
 		appendColumnDefinitions(result, columns, meta, new HashMap<String, String>());
@@ -377,7 +377,7 @@ public class TableSourceBuilder
 		// nothing here
 	}
 
-	public String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
+	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
 		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
