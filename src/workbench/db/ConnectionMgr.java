@@ -568,16 +568,6 @@ public class ConnectionMgr
 			if (hook != null)
 			{
 				hook.shutdown(conn);
-				if (hook.unloadClassloaderRequired(conn.getUrl()) && conn.getProfile() != null)
-				{
-					String drvClass = conn.getProfile().getDriverclass();
-					String drvName = conn.getProfile().getDriverName();
-					DbDriver drv = findDriverByName(drvClass, drvName);
-					if (drv != null)
-					{
-						drv.releaseDriverInstance();
-					}
-				}
 			}
 			else
 			{

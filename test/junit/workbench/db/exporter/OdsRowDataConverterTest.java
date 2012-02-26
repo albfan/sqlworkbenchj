@@ -107,49 +107,69 @@ public class OdsRowDataConverterTest
 		in = archive.getInputStream(entry);
 		reader = new InputStreamReader(in, "UTF-8");
 		String meta = FileUtil.readCharacters(reader);
-//		TestUtil.writeFile(new File("c:/temp/meta.xml"), meta);
 
 		archive.close();
-//		System.out.println(content);
 
-		Map<String, String> nsMap = new HashMap<String, String>();
-		nsMap.put("office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0");
-		nsMap.put("text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0");
-		nsMap.put("table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0");
-		nsMap.put("dc", "http://purl.org/dc/elements/1.1/");
+		Map<String, String> contentNamespaces = TestUtil.getNameSpaces(content, "office:document-content");
+		Map<String, String> metaNamespaces = TestUtil.getNameSpaces(meta, "office:document-meta");
 
 		String colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[1]/text:p/text()",
-			nsMap);
+			contentNamespaces);
 		assertEquals(data.getValue(0), colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[2]/text:p/text()",
-			nsMap);
+			contentNamespaces);
 		assertEquals(data.getValue(1).toString(), colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[3]/text:p/text()",
-			nsMap);
+			contentNamespaces);
 		assertEquals("2008-07-23", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[3]/@office:date-value",
-			nsMap);
+			contentNamespaces);
 		assertEquals("2008-07-23", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[4]/text:p/text()",
-			nsMap);
+			contentNamespaces);
 		assertEquals("2008-07-23 13:42:01", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[4]/@office:date-value",
-			nsMap);
+			contentNamespaces);
 		assertEquals("2008-07-23T13:42:01", colValue);
 
-		String sql = TestUtil.getXPathValue(meta,"/office:document-meta/office:meta/dc:description",nsMap);
+		String sql = TestUtil.getXPathValue(meta,"/office:document-meta/office:meta/dc:description",metaNamespaces);
 		assertEquals(generatingSql, sql);
-	}
+		String count = TestUtil.getXPathValue(content, "count(/office:document-content/office:automatic-styles/number:date-style)", contentNamespaces);
+		assertEquals("2", count);
 
+		String text = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/number:date-style[@style:name='N60']/number:year/@number:style", contentNamespaces);
+		assertEquals("long", text);
+
+		text = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/number:date-style[@style:name='N60']/number:text[1]/text()", contentNamespaces);
+		assertEquals("-", text);
+
+		text = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/number:date-style[@style:name='N50']/number:hours/@number:style", contentNamespaces);
+		assertEquals("long", text);
+
+		text = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/number:date-style[@style:name='N50']/number:text[4]/text()", contentNamespaces);
+		assertEquals(":", text);
+
+		String dateColStyle = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/style:style[@style:data-style-name='N60']/@style:name", contentNamespaces);
+		assertEquals("ce2", dateColStyle);
+
+		String tsColStyle = TestUtil.getXPathValue(content,"/office:document-content/office:automatic-styles/style:style[@style:data-style-name='N50']/@style:name", contentNamespaces);
+		assertEquals("ce3", tsColStyle);
+
+		String dateStyleUsed = TestUtil.getXPathValue(content, "/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-column[3]/@table:default-cell-style-name", contentNamespaces);
+		assertEquals(dateColStyle, dateStyleUsed);
+
+		String tsStyleUsed = TestUtil.getXPathValue(content, "/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-column[4]/@table:default-cell-style-name", contentNamespaces);
+		assertEquals(tsColStyle, tsStyleUsed);
+	}
 }

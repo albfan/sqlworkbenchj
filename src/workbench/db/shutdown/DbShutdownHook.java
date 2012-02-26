@@ -22,6 +22,4 @@ public interface DbShutdownHook
 {
 	void shutdown(WbConnection con)
 		throws SQLException;
-
-	boolean unloadClassloaderRequired(String url);
 }

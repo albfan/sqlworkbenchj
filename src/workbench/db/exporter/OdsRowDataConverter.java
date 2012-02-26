@@ -41,9 +41,9 @@ public class OdsRowDataConverter
 	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-	private String dateStyle = "ce2";
-	private String tsStyle = "ce3";
-	private String timeStyle = "ce4";
+	private final String dateStyle = "ce2";
+	private final String tsStyle = "ce3";
+	private final String timeStyle = "ce4";
 
 	@Override
 	public StrBuffer getStart()

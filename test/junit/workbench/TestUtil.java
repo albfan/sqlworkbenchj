@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -320,7 +321,7 @@ public class TestUtil
 		Settings.getInstance().setDoFormatInserts(oldIns);
 		Settings.getInstance().setDoFormatUpdates(oldUpd);
 	}
-	
+
 	public void disableSqlFormatting()
 	{
 		oldDel = Settings.getInstance().getDoFormatDeletes();
@@ -656,4 +657,29 @@ public class TestUtil
 			return null;
 		}
 	}
+
+	public static Map<String, String> getNameSpaces(String xml, String rootTag)
+	{
+		Map<String, String> result = new HashMap<String, String>();
+		// find first tag
+		int start = xml.indexOf("<" + rootTag);
+		int end = xml.indexOf('>', start);
+		int firstSpace = xml.indexOf(' ', start);
+		String nstext = xml.substring(firstSpace, end);
+
+		String[] elements = nstext.split(" ");
+		for (String element : elements)
+		{
+			if (element == null ||element.isEmpty()) continue;
+			if (!element.startsWith("xmlns:")) continue;
+
+			int colon = element.indexOf(':');
+			int equal = element.indexOf('=');
+			String name = element.substring(colon + 1, equal);
+			String value = element.substring(equal + 1);
+			result.put(name, StringUtil.trimQuotes(value));
+		}
+		return result;
+	}
+
 }

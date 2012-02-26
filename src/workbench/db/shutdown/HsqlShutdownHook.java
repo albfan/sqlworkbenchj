@@ -63,10 +63,4 @@ public class HsqlShutdownHook
 		}
 		con.shutdown();
 	}
-
-	@Override
-	public boolean unloadClassloaderRequired(String url)
-	{
-		return url.contains(":res:");
-	}
 }

@@ -97,11 +97,6 @@ public class DerbyShutdownHook
 
 		return true;
 	}
-
-	@Override
-	public boolean unloadClassloaderRequired(String url)
-	{
-		return false;
-	}
-
+	
 }
+

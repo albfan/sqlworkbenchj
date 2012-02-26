@@ -434,8 +434,6 @@ public class DbDriver
 	public void releaseDriverInstance()
 	{
 		LogMgr.logDebug("DbDriver.releaseDriverInstance()", "Releasing classloader and driver");
-		Thread.currentThread().setContextClassLoader(null);
-		this.classLoader = null;
 		if (this.driverClassInstance != null)
 		{
 			try
@@ -448,6 +446,8 @@ public class DbDriver
 			}
 			this.driverClassInstance = null;
 		}
+		this.classLoader = null;
+		System.gc();
 	}
 
 	private String getProgramName()
