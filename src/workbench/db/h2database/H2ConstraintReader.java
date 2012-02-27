@@ -24,12 +24,23 @@ public class H2ConstraintReader
 	extends AbstractConstraintReader
 {
 
+	private final String COLUMN_SQL =
+		"select column_name constraint_name, " +
+		"       case when \n" +
+		"           check_constraint is not null and trim(check_constraint) <> '' then 'CHECK '||check_constraint \n" +
+		"           else null \n" +
+		"       end as check_constraint \n" +
+		"from information_schema.columns \n" +
+		"where table_name = ? \n" +
+		"  and table_schema = ?";
+
 	private final String TABLE_SQL =
-		"select constraint_name, check_expression \n" +
+		"select constraint_name, \n" +
+		"       check_expression \n" +
 		"from information_schema.constraints \n" +
 		"where constraint_type = 'CHECK'  \n" +
 		"and table_name = ? \n" +
-		"and table_schema = ?";
+		" and table_schema = ?";
 
 	private Pattern systemNamePattern = Pattern.compile("^(CONSTRAINT_[0-9A-F][0-9A-F])");
 
@@ -48,7 +59,7 @@ public class H2ConstraintReader
 	@Override
 	public String getColumnConstraintSql()
 	{
-		return null;
+		return this.COLUMN_SQL;
 	}
 
 	@Override
