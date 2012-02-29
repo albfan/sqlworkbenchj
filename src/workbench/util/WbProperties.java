@@ -309,6 +309,16 @@ public class WbProperties
     return setProperty(name, value, true);
 	}
 
+	public void setTemporaryProperty(String key, String value)
+	{
+		String oldValue = getProperty(key);
+		if (StringUtil.equalStringOrEmpty(oldValue, value))
+		{
+			System.setProperty(key, value);
+			firePropertyChanged(key, oldValue, value);
+		}
+	}
+	
 	public Object setProperty(String name, String value, boolean firePropChange)
 	{
 		if (name == null) return null;

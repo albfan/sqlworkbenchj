@@ -74,7 +74,7 @@ public class WbSetProp
 				}
 				else
 				{
-					System.setProperty(prop, value);
+					Settings.getInstance().setTemporaryProperty(prop, value);
 					result.addMessage(prop  + " set to "  + value);
 				}
 			}
@@ -82,9 +82,9 @@ public class WbSetProp
 		else if (args.indexOf('=') > -1)
 		{
 			String[] pair = args.split("=");
-			if (pair.length== 2)
+			if (pair.length == 2)
 			{
-				System.setProperty(pair[0], pair[1]);
+				Settings.getInstance().setTemporaryProperty(pair[0], pair[1]);
 				result.addMessage(pair[0]  + " set to "  + pair[1]);
 			}
 		}
