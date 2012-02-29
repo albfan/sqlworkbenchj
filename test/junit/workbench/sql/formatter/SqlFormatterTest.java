@@ -32,6 +32,31 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testNumericLiterals()
+	{
+		String sql = "select * from foo where bar = -1";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected = "SELECT *\nFROM foo\nWHERE bar = -1";
+		//System.out.println(formatted);
+		assertEquals(expected, formatted);
+
+		sql = "select * from foo where bar = +1";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected = "SELECT *\nFROM foo\nWHERE bar = +1";
+		//System.out.println(formatted);
+		assertEquals(expected, formatted);
+
+		sql = "select * from foo where bar < -1.5";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected = "SELECT *\nFROM foo\nWHERE bar < -1.5";
+		//System.out.println(formatted);
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testJDBCEscapes()
 	{
 		String sql = "insert into test (some_col) values ( {d '2011-01-01'})";
