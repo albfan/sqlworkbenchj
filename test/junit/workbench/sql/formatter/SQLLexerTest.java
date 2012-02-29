@@ -22,19 +22,19 @@ import org.junit.Test;
  *
  * @author Thomas Kellerer
  */
-public class SQLLexerTest 
+public class SQLLexerTest
 	extends WbTestCase
 {
-	
+
 	public SQLLexerTest()
 	{
 		super("SQLLexerTest");
 	}
-	
+
 	private List<SQLToken> getTokenList(String sql)
 	{
 		ArrayList<SQLToken> result = new ArrayList<SQLToken>();
-		
+
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 		while (t != null)
@@ -78,7 +78,7 @@ public class SQLLexerTest
 		assertEquals("'col2_value'", l.get(14).getText());
 		assertEquals("1234", l.get(16).getText());
 	}
-	
+
 	@Test
 	public void testQuotedIdentifier()
 	{
@@ -104,41 +104,41 @@ public class SQLLexerTest
 		t = l.getNextToken(false, false);
 		assertEquals("\"c:\\Documents and Settings\\test.txt\"", t.getContents());
 	}
-	
+
 	@Test
 	public void testLexer()
 	{
 		// Test if the multi-word keywords are detected properly
-		
+
 		String sql = "-- create a view\nCREATE\nOR\nREPLACE view my_view as (SELECT * FROM bal);";
-		
+
 		List<SQLToken> tokens = getTokenList(sql);
-		
+
 		SQLToken t = tokens.get(0);
-		
+
 		assertEquals(true, t.isReservedWord());
 		assertEquals("CREATE OR REPLACE", t.getContents());
 
 		sql = "SELECT * FROM bla INNER JOIN blub ON (x = y)";
-		
+
 		tokens = getTokenList(sql);
 		t = tokens.get(0);
 		assertEquals("SELECT", t.getContents());
-		
+
 		t = tokens.get(4);
 		assertEquals("INNER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
-	
+
 		sql = "SELECT * FROM bla INNER JOIN blub ON (x = y)\nOUTER JOIN blub2 on (y = y)";
-		
+
 		tokens = getTokenList(sql);
 		t = tokens.get(0);
 		assertEquals("SELECT", t.getContents());
-		
+
 		t = tokens.get(4);
 		assertEquals("INNER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
-		
+
 		t = tokens.get(12);
 		assertEquals("OUTER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
@@ -162,7 +162,7 @@ public class SQLLexerTest
 		assertEquals("'line 1 \n x \n   line2;\n'", tokens.get(4).getText());
 		assertTrue(tokens.get(4).isLiteral());
 	}
-	
+
 	@Test
 	public void testKeywords()
 	{
@@ -178,7 +178,7 @@ public class SQLLexerTest
 					"left        outer join\n"+
 					"right join\n" +
 					"right \nouter\n\n join\njoin\n";
-		
+
 		List<SQLToken> tokens = getTokenList(sql);
 		for (int i = 0; i < tokens.size(); i++)
 		{
@@ -244,6 +244,43 @@ public class SQLLexerTest
 	}
 
 	@Test
+	public void testNumbers()
+	{
+		String sql = "-1";
+		List<SQLToken> tokens = getTokenList(sql);
+		assertEquals(1, tokens.size());
+		assertEquals("-1", tokens.get(0).getText());
+		assertTrue(tokens.get(0).isNumberLiteral());
+		assertTrue(tokens.get(0).isIntegerLiteral());
+
+		tokens = getTokenList("1234567890");
+		assertEquals(1, tokens.size());
+		assertEquals("1234567890", tokens.get(0).getText());
+		assertTrue(tokens.get(0).isNumberLiteral());
+		assertTrue(tokens.get(0).isIntegerLiteral());
+
+		tokens = getTokenList("0.1E-12");
+		assertEquals(1, tokens.size());
+		assertEquals("0.1E-12", tokens.get(0).getText());
+		assertTrue(tokens.get(0).isNumberLiteral());
+		assertFalse(tokens.get(0).isIntegerLiteral());
+
+		tokens = getTokenList("-1.1E+12");
+		assertEquals(1, tokens.size());
+		assertEquals("-1.1E+12", tokens.get(0).getText());
+		assertTrue(tokens.get(0).isNumberLiteral());
+		assertFalse(tokens.get(0).isIntegerLiteral());
+
+		tokens = getTokenList("+0.123");
+		assertEquals(1, tokens.size());
+		assertEquals("+0.123", tokens.get(0).getText());
+		assertTrue(tokens.get(0).isNumberLiteral());
+		assertFalse(tokens.get(0).isIntegerLiteral());
+
+	}
+
+
+	@Test
 	public void testQuotes()
 		throws Exception
 	{
@@ -261,5 +298,5 @@ public class SQLLexerTest
 		assertEquals(2, tokens.size());
 		assertEquals("schema.proc", tokens.get(1).getText());
 	}
-	
+
 }
