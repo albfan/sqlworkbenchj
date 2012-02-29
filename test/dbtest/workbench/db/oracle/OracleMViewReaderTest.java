@@ -15,9 +15,11 @@ import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import workbench.db.TableSourceBuilderFactory;
 
 /**
  *
@@ -61,9 +63,9 @@ public class OracleMViewReaderTest
 			"as\n" +
 			"select * from person;";
 		TestUtil.executeScript(con, sql);
-		OracleMViewReader reader = new OracleMViewReader();
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
-		String source = reader.getMViewSource(con, mview, null, false).toString();
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		String source = builder.getTableSource(mview, false, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE OR REPLACE MATERIALIZED VIEW V_PERSON\n" +
@@ -90,9 +92,9 @@ public class OracleMViewReaderTest
 			"as\n" +
 			"select * from person;";
 		TestUtil.executeScript(con, sql);
-		OracleMViewReader reader = new OracleMViewReader();
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
-		String source = reader.getMViewSource(con, mview, null, false).toString();
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		String source = builder.getTableSource(mview, false, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE OR REPLACE MATERIALIZED VIEW V_PERSON\n" +
@@ -122,9 +124,9 @@ public class OracleMViewReaderTest
 			";";
 
 		TestUtil.executeScript(con, sql);
-		OracleMViewReader reader = new OracleMViewReader();
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
-		String source = reader.getMViewSource(con, mview, null, false).toString();
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		String source = builder.getTableSource(mview, false, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE OR REPLACE MATERIALIZED VIEW MV_PERSON\n" +
