@@ -31,6 +31,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="14" type="fix">In the DbExplorer changes to the data display colors were only applied when re-opening the DbExplorer</entry>
     <entry dev-build="14" type="fix">For H2 unnamed check constraint where not shown in the generated SQL source</entry>
     <entry dev-build="14" type="fix">Date and timestamp columns where not properly formatted when exported to OpenOffice</entry>
     <entry dev-build="13" type="fix">If a column alias was used, the alias name was not used when exporting the result (WbExport or using Save Data As)</entry>

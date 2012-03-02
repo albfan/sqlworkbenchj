@@ -19,6 +19,7 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import javax.swing.CellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -35,15 +36,13 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
-import workbench.gui.components.GenericRowMonitor;
-import workbench.gui.components.WbTextCellEditor;
-import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.CreateDeleteScriptAction;
@@ -54,10 +53,13 @@ import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TableRowHeader;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTextCellEditor;
+import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
@@ -72,6 +74,7 @@ import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
+import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -153,10 +156,16 @@ public class DwPanel
 		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
-		this.dataTable.setHighlightRequiredFields(GuiSettings.getHighlightRequiredFields());
 		this.dataTable.setStatusBar(this.statusBar);
-		this.dataTable.setModifiedColor(GuiSettings.getColumnModifiedColor());
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
+		initColors();
+	}
+
+	private void initColors()
+	{
+		dataTable.setRendererSetup(new RendererSetup());
+		dataTable.setModifiedColor(GuiSettings.getColumnModifiedColor());
+		dataTable.setHighlightRequiredFields(GuiSettings.getHighlightRequiredFields());
 	}
 
 	public void showCreateDeleteScript()
@@ -671,6 +680,7 @@ public class DwPanel
 				public void run()
 				{
 					clearContent();
+					initColors();
 				}
 			});
 
