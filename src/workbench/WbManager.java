@@ -429,7 +429,6 @@ public final class WbManager
 				disconnected();
 			}
 		};
-		t.setDaemon(false);
 		t.start();
 		return true;
 	}
@@ -445,7 +444,7 @@ public final class WbManager
 				doShutdown(0);
 			}
 		};
-		
+
 		this.closeMessage = new DisconnectInfo(parent, abort, "MsgAbortImmediately");
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}

@@ -481,7 +481,7 @@ public class MainWindowTest
 				panel.runAll();
 			}
 		};
-		
+
 		testUtil.execute(r);
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();

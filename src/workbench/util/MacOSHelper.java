@@ -18,6 +18,7 @@ import java.lang.reflect.Proxy;
 import workbench.WbManager;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  * This class - if running on Mac OS - will install an ApplicationListener
@@ -98,14 +99,24 @@ public class MacOSHelper
 			if ("handleQuit".equals(methodName))
 			{
 				setHandled(args[0], true);
-				EventQueue.invokeLater(new Runnable()
+				boolean immediate = Settings.getInstance().getBoolProperty("workbench.osx.quit.immediate", false);
+				if (immediate)
 				{
-					@Override
-					public void run()
+					LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
+					WbManager.getInstance().exitWorkbench(true);
+				}
+				else
+				{
+					EventQueue.invokeLater(new Runnable()
 					{
-						WbManager.getInstance().exitWorkbench(true);
-					}
-				});
+						@Override
+						public void run()
+						{
+							LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
+							WbManager.getInstance().exitWorkbench(true);
+						}
+					});
+				}
 			}
 			else if ("handleAbout".equals(methodName))
 			{

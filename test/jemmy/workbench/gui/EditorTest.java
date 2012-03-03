@@ -72,43 +72,43 @@ public class EditorTest
 		editor.setText("select nr, firstname, lastname\nfrom person;");
 		editor.setCaretPosition(0);
 //		editor.selectNone();
-		
+
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 		JMenuOperator editMenu = new JMenuOperator(mainMenu.getMenu(1));
-		JMenuItem commentItem = (JMenuItem)editMenu.getMenuComponent(19);
-		JMenuItem uncommentItem = (JMenuItem)editMenu.getMenuComponent(20);
-		
+		JMenuItem commentItem = (JMenuItem)editMenu.getMenuComponent(20);
+		JMenuItem uncommentItem = (JMenuItem)editMenu.getMenuComponent(21);
+
 		JMenuItemOperator comment = new JMenuItemOperator(commentItem);
 		JMenuItemOperator unComment = new JMenuItemOperator(uncommentItem);
-		
+
 		QueueTool tool = new QueueTool();
-		
+
 		//editor.select(0, 15);
 		comment.push();
-		tool.waitEmpty();		
-		
+		tool.waitEmpty();
+
 		String text = editor.getText();
 		assertTrue(text.startsWith("--"));
-		
+
 		//editor.select(0, 15);
-		
+
 		// test toggle
 		comment.push();
-		tool.waitEmpty();		
-		
+		tool.waitEmpty();
+
 		text = editor.getText();
 		assertFalse(text.startsWith("--"));
-		
+
 		editor.setText("-- first line\n-- second line\n");
 		editor.selectAll();
 		tool.waitEmpty();
 		unComment.push();
 		tool.waitEmpty();
 		text = editor.getText();
-		
+
 		assertEquals(" first line\n second line\n", text);
-	}	
-	
+	}
+
 	private void copySnippet()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -119,25 +119,25 @@ public class EditorTest
 
 		editor.setText("select nr, firstname, lastname\nfrom person;");
 		editor.setCaretPosition(0);
-		
+
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 //		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
-		
+
 		QueueTool tool = new QueueTool();
 		editor.selectAll();
 		tool.waitEmpty();
-		
+
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		
+
 		try
 		{
 			mainMenu.pushMenu("SQL|Copy Code Snippet", "|");
 			tool.waitEmpty();
-			
+
 			final String text = (String)clp.getData(DataFlavor.stringFlavor);
 //			System.out.println("clipboard: " + text);
 			assertTrue(text.startsWith("String sql = \"select nr,"));
-			
+
 			editor.setText(text);
 			editor.selectAll();
 			mainMenu.pushMenu("SQL|Clean Java Code", "|");
@@ -145,14 +145,14 @@ public class EditorTest
 			String newText = editor.getText();
 //			System.out.println("new text: " + newText);
 			assertTrue(newText.startsWith("select nr,"));
-			
+
 		}
 		catch(Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	private void findText()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -179,7 +179,7 @@ public class EditorTest
 		JButtonOperator ok = new JButtonOperator(dialog, "OK");
 		ok.push();
 		tool.waitEmpty();
-		
+
 		assertEquals("person", editor.getSelectedText());
 	}
 
@@ -197,7 +197,7 @@ public class EditorTest
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "Replace");
 
 		QueueTool tool = new QueueTool();
-		
+
 		setCheckbox(dialog, "regex", false);
 		setCheckbox(dialog, "ignorecase", true);
 		setCheckbox(dialog, "wordsonly", false);
@@ -211,7 +211,7 @@ public class EditorTest
 		chooser.setName("replaceallbutton");
 		JButtonOperator replaceAll = new JButtonOperator(dialog, chooser);
 		replaceAll.push();
-		
+
 		tool.waitEmpty();
 
 		chooser.setName("closebutton");
@@ -234,7 +234,7 @@ public class EditorTest
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
 	}
-	
+
 	private void checkWordSep()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -244,28 +244,28 @@ public class EditorTest
 		EditorPanel editor = (EditorPanel)editorComp.getSource();
 
 		QueueTool tool = new QueueTool();
-		
+
 		changeWordSep("");
 		assertEquals("Wrong word separator", "", Settings.getInstance().getEditorNoWordSep());
-		
+
 		editor.setText("my_person;");
 		editor.setCaretPosition(0);
-		
+
 		tool.waitEmpty();
-		
+
 		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
 		tool.waitEmpty();
-		
+
 		int pos = editor.getCaretPosition();
 		assertEquals("Wrong word jump", 2, pos);
 
 		changeWordSep("_");
 		assertEquals("Wrong word separator", "_", Settings.getInstance().getEditorNoWordSep());
-		
+
 		editor.setCaretPosition(0);
 		editorComp.pushKey(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK);
 		tool.waitEmpty();
-		
+
 		pos = editor.getCaretPosition();
 		assertEquals("Wrong word jump", 9, pos);
 	}
@@ -277,7 +277,7 @@ public class EditorTest
 		JComboBoxOperator comp = new JComboBoxOperator(dialog, chooser);
 		comp.setSelectedItem(newText);
 	}
-	
+
 	private void setTextField(JDialogOperator dialog, String name, String newText)
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();

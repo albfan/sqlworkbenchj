@@ -636,13 +636,23 @@ public class MainWindow
 		content.invalidate();
 	}
 
-	protected void forceRedraw()
+	protected void scheduleRedraw()
 	{
-		Container content = this.getContentPane();
-		content.invalidate();
-		validate();
-		doLayout();
-		WbSwingUtilities.repaintLater(this);
+		// This is a bit of an overkill, but it's the only
+		// way to properly update the main window in MacOS
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				sqlTab.invalidate();
+				JComponent content = (JComponent)getContentPane();
+				content.invalidate();
+				validate();
+				doLayout();
+				repaint();
+			}
+		});
 	}
 
 	@Override
@@ -650,8 +660,8 @@ public class MainWindow
 	{
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
-			this.updateToolbarVisibility();
-			forceRedraw();
+			updateToolbarVisibility();
+			scheduleRedraw();
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
@@ -1034,26 +1044,30 @@ public class MainWindow
 		});
 	}
 
-	private synchronized void updateGuiForTab(int index)
+	private void updateGuiForTab(final int index)
 	{
 		if (index < 0) return;
 
 		final MainPanel current = this.getSqlPanel(index);
 		if (current == null) return;
 
-		JMenuBar menu = this.panelMenus.get(index);
+		final JMenuBar menu = this.panelMenus.get(index);
 		if (menu == null)	return;
 
-		this.setJMenuBar(menu);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				setJMenuBar(menu);
+				updateToolbarVisibility();
+				createNewConnection.checkState();
+				disconnectTab.checkState();
+				checkMacroMenuForPanel(index);
+			}
+		});
 
-		this.updateToolbarVisibility();
-
-		this.createNewConnection.checkState();
-		this.disconnectTab.checkState();
-
-		this.checkMacroMenuForPanel(index);
-
-		forceRedraw();
+		scheduleRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
