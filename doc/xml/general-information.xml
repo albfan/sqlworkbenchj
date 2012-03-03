@@ -142,6 +142,14 @@
       </para>
     </section>
 
+    <section id="winrun4j-license">
+      <title>WinRun4J License</title>
+      <para>
+        The Launcher is created with WinRun4j: <ulink url="http://winrun4j.sourceforge.net/"/> which is
+        licensed under the <ulink url="http://www.eclipse.org/legal/cpl-v10.html">Common Public License (CPL)</ulink>.
+      </para>
+    </section>
+    
     <section id="jedit-license">
       <title>Editor</title>
       <para>
@@ -153,12 +161,12 @@
       </para>
     </section>
 
-    <secion id="iharder-license">
+    <section id="iharder-license">
       <title>iHarder - Base64 implementation</title>
       <para>
         &wb-productname; uses the Base64 implementation from <ulink url="http://iharder.net/base64"/>
       </para>
-    </secion>
+    </section>
 
     <section id="icons">
       <title>Icons</title>

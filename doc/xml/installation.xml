@@ -219,11 +219,6 @@
       <link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
     </para>
 
-    <para>
-      Note that, before Build 98 the default configuration directory was the program's directory
-      and not a directory in the user's home directory.
-    </para>
-
     <para>The following files are stored in the configuration directory:
       <itemizedlist>
         <listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
@@ -245,30 +240,17 @@
       The different shortcuts can still use the same main configuration file.
     </para>
 
-    <section id="config-dir-adjust">
-      <title>Specifying the location of the configuration directory</title>
-
-      <?dbfo-need height="2cm" ?>
-      <para>
-        If you want to control the location where &wb-productname; stores the configuration
-        files, you have to start the application with the parameter -configDir to specify an
-        alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
-      </para>
-
-      <?dbfo-need height="2cm" ?>
-      <para>
-        or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
-        The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
-        (as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
-        If the specified directory does not exist, it will be created.
-      </para>
+    <section id="move-installation">
+      <title>Copying an installation</title>
 
       <para>
         To copy an installation to a different computer, simply copy all the above
         files to the other computer (the log file does not need to be copied).
-        When a profile is connected to a workspace, the filename
-        of the workspace file is usually stored with a placeholder for the configuration directory
-        (%configDir%) so that the profiles don't need to be adjusted.
+        When a profile is connected to a workspace, the workspace file should be specified
+        without a directory name (or using the <literal>%ConfigDir%</literal> placeholder).
+        In that case it is always loaded from the configuration directory.
+        If the workspace file location is given with an absolute directory, this needs to be adjusted
+        after the copying the files.
       </para>
 
       <para>
@@ -315,18 +297,6 @@
       edit the scripts and change the value for the -Xmx parameter in there.
     </para>
 
-    <!--
-    <para>
-      The default heap size for your Java environment depends on your operating
-      system and your JDK implementation. Most JDKs use a default of 64MB.
-    </para>
-    <para>
-      The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
-      memory to the given value. This does not mean that the application will use
-      that much memory
-    </para>
-    -->
-
   </section>
 
   <section id="commandline" xreflabel="command line parameters">
@@ -359,9 +329,20 @@
         If the specified directory does not exist, it will be created.
       </para>
 
-      <?dbfo-need height="1.5cm" ?>
-      <programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/wbconfig
-SQLWorkbench -configDir='c:\Configurations\SQLWorkbench'</programlisting>
+      <?dbfo-need height="2cm" ?>
+      <para>
+        If you want to control the location where &wb-productname; stores the configuration
+        files, you have to start the application with the parameter -configDir to specify an
+        alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
+      </para>
+
+      <?dbfo-need height="2cm" ?>
+      <para>
+        or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
+        The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
+        (as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
+        If the specified directory does not exist, it will be created.
+      </para>
 
       <para>
         On the Windows platform you can use a forward slash to separate directory names in the parameter.

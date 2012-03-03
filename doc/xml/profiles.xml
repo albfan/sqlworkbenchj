@@ -645,19 +645,8 @@
 	<section id="oracle-sysdba-connection">
 		<title>Connect to Oracle with SYSDBA privilege</title>
 		<para>
-			Connecting to Oracle with SYSDBA privilege can be done by supplying an additional
-			property to the driver when connecting.
-		</para>
-		<para>
-			In the profile dialog, click on the <guibutton>Extended Properties</guibutton> button.
-			Add a new property in the following window with the name <literal>internal_logon</literal>
-			and the value <literal>sysdba</literal>. Now close the dialog by clicking on the OK button.
-			This property will be passed on to the JDBC driver, which will enable the SYSDBA role when
-			connecting to the server.
-		</para>
-		<para>
-			The profile itself has to use an Oracle user account that is allowed to connect
-			as SYSDBA (e.g. SYS).
+			Connecting to Oracle with SYSDBA privilege can be done by checking the option <literal>as SYSDBA</literal> next to the username.
+      when using this option, you have to use an Oracle user account that is allowed to connect as SYSDBA (e.g. SYS).
 		</para>
 	</section>
 

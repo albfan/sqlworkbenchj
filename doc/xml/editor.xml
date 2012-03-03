@@ -89,7 +89,7 @@ SELECT ord.amount, ord.order_date, prod.name
 FROM orders ord
   JOIN product prod ON</programlisting>
     <para>
-      When the cursor is located behind the <literal>ON</literal>keyword, and you select
+      When the cursor is located behind the <literal>ON</literal> keyword and you select
       <menuchoice><guimenu>SQL</guimenu><guimenuitem>JOIN completion</guimenuitem></menuchoice>, &wb-productname; will
       retrieve the foreign key and corresponding primary key definitions between the tables <literal>orders</literal> and
       <literal>product</literal>. If such constraints exist, the corresponding condition will be generated and
@@ -99,7 +99,7 @@ FROM orders ord
 FROM orders ord
   JOIN product prod ON prod.id = ord.product_id</programlisting>
     <para>
-      This feature depends on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
+      This feature requires on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
     </para>
   </section>
 
