@@ -19,7 +19,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Exit and close the application.
- * 
+ *
  * @see workbench.WbManager#exitWorkbench()
  *
  * @author  Thomas Kellerer
@@ -41,7 +41,6 @@ public class FileExitAction
 		{
 			forceShutdown = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgAbortWarning"));
 		}
-
 		WbManager.getInstance().exitWorkbench(forceShutdown);
 	}
 }
