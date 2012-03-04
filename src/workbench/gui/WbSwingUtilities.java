@@ -84,13 +84,7 @@ public class WbSwingUtilities
 	private static Border createBevelBorder(int type)
 	{
 		BevelBorder b = new BevelBorder(type);
-
-		Color c = Color.LIGHT_GRAY;
-		return new BevelBorder(type,
-			b.getHighlightOuterColor(),
-			c,
-			b.getHighlightInnerColor(),
-			b.getShadowInnerColor());
+		return new BevelBorder(type, b.getHighlightOuterColor(), Color.LIGHT_GRAY, b.getHighlightInnerColor(), b.getShadowInnerColor());
 	}
 
 	public static void waitForEmptyQueue()
@@ -101,12 +95,14 @@ public class WbSwingUtilities
 		}
 		EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
 		int counter = 0;
+		final int tries = 20;
 		while (queue.peekEvent() != null)
 		{
 			WbThread.sleepSilently(25);
 			counter++;
-			if (counter > 20)
+			if (counter > tries)
 			{
+				LogMgr.logDebug("WbSwingUtilities.waitForEmptyQueue()", "Queue still not empty after " + tries + " tries!");
 				break;
 			}
 		}
@@ -135,7 +131,7 @@ public class WbSwingUtilities
 	{
 		EventQueue.invokeLater(runner);
 	}
-	
+
 	/**
 	 * Synchronously execute code on the EDT.
 	 * If the current thread is the EDT, this merely calls r.run()

@@ -95,15 +95,26 @@ public class MacOSHelper
 		try
 		{
 			String methodName = method.getName();
-			LogMgr.logDebug("MacOSHelper.invoke()", "ApplicationEvent [" + methodName + "] received.");
+			LogMgr.logDebug("MacOSHelper.invoke()", "ApplicationEvent [" + methodName + "] received. Arguments: " + getArguments(args));
 			if ("handleQuit".equals(methodName))
 			{
-				setHandled(args[0], true);
-				boolean immediate = Settings.getInstance().getBoolProperty("workbench.osx.quit.immediate", false);
+				WbManager.getInstance().removeShutdownHook();
+
+				boolean handled = Settings.getInstance().getBoolProperty("workbench.osx.quit.sethandled", false);
+				if (handled)
+				{
+					// Apparently MacOS will call System.exit() once this event is trigger (and the "handled" flat was set to true)
+					// The following line will prevent WbManager from calling system.exit() as well.
+					System.setProperty("workbench.system.doexit", "false");
+				}
+
+				setHandled(args[0], handled);
+
+				boolean immediate = Settings.getInstance().getBoolProperty("workbench.osx.quit.immediate", true);
 				if (immediate)
 				{
 					LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
-					WbManager.getInstance().exitWorkbench(true);
+					WbManager.getInstance().exitWorkbench(false);
 				}
 				else
 				{
@@ -113,7 +124,7 @@ public class MacOSHelper
 						public void run()
 						{
 							LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
-							WbManager.getInstance().exitWorkbench(true);
+							WbManager.getInstance().exitWorkbench(false);
 						}
 					});
 				}
@@ -135,30 +146,37 @@ public class MacOSHelper
 		}
 		catch (Throwable e)
 		{
-			StringBuilder arguments = new StringBuilder();
-
-			for (int i=0; i < args.length; i++)
-			{
-				if (i > 0) arguments.append(", ");
-				arguments.append("args[");
-				arguments.append(Integer.toString(i));
-				arguments.append("]=");
-				if (args[i] == null)
-				{
-					arguments.append("null");
-				}
-				else
-				{
-					arguments.append(args[i].getClass().getName());
-					arguments.append(" [");
-					arguments.append(args[i].toString());
-					arguments.append("]");
-				}
-			}
 			LogMgr.logError("MacOSHelper.invoke()", "Error during callback", e);
-			LogMgr.logDebug("MacOSHelper.invoke()", "Arguments: " + arguments.toString());
+			LogMgr.logDebug("MacOSHelper.invoke()", "Arguments: " + getArguments(args));
 		}
 		return null;
+	}
+
+	private String getArguments(Object[] args)
+	{
+		if (args == null) return "<null>";
+
+		StringBuilder arguments = new StringBuilder();
+
+		for (int i=0; i < args.length; i++)
+		{
+			if (i > 0) arguments.append(", ");
+			arguments.append("args[");
+			arguments.append(Integer.toString(i));
+			arguments.append("]=");
+			if (args[i] == null)
+			{
+				arguments.append("null");
+			}
+			else
+			{
+				arguments.append(args[i].getClass().getName());
+				arguments.append(" [");
+				arguments.append(args[i].toString());
+				arguments.append("]");
+			}
+		}
+		return arguments.toString();
 	}
 
 	private void setHandled(Object event, boolean flag)

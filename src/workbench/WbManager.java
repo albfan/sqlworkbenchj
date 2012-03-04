@@ -38,6 +38,11 @@ import workbench.gui.WbFocusManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.filter.FilterDefinitionManager;
+import workbench.gui.lnf.LnFHelper;
+import workbench.gui.profiles.ProfileKey;
+import workbench.gui.tools.DataPumper;
+import workbench.gui.tools.ObjectSourceSearchPanel;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
@@ -48,11 +53,6 @@ import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
-import workbench.gui.filter.FilterDefinitionManager;
-import workbench.gui.lnf.LnFHelper;
-import workbench.gui.profiles.ProfileKey;
-import workbench.gui.tools.DataPumper;
-import workbench.gui.tools.ObjectSourceSearchPanel;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -386,20 +386,20 @@ public final class WbManager
 		this.exitWorkbench(w, forceAbort);
 	}
 
-	public boolean exitWorkbench(final JFrame window, final boolean forceAbort)
+	public void exitWorkbench(final JFrame window, final boolean forceAbort)
 	{
 		// canExit() will also prompt if any modified
 		// files should be changed
 		if (!canExit())
 		{
-			return false;
+			return;
 		}
 
 		if (window == null)
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 			this.doShutdown(0);
-			return true;
+			return;
 		}
 
 		// When disconnecting it can happen that the disconnect itself
@@ -407,8 +407,7 @@ public final class WbManager
 		// that the disconnect takes place, and the actual disconnect is
 		// carried out in a different thread to not block the AWT thread.
 		// If it takes too long the user can still abort the JVM ...
-
-		WbSwingUtilities.invoke(new Runnable()
+		WbSwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
@@ -430,7 +429,6 @@ public final class WbManager
 			}
 		};
 		t.start();
-		return true;
 	}
 
 	private void createCloseMessageWindow(JFrame parent)
@@ -482,7 +480,6 @@ public final class WbManager
 					closeMessage.dispose();
 					closeMessage = null;
 				}
-				closeAllWindows();
 			}
 		});
 		doShutdown(0);
@@ -490,6 +487,7 @@ public final class WbManager
 
 	private void closeAllWindows()
 	{
+		LogMgr.logDebug("WbManager.closeAllWindows()", "Closing all open windows");
 		for (MainWindow w : mainWindows)
 		{
 			if (w != null)
@@ -498,6 +496,7 @@ public final class WbManager
 				try { w.dispose(); } catch (Throwable th) {}
 			}
 		}
+		mainWindows.clear();
 		closeToolWindows();
 	}
 
@@ -519,9 +518,18 @@ public final class WbManager
 		}
 	}
 
+	public void removeShutdownHook()
+	{
+		if (this.shutdownHook != null)
+		{
+			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+			this.shutdownHook = null;
+		}
+	}
+
 	public void doShutdown(int errorCode)
 	{
-		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+		removeShutdownHook();
 		closeAllWindows();
 		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));

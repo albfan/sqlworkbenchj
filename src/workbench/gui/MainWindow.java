@@ -188,7 +188,7 @@ public class MainWindow
 
 	private boolean resultForWorkspaceClose;
 
-	private boolean tabRemovalInProgress;
+	private boolean ignoreTabChange;
 
 	// will indicate a connect or disconnect in progress
 	// connecting and disconnecting is done in a separate thread
@@ -259,8 +259,17 @@ public class MainWindow
 
 	protected final void updateTabPolicy()
 	{
-		int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
-		this.sqlTab.setTabLayoutPolicy(tabPolicy);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
+				sqlTab.setTabLayoutPolicy(tabPolicy);
+				sqlTab.validate();
+			}
+		});
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	public void display()
@@ -636,23 +645,21 @@ public class MainWindow
 		content.invalidate();
 	}
 
-	protected void scheduleRedraw()
+	protected void forceRedraw()
 	{
-		// This is a bit of an overkill, but it's the only
-		// way to properly update the main window in MacOS
-		SwingUtilities.invokeLater(new Runnable()
+		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				sqlTab.invalidate();
 				JComponent content = (JComponent)getContentPane();
+				sqlTab.invalidate();
 				content.invalidate();
-				validate();
-				doLayout();
-				repaint();
+				content.revalidate();
+				validateTree();
 			}
 		});
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	@Override
@@ -661,7 +668,7 @@ public class MainWindow
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
 			updateToolbarVisibility();
-			scheduleRedraw();
+			forceRedraw();
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
@@ -989,7 +996,7 @@ public class MainWindow
 
 		try
 		{
-			// prevent a manual tab change during connection as this is not working properly
+			// prevent a manual tab change while connecting
 			sqlTab.setEnabled(false);
 
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
@@ -1054,20 +1061,13 @@ public class MainWindow
 		final JMenuBar menu = this.panelMenus.get(index);
 		if (menu == null)	return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				setJMenuBar(menu);
-				updateToolbarVisibility();
-				createNewConnection.checkState();
-				disconnectTab.checkState();
-				checkMacroMenuForPanel(index);
-			}
-		});
+		setJMenuBar(menu);
+		updateToolbarVisibility();
+		createNewConnection.checkState();
+		disconnectTab.checkState();
+		checkMacroMenuForPanel(index);
 
-		scheduleRedraw();
+		forceRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1100,8 +1100,8 @@ public class MainWindow
 		MainPanel current = getSqlPanel(index);
 		if (current == null) return;
 		this.checkConnectionForPanel(current);
-		this.updateGuiForTab(index);
 		this.updateAddMacroAction();
+		this.updateGuiForTab(index);
 		this.updateWindowTitle();
 	}
 
@@ -1502,7 +1502,7 @@ public class MainWindow
 					removeAllPanels(false);
 
 					// Ignore all stateChanged() events from the SQL Tab during loading
-					tabRemovalInProgress = true;
+					setIgnoreTabChange(true);
 
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
@@ -1529,7 +1529,7 @@ public class MainWindow
 					checkWorkspaceActions();
 					updateAddMacroAction();
 
-					tabRemovalInProgress = false;
+					setIgnoreTabChange(false);
 
 					int newIndex = w.getSelectedTab();
 					if (newIndex < sqlTab.getTabCount())
@@ -1549,7 +1549,7 @@ public class MainWindow
 				}
 				finally
 				{
-					tabRemovalInProgress = false;
+					setIgnoreTabChange(false);
 					FileUtil.closeQuietely(w);
 					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
@@ -2142,7 +2142,7 @@ public class MainWindow
 
 		try
 		{
-			this.tabRemovalInProgress = true;
+			setIgnoreTabChange(true);
 			int index = 0;
 			while (index < sqlTab.getTabCount())
 			{
@@ -2188,7 +2188,7 @@ public class MainWindow
 		}
 		finally
 		{
-			tabRemovalInProgress = false;
+			setIgnoreTabChange(false);
 			if (!inProgress) clearConnectIsInProgress();
 		}
 	}
@@ -2199,7 +2199,7 @@ public class MainWindow
 		if (!inProgress) this.setConnectIsInProgress();
 		try
 		{
-			this.tabRemovalInProgress = true;
+			setIgnoreTabChange(true);
 			int keep = (keepOne ? 1 : 0);
 			while (sqlTab.getTabCount() > keep)
 			{
@@ -2226,7 +2226,7 @@ public class MainWindow
 		}
 		finally
 		{
-			tabRemovalInProgress = false;
+			setIgnoreTabChange(false);
 			if (!inProgress) clearConnectIsInProgress();
 		}
 	}
@@ -2606,7 +2606,10 @@ public class MainWindow
 	{
 		if (e.getSource() == this.sqlTab)
 		{
-			if (this.tabRemovalInProgress) return;
+			if (this.ignoreTabChange)
+			{
+				return;
+			}
 			int index = this.sqlTab.getSelectedIndex();
 			this.tabSelected(index);
 		}
@@ -2676,7 +2679,7 @@ public class MainWindow
 
 		try
 		{
-			tabRemovalInProgress = true;
+			setIgnoreTabChange(true);
 
 			sql.setConnectionClient(this);
 			sql.addDbExecutionListener(this);
@@ -2698,7 +2701,7 @@ public class MainWindow
 		}
 		finally
 		{
-			tabRemovalInProgress = false;
+			setIgnoreTabChange(false);
 		}
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
 
@@ -2892,21 +2895,23 @@ public class MainWindow
 	@Override
 	public void moveCancelled()
 	{
-		this.tabRemovalInProgress = false;
 	}
 
 	@Override
 	public void endMove(int finalIndex)
 	{
-		this.tabRemovalInProgress = false;
-		this.tabSelected(finalIndex);
+		tabSelected(finalIndex);
 	}
 
 	@Override
 	public boolean startMove(int index)
 	{
-		this.tabRemovalInProgress = true;
 		return true;
+	}
+
+	private void setIgnoreTabChange(boolean flag)
+	{
+		this.ignoreTabChange = flag;
 	}
 
 	@Override
@@ -2973,7 +2978,7 @@ public class MainWindow
 
 		try
 		{
-			this.tabRemovalInProgress = true;
+			setIgnoreTabChange(true);
 
 			WbConnection conn = panel.getConnection();
 
@@ -3015,7 +3020,7 @@ public class MainWindow
 		}
 		finally
 		{
-			this.tabRemovalInProgress = false;
+			setIgnoreTabChange(false);
 			if (!inProgress) this.clearConnectIsInProgress();
 		}
 		if (newTab >= 0 && updateGUI)
