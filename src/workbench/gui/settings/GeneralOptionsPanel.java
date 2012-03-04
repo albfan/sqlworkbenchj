@@ -31,6 +31,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import workbench.db.KeepAliveDaemon;
 import workbench.gui.components.WbLabelField;
+import workbench.gui.sql.IconHandler;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -143,6 +144,10 @@ public class GeneralOptionsPanel
 		alertDuration.setEnabled(showFinishAlert.isSelected());
 		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
+		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_IMAGE);
+		LoadingImage img = new LoadingImage();
+		img.setName(iconName);
+		iconCombobox.setSelectedItem(img);
 	}
 
 	@Override
@@ -158,7 +163,6 @@ public class GeneralOptionsPanel
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
-		GuiSettings.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
@@ -209,6 +213,8 @@ public class GeneralOptionsPanel
 		{
 			GuiSettings.setUseSystemTrayForAlert(useSystemTray.isSelected());
 		}
+		LoadingImage img = (LoadingImage)iconCombobox.getSelectedItem();
+		Settings.getInstance().setProperty(IconHandler.PROP_LOADING_IMAGE, img.getName());
 	}
 
 	private Locale getSelectedLanguage()
@@ -238,7 +244,6 @@ public class GeneralOptionsPanel
         jPanel1 = new JPanel();
         showTabIndex = new JCheckBox();
         scrollTabs = new JCheckBox();
-        enableAnimatedIcon = new JCheckBox();
         confirmTabClose = new JCheckBox();
         showTabCloseButton = new JCheckBox();
         showResultTabClose = new JCheckBox();
@@ -246,6 +251,9 @@ public class GeneralOptionsPanel
         closeButtonRightSide = new JCheckBox();
         jSeparator1 = new JSeparator();
         tabLRUclose = new JCheckBox();
+        imageContainer = new JPanel();
+        iconCombobox = new IconListCombobox();
+        jLabel1 = new JLabel();
         jSeparator2 = new JSeparator();
         jSeparator3 = new JSeparator();
         jPanel3 = new JPanel();
@@ -389,19 +397,6 @@ public class GeneralOptionsPanel
         gridBagConstraints.insets = new Insets(2, 16, 1, 0);
         jPanel1.add(scrollTabs, gridBagConstraints);
 
-        enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
-        enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));         enableAnimatedIcon.setToolTipText(ResourceMgr.getString("d_LblEnableAnimatedIcon"));         enableAnimatedIcon.setBorder(null);
-        enableAnimatedIcon.setHorizontalAlignment(SwingConstants.LEFT);
-        enableAnimatedIcon.setHorizontalTextPosition(SwingConstants.RIGHT);
-        enableAnimatedIcon.setIconTextGap(5);
-        gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(6, 16, 1, 0);
-        jPanel1.add(enableAnimatedIcon, gridBagConstraints);
-
         confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose"));         confirmTabClose.setToolTipText(ResourceMgr.getString("d_LblConfirmTabClose"));         confirmTabClose.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -428,6 +423,7 @@ public class GeneralOptionsPanel
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new Insets(0, 16, 5, 0);
         jPanel1.add(showResultTabClose, gridBagConstraints);
@@ -444,7 +440,9 @@ public class GeneralOptionsPanel
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new Insets(3, 16, 5, 0);
         jPanel1.add(closeButtonRightSide, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
@@ -463,6 +461,27 @@ public class GeneralOptionsPanel
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.insets = new Insets(6, 4, 0, 0);
         jPanel1.add(tabLRUclose, gridBagConstraints);
+
+        imageContainer.setLayout(new GridBagLayout());
+
+        iconCombobox.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        imageContainer.add(iconCombobox, gridBagConstraints);
+
+        jLabel1.setText(ResourceMgr.getString("LblBusyIcon"));         jLabel1.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new Insets(0, 0, 0, 14);
+        imageContainer.add(jLabel1, gridBagConstraints);
+
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new Insets(2, 16, 1, 0);
+        jPanel1.add(imageContainer, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -648,8 +667,10 @@ public class GeneralOptionsPanel
     private JCheckBox closeButtonRightSide;
     private JCheckBox confirmTabClose;
     private JCheckBox consolidateLog;
-    private JCheckBox enableAnimatedIcon;
     private JCheckBox exitOnConnectCancel;
+    private JComboBox iconCombobox;
+    private JPanel imageContainer;
+    private JLabel jLabel1;
     private JLabel jLabel2;
     private JPanel jPanel1;
     private JPanel jPanel2;

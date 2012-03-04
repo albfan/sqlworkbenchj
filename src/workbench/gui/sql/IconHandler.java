@@ -31,6 +31,9 @@ import workbench.resource.Settings;
 public class IconHandler
 	implements PropertyChangeListener, TextChangeListener
 {
+	public static final String PROP_LOADING_IMAGE = "workbench.gui.animatedicon.name";
+	public static final String DEFAULT_IMAGE = "loading-static";
+
 	private SqlPanel client;
 
 	private ImageIcon fileIcon;
@@ -43,7 +46,7 @@ public class IconHandler
 	{
 		client = panel;
 		client.getEditor().addTextChangeListener(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_ANIMATED_ICONS);
+		Settings.getInstance().addPropertyChangeListener(this, PROP_LOADING_IMAGE);
 	}
 
 	protected void dispose()
@@ -81,23 +84,15 @@ public class IconHandler
 	{
 		if (this.loadingIcon == null)
 		{
-			if (GuiSettings.getUseAnimatedIcon())
+			String name = Settings.getInstance().getProperty(PROP_LOADING_IMAGE, DEFAULT_IMAGE);
+			this.loadingIcon = ResourceMgr.getPicture(name);
+			if (loadingIcon == null)
 			{
-				String name = Settings.getInstance().getProperty("workbench.gui.animatedicon.name", "loading");
-				this.loadingIcon = ResourceMgr.getPicture(name);
-				if (loadingIcon == null)
-				{
-					this.loadingIcon = ResourceMgr.getPicture("loading");
-				}
-			}
-			else
-			{
-				this.loadingIcon = ResourceMgr.getPicture("loading-static");
+				this.loadingIcon = ResourceMgr.getPicture(DEFAULT_IMAGE);
 			}
 		}
 		return this.loadingIcon;
 	}
-
 
 	protected ImageIcon getCancelIndicator()
 	{
@@ -165,6 +160,7 @@ public class IconHandler
 
 	private Runnable hideBusyRunnable = new Runnable()
 	{
+		@Override
 		public void run()
 		{
 			_showBusyIcon(false);
@@ -173,6 +169,7 @@ public class IconHandler
 
 	private Runnable showBusyRunnable = new Runnable()
 	{
+		@Override
 		public void run()
 		{
 			_showBusyIcon(true);
@@ -239,12 +236,13 @@ public class IconHandler
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
 
-		if (evt.getSource() == Settings.getInstance() && prop.equals(Settings.PROPERTY_ANIMATED_ICONS))
+		if (prop.equals(Settings.PROPERTY_ANIMATED_ICONS) || prop.equals(PROP_LOADING_IMAGE))
 		{
 			if (this.cancelIcon != null)
 			{
@@ -259,6 +257,7 @@ public class IconHandler
 		}
 	}
 
+	@Override
 	public void textStatusChanged(boolean modified)
 	{
 		this.textModified = modified;
