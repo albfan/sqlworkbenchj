@@ -311,14 +311,14 @@ public class WbProperties
 
 	public void setTemporaryProperty(String key, String value)
 	{
-		String oldValue = getProperty(key);
-		if (StringUtil.equalStringOrEmpty(oldValue, value))
+		String oldValue = System.getProperty(key, getProperty(key));
+		if (!StringUtil.equalStringOrEmpty(oldValue, value))
 		{
 			System.setProperty(key, value);
 			firePropertyChanged(key, oldValue, value);
 		}
 	}
-	
+
 	public Object setProperty(String name, String value, boolean firePropChange)
 	{
 		if (name == null) return null;
