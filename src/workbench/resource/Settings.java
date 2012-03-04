@@ -2561,11 +2561,11 @@ public class Settings
 		this.props.setProperty(property, value);
 	}
 
-	public void setTemporaryProperty(String aProperty, String aValue)
+	public void setTemporaryProperty(String property, String newValue)
 	{
-		this.props.setTemporaryProperty(aProperty, aValue);
+		this.props.setTemporaryProperty(property, newValue);
 	}
-	
+
 	@Override
 	public Object setProperty(String aProperty, String aValue)
 	{
