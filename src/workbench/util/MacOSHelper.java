@@ -100,7 +100,7 @@ public class MacOSHelper
 			{
 				WbManager.getInstance().removeShutdownHook();
 
-				boolean handled = Settings.getInstance().getBoolProperty("workbench.osx.quit.sethandled", false);
+				boolean handled = Settings.getInstance().getBoolProperty("workbench.osx.quit.sethandled", true);
 				if (handled)
 				{
 					// Apparently MacOS will call System.exit() once this event is trigger (and the "handled" flat was set to true)
