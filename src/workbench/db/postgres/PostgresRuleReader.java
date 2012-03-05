@@ -51,7 +51,7 @@ public class PostgresRuleReader
              "         when '4' then 'DELETE' \n" +
              "         else 'UNKNOWN' \n" +
              "       end as rule_event, \n" +
-             "       pg_get_ruledef(r.oid) as definition, \n" +
+             "       pg_get_ruledef(r.oid, true) as definition, \n" +
              "       d.description as remarks \n" +
              "from pg_rewrite r  \n" +
              "  join pg_class c on r.ev_class = c.oid \n" +

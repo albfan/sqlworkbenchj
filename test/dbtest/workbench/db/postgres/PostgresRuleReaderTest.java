@@ -73,7 +73,7 @@ public class PostgresRuleReaderTest
 		TableIdentifier tbl = objects.get(0);
 		assertEquals("RULE", tbl.getObjectType());
 		String sql = tbl.getSource(con).toString();
-		assertEquals("CREATE RULE \"_INSERT\" AS ON INSERT TO person DO INSTEAD NOTHING;", sql);
+		assertEquals("CREATE RULE \"_INSERT\" AS\n    ON INSERT TO person DO INSTEAD NOTHING;", sql);
 		DbObject rule = con.getMetadata().getObjectDefinition(tbl);
 		String drop = rule.getDropStatement(con, true);
 		assertEquals("DROP RULE \"_INSERT\" ON person CASCADE", drop);
