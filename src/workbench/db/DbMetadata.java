@@ -206,7 +206,10 @@ public class DbMetadata
 				this.ddlFilter = new PostgresDDLFilter();
 			}
 			extenders.add(new PostgresDomainReader());
-			extenders.add(new PostgresEnumReader());
+			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.3"))
+			{
+				extenders.add(new PostgresEnumReader());
+			}
 			extenders.add(new PostgresRuleReader());
 			extenders.add(new PostgresTypeReader());
 			columnEnhancer = new PostgresColumnEnhancer();
