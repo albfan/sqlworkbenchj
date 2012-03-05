@@ -22,13 +22,13 @@ import workbench.gui.components.NumberField;
 import workbench.gui.components.WbColorPicker;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.DisplayLocale;
 import workbench.util.StringUtil;
 import workbench.util.WbLocale;
-import workbench.util.WbThread;
 
 /**
  *
@@ -38,8 +38,6 @@ public class DataDisplayOptions
 	extends JPanel
 	implements Restoreable, ValidatingComponent
 {
-	private static Locale[] locales;
-	private static final Object localeLock = new Object();
 
 	public DataDisplayOptions()
 	{
@@ -178,44 +176,27 @@ public class DataDisplayOptions
 		return true;
 	}
 
-	public static void clearLocales()
+	private Locale[] readLocales()
 	{
-		synchronized (localeLock)
-		{
-			locales = null;
-		}
-	}
+		long start = System.currentTimeMillis();
+		Locale[] locales = Locale.getAvailableLocales();
+		long duration = System.currentTimeMillis() - start;
+		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Reading " + locales.length + " locales took: " + duration);
 
-	public static void readLocales()
-	{
-		if (locales != null) return;
-
-		WbThread readThread = new WbThread("Locale Read Thread")
+		start = System.currentTimeMillis();
+		Comparator<Locale> localeComp = new Comparator<Locale>()
 		{
+			private Locale l = Settings.getInstance().getLanguage();
 			@Override
-			public void run()
+			public int compare(Locale o1, Locale o2)
 			{
-				synchronized (localeLock)
-				{
-					// Sleep a bit in order to not slow down the opening the Options dialog
-					// by the retrieval of the locales
-					sleepSilently(150);
-					locales = Locale.getAvailableLocales();
-					Comparator<Locale> localeComp = new Comparator<Locale>()
-					{
-						private Locale l = Settings.getInstance().getLanguage();
-						@Override
-						public int compare(Locale o1, Locale o2)
-						{
-							return o1.getDisplayLanguage(l).compareTo(o2.getDisplayLanguage(l));
-						}
-					};
-					Arrays.sort(locales, localeComp);
-				}
+				return o1.getDisplayLanguage(l).compareTo(o2.getDisplayLanguage(l));
 			}
 		};
-		readThread.setPriority(Thread.MIN_PRIORITY);
-		readThread.start();
+		Arrays.sort(locales, localeComp);
+		duration = System.currentTimeMillis() - start;
+		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Sorting locales took: " + duration);
+		return locales;
 	}
 
 	private void fillLanguageDropDown()
@@ -223,13 +204,8 @@ public class DataDisplayOptions
 		Locale guiLocale = Settings.getInstance().getLanguage();
 		DisplayLocale currentSortLocale = new DisplayLocale(new WbLocale(Settings.getInstance().getSortLocale()));
 
-		synchronized (localeLock)
-		{
-			if (locales == null)
-			{
-				locales = Locale.getAvailableLocales();
-			}
-		}
+		Locale[] locales = readLocales();
+
 		localeDropDown.removeAllItems();
 		localeDropDown.addItem(new DisplayLocale(null));
 

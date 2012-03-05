@@ -228,7 +228,10 @@ public class SettingsPanel
 	private void closeWindow()
 	{
 		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
-		DataDisplayOptions.clearLocales();
+		for (OptionPanelPage page : pages)
+		{
+			page.dispose();
+		}
 		this.dialog.setVisible(false);
 		this.dialog.dispose();
 		this.dialog = null;
@@ -289,12 +292,6 @@ public class SettingsPanel
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
-		// readLocales() will read the available locales in a background
-		// thread, so that they are available once the user switches
-		// to the DataFormattingOptionsPanel
-		// Reading the locales can take up to 2 seconds which is too
-		// long to be done when switching to the panel
-		DataDisplayOptions.readLocales();
 	}
 
 	@Override

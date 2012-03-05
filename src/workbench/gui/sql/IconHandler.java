@@ -20,7 +20,6 @@ import javax.swing.JTabbedPane;
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -31,7 +30,7 @@ import workbench.resource.Settings;
 public class IconHandler
 	implements PropertyChangeListener, TextChangeListener
 {
-	public static final String PROP_LOADING_IMAGE = "workbench.gui.animatedicon.name";
+	public static final String PROP_LOADING_IMAGE = "workbench.gui.busyicon.name";
 	public static final String DEFAULT_IMAGE = "loading-static";
 
 	private SqlPanel client;
@@ -77,7 +76,7 @@ public class IconHandler
 	public void showCancelIcon()
 	{
 		showIconForTab(this.getCancelIndicator());
-		if (loadingIcon != null) loadingIcon.getImage().flush();
+//		if (loadingIcon != null) loadingIcon.getImage().flush();
 	}
 
 	private ImageIcon getLoadingIndicator()
@@ -98,14 +97,7 @@ public class IconHandler
 	{
 		if (this.cancelIcon == null)
 		{
-			if (GuiSettings.getUseAnimatedIcon())
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling");
-			}
-			else
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling-static");
-			}
+			this.cancelIcon = ResourceMgr.getPicture("cancelling");
 		}
 		return this.cancelIcon;
 	}
@@ -213,17 +205,17 @@ public class IconHandler
 						{
 							tab.setIconAt(index, null);
 						}
-						if (GuiSettings.getUseAnimatedIcon())
-						{
+//						if (GuiSettings.getUseAnimatedIcon())
+//						{
 							// flushing the animated icons also stops the thread that
 							// is used for the animation. If this is not done it will still
 							// "animate" in the background (at least on older JDKs) and thus
 							// degrade performance
 							// For a static icon this is not necessary, actually not flushing
 							// the static icon improves performance when it's re-displayed
-							if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
-							if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
-						}
+//							if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
+//							if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
+//						}
 					}
 				}
 				catch (Throwable th)
@@ -242,7 +234,7 @@ public class IconHandler
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
 
-		if (prop.equals(Settings.PROPERTY_ANIMATED_ICONS) || prop.equals(PROP_LOADING_IMAGE))
+		if (prop.equals(PROP_LOADING_IMAGE))
 		{
 			if (this.cancelIcon != null)
 			{

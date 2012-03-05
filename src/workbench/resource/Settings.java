@@ -68,7 +68,6 @@ public class Settings
 	implements PropertyStorage
 {
 	// <editor-fold defaultstate="collapsed" desc="Property Keys">
-	public static final String PROPERTY_ANIMATED_ICONS = "workbench.gui.animatedicon";
 	public static final String PROPERTY_ENCRYPT_PWD = "workbench.profiles.encryptpassword";
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
@@ -2881,6 +2880,8 @@ public class Settings
 		renameProperty("workbench.datasearch.history", "workbench.data.search.history");
 		renameProperty("workbench.datasearch.lastvalue", "workbench.data.search.lastvalue");
 		renameProperty("workbench.editor.autocompletion.sql.emptylineseparator", "workbench.editor.sql.emptyline.delimiter");
+		removeProperty("workbench.gui.animatedicon.name");
+		removeProperty("workbench.gui.animatedicon");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

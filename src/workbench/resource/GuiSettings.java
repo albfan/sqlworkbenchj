@@ -351,16 +351,6 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.optimalwidth.automatic", flag);
 	}
 
-	public static boolean getUseAnimatedIcon()
-	{
-		return Settings.getInstance().getBoolProperty(Settings.PROPERTY_ANIMATED_ICONS, false);
-	}
-
-	public static void setUseAnimatedIcon(boolean flag)
-	{
-		Settings.getInstance().setProperty(Settings.PROPERTY_ANIMATED_ICONS, flag);
-	}
-
 	public static void setUseDynamicLayout(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.dynamiclayout", flag);

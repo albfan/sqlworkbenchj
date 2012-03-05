@@ -30,6 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import workbench.db.KeepAliveDaemon;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbLabelField;
 import workbench.gui.sql.IconHandler;
 import workbench.interfaces.Restoreable;
@@ -47,8 +48,9 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements Restoreable, ActionListener
+	implements Restoreable, ActionListener, Disposable
 {
+
 	public GeneralOptionsPanel()
 	{
 		super();
@@ -73,6 +75,7 @@ public class GeneralOptionsPanel
 		};
 		checkInterval.setModel(new DefaultComboBoxModel(updTypes));
 		useSystemTray.setVisible(SystemTray.isSupported());
+		WbSwingUtilities.repaintLater(iconCombobox);
 	}
 
 	@Override
@@ -215,6 +218,12 @@ public class GeneralOptionsPanel
 		}
 		LoadingImage img = (LoadingImage)iconCombobox.getSelectedItem();
 		Settings.getInstance().setProperty(IconHandler.PROP_LOADING_IMAGE, img.getName());
+	}
+
+	@Override
+	public void dispose()
+	{
+		((IconListCombobox)iconCombobox).done();
 	}
 
 	private Locale getSelectedLanguage()

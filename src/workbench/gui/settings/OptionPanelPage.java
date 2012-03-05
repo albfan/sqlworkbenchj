@@ -113,4 +113,12 @@ public class OptionPanelPage
 		}
 	}
 
+	public void dispose()
+	{
+		if (options instanceof Disposable)
+		{
+			((Disposable)options).dispose();
+		}
+	}
+
 }

@@ -15,8 +15,8 @@ import javax.swing.ImageIcon;
 import workbench.resource.ResourceMgr;
 
 /**
- * A container to store the name and the real image for the busy icon droddown.
- * 
+ * A container to store the name and the real image for the busy icon dropdown.
+ *
  * @author Thomas Kellerer
  */
 class LoadingImage
@@ -58,9 +58,10 @@ class LoadingImage
 
 	public void dispose()
 	{
-		if (image != null)
+		Image img = getImage();
+		if (img != null)
 		{
-			image.getImage().flush();
+			img.flush();
 		}
 	}
 

@@ -656,7 +656,6 @@ public class MainWindow
 				sqlTab.invalidate();
 				content.invalidate();
 				content.revalidate();
-				validateTree();
 			}
 		});
 		WbSwingUtilities.repaintLater(this);
