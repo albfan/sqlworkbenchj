@@ -63,6 +63,6 @@ public class PostgresViewReaderTest
 
 		TableIdentifier view = con.getMetadata().findObject(new TableIdentifier(TEST_SCHEMA, "v_view"));
 		String sql = con.getMetadata().getViewReader().getExtendedViewSource(view).toString();
-		assertTrue(sql.contains("CREATE RULE insert_view AS ON INSERT TO v_view DO"));
+		assertTrue(sql.contains("CREATE RULE insert_view AS\n    ON INSERT TO v_view DO"));
 	}
 }

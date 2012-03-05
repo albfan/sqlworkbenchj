@@ -55,6 +55,10 @@ public class MySQLTestUtil
 		}
 	}
 
+	public static void cleanUpTestCase()
+	{
+		ConnectionMgr.getInstance().disconnectAll();
+	}
 
 	public static void initTestcase(String name)
 		throws Exception

@@ -29,10 +29,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -348,9 +345,16 @@ public class TestUtil
 	}
 
 	public static List<String> getLines(String s)
-		throws IOException
 	{
-		return readLines(new StringReader(s));
+		try
+		{
+			return readLines(new StringReader(s));
+		}
+		catch (IOException io)
+		{
+			// Cannot happen
+			return Collections.emptyList();
+		}
 	}
 
 	public static List<String> readLines(File f)

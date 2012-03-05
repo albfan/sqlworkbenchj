@@ -13,16 +13,18 @@ package workbench.db.mysql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
-import workbench.db.TableIdentifier;
 
 /**
  *
@@ -61,6 +63,7 @@ public class MySQLDataStoreTest
 		if (con == null) return;
 		String sql = "DROP TABLE data;";
 		TestUtil.executeScript(con, sql);
+		MySQLTestUtil.cleanUpTestCase();
 	}
 
 	@Test

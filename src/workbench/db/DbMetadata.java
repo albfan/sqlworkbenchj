@@ -206,7 +206,7 @@ public class DbMetadata
 				this.ddlFilter = new PostgresDDLFilter();
 			}
 			extenders.add(new PostgresDomainReader());
-			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.3"))
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection.getSqlConnection(), "8.3"))
 			{
 				extenders.add(new PostgresEnumReader());
 			}

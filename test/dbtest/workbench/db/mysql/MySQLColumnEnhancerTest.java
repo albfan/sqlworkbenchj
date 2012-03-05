@@ -61,6 +61,7 @@ public class MySQLColumnEnhancerTest
 		if (con == null) return;
 		String sql = "DROP TABLE enum_test;";
 		TestUtil.executeScript(con, sql);
+		MySQLTestUtil.cleanUpTestCase();
 	}
 
 	@Test

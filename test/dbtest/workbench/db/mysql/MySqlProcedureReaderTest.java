@@ -1,11 +1,11 @@
 /*
  * MySqlProcedureReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.mysql;
@@ -61,6 +61,7 @@ public class MySqlProcedureReaderTest
 		String sql =
 			"DROP PROCEDURE simpleproc;";
 		TestUtil.executeScript(con, sql);
+		MySQLTestUtil.cleanUpTestCase();
 	}
 
 	@Test
@@ -68,11 +69,7 @@ public class MySqlProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			System.out.println("No connection!");
-			return;
-		}
+		if (con == null) return;
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(MySQLTestUtil.DB_NAME, null, null);
 		assertNotNull(procs);

@@ -65,6 +65,7 @@ public class MySQLTriggerReaderTest
 		if (con == null) return;
 		String sql = "DROP TABLE one;";
 		TestUtil.executeScript(con, sql);
+		MySQLTestUtil.cleanUpTestCase();
 	}
 
 	@Test

@@ -63,6 +63,7 @@ public class MySQLTableCommentReaderTest
 			"DROP TABLE aaa_one;\n" +
 			"DROP TABLE bbb_two;";
 		TestUtil.executeScript(con, sql);
+		MySQLTestUtil.cleanUpTestCase();
 	}
 
 	@Test
