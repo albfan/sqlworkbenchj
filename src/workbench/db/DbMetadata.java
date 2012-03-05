@@ -1705,8 +1705,13 @@ public class DbMetadata
 		}
 
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(this.dbConnection).getSearchPath(this.dbConnection, null);
-		LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
 
+		if (searchPath.isEmpty())
+		{
+			return findTable(table);
+		}
+
+		LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
 		for (String checkSchema  : searchPath)
 		{
 			TableIdentifier toSearch = table.createCopy();
