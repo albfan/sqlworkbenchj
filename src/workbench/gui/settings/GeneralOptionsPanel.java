@@ -76,6 +76,7 @@ public class GeneralOptionsPanel
 		checkInterval.setModel(new DefaultComboBoxModel(updTypes));
 		useSystemTray.setVisible(SystemTray.isSupported());
 		WbSwingUtilities.repaintLater(iconCombobox);
+		WbSwingUtilities.repaintLater(cancelIconCombo);
 	}
 
 	@Override
@@ -147,10 +148,16 @@ public class GeneralOptionsPanel
 		alertDuration.setEnabled(showFinishAlert.isSelected());
 		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
-		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_IMAGE);
+
+		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_BUSY_IMAGE);
 		LoadingImage img = new LoadingImage();
 		img.setName(iconName);
 		iconCombobox.setSelectedItem(img);
+
+		iconName = Settings.getInstance().getProperty(IconHandler.PROP_CANCEL_IMAGE, IconHandler.DEFAULT_CANCEL_IMAGE);
+		img = new LoadingImage();
+		img.setName(iconName);
+		cancelIconCombo.setSelectedItem(img);
 	}
 
 	@Override
@@ -218,6 +225,9 @@ public class GeneralOptionsPanel
 		}
 		LoadingImage img = (LoadingImage)iconCombobox.getSelectedItem();
 		Settings.getInstance().setProperty(IconHandler.PROP_LOADING_IMAGE, img.getName());
+
+		LoadingImage cancelImg = (LoadingImage)cancelIconCombo.getSelectedItem();
+		Settings.getInstance().setProperty(IconHandler.PROP_CANCEL_IMAGE, cancelImg.getName());
 	}
 
 	@Override
@@ -260,9 +270,11 @@ public class GeneralOptionsPanel
         closeButtonRightSide = new JCheckBox();
         jSeparator1 = new JSeparator();
         tabLRUclose = new JCheckBox();
-        imageContainer = new JPanel();
+        imagePanel = new JPanel();
         iconCombobox = new IconListCombobox();
-        jLabel1 = new JLabel();
+        busyIconLabel = new JLabel();
+        cancelIconCombo = new IconListCombobox();
+        cancelIconLabel = new JLabel();
         jSeparator2 = new JSeparator();
         jSeparator3 = new JSeparator();
         jPanel3 = new JPanel();
@@ -471,26 +483,44 @@ public class GeneralOptionsPanel
         gridBagConstraints.insets = new Insets(6, 4, 0, 0);
         jPanel1.add(tabLRUclose, gridBagConstraints);
 
-        imageContainer.setLayout(new GridBagLayout());
+        imagePanel.setLayout(new GridBagLayout());
 
+        iconCombobox.setModel(IconListCombobox.getBusyIcons());
         iconCombobox.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-        imageContainer.add(iconCombobox, gridBagConstraints);
+        imagePanel.add(iconCombobox, gridBagConstraints);
 
-        jLabel1.setText(ResourceMgr.getString("LblBusyIcon"));         jLabel1.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
+        busyIconLabel.setLabelFor(iconCombobox);
+        busyIconLabel.setText(ResourceMgr.getString("LblBusyIcon"));         busyIconLabel.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(0, 0, 0, 14);
-        imageContainer.add(jLabel1, gridBagConstraints);
+        imagePanel.add(busyIconLabel, gridBagConstraints);
+
+        cancelIconCombo.setModel(IconListCombobox.getCancelIcons());
+        cancelIconCombo.setToolTipText(ResourceMgr.getString("d_LblBusyIcon"));         gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        imagePanel.add(cancelIconCombo, gridBagConstraints);
+
+        cancelIconLabel.setLabelFor(cancelIconCombo);
+        cancelIconLabel.setText(ResourceMgr.getString("LblCancelIcon"));         cancelIconLabel.setToolTipText(ResourceMgr.getString("d_LblCancelIcon"));         gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new Insets(0, 0, 0, 14);
+        imagePanel.add(cancelIconLabel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(2, 16, 1, 0);
-        jPanel1.add(imageContainer, gridBagConstraints);
+        jPanel1.add(imagePanel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -671,6 +701,9 @@ public class GeneralOptionsPanel
     private JCheckBox autoConnect;
     private JCheckBox autoSaveProfiles;
     private JCheckBox brushedMetal;
+    private JLabel busyIconLabel;
+    private JComboBox cancelIconCombo;
+    private JLabel cancelIconLabel;
     private JComboBox checkInterval;
     private JLabel checkUpdatesLabel;
     private JCheckBox closeButtonRightSide;
@@ -678,8 +711,7 @@ public class GeneralOptionsPanel
     private JCheckBox consolidateLog;
     private JCheckBox exitOnConnectCancel;
     private JComboBox iconCombobox;
-    private JPanel imageContainer;
-    private JLabel jLabel1;
+    private JPanel imagePanel;
     private JLabel jLabel2;
     private JPanel jPanel1;
     private JPanel jPanel2;

@@ -31,7 +31,9 @@ public class IconHandler
 	implements PropertyChangeListener, TextChangeListener
 {
 	public static final String PROP_LOADING_IMAGE = "workbench.gui.busyicon.name";
-	public static final String DEFAULT_IMAGE = "loading-static";
+	public static final String PROP_CANCEL_IMAGE = "workbench.gui.cancelicon.name";
+	public static final String DEFAULT_BUSY_IMAGE = "loading-static";
+	public static final String DEFAULT_CANCEL_IMAGE = "cancelling-static";
 
 	private SqlPanel client;
 
@@ -45,7 +47,7 @@ public class IconHandler
 	{
 		client = panel;
 		client.getEditor().addTextChangeListener(this);
-		Settings.getInstance().addPropertyChangeListener(this, PROP_LOADING_IMAGE);
+		Settings.getInstance().addPropertyChangeListener(this, PROP_LOADING_IMAGE, PROP_CANCEL_IMAGE);
 	}
 
 	protected void dispose()
@@ -83,11 +85,11 @@ public class IconHandler
 	{
 		if (this.loadingIcon == null)
 		{
-			String name = Settings.getInstance().getProperty(PROP_LOADING_IMAGE, DEFAULT_IMAGE);
+			String name = Settings.getInstance().getProperty(PROP_LOADING_IMAGE, DEFAULT_BUSY_IMAGE);
 			this.loadingIcon = ResourceMgr.getPicture(name);
 			if (loadingIcon == null)
 			{
-				this.loadingIcon = ResourceMgr.getPicture(DEFAULT_IMAGE);
+				this.loadingIcon = ResourceMgr.getPicture(DEFAULT_BUSY_IMAGE);
 			}
 		}
 		return this.loadingIcon;
@@ -97,7 +99,12 @@ public class IconHandler
 	{
 		if (this.cancelIcon == null)
 		{
-			this.cancelIcon = ResourceMgr.getPicture("cancelling");
+			String name = Settings.getInstance().getProperty(PROP_CANCEL_IMAGE, DEFAULT_CANCEL_IMAGE);
+			cancelIcon = ResourceMgr.getPicture(name);
+			if (cancelIcon == null)
+			{
+				cancelIcon = ResourceMgr.getPicture(DEFAULT_CANCEL_IMAGE);
+			}
 		}
 		return this.cancelIcon;
 	}
@@ -236,15 +243,18 @@ public class IconHandler
 
 		if (prop.equals(PROP_LOADING_IMAGE))
 		{
-			if (this.cancelIcon != null)
-			{
-				this.cancelIcon.getImage().flush();
-				this.cancelIcon = null;
-			}
 			if (this.loadingIcon != null)
 			{
 				this.loadingIcon.getImage().flush();
 				this.loadingIcon = null;
+			}
+		}
+		if (prop.equals(PROP_CANCEL_IMAGE))
+		{
+			if (this.cancelIcon != null)
+			{
+				this.cancelIcon.getImage().flush();
+				this.cancelIcon = null;
 			}
 		}
 	}

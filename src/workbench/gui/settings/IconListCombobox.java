@@ -23,14 +23,6 @@ public class IconListCombobox
 	public IconListCombobox()
 	{
 		super();
-		LoadingImage[] data = new LoadingImage[5];
-		data[0] = new LoadingImage("loading-static");
-		data[1] = new LoadingImage("loading_box");
-		data[2] = new LoadingImage("loading_small");
-		data[3] = new LoadingImage("loading");
-		data[4] = new LoadingImage("loading_arrows");
-		ComboBoxModel model = new DefaultComboBoxModel(data);
-		setModel(model);
 		setRenderer(new ImagePanel());
 	}
 
@@ -42,6 +34,27 @@ public class IconListCombobox
 			LoadingImage icon = (LoadingImage)model.getElementAt(i);
 			icon.dispose();
 		}
+	}
+
+	public static ComboBoxModel getBusyIcons()
+	{
+		LoadingImage[] data = new LoadingImage[6];
+		data[0] = new LoadingImage("loading-static");
+		data[1] = new LoadingImage("loading_box");
+		data[2] = new LoadingImage("loading_small");
+		data[3] = new LoadingImage("loading");
+		data[4] = new LoadingImage("loading_arrows");
+		data[5] = new LoadingImage("spinning");
+		return new DefaultComboBoxModel(data);
+	}
+
+	public static ComboBoxModel getCancelIcons()
+	{
+		LoadingImage[] data = new LoadingImage[3];
+		data[0] = new LoadingImage("cancelling-static");
+		data[1] = new LoadingImage("cancelling");
+		data[2] = new LoadingImage("cancelling-spinning");
+		return new DefaultComboBoxModel(data);
 	}
 
 }

@@ -25,7 +25,7 @@ public class ImagePanel
 	implements ListCellRenderer
 {
 	private Image image;
-	private Dimension dim = new Dimension(32,16);
+	private Dimension dim = new Dimension(32,18);
 
 	public ImagePanel()
 	{
