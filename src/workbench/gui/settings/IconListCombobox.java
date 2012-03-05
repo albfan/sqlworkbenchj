@@ -50,10 +50,11 @@ public class IconListCombobox
 
 	public static ComboBoxModel getCancelIcons()
 	{
-		LoadingImage[] data = new LoadingImage[3];
+		LoadingImage[] data = new LoadingImage[4];
 		data[0] = new LoadingImage("cancelling-static");
 		data[1] = new LoadingImage("cancelling");
 		data[2] = new LoadingImage("cancelling-spinning");
+		data[3] = new LoadingImage("progress_open");
 		return new DefaultComboBoxModel(data);
 	}
 
