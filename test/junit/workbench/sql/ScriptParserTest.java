@@ -87,7 +87,7 @@ public class ScriptParserTest
 		String sql =
 			"wbexport  -type=text -delimiter=';' -quoteChar=\"'\" -sourceTable=test -file=test.txt; \n" +
       "wbimport  -type=text;";
-		
+
 		ScriptParser p = new ScriptParser(sql);
 		int count = 0;
 		while (p.getNextCommand() != null)
@@ -96,7 +96,7 @@ public class ScriptParserTest
 		}
 		assertEquals(2, count);
 	}
-	
+
 	@Test
 	public void testArrayBasedGetNext()
 		throws Exception
@@ -110,13 +110,13 @@ public class ScriptParserTest
 		}
 		assertEquals(2, count);
 	}
-	
+
 	@Test
 	public void testMultiByteEncoding()
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-		
+
 		File f = new File(util.getBaseDir(), "insert.sql");
 		ScriptParser parser = null;
 		int commandsInFile = 0;
@@ -165,7 +165,7 @@ public class ScriptParserTest
 			ScriptParser p = new ScriptParser();
 			p.setEmptyLineIsDelimiter(false);
 			p.setScript(sql);
-//			assertEquals(2, p.getSize());
+			assertEquals(2, p.getSize());
 		}
 		catch (Exception e)
 		{
@@ -602,7 +602,7 @@ public class ScriptParserTest
 			assertEquals(2, p.getSize());
 			assertEquals("select 'One Value'", p.getCommand(0));
 			assertEquals("select 'Some other value'", p.getCommand(1));
-			
+
 			assertEquals(0, p.getCommandIndexAtCursorPos(1));
 			assertEquals(1, p.getCommandIndexAtCursorPos(31));
 

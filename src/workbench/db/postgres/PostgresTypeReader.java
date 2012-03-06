@@ -106,17 +106,17 @@ public class PostgresTypeReader
 		 "       'TYPE' as table_type, \n" +
 		 "       pg_catalog.obj_description(t.oid, 'pg_type') as remarks \n" +
 		 "FROM pg_catalog.pg_type t \n" +
-		 "     JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
+		 "  JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
 		 "WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) \n" +
-		 "  AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid) \n" +
-		 "      AND n.nspname <> 'pg_catalog' \n" +
-		 "      AND n.nspname <> 'information_schema' \n";
+		 " AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid) \n" +
+		 " AND n.nspname <> 'pg_catalog' \n" +
+		 " AND n.nspname <> 'information_schema' \n";
 
 		if (!JdbcUtils.hasMinimumServerVersion(con, "8.3"))
 		{
 			baseSelect = baseSelect.replace("AND el.typarray = t.oid", "");
 		}
-		
+
 		select.append(baseSelect);
 		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern);
 		SqlUtil.appendAndCondition(select, "t.typname", objectPattern);
