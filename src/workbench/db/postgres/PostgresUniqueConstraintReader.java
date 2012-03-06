@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import workbench.db.IndexDefinition;
+import workbench.db.JdbcUtils;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -40,17 +41,39 @@ public class PostgresUniqueConstraintReader
 		if (con == null) return;
 
 		StringBuilder sql = new StringBuilder(500);
-		sql.append("select *  \n" +
-             "from ( \n" +
-             "  select ind.relname as index_name, indschem.nspname as index_schema, cons.conname as constraint_name \n" +
-             "  from pg_constraint cons \n" +
-             "    join pg_class tbl ON tbl.oid = cons.conrelid \n" +
-             "    join pg_namespace ns ON ns.oid = tbl.relnamespace \n" +
-             "    join pg_class ind ON ind.oid = cons.conindid \n" +
-             "    join pg_namespace indschem ON indschem.oid = ind.relnamespace \n" +
-             "  where cons.contype = 'u' \n" +
-             ") t \n" +
-             "where (index_name, index_schema) in (");
+		String baseSql = null;
+
+		if (JdbcUtils.hasMinimumServerVersion(con, "9.0"))
+		{
+			baseSql =
+				"  select ind.relname as index_name, indschem.nspname as index_schema, cons.conname as constraint_name \n" +
+				"  from pg_constraint cons \n" +
+				"    join pg_class tbl ON tbl.oid = cons.conrelid \n" +
+				"    join pg_namespace ns ON ns.oid = tbl.relnamespace \n" +
+				"    join pg_class ind ON ind.oid = cons.conindid \n" +
+				"    join pg_namespace indschem ON indschem.oid = ind.relnamespace \n" +
+				"  where cons.contype = 'u'";
+		}
+		else
+		{
+			// Prior to 9.0 the unique index supporting the constraint could not be named differently
+			// than the constaint itself (and pg_constraint.conindid does not exist there)
+			baseSql =
+				"  select cons.conname as index_name,  \n" +
+				"         cns.nspname as index_schema, \n" +
+				"         cons.conname as constraint_name \n" +
+				"  from pg_constraint cons  \n" +
+				"    join pg_class tbl ON tbl.oid = cons.conrelid  \n" +
+				"    join pg_namespace cns on cns.oid = cons.connamespace \n" +
+				"  where cons.contype = 'u'";
+		}
+		sql.append(
+			"select *  \n" +
+			"from ( \n");
+		sql.append(baseSql);
+		sql.append(
+			") t \n" +
+			"where (index_name, index_schema) in (");
 
 		boolean first = true;
 		int idxCount = 0;
