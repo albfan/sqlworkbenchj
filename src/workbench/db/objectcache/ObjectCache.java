@@ -67,7 +67,12 @@ class ObjectCache
 
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 	{
-		return DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
+		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
+		if (schemas.isEmpty())
+		{
+			return CollectionUtil.arrayList(null);
+		}
+		return schemas;
 	}
 
 	private boolean isSchemaCached(String schema)
@@ -370,32 +375,35 @@ class ObjectCache
 	{
 		if (toSearch == null) return null;
 
-		TableIdentifier key = toSearch.createCopy();
-		key.adjustCase(con);
-
-		List<String> schemas = Collections.emptyList();
-
-		if (key.getSchema() == null)
+		if (toSearch.getSchema() == null)
 		{
-			schemas = getSearchPath(con, con.getCurrentSchema());
-		}
-
-		if (!schemas.isEmpty())
-		{
+			TableIdentifier key = toSearch.createCopy();
+			key.adjustCase(con);
+			
+			List<String> schemas = getSearchPath(con, con.getCurrentSchema());
 			for (String schema : schemas)
 			{
 				TableIdentifier copy = key.createCopy();
 				copy.setSchema(schema);
-				TableIdentifier tbl = findEntry(con, copy);
+				TableIdentifier tbl = findInCache(con, copy);
 				if (tbl != null) return tbl;
 			}
 		}
 		else
 		{
-			for (TableIdentifier tbl : objects.keySet())
-			{
-				if (tbl.equals(key)) return tbl;
-			}
+			return findInCache(con, toSearch);
+		}
+
+		return null;
+	}
+
+	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch)
+	{
+		TableIdentifier key = toSearch.createCopy();
+		key.adjustCase(con);
+		for (TableIdentifier tbl : objects.keySet())
+		{
+			if (tbl.equals(key)) return tbl;
 		}
 		return null;
 	}

@@ -59,14 +59,17 @@ public class PostgresTableSourceBuilder
              "    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
              "    join pg_class bt on i.inhparent = bt.oid \n" +
              "    join pg_namespace bns on bt.relnamespace = bns.oid";
+
+		Savepoint sp = null;
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, table.getSchema());
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Using sql: " + pstmt.toString());
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -84,9 +87,11 @@ public class PostgresTableSourceBuilder
 				}
 				result.append(')');
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
+			dbConnection.rollback(sp);
 			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
 			return null;
 		}
@@ -131,8 +136,6 @@ public class PostgresTableSourceBuilder
 	@Override
 	public void readTableConfigOptions(TableIdentifier tbl)
 	{
-		boolean is91 = JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
-
 		String optionsCol = null;
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.1"))
 		{
@@ -143,29 +146,34 @@ public class PostgresTableSourceBuilder
 			optionsCol = "null as reloptions";
 		}
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = null;
-		if (is91)
+		String tempCol = null;
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1"))
 		{
-			sql = "select ct.relpersistence, ct.relkind, " + optionsCol + ", spc.spcname \n" +
-							 "from pg_class ct \n" +
-							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
-				       "    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
-							 " where cns.nspname = ? \n" +
-							 "   and ct.relname = ?";
+			tempCol = "ct.relpersistence";
+		}
+		else if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4"))
+		{
+			tempCol = "case when ct.relistemp then 't' else null::char end as relpersitence";
 		}
 		else
 		{
-			sql = "select case when ct.relistemp then 't' else null end as relpersitence, ct.relkind, " + optionsCol + ", spc.spcname \n" +
-							 "from pg_class ct \n" +
-							 "    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
-				       "    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
-							 " where cns.nspname = ? \n" +
-							 "   and ct.relname = ?";
+			tempCol = "null::char as relpersistence";
 		}
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname \n" +
+			"from pg_class ct \n" +
+			"    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
+			"    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
+			" where cns.nspname = ? \n" +
+			"   and ct.relname = ?";
+
+		Savepoint sp = null;
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, tbl.getSchema());
 			pstmt.setString(2, tbl.getTableName());
@@ -202,10 +210,13 @@ public class PostgresTableSourceBuilder
 		}
 		catch (SQLException e)
 		{
+			dbConnection.rollback(sp);
+			sp = null;
 			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
 		}
 		finally
 		{
+			dbConnection.releaseSavepoint(sp);
 			SqlUtil.closeAll(rs, pstmt);
 		}
 	}
@@ -224,8 +235,10 @@ public class PostgresTableSourceBuilder
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		StringBuilder result = new StringBuilder(100);
+		Savepoint sp = null;
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, table.getTableName());
 			stmt.setString(2, table.getSchema());
@@ -256,11 +269,14 @@ public class PostgresTableSourceBuilder
 		}
 		catch (SQLException ex)
 		{
+			dbConnection.rollback(sp);
+			sp = null;
 			LogMgr.logError("PostgresTableSourceBuilder.getForeignTableOptions()", "Could not retrieve table options", ex);
 			return null;
 		}
 		finally
 		{
+			dbConnection.releaseSavepoint(sp);
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}

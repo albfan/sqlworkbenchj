@@ -60,7 +60,7 @@ public class JdbcTableDefinitionReader
 		PkDefinition primaryKey = table.getPrimaryKey();
 		Set<String> primaryKeyColumns = CollectionUtil.caseInsensitiveSet();
 
-		LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "PK table " + table.getTableName() + ": " + primaryKey);
+		LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "PK for " + table.getTableName() + ": " + primaryKey);
 		if (primaryKey != null)
 		{
 			primaryKeyColumns.addAll(primaryKey.getColumns());

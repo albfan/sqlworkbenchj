@@ -401,7 +401,7 @@ public class JdbcIndexReader
 
 	public UniqueConstraintReader getUniqueConstraintReader()
 	{
-		if (this.metaData.isPostgres())
+		if (this.metaData.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.metaData.getWbConnection(), "9.0"))
 		{
 			return new PostgresUniqueConstraintReader();
 		}
