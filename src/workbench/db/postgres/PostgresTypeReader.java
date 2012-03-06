@@ -112,6 +112,11 @@ public class PostgresTypeReader
 		 "      AND n.nspname <> 'pg_catalog' \n" +
 		 "      AND n.nspname <> 'information_schema' \n";
 
+		if (!JdbcUtils.hasMinimumServerVersion(con, "8.3"))
+		{
+			baseSelect = baseSelect.replace("AND el.typarray = t.oid", "");
+		}
+		
 		select.append(baseSelect);
 		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern);
 		SqlUtil.appendAndCondition(select, "t.typname", objectPattern);
