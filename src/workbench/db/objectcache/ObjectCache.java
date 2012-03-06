@@ -70,7 +70,7 @@ class ObjectCache
 		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
 		if (schemas.isEmpty())
 		{
-			return CollectionUtil.arrayList(null);
+			return CollectionUtil.arrayList((String)null);
 		}
 		return schemas;
 	}
@@ -379,7 +379,7 @@ class ObjectCache
 		{
 			TableIdentifier key = toSearch.createCopy();
 			key.adjustCase(con);
-			
+
 			List<String> schemas = getSearchPath(con, con.getCurrentSchema());
 			for (String schema : schemas)
 			{
