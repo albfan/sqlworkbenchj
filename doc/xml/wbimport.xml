@@ -714,14 +714,15 @@
 						<entry>-columnWidths</entry>
 						<entry>
 							<para>
-								To import files that do not have a delimiter but a fixed
+								In order to import files that do not have a delimiter but have a fixed
 								width for each column, this parameters defines the width of each
 								column in the input file. The value for this parameter is a
-								comma separated list, where each element defines the width for
-								a single column. If this parameter is given, the <literal>-delimiter</literal>
-								parameter is ignored.
+								comma separated list, where each element defines the width in characters for
+								each column. If this parameter is given, the <literal>-delimiter</literal>
+								parameter is ignored. The order of the columns in the input file must still
+                be defined using the <literal>-fileColumns</literal> parameter.
 							</para>
-							<para>e.g.: -columnWidths='name=10,lastname=20,street=50,flag=1'</para>
+							<para>e.g.: <literal>-fileColumns=custid,actcode,regioncd,flag -columnWidths='custid=10,actcode=5,regioncd=3,flag=1'</literal></para>
 							<para>
 								Note that the whole list must be enclosed in quotes as the parameter
 								value contains the equal sign.
@@ -730,7 +731,7 @@
 								If you want to import only certain columns you have to use
 								<literal>-fileColumns</literal> and <literal>-importColumns</literal>
 								to select the columns to import. You cannot use <literal>$wb_skip$</literal>
-								in the -fileColumns parameter with a fixed column width import.
+								in the <literal>-fileColumns</literal> parameter with a fixed column width import.
 							</para>
 						</entry>
 					</row>
@@ -1076,6 +1077,21 @@
       version with <literal>$wb_skip$</literal> is mandatory if the input file
       contains columns that do not exist in the target table.
     </para>
+   </section>
+
+  <section id="wbimport-example-3">
+    <title>Importing a file with fixed column widths</title>
+    <programlisting>WbImport -file=cust_data.txt
+         -table=customer
+         -filecolumns=custnr,accountid,region_code
+         -columnWidths='custnr=10,accountid=10,region_code=2';</programlisting>
+
+     <para>
+       This will import a file with three columns. The first column named <literal>custnr</literal> is taken
+       from the characters 1-10, the second column namend <literal>accountid</literal> ist taken from
+       the characters 21-30 and the third the column <literal>region_code</literal> is taken from
+       characters 31 and 32
+     </para>
    </section>
 
    <section id="wbimport-example-4">
