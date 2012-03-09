@@ -442,15 +442,21 @@ public class TriggerListPanel
 			dbConnection.setBusy(false);
 		}
 
-		EventQueue.invokeLater(new Runnable()
+		if (this.triggerList.getSelectedRowCount() == 1)
 		{
-			@Override
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				source.setCaretPosition(0, false);
-				source.requestFocusInWindow();
-			}
-		});
+				@Override
+				public void run()
+				{
+					source.setCaretPosition(0, false);
+					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					{
+						source.requestFocusInWindow();
+					}
+				}
+			});
+		}
 	}
 
 	@Override

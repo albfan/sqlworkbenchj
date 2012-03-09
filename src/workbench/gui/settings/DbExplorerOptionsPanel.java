@@ -41,6 +41,7 @@ public class DbExplorerOptionsPanel
 		set.setAutoGeneratePKName(autogeneratePK.isSelected());
 		set.setShowTriggerPanel(showTriggerPanel.isSelected());
 		set.setSelectDataPanelAfterRetrieve(autoselectDataPanel.isSelected());
+		set.setSelectSourcePanelAfterRetrieve(selectSrcPanel.isSelected());
 		set.setRememberSortInDbExplorer(rememberSort.isSelected());
 		set.setRememberColumnOrder(rememberColOrder.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
@@ -63,6 +64,7 @@ public class DbExplorerOptionsPanel
 		rememberColOrder.setSelected(set.getRememberColumnOrder());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
 		filterWhileTyping.setSelected(Settings.getInstance().getDbExpFilterDuringTyping());
+		selectSrcPanel.setSelected(set.getSelectSourcePanelAfterRetrieve());
 		((PlacementChooser)tabPlacement).showPlacement();
 	}
 
@@ -94,6 +96,7 @@ public class DbExplorerOptionsPanel
         useQuickFilterRegex = new javax.swing.JCheckBox();
         filterWhileTyping = new javax.swing.JCheckBox();
         retrieveFKTree = new javax.swing.JCheckBox();
+        selectSrcPanel = new javax.swing.JCheckBox();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -186,7 +189,7 @@ public class DbExplorerOptionsPanel
         showFocus.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
@@ -198,11 +201,11 @@ public class DbExplorerOptionsPanel
         autogeneratePK.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         autogeneratePK.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
         add(autogeneratePK, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -318,6 +321,18 @@ public class DbExplorerOptionsPanel
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
         add(retrieveFKTree, gridBagConstraints);
+
+        selectSrcPanel.setText(ResourceMgr.getString("LblSelectSourcePanel")); // NOI18N
+        selectSrcPanel.setToolTipText(ResourceMgr.getString("d_LblSelectSourcePanel")); // NOI18N
+        selectSrcPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        selectSrcPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
+        add(selectSrcPanel, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -336,6 +351,7 @@ public class DbExplorerOptionsPanel
     private javax.swing.JCheckBox rememberSort;
     private javax.swing.JCheckBox retrieveDbExplorer;
     private javax.swing.JCheckBox retrieveFKTree;
+    private javax.swing.JCheckBox selectSrcPanel;
     private javax.swing.JCheckBox showDbExplorer;
     private javax.swing.JCheckBox showFocus;
     private javax.swing.JCheckBox showTriggerPanel;

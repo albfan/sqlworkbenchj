@@ -1047,6 +1047,16 @@ public class Settings
 		setProperty("workbench.gui.dbobjects.autoselectdatapanel", flag);
 	}
 
+	public boolean getSelectSourcePanelAfterRetrieve()
+	{
+		return getBoolProperty("workbench.gui.dbobjects.autoselectsrcpanel", true);
+	}
+
+	public void setSelectSourcePanelAfterRetrieve(boolean flag)
+	{
+		setProperty("workbench.gui.dbobjects.autoselectsrcpanel", flag);
+	}
+
 	// </editor-fold>
 
 	public void addFontChangedListener(FontChangedListener aListener)

@@ -389,7 +389,7 @@ public class GeneralOptionsPanel
         settingsfilename.setText("jTextField1");
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -404,26 +404,26 @@ public class GeneralOptionsPanel
         showTabIndex.setHorizontalTextPosition(SwingConstants.RIGHT);
         showTabIndex.setIconTextGap(5);
         gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.insets = new Insets(2, 4, 1, 0);
+        gridBagConstraints.insets = new Insets(4, 16, 1, 0);
         jPanel1.add(showTabIndex, gridBagConstraints);
 
         scrollTabs.setText(ResourceMgr.getString("LblScrolTabs"));         scrollTabs.setToolTipText(ResourceMgr.getString("d_LblScrolTabs"));         scrollTabs.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.insets = new Insets(2, 16, 1, 0);
+        gridBagConstraints.insets = new Insets(4, 16, 0, 0);
         jPanel1.add(scrollTabs, gridBagConstraints);
 
         confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose"));         confirmTabClose.setToolTipText(ResourceMgr.getString("d_LblConfirmTabClose"));         confirmTabClose.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new Insets(6, 4, 1, 0);
+        gridBagConstraints.insets = new Insets(4, 4, 1, 0);
         jPanel1.add(confirmTabClose, gridBagConstraints);
 
         showTabCloseButton.setText(ResourceMgr.getString("LblShowTabClose"));         showTabCloseButton.setToolTipText(ResourceMgr.getString("d_LblShowTabClose"));         showTabCloseButton.setBorder(null);
@@ -432,7 +432,7 @@ public class GeneralOptionsPanel
         showTabCloseButton.setIconTextGap(5);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new Insets(0, 4, 5, 0);
         jPanel1.add(showTabCloseButton, gridBagConstraints);
@@ -443,7 +443,7 @@ public class GeneralOptionsPanel
         showResultTabClose.setIconTextGap(5);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new Insets(0, 16, 5, 0);
@@ -452,7 +452,7 @@ public class GeneralOptionsPanel
         onlyActiveTab.setText(ResourceMgr.getString("LblCloseActive"));         onlyActiveTab.setToolTipText(ResourceMgr.getString("d_LblCloseActive"));         onlyActiveTab.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.insets = new Insets(3, 4, 5, 0);
         jPanel1.add(onlyActiveTab, gridBagConstraints);
@@ -460,7 +460,7 @@ public class GeneralOptionsPanel
         closeButtonRightSide.setText(ResourceMgr.getString("LblCloseOnRight"));         closeButtonRightSide.setToolTipText(ResourceMgr.getString("d_LblCloseOnRight"));         closeButtonRightSide.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
@@ -468,19 +468,18 @@ public class GeneralOptionsPanel
         jPanel1.add(closeButtonRightSide, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new Insets(8, 3, 8, 0);
+        gridBagConstraints.insets = new Insets(5, 3, 6, 0);
         jPanel1.add(jSeparator1, gridBagConstraints);
 
         tabLRUclose.setText(ResourceMgr.getString("LblTabOrderLRU"));         tabLRUclose.setToolTipText(ResourceMgr.getString("d_LblTabOrderLRU"));         tabLRUclose.setBorder(null);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.insets = new Insets(6, 4, 0, 0);
+        gridBagConstraints.insets = new Insets(4, 4, 0, 0);
         jPanel1.add(tabLRUclose, gridBagConstraints);
 
         imagePanel.setLayout(new GridBagLayout());
@@ -516,10 +515,11 @@ public class GeneralOptionsPanel
         imagePanel.add(cancelIconLabel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new Insets(2, 16, 1, 0);
+        gridBagConstraints.insets = new Insets(0, 12, 1, 0);
         jPanel1.add(imagePanel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
@@ -528,11 +528,11 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new Insets(6, 7, 0, 10);
+        gridBagConstraints.insets = new Insets(2, 7, 0, 10);
         add(jPanel1, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new Insets(6, 7, 7, 10);
@@ -542,18 +542,18 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new Insets(7, 7, 2, 10);
+        gridBagConstraints.insets = new Insets(7, 7, 0, 10);
         add(jSeparator3, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(jPanel3, gridBagConstraints);
 
         logLevelLabel.setText(ResourceMgr.getString("LblLogLevel"));         logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel"));         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.insets = new Insets(0, 11, 0, 0);
         add(logLevelLabel, gridBagConstraints);
@@ -561,7 +561,7 @@ public class GeneralOptionsPanel
         logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
@@ -572,7 +572,7 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new Insets(7, 7, 11, 10);
+        gridBagConstraints.insets = new Insets(4, 7, 8, 10);
         add(jSeparator4, gridBagConstraints);
 
         jPanel4.setLayout(new GridBagLayout());
@@ -582,16 +582,14 @@ public class GeneralOptionsPanel
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new Insets(0, 10, 0, 0);
         jPanel4.add(showFinishAlert, gridBagConstraints);
 
         jLabel2.setText(ResourceMgr.getString("LblScriptEndAlertDuration"));         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.insets = new Insets(7, 11, 0, 0);
         jPanel4.add(jLabel2, gridBagConstraints);
@@ -599,19 +597,19 @@ public class GeneralOptionsPanel
         alertDuration.setColumns(8);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(5, 10, 0, 0);
+        gridBagConstraints.insets = new Insets(5, 8, 0, 0);
         jPanel4.add(alertDuration, gridBagConstraints);
 
         useSystemTray.setText(ResourceMgr.getString("LblAlertSysTray"));         useSystemTray.setBorder(null);
         useSystemTray.setMargin(new Insets(0, 0, 0, 0));
         gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new Insets(4, 26, 0, 0);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.insets = new Insets(0, 8, 0, 0);
         jPanel4.add(useSystemTray, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
@@ -668,14 +666,14 @@ public class GeneralOptionsPanel
         logAllStatements.setIconTextGap(5);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = GridBagConstraints.WEST;
         gridBagConstraints.insets = new Insets(3, 11, 8, 0);
         add(logAllStatements, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new Insets(2, 7, 12, 10);

@@ -1282,14 +1282,14 @@ public class TableListPanel
 
 		try
 		{
-
 			WbSwingUtilities.showWaitCursor(this);
-			CharSequence sql = null;
 
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DbSettings dbs = this.dbConnection.getDbSettings();
 
 			String type = selectedTable.getType();
+
+			CharSequence sql = null;
 
 			if (meta.isExtendedObject(selectedTable))
 			{
@@ -1340,8 +1340,13 @@ public class TableListPanel
 				{
 					tableSource.setText(s);
 					tableSource.setCaretPosition(0, false);
+					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					{
+						tableSource.requestFocusInWindow();
+					}
 				}
 			});
+
 			shouldRetrieveTableSource = false;
 		}
 		catch (Exception e)
@@ -1361,6 +1366,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 		}
+
 	}
 
 	private void retrieveTableDefinition()

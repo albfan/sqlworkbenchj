@@ -568,15 +568,21 @@ public class ProcedureListPanel
 
 		final int pos = findOracleProcedureInPackage(sql, def);
 
-		EventQueue.invokeLater(new Runnable()
+		if (procList.getSelectedRowCount() == 1)
 		{
-			@Override
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				source.setCaretPosition(pos,(pos > 0));
-				source.requestFocusInWindow();
-			}
-		});
+				@Override
+				public void run()
+				{
+					source.setCaretPosition(pos,(pos > 0));
+					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					{
+						source.requestFocusInWindow();
+					}
+				}
+			});
+		}
 	}
 
 	private List<String> getParameterNames()
