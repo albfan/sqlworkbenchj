@@ -234,6 +234,7 @@ public class GeneralOptionsPanel
 	public void dispose()
 	{
 		((IconListCombobox)iconCombobox).done();
+		((IconListCombobox)cancelIconCombo).done();
 	}
 
 	private Locale getSelectedLanguage()
@@ -489,6 +490,7 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new Insets(0, 4, 0, 0);
         imagePanel.add(iconCombobox, gridBagConstraints);
 
         busyIconLabel.setLabelFor(iconCombobox);
@@ -496,7 +498,6 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new Insets(0, 0, 0, 14);
         imagePanel.add(busyIconLabel, gridBagConstraints);
 
         cancelIconCombo.setModel(IconListCombobox.getCancelIcons());
@@ -504,6 +505,7 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new Insets(0, 4, 0, 0);
         imagePanel.add(cancelIconCombo, gridBagConstraints);
 
         cancelIconLabel.setLabelFor(cancelIconCombo);
@@ -511,7 +513,6 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new Insets(0, 0, 0, 14);
         imagePanel.add(cancelIconLabel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
@@ -542,7 +543,7 @@ public class GeneralOptionsPanel
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new Insets(7, 7, 0, 10);
+        gridBagConstraints.insets = new Insets(7, 7, 6, 10);
         add(jSeparator3, gridBagConstraints);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 3;

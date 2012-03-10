@@ -84,7 +84,7 @@ public class VariablePool
 		this.initFromProperties(System.getProperties());
 	}
 
-	void initFromProperties(Properties props)
+	final void initFromProperties(Properties props)
 	{
 		synchronized (this.data)
 		{
@@ -262,7 +262,6 @@ public class VariablePool
 	 */
 	private void replaceVarValue(StringBuilder original, String pattern, String replacement)
 	{
-		//StringBuilder result = new StringBuilder(original);
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(original);
 		while (m != null && m.find())
@@ -272,7 +271,6 @@ public class VariablePool
 			original.replace(start, end, replacement);
 			m = p.matcher(original.toString());
 		}
-		//return result.toString();
 	}
 
 	public String buildVarName(String varName, boolean forPrompt)
@@ -418,7 +416,7 @@ class VariableDataStore
 	private static final int[] sizes =   {20, 50};
 	private static final TableIdentifier TABLE_ID = new TableIdentifier("WB$VARIABLE_DEFINITION");
 
-	public VariableDataStore()
+	VariableDataStore()
 	{
 		super(cols, types, sizes);
 		this.setUpdateTable(TABLE_ID);
