@@ -97,6 +97,7 @@ public class DbObjectChanger
 		if (StringUtil.equalStringOrEmpty(oldName.trim(), newName.trim(), true)) return null; // no change
 		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldName.trim());
 		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newName.trim());
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, oldTable.getFullyQualifiedName(dbConnection));
 		return sql;
 	}
 
