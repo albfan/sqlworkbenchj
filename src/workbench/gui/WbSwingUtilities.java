@@ -87,6 +87,17 @@ public class WbSwingUtilities
 		return new BevelBorder(type, b.getHighlightOuterColor(), Color.LIGHT_GRAY, b.getHighlightInnerColor(), b.getShadowInnerColor());
 	}
 
+	public static boolean containsComponent(JComponent container, JComponent toCheck)
+	{
+		Component[] children = container.getComponents();
+		if (children == null || children.length == 0) return false;
+		for (Component c : children)
+		{
+			if (c == toCheck) return true;
+		}
+		return false;
+	}
+
 	public static void waitForEmptyQueue()
 	{
 		if (EventQueue.isDispatchThread())
