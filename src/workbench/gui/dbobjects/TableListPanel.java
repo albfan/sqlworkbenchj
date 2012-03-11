@@ -11,6 +11,7 @@
  */
 package workbench.gui.dbobjects;
 
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -25,12 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,65 +35,75 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
-import workbench.db.TableIdentifier;
-import workbench.db.TriggerReader;
-import workbench.db.WbConnection;
-import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.CreateDropScriptAction;
-import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.SpoolDataAction;
-import workbench.gui.actions.ToggleTableSourceAction;
-import workbench.gui.actions.WbAction;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.QuickFilterPanel;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.ShareableDisplay;
-import workbench.interfaces.Exporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.storage.DataStore;
-import workbench.util.StringUtil;
-import workbench.util.WbThread;
-import workbench.util.ExceptionUtil;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import java.sql.SQLException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import workbench.WbManager;
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.DbSettings;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
+import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
+import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
-import workbench.gui.actions.AlterObjectAction;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
+import workbench.gui.actions.SpoolDataAction;
+import workbench.gui.actions.ToggleTableSourceAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.*;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.Exporter;
 import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
+import workbench.interfaces.ShareableDisplay;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
-import workbench.util.WbWorkspace;
+import workbench.util.StringUtil;
 import workbench.util.WbProperties;
+import workbench.util.WbThread;
+import workbench.util.WbWorkspace;
 
 
 /**
@@ -1072,7 +1078,7 @@ public class TableListPanel
 	{
 		try
 		{
-			String type = null;
+			String type;
 			if (tableTypes != null && tableTypes.getModel().getSize() > 0)
 			{
 				type = (String)tableTypes.getSelectedItem();
@@ -1787,7 +1793,6 @@ public class TableListPanel
 			}
 		}
 
-		StringBuilder select = null;
 		String sql = tableDefinition.getSelectForTable();
 		if (sql == null)
 		{
@@ -1795,7 +1800,7 @@ public class TableListPanel
 			WbSwingUtilities.showErrorMessage(this, msg);
 			return null;
 		}
-		select = new StringBuilder(sql.length() + 40);
+		StringBuilder select = new StringBuilder(sql.length() + 40);
 		select.append("-- @WbResult ");
 		select.append(selectedTable.getTableName());
 		select.append('\n');
