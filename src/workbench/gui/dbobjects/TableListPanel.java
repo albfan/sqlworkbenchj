@@ -844,14 +844,22 @@ public class TableListPanel
 
 	protected void checkAlterButton()
 	{
-		if (renameAction.isEnabled())
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.statusPanel.add(alterButton, BorderLayout.EAST);
-		}
-		else
-		{
-			this.statusPanel.remove(alterButton);
-		}
+			@Override
+			public void run()
+			{
+				if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
+				{
+					statusPanel.add(alterButton, BorderLayout.EAST);
+					statusPanel.validate();
+				}
+				else
+				{
+					statusPanel.remove(alterButton);
+				}
+			}
+		});
 	}
 
 	protected void setFocusToTableList()
