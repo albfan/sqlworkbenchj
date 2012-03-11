@@ -40,44 +40,45 @@ public class WbButton
 	private Border emptyBorder;
 	protected boolean iconButton;
 	private boolean rolloverEnabled;
-	
+
 	public WbButton()
 	{
 		super();
 		init();
 	}
-	
+
 	public WbButton(Action a)
 	{
 		super(a);
 		init();
 	}
-	
+
 	public WbButton(String aText)
 	{
 		super(aText);
 		init();
 	}
-	
+
 	public WbButton(Icon i)
 	{
 		super(i);
 		iconButton = true;
 		init();
 	}
-	
+
 	private void init()
 	{
 		putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
 		setRolloverEnabled(true);
 	}
-	
+
 	public void setResourceKey(String key)
 	{
 		this.setText(ResourceMgr.getString(key));
 		this.setToolTipText(ResourceMgr.getDescription(key));
 	}
-	
+
+	@Override
 	public void setText(String newText)
 	{
 		if (newText == null)
@@ -105,11 +106,11 @@ public class WbButton
 		removeMouseListener(this);
 		rolloverEnabled = false;
 	}
-	
+
 	public void enableBasicRollover()
 	{
 		if (rolloverEnabled) return;
-		
+
 		setBasicUI();
 		UIDefaults table = UIManager.getLookAndFeelDefaults();
 		Border out = new BasicBorders.RolloverButtonBorder(
@@ -133,7 +134,7 @@ public class WbButton
 		this.addMouseListener(this);
 		rolloverEnabled = true;
 	}
-	
+
 	public void enableToolbarRollover()
 	{
 		this.rolloverBorder = null;
@@ -142,19 +143,23 @@ public class WbButton
 		this.setRolloverEnabled(false);
 		this.addMouseListener(this);
 	}
-	
+
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 	}
-	
+
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 		if (this.rolloverBorder == null)
@@ -166,7 +171,8 @@ public class WbButton
 			this.setBorder(this.rolloverBorder);
 		}
 	}
-	
+
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 		if (this.rolloverBorder == null)
@@ -178,5 +184,5 @@ public class WbButton
 			this.setBorder(this.emptyBorder);
 		}
 	}
-	
+
 }

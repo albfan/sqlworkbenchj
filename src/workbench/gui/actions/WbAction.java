@@ -514,6 +514,7 @@ public class WbAction
 		}
 	}
 
+	@Override
 	public Object getValue(String key)
 	{
 		if (key.equals(Action.SMALL_ICON))
@@ -542,12 +543,14 @@ public class WbAction
 		putValue(Action.SMALL_ICON, null);
 	}
 
+	@Override
 	public void actionPerformed(final ActionEvent e)
 	{
 		if (isEnabled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (original != null)
@@ -589,6 +592,7 @@ public class WbAction
 		return display;
 	}
 
+	@Override
 	public void setEnabled(boolean flag)
 	{
 		super.setEnabled(flag);
@@ -617,6 +621,7 @@ public class WbAction
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return this.getActionName() + ", " + this.getAccelerator();

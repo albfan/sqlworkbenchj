@@ -31,20 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.InputMap;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -98,7 +85,7 @@ import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
-import workbench.gui.components.WbTabbedPane;
+import workbench.gui.components.*;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
@@ -185,6 +172,8 @@ public class TableListPanel
 
 	protected JDialog infoWindow;
 	private JLabel infoLabel;
+	private JPanel statusPanel;
+	private FlatButton alterButton;
 	private JLabel summaryStatusBarLabel;
 	private String tableTypeToSelect;
 
@@ -286,6 +275,7 @@ public class TableListPanel
 
 		renameAction = new AlterObjectAction(tableList);
 		renameAction.setReloader(this);
+		renameAction.addPropertyChangeListener(this);
 
 		this.extendPopupMenu();
 
@@ -324,8 +314,12 @@ public class TableListPanel
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
 
+		this.statusPanel = new JPanel(new BorderLayout());
+		this.alterButton = new FlatButton(this.renameAction);
+		this.alterButton.setResourceKey("MnuTxtRunAlter");
 		this.summaryStatusBarLabel = new SummaryLabel("");
-		this.listPanel.add(summaryStatusBarLabel, BorderLayout.SOUTH);
+		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);
+		this.listPanel.add(statusPanel, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		WbScrollPane scroll = new WbScrollPane(this.tableList);
@@ -840,6 +834,18 @@ public class TableListPanel
 	{
 		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
 		this.summaryStatusBarLabel.setText(info);
+	}
+
+	protected void checkAlterButton()
+	{
+		if (renameAction.isEnabled())
+		{
+			this.statusPanel.add(alterButton, BorderLayout.EAST);
+		}
+		else
+		{
+			this.statusPanel.remove(alterButton);
+		}
 	}
 
 	protected void setFocusToTableList()
@@ -2014,7 +2020,11 @@ public class TableListPanel
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
+		if (evt.getSource() == renameAction)
+		{
+			checkAlterButton();
+		}
+		else if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
 		{
 			this.shouldRetrieveIndexes = true;
 		}
