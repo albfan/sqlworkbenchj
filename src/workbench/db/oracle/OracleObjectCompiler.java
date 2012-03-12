@@ -52,10 +52,11 @@ public class OracleObjectCompiler
 	{
 		String sql = createCompileStatement(object);
 
-		if (Settings.getInstance().getDebugMetadataSql())
+		if (Settings.getInstance().getLogAllStatements())
 		{
-			LogMgr.logDebug("OracleObjectCompiler.compileObject()", "Using SQL: " + sql);
+			LogMgr.logInfo("OracleObjectCompiler.compileObject()", "Compiling " + object.getObjectType() + " " + object.getObjectName() + " using: " + sql);
 		}
+
 		Statement stmt = null;
 		try
 		{

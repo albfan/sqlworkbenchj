@@ -103,7 +103,7 @@ public class ProcedureListPanel
 	private boolean initialized;
 	private FilteredProperties workspaceSettings;
 
-   private EditorTabSelectMenu generateWbCall;
+  private EditorTabSelectMenu generateWbCall;
 
 	public ProcedureListPanel(MainWindow window)
 	{
