@@ -24,8 +24,11 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Action to "comment" the currently selected text in the SQL editor.
- * This is done by addin single line comments to each line
+ *
+ * This is done by adding single line comments to each line.
+ *
  * @see workbench.gui.editor.TextCommenter#commentSelection()
+ * 
  * @author  Thomas Kellerer
  */
 public class CommentAction
@@ -41,6 +44,7 @@ public class CommentAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		TextCommenter commenter = new TextCommenter(client);

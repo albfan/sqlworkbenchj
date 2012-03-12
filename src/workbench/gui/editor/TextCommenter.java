@@ -43,7 +43,7 @@ public class TextCommenter
 		doComment(editor.getCommentChar(), false);
 	}
 
-	private void doComment(String commentChar, boolean comment)
+	private void doComment(String commentChar, boolean addComment)
 	{
 		int startline = editor.getSelectionStartLine();
 		int endline = editor.getSelectionEndLine();
@@ -55,6 +55,21 @@ public class TextCommenter
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		SyntaxDocument document = editor.getDocument();
 
+		if (addComment && commentChar.equals("--"))
+		{
+			// workaround for an Oracle bug, where a comment like
+			//
+			// --commit;
+			//
+			// would not be treated correctly when sent to the database.
+			// Apparently Oracle requires a blank after the two dashes.
+			//
+			// Adding the blank shouldn't do any harm for other databases
+			commentChar = "-- ";
+		}
+
+		boolean ansiComment = "--".equals(commentChar);
+
 		try
 		{
 			document.beginCompoundEdit();
@@ -63,7 +78,7 @@ public class TextCommenter
 				String text = editor.getLineText(line);
 				if (StringUtil.isBlank(text)) continue;
 				int lineStart = editor.getLineStartOffset(line);
-				if (comment)
+				if (addComment)
 				{
 					document.insertString(lineStart, commentChar, null);
 				}
@@ -72,7 +87,14 @@ public class TextCommenter
 					pos = text.indexOf(commentChar);
 					if (pos > -1)
 					{
-						document.remove(lineStart, pos + cLength);
+						int commentLength = cLength;
+						// remove the blank following the comment character to cater
+						// for the blank that was inserted by commenting the lines (see above)
+						if (ansiComment && text.length() > pos + cLength && Character.isWhitespace(text.charAt(pos + cLength)))
+						{
+							commentLength ++;
+						}
+						document.remove(lineStart, pos + commentLength);
 					}
 				}
 			}
