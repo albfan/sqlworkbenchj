@@ -53,9 +53,11 @@ public class Db2SynonymReader
 
 		boolean isHostDB2 = con.getMetadata().getDbId().equals("db2h");
 		boolean isAS400 = con.getMetadata().getDbId().equals("db2i");
+
 		if (isAS400)
 		{
-			sql.append("SELECT base_table_schema, base_table_name FROM qsys2.systables");
+			char catalogSeparator = con.getMetadata().getCatalogSeparator();
+			sql.append("SELECT base_table_schema, base_table_name FROM qsys2").append(catalogSeparator).append("systables");
 			sql.append(" WHERE table_type = 'A' AND table_name = ? AND table_owner = ?");
 		}
 		else if (isHostDB2)
