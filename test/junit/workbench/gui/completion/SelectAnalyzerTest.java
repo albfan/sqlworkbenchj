@@ -111,6 +111,12 @@ public class SelectAnalyzerTest
 		analyzer = new SelectAnalyzer(null, sql, pos);
 		analyzer.checkContext();
 		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
+	}
+
+	@Test
+	public void testAlternateSeparator()
+	{
+		String select = "select * from mylib/sometable";
 
 	}
 

@@ -235,6 +235,7 @@ class ObjectCache
 	 */
 	public synchronized List<ColumnIdentifier> getColumns(WbConnection dbConnection, TableIdentifier tbl)
 	{
+		LogMgr.logDebug("ObjectCache.getColumns()", "Checking columns for: " + tbl.getTableExpression());
 		String schema = getSchemaToUse(dbConnection, tbl.getSchema());
 		List<String> schemas = getSearchPath(dbConnection, schema);
 
@@ -248,6 +249,7 @@ class ObjectCache
 
 		if (cols == null)
 		{
+			LogMgr.logDebug("ObjectCache.getColumns()", "No columns found, searching table " + toSearch.getTableExpression() + " in path: " + schemas);
 			toSearch = findTableInDb(dbConnection, schemas, toSearch == null ? tbl : toSearch);
 			if (toSearch == null) return null;
 		}
@@ -270,6 +272,7 @@ class ObjectCache
 		{
 			try
 			{
+				LogMgr.logDebug("ObjectCache.getColumns()", "Table not in cache, retrieving columns for " + toSearch.getTableExpression());
 				cols = dbConnection.getMetadata().getTableColumns(toSearch);
 			}
 			catch (Throwable e)
@@ -365,8 +368,7 @@ class ObjectCache
 	}
 
 	/**
-	 * Return the stored key according to the passed
-	 * TableIdentifier.
+	 * Return the stored key according to the passed TableIdentifier.
 	 *
 	 * The stored key might carry additional properties that the passed key does not have
 	 * (even though they are equal)

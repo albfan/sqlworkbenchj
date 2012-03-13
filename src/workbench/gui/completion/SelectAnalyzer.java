@@ -161,7 +161,8 @@ public class SelectAnalyzer
 			String table = null;
 			if (currentWord != null)
 			{
-				int pos = currentWord.indexOf('.');
+				char separator = SqlUtil.getCatalogSeparator(dbConnection);
+				int pos = currentWord.indexOf(separator);
 				if (pos > -1)
 				{
 					table = currentWord.substring(0, pos);

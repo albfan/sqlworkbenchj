@@ -206,6 +206,14 @@ public class SqlUtil
 		return col.toString();
 	}
 
+public static char getCatalogSeparator(WbConnection conn)
+	{
+		if (conn == null) return '.';
+		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return '.';
+		return meta.getCatalogSeparator();
+	}
+
 	/**
 	 * Removes quote characters from the start and the end of a string.
 	 * <br/>
@@ -905,8 +913,7 @@ public class SqlUtil
 
 	public static List<String> getTables(String sql, boolean includeAlias, WbConnection conn)
 	{
-		char separator = conn == null ? '.' : conn.getMetadata().getCatalogSeparator();
-		return getTables(sql, includeAlias, separator);
+		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn));
 	}
 
 	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator)

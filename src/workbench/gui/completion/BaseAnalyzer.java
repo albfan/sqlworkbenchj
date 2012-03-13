@@ -23,6 +23,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.util.EncodingUtil;
@@ -407,8 +408,8 @@ public abstract class BaseAnalyzer
 		{
 			if (cache.supportsSearchPath())
 			{
-				TableIdentifier tbl = cache.getTable(tableForColumnList);
-				this.title = (tbl == null ? tableForColumnList.getTableName() : tbl.getTableExpression()) + ".*";
+				TableIdentifier tbl = cache.getTable(toCheck);
+				this.title = (tbl == null ? toCheck.getTableName() : tbl.getTableExpression()) + ".*";
 			}
 			else
 			{

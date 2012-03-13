@@ -40,11 +40,12 @@ public class SqlUtilTest
 	@Test
 	public void testDb2Parsing()
 	{
-		String select = "select * from wagner/atlas04pf where belegid=20100234";
+		String select = "select * from mylib/sometable where belegid=20100234";
 		List<String> tables = SqlUtil.getTables(select, true, '/');
 		assertEquals(1, tables.size());
-		assertEquals("wagner/atlas04pf", tables.get(0));
+		assertEquals("mylib/sometable", tables.get(0));
 	}
+	
 	@Test
 	public void testEscapeWildcards()
 	{

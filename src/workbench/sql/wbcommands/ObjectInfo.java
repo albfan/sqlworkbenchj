@@ -19,6 +19,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -66,7 +67,7 @@ public class ObjectInfo
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		TableIdentifier dbObject = new TableIdentifier(objectName, connection.getMetadata().getCatalogSeparator());
+		TableIdentifier dbObject = new TableIdentifier(objectName, SqlUtil.getCatalogSeparator(connection));
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
 		boolean showSchema = false;

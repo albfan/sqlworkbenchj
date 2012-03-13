@@ -75,7 +75,7 @@ public class TableIdentifier
 	{
 		this.expression = null;
 		this.isNewTable = false;
-		this.setTable(aName, conn == null ? '.' : conn.getMetadata().getCatalogSeparator());
+		this.setTable(aName, SqlUtil.getCatalogSeparator(conn));
 		this.adjustCase(conn);
 	}
 
@@ -340,7 +340,7 @@ public class TableIdentifier
 			{
 				conn.getCurrentSchema();
 			}
-			
+
 			if (StringUtil.isNonBlank(schemaToUse))
 			{
 				result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
