@@ -23,11 +23,16 @@ public class TableAlias
 
 	public TableAlias(String value)
 	{
+		this(value, '.');
+	}
+
+	public TableAlias(String value, char separator)
+	{
 		super(value);
 
 		if (getObjectName() != null)
 		{
-			this.table = new TableIdentifier(getObjectName());
+			this.table = new TableIdentifier(getObjectName(), separator);
 		}
 	}
 
@@ -40,14 +45,14 @@ public class TableAlias
 	 * Compares the given name to this TableAlias checking
 	 * if the name either references this table or its alias
 	 */
-	public boolean isTableOrAlias(String name)
+	public boolean isTableOrAlias(String name, char separator)
 	{
 		if (StringUtil.isEmptyString(name))
 		{
 			return false;
 		}
 
-		TableIdentifier tbl = new TableIdentifier(name);
+		TableIdentifier tbl = new TableIdentifier(name, separator);
 		return (table.getTableName().equalsIgnoreCase(tbl.getTableName()) || name.equalsIgnoreCase(getAlias()));
 	}
 }

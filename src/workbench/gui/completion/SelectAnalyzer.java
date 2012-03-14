@@ -153,6 +153,7 @@ public class SelectAnalyzer
 			}
 
 			this.addAllMarker = !afterWhere;
+			char separator = SqlUtil.getCatalogSeparator(dbConnection);
 
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
@@ -161,7 +162,6 @@ public class SelectAnalyzer
 			String table = null;
 			if (currentWord != null)
 			{
-				char separator = SqlUtil.getCatalogSeparator(dbConnection);
 				int pos = currentWord.indexOf(separator);
 				if (pos > -1)
 				{
@@ -171,7 +171,7 @@ public class SelectAnalyzer
 
 			if (table != null)
 			{
-				currentAlias = findAlias(table, tables);
+				currentAlias = findAlias(table, tables, separator);
 
 				if (currentAlias != null)
 				{
@@ -187,7 +187,7 @@ public class SelectAnalyzer
 					{
 						for (TableAlias outer : outerTables)
 						{
-							if (outer.isTableOrAlias(table))
+							if (outer.isTableOrAlias(table, separator))
 							{
 								tableForColumnList = outer.getTable();
 								currentAlias = outer;
@@ -198,7 +198,7 @@ public class SelectAnalyzer
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias(tables.get(0));
+				TableAlias tbl = new TableAlias(tables.get(0), separator);
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -209,7 +209,7 @@ public class SelectAnalyzer
 				this.elements = new ArrayList();
 				for (String entry : tables)
 				{
-					TableAlias tbl = new TableAlias(entry);
+					TableAlias tbl = new TableAlias(entry, separator);
 					this.elements.add(tbl);
 					setAppendDot(true);
 				}
@@ -221,13 +221,13 @@ public class SelectAnalyzer
 		}
 	}
 
-	private TableAlias findAlias(String toSearch, List<String> possibleTables)
+	private TableAlias findAlias(String toSearch, List<String> possibleTables, char separator)
 	{
 		for (String element : possibleTables)
 		{
-			TableAlias tbl = new TableAlias(element);
+			TableAlias tbl = new TableAlias(element, separator);
 
-			if (tbl.isTableOrAlias(toSearch))
+			if (tbl.isTableOrAlias(toSearch, separator))
 			{
 				return tbl;
 			}

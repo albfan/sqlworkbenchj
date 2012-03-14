@@ -1711,7 +1711,7 @@ public class DbMetadata
 	{
 		if (table.getSchema() != null)
 		{
-			return findTable(table);
+			return findTable(table, types, false);
 		}
 
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(this.dbConnection).getSearchPath(this.dbConnection, null);

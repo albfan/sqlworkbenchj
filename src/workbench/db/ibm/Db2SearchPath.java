@@ -48,14 +48,14 @@ public class Db2SearchPath
 		try
 		{
 			stmt = con.createStatementForQuery();
-			LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Running: " + sql);
+
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
 				String row = rs.getString(1);
 				if (StringUtil.isNonBlank(row))
 				{
-					result.add(row);
+					result.add(row.trim());
 				}
 			}
 		}
@@ -68,21 +68,28 @@ public class Db2SearchPath
 			SqlUtil.closeAll(rs, stmt);
 		}
 
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Received: " + result.toString());
+		List<String> searchPath = parseResult(result);
 
-		List<String> searchPath = new ArrayList<String>();
-		for (String line : result)
-		{
-			if (!line.startsWith("*"))
-			{
-				searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
-			}
-		}
 		if (defaultSchema != null && searchPath.isEmpty())
 		{
 			searchPath.add(defaultSchema);
 		}
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: [" + result.toString() + "]");
+
+		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + result.toString());
 		return searchPath;
 	}
+
+	List<String> parseResult(List<String> entries)
+	{
+		List<String> searchPath = new ArrayList<String>(entries.size());
+		for (String line : entries)
+		{
+			if (line.charAt(0) != '*')
+			{
+				searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
+			}
+		}
+		return searchPath;
+	}
+
 }

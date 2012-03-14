@@ -100,7 +100,7 @@ public class UpdateAnalyzer
 	public List<TableAlias> getTables()
 	{
 		String table = SqlUtil.getUpdateTable(this.sql);
-		TableAlias a = new TableAlias(table);
+		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection));
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);
 		return result;

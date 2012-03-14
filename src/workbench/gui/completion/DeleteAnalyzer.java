@@ -40,7 +40,6 @@ public class DeleteAnalyzer
 
 		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)
 		{
-
 			context = CONTEXT_TABLE_LIST;
 			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
@@ -58,7 +57,7 @@ public class DeleteAnalyzer
 	public List<TableAlias> getTables()
 	{
 		String table = SqlUtil.getDeleteTable(this.sql);
-		TableAlias a = new TableAlias(table);
+		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection));
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);
 		return result;
