@@ -1697,7 +1697,17 @@ public class DbMetadata
 		return findTable(tbl, selectableTypes, false);
 	}
 
+	public TableIdentifier searchSelectableObjectOnPath(TableIdentifier tbl)
+	{
+		return searchObjectOnPath(tbl, selectableTypes);
+	}
+
 	public TableIdentifier searchTableOnPath(TableIdentifier table)
+	{
+		return searchObjectOnPath(table, tableTypesArray);
+	}
+
+	private TableIdentifier searchObjectOnPath(TableIdentifier table, String[] types)
 	{
 		if (table.getSchema() != null)
 		{
@@ -1708,19 +1718,19 @@ public class DbMetadata
 
 		if (searchPath.isEmpty())
 		{
-			return findTable(table);
+			return findTable(table, types, false);
 		}
 
-		LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
+		LogMgr.logDebug("DbMetaData.searchObjectOnPath()", "Looking for table " + table.getRawTableName() + " in schemas: " + searchPath);
 		for (String checkSchema  : searchPath)
 		{
 			TableIdentifier toSearch = table.createCopy();
 			toSearch.setSchema(checkSchema);
 
-			TableIdentifier found = findTable(toSearch);
+			TableIdentifier found = findTable(toSearch, types, false);
 			if (found != null)
 			{
-				LogMgr.logDebug("DbMetaData.searchTableOnPath()", "Found table " + found.getTableExpression());
+				LogMgr.logDebug("DbMetaData.searchObjectOnPath()", "Found table " + found.getTableExpression());
 				return found;
 			}
 		}
@@ -1783,7 +1793,6 @@ public class DbMetadata
 
 			// if nothing was found there is nothing we can do to guess the correct
 			// "searching strategy" for the current DBMS
-
 		}
 		catch (Exception e)
 		{

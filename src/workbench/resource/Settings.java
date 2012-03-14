@@ -301,11 +301,17 @@ public class Settings
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		LogMgr.logToSystemError(logSysErr);
 
-		String format = getProperty("workbench.log.format", "{timestamp} {type} {message} {error}");
-		LogMgr.setMessageFormat(format);
-
 		String level = getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
+
+		String defaultFormat = "{timestamp} {type} {message} {error}";
+		if (LogMgr.isDebugEnabled())
+		{
+			defaultFormat = "{timestamp} {type} {source} {message} {error}";
+		}
+		
+		String format = getProperty("workbench.log.format", defaultFormat);
+		LogMgr.setMessageFormat(format);
 
 		try
 		{

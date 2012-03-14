@@ -211,20 +211,6 @@ class ObjectCache
 		return result;
 	}
 
-	private TableIdentifier findTableInDb(WbConnection dbConnection, List<String> schemas, TableIdentifier toSearch)
-	{
-		if (toSearch == null) return null;
-
-		for (String schema : schemas)
-		{
-			TableIdentifier toRead = toSearch.createCopy();
-			toRead.setSchema(schema);
-			TableIdentifier def = dbConnection.getMetadata().findSelectableObject(toRead);
-			if (def != null) return def;
-		}
-		return null;
-	}
-
 	/**
 	 * Return the columns for the given table.
 	 *
@@ -236,8 +222,6 @@ class ObjectCache
 	public synchronized List<ColumnIdentifier> getColumns(WbConnection dbConnection, TableIdentifier tbl)
 	{
 		LogMgr.logDebug("ObjectCache.getColumns()", "Checking columns for: " + tbl.getTableExpression());
-		String schema = getSchemaToUse(dbConnection, tbl.getSchema());
-		List<String> schemas = getSearchPath(dbConnection, schema);
 
 		TableIdentifier toSearch = findEntry(dbConnection, tbl);
 		List<ColumnIdentifier> cols = null;
@@ -249,8 +233,7 @@ class ObjectCache
 
 		if (cols == null)
 		{
-			LogMgr.logDebug("ObjectCache.getColumns()", "No columns found, searching table " + toSearch.getTableExpression() + " in path: " + schemas);
-			toSearch = findTableInDb(dbConnection, schemas, toSearch == null ? tbl : toSearch);
+			toSearch = dbConnection.getMetadata().searchSelectableObjectOnPath(toSearch == null ? tbl : toSearch);
 			if (toSearch == null) return null;
 		}
 
