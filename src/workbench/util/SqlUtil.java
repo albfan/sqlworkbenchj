@@ -395,29 +395,78 @@ public static char getCatalogSeparator(WbConnection conn)
 		return info.objectType;
 	}
 
+	public static String getDeleteTable(CharSequence sql)
+	{
+		return getDeleteTable(sql, '.');
+	}
+
 	/**
 	 * If the given SQL is a DELETE [FROM] returns
 	 * the table from which rows will be deleted
 	 */
-	public static String getDeleteTable(CharSequence sql)
+	public static String getDeleteTable(CharSequence sql, char catalogSeparator)
 	{
 		try
 		{
+			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			if (!t.getContents().equals("DELETE")) return null;
 			t = lexer.getNextToken(false, false);
+
 			// If the next token is not the FROM keyword (which is optional)
 			// then it must be the table name.
 			if (t == null) return null;
-			if (!t.getContents().equals("FROM")) return t.getContents();
+
+			if (!t.getContents().equals("FROM"))
+			{
+				tableName.append(t.getContents());
+				appendCurrentTablename(lexer, tableName, catalogSeparator);
+				return tableName.toString();
+			}
+
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
-			return t.getContents();
+			tableName.append(t.getContents());
+			appendCurrentTablename(lexer, tableName, catalogSeparator);
+
+			t = lexer.getNextToken(false, false);
+			if (t != null && t.getContents().charAt(0) == catalogSeparator)
+			{
+				// found a table name with a non-standard catalog separator (the . will be recognized by the lexer)
+				tableName.append(t.getContents());
+				t = lexer.getNextToken(false, false);
+				if (t != null && t.isIdentifier())
+				{
+					tableName.append(t.getContents());
+				}
+			}
+			return tableName.toString();
 		}
 		catch (Exception e)
 		{
 			return null;
+		}
+	}
+
+	private static void appendCurrentTablename(SQLLexer lexer, StringBuilder tableName, char catalogSeparator)
+	{
+		try
+		{
+			SQLToken t = lexer.getNextToken(false, false);
+			if (t != null && t.getContents().charAt(0) == catalogSeparator)
+			{
+				// found a table name with a non-standard catalog separator (the . will be recognized by the lexer)
+				tableName.append(t.getContents());
+				t = lexer.getNextToken(false, false);
+				if (t != null && t.isIdentifier())
+				{
+					tableName.append(t.getContents());
+				}
+			}
+		}
+		catch (Exception ex)
+		{
 		}
 	}
 
@@ -427,8 +476,14 @@ public static char getCatalogSeparator(WbConnection conn)
 	 */
 	public static String getInsertTable(CharSequence sql)
 	{
+		return getInsertTable(sql, '.');
+	}
+
+	public static String getInsertTable(CharSequence sql, char catalogSeparator)
+	{
 		try
 		{
+			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null || !t.getContents().equals("INSERT")) return null;
@@ -436,7 +491,9 @@ public static char getCatalogSeparator(WbConnection conn)
 			if (t == null || !t.getContents().equals("INTO")) return null;
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
-			return t.getContents();
+			tableName.append(t.getContents());
+			appendCurrentTablename(lexer, tableName, catalogSeparator);
+			return tableName.toString();
 		}
 		catch (Exception e)
 		{
@@ -450,14 +507,32 @@ public static char getCatalogSeparator(WbConnection conn)
 	 */
 	public static String getUpdateTable(CharSequence sql)
 	{
+		return getUpdateTable(sql, '.');
+	}
+
+	public static String getUpdateTable(CharSequence sql, char catalogSeparator)
+	{
 		try
 		{
+			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null || !t.getContents().equals("UPDATE")) return null;
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
-			return t.getContents();
+			tableName.append(t.getContents());
+			t = lexer.getNextToken(false, false);
+			if (t != null && t.getContents().charAt(0) == catalogSeparator)
+			{
+				// found a table name with a non-standard catalog separator (the . will be recognized by the lexer)
+				tableName.append(t.getContents());
+				t = lexer.getNextToken(false, false);
+				if (t != null && t.isIdentifier())
+				{
+					tableName.append(t.getContents());
+				}
+			}
+			return tableName.toString();
 		}
 		catch (Exception e)
 		{

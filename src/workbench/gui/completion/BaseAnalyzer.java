@@ -192,7 +192,7 @@ public abstract class BaseAnalyzer
 			return q;
 		}
 
-		TableIdentifier tbl = (StringUtil.isBlank(word) ? null : new TableIdentifier(word));
+		TableIdentifier tbl = (StringUtil.isBlank(word) ? null : new TableIdentifier(word, dbConnection));
 
 		if (tbl == null || StringUtil.isBlank(tbl.getSchema()))
 		{
@@ -440,13 +440,14 @@ public abstract class BaseAnalyzer
 			start = len - 1;
 		}
 
+		char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
 		char c = this.sql.charAt(start);
 		//if (Character.isWhitespace(c)) return null;
 
 		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
-		if (c != '.') return null;
+		if (c != separator) return null;
 
-		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM + ".");
+		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM + separator);
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 

@@ -99,8 +99,9 @@ public class UpdateAnalyzer
 	@Override
 	public List<TableAlias> getTables()
 	{
-		String table = SqlUtil.getUpdateTable(this.sql);
-		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection));
+		char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
+		String table = SqlUtil.getUpdateTable(this.sql, separator);
+		TableAlias a = new TableAlias(table, separator);
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);
 		return result;

@@ -45,7 +45,7 @@ public class SqlUtilTest
 		assertEquals(1, tables.size());
 		assertEquals("mylib/sometable", tables.get(0));
 	}
-	
+
 	@Test
 	public void testEscapeWildcards()
 	{
@@ -233,38 +233,39 @@ public class SqlUtilTest
 
 	@Test
 	public void testGetDeleteTable()
+		throws Exception
 	{
-		try
-		{
-			String sql = "delete \nfrom mytable";
-			String table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "mytable", table);
+		String sql = "delete \nfrom mytable";
+		String table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "mytable", table);
 
-			sql = "-- bla\ndelete mytable";
-			table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "mytable", table);
+		sql = "-- bla\ndelete mytable";
+		table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "mytable", table);
 
-			sql = "delete\n--bla\nmyschema.mytable";
-			table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "myschema.mytable", table);
+		sql = "delete\n--bla\nmyschema.mytable";
+		table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "myschema.mytable", table);
 
-			sql = "delete from myschema.mytable";
-			table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "myschema.mytable", table);
+		sql = "delete from myschema.mytable";
+		table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "myschema.mytable", table);
 
-			sql = "delete \"FROM\"";
-			table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "\"FROM\"", table);
+		sql = "delete \"FROM\"";
+		table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "\"FROM\"", table);
 
-			sql = "delete from \"FROM\"";
-			table = SqlUtil.getDeleteTable(sql);
-			assertEquals("Wrong table returned", "\"FROM\"", table);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		sql = "delete from \"FROM\"";
+		table = SqlUtil.getDeleteTable(sql);
+		assertEquals("Wrong table returned", "\"FROM\"", table);
+
+		sql = "delete from mylib/sometable";
+		table = SqlUtil.getDeleteTable(sql, '/');
+		assertEquals("mylib/sometable", table);
+
+		sql = "delete mylib/sometable where x = 1";
+		table = SqlUtil.getDeleteTable(sql, '/');
+		assertEquals("mylib/sometable", table);
 
 	}
 
@@ -386,25 +387,37 @@ public class SqlUtilTest
 	@Test
 	public void testGetInsertTable()
 	{
-		try
-		{
-			String sql = "insert into mytable";
-			String table = SqlUtil.getInsertTable(sql);
-			assertEquals("Wrong table returned", "mytable", table);
+		String sql = "insert into mytable";
+		String table = SqlUtil.getInsertTable(sql);
+		assertEquals("mytable", table);
 
-			sql = "insert into theschema.mytable";
-			table = SqlUtil.getInsertTable(sql);
-			assertEquals("Wrong table returned", "theschema.mytable", table);
+		sql = "insert into theschema.mytable";
+		table = SqlUtil.getInsertTable(sql);
+		assertEquals("theschema.mytable", table);
 
-			sql = "insert into \"into\"";
-			table = SqlUtil.getInsertTable(sql);
-			assertEquals("Wrong table returned", "\"into\"", table);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		sql = "insert into \"into\"";
+		table = SqlUtil.getInsertTable(sql);
+		assertEquals("\"into\"", table);
+
+		sql = "insert into mylib/sometable (";
+		table = SqlUtil.getInsertTable(sql, '/');
+		assertEquals("mylib/sometable", table);
+	}
+
+	@Test
+	public void testGetUpdateTable()
+	{
+		String sql = "update mytable set foo=42";
+		String table = SqlUtil.getUpdateTable(sql);
+		assertEquals("mytable", table);
+
+		sql = "update \"mytable\" set foo=42";
+		table = SqlUtil.getUpdateTable(sql);
+		assertEquals("\"mytable\"", table);
+
+		sql = "update somelib/mytable set foo=42";
+		table = SqlUtil.getUpdateTable(sql, '/');
+		assertEquals("somelib/mytable", table);
 	}
 
 	@Test
