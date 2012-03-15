@@ -8,7 +8,7 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.postgres;
+package workbench.db.oracle;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -30,22 +30,22 @@ import workbench.gui.completion.StatementContext;
  *
  * @author Thomas Kellerer
  */
-public class PostgresCompletionTest
+public class OracleCompletionTest
 	extends WbTestCase
 {
 
-	public PostgresCompletionTest()
+	public OracleCompletionTest()
 	{
-		super("PostgresCompletionTest");
+		super("OracleCompletionTest");
 	}
 
 	@BeforeClass
 	public static void setUpClass()
 		throws Exception
 	{
-		PostgresTestUtil.initTestCase("completion_test");
+		OracleTestUtil.initTestCase();
 
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
 		String sql =
@@ -59,16 +59,16 @@ public class PostgresCompletionTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		PostgresTestUtil.dropAllObjects(con);
+		OracleTestUtil.dropAllObjects(con);
 	}
 
 	@Test
 	public void testSelectCompletion()
 		throws SQLException
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
 		String sql = "select  from  ";
@@ -85,13 +85,27 @@ public class PostgresCompletionTest
 		data = context.getData();
 		assertNotNull(data);
 		assertEquals(3, data.size());
+
+		sql = "select  from " + OracleTestUtil.SCHEMA_NAME + ".";
+		context = new StatementContext(con, sql, sql.indexOf(".") + 1);
+		analyzer = context.getAnalyzer();
+		data = context.getData();
+		assertNotNull(data);
+		assertEquals(1, data.size());
+
+		sql = "select data. from data";
+		context = new StatementContext(con, sql, sql.indexOf(".") + 1);
+		analyzer = context.getAnalyzer();
+		data = context.getData();
+		assertNotNull(data);
+		assertEquals(3, data.size());
 	}
 
 	@Test
 	public void testDelete()
 		throws SQLException
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
 		String sql = "delete from  ";
@@ -101,14 +115,14 @@ public class PostgresCompletionTest
 		assertEquals(1, data.size());
 		assertTrue(data.get(0) instanceof TableIdentifier);
 		TableIdentifier tbl = (TableIdentifier)data.get(0);
-		assertEquals("data", tbl.getTableName());
+		assertEquals("DATA", tbl.getTableName());
 	}
 
 	@Test
 	public void testInsert()
 		throws SQLException
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
 		String sql = "insert into ";
@@ -118,7 +132,7 @@ public class PostgresCompletionTest
 		assertEquals(1, data.size());
 		assertTrue(data.get(0) instanceof TableIdentifier);
 		TableIdentifier tbl = (TableIdentifier)data.get(0);
-		assertEquals("data", tbl.getTableName());
+		assertEquals("DATA", tbl.getTableName());
 
 		sql = "insert into data (   ) values ";
 		context = new StatementContext(con, sql, sql.indexOf("(") + 2);
