@@ -16,16 +16,16 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.BorderFactory;
+
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.Restoreable;
