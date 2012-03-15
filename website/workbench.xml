@@ -96,10 +96,17 @@ WHERE id=42;</p>
     </content>
   </page>
 
-  <page name="databases" title="Supported DBMS"  toc="main">
-    <title>Supported database systems</title>
+  <page name="databases" title="Compatible DBMS"  toc="main">
+    <title>Compatible DBMS</title>
     <content>
-    <p style="margin-top:10px">SQL Workbench/J is known to work with the following database systems:</p>
+    <p style="margin-top:10px">
+      SQL Workbench/J uses standard Java/JDBC calls to the database and thus should work against any DBMS that has a JDBC driver.
+    </p>
+    <p>
+      For some features such as displaying the source for triggers or views no JDBC API is available and these must be
+      implemented for each DBMS separately.
+    </p>
+    <p>SQL Workbench/J has been specifically tested with the following or they have been reported to work with SQL Workbench/J:</p>
     <ul>
       <li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
       <li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
@@ -116,14 +123,10 @@ WHERE id=42;</p>
       <li><a target="_blank" href="http://www.teradata.com">Teradata</a> (<a target="_blank" href="http://www.teradata.com/DownloadCenter/Forum158-1.aspx">Download JDBC driver</a>)</li>
       <li><a target="_blank" href="http://www.luciddb.org/">LucidDB</a></li>
     </ul>
-    <p>Displaying the source for trigger, views, stored procedures and functions is not part of the JDBC
-    API and thus is implemeted through customized SQL queries. If you find that support for this information
-    is missing for your DBMS, please feel free to contact me.
-    </p>
-    <p>SQL Workbench/J is using primarily standard JDBC API calls and therefore the basic
-    function should work with any DBMS that has a JDBC driver. It also works with ODBC
-    drivers through the JDBC/ODBC bridge, though this is not very performant. But basic
-    queries on e.g. Excel&reg; worksheets do work.
+    <p>If you find that not all features (especially in the DbExplorer) work for your DBMS, please feel free to contact me.</p>
+    <p>
+      SQL Workbench/J also works with ODBC drivers through the JDBC/ODBC bridge, but this is not recommended.
+      Basic queries on e.g. Excel&reg; worksheets or Microsoft Access databases do work.
     </p>
     </content>
   </page>
