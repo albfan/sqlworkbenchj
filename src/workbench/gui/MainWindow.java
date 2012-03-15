@@ -164,6 +164,7 @@ public class MainWindow
 	private ConnectionProfile currentProfile;
 	protected ConnectionSelector connectionSelector;
 
+	private ShowDbmsManualAction showDbmsManual;
 	private FileDisconnectAction disconnectAction;
 	private CreateNewConnection createNewConnection;
 	private DisconnectTabAction disconnectTab;
@@ -1347,11 +1348,11 @@ public class MainWindow
 		{
 			int major = meta.getDatabaseMajorVersion();
 			int minor = meta.getDatabaseMinorVersion();
-			ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId(), major, minor);
+			showDbmsManual.setDbms(conn.getMetadata().getDbId(), major, minor);
 		}
 		catch (SQLException sql)
 		{
-			ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId(), -1, -1);
+			showDbmsManual.setDbms(conn.getMetadata().getDbId(), -1, -1);
 		}
 		showConnectionWarnings(conn, this.getCurrentPanel());
 		selectCurrentEditor();
@@ -1781,7 +1782,7 @@ public class MainWindow
 		getJobIndicator().allJobsEnded();
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
-		ShowDbmsManualAction.getInstance().setDbms(null, -1, -1);
+		showDbmsManual.setDbms(null, -1, -1);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.dbExplorerAction.setEnabled(false);
@@ -2297,7 +2298,11 @@ public class MainWindow
 		result.setName(ResourceMgr.MNU_TXT_HELP);
 		new ShowHelpAction().addToMenu(result);
 		new ShowManualAction().addToMenu(result);
-		result.add(ShowDbmsManualAction.getInstance());
+		if (showDbmsManual == null)
+		{
+			showDbmsManual = new ShowDbmsManualAction();
+		}
+		result.add(showDbmsManual);
 		result.add(HelpContactAction.getInstance());
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();

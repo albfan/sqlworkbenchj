@@ -28,14 +28,7 @@ public class ShowDbmsManualAction
 {
 	private String onlineManualUrl;
 
-	private static ShowDbmsManualAction instance = new ShowDbmsManualAction();
-
-	public static ShowDbmsManualAction getInstance()
-	{
-		return instance;
-	}
-
-	private ShowDbmsManualAction()
+	public ShowDbmsManualAction()
 	{
 		super();
 		initMenuDefinition("MnuTxtDbmsHelp");
@@ -44,7 +37,7 @@ public class ShowDbmsManualAction
 	}
 
 	@Override
-	public synchronized void executeAction(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		if (StringUtil.isNonBlank(onlineManualUrl))
 		{
@@ -59,7 +52,7 @@ public class ShowDbmsManualAction
 		}
 	}
 
-	public synchronized void setDbms(String dbid, int majorVersion, int minorVersion)
+	public void setDbms(String dbid, int majorVersion, int minorVersion)
 	{
 		if (StringUtil.isNonBlank(dbid))
 		{
