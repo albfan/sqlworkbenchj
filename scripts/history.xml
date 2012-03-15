@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-03-05">
+  <release build="-1" date="2012-03-15">
     <entry dev-build="15" type="enh">The busy and cancelling indicator for a SQL panel can now be selected in the options panel</entry>
     <entry dev-build="14" type="enh">The editor now supports "Find previous"</entry>
     <entry dev-build="14" type="enh">A new option to blend the selection color with the column highlight color is available</entry>
