@@ -449,7 +449,7 @@ public static char getCatalogSeparator(WbConnection conn)
 		}
 	}
 
-	private static void appendCurrentTablename(SQLLexer lexer, StringBuilder tableName, char catalogSeparator)
+	public static SQLToken appendCurrentTablename(SQLLexer lexer, StringBuilder tableName, char catalogSeparator)
 	{
 		try
 		{
@@ -464,9 +464,11 @@ public static char getCatalogSeparator(WbConnection conn)
 					tableName.append(t.getContents());
 				}
 			}
+			return t;
 		}
 		catch (Exception ex)
 		{
+			return null;
 		}
 	}
 
@@ -521,17 +523,7 @@ public static char getCatalogSeparator(WbConnection conn)
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
 			tableName.append(t.getContents());
-			t = lexer.getNextToken(false, false);
-			if (t != null && t.getContents().charAt(0) == catalogSeparator)
-			{
-				// found a table name with a non-standard catalog separator (the . will be recognized by the lexer)
-				tableName.append(t.getContents());
-				t = lexer.getNextToken(false, false);
-				if (t != null && t.isIdentifier())
-				{
-					tableName.append(t.getContents());
-				}
-			}
+			appendCurrentTablename(lexer, tableName, catalogSeparator);
 			return tableName.toString();
 		}
 		catch (Exception e)

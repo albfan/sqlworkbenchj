@@ -52,9 +52,20 @@ public class UpdateAnalyzer
 		{
 			if (nextIsTable)
 			{
-				table = t.getContents();
+				if (catalogSeparator != '.')
+				{
+					StringBuilder tableName = new StringBuilder(t.getContents());
+					t = SqlUtil.appendCurrentTablename(lexer, tableName, catalogSeparator);
+					table = tableName.toString();
+				}
+				else
+				{
+					table = t.getContents();
+				}
 				nextIsTable = false;
+				continue;
 			}
+
 			if (t.getContents().equals("UPDATE"))
 			{
 				nextIsTable = true;
@@ -99,9 +110,8 @@ public class UpdateAnalyzer
 	@Override
 	public List<TableAlias> getTables()
 	{
-		char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
-		String table = SqlUtil.getUpdateTable(this.sql, separator);
-		TableAlias a = new TableAlias(table, separator);
+		String table = SqlUtil.getUpdateTable(this.sql, catalogSeparator);
+		TableAlias a = new TableAlias(table, catalogSeparator);
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);
 		return result;

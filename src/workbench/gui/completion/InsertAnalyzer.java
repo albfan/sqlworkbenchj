@@ -16,6 +16,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.SqlUtil;
 
 /**
  * Analyze an UPDATE statement regarding the context for the auto-completion
@@ -80,7 +81,17 @@ public class InsertAnalyzer
 					if (nextTokenIsTable)
 					{
 						tableStart = t.getCharBegin();
-						tableName = t.getContents();
+						if (catalogSeparator != '.')
+						{
+							StringBuilder tname = new StringBuilder(t.getContents());
+							t = SqlUtil.appendCurrentTablename(lexer, tname, catalogSeparator);
+							tableName = tname.toString();
+						}
+						else
+						{
+							tableName = t.getContents();
+						}
+
 						nextTokenIsTable = false;
 					}
 					if ("INTO".equals(value))
@@ -106,7 +117,8 @@ public class InsertAnalyzer
 		TableIdentifier table = null;
 		if (tableName != null)
 		{
-			table = new TableIdentifier(tableName, dbConnection);
+			table = new TableIdentifier(tableName, catalogSeparator);
+			table.adjustCase(dbConnection);
 		}
 
 		if (cursorPos > intoStart && cursorPos < intoEnd)

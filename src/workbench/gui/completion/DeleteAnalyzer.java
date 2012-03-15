@@ -48,15 +48,19 @@ public class DeleteAnalyzer
 			// current cursor position is after the WHERE
 			// so we'll need a column list
 			context = CONTEXT_COLUMN_LIST;
-			String table = SqlUtil.getDeleteTable(sql, SqlUtil.getCatalogSeparator(dbConnection));
-			if (table != null) tableForColumnList = new TableIdentifier(table, dbConnection);
+			String table = SqlUtil.getDeleteTable(sql, catalogSeparator);
+			if (table != null)
+			{
+				tableForColumnList = new TableIdentifier(table, catalogSeparator);
+				tableForColumnList.adjustCase(dbConnection);
+			}
 		}
 	}
 
 	@Override
 	public List<TableAlias> getTables()
 	{
-		String table = SqlUtil.getDeleteTable(this.sql);
+		String table = SqlUtil.getDeleteTable(this.sql, this.catalogSeparator);
 		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection));
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);

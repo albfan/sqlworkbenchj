@@ -19,11 +19,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
-import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.util.EncodingUtil;
@@ -97,12 +97,23 @@ public abstract class BaseAnalyzer
 	private boolean appendDot;
 	private String columnPrefix;
 	protected BaseAnalyzer parentAnalyzer;
+	protected char catalogSeparator;
 
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		this.dbConnection = conn;
 		this.sql = statement;
 		this.cursorPos = cursorPos;
+		this.catalogSeparator = SqlUtil.getCatalogSeparator(this.dbConnection);
+	}
+
+	/**
+	 * For testing purposes only!
+	 * @param newSeparator
+	 */
+	void setCatalogSeparator(char newSeparator)
+	{
+		this.catalogSeparator = newSeparator;
 	}
 
 	public String getAnalyzedSql()
@@ -477,7 +488,7 @@ public abstract class BaseAnalyzer
 		}
 		else
 		{
-			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
+			boolean keyWord = this.dbConnection != null && this.dbConnection.getMetadata().isKeyword(currentWord);
 			setOverwriteCurrentWord(!keyWord);
 		}
 	}

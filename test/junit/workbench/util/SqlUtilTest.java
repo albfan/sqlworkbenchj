@@ -14,15 +14,17 @@ package workbench.util;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.regex.Pattern;
-import workbench.WbTestCase;
-import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
+import workbench.storage.ResultInfo;
 
 /**
  *
@@ -415,7 +417,7 @@ public class SqlUtilTest
 		table = SqlUtil.getUpdateTable(sql);
 		assertEquals("\"mytable\"", table);
 
-		sql = "update somelib/mytable set foo=42";
+		sql = "update somelib/mytable set foo=42 where ";
 		table = SqlUtil.getUpdateTable(sql, '/');
 		assertEquals("somelib/mytable", table);
 	}

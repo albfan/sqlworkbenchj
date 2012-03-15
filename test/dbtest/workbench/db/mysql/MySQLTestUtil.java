@@ -41,7 +41,7 @@ public class MySQLTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:mysql://localhost/wbjunit' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=com.mysql.jdbc.Driver");
+			parser.parse("-url='jdbc:mysql://localhost/" + DB_NAME + "' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=com.mysql.jdbc.Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName(PROFILE_NAME);
 			ConnectionMgr.getInstance().addProfile(prof);

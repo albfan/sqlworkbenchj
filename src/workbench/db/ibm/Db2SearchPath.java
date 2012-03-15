@@ -75,7 +75,7 @@ public class Db2SearchPath
 			searchPath.add(defaultSchema);
 		}
 
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + result.toString());
+		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + searchPath.toString());
 		return searchPath;
 	}
 
