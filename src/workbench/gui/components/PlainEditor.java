@@ -16,14 +16,17 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
@@ -46,6 +49,7 @@ public class PlainEditor
 	private Color enabledBackground;
 	private JLabel infoText;
 	private JPanel toolPanel;
+	private JScrollPane scroll;
 
 	public PlainEditor()
 	{
@@ -55,7 +59,7 @@ public class PlainEditor
 		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
 		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
 
-		JScrollPane scroll = new JScrollPane(editor);
+		scroll = new JScrollPane(editor);
 		editor.setLineWrap(true);
 		editor.setWrapStyleWord(true);
 		editor.setFont(Settings.getInstance().getEditorFont());
@@ -63,6 +67,7 @@ public class PlainEditor
 		toolPanel = new JPanel();
 		toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
 		wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
+		wordWrap.setSelected(true);
 		wordWrap.addActionListener(this);
 		toolPanel.add(wordWrap);
 
@@ -79,6 +84,13 @@ public class PlainEditor
 		l.addAction(replacer.getFindAction());
 		l.addAction(replacer.getFindNextAction());
 		l.addAction(replacer.getReplaceAction());
+	}
+
+	public void removeBorders()
+	{
+		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
 	}
 
 	@Override

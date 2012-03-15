@@ -1369,7 +1369,7 @@ public class MainWindow
 		try
 		{
 			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
-			if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0)
+			if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > 100)
 			{
 				WbSwingUtilities.showMultiLineError(this, msg);
 			}

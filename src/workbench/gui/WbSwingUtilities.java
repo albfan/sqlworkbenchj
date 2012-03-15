@@ -33,7 +33,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -44,6 +43,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import workbench.WbManager;
 import workbench.db.WbConnection;
+import workbench.gui.components.PlainEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
 import workbench.interfaces.SimplePropertyEditor;
@@ -390,9 +390,13 @@ public class WbSwingUtilities
 			realCaller = getWindowAncestor(caller);
 		}
 
-		final JTextArea msg = new JTextArea(message);
+		final PlainEditor msg = new PlainEditor();
+		msg.removeBorders();
+		msg.setText(message);
 		msg.setEditable(false);
 		msg.setFont(Settings.getInstance().getEditorFont());
+		msg.setBorder(new EmptyBorder(0,0,0,0));
+
 		final JScrollPane pane = new JScrollPane(msg);
 		pane.setMaximumSize(new Dimension(640, 480));
 		pane.setPreferredSize(new Dimension(400, 250));

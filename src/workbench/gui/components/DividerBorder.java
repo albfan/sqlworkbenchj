@@ -46,6 +46,7 @@ public class DividerBorder
 		this.borderType = type;
 	}
 
+	@Override
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color oldColor = g.getColor();
@@ -106,11 +107,13 @@ public class DividerBorder
 		g.setColor(oldColor);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c)
 	{
 		return new Insets(2, 2, 2, 2);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c, Insets insets)
 	{
 		insets.left = insets.top = insets.right = insets.bottom = 2;
