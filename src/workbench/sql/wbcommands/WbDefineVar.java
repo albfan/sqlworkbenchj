@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.util.ArgumentParser;
@@ -151,7 +152,7 @@ public class WbDefineVar
 						// there are no quotes before removing the @ sign
 						value = StringUtil.trimQuotes(value);
 						valueSql = StringUtil.trimQuotes(value.trim().substring(1));
-						value = this.evaluateSql(currentConnection, valueSql);
+						value = this.evaluateSql(currentConnection, valueSql, result);
 					}
 					catch (Exception e)
 					{
@@ -212,7 +213,7 @@ public class WbDefineVar
 	 *
 	 *	If the SQL gives an error, an empty string will be returned
 	 */
-	private String evaluateSql(WbConnection conn, String sql)
+	private String evaluateSql(WbConnection conn, String sql, StatementRunnerResult stmtResult)
 		throws SQLException
 	{
 		ResultSet rs = null;
@@ -231,6 +232,8 @@ public class WbDefineVar
 				sql = sql.substring(0, sql.length() - 1);
 			}
 			rs = this.currentStatement.executeQuery(sql);
+			ResultSetMetaData meta = rs.getMetaData();
+			int colCount = meta.getColumnCount();
 			if (rs.next())
 			{
 				Object value = rs.getObject(1);
@@ -238,6 +241,23 @@ public class WbDefineVar
 				{
 					result = value.toString();
 				}
+			}
+
+			if (rs.next())
+			{
+				stmtResult.setWarning(true);
+				stmtResult.addMessageByKey("ErrVarDefRows");
+			}
+
+			if (colCount > 1)
+			{
+				stmtResult.setWarning(true);
+				stmtResult.addMessageByKey("ErrVarDefCols");
+			}
+			
+			if (stmtResult.hasWarning())
+			{
+				stmtResult.addMessageNewLine();
 			}
 		}
 		finally
