@@ -57,7 +57,7 @@ public class SourceStatementsHelp
 			"  </void>  \n" +
 			"   \n" +
 			" </object>  \n" +
-			"</java>";
+			"</java>\n";
 		return explain;
 	}
 
@@ -93,7 +93,7 @@ public class SourceStatementsHelp
 			"  </void>  \n" +
 			"   \n" +
 			" </object>  \n" +
-			"</java> ";
+			"</java>\n";
 		return explain;
 	}
 

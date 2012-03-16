@@ -173,20 +173,6 @@ WHERE c.relkind = 'v'::char
    </object>
   </void>
 
-  <!--
-  <void method="put">
-   <string>PostgreSQL</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>SELECT definition FROM pg_views</string>
-    </void>
-    <void property="objectNameField">
-     <string>viewname</string>
-    </void>
-   </object>
-  </void>
-  -->
-
   <void method="put">
    <string>ThinkSQL Relational Database Management System</string>
    <object class="workbench.db.GetMetaDataSql">
