@@ -72,11 +72,11 @@ public class SqlUtil
 	private static class KnownTypesHolder
 	{
 		protected final static Set<String> KNOWN_TYPES =
-			Collections.unmodifiableSet(CollectionUtil.treeSet(
+			Collections.unmodifiableSet(CollectionUtil.caseInsensitiveSet(
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
-			"FLASHBACK ARCHIVE", "TYPE BODY", "CAST", "FOREIGN DATA WRAPPER", "OPERATOR", "SCHEMA"));
+			"FLASHBACK ARCHIVE", "TYPE BODY", "CAST", "FOREIGN DATA WRAPPER", "OPERATOR", "SCHEMA", "EXTENSION"));
 	}
 
 	private static class TypesWithoutNamesHolder
@@ -291,7 +291,7 @@ public static char getCatalogSeparator(WbConnection conn)
 				if (getKnownTypes().contains(c))
 				{
 					typeFound = true;
-					info.objectType = c;
+					info.objectType = c.toUpperCase();
 					break;
 				}
 				token = lexer.getNextToken(false, false);

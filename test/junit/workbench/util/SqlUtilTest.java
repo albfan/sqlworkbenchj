@@ -337,7 +337,8 @@ public class SqlUtilTest
 
 		sql = "drop role s;";
 		info = SqlUtil.getDDLObjectInfo(sql);
-		assertNull(info);
+		assertEquals("s", info.objectName);
+		assertEquals("ROLE", info.objectType);
 
 		sql = "-- test\ncreate \n\ntrigger test_trg for mytable";
 		info = SqlUtil.getDDLObjectInfo(sql);
@@ -384,6 +385,11 @@ public class SqlUtilTest
 		assertNotNull(info);
 		assertEquals("mystuff", info.objectName);
 		assertEquals("FUNCTION", info.objectType);
+
+		sql = "create extension hstore";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("hstore", info.objectName);
+		assertEquals("EXTENSION", info.objectType);
 	}
 
 	@Test
