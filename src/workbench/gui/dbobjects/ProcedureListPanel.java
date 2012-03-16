@@ -361,7 +361,17 @@ public class ProcedureListPanel
 	{
 		super.setVisible(aFlag);
 		if (aFlag && this.shouldRetrieve)
-			this.retrieve();
+		{
+			initGui();
+			WbSwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					retrieve();
+				}
+			});
+		}
 	}
 
 	private String getWorkspacePrefix(int index)
