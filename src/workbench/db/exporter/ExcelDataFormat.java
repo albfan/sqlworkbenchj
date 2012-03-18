@@ -38,7 +38,7 @@ class ExcelDataFormat
 	protected short gridIntegerFormat;
 	protected short gridTsFormat;
 
-	public ExcelDataFormat(String decFormat, String dtFormat,
+	ExcelDataFormat(String decFormat, String dtFormat,
 		String intFormat, String tsFormat)
 	{
 		this.decimalFormat = decFormat;
