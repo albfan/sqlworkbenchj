@@ -32,6 +32,7 @@
     <entry dev-build="3" type="enh">For H2 the (SQL) source for linked tables is now correctly shown in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">A new option for WbImport is available to control the behaviour with empty files</entry>
     <entry dev-build="1" type="enh">For Postgres the generated CREATE TABLE statements now includes storage and tablespace information</entry>
+    <entry dev-build="17" type="fix">In the editor, regular expressions that anchored at the start or end of a line did not work.</entry>
     <entry dev-build="16" type="fix">Fixed several problems for DB2 on iSeries</entry>
     <entry dev-build="16" type="fix">Autocompletion for tables and columns was not working with MySQL</entry>
     <entry dev-build="15" type="fix">Results of SELECT statements could no longer be updated for MySQL</entry>
