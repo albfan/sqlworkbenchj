@@ -299,7 +299,7 @@ public class SearchAndReplace
 		String regex = getSearchExpression(value, ignoreCase, wholeWord, useRegex);
 		replacement = fixSpecialReplacementChars(replacement, useRegex);
 
-		Pattern p = Pattern.compile(regex);
+		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
 		Matcher m = p.matcher(old);
 		String newText = m.replaceAll(replacement);
 
@@ -416,7 +416,7 @@ public class SearchAndReplace
 		String regex = getSearchExpression(anExpression, ignoreCase, wholeWord, useRegex);
 
 		int end = -1;
-		this.lastSearchPattern = Pattern.compile(regex);
+		this.lastSearchPattern = Pattern.compile(regex, Pattern.MULTILINE);
 		this.lastSearchExpression = anExpression;
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
 
@@ -437,7 +437,6 @@ public class SearchAndReplace
 		}
 		return this.lastSearchPos;
 	}
-
 
 	public boolean searchPatternMatchesSelectedText()
 	{
