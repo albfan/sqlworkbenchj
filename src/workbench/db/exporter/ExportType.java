@@ -25,7 +25,7 @@ public enum ExportType
 	XML("XML"),
 	ODS("OpenDocument Spreadsheet"),
 	XLS("XLS"),
-	XLSM("SpreadsheetML"),
+	XLSM("XLSM"),
 	XLSX("XLSX");
 
 	private String display;
