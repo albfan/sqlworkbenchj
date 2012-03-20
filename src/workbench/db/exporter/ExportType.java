@@ -25,7 +25,7 @@ public enum ExportType
 	XML("XML"),
 	ODS("OpenDocument Spreadsheet"),
 	XLS("XLS"),
-	XLSM("XLSM"),
+	XLSM("SpreadsheetML"),
 	XLSX("XLSX");
 
 	private String display;
@@ -103,7 +103,7 @@ public enum ExportType
 				return ".xlsx";
 
 			case XLSM:
-				return ".xlsm";
+				return ".xml";
 
 			case XLS:
 				return ".xls";

@@ -32,14 +32,14 @@ class ExcelDataFormat
 	protected CellStyle decimalCellStyle = null;
 	protected CellStyle integerCellStyle = null;
 	protected CellStyle textCellStyle = null;
+	protected CellStyle multilineCellStyle = null;
 	protected DataFormat dataFormat = null;
 	protected short gridDateFormat;
 	protected short gridDecimalFormat;
 	protected short gridIntegerFormat;
 	protected short gridTsFormat;
 
-	ExcelDataFormat(String decFormat, String dtFormat,
-		String intFormat, String tsFormat)
+	ExcelDataFormat(String decFormat, String dtFormat, String intFormat, String tsFormat)
 	{
 		this.decimalFormat = decFormat;
 		this.dateFormat = dtFormat;
@@ -59,11 +59,18 @@ class ExcelDataFormat
 		setUpTs(wb);
 	}
 
+	protected void setUpMultiline(Workbook wb)
+	{
+		multilineCellStyle = wb.createCellStyle();
+		multilineCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+		multilineCellStyle.setWrapText(true);
+	}
+
 	protected void setUpText(Workbook wb)
 	{
 		textCellStyle = wb.createCellStyle();
 		textCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		textCellStyle.setWrapText(true);
+		textCellStyle.setWrapText(false);
 	}
 
 	protected void setUpDate(Workbook wb)

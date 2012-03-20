@@ -82,38 +82,75 @@
     <indexterm><primary>Excel export</primary><secondary>installation</secondary></indexterm>
 
     <para>
-      If you need to export data for Microsoft Excel, additional libraries are required to write the native Excel formats (xls and the
-      new xlsx introduced with Office 2007). Exporting the "SpreadsheetML" format introduced with Office 2003 does not require
+      If you need to export data for Microsoft Excel, additional libraries are required to write the native Excel formats (<literal>xls</literal> and the
+      new <literal>xlsx</literal> introduced with Office 2007). Exporting the "SpreadsheetML" format introduced with Office 2003 does not require
       additional libraries.
     </para>
 
-    <important>
-      <para>
-        Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format (now called "XML Spreadsheet").
-        To distinguish between the two (XML based) formats from Microsoft, the naming has been changed to reflect the default
-        file extensions that are used by Microsoft. When using Microsof Office 2010, the <literal>-type=xlsm</literal>
-        (plain XML format) should be saved with a file extension of <literal>.xml</literal> in order to be identified correctly.
-      </para>
-    </important>
-
     <para>
       &wb-productname; supports three different Excel file formats:
-        <itemizedlist>
-          <listitem>Excel XML Spreadsheet (xlsm) - this is a plain XML format that does not need additional libraries</listitem>
-          <listitem>Excel 97-2003 binary format (xls) - only <literal>poi.jar</literal> is needed</listitem>
-          <listitem>Excel 2007 Workbook (xlsx) - additional libraries from the POI project are needed</listitem>
-        </itemizedlist>
+    </para>
+
+		<informaltable frame="all">
+			<tgroup cols="2" align="left">
+				<colspec colname="c1" />
+				<colspec colname="c2" />
+				<thead>
+					<row>
+						<entry>Value for <literal>-type</literal> parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+
+				<tbody valign="top">
+					<row>
+						<entry>xlsm</entry>
+						<entry>
+              <para>This is the plain XML ("SpreadsheetML") format introduced with Office 2003. This format is always
+              available and does not need any additional libraries.</para>
+              <para>Files with this format should be saved with
+              the extension <emphasis role="bold">xml</emphasis> (otherwise Office is not able to open them properly)</para>
+            </entry>
+          </row>
+					<row>
+						<entry>xls</entry>
+						<entry>
+              <para>This is the "old" binary format using by Excel 97 up to 2003.
+              To export this format, only <literal>poi.jar</literal> is needed. If the library is not available,
+              this format will not be listed in the export dialog ("Save data as...")</para>
+              <para>Files with this format should be saved with
+              the extension <emphasis role="bold">xls</emphasis></para>
+            </entry>
+          </row>
+					<row>
+						<entry>xlsx</entry>
+						<entry>
+              <para>This is the "new" XML format (OfficeOpen XML) introduced with Office 2007. To create this file format,
+              additionaly libraries are required. If those libraries are not available,
+              this format will not be listed in the export dialog ("Save data as...")</para>
+              <para>Files with this format should be saved with
+              the extension <emphasis role="bold">xlsx</emphasis></para>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>
+      For a comparison of the different Microsoft Office XML formats please refer to: <ulink url="http://en.wikipedia.org/wiki/Microsoft_Office_XML_formats"/>
     </para>
 
     <para>
-      Instead of downloading and renaming the POI libraries from the <ulink url="http://poi.apache.org/download.html">Apache website</ulink>,
-      you can download all of them as a single archive from the &wb-productname; homepage:
-      <ulink url="http://www.sql-workbench.net/poi-add-on.zip"/>
+      You can download all required POI libraries in a a single archive from the &wb-productname; homepage:
+      <ulink url="http://www.sql-workbench.net/poi-add-on.zip"/>. After downloading the archive, unzip it
+      into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
-
-    <para>
-      Simply unzip the archive into the directory where <literal>sqlworkbench.jar</literal> is located.
-    </para>
+    <important>
+      <para>
+        If you have downloaded the add-on ZIP before build 112, you have to delete the file
+        <emphasis role="bold"><literal>ooxml-schemas-1.0.jar</literal></emphasis> as it has been replaced with <literal>poi-ooxml-schemas</literal>.
+      </para>
+    </important>
 
   </section>
 

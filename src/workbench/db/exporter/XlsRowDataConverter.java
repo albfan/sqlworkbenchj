@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Types;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -29,6 +30,7 @@ import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -39,7 +41,7 @@ import workbench.util.FileUtil;
 public class XlsRowDataConverter
 	extends RowDataConverter
 {
-	private Workbook wb = null;
+	private Workbook workbook = null;
 	private Sheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
 	private boolean useXLSX;
@@ -75,15 +77,15 @@ public class XlsRowDataConverter
 
 		if (useXLSX)
 		{
-			wb = new XSSFWorkbook();
+			workbook = new XSSFWorkbook();
 		}
 		else
 		{
-			wb = new HSSFWorkbook();
+			workbook = new HSSFWorkbook();
 		}
 
-		excelFormat.setupWithWorkbook(wb);
-		sheet = wb.createSheet(getPageTitle("SQLExport"));
+		excelFormat.setupWithWorkbook(workbook);
+		sheet = workbook.createSheet(getPageTitle("SQLExport"));
 
 		if (includeColumnComments)
 		{
@@ -95,7 +97,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = commentRow.createCell(column);
-					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true, false);
 					column ++;
 				}
 			}
@@ -112,7 +114,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = headRow.createCell(column);
-					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnDisplayName(c)), true);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnDisplayName(c)), true, false);
 					column ++;
 				}
 			}
@@ -130,15 +132,15 @@ public class XlsRowDataConverter
 
 		if (getAppendInfoSheet())
 		{
-			Sheet info = wb.createSheet("SQL");
+			Sheet info = workbook.createSheet("SQL");
 			Row infoRow = info.createRow(0);
 			Cell cell = infoRow.createCell(0);
 
-			CellStyle style = wb.createCellStyle();
+			CellStyle style = workbook.createCellStyle();
 			style.setAlignment(CellStyle.ALIGN_LEFT);
 			style.setWrapText(false);
 
-			RichTextString s = wb.getCreationHelper().createRichTextString(generatingSql);
+			RichTextString s = workbook.getCreationHelper().createRichTextString(generatingSql);
 			cell.setCellValue(s);
 			cell.setCellStyle(style);
 		}
@@ -152,7 +154,7 @@ public class XlsRowDataConverter
 		try
 		{
 			fileOut = new FileOutputStream(getOutputFile());
-			wb.write(fileOut);
+			workbook.write(fileOut);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -185,15 +187,15 @@ public class XlsRowDataConverter
 				Cell cell = myRow.createCell(column);
 
 				Object value = row.getValue(c);
-
-				setCellValueAndStyle(cell, value, false);
+				boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
+				setCellValueAndStyle(cell, value, false, multiline);
 				column ++;
 			}
 		}
 		return ret;
 	}
 
-	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead)
+	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline)
 	{
 		CellStyle cellStyle = null;
 
@@ -224,9 +226,16 @@ public class XlsRowDataConverter
 		}
 		else
 		{
-			RichTextString s = wb.getCreationHelper().createRichTextString(value != null ? value.toString() : "");
+			RichTextString s = workbook.getCreationHelper().createRichTextString(value != null ? value.toString() : "");
 			cell.setCellValue(s);
-			cellStyle = excelFormat.textCellStyle;
+			if (multiline)
+			{
+				cellStyle = excelFormat.multilineCellStyle;
+			}
+			else
+			{
+				cellStyle = excelFormat.textCellStyle;
+			}
 		}
 
 		if (isHead)

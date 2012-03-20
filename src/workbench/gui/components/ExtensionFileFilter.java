@@ -18,6 +18,7 @@ import java.util.List;
 
 import java.util.Map;
 import javax.swing.filechooser.FileFilter;
+import workbench.db.exporter.ExportType;
 
 import workbench.resource.ResourceMgr;
 import workbench.util.WbFile;
@@ -32,10 +33,8 @@ public class ExtensionFileFilter
 	// The created FileFilters are stored in variables
 	// as in some cases it is necessary to access the
 	// instance (e.g. for JFileChooser.setFileFilter()
-	private static Map<String, FileFilter> filters = new HashMap<String, FileFilter>();
+	private static Map<String, ExtensionFileFilter> filters = new HashMap<String, ExtensionFileFilter>();
 	private static FileFilter jarFileFilter;
-	private static FileFilter sqlUpdateFileFilter;
-	private static FileFilter sqlInsertDeleteFilter;
 
 	private List<String> extensions;
 	private String desc;
@@ -50,6 +49,7 @@ public class ExtensionFileFilter
 	public static final String ODS_EXT = "ods";
 
 	private boolean ignoreCase = true;
+	private ExportType exportType;
 
 	public ExtensionFileFilter(String aDescription, String extension, boolean ignore)
 	{
@@ -71,6 +71,11 @@ public class ExtensionFileFilter
 		this.desc = aDescription;
 		this.extensions = anExtensionList;
 		this.ignoreCase = ignoreCase;
+	}
+
+	public ExportType getExportType()
+	{
+		return exportType;
 	}
 
 	public boolean hasFilter(String extension)
@@ -160,77 +165,68 @@ public class ExtensionFileFilter
 
 	public static FileFilter getSqlFileFilter()
 	{
-		return getFileFilter(SQL_EXT, "TxtFileFilterSql");
+		return getFileFilter(SQL_EXT, "TxtFileFilterSql", ExportType.SQL_INSERT);
 	}
 
 	public static FileFilter getSqlInsertDeleteFilter()
 	{
-		if (sqlInsertDeleteFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterSqlInsDel");
-			sqlInsertDeleteFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
-		}
-		return sqlInsertDeleteFilter;
+		return getFileFilter(SQL_EXT, "TxtFileFilterSqlInsDel", ExportType.SQL_DELETE_INSERT);
 	}
 
 	public static FileFilter getSqlUpdateFileFilter()
 	{
-		if (sqlUpdateFileFilter == null)
-		{
-			String desc = ResourceMgr.getString("TxtFileFilterSqlUpdate");
-			sqlUpdateFileFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
-		}
-		return sqlUpdateFileFilter;
+		return getFileFilter(SQL_EXT, "TxtFileFilterSqlInsDel", ExportType.SQL_UPDATE);
 	}
 
 	public static FileFilter getTextFileFilter()
 	{
-		return getFileFilter(TXT_EXT, "TxtFileFilterText");
+		return getFileFilter(TXT_EXT, "TxtFileFilterText", ExportType.TEXT);
 	}
 
 	public static FileFilter getXmlFileFilter()
 	{
-		return getFileFilter(XML_EXT, "TxtFileFilterXml");
+		return getFileFilter(XML_EXT, "TxtFileFilterXml", ExportType.XML);
 	}
 
 	public static FileFilter getWorkspaceFileFilter()
 	{
-		return getFileFilter(WORKSPACE_EXT, "TxtFileFilterWksp");
+		return getFileFilter(WORKSPACE_EXT, "TxtFileFilterWksp", null);
 	}
 
 	public static FileFilter getHtmlFileFilter()
 	{
-		return getFileFilter(HTML_EXT, "TxtFileFilterHtml");
+		return getFileFilter(HTML_EXT, "TxtFileFilterHtml", ExportType.HTML);
 	}
 
 	public static FileFilter getXlsFileFilter()
 	{
-		return getFileFilter(XLS_EXT, "TxtFileFilterXls");
+		return getFileFilter(XLS_EXT, "TxtFileFilterXls", ExportType.XLS);
 	}
 
 	public static FileFilter getXlsXFileFilter()
 	{
-		return getFileFilter(XLSX_EXT, "TxtFileFilterXlsX");
+		return getFileFilter(XLSX_EXT, "TxtFileFilterXlsX", ExportType.XLSX);
 	}
 
 	public static FileFilter getXlsMFileFilter()
 	{
-		return getFileFilter(XLSM_EXT, "TxtFileFilterXlsM");
+		 return getFileFilter(XLSM_EXT, "TxtFileFilterXlsM", ExportType.XLSM);
 	}
 
 	public static FileFilter getOdsFileFilter()
 	{
-		return getFileFilter(ODS_EXT, "TxtFileFilterOds");
+		return getFileFilter(ODS_EXT, "TxtFileFilterOds", ExportType.ODS);
 	}
 
-	private static FileFilter getFileFilter(String ext, String key)
+	private static ExtensionFileFilter getFileFilter(String ext, String key, ExportType type)
 	{
-		FileFilter ff = filters.get(ext);
+		ExtensionFileFilter ff = filters.get(key);
 		if (ff == null)
 		{
 			String desc = ResourceMgr.getString(key);
 			ff = new ExtensionFileFilter(desc, ext, true);
-			filters.put(ext, ff);
+			ff.exportType = type;
+			filters.put(key, ff);
 		}
 		return ff;
 	}

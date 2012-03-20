@@ -204,9 +204,14 @@ public class ExportFileDialog
 
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getOdsFileFilter());
+		fc.addChoosableFileFilter(ExtensionFileFilter.getXlsMFileFilter());
 		if (PoiHelper.isPoiAvailable())
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getXlsFileFilter());
+		}
+		if (PoiHelper.isXLSXAvailable())
+		{
+			fc.addChoosableFileFilter(ExtensionFileFilter.getXlsXFileFilter());
 		}
 	}
 
@@ -351,6 +356,11 @@ public class ExportFileDialog
 
 	private ExportType getExportType(ExtensionFileFilter ff)
 	{
+		if (ff.getExportType() != null)
+		{
+			return ff.getExportType();
+		}
+		
 		if (ff.hasFilter(ExtensionFileFilter.SQL_EXT))
 		{
 			return ExportType.SQL_INSERT;
