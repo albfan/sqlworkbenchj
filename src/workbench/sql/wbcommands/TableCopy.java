@@ -130,8 +130,7 @@ class TableCopy
 			List<ColumnIdentifier> queryCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
 			if (cols != null)
 			{
-				List<String> selectCols = SqlUtil.getSelectColumns(sourcequery, false);
-				if (selectCols.size() != cols.size())
+				if (queryCols.size() != cols.size())
 				{
 					result.addMessage("Columns in query does not match number of columns in -columns parameter");
 					result.setFailure();
