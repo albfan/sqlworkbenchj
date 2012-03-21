@@ -436,9 +436,16 @@ public class DataPumper
 				@Override
 				public void run()
 				{
-					sourceTable.setConnection(sourceConnection);
-					completionAction.setConnection(sourceConnection);
-					isConnecting = false;
+					try
+					{
+						LogMgr.logDebug("DataPumper.connectSource()", "Source connection established retrieving tables.");
+						sourceTable.setConnection(sourceConnection);
+						completionAction.setConnection(sourceConnection);
+					}
+					finally
+					{
+						isConnecting = false;
+					}
 				}
 			};
 			t.start();
@@ -505,8 +512,15 @@ public class DataPumper
 				@Override
 			  public void run()
 			  {
-				  targetTable.setConnection(targetConnection);
-					isConnecting = false;
+					try
+					{
+						LogMgr.logDebug("DataPumper.connectSource()", "Target connection established retrieving tables.");
+						targetTable.setConnection(targetConnection);
+					}
+					finally
+					{
+						isConnecting = false;
+					}
 			  }
 		  };
 		  t.start();
