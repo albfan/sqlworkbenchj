@@ -6,14 +6,29 @@
 
       <para>
         You can define variables within &wb-productname; that can be referenced in your
-				SQL statements. This is done through the internal command <literal>WbVarDef</literal>,
-				e.g.: <literal>wbvardef myvar=42</literal>
-        This example defines a variable with the name <literal>myvar</literal> and the value
+				SQL statements. This is done through the internal command <literal>WbVarDef</literal>.
+      </para>
+      <para>
+				<literal>WbVarDef myvar=42</literal> defines a variable with the name <literal>myvar</literal> and the value
         <literal>42</literal>. If the variable does not exist, it will be created. If it exists
         its value will be overwritten with the new value. To remove a variable simply set its value
-        to nothing: <literal>wbvardef myvar=</literal>. Alternatevily you can use the command
-        <literal>wbvardelete myvar</literal> to remove a variable definition.
+        to nothing: <literal>WbVarDef myvar=</literal>. Alternatevily you can use the command
+        <literal>WbVarDelete myvar</literal> to remove a variable definition.
       </para>
+
+			<para>
+				Variables are case sensitive: <literal>WbVarDef foo=bar</literal> is different to <literal>WbVarDef FOO=bar</literal>.
+			</para>
+
+      <note>
+      <para>
+        The definition of variables can also be read from a properties file. This can be done by specifying
+        <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command,
+        or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
+        Please see the description for the <link linkend="cmdline-vardef">command line parameters</link>
+        for details.
+      </para>
+      </note>
 
       <para>
         Variable substitution is also done within <link href="">Macros</link>. If your macro definition
@@ -21,19 +36,7 @@
         statements.
       </para>
 
-			<note><para>
-				Variables are case sensitive.
-			</para></note>
-
-      <para>
-        The definition of variables can also be read from a properties file, either by specifying
-        <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command,
-        or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
-        Please see the description for the <link linkend="cmdline-vardef">command line parameters</link>
-        for details.
-      </para>
-
-      <programlisting>wbvardef -file=/temp/myvars.def</programlisting>
+      <programlisting>WbVarDef -file=/temp/myvars.def</programlisting>
 
       <para>This file has to be a standard Java "properties" file. Each variable
       is listed on a single line in the format <literal>variable=value</literal>.
@@ -47,7 +50,7 @@ person_name=Dent
 another_variable=24</programlisting>
 
     <para>After executing
-      <literal>wbvardef -file=/temp/myvars.def</literal> there would be
+      <literal>WbVarDef -file=/temp/myvars.def</literal> there would be
       three variables available in the system:
       <literal>var_id, person_name, another_variable</literal>, that
 			could be used e.g. in a SELECT query:
@@ -67,7 +70,7 @@ another_variable=24</programlisting>
       by using @ as the first character after the equal sign. The <literal>SELECT</literal> needs
       to be enclosed in double quotes, if you are using single quotes e.g. in the where clause:
     </para>
-    <programlisting>wbvardef myvar=@"SELECT id FROM person WHERE name='Dent'"</programlisting>
+    <programlisting>WbVarDef myvar=@"SELECT id FROM person WHERE name='Dent'"</programlisting>
     <para>
       When executing the statement, &wb-productname; uses the first column of the first row of
       the result set for retrieving the value for the variable. Everything else (additional
@@ -90,7 +93,7 @@ another_variable=24</programlisting>
       A variable can also be defined by reading the content of a file (this is different from
       reading the variable definition from a file).
     </para>
-    <programlisting>wbvardef -variable=somevar -contentFile=/temp/mydata.txt</programlisting>
+    <programlisting>WbVarDef -variable=somevar -contentFile=/temp/mydata.txt</programlisting>
     <para>
       When executing the statement, &wb-productname; will read the content of the file <literal>mydata.txt</literal>
       and use that as the value for the variable <literal>somevar</literal>.
@@ -146,7 +149,7 @@ $[my_select];</programlisting>
     </para>
      <para>
       If the SQL statement requires quotes for the SQL literal, you can either put
-      the quotes into the value of the variable (e.g. <literal>wbvardef name="'Arthur'"</literal>)
+      the quotes into the value of the variable (e.g. <literal>WbVarDef name="'Arthur'"</literal>)
       or you put the quotes around the variable's placeholder, e.g.: <literal>WHERE name='$[name]';</literal>
     </para>
 

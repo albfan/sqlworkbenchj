@@ -289,19 +289,6 @@
 			</para>
 		</section>
 
-		<!--
-		<section id="cmdline-parameter-quiet">
-			<title>Surpressing informational messages</title>
-			<para>
-				When running script &wb-productname; will display other informational messages, such as
-				reporting a successful connection or the total number of statements executed.
-				These messages can be surpressed with the switch <literal>-quiet</literal>.
-				This switch does not have parameter values (e.g. <literal>true, false</literal>). If the parameter
-				is present the "quiet" mode is enabled.
-			</para>
-		</section>
-		-->
-
 		<section id="cmdline-parameter-progress">
 			<title>Controlling statement progress information</title>
 			<para>
@@ -323,6 +310,18 @@
 			using the parameter <literal>-interactive=true</literal>.
 		</para>
 	</section>
+
+	<section id="script-vardef">
+    <indexterm><primary>Batch files</primary><secondary>defining variables</secondary></indexterm>
+    <indexterm><primary>&wb-productname; variables</primary><secondary>use in batch files</secondary></indexterm>
+		<title>Defining variables</title>
+      <para>
+        The definition of variables can be read from a properties file, either by specifying
+        <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command,
+        or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
+        Please see the description for the <link linkend="cmdline-vardef">command line parameters</link> for details.
+      </para>
+  </section>
 
 	<section id="script-properties">
     <indexterm><primary>Batch files</primary><secondary>setting &wb-productname; configuration properties</secondary></indexterm>
