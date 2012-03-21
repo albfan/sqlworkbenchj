@@ -169,8 +169,8 @@ public class DbDriver
 		// java.library.path before nulling the field, this will result in an updated java.library.path
 		try
 		{
-			Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
-			fieldSysPath.setAccessible( true );
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
 			fieldSysPath.set(null, null);
 		}
 		catch (Throwable nf)

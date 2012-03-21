@@ -104,42 +104,6 @@
    </object>
   </void>
 
-  <!--
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>COM.FirstSQL.Dbcp.DbcpDriver</string>
-    </void>
-    <void property="library">
-     <string>fsjclient.jar</string>
-    </void>
-    <void property="name">
-     <string>FirstSQL/J</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:dbcp://hostname:8000</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>uk.co.thinksql.ThinkSQLDriver</string>
-    </void>
-    <void property="library">
-     <string>ThinkSQLDriver.jar</string>
-    </void>
-    <void property="name">
-     <string>ThinkSQL</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:thinksql://hostname:9075</string>
-    </void>
-   </object>
-  </void>
-  -->
-
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -214,7 +178,7 @@
      <string>com.mysql.jdbc.Driver</string>
     </void>
     <void property="library">
-     <string>mysql-connector-java-5.0.6-bin.jar</string>
+     <string>mysql-connector-java-5.1.7-bin.jar</string>
     </void>
     <void property="name">
      <string>MySQL</string>
@@ -282,7 +246,7 @@
      <string>org.postgresql.Driver</string>
     </void>
     <void property="library">
-     <string>postgresql-8.4-701.jdbc4.jar</string>
+     <string>postgresql-9.1-901.jdbc4.jar</string>
     </void>
     <void property="name">
      <string>PostgreSQL</string>
@@ -396,83 +360,13 @@
    </object>
   </void>
 
-  <!--
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>com.mckoi.JDBCDriver</string>
-    </void>
-    <void property="library">
-     <string>mkjdbc.jar</string>
-    </void>
-    <void property="name">
-     <string>McKoi (Server)</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:mckoi://servername/</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>com.mckoi.JDBCDriver</string>
-    </void>
-    <void property="library">
-     <string>mkjdbc.jar</string>
-    </void>
-    <void property="name">
-     <string>McKoi (Embedded)</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:mckoi:local://path_to_db.conf</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>in.co.daffodil.db.jdbc.DaffodilDBDriver</string>
-    </void>
-    <void property="library">
-     <string>DaffodilDB_Embedded.jar;DaffodilDB_Common.jar</string>
-    </void>
-    <void property="name">
-     <string>Daffodil DB Embedded Edition</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:daffodilDB_embedded:Databasename;path=Daffodil_Databases_Directory</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>in.co.daffodil.db.rmi.RmiDaffodilDBDriver</string>
-    </void>
-    <void property="library">
-     <string>DaffodilDB_Client.jar</string>
-    </void>
-    <void property="name">
-     <string>Daffodil DB Server Edition</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:daffodilDB://&lt;hostname&gt;:&lt;port&gt;/Databasename;create=true</string>
-    </void>
-   </object>
-  </void>
-  -->
-
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
      <string>com.teradata.jdbc.TeraDriver</string>
     </void>
     <void property="library">
-     <string>terajdbc4.jar</string>
+     <string>terajdbc4.jar|tdgssconfig.jar</string>
     </void>
     <void property="name">
      <string>Teradata</string>
