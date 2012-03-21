@@ -1,4 +1,5 @@
 <section id="using-variables" xreflabel="Variable substitution">
+    <indexterm><primary>Variables</primary><secondary>definition</secondary></indexterm>
     <title>Variable substitution in SQL statements</title>
 
     <section id="define-variable">

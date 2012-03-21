@@ -375,7 +375,7 @@
     </section>
 
     <section id="cmdline-vardef">
-      <indexterm><primary>&wb-productname; variables</primary><secondary>define on commandline</secondary></indexterm>
+      <indexterm><primary>Variables</primary><secondary>define on commandline</secondary></indexterm>
 
       <title>Defining variables</title>
 

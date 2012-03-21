@@ -313,7 +313,7 @@
 
 	<section id="script-vardef">
     <indexterm><primary>Batch files</primary><secondary>defining variables</secondary></indexterm>
-    <indexterm><primary>&wb-productname; variables</primary><secondary>use in batch files</secondary></indexterm>
+    <indexterm><primary>Variables</primary><secondary>use in batch files</secondary></indexterm>
 		<title>Defining variables</title>
       <para>
         The definition of variables can be read from a properties file, either by specifying
