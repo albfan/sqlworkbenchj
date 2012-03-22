@@ -33,15 +33,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.DefaultOutputFactory;
-import workbench.util.EncodingUtil;
-import workbench.util.ExceptionUtil;
-import workbench.util.FileUtil;
-import workbench.util.OutputFactory;
-import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-import workbench.util.ZipOutputFactory;
+import workbench.util.*;
 
 /**
  * Abstract class for converting data into various output formats.
@@ -105,8 +97,8 @@ public abstract class RowDataConverter
 
 	public RowDataConverter()
 	{
-		defaultDateFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultDateFormat());
-		defaultTimestampFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimestampFormat());
+		defaultDateFormatter = new WbDateFormatter(Settings.getInstance().getDefaultDateFormat());
+		defaultTimestampFormatter = new WbDateFormatter(Settings.getInstance().getDefaultTimestampFormat());
 		defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
@@ -554,6 +546,20 @@ public abstract class RowDataConverter
 		if (originalConnection != null)
 		{
 			this.convertDateToTimestamp = this.originalConnection.getDbSettings().getConvertDateInExport();
+		}
+		checkInfinityHandling();
+	}
+
+	private void checkInfinityHandling()
+	{
+		boolean usePGInfinity = originalConnection != null ? originalConnection.getMetadata().isPostgres() : false;
+		if (defaultDateFormatter instanceof WbDateFormatter)
+		{
+			((WbDateFormatter)defaultDateFormatter).setCheckInfinity(usePGInfinity);
+		}
+		if (defaultTimeFormatter instanceof WbDateFormatter)
+		{
+			((WbDateFormatter)defaultTimeFormatter).setCheckInfinity(usePGInfinity);
 		}
 	}
 

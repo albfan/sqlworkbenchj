@@ -90,11 +90,11 @@ public class ExceptionUtil
 	{
 		if (th instanceof SQLException)
 		{
-			return getAllExceptions((SQLException)th).toString();
+			return getAllExceptions((SQLException)th).toString().trim();
 		}
 		else
 		{
-			return getDisplay(th, false);
+			return getDisplay(th, false).trim();
 		}
 	}
 

@@ -329,8 +329,8 @@ public class BatchRunner
 		{
 			success = false;
 			LogMgr.logError("BatchRunner.connect()", "Connection failed", e);
-			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", ExceptionUtil.getDisplay(e));
-			printMessage(msg);
+			printMessage(ResourceMgr.getString("ErrConnectFailed"));
+			printMessage(ExceptionUtil.getDisplay(e));
 			throw e;
 		}
 	}

@@ -342,7 +342,29 @@ public class WbSwingUtilities
 		showErrorMessage(aCaller, ResourceMgr.TXT_PRODUCT_NAME, aMessage);
 	}
 
-	public static void showErrorMessage(Component aCaller, final String title, final String message)
+	public static void showFriendlyErrorMessage(Component caller, final String error)
+	{
+		showFriendlyErrorMessage(caller, ResourceMgr.TXT_PRODUCT_NAME, error);
+	}
+
+	/**
+	 * Displays an error message and checks for the length of the message.
+	 * For messages that contain newlines or are longer than 100 characters,
+	 * a multiline display is used.
+	 */
+	public static void showFriendlyErrorMessage(Component caller, final String title, final String error)
+	{
+		if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > 100)
+		{
+			showMultiLineError(caller, title, error);
+		}
+		else
+		{
+			showErrorMessage(caller, title, error);
+		}
+	}
+
+	public static void showErrorMessage(Component component, final String title, final String message)
 	{
 		if (WbManager.getInstance().isBatchMode())
 		{
@@ -352,13 +374,13 @@ public class WbSwingUtilities
 
 		final Component caller;
 
-		if (aCaller == null)
+		if (component == null)
 		{
 			caller = WbManager.getInstance().getCurrentWindow();
 		}
 		else
 		{
-			caller = getWindowAncestor(aCaller);
+			caller = getWindowAncestor(component);
 		}
 
 		invoke(new Runnable()
@@ -371,7 +393,7 @@ public class WbSwingUtilities
 		});
 	}
 
-	public static void showMultiLineError(final Component caller, final String message)
+	public static void showMultiLineError(final Component caller, final String title, final String message)
 	{
 		if (WbManager.getInstance().isBatchMode())
 		{
@@ -405,7 +427,7 @@ public class WbSwingUtilities
 			@Override
 			public void run()
 			{
-				JOptionPane.showMessageDialog(realCaller, pane, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(realCaller, pane, title, JOptionPane.ERROR_MESSAGE);
 			}
 		});
 	}

@@ -64,6 +64,7 @@ import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -284,27 +285,26 @@ public class ObjectSourceSearchPanel
 				try
 				{
 					connection = ConnectionMgr.getInstance().getConnection(profile, "ObjectSearcher");
-					connectEnded(null);
 				}
 				catch (Exception e)
 				{
 					LogMgr.logError("ObjectSourceSearchPanel.connect()", "Error during connect", e);
-					String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
+					String msg = ExceptionUtil.getDisplay(e);
+					WbSwingUtilities.showFriendlyErrorMessage(ObjectSourceSearchPanel.this, ResourceMgr.getString("ErrConnectFailed"), msg);
 					connection = null;
-					connectEnded(msg);
+				}
+				finally
+				{
+					connectEnded();
 				}
 			}
 		};
 		t.start();
 	}
 
-	protected void connectEnded(String error)
+	protected void connectEnded()
 	{
 		WbSwingUtilities.showDefaultCursor(window);
-		if (error != null)
-		{
-			WbSwingUtilities.showErrorMessage(this, error);
-		}
 		objectSource.setDatabaseConnection(connection);
 		EventQueue.invokeLater(new Runnable()
 		{

@@ -53,14 +53,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CharacterRange;
-import workbench.util.EncodingUtil;
-import workbench.util.MessageBuffer;
-import workbench.util.QuoteEscapeType;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-import workbench.util.WbThread;
+import workbench.util.*;
 
 /**
  * A class to export data from the database into an external file.
@@ -704,7 +697,7 @@ public class DataExporter
 		dateFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultDateFormat() : aFormat;
 		try
 		{
-			dateFormatter = new SimpleDateFormat(this.dateFormat);
+			dateFormatter = new WbDateFormatter(this.dateFormat);
 		}
 		catch (IllegalArgumentException i)
 		{
@@ -728,7 +721,7 @@ public class DataExporter
 		dateTimeFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultTimestampFormat() : aFormat;
 		try
 		{
-			dateTimeFormatter = new SimpleDateFormat(dateTimeFormat);
+			dateTimeFormatter = new WbDateFormatter(dateTimeFormat);
 		}
 		catch (Exception e)
 		{

@@ -74,6 +74,7 @@ import workbench.interfaces.DbExecutionNotifier;
 import workbench.storage.NamedSortDefinition;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
+import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 /**
@@ -483,7 +484,7 @@ public class TableDataPanel
 				WbSwingUtilities.setLabel(rowCountLabel, ResourceMgr.getString("TxtError"), msg);
 			}
 			String title = ResourceMgr.getString("TxtErrorRowCount");
-			WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), title, msg);
+			WbSwingUtilities.showFriendlyErrorMessage(SwingUtilities.getWindowAncestor(this), title, msg);
 		}
 		finally
 		{
@@ -808,9 +809,8 @@ public class TableDataPanel
 			{
 				String msg = ExceptionUtil.getDisplay(e);
 				LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
-				WbSwingUtilities.showErrorMessage(this, msg);
+				WbSwingUtilities.showFriendlyErrorMessage(this, msg);
 			}
-
 		}
 		finally
 		{

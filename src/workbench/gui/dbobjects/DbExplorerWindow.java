@@ -248,8 +248,7 @@ public class DbExplorerWindow
 	{
 		this.setProfileName(null);
 		this.panel.setConnection(null);
-		String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
-		WbSwingUtilities.showErrorMessage(this, msg);
+		WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error.trim());
 	}
 
 	@Override

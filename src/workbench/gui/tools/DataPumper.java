@@ -408,9 +408,8 @@ public class DataPumper
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + (sourceProfile == null ? "n/a" : this.sourceProfile.getName()), e);
-			String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
 			this.sourceProfile = null;
-			WbSwingUtilities.showErrorMessage(this, msg);
+			WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
@@ -490,9 +489,8 @@ public class DataPumper
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.targetProfile.getName(), e);
-			String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
 			this.targetProfile = null;
-			WbSwingUtilities.showErrorMessage(this, msg);
+			WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
@@ -1876,7 +1874,7 @@ public class DataPumper
 		}
 		catch (Exception e)
 		{
-			WbSwingUtilities.showErrorMessage(this, this.window.getTitle(), ExceptionUtil.getDisplay(e));
+			WbSwingUtilities.showFriendlyErrorMessage(this, this.window.getTitle(), ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataPumper.initColumnMapper()", "Error when intializing column mapper", e);
 		}
 	}

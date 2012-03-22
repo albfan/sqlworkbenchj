@@ -186,7 +186,7 @@ public class WbConnect
 		catch (Exception e)
 		{
 			String err = ExceptionUtil.getDisplay(e);
-			result.addMessage(ResourceMgr.getFormattedString("ErrConnectFailed", err));
+			result.addMessage(err);
 			result.setFailure();
 		}
 

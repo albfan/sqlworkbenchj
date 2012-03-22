@@ -21,6 +21,8 @@ import workbench.resource.Settings;
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.commands.SetCommand;
+import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.*;
@@ -74,12 +76,12 @@ public class OracleStatementHook
 	/**
 	 * A list of SQL commands where no statistics should be shown.
 	 */
-	private static final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(
+	private final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(
 		WbFetchSize.VERB, WbAbout.VERB, WbConfirm.VERB, WbConnInfo.VERB, WbDefinePk.VERB, WbDefineVar.VERB,
 		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
 		WbDisableOraOutput.VERB, WbEnableOraOutput.VERB, WbStartBatch.VERB, WbEndBatch.VERB, WbHelp.VERB,
 		WbIsolationLevel.VERB, WbLoadPkMapping.VERB, WbListPkDef.VERB, WbMode.VERB, WbListVars.VERB, WbSetProp.VERB,
-		WbSysProps.VERB, WbXslt.VERB, "SET");
+		WbSysProps.VERB, WbXslt.VERB, SetCommand.VERB, SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.ROLLBACK.getVerb());
 
 	/**
 	 * Stores the statistic values before the execution of the statement.
@@ -225,6 +227,8 @@ public class OracleStatementHook
 		if (verb == null) return getIDPrefix() + "  " + sql;
 		int pos = verb.getCharEnd();
 
+		if (pos >= sql.length()) return sql;
+
 		if (pos < 0)
 		{
 			LogMgr.logWarning("OracleStatementHook.adjustSql()", "Wrong char end " + pos + " for first SQL verb: " + verb);
@@ -305,7 +309,7 @@ public class OracleStatementHook
 		SQLToken verb = lexer.getNextToken(false, false);
 		if (verb == null) return false;
 		String sqlVerb = verb.getContents();
-		if ("SET".equalsIgnoreCase(sqlVerb))
+		if (noStatistics.contains(sqlVerb))
 		{
 			return false;
 		}

@@ -14,6 +14,7 @@ package workbench.gui.renderer;
 import java.text.SimpleDateFormat;
 import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
+import workbench.util.WbDateFormatter;
 
 /**
  * A class to render date and timestamp values.
@@ -32,7 +33,7 @@ public class DateColumnRenderer
 	public DateColumnRenderer()
 	{
 		super();
-		this.dateFormatter = new SimpleDateFormat(DEFAULT_FORMAT);
+		this.dateFormatter = new WbDateFormatter(DEFAULT_FORMAT);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
@@ -68,6 +69,7 @@ public class DateColumnRenderer
 			{
 				this.displayValue = this.dateFormatter.format(d);
 			}
+
 			if (showTooltip)
 			{
 				this.tooltip = displayValue;

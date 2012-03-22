@@ -266,7 +266,7 @@ public class RunScriptPanel
 				String errors = runner.getMessages();
 				if (errors != null)
 				{
-					WbSwingUtilities.showMultiLineError(this, errors);
+					WbSwingUtilities.showMultiLineError(this, ResourceMgr.TXT_PRODUCT_NAME, errors);
 				}
 			}
 		}

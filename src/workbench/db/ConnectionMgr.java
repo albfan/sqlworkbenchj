@@ -177,6 +177,7 @@ public class ConnectionMgr
 		{
 			DriverManager.setLoginTimeout(oldTimeout);
 		}
+
 		try
 		{
 			sql.setAutoCommit(profile.getAutocommit());
@@ -524,7 +525,6 @@ public class ConnectionMgr
 	public void disconnect(WbConnection con)
 	{
 		if (con == null) return;
-		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to remove connection with id=" + con.getId());
 		this.activeConnections.remove(con.getId());
 		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to physically close the connection with id=" + con.getId());
 		this.closeConnection(con);
@@ -535,7 +535,6 @@ public class ConnectionMgr
 	 */
 	public void disconnect(String anId)
 	{
-		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to disconnect connection with id=" + anId);
 		WbConnection con = this.activeConnections.get(anId);
 		disconnect(con);
 	}

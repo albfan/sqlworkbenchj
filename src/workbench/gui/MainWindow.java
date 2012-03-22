@@ -1008,8 +1008,7 @@ public class MainWindow
 			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting panel " + aPanel.getId(), e);
 			showStatusMessage("");
 			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
-			WbSwingUtilities.showErrorMessage(this, msg);
+			WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error);
 		}
 		finally
 		{
@@ -1365,24 +1364,7 @@ public class MainWindow
 		tabSelected(0);
 
 		if (error == null) return;
-
-		try
-		{
-			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
-			if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > 100)
-			{
-				WbSwingUtilities.showMultiLineError(this, msg);
-			}
-			else
-			{
-				WbSwingUtilities.showErrorMessage(this, msg);
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("MainWindow.connectFailed()", "Could not display connection error!", th);
-			WbSwingUtilities.showErrorMessage(this, error);
-		}
+		WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error.trim());
 	}
 
 	@Override

@@ -76,9 +76,9 @@ public class ValueConverter
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
 
-	private final SimpleDateFormat dateFormatter = new SimpleDateFormat();
-	private final SimpleDateFormat timestampFormatter = new SimpleDateFormat();
-	private final SimpleDateFormat formatter = new SimpleDateFormat();
+	private final SimpleDateFormat dateFormatter = new WbDateFormatter();
+	private final SimpleDateFormat timestampFormatter = new WbDateFormatter();
+	private final SimpleDateFormat formatter = new WbDateFormatter();
 	private boolean autoConvertBooleanNumbers = true;
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;

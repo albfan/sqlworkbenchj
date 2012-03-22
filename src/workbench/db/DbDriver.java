@@ -424,8 +424,8 @@ public class DbDriver
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, th);
-			throw new SQLException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
+			LogMgr.logError("DbDriver.connect()", "Error connecting to the database using URL=" + url + ", username=" + user, th);
+			throw new SQLException(th.getMessage(), th);
 		}
 
 		return conn;
