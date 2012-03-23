@@ -21,8 +21,10 @@ public class WbDateFormatter
 	// copied from the PostgreSQL driver
 	public static final long DATE_POSITIVE_INFINITY = 9223372036825200000l;
 	public static final long DATE_NEGATIVE_INFINITY = -9223372036832400000l;
-	private static final StringBuffer POSITIVE_INFINITY = new StringBuffer("infinity");
-	private static final StringBuffer NEGATIVE_INFINITY = new StringBuffer("-infinity");
+	public static final String POSITIVE_INFINITY_LITERAL = "infinity";
+	public static final String NEGATIVE_INFINITY_LITERAL = "-infinity";
+	private static final StringBuffer POSITIVE_INFINITY = new StringBuffer(POSITIVE_INFINITY_LITERAL);
+	private static final StringBuffer NEGATIVE_INFINITY = new StringBuffer(NEGATIVE_INFINITY_LITERAL);
 
 	private boolean checkPgInfinity = true;
 
@@ -69,11 +71,11 @@ public class WbDateFormatter
 	{
 		if (checkPgInfinity)
 		{
-			if (source.equalsIgnoreCase("infinity") || source.equalsIgnoreCase("+infinity"))
+			if (source.trim().equalsIgnoreCase(POSITIVE_INFINITY_LITERAL))
 			{
 				return new Date(DATE_POSITIVE_INFINITY);
 			}
-			if (source.equalsIgnoreCase("-infinity"))
+			if (source.trim().equalsIgnoreCase(NEGATIVE_INFINITY_LITERAL))
 			{
 				return new Date(DATE_NEGATIVE_INFINITY);
 			}
@@ -84,5 +86,23 @@ public class WbDateFormatter
 	public void setCheckInfinity(boolean flag)
 	{
 		this.checkPgInfinity = flag;
+	}
+
+	public static String getDisplayValue(Object value)
+	{
+		if (value == null) return "";
+		if (value instanceof java.util.Date)
+		{
+			long time = ((java.util.Date)value).getTime();
+			if (time == DATE_POSITIVE_INFINITY)
+			{
+				return POSITIVE_INFINITY_LITERAL;
+			}
+			if (time == WbDateFormatter.DATE_NEGATIVE_INFINITY)
+			{
+				return NEGATIVE_INFINITY_LITERAL;
+			}
+		}
+		return value.toString();
 	}
 }

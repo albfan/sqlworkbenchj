@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -34,9 +33,9 @@ import javax.swing.text.JTextComponent;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
-import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.interfaces.NullableEditor;
+import workbench.util.WbDateFormatter;
 
 /**
  * A TableCellEditor that displays multiple lines
@@ -138,7 +137,7 @@ public class WbCellEditor
 		isNull = false;
 	}
 
-	public void setFont(Font aFont)
+	public final void setFont(Font aFont)
 	{
 		this.editor.setFont(aFont);
 	}
@@ -176,7 +175,7 @@ public class WbCellEditor
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
 	{
-		editor.setText(value != null ? value.toString() : "");
+		editor.setText(WbDateFormatter.getDisplayValue(value));
 		// this method is called when the user edits a cell
 		// in that case we want to select all text
 		editor.selectAll();

@@ -24,6 +24,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbDateFormatter;
 
 /**
  *
@@ -50,7 +51,7 @@ public class SqlLiteralFormatter
 	 * The "product" for the dbms specific date literal format
 	 */
 	public static final String DBMS_DATE_LITERAL_TYPE = "dbms";
-	
+
 	private SimpleDateFormat dateFormatter;
 	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat timeFormatter;
@@ -61,23 +62,23 @@ public class SqlLiteralFormatter
 	private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
 	private boolean isDbId;
 	private DbSettings dbSettings;
-	
+
 	/**
-	 * Create a new formatter with default formatting. 
+	 * Create a new formatter with default formatting.
 	 */
 	public SqlLiteralFormatter()
 	{
 		this(null);
 	}
-	
+
 	/**
 	 * Create  new formatter specifically for the DBMS identified
 	 * by the connection.
 	 * The type of date literals used, can be changed to a different
 	 * "product" using {@link #setDateLiteralType(String)}
-	 * 
+	 *
 	 * @param con the connection identifying the DBMS
-	 * 
+	 *
 	 * @see workbench.db.DbMetadata#getProductName()
   */
 	public SqlLiteralFormatter(WbConnection con)
@@ -91,9 +92,9 @@ public class SqlLiteralFormatter
 		}
 		setDateLiteralType(product);
 	}
-	
+
 	/**
-	 * Select the DBMS specific date literal according to the 
+	 * Select the DBMS specific date literal according to the
 	 * DBMS identified by the connection.
 	 * @param con the connection to identify the DBMS
 	 * @see #setDateLiteralType(String)
@@ -108,18 +109,18 @@ public class SqlLiteralFormatter
 			this.dbSettings = con.getDbSettings();
 		}
 	}
-	
+
 	/**
 	 * Use a specific product name for formatting date and timestamp values.
-	 * This call is ignored if the passed value is DBMS and this instance has 
+	 * This call is ignored if the passed value is DBMS and this instance has
 	 * been initialised with a Connection (thus the DBMS specific formatter is already
 	 * selected).
-	 * 
+	 *
 	 * @param type the literal type to use. This is the key to the map defining the formats
-	 * 
+	 *
 	 * @see workbench.db.DbMetadata#getProductName()
 	 */
-	public void setDateLiteralType(String type)
+	public final void setDateLiteralType(String type)
 	{
 		// If the DBMS specific format is selected and we already have a DBID
 		// then this call is simply ignored.
@@ -131,7 +132,7 @@ public class SqlLiteralFormatter
 			}
 			type = null;
 		}
-		
+
 		dateFormatter = createFormatter(type, "date", "''yyyy-MM-dd''");
 		timestampFormatter = createFormatter(type, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
 		timeFormatter = createFormatter(type, "time", "''HH:mm:ss''");
@@ -160,12 +161,12 @@ public class SqlLiteralFormatter
 		blobFormatter = BlobFormatterFactory.createAnsiFormatter();
 		this.blobWriter = null;
 	}
-	
+
 	/**
-	 * Create BLOB literals that are compatible with the 
+	 * Create BLOB literals that are compatible with the
 	 * DBMS identified by the connection.
 	 * If no specific formatter for the given DMBS can be found, the generic
-	 * ANSI formatter will be used. 
+	 * ANSI formatter will be used.
 	 * @param con the connection (i.e. the DBMS) for which the literals should be created
 	 */
 	public void createDbmsBlobLiterals(WbConnection con)
@@ -183,7 +184,7 @@ public class SqlLiteralFormatter
 	 * or createDbmsBlobLiterals().
 	 * The generated SQL Literal will be compatible with SQL Workbench extended
 	 * blob handling and will generate literals in the format <code>{$blobfile=...}</code>
-	 * 
+	 *
 	 * @param bw the writer to be used for writing the BLOB content
 	 */
 	public void createBlobFiles(DataFileWriter bw)
@@ -191,12 +192,12 @@ public class SqlLiteralFormatter
 		this.blobFormatter = null;
 		this.blobWriter = bw;
 	}
-	
+
 	/**
 	 * Create external files for CLOB columns (instead of String literals).
 	 * The generated SQL Literal will be compatible with SQL Workbench extended
 	 * LOB handling and will generate literals in the format <code>{$clobfile='...' encoding='encoding'}</code>
-	 * 
+	 *
 	 * @param writer the writer to be used for writing the BLOB content
 	 * @param encoding the encoding to be used to write the CLOB files
 	 */
@@ -206,7 +207,7 @@ public class SqlLiteralFormatter
 		this.clobWriter = writer;
 		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
 	}
-	
+
 	public static SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
 	{
 		String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + type + ".pattern";
@@ -220,25 +221,25 @@ public class SqlLiteralFormatter
 				key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
 				pattern = Settings.getInstance().getProperty(key, defaultPattern);
 			}
-			f = new SimpleDateFormat(pattern);
+			f = new WbDateFormatter(pattern);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlLiteralFormatter.createFormatter()", "Could not create formatter with pattern [" + pattern + "], using default [" + defaultPattern + "]", e);
-			f = new SimpleDateFormat(defaultPattern);
+			f = new WbDateFormatter(defaultPattern);
 		}
 		return f;
 	}
-	
+
 	private String quoteString(String t)
 	{
 		if (t == null) return t;
 		return "'" + t.replace("'", "''") + "'";
 	}
-	
+
 	/**
 	 * Return the default literal for the given column data.
-	 * Date and Timestamp data will be formatted according to the 
+	 * Date and Timestamp data will be formatted according to the
 	 * syntax defined by the {@link #setDateLiteralType(String)} method
 	 * or through the connection provided in the constructor.
 	 * @param data the data to be converted into a literal.
@@ -248,13 +249,13 @@ public class SqlLiteralFormatter
 	public CharSequence getDefaultLiteral(ColumnData data)
 	{
 		if (data.isNull()) return "NULL";
-		
+
 		Object value = data.getValue();
 		if (value == null) return "NULL";
-		
+
 		int type = data.getIdentifier().getDataType();
 		String dbmsType = data.getIdentifier().getDbmsType();
-		
+
 		if (value == null)
 		{
 			return "NULL";
@@ -291,11 +292,11 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof Timestamp)
 		{
-			return this.timestampFormatter.format((Timestamp)value);
+			return fixInfinity(this.timestampFormatter.format((Timestamp)value));
 		}
 		else if (value instanceof Date)
 		{
-			return this.dateFormatter.format((Date)value);
+			return fixInfinity(this.dateFormatter.format((Date)value));
 		}
 		else if (value instanceof File)
 		{
@@ -352,9 +353,18 @@ public class SqlLiteralFormatter
 				}
 			}
 		}
-		
+
 		// Fallback, let the JDBC driver format the value
 		return value.toString();
 	}
-	
+
+	private String fixInfinity(String input)
+	{
+		if (input == null) return null;
+		if (input.endsWith(WbDateFormatter.POSITIVE_INFINITY_LITERAL))
+		{
+			return "'" + input + "'";
+		}
+		return input;
+	}
 }

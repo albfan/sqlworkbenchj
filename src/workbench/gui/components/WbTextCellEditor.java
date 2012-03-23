@@ -32,6 +32,7 @@ import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.ResourceMgr;
+import workbench.util.WbDateFormatter;
 
 /**
  *
@@ -143,7 +144,8 @@ public class WbTextCellEditor
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
-		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
+		String displayValue = WbDateFormatter.getDisplayValue(value);
+		Component result = super.getTableCellEditorComponent(table, displayValue, isSelected, row, column);
 		textField.selectAll();
 		setEditable(!(parentTable != null && parentTable.isReadOnly()));
 		changed = false;
