@@ -116,6 +116,7 @@ public class SQLServerTestUtil
 		try
 		{
 			TestUtil.executeScript(con, sql);
+			con.commit();
 		}
 		catch (SQLException ex)
 		{
