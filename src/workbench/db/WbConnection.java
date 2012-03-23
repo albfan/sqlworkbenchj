@@ -14,8 +14,6 @@ package workbench.db;
 import workbench.db.objectcache.DbObjectCache;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -27,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import workbench.db.objectcache.DbObjectCacheFactory;
+import workbench.db.oracle.OracleWarningsClearer;
 
 import workbench.db.report.TagWriter;
 import workbench.interfaces.DbExecutionListener;
@@ -64,9 +63,7 @@ public class WbConnection
 	private PreparedStatementPool preparedStatementPool;
 	private List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
 
-	private Method clearSettings;
-	private Object dbAccess;
-	private boolean doOracleClear = true;
+	private boolean doOracleClear;
 
 	private boolean busy;
 	private KeepAliveDaemon keepAlive;
@@ -341,7 +338,7 @@ public class WbConnection
 	{
 		this.sqlConnection = aConn;
 		this.metaData = new DbMetadata(this);
-		this.doOracleClear = this.metaData.isOracle();
+		this.doOracleClear = this.metaData.isOracle() && !JdbcUtils.hasMiniumDriverVersion(this.getSqlConnection(), "10.0");
 		this.currentCatalog = metaData.getCurrentCatalog();
 	}
 
@@ -412,45 +409,10 @@ public class WbConnection
 		try
 		{
 			this.sqlConnection.clearWarnings();
-
 			if (doOracleClear)
 			{
-				// obviously the Oracle driver does NOT clear the warnings
-				// (as discovered when looking at the source code)
-				// this is not true for newer drivers (10.x)
-
-				// luckily the instance variable on the driver which holds the
-				// warnings is defined as public and thus we can
-				// reset the warnings "manually"
-				// This is done via reflection so that the Oracle driver
-				// does not need to be present when compiling
-
-				if (this.clearSettings == null || dbAccess == null)
-				{
-					Class ora = this.sqlConnection.getClass();
-
-					if (ora.getName().equals("oracle.jdbc.driver.OracleConnection"))
-					{
-						Field dbAccessField = ora.getField("db_access");
-						Class dbAccessClass = dbAccessField.getType();
-						dbAccess = dbAccessField.get(this.sqlConnection);
-						try
-						{
-							clearSettings = dbAccessClass.getMethod("setWarnings", new Class[] {SQLWarning.class} );
-						}
-						catch (Throwable e)
-						{
-							// newer drivers do not seem to support this any more,
-							// so after the first error, we'll skip this for the rest of the session
-							doOracleClear = false;
-							clearSettings = null;
-						}
-					}
-				}
-				// the following line is equivalent to:
-				// OracleConnection con = (OracleConnection)this.sqlConnection;
-				// con.db_access.setWarnings(null);
-				if (clearSettings != null) clearSettings.invoke(dbAccess, new Object[] { null });
+				OracleWarningsClearer clearer = new OracleWarningsClearer();
+				clearer.clearWarnings(this);
 			}
 		}
 		catch (Throwable th)
