@@ -63,7 +63,7 @@ public class WbConnection
 	private PreparedStatementPool preparedStatementPool;
 	private List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
 
-	private boolean doOracleClear;
+	private OracleWarningsClearer oracleWarningsClearer;
 
 	private boolean busy;
 	private KeepAliveDaemon keepAlive;
@@ -338,7 +338,14 @@ public class WbConnection
 	{
 		this.sqlConnection = aConn;
 		this.metaData = new DbMetadata(this);
-		this.doOracleClear = this.metaData.isOracle() && !JdbcUtils.hasMiniumDriverVersion(this.getSqlConnection(), "10.0");
+		if (this.metaData.isOracle() && !JdbcUtils.hasMiniumDriverVersion(this.getSqlConnection(), "10.0"))
+		{
+			this.oracleWarningsClearer = new OracleWarningsClearer();
+		}
+		else
+		{
+			this.oracleWarningsClearer = null;
+		}
 		this.currentCatalog = metaData.getCurrentCatalog();
 	}
 
@@ -396,23 +403,22 @@ public class WbConnection
 
 	/**
 	 *	This will clear the warnings from the connection object.
+	 *
 	 *	Some drivers will not replace existing warnings until clearWarnings()
 	 *	is called, thus SQL Workbench would show the same error message over and
 	 *  over again.
-	 *  This method also works around a bug in the Oracle JDBC driver, because
-	 *	that does not properly clear the warnings list.
 	 */
 	public void clearWarnings()
 	{
 		this.scriptError = null;
 		if (this.sqlConnection == null) return;
+
 		try
 		{
 			this.sqlConnection.clearWarnings();
-			if (doOracleClear)
+			if (oracleWarningsClearer != null)
 			{
-				OracleWarningsClearer clearer = new OracleWarningsClearer();
-				clearer.clearWarnings(this);
+				oracleWarningsClearer.clearWarnings(sqlConnection);
 			}
 		}
 		catch (Throwable th)
@@ -429,8 +435,10 @@ public class WbConnection
 	public void commit()
 		throws SQLException
 	{
-		if (!getDbSettings().supportsTransactions()) return;
-		this.sqlConnection.commit();
+		if (getDbSettings().supportsTransactions())
+		{
+			this.sqlConnection.commit();
+		}
 	}
 
 	public Savepoint setSavepoint()
