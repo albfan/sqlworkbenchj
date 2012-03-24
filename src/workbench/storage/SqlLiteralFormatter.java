@@ -53,8 +53,8 @@ public class SqlLiteralFormatter
 	 */
 	public static final String DBMS_DATE_LITERAL_TYPE = "dbms";
 
-	private SimpleDateFormat dateFormatter;
-	private SimpleDateFormat timestampFormatter;
+	private WbDateFormatter dateFormatter;
+	private WbDateFormatter timestampFormatter;
 	private SimpleDateFormat timeFormatter;
 	private BlobLiteralFormatter blobFormatter;
 	private DataFileWriter blobWriter;
@@ -141,14 +141,8 @@ public class SqlLiteralFormatter
 
 	public void setInfinityLiterals(InfinityLiterals literals)
 	{
-		if (dateFormatter instanceof WbDateFormatter)
-		{
-			((WbDateFormatter)dateFormatter).setInfinityLiterals(literals);
-		}
-		if (timestampFormatter instanceof WbDateFormatter)
-		{
-			((WbDateFormatter)timestampFormatter).setInfinityLiterals(literals);
-		}
+		dateFormatter.setInfinityLiterals(literals);
+		timestampFormatter.setInfinityLiterals(literals);
 	}
 
 	/**
@@ -220,10 +214,10 @@ public class SqlLiteralFormatter
 		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
 	}
 
-	public static SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
+	public static WbDateFormatter createFormatter(String format, String type, String defaultPattern)
 	{
 		String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + type + ".pattern";
-		SimpleDateFormat f = null;
+		WbDateFormatter f = null;
 		String pattern = null;
 		try
 		{
