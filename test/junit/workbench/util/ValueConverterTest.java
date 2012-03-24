@@ -41,7 +41,7 @@ public class ValueConverterTest
 		Object flag = converter.convertValue("", Types.BOOLEAN);
 		assertNull(flag);
 	}
-	
+
 	@Test
 	public void testConvertBoolLiterals()
 		throws Exception
@@ -237,7 +237,8 @@ public class ValueConverterTest
 	}
 
 	@Test
-	public void testConvertStrings() throws Exception
+	public void testConvertStrings()
+		throws Exception
 	{
 		ValueConverter converter = new ValueConverter();
 		Object data = converter.convertValue("Test", Types.VARCHAR);
@@ -248,7 +249,24 @@ public class ValueConverterTest
 	}
 
 	@Test
-	public void testConvertDateLiterals() throws Exception
+	public void testInfinity()
+		throws Exception
+	{
+		ValueConverter converter = new ValueConverter("yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss");
+		Object o = converter.convertValue("infinity", Types.DATE);
+		assertTrue(o instanceof Date);
+		java.sql.Date d = new java.sql.Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
+		assertEquals(d, o);
+
+		o = converter.convertValue("-infinity", Types.DATE);
+		assertTrue(o instanceof Date);
+		d = new java.sql.Date(WbDateFormatter.DATE_NEGATIVE_INFINITY);
+		assertEquals(d, o);
+	}
+
+	@Test
+	public void testConvertDateLiterals()
+		throws Exception
 	{
 		String aDate = "2007-04-01";
 		ValueConverter converter = new ValueConverter("yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss");
