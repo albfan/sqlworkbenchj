@@ -84,6 +84,7 @@ public class DbObjectCacheFactory
 			synchronized (lock)
 			{
 				String key = makeKey(conn);
+				LogMgr.logDebug("DbObjectCacheFactory.propertyChange()", "Remove cache for key=" + key);
 				ObjectCache cache = caches.get(key);
 				if (cache != null)
 				{
@@ -95,4 +96,15 @@ public class DbObjectCacheFactory
 		}
 	}
 
+	public void clear()
+	{
+		synchronized(lock)
+		{
+			for (ObjectCache cache : caches.values())
+			{
+				cache.clear();
+			}
+			caches.clear();
+		}
+	}
 }

@@ -59,9 +59,7 @@ public class OracleCompletionTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
-		OracleTestUtil.dropAllObjects(con);
+		OracleTestUtil.cleanUpTestCase();
 	}
 
 	@Test

@@ -107,7 +107,7 @@ public class OracleTestUtil
 	{
 		cleanUpTestCase(SCHEMA_NAME);
 	}
-	
+
 	public static void cleanUpTestCase(String username)
 	{
 		if (!isAvailable) return;

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import workbench.WbManager;
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.shutdown.DbShutdownFactory;
 import workbench.db.shutdown.DbShutdownHook;
 import workbench.gui.profiles.ProfileKey;
@@ -460,6 +461,7 @@ public class ConnectionMgr
 			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
+		DbObjectCacheFactory.getInstance().clear();
 	}
 
 	/**

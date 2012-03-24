@@ -42,6 +42,7 @@ public class OracleSetCommandTest
 	public static void tearDownClass()
 		throws Exception
 	{
+		OracleTestUtil.cleanUpTestCase();
 	}
 
 	@Test

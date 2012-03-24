@@ -61,6 +61,7 @@ public class OracleExplainTest
 
 	@Test
 	public void testRetrieveTables()
+		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;

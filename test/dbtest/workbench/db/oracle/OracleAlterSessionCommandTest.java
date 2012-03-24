@@ -10,13 +10,16 @@
  */
 package workbench.db.oracle;
 
+
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunner;
-import static org.junit.Assert.*;
 /**
  *
  * @author Thomas Kellerer
@@ -35,6 +38,13 @@ public class OracleAlterSessionCommandTest
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
+	}
+
+	@AfterClass
+	public static void tearDownClass()
+		throws Exception
+	{
+		OracleTestUtil.cleanUpTestCase();
 	}
 
 	@Test

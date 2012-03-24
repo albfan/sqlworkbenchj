@@ -194,6 +194,11 @@ public abstract class BaseAnalyzer
 		return this.overwriteCurrentWord;
 	}
 
+	public String getSchemaForTableList()
+	{
+		return schemaForTableList;
+	}
+
 	protected String getSchemaFromCurrentWord()
 	{
 		String word = getCurrentWord();
