@@ -379,6 +379,11 @@ public class WbExport
 			{
 				exporter.setInfinityLiterals(new InfinityLiterals(literals.get(0), literals.get(1)));
 			}
+			else
+			{
+				result.addMessage("Illegal infinity definition ignored");
+				result.setWarning(true);
+			}
 		}
 
 		String updateTable = cmdLine.getValue(ARG_TABLE);
