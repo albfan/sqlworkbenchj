@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
+import workbench.db.exporter.InfinityLiterals;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -138,6 +139,17 @@ public class SqlLiteralFormatter
 		timeFormatter = createFormatter(type, "time", "''HH:mm:ss''");
 	}
 
+	public void setInfinityLiterals(InfinityLiterals literals)
+	{
+		if (dateFormatter instanceof WbDateFormatter)
+		{
+			((WbDateFormatter)dateFormatter).setInfinityLiterals(literals);
+		}
+		if (timestampFormatter instanceof WbDateFormatter)
+		{
+			((WbDateFormatter)timestampFormatter).setInfinityLiterals(literals);
+		}
+	}
 
 	/**
 	 * Do not write BLOBs as SQL Literals.
@@ -361,7 +373,7 @@ public class SqlLiteralFormatter
 	private String fixInfinity(String input)
 	{
 		if (input == null) return null;
-		if (input.endsWith(WbDateFormatter.POSITIVE_INFINITY_LITERAL))
+		if (InfinityLiterals.isPGLiteral(input))
 		{
 			return "'" + input + "'";
 		}

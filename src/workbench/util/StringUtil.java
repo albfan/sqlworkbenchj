@@ -526,7 +526,7 @@ public class StringUtil
 	}
 
 	/**
-	 * Checks if the given parameter is not empty and deos not only exist of whitespace
+	 * Checks if the given parameter is not empty and does not only consist of whitespace
 	 *
 	 * @param value
 	 * @return true if at least one non-whitespace character is returned

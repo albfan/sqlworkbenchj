@@ -80,6 +80,13 @@ public class SqlRowDataConverter
 	}
 
 	@Override
+	public void setInfinityLiterals(InfinityLiterals literals)
+	{
+		super.setInfinityLiterals(literals);
+		this.literalFormatter.setInfinityLiterals(literals);
+	}
+
+	@Override
 	public void setResultInfo(ResultInfo meta)
 	{
 		super.setResultInfo(meta);
@@ -116,6 +123,7 @@ public class SqlRowDataConverter
 		if (this.literalFormatter != null)
 		{
 			this.literalFormatter.setDateLiteralType(type);
+			this.literalFormatter.setInfinityLiterals(infinityLiterals);
 		}
 	}
 

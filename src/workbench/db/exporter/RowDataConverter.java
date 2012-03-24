@@ -53,31 +53,33 @@ public abstract class RowDataConverter
 	private File baseDirectory;
 	private String baseFilename;
 	private String pageTitle;
-	private boolean[] columnsToExport = null;
-	protected List exportColumns = null;
+	private boolean[] columnsToExport;
+	protected List exportColumns;
 	protected ErrorReporter errorReporter;
 
 	protected SimpleDateFormat defaultTimeFormatter;
-	protected SimpleDateFormat defaultDateFormatter;
+	protected WbDateFormatter defaultDateFormatter;
 	protected DecimalFormat defaultNumberFormatter;
-	protected SimpleDateFormat defaultTimestampFormatter;
-	protected boolean needsUpdateTable = false;
+	protected WbDateFormatter defaultTimestampFormatter;
+	protected boolean needsUpdateTable;
 	protected OutputFactory factory;
 	private boolean compressExternalFiles;
 	protected boolean useRowNumForBlobFile = true;
-	protected int[] blobNameCols = null;
-	protected List<String> blobIdColumns = null;
+	protected int[] blobNameCols;
+	protected List<String> blobIdColumns;
 
-	protected String filenameColumn = null;
+	protected String filenameColumn;
 	protected int filenameColumnIndex = -1;
 
 	protected long currentRow = -1;
 	protected RowData currentRowData;
 
-	protected boolean convertDateToTimestamp = false;
+	protected boolean convertDateToTimestamp;
 	protected BlobLiteralFormatter blobFormatter;
 	protected ExportDataModifier columnModifier;
-	protected boolean includeColumnComments = false;
+	protected boolean includeColumnComments;
+
+	protected InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
@@ -136,6 +138,18 @@ public abstract class RowDataConverter
 	public void setAppendInfoSheet(boolean flag)
 	{
 		this.appendInfoSheet = flag;
+	}
+
+	public void setInfinityLiterals(InfinityLiterals literals)
+	{
+		this.infinityLiterals = literals;
+		syncInfinityLiterals();
+	}
+
+	private void syncInfinityLiterals()
+	{
+		this.defaultDateFormatter.setInfinityLiterals(infinityLiterals);
+		this.defaultTimestampFormatter.setInfinityLiterals(infinityLiterals);
 	}
 
 	public void setWriteHeader(boolean writeHeader)
@@ -547,21 +561,8 @@ public abstract class RowDataConverter
 		{
 			this.convertDateToTimestamp = this.originalConnection.getDbSettings().getConvertDateInExport();
 		}
-		checkInfinityHandling();
 	}
 
-	private void checkInfinityHandling()
-	{
-		boolean usePGInfinity = originalConnection != null ? originalConnection.getMetadata().isPostgres() : false;
-		if (defaultDateFormatter instanceof WbDateFormatter)
-		{
-			((WbDateFormatter)defaultDateFormatter).setCheckInfinity(usePGInfinity);
-		}
-		if (defaultTimeFormatter instanceof WbDateFormatter)
-		{
-			((WbDateFormatter)defaultTimeFormatter).setCheckInfinity(usePGInfinity);
-		}
-	}
 
 	/**
 	 *	The SQL statement that was used to generate the data.
@@ -620,10 +621,11 @@ public abstract class RowDataConverter
 		this.blobFormatter = formatter;
 	}
 
-	public void setDefaultTimestampFormatter(SimpleDateFormat formatter)
+	public void setDefaultTimestampFormatter(WbDateFormatter formatter)
 	{
 		if (formatter == null) return;
 		this.defaultTimestampFormatter = formatter;
+		syncInfinityLiterals();
 	}
 
 	public void setDefaultTimeFormatter(SimpleDateFormat formatter)
@@ -632,10 +634,11 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = formatter;
 	}
 
-	public void setDefaultDateFormatter(SimpleDateFormat formatter)
+	public void setDefaultDateFormatter(WbDateFormatter formatter)
 	{
 		if (formatter == null) return;
 		this.defaultDateFormatter = formatter;
+		syncInfinityLiterals();
 	}
 
 	public void setDefaultNumberFormatter(DecimalFormat formatter)
@@ -646,14 +649,14 @@ public abstract class RowDataConverter
 	public void setDefaultDateFormat(String format)
 	{
 		if (StringUtil.isEmptyString(format)) return;
-		SimpleDateFormat formatter = new SimpleDateFormat(format);
+		WbDateFormatter formatter = new WbDateFormatter(format);
 		this.setDefaultDateFormatter(formatter);
 	}
 
 	public void setDefaultTimestampFormat(String format)
 	{
 		if (StringUtil.isEmptyString(format)) return;
-		SimpleDateFormat formatter = new SimpleDateFormat(format);
+		WbDateFormatter formatter = new WbDateFormatter(format);
 		this.setDefaultTimestampFormatter(formatter);
 	}
 

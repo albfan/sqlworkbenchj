@@ -15,7 +15,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,9 +75,9 @@ public class ValueConverter
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
 
-	private final SimpleDateFormat dateFormatter = new WbDateFormatter();
-	private final SimpleDateFormat timestampFormatter = new WbDateFormatter();
-	private final SimpleDateFormat formatter = new WbDateFormatter();
+	private final WbDateFormatter dateFormatter = new WbDateFormatter();
+	private final WbDateFormatter timestampFormatter = new WbDateFormatter();
+	private final WbDateFormatter formatter = new WbDateFormatter();
 	private boolean autoConvertBooleanNumbers = true;
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;

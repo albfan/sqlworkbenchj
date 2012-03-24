@@ -25,6 +25,7 @@ import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.ExportDataModifier;
 import workbench.db.exporter.ExportType;
+import workbench.db.exporter.InfinityLiterals;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.exporter.WrongFormatFileException;
 import workbench.interfaces.ProgressReporter;
@@ -101,6 +102,7 @@ public class WbExport
 	public static final String ARG_TABLE = "table";
 	public static final String ARG_TIMEFORMAT = "timeFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
+	public static final String ARG_INFINITY_LITERALS = "infinityLiterals";
 	// </editor-fold>
 
 	private DataExporter exporter;
@@ -180,6 +182,7 @@ public class WbExport
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
+		cmdLine.addArgument(ARG_INFINITY_LITERALS, ArgumentType.ListArgument);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -367,6 +370,15 @@ public class WbExport
 			result.setFailure();
 			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));
 			return result;
+		}
+
+		if (cmdLine.isArgPresent(ARG_INFINITY_LITERALS))
+		{
+			List<String> literals = cmdLine.getListValue(ARG_INFINITY_LITERALS);
+			if (literals != null && literals.size() == 2)
+			{
+				exporter.setInfinityLiterals(new InfinityLiterals(literals.get(0), literals.get(1)));
+			}
 		}
 
 		String updateTable = cmdLine.getValue(ARG_TABLE);

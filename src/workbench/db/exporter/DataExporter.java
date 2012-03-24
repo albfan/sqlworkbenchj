@@ -104,12 +104,14 @@ public class DataExporter
 	private int commitEvery = 0;
 	private boolean useSchemaInSql;
 
+	private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
+
 	private String dateFormat;
 	private String timeFormat;
 	private String dateTimeFormat;
 	private SimpleDateFormat timeFormatter;
-	private SimpleDateFormat dateFormatter;
-	private SimpleDateFormat dateTimeFormatter;
+	private WbDateFormatter dateFormatter;
+	private WbDateFormatter dateTimeFormatter;
 
 	private DecimalFormat numberFormatter;
 	private boolean append;
@@ -253,6 +255,16 @@ public class DataExporter
 	public void setUseSchemaInSql(boolean flag)
 	{
 		this.useSchemaInSql = flag;
+	}
+
+	public void setInfinityLiterals(InfinityLiterals literals)
+	{
+		this.infinityLiterals = literals;
+	}
+
+	public InfinityLiterals getInfinityLiterals()
+	{
+		return infinityLiterals;
 	}
 
 	/**
@@ -706,7 +718,7 @@ public class DataExporter
 		}
 	}
 
-	public SimpleDateFormat getDateFormatter()
+	public WbDateFormatter getDateFormatter()
 	{
 		return dateFormatter;
 	}
@@ -735,7 +747,7 @@ public class DataExporter
 		return dateTimeFormat;
 	}
 
-	public SimpleDateFormat getTimestampFormatter()
+	public WbDateFormatter getTimestampFormatter()
 	{
 		return this.dateTimeFormatter;
 	}

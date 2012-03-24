@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import workbench.db.exporter.InfinityLiterals;
 
 /**
  *
@@ -21,12 +22,8 @@ public class WbDateFormatter
 	// copied from the PostgreSQL driver
 	public static final long DATE_POSITIVE_INFINITY = 9223372036825200000l;
 	public static final long DATE_NEGATIVE_INFINITY = -9223372036832400000l;
-	public static final String POSITIVE_INFINITY_LITERAL = "infinity";
-	public static final String NEGATIVE_INFINITY_LITERAL = "-infinity";
-	private static final StringBuffer POSITIVE_INFINITY = new StringBuffer(POSITIVE_INFINITY_LITERAL);
-	private static final StringBuffer NEGATIVE_INFINITY = new StringBuffer(NEGATIVE_INFINITY_LITERAL);
 
-	private boolean checkPgInfinity = true;
+	private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
 	public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
 	{
@@ -47,19 +44,24 @@ public class WbDateFormatter
 	{
 	}
 
+	public void setInfinityLiterals(InfinityLiterals literals)
+	{
+		this.infinityLiterals = literals;
+	}
+
 	@Override
 	public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition pos)
 	{
-		if (checkPgInfinity)
+		if (infinityLiterals != null)
 		{
 			long dt = (date == null ? 0 : date.getTime());
 			if (dt == DATE_POSITIVE_INFINITY)
 			{
-				return POSITIVE_INFINITY;
-			}
+				return toAppendTo.append(infinityLiterals.getPositiveInfinity());
+		}
 			else if (dt == DATE_NEGATIVE_INFINITY)
 			{
-				return NEGATIVE_INFINITY;
+				return toAppendTo.append(infinityLiterals.getNegativeInfinity());
 			}
 		}
 		return super.format(date, toAppendTo, pos);
@@ -69,23 +71,18 @@ public class WbDateFormatter
 	public Date parse(String source)
 		throws ParseException
 	{
-		if (checkPgInfinity)
+		if (infinityLiterals != null)
 		{
-			if (source.trim().equalsIgnoreCase(POSITIVE_INFINITY_LITERAL))
+			if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
 			{
 				return new Date(DATE_POSITIVE_INFINITY);
 			}
-			if (source.trim().equalsIgnoreCase(NEGATIVE_INFINITY_LITERAL))
+			if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
 			{
 				return new Date(DATE_NEGATIVE_INFINITY);
 			}
 		}
 		return super.parse(source);
-	}
-
-	public void setCheckInfinity(boolean flag)
-	{
-		this.checkPgInfinity = flag;
 	}
 
 	public static String getDisplayValue(Object value)
@@ -96,11 +93,11 @@ public class WbDateFormatter
 			long time = ((java.util.Date)value).getTime();
 			if (time == DATE_POSITIVE_INFINITY)
 			{
-				return POSITIVE_INFINITY_LITERAL;
+				return InfinityLiterals.PG_POSITIVE_LITERAL;
 			}
 			if (time == WbDateFormatter.DATE_NEGATIVE_INFINITY)
 			{
-				return NEGATIVE_INFINITY_LITERAL;
+				return InfinityLiterals.PG_NEGATIVE_LITERAL;
 			}
 		}
 		return value.toString();

@@ -88,6 +88,7 @@ public abstract class ExportWriter
 		converter.setDataModifier(exporter.getDataModifier());
 		converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
 		converter.setMaxLobFilesPerDirectory(exporter.getMaxLobFilesPerDirectory());
+		converter.setInfinityLiterals(exporter.getInfinityLiterals());
     trimCharData = getTrimCharData();
 	}
 
@@ -96,9 +97,13 @@ public abstract class ExportWriter
 	public void setProgressInterval(int interval)
 	{
 		if (interval <= 0)
+		{
 			this.progressInterval = 0;
+		}
 		else
+		{
 			this.progressInterval = interval;
+		}
 	}
 
 	public void setRowMonitor(RowActionMonitor monitor)
