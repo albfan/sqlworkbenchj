@@ -106,7 +106,7 @@ public class EditorTest
 		tool.waitEmpty();
 		text = editor.getText();
 
-		assertEquals(" first line\n second line\n", text);
+		assertEquals("first line\nsecond line\n", text);
 	}
 
 	private void copySnippet()
