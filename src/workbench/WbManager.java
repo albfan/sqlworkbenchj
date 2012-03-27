@@ -837,17 +837,6 @@ public final class WbManager
 		};
 		t1.setPriority(Thread.MIN_PRIORITY);
 		t1.start();
-
-		WbThread t2 = new WbThread("WarmUp2")
-		{
-			@Override
-			public void run()
-			{
-				ConnectionMgr.getInstance().readProfiles();
-			}
-		};
-		t2.setPriority(Thread.MIN_PRIORITY);
-		t2.start();
 	}
 
 	public void runGui()
