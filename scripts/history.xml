@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
+  <release build="-1" date="2012-03-25">
+    <entry dev-build="1" type="fix">On some (slow) computers the application would hang when trying to display the initial connection selection dialog</entry>
+  </release>
   <release build="112" date="2012-03-25">
     <entry dev-build="16" type="enh">PostgreSQL's "infinity" values for DATE and TIMESTAMP columns are now displayed and parsed correctly</entry>
     <entry dev-build="15" type="enh">The busy and cancelling indicator for a SQL panel can now be selected in the options panel</entry>
