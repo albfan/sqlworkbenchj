@@ -22,7 +22,8 @@ public enum LogLevel
 	error,
 	warning,
 	info,
-	debug;
+	debug,
+	trace;
 
 	public boolean isIncluded(LogLevel target)
 	{
@@ -37,7 +38,8 @@ public enum LogLevel
 		if (type.equalsIgnoreCase("error")) return error;
 		if (type.equalsIgnoreCase("info")) return info;
 		if (type.equalsIgnoreCase("debug")) return debug;
-	 return error;
+		if (type.equalsIgnoreCase("trace")) return trace;
+		return error;
  	}
 
 	@Override
@@ -47,6 +49,7 @@ public enum LogLevel
 		if (this == warning) return "WARN";
 		if (this == info) return "INFO";
 		if (this == debug) return "DEBUG";
+		if (this == trace) return "TRACE";
 		return super.toString();
 	}
 

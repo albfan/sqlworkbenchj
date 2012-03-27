@@ -102,6 +102,11 @@ public class LogMgr
 		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, null);
 	}
 
+	public static void logTrace(Object aCaller, String aMsg)
+	{
+		getLogger().logMessage(LogLevel.trace, aCaller, aMsg, null);
+	}
+
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
 		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, th);

@@ -808,8 +808,6 @@ public final class WbManager
 		}
 		else
 		{
-			warmUp();
-
 			// This will install the application listener if running under MacOS
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
@@ -823,20 +821,6 @@ public final class WbManager
 				}
 			});
 		}
-	}
-
-	private void warmUp()
-	{
-		WbThread t1 = new WbThread("WarmUp1")
-		{
-			@Override
-			public void run()
-			{
-				MacroManager.getInstance().getMacros();
-			}
-		};
-		t1.setPriority(Thread.MIN_PRIORITY);
-		t1.start();
 	}
 
 	public void runGui()

@@ -130,14 +130,6 @@ public class SimpleLogger
 		}
 	}
 
-	public void logDebug(Object aCaller, String aMsg)
-	{
-		if (levelEnabled(LogLevel.debug))
-		{
-			logMessage(LogLevel.debug, aCaller, aMsg, null);
-		}
-	}
-
 	@Override
 	public void logSqlError(Object caller, String sql, Throwable th)
 	{

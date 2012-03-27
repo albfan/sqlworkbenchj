@@ -442,9 +442,14 @@ public class ConnectionMgr
 	 */
 	public List<ConnectionProfile> getProfiles()
 	{
+		LogMgr.logTrace("ConnectionMgr.getProfiles()", "getProfiles() called at " + System.currentTimeMillis() + " from " + Thread.currentThread().getName());
+
 		synchronized (profileLock)
 		{
-			if (this.profiles == null) this.readProfiles();
+			if (this.profiles == null)
+			{
+				this.readProfiles();
+			}
 			return Collections.unmodifiableList(this.profiles);
 		}
 	}
@@ -747,11 +752,14 @@ public class ConnectionMgr
 	 * This does not make sure that all connections are closed!
 	 * This method is used in Unit tests to setup a new set of profiles.
 	 */
-	public synchronized void clearProfiles()
+	public void clearProfiles()
 	{
-		if (this.profiles != null)
+		synchronized (profileLock)
 		{
-			this.profiles.clear();
+			if (this.profiles != null)
+			{
+				this.profiles.clear();
+			}
 		}
 	}
 
@@ -761,8 +769,10 @@ public class ConnectionMgr
 	 * @see WbPersistence#readObject()
 	 * @see workbench.resource.Settings#getProfileStorage()
 	 */
-	public synchronized void readProfiles()
+	private void readProfiles()
 	{
+		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + System.currentTimeMillis() + " from " + Thread.currentThread().getName());
+
 		Object result = null;
 		try
 		{
@@ -780,27 +790,24 @@ public class ConnectionMgr
 			result = null;
 		}
 
-		synchronized (profileLock)
-		{
-			this.profiles = new ArrayList<ConnectionProfile>();
+		this.profiles = new ArrayList<ConnectionProfile>();
 
-			if (result instanceof Collection)
-			{
-				Collection c = (Collection)result;
-				this.profiles.addAll(c);
-			}
-			else if (result instanceof Object[])
-			{
-				// This is to support the very first version of the profile storage
-				// probably obsolete by know, but you never know...
-				Object[] l = (Object[])result;
-				for (Object prof : l)
-				{
-					this.profiles.add((ConnectionProfile)prof);
-				}
-			}
-			this.resetProfiles();
+		if (result instanceof Collection)
+		{
+			Collection c = (Collection)result;
+			this.profiles.addAll(c);
 		}
+		else if (result instanceof Object[])
+		{
+			// This is to support the very first version of the profile storage
+			// probably obsolete by know, but you never know...
+			Object[] l = (Object[])result;
+			for (Object prof : l)
+			{
+				this.profiles.add((ConnectionProfile)prof);
+			}
+		}
+		this.resetProfiles();
 	}
 
 

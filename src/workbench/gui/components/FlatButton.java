@@ -23,7 +23,7 @@ import workbench.gui.WbSwingUtilities;
 public class FlatButton
 	extends WbButton
 {
-	
+
 	public FlatButton()
 	{
 		super();
@@ -35,13 +35,13 @@ public class FlatButton
 		super(action);
 		init();
 	}
-	
+
 	public FlatButton(Icon icon)
 	{
 		super(icon);
 		init();
 	}
-	
+
 	public FlatButton(String label)
 	{
 		super(label);
@@ -58,7 +58,7 @@ public class FlatButton
 			setFlatLook();
 		}
 	}
-	
+
 	public void setFlatLook()
 	{
 		this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);

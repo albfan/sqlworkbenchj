@@ -159,6 +159,10 @@ public class Log4JLogger
 		{
 			return LogLevel.warning;
 		}
+		if (level == Level.TRACE)
+		{
+			return LogLevel.trace;
+		}
 		return LogLevel.error;
 	}
 
@@ -227,6 +231,9 @@ public class Log4JLogger
 	{
 		switch (level)
 		{
+			case trace:
+				trace(msg, th);
+				break;
 			case debug:
 				debug(msg, th);
 				break;
@@ -316,6 +323,8 @@ public class Log4JLogger
 		Logger root = Logger.getRootLogger();
 		switch (tolog)
 		{
+			case trace:
+				return root.isTraceEnabled();
 			case debug:
 				return root.isDebugEnabled();
 			case info:
