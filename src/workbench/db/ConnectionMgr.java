@@ -771,7 +771,8 @@ public class ConnectionMgr
 	 */
 	private void readProfiles()
 	{
-		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + System.currentTimeMillis() + " from " + Thread.currentThread().getName());
+		long start = System.currentTimeMillis();
+		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
 
 		Object result = null;
 		try
@@ -808,6 +809,9 @@ public class ConnectionMgr
 			}
 		}
 		this.resetProfiles();
+		long end = System.currentTimeMillis();
+		long duration = end - start;
+		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() finished at " + end + " (" + duration + "ms) in " + Thread.currentThread().getName());
 	}
 
 

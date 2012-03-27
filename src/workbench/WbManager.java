@@ -808,6 +808,11 @@ public final class WbManager
 		}
 		else
 		{
+			if (Boolean.getBoolean("workbench.gui.warmup"))
+			{
+				warmUp();
+			}
+
 			// This will install the application listener if running under MacOS
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
@@ -821,6 +826,29 @@ public final class WbManager
 				}
 			});
 		}
+	}
+
+	private void warmUp()
+	{
+		WbThread t1 = new WbThread("BackgrounProfilesLoader")
+		{
+			@Override
+			public void run()
+			{
+				ConnectionMgr.getInstance().getProfiles();
+			}
+		};
+		t1.start();
+
+		WbThread t2 = new WbThread("BackgroundMacrosLoader")
+		{
+			@Override
+			public void run()
+			{
+				MacroManager.getInstance().getMacros();
+			}
+		};
+		t2.start();
 	}
 
 	public void runGui()

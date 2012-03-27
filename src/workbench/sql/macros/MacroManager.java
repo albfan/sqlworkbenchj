@@ -14,6 +14,7 @@ package workbench.sql.macros;
 import java.io.File;
 import java.util.List;
 import javax.swing.KeyStroke;
+import workbench.log.LogMgr;
 
 import workbench.resource.Settings;
 import workbench.resource.StoreableKeyStroke;
@@ -37,8 +38,11 @@ public class MacroManager
 
 	private MacroManager()
 	{
+		long start = System.currentTimeMillis();
 		storage = new MacroStorage();
 		storage.loadMacros(getMacroFile());
+		long duration = System.currentTimeMillis() - start;
+		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration);
 	}
 
 	public final File getMacroFile()
