@@ -30,6 +30,11 @@ public class HtmlUtil
 
 	public static String escapeXML(CharSequence s)
 	{
+		return escapeXML(s, true);
+	}
+
+	public static String escapeXML(CharSequence s, boolean replaceSingleQuotes)
+	{
 		if (s == null) return null;
 		StringBuilder sb = new StringBuilder(s.length() + 100);
 		int n = s.length();
@@ -38,12 +43,27 @@ public class HtmlUtil
 			char c = s.charAt(i);
 			switch (c)
 			{
-				case '<': sb.append("&lt;"); break;
-				case '>': sb.append("&gt;"); break;
-				case '&': sb.append("&amp;"); break;
-				case '"': sb.append("&quot;"); break;
-				case '\'': sb.append("&apos;"); break;
-				default:  sb.append(c); break;
+				case '<':
+					sb.append("&lt;");
+					break;
+				case '>':
+					sb.append("&gt;");
+					break;
+				case '&':
+					sb.append("&amp;");
+					break;
+				case '"':
+					sb.append("&quot;");
+					break;
+				case '\'':
+					if (replaceSingleQuotes)
+					{
+						sb.append("&apos;");
+						break;
+					}
+				default:
+					sb.append(c);
+					break;
 			}
 		}
 		return sb.toString();

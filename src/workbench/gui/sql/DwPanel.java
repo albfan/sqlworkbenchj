@@ -75,6 +75,7 @@ import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ExceptionUtil;
+import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -870,7 +871,7 @@ public class DwPanel
 		int index = getTabIndex(tab);
 		if (index == -1) return;
 
-		String tip = "<html><pre>" + sql.trim() + "</pre></html>";
+		String tip = "<html><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
 	}
