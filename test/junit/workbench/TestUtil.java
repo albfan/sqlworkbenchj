@@ -636,7 +636,7 @@ public class TestUtil
 		writer.println(xml);
 		writer.close();
 		// Make sure the new profiles are read
-		ConnectionMgr.getInstance().readProfiles();
+		ConnectionMgr.getInstance().reloadProfiles();
 	}
 
 	/**

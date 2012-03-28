@@ -455,6 +455,19 @@ public class ConnectionMgr
 	}
 
 	/**
+	 * Re-load the profiles, regardless whether they have been loaded or not.
+	 * This should only be used in unit-testing
+	 */
+	public void reloadProfiles()
+	{
+		synchronized (profileLock)
+		{
+			this.readProfiles();
+		}
+	}
+
+
+	/**
 	 * Disconnects all connections.
 	 *
 	 * @see #closeConnection(workbench.db.WbConnection)
