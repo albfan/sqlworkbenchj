@@ -146,7 +146,6 @@ public final class WbManager
 			if (dialog != null && dialog.isModal())
 			{
 				dialog.dispose();
-				dialog = null;
 			}
 		}
 	}
@@ -266,7 +265,7 @@ public final class WbManager
 	public File getJarFile()
 	{
 		URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
-		File f = null;
+		File f;
 		try
 		{
 			// Sending the path through the URLDecoder is important
@@ -320,7 +319,7 @@ public final class WbManager
 
 		if (!this.checkProfiles(getCurrentWindow())) return false;
 
-		boolean result = true;
+		boolean result;
 		for (MainWindow win : mainWindows)
 		{
 			if (win == null) continue;
@@ -639,7 +638,7 @@ public final class WbManager
 			// get profile name from commandline
 			String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
-			ConnectionProfile prof  = null;
+			ConnectionProfile prof;
 			if (!StringUtil.isEmptyString(profilename))
 			{
 				ProfileKey def = new ProfileKey(profilename, group);
