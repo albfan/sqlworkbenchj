@@ -35,6 +35,7 @@ public class AppArguments
 	public static final String ARG_COMMAND = "command";
 	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortOnError";
+	public static final String ARG_SHOWPROGRESS = "showProgress";
 
 	// Connection related parameters
 	public static final String ARG_PROFILE = "profile";
@@ -78,7 +79,6 @@ public class AppArguments
 	public static final String ARG_SHOW_SEARCHER = "objectSearcher";
 
 	// Other parameters
-	public static final String ARG_SHOWPROGRESS = "showProgress";
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
 	public static final String ARG_CONFIGDIR = "configDir";
 	public static final String ARG_LIBDIR = "libdir";
@@ -90,6 +90,7 @@ public class AppArguments
 	public static final String ARG_NOTEMPLATES = "noTemplates";
 	public static final String ARG_CONSOLE_OPT_COLS = "optimizeColWidth";
 	public static final String ARG_CONSOLE_BUFFER_RESULTS = "bufferResults";
+	public static final String ARG_PROP = "prop";
 
 	public AppArguments()
 	{
@@ -147,6 +148,7 @@ public class AppArguments
 		addArgument(ARG_CONSOLIDATE_LOG, ArgumentType.BoolArgument);
 		addArgument(ARG_INTERACTIVE, ArgumentType.BoolArgument);
 		addArgument("help");
+		addArgument(ARG_PROP, ArgumentType.Repeatable);
 	}
 
 	@Override

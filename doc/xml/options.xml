@@ -905,8 +905,16 @@
 			</para>
 		</section>
 
+		<section id="options-retrieve-ref-tree" xreflabel="Retrieve foreign key dependecy">
+			<title>Automatically retrieve dependency tree</title>
+			<para>
+        If this option is enabled, the tree display in the "References" and "Referenced by" tabs
+        will automatically be loaded when the list of foreign keys is loaded. If this option
+        is disabled, loading of the tree display must be started manually by clicking on the "reload" button.
+			</para>
+		</section>
 
-		<section id="dbexp-options-show-trigger">
+    <section id="dbexp-options-show-trigger">
 			<title>Show trigger panel</title>
       <indexterm><primary>DbExplorer</primary><secondary>show all triggers</secondary></indexterm>
       <indexterm><primary>Triggers</primary><secondary>show all triggers in DbExplorer</secondary></indexterm>
@@ -937,23 +945,6 @@
 			</para>
 		</section>
 
-		<section id="dbexp-options-gen-pk">
-			<title>Generate PK constraint name</title>
-			<para>
-				When displaying the SQL source for a table, a name will be generated
-				for primary key constraint if the current constraint has no name or
-				a system generated name.
-			</para>
-			<para>
-				System generated names are identified using a regular expression
-				that can be <link linkend="manual-setting-system-names">configured</link>.
-			</para>
-			<para>
-				If this option is selected, the generated SQL will not reflect
-				the real statement that was used to create the table!
-			</para>
-		</section>
-
 		<section id="dbexp-options-remember-type">
 			<title>Remember object type</title>
 			<para>
@@ -979,6 +970,47 @@
 				in the data display of a table, enabling this option will automatically
 				store the new column order and apply it the next time the table data
 				is displayed.
+			</para>
+		</section>
+
+		<section id="dbexp-options-allow-alter">
+			<title>Allow table altering</title>
+			<para>
+        If this option is enabled, column definitions of a table can directly be altered by editing
+        them inside the "Columns" tab. It also allows to directly change the name of a table in the table list.
+			</para>
+		</section>
+
+		<section id="dbexp-options-use-regex">
+			<title>Use RegEx in Quickfilter</title>
+			<para>
+        If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
+        is used as a regular expression (rather than a "SQL" Expression) to filter the list.
+			</para>
+		</section>
+
+		<section id="dbexp-options-filter-typing">
+			<title>Filter while typing</title>
+			<para>
+        If this option is enabled, the filter expression is applied while you type. In this case, the
+        "Filter" button does not need to be clicked in order to apply the filter expression.
+			</para>
+		</section>
+
+    <section id="dbexp-options-gen-pk">
+			<title>Generate PK constraint name</title>
+			<para>
+				When displaying the SQL source for a table, a name will be generated
+				for primary key constraint if the current constraint has no name or
+				a system generated name.
+			</para>
+			<para>
+				System generated names are identified using a regular expression
+				that can be <link linkend="manual-setting-system-names">configured</link>.
+			</para>
+			<para>
+				If this option is selected, the generated SQL will not reflect
+				the real statement that was used to create the table!
 			</para>
 		</section>
 

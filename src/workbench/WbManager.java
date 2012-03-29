@@ -724,6 +724,16 @@ public final class WbManager
 				this.writeSettings = false;
 			}
 
+			List<String> list = cmdLine.getList(AppArguments.ARG_PROP);
+			for (String propDef : list)
+			{
+				String[] elements = propDef.split("=");
+				if (elements.length == 2)
+				{
+					System.setProperty(elements[0], elements[1]);
+				}
+			}
+
 			// Make sure the Settings object is (re)initialized properly now that
 			// some system properties have been read from the commandline
 			// this is especially necessary during JUnit tests to make
@@ -807,6 +817,11 @@ public final class WbManager
 		}
 		else
 		{
+			if (Settings.getInstance().getBoolProperty("workbench.gui.warmup", false))
+			{
+				warmUp();
+			}
+
 			// This will install the application listener if running under MacOS
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
@@ -820,6 +835,29 @@ public final class WbManager
 				}
 			});
 		}
+	}
+
+	private void warmUp()
+	{
+		WbThread t1 = new WbThread("BackgroundProfilesLoader")
+		{
+			@Override
+			public void run()
+			{
+				ConnectionMgr.getInstance().getProfiles();
+			}
+		};
+		t1.start();
+
+		WbThread t2 = new WbThread("BackgroundMacrosLoader")
+		{
+			@Override
+			public void run()
+			{
+				MacroManager.getInstance().getMacros();
+			}
+		};
+		t2.start();
 	}
 
 	public void runGui()

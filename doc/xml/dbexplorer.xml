@@ -294,11 +294,14 @@
 			<title>Changing the table definition</title>
       <para>
         You can edit the definition of the columns, add new columns or delete existing columns.
-        To apply the changes, click on the <guibutton>ALTER table</guibutton> button.
+        To apply the changes, click on the <guibutton>Apply DDL</guibutton> button.
       </para>
-        <para>
-          For details please refer to the section <link linkend="dbexplorer-change-column">Changing table definitions</link>
-        </para>
+      <para>
+        Editing of the column definition is only possible, if the <link linkend="dbexp-options-allow-alter">Allow table altering</link> option in the DbExplorer is enabled.
+      </para>
+      <para>
+        For details please refer to the section <link linkend="dbexplorer-change-column">Changing table definitions</link>
+      </para>
     </simplesect>
 	</section>
 
