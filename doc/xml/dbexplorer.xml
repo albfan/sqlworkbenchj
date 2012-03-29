@@ -270,85 +270,61 @@
 		</para>
 
 		<para>
-			The column list will also display any comments defined for the column
-			(if the JDBC driver returns the information).
-			Oracle's JDBC driver does not return those comments by default. To enable the
-			display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>
+			The column list will also display any comments defined for the column (if the JDBC driver returns the information).
+			Oracle's JDBC driver does not return those comments by default. To enable the display of column comments (remarks) you have to
+      supply an <link linkend="profile-extended-properties">extended property</link>
 			in your connection profile. The property's name should be <literal>remarksReporting</literal>
 			and the value should be set to <literal>true</literal>.
 		</para>
 
 		<para>
-			If the DBMS supports synonyms, the columns tab will display
-			the column definition of the underlying table or view. The source tab
-			will display the statement to re-create the synonym. If the underlying object
-			of the synonym is a table, then indexes, foreign keys and triggers for
+			If the DBMS supports synonyms, the columns tab will display the column definition of the underlying table or view. The source tab
+			will display the statement to re-create the synonym. If the underlying object of the synonym is a table, then indexes, foreign keys and triggers for
 			that table will be displayed as well.
-		</para>
-		<para>
-			Note that if the synonym is for a view, those tabs will still be displayed,
-			but will not show any information.
-		</para>
+    </para>
 
-		<simplesect id="dbexplorer-change-table-def">
-			<title>Changing the table definition</title>
-      <para>
-        You can edit the definition of the columns, add new columns or delete existing columns.
-        To apply the changes, click on the <guibutton>Apply DDL</guibutton> button.
-      </para>
-      <para>
-        Editing of the column definition is only possible, if the <link linkend="dbexp-options-allow-alter">Allow table altering</link> option in the DbExplorer is enabled.
-      </para>
-      <para>
-        For details please refer to the section <link linkend="dbexplorer-change-column">Changing table definitions</link>
-      </para>
-    </simplesect>
+		<para>
+			Note that if the synonym is not for a view, those tabs will still be displayed,	but will not show any information.
+		</para>
 	</section>
 
   <section id="dbexplorer-alter">
     <title>Modifying the definition of database objects</title>
 
+    <important>
+      <para>
+        Applying changes to the definition of a table (or other database objects) is only possible if the necessary
+        <literal>ALTER</literal> statements have been configured. For most of the major DBMS these statements are already built into
+        &wb-productname;.
+      </para>
+      <para>
+        If your changes are rejected (e.g. while changing a table name or the datatype of a column), please make
+        sure that you have enabled the option <link linkend="dbexp-options-allow-alter">Allow table altering</link>.
+        If that option is enabled and your DBMS <emphasis>does</emphasis> support the change you were trying to do,
+        please send a mail with the necessary information to the support email address.
+      </para>
+    </important>
+
+    <section id="dbexplorer-change-table-def">
+			<title>Changing the table definition</title>
+      <para>
+        You can edit the definition of the columns, add new columns or delete existing columns directly in the list of columns.
+        To apply the changes, click on the <guibutton>Apply DDL</guibutton> button.
+      </para>
+    </section>
+
     <section id="dbexplorer-rename-objects">
       <title>Renaming objects</title>
         <para>
-          You can edit the name of the objects in the object list. Depending on the DBMS, you might be able to change the
-          name of other database objects as well (e.g. SEQUENCEs, VIEWs, ...).
+          You can change the name of a table (or other objects if the DBMS supports that) directly in the object list.
+          For DBMS that support it, you can also edit the remarks column of the table to change the documentation.
         </para>
         <para>
-          For DBMS that support it, you can also edit the remarks column of the
-          table to change the documentation.
+          Once you have changed a name (or several) the menu item "<guimenuitem>ALTER Script</guimenuitem>" in the
+          context menu of the object list will be enabled. Additionally a button <guibutton>Apply DDL</guibutton> will appear in the status bar
+          of the object list. Both will bring up a window with the necessary SQL statements to apply your changes.
+          You can save the generated script to a file or run the statements directly from that window.
         </para>
-        <para>
-          If the editing the name or comment is rejected, the necessary SQL statements
-          have not been configured for your DBMS. If your DBMS does support changing
-          the object type in question, please send a mail with the necessary
-          information to the support email address.
-        </para>
-        <para>
-          Once you have changed a name (or several) the menu item "ALTER script" in the
-          context menu of the object list, will display a window with the necessary SQL statements
-          to apply your changes. You can save the generated script to a file or run the statements
-          directly from that window.
-        </para>
-    </section>
-
-    <section id="dbexplorer-change-column">
-      <title>Changing column definitions</title>
-      <para>
-        You can change the column name, datatype, default value or the nullable
-        flag in the display of the table's details. If the necessary ALTER statements
-        have been configured for your DBMS, you can generate and run an ALTER
-        script to apply your changes. This is done by clicking on the <guibutton>ALTER table</guibutton>
-        button.
-      </para>
-
-      <para>
-        If your changes are rejected when editing, the necessary SQL statements
-        have not been configured for your DBMS. If your DBMS does support
-        changing table columns, please send a mail with the necessary
-        information to the support email address.
-      </para>
-
     </section>
 
   </section>
