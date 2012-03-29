@@ -477,7 +477,7 @@ public class ArgumentParser
 			return CollectionUtil.arrayList(value);
 		}
 		Object value = this.arguments.get(key);
-		if (value == ARG_PRESENT) return null;
+		if (value == ARG_PRESENT || value == null) return Collections.emptyList();
 		return (List<String>)value;
 	}
 

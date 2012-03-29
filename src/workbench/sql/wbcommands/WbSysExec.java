@@ -79,10 +79,7 @@ public class WbSysExec
 				List<String> args = new ArrayList<String>();
 				args.add(prg);
 				List<String> params = cmdLine.getList(ARG_PRG_ARG);
-				if (params != null)
-				{
-					args.addAll(params);
-				}
+				args.addAll(params);
 				ProcessBuilder pb = new ProcessBuilder(args);
 				String dir = cmdLine.getValue(ARG_WORKING_DIR);
 				if (StringUtil.isNonBlank(dir))

@@ -122,7 +122,7 @@ public class WbDataDiff
 		Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
 		List<String> list = command.getList(PARAM_ALTERNATE_KEYS);
-		if (list == null)
+		if (CollectionUtil.isEmpty(list))
 		{
 			return null;
 		}
@@ -280,7 +280,7 @@ public class WbDataDiff
 		Map<String, Set<String>> alternatekeys = getAlternateKeys(cmdLine, result);
 		dataDiff.setAlternateKeys(alternatekeys);
 		dataDiff.setExcludeRealPK(cmdLine.getBoolean(PARAM_EXCLUDE_REAL_PK, false));
-		
+
 		try
 		{
 			for (int i=0; i < tableCount; i++)

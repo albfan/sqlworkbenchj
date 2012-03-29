@@ -89,17 +89,6 @@ import workbench.util.CharSequenceReader;
 		}
 	}
 
-
-  /*
-	public SQLToken getNextToken()
-		throws IOException
-  {
-    SQLToken t = _getNextToken();
-    if (t != null) t.setKeywordHelper(keywordHelper);
-    return t;
-  }
-	*/
-
 	/**
 	 * Closes the current input stream, and resets the scanner to read from a new input stream.
 	 * All internal variables are reset, the old input stream  cannot be reused
