@@ -75,7 +75,7 @@ public class StatementContext
 		{
 			verbAnalyzer = new CreateAnalyzer(conn, sql, pos);
 		}
-		else if ("EXEC".equalsIgnoreCase(verb) || "WBCALL".equalsIgnoreCase(verb) || "CALL".equalsIgnoreCase(verb))
+		else if ("EXECUTE".equalsIgnoreCase(verb) || "EXEC".equalsIgnoreCase(verb) || "WBCALL".equalsIgnoreCase(verb) || "CALL".equalsIgnoreCase(verb))
 		{
 			verbAnalyzer = new ExecAnalyzer(conn, sql, pos);
 		}

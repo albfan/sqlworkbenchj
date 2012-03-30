@@ -108,26 +108,31 @@ public class TextOptionsPanel
 		return quoteEscape.getEscapeType();
 	}
 
+	@Override
 	public boolean getDecode()
 	{
 		return this.decode.isSelected();
 	}
 
+	@Override
 	public void setDecode(boolean flag)
 	{
 		this.decode.setSelected(flag);
 	}
 
+	@Override
 	public boolean getContainsHeader()
 	{
 		return this.headerIncluded.isSelected();
 	}
 
+	@Override
 	public String getTextDelimiter()
 	{
 		return this.delimiter.getText();
 	}
 
+	@Override
 	public String getTextQuoteChar()
 	{
 		return this.quoteChar.getText();
@@ -137,21 +142,25 @@ public class TextOptionsPanel
 	{
 		this.headerIncluded.setEnabled(false);
 	}
+	@Override
 	public void setContainsHeader(boolean flag)
 	{
 		this.headerIncluded.setSelected(flag);
 	}
 
+	@Override
 	public void setTextDelimiter(String delim)
 	{
 		this.delimiter.setText(delim);
 	}
 
+	@Override
 	public void setTextQuoteChar(String quote)
 	{
 		this.quoteChar.setText(quote);
 	}
 
+	@Override
 	public String getDecimalChar()
 	{
 		String s = this.decimalCharTextField.getText();
@@ -159,6 +168,7 @@ public class TextOptionsPanel
 		return s.trim();
 	}
 
+	@Override
 	public void setDecimalChar(String s)
 	{
 		this.decimalCharTextField.setText(s);

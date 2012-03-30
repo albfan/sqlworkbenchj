@@ -11,9 +11,11 @@
  */
 package workbench.gui.components;
 
+import java.awt.Component;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
 import workbench.util.FixedSizeList;
@@ -61,7 +63,7 @@ public class HistoryTextField
 		for (int i=0; i < cols; i++) b.append('w');
 		this.setPrototypeDisplayValue(b);
 	}
-	
+
 	public String getText()
 	{
 		Object item = getSelectedItem();
@@ -69,10 +71,16 @@ public class HistoryTextField
 		if (item == null) return null;
 		return (String)item;
 	}
-	
+
 	public void setText(String s)
 	{
 		this.setSelectedItem(s);
+		Component edit = this.getEditor().getEditorComponent();
+		if (edit instanceof JTextField)
+		{
+			JTextField field = (JTextField)edit;
+			field.setCaretPosition(0);
+		}
 	}
 
 	public void saveSettings(PropertyStorage props, String prefix)
@@ -80,7 +88,7 @@ public class HistoryTextField
 		props.setProperty(prefix + propName + ".history", StringUtil.listToString(historyValues, ';', true));
 		props.setProperty(prefix + propName + ".lastvalue", this.getText());
 	}
-	
+
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
 		String s = props.getProperty(prefix + propName + ".history", "");
@@ -93,10 +101,10 @@ public class HistoryTextField
 		}
 		this.updateModel();
 		String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
-		
+
 		if (lastValue != null) this.setText(lastValue);
 	}
-	
+
 	public void restoreSettings()
 	{
 		restoreSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
@@ -111,17 +119,17 @@ public class HistoryTextField
 	{
 		addToHistory(getText());
 	}
-	
+
 	public void addToHistory(String s)
 	{
 		if (StringUtil.isEmptyString(s)) return;
-		s = s.trim();	
+		s = s.trim();
 		Object item = getSelectedItem();
 		historyValues.addEntry(s);
 		updateModel();
 		setSelectedItem(item);
 	}
-	
+
 	private void updateModel()
 	{
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
