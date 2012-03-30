@@ -447,7 +447,7 @@ public class ArgumentParser
 		if (getArgumentType(key) == ArgumentType.Repeatable)
 		{
 			List<String> list = getList(key);
-			if (list == null) return null;
+			if (CollectionUtil.isEmpty(list)) return null;
 
 			if (list.size() == 1)
 			{
