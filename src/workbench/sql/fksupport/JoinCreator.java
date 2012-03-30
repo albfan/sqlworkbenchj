@@ -123,7 +123,6 @@ public class JoinCreator
 	{
 		Integer pos = getTableIndexBeforeCursor();
 		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
-		//Collections.sort(tableIndex);
 		int index = tableIndex.indexOf(pos);
 		if (index > 0)
 		{

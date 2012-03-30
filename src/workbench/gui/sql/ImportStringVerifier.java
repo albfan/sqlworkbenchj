@@ -180,6 +180,7 @@ public class ImportStringVerifier
 		dialog.setVisible(true);
 		boolean ok = !dialog.isCancelled();
 		textOptions.saveSettings("clipboard");
+		generalOptions.saveSettings("clipboard");
 		return ok;
 	}
 
