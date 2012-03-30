@@ -78,7 +78,7 @@ public class CreateSnippetAction extends WbAction
 
 		StringBuilder result = new StringBuilder(text.length() + prefix.length() + 10);
 		result.append(prefix);
-		
+
 		boolean first = true;
 
 		if (newLineAfterPrefix)
@@ -126,11 +126,11 @@ public class CreateSnippetAction extends WbAction
 					{
 						result.append(" \"");
 					}
-					result.append(" " + concat + "\n");
+					result.append(' ').append(concat).append('\n');
 				}
 				else
 				{
-					result.append("\"");
+					result.append('"');
 				}
 			}
 			result.append(';');
