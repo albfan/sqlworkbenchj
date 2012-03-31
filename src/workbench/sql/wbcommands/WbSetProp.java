@@ -54,7 +54,18 @@ public class WbSetProp
 		{
 			String type = cmdLine.getValue(PARAM_TYPE, "temp");
 			String prop = cmdLine.getValue(PARAM_PROP);
-			String value = cmdLine.getValue(PARAM_VALUE);
+			String value = null;
+			int pos = prop.indexOf(':');
+			if (pos < 0)
+			{
+				cmdLine.getValue(PARAM_VALUE);
+			}
+			else
+			{
+				value = prop.substring(pos + 1);
+				prop = prop.substring(0, pos);
+			}
+			
 			if (prop == null)
 			{
 				result.setFailure();

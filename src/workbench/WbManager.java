@@ -817,7 +817,14 @@ public final class WbManager
 		}
 		else
 		{
-			if (Settings.getInstance().getBoolProperty("workbench.gui.warmup", false))
+			boolean doWarmup = Settings.getInstance().getBoolProperty("workbench.gui.warmup", false);
+			if (!doWarmup)
+			{
+				// if the connection dialog is not show, pre-load the profiles
+				doWarmup = !Settings.getInstance().getShowConnectDialogOnStartup();
+			}
+
+			if (doWarmup)
 			{
 				warmUp();
 			}

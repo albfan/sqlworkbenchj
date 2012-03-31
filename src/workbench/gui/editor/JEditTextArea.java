@@ -582,21 +582,30 @@ public class JEditTextArea
 	}
 
 	/**
-	 * Updates the state of the scroll bars. This should be called
-	 * if the number of lines in the document changes, or when the
-	 * size of the text area changes.
+	 * Updates the state of the scroll bars.
+	 *
+	 * This should be called
+	 * if the number of lines in the document changes, or when the size of the text area changes.
 	 */
 	public void updateScrollBars()
 	{
+		if (!EventQueue.isDispatchThread())
+		{
+			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "Not called from within the EDT!", new Exception());
+		}
+		
+		boolean changed = false;
+		int lineCount = getLineCount();
 		if (vertical != null && visibleLines != 0)
 		{
-			vertical.setValues(firstLine, visibleLines, 0, getLineCount());
+			vertical.setValues(firstLine, visibleLines, 0, lineCount);
 			vertical.setUnitIncrement(2);
 			vertical.setBlockIncrement(visibleLines);
-			if (visibleLines > getLineCount())
+			if (visibleLines > lineCount)
 			{
 				setFirstLine(0);
 				remove(vertical);
+				changed = true;
 			}
 			else
 			{
@@ -616,11 +625,16 @@ public class JEditTextArea
 			if (maxLineWidth < width)
 			{
 				remove(horizontal);
+				changed = true;
 			}
 			else
 			{
 				add(BOTTOM, horizontal);
 			}
+		}
+		if (changed)
+		{
+			invalidate();
 		}
 	}
 
@@ -744,13 +758,13 @@ public class JEditTextArea
 			changed = true;
 		}
 
-		if(firstLine != this.firstLine)
+		if (firstLine != this.firstLine)
 		{
 			this.firstLine = firstLine;
 			changed = true;
 		}
 
-		if(changed)
+		if (changed)
 		{
 			updateScrollBars();
 			painter.repaint();
@@ -1073,11 +1087,11 @@ public class JEditTextArea
 				@Override
 				public void run()
 				{
-					validate();
+					invalidate();
 					painter.repaint();
 					painter.validate();
-					repaint();
 					updateScrollBars();
+					validate();
 				}
 			});
 
@@ -1319,6 +1333,7 @@ public class JEditTextArea
 					invalidate();
 					updateScrollBars();
 					painter.invalidateLineRange(0, getLineCount());
+					validate();
 				}
 			});
 		}
