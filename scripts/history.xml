@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-03-25">
+  <release build="-1" date="2012-03-27">
+    <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="2" type="fix">When running a stored procedure in Oracle message from dbms_output would not be shown if the procedure terminated with an error.</entry>
     <entry dev-build="1" type="fix">On some (slow) computers the application would hang when trying to display the initial connection selection dialog</entry>
   </release>
   <release build="112" date="2012-03-25">
