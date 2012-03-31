@@ -142,7 +142,8 @@ public class OracleTableSourceBuilder
 			pstmt.setString(2, tbl.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableConfigOptions()", "Using sql:\n" +
+					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
 			}
 
 			String options = "";

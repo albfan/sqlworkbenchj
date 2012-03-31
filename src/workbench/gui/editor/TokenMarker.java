@@ -64,6 +64,33 @@ public abstract class TokenMarker
 		return null;
 	}
 
+	private Token findTokenForPosition(int line, int positionInLine)
+	{
+		Token tok = getFirstTokenInLine(line);
+		if (tok == null) return null;
+		int pos = 0;
+		while (tok != null)
+		{
+			if (pos <= positionInLine && positionInLine <= pos + tok.length) return tok;
+			pos += tok.length;
+			tok = tok.next;
+			if (pos > positionInLine) return null;
+		}
+		return null;
+	}
+
+	public boolean isStringLiteralAt(int line, int positionInLine)
+	{
+		Token tok = findTokenForPosition(line, positionInLine);
+		if (tok == null) return false;
+		if (tok.isLiteral())
+		{
+			char pending = getPendingLiteralChar();
+			return pending == 0;
+		}
+		return false;
+	}
+
 	public Token getFirstTokenInLine(int lineIndex)
 	{
 		if (lineIndex < 0 || lineIndex >= length)
@@ -116,7 +143,7 @@ public abstract class TokenMarker
 		}
 		lineStartTokens.set(lineIndex, null);
 	}
-	
+
 	/**
 	 * A wrapper for the lower-level <code>markTokensImpl</code> method
 	 * that is called to split a line up into tokens.
@@ -130,7 +157,7 @@ public abstract class TokenMarker
 		Token prev = getPreviousLineToken(lineIndex);
 
 		lineStartTokens.set(lineIndex, null);
-		
+
 		markTokensImpl(prev, line, lineIndex);
 
 		// tell the last token if it has a pending literal character (" or ')
@@ -171,7 +198,7 @@ public abstract class TokenMarker
 
 	/**
 	 * Informs the token marker that lines have been inserted into
-	 * the document. 
+	 * the document.
 	 * @param index The first line number
 	 * @param lines The number of lines
 	 */

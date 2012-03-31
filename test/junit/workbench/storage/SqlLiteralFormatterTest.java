@@ -32,6 +32,23 @@ public class SqlLiteralFormatterTest
 	}
 
 	@Test
+	public void testNVarchar()
+	{
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		ColumnIdentifier col = new ColumnIdentifier("SOME_STRING", Types.VARCHAR);
+		ColumnData data = new ColumnData("hello", col);
+		CharSequence literal = f.getDefaultLiteral(data);
+		assertNotNull(literal);
+		assertEquals("'hello'", literal.toString());
+
+		col = new ColumnIdentifier("SOME_STRING", Types.NVARCHAR);
+		data = new ColumnData("hello", col);
+		literal = f.getDefaultLiteral(data);
+		assertNotNull(literal);
+		assertEquals("N'hello'", literal.toString());
+	}
+	
+	@Test
 	public void testGetJdbcLiteral()
 	{
 		SqlLiteralFormatter f = new SqlLiteralFormatter();

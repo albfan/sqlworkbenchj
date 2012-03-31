@@ -54,13 +54,7 @@ import workbench.gui.actions.*;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
-import workbench.gui.editor.AnsiSQLTokenMarker;
-import workbench.gui.editor.JEditTextArea;
-import workbench.gui.editor.SearchAndReplace;
-import workbench.gui.editor.SyntaxDocument;
-import workbench.gui.editor.SyntaxUtilities;
-import workbench.gui.editor.TextFormatter;
-import workbench.gui.editor.TokenMarker;
+import workbench.gui.editor.*;
 import workbench.interfaces.*;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -125,6 +119,7 @@ public class EditorPanel
 		EditorPanel p = new EditorPanel(sql);
 		p.editorType = SQL_EDITOR;
 		p.sqlTokenMarker = sql;
+		p.setBracketCompleter(new BracketCompleter());
 		return p;
 	}
 
@@ -348,8 +343,10 @@ public class EditorPanel
 		this.addKeyBinding(anAction);
 	}
 
+	@Override
 	public void dispose()
 	{
+		super.dispose();
 		Settings.getInstance().removeFontChangedListener(this);
 		Settings.getInstance().removePropertyChangeListener(this);
 		this.clearUndoBuffer();
@@ -359,8 +356,8 @@ public class EditorPanel
 		this.painter.dispose();
 		inputHandler.dispose();
 		this.setDocument(new SyntaxDocument());
-
 	}
+
 	/**
 	 * Return the selected statement of the editor. If no
 	 * text is selected, the whole text will be returned

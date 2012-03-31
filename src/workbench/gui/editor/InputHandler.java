@@ -525,10 +525,13 @@ public class InputHandler
 				int caret = textArea.getCaretPosition();
 				if (caret == 0) return;
 
+				boolean removeNext = textArea.removeClosingBracket(caret);
+				int len = removeNext ? 2 : 1;
+
 				SyntaxDocument doc = textArea.getDocument();
 				try
 				{
-					doc.remove(caret - 1, 1);
+					doc.remove(caret - 1, len);
 				}
 				catch (BadLocationException bl)
 				{
@@ -576,6 +579,7 @@ public class InputHandler
 			}
 		}
 	}
+
 	public static class insert_tab implements ActionListener
 	{
 		@Override
@@ -658,6 +662,10 @@ public class InputHandler
 			if (textArea.isEditable())
 			{
 				textArea.overwriteSetSelectedText(str);
+				if (str.length() == 1)
+				{
+					textArea.completeBracket(str.charAt(0));
+				}
 			}
 			else
 			{

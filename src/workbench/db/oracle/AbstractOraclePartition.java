@@ -196,7 +196,7 @@ public abstract class AbstractOraclePartition
 			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionDefinitionSql);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTablePartition.retrieveDefinition()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveDefinition()", "Using SQL=\n" +
 					SqlUtil.replaceParameters(retrievePartitionDefinitionSql, dbObject.getSchema(), dbObject.getObjectName()));
 			}
 
@@ -244,7 +244,7 @@ public abstract class AbstractOraclePartition
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveColumnsSql);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveColumns()", "Using SQL=\n" +
 					SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getObjectName()));
 			}
 
@@ -275,7 +275,7 @@ public abstract class AbstractOraclePartition
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubColumns);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveSubColumns()", "Using SQL=\n" +
 					SqlUtil.replaceParameters(retrieveSubColumns, dbObject.getSchema(), dbObject.getObjectName()));
 			}
 
@@ -320,7 +320,7 @@ public abstract class AbstractOraclePartition
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubPartitions);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveSubPartitions()", "Using SQL=\n" +
 					SqlUtil.replaceParameters(retrieveSubPartitions, object.getSchema(), object.getObjectName()));
 			}
 
@@ -370,7 +370,7 @@ public abstract class AbstractOraclePartition
 			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionSQL);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTablePartition.retrieveColumns()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrievePartitions()", "Using SQL=\n" +
 					SqlUtil.replaceParameters(retrievePartitionSQL, object.getSchema(), object.getObjectName()));
 			}
 
@@ -404,6 +404,12 @@ public abstract class AbstractOraclePartition
 		{
 			retrieveSubPartitions(object, conn);
 		}
+	}
+
+	private String getClassName()
+	{
+		String clsname = getClass().getName();
+		return clsname.substring(clsname.lastIndexOf('.') + 1);
 	}
 
 }

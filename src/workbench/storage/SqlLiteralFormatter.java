@@ -75,6 +75,7 @@ public class SqlLiteralFormatter
 	/**
 	 * Create  new formatter specifically for the DBMS identified
 	 * by the connection.
+	 *
 	 * The type of date literals used, can be changed to a different
 	 * "product" using {@link #setDateLiteralType(String)}
 	 *
@@ -186,6 +187,7 @@ public class SqlLiteralFormatter
 
 	/**
 	 * Create external BLOB files instead of BLOB literals.
+	 *
 	 * This will reset any literal formatting selected with createAnsiBlobLiterals()
 	 * or createDbmsBlobLiterals().
 	 * The generated SQL Literal will be compatible with SQL Workbench extended
@@ -237,36 +239,41 @@ public class SqlLiteralFormatter
 		return f;
 	}
 
-	private String quoteString(String t)
+	private String quoteString(int jdbcType, String t)
 	{
 		if (t == null) return t;
-		return "'" + t.replace("'", "''") + "'";
+		String prefix;
+		if (jdbcType == Types.NVARCHAR || jdbcType == Types.NCHAR || jdbcType == Types.NCLOB || jdbcType == Types.LONGNVARCHAR)
+		{
+			prefix = "N'";
+		}
+		else
+		{
+			 prefix = "'";
+		}
+		return prefix + t.replace("'", "''") + "'";
 	}
 
 	/**
 	 * Return the default literal for the given column data.
+	 *
 	 * Date and Timestamp data will be formatted according to the
 	 * syntax defined by the {@link #setDateLiteralType(String)} method
 	 * or through the connection provided in the constructor.
+	 *
 	 * @param data the data to be converted into a literal.
 	 * @return the literal to be used in a SQL statement
 	 * @see #setDateLiteralType(String)
 	 */
 	public CharSequence getDefaultLiteral(ColumnData data)
 	{
-		if (data.isNull()) return "NULL";
-
 		Object value = data.getValue();
 		if (value == null) return "NULL";
 
 		int type = data.getIdentifier().getDataType();
 		String dbmsType = data.getIdentifier().getDbmsType();
 
-		if (value == null)
-		{
-			return "NULL";
-		}
-		else if (type == Types.STRUCT)
+		if (type == Types.STRUCT)
 		{
 			return value.toString();
 		}
@@ -284,12 +291,12 @@ public class SqlLiteralFormatter
 				catch (Exception e)
 				{
 					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Could not write CLOB file", e);
-					return quoteString(t);
+					return quoteString(type, t);
 				}
 			}
 			else
 			{
-				return quoteString(t);
+				return quoteString(type, t);
 			}
 		}
 		else if (value instanceof Time)
@@ -317,9 +324,13 @@ public class SqlLiteralFormatter
 				path = f.getAbsolutePath();
 			}
 			if (SqlUtil.isBlobType(type))
+			{
 				return "{$blobfile='" + path + "'}";
+			}
 			else if (SqlUtil.isClobType(type))
+			{
 				return "{$clobfile='" + path + "' encoding='" + this.clobEncoding + "'}";
+			}
 		}
 		else if (type == java.sql.Types.BIT && "bit".equalsIgnoreCase(data.getIdentifier().getDbmsType()))
 		{

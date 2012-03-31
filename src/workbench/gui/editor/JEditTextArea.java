@@ -185,6 +185,8 @@ public class JEditTextArea
 
 	private FontZoomer fontZoomer;
 
+	private BracketCompleter bracketCompleter;
+
 	/**
 	 * Creates a new JEditTextArea with the default settings.
 	 */
@@ -453,6 +455,51 @@ public class JEditTextArea
 			stopBlinkTimer();
 		}
 		painter.invalidateSelectedLines();
+	}
+
+	public void dispose()
+	{
+		if (bracketCompleter != null) bracketCompleter.dispose();
+	}
+
+	public boolean removeClosingBracket(int position)
+	{
+		if (bracketCompleter == null || currentTokenMarker == null) return false;
+		String toBeRemoved = getText(position - 1, 1);
+		if (toBeRemoved == null) return false;
+
+		String toComplete = bracketCompleter.getCompletionChar(toBeRemoved.charAt(0));
+		if (toComplete == null) return false;
+
+		String next = getText(position, 1);
+		return StringUtil.equalString(toComplete, next);
+	}
+
+	public void completeBracket(char currentChar)
+	{
+		if (bracketCompleter == null || currentTokenMarker == null) return;
+
+		String toComplete = bracketCompleter.getCompletionChar(currentChar);
+		if (toComplete == null) return;
+
+		int line = getCaretLine();
+		int positionInLine = getCaretPositionInLine(line);
+
+		// do not complete brackets inside string literals
+		if (!currentTokenMarker.isStringLiteralAt(line, positionInLine))
+		{
+			// insertText() will move the caret, so we need to remember the last position
+			// in order to put the caret back where it was
+			int caret = getCaretPosition();
+			insertText(caret, toComplete);
+			setCaretPosition(caret);
+		}
+
+	}
+
+	public void setBracketCompleter(BracketCompleter completer)
+	{
+		this.bracketCompleter = completer;
 	}
 
 	/**
@@ -2707,14 +2754,22 @@ public class JEditTextArea
 			int newEnd;
 
 			if (selectionStart > offset || (selectionStart == selectionEnd && selectionStart == offset))
+			{
 				newStart = selectionStart + length;
+			}
 			else
+			{
 				newStart = selectionStart;
+			}
 
 			if (selectionEnd >= offset)
+			{
 				newEnd = selectionEnd + length;
+			}
 			else
+			{
 				newEnd = selectionEnd;
+			}
 
 			select(newStart,newEnd);
 		}
@@ -2730,26 +2785,37 @@ public class JEditTextArea
 			int newStart;
 			int newEnd;
 
-			if(selectionStart > offset)
+			if (selectionStart > offset)
 			{
-				if(selectionStart > offset + length)
+				if (selectionStart > offset + length)
+				{
 					newStart = selectionStart - length;
+				}
 				else
+				{
 					newStart = offset;
+				}
 			}
 			else
-				newStart = selectionStart;
-
-			if(selectionEnd > offset)
 			{
-				if(selectionEnd > offset + length)
+				newStart = selectionStart;
+			}
+
+			if (selectionEnd > offset)
+			{
+				if (selectionEnd > offset + length)
+				{
 					newEnd = selectionEnd - length;
+				}
 				else
+				{
 					newEnd = offset;
+				}
 			}
 			else
+			{
 				newEnd = selectionEnd;
-
+			}
 			select(newStart,newEnd);
 		}
 
@@ -2764,7 +2830,7 @@ public class JEditTextArea
 		@Override
 		public void mouseDragged(MouseEvent evt)
 		{
-			if(popup != null && popup.isVisible()) return;
+			if (popup != null && popup.isVisible()) return;
 
 			setSelectionRectangular((evt.getModifiers()	& Settings.getInstance().getRectSelectionModifier()) != 0);
 
