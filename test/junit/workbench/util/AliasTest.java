@@ -42,4 +42,18 @@ public class AliasTest
 		assertEquals("\"Imbecile Schema Name\".\"Daft table name\"", alias.getObjectName());
 		assertNull(alias.getAlias());
 	}
+
+
+	@Test
+	public void testEquals()
+	{
+		TableAlias t1 = new TableAlias("t1");
+		TableAlias t2 = new TableAlias("t1 as foo");
+		assertTrue(t1.equals(t1));
+		assertTrue(t2.equals(t2));
+		assertFalse(t2.equals(t1));
+		assertFalse(t1.equals(t2));
+		TableAlias t3 = new TableAlias("t1");
+		assertTrue(t1.equals(t3));
+	}
 }

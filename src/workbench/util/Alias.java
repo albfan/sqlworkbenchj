@@ -123,15 +123,11 @@ public class Alias
 			return false;
 		}
 		final Alias other = (Alias) obj;
-		if ((this.objectName == null) ? (other.objectName != null) : !this.objectName.equals(other.objectName))
+		if (StringUtil.equalStringIgnoreCase(this.objectName, other.objectName))
 		{
-			return false;
+			return StringUtil.equalStringIgnoreCase(this.alias, other.alias);
 		}
-		if ((this.alias == null) ? (other.alias != null) : !this.alias.equals(other.alias))
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 }

@@ -72,12 +72,16 @@ public class JoinCreatorTest
 			"select * \n" +
 			"from t1 \n" +
 			"  join t2 on t2.i1 = t1.id \n" +
-			"  join t3 on  ";
+			"  join t3 on t3.i1 = t1.id \n" +
+			"  join t4 on  ";
 
-		int pos = sql.indexOf("t3 on") + "t3 on".length() + 1;
+		int pos = sql.indexOf("t4 on") + "t4 on".length() + 1;
 		JoinCreator creator = new JoinCreator(sql, pos, null);
 		List<TableAlias> tables = creator.getPossibleJoinTables();
 		assertEquals(2, tables.size());
+		assertTrue(tables.indexOf(new TableAlias("t2"))  > - 1);
+		assertTrue(tables.indexOf(new TableAlias("t1"))  > - 1);
+		assertTrue(tables.indexOf(new TableAlias("t3"))  == - 1);
 	}
 
 	@Test
