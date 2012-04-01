@@ -11,11 +11,7 @@
 package workbench.sql.fksupport;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import workbench.db.WbConnection;
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
@@ -51,7 +47,8 @@ public class JoinCreator
 	public JoinCreator(String statement, int positionInStatement, WbConnection dbConn)
 	{
 		this.connection = dbConn;
-		SqlKeywordHelper helper = new SqlKeywordHelper(connection.getDbId());
+		String dbid = connection != null ? connection.getDbId() : null;
+		SqlKeywordHelper helper = new SqlKeywordHelper(dbid);
 		keywords = helper.getKeywords();
 		int realPos = setSql(statement, positionInStatement);
 		setCursorPosition(realPos);
@@ -88,6 +85,12 @@ public class JoinCreator
 		throws SQLException
 	{
 		TableAlias joinTable = getJoinTable();
+		return getJoinCondition(joinTable);
+	}
+	
+	public String getJoinCondition(TableAlias joinTable)
+		throws SQLException
+	{
 		TableAlias joinedTable = getJoinedTable();
 		if (joinTable == null || joinedTable == null) return null;
 		JoinColumnsDetector detector = new JoinColumnsDetector(connection, joinTable, joinedTable);
@@ -117,6 +120,28 @@ public class JoinCreator
 			return Character.isWhitespace(c);
 		}
 		return false;
+	}
+
+	public List<TableAlias> getPossibleJoinTables()
+	{
+		Integer index = getTableIndexBeforeCursor();
+		if (index == null) return Collections.emptyList();
+
+		int pos = index.intValue();
+
+		TableAlias firstTable = getJoinTable();
+
+		List<TableAlias> tables = new ArrayList<TableAlias>(tablePositions.size());
+
+		for (Map.Entry<Integer, TableAlias> entry : tablePositions.entrySet())
+		{
+			int tableIndex = entry.getKey().intValue();
+			if (tableIndex < pos && !entry.getValue().equals(firstTable))
+			{
+				tables.add(entry.getValue());
+			}
+		}
+		return tables;
 	}
 
 	public TableAlias getJoinTable()

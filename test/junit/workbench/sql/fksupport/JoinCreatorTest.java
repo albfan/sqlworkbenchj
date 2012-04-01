@@ -10,6 +10,8 @@
  */
 package workbench.sql.fksupport;
 
+import java.util.List;
+import org.junit.BeforeClass;
 import workbench.resource.Settings;
 import org.junit.AfterClass;
 import workbench.TestUtil;
@@ -30,20 +32,15 @@ public class JoinCreatorTest
 
 	public JoinCreatorTest()
 	{
+		super("JoinCreatorTest");
 	}
 
-	@AfterClass
-	public static void tearDownClass()
-		throws Exception
-	{
-		ConnectionMgr.getInstance().disconnectAll();
-	}
 
-	@Test
-	public void testJoinCreator()
+	@BeforeClass
+	public static void initClass()
 		throws Exception
 	{
-		TestUtil util = getTestUtil();
+		TestUtil util = new TestUtil("JoinCreatorTest");
 		WbConnection conn = util.getConnection();
 		TestUtil.executeScript(conn,
 			"create table person (per_id integer not null, tenant_id integer not null, person_name varchar(10), primary key (per_id, tenant_id));\n" +
@@ -59,6 +56,35 @@ public class JoinCreatorTest
 			");\n" +
 			"commit;"
 		);
+	}
+
+	@AfterClass
+	public static void tearDownClass()
+		throws Exception
+	{
+		ConnectionMgr.getInstance().disconnectAll();
+	}
+
+	@Test
+	public void testGetTables()
+	{
+		String sql =
+			"select * \n" +
+			"from t1 \n" +
+			"  join t2 on t2.i1 = t1.id \n" +
+			"  join t3 on  ";
+
+		int pos = sql.indexOf("t3 on") + "t3 on".length() + 1;
+		JoinCreator creator = new JoinCreator(sql, pos, null);
+		List<TableAlias> tables = creator.getPossibleJoinTables();
+		assertEquals(2, tables.size());
+	}
+
+	@Test
+	public void testJoinCreator()
+		throws Exception
+	{
+		WbConnection conn = ConnectionMgr.getInstance().findConnection("JoinCreatorTest");
 
 		String sql = "select * from person p join address a join address_type adt on  ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
@@ -77,6 +103,7 @@ public class JoinCreatorTest
 		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
 		creator.setCursorPosition(pos);
 		condition = creator.getJoinCondition();
+		assertNotNull(condition);
 		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
 
 		creator.setCursorPosition(pos + 1);
@@ -109,5 +136,20 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", creator.getJoinCondition().trim());
+	}
+
+	//@Test
+	public void testSetJoinTable()
+	{
+		String sql =
+			"select * \n" +
+			"from t1 \n" +
+			"  join t2 on t2.i1 = t1.id \n" +
+			"  join t3 on  ";
+
+		int pos = sql.indexOf("t3 on") + "t3 on".length() + 1;
+		JoinCreator creator = new JoinCreator(sql, pos, null);
+		List<TableAlias> tables = creator.getPossibleJoinTables();
+		assertEquals(2, tables.size());
 	}
 }

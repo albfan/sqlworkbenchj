@@ -102,4 +102,36 @@ public class Alias
 		return display;
 	}
 
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 47 * hash + (this.objectName != null ? this.objectName.hashCode() : 0);
+		hash = 47 * hash + (this.alias != null ? this.alias.hashCode() : 0);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+		{
+			return false;
+		}
+		if (getClass() != obj.getClass())
+		{
+			return false;
+		}
+		final Alias other = (Alias) obj;
+		if ((this.objectName == null) ? (other.objectName != null) : !this.objectName.equals(other.objectName))
+		{
+			return false;
+		}
+		if ((this.alias == null) ? (other.alias != null) : !this.alias.equals(other.alias))
+		{
+			return false;
+		}
+		return true;
+	}
+
 }

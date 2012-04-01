@@ -265,7 +265,7 @@ public class ObjectDropperUI
     addMissingTables = new javax.swing.JCheckBox();
     showScriptButton = new javax.swing.JButton();
     checkBoxCascadeConstraints = new javax.swing.JCheckBox();
-    jPanel1 = new javax.swing.JPanel();
+    jSeparator1 = new javax.swing.JSeparator();
     buttonPanel = new javax.swing.JPanel();
     dropButton = new WbButton();
     cancelButton = new WbButton();
@@ -303,7 +303,9 @@ public class ObjectDropperUI
     checkPanel.add(addMissingTables);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 6, 0);
     optionPanel.add(checkPanel, gridBagConstraints);
@@ -318,7 +320,7 @@ public class ObjectDropperUI
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 3, 0);
     optionPanel.add(showScriptButton, gridBagConstraints);
@@ -327,17 +329,19 @@ public class ObjectDropperUI
     checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LblCascadeConstraints"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 3, 3, 0);
     optionPanel.add(checkBoxCascadeConstraints, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    optionPanel.add(jPanel1, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 10, 2);
+    optionPanel.add(jSeparator1, gridBagConstraints);
 
     mainPanel.add(optionPanel, java.awt.BorderLayout.SOUTH);
 
@@ -386,6 +390,7 @@ public class ObjectDropperUI
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     add(statusLabel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
@@ -513,8 +518,8 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
   protected javax.swing.JButton checkFKButton;
   protected javax.swing.JPanel checkPanel;
   protected javax.swing.JButton dropButton;
-  protected javax.swing.JPanel jPanel1;
   protected javax.swing.JScrollPane jScrollPane1;
+  protected javax.swing.JSeparator jSeparator1;
   protected javax.swing.JPanel mainPanel;
   protected javax.swing.JList objectList;
   protected javax.swing.JPanel optionPanel;

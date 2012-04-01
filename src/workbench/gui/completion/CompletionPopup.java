@@ -384,7 +384,7 @@ public class CompletionPopup
 		}
 	}
 
-	private void doPaste()
+	protected void doPaste()
 	{
 		Object[] selected = this.elementList.getSelectedValues();
 		if (selected == null)

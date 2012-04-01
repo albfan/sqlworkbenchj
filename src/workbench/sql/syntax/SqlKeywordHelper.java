@@ -62,8 +62,8 @@ public class SqlKeywordHelper
 	/**
 	 * Read keywords specific for the DBMS identified by the given DBID.
 	 * (dbms-independent keywords will be included).
-	 * 
-	 * @param id the DBID for the dbms
+	 *
+	 * @param id the DBID for the DBMS, may be null. In that case only standard keywords are used.
 	 */
 	public SqlKeywordHelper(String id)
 	{

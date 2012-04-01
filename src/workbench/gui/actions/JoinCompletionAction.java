@@ -14,8 +14,8 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
-
-import javax.swing.KeyStroke;
+import java.util.List;
+import javax.swing.*;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
@@ -28,6 +28,7 @@ import workbench.sql.ScriptParser;
 import workbench.sql.fksupport.JoinCreator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.TableAlias;
 
 /**
  * Action do an automatic completion of a join in a SQL statement.
@@ -83,6 +84,13 @@ public class JoinCompletionAction
 			setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"), 0);
 			JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
 			String condition = creator.getJoinCondition();
+			List<TableAlias> tables = creator.getPossibleJoinTables();
+
+			if (StringUtil.isBlank(condition) && tables.size() == 1)
+			{
+				condition = creator.getJoinCondition(tables.get(0));
+			}
+
 			if (StringUtil.isNonBlank(condition))
 			{
 				editor.insertText(condition + " ");
@@ -90,7 +98,17 @@ public class JoinCompletionAction
 			}
 			else
 			{
-				setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
+				if (tables.size() > 1)
+				{
+					setStatusMessage("", 0);
+					JoinCompletionPopup popup = new JoinCompletionPopup(editor, tables, creator);
+					popup.setStatusBar(client.getStatusBar());
+					popup.showPopup();
+				}
+				else
+				{
+					setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
+				}
 			}
 		}
 		catch (SQLException ex)

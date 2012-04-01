@@ -101,6 +101,12 @@ FROM orders ord
     <para>
       This feature requires on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
     </para>
+    <para>
+      By default &wb-productname; tries to create a join condition on the table from the "previous" <literal>JOIN</literal> condition
+      (or the <literal>FROM</literal>) clause. If no foreign key constraint is found linking the "current" and the "previous" table,
+      a popup window with all tables in the select statement that could be used for completion is displayed. This popup merely
+      looks at the tables in the statement, no test for foreign key constraints is done when displaying this list.
+    </para>
   </section>
 
 	<section id="insert-value-hinting">

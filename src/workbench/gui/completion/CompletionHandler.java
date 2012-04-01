@@ -52,7 +52,7 @@ public class CompletionHandler
 
 	public CompletionHandler()
 	{
-		header = new JLabel("Tables");
+		header = new JLabel(ResourceMgr.getString("LblCompletionListTables"));
 		header.setForeground(Color.BLUE);
 		header.setBorder(BorderFactory.createEmptyBorder(0,2,0,2));
 	}
