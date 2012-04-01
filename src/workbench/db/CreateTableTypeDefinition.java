@@ -1,11 +1,11 @@
 /*
  * CreateTableTypeDefinition
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db;
@@ -14,6 +14,14 @@ import java.util.Map;
 import workbench.util.ArgumentValue;
 
 /**
+ * A wrapper class to retrieve defined "table types" from workbench.settings.
+ *
+ * These table types are used by the DataCopier in case the target table should be
+ * created on the fly. The name of the type is used to retrieve the SQL definition
+ * to create such a table.
+ *
+ * @see TableCreator
+ * @see DbSettings#getCreateTableTemplate(String);
  *
  * @author Thomas Kellerer
  */
@@ -48,7 +56,7 @@ public class CreateTableTypeDefinition
 	{
 		return dbid;
 	}
-	
+
 	public String getDatabase()
 	{
 		return dbmsName;
@@ -58,7 +66,7 @@ public class CreateTableTypeDefinition
 	 * The type of this definition.
 	 *
 	 * This type can be used to retrieve the configured template from DbSettings
-	 * 
+	 *
 	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public String getType()
@@ -146,5 +154,5 @@ public class CreateTableTypeDefinition
 		return hash;
 	}
 
-	
+
 }
