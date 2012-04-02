@@ -1404,7 +1404,7 @@ public class DbSettings
 
 	public String getQuoteEscapeCharacter()
 	{
-		return Settings.getInstance().getProperty(prefix + "quote.escape", "\"");
+		return Settings.getInstance().getProperty(prefix + "quote.escape", null);
 	}
 
 	public boolean objectInfoWithFK()

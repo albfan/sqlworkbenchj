@@ -367,11 +367,17 @@ public class DbMetadata
 
 		this.metaSqlMgr = new MetaDataSqlManager(productName);
 
+		String quote = dbSettings.getQuoteEscapeCharacter();
+		if (quote != null)
+		{
+			this.quoteCharacter = "\"";
+			LogMgr.logDebug("DbMetadata.<init>", "Using configured quote escape character: " + quoteCharacter);
+		}
+
 		if (StringUtil.isBlank(quoteCharacter))
 		{
-			this.quoteCharacter = dbSettings.getQuoteEscapeCharacter();
+			this.quoteCharacter = "\"";
 			LogMgr.logDebug("DbMetadata.<init>", "Using quote escape character: " + quoteCharacter);
-
 		}
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
