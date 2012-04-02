@@ -243,7 +243,7 @@ public class DeleteScriptGenerator
 
 	private void appendColumnData(StringBuilder sql, String column, ColumnData data)
 	{
-		sql.append(SqlUtil.quoteObjectname(column));
+		sql.append(connection.getMetadata().quoteObjectname(column));
 		if (data.isNull() || data == null)
 		{
 			sql.append(" IS NULL");

@@ -646,7 +646,7 @@ public class PostgresProcedureReader
 				if (StringUtil.isNonBlank(sortop))
 				{
 					source.append(",\n  sortop = ");
-					source.append(SqlUtil.quoteObjectname(sortop));
+					source.append(connection.getMetadata().quoteObjectname(sortop));
 				}
 
 				String finalfunc = rs.getString("aggfinalfn");

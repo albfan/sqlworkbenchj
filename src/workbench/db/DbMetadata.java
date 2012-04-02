@@ -1155,26 +1155,15 @@ public class DbMetadata
 
 		boolean needQuote = quoteAlways ? true : needsQuotes(name);
 
-		try
+		if (needQuote)
 		{
-			if (needQuote)
-			{
-				StringBuilder result = new StringBuilder(name.length() + quoteCharacter.length() * 2);
-				result.append(this.quoteCharacter);
-				result.append(name.trim());
-				result.append(this.quoteCharacter);
-				return result.toString();
-			}
-
+			StringBuilder result = new StringBuilder(name.length() + quoteCharacter.length() * 2);
+			result.append(this.quoteCharacter);
+			result.append(name.trim());
+			result.append(this.quoteCharacter);
+			return result.toString();
 		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("DbMetadata.quoteObjectName()", "Error when retrieving DB information", e);
-		}
-
-		// if it is not a keyword, we have to check for special characters such
-		// as a space, $, digits at the beginning etc
-		return SqlUtil.quoteObjectname(name);
+		return name;
 	}
 
 	/**
@@ -1202,6 +1191,11 @@ public class DbMetadata
 			Pattern chars = Pattern.compile("[A-Za-z0-9]+");
 			Matcher m = chars.matcher(name);
 			needQuote = !m.matches();
+		}
+		else if (!needQuote)
+		{
+			Matcher matcher = SqlUtil.SQL_IDENTIFIER.matcher(name);
+			needQuote = !matcher.matches();
 		}
 
 		if (!needQuote && !this.storesMixedCaseIdentifiers())

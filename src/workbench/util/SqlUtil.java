@@ -52,7 +52,7 @@ import workbench.storage.ResultInfo;
  */
 public class SqlUtil
 {
-	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
+	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 
 	private static final SQLLexer LEXER_INSTANCE = new SQLLexer("");
 
@@ -154,24 +154,29 @@ public class SqlUtil
 	 */
 	public static String quoteObjectname(String objectName, boolean quoteAlways)
 	{
-		return quoteObjectname(objectName, quoteAlways, false);
+		return quoteObjectname(objectName, quoteAlways, false, '"');
 	}
 
 	/**
 	 * Quote the given objectName if needed according to the SQL standard.
 	 * If quoteAlways is true, then no name checking is performed.
 	 *
+	 * DbMetadata.quoteObjectName() should be preferred over this method because it will use
+	 * the correct quoting character reported by the JDBC driver.
+	 *
 	 * @param objectName the name to quote
 	 * @param quoteAlways if true, the name is not tested for special characters
-	 * @param checkReservedWords  if true, the value will be compared to a list of SQL 2003 reserved words.
+	 * @param checkReservedWords if true, the value will be compared to a list of SQL 2003 reserved words.
 	 *
 	 * @return the quoted version of the name.
+	 * @see DbMetadata#quoteObjectname(java.lang.String)
 	 */
-	public static String quoteObjectname(String objectName, boolean quoteAlways, boolean checkReservedWords)
+	public static String quoteObjectname(String objectName, boolean quoteAlways, boolean checkReservedWords, char quote)
 	{
 		if (objectName == null) return null;
 		if (objectName.length() == 0) return "";
-		if (objectName.charAt(0) == '"') return objectName;
+
+		if (objectName.charAt(0) == quote) return objectName;
 
 		objectName = objectName.trim();
 		if (objectName.charAt(0) == '[' && objectName.charAt(objectName.length() - 1) == ']')
@@ -200,9 +205,9 @@ public class SqlUtil
 		}
 
 		StringBuilder col = new StringBuilder(objectName.length() + 2);
-		col.append('"');
+		col.append(quote);
 		col.append(objectName);
-		col.append('"');
+		col.append(quote);
 		return col.toString();
 	}
 

@@ -243,7 +243,7 @@ public class TableCreator
 		// the case of the column name by using DbMetadata.quoteObjectName()
 		// This is to ensure that the columns are created with the default case of the target DBMS
 		boolean isKeyword = connection.getMetadata().isReservedWord(name);
-		name = SqlUtil.quoteObjectname(name, isKeyword);
+		name = SqlUtil.quoteObjectname(name, isKeyword, false, connection.getMetadata().getQuoteCharacter().charAt(0));
 		result.append(name);
 		result.append(' ');
 

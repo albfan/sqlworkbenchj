@@ -425,7 +425,7 @@ public class StatementFactory
 		{
 			return dbConnection.getMetadata().quoteObjectname(colName);
 		}
-		return SqlUtil.quoteObjectname(colName, false, true);
+		return SqlUtil.quoteObjectname(colName, false, true, '"');
 	}
 
 	private TableIdentifier getUpdateTable()
@@ -447,7 +447,7 @@ public class StatementFactory
 		}
 		if (dbConnection == null)
 		{
-			return SqlUtil.quoteObjectname(toUse.getTableName(), false, true);
+			return SqlUtil.quoteObjectname(toUse.getTableName(), false, true, '"');
 		}
 		return dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
 	}

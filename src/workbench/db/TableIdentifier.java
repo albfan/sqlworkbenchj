@@ -183,7 +183,7 @@ public class TableIdentifier
 	@Override
 	public String getObjectName(WbConnection conn)
 	{
-		if (conn == null) return SqlUtil.quoteObjectname(tablename);
+		if (conn == null) return SqlUtil.quoteObjectname(tablename, tableWasQuoted);
 		return conn.getMetadata().quoteObjectname(this.tablename);
 	}
 
