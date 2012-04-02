@@ -30,7 +30,6 @@ import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.SqlUtil;
 
 /**
  * Generates a SQL script to delete a record from the given table and
