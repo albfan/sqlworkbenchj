@@ -56,6 +56,8 @@ public class ProcedureDefinition
 	private List<String> parameterTypes;
 	private String dbmsProcType;
 
+	private final Object typeLock = new Object();
+
 	/**
 	 * Creates a new ProcedureDefinition.
 	 *
@@ -140,30 +142,48 @@ public class ProcedureDefinition
 		comment = cmt;
 	}
 
-	public synchronized List<String> getParameterTypes(WbConnection con)
+	public void setParameterTypes(List<String> types)
 	{
-		if (parameterTypes == null)
+		synchronized (typeLock)
 		{
-			ProcedureReader reader = con.getMetadata().getProcedureReader();
-			try
+			if (types == null)
 			{
-				DataStore ds = reader.getProcedureColumns(this);
-				parameterTypes = new ArrayList<String>(ds.getRowCount());
-
-				for (int i = 0; i < ds.getRowCount(); i++)
-				{
-					String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-					if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
-					{
-						parameterTypes.add(ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE));
-					}
-				}
+				this.parameterTypes = null;
 			}
-			catch (SQLException s)
+			else
 			{
+				this.parameterTypes = new ArrayList<String>(types);
 			}
 		}
-		return Collections.unmodifiableList(this.parameterTypes);
+	}
+
+	public List<String> getParameterTypes(WbConnection con)
+	{
+		synchronized (typeLock)
+		{
+			if (parameterTypes == null)
+			{
+				ProcedureReader reader = con.getMetadata().getProcedureReader();
+				try
+				{
+					DataStore ds = reader.getProcedureColumns(this);
+					parameterTypes = new ArrayList<String>(ds.getRowCount());
+
+					for (int i = 0; i < ds.getRowCount(); i++)
+					{
+						String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+						if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
+						{
+							parameterTypes.add(ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE));
+						}
+					}
+				}
+				catch (SQLException s)
+				{
+				}
+			}
+			return Collections.unmodifiableList(this.parameterTypes);
+		}
 	}
 
 	@Override

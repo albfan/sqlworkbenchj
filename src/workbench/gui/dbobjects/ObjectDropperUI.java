@@ -155,9 +155,24 @@ public class ObjectDropperUI
 			this.dialog.addWindowListener(this);
 			this.dialog.getContentPane().add(this);
 			this.dialog.pack();
-			if (this.dialog.getWidth() < 200)
+
+			int height = dialog.getHeight();
+			if (height > aParent.getHeight() * 0.8)
 			{
-				this.dialog.setSize(200, this.dialog.getHeight());
+				height = (int)(aParent.getHeight() * 0.7);
+			}
+			int width = dialog.getWidth();
+			if (width < 200)
+			{
+				width = 200;
+			}
+			else if (this.dialog.getWidth() > aParent.getWidth() * 0.9)
+			{
+				width = (int)(aParent.getWidth() * 0.7);
+			}
+			if (width != dialog.getWidth() || height != dialog.getHeight())
+			{
+					this.dialog.setSize(width, height);
 			}
 			WbSwingUtilities.center(this.dialog, aParent);
 			this.cancelled = true;
@@ -276,6 +291,7 @@ public class ObjectDropperUI
     mainPanel.setLayout(new java.awt.BorderLayout(0, 2));
 
     objectList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    objectList.setMaximumSize(new java.awt.Dimension(800, 0));
     objectList.setSelectionModel(new NoSelectionModel());
     jScrollPane1.setViewportView(objectList);
 

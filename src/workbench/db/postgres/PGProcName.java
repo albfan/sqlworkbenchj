@@ -25,7 +25,6 @@ public class PGProcName
 {
 	private List<PGType> arguments;
 	private String procName;
-	private String formattedName;
 
 	/**
 	 * Initialize a PGProcName from a "full" name that includes the
@@ -118,20 +117,16 @@ public class PGProcName
 	public String getFormattedName()
 	{
 		if (arguments == null || arguments.isEmpty()) return procName +"()";
-		if (formattedName == null)
+		StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
+		b.append(procName);
+		b.append('(');
+		for (int i=0; i < arguments.size(); i++)
 		{
-			StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
-			b.append(procName);
-			b.append('(');
-			for (int i=0; i < arguments.size(); i++)
-			{
-				if (i > 0) b.append(", ");
-				b.append(arguments.get(i).rawType);
-			}
-			b.append(')');
-			formattedName = b.toString();
+			if (i > 0) b.append(", ");
+			b.append(arguments.get(i).rawType);
 		}
-		return formattedName;
+		b.append(')');
+		return b.toString();
 	}
 
 	@Override
@@ -143,24 +138,14 @@ public class PGProcName
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null)
+		if (obj instanceof PGProcName)
 		{
-			return false;
+			final PGProcName other = (PGProcName) obj;
+			String myName = getFormattedName();
+			String otherName = other.getFormattedName();
+			return myName.equals(otherName);
 		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final PGProcName other = (PGProcName) obj;
-		if (this.arguments != other.arguments && (this.arguments == null || !this.arguments.equals(other.arguments)))
-		{
-			return false;
-		}
-		if ((this.procName == null) ? (other.procName != null) : !this.procName.equals(other.procName))
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	@Override

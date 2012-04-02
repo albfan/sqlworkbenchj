@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +128,10 @@ public class PostgresProcedureReader
 					long oid = rs.getLong(1);
 					String name = rs.getString(2);
 					String formattedName = rs.getString(3);
+					if (formattedName.equals("character varying"))
+					{
+						formattedName = "varchar";
+					}
 					PGType typ = new PGType(name, StringUtil.trimQuotes(formattedName), oid);
 					typeMap.put(Long.valueOf(typ.oid), typ);
 					if ("void".equals(typ.rawType))
@@ -232,8 +237,18 @@ public class PostgresProcedureReader
 				int row = ds.addRow();
 
 				PGProcName pname = new PGProcName(name, args, getTypeLookup());
+				List<PGType> pgArgs = pname.getArguments();
 
 				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
+				if (pgArgs != null)
+				{
+					List<String> types = new ArrayList<String>(pgArgs.size());
+					for (PGType pgType : pgArgs)
+					{
+						types.add(pgType.formattedType);
+					}
+					def.setParameterTypes(types);
+				}
 				def.setDisplayName(pname.getFormattedName());
 				def.setDbmsProcType(type);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
