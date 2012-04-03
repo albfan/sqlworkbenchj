@@ -12,6 +12,7 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -258,6 +259,13 @@ public class JEditTextArea
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 		this.fontZoomer = new FontZoomer(painter);
 		this.addMouseWheelListener(fontZoomer);
+	}
+
+	@Override
+	public void setCursor(Cursor c)
+	{
+		super.setCursor(c);
+		this.painter.setCursor(c);
 	}
 
 	public int getHScrollBarHeight()
@@ -593,7 +601,7 @@ public class JEditTextArea
 		{
 			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "Not called from within the EDT!", new Exception());
 		}
-		
+
 		boolean changed = false;
 		int lineCount = getLineCount();
 		if (vertical != null && visibleLines != 0)

@@ -52,6 +52,7 @@ import workbench.interfaces.QuickFilter;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.RegExComparator;
@@ -155,7 +156,15 @@ public class QuickFilterPanel
 		{
 			col = ResourceMgr.getFormattedString("TxtQuickFilterCurrCol", searchColumn);
 		}
-		String msg = ResourceMgr.getFormattedString("TxtQuickFilterColumnHint", col);
+		String msg;
+		if (GuiSettings.getUseRegexInQuickFilter())
+		{
+			msg = ResourceMgr.getFormattedString("TxtQuickFilterRegexHint", col);
+		}
+		else
+		{
+			msg = ResourceMgr.getFormattedString("TxtQuickFilterColumnHint", col);
+		}
 		this.filterValue.setToolTipText(msg);
 	}
 
@@ -213,6 +222,7 @@ public class QuickFilterPanel
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 		this.filterValue.addActionListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_QUICK_FILTER_REGEX);
 	}
 
 	public void setToolbarBorder(Border b)
@@ -513,13 +523,20 @@ public class QuickFilterPanel
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		int count = this.searchTable.getColumnCount();
-		String[] names = new String[count];
-		for (int i = 0; i < count; i++)
+		if (evt.getSource() == searchTable)
 		{
-			names[i] = this.searchTable.getColumnName(i);
+			int count = this.searchTable.getColumnCount();
+			String[] names = new String[count];
+			for (int i = 0; i < count; i++)
+			{
+				names[i] = this.searchTable.getColumnName(i);
+			}
+			setColumnList(names);
 		}
-		setColumnList(names);
+		else if (evt.getPropertyName().equals(GuiSettings.PROPERTY_QUICK_FILTER_REGEX))
+		{
+			setFilterTooltip();
+		}
 	}
 
 	private synchronized void filterByEditorValue()

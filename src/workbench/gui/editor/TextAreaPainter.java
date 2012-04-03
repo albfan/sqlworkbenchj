@@ -81,6 +81,8 @@ public class TextAreaPainter
 
 	private Map renderingHints;
 
+	private static final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);
+
 	public TextAreaPainter(JEditTextArea textArea)
 	{
 		super();
@@ -91,7 +93,7 @@ public class TextAreaPainter
 
 		currentLine = new Segment();
 
-		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+		super.setCursor(DEFAULT_CURSOR);
 		super.setFont(Settings.getInstance().getEditorFont());
 
 		setForeground(Settings.getInstance().getEditorTextColor());
@@ -129,6 +131,19 @@ public class TextAreaPainter
 
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
+	}
+
+	@Override
+	public void setCursor(Cursor current)
+	{
+		if (current != null && current.equals(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
+		{
+			super.setCursor(current);
+		}
+		else
+		{
+			super.setCursor(DEFAULT_CURSOR);
+		}
 	}
 
 	public void dispose()
@@ -329,7 +344,7 @@ public class TextAreaPainter
 	 * Sets the font for this component.
 	 *
 	 * This is overridden to update the cached font metrics and to recalculate which lines are visible.
-	 * 
+	 *
 	 * @param font The font
 	 */
 	@Override

@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -105,6 +106,13 @@ public class DbObjectSourcePanel
 			new FocusIndicator(sourceEditor, sourceEditor);
 		}
 		initialized = true;
+	}
+
+	@Override
+	public void setCursor(Cursor newCursor)
+	{
+		super.setCursor(newCursor);
+		sourceEditor.setCursor(newCursor);
 	}
 
 	@Override

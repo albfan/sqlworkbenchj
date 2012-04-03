@@ -41,7 +41,7 @@ public class OracleIndexPartition
 	{
 		return locality;
 	}
-	
+
 	@Override
 	protected String getRetrieveColumnsSql()
 	{
@@ -52,13 +52,13 @@ public class OracleIndexPartition
 			"where object_type = 'INDEX' \n" +
 			"  and owner = ? \n" +
 			"  and name = ? \n" +
-			"order by column_position \n";	
+			"order by column_position \n";
 	}
 
 	@Override
 	protected String getRetrievePartitionDefinitionSql()
 	{
-		return 
+		return
 			"select owner,  \n" +
 			"       table_name, \n" +
 			"       partitioning_type,  \n" +
@@ -70,7 +70,7 @@ public class OracleIndexPartition
 			"       def_subpartition_count \n" +
 			"from all_part_indexes \n" +
 			"where owner = ? \n" +
-			"  and index_name = ? ";			
+			"  and index_name = ? ";
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class OracleIndexPartition
 					"FROM all_ind_partitions \n" +
 					"WHERE index_owner = ?  \n" +
 					"  AND index_name = ? \n" +
-					"ORDER BY partition_position";			
+					"ORDER BY partition_position";
 		}
 		return
 			"SELECT partition_name,  \n" +
@@ -97,7 +97,7 @@ public class OracleIndexPartition
 			"FROM all_ind_partitions \n" +
 			"WHERE index_owner = ?  \n" +
 			"  AND index_name = ? \n" +
-			"ORDER BY partition_position";	
+			"ORDER BY partition_position";
 	}
 
 	@Override
@@ -111,8 +111,8 @@ public class OracleIndexPartition
 		"from all_subpart_key_columns \n" +
 		"where object_type = 'INDEX' \n " +
 		"  and owner = ? \n" +
-		"  and name = ? \n" + 
-		"order by column_position";	
+		"  and name = ? \n" +
+		"order by column_position";
 	}
 
 	@Override
@@ -120,26 +120,26 @@ public class OracleIndexPartition
 	{
 		if (useCompression)
 		{
-		return 
+		return
 			"select partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
 			"       subpartition_position, \n" +
 			"       compression \n" +
-			"from all_tab_subpartitions \n" +
+			"from all_ind_subpartitions \n" +
 			"where index_owner = ?  \n" +
 			"  and index_name = ?  \n" +
-			"order by subpartition_position";			
+			"order by subpartition_position";
 		}
-		return 
+		return
 			"select partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
 			"       subpartition_position \n" +
-			"from all_tab_subpartitions \n" +
+			"from all_ind_subpartitions \n" +
 			"where index_owner = ?  \n" +
 			"  and index_name = ?  \n" +
-			"order by subpartition_position";			
+			"order by subpartition_position";
 	}
-	
+
 }

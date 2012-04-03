@@ -1298,11 +1298,13 @@ public class TableListPanel
 
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
+
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(this.dbConnection);
 
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
+			WbSwingUtilities.showWaitCursor(tableSource);
 
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DbSettings dbs = this.dbConnection.getDbSettings();
@@ -1384,6 +1386,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			WbSwingUtilities.showDefaultCursor(tableSource);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 

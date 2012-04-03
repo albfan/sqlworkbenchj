@@ -28,6 +28,7 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 	public static final String PROPERTY_EXEC_SEL_ONLY = "workbench.gui.editor.execute.onlyselected";
+	public static final String PROPERTY_QUICK_FILTER_REGEX = "workbench.gui.quickfilter.useregex";
 
 	public static boolean getAutoRetrieveFKTree()
 	{
@@ -51,12 +52,12 @@ public class GuiSettings
 
 	public static boolean getUseRegexInQuickFilter()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.quickfilter.useregex", true);
+		return Settings.getInstance().getBoolProperty(PROPERTY_QUICK_FILTER_REGEX, true);
 	}
 
 	public static void setUseRegexInQuickFilter(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.quickfilter.useregex", flag);
+		Settings.getInstance().setProperty(PROPERTY_QUICK_FILTER_REGEX, flag);
 	}
 
 	public static boolean getUseShellFolders()
