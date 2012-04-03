@@ -112,17 +112,17 @@ public abstract class TokenMarker
 
 	protected Token getPreviousLineToken(int lineIndex)
 	{
-	    Token token = null;
-	    while (lineIndex > 0)
-	    {
-	        lineIndex --;
-	        token = getLastTokenInLine(lineIndex);
-	        if (token != null)
-	        {
-	            break;
-	        }
-	    }
-	    return token;
+		Token token = null;
+		while (lineIndex > 0)
+		{
+			lineIndex--;
+			token = getLastTokenInLine(lineIndex);
+			if (token != null)
+			{
+				break;
+			}
+		}
+		return token;
 	}
 
 	/**

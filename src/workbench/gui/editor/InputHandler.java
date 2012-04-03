@@ -661,10 +661,19 @@ public class InputHandler
 
 			if (textArea.isEditable())
 			{
-				textArea.overwriteSetSelectedText(str);
-				if (str.length() == 1)
+				char typedChar = str.charAt(0);
+				if (textArea.shouldInsert(typedChar))
 				{
-					textArea.completeBracket(str.charAt(0));
+					textArea.overwriteSetSelectedText(str);
+					if (str.length() == 1)
+					{
+						textArea.completeBracket(typedChar);
+					}
+				}
+				else
+				{
+					int caret = textArea.getCaretPosition();
+					textArea.setCaretPosition(caret + 1);
 				}
 			}
 			else

@@ -29,7 +29,9 @@ public class GuiSettings
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 	public static final String PROPERTY_EXEC_SEL_ONLY = "workbench.gui.editor.execute.onlyselected";
 	public static final String PROPERTY_QUICK_FILTER_REGEX = "workbench.gui.quickfilter.useregex";
-
+	public static final String PROPERTY_COMPLETE_CHARS = "workbench.editor.completechars";
+	public static final String PROPERTY_SMART_COMPLETE = "workbench.editor.smartcomplete";
+	
 	public static boolean getAutoRetrieveFKTree()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);

@@ -12,6 +12,7 @@ package workbench.gui.editor;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
@@ -25,17 +26,15 @@ public class BracketCompleter
 	private char[] openingBrackets;
 	private String[] closingBrackets;
 
-	public static final String SETTINGS_KEY = "workbench.editor.completechars";
-
 	public BracketCompleter()
 	{
-		Settings.getInstance().addPropertyChangeListener(this, SETTINGS_KEY);
-		setCompletionPairs(Settings.getInstance().getProperty(SETTINGS_KEY, null));
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_COMPLETE_CHARS);
+		setCompletionPairs(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, null));
 	}
 
 	public BracketCompleter(String pairs)
 	{
-		Settings.getInstance().addPropertyChangeListener(this, SETTINGS_KEY);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_COMPLETE_CHARS);
 		setCompletionPairs(pairs);
 	}
 
@@ -73,6 +72,20 @@ public class BracketCompleter
 			result.append(closingBrackets[i]);
 		}
 		return result.toString();
+	}
+
+	public char getOpeningChar(char input)
+	{
+		if (openingBrackets == null || closingBrackets == null) return 0;
+		for (int i=0; i < closingBrackets.length; i++)
+		for (String s : closingBrackets)
+		{
+			if (s.charAt(0) == input)
+			{
+				return openingBrackets[i];
+			}
+		}
+		return 0;
 	}
 
 	public String getCompletionChar(char input)

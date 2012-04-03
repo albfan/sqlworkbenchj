@@ -39,6 +39,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +81,7 @@ import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.util.MemoryWatcher;
 import workbench.util.NumberStringCache;
@@ -116,7 +119,7 @@ import workbench.util.StringUtil;
  */
 public class JEditTextArea
 	extends JComponent
-	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener, LineScroller, FontZoomProvider
+	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener, LineScroller, FontZoomProvider, PropertyChangeListener
 {
 	protected boolean rightClickMovesCursor = false;
 
@@ -187,6 +190,7 @@ public class JEditTextArea
 	private FontZoomer fontZoomer;
 
 	private BracketCompleter bracketCompleter;
+	private boolean smartClosing = true;
 
 	/**
 	 * Creates a new JEditTextArea with the default settings.
@@ -259,6 +263,18 @@ public class JEditTextArea
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 		this.fontZoomer = new FontZoomer(painter);
 		this.addMouseWheelListener(fontZoomer);
+
+		smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SMART_COMPLETE);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_SMART_COMPLETE))
+		{
+			smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
+		}
 	}
 
 	@Override
@@ -468,6 +484,7 @@ public class JEditTextArea
 	public void dispose()
 	{
 		if (bracketCompleter != null) bracketCompleter.dispose();
+		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	public boolean removeClosingBracket(int position)
@@ -491,18 +508,69 @@ public class JEditTextArea
 		if (toComplete == null) return;
 
 		int line = getCaretLine();
-		int positionInLine = getCaretPositionInLine(line);
+		int caret = getCaretPositionInLine(line);
+
+		getLineText(getCaretLine(), lineSegment);
+
+		if (caret > 0 && caret < lineSegment.length())
+		{
+			char nextChar = lineSegment.charAt(caret);
+			if (!Character.isWhitespace(nextChar)) return;
+		}
 
 		// do not complete brackets inside string literals
-		if (!currentTokenMarker.isStringLiteralAt(line, positionInLine))
+		if (!currentTokenMarker.isStringLiteralAt(line, caret))
 		{
 			// insertText() will move the caret, so we need to remember the last position
 			// in order to put the caret back where it was
-			int caret = getCaretPosition();
-			insertText(caret, toComplete);
-			setCaretPosition(caret);
+			int caretPosition = getCaretPosition();
+			insertText(caretPosition, toComplete);
+			setCaretPosition(caretPosition);
 		}
+	}
 
+	/**
+	 * Check if the currently typed character should be inserted.
+	 *
+	 * This is only valid if auto-closing of brackets is enabled.
+	 *
+	 * In that case typing a closing bracket right in front of a closing bracket
+	 * will only be "honored" if the brackets in the current line are un-balanced.
+	 *
+	 * @param currentChar the typed char.
+	 * @return true, the character should be insert,
+	 *         false ignore this character - just move the caret
+	 */
+	public boolean shouldInsert(char currentChar)
+	{
+		if (!smartClosing) return true;
+		if (bracketCompleter == null || currentTokenMarker == null) return true;
+		char opening = bracketCompleter.getOpeningChar(currentChar);
+		if (opening == 0) return true;
+
+		getLineText(getCaretLine(), lineSegment);
+		int caret = getCaretPositionInLine(getCaretLine());
+
+		if (caret <= 0 || caret >= lineSegment.length()) return true;
+
+		char nextChar = lineSegment.charAt(caret);
+
+		if (nextChar != currentChar) return true;
+
+		int count = 0;
+		for (int i=0; i < lineSegment.length(); i++)
+		{
+			char c = lineSegment.charAt(i);
+			if (c == opening)
+			{
+				count ++;
+			}
+			else if (c == currentChar)
+			{
+				count --;
+			}
+		}
+		return count != 0;
 	}
 
 	public void setBracketCompleter(BracketCompleter completer)
