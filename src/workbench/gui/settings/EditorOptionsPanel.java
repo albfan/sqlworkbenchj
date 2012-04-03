@@ -82,7 +82,7 @@ public class EditorOptionsPanel
 		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
-		autoCloseBrackets.setText(Settings.getInstance().getProperty(BracketCompleter.SETTINGS_KEY, ""));
+		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -129,14 +129,14 @@ public class EditorOptionsPanel
 		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
 		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
 		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
-		set.setProperty(BracketCompleter.SETTINGS_KEY, autoCloseBrackets.getText());
+		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
 	}
 
 	@Override
 	public void componentDisplayed()
 	{
 	}
-	
+
 	@Override
 	public boolean validateInput()
 	{
