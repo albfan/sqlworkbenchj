@@ -27,14 +27,14 @@ public class OracleTablePartition
 		throws SQLException
 	{
 		super(conn, true);
-		useLocality = false;
+		isIndex = false;
 	}
 
 	protected OracleTablePartition(WbConnection conn, boolean retrieveCompression)
 		throws SQLException
 	{
 		super(conn, retrieveCompression);
-		useLocality = false;
+		isIndex = false;
 	}
 
 	@Override

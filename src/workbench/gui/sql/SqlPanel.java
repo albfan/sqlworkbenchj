@@ -155,7 +155,6 @@ import workbench.interfaces.DbUpdater;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.FormattableSql;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.MainPanel;
@@ -196,7 +195,7 @@ public class SqlPanel
 	extends JPanel
 	implements FontChangedListener,
 		PropertyChangeListener, ChangeListener,
-		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
+		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
 		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser
 {
@@ -1027,14 +1026,6 @@ public class SqlPanel
 		int index = parser.getCommandIndexAtCursorPos(getEditor().getCaretPosition());
 		String currentStatement = parser.getCommand(index);
 		return currentStatement;
-	}
-
-	@Override
-	public void reformatSql()
-	{
-		this.storeStatementInHistory();
-		this.editor.reformatSql();
-		this.selectEditorLater();
 	}
 
 	private boolean isCurrentTab()

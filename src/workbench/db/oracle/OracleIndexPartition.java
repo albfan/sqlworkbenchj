@@ -27,14 +27,14 @@ public class OracleIndexPartition
 		throws SQLException
 	{
 		super(conn, false);
-		useLocality = true;
+		isIndex = true;
 	}
 
 	protected OracleIndexPartition(WbConnection conn, boolean retrieveCompression)
 		throws SQLException
 	{
 		super(conn, retrieveCompression);
-		useLocality = true;
+		isIndex = true;
 	}
 
 	public String getLocality()

@@ -11,6 +11,7 @@
  */
 package workbench.gui.editor;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.SqlTextContainer;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -33,7 +34,7 @@ public class TextFormatter
 		this.dbId = id;
 	}
 
-	public void formatSql(SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
+	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
 	{
 		if (!editor.isEditable()) return;
 
@@ -67,7 +68,6 @@ public class TextFormatter
 				continue;
 			}
 
-
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
 
 			try
@@ -98,13 +98,22 @@ public class TextFormatter
 
 		if (newSql.length() == 0) return;
 
-		if (editor.isTextSelected())
+		final String text = newSql.toString();
+
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			editor.setSelectedText(newSql.toString());
-		}
-		else
-		{
-			editor.setText(newSql.toString());
-		}
+			@Override
+			public void run()
+			{
+				if (editor.isTextSelected())
+				{
+					editor.setSelectedText(text);
+				}
+				else
+				{
+					editor.setText(text);
+				}
+			}
+		});
 	}
 }

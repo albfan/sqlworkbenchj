@@ -149,6 +149,7 @@ public class InputHandler
 	private Map<KeyStroke, ActionListener> bindings;
 
 	private boolean sequenceIsMapped = false;
+	private boolean enabled = true;
 
 	public InputHandler()
 	{
@@ -268,9 +269,16 @@ public class InputHandler
 		removeAllKeyBindings();
 	}
 
+	public void setEnabled(boolean flag)
+	{
+		this.enabled = flag;
+	}
+
 	@Override
 	public void keyPressed(final KeyEvent evt)
 	{
+		if (!enabled) return;
+
 		int keyCode = evt.getKeyCode();
 
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
@@ -311,6 +319,7 @@ public class InputHandler
 	@Override
 	public void keyTyped(KeyEvent evt)
 	{
+		if (!enabled) return;
 		if (evt.isConsumed()) return;
 
 		boolean isMapped = sequenceIsMapped;
@@ -456,6 +465,7 @@ public class InputHandler
 	 */
 	public void executeAction(ActionListener listener, Object source, String actionCommand)
 	{
+		if (!enabled) return;
 		ActionEvent evt = new ActionEvent(source, ActionEvent.ACTION_PERFORMED, actionCommand);
 		listener.actionPerformed(evt);
 	}

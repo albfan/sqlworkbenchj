@@ -68,6 +68,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  * An extension to {@link workbench.gui.editor.JEditTextArea}. This class
@@ -329,8 +330,46 @@ public class EditorPanel
 	@Override
 	public void reformatSql()
 	{
-		TextFormatter f = new TextFormatter(this.dbId);
-		f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
+		int size = getSelectionLength() > 0 ? getSelectionLength() : getDocumentLength();
+		if (size < 1024 * 5) // small text can directly be formatted inside the EDT thread
+		{
+			TextFormatter f = new TextFormatter(this.dbId);
+			f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
+		}
+		else
+		{
+			LogMgr.logDebug("EditorPanel.reformatSql", "Formatting in background thread");
+			reformatInBackgroundThread();
+		}
+	}
+
+	public void reformatInBackgroundThread()
+	{
+		WbSwingUtilities.showWaitCursor(this);
+		setEnabled(false);
+		WbThread t = new WbThread("ReformatSQL")
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					TextFormatter f = new TextFormatter(dbId);
+					f.formatSql(EditorPanel.this, alternateDelimiter, isMySQL ? "#" : "--");
+					WbSwingUtilities.repaintLater(EditorPanel.this);
+				}
+				finally
+				{
+					WbSwingUtilities.showDefaultCursor(EditorPanel.this);
+					setEnabled(true);
+					if (isReallyVisible())
+					{
+						requestFocusInWindow();
+					}
+				}
+			}
+		};
+		t.start();
 	}
 
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)

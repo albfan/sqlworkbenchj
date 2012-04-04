@@ -39,7 +39,7 @@ public abstract class AbstractOraclePartition
 	private int defaultSubpartitionCount;
 	private List<String> subColumns;
 	protected boolean useCompression;
-	protected boolean useLocality;
+	protected boolean isIndex;
 	protected String locality; // only used for indexes
 
 	public AbstractOraclePartition(WbConnection conn)
@@ -121,33 +121,36 @@ public abstract class AbstractOraclePartition
 		{
 			result.append(indent);
 			result.append(locality);
-			result.append('\n');
 		}
-		result.append(indent);
-		result.append("PARTITION BY ");
-		result.append(type);
-		result.append(' ');
-		if (columns != null)
-		{
-			result.append('(');
-			result.append(StringUtil.listToString(columns, ','));
-			result.append(')');
-		}
-		if (!"NONE".equals(subType))
+		if (locality == null)
 		{
 			result.append('\n');
 			result.append(indent);
-			result.append("SUBPARTITION BY ");
-			result.append(subType);
-			result.append(" (");
-			result.append(StringUtil.listToString(subColumns, ','));
-			result.append(')');
-			if (defaultSubpartitionCount > 1)
+			result.append("PARTITION BY ");
+			result.append(type);
+			result.append(' ');
+			if (columns != null)
+			{
+				result.append('(');
+				result.append(StringUtil.listToString(columns, ','));
+				result.append(')');
+			}
+			if (!"NONE".equals(subType))
 			{
 				result.append('\n');
 				result.append(indent);
-				result.append("SUBPARTITIONS ");
-				result.append(defaultSubpartitionCount);
+				result.append("SUBPARTITION BY ");
+				result.append(subType);
+				result.append(" (");
+				result.append(StringUtil.listToString(subColumns, ','));
+				result.append(')');
+				if (defaultSubpartitionCount > 1)
+				{
+					result.append('\n');
+					result.append(indent);
+					result.append("SUBPARTITIONS ");
+					result.append(defaultSubpartitionCount);
+				}
 			}
 		}
 		result.append('\n');
@@ -208,7 +211,7 @@ public abstract class AbstractOraclePartition
 			{
 				type = rs.getString("PARTITIONING_TYPE");
 				subType = rs.getString("SUBPARTITIONING_TYPE");
-				if (useLocality)
+				if (isIndex)
 				{
 					locality = rs.getString("LOCALITY");
 				}

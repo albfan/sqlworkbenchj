@@ -1875,6 +1875,17 @@ public class JEditTextArea
 	}
 
 	/**
+	 * Returns the number of selected characters.
+	 *
+	 * This is not accurate if a rectangular selection is active!
+	 *
+	 */
+	public int getSelectionLength()
+	{
+		return selectionStart - selectionEnd;
+	}
+
+	/**
 	 * Returns the selected text, or null if no selection is active.
 	 */
 	public final String getSelectedText()
@@ -2104,6 +2115,13 @@ public class JEditTextArea
 	public final boolean isEditable()
 	{
 		return editable;
+	}
+
+	@Override
+	public void setEnabled(boolean flag)
+	{
+		super.setEnabled(flag);
+		inputHandler.setEnabled(flag);
 	}
 
 	/**
