@@ -25,7 +25,8 @@ import workbench.resource.ResourceMgr;
  *
  *	@author  Thomas Kellerer
  */
-public class FormatSqlAction extends WbAction
+public class FormatSqlAction
+	extends WbAction
 {
 	private FormattableSql client;
 

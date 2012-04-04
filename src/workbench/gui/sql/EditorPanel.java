@@ -11,6 +11,14 @@
  */
 package workbench.gui.sql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -21,19 +29,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -46,6 +41,14 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import workbench.WbManager;
 import workbench.db.WbConnection;
@@ -68,7 +71,6 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
-import workbench.util.WbThread;
 
 /**
  * An extension to {@link workbench.gui.editor.JEditTextArea}. This class
@@ -330,46 +332,16 @@ public class EditorPanel
 	@Override
 	public void reformatSql()
 	{
-		int size = getSelectionLength() > 0 ? getSelectionLength() : getDocumentLength();
-		if (size < 1024 * 5) // small text can directly be formatted inside the EDT thread
+		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			TextFormatter f = new TextFormatter(this.dbId);
 			f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
 		}
-		else
+		finally
 		{
-			LogMgr.logDebug("EditorPanel.reformatSql", "Formatting in background thread");
-			reformatInBackgroundThread();
+			WbSwingUtilities.showDefaultCursor(this);
 		}
-	}
-
-	public void reformatInBackgroundThread()
-	{
-		WbSwingUtilities.showWaitCursor(this);
-		setEnabled(false);
-		WbThread t = new WbThread("ReformatSQL")
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					TextFormatter f = new TextFormatter(dbId);
-					f.formatSql(EditorPanel.this, alternateDelimiter, isMySQL ? "#" : "--");
-					WbSwingUtilities.repaintLater(EditorPanel.this);
-				}
-				finally
-				{
-					WbSwingUtilities.showDefaultCursor(EditorPanel.this);
-					setEnabled(true);
-					if (isReallyVisible())
-					{
-						requestFocusInWindow();
-					}
-				}
-			}
-		};
-		t.start();
 	}
 
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
