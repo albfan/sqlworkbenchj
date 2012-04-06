@@ -51,4 +51,25 @@ public class BracketCompleterTest
 		compl = new BracketCompleter("");
 		assertNull(compl.getCompletionChar(')'));
 	}
+
+	@Test
+	public void testGetOpeningChar()
+	{
+		BracketCompleter compl = new BracketCompleter("()[]\"\"''");
+		char opening = compl.getOpeningChar('\'');
+		assertEquals('\'', opening);
+
+		opening = compl.getOpeningChar('"');
+		assertEquals('"', opening);
+
+		opening = compl.getOpeningChar(')');
+		assertEquals('(', opening);
+
+		opening = compl.getOpeningChar(']');
+		assertEquals('[', opening);
+
+		opening = compl.getOpeningChar('(');
+		assertEquals(0, opening);
+
+	}
 }

@@ -77,10 +77,9 @@ public class BracketCompleter
 	public char getOpeningChar(char input)
 	{
 		if (openingBrackets == null || closingBrackets == null) return 0;
-		for (int i=0; i < closingBrackets.length; i++)
-		for (String s : closingBrackets)
+		for (int i = 0; i < closingBrackets.length; i++)
 		{
-			if (s.charAt(0) == input)
+			if (closingBrackets[i].charAt(0) == input)
 			{
 				return openingBrackets[i];
 			}
