@@ -262,6 +262,18 @@
 			</para>
 		</section>
 
+		<section id="options-auto-close-bracket">
+			<title>Insert closing brackets for</title>
+			<para>
+        To enable auto-completion of brackets, enter pairs of characters that should automatically be "closed", e.g.
+        <literal>()''</literal> will automatically insert a closing bracket when an opening bracket is typed. To auto-complete
+        quote characters enter two quotes.
+			</para>
+      <para>
+        To disable automatic closing of brackets enter nothing in this input field.
+      </para>
+		</section>
+
 		<section id="options-always-execute-selected">
 			<title>Always allow "Execute Selected"</title>
 			<para>
