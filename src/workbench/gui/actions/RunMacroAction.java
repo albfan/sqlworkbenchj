@@ -17,9 +17,9 @@ import javax.swing.Action;
 
 import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
+import workbench.gui.editor.MacroExpander;
 import workbench.gui.macros.MacroRunner;
 import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.StoreableKeyStroke;
 import workbench.sql.macros.MacroDefinition;
@@ -34,7 +34,7 @@ public class RunMacroAction
 {
 	private MainWindow client;
 	private MacroDefinition macro;
-	
+
 	public RunMacroAction(MainWindow aClient, MacroDefinition def, int index)
 	{
 		super();
@@ -75,25 +75,28 @@ public class RunMacroAction
 	{
 		this.macro = def;
 	}
-	
+
+	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (this.client != null && this.macro != null)
-		{
-			boolean shiftPressed = isShiftPressed(e) && invokedByMouse(e);
+		if (this.client == null || this.macro == null) return;
 
-			SqlPanel sql = this.client.getCurrentSqlPanel();
-			if (sql != null)
+		SqlPanel sql = this.client.getCurrentSqlPanel();
+		if (sql == null) return;
+
+		if (macro.getExpandWhileTyping())
+		{
+			MacroExpander expander = sql.getEditor().getMacroExpander();
+			if (expander != null)
 			{
-				MacroRunner runner = new MacroRunner();
-				runner.runMacro(macro, sql, shiftPressed);
-			}
-			else
-			{
-				LogMgr.logWarning("RunMacroAction.actionPerformed()", "Don't have a current SqlPanel!");
+				expander.insertMacroText(macro.getText());
 			}
 		}
+		else
+		{
+			boolean shiftPressed = isShiftPressed(e) && invokedByMouse(e);
+			MacroRunner runner = new MacroRunner();
+			runner.runMacro(macro, sql, shiftPressed);
+		}
 	}
-
-
 }

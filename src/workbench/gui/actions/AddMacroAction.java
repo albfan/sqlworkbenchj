@@ -57,6 +57,7 @@ public class AddMacroAction
 		this.setEnabled(client.isTextSelected());
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		String text = client.getSelectedText();
@@ -87,6 +88,7 @@ public class AddMacroAction
 		}
 	}
 
+	@Override
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		boolean selected = (newStart > -1 && newEnd > newStart);

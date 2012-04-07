@@ -643,7 +643,14 @@ public class SqlCommand
 		if (prof == null) return false;
 		if (isUpdatingCommand(con, sql))
 		{
-			return prof.confirmUpdatesInSession();
+			if (prof.confirmUpdatesInSession())
+			{
+				return true;
+			}
+			if (prof.getPreventDMLWithoutWhere())
+			{
+				return SqlUtil.isUnRestrictedDML(sql);
+			}
 		}
 		return false;
 	}

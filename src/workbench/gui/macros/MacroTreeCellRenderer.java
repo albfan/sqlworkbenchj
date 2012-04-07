@@ -20,9 +20,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import workbench.resource.ResourceMgr;
+import workbench.sql.macros.MacroDefinition;
 
 /**
- * A tree cell renderer that can indicate a drop target 
+ * A tree cell renderer that can indicate a drop target
  * @author Thomas Kellerer
  */
 public class MacroTreeCellRenderer
@@ -33,7 +34,7 @@ public class MacroTreeCellRenderer
 	private final ReorderBorder reorderBorder = new ReorderBorder();
 	private final Border moveToGroupBorder;
 	private final Border standardBorder = new EmptyBorder(2, 2, 2, 2);
-	
+
 	public MacroTreeCellRenderer()
 	{
 		super();
@@ -43,22 +44,41 @@ public class MacroTreeCellRenderer
 		setClosedIcon(ResourceMgr.getImage("Tree"));
 		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
 	}
-	
+
 	public void setDragType(DragType dragType, MacroTreeNode targetItem)
 	{
 		type = dragType;
 		dropTarget = targetItem;
 	}
 
-	public Component getTreeCellRendererComponent(JTree tree, 
-	                                              Object value, 
-	                                              boolean sel, 
-	                                              boolean expanded, 
-	                                              boolean leaf, 
-	                                              int row, 
+	@Override
+	public Component getTreeCellRendererComponent(JTree tree,
+	                                              Object value,
+	                                              boolean sel,
+	                                              boolean expanded,
+	                                              boolean leaf,
+	                                              int row,
 	                                              boolean hasFocus)
 	{
 		Component result = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		if (value instanceof MacroTreeNode)
+		{
+			MacroTreeNode node = (MacroTreeNode)value;
+
+			if (!node.getAllowsChildren())
+			{
+				MacroDefinition macro = (MacroDefinition) node.getDataObject();
+				if (macro.getExpandWhileTyping())
+				{
+					setIcon(ResourceMgr.getPng("macro_expand"));
+				}
+				else
+				{
+					setIcon(ResourceMgr.getPng("macro"));
+				}
+			}
+		}
+		
 		if (dropTarget == value && type == DragType.moveItems)
 		{
 			setBorder(moveToGroupBorder);

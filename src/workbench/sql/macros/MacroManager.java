@@ -13,11 +13,14 @@ package workbench.sql.macros;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.swing.KeyStroke;
 import workbench.log.LogMgr;
 
 import workbench.resource.Settings;
 import workbench.resource.StoreableKeyStroke;
+import workbench.util.CaseInsensitiveComparator;
 
 /**
  * A singleton class to load and save SQL macros (aliases)
@@ -84,6 +87,23 @@ public class MacroManager
 			}
 		}
 		return null;
+	}
+
+	public Map<String, MacroDefinition> getExpandableMacros()
+	{
+		Map<String, MacroDefinition> result = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
+		List<MacroGroup> groups = this.storage.getGroups();
+		for (MacroGroup group : groups)
+		{
+			for (MacroDefinition def : group.getMacros())
+			{
+				if (def.getExpandWhileTyping())
+				{
+					result.put(def.getName(), def);
+				}
+			}
+		}
+		return result;
 	}
 
 	public void save()

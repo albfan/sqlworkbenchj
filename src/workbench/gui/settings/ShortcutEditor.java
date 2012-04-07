@@ -45,10 +45,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.resource.ShortcutDefinition;
-import workbench.resource.ShortcutManager;
+import workbench.resource.*;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
 import workbench.storage.DataStore;
@@ -350,6 +347,12 @@ public class ShortcutEditor
 				boolean choice = WbSwingUtilities.getYesNo(this, msg);
 				if (!choice) return;
 				def.setShortcut(null);
+			}
+
+			if (key.equals(GuiSettings.getExpansionKey()))
+			{
+				WbSwingUtilities.showErrorMessageKey(this, "MsgShortcutExpansion");
+				return;
 			}
 
 			d.setNewKey(key);

@@ -1079,6 +1079,21 @@ public static char getCatalogSeparator(WbConnection conn)
 	}
 
 	/**
+	 * Checks if the given SQL if either not a DML statement or if it is, contains a WHERE clause
+	 * @param sql the sql to check
+	 * @return true if the sql is not a DML or it contains a WHERE clause.
+	 */
+	public static boolean isUnRestrictedDML(String sql)
+	{
+		String verb = getSqlVerb(sql);
+		if (verb.equalsIgnoreCase("update") || verb.equalsIgnoreCase("delete"))
+		{
+			return getWherePosition(sql) < 0;
+		}
+		return false;
+	}
+
+	/**
 	 * Extract the FROM part of a SQL statement. That is anything after the FROM
 	 * up to (but not including) the WHERE, GROUP BY, ORDER BY, whichever comes first
 	 */

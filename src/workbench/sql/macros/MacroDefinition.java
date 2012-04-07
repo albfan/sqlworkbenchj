@@ -21,6 +21,9 @@ import workbench.util.StringUtil;
  * A macro can have a keyboard shortcut assigned and can be hidden from the
  * menu.
  *
+ * A macro can also be defined as "expandable", in that case it will be checked during editing if the
+ * macro name is entered. If that is the case the typed word will be replaced with the actual macro text.
+ *
  * @author Thomas Kellerer
  */
 public class MacroDefinition
@@ -32,6 +35,7 @@ public class MacroDefinition
 	private boolean modified;
 	private StoreableKeyStroke shortcut;
 	private boolean showInMenu = true;
+	private boolean expandWhileTyping;
 
 	public MacroDefinition()
 	{
@@ -41,6 +45,17 @@ public class MacroDefinition
 	{
 		this.name = macroName;
 		this.text = macroText;
+	}
+
+	public void setExpandWhileTyping(boolean flag)
+	{
+		if (expandWhileTyping != flag) modified = true;
+		this.expandWhileTyping = flag;
+	}
+
+	public boolean getExpandWhileTyping()
+	{
+		return this.expandWhileTyping;
 	}
 
 	public boolean isVisibleInMenu()
@@ -94,6 +109,7 @@ public class MacroDefinition
 		def.sortOrder = this.sortOrder;
 		def.showInMenu = this.showInMenu;
 		def.shortcut = this.shortcut;
+		def.expandWhileTyping = this.expandWhileTyping;
 		return def;
 	}
 

@@ -192,6 +192,8 @@ public class JEditTextArea
 	private BracketCompleter bracketCompleter;
 	private boolean smartClosing = true;
 
+	private MacroExpander expander;
+
 	/**
 	 * Creates a new JEditTextArea with the default settings.
 	 */
@@ -484,7 +486,35 @@ public class JEditTextArea
 	public void dispose()
 	{
 		if (bracketCompleter != null) bracketCompleter.dispose();
+		if (expander != null) expander.dispose();
 		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
+	public MacroExpander getMacroExpander()
+	{
+		return expander;
+	}
+
+	public void enableMacroExpansion(boolean flag)
+	{
+		if (flag && expander == null)
+		{
+			expander = new MacroExpander(this);
+		}
+		else if (!flag)
+		{
+			if (expander != null)
+			{
+				expander.dispose();
+			}
+			expander = null;
+		}
+	}
+
+	public boolean expandWordAtCursor()
+	{
+		if (expander == null) return false;
+		return expander.expandWordAtCursor();
 	}
 
 	public boolean removeClosingBracket(int position)
@@ -1970,6 +2000,32 @@ public class JEditTextArea
 		setSelectedText("");
 	}
 
+	public void replaceText(int line, int start, int end, String replacement)
+	{
+		if (!editable) return;
+
+		try
+		{
+			document.beginCompoundEdit();
+			int lineStart = getLineStartOffset(line);
+			document.remove(lineStart + start, (end - start));
+			document.insertString(lineStart + start, replacement, null);
+			int newCaret = lineStart + start + replacement.length();
+			int newEndline = getLineOfOffset(newCaret);
+			painter.invalidateLineRange(line, newEndline);
+			setCaretPosition(newCaret);
+		}
+		catch (BadLocationException bl)
+		{
+			LogMgr.logError("JEditTextArea.setSelectedText()", "Error setting text", bl);
+			throw new InternalError("Cannot replace selection");
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
+	}
+
 	/**
 	 * Replaces the selection with the specified text.
 	 * @param selectedText The replacement text for the selection
@@ -2612,6 +2668,11 @@ public class JEditTextArea
 	{
 		Point p = getCursorLocation();
 		popup.show(painter, p.x, p.y);
+	}
+
+	public long getLastModifiedTime()
+	{
+		return lastModified;
 	}
 
 	public boolean isModifiedAfter(long timeInMillis)

@@ -29,6 +29,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.MacroChangeListener;
@@ -70,7 +71,7 @@ public class MacroPopup
 
 		if (!Settings.getInstance().restoreWindowPosition(this))
 		{
-			setLocation((int)(parent.getX() + parent.getWidth() - getWidth()/2), parent.getY() + 25);
+			setLocation(parent.getX() + parent.getWidth() - getWidth()/2, parent.getY() + 25);
 		}
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -84,38 +85,42 @@ public class MacroPopup
 		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
 
-				
+
 		FileActions actions = new FileActions()
 		{
+			@Override
 			public void saveItem()
 				throws Exception
 			{
 				saveMacros(false);
 			}
 
+			@Override
 			public void deleteItem()
 				throws Exception
 			{
 				tree.deleteSelection();
 			}
 
+			@Override
 			public void newItem(boolean copyCurrent)
 				throws Exception
 			{
 			}
 		};
-		
+
 		DeleteListEntryAction delete = new DeleteListEntryAction(actions);
 		tree.addPopupAction(delete, true);
 		SaveListFileAction save = new SaveListFileAction(actions, "LblSaveMacros");
 		tree.addPopupAction(save, false);
-		
+
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 	}
 
 	private void closeWindow()
 	{
 		setVisible(false);
+		MacroManager.getInstance().getMacros().removeChangeListener(this);
 		dispose();
 	}
 
@@ -123,7 +128,8 @@ public class MacroPopup
 	{
 		return isClosing;
 	}
-	
+
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
@@ -140,7 +146,8 @@ public class MacroPopup
 			MacroManager.getInstance().getMacros().addChangeListener(this);
 		}
 	}
-	
+
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		isClosing = true;
@@ -166,6 +173,7 @@ public class MacroPopup
 		Settings.getInstance().storeWindowSize(this);
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				closeWindow();
@@ -173,26 +181,32 @@ public class MacroPopup
 		});
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
@@ -203,29 +217,45 @@ public class MacroPopup
 				SqlPanel panel = mainWindow.getCurrentSqlPanel();
 				if (panel != null)
 				{
-					MacroRunner runner = new MacroRunner();
-					runner.runMacro(macro, panel, WbAction.isShiftPressed(e.getModifiers()));
+					if (macro.getExpandWhileTyping())
+					{
+						MacroExpander expander = panel.getEditor().getMacroExpander();
+						if (expander != null)
+						{
+							expander.insertMacroText(macro.getText());
+						}
+					}
+					else
+					{
+						MacroRunner runner = new MacroRunner();
+						runner.runMacro(macro, panel, WbAction.isShiftPressed(e.getModifiers()));
+					}
 				}
 			}
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		MacroDefinition macro = tree.getSelectedMacro();
@@ -244,6 +274,7 @@ public class MacroPopup
 		}
 	}
 
+	@Override
 	public void macroListChanged()
 	{
 		List<String> groups = tree.getExpandedGroupNames();

@@ -16,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,6 +70,7 @@ import workbench.gui.editor.actions.SelectPrevWord;
 import workbench.gui.editor.actions.SelectPreviousChar;
 import workbench.gui.editor.actions.SelectPreviousLine;
 import workbench.gui.editor.actions.SelectPreviousPage;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
@@ -84,7 +87,7 @@ import workbench.resource.ShortcutManager;
  */
 public class InputHandler
 	extends KeyAdapter
-	implements ChangeListener
+	implements ChangeListener, PropertyChangeListener
 {
 	/**
 	 * If this client property is set to Boolean.TRUE on the text area,
@@ -151,10 +154,13 @@ public class InputHandler
 	private boolean sequenceIsMapped = false;
 	private boolean enabled = true;
 
+	private KeyStroke expandKey;
+
 	public InputHandler()
 	{
 		initKeyBindings();
 		ShortcutManager.getInstance().addChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXPAND_KEYSTROKE);
 	}
 
 	/**
@@ -218,6 +224,7 @@ public class InputHandler
 		addKeyBinding(INCREASE_FONT);
 		addKeyBinding(DECREASE_FONT);
 		addKeyBinding(RESET_FONT);
+		expandKey = GuiSettings.getExpansionKey();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -252,6 +259,12 @@ public class InputHandler
 	public void removeAllKeyBindings()
 	{
 		bindings.clear();
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		expandKey = GuiSettings.getExpansionKey();
 	}
 
 	@Override
@@ -302,13 +315,24 @@ public class InputHandler
 			return;
 		}
 
-		ActionListener l = bindings.get(keyStroke);
+		if (expandKey != null && expandKey.equals(keyStroke))
+		{
+			JEditTextArea area = getTextArea(evt);
+			if (area.expandWordAtCursor())
+			{
+				sequenceIsMapped = true; // prevent inserting a space if expansion is a space only
+				evt.consume();
+				return;
+			}
+		}
 
+		ActionListener l = bindings.get(keyStroke);
 		if (l != null)
 		{
 			executeAction(l, evt.getSource(), null);
 			evt.consume();
 		}
+
 	}
 
 	void resetStatus()
@@ -356,6 +380,7 @@ public class InputHandler
 				evt.consume();
 				return;
 			}
+
 			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
 		}
 	}
@@ -451,7 +476,6 @@ public class InputHandler
 				}
 			}
 		}
-
 		return allKeys.contains(toTest);
 	}
 
@@ -558,7 +582,7 @@ public class InputHandler
 		{
 			JEditTextArea textArea = getTextArea(evt);
 
-			if(!textArea.isEditable())
+			if (!textArea.isEditable())
 			{
 				textArea.getToolkit().beep();
 				return;
@@ -567,6 +591,7 @@ public class InputHandler
 			textArea.setSelectedText("\n");
 		}
 	}
+
 	public static class shift_tab implements ActionListener
 	{
 		@Override

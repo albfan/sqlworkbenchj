@@ -103,8 +103,6 @@ public class MacroTree
 		popup.addAction(pasteToFolderAction, true);
 
 		MacroTreeCellRenderer renderer = new MacroTreeCellRenderer();
-//		renderer.setOpenIcon(ResourceMgr.getImage("Tree"));
-//		renderer.setClosedIcon(ResourceMgr.getImage("Tree"));
 		setCellRenderer(renderer);
 		setAutoscrolls(true);
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
@@ -135,6 +133,7 @@ public class MacroTree
 		action.addToInputMap(im, am);
 	}
 
+	@Override
 	public void treeNodesChanged(TreeModelEvent e)
 	{
 		Object[] changed = e.getChildren();
@@ -156,6 +155,7 @@ public class MacroTree
 		}
 	}
 
+	@Override
 	public void expandAll()
 	{
 		TreePath[] groups = this.macroModel.getGroupNodes();
@@ -165,6 +165,7 @@ public class MacroTree
 		}
 	}
 
+	@Override
 	public void collapseAll()
 	{
 		TreePath[] groups = this.macroModel.getGroupNodes();
@@ -259,14 +260,17 @@ public class MacroTree
 		return result;
 	}
 
+	@Override
 	public void treeNodesInserted(TreeModelEvent e)
 	{
 	}
 
+	@Override
 	public void treeNodesRemoved(TreeModelEvent e)
 	{
 	}
 
+	@Override
 	public void treeStructureChanged(TreeModelEvent e)
 	{
 	}
@@ -409,6 +413,7 @@ public class MacroTree
 	}
 
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
@@ -425,18 +430,22 @@ public class MacroTree
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
@@ -455,26 +464,31 @@ public class MacroTree
 		}
 	}
 
+	@Override
 	public void copy()
 	{
 		storeSelectedNodes();
 		this.clipboardType = CLIP_COPY;
 	}
 
+	@Override
 	public void selectAll()
 	{
 	}
 
+	@Override
 	public void clear()
 	{
 	}
 
+	@Override
 	public void cut()
 	{
 		storeSelectedNodes();
 		this.clipboardType = CLIP_CUT;
 	}
 
+	@Override
 	public void paste()
 	{
 		if (clipboardNodes == null) return;
@@ -518,6 +532,7 @@ public class MacroTree
 		selectNode(nodes[0]);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		// invoked from the "paste into new folder" action
@@ -573,6 +588,7 @@ public class MacroTree
 	 * selected after creation.
 	 * @return the name of the new group or null if the user cancelled the name input
 	 */
+	@Override
 	public String addGroup()
 	{
 		String group = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
@@ -603,6 +619,7 @@ public class MacroTree
 		this.selectPath(path);
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		checkActions();

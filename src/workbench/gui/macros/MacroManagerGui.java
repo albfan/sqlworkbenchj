@@ -92,7 +92,7 @@ public class MacroManagerGui
 
 		macroPanel = new MacroDefinitionPanel(this);
 		groupPanel = new MacroGroupPanel(this);
-		
+
 		splitPane.setRightComponent(new JPanel());
 
 		add(splitPane, BorderLayout.CENTER);
@@ -103,17 +103,18 @@ public class MacroManagerGui
 	{
 		macroPanel.setCurrentConnection(conn);
 	}
-	
+
 	public void addTreeSelectionListener(TreeSelectionListener l)
 	{
 		macroTree.addTreeSelectionListener(l);
 	}
-	
+
 	public MacroDefinition getSelectedMacro()
 	{
 		return macroTree.getSelectedMacro();
 	}
 
+	@Override
 	public void deleteItem()
 		throws Exception
 	{
@@ -121,6 +122,7 @@ public class MacroManagerGui
 		macroTree.repaint();
 	}
 
+	@Override
 	public void newItem(boolean copyCurrent) throws Exception
 	{
 		boolean ok = macroTree.addMacro(copyCurrent);
@@ -134,6 +136,7 @@ public class MacroManagerGui
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				macroTree.requestFocusInWindow();
@@ -141,12 +144,13 @@ public class MacroManagerGui
 		});
 	}
 
+	@Override
 	public void saveItem() throws Exception
 	{
 		macroPanel.applyChanges();
 		macroTree.saveChanges();
 	}
-	
+
 	public void saveSettings()
 	{
 		int location = this.splitPane.getDividerLocation();
@@ -179,7 +183,7 @@ public class MacroManagerGui
 		groupPanel.setMacroGroup(group);
 		changePanel(groupPanel);
 	}
-	
+
 	private void showMacro(final MacroDefinition entry)
 	{
 		groupPanel.setMacroGroup(null);
@@ -193,33 +197,39 @@ public class MacroManagerGui
 		splitPane.setRightComponent(newPanel);
 		splitPane.setDividerLocation(location);
 	}
-	
+
+	@Override
 	public void treeNodesChanged(TreeModelEvent e)
 	{
-		
+
 	}
 
+	@Override
 	public void treeNodesInserted(TreeModelEvent e)
 	{
 
 	}
 
+	@Override
 	public void treeNodesRemoved(TreeModelEvent e)
 	{
 
 	}
 
+	@Override
 	public void treeStructureChanged(TreeModelEvent e)
 	{
 
 	}
 
 
+	@Override
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		this.macroTree.repaint();
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		TreePath path = e.getPath();

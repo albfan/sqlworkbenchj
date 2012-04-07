@@ -31,11 +31,13 @@ public class MacroDefinitionTest
 		MacroDefinition macro = new MacroDefinition("test", "select 42 from dual");
 		assertTrue(macro.isVisibleInMenu());
 		macro.setVisibleInMenu(false);
+		macro.setExpandWhileTyping(true);
 		macro.setSortOrder(5);
 		StoreableKeyStroke key = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
 		macro.setShortcut(key);
 
 		MacroDefinition copy = macro.createCopy();
+		assertTrue(copy.getExpandWhileTyping());
 		StoreableKeyStroke key2 = copy.getShortcut();
 		assertEquals(key, key2);
 		assertFalse(copy.isVisibleInMenu());

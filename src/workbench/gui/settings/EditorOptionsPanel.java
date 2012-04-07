@@ -14,16 +14,12 @@ package workbench.gui.settings;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import java.awt.event.KeyEvent;
+import javax.swing.*;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.NumberField;
+import workbench.gui.components.TextFieldWidthAdjuster;
 import workbench.gui.components.WbFilePicker;
 import workbench.gui.editor.BracketCompleter;
 import workbench.interfaces.Restoreable;
@@ -31,6 +27,7 @@ import workbench.interfaces.ValidatingComponent;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.resource.StoreableKeyStroke;
 import workbench.util.StringUtil;
 
 /**
@@ -46,7 +43,14 @@ public class EditorOptionsPanel
 	{
 		super();
 		initComponents();
+		TextFieldWidthAdjuster adjuster = new TextFieldWidthAdjuster();
+		adjuster.adjustAllFields(this);
 		defaultDir.setSelectDirectoryOnly(true);
+		StoreableKeyStroke space = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		StoreableKeyStroke shiftSpace = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.SHIFT_MASK));
+		StoreableKeyStroke tab = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
+		ComboBoxModel model = new DefaultComboBoxModel(new Object[] { space, shiftSpace, tab});
+		cbExpansionKey.setModel(model);
 	}
 
 	@Override
@@ -83,6 +87,8 @@ public class EditorOptionsPanel
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
+		StoreableKeyStroke key = new StoreableKeyStroke(GuiSettings.getExpansionKey());
+		cbExpansionKey.setSelectedItem(key);
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -130,6 +136,9 @@ public class EditorOptionsPanel
 		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
 		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
+
+		StoreableKeyStroke key = (StoreableKeyStroke) cbExpansionKey.getSelectedItem();
+		GuiSettings.setExpansionKey(key.getKeyStroke());
 	}
 
 	@Override
@@ -182,23 +191,26 @@ public class EditorOptionsPanel
     noWordSepLabel = new JLabel();
     useTabs = new JCheckBox();
     noWordSep = new JTextField();
-    autoAdvance = new JCheckBox();
     jPanel2 = new JPanel();
-    keepHilite = new JCheckBox();
     hiliteCurrent = new JCheckBox();
+    keepHilite = new JCheckBox();
     allowEditDuringExec = new JCheckBox();
     rightClickMovesCursor = new JCheckBox();
+    alwaysAllowExecSel = new JCheckBox();
+    autoAdvance = new JCheckBox();
+    emptyLineDelimiter = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
     defaultDir = new WbFilePicker();
-    alwaysAllowExecSel = new JCheckBox();
-    emptyLineDelimiter = new JCheckBox();
     jLabel2 = new JLabel();
     autoCloseBrackets = new JTextField();
+    jLabel3 = new JLabel();
+    cbExpansionKey = new JComboBox();
 
     setLayout(new GridBagLayout());
 
+    editorTabSizeLabel.setLabelFor(tabSize);
     editorTabSizeLabel.setText(ResourceMgr.getString("LblTabWidth"));     editorTabSizeLabel.setToolTipText(ResourceMgr.getString("d_LblTabWidth"));     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -206,7 +218,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(editorTabSizeLabel, gridBagConstraints);
 
-    tabSize.setColumns(6);
+    tabSize.setColumns(4);
     tabSize.setHorizontalAlignment(JTextField.LEFT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -230,7 +242,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(historySizeLabel, gridBagConstraints);
 
-    historySizeField.setColumns(6);
+    historySizeField.setColumns(4);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
@@ -246,7 +258,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(electricScrollLabel, gridBagConstraints);
 
-    electricScroll.setColumns(6);
+    electricScroll.setColumns(4);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -299,7 +311,6 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 0, 0, 11);
     add(includeFilesInHistory, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
@@ -311,6 +322,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(6, 10, 0, 15);
     add(alternateDelim, gridBagConstraints);
 
+    noWordSepLabel.setLabelFor(noWordSep);
     noWordSepLabel.setText(ResourceMgr.getString("LblNoWordSep"));     noWordSepLabel.setToolTipText(ResourceMgr.getString("d_LblNoWordSep"));     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -337,19 +349,14 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(noWordSep, gridBagConstraints);
 
-    autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
-    autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance"));     autoAdvance.setToolTipText(ResourceMgr.getString("d_LblAutoAdvance"));     autoAdvance.setBorder(null);
-    autoAdvance.setHorizontalAlignment(SwingConstants.LEFT);
-    autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
+    jPanel2.setLayout(new GridBagLayout());
+
+    hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent"));     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent"));     hiliteCurrent.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 13, 0, 0);
-    add(autoAdvance, gridBagConstraints);
-
-    jPanel2.setLayout(new GridBagLayout());
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    jPanel2.add(hiliteCurrent, gridBagConstraints);
 
     keepHilite.setText(ResourceMgr.getString("LblKeepHilite"));     keepHilite.setToolTipText(ResourceMgr.getString("d_LblKeepHilite"));     keepHilite.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
@@ -359,13 +366,6 @@ public class EditorOptionsPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 15, 0, 0);
     jPanel2.add(keepHilite, gridBagConstraints);
-
-    hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent"));     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent"));     hiliteCurrent.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    jPanel2.add(hiliteCurrent, gridBagConstraints);
 
     allowEditDuringExec.setText(ResourceMgr.getString("LblAllowEditExecSQL"));     allowEditDuringExec.setToolTipText(ResourceMgr.getString("d_LblAllowEditExecSQL"));     allowEditDuringExec.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
@@ -386,6 +386,39 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 15, 0, 0);
     jPanel2.add(rightClickMovesCursor, gridBagConstraints);
+
+    alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly"));     alwaysAllowExecSel.setToolTipText(ResourceMgr.getString("d_LblExecSelOnly"));     alwaysAllowExecSel.setBorder(null);
+    alwaysAllowExecSel.setHorizontalAlignment(SwingConstants.LEFT);
+    alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(alwaysAllowExecSel, gridBagConstraints);
+
+    autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
+    autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance"));     autoAdvance.setToolTipText(ResourceMgr.getString("d_LblAutoAdvance"));     autoAdvance.setBorder(null);
+    autoAdvance.setHorizontalAlignment(SwingConstants.LEFT);
+    autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(9, 13, 0, 0);
+    jPanel2.add(autoAdvance, gridBagConstraints);
+
+    emptyLineDelimiter.setText(ResourceMgr.getString("LblEmptyLineDelimiter"));     emptyLineDelimiter.setToolTipText(ResourceMgr.getString("d_LblEmptyLineDelimiter"));     emptyLineDelimiter.setBorder(null);
+    emptyLineDelimiter.setHorizontalAlignment(SwingConstants.LEFT);
+    emptyLineDelimiter.setHorizontalTextPosition(SwingConstants.RIGHT);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(emptyLineDelimiter, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -434,28 +467,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(10, 13, 0, 15);
     add(jPanel1, gridBagConstraints);
 
-    alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly"));     alwaysAllowExecSel.setToolTipText(ResourceMgr.getString("d_LblExecSelOnly"));     alwaysAllowExecSel.setBorder(null);
-    alwaysAllowExecSel.setHorizontalAlignment(SwingConstants.LEFT);
-    alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 13, 0, 0);
-    add(alwaysAllowExecSel, gridBagConstraints);
-
-    emptyLineDelimiter.setText(ResourceMgr.getString("LblEmptyLineDelimiter"));     emptyLineDelimiter.setToolTipText(ResourceMgr.getString("d_LblEmptyLineDelimiter"));     emptyLineDelimiter.setBorder(null);
-    emptyLineDelimiter.setHorizontalAlignment(SwingConstants.LEFT);
-    emptyLineDelimiter.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 13, 0, 0);
-    add(emptyLineDelimiter, gridBagConstraints);
-
+    jLabel2.setLabelFor(autoCloseBrackets);
     jLabel2.setText(ResourceMgr.getString("LblAutoCloseBrkt"));     jLabel2.setToolTipText(ResourceMgr.getString("d_LblAutoCloseBrkt"));     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -463,6 +475,7 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(jLabel2, gridBagConstraints);
 
+    autoCloseBrackets.setColumns(8);
     autoCloseBrackets.setToolTipText(ResourceMgr.getString("d_LblAutoCloseBrkt"));     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 7;
@@ -470,6 +483,23 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(autoCloseBrackets, gridBagConstraints);
+
+    jLabel3.setLabelFor(cbExpansionKey);
+    jLabel3.setText(ResourceMgr.getString("LblExpandKey"));     jLabel3.setToolTipText(ResourceMgr.getString("d_LblExpandKey"));     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
+    add(jLabel3, gridBagConstraints);
+
+    cbExpansionKey.setModel(new DefaultComboBoxModel(new String[] { "Space", "Shift-Space", "Tab" }));
+    cbExpansionKey.setToolTipText(ResourceMgr.getString("d_LblExpandKey"));     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(4, 11, 0, 15);
+    add(cbExpansionKey, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -495,6 +525,7 @@ public class EditorOptionsPanel
   private JCheckBox alwaysAllowExecSel;
   private JCheckBox autoAdvance;
   private JTextField autoCloseBrackets;
+  private JComboBox cbExpansionKey;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
@@ -511,6 +542,7 @@ public class EditorOptionsPanel
   private JLabel internalLineEndingLabel;
   private JLabel jLabel1;
   private JLabel jLabel2;
+  private JLabel jLabel3;
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JCheckBox keepHilite;

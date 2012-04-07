@@ -90,6 +90,8 @@ public class TableSearchPanel
 	private boolean initialized;
 	private FilteredProperties workspaceSettings;
 
+	private int tableCount;
+
 	public TableSearchPanel(ShareableDisplay source)
 	{
 		super();
@@ -216,6 +218,14 @@ public class TableSearchPanel
 	@Override
 	public void tableSearched(final TableIdentifier table, final DataStore result)
 	{
+		if (result.getRowCount() == 0)
+		{
+			return;
+		}
+
+		tableCount ++;
+
+		// Make sure everything happens on the EDT thread
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -223,11 +233,6 @@ public class TableSearchPanel
 			{
 				try
 				{
-					if (result.getRowCount() == 0)
-					{
-						return;
-					}
-
 					WbTable display = new WbTable(true, true, false);
 
 					DataStoreTableModel model = new DataStoreTableModel(result);
@@ -259,11 +264,24 @@ public class TableSearchPanel
 						b.setTitleFont(f);
 					}
 
+					// only the last component should have weighty = 1.0
+					// so reset the weighty attribute for the component that is currently the last one
+					int count = resultPanel.getComponentCount();
+					if (count > 0)
+					{
+						Component comp = resultPanel.getComponent(count - 1);
+						GridBagLayout layout = (GridBagLayout)resultPanel.getLayout();
+						GridBagConstraints prev = layout.getConstraints(comp);
+						prev.weighty = 0;
+						layout.setConstraints(comp, prev);
+					}
+
 					GridBagConstraints constraints = new GridBagConstraints();
 					constraints.gridx = 0;
 					constraints.fill = GridBagConstraints.HORIZONTAL;
 					constraints.weightx = 1.0;
-					constraints.anchor = GridBagConstraints.WEST;
+					constraints.weighty = 1.0;
+					constraints.anchor = GridBagConstraints.NORTHWEST;
 					resultPanel.add(pane, constraints);
 
 					int height = display.getRowHeight();
@@ -303,27 +321,34 @@ public class TableSearchPanel
 	 *	Call back function from the table searcher...
 	 */
 	@Override
-	public synchronized void setCurrentTable(String table, String sql, long currentObject, long totalObjects)
+	public synchronized void setCurrentTable(final String table, final String sql, final long currentObject, final long totalObjects)
 	{
-		if (sql == null)
-		{
-			String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
-			this.sqlDisplay.appendLine("-- " + msg);
-		}
-		else
-		{
-			StringBuilder info = new StringBuilder(fixedStatusText.length() + 25);
-			info.append(this.fixedStatusText); // the text already contains a trailing space
-			info.append(table);
-			info.append(" (");
-			info.append(NumberStringCache.getNumberString(currentObject));
-			info.append('/');
-			info.append(NumberStringCache.getNumberString(totalObjects));
-			info.append(')');
-			this.statusInfo.setText(info.toString());
-			this.sqlDisplay.appendLine(sql + ";");
-		}
-		this.sqlDisplay.appendLine("\n\n");
+		EventQueue.invokeLater(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				if (sql == null)
+				{
+					String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
+					sqlDisplay.appendLine("-- " + msg);
+				}
+				else
+				{
+					StringBuilder info = new StringBuilder(fixedStatusText.length() + 25);
+					info.append(fixedStatusText); // the text already contains a trailing space
+					info.append(table);
+					info.append(" (");
+					info.append(NumberStringCache.getNumberString(currentObject));
+					info.append('/');
+					info.append(NumberStringCache.getNumberString(totalObjects));
+					info.append(')');
+					statusInfo.setText(info.toString());
+					sqlDisplay.appendLine(sql + ";");
+				}
+				sqlDisplay.appendLine("\n\n");
+			}
+		});
 	}
 
 	@Override
@@ -364,10 +389,17 @@ public class TableSearchPanel
     // resultPanel.removeAll() does not work properly for some reason
     // the old tables just stay in there
     // so I re-create the actual result panel
-		this.resultPanel = new JPanel(new GridBagLayout());
-    this.resultScrollPane.setViewportView(resultPanel);
-		this.sqlDisplay.setText("");
-		this.setStatusText("");
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				resultPanel = new JPanel(new GridBagLayout());
+				resultScrollPane.setViewportView(resultPanel);
+				sqlDisplay.setText("");
+				setStatusText("");
+			}
+		});
 	}
 
 	public void searchData()
@@ -502,21 +534,13 @@ public class TableSearchPanel
 			@Override
 			public void run()
 			{
-				// insert a dummy panel at the end which will move
-				// all tables in the panel to the upper border
-				// e.g. when there is only one table
-				GridBagConstraints constraints = new GridBagConstraints();
-				constraints.gridx = 0;
-				constraints.weighty = 1.0;
-				constraints.anchor = GridBagConstraints.NORTHWEST;
-				resultPanel.add(new JPanel(), constraints);
-
 				resultPanel.doLayout();
 				getCriteriaPanel().enableControls();
 				serverSideSearch.setEnabled(true);
 				startButton.setText(ResourceMgr.getString("LblStartSearch"));
 				statusInfo.setText("");
 				startButton.setEnabled(tableNames.getSelectedRowCount() > 0);
+				statusInfo.setText(ResourceMgr.getFormattedString("MsgTablesFound", tableCount));
 			}
 		});
 	}
@@ -527,6 +551,7 @@ public class TableSearchPanel
 		getCriteriaPanel().disableControls();
 		serverSideSearch.setEnabled(false);
 		startButton.setText(ResourceMgr.getString("LblCancelPlain"));
+		tableCount = 0;
 	}
 
 	@Override

@@ -11,8 +11,13 @@
  */
 package workbench.sql.wbcommands;
 
+
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
@@ -20,10 +25,6 @@ import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
 import workbench.sql.BatchRunner;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -69,7 +70,7 @@ public class WbModeTest
 			int count = rs.getInt(1);
 			assertEquals(count, 2);
 			SqlUtil.closeResult(rs);
-			
+
 			Controller controll = new Controller();
 			runner.setExecutionController(controll);
 
@@ -127,18 +128,21 @@ public class WbModeTest
 			confirmCalled = 0;
 		}
 
+		@Override
 		public boolean confirmStatementExecution(String command)
 		{
 			confirmStatementCalled ++;
 			return true;
 		}
 
+		@Override
 		public boolean confirmExecution(String prompt)
 		{
 			confirmCalled ++;
 			return true;
 		}
 
+		@Override
 		public String getPassword(String prompt)
 		{
 			return "";

@@ -12,6 +12,7 @@
 package workbench.resource;
 
 import java.awt.Color;
+import javax.swing.KeyStroke;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 
@@ -31,7 +32,31 @@ public class GuiSettings
 	public static final String PROPERTY_QUICK_FILTER_REGEX = "workbench.gui.quickfilter.useregex";
 	public static final String PROPERTY_COMPLETE_CHARS = "workbench.editor.completechars";
 	public static final String PROPERTY_SMART_COMPLETE = "workbench.editor.smartcomplete";
-	
+	public static final String PROPERTY_EXPAND_KEYSTROKE = "workbench.editor.expand.macro.key";
+	public static final String PROPERTY_EXPAND_MAXDURATION = "workbench.editor.expand.maxduration";
+
+
+	public static int getMaxExpansionPause()
+	{
+		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
+	}
+
+	public static KeyStroke getExpansionKey()
+	{
+		String value = Settings.getInstance().getProperty(PROPERTY_EXPAND_KEYSTROKE, "32,0");
+		String[] elements = value.split(",");
+		int code = Integer.valueOf(elements[0]);
+		int modifier = Integer.valueOf(elements[1]);
+		return KeyStroke.getKeyStroke(code, modifier);
+	}
+
+	public static void setExpansionKey(KeyStroke key)
+	{
+		int code = key.getKeyCode();
+		int modifier = key.getModifiers();
+		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
+	}
+
 	public static boolean getAutoRetrieveFKTree()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);

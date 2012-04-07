@@ -203,10 +203,9 @@
 		<section id="options-alternate-delimiter" xreflabel="alternate delimiter">
 			<title>Alternate Delimiter</title>
 			<para>
-				This options defines the default alternate delimiter. You can
-				override this default in the connection profile, to use different
-				delimiters for different DBMS.
-				For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
+				This options defines the default alternate delimiter. You can override this default in the connection profile,
+        to use different delimiters for different DBMS.
+        For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
 			</para>
 		</section>
 
@@ -274,40 +273,13 @@
       </para>
 		</section>
 
-		<section id="options-always-execute-selected">
-			<title>Always allow "Execute Selected"</title>
-			<para>
-        If this option is turned off, then <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute Selected</guimenuitem></menuchoice> will
-        only work if text is selected in the editor. If this option is turned on and no text is selected, the complete content of the
-        editor will be executed.
-			</para>
-		</section>
-
-		<section id="options-empty-line-delimiter">
-			<title>Allow empty lines as statement delimiter</title>
-			<para>
-				When analysing statements in the editor, it is assumed that individual statements
-				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
-        setting will be used to detect the current statement for auto-completion and when using "Execute Current" inside
-        the editor.
-			</para>
-			<note><para>
-				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
-			</para></note>
-		</section>
-
-		<section id="options-autojump-statement">
-			<title>Auto advance to next statement</title>
-			<para>
-				If this option is enabled, then the cursor will automatically jump
-				to the next statement in the script, when you execute a single statement
-				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
-				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
-			</para>
-			<para>For more information on how you can execute statements
-				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
-			</para>
-		</section>
+    <section id="macro-expansion-keystroke">
+      <title>Macro expansion key</title>
+      <para>
+        This defines the key combination that triggers the detection of
+        <link linkend="expandable-macro">expandable macros</link>.
+      </para>
+    </section>
 
 		<section id="options-hilite-current">
 			<title>Highlight current statement</title>
@@ -342,6 +314,41 @@
 				click will also change the caret's location (to where the mouse cursor
 				is located)
 			</para>
+		</section>
+
+		<section id="options-always-execute-selected">
+			<title>Always allow "Execute Selected"</title>
+			<para>
+        If this option is turned off, then <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute Selected</guimenuitem></menuchoice> will
+        only work if text is selected in the editor. If this option is turned on and no text is selected, the complete content of the
+        editor will be executed.
+			</para>
+		</section>
+
+		<section id="options-autojump-statement">
+			<title>Auto advance to next statement</title>
+			<para>
+				If this option is enabled, then the cursor will automatically jump
+				to the next statement in the script, when you execute a single statement
+				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
+				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
+			</para>
+			<para>For more information on how you can execute statements
+				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
+			</para>
+		</section>
+
+		<section id="options-empty-line-delimiter">
+			<title>Allow empty lines as statement delimiter</title>
+			<para>
+				When analysing statements in the editor, it is assumed that individual statements
+				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
+        setting will be used to detect the current statement for auto-completion and when using "Execute Current" inside
+        the editor.
+			</para>
+			<note><para>
+				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
+			</para></note>
 		</section>
 
     <section id="editor-follow-current-dir">

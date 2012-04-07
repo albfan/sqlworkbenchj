@@ -58,6 +58,7 @@ public class ConnectionProfile
 	private boolean detectOpenTransaction;
 
 	private boolean readOnly;
+	private boolean preventNoWhere;
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
 	private boolean confirmUpdates;
@@ -297,6 +298,17 @@ public class ConnectionProfile
 	{
 		if (this.readOnly != flag) changed = true;
 		this.readOnly = flag;
+	}
+
+	public void setPreventDMLWithoutWhere(boolean flag)
+	{
+		if (preventNoWhere != flag) changed = true;
+		preventNoWhere = flag;
+	}
+
+	public boolean getPreventDMLWithoutWhere()
+	{
+		return preventNoWhere;
 	}
 
 	public boolean getTrimCharData()
@@ -745,8 +757,10 @@ public class ConnectionProfile
 
 	/**
 	 * Returns a copy of this profile.
+	 * 
 	 * The copy is marked as "new" and "changed", so isNew() and isChanged()
 	 * will return true on the copy
+	 *
 	 * @return a copy of this profile
 	 * @see #isNew()
 	 * @see #isChanged()
@@ -788,6 +802,7 @@ public class ConnectionProfile
 		result.setCatalogFilter(this.catalogFilter == null ? null : catalogFilter.createCopy());
 		result.setSchemaFilter(this.schemaFilter == null ? null : schemaFilter.createCopy());
 		result.setDetectOpenTransaction(this.detectOpenTransaction);
+		result.setPreventDMLWithoutWhere(this.preventNoWhere);
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();
@@ -800,7 +815,6 @@ public class ConnectionProfile
 				result.connectionProperties.put(key, value);
 			}
 		}
-
 		return result;
 	}
 

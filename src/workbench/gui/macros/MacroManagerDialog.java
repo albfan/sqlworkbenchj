@@ -40,6 +40,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
+import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -140,6 +141,7 @@ public class MacroManagerDialog
 		setName("MacroManagerDialog");
 		addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowClosing(WindowEvent evt)
 			{
 				closeDialog(evt);
@@ -178,6 +180,7 @@ public class MacroManagerDialog
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == okButton)
@@ -228,8 +231,17 @@ public class MacroManagerDialog
 			if (this.client != null)
 			{
 				MacroDefinition macro = this.macroPanel.getSelectedMacro();
-				MacroRunner runner = new MacroRunner();
-				runner.runMacro(macro, client, this.replaceEditorText.isSelected());
+				if (macro.getExpandWhileTyping())
+				{
+					MacroExpander expander = client.getEditor().getMacroExpander();
+					expander.insertMacroText(macro.getText());
+				}
+				else
+				{
+					MacroRunner runner = new MacroRunner();
+					runner.runMacro(macro, client, this.replaceEditorText.isSelected());
+				}
+
 			}
 		}
 		catch (Exception e)
@@ -256,6 +268,7 @@ public class MacroManagerDialog
 		setVisible(false);
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		TreePath[] paths = e.getPaths();
@@ -279,6 +292,7 @@ public class MacroManagerDialog
 		this.runButton.setEnabled(selected == 1 && selectedIsMacro);
 	}
 
+	@Override
 	public void mouseClicked(java.awt.event.MouseEvent e)
 	{
 		if (e.getSource() == this.macroList)
@@ -290,22 +304,27 @@ public class MacroManagerDialog
 		}
 	}
 
+	@Override
 	public void mouseEntered(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent windowEvent)
 	{
 		// Fix for JDK 6
@@ -314,6 +333,7 @@ public class MacroManagerDialog
 		// it's not visible
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				macroPanel.restoreSettings();
@@ -321,26 +341,32 @@ public class MacroManagerDialog
 		});
 	}
 
+	@Override
 	public void windowClosing(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent windowEvent)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
 	}

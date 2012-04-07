@@ -54,31 +54,37 @@ public class GeneralExportOptionsPanel
 		this.setEncoding(s.getProperty("workbench.export.general.encoding", s.getDefaultDataEncoding()));
 	}
 
+	@Override
 	public String getDateFormat()
 	{
 		return this.dateFormat.getText();
 	}
 
+	@Override
 	public String getEncoding()
 	{
 		return encodingPanel.getEncoding();
 	}
 
+	@Override
 	public String getTimestampFormat()
 	{
 		return this.timestampFormat.getText();
 	}
 
+	@Override
 	public void setDateFormat(String format)
 	{
 		dateFormat.setText(format);
 	}
 
+	@Override
 	public void setEncoding(String enc)
 	{
 		encodingPanel.setEncoding(enc);
 	}
 
+	@Override
 	public void setTimestampFormat(String format)
 	{
 		timestampFormat.setText(format);

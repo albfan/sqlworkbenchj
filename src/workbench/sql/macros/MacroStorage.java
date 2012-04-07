@@ -214,9 +214,6 @@ public class MacroStorage
 			applySort();
 			updateMap();
 		}
-		catch (FileNotFoundException fne)
-		{
-		}
 		catch (Exception e)
 		{
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
