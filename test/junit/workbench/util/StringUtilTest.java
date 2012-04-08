@@ -238,19 +238,6 @@ public class StringUtilTest
 	}
 
 	@Test
-	public void testReplace()
-	{
-		String s = StringUtil.replace(null, "gaga", "gogo");
-		assertNull(s);
-
-		s = StringUtil.replace("gaga", null, "gogo");
-		assertEquals("gaga", s);
-
-		s = StringUtil.replace("gaga", "gogo", null);
-		assertEquals("gaga", s);
-	}
-
-	@Test
 	public void testEndsWith()
 	{
 		String s = "this is a test";
@@ -359,23 +346,40 @@ public class StringUtilTest
 	}
 
 	@Test
-	public void testReplaceBuffer()
+	public void testReplace()
 	{
+		String s = StringUtil.replace(null, "gaga", "gogo");
+		assertNull(s);
+
+		s = StringUtil.replace("gaga", null, "gogo");
+		assertEquals("gaga", s);
+
+		s = StringUtil.replace("gaga", "gogo", null);
+		assertEquals("gaga", s);
+
 		String value = "something";
-		String result = StringUtil.replaceBuffer(new StringBuilder(value), "some", "other").toString();
+		String result = StringUtil.replace(value, "some", "other");
 		assertEquals("otherthing", result);
 
 		value = "ababababaab";
-		result = StringUtil.replaceBuffer(new StringBuilder(value), "a", "x").toString();
+		result = StringUtil.replace(value, "a", "x");
 		assertEquals("xbxbxbxbxxb", result);
 
 		value = "foobear";
-		result = StringUtil.replaceBuffer(new StringBuilder(value), "bear", "bar").toString();
+		result = StringUtil.replace(value, "bear", "bar");
 		assertEquals("foobar", result);
 
 		value = "some text";
-		result = StringUtil.replaceBuffer(new StringBuilder(value), "xyz", "zxy").toString();
+		result = StringUtil.replace(value, "xyz", "zxy");
 		assertEquals(value, result);
+
+		value = "some text";
+		result = StringUtil.replace(value, "text", "other text");
+		assertEquals("some other text", result);
+
+		value = "some text";
+		result = StringUtil.replace(value, "some", "no");
+		assertEquals("no text", result);
 	}
 
 	@Test

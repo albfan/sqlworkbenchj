@@ -358,31 +358,31 @@ public class StringUtil
 	 * and StringBuffer, and will basically be the same for String
 	 * objects.
 	 *
-	 * @param s the string to search in
-	 * @param c the character to look for
+	 * @param haystack the string to search in
+	 * @param needle the character to look for
 	 * @return -1 if c was not found, the position of c in s otherwise
 	 */
-	public static int lastIndexOf(CharSequence s, char c)
+	public static int lastIndexOf(CharSequence haystack, char needle)
 	{
-		int len = s.length();
-		if (s == null || len == 0) return -1;
+		int len = haystack.length();
+		if (haystack == null || len == 0) return -1;
 
 		for (int i=(len - 1); i > 0; i--)
 		{
-			if (s.charAt(i) == c) return i;
+			if (haystack.charAt(i) == needle) return i;
 		}
 		return -1;
 	}
 
-	/*
+	/**
 	 * Null safe string replacement.
 	 *
-	 * This is a wrapper around String.replace(String, String) but does not throw an
-	 * exception if one of the parameters is null.
+	 * This is faster than using String.replace() as that uses regular expressions internally.
 	 *
 	 * @param haystack the string in which to replace. If null, null is returned
 	 * @param needle the string to search for. If null, haystack is returned.
 	 * @param replacement the replacement. If null haystack is returned
+	 * @return the haystack with all occurances of needle replaced with replacement
 	 */
 	public static String replace(String haystack, String needle, String replacement)
 	{
@@ -390,29 +390,16 @@ public class StringUtil
 		if (needle == null) return haystack;
 		if (haystack == null) return null;
 
-		return haystack.replace(needle, replacement);
-	}
-
-	/**
-	 * Replace all occurances of a search string in the passed StringBuilder.
-	 *
-	 * This is faster than using String.replace() as that uses regular expressions internally
-	 *
-	 * @param haystack
-	 * @param needle
-	 * @param replacement
-	 * @return
-	 */
-	public static StringBuilder replaceBuffer(StringBuilder haystack, String needle, String replacement)
-	{
-
 		int pos = haystack.indexOf(needle);
 		if (pos == -1)
 		{
 			return haystack;
 		}
 
-		StringBuilder result = new StringBuilder(haystack.length() + 10);
+		int add = replacement.length() - needle.length() * 2;
+		if (add < 0) add = 0;
+
+		StringBuilder result = new StringBuilder(haystack.length() + add);
 
 		int lastpos = 0;
 		int len = needle.length();
@@ -427,7 +414,7 @@ public class StringUtil
 		{
 			result.append(haystack.substring(lastpos));
 		}
-		return result;
+		return result.toString();
 	}
 
 	private static final int[] limits =
@@ -1187,7 +1174,6 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
-	@SuppressWarnings({"UnusedDeclaration"})
 	public static void dump(String value)
 	{
 		int size = value.length();

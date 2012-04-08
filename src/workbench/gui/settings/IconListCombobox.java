@@ -38,23 +38,38 @@ public class IconListCombobox
 
 	public static ComboBoxModel getBusyIcons()
 	{
-		LoadingImage[] data = new LoadingImage[6];
-		data[0] = new LoadingImage("loading-static");
-		data[1] = new LoadingImage("loading_box");
-		data[2] = new LoadingImage("loading_small");
-		data[3] = new LoadingImage("loading");
-		data[4] = new LoadingImage("loading_arrows");
-		data[5] = new LoadingImage("spinning");
-		return new DefaultComboBoxModel(data);
+		return getModel(
+			"loading-static",
+			"loading_box",
+			"loading_small",
+			"loading",
+			"loading_arrows",
+			"spinning",
+			"loading_snake",
+			"loading_spider");
 	}
 
 	public static ComboBoxModel getCancelIcons()
 	{
-		LoadingImage[] data = new LoadingImage[4];
-		data[0] = new LoadingImage("cancelling-static");
-		data[1] = new LoadingImage("cancelling");
-		data[2] = new LoadingImage("cancelling-spinning");
-		data[3] = new LoadingImage("progress_open");
+		return getModel(
+			"cancelling-static",
+			"cancelling",
+			"cancelling-spinning",
+			"progress_open",
+			"loading_clock",
+			"loading_blocks",
+			"loading_spider");
+	}
+
+	private static ComboBoxModel getModel(String ... pictures)
+	{
+		LoadingImage[] data = new LoadingImage[pictures.length];
+		int i=0;
+		for (String picture : pictures)
+		{
+			data[i] = new LoadingImage(picture);
+			i++;
+		}
 		return new DefaultComboBoxModel(data);
 	}
 

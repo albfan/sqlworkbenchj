@@ -223,6 +223,7 @@ public class MacroPopup
 						if (expander != null)
 						{
 							expander.insertMacroText(macro.getText());
+							panel.selectEditorLater();
 						}
 					}
 					else

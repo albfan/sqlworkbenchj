@@ -43,6 +43,11 @@ public class NextWord
 	public void actionPerformed(ActionEvent evt)
 	{
 		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		jump(textArea, select);
+	}
+
+	public static void jump(JEditTextArea textArea, boolean select)
+	{
 		int caret = textArea.getCaretPosition();
 		int line = textArea.getCaretLine();
 		int lineStart = textArea.getLineStartOffset(line);

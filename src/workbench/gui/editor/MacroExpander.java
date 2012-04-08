@@ -14,6 +14,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 
+import workbench.gui.editor.actions.NextWord;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
@@ -106,46 +107,7 @@ public class MacroExpander
 			String replacement = getReplacement(word);
 			if (replacement != null)
 			{
-				int newCaret = -1;
-				int lineStart = editor.getLineStartOffset(currentLine);
-				boolean doSelect = false;
-				int cursorPos = replacement.indexOf(MacroExpander.CURSOR_PLACEHOLDER);
-
-				if (cursorPos > -1)
-				{
-					replacement = replacement.replace(MacroExpander.CURSOR_PLACEHOLDER, "");
-					newCaret = lineStart + cursorPos;
-				}
-				else
-				{
-					cursorPos = replacement.indexOf(MacroExpander.SELECT_PLACEHOLDER);
-					if (cursorPos > -1)
-					{
-						replacement = replacement.replace(MacroExpander.SELECT_PLACEHOLDER, "");
-						newCaret = lineStart + cursorPos;
-						doSelect = true;
-					}
-				}
-
-				editor.replaceText(currentLine, start, end, replacement);
-
-				if (newCaret > -1)
-				{
-					editor.setCaretPosition(newCaret);
-
-					if (doSelect)
-					{
-						// When expanding the macro, the current line could have changed
-						int caretLine = editor.getCaretLine();
-						int newLineStart = editor.getLineStartOffset(caretLine);
-						String newLine = editor.getLineText(caretLine);
-						int newEnd = TextUtilities.findWordEnd(newLine, newCaret) + newLineStart;
-						if (newEnd > newCaret)
-						{
-							editor.select(newCaret, newEnd);
-						}
-					}
-				}
+				insertMacroText(replacement, start, end);
 				return true;
 			}
 		}
@@ -154,47 +116,56 @@ public class MacroExpander
 
 	public void insertMacroText(String replacement)
 	{
+		insertMacroText(replacement, -1, -1);
+	}
+
+	private void insertMacroText(String replacement, int start, int end)
+	{
 		int newCaret = -1;
 		int currentLine = editor.getCaretLine();
 		int lineStart = editor.getLineStartOffset(currentLine);
-		boolean doSelect = false;
-		int cursorPos = replacement.indexOf(MacroExpander.CURSOR_PLACEHOLDER);
 
+		boolean doSelect = shouldSelect(replacement);
+		int cursorPos = getCaretPositionInString(replacement);
 		if (cursorPos > -1)
 		{
-			replacement = replacement.replace(MacroExpander.CURSOR_PLACEHOLDER, "");
 			newCaret = lineStart + cursorPos;
+		}
+
+		replacement = replacement.replace(CURSOR_PLACEHOLDER, "").replace(SELECT_PLACEHOLDER, "");
+
+		if (start > -1 && end > -1)
+		{
+			editor.replaceText(currentLine, start, end, replacement);
 		}
 		else
 		{
-			cursorPos = replacement.indexOf(MacroExpander.SELECT_PLACEHOLDER);
-			if (cursorPos > -1)
-			{
-				replacement = replacement.replace(MacroExpander.SELECT_PLACEHOLDER, "");
-				newCaret = lineStart + cursorPos;
-				doSelect = true;
-			}
+			editor.insertText(replacement);
 		}
-
-		editor.insertText(replacement);
 
 		if (newCaret > -1)
 		{
 			editor.setCaretPosition(newCaret);
-
 			if (doSelect)
 			{
-				// When expanding the macro, the current line could have changed
-				int caretLine = editor.getCaretLine();
-				int newLineStart = editor.getLineStartOffset(caretLine);
-				String newLine = editor.getLineText(caretLine);
-				int newEnd = TextUtilities.findWordEnd(newLine, newCaret) + newLineStart;
-				if (newEnd > newCaret)
-				{
-					editor.select(newCaret, newEnd);
-				}
+				NextWord.jump(editor, true);
 			}
 		}
+	}
+
+	private int getCaretPositionInString(String replacement)
+	{
+		int cursorPos = replacement.indexOf(CURSOR_PLACEHOLDER);
+		if (cursorPos == -1)
+		{
+			cursorPos = cursorPos = replacement.indexOf(SELECT_PLACEHOLDER);
+		}
+		return cursorPos;
+	}
+
+	private boolean shouldSelect(String replacement)
+	{
+		return replacement.indexOf(SELECT_PLACEHOLDER) > -1;
 	}
 
 }

@@ -17,6 +17,11 @@ package workbench.interfaces;
  */
 public interface ValidatingComponent
 {
+	/**
+	 * Validate the input and display an error message if not valid.
+	 * @return true, everything OK
+	 *         false, input is not valid
+	 */
 	boolean validateInput();
 	void componentDisplayed();
 }

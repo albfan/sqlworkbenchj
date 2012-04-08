@@ -385,8 +385,7 @@ public static char getCatalogSeparator(WbConnection conn)
 		if (name.indexOf('_') > -1 && StringUtil.isNonEmpty(escape))
 		{
 			// Only the underscore is replaced as the % character is not allowed in SQL identifiers
-			StringBuilder temp = new StringBuilder(name);
-			name = StringUtil.replaceBuffer(temp, "_", escape + "_").toString();
+			name = StringUtil.replaceBuffer(name, "_", escape + "_");
 		}
 		return name;
 	}

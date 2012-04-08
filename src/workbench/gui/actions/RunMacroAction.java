@@ -12,10 +12,9 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-
 import javax.swing.Action;
-
 import javax.swing.KeyStroke;
+
 import workbench.gui.MainWindow;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.macros.MacroRunner;
@@ -90,6 +89,7 @@ public class RunMacroAction
 			if (expander != null)
 			{
 				expander.insertMacroText(macro.getText());
+				sql.selectEditorLater();
 			}
 		}
 		else

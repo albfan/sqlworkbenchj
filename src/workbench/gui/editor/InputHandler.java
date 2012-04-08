@@ -279,6 +279,7 @@ public class InputHandler
 	public void dispose()
 	{
 		ShortcutManager.getInstance().removeChangeListener(this);
+		Settings.getInstance().removePropertyChangeListener(this);
 		removeAllKeyBindings();
 	}
 
@@ -320,7 +321,9 @@ public class InputHandler
 			JEditTextArea area = getTextArea(evt);
 			if (area.expandWordAtCursor())
 			{
-				sequenceIsMapped = true; // prevent inserting a space if expansion is a space only
+				// setting sequencedMapped to true will prevent keyTyped() to do the expansion again
+				// in case the triggering keystroke is a regular space character.
+				sequenceIsMapped = true;
 				evt.consume();
 				return;
 			}
