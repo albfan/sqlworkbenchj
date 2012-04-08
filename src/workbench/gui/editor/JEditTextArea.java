@@ -603,9 +603,17 @@ public class JEditTextArea
 		return count != 0;
 	}
 
-	public void setBracketCompleter(BracketCompleter completer)
+	public void enableBracketCompletion(boolean flag)
 	{
-		this.bracketCompleter = completer;
+		if (bracketCompleter == null && flag)
+		{
+			this.bracketCompleter = new BracketCompleter();
+		}
+		else if (!flag)
+		{
+			if (bracketCompleter != null) bracketCompleter.dispose();
+			bracketCompleter = null;
+		}
 	}
 
 	/**

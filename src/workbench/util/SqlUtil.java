@@ -352,11 +352,12 @@ public static char getCatalogSeparator(WbConnection conn)
 	 * Escapes any underscore in the passed name with the escape character defined by the connection.
 	 *
 	 * @param name the object identifier to test
-	 * @param conn the connection
+	 * @param conn the connection, if null no escaping is done
 	 * @return an escaped version of the name
 	 *
 	 * @see WbConnection#getSearchStringEscape()
 	 * @see #escapeUnderscore(java.lang.String, java.lang.String)
+	 * @see DbSettings#doEscapeSearchString()
 	 */
 	public static String escapeUnderscore(String name, WbConnection conn)
 	{
@@ -373,7 +374,7 @@ public static char getCatalogSeparator(WbConnection conn)
 	 * Escapes any underscore in the passed name with the given escape character.
 	 *
 	 * @param name the object identifier to test
-	 * @param escape the esacpe character to use connection
+	 * @param escape the esacpe character used by connection
 	 * @return an escaped version of the name
 	 *
 	 * @see WbConnection#getSearchStringEscape()
@@ -382,12 +383,11 @@ public static char getCatalogSeparator(WbConnection conn)
 	public static String escapeUnderscore(String name, String escape)
 	{
 		if (name == null) return null;
-		if (name.indexOf('_') > -1 && StringUtil.isNonEmpty(escape))
-		{
-			// Only the underscore is replaced as the % character is not allowed in SQL identifiers
-			name = StringUtil.replace(name, "_", escape + "_");
-		}
-		return name;
+		if (StringUtil.isEmptyString(escape)) return name;
+		if (name.indexOf('_') == -1) return name;
+
+		// Only the underscore is replaced as the % character is not allowed in SQL identifiers
+		return StringUtil.replace(name, "_", escape + "_");
 	}
 
 	/**

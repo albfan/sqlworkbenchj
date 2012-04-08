@@ -370,6 +370,7 @@ public class SqlPanel
 		tabName = ResourceMgr.getDefaultTabLabel();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
 		editor.enableMacroExpansion(true);
+		editor.enableBracketCompletion(true);
 	}
 
 	public void setDividerLocation(int location)

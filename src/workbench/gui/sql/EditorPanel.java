@@ -122,7 +122,6 @@ public class EditorPanel
 		EditorPanel p = new EditorPanel(sql);
 		p.editorType = SQL_EDITOR;
 		p.sqlTokenMarker = sql;
-		p.setBracketCompleter(new BracketCompleter());
 		return p;
 	}
 

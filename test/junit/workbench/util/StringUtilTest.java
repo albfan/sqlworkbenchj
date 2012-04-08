@@ -346,6 +346,15 @@ public class StringUtilTest
 	}
 
 	@Test
+	public void testEscapeUnderscore()
+	{
+		assertEquals("first#_name", SqlUtil.escapeUnderscore("first_name", "#"));
+		assertEquals("first_name", SqlUtil.escapeUnderscore("first_name", (String)null));
+		assertEquals("first\\_name", SqlUtil.escapeUnderscore("first_name", "\\"));
+		assertEquals("firstname", SqlUtil.escapeUnderscore("firstname", "#"));
+	}
+
+	@Test
 	public void testReplace()
 	{
 		String s = StringUtil.replace(null, "gaga", "gogo");
