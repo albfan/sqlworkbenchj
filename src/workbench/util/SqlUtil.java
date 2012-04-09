@@ -107,6 +107,7 @@ public class SqlUtil
 	{
 		LEXER_INSTANCE.reset(new StringReader(sql),0,0);
 	}
+
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
@@ -114,7 +115,7 @@ public class SqlUtil
 	 */
 	public static String stripVerb(String sql)
 	{
-		String result = "";
+		String result;
 		try
 		{
 			synchronized (LEXER_INSTANCE)
@@ -124,6 +125,7 @@ public class SqlUtil
 				int pos = -1;
 				if (t != null) pos = t.getCharEnd();
 				if (pos > -1) result = sql.substring(pos).trim();
+				else result = "";
 			}
 		}
 		catch (Exception e)
