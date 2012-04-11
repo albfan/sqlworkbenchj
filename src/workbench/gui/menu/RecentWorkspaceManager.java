@@ -53,7 +53,7 @@ public class RecentWorkspaceManager
 	public void populateMenu(JMenu recentMenu, MainWindow window)
 	{
 		recentMenu.removeAll();
-		
+
 		if (workspaces.isEmpty())
 		{
 			recentMenu.setEnabled(false);
@@ -68,7 +68,7 @@ public class RecentWorkspaceManager
 		recentMenu.setEnabled(true);
 	}
 
-	public void readSettings()
+	public final void readSettings()
 	{
 		ListItemProperty props = new ListItemProperty(PROP_NAME);
 		List<String> fileNames = props.getItems();
