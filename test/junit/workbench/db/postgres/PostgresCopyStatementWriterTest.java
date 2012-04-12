@@ -127,12 +127,14 @@ public class PostgresCopyStatementWriterTest
 			assertTrue(formatFile.exists());
 
 			List<String> contents = TestUtil.readLines(formatFile);
+			System.out.println(contents);
 			assertNotNull(contents);
 			assertEquals(1, contents.size()); // the \copy command cannot span multiple lines.
-			assertTrue(contents.get(0).startsWith("\\copy person (id, firstname, lastname)"));
-			assertTrue(contents.get(0).contains("delimiter as '\t'"));
-			assertTrue(contents.get(0).contains("csv header"));
-			assertTrue(contents.get(0).contains("quote as '\"'"));
+			assertTrue(contents.get(0).startsWith("copy person (id, firstname, lastname)"));
+			assertTrue(contents.get(0).contains("delimiter '\t'"));
+			assertTrue(contents.get(0).contains("format csv"));
+			assertTrue(contents.get(0).contains("header true"));
+			assertTrue(contents.get(0).contains("quote '\"'"));
 			assertTrue(contents.get(0).contains("encoding 'UTF-8'"));
 		}
 		finally

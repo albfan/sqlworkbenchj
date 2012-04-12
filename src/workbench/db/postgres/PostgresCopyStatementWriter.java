@@ -47,7 +47,7 @@ public class PostgresCopyStatementWriter
 		try
 		{
 			out = new PrintWriter(new FileWriter(ctl));
-			out.print("\\copy ");
+			out.print("copy ");
 			String table = exporter.getTableNameToUse();
 			out.print(table);
 			out.print(" (");
@@ -63,23 +63,25 @@ public class PostgresCopyStatementWriter
 			out.print("'" + baseFile.getFullPath() + "'");
 
 			String delim = exporter.getTextDelimiter();
-			out.print(" delimiter as '" + delim + "'");  // a tab should be written as a tab!
+			out.print(" with (format csv");
+
+			out.print(", delimiter '" + delim + "'");  // a tab should be written as a tab!
 
 			if (exporter.getExportHeaders())
 			{
-				out.print(" csv header");
+				out.print(", header true, ");
 			}
 			String quote = exporter.getTextQuoteChar();
 			if (quote != null)
 			{
-				out.print(" quote as '" + quote + "'");
+				out.print(", quote '" + quote + "'");
 			}
 			String encoding = exporter.getEncoding();
 			if (quote != null)
 			{
-				out.print(" encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
+				out.print(", encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
 			}
-			out.println();
+			out.println(")");
 		}
 		catch (Exception e)
 		{
