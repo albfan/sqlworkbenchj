@@ -161,6 +161,8 @@ public class TextUtilities
 			pos = line.length();
 		}
 
+		if (pos < 1) return 0;
+
 		char ch = line.charAt(pos - 1);
 
 		String noWordSep = Settings.getInstance().getEditorNoWordSep();

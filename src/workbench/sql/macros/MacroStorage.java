@@ -12,7 +12,6 @@
 package workbench.sql.macros;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;

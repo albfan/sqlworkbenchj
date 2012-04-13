@@ -104,8 +104,15 @@ public class ObjectScripterUI
 					scripter.generateScript();
 					if (!scripter.isCancelled())
 					{
-						editor.setText(scripter.getScript().toString());
-						editor.setCaretPosition(0);
+						WbSwingUtilities.invoke(new Runnable() {
+
+							@Override
+							public void run()
+							{
+								editor.setText(scripter.getScript().toString());
+								editor.setCaretPosition(0);
+							}
+						});
 					}
 				}
 				finally

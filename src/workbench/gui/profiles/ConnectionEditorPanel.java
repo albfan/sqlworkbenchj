@@ -388,7 +388,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(rollbackBeforeDisconnect, gridBagConstraints);
@@ -438,7 +437,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(includeNull, gridBagConstraints);
@@ -449,10 +447,13 @@ public class ConnectionEditorPanel
     removeComments.setMargin(new java.awt.Insets(2, 0, 2, 2));
     removeComments.setName("removeComments"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(removeComments, gridBagConstraints);
 
     rememberExplorerSchema.setText(ResourceMgr.getString("LblRememberSchema")); // NOI18N
@@ -463,7 +464,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
@@ -499,7 +499,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(controlUpdates, gridBagConstraints);
@@ -522,12 +521,14 @@ public class ConnectionEditorPanel
     checkOpenTrans.setMargin(new java.awt.Insets(2, 0, 2, 2));
     checkOpenTrans.setName("detectOpenTransaction");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 6, 0);
     wbOptionsPanel.add(checkOpenTrans, gridBagConstraints);
 
     preventNoWhere.setText(ResourceMgr.getString("LblConnPreventNoWhere")); // NOI18N

@@ -20,7 +20,9 @@
       to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
       and <literal>-continueOnError=false</literal>.
     </para>
-
+    <para>
+      These statements are only used if more than one table is processed.
+    </para>
   </entry>
 </row>
 <row>

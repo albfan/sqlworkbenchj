@@ -217,6 +217,22 @@
 			</blockquote>
 		</simplesect>
 
+		<simplesect id="dbexplorer-gendrop">
+			<title>Generate DROP script</title>
+
+			<blockquote>
+				<para>
+          This creates a script that first removes all incoming foreign keys to the selected tables,
+          the necessary <literal>DROP</literal> statements and the statements to re-create the foreign keys.
+				</para>
+				<para>
+          For more details, please refer to the description of the <link linkend="command-gendrop">WbGenerateDrop</link>
+          statement.
+				</para>
+			</blockquote>
+		</simplesect>
+
+
 		<simplesect id="dbexplorer-delete-data">
 			<title>Delete data</title>
 
