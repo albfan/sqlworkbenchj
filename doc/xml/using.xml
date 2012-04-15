@@ -671,7 +671,7 @@ WHERE id=42;</programlisting>
         the script variables.
       </para>
 
-      <informaltable frame="all">
+      <informaltable frame="all" id="macro-parameters">
 
         <tgroup cols="2" align="left">
           <colspec colname="c1" colwidth="3.8cm" />

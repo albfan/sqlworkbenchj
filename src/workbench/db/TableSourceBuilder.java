@@ -14,7 +14,13 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.util.*;
+
+import workbench.db.sqltemplates.ColumnDefinitionTemplate;
+import workbench.db.sqltemplates.FkTemplate;
+import workbench.db.sqltemplates.PkTemplate;
+import workbench.db.sqltemplates.TemplateHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -33,7 +39,6 @@ import workbench.util.StringUtil;
 public class TableSourceBuilder
 {
 	protected WbConnection dbConnection;
-	private boolean createInlineConstraints;
 
 	/**
 	 * This class should not be instantiated directly. Use
@@ -45,17 +50,6 @@ public class TableSourceBuilder
 	protected TableSourceBuilder(WbConnection con)
 	{
 		dbConnection = con;
-		this.createInlineConstraints = dbConnection.getDbSettings().createInlineConstraints();
-	}
-
-	/**
-	 * Change the flag if table constraints (FK, PK) should be created "inline".
-	 *
-	 * If false they will be generated as a separate ALTER TABLE statement (the default).
-	 */
-	public void setCreateInlineConstraints(boolean flag)
-	{
-		this.createInlineConstraints = flag;
 	}
 
 	protected ViewReader getViewReader()
@@ -113,14 +107,18 @@ public class TableSourceBuilder
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
-		StringBuilder result = new StringBuilder(250);
-		result.append(getCreateTable(table, columns, indexList, aFkDef, includeDrop, tableNameToUse, includeFk));
+		CharSequence createSql = getCreateTable(table, columns, indexList, aFkDef, includeDrop, tableNameToUse, includeFk);
+
+		StringBuilder result = new StringBuilder(createSql.length() + 50);
+		result.append(createSql);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
-		if (!this.createInlineConstraints && includeFk && dbConnection.getDbSettings().getGenerateTableFKSource())
+		boolean inlineFK = getCreateInlineFKConstraints();
+
+		if (!inlineFK && includeFk && dbConnection.getDbSettings().getGenerateTableFKSource())
 		{
-			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
+			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, false);
 			if (StringUtil.isNonBlank(fk))
 			{
 				result.append(lineEnding);
@@ -236,29 +234,21 @@ public class TableSourceBuilder
 			pkCols = getPKColsFromIndex(indexList, pkname);
 		}
 
-		if (this.createInlineConstraints && pkCols.size() > 0)
+		boolean inlinePK = getCreateInlinePKConstraints();
+		if (inlinePK && pkCols.size() > 0)
 		{
 			result.append("\n   ,");
-			if (StringUtil.isNonBlank(pkname))
-			{
-				result.append("CONSTRAINT ");
-				result.append(pkname);
-			}
-			result.append(' ');
-			result.append(dbConnection.getDbSettings().getInlinePKKeyword());
-			result.append(" (");
+			CharSequence pk = getPkSource(table, pkCols, pkname, true);
+			result.append(pk);
+		}
 
-			result.append(StringUtil.listToString(pkCols, ", ", false));
-			result.append(")");
-
-			if (includeFk)
+		if (includeFk && getCreateInlineFKConstraints())
+		{
+			StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, true);
+			if (fk.length() > 0)
 			{
-				StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, createInlineConstraints);
-				if (fk.length() > 0)
-				{
-					result.append('\n');
-					result.append(fk);
-				}
+				result.append('\n');
+				result.append(fk);
 			}
 		}
 
@@ -283,7 +273,7 @@ public class TableSourceBuilder
 			result.append("\n\n");
 		}
 
-		if (!this.createInlineConstraints && pkCols.size() > 0)
+		if (!inlinePK && pkCols.size() > 0)
 		{
 			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, pkname);
 			result.append('\n');
@@ -508,8 +498,15 @@ public class TableSourceBuilder
 	 */
 	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
 	{
+		return getPkSource(table, pkCols, pkName, false);
+	}
+
+	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName, boolean forInlineUse)
+	{
 		DbMetadata meta = dbConnection.getMetadata();
-		String template = meta.metaSqlMgr.getPrimaryKeyTemplate();
+
+		PkTemplate pkTmpl = new PkTemplate(dbConnection.getDbId(), forInlineUse);
+		String template = pkTmpl.getSQLTemplate();
 
 		if (StringUtil.isEmptyString(template)) return "";
 
@@ -539,16 +536,32 @@ public class TableSourceBuilder
 
 		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
 		result.append(template);
-		result.append(";\n");
+		if (!forInlineUse)
+		{
+			result.append(";\n");
+		}
 
 		return result;
 	}
+
+	private boolean getCreateInlinePKConstraints()
+	{
+		if (dbConnection == null) return false;
+		return dbConnection.getDbSettings().createInlinePKConstraints();
+	}
+
+	private boolean getCreateInlineFKConstraints()
+	{
+		if (dbConnection == null) return false;
+		return dbConnection.getDbSettings().createInlineFKConstraints();
+	}
+
 
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
 		FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 		DataStore fkDef = fk.getForeignKeys(table, false);
-		return getFkSource(table, fkDef, null, createInlineConstraints);
+		return getFkSource(table, fkDef, null, getCreateInlineFKConstraints());
 	}
 
 	/**
@@ -567,7 +580,8 @@ public class TableSourceBuilder
 		int count = aFkDef.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 
-		String template = meta.metaSqlMgr.getForeignKeyTemplate(forInlineUse);
+		FkTemplate tmpl = new FkTemplate(dbConnection.getDbId(), forInlineUse);
+		String template = tmpl.getSQLTemplate();
 
 		// fkCols collects all columns from the base table mapped to the
 		// defining foreign key constraint.
@@ -666,7 +680,7 @@ public class TableSourceBuilder
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
+					stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
 				}
 				else
 				{
@@ -681,7 +695,7 @@ public class TableSourceBuilder
 			rule = getDeferrableVerb(deferrable.get(fkname));
 			if (StringUtil.isEmptyString(rule))
 			{
-				stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
+				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
 			}
 			else
 			{
@@ -742,7 +756,7 @@ public class TableSourceBuilder
 				fk.append(';');
 				fk.append(nl);
 			}
-			fk.append(nl);
+			if (values.hasNext()) fk.append(nl);
 		}
 
 		return fk;

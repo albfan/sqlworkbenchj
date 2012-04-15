@@ -749,9 +749,11 @@ public class SqlCommand
 
 	/**
 	 * Assumes the given parameter is a filename supplied by the end user.
+	 * <br/>
 	 * If the filename is absolute, a file object with that path is returned.
 	 * If the filename does not contain a full path, the current baseDir of the
 	 * StatementRunner is added to the returned file.
+	 * 
 	 * @param fileName
 	 * @return a File object pointing to the file indicated by the user.
 	 * @see workbench.sql.StatementRunner#getBaseDir()

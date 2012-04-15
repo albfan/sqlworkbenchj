@@ -175,6 +175,10 @@
 					The objects will be processed in the order: <literal>SEQUENCES</literal>, <literal>TABLES</literal>,
 					<literal>VIEWS</literal>, <literal>SYNONYMS</literal>.
 				</para>
+        <para>
+          The same script can also be generated using the <link linkend="command-genscript">WbGenerateScript</link>
+          command.
+        </para>
 			</blockquote>
 		</simplesect>
 

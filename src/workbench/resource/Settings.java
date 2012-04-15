@@ -309,7 +309,7 @@ public class Settings
 		{
 			defaultFormat = "{timestamp} {type} {source} {message} {error}";
 		}
-		
+
 		String format = getProperty("workbench.log.format", defaultFormat);
 		LogMgr.setMessageFormat(format);
 
@@ -2855,42 +2855,42 @@ public class Settings
 
 	private void renameOldProps()
 	{
-		this.renameProperty("workbench.worspace.recent", "workbench.workspace.recent");
-		this.renameProperty("workbench.sql.search.lastValue", "workbench.sql.search.lastvalue");
-		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
-		this.renameProperty("workbench.sql.mincolwidth","workbench.gui.optimalwidth.minsize");
-		this.renameProperty("sort.language", "workbench.sort.language");
-		this.renameProperty("sort.country", "workbench.sort.country");
-		this.renameProperty("connection.last", "workbench.connection.last");
-		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
-		this.renameProperty("workbench.db.debugger", "workbench.db.previewsql");
+		renameProperty("workbench.worspace.recent", "workbench.workspace.recent");
+		renameProperty("workbench.sql.search.lastValue", "workbench.sql.search.lastvalue");
+		renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
+		renameProperty("workbench.sql.mincolwidth","workbench.gui.optimalwidth.minsize");
+		renameProperty("sort.language", "workbench.sort.language");
+		renameProperty("sort.country", "workbench.sort.country");
+		renameProperty("connection.last", "workbench.connection.last");
+		renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
+		renameProperty("workbench.db.debugger", "workbench.db.previewsql");
 
 		// Fix typos from incorrect default.properties
-		this.renameProperty("workbench.db.objecttype.data.postgres", "workbench.db.objecttype.data.postgresql");
-		this.renameProperty("workbench.db.objecttype.selectable.postgres", "workbench.db.objecttype.selectable.postgresql");
-		this.renameProperty("workbench.ignoretypes.postgres", "workbench.ignoretypes.postgresql");
+		renameProperty("workbench.db.objecttype.data.postgres", "workbench.db.objecttype.data.postgresql");
+		renameProperty("workbench.db.objecttype.selectable.postgres", "workbench.db.objecttype.selectable.postgresql");
+		renameProperty("workbench.ignoretypes.postgres", "workbench.ignoretypes.postgresql");
 		String s = getProperty("workbench.db.truncatesupported",null);
 		if (s!=null)
 		{
 			s = s.replace(",postgres,",",postgresql,");
-			this.setProperty("workbench.db.truncatesupported",s);
+			setProperty("workbench.db.truncatesupported",s);
 		}
-		this.renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");
-		this.renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
-		this.renameProperty("workbench.gui.dbobjects.ProcedureListPanel.lastsearch", "workbench.quickfilter.procedurelist.history");
-		this.renameProperty("workbench.blob.text.encoding", "workbench.gui.blob.text.encoding");
-		this.renameProperty("workbench.javacode.includenewline", "workbench.clipcreate.includenewline");
-		this.renameProperty("workbench.javacode.codeprefix", "workbench.clipcreate.codeprefix");
+		renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");
+		renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
+		renameProperty("workbench.gui.dbobjects.ProcedureListPanel.lastsearch", "workbench.quickfilter.procedurelist.history");
+		renameProperty("workbench.blob.text.encoding", "workbench.gui.blob.text.encoding");
+		renameProperty("workbench.javacode.includenewline", "workbench.clipcreate.includenewline");
+		renameProperty("workbench.javacode.codeprefix", "workbench.clipcreate.codeprefix");
 
-		this.renameProperty("workbench.sql.replace.criteria", "workbench.sql.replace.criteria.lastvalue");
-		this.renameProperty("workbench.sql.replace.replacement", "workbench.sql.replace.replacement.lastvalue");
-		this.renameProperty("workbench.db.nullkeyword.ingres", "workbench.db.ingres.nullkeyword");
-		this.renameProperty("workbench.db.defaultbeforenull.ingres", "workbench.db.ingres.defaultbeforenull");
-		this.renameProperty("workbench.db.defaultbeforenull.firebird", "workbench.db.firebird.defaultbeforenull");
-		this.renameProperty("workbench.db.defaultbeforenull.oracle", "workbench.db.oracle.defaultbeforenull");
+		renameProperty("workbench.sql.replace.criteria", "workbench.sql.replace.criteria.lastvalue");
+		renameProperty("workbench.sql.replace.replacement", "workbench.sql.replace.replacement.lastvalue");
+		renameProperty("workbench.db.nullkeyword.ingres", "workbench.db.ingres.nullkeyword");
+		renameProperty("workbench.db.defaultbeforenull.ingres", "workbench.db.ingres.defaultbeforenull");
+		renameProperty("workbench.db.defaultbeforenull.firebird", "workbench.db.firebird.defaultbeforenull");
+		renameProperty("workbench.db.defaultbeforenull.oracle", "workbench.db.oracle.defaultbeforenull");
 
-		this.renameProperty("workbench.db.procversiondelimiter.microsoft_sql_server", "workbench.db.microsoft_sql_server.procversiondelimiter");
-		this.renameProperty("workbench.db.procversiondelimiter.adaptive_server_enterprise", "workbench.db.adaptive_server_enterprise.procversiondelimiter");
+		renameProperty("workbench.db.procversiondelimiter.microsoft_sql_server", "workbench.db.microsoft_sql_server.procversiondelimiter");
+		renameProperty("workbench.db.procversiondelimiter.adaptive_server_enterprise", "workbench.db.adaptive_server_enterprise.procversiondelimiter");
 		renameProperty("workbench.sql.searchsearch.history", "workbench.sql.search.history");
 		renameProperty("workbench.sql.searchsearch.lastvalue", "workbench.sql.search.lastvalue");
 		renameProperty("workbench.datasearch.history", "workbench.data.search.history");
@@ -2898,6 +2898,13 @@ public class Settings
 		renameProperty("workbench.editor.autocompletion.sql.emptylineseparator", "workbench.editor.sql.emptyline.delimiter");
 		removeProperty("workbench.gui.animatedicon.name");
 		removeProperty("workbench.gui.animatedicon");
+		String value = props.getProperty("workbench.db.postgresql..inlineconstraints", null);
+		if ("true".equals(value))
+		{
+			removeProperty(".inlineconstraints");
+			props.setProperty("workbench.db.postgresql.pk.inline", "true");
+			props.setProperty("workbench.db.postgresql.fk.inline", "true");
+		}
 	}
 
 	private void renameProperty(String oldKey, String newKey)

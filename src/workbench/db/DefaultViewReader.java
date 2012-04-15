@@ -208,7 +208,7 @@ public class DefaultViewReader
 	{
 		if (viewId == null) return null;
 
-		GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
+		GetMetaDataSql sql = connection.getMetadata().getMetaDataSQLMgr().getViewSourceSql();
 		if (sql == null) throw new NoConfigException("No SQL to retrieve the VIEW source");
 
 		StringBuilder source = new StringBuilder(500);

@@ -8,12 +8,16 @@
  *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db;
+package workbench.db.sqltemplates;
+
 
 import java.sql.Types;
-import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+import static org.junit.Assert.*;
+
+import workbench.WbTestCase;
+import workbench.db.ColumnIdentifier;
 
 /**
  *
@@ -80,7 +84,7 @@ public class ColumnDefinitionTemplateTest
 			ColumnDefinitionTemplate.PARAM_COL_CONSTRAINTS;
 
 		tmpl.setTemplate(templateSql);
-		
+
 		ColumnIdentifier column = new ColumnIdentifier("first_name", Types.VARCHAR, false);
 		column.setDbmsType("VARCHAR(50)");
 		column.setColumnSize(50);

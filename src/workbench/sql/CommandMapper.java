@@ -105,6 +105,7 @@ public class CommandMapper
 		addCommand(new WbStoreProfile());
 		addCommand(new WbDeleteProfile());
 		addCommand(new WbGenDrop());
+		addCommand(new WbGenerateScript());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);

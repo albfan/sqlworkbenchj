@@ -46,8 +46,8 @@ public interface RowActionMonitor
 
 	void setMonitorType(int aType);
 	int getMonitorType();
-	void saveCurrentType(String type);
-	void restoreType(String type);
+	void saveCurrentType(String key);
+	void restoreType(String key);
 	void setCurrentObject(String object, long number, long totalObjects);
 	void setCurrentRow(long currentRow, long totalRows);
 	void jobFinished();

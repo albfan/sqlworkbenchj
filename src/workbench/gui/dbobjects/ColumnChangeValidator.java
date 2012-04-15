@@ -11,7 +11,7 @@
  */
 package workbench.gui.dbobjects;
 
-import workbench.db.ColumnChanger;
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.WbConnection;
 import workbench.gui.components.DataStoreTableModel;
@@ -40,7 +40,7 @@ public class ColumnChangeValidator
 		{
 			return changer.canAddColumn();
 		}
-		
+
 		switch (col)
 		{
 			case TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE:

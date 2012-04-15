@@ -38,8 +38,10 @@ public class GenericRowMonitor
 		this.statusBar = status;
 	}
 
+	@Override
 	public int getMonitorType() { return this.monitorType; }
 
+	@Override
 	public void setMonitorType(int type)
 	{
 		this.monitorType = type;
@@ -79,6 +81,7 @@ public class GenericRowMonitor
 		}
 	}
 
+	@Override
 	public void setCurrentObject(String name, long number, long total)
 	{
 		this.currentMonitorObject = name;
@@ -106,6 +109,7 @@ public class GenericRowMonitor
 		}
 	}
 
+	@Override
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		if (this.updateMsg == null && this.currentMonitorObject == null) return;
@@ -130,6 +134,7 @@ public class GenericRowMonitor
 		statusBar.setStatusMessage(msg.toString());
 	}
 
+	@Override
 	public void jobFinished()
 	{
 		statusBar.clearStatusMessage();
@@ -138,15 +143,17 @@ public class GenericRowMonitor
 		typeStack.clear();
 	}
 
-	public void saveCurrentType(String type)
+	@Override
+	public void saveCurrentType(String key)
 	{
 		TypeEntry entry = new TypeEntry();
 		entry.msg = this.updateMsg;
 		entry.type = this.monitorType;
 		entry.obj = this.currentMonitorObject;
-		this.typeStack.put(type, entry);
+		this.typeStack.put(key, entry);
 	}
 
+	@Override
 	public void restoreType(String type)
 	{
 		TypeEntry entry = typeStack.get(type);
@@ -155,7 +162,6 @@ public class GenericRowMonitor
 		this.currentMonitorObject = entry.obj;
 		this.monitorType = entry.type;
 	}
-
 }
 
 class TypeEntry

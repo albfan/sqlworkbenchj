@@ -8,8 +8,9 @@
  *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db;
+package workbench.db.sqltemplates;
 
+import workbench.db.ColumnIdentifier;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -122,7 +123,7 @@ public class ColumnDefinitionTemplate
 			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "");
 		}
 		sql = replaceNullable(sql, dbid, column.isNullable());
-		
+
 		if (isDefaultConstraint)
 		{
 			sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, "");

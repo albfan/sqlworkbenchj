@@ -102,6 +102,7 @@ public class CommandTester
 		commands.add(WbOraShow.VERB);
 		commands.add(WbGenDrop.VERB);
 		commands.add(WbSetProp.VERB);
+		commands.add(WbGenerateScript.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -143,6 +144,7 @@ public class CommandTester
 			formattedWords.put(WbSysExec.VERB, "WbSysExec");
 			formattedWords.put(WbGenDrop.VERB, "WbGenerateDrop");
 			formattedWords.put(WbSetProp.VERB, "WbSetProp");
+			formattedWords.put(WbGenerateScript.VERB, "WbGenerateScript");
 		}
 		return formattedWords;
 	}

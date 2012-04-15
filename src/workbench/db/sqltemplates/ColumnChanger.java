@@ -9,9 +9,16 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.sqltemplates;
 
 import java.util.List;
+import workbench.db.ColumnIdentifier;
+import workbench.db.CommentSqlManager;
+import workbench.db.DbObject;
+import workbench.db.DbSettings;
+import workbench.db.MetaDataSqlManager;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.db.oracle.OracleMetadata;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;

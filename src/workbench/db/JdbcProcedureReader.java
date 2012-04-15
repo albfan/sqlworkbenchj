@@ -368,7 +368,7 @@ public class JdbcProcedureReader
 	{
 		if (def == null) return;
 
-		GetMetaDataSql sql = this.connection.getMetadata().metaSqlMgr.getProcedureSourceSql();
+		GetMetaDataSql sql = this.connection.getMetadata().getMetaDataSQLMgr().getProcedureSourceSql();
 		if (sql == null)
 		{
 			throw new NoConfigException("No sql configured to retrieve procedure source");

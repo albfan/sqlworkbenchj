@@ -131,7 +131,7 @@ public class WbGenDrop
 			try
 			{
 				writeFile(output, gen.getScript());
-				result.addMessage(ResourceMgr.getFormattedString("MsgDropScriptWritten", output.getFullPath()));
+				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getFullPath()));
 				result.setSuccess();
 			}
 			catch (IOException io)

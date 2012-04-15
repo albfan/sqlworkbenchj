@@ -11,12 +11,17 @@
  */
 package workbench.db;
 
+
 import java.util.List;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.db.sqltemplates.ColumnChanger;
+import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 import workbench.resource.Settings;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import workbench.util.CollectionUtil;
 
 /**

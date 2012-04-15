@@ -20,6 +20,7 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -51,7 +52,7 @@ public class ObjectScripter
 	private String nl = Settings.getInstance().getInternalEditorLineEnding();
 	private Collection<String> commitTypes;
 	private boolean appendCommit;
-
+	private boolean useSeparator = true;
 	private Collection<String> typesWithoutSeparator;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
@@ -64,6 +65,11 @@ public class ObjectScripter
 			TYPE_DOMAIN, TYPE_ENUM);
 
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
+	}
+
+	public void setUseSeparator(boolean flag)
+	{
+		this.useSeparator = flag;
 	}
 
 	@Override
@@ -147,8 +153,11 @@ public class ObjectScripter
 			{
 				if (first)
 				{
-					this.script.append("-- BEGIN FOREIGN KEYS --");
-					this.script.append(nl);
+					if (useSeparator)
+					{
+						this.script.append("-- BEGIN FOREIGN KEYS --");
+						this.script.append(nl);
+					}
 					first = false;
 				}
 				script.append(source);
@@ -157,8 +166,11 @@ public class ObjectScripter
 		if (!first)
 		{
 			// no table was found, so no FK was added --> do not add separator
-			this.script.append("-- END FOREIGN KEYS --");
-			this.script.append(nl);
+			if (useSeparator)
+			{
+				this.script.append("-- END FOREIGN KEYS --");
+				this.script.append(nl);
+			}
 			this.script.append(nl);
 		}
 	}
@@ -189,15 +201,31 @@ public class ObjectScripter
 			}
 			catch (Exception e)
 			{
-				this.script.append("\nError creating script for " + dbo.getObjectName() + " " + ExceptionUtil.getDisplay(e));
+				this.script.append("\nError creating script for ");
+				this.script.append(dbo.getObjectName());
+				this.script.append(' ');
+				this.script.append(ExceptionUtil.getDisplay(e));
 			}
 
 			if (source != null && source.length() > 0)
 			{
-				boolean useSeparator = !typesWithoutSeparator.contains(type);
-				if (useSeparator) this.script.append("-- BEGIN " + type + " " + dbo.getObjectName() + nl);
+				boolean writeSeparator = useSeparator && !typesWithoutSeparator.contains(type) && this.objectList.size() > 1;
+				if (writeSeparator)
+				{
+					this.script.append("-- BEGIN ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
+				}
+				
 				this.script.append(source);
-				if (useSeparator) this.script.append("-- END " + type + " " + dbo.getObjectName() + nl);
+
+				if (!StringUtil.endsWith(source, nl))
+				{
+					script.append(nl);
+				}
+
+				if (writeSeparator)
+				{
+					this.script.append("-- END ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
+				}
 				this.script.append(nl);
 			}
 		}

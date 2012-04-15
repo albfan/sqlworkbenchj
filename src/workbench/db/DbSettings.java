@@ -1423,9 +1423,14 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "separator.catalog", null);
 	}
 
-	public boolean createInlineConstraints()
+	public boolean createInlinePKConstraints()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + ".inlineconstraints", false);
+		return Settings.getInstance().getBoolProperty(prefix + "pk.inline", false);
+	}
+
+	public boolean createInlineFKConstraints()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "fk.inline", false);
 	}
 
 }

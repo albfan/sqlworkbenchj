@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.HashMap;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
@@ -43,18 +42,12 @@ public class MetaDataSqlManager
 	public static final String GENERAL_SQL = "All";
 
 	private String productName;
-	private static final GetMetaDataSql MARKER = new GetMetaDataSql();
-	private static final String NO_STRING = "";
 
-	private GetMetaDataSql procedureSource = MARKER;
-	private GetMetaDataSql viewSource = MARKER;
-	private GetMetaDataSql listTrigger = MARKER;
-	private GetMetaDataSql triggerSource = MARKER;
+	private GetMetaDataSql procedureSource;
+	private GetMetaDataSql viewSource;
+	private GetMetaDataSql listTrigger;
+	private GetMetaDataSql triggerSource;
 
-	private String primaryKeyTemplate = NO_STRING;
-	private String foreignKeyTemplate = NO_STRING;
-//	private String columnCommentTemplate = NO_STRING;
-//	private String tableCommentTemplate = NO_STRING;
 	private final Object LOCK = new Object();
 
 	public MetaDataSqlManager(String product)
@@ -64,115 +57,55 @@ public class MetaDataSqlManager
 
 	public GetMetaDataSql getProcedureSourceSql()
 	{
-		if (this.procedureSource == MARKER)
+		synchronized (LOCK)
 		{
-			synchronized (LOCK)
+			if (this.procedureSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ProcSourceStatements.xml");
 				this.procedureSource = sql.get(this.productName);
 			}
+			return this.procedureSource;
 		}
-		return this.procedureSource;
 	}
 
 	public GetMetaDataSql getViewSourceSql()
 	{
-		if (this.viewSource == MARKER)
+		synchronized (LOCK)
 		{
-			synchronized (LOCK)
+			if (this.viewSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ViewSourceStatements.xml");
 				this.viewSource = sql.get(this.productName);
 			}
+			return this.viewSource;
 		}
-		return this.viewSource;
 	}
 
 
 	public GetMetaDataSql getListTriggerSql()
 	{
-		if (this.listTrigger == MARKER)
+		synchronized (LOCK)
 		{
-			synchronized (LOCK)
+			if (this.listTrigger == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListTriggersStatements.xml");
 				this.listTrigger = sql.get(this.productName);
 			}
+			return this.listTrigger;
 		}
-		return this.listTrigger;
 	}
 
 	public GetMetaDataSql getTriggerSourceSql()
 	{
-		if (this.triggerSource == MARKER)
+		synchronized (LOCK)
 		{
-			synchronized (LOCK)
+			if (this.triggerSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("TriggerSourceStatements.xml");
 				this.triggerSource = sql.get(this.productName);
 			}
+			return this.triggerSource;
 		}
-		return this.triggerSource;
-	}
-
-	public String getPrimaryKeyTemplate()
-	{
-		if (this.primaryKeyTemplate == NO_STRING)
-		{
-			synchronized (LOCK)
-			{
-				HashMap<String, String> sql = this.readStatementTemplates("CreatePkStatements.xml");
-				this.primaryKeyTemplate = sql.get(this.productName);
-				if (this.primaryKeyTemplate == null)
-				{
-					this.primaryKeyTemplate = sql.get(GENERAL_SQL);
-				}
-			}
-		}
-		return this.primaryKeyTemplate;
-	}
-
-	public String getForeignKeyTemplate(boolean createInline)
-	{
-		if (this.foreignKeyTemplate == NO_STRING)
-		{
-			synchronized (LOCK)
-			{
-				HashMap<String, String> sql = this.readStatementTemplates("CreateFkStatements.xml");
-				String template = sql.get(this.productName);
-				if (template == null)
-				{
-					if (createInline)
-					{
-						template = sql.get("All-Inline");
-					}
-					else
-					{
-						template = sql.get(GENERAL_SQL);
-					}
-				}
-				this.foreignKeyTemplate = template;
-			}
-		}
-		return this.foreignKeyTemplate;
-	}
-
-	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
-	{
-		String s;
-		if (withNL)
-		{
-			StringBuilder b = new StringBuilder(placeholder.length() + 10);
-			b.append("[ \\t]*");
-			b.append(StringUtil.quoteRegexMeta(placeholder));
-			b.append("[\n|\r\n]?");
-			s = b.toString();
-		}
-		else
-		{
-			s = StringUtil.quoteRegexMeta(placeholder);
-		}
-		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
 	}
 
 	@SuppressWarnings("unchecked")

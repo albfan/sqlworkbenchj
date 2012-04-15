@@ -11,7 +11,7 @@
 package workbench.db.mssql;
 
 import java.sql.Statement;
-import workbench.db.ColumnChanger;
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import java.sql.SQLException;

@@ -16,7 +16,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.db.ColumnChanger;
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableColumnsDatastore;

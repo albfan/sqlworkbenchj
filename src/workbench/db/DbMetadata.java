@@ -97,7 +97,7 @@ public class DbMetadata
 	private String productName;
 	private String dbId;
 
-	MetaDataSqlManager metaSqlMgr;
+	private MetaDataSqlManager metaSqlMgr;
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
@@ -365,8 +365,6 @@ public class DbMetadata
 
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 
-		this.metaSqlMgr = new MetaDataSqlManager(productName);
-
 		String quote = dbSettings.getQuoteEscapeCharacter();
 		if (quote != null)
 		{
@@ -456,6 +454,15 @@ public class DbMetadata
 	public char getCatalogSeparator()
 	{
 		return catalogSeparator;
+	}
+
+	public MetaDataSqlManager getMetaDataSQLMgr()
+	{
+		if (this.metaSqlMgr == null)
+		{
+			this.metaSqlMgr = new MetaDataSqlManager(productName);
+		}
+		return this.metaSqlMgr;
 	}
 
 	public ProcedureReader getProcedureReader()

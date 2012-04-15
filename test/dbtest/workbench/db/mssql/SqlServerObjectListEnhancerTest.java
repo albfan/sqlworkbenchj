@@ -18,7 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.ColumnChanger;
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableCommentReader;
 import workbench.db.TableDefinition;

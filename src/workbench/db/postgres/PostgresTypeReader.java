@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.ColumnChanger;
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.db.ColumnIdentifier;
 import workbench.db.CommentSqlManager;
 import workbench.db.DbMetadata;

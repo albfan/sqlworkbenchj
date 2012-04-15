@@ -9,12 +9,18 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.sqltemplates;
+
 
 import java.util.List;
-import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+import static org.junit.Assert.*;
+
+import workbench.WbTestCase;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
+import workbench.db.TableIdentifier;
 
 /**
  *

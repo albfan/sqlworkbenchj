@@ -11,9 +11,13 @@
  */
 package workbench.db;
 
+
 import java.sql.SQLException;
+
 import java.util.List;
 import java.util.Map;
+
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 

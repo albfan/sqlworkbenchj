@@ -104,7 +104,7 @@ public class DefaultTriggerReader
 
 		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 
-		GetMetaDataSql sql = dbMeta.metaSqlMgr.getListTriggerSql();
+		GetMetaDataSql sql = dbMeta.getMetaDataSQLMgr().getListTriggerSql();
 		if (sql == null)
 		{
 			LogMgr.logWarning("TriggerReader.getTriggers()", "getTriggers() called but no SQL configured");
@@ -226,7 +226,7 @@ public class DefaultTriggerReader
 		if ("*".equals(triggerCatalog)) triggerCatalog = null;
 		if ("*".equals(triggerSchema)) triggerSchema = null;
 
-		GetMetaDataSql sql = dbMeta.metaSqlMgr.getTriggerSourceSql();
+		GetMetaDataSql sql = dbMeta.getMetaDataSQLMgr().getTriggerSourceSql();
 		if (sql == null) return StringUtil.EMPTY_STRING;
 
 		sql.setSchema(triggerSchema);
