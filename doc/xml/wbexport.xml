@@ -1029,7 +1029,7 @@
 					</row>
 
 					<row>
-						<entry>-createTable</entry>
+						<entry id="export-sql-createtable">-createTable</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -1037,6 +1037,11 @@
 								command is put into the output file. This parameter is ignored when creating
 								<literal>UPDATE</literal> statements.
 							</para>
+              <para>
+                Note that this will only create the table including its primary key.
+                This will <emphasis role="bold">not</emphasis> create other constraints (such as foreign key or unique constraints)
+                nor will it create indexes on the target table.
+              </para>
 						</entry>
 					</row>
 
