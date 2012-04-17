@@ -129,7 +129,7 @@ public class MacroExpander
 		int cursorPos = getCaretPositionInString(replacement);
 		if (cursorPos > -1)
 		{
-			newCaret = lineStart + cursorPos;
+			newCaret = lineStart + start + cursorPos;
 		}
 
 		replacement = replacement.replace(CURSOR_PLACEHOLDER, "").replace(SELECT_PLACEHOLDER, "");
