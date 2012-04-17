@@ -109,4 +109,25 @@ public class ColumnDefinitionTemplateTest
 		assertEquals(expResult, tmpl.getColumnDefinitionSQL(column, null, 12));
 
 	}
+
+	@Test
+	public void testMySQLWorkaround()
+	{
+		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate("mysql");
+
+		ColumnIdentifier column = new ColumnIdentifier("id", Types.INTEGER, false);
+		column.setDbmsType("INTEGER");
+		column.setIsNullable(true);
+		column.setDefaultValue("((42))");
+		String coldef = tmpl.getColumnDefinitionSQL(column, null, 1);
+		assertEquals("INTEGER DEFAULT 42", coldef);
+
+		column.setDefaultValue("(0)");
+		coldef = tmpl.getColumnDefinitionSQL(column, null, 1);
+		assertEquals("INTEGER DEFAULT 0", coldef);
+
+		column.setDefaultValue("42");
+		coldef = tmpl.getColumnDefinitionSQL(column, null, 1);
+		assertEquals("INTEGER DEFAULT 42", coldef);
+	}
 }

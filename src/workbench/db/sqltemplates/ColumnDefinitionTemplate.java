@@ -148,21 +148,34 @@ public class ColumnDefinitionTemplate
 	 * Some drivers seem to return default values that are not "real" expressions but e.g. an
 	 * unquoted string even though the column is a character column.
 	 *
-	 * This method will fix this for character columns. Defaults for other data types
-	 * will be returned unchanged.
+	 * This method will fix this for character columns.
+	 * If the DBMS is MySQL duplicated brackets at the start and end of the expression are also replaced by
+	 * single brackets.
 	 *
 	 * @param column the column
 	 * @return a valid expression for the column default.
 	 */
 	private String getDefaultExpression(ColumnIdentifier column)
 	{
-		if (!fixDefaultExpression) return column.getDefaultValue();
-
 		String value = column.getDefaultValue();
+
+		// If the ColumnDefinition was retrieved from a different DBMS (e.g. SQL Server) it might be that
+		// the default value is defined as ((42)).
+		// MySQL's SQL parser is not smart enough to accept that as a valid default expression, so we need to fix it here.
+		if (dbid != null && dbid.equals("mysql") && SqlUtil.isNumberType(column.getDataType()))
+		{
+			value = value.replaceAll("^\\(+", "");
+			value = value.replaceAll("\\)+$", "");
+		}
+
+		if (!fixDefaultExpression) return value;
+
 		if (value == null) return null;
+
 		if (SqlUtil.isCharacterType(column.getDataType()))
 		{
-			if (StringUtil.getFirstNonWhitespace(value) != '\'')
+			value = value.trim();
+			if (!value.startsWith("'") && !value.startsWith("N'") && !value.startsWith("E'") && !value.startsWith("U&'"))
 			{
 				return "'" + value + "'";
 			}
