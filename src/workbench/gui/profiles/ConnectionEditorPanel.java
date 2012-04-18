@@ -1072,7 +1072,7 @@ public class ConnectionEditorPanel
 
 		DbDriver current = getCurrentDriver();
 		String driverName = currentProfile.getDriverName();
-		if (!current.getName().equals(driverName))
+		if (current != null && !current.getName().equals(driverName))
 		{
 			// an alternate driver was chosen, because the original driver was not available.
 			LogMgr.logDebug("ConnectionEditorPanel.updateProfile()", "Adjusting selected driver name for non-existing driver: " + currentProfile.getDriverName());
