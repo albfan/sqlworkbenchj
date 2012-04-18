@@ -304,9 +304,11 @@ public class ProcedureListPanel
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 
+		final Container parent = this.getParent();
 		try
 		{
 			this.dbConnection.setBusy(true);
+			WbSwingUtilities.showWaitCursor(parent);
 			reset();
 			WbSwingUtilities.invoke(new Runnable()
 			{
@@ -319,7 +321,6 @@ public class ProcedureListPanel
 
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
-			WbSwingUtilities.showWaitCursorOnWindow(this);
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
@@ -352,7 +353,7 @@ public class ProcedureListPanel
 		{
 			this.isRetrieving = false;
 			this.dbConnection.setBusy(false);
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			WbSwingUtilities.showDefaultCursor(parent);
 		}
 	}
 
