@@ -7,6 +7,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="3" type="fix">When expanding macros the cursor would not be located at the correct position if the expanded text did not start at the first character of the line</entry>
     <entry dev-build="2" type="fix">If MySQL was not running in ANSI mode, standard double quotes were used for quoting table or column names which needed quoting.</entry>
     <entry dev-build="2" type="fix">EXECUTE wasn't supported for auto-completion of stored procedures (only EXEC)</entry>
     <entry dev-build="2" type="fix">When running a stored procedure in Oracle message from dbms_output would not be shown if the procedure terminated with an error.</entry>
