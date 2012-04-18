@@ -174,6 +174,9 @@ public class TableCreator
 
 		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
+
+		boolean commitRequired = needsCommit();
+
 		try
 		{
 			stmt.executeUpdate(sql);
@@ -194,9 +197,7 @@ public class TableCreator
 				}
 			}
 
-			if (this.connection.getDbSettings().ddlNeedsCommit() &&
-				  connection.getDbSettings().commitCreateTable(creationType) &&
-				  !this.connection.getAutoCommit())
+			if (commitRequired)
 			{
 				LogMgr.logDebug("TableCreator.createTable()", "Commiting the CREATE TABLE");
 				this.connection.commit();
@@ -206,6 +207,13 @@ public class TableCreator
 		{
 			SqlUtil.closeStatement(stmt);
 		}
+	}
+
+	private boolean needsCommit()
+	{
+		return connection.getDbSettings().ddlNeedsCommit() &&
+				   connection.getDbSettings().commitCreateTable(creationType) &&
+				   !this.connection.getAutoCommit();
 	}
 
 	/**

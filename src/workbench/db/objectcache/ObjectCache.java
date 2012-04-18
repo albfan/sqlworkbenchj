@@ -103,7 +103,7 @@ class ObjectCache
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("DbObjectCache.getTables()", "Could not retrieve table list", e);
+					LogMgr.logError("ObjectCache.getTables()", "Could not retrieve table list", e);
 				}
 			}
 		}
@@ -141,7 +141,7 @@ class ObjectCache
 			}
 			catch (SQLException e)
 			{
-				LogMgr.logError("ExecAnalyzer.checkContext()", "Error retrieving procedures", e);
+				LogMgr.logError("ObjectCache.getProcedures()", "Error retrieving procedures", e);
 			}
 		}
 		return procs;
@@ -260,7 +260,7 @@ class ObjectCache
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logError("DbObjectCache.getColumns", "Error retrieving columns for " + toSearch, e);
+				LogMgr.logError("ObjectCache.getColumns()", "Error retrieving columns for " + toSearch, e);
 				cols = null;
 			}
 
@@ -287,7 +287,7 @@ class ObjectCache
 
 		if (removed)
 		{
-			LogMgr.logDebug("DbObjectCach.addTableList()", "Removed " + tbl.getTableName() + " from the cache");
+			LogMgr.logDebug("ObjectCache.removeTable()", "Removed " + tbl.getTableName() + " from the cache");
 		}
 	}
 
@@ -313,7 +313,7 @@ class ObjectCache
 		}
 
 		this.schemasInCache.add(schema);
-		LogMgr.logDebug("DbObjectCach.addTableList()", "Added " + count + " objects");
+		LogMgr.logDebug("ObjectCache.addTableList()", "Added " + count + " objects");
 	}
 
 	private TableIdentifier createIdentifier(DataStore tableList, int row)

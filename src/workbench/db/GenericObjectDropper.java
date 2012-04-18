@@ -176,10 +176,8 @@ public class GenericObjectDropper
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
-			if (this.connection.isBusy()) return;
 			if (this.objects == null || this.objects.isEmpty()) return;
 			int count = this.objects.size();
-			this.connection.setBusy(true);
 
     	currentStatement = this.connection.createStatement();
 			Set<String> types = connection.getMetadata().getObjectsWithData();
@@ -229,7 +227,6 @@ public class GenericObjectDropper
 		{
 			SqlUtil.closeStatement(currentStatement);
 			this.currentStatement = null;
-			this.connection.setBusy(false);
 		}
 	}
 

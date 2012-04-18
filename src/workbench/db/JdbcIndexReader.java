@@ -126,7 +126,7 @@ public class JdbcIndexReader
 					int sequence = keysRs.getInt("KEY_SEQ");
 					if (sequence < 1)
 					{
-						LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Invalid column sequence '" + sequence + "' for table " + tbl.getTableName() + " received!");
+						LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");
 					}
 					cols.add(new IndexColumn(colName, sequence));
 				}

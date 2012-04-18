@@ -160,8 +160,7 @@ public class DataCopier
 	 *	Define the source table, the target table and the column mapping
 	 *	for the copy process.
 	 *	If the columnMapping is null, the matching columns from both tables are used.
-	 *	It is expected that the mapping contains String objects. The key is the name of the
-	 *	source column, the mapped value is the name of the target column
+	 *	The key is the name of the source column, the mapped value is the name of the target column
 	 *
 	 * @param source the source connection
 	 * @param target the target connection

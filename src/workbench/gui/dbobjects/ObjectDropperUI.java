@@ -68,15 +68,32 @@ public class ObjectDropperUI
 		}
 	}
 
+	private boolean isConnectionBusy()
+	{
+		if (dropper == null) return false;
+		WbConnection con = dropper.getConnection();
+		if (con == null) return false;
+		return con.isBusy();
+	}
+
+	private void setConnectionBusy(boolean flag)
+	{
+		if (dropper == null) return;
+		WbConnection con = dropper.getConnection();
+		if (con == null) return;
+		con.setBusy(flag);
+	}
+
 	protected void doDrop()
 	{
-		if (this.running)
+		if (this.running || isConnectionBusy())
 		{
 			return;
 		}
 
 		try
 		{
+			setConnectionBusy(true);
 			this.running = true;
 			this.cancelled = false;
 			this.dropper.dropObjects();
@@ -90,6 +107,7 @@ public class ObjectDropperUI
 		{
 			this.running = false;
 			this.dropThread = null;
+			setConnectionBusy(false);
 		}
 
 		EventQueue.invokeLater(new Runnable()

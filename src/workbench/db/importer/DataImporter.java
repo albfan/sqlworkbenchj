@@ -45,7 +45,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
-import workbench.db.DbSettings;
 import workbench.db.compare.BatchedStatement;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -202,11 +201,11 @@ public class DataImporter
 			}
 			if (useSavepoint && !this.dbConn.supportsSavepoints())
 			{
-				LogMgr.logWarning("DataImporter.setConnection", "A savepoint should be used for each statement but the driver does not support savepoints!");
+				LogMgr.logWarning("DataImporter.setUseSavepoint()", "A savepoint should be used for each statement but the driver does not support savepoints!");
 				this.useSavepoint = false;
 			}
 		}
-		LogMgr.logInfo("DataImporter.setConnection()", "Using savepoints for DML: " + useSavepoint);
+		LogMgr.logInfo("DataImporter.setUseSavepoint()", "Using savepoints for DML: " + useSavepoint);
 	}
 
 
