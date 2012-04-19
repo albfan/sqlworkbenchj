@@ -62,9 +62,9 @@
   <para>
     <important>
       Oracles's <literal>BFILE</literal>, PostgreSQL's <literal>large object</literal> and SQL Server's <literal>filestream</literal>
-      types are not real <literal>BLOB</literal> datatypes and are currently not exported by WbExport. Essentially only columns
+      types are not real <literal>BLOB</literal> datatypes and are currently not exported by WbExport. Essentially only BLOB columns
       that are reported as <literal>BLOB</literal>, <literal>BINARY</literal>, <literal>VARBINARY</literal> or <literal>LONGVARBINARY</literal>
-      in the column "JDBC type" in the DbExplorer will be exported as a <literal>BLOB</literal>.
+      in the column "JDBC type" in the DbExplorer will be exported correctly into a separate file.
     </important>
   </para>
 
