@@ -55,9 +55,18 @@
 		the main file will contain the filename of the BLOB data file instead of the actual BLOB data.
 		The only other application that I know of, that can handle this type of imports is Oracle's
 		<literal>SQL*Loader</literal> utility. If you run the text export together with the
-		parameter <literal>-writeoracleloader=true</literal> the control file will contain the
+		parameter <literal>-formatFile=oracle</literal> a control file will be created that contains the
 		approriate definitions to read the BLOB data from the external file.
 	</para>
+
+  <para>
+    <important>
+      Oracles's <literal>BFILE</literal>, PostgreSQL's <literal>large object</literal> and SQL Server's <literal>filestream</literal>
+      types are not real <literal>BLOB</literal> datatypes and are currently not exported by WbExport. Essentially only columns
+      that are reported as <literal>BLOB</literal>, <literal>BINARY</literal>, <literal>VARBINARY</literal> or <literal>LONGVARBINARY</literal>
+      in the column "JDBC type" in the DbExplorer will be exported as a <literal>BLOB</literal>.
+    </important>
+  </para>
 
 	<section id="wb-export-memory">
 		<title>Memory usage and WbExport</title>
