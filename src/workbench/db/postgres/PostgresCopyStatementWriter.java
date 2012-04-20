@@ -69,7 +69,7 @@ public class PostgresCopyStatementWriter
 
 			if (exporter.getExportHeaders())
 			{
-				out.print(", header true, ");
+				out.print(", header true");
 			}
 			String quote = exporter.getTextQuoteChar();
 			if (quote != null)
