@@ -11,8 +11,8 @@
  */
 package workbench.db.oracle;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +64,9 @@ public class OracleSequenceReader
 	@Override
   public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
   {
-    String sql = "SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
+		StringBuilder sql = new StringBuilder(100);
+		sql.append(
+			"SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
 			"MIN_VALUE, \n       " +
 			"MAX_VALUE, \n       " +
 			"INCREMENT_BY, \n       " +
@@ -73,27 +75,28 @@ public class OracleSequenceReader
 			"CACHE_SIZE, \n" +
 			"LAST_NUMBER \n" +
 			"FROM ALL_SEQUENCES \n" +
-			"WHERE sequence_owner = ?";
+			"WHERE sequence_owner = '");
+		sql.append(StringUtil.trimQuotes(owner));
+		sql.append("'\n ");
 
-		if (!StringUtil.isEmptyString(sequence))
+		if (StringUtil.isNonEmpty(sequence))
 		{
-			sql += "  AND sequence_name LIKE ? ";
+			SqlUtil.appendAndCondition(sql, "sequence_name", sequence, connection);
 		}
+		sql.append("\n ORDER BY 1,2");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("OracleSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 		}
 
-    PreparedStatement stmt = null;
+    Statement stmt = null;
     ResultSet rs = null;
     DataStore result = null;
     try
     {
-      stmt = this.connection.getSqlConnection().prepareStatement(sql);
-      stmt.setString(1, owner);
-      if (!StringUtil.isEmptyString(sequence)) stmt.setString(2, sequence);
-      rs = stmt.executeQuery();
+      stmt = this.connection.createStatement();
+      rs = stmt.executeQuery(sql.toString());
       result = new DataStore(rs, this.connection, true);
     }
     catch (Exception e)
@@ -154,42 +157,42 @@ public class OracleSequenceReader
 		String order = (String) def.getSequenceProperty("ORDER_FLAG");
 		Number cache = (Number) def.getSequenceProperty("CACHE_SIZE");
 
-		result.append(nl + "      INCREMENT BY ");
+		result.append(nl).append("      INCREMENT BY ");
 		result.append(increment);
 
 		if (minValue != null && minValue.intValue() != 1)
 		{
-			result.append(nl + "      MINVALUE ");
+			result.append(nl).append("      MINVALUE ");
 			result.append(minValue);
 		}
 		else
 		{
-			result.append(nl + "      NOMINVALUE");
+			result.append(nl).append("      NOMINVALUE");
 		}
 
 		if (maxValue != null && !maxValue.toString().startsWith("999999999999999999999999999"))
 		{
-			result.append(nl + "      MAXVALUE ");
+			result.append(nl).append("      MAXVALUE ");
 			result.append(maxValue);
 		}
 		else
 		{
-			result.append(nl + "      NOMAXVALUE");
+			result.append(nl).append("      NOMAXVALUE");
 		}
 
 		if (cache != null && cache.longValue() > 0)
 		{
-			result.append(nl + "      CACHE ");
+			result.append(nl).append("      CACHE ");
 			result.append(cache);
 		}
 		else
 		{
-			result.append(nl + "      NOCACHE");
+			result.append(nl).append("      NOCACHE");
 		}
-		result.append(nl + "      ");
+		result.append(nl).append("      ");
 		result.append(cycle);
 
-		result.append(nl + "      ");
+		result.append(nl).append("      ");
 		result.append(order);
 
 		result.append(';');

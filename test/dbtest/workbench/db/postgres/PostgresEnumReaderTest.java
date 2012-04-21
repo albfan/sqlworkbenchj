@@ -48,8 +48,8 @@ public class PostgresEnumReaderTest
 			return;
 		}
 		TestUtil.executeScript(con,
-			"CREATE TYPE stimmung AS ENUM ('sad','ok','happy');\n" +
-			"COMMENT ON TYPE stimmung IS 'my enum';\n" +
+			"CREATE TYPE stimmung_enum AS ENUM ('sad','ok','happy');\n" +
+			"COMMENT ON TYPE stimmung_enum IS 'my enum';\n" +
 			"COMMIT;\n");
 	}
 
@@ -85,16 +85,16 @@ public class PostgresEnumReaderTest
 		Collection<EnumIdentifier> enums = reader.getDefinedEnums(con, TEST_ID, null);
 		assertEquals(1, enums.size());
 		EnumIdentifier enumId = enums.iterator().next();
-		assertEquals("stimmung", enumId.getObjectName());
+		assertEquals("stimmung_enum", enumId.getObjectName());
 		assertEquals("my enum", enumId.getComment());
 
 		String sql = enumId.getSource(con).toString();
 		ScriptParser parser = new ScriptParser(sql.toString());
 		assertEquals(2, parser.getSize());
 		String create = parser.getCommand(0);
-		assertEquals(create, "CREATE TYPE stimmung AS ENUM ('sad','ok','happy')");
+		assertEquals(create, "CREATE TYPE stimmung_enum AS ENUM ('sad','ok','happy')");
 		String comment = parser.getCommand(1);
-		assertEquals(comment, "COMMENT ON TYPE stimmung IS 'my enum'");
+		assertEquals(comment, "COMMENT ON TYPE stimmung_enum IS 'my enum'");
 	}
 
 }

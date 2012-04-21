@@ -69,19 +69,20 @@ public class OracleTypeReader
 
 	public List<OracleObjectType> getTypes(WbConnection con, String schema, String name)
 	{
-		String select =
+		StringBuilder select = new StringBuilder(50);
+		select.append(
 			"SELECT owner,  \n" +
 			"       type_name, " +
 			"       methods, \n" +
 			"       attributes \n" +
-			"FROM all_types ";
+			"FROM all_types ");
 
 		int schemaIndex = -1;
 		int nameIndex = -1;
 
 		if (StringUtil.isNonBlank(schema))
 		{
-			select += " WHERE owner LIKE ? ";
+			select.append(" WHERE owner = ? ");
 			schemaIndex = 1;
 		}
 
@@ -89,14 +90,16 @@ public class OracleTypeReader
 		{
 			if (schemaIndex != -1)
 			{
-				select += " AND type_name LIKE ? ";
+				select.append(" AND ");
 				nameIndex = 2;
 			}
 			else
 			{
-				select += " WHERE type_name LIKE ? ";
+				select.append(" WHERE ");
 				nameIndex = 1;
 			}
+			select.append(" type_name LIKE ? ");
+			SqlUtil.appendEscapeClause(select, con, name);
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -109,7 +112,7 @@ public class OracleTypeReader
 		List<OracleObjectType> result = new ArrayList<OracleObjectType>();
 		try
 		{
-			stmt = con.getSqlConnection().prepareStatement(select);
+			stmt = con.getSqlConnection().prepareStatement(select.toString());
 			if (schemaIndex > -1)
 			{
 				stmt.setString(schemaIndex, schema);

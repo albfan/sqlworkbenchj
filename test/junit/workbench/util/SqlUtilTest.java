@@ -132,9 +132,9 @@ public class SqlUtilTest
 		throws Exception
 	{
 		StringBuilder sql = new StringBuilder("select * from sometable");
-		SqlUtil.appendAndCondition(sql, "some_col", "some_condition");
+		SqlUtil.appendAndCondition(sql, "some_col", "some_condition", null);
 		assertEquals("select * from sometable AND some_col = 'some_condition'", sql.toString());
-		SqlUtil.appendAndCondition(sql, "some_col", null);
+		SqlUtil.appendAndCondition(sql, "some_col", null, null);
 		assertEquals("select * from sometable AND some_col = 'some_condition'", sql.toString());
 	}
 
@@ -885,5 +885,14 @@ public class SqlUtilTest
 		String sql = "select * from t where x = ? and y = ?";
 		String newSql = SqlUtil.replaceParameters(sql, Integer.valueOf(42), "two");
 		assertEquals("select * from t where x = 42 and y = 'two'", newSql);
+
+		sql = "select * from t where x = ? and y = 42";
+		newSql = SqlUtil.replaceParameters(sql, Integer.valueOf(42));
+		assertEquals("select * from t where x = 42 and y = 42", newSql);
+
+		sql = "select * from t where x = 1 and y = 42";
+		newSql = SqlUtil.replaceParameters(sql, "foo", "bar");
+		assertEquals("select * from t where x = 1 and y = 42", newSql);
+
 	}
 }

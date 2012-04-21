@@ -114,7 +114,7 @@ public class Db2SynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE ALIAS ");
 		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
-		result.append(nl + "   FOR ");
+		result.append(nl).append("   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

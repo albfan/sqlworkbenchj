@@ -2051,4 +2051,9 @@ public class DataStore
 		this.rowActionMonitor = aMonitor;
 	}
 
+	@Override
+	public String toString()
+	{
+		return Integer.toString(getRowCount()) + " rows";
+	}
 }

@@ -46,9 +46,9 @@ public class PostgresTypeReaderTest
 		if (con == null) return;
 
 		String sql =
-			"CREATE TYPE address AS (city varchar(100), street varchar(50), zipcode varchar(10));\n" +
-			"comment on type address is 'a single address';\n" +
-			"comment on column address.city is 'the city';\n" +
+			"CREATE TYPE address_type AS (city varchar(100), street varchar(50), zipcode varchar(10));\n" +
+			"comment on type address_type is 'a single address';\n" +
+			"comment on column address_type.city is 'the city';\n" +
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 	}
@@ -71,7 +71,7 @@ public class PostgresTypeReaderTest
 		assertNotNull(types);
 		assertEquals(1, types.size());
 		TableIdentifier tbl = types.get(0);
-		assertEquals("address", tbl.getObjectName());
+		assertEquals("address_type", tbl.getObjectName());
 		assertEquals("TYPE", tbl.getType());
 //		assertEquals("a single address", tbl.getComment());
 
@@ -94,12 +94,12 @@ public class PostgresTypeReaderTest
 		assertEquals("varchar(50)", street.getDbmsType());
 
 		String sql = reader.getObjectSource(con, type);
-		assertTrue(sql.startsWith("CREATE TYPE address AS"));
+		assertTrue(sql.startsWith("CREATE TYPE address_type AS"));
 		assertTrue(sql.contains("city "));
 		assertTrue(sql.contains("street "));
 		assertTrue(sql.contains("zipcode "));
-		assertTrue(sql.contains("COMMENT ON TYPE address IS 'a single address'"));
-		assertTrue(sql.contains("COMMENT ON COLUMN address.city IS 'the city'"));
+		assertTrue(sql.contains("COMMENT ON TYPE address_type IS 'a single address'"));
+		assertTrue(sql.contains("COMMENT ON COLUMN address_type.city IS 'the city'"));
 	}
 
 

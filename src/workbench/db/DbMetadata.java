@@ -1401,8 +1401,8 @@ public class DbMetadata
 		if ("*".equals(schemaPattern) || "%".equals(schemaPattern)) schemaPattern = null;
 		if ("*".equals(namePattern) || "%".equals(namePattern)) namePattern = null;
 
-		if (schemaPattern != null) schemaPattern = StringUtil.replace(schemaPattern, "*", "%");
-		if (namePattern != null) namePattern = StringUtil.replace(namePattern, "*", "%");
+		if (schemaPattern != null) schemaPattern = StringUtil.trimQuotes(StringUtil.replace(schemaPattern, "*", "%"));
+		if (namePattern != null) namePattern = StringUtil.trimQuotes(StringUtil.replace(namePattern, "*", "%"));
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30, 12, 10, 10, 20};
@@ -1427,14 +1427,23 @@ public class DbMetadata
 		boolean detectDuplicates = isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types);
 		Set<String> processed = new TreeSet<String>();
 
+		String escape = dbConnection.getSearchStringEscape();
+		String escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
+		String escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
+		String escapedCatalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(catalogPattern), escape);
+
 		ResultSet tableRs = null;
 		try
 		{
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("DbMetadata.getObjects()", "Calling getTables() using: catalog="+ catalogPattern + ", schema=" + schemaPattern + ", name=" + namePattern + ", types=" + (types == null ? "NULL" : Arrays.asList(types).toString()));
+				LogMgr.logDebug("DbMetadata.getObjects()", "Calling getTables() using: catalog="+ escapedCatalog +
+					", schema=" + escapedSchema +
+					", name=" + escapedNamePattern +
+					", types=" + (types == null ? "NULL" : Arrays.asList(types).toString()));
 			}
-			tableRs = metaData.getTables(StringUtil.trimQuotes(catalogPattern), StringUtil.trimQuotes(schemaPattern), StringUtil.trimQuotes(namePattern), types);
+
+			tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, types);
 			if (tableRs == null)
 			{
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
@@ -1627,8 +1636,8 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			String tablename = SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
-			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+			String tablename = table.getRawTableName(); // SqlUtil.escapeUnderscore(, dbConnection);
+			// schema = SqlUtil.escapeUnderscore(schema, dbConnection);
 
 			DataStore ds = getObjects(catalog, schema, tablename, null);
 
@@ -1775,8 +1784,8 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			String tablename = SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
-			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+			String tablename = table.getRawTableName(); //SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
+			//schema = SqlUtil.escapeUnderscore(schema, dbConnection);
 
 			DataStore ds = getObjects(catalog, schema, tablename, types);
 

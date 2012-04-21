@@ -36,22 +36,24 @@ public class InformixSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConn;
-	private String baseQuery;
+	private final String baseQuery;
 
 	public InformixSequenceReader(WbConnection conn)
 	{
 		dbConn = conn;
-		baseQuery = "select trim(t.tabname) as sequence_name, \n" +
-             "       trim(t.owner) as sequence_schema, \n" +
-             "       seq.start_val, \n" +
-             "       seq.inc_val, \n" +
-             "       seq.min_val, \n" +
-             "       seq.max_val, \n" +
-             "       seq.cycle, \n" +
-             "       seq.cache, \n" +
-             "       seq.order \n" +
-             " from syssequences seq \n" +
-             "   join systables t on seq.tabid = t.tabid";	}
+		baseQuery =
+			"select trim(t.tabname) as sequence_name, \n" +
+			"       trim(t.owner) as sequence_schema, \n" +
+			"       seq.start_val, \n" +
+			"       seq.inc_val, \n" +
+			"       seq.min_val, \n" +
+			"       seq.max_val, \n" +
+			"       seq.cycle, \n" +
+			"       seq.cache, \n" +
+			"       seq.order \n" +
+			" from syssequences seq \n" +
+			"   join systables t on seq.tabid = t.tabid";
+	}
 
 	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
@@ -92,12 +94,13 @@ public class InformixSequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		String sql = baseQuery;
+		StringBuilder sql = new StringBuilder(baseQuery.length() + 20);
+		sql.append(baseQuery);
 
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql += " WHERE t.owner = '" + schema + "'";
+			sql.append(" WHERE t.owner = '" + schema + "'");
 			whereAdded = true;
 		}
 
@@ -105,13 +108,13 @@ public class InformixSequenceReader
 		{
 			if (whereAdded)
 			{
-				sql += " AND ";
+				sql.append(" AND ");
 			}
 			else
 			{
-				sql += " WHERE ";
+				sql.append(" WHERE ");
 			}
-			sql += " t.tabname LIKE '" + namePattern + "'";
+			SqlUtil.appendExpression(sql, "t.tabname", namePattern, dbConn);
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -125,7 +128,7 @@ public class InformixSequenceReader
 		try
 		{
 			stmt = dbConn.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql.toString());
 			result = new DataStore(rs, dbConn, true);
 		}
 		catch (Exception e)

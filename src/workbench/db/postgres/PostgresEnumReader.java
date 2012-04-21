@@ -120,9 +120,10 @@ public class PostgresEnumReader
 
 		if (StringUtil.isNonBlank(namePattern))
 		{
-			sql.append(" WHERE enum_name like '");
-			sql.append(con.getMetadata().quoteObjectname(namePattern));
+			sql.append("\n WHERE enum_name like '");
+			sql.append(namePattern);
 			sql.append("%' ");
+			SqlUtil.appendEscapeClause(sql, con, namePattern);
 			whereAdded = true;
 		}
 
@@ -130,10 +131,11 @@ public class PostgresEnumReader
 		{
 			sql.append(whereAdded ? " AND " : " WHERE ");
 			sql.append(" enum_schema = '");
-			sql.append(con.getMetadata().quoteObjectname(schema));
+			sql.append(schema);
 			sql.append("'");
 		}
-		sql.append(" ORDER BY 2");
+
+		sql.append("\n ORDER BY 2");
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("PostgresEnumReader.getSql()", "Using SQL=\n" + sql);

@@ -11,7 +11,6 @@
  */
 package workbench.db.hsqldb;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +22,7 @@ import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -38,11 +38,11 @@ import workbench.util.StringUtil;
 public class HsqlSequenceReader
 	implements SequenceReader
 {
-	private Connection dbConn;
+	private WbConnection dbConn;
 	private String baseQuery;
 	private boolean supportsColumnSequence;
 
-	public HsqlSequenceReader(Connection conn)
+	public HsqlSequenceReader(WbConnection conn)
 	{
 		this.dbConn = conn;
 		String query = "SELECT sequence_schema, " +
@@ -86,9 +86,8 @@ public class HsqlSequenceReader
 		if (StringUtil.isNonBlank(namePattern))
 		{
 			whereAdded = true;
-			query.append(" WHERE sequence_name LIKE '");
-			query.append(StringUtil.trimQuotes(namePattern));
-			query.append("' ");
+			query.append(" WHERE ");
+			SqlUtil.appendExpression(query, "sequence_name", StringUtil.trimQuotes(namePattern), dbConn);
 		}
 
 		if (StringUtil.isNonBlank(schema))
@@ -101,7 +100,7 @@ public class HsqlSequenceReader
 			{
 				query.append(" AND ");
 			}
-			SqlUtil.appendExpression(query, "sequence_schema", StringUtil.trimQuotes(schema));
+			SqlUtil.appendExpression(query, "sequence_schema", StringUtil.trimQuotes(schema), null);
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -114,7 +113,7 @@ public class HsqlSequenceReader
 		DataStore result = null;
 		try
 		{
-			stmt = this.dbConn.prepareStatement(query.toString());
+			stmt = this.dbConn.getSqlConnection().prepareStatement(query.toString());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
 		}
@@ -240,7 +239,7 @@ public class HsqlSequenceReader
 
 		try
 		{
-			pstmt = dbConn.prepareStatement(sql);
+			pstmt = dbConn.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, def.getSchema());
 			pstmt.setString(2, def.getSequenceName());
 

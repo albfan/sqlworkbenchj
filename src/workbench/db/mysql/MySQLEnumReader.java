@@ -24,7 +24,7 @@ import workbench.util.SqlUtil;
 /**
  * A class to retrieve enum definitions from a MySQL database.
  * <br/>
- * The method updateEnumDefinition() can be used to post-process a TableDefinition
+ * The method readEnums() can be used to post-process a TableDefinition
  *
  * @author  Thomas Kellerer
  * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
@@ -32,6 +32,15 @@ import workbench.util.SqlUtil;
 public class MySQLEnumReader
 {
 
+	/**
+	 * Update the passed TableDefinition with information about the enums used in the columns.
+	 *
+	 * For each ColumnIdentier in the table that is defined as an enum the dbms type is updated
+	 * with the enum name.
+	 * 
+	 * @param tbl  the table definition to check
+	 * @param connection the connection to use
+	 */
 	public void readEnums(TableDefinition tbl, WbConnection connection)
 	{
 		if (!hasEnums(tbl)) return;

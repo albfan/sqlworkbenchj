@@ -12,7 +12,6 @@
 package workbench.db.ingres;
 
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,7 +36,7 @@ import workbench.util.StringUtil;
 public class IngresMetadata
 	implements SynonymReader, SequenceReader
 {
-	private Connection dbConn;
+	private WbConnection dbConn;
 	private final String SELECT_SEQUENCE_DEF =
 			       "SELECT SEQ_NAME,  \n" +
 			       "       SEQ_OWNER, \n" +
@@ -49,7 +48,7 @@ public class IngresMetadata
              "       CACHE_SIZE  \n" +
              "FROM   iisequences \n";
 
-	public IngresMetadata(Connection conn)
+	public IngresMetadata(WbConnection conn)
 	{
 		dbConn = conn;
 	}
@@ -179,6 +178,7 @@ public class IngresMetadata
 				nameIndex = 1;
 			}
 			sql.append(" seq_name LIKE ? ");
+			SqlUtil.appendEscapeClause(sql, this.dbConn, namePattern);
 		}
 
 		ResultSet rs = null;
@@ -187,7 +187,7 @@ public class IngresMetadata
 
 		try
 		{
-			stmt = this.dbConn.prepareStatement(sql.toString());
+			stmt = this.dbConn.getSqlConnection().prepareStatement(sql.toString());
 			if (ownerIndex != -1) stmt.setString(ownerIndex, owner.trim());
 			if (nameIndex != -1) stmt.setString(nameIndex, namePattern.trim());
 			rs = stmt.executeQuery();
@@ -238,7 +238,7 @@ public class IngresMetadata
 		String sql = SELECT_SEQUENCE_DEF + " WHERE seq_owner = ? AND seq_name = ?";
 		try
 		{
-			stmt = this.dbConn.prepareStatement(sql);
+			stmt = this.dbConn.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, owner.trim());
 			stmt.setString(2, sequence.trim());
 			rs = stmt.executeQuery();
@@ -327,7 +327,7 @@ public class IngresMetadata
 
 		try
 		{
-			stmt = this.dbConn.prepareStatement(SELECT_SEQUENCE_DEF);
+			stmt = this.dbConn.getSqlConnection().prepareStatement(SELECT_SEQUENCE_DEF);
 			stmt.setString(1, owner.trim());
 			stmt.setString(2, sequence.trim());
 

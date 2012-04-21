@@ -388,8 +388,12 @@ public static char getCatalogSeparator(WbConnection conn)
 		if (StringUtil.isEmptyString(escape)) return name;
 		if (name.indexOf('_') == -1) return name;
 
+		String escaped = escape + "_";
+		// already escaped.
+		if (name.indexOf(escaped) > -1) return name;
+
 		// Only the underscore is replaced as the % character is not allowed in SQL identifiers
-		return StringUtil.replace(name, "_", escape + "_");
+		return StringUtil.replace(name, "_", escaped);
 	}
 
 	/**
@@ -1836,14 +1840,15 @@ public static char getCatalogSeparator(WbConnection conn)
 		return charLength >= sizeThreshold;
 	}
 
-	public static void appendAndCondition(StringBuilder baseSql, String column, String value)
+	public static void appendAndCondition(StringBuilder baseSql, String column, String value, WbConnection con)
 	{
-		if (StringUtil.isNonBlank(value) && StringUtil.isNonEmpty(column))
+		if (StringUtil.isNonEmpty(value) && StringUtil.isNonEmpty(column))
 		{
 			baseSql.append(" AND ");
-			appendExpression(baseSql, column, value);
+			appendExpression(baseSql, column, value, con);
 		}
 	}
+
 	/**
 	 * Appends an AND condition for the given column. If the value contains
 	 * a wildcard the condition will use LIKE, otherwise =
@@ -1852,17 +1857,18 @@ public static char getCatalogSeparator(WbConnection conn)
 	 * @param column
 	 * @param value
 	 */
-	public static void appendExpression(StringBuilder baseSql, String column, String value)
+	public static void appendExpression(StringBuilder baseSql, String column, String value, WbConnection con)
 	{
-		if (StringUtil.isBlank(value)) return;
+		if (StringUtil.isEmptyString(value)) return;
 		if (StringUtil.isEmptyString(column)) return;
 
 		baseSql.append(column);
-
+		boolean isLike = false;
 		if (value.indexOf('%') > -1)
 		{
 			baseSql.append(" LIKE '");
-			baseSql.append(value);
+			baseSql.append(escapeUnderscore(value, con));
+			isLike = true;
 		}
 		else
 		{
@@ -1870,6 +1876,10 @@ public static char getCatalogSeparator(WbConnection conn)
 			baseSql.append(value);
 		}
 		baseSql.append("'");
+		if (isLike && con != null)
+		{
+			appendEscapeClause(baseSql, con, value);
+		}
 	}
 
 	/**
@@ -1945,4 +1955,17 @@ public static char getCatalogSeparator(WbConnection conn)
 		}
 		return result.toString();
 	}
+
+	public static void appendEscapeClause(StringBuilder sql, WbConnection con, String searchValue)
+	{
+		if (searchValue == null) return;
+		if (searchValue.indexOf('_') < 0) return;
+		if (con == null) return;
+		String escape = con.getSearchStringEscape();
+		if (StringUtil.isEmptyString(escape)) return;
+		sql.append(" ESCAPE '");
+		sql.append(escape);
+		sql.append('\'');
+	}
+
 }

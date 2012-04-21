@@ -91,10 +91,8 @@ public class Db2SequenceReader
 	{
 		String name = getDSValueString(ds, row, "SEQNAME", "NAME", "SEQUENCE_NAME");
 		String schema = getDSValueString(ds, row, "SEQUENCE_SCHEMA", "SEQSCHEMA", "SCHEMA");
-//		String catalog = getDSValueString(ds, row, "SEQUENCE_CATALOG", "SEQUENCE_CATALOG");
 
 		SequenceDefinition result = new SequenceDefinition(schema, name);
-//		result.setCatalog(catalog);
 
 		result.setSequenceProperty("START", ds.getValue(row, "START"));
 		result.setSequenceProperty("MINVALUE", getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
@@ -121,7 +119,7 @@ public class Db2SequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		String sql = null;
+		StringBuilder query = new StringBuilder(100);
 
 		int schemaIndex = -1;
 		int nameIndex = -1;
@@ -129,13 +127,10 @@ public class Db2SequenceReader
 		String nameCol;
 		String schemaCol;
 
-//		String catExpr = StringUtil.isBlank(catalog) ? "''" : "'" + catalog + "'";
-//		catExpr += "as sequence_catalog, \n";
-
 		if (dbid.equals("db2i"))
 		{
 			// Host system on AS/400
-			sql =
+			query.append(
 			"SELECT SEQUENCE_NAME, \n" +
 			"       SEQUENCE_SCHEMA \n, " +
 			"       0 as START, \n" +
@@ -147,7 +142,7 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       data_type, \n" +
 			"       long_comment as remarks \n" +
-			"FROM   qsys2" + catalogSeparator + "syssequences \n";
+			"FROM   qsys2" + catalogSeparator + "syssequences \n");
 
 			nameCol = "sequence_name";
 			schemaCol = "sequence_schema";
@@ -155,7 +150,7 @@ public class Db2SequenceReader
 		else if (dbid.equals("db2h"))
 		{
 			// Host system on z/OS
-			sql =
+			query.append(
 			"SELECT NAME AS SEQNAME, \n" +
 			"       SCHEMA AS SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
@@ -167,7 +162,7 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 			"       REMARKS \n" +
-			"FROM   SYSIBM.SYSSEQUENCES \n";
+			"FROM   SYSIBM.SYSSEQUENCES \n");
 
 			nameCol = "name";
 			schemaCol = "schema";
@@ -175,7 +170,7 @@ public class Db2SequenceReader
 		else
 		{
 			// LUW Version
-			sql =
+			query.append(
 			"SELECT SEQNAME AS SEQUENCE_NAME, \n" +
 			"       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
@@ -187,7 +182,7 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 		  "       REMARKS  \n" +
-			"FROM   syscat.sequences \n";
+			"FROM   syscat.sequences \n");
 
 			nameCol = "seqname";
 			schemaCol = "seqschema";
@@ -197,7 +192,7 @@ public class Db2SequenceReader
 
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql += " WHERE " + schemaCol + " = ?";
+			query.append(" WHERE " + schemaCol + " = ?");
 			schemaIndex = 1;
 			whereAdded = true;
 		}
@@ -206,17 +201,19 @@ public class Db2SequenceReader
 		{
 			if (whereAdded)
 			{
-				sql += " AND ";
+				query.append(" AND ");
 				nameIndex = 2;
 			}
 			else
 			{
-				sql += " WHERE ";
+				query.append(" WHERE ");
 				nameIndex = 1;
 			}
-			sql += nameCol + " LIKE ? ";
+			query.append(nameCol).append(" LIKE ? ");
+			SqlUtil.appendEscapeClause(query, connection, namePattern);
 		}
 
+		String sql = query.toString();
 		// Needed for the unit test (because in H2 order is a reserved word)
 		if (quoteKeyword)
 		{
@@ -226,7 +223,8 @@ public class Db2SequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Using query=\n" +
+				SqlUtil.replaceParameters(sql, schema, namePattern));
 		}
 
 		PreparedStatement stmt = null;

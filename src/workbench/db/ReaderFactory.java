@@ -25,7 +25,6 @@ import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
-import workbench.db.mckoi.McKoiSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mysql.MySqlProcedureReader;
@@ -88,7 +87,7 @@ public class ReaderFactory
 		}
 		if (meta.isHsql())
 		{
-			return new HsqlSequenceReader(con.getSqlConnection());
+			return new HsqlSequenceReader(con);
 		}
 		if (meta.isApacheDerby() && JdbcUtils.hasMinimumServerVersion(con, "10.6"))
 		{
@@ -96,7 +95,7 @@ public class ReaderFactory
 		}
 		if (meta.isH2())
 		{
-			return new H2SequenceReader(con.getSqlConnection());
+			return new H2SequenceReader(con);
 		}
 		if (meta.isFirebird())
 		{
@@ -105,10 +104,6 @@ public class ReaderFactory
 		if (meta.getDbId().startsWith("db2"))
 		{
 			return new Db2SequenceReader(con, meta.getDbId());
-		}
-		if (meta.getDbId().contains("mcckoi"))
-		{
-			return new McKoiSequenceReader(con.getSqlConnection());
 		}
 		return null;
 	}

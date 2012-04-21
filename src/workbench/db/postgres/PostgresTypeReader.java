@@ -118,8 +118,8 @@ public class PostgresTypeReader
 		}
 
 		select.append(baseSelect);
-		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern);
-		SqlUtil.appendAndCondition(select, "t.typname", objectPattern);
+		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern, con);
+		SqlUtil.appendAndCondition(select, "t.typname", objectPattern, con);
 
 		select.append("\n ORDER BY 2,3 ");
 

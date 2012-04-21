@@ -58,7 +58,7 @@ public class PostgresRuleReader
              "  left join pg_namespace n on n.oid = c.relnamespace \n" +
              "  left join pg_description d on r.oid = d.objoid ";
 
-	private String getSql(String ruleSchemaPattern, String ruleNamePattern, String ruleTable, boolean excludeSelectView)
+	private String getSql(WbConnection con, String ruleSchemaPattern, String ruleNamePattern, String ruleTable, boolean excludeSelectView)
 	{
 		StringBuilder sql = new StringBuilder(150);
 
@@ -66,19 +66,9 @@ public class PostgresRuleReader
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(ruleNamePattern))
 		{
-			sql.append("\n WHERE r.rulename ");
-			if (ruleNamePattern.indexOf('%') > -1)
-			{
-				sql.append(" LIKE ");
-			}
-			else
-			{
-				sql.append(" = ");
-			}
-			sql.append('\'');
+			sql.append("\n WHERE ");
+			SqlUtil.appendExpression(sql, "r.rulename", ruleNamePattern, con);
 			whereAdded = true;
-			sql.append(ruleNamePattern);
-			sql.append("' ");
 		}
 
 		if (StringUtil.isNonBlank(ruleSchemaPattern))
@@ -92,9 +82,7 @@ public class PostgresRuleReader
 			{
 				sql.append("\n AND ");
 			}
-			sql.append(" n.nspname = '");
-			sql.append(ruleSchemaPattern);
-			sql.append("'");
+			SqlUtil.appendExpression(sql, "n.nspname", ruleSchemaPattern, con);
 		}
 
 		if (StringUtil.isNonBlank(ruleTable))
@@ -108,9 +96,7 @@ public class PostgresRuleReader
 			{
 				sql.append("\n AND ");
 			}
-			sql.append(" c.relname = '");
-			sql.append(ruleTable);
-			sql.append("'");
+			SqlUtil.appendExpression(sql, "c.relname", ruleTable, con);
 		}
 
 		if (excludeSelectView)
@@ -126,6 +112,7 @@ public class PostgresRuleReader
 			}
 			sql.append(" not (c.relkind = 'v' and r.ev_type = '1')");
 		}
+
 		sql.append("\n ORDER BY 1, 2 ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -146,7 +133,7 @@ public class PostgresRuleReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(schemaPattern, namePattern, ruleTable, DbSettings.getExcludePostgresDefaultRules());
+			String sql = getSql(connection, schemaPattern, namePattern, ruleTable, DbSettings.getExcludePostgresDefaultRules());
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{

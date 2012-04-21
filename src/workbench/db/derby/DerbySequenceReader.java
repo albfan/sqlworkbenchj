@@ -93,12 +93,13 @@ public class DerbySequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		String sql = baseQuery;
+		StringBuilder sql = new StringBuilder(baseQuery.length() + 50);
+		sql.append(baseQuery);
 
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql += " WHERE sch.schemaname = '" + schema + "'";
+			sql.append(" WHERE sch.schemaname = '").append(schema).append('\'');
 			whereAdded = true;
 		}
 
@@ -106,13 +107,13 @@ public class DerbySequenceReader
 		{
 			if (whereAdded)
 			{
-				sql += " AND ";
+				sql.append(" AND ");
 			}
 			else
 			{
-				sql += " WHERE ";
+				sql.append(" WHERE ");
 			}
-			sql += " seq.sequencename LIKE '" + namePattern + "'";
+			SqlUtil.appendExpression(sql, "seq.sequencename", namePattern, null);
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -126,7 +127,7 @@ public class DerbySequenceReader
 		try
 		{
 			stmt = dbConn.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql.toString());
 			result = new DataStore(rs, dbConn, true);
 		}
 		catch (Exception e)

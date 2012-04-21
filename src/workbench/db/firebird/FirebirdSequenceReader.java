@@ -124,30 +124,21 @@ public class FirebirdSequenceReader
 		DataStore ds = null;
 		try
 		{
-			String sql =
+			StringBuilder sql = new StringBuilder(100);
+			sql.append(
 				"SELECT trim(rdb$generator_name) AS SEQUENCE_NAME, \n" +
 				"       trim(rdb$description) AS REMARKS \n" +
 				"FROM rdb$generators \n" +
-				"WHERE (rdb$system_flag = 0 OR rdb$system_flag IS NULL) \n";
+				"WHERE (rdb$system_flag = 0 OR rdb$system_flag IS NULL) \n");
 
-			if (StringUtil.isNonBlank(sequence))
-			{
-				if (sequence.indexOf('%') > 0)
-				{
-					sql += " AND rdb$generator_name LIKE '" + sequence + "' \n";
-				}
-				else
-				{
-					sql += " AND rdb$generator_name = '" + sequence + "' \n";
-				}
-			}
-			sql += " ORDER BY 1";
+			SqlUtil.appendAndCondition(sql, "rdb$generator_name", sequence, dbConnection);
+			sql.append("\n ORDER BY 1");
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logInfo("FirebirdSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 			}
 			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql.toString());
 			ds = new DataStore(rs, true);
 		}
 		catch (Exception e)

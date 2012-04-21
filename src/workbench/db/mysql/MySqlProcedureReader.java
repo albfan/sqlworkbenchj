@@ -44,12 +44,13 @@ public class MySqlProcedureReader
 		String sql =
 			"SELECT routine_type, dtd_identifier \n" +
 			"FROM information_schema.routines \n" +
-			" WHERE routine_schema like ? \n" +
+			" WHERE routine_schema = ? \n" +
 			"  and  routine_name = ? \n";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" + SqlUtil.replaceParameters(sql, (aSchema == null ? "%" : aSchema), aProcname));
+			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" +
+				SqlUtil.replaceParameters(sql, aSchema, aProcname));
 		}
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -58,7 +59,7 @@ public class MySqlProcedureReader
 		try
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, (aSchema == null ? "%" : aSchema));
+			stmt.setString(1, aSchema);
 			stmt.setString(2, aProcname);
 			rs = stmt.executeQuery();
 			String proctype = "PROCEDURE";

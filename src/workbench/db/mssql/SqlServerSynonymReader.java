@@ -55,8 +55,8 @@ public class SqlServerSynonymReader
 		throws SQLException
 	{
 		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
-		String sql = baseSql;
-
+		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+		sql.append(baseSql);
 		int schemaIndex = -1;
 		int nameIndex = -1;
 
@@ -64,7 +64,7 @@ public class SqlServerSynonymReader
 
 		if (StringUtil.isNonBlank(owner))
 		{
-			sql += " where sc.name = ?";
+			sql.append(" where sc.name = ?");
 			whereAdded = true;
 			schemaIndex = 1;
 		}
@@ -73,20 +73,23 @@ public class SqlServerSynonymReader
 		{
 			if (whereAdded)
 			{
-				sql += " AND ";
+				sql.append(" AND ");
 			}
 			else
 			{
-				sql += " WHERE ";
+				sql.append(" WHERE ");
 			}
 			if (namePattern.indexOf('%') > -1)
 			{
-				sql += " syn.name LIKE ?";
+				sql.append(" syn.name LIKE ?");
+				namePattern = SqlUtil.escapeUnderscore(namePattern, con);
 			}
 			else
 			{
-				sql += " syn.name = ? ";
+				sql.append(" syn.name = ? ");
 			}
+
+			SqlUtil.appendEscapeClause(sql, con, namePattern);
 			if (schemaIndex == 1) nameIndex = 2;
 			else nameIndex = 1;
 		}
@@ -100,7 +103,7 @@ public class SqlServerSynonymReader
 		ResultSet rs = null;
 		try
 		{
-			stmt = con.getSqlConnection().prepareStatement(sql);
+			stmt = con.getSqlConnection().prepareStatement(sql.toString());
 			if (schemaIndex != -1) stmt.setString(schemaIndex, owner);
 			if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
 
@@ -176,7 +179,7 @@ public class SqlServerSynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append(nl + "   FOR ");
+		result.append(nl).append("   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

@@ -142,9 +142,9 @@ public class ObjectInfo
 						if (source != null)
 						{
 							String src = source.toString();
-							result.addMessage("--------[ " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
+							result.addMessage("--------[ BEGIN " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
 							result.addMessage(src);
-							result.addMessage("--------");
+							result.addMessage("--------[ END " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + "   ]--------");
 							if (StringUtil.isBlank(result.getSourceCommand()))
 							{
 								result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
@@ -173,9 +173,9 @@ public class ObjectInfo
 				{
 					ProcedureDefinition def = procs.get(0);
 					CharSequence source = def.getSource(connection);
-					result.addMessage("--------[ " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
+					result.addMessage("--------[ BEGIN " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
 					result.addMessage(source);
-					result.addMessage("--------");
+					result.addMessage("--------[ END " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + "   ]--------");
 					result.setSuccess();
 					return result;
 				}
@@ -197,9 +197,9 @@ public class ObjectInfo
 				}
 				if (StringUtil.isNonBlank(source))
 				{
-					result.addMessage("--------[ Trigger: " + dbObject.getObjectName() + " ]--------");
+					result.addMessage("--------[ BEGIN Trigger: " + dbObject.getObjectName() + " ]--------");
 					result.addMessage(source);
-					result.addMessage("--------");
+					result.addMessage("--------[ END Trigger: " + dbObject.getObjectName() + "   ]--------");
 					result.setSuccess();
 					return result;
 				}
@@ -228,7 +228,11 @@ public class ObjectInfo
 		}
 		else
 		{
-			details = connection.getMetadata().getObjectDetails(toDescribe);
+			DataStore ds = connection.getMetadata().getObjectDetails(toDescribe);
+			if (ds != null && ds.getRowCount() > 0)
+			{
+				details = ds;
+			}
 		}
 		boolean isExtended = connection.getMetadata().isExtendedObject(toDescribe);
 
@@ -252,18 +256,22 @@ public class ObjectInfo
 			displayName = toDescribe.getObjectName();
 		}
 
-		ColumnRemover remover = new ColumnRemover(details);
-		DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-		cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
-		result.setSuccess();
-		result.addDataStore(cols);
+		if (details != null)
+		{
+			ColumnRemover remover = new ColumnRemover(details);
+			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
+			cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
+			result.addDataStore(cols);
+			result.setSuccess();
+		}
 
 		if (source != null)
 		{
-			result.addMessage("\n--------[ " + StringUtil.capitalize(toDescribe.getObjectType()) + ": " +  displayName + " ]--------");
+			result.addMessage("\n--------[ BEGIN " + StringUtil.capitalize(toDescribe.getObjectType()) + ": " +  displayName + " ]--------");
 			result.addMessage(source.toString().trim());
-			result.addMessage("--------");
+			result.addMessage("--------[ END " + StringUtil.capitalize(toDescribe.getObjectType()) + ": " +  displayName + "   ]--------");
 			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
+			result.setSuccess();
 		}
 		else if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{

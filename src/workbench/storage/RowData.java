@@ -166,6 +166,7 @@ public class RowData
 		boolean useGetStringForClobs = info.useGetStringForClobs();
 		boolean useGetStringForBit = info.useGetStringForBit();
 		boolean useGetXML = info.useGetXML();
+		boolean adjustArrayDisplay = info.convertArrays();
 
 		Object value;
 
@@ -201,6 +202,13 @@ public class RowData
 				else if (useGetStringForBit && type == Types.BIT)
 				{
 					value = rs.getString(i + 1);
+				}
+				else if (adjustArrayDisplay && type == java.sql.Types.ARRAY)
+				{
+					// this is mainly here for Oracle nested tables and VARRAYS, but should basically work
+					// for other arrays as well.
+					Object o = rs.getObject(i+1);
+					value = ArrayConverter.getArrayDisplay(o, info.getDbmsTypeName(i));
 				}
 				else if (type == java.sql.Types.STRUCT)
 				{

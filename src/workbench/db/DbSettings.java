@@ -156,6 +156,11 @@ public class DbSettings
 		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), flag);
 	}
 
+	public boolean handleArrayDisplay()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "array.adjust.display", false);
+	}
+
 	public boolean useGetStringForBit()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "bit.use.getstring", false);

@@ -14,8 +14,11 @@ import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import workbench.util.SqlUtil;
 
 /**
  * A class to create a readable display for java.sql.Struct objects
@@ -29,9 +32,9 @@ import java.util.Date;
  * (and not a Struct).
  * DB2 needs a conversion function that will be called by DB2 during retrieval
  * and will thus return a String object as well.
- * 
+ *
  * @author Thomas Kellerer
- * @see RowData#read(java.sql.ResultSet, workbench.storage.ResultInfo) 
+ * @see RowData#read(java.sql.ResultSet, workbench.storage.ResultInfo)
  */
 public class StructConverter
 {
@@ -49,6 +52,7 @@ public class StructConverter
 	private final SimpleDateFormat timestampFormatter;
 	private final SimpleDateFormat dateFormatter;
 	private final SimpleDateFormat timeFormatter;
+	private final DecimalFormat numberFormatter;
 
 	private StructConverter()
 	{
@@ -57,6 +61,11 @@ public class StructConverter
 		timestampFormatter = new SimpleDateFormat("'TIMESTAMP '''yyyy-MM-dd HH:mm:ss''");
 		timeFormatter = new SimpleDateFormat("'TIME '''HH:mm:ss''");
 		dateFormatter = new SimpleDateFormat("'DATE '''yyyy-MM-dd''");
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		symb.setDecimalSeparator('.');
+		numberFormatter = new DecimalFormat("0.#", symb);
+		numberFormatter.setMinimumIntegerDigits(0);
+		numberFormatter.setMaximumFractionDigits(100);
 	}
 
 	/**
@@ -67,7 +76,7 @@ public class StructConverter
 	 * recursively.
 	 * <br/>
 	 * The name of the Struct will be followed by all values in paranthesis, e.g.
-	 * <tt>MY_TYPE('Hello', 'World', 42)</tt> 
+	 * <tt>MY_TYPE('Hello', 'World', 42)</tt>
 	 * <br/>
 	 * Note that Oracle apparently always returns the owner as part of the type name,
 	 * so the actual display will be <tt>SCOTT.MY_TYPE('Hello', 'World', 42)</tt>
@@ -107,45 +116,57 @@ public class StructConverter
 				}
 				else
 				{
-					if (a instanceof CharSequence)
-					{
-						// String need to be enclosed in single quotes
-						buffer.append('\'');
-						buffer.append(a.toString());
-						buffer.append('\'');
-					}
-					else if (a instanceof Timestamp)
-					{
-						synchronized (timestampFormatter)
-						{
-							buffer.append(timestampFormatter.format((Timestamp)a));
-						}
-					}
-					else if (a instanceof Time)
-					{
-						synchronized (timeFormatter)
-						{
-							buffer.append(timeFormatter.format((Time)a));
-						}
-					}
-					else if (a instanceof Date)
-					{
-						synchronized (dateFormatter)
-						{
-							buffer.append(dateFormatter.format((Date)a));
-						}
-					}
-					else
-					{
-						// for anything else, rely on the driver
-						// as the JDBC type of this attribute is not known, we also
-						// cannot dispatch this to a DataConverter
-						buffer.append(a.toString());
-					}
+					appendValue(buffer, a);
 				}
 			}
 		}
 		buffer.append(')');
 		return buffer.toString();
+	}
+
+	public void appendValue(StringBuilder buffer, Object a)
+	{
+		if (a instanceof CharSequence)
+		{
+			// String need to be enclosed in single quotes
+			buffer.append('\'');
+			buffer.append(SqlUtil.escapeQuotes(a.toString()));
+			buffer.append('\'');
+		}
+		else if (a instanceof Timestamp)
+		{
+			synchronized (timestampFormatter)
+			{
+				buffer.append(timestampFormatter.format((Timestamp)a));
+			}
+		}
+		else if (a instanceof Time)
+		{
+			synchronized (timeFormatter)
+			{
+				buffer.append(timeFormatter.format((Time)a));
+			}
+		}
+		else if (a instanceof Date)
+		{
+			synchronized (dateFormatter)
+			{
+				buffer.append(dateFormatter.format((Date)a));
+			}
+		}
+		else if (a instanceof Number)
+		{
+			synchronized (numberFormatter)
+			{
+				buffer.append(numberFormatter.format(a));
+			}
+		}
+		else
+		{
+			// for anything else, rely on the driver
+			// as the JDBC type of this attribute is not known, we also
+			// cannot dispatch this to a DataConverter
+			buffer.append(a.toString());
+		}
 	}
 }

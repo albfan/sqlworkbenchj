@@ -85,7 +85,7 @@ public class PostgresSequenceReader
 			if (StringUtil.isNonBlank(def.getComment()))
 			{
 				buf.append('\n');
-				buf.append("COMMENT ON SEQUENCE " + def.getSequenceName() + " IS '" + def.getComment().replace("'", "''") + "';");
+				buf.append("COMMENT ON SEQUENCE ").append(def.getSequenceName()).append(" IS '").append(def.getComment().replace("'", "''")).append("';");
 			}
 
 			String col = def.getRelatedColumn();

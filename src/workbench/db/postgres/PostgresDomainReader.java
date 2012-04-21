@@ -69,7 +69,7 @@ public class PostgresDomainReader
 		return result;
 	}
 
-	private String getSql(String schema, String name)
+	private String getSql(WbConnection con, String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
 
@@ -80,17 +80,18 @@ public class PostgresDomainReader
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(name))
 		{
-			sql.append(" WHERE ");
-			SqlUtil.appendExpression(sql, "domain_name", name);
+			sql.append("\n WHERE ");
+			SqlUtil.appendExpression(sql, "domain_name", name, con);
 			whereAdded = true;
 		}
 
 		if (StringUtil.isNonBlank(schema))
 		{
 			sql.append(whereAdded ? " AND " : " WHERE ");
-			SqlUtil.appendExpression(sql, "domain_schema", schema);
+			SqlUtil.appendExpression(sql, "domain_schema", schema, con);
 		}
-		sql.append(" ORDER BY 1, 2 ");
+
+		sql.append("\n ORDER BY 1, 2 ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -110,7 +111,7 @@ public class PostgresDomainReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(schemaPattern, namePattern);
+			String sql = getSql(connection, schemaPattern, namePattern);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -166,7 +167,7 @@ public class PostgresDomainReader
 			result.append("\n   CONSTRAINT ");
 			if (StringUtil.isNonBlank(domain.getConstraintName()))
 			{
-				result.append(domain.getConstraintName() + " ");
+				result.append(domain.getConstraintName()).append(" ");
 			}
 			if (!domain.isNullable()) result.append("NOT NULL");
 			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
@@ -178,7 +179,7 @@ public class PostgresDomainReader
 		result.append(";\n");
 		if (StringUtil.isNonBlank(domain.getComment()))
 		{
-			result.append("\nCOMMENT ON DOMAIN " + name + " IS '");
+			result.append("\nCOMMENT ON DOMAIN ").append(name).append(" IS '");
 			result.append(SqlUtil.escapeQuotes(domain.getComment()));
 			result.append("';\n");
 		}

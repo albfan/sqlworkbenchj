@@ -16,7 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
@@ -25,11 +24,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class SqlServerSynonymReaderTest
+public class SqlServerTypeReaderTest
 	extends WbTestCase
 {
 
-	public SqlServerSynonymReaderTest()
+	public SqlServerTypeReaderTest()
 	{
 		super("SqlServerSynonymReaderTest");
 	}
@@ -44,8 +43,14 @@ public class SqlServerSynonymReaderTest
 		SQLServerTestUtil.dropAllObjects(conn);
 
 		String sql =
-			"create table person (id integer);\n " +
-			"create synonym s_person for person;\n " +
+			"CREATE TYPE address_type \n" +
+			"AS \n" +
+			"TABLE \n" +
+			"( \n" +
+			"   streetname  varchar(50), \n" +
+			"   city        varchar(50)     DEFAULT ('Munich'), \n" +
+			"   some_value  numeric(12,4) \n" +
+			")\n" +
 			"commit;\n";
 		TestUtil.executeScript(conn, sql);
 	}
@@ -66,20 +71,22 @@ public class SqlServerSynonymReaderTest
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
 		if (conn == null) return;
-		SynonymReader reader = conn.getMetadata().getSynonymReader();
-		assertNotNull(reader);
-		List<TableIdentifier> syns = reader.getSynonymList(conn, "dbo", null);
-		assertNotNull(syns);
-		assertEquals(1, syns.size());
-		assertEquals("s_person", syns.get(0).getObjectName());
+		List<TableIdentifier> types = conn.getMetadata().getObjectList(null, new String[] { "TYPE" });
+		assertNotNull(types);
+		assertEquals(1, types.size());
+		assertEquals("address_type", types.get(0).getObjectName());
 
-		String source = syns.get(0).getSource(conn).toString().trim();
+		String source = types.get(0).getSource(conn).toString().trim();
 		String expected =
-				"CREATE SYNONYM s_person\n" +
-				"   FOR wbjunit.dbo.person;";
+			"CREATE TYPE dbo.address_type\n" +
+			"AS\n" +
+			"TABLE\n" +
+			"(\n" +
+			"   streetname  varchar(50),\n" +
+			"   city        varchar(50)     DEFAULT ('Munich'),\n" +
+			"   some_value  numeric(12,4)\n" +
+			");";
+//		System.out.println("----------------\n" + source + "\n++++++++++++\n" + expected);
 		assertEquals(expected, source);
-		TableIdentifier table = conn.getMetadata().getSynonymTable(syns.get(0));
-		assertNotNull(table);
-		assertEquals("person", table.getTableName());
 	}
 }

@@ -108,7 +108,7 @@ public class SqlServerTypeReader
 		try
 		{
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(owner, typeName);
+			String sql = getSql(connection, owner, typeName);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -159,12 +159,12 @@ public class SqlServerTypeReader
 			}
 			else
 			{
-				displayType.append("(" + size + ")");
+				displayType.append("(").append(size).append(")");
 			}
 		}
 		else if (numericTypes.contains(typeName))
 		{
-			displayType.append("(" + precision + "," + scale + ")");
+			displayType.append("(").append(precision).append(",").append(scale).append(")");
 		}
 		return displayType.toString();
 	}
@@ -190,24 +190,24 @@ public class SqlServerTypeReader
 		return result;
 	}
 
-	private String getSql(String owner, String typeName)
+	private String getSql(WbConnection con, String owner, String typeName)
 	{
-		String sql = baseSql;
+		StringBuilder sql = new StringBuilder(baseSql.length() + 20);
+		sql.append(baseSql);
 		if (StringUtil.isNonBlank(typeName))
 		{
-			sql += " AND t.name like '" + typeName + "%' ";
+			SqlUtil.appendAndCondition(sql, "t.name", typeName, con);
 		}
 		if (StringUtil.isNonBlank(owner))
 		{
-			sql += " AND s.name = '" + owner + "' ";
+			SqlUtil.appendAndCondition(sql, "s.name", owner, con);
 		}
-
-		sql += " ORDER BY 1, 2";
+		sql.append("\n ORDER BY 1, 2");
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("SqlServerTypeReader.getSql()", "Using SQL=\n" + sql);
 		}
-		return sql;
+		return sql.toString();
 	}
 
 	@Override
@@ -222,7 +222,7 @@ public class SqlServerTypeReader
 			String typename = con.getMetadata().adjustObjectnameCase(name.getObjectName());
 			String schema = con.getMetadata().adjustSchemaNameCase(name.getSchema());
 
-			String sql = getSql(schema, typename);
+			String sql = getSql(con, schema, typename);
 
 			rs = stmt.executeQuery(sql);
 			if (rs.next())

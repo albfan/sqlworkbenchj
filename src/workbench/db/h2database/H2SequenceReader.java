@@ -11,7 +11,6 @@
  */
 package workbench.db.h2database;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -33,9 +33,9 @@ import workbench.util.StringUtil;
 public class H2SequenceReader
 	implements SequenceReader
 {
-	private Connection dbConnection;
+	private WbConnection dbConnection;
 
-	public H2SequenceReader(Connection conn)
+	public H2SequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
 	}
@@ -132,7 +132,6 @@ public class H2SequenceReader
 		}
 
 		def.setSource(result);
-		return;
 	}
 
 	@Override
@@ -143,7 +142,8 @@ public class H2SequenceReader
 		DataStore ds = null;
 		try
 		{
-			String sql = "SELECT SEQUENCE_CATALOG, " +
+			StringBuilder sql = new StringBuilder(100);
+			sql.append("SELECT SEQUENCE_CATALOG, " +
 				"SEQUENCE_SCHEMA, " +
 				"SEQUENCE_NAME, " +
 				"CURRENT_VALUE, " +
@@ -152,7 +152,7 @@ public class H2SequenceReader
 				"REMARKS, " +
 				"ID," +
 				"CACHE " +
-				"FROM information_schema.sequences ";
+				"FROM information_schema.sequences ");
 
 			boolean whereAdded = false;
 
@@ -160,35 +160,36 @@ public class H2SequenceReader
 			{
 				if (!whereAdded)
 				{
-					sql += " WHERE ";
+					sql.append(" WHERE ");
 					whereAdded = true;
 				}
 				else
 				{
-					sql += " AND ";
+					sql.append(" AND ");
 				}
-				sql += " sequence_schema = '" + owner + "'";
+				sql.append(" sequence_schema = '" + owner + "'");
 			}
 
 			if (StringUtil.isNonBlank(sequence))
 			{
 				if (!whereAdded)
 				{
-					sql += " WHERE ";
+					sql.append(" WHERE ");
 					whereAdded = true;
 				}
 				else
 				{
-					sql += " AND ";
+					sql.append(" AND ");
 				}
-				sql += " sequence_name LIKE '" + sequence + "'";
+				SqlUtil.appendExpression(sql, "sequence_name", sequence, dbConnection);
 			}
+
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logInfo("H2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 			}
 			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql.toString());
 			ds = new DataStore(rs, true);
 		}
 		catch (Exception e)

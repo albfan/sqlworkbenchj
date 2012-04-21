@@ -1,11 +1,11 @@
 /*
  * Db2ProcedureReader
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2012, Thomas Kellerer
  * No part of this code may be reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.ibm;
@@ -109,8 +109,8 @@ public class Db2ProcedureReader
              "WHERE routinetype in ('F', 'P') \n" +
              "AND origin in ('Q', 'U') \n");
 
-			SqlUtil.appendAndCondition(sql, "schema", schemaPattern);
-			SqlUtil.appendAndCondition(sql, "name", namePattern);
+			SqlUtil.appendAndCondition(sql, "schema", schemaPattern, this.connection);
+			SqlUtil.appendAndCondition(sql, "name", namePattern, this.connection);
 		}
 		else
 		{
@@ -126,9 +126,9 @@ public class Db2ProcedureReader
 					 "FROM syscat.routines \n" +
 					 "WHERE routinetype in ('F', 'P') \n" +
 					 "AND origin in ('Q', 'U') \n");
-			
-			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern);
-			SqlUtil.appendAndCondition(sql, "routinename", namePattern);
+
+			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern, this.connection);
+			SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
 		}
 		return sql.toString();
 	}
