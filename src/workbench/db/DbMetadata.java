@@ -304,7 +304,7 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{
-			IngresMetadata imeta = new IngresMetadata(dbConnection.getSqlConnection());
+			IngresMetadata imeta = new IngresMetadata(dbConnection);
 			synonymReader = imeta;
 			sequenceReader = imeta;
 		}

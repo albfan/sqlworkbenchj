@@ -73,16 +73,17 @@ public class IngresMetadataTest
 	@Test
 	public void testGetSequences()
 	{
-		IngresMetadata instance = new IngresMetadata(db.getSqlConnection());
+		IngresMetadata instance = new IngresMetadata(db);
 		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
+			@Override
 			public int compare(DbObject o1, DbObject o2)
 			{
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
 			}
 		});
-		
+
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		assertEquals("SEQ_AAA", result.get(0).getSequenceName());
