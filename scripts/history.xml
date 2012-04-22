@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-04-13">
+  <release build="-1" date="2012-04-22">
     <entry dev-build="3" type="enh">Oracle nested tables are now displayed correctly in a result set</entry>
     <entry dev-build="3" type="enh">A new command WbGenerateScript is available to generate the SQL scripts of tables and other objects (this is the same as the "Generate Script" option in the DbExplorer)</entry>
     <entry dev-build="2" type="enh">Macros can now be defined to be expanded while typing their name. When such a macro is selected from the menu it is not run, but the text is inserted into the editor</entry>
