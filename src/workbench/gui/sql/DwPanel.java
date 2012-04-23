@@ -661,6 +661,10 @@ public class DwPanel
 		String generatingSql = ds.getGeneratingSql();
 		if (generatingSql == null) return;
 		runQuery(generatingSql, respectMaxRows);
+		if (showSQLAsTooltip)
+		{
+			showGeneratingSQLAsTooltip(); // re-create the tooltip because it contains the last execution time
+		}
 	}
 
 	/**
