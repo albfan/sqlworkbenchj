@@ -104,7 +104,7 @@ public class DwPanel
 	private boolean hasResultSet;
 
 	protected WbScrollPane scrollPane;
-	private long lastExecutionTime;
+	private long lastExecutionDuration;
 
 	private boolean showLoadProgress;
 	private boolean savingData = false;
@@ -616,7 +616,7 @@ public class DwPanel
 
 	public long getLastExecutionTime()
 	{
-		return lastExecutionTime;
+		return lastExecutionDuration;
 	}
 
 	/**
@@ -624,7 +624,7 @@ public class DwPanel
 	 */
 	public void showlastExecutionTime()
 	{
-		statusBar.setExecutionTime(lastExecutionTime);
+		statusBar.setExecutionTime(lastExecutionDuration);
 	}
 
 	public void setSortDefinition(NamedSortDefinition sort)
@@ -728,7 +728,7 @@ public class DwPanel
 	{
 		if (result == null || !result.isSuccess())
 		{
-			lastExecutionTime = 0;
+			lastExecutionDuration = 0;
 			hasResultSet = false;
 		}
 		else
@@ -779,7 +779,7 @@ public class DwPanel
 			this.setBatchUpdate(true);
 			this.hasResultSet = true;
 			this.sql = statement;
-			this.lastExecutionTime = executionTime;
+			this.lastExecutionDuration = executionTime;
 
 			newData.setOriginalConnection(this.dbConnection);
 			newData.setProgressMonitor(null);
@@ -871,7 +871,8 @@ public class DwPanel
 		int index = getTabIndex(tab);
 		if (index == -1) return;
 
-		String tip = "<html><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
+		String time = StringUtil.getCurrentTimestamp();
+		String tip = "<html><pre>(" + time + ")<br>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
 	}
