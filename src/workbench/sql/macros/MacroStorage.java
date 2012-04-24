@@ -37,6 +37,7 @@ import workbench.util.WbPersistence;
  */
 public class MacroStorage
 {
+	private final Object lock = new Object();
 	private final Map<String, MacroDefinition> allMacros;
 	private final List<MacroGroup> groups;
 
@@ -87,11 +88,14 @@ public class MacroStorage
 
 	public synchronized void copyFrom(MacroStorage source)
 	{
-		this.allMacros.clear();
-		this.groups.clear();
-		groups.addAll(source.groups);
-		modified = true;
-		updateMap();
+		synchronized (lock)
+		{
+			this.allMacros.clear();
+			this.groups.clear();
+			groups.addAll(source.groups);
+			modified = true;
+			updateMap();
+		}
 		fireMacroListChange();
 	}
 
@@ -107,28 +111,31 @@ public class MacroStorage
 		return copy;
 	}
 
-	public synchronized void saveMacros(File file)
+	public void saveMacros(File file)
 	{
-		if (this.getSize() == 0)
+		synchronized (lock)
 		{
-			if (file.exists())
+			if (this.getSize() == 0)
 			{
-				file.delete();
+				if (file.exists())
+				{
+					file.delete();
+				}
 			}
+			else
+			{
+				WbPersistence writer = new WbPersistence(file.getAbsolutePath());
+				try
+				{
+					writer.writeObject(this.groups);
+				}
+				catch (Exception th)
+				{
+					LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
+				}
+			}
+			this.modified = false;
 		}
-		else
-		{
-			WbPersistence writer = new WbPersistence(file.getAbsolutePath());
-			try
-			{
-				writer.writeObject(this.groups);
-			}
-			catch (Exception th)
-			{
-				LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
-			}
-		}
-		this.modified = false;
 	}
 
 	private void fireMacroListChange()
@@ -143,17 +150,20 @@ public class MacroStorage
 		}
 	}
 
-	public synchronized void applySort()
+	public void applySort()
 	{
-		Collections.sort(groups, new Sorter());
-		for (int i=0; i < groups.size(); i++)
+		synchronized (lock)
 		{
-			groups.get(i).setSortOrder(i);
-			groups.get(i).applySort();
+			Collections.sort(groups, new Sorter());
+			for (int i=0; i < groups.size(); i++)
+			{
+				groups.get(i).setSortOrder(i);
+				groups.get(i).applySort();
+			}
 		}
 	}
 
-	private synchronized void updateMap()
+	private void updateMap()
 	{
 		allMacros.clear();
 		for (MacroGroup group : groups)
@@ -180,39 +190,49 @@ public class MacroStorage
 	 * @see workbench.util.WbPersistence#readObject()
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized void loadMacros(File source)
+	public void loadMacros(File source)
 	{
+		if (!source.exists())
+		{
+			LogMgr.logDebug("MacroManager.loadMacros()", "Macro file " + source.getAbsolutePath() + " not found. No Macros loaded");
+			return;
+		}
+
 		try
 		{
-			WbPersistence reader = new WbPersistence(source.getAbsolutePath());
-			Object o = reader.readObject();
-			if (o instanceof List)
+			synchronized (lock)
 			{
-				List<MacroGroup> g = (List)o;
-				groups.clear();
-				groups.addAll(g);
-			}
-			else if (o instanceof HashMap)
-			{
-				File backup = new File(source.getParentFile(), source.getName() + ".old");
-				FileUtil.copy(source, backup);
-				Map<String, String> oldMacros = (Map)o;
-				MacroGroup group = new MacroGroup(ResourceMgr.getString("LblDefGroup"));
-
-				groups.clear();
-
-				int sortOrder = 0;
-				for (Map.Entry<String, String> entry : oldMacros.entrySet())
+				WbPersistence reader = new WbPersistence(source.getAbsolutePath());
+				Object o = reader.readObject();
+				if (o instanceof List)
 				{
-					MacroDefinition def = new MacroDefinition(entry.getKey(), entry.getValue());
-					def.setSortOrder(sortOrder);
-					sortOrder++;
-					group.addMacro(def);
+					List<MacroGroup> g = (List)o;
+					groups.clear();
+					groups.addAll(g);
 				}
-				groups.add(group);
+				else if (o instanceof HashMap)
+				{
+					// Upgrade from previous version
+					File backup = new File(source.getParentFile(), source.getName() + ".old");
+					FileUtil.copy(source, backup);
+					Map<String, String> oldMacros = (Map)o;
+					MacroGroup group = new MacroGroup(ResourceMgr.getString("LblDefGroup"));
+
+					groups.clear();
+
+					int sortOrder = 0;
+					for (Map.Entry<String, String> entry : oldMacros.entrySet())
+					{
+						MacroDefinition def = new MacroDefinition(entry.getKey(), entry.getValue());
+						def.setSortOrder(sortOrder);
+						sortOrder++;
+						group.addMacro(def);
+					}
+					groups.add(group);
+				}
+				applySort();
+				updateMap();
 			}
-			applySort();
-			updateMap();
 		}
 		catch (Exception e)
 		{
@@ -235,78 +255,93 @@ public class MacroStorage
 		this.fireMacroListChange();
 	}
 
-	public synchronized void addMacro(MacroGroup group, MacroDefinition macro)
+	public void addMacro(MacroGroup group, MacroDefinition macro)
 	{
-		allMacros.put(macro.getName(), macro);
-		group.addMacro(macro);
-		macro.setSortOrder(group.getSize() + 1);
-		this.modified = true;
-		this.fireMacroListChange();
-	}
-
-	public synchronized void removeMacro(MacroDefinition toDelete)
-	{
-		MacroDefinition macro = allMacros.remove(toDelete.getName());
-		for (MacroGroup group : groups)
+		synchronized (lock)
 		{
-			group.removeMacro(macro);
+			allMacros.put(macro.getName(), macro);
+			group.addMacro(macro);
+			macro.setSortOrder(group.getSize() + 1);
+			this.modified = true;
 		}
-		this.modified = true;
 		this.fireMacroListChange();
 	}
 
-	public synchronized void addMacro(String groupName, String key, String text)
+	public void removeMacro(MacroDefinition toDelete)
+	{
+		synchronized (lock)
+		{
+			MacroDefinition macro = allMacros.remove(toDelete.getName());
+			for (MacroGroup group : groups)
+			{
+				group.removeMacro(macro);
+			}
+			this.modified = true;
+		}
+		this.fireMacroListChange();
+	}
+
+	public void addMacro(String groupName, String key, String text)
 	{
 		MacroDefinition def = new MacroDefinition(key, text);
-		boolean added = false;
-		if (groupName != null)
+		synchronized (lock)
+		{
+			boolean added = false;
+			if (groupName != null)
+			{
+				for (MacroGroup group : groups)
+				{
+					if (group.getName().equalsIgnoreCase(groupName))
+					{
+						group.addMacro(def);
+						added = true;
+					}
+				}
+				if (!added)
+				{
+					MacroGroup group = new MacroGroup(groupName);
+					group.addMacro(def);
+					groups.add(group);
+				}
+			}
+			else
+			{
+				groups.get(0).addMacro(def);
+			}
+			updateMap();
+			this.modified = true;
+		}
+		this.fireMacroListChange();
+	}
+
+	public boolean containsGroup(String groupName)
+	{
+		synchronized (lock)
 		{
 			for (MacroGroup group : groups)
 			{
-				if (group.getName().equalsIgnoreCase(groupName))
+				if (group.getName().equalsIgnoreCase(groupName)) return true;
+			}
+			return false;
+		}
+	}
+
+	public void addGroup(MacroGroup group)
+	{
+		synchronized (lock)
+		{
+			if (!groups.contains(group))
+			{
+				int newIndex = 1;
+				if (groups.size() > 0)
 				{
-					group.addMacro(def);
-					added = true;
+					newIndex = groups.get(groups.size() - 1).getSortOrder() + 1;
 				}
-			}
-			if (!added)
-			{
-				MacroGroup group = new MacroGroup(groupName);
-				group.addMacro(def);
+				group.setSortOrder(newIndex);
 				groups.add(group);
+				applySort();
+				modified = true;
 			}
-		}
-		else
-		{
-			groups.get(0).addMacro(def);
-		}
-		updateMap();
-		this.modified = true;
-		this.fireMacroListChange();
-	}
-
-	public synchronized boolean containsGroup(String groupName)
-	{
-		for (MacroGroup group : groups)
-		{
-			if (group.getName().equalsIgnoreCase(groupName)) return true;
-		}
-		return false;
-	}
-
-	public synchronized void addGroup(MacroGroup group)
-	{
-		if (!groups.contains(group))
-		{
-			int newIndex = 1;
-			if (groups.size() > 0)
-			{
-				newIndex = groups.get(groups.size() - 1).getSortOrder() + 1;
-			}
-			group.setSortOrder(newIndex);
-			groups.add(group);
-			applySort();
-			modified = true;
 		}
 	}
 
@@ -315,48 +350,63 @@ public class MacroStorage
 	 * contain only macros hat have isVisibleInMenu() == true
 	 *
 	 */
-	public synchronized List<MacroGroup> getVisibleGroups()
+	public List<MacroGroup> getVisibleGroups()
 	{
 		List<MacroGroup> result = new ArrayList<MacroGroup>(groups.size());
-		for (MacroGroup group : groups)
+		synchronized (lock)
 		{
-			if (group.isVisibleInMenu() && group.getVisibleMacroSize() > 0)
+			for (MacroGroup group : groups)
 			{
-				result.add(group);
+				if (group.isVisibleInMenu() && group.getVisibleMacroSize() > 0)
+				{
+					result.add(group);
+				}
 			}
 		}
 		return Collections.unmodifiableList(result);
 	}
 
-	public synchronized List<MacroGroup> getGroups()
+	public List<MacroGroup> getGroups()
 	{
-		return Collections.unmodifiableList(groups);
+		synchronized (lock)
+		{
+			return Collections.unmodifiableList(groups);
+		}
 	}
 
 	public void resetModified()
 	{
-		this.modified = false;
-		for (MacroGroup group : groups)
+		synchronized (lock)
 		{
-			group.resetModified();
+			this.modified = false;
+			for (MacroGroup group : groups)
+			{
+				group.resetModified();
+			}
 		}
 	}
 
 	public boolean isModified()
 	{
-		if (this.modified) return true;
-		for (MacroGroup group : groups)
+		synchronized (lock)
 		{
-			if (group.isModified()) return true;
+			if (this.modified) return true;
+			for (MacroGroup group : groups)
+			{
+				if (group.isModified()) return true;
+			}
 		}
 		return false;
 	}
 
-	public synchronized void clearAll()
+	public void clearAll()
 	{
-		this.allMacros.clear();
-		this.groups.clear();
-		this.modified = true;
+		synchronized (lock)
+		{
+			this.allMacros.clear();
+			this.groups.clear();
+			this.modified = true;
+		}
 		this.fireMacroListChange();
 	}
 

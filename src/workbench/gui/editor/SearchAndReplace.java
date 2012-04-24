@@ -276,7 +276,6 @@ public class SearchAndReplace
 		String fixed = input.replaceAll("\\\\n", "\n");
 		fixed = fixed.replaceAll("\\\\r", "\r");
 		fixed = fixed.replaceAll("\\\\t", "\t");
-		fixed = StringUtil.quoteRegexMeta(fixed);
 		return fixed;
 	}
 
