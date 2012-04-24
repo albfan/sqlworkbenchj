@@ -15,16 +15,25 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import workbench.console.DataStorePrinter;
+import workbench.gui.components.FlatButton;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
+import workbench.storage.RowData;
 import workbench.util.StringUtil;
 
 /**
@@ -38,6 +47,7 @@ public class FormNavigation
 	private RecordFormPanel display;
 	private JTextField currentRow = new JTextField(4);
 	private JScrollBar scrollBar;
+	private FlatButton copyButton;
 
 	public FormNavigation(RecordFormPanel panel)
 	{
@@ -63,31 +73,62 @@ public class FormNavigation
 		c.weightx = 1.0;
 		status.add(new JLabel(ResourceMgr.getString("TxtOf") + " " + display.getRowCount()), c);
 
+		copyButton = new FlatButton(ResourceMgr.getString("MnuTxtCopy"));
+		c.gridx ++;
+		c.anchor = GridBagConstraints.EAST;
+		c.weightx = 1.0;
+		c.insets = new Insets(5,0,0,0);
+		status.add(copyButton, c);
+		copyButton.addActionListener(this);
+
 		this.add(status, BorderLayout.SOUTH);
 		this.add(scrollBar, BorderLayout.NORTH);
 		currentRow.addActionListener(this);
 		updateStatus();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		int newRow = StringUtil.getIntValue(currentRow.getText(), -1);
-		if (newRow > 0 && newRow <= display.getRowCount())
+		if (e.getSource() == this)
 		{
-			if (changeRow(newRow - 1))
+			int newRow = StringUtil.getIntValue(currentRow.getText(), -1);
+			if (newRow > 0 && newRow <= display.getRowCount())
 			{
-				try
+				if (changeRow(newRow - 1))
 				{
-					scrollBar.setValueIsAdjusting(true);
-					scrollBar.setValue(display.getCurrentRow());
-				}
-				finally
-				{
-					scrollBar.setValueIsAdjusting(false);
+					try
+					{
+						scrollBar.setValueIsAdjusting(true);
+						scrollBar.setValue(display.getCurrentRow());
+					}
+					finally
+					{
+						scrollBar.setValueIsAdjusting(false);
+					}
 				}
 			}
+			updateStatus();
 		}
-		updateStatus();
+		
+		if (e.getSource() == copyButton)
+		{
+			copyToClipboard();
+		}
+	}
+
+	private void copyToClipboard()
+	{
+		DataStore ds = display.getDataStore();
+		DataStorePrinter printer = new DataStorePrinter(ds);
+		StringWriter writer = new StringWriter();
+		PrintWriter pw = new PrintWriter(writer);
+		RowData row = ds.getRow(display.getCurrentRow());
+		printer.printAsRecord(pw, row, display.getCurrentRow());
+
+		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection sel = new StringSelection(writer.toString());
+		clp.setContents(sel, sel);
 	}
 
 	private boolean changeRow(int newRow)
@@ -99,12 +140,13 @@ public class FormNavigation
 		}
 		return false;
 	}
-	
+
 	private void updateStatus()
 	{
 		currentRow.setText(Integer.toString(display.getCurrentRow() + 1));
 	}
 
+	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e)
 	{
 		int newRow = e.getValue();

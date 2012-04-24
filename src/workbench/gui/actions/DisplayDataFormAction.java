@@ -49,6 +49,7 @@ public class DisplayDataFormAction
 		setTable(aClient);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if(client.getRowCount() == 0) return;
@@ -72,12 +73,12 @@ public class DisplayDataFormAction
 		int maxHeight = (int)(screen.height * 0.6);
 
 		Dimension maxSize = new Dimension(maxWidth, maxHeight);
-		
+
 		panel.setMaximumSize(maxSize);
 		dialog.setMaximumSize(maxSize);
 
 		boolean doLimit = false;
-		
+
 		if (d.height > maxSize.height)
 		{
 			doLimit = true;
@@ -102,7 +103,7 @@ public class DisplayDataFormAction
 		}
 
 		dialog.pack();
-		
+
 		try
 		{
 			WbSwingUtilities.center(dialog, window);

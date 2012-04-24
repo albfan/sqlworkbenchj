@@ -133,7 +133,7 @@ public abstract class ConsolePrinter
 		}
 	}
 
-	protected void printAsRecord(PrintWriter pw, RowData row, int rowNum)
+	public void printAsRecord(PrintWriter pw, RowData row, int rowNum)
 	{
 		int colcount = row.getColumnCount();
 		int colwidth = 0;

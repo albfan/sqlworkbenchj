@@ -57,6 +57,7 @@ import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
 
@@ -97,10 +98,17 @@ public class RecordFormPanel
 		showRecord(displayRow);
 	}
 
+	public DataStore getDataStore()
+	{
+		if (this.data == null) return null;
+		return data.getDataStore();
+	}
+	
 	protected void buildEntryForm()
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_buildEntryForm();
@@ -309,6 +317,7 @@ public class RecordFormPanel
 		currentRow = rowNumber;
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				_showRecord();
@@ -485,6 +494,7 @@ public class RecordFormPanel
 		return false;
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		if (!isChanged()) return true;
@@ -508,12 +518,14 @@ public class RecordFormPanel
 		}
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 		if (inputControls == null) return;
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				inputControls[toFocus].requestFocusInWindow();
@@ -571,6 +583,7 @@ public class RecordFormPanel
 		//Object newValue = blobHandlers[column].getValueToUse();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		boolean ctrlPressed = WbAction.isCtrlPressed(e);
