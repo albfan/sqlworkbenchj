@@ -64,8 +64,8 @@ public class WbAbout
 
 		f = LogMgr.getLogfile();
 		result.addMessage("Logfile: " + (f == null ? "": f.getFullPath()));
-		long freeMem = (long)(MemoryWatcher.getFreeMemory() / (1024*1024) );
-		long maxMem = (long)(MemoryWatcher.MAX_MEMORY / (1024*1024) );
+		long freeMem = MemoryWatcher.getFreeMemory() / (1024*1024);
+		long maxMem = MemoryWatcher.MAX_MEMORY / (1024*1024);
 		result.addMessage(ResourceMgr.getString("LblMemory") + " " + freeMem + "MB/" + maxMem + "MB");
 
 
@@ -74,7 +74,7 @@ public class WbAbout
 		{
 			result.addMessageNewLine();
 			String l = ResourceMgr.getString("LblConnInfo");
-			result.addMessageByKey(l);
+			result.addMessage(l);
 			String line = StringUtil.padRight("", l.length(), '-');
 			result.addMessage(line);
 			result.addMessage(info);
