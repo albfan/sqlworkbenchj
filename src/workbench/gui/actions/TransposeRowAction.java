@@ -50,9 +50,13 @@ public class TransposeRowAction
 	public void executeAction(ActionEvent e)
 	{
 		DatastoreTransposer transpose = new DatastoreTransposer(client.getDataStore());
-		int row = client.getSelectedRow();
-		DataStore ds = transpose.transposeRow(row);
-		showDatastore(ds);
+		int[] rows = client.getSelectedRows();
+		for (int i=0; i < rows.length; i++)
+		{
+			int row = rows[i];
+			DataStore ds = transpose.transposeRow(row);
+			showDatastore(ds);
+		}
 	}
 
 	private void showDatastore(DataStore ds)
@@ -89,11 +93,11 @@ public class TransposeRowAction
 	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
-		boolean singleRow = false;
+		boolean selected = false;
 		if (client != null)
 		{
-			singleRow = client.getSelectedRowCount() == 1;
+			selected = client.getSelectedRowCount() > 0;
 		}
-		setEnabled(singleRow);
+		setEnabled(selected);
 	}
 }
