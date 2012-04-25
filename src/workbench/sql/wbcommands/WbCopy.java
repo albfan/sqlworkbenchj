@@ -261,7 +261,7 @@ public class WbCopy
 		}
 		catch (TableNotFoundException tnf)
 		{
-			String err = ResourceMgr.getFormattedString("ErrImportTableNotFound", tnf.getTableName());
+			String err = ResourceMgr.getFormattedString("ErrTableNotFound", tnf.getTableName());
 			result.addMessage(err);
 			result.setFailure();
 		}

@@ -1180,7 +1180,7 @@ public class TextFileParser
 		if (def == null || def.getColumns().isEmpty())
 		{
 			TableIdentifier tbl = createTargetTableId();
-			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableExpression());
+			String msg = ResourceMgr.getFormattedString("ErrTableNotFound", tbl.getTableExpression());
 			this.messages.append(msg);
 			this.messages.appendNewLine();
 			this.importColumns = null;

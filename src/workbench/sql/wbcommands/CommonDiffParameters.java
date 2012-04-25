@@ -50,6 +50,8 @@ public class CommonDiffParameters
 
 	private RowActionMonitor monitor;
 	private ArgumentParser cmdLine;
+	private List<String> missingRefTables = new ArrayList<String>();
+	private List<String> missingTargetTables = new ArrayList<String>();
 
 	public CommonDiffParameters(ArgumentParser args)
 	{
@@ -125,6 +127,9 @@ public class CommonDiffParameters
 		List<TableIdentifier> targetTables = null;
 		boolean matchNames = true;
 
+		this.missingRefTables.clear();
+		this.missingTargetTables.clear();
+
 		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA))
 		{
 			String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
@@ -154,6 +159,7 @@ public class CommonDiffParameters
 			{
 				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn);
 				refTables = refArg.getTables();
+				missingRefTables.addAll(refArg.getMissingTables());
 			}
 			else
 			{
@@ -164,6 +170,7 @@ public class CommonDiffParameters
 			{
 				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon);
 				targetTables = targetArg.getTables();
+				missingTargetTables.addAll(targetArg.getMissingTables());
 			}
 			else
 			{
@@ -182,6 +189,7 @@ public class CommonDiffParameters
 			{
 				SourceTableArgument refTableArgs = new SourceTableArgument(tableNames, referenceConn);
 				refTables = refTableArgs.getTables();
+				missingRefTables.addAll(refTableArgs.getMissingTables());
 			}
 
 			tableNames = cmdLine.getValue(PARAM_TARGETTABLES);
@@ -193,6 +201,7 @@ public class CommonDiffParameters
 			{
 				SourceTableArgument tableArgs = new SourceTableArgument(tableNames, targetCon);
 				targetTables = tableArgs.getTables();
+				missingTargetTables.addAll(tableArgs.getMissingTables());
 				matchNames = false;
 			}
 		}
@@ -231,6 +240,16 @@ public class CommonDiffParameters
 		}
 
 		return mapping;
+	}
+
+	public List<String> getMissingReferenceTables()
+	{
+		return missingRefTables;
+	}
+
+	public List<String> getMissingTargetTables()
+	{
+		return missingTargetTables;
 	}
 
 	public static class TableMapping

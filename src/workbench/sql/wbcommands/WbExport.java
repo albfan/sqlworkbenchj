@@ -635,7 +635,7 @@ public class WbExport
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && cmdLine.isArgPresent(ARG_SOURCETABLE))
 			{
-				String key = "ErrImportTableNotFound";
+				String key = "ErrTableNotFound";
 				if (argParser.wasWildCardArgument())
 				{
 					key = "ErrExportNoTablesFound";

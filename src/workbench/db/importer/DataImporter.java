@@ -1577,7 +1577,7 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
-					String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", this.targetTable.getTableExpression());
+					String msg = ResourceMgr.getFormattedString("ErrTableNotFound", this.targetTable.getTableExpression());
 					if (parser != null)
 					{
 						String s = ResourceMgr.getString("ErrImportFileNotProcessed");

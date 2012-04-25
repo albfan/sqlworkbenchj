@@ -400,6 +400,16 @@
 						and will contain all <literal>DELETE</literal> statements for the target table.
 						The main script merely calls (using <link linkend="command-wbinclude">WbInclude</link>)
 						the generated scripts for each table.
+            You can enable writing a single file that includes all statements for all tables by using the parameter
+            <literal>-singleFile=true</literal>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-singleFile</entry>
+					<entry>
+            If this parameter's value is <literal>true</literal>, then only one single file
+            containing all statements will be written.
 					</entry>
 				</row>
 

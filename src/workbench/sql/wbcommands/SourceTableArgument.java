@@ -30,6 +30,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class SourceTableArgument
 {
+	private List<String> missingTables = new ArrayList<String>();
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent;
 
@@ -70,6 +71,7 @@ public class SourceTableArgument
 	private void initTableList(String includeTables, String excludeTables, String schema, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
+		missingTables.clear();
 		tables.addAll(parseArgument(includeTables, schema, true, types, dbConn));
 
 		if (StringUtil.isNonBlank(excludeTables))
@@ -128,6 +130,7 @@ public class SourceTableArgument
 				}
 				else
 				{
+					missingTables.add(t);
 					LogMgr.logDebug("SourceTableArgument.parseArgument()", "Table " + t + " not found!");
 				}
 			}
@@ -135,6 +138,11 @@ public class SourceTableArgument
 		return result;
 	}
 
+	public List<String> getMissingTables()
+	{
+		return missingTables;
+	}
+	
 	/**
 	 * Returns all DB Object names from the comma separated list.
 	 * This is different to stringToList() as it keeps any quotes that
