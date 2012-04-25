@@ -146,6 +146,7 @@ import workbench.gui.editor.actions.IndentSelection;
 import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
+import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -3223,27 +3224,32 @@ public class SqlPanel
 		}
 	}
 
-	private DwPanel createDwPanel()
+	private DwPanel createDwPanel(boolean enableNavigation)
 		throws SQLException
 	{
 		DwPanel data = new DwPanel(statusBar);
+		data.getTable().setTransposeRowEnabled(true);
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(dbConnection);
 		data.setUpdateHandler(this);
-		MainWindow w = null;
-		try
-		{
-			w = (MainWindow)SwingUtilities.getWindowAncestor(this);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlPanel.createDwPanel()", "Could not find MainWindow!", e);
-			w = null;
-		}
 
-		if (w != null)
+		if (enableNavigation)
 		{
-			data.initTableNavigation(w);
+			MainWindow w = null;
+			try
+			{
+				w = (MainWindow)SwingUtilities.getWindowAncestor(this);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("SqlPanel.createDwPanel()", "Could not find MainWindow!", e);
+				w = null;
+			}
+
+			if (w != null)
+			{
+				data.initTableNavigation(w);
+			}
 		}
 		return data;
 	}
@@ -3286,6 +3292,26 @@ public class SqlPanel
 			this.editor.scrollToCaret();
 		}
 		startExecution(comment + "\n" + sql, 0, -1, false, true);
+	}
+
+	public void showData(DataStore ds)
+		throws SQLException
+	{
+		String gen = ds.getGeneratingSql();
+		DwPanel p = createDwPanel(false);
+		p.showData(ds, gen, 0);
+		final int newIndex = addResultTab(p);
+		if (newIndex > 0)
+		{
+			WbSwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run()
+				{
+					resultTab.setSelectedIndex(newIndex);
+				}
+			});
+		}
 	}
 
 	private int addResultTab(DwPanel data)
@@ -3360,7 +3386,7 @@ public class SqlPanel
 						for (DataStore ds : results)
 						{
 							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
-							DwPanel p = createDwPanel();
+							DwPanel p = createDwPanel(true);
 							p.showData(ds, gen, time);
 							addResultTab(p);
 							newPanels.add(p);
@@ -3396,7 +3422,7 @@ public class SqlPanel
 					{
 						for (ResultSet rs : results)
 						{
-							DwPanel p = createDwPanel();
+							DwPanel p = createDwPanel(true);
 							p.showData(rs, sql, time);
 							addResultTab(p);
 						}

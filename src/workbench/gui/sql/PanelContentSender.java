@@ -17,22 +17,22 @@ import workbench.interfaces.ResultReceiver;
 import workbench.util.WbThread;
 
 /**
- * This class sends a SQL statement to one of the 
+ * This class sends a SQL statement to one of the
  * panels in the MainWindow
- * 
+ *
  * @author Thomas Kellerer
  */
 public class PanelContentSender
 {
 	public static final int NEW_PANEL = -1;
-	
+
 	protected MainWindow target;
-	
+
 	public PanelContentSender(MainWindow window)
 	{
 		this.target = window;
 	}
-	
+
 	public void showResult(final String sql, final String comment, final int panelIndex, final boolean logText)
 	{
 		if (sql == null) return;
@@ -42,24 +42,26 @@ public class PanelContentSender
 		// will not be initialized correctly
 		final SqlPanel panel = selectPanel(panelIndex);
 
-		// When adding a new panel, a new connection 
+		// When adding a new panel, a new connection
 		// might be initiated automatically. As that is done in a separate
 		// thread, the call to showResult() might occur
 		// before the connection is actually established.
 		// So we need to wait until the new panel is connected
-		// that's what waitForConnection() is for. 
+		// that's what waitForConnection() is for.
 		// As this code might be execute on the EDT we have to make sure
 		// we are not blocking the current thread, so a new thread
 		// is created that will wait for the connection to succeed.
 		// then the actual showing of the data can be executed (on the EDT)
 		WbThread t = new WbThread("ShowThread")
 		{
+			@Override
 			public void run()
 			{
 				target.waitForConnection();
-				
+
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						if (panel != null)
@@ -87,16 +89,17 @@ public class PanelContentSender
 		};
 		t.start();
 	}
-	
+
 	public void sendContent(final String text, final int panelIndex, final boolean appendText)
 	{
 		if (text == null) return;
-		
+
 		final SqlPanel panel = selectPanel(panelIndex);
 		if (panel == null) return;
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				if (appendText)
@@ -112,11 +115,11 @@ public class PanelContentSender
 			}
 		});
 	}
-	
+
 	private SqlPanel selectPanel(int index)
 	{
 		SqlPanel panel;
-		
+
 		if (index == NEW_PANEL)
 		{
 			panel = (SqlPanel)this.target.addTab(true, true);

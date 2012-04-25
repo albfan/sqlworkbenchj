@@ -2408,7 +2408,8 @@ public class MainWindow
 		FileDialogUtil dialog = new FileDialogUtil();
 		String filename = dialog.getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
-		if (this.loadWorkspace(filename, true) && Settings.getInstance().getBoolProperty("workbench.gui.workspace.load.askassign", true))
+		boolean loaded = this.loadWorkspace(filename, true);
+		if (loaded && Settings.getInstance().getBoolProperty("workbench.gui.workspace.load.askassign", true))
 		{
 			checkMakeProfileWorkspace();
 		}

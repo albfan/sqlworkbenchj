@@ -99,6 +99,7 @@ import workbench.gui.actions.ScrollToColumnAction;
 import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
+import workbench.gui.actions.TransposeRowAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.FontZoomProvider;
@@ -173,6 +174,7 @@ public class WbTable
 	private ResetHighlightAction resetHighlightAction;
 
 	private ColumnExpression highlightExpression;
+	private TransposeRowAction transposeRow;
 
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
@@ -367,6 +369,24 @@ public class WbTable
 		if (uiAction != null)
 		{
 			im.put(copyShortcut, uiAction);
+		}
+	}
+
+	public void setTransposeRowEnabled(boolean flag)
+	{
+		if (flag && this.transposeRow == null)
+		{
+			transposeRow = new TransposeRowAction(this);
+			addPopupActionAfter(transposeRow, resetHighlightAction);
+		}
+		if (!flag && transposeRow != null)
+		{
+			final int index = findPopupItem(transposeRow);
+			if (index > -1)
+			{
+				popup.remove(index);
+			}
+			transposeRow = null;
 		}
 	}
 

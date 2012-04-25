@@ -41,16 +41,19 @@ public class CopySelectedAsTextAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public boolean hasCtrlModifier()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean hasShiftModifier()
 	{
 		return true;
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
