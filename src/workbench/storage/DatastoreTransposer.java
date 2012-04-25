@@ -5,6 +5,8 @@
 package workbench.storage;
 
 import java.sql.Types;
+import java.util.List;
+import workbench.util.SqlUtil;
 
 /**
  * A class to turn the columns of a datastore into rows.
@@ -13,12 +15,32 @@ import java.sql.Types;
  */
 public class DatastoreTransposer
 {
-
 	private DataStore source;
+	private String resultName;
 
 	public DatastoreTransposer(DataStore sourceData)
 	{
 		this.source = sourceData;
+		retrieveResultName();
+	}
+
+	private void retrieveResultName()
+	{
+		if (source == null)
+		{
+			resultName = "";
+			return;
+		}
+		resultName = source.getResultName();
+		if (resultName == null)
+		{
+			String sql = source.getGeneratingSql();
+			List<String> tables = SqlUtil.getTables(sql, false);
+			if (tables.size() == 1)
+			{
+				resultName = tables.get(0);
+			}
+		}
 	}
 
 	public DataStore transposeRow(int row)
@@ -32,14 +54,11 @@ public class DatastoreTransposer
 			ds.setValue(newRow, 0, source.getColumnDisplayName(col));
 			ds.setValue(newRow, 1, source.getValueAsString(row, col));
 		}
-		String name = source.getResultName();
-		if (name == null)
+
+		String name = "Row " + Integer.toString(row + 1);
+		if (resultName != null)
 		{
-			name = "Row " + Integer.toString(row + 1);
-		}
-		else
-		{
-			name = name + " (Row " + Integer.toString(row + 1) + ")";
+			name = resultName + " (" + name + ")";
 		}
 		ds.setResultName(name);
 		ds.resetStatus();
