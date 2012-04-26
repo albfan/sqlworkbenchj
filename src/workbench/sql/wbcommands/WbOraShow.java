@@ -17,7 +17,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import workbench.db.ErrorInformationReader;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
@@ -86,7 +88,11 @@ public class WbOraShow
 			{
 				parm = name.getContents();
 			}
-			return getParameterValues(sql, parm);
+			return getParameterValues(parm);
+		}
+		else if (verb.equals("sga"))
+		{
+			return getSGAInfo();
 		}
 		else if (verb.equals("user"))
 		{
@@ -207,7 +213,7 @@ public class WbOraShow
 		return result;
 	}
 
-	private StatementRunnerResult getParameterValues(String sql, String parameter)
+	private StatementRunnerResult getParameterValues(String parameter)
 	{
 		String query =
 			"select name,  \n" +
@@ -294,6 +300,51 @@ public class WbOraShow
 		{
 		}
 		return null;
+	}
+
+	protected StatementRunnerResult getSGAInfo()
+	{
+		StatementRunnerResult result = new StatementRunnerResult();
+
+		boolean sqlPlusMode = Settings.getInstance().getBoolProperty("workbench.db.oracle.sgainfo.sqlplusmode", false);
+		String sqlPlusStatement =
+				"select 'Total System Global Area' as \"Memory\", \n" +
+				"       sum(VALUE) as \"Value\", \n" +
+				"       'bytes' as unit \n" +
+				"from V$SGA \n" +
+				"union all \n" +
+				"select NAME, \n" +
+				"       VALUE, \n" +
+				"       'bytes' \n" +
+				"from V$SGA";
+		String infoStatement = "select * from v$sgainfo";
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try
+		{
+			stmt = this.currentConnection.createStatementForQuery();
+			rs = stmt.executeQuery(sqlPlusMode ? sqlPlusStatement : infoStatement);
+			DataStore ds = new DataStore(rs, true);
+			ds.setGeneratingSql("show sga");
+			ds.setResultName("SGA Size");
+			ds.resetStatus();
+			result.addDataStore(ds);
+			result.setSuccess();
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info", ex);
+			result.setFailure();
+			result.addMessage(ex.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+			SqlUtil.closeStatement(stmt);
+		}
+		return result;
 	}
 
 	private long roundToKb(long input)
