@@ -2062,7 +2062,14 @@ public class JEditTextArea
 					start = tmp;
 				}
 
-				for (int i = selectionStartLine; i <= selectionEndLine; i++)
+				// document.remove might change these lines (due to events)
+				int startLine = selectionStartLine;
+				int endLine = selectionEndLine;
+
+				String[] selectedLines = selectedText.split("\n");
+				int lineNum = 0;
+
+				for (int i = startLine; i <= endLine; i++)
 				{
 					Element lineElement = map.getElement(i);
 					int lineStart = lineElement.getStartOffset();
@@ -2071,10 +2078,14 @@ public class JEditTextArea
 
 					document.remove(rectStart, Math.min(lineEnd - rectStart, end - start));
 
-					if (StringUtil.isNonEmpty(selectedText))
+					if (lineNum < selectedLines.length)
 					{
-						document.insertString(rectStart, selectedText, null);
+						if (StringUtil.isNonEmpty(selectedText))
+						{
+							document.insertString(rectStart, selectedLines[lineNum], null);
+						}
 					}
+					lineNum ++;
 				}
 			}
 			else

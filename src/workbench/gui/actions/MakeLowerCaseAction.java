@@ -42,11 +42,13 @@ public class MakeLowerCaseAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.toLowerCase();
 	}
 
+	@Override
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		this.setEnabled(newEnd > newStart);

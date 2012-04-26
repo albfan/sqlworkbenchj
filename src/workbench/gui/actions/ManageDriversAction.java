@@ -26,9 +26,10 @@ public class ManageDriversAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().showDialog("workbench.gui.profiles.DriverEditorDialog");
 	}
-	
+
 }

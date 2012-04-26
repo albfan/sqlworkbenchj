@@ -23,7 +23,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Make current selection upper case
- * 
+ *
  * @see workbench.gui.sql.EditorPanel#toUpperCase()
  * @author  Thomas Kellerer
  */
@@ -43,11 +43,13 @@ public class MakeUpperCaseAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.toUpperCase();
 	}
 
+	@Override
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		this.setEnabled(newEnd > newStart);
