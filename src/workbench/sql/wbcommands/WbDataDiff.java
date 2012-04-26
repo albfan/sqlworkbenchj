@@ -264,6 +264,14 @@ public class WbDataDiff
 			result.addMessageNewLine();
 		}
 
+		if (tableCount == 0)
+		{
+			LogMgr.logWarning("WbDataDiff.execute()", "No tables found.");
+			result.setWarning(true);
+			result.setSuccess();
+			return result;
+		}
+
 		dataDiff = new TableDataDiff(sourceCon, targetCon);
 		dataDiff.setSqlDateLiteralType(literalType);
 
