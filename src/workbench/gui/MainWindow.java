@@ -154,7 +154,7 @@ public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
 						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener,
-						Moveable, RenameableTab, TabCloser
+						Moveable, RenameableTab, TabCloser, FilenameChangeListener
 {
 	private static final String DEFAULT_WORKSPACE = "Default.wksp";
 	private static int instanceCount;
@@ -293,6 +293,12 @@ public class MainWindow
 				}
 			});
 		}
+	}
+
+	@Override
+	public void fileNameChanged(Object sender, String newFilename)
+	{
+		updateWindowTitle();
 	}
 
 	/**
@@ -2670,6 +2676,7 @@ public class MainWindow
 
 			sql.setConnectionClient(this);
 			sql.addDbExecutionListener(this);
+			sql.addFilenameChangeListener(this);
 			this.sqlTab.add(sql, index);
 			sql.setTabTitle(sqlTab, index);
 

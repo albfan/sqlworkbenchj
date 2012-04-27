@@ -214,7 +214,7 @@ public class SqlPanel
 	private List actions = new LinkedList();
 	private List<WbAction> toolbarActions = new LinkedList<WbAction>();
 
-	private List<FilenameChangeListener> filenameChangeListeners;
+	private List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
@@ -585,33 +585,28 @@ public class SqlPanel
 				// reset a user-defined tab name if a file is loaded
 				this.tabName = null;
 			}
-			updateTabTitle();
+			fireFilenameChanged(newFilename);
 		}
 	}
 
 	private void fireFilenameChanged(String aNewName)
 	{
 		updateTabTitle();
-		if (this.filenameChangeListeners == null) return;
-		Iterator<FilenameChangeListener> itr = filenameChangeListeners.iterator();
-		while (itr.hasNext())
+		for (FilenameChangeListener listener : filenameChangeListeners)
 		{
-			FilenameChangeListener l = itr.next();
-			l.fileNameChanged(this, aNewName);
+			listener.fileNameChanged(this, aNewName);
 		}
 	}
 
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 		this.filenameChangeListeners.add(aListener);
 	}
 
 	public void removeFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) return;
 		this.filenameChangeListeners.remove(aListener);
 	}
 
@@ -1410,9 +1405,13 @@ public class SqlPanel
 	public void setTabName(String aName)
 	{
 		if (StringUtil.isBlank(aName))
+		{
 			this.tabName = null;
+		}
 		else
+		{
 			this.tabName = aName;
+		}
 		this.fireFilenameChanged(aName);
 	}
 

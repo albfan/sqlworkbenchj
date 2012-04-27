@@ -107,7 +107,7 @@ public class EditorPanel
 	private CommentAction commentAction;
 	private UnCommentAction unCommentAction;
 
-	private List<FilenameChangeListener> filenameChangeListeners;
+	private List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 	private File currentFile;
 	private String fileEncoding;
 	private Set<String> dbFunctions;
@@ -410,26 +410,21 @@ public class EditorPanel
 	public void fireFilenameChanged(String aNewName)
 	{
 		this.checkFileActions();
-		if (this.filenameChangeListeners == null) return;
-		Iterator<FilenameChangeListener> itr = filenameChangeListeners.iterator();
-		while (itr.hasNext())
+		for (FilenameChangeListener listener : filenameChangeListeners)
 		{
-			FilenameChangeListener l = itr.next();
-			l.fileNameChanged(this, aNewName);
+			listener.fileNameChanged(this, aNewName);
 		}
 	}
 
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 		this.filenameChangeListeners.add(aListener);
 	}
 
 	public void removeFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
-		if (this.filenameChangeListeners == null) return;
 		this.filenameChangeListeners.remove(aListener);
 	}
 
