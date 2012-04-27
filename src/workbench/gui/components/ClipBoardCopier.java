@@ -378,7 +378,7 @@ public class ClipBoardCopier
 		TableColumnModel model = client.getColumnModel();
 		for (int i=0; i < cols.length; i++)
 		{
-			int realIndex = model.getColumn(i).getModelIndex();
+			int realIndex = model.getColumn(cols[i]).getModelIndex();
 			result.add(ds.getResultInfo().getColumn(realIndex));
 		}
 		return result;
