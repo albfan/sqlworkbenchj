@@ -41,14 +41,21 @@ public class EditorTabSelectMenu
 	private String newTabTooltip;
 	public static final String PANEL_CMD_PREFIX = "panel_";
 	private DependencyNode node;
-	
+	private boolean withClipboard;
+
 	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
+	{
+		this(l,label, tooltipKeyNewTab, tooltipKeyTab, parent, false);
+	}
+
+	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent, boolean includeClipboard)
 	{
 		super(label);
 		parentWindow = parent;
 		target = l;
 		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab, true);
 		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab, true);
+		this.withClipboard = includeClipboard;
 		if (parentWindow != null)
 		{
 			updateMenu();
@@ -56,24 +63,24 @@ public class EditorTabSelectMenu
 			parentWindow.addTabChangeListener(this);
 		}
 	}
-	
+
 	public void setDependencyNode(DependencyNode dep)
 	{
 		this.node = dep;
 	}
-	
+
 	public DependencyNode getDependencyNode()
 	{
 		return node;
 	}
-	
-	protected synchronized void updateMenu()
+
+	protected final synchronized void updateMenu()
 	{
 		if (parentWindow == null) return;
-		
+
 		List<String> panels = this.parentWindow.getPanelLabels();
 		if (CollectionUtil.isEmpty(panels)) return;
-		
+
 		int count = this.getItemCount();
 		// Make sure none of the items has an ActionListener attached
 		for (int i=0; i < count; i++)
@@ -84,7 +91,7 @@ public class EditorTabSelectMenu
 				item.removeActionListener(target);
 			}
 		}
-		
+
 		this.removeAll();
 
 		int current = this.parentWindow.getCurrentPanelIndex();
@@ -94,7 +101,15 @@ public class EditorTabSelectMenu
 		show.setToolTipText(newTabTooltip);
 		show.addActionListener(target);
 		this.add(show);
-		
+
+		if (withClipboard)
+		{
+			JMenuItem clipboard = new WbMenuItem(ResourceMgr.getString("TxtClipboard"));
+			clipboard.setActionCommand("clipboard");
+			clipboard.addActionListener(target);
+			this.add(clipboard);
+		}
+
 		Font boldFont = show.getFont();
 		if (boldFont != null) boldFont = boldFont.deriveFont(Font.BOLD);
 
@@ -120,19 +135,20 @@ public class EditorTabSelectMenu
 			{
 				item.setFont(boldFont);
 			}
-			
+
 			// The tooltip is the same for all items
 			item.setToolTipText(regularTooltip);
 			item.addActionListener(target);
 			this.add(item);
 		}
 	}
-	
+
 	/**
 	 * This is a callback from the MainWindow if a tab has been
 	 * renamed. As we are showing the tab names in the "Show table data"
 	 * popup menu, we need to update the popup menu
 	 */
+	@Override
 	public void fileNameChanged(Object sender, String newFilename)
 	{
 		try
@@ -145,6 +161,7 @@ public class EditorTabSelectMenu
 		}
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		// Updating the menu needs to be done "later" because
@@ -154,6 +171,7 @@ public class EditorTabSelectMenu
 		// panel is removed from the control.
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				updateMenu();

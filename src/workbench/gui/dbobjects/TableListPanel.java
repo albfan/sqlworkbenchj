@@ -22,6 +22,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -448,7 +450,7 @@ public class TableListPanel
 	{
 		if (this.parentWindow != null)
 		{
-			this.showDataMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", parentWindow);
+			this.showDataMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", parentWindow, true);
 			this.showDataMenu.setEnabled(false);
 			this.tableList.addPopupMenu(this.showDataMenu, false);
 		}
@@ -1779,13 +1781,13 @@ public class TableListPanel
 	private void showTableData(final int panelIndex, final boolean appendText)
 	{
 		PanelContentSender sender = new PanelContentSender(this.parentWindow);
-		String sql = buildSqlForTable();
+		String sql = buildSqlForTable(true);
 		if (sql == null) return;
 
 		sender.sendContent(sql, panelIndex, appendText);
 	}
 
-	private String buildSqlForTable()
+	private String buildSqlForTable(boolean withComment)
 	{
 		if (this.selectedTable == null) return null;
 
@@ -1812,9 +1814,12 @@ public class TableListPanel
 			return null;
 		}
 		StringBuilder select = new StringBuilder(sql.length() + 40);
-		select.append("-- @WbResult ");
-		select.append(selectedTable.getTableName());
-		select.append('\n');
+		if (withComment)
+		{
+			select.append("-- @WbResult ");
+			select.append(selectedTable.getTableName());
+			select.append('\n');
+		}
 		select.append(sql);
 		select.append(';');
 		return select.toString();
@@ -1847,6 +1852,14 @@ public class TableListPanel
 		{
 			String command = e.getActionCommand();
 
+			if ("clipboard".equals(command))
+			{
+				String sql = buildSqlForTable(false);
+				if (sql == null) return;
+				StringSelection sel = new StringSelection(sql);
+				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clp.setContents(sel, sel);
+			}
 			if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
 			{
 				try

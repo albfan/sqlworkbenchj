@@ -15,6 +15,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.DatabaseMetaData;
@@ -225,7 +228,7 @@ public class ProcedureListPanel
 	{
 		if (this.parentWindow != null)
 		{
-			this.generateWbCall = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowProcData"), "LblWbCallInNewTab", "LblWbCallInTab", parentWindow);
+			this.generateWbCall = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowProcData"), "LblWbCallInNewTab", "LblWbCallInTab", parentWindow, true);
 			this.generateWbCall.setEnabled(false);
 			this.procList.addPopupMenu(this.generateWbCall, true);
 		}
@@ -679,6 +682,16 @@ public class ProcedureListPanel
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();
+		if ("clipboard".equals(command))
+		{
+			String sql = buildProcedureCallForTable();
+			if (sql != null)
+			{
+				StringSelection sel = new StringSelection(sql);
+				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clp.setContents(sel, sel);
+			}
+		}
 		if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
 		{
 			try

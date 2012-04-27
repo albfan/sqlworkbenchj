@@ -254,7 +254,7 @@ public class StatementFactory
 				if (!columns.contains(colId)) continue;
 			}
 
-			if (skipIdentityCols && colId.isIdentityColumn()) continue;
+			if (skipIdentityCols && (colId.isIdentityColumn() || colId.isAutoincrement())) continue;
 
 			Object value = aRow.getValue(col);
 			boolean isNull = isNull(value);
