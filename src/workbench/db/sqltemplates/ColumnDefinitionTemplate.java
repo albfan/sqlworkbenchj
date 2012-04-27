@@ -159,6 +159,8 @@ public class ColumnDefinitionTemplate
 	{
 		String value = column.getDefaultValue();
 
+		if (value == null) return null;
+
 		// If the ColumnDefinition was retrieved from a different DBMS (e.g. SQL Server) it might be that
 		// the default value is defined as ((42)).
 		// MySQL's SQL parser is not smart enough to accept that as a valid default expression, so we need to fix it here.
@@ -169,9 +171,7 @@ public class ColumnDefinitionTemplate
 		}
 
 		if (!fixDefaultExpression) return value;
-
-		if (value == null) return null;
-
+		
 		if (SqlUtil.isCharacterType(column.getDataType()))
 		{
 			value = value.trim();

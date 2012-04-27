@@ -52,8 +52,10 @@ public class MySQLTableSourceBuilderTest
 		String sql =
 			"drop table tbl_isam;\n" +
 			"drop table tbl_inno;\n" +
+			"drop table foo;\n" +
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
+
 		MySQLTestUtil.cleanUpTestCase();
 	}
 
@@ -86,5 +88,27 @@ public class MySQLTableSourceBuilderTest
 		assertEquals("ENGINE=InnoDB", lines.get(0));
 		assertEquals("COMMENT='innodb table'", lines.get(1));
 	}
-	
+
+	@Test
+	public void testDefaultValue()
+		throws SQLException
+	{
+		WbConnection con = MySQLTestUtil.getMySQLConnection();
+		if (con == null) return;
+
+		String sql =
+			"create table foo (id integer primary key, foo varchar(10) default 'bar');\n" +
+			"commit;\n";
+		TestUtil.executeScript(con, sql);
+
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
+
+		String create = tbl.getSource(con).toString();
+		System.out.println(create);
+		String[] lines = create.trim().split("\n");
+		assertEquals(9, lines.length);
+		assertEquals("CREATE TABLE foo", lines[0]);
+		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar'", lines[3]);
+	}
+
 }

@@ -9,6 +9,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="4" type="fix">Displaying the table source SQL for MySQL was broken</entry>
     <entry dev-build="4" type="fix">Using "Make lowercase" or "Make uppercase" in the editor would lock up the application if a rectangular area was selected</entry>
     <entry dev-build="4" type="fix">WbDataDiff now shows a proper warning if a table that should be compared could not be found</entry>
     <entry dev-build="4" type="fix">Using capturing groups in the replacement text when doing search & replace in the editor did not work</entry>
