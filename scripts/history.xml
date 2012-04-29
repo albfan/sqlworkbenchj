@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-04-22">
+  <release build="-1" date="2012-04-29">
     <entry dev-build="4" type="enh">In the DbExplorer "Put SELECT into" can now also put the statement into the clipboard.</entry>
     <entry dev-build="4" type="enh">A new option for WbDataDiff to write a single SQL script is available (-singleFile=true/false)</entry>
     <entry dev-build="3" type="enh">Oracle nested tables are now displayed correctly in a result set</entry>
@@ -16,7 +16,7 @@
     <entry dev-build="4" type="fix">Displaying the table source SQL for MySQL was broken</entry>
     <entry dev-build="4" type="fix">Using "Make lowercase" or "Make uppercase" in the editor would lock up the application if a rectangular area was selected</entry>
     <entry dev-build="4" type="fix">WbDataDiff now shows a proper warning if a table that should be compared could not be found</entry>
-    <entry dev-build="4" type="fix">Using capturing groups in the replacement text when doing search & replace in the editor did not work</entry>
+    <entry dev-build="4" type="fix">Using capturing groups in the replacement text when doing search &amp; replace in the editor did not work</entry>
     <entry dev-build="3" type="fix">WbCopy's option -dropTable=true was no longer working</entry>
     <entry dev-build="3" type="fix">When expanding macros the cursor would not be located at the correct position if the expanded text did not start at the first character of the line</entry>
     <entry dev-build="2" type="fix">If MySQL was not running in ANSI mode, standard double quotes were used for quoting table or column names which needed quoting.</entry>
