@@ -35,6 +35,8 @@ public class EditorTabSelectMenu
 	extends WbMenu
 	implements FilenameChangeListener, ChangeListener
 {
+	public static final String CMD_CLIPBOARD = "clipboard";
+
 	private MainWindow parentWindow;
 	private ActionListener target;
 	private String regularTooltip;
@@ -104,8 +106,9 @@ public class EditorTabSelectMenu
 
 		if (withClipboard)
 		{
-			JMenuItem clipboard = new WbMenuItem(ResourceMgr.getString("TxtClipboard"));
-			clipboard.setActionCommand("clipboard");
+			JMenuItem clipboard = new WbMenuItem(ResourceMgr.getString("MnuTxtStmtClip"));
+			clipboard.setToolTipText(ResourceMgr.getDescription("MnuTxtStmtClip", true));
+			clipboard.setActionCommand(CMD_CLIPBOARD);
 			clipboard.addActionListener(target);
 			this.add(clipboard);
 		}

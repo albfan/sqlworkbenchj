@@ -66,7 +66,7 @@ public class CreateSnippetAction extends WbAction
 		clp.setContents(sel, sel);
 	}
 
-	public String makeJavaString(String text, boolean removeSemicolon)
+	public static String makeJavaString(String text, boolean removeSemicolon)
 	{
 		if (text == null) return "";
 

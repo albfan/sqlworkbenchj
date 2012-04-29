@@ -69,6 +69,7 @@ import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
+import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
@@ -1852,10 +1853,16 @@ public class TableListPanel
 		{
 			String command = e.getActionCommand();
 
-			if ("clipboard".equals(command))
+			if (EditorTabSelectMenu.CMD_CLIPBOARD.equals(command))
 			{
+				boolean ctrlPressed = WbAction.isCtrlPressed(e);
 				String sql = buildSqlForTable(false);
 				if (sql == null) return;
+				
+				if (ctrlPressed)
+				{
+					sql = CreateSnippetAction.makeJavaString(sql, true);
+				}
 				StringSelection sel = new StringSelection(sql);
 				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clp.setContents(sel, sel);

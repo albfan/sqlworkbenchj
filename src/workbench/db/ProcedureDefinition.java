@@ -477,7 +477,7 @@ public class ProcedureDefinition
 
 		StringBuilder call = new StringBuilder(150);
 		call.append(oracleType != null ? catalog + "." + procName : procName);
-		call.append("( ");
+		call.append("(");
 
 		int rows = params.getRowCount();
 		int numParams = 0;
@@ -509,7 +509,7 @@ public class ProcedureDefinition
 				numParams ++;
 			}
 		}
-		call.append(" )");
+		call.append(")");
 
 		String sql = template.replace("%function%", call.toString());
 		return sql;

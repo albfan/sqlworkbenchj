@@ -46,6 +46,7 @@ import workbench.db.oracle.OraclePackageParser;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ScriptDbObjectAction;
@@ -682,11 +683,16 @@ public class ProcedureListPanel
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();
-		if ("clipboard".equals(command))
+		if (EditorTabSelectMenu.CMD_CLIPBOARD.equals(command))
 		{
+			boolean ctrlPressed = WbAction.isCtrlPressed(e);
 			String sql = buildProcedureCallForTable();
 			if (sql != null)
 			{
+				if (ctrlPressed)
+				{
+					sql = CreateSnippetAction.makeJavaString(sql, true);
+				}
 				StringSelection sel = new StringSelection(sql);
 				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clp.setContents(sel, sel);
