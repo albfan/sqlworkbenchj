@@ -1412,6 +1412,7 @@ public class SqlFormatter
 		SQLToken lastToken = previousToken;
 		int bracketCount = 0;
 
+		boolean noBreakOnCondition = false;
 		while (t != null)
 		{
 			String verb = t.getContents();
@@ -1424,6 +1425,11 @@ public class SqlFormatter
 			if (verb.equals(";"))
 			{
 				return t;
+			}
+
+			if (verb.equals("BETWEEN"))
+			{
+				noBreakOnCondition = true;
 			}
 
 			if (verb.equals(")"))
@@ -1461,14 +1467,25 @@ public class SqlFormatter
 			}
 			else if (bracketCount == 0 && (verb.equalsIgnoreCase("AND") || verb.equalsIgnoreCase("OR")) )
 			{
-				// TODO: this attempt to keep conditions in bracktes together, results
-				// in effectively no formatting when the whole WHERE clause is put
-				// between brackets (because bracketCount will never be zero until
-				// the end of the WHERE clause)
-				if (!this.isStartOfLine()) this.appendNewline();
+				if (noBreakOnCondition)
+				{
+					this.appendText(' ');
+				}
+				else
+				{
+					// TODO: this attempt to keep conditions in bracktes together, results
+					// in effectively no formatting when the whole WHERE clause is put
+					// between brackets (because bracketCount will never be zero until
+					// the end of the WHERE clause)
+					if (!this.isStartOfLine()) this.appendNewline();
+				}
 				this.appendText(verb);
-				this.appendText("  ");
-				if (verb.equals("OR")) this.appendText(' ');
+				if (!noBreakOnCondition)
+				{
+					this.appendText("  ");
+					if (verb.equals("OR")) this.appendText(' ');
+				}
+				noBreakOnCondition = false;
 			}
 			else if (verb.equals(","))
 			{

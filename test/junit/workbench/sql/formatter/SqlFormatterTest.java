@@ -671,6 +671,23 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testBetween()
+		throws Exception
+	{
+		String sql = "SELECT * FROM mytable WHERE id between 1 and 5 and some_date between current_date -2 and current_date and x > 5 ";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM mytable\n" +
+			"WHERE id BETWEEN 1 AND 5\n" +
+			"AND   some_date BETWEEN CURRENT_DATE -2 AND CURRENT_DATE\n" +
+			"AND   x > 5";
+//		System.out.println("*******\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testCTE()
 		throws Exception
 	{
@@ -773,8 +790,7 @@ public class SqlFormatterTest
 							"SELECT id,\n" +
 							"       name\n" +
 							"FROM foo\n" +
-							"WHERE id BETWEEN 1\n" +
-							"AND   10000 WITH CHECK OPTION";
+							"WHERE id BETWEEN 1 AND 10000 WITH CHECK OPTION";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
