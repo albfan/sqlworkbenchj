@@ -40,6 +40,7 @@ import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
+import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
@@ -235,6 +236,10 @@ public class DbMetadata
 				// to be different, therefor the product name is "patched" to include the version number
 				productName += " 2.0";
 				columnEnhancer = new HsqlColumnEnhancer();
+			}
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.2"))
+			{
+				extenders.add(new HsqlTypeReader());
 			}
 		}
 		else if (productLower.indexOf("firebird") > -1)

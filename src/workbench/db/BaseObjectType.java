@@ -18,7 +18,7 @@ import workbench.util.SqlUtil;
 
 /**
  * A generic TYPE object
- * (used for Postgres, Oracle and DB2)
+ * (used for Postgres, Oracle, DB2 and HSQLDB)
  *
  * @author Thomas Kellerer
  */
@@ -37,6 +37,11 @@ public class BaseObjectType
 	{
 		this.schema = schema;
 		this.typeName = typeName;
+	}
+
+	public void setCatalog(String catalogName)
+	{
+		this.catalog = catalogName;
 	}
 
 	@Override

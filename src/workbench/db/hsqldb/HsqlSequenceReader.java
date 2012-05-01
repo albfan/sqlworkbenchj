@@ -45,15 +45,17 @@ public class HsqlSequenceReader
 	public HsqlSequenceReader(WbConnection conn)
 	{
 		this.dbConn = conn;
-		String query = "SELECT sequence_schema, " +
-						"sequence_name, " +
-						"dtd_identifier as data_type, " +
-						"maximum_value, " +
-						"minimum_value, " +
-						"increment, " +
-						"cycle_option, " +
-						"start_with " +
-						"FROM ";
+		String query =
+			"SELECT sequence_catalog, \n" +
+			"       sequence_schema, \n" +
+			"       sequence_name, \n" +
+			"       dtd_identifier as data_type, \n" +
+			"       maximum_value, \n" +
+			"       minimum_value, \n" +
+			"       increment, \n" +
+			"       cycle_option,  \n" +
+			"       start_with \n" +
+			"FROM ";
 
 		if (JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
 		{
@@ -151,9 +153,11 @@ public class HsqlSequenceReader
 
     if (ds == null || ds.getRowCount() == 0) return null;
 
+		String catalog = ds.getValueAsString(row, "SEQUENCE_CATALOG");
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
+		result.setCatalog(catalog);
 
 		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
 		result.setSequenceProperty("MAXIMUM_VALUE", ds.getValue(row, "MAXIMUM_VALUE"));
