@@ -183,7 +183,7 @@ public class ConnectionInfoPanel
 	private class InfoEditorPane
 		extends JEditorPane
 	{
-		public InfoEditorPane()
+		InfoEditorPane()
 		{
 			super();
 		}

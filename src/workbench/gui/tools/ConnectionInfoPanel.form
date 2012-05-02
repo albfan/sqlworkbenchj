@@ -58,7 +58,7 @@
                         <EmptyBorder bottom="2" left="2" right="2" top="2"/>
                       </Border>
                     </Property>
-                    <Property name="contentType" type="java.lang.String" value="text/html"/>
+                    <Property name="contentType" type="java.lang.String" value="text/html" noResource="true"/>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="11" style="0"/>

@@ -13,10 +13,15 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -28,16 +33,23 @@ import workbench.resource.ResourceMgr;
  * @author  Thomas Kellerer
  */
 public class ConnectionInfo
-	extends WbLabelField
+	extends JPanel
 	implements PropertyChangeListener, ActionListener
 {
 	private WbConnection sourceConnection;
 	private Color defaultBackground;
 	private WbAction showInfoAction;
+	private WbLabelField infoText;
+	private JLabel iconLabel;
 
 	public ConnectionInfo(Color aBackground)
 	{
-		super();
+		super(new GridBagLayout());
+		infoText = new WbLabelField();
+		infoText.setOpaque(false);
+
+		setOpaque(true);
+
 		if (aBackground != null)
 		{
 			setBackground(aBackground);
@@ -45,14 +57,20 @@ public class ConnectionInfo
 		}
 		else
 		{
-			defaultBackground = getBackground();
+			defaultBackground = infoText.getBackground();
 		}
 		showInfoAction = new WbAction(this, "show-info");
 		showInfoAction.setMenuTextByKey("MnuTxtConnInfo");
 		showInfoAction.setEnabled(false);
-		addPopupAction(showInfoAction);
-		setText(ResourceMgr.getString("TxtNotConnected"));
-
+		infoText.addPopupAction(showInfoAction);
+		infoText.setText(ResourceMgr.getString("TxtNotConnected"));
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		add(infoText, c);
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -93,7 +111,7 @@ public class ConnectionInfo
 	{
 		if (this.sourceConnection != null)
 		{
-			this.setText(this.sourceConnection.getDisplayString());
+			infoText.setText(this.sourceConnection.getDisplayString());
 			StringBuilder tip = new StringBuilder(30);
 			tip.append("<html>");
 			tip.append(this.sourceConnection.getDatabaseProductName());
@@ -106,10 +124,11 @@ public class ConnectionInfo
 		}
 		else
 		{
-			setText(ResourceMgr.getString("TxtNotConnected"));
+			infoText.setText(ResourceMgr.getString("TxtNotConnected"));
 			setToolTipText(null);
 		}
-		setCaretPosition(0);
+		infoText.setCaretPosition(0);
+		showMode();
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -120,6 +139,7 @@ public class ConnectionInfo
 				{
 					// this seems to be the only way to resize the component
 					// approriately after setting a new text when using the dreaded GTK+ look and feel
+					doLayout();
 					getParent().doLayout();
 				}
 			}
@@ -129,9 +149,9 @@ public class ConnectionInfo
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getSource() == this.sourceConnection
-			  && (WbConnection.PROP_CATALOG.equals(evt.getPropertyName()) ||
-			      WbConnection.PROP_SCHEMA.equals(evt.getPropertyName())))
+		if (evt.getSource() == this.sourceConnection)
+//			  && (WbConnection.PROP_CATALOG.equals(evt.getPropertyName()) ||
+//			      WbConnection.PROP_SCHEMA.equals(evt.getPropertyName())))
 		{
 			this.updateDisplay();
 		}
@@ -144,6 +164,62 @@ public class ConnectionInfo
 		if (!WbSwingUtilities.checkConnection(this, sourceConnection)) return;
 
 		ConnectionInfoPanel.showConnectionInfo(sourceConnection);
+	}
+
+	private void showMode()
+	{
+		if (sourceConnection == null)
+		{
+			hideIcon();
+		}
+		else
+		{
+			ConnectionProfile profile = sourceConnection.getProfile();
+			boolean readOnly = profile.isReadOnly();
+			boolean sessionReadonly = profile.readOnlySession();
+			if (readOnly && !sessionReadonly)
+			{
+				// the profile is set to read only, but it was changed temporarily
+				showIcon("unlocked");
+			}
+			else if (readOnly || sessionReadonly)
+			{
+				showIcon("lock");
+			}
+			else
+			{
+				hideIcon();
+			}
+		}
+	}
+
+	private void hideIcon()
+	{
+		if (iconLabel != null)
+		{
+			this.remove(iconLabel);
+			iconLabel = null;
+			invalidate();
+		}
+	}
+
+	private void showIcon(String name)
+	{
+		if (iconLabel == null)
+		{
+			this.iconLabel = new JLabel();
+			iconLabel.setOpaque(false);
+		}
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 0;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		ImageIcon png = ResourceMgr.getPng(name);
+		iconLabel.setIcon(png);
+		add(iconLabel, c);
+		invalidate();
 	}
 
 }

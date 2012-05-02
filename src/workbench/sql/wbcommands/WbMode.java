@@ -21,7 +21,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
 
 /**
- * A SQL Statement to halt a script and confirm execution by the user
+ * A SQL Statement to change the read only mode of the current profile.
  *
  * @author Thomas Kellerer
  */
@@ -62,6 +62,8 @@ public class WbMode
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
+		boolean changed = true;
+
 		ConnectionProfile profile = (currentConnection != null ? currentConnection.getProfile() : null);
 		if (profile == null)
 		{
@@ -93,6 +95,8 @@ public class WbMode
 			return result;
 		}
 
+		boolean readOnly  = profile.readOnlySession();
+
 		if (command.equalsIgnoreCase("reset"))
 		{
 			profile.resetSessionFlags();
@@ -101,6 +105,7 @@ public class WbMode
 		{
 			// only trigger display of current state
 			result.setSuccess();
+			changed = false;
 		}
 		else if (command.equalsIgnoreCase("normal"))
 		{
@@ -123,6 +128,10 @@ public class WbMode
 		if (result.isSuccess())
 		{
 			result.addMessage(ResourceMgr.getFormattedString("MsgModeSession", profile.readOnlySession(), profile.confirmUpdatesInSession()));
+			if (changed)
+			{
+				currentConnection.readOnlyChanged(readOnly, profile.readOnlySession());
+			}
 		}
 		else
 		{

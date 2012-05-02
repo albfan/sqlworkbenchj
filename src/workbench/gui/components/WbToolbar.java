@@ -37,6 +37,7 @@ public class WbToolbar
 		this.setRollover(true);
 	}
 
+	@Override
 	public JButton add(Action a)
 	{
 		JButton button;
@@ -67,6 +68,7 @@ public class WbToolbar
 		return button;
 	}
 
+	@Override
 	public void addSeparator()
 	{
 		this.addSeparator(-1);

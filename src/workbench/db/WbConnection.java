@@ -1130,6 +1130,11 @@ public class WbConnection
 		this.listeners.remove(l);
 	}
 
+	public void readOnlyChanged(boolean oldValue, boolean newValue)
+	{
+		fireConnectionStateChanged("readonly", Boolean.toString(oldValue), Boolean.toString(newValue));
+	}
+	
 	private void fireConnectionStateChanged(String property, String oldValue, String newValue)
 	{
 		int count = this.listeners.size();
