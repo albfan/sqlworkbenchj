@@ -1148,11 +1148,16 @@ public class Settings
 	public Font getEditorFont(boolean returnDefault)
 	{
 		Font f = this.getFont(PROPERTY_EDITOR_FONT);
+
+		boolean isDefaultFont = false;
+
 		if (f == null && returnDefault)
 		{
 			f = new Font("Monospaced", Font.PLAIN, 12);
+			isDefaultFont = true;
 		}
-		if (getScaleFonts())
+
+		if (getScaleFonts() && isDefaultFont)
 		{
 			FontScaler scaler = new FontScaler();
 			f = scaler.scaleFont(f);
@@ -1183,11 +1188,13 @@ public class Settings
 	public Font getDataFont(boolean returnDefault)
 	{
 		Font f = this.getFont(PROPERTY_DATA_FONT);
-		if (f != null && returnDefault)
+		boolean isDefault = false;
+		if (f == null && returnDefault)
 		{
 			f = UIManager.getFont("Table.font");
+			isDefault = true;
 		}
-		else if (getScaleFonts())
+		if (getScaleFonts() && isDefault)
 		{
 			// when retrieving the default font from UIManager there is no need
 			// to scale it, as this has already been done in LnfHelper during
@@ -1236,7 +1243,7 @@ public class Settings
 		Font result = null;
 
 		String baseKey = "workbench.font." + aFontName;
-		String name = this.props.getProperty(baseKey + TOOLS_NAME, null);
+		String name = this.props.getProperty(baseKey + ".name", null);
 
 		if (name == null) return null;
 

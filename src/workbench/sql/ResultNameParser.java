@@ -33,30 +33,28 @@ public class ResultNameParser
 	public String getResultName(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return null;
-		try
-		{
-			SQLLexer lexer = new SQLLexer(sql);
-			SQLToken token = lexer.getNextToken(true, false);
-			if (token == null || !token.isComment()) return null;
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken token = lexer.getNextToken(true, false);
 
+		while (token != null && token.isComment())
+		{
 			String comment = token.getText();
 			comment = stripCommentChars(comment.trim());
 			int pos = comment.toLowerCase().indexOf(resultKeyword);
-			if (pos == -1) return null;
-
-			pos += resultKeyword.length();
-			if (pos >= comment.length()) return null;
-			if (!Character.isWhitespace(comment.charAt(pos))) return null;
-
-			int nameEnd = StringUtil.findPattern(StringUtil.PATTERN_CRLF, comment, pos + 1);
-			if (nameEnd == -1) nameEnd = comment.length();
-			return comment.substring(pos + 1, nameEnd);
+			if (pos >= 0)
+			{
+				pos += resultKeyword.length();
+				if (pos >= comment.length()) return null;
+				if (Character.isWhitespace(comment.charAt(pos)))
+				{
+					int nameEnd = StringUtil.findPattern(StringUtil.PATTERN_CRLF, comment, pos + 1);
+					if (nameEnd == -1) nameEnd = comment.length();
+					return comment.substring(pos + 1, nameEnd);
+				}
+			}
+			token = lexer.getNextToken(true, false);
 		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("ResultNameParser.getResultName()", "Error when parsing sql", e);
-			return null;
-		}
+		return null;
 	}
 
 	private String stripCommentChars(String sql)

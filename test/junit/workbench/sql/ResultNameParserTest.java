@@ -49,6 +49,10 @@ public class ResultNameParserTest
 		name = p.getResultName(sql);
 		assertNull(name);
 
+		sql = "-- some witty comment\n-- @wbresult foobar\nSELECT * FROM dummy;";
+		name = p.getResultName(sql);
+		assertEquals("foobar", name);
+
 		sql = "/*@wbresult mystuff\tselected\r\nanother line */\nSELECT * FROM dummy;";
 		name = p.getResultName(sql);
 		assertEquals("mystuff\tselected", name);
