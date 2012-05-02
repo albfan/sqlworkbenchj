@@ -150,8 +150,6 @@ public class ConnectionInfo
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.sourceConnection)
-//			  && (WbConnection.PROP_CATALOG.equals(evt.getPropertyName()) ||
-//			      WbConnection.PROP_SCHEMA.equals(evt.getPropertyName())))
 		{
 			this.updateDisplay();
 		}
