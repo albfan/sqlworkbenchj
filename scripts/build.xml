@@ -42,7 +42,7 @@
   </path>
   <taskdef classpathref="cobertura.path" resource="tasks.properties" />
 
-  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.16.jar"/>
 
   <target name="init">
     <tstamp>
