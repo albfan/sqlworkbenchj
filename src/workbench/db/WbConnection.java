@@ -76,6 +76,9 @@ public class WbConnection
 
 	private boolean supportsGetWarnings = true;
 
+	private Boolean sessionReadOnly;
+	private Boolean sessionConfirmUpdates;
+
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -150,6 +153,63 @@ public class WbConnection
 	{
 		this.profile = aProfile;
 		initKeepAlive();
+	}
+
+	public void resetSessionReadOnly()
+	{
+		if (sessionReadOnly != null)
+		{
+			sessionReadOnly = null;
+			fireConnectionStateChanged("readonly", null, null);
+		}
+	}
+	
+	public void resetSessionFlags()
+	{
+		boolean wasSet = sessionReadOnly != null;
+		sessionReadOnly = null;
+		sessionConfirmUpdates = null;
+		if (wasSet)
+		{
+			fireConnectionStateChanged("readonly", null, null);
+		}
+	}
+
+	public void setSessionReadOnly(boolean flag)
+	{
+		boolean oldValue = sessionReadOnly == null ? false : sessionReadOnly.booleanValue();
+		boolean wasSet = sessionReadOnly != null;
+
+		sessionReadOnly = Boolean.valueOf(flag);
+		if (flag)
+		{
+			sessionConfirmUpdates = Boolean.valueOf(!flag);
+		}
+		if (!wasSet || oldValue != flag)
+		{
+			fireConnectionStateChanged("readonly", Boolean.toString(oldValue), Boolean.toString(flag));
+		}
+	}
+
+	public boolean isSessionReadOnly()
+	{
+		if (sessionReadOnly != null) return sessionReadOnly.booleanValue();
+		return getProfile().isReadOnly();
+	}
+
+	public void setSessionConfirmUpdate(boolean flag)
+	{
+		sessionConfirmUpdates = Boolean.valueOf(flag);
+		if (flag)
+		{
+			sessionReadOnly = Boolean.valueOf(!flag);
+		}
+	}
+
+	public boolean confirmUpdatesInSession()
+	{
+		if (sessionConfirmUpdates != null) return sessionConfirmUpdates.booleanValue();
+		return getProfile().getConfirmUpdates();
 	}
 
 	/**
@@ -1130,11 +1190,6 @@ public class WbConnection
 		this.listeners.remove(l);
 	}
 
-	public void readOnlyChanged(boolean oldValue, boolean newValue)
-	{
-		fireConnectionStateChanged("readonly", Boolean.toString(oldValue), Boolean.toString(newValue));
-	}
-	
 	private void fireConnectionStateChanged(String property, String oldValue, String newValue)
 	{
 		int count = this.listeners.size();

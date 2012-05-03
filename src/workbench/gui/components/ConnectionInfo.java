@@ -14,13 +14,17 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -33,7 +37,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ConnectionInfo
 	extends JPanel
-	implements PropertyChangeListener, ActionListener
+	implements PropertyChangeListener, ActionListener, MouseListener
 {
 	private WbConnection sourceConnection;
 	private Color defaultBackground;
@@ -63,7 +67,7 @@ public class ConnectionInfo
 		showInfoAction.setMenuTextByKey("MnuTxtConnInfo");
 		showInfoAction.setEnabled(false);
 		infoText.addPopupAction(showInfoAction);
-		infoText.setText(" " + ResourceMgr.getString("TxtNotConnected"));
+		infoText.setText(ResourceMgr.getString("TxtNotConnected"));
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
@@ -174,6 +178,7 @@ public class ConnectionInfo
 
 	private void showMode()
 	{
+		String tooltip = null;
 		if (sourceConnection == null)
 		{
 			hideIcon();
@@ -182,20 +187,26 @@ public class ConnectionInfo
 		{
 			ConnectionProfile profile = sourceConnection.getProfile();
 			boolean readOnly = profile.isReadOnly();
-			boolean sessionReadonly = profile.readOnlySession();
+			boolean sessionReadonly = sourceConnection.isSessionReadOnly();
 			if (readOnly && !sessionReadonly)
 			{
 				// the profile is set to read only, but it was changed temporarily
 				showIcon("unlocked");
+				tooltip = ResourceMgr.getString("TxtConnReadOnlyOff");
 			}
 			else if (readOnly || sessionReadonly)
 			{
 				showIcon("lock");
+				tooltip = ResourceMgr.getString("TxtConnReadOnly");
 			}
 			else
 			{
 				hideIcon();
 			}
+		}
+		if (this.iconLabel != null)
+		{
+			this.iconLabel.setToolTipText(tooltip);
 		}
 		invalidate();
 	}
@@ -204,7 +215,8 @@ public class ConnectionInfo
 	{
 		if (iconLabel != null)
 		{
-			this.remove(iconLabel);
+			iconLabel.removeMouseListener(this);
+			remove(iconLabel);
 			iconLabel = null;
 		}
 	}
@@ -215,6 +227,7 @@ public class ConnectionInfo
 		{
 			this.iconLabel = new JLabel();
 			iconLabel.setOpaque(false);
+			iconLabel.addMouseListener(this);
 		}
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
@@ -225,6 +238,50 @@ public class ConnectionInfo
 		ImageIcon png = ResourceMgr.getPng(name);
 		iconLabel.setIcon(png);
 		add(iconLabel, c);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1 && sourceConnection != null)
+		{
+			ConnectionProfile profile = sourceConnection.getProfile();
+			boolean profileReadOnly = profile.isReadOnly();
+			boolean sessionReadOnly = sourceConnection.isSessionReadOnly();
+			if (!sessionReadOnly && profileReadOnly)
+			{
+				sourceConnection.resetSessionReadOnly();
+			}
+			if (profileReadOnly && sessionReadOnly)
+			{
+				Window parent = SwingUtilities.getWindowAncestor(this);
+				boolean makeRead = WbSwingUtilities.getYesNo(parent, ResourceMgr.getString("MsgDisableReadOnly"));
+				if (makeRead)
+				{
+					sourceConnection.setSessionReadOnly(false);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e)
+	{
 	}
 
 }

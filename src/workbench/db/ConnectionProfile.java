@@ -59,8 +59,6 @@ public class ConnectionProfile
 
 	private boolean readOnly;
 	private boolean preventNoWhere;
-	private Boolean sessionReadOnly;
-	private Boolean sessionConfirmUpdates;
 	private boolean confirmUpdates;
 
 	private Integer defaultFetchSize;
@@ -271,27 +269,6 @@ public class ConnectionProfile
 	public boolean isReadOnly()
 	{
 		return readOnly;
-	}
-
-	public void resetSessionFlags()
-	{
-		sessionReadOnly = null;
-		sessionConfirmUpdates = null;
-	}
-
-	public void setSessionReadOnly(boolean flag)
-	{
-		sessionReadOnly = Boolean.valueOf(flag);
-		if (flag)
-		{
-			sessionConfirmUpdates = Boolean.valueOf(!flag);
-		}
-	}
-
-	public boolean readOnlySession()
-	{
-		if (sessionReadOnly != null) return sessionReadOnly.booleanValue();
-		return isReadOnly();
 	}
 
 	public void setReadOnly(boolean flag)
@@ -757,7 +734,7 @@ public class ConnectionProfile
 
 	/**
 	 * Returns a copy of this profile.
-	 * 
+	 *
 	 * The copy is marked as "new" and "changed", so isNew() and isChanged()
 	 * will return true on the copy
 	 *
@@ -906,21 +883,6 @@ public class ConnectionProfile
 			this.driverName = name;
 			this.changed = true;
 		}
-	}
-
-	public void setSessionConfirmUpdate(boolean flag)
-	{
-		sessionConfirmUpdates = Boolean.valueOf(flag);
-		if (flag)
-		{
-			sessionReadOnly = Boolean.valueOf(!flag);
-		}
-	}
-
-	public boolean confirmUpdatesInSession()
-	{
-		if (sessionConfirmUpdates != null) return sessionConfirmUpdates.booleanValue();
-		return getConfirmUpdates();
 	}
 
 	public boolean getConfirmUpdates()

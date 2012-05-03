@@ -643,7 +643,7 @@ public class SqlCommand
 		if (prof == null) return false;
 		if (isUpdatingCommand(con, sql))
 		{
-			if (prof.confirmUpdatesInSession())
+			if (con.confirmUpdatesInSession())
 			{
 				return true;
 			}
@@ -716,7 +716,7 @@ public class SqlCommand
 		if (prof == null) return true;
 		if (isUpdatingCommand(con, sql))
 		{
-			if (prof.readOnlySession()) return false;
+			if (con.isSessionReadOnly()) return false;
 		}
 		return true;
 	}
@@ -753,7 +753,7 @@ public class SqlCommand
 	 * If the filename is absolute, a file object with that path is returned.
 	 * If the filename does not contain a full path, the current baseDir of the
 	 * StatementRunner is added to the returned file.
-	 * 
+	 *
 	 * @param fileName
 	 * @return a File object pointing to the file indicated by the user.
 	 * @see workbench.sql.StatementRunner#getBaseDir()

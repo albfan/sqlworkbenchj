@@ -239,7 +239,7 @@ public class DwPanel
 
 		if (dbConnection != null)
 		{
-			setReadOnly(dbConnection.getProfile().readOnlySession());
+			setReadOnly(dbConnection.isSessionReadOnly());
 		}
 	}
 
@@ -512,7 +512,7 @@ public class DwPanel
 	{
 		if (this.dbConnection != null)
 		{
-			aFlag = this.dbConnection.getProfile().readOnlySession();
+			aFlag = this.dbConnection.isSessionReadOnly();
 		}
 
 		this.readOnly = aFlag;

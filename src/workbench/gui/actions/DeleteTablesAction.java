@@ -49,6 +49,7 @@ public class DeleteTablesAction
 		list.addListSelectionListener(this);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
@@ -66,7 +67,7 @@ public class DeleteTablesAction
 	private List<TableIdentifier> getSelectedTables()
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.size() == 0) return null;
+		if (objects == null || objects.isEmpty()) return null;
 
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(objects.size());
 		for (DbObject dbo : objects)
@@ -81,10 +82,11 @@ public class DeleteTablesAction
 		return tables;
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
-		if (conn == null || conn.getProfile().readOnlySession())
+		if (conn == null || conn.isSessionReadOnly())
 		{
 			setEnabled(false);
 		}

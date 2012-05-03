@@ -53,6 +53,7 @@ public class IconListCombobox
 	{
 		return getModel(
 			"cancelling-static",
+			"loading_coffee",
 			"cancelling",
 			"cancelling-spinning",
 			"progress_open",

@@ -95,11 +95,9 @@ public class WbMode
 			return result;
 		}
 
-		boolean readOnly  = profile.readOnlySession();
-
 		if (command.equalsIgnoreCase("reset"))
 		{
-			profile.resetSessionFlags();
+			currentConnection.resetSessionFlags();
 		}
 		else if (command.equalsIgnoreCase("status"))
 		{
@@ -109,16 +107,16 @@ public class WbMode
 		}
 		else if (command.equalsIgnoreCase("normal"))
 		{
-			profile.setSessionConfirmUpdate(false);
-			profile.setSessionReadOnly(false);
+			currentConnection.setSessionConfirmUpdate(false);
+			currentConnection.setSessionReadOnly(false);
 		}
 		else if (command.equalsIgnoreCase("readonly"))
 		{
-			profile.setSessionReadOnly(true);
+			currentConnection.setSessionReadOnly(true);
 		}
 		else if (command.equalsIgnoreCase("confirm"))
 		{
-			profile.setSessionConfirmUpdate(true);
+			currentConnection.setSessionConfirmUpdate(true);
 		}
 		else
 		{
@@ -127,11 +125,7 @@ public class WbMode
 
 		if (result.isSuccess())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("MsgModeSession", profile.readOnlySession(), profile.confirmUpdatesInSession()));
-			if (changed)
-			{
-				currentConnection.readOnlyChanged(readOnly, profile.readOnlySession());
-			}
+			result.addMessage(ResourceMgr.getFormattedString("MsgModeSession", currentConnection.isSessionReadOnly(), currentConnection.confirmUpdatesInSession()));
 		}
 		else
 		{

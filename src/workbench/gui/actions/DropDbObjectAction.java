@@ -108,7 +108,7 @@ public class DropDbObjectAction
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
-		if (conn == null || conn.getProfile().readOnlySession())
+		if (conn == null || conn.isSessionReadOnly())
 		{
 			setEnabled(false);
 		}
