@@ -254,7 +254,14 @@ public class MainWindow
 			Settings.PROPERTY_SHOW_TOOLBAR,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
 			GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON,
-			Settings.PROPERTY_TAB_POLICY
+			Settings.PROPERTY_TAB_POLICY,
+			GuiSettings.PROP_TITLE_APP_AT_END,
+			GuiSettings.PROP_TITLE_SHOW_WKSP,
+			GuiSettings.PROP_TITLE_SHOW_URL,
+			GuiSettings.PROP_TITLE_SHOW_PROF_GROUP,
+			GuiSettings.PROP_TITLE_SHOW_EDITOR_FILE,
+			GuiSettings.PROP_TITLE_GROUP_SEP,
+			GuiSettings.PROP_TITLE_GROUP_BRACKET
 		);
 	}
 
@@ -694,6 +701,10 @@ public class MainWindow
 		else if (Settings.PROPERTY_TAB_POLICY.equals(evt.getPropertyName()))
 		{
 			updateTabPolicy();
+		}
+		else if (GuiSettings.WINDOW_TITLE_PROPS.contains(evt.getPropertyName()))
+		{
+			updateWindowTitle();
 		}
 	}
 

@@ -225,9 +225,10 @@ public class ConnectionInfo
 	{
 		if (iconLabel == null)
 		{
-			this.iconLabel = new JLabel();
+			iconLabel = new JLabel();
 			iconLabel.setOpaque(false);
 			iconLabel.addMouseListener(this);
+			iconLabel.setBackground(getBackground());
 		}
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;

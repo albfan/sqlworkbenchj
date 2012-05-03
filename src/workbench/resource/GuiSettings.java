@@ -12,7 +12,10 @@
 package workbench.resource;
 
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.util.Set;
 import javax.swing.KeyStroke;
+import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 
@@ -35,11 +38,23 @@ public class GuiSettings
 	public static final String PROPERTY_EXPAND_KEYSTROKE = "workbench.editor.expand.macro.key";
 	public static final String PROPERTY_EXPAND_MAXDURATION = "workbench.editor.expand.maxduration";
 
+	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
+	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
+	public static final String PROP_TITLE_SHOW_PROF_GROUP = "workbench.gui.display.showprofilegroup";
+	public static final String PROP_TITLE_APP_AT_END = "workbench.gui.display.name_at_end";
+	public static final String PROP_TITLE_SHOW_EDITOR_FILE = "workbench.gui.display.showfilename";
+	public static final String PROP_TITLE_GROUP_SEP = "workbench.gui.display.titlegroupsep";
+	public static final String PROP_TITLE_GROUP_BRACKET = "workbench.gui.display.titlegroupbracket";
+
+	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
+		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
+		PROP_TITLE_SHOW_EDITOR_FILE, PROP_TITLE_GROUP_SEP, PROP_TITLE_GROUP_BRACKET);
 
 	public static int getMaxExpansionPause()
 	{
 		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
 	}
+
 
 	public static KeyStroke getExpansionKey()
 	{
@@ -468,20 +483,20 @@ public class GuiSettings
 		switch (type)
 		{
 			case SHOW_NO_FILENAME:
-				Settings.getInstance().setProperty("workbench.gui.display.showfilename", "none");
+				Settings.getInstance().setProperty(PROP_TITLE_SHOW_EDITOR_FILE, "none");
 				break;
 			case SHOW_FILENAME:
-				Settings.getInstance().setProperty("workbench.gui.display.showfilename", "name");
+				Settings.getInstance().setProperty(PROP_TITLE_SHOW_EDITOR_FILE, "name");
 				break;
 			case SHOW_FULL_PATH:
-				Settings.getInstance().setProperty("workbench.gui.display.showfilename", "path");
+				Settings.getInstance().setProperty(PROP_TITLE_SHOW_EDITOR_FILE, "path");
 				break;
 		}
 	}
 
 	public static int getShowFilenameInWindowTitle()
 	{
-		String type = Settings.getInstance().getProperty("workbench.gui.display.showfilename", "none");
+		String type = Settings.getInstance().getProperty(PROP_TITLE_SHOW_EDITOR_FILE, "none");
 		if ("name".equalsIgnoreCase(type)) return SHOW_FILENAME;
 		if ("path".equalsIgnoreCase(type)) return SHOW_FULL_PATH;
 		return SHOW_NO_FILENAME;
@@ -489,7 +504,7 @@ public class GuiSettings
 
 	public static String getTitleGroupSeparator()
 	{
-		String sep = Settings.getInstance().getProperty("workbench.gui.display.titlegroupsep", "/");
+		String sep = Settings.getInstance().getProperty(PROP_TITLE_GROUP_SEP, "/");
 		if ("XXX".equals(sep)) return "";
 		return sep;
 	}
@@ -497,32 +512,32 @@ public class GuiSettings
 	public static void setTitleGroupSeparator(String sep)
 	{
 		if (StringUtil.isBlank(sep)) sep = "XXX";
-		Settings.getInstance().setProperty("workbench.gui.display.titlegroupsep", sep);
+		Settings.getInstance().setProperty(PROP_TITLE_GROUP_SEP, sep);
 	}
 
 	public static String getTitleGroupBracket()
 	{
-		return Settings.getInstance().getProperty("workbench.gui.display.titlegroupbracket", null);
+		return Settings.getInstance().getProperty(PROP_TITLE_GROUP_BRACKET, null);
 	}
 
 	public static void setTitleGroupBracket(String bracket)
 	{
-		Settings.getInstance().setProperty("workbench.gui.display.titlegroupbracket", bracket);
+		Settings.getInstance().setProperty(PROP_TITLE_GROUP_BRACKET, bracket);
 	}
 
 	public static void setShowWorkspaceInWindowTitle(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.display.showpworkspace", flag);
+		Settings.getInstance().setProperty(PROP_TITLE_SHOW_WKSP, flag);
 	}
 
 	public static boolean getShowWorkspaceInWindowTitle()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.display.showpworkspace", true);
+		return Settings.getInstance().getBoolProperty(PROP_TITLE_SHOW_WKSP, true);
 	}
 
 	public static void setShowURLinWindowTitle(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.display.showurl", flag);
+		Settings.getInstance().setProperty(PROP_TITLE_SHOW_URL, flag);
 	}
 
 	/**
@@ -531,27 +546,27 @@ public class GuiSettings
 	 */
 	public static boolean getShowURLinWindowTitle()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.display.showurl", false);
+		return Settings.getInstance().getBoolProperty(PROP_TITLE_SHOW_URL, false);
 	}
 
 	public static void setShowProfileGroupInWindowTitle(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.display.showprofilegroup", flag);
+		Settings.getInstance().setProperty(PROP_TITLE_SHOW_PROF_GROUP, flag);
 	}
 
 	public static boolean getShowProfileGroupInWindowTitle()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.display.showprofilegroup", false);
+		return Settings.getInstance().getBoolProperty(PROP_TITLE_SHOW_PROF_GROUP, false);
 	}
 
 	public static void setShowProductNameAtEnd(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.display.name_at_end", flag);
+		Settings.getInstance().setProperty(PROP_TITLE_APP_AT_END, flag);
 	}
 
 	public static boolean getShowProductNameAtEnd()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.display.name_at_end", false);
+		return Settings.getInstance().getBoolProperty(PROP_TITLE_APP_AT_END, false);
 	}
 
 	public static boolean getShowToolbar()

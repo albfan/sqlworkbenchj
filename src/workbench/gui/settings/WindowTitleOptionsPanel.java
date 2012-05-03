@@ -49,7 +49,7 @@ public class WindowTitleOptionsPanel
 	}
 
 	@Override
-	public void restoreSettings()
+	public final void restoreSettings()
 	{
 		int type = GuiSettings.getShowFilenameInWindowTitle();
 		if (type >= GuiSettings.SHOW_NO_FILENAME && type <= GuiSettings.SHOW_FULL_PATH)
