@@ -14,6 +14,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import workbench.db.DefaultTriggerReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
@@ -47,9 +48,10 @@ public class PostgresTriggerReader
 		String funcName = null;
 		String funcSchema = null;
 		StringBuilder result = null;
-
+		Savepoint sp = null;
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			final String sql =
 				"SELECT trgsch.nspname as function_schema, proc.proname as function_name \n" +
 				"FROM pg_trigger trg  \n" +
@@ -72,6 +74,12 @@ public class PostgresTriggerReader
 				funcSchema = rs.getString(1);
 				funcName = rs.getString(2);
 			}
+			dbConnection.releaseSavepoint(sp);
+		}
+		catch (SQLException sql)
+		{
+			dbConnection.rollback(sp);
+			throw sql;
 		}
 		finally
 		{

@@ -11,6 +11,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="5" type="fix">Auto completion was not working with Postgres 8.3 (and before)</entry>
     <entry dev-build="5" type="fix">Setting a result's name using @wbresult in the comment only worked in the first line comment</entry>
     <entry dev-build="5" type="fix">When using scaled fonts in Windows, the editor and data font would be incorrectly re-scaled even if they weren't set to "Default"</entry>
     <entry dev-build="4" type="fix">Comments used in the output files of WbDataDiff are now compatible with MySQL</entry>

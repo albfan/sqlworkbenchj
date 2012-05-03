@@ -134,6 +134,7 @@ public class PostgresSequenceReader
 
 		try
 		{
+			sp = dbConnection.setSavepoint();
 			if (def.getSchema() != null)
 			{
 				sql += " AND sequence_schema = ?";

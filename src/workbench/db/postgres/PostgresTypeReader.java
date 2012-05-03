@@ -12,6 +12,7 @@ package workbench.db.postgres;
 
 import workbench.db.BaseObjectType;
 import java.sql.ResultSet;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,8 +131,10 @@ public class PostgresTypeReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
+		Savepoint sp = null;
 		try
 		{
+			sp = con.setSavepoint();
 			stmt = con.createStatementForQuery();
 			rs = stmt.executeQuery(select.toString());
 			while (rs.next())
@@ -143,9 +146,11 @@ public class PostgresTypeReader
 				pgtype.setComment(remarks);
 				result.add(pgtype);
 			}
+			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			con.rollback(sp);
 			LogMgr.logError("PostgresTypeReader.getTypes()", "Error retrieving object types", e);
 		}
 		finally

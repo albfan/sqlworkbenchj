@@ -95,20 +95,20 @@ public class WbModeTest
 			runner.executeScript(
 				"WbMode confirm;\n"
 			);
-			assertTrue(con.getProfile().confirmUpdatesInSession());
-			assertFalse(con.getProfile().readOnlySession());
+			assertTrue(con.confirmUpdatesInSession());
+			assertFalse(con.isSessionReadOnly());
 
 			runner.executeScript(
 				"WbMode normal;\n"
 			);
-			assertFalse(con.getProfile().confirmUpdatesInSession());
-			assertFalse(con.getProfile().readOnlySession());
+			assertFalse(con.confirmUpdatesInSession());
+			assertFalse(con.isSessionReadOnly());
 
 			runner.executeScript(
 				"WbMode reset;\n"
 			);
-			assertFalse(con.getProfile().confirmUpdatesInSession());
-			assertTrue(con.getProfile().readOnlySession());
+			assertFalse(con.confirmUpdatesInSession());
+			assertTrue(con.isSessionReadOnly());
 		}
 		finally
 		{
@@ -122,7 +122,7 @@ public class WbModeTest
 		public int confirmStatementCalled;
 		public int confirmCalled;
 
-		public Controller()
+		Controller()
 		{
 			confirmStatementCalled = 0;
 			confirmCalled = 0;

@@ -121,7 +121,7 @@ public class PostgresCompletionTest
 		assertEquals("data", tbl.getTableName());
 
 		sql = "insert into data (   ) values ";
-		context = new StatementContext(con, sql, sql.indexOf("(") + 2);
+		context = new StatementContext(con, sql, sql.indexOf('(') + 2);
 		data = context.getData();
 		assertNotNull(data);
 		assertEquals(2, data.size());

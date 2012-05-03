@@ -20,6 +20,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
 /**
@@ -122,10 +123,11 @@ public class PostgresUtil
 		{
 			sp = con.setSavepoint();
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery("select unnest(current_schemas(false))");
-			while (rs.next())
+			rs = stmt.executeQuery("select array_to_string(current_schemas(false), ';')");
+			if (rs.next())
 			{
-				result.add(rs.getString(1));
+				String path = rs.getString(1);
+				result = StringUtil.stringToList(path, ";", true, true, false, false);
 			}
 			con.releaseSavepoint(sp);
 		}

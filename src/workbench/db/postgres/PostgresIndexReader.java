@@ -175,8 +175,10 @@ public class PostgresIndexReader
 			LogMgr.logDebug("PostgresIndexReader.getIndexSource()", "Using SQL:\n " + sql);
 		}
 
+		Savepoint sp = null;
 		try
 		{
+			sp = con.setSavepoint();
 			stmt = con.getSqlConnection().prepareStatement(sql.toString());
 			stmt.setString(1, indexDefinition.getName());
 			if (hasSchema)
@@ -188,9 +190,11 @@ public class PostgresIndexReader
 			{
 				result = rs.getString(1);
 			}
+			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			con.rollback(sp);
 			LogMgr.logError("PostgresIndexReader.getIndexSource()", "Error when retrieving index", e);
 		}
 		finally

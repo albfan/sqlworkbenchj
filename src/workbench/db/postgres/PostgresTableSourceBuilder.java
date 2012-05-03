@@ -207,16 +207,15 @@ public class PostgresTableSourceBuilder
 				tbl.setTableConfigOptions(options);
 				tbl.setTablespace(tableSpace);
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			sp = null;
 			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
 		}
 		finally
 		{
-			dbConnection.releaseSavepoint(sp);
 			SqlUtil.closeAll(rs, pstmt);
 		}
 	}

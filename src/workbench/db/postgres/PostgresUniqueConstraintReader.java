@@ -57,7 +57,7 @@ public class PostgresUniqueConstraintReader
 		else
 		{
 			// Prior to 9.0 the unique index supporting the constraint could not be named differently
-			// than the constaint itself (and pg_constraint.conindid does not exist there)
+			// than the constraint itself (and pg_constraint.conindid does not exist there)
 			baseSql =
 				"  select cons.conname as index_name,  \n" +
 				"         cns.nspname as index_schema, \n" +
