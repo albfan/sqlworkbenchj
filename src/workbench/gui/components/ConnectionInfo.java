@@ -12,7 +12,6 @@
 package workbench.gui.components;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -41,6 +40,7 @@ public class ConnectionInfo
 	private WbAction showInfoAction;
 	private WbLabelField infoText;
 	private JLabel iconLabel;
+	private final Runnable updater;
 
 	public ConnectionInfo(Color aBackground)
 	{
@@ -63,7 +63,7 @@ public class ConnectionInfo
 		showInfoAction.setMenuTextByKey("MnuTxtConnInfo");
 		showInfoAction.setEnabled(false);
 		infoText.addPopupAction(showInfoAction);
-		infoText.setText(ResourceMgr.getString("TxtNotConnected"));
+		infoText.setText(" " + ResourceMgr.getString("TxtNotConnected"));
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
@@ -71,6 +71,14 @@ public class ConnectionInfo
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		add(infoText, c);
+		updater = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_updateDisplay();
+			}
+		};
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -109,6 +117,11 @@ public class ConnectionInfo
 
 	private void updateDisplay()
 	{
+		WbSwingUtilities.invoke(updater);
+	}
+
+	private void _updateDisplay()
+	{
 		if (this.sourceConnection != null)
 		{
 			infoText.setText(this.sourceConnection.getDisplayString());
@@ -120,30 +133,25 @@ public class ConnectionInfo
 			tip.append("<br>");
 			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
 			tip.append("</html>");
-			setToolTipText(tip.toString());
+			infoText.setToolTipText(tip.toString());
 		}
 		else
 		{
 			infoText.setText(ResourceMgr.getString("TxtNotConnected"));
-			setToolTipText(null);
+			infoText.setToolTipText(null);
 		}
+		infoText.setBackground(this.getBackground());
 		infoText.setCaretPosition(0);
 		showMode();
 
-		EventQueue.invokeLater(new Runnable()
+		validate();
+
+		if (getParent() != null)
 		{
-			@Override
-			public void run()
-			{
-				if (getParent() != null)
-				{
-					// this seems to be the only way to resize the component
-					// approriately after setting a new text when using the dreaded GTK+ look and feel
-					doLayout();
-					getParent().doLayout();
-				}
-			}
-		});
+			// this seems to be the only way to resize the component
+			// approriately after setting a new text when using the dreaded GTK+ look and feel
+			getParent().validate();
+		}
 	}
 
 	@Override
@@ -189,6 +197,7 @@ public class ConnectionInfo
 				hideIcon();
 			}
 		}
+		invalidate();
 	}
 
 	private void hideIcon()
@@ -197,7 +206,6 @@ public class ConnectionInfo
 		{
 			this.remove(iconLabel);
 			iconLabel = null;
-			invalidate();
 		}
 	}
 
@@ -217,7 +225,6 @@ public class ConnectionInfo
 		ImageIcon png = ResourceMgr.getPng(name);
 		iconLabel.setIcon(png);
 		add(iconLabel, c);
-		invalidate();
 	}
 
 }
