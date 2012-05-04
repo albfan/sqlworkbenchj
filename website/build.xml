@@ -7,7 +7,7 @@
     <pathelement location="js.jar"/>
   </path>
 
-  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="../scripts/xmltask-v1.15.jar"/>
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="../scripts/xmltask-v1.16.jar"/>
 
   <property file="..\scripts\release.property"/>
 

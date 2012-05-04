@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-05-02">
+  <release build="-1" date="2012-05-04">
     <entry dev-build="5" type="enh">If a connection profile is set to read-only, this is now shown with an icon in the connection info of the main window</entry>
     <entry dev-build="4" type="enh">In the DbExplorer "Put SELECT into" can now also put the statement into the clipboard.</entry>
     <entry dev-build="4" type="enh">A new option for WbDataDiff to write a single SQL script is available (-singleFile=true/false)</entry>
@@ -11,6 +11,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="5" type="fix">For PostgreSQL the table source was not displayed if the table contained a unique index together with non-unique indexes</entry>
     <entry dev-build="5" type="fix">Auto completion was not working with Postgres 8.3 (and before)</entry>
     <entry dev-build="5" type="fix">Setting a result's name using @wbresult in the comment only worked in the first line comment</entry>
     <entry dev-build="5" type="fix">When using scaled fonts in Windows, the editor and data font would be incorrectly re-scaled even if they weren't set to "Default"</entry>
