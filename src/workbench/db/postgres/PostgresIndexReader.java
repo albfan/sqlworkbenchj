@@ -86,7 +86,6 @@ public class PostgresIndexReader
 				String idxName = index.getName();
 
 				if (index.isPrimaryKeyIndex()) continue;
-				if (indexCount > 0) sql.append(',');
 
 				if (index.isUniqueConstraint())
 				{
@@ -97,6 +96,7 @@ public class PostgresIndexReader
 				}
 				else
 				{
+					if (indexCount > 0) sql.append(',');
 					sql.append('\'');
 					sql.append(idxName);
 					sql.append('\'');
@@ -104,6 +104,12 @@ public class PostgresIndexReader
 				}
 			}
 			sql.append(')');
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresIndexReader.getIndexSource1()", "Using sql: " + sql.toString());
+			}
+
 			if (indexCount > 0)
 			{
 				sp = con.setSavepoint();
@@ -122,7 +128,7 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresIndexReader.getIndexSource()", "Error retrieving source", e);
+			LogMgr.logError("PostgresIndexReader.getIndexSource1()", "Error retrieving source", e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
@@ -172,7 +178,7 @@ public class PostgresIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresIndexReader.getIndexSource()", "Using SQL:\n " + sql);
+			LogMgr.logDebug("PostgresIndexReader.getIndexSource2()", "Using SQL:\n " + sql);
 		}
 
 		Savepoint sp = null;
@@ -195,7 +201,7 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresIndexReader.getIndexSource()", "Error when retrieving index", e);
+			LogMgr.logError("PostgresIndexReader.getIndexSource2()", "Error when retrieving index", e);
 		}
 		finally
 		{

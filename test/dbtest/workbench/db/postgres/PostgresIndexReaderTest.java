@@ -23,6 +23,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
 
 /**
@@ -98,6 +99,58 @@ public class PostgresIndexReaderTest
 		assertEquals("uq_firstname", index.getObjectName());
 		sql = index.getSource(conn).toString();
 		assertTrue(sql.startsWith("ALTER TABLE"));
+	}
+
+	@Test
+	public void testGetIndexSource2()
+		throws Exception
+	{
+		String sql =
+			"CREATE TABLE films \n" +
+			"( \n" +
+			"   code       char(5), \n" +
+			"   title      varchar(40), \n" +
+			"   did        integer, \n" +
+			"   date_prod  date, \n" +
+			"   kind       varchar(10), \n" +
+			"   len        interval \n" +
+			"); \n" +
+			" \n" +
+			"ALTER TABLE films \n" +
+			"   ADD CONSTRAINT production UNIQUE (date_prod); \n" +
+			"CREATE INDEX title_idx_nulls_low ON films USING btree (title NULLS FIRST); \n" +
+			"CREATE INDEX lower_title_idx ON films USING btree (lower((title)::text)); \n" +
+			" \n" +
+			"COMMIT;";
+
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+		if (conn == null)
+		{
+			System.out.println("No local postgres connection. Skipping test...");
+			return;
+		}
+
+		DbMetadata meta = conn.getMetadata();
+		IndexReader reader = meta.getIndexReader();
+
+		assertNotNull(reader);
+		assertTrue(reader instanceof PostgresIndexReader);
+
+		TestUtil.executeScript(conn, sql);
+
+		TableIdentifier table = meta.findTable(new TableIdentifier("films"));
+		List<IndexDefinition> indexes = reader.getTableIndexList(table);
+		assertEquals(3, indexes.size());
+
+		String source = table.getSource(conn).toString();
+		ScriptParser p = new ScriptParser(source);
+		assertEquals(4, p.getSize());
+		String alter = p.getCommand(1);
+		assertTrue(alter.startsWith("ALTER TABLE films"));
+		String idx1 = p.getCommand(2);
+		assertEquals("CREATE INDEX title_idx_nulls_low ON films USING btree (title NULLS FIRST)", idx1);
+		String idx2 = p.getCommand(3);
+		assertEquals("CREATE INDEX lower_title_idx ON films USING btree (lower((title)::text))", idx2);
 	}
 
 }
