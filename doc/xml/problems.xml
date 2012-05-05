@@ -124,7 +124,7 @@
 
   </section>
   -->
-  
+
   <section id="hi-cpu-usage">
     <title>High CPU usage when executing statements</title>
 
@@ -143,6 +143,38 @@
 		<title>Oracle Problems</title>
     <indexterm><primary>Problems</primary><secondary>Oracle</secondary></indexterm>
     <indexterm><primary>Oracle</primary><secondary>Problems</secondary></indexterm>
+
+		<section id="oracle-db-exp-tables">
+			<title>No Views or tables visible in the DbExplorer</title>
+			<para>
+        Since Build 112 it is possible that the DbExplorer does no longer display views or tables if the
+        selected schema (username) contains an underscore. This is caused by a bug in older Oracle JDBC drivers.
+			</para>
+      <para>
+        The driver calls used to display the list of tables and views in a specific schema expects a wildcard expression.
+        To avoid listing the objects for <literal>USERX1</literal> when displaying the objects for <literal>USER_1</literal>
+        the underscore must be escaped. The driver will create an expression similar to <literal>AND onwer LIKE 'USER_1' ESCAPE '\'</literal>
+        (which would return tables for <literal>USERA1</literal>, <literal>USERB1</literal> and so on, including of course
+        <literal>USER_1</literal>).
+      </para>
+      <para>
+        The character that is used to escape the wildcards is reported by the driver. &wb-productname; sends e.g. the
+        value <literal>USER\_1</literal> if the driver reports that a backslash is used to escape wildcards.
+      </para>
+      <para>
+        However some older Oracle drivers report the wrong escape character, so the value sent to the database results in
+        <literal>AND onwer LIKE 'USER\_1' ESCAPE '/'</literal>. The backslash in the expression is the character
+        <emphasis>reported</emphasis> by the driver, whereas the forward slash in the expression is the character
+        actually <emphasis>used</emphasis> by the driver.
+      </para>
+      <para>
+        To fix this problem, the escape character reported by the driver can be overridden with a property in <literal>workbench.settings</literal>:
+        <literal>workbench.db.oracle.searchstringescape=/</literal>
+      </para>
+      <para>
+        This bug was fixed in the 11.2 drivers.
+      </para>
+		</section>
 
 		<section id="oracle-long-problems">
 			<title>Error: "Stream has already been closed"</title>
