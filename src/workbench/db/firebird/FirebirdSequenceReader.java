@@ -152,4 +152,10 @@ public class FirebirdSequenceReader
 		}
 		return ds;
 	}
+
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

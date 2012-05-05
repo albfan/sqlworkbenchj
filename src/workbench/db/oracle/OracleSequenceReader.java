@@ -201,4 +201,9 @@ public class OracleSequenceReader
 		def.setSource(result);
 	}
 
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

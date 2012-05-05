@@ -1520,7 +1520,7 @@ public class DbMetadata
 		boolean sortNeeded = false;
 
 		SequenceReader seqReader = this.getSequenceReader();
-		if (seqReader != null && typeIncluded("SEQUENCE", types) &&
+		if (seqReader != null && typeIncluded(seqReader.getSequenceTypeName(), types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
@@ -2119,6 +2119,14 @@ public class DbMetadata
 		return def;
 	}
 
+	public boolean isSequenceType(String type)
+	{
+		if (type == null) return false;
+		SequenceReader reader = getSequenceReader();
+		if (reader == null) return false;
+		return StringUtil.equalStringIgnoreCase(type, reader.getSequenceTypeName());
+	}
+
 	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{
@@ -2131,7 +2139,7 @@ public class DbMetadata
 				break;
 			}
 		}
-		if (def == null && "SEQUENCE".equalsIgnoreCase(table.getObjectType()))
+		if (def == null && isSequenceType(table.getObjectType()))
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
@@ -2561,7 +2569,7 @@ public class DbMetadata
 
 		if (getSequenceReader() != null)
 		{
-			result.add("SEQUENCE");
+			result.add(getSequenceReader().getSequenceTypeName());
 		}
 
 		for (ObjectListExtender extender : extenders)

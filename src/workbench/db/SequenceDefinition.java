@@ -34,6 +34,7 @@ public class SequenceDefinition
 	private String comment;
 	private TableIdentifier relatedTable;
 	private String relatedColumn;
+	private String typeName = SequenceReader.DEFAULT_TYPE_NAME;
 
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
 
@@ -138,9 +139,14 @@ public class SequenceDefinition
 	@Override
 	public String getObjectType()
 	{
-		return "SEQUENCE";
+		return typeName;
 	}
 
+	public void setObjectTypeName(String name)
+	{
+		typeName = name;
+	}
+	
 	@Override
 	public String getObjectName()
 	{

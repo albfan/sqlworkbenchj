@@ -398,5 +398,11 @@ public class IngresMetadata
 		return result.toString();
 	}
 
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
+
 }
 

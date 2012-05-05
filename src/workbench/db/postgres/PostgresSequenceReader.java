@@ -343,4 +343,10 @@ public class PostgresSequenceReader
 		}
 		return result;
 	}
+
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

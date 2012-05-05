@@ -377,5 +377,22 @@
    </object>
   </void>
 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>cubrid.jdbc.driver.CUBRIDDriver</string>
+    </void>
+    <void property="library">
+     <string>cubrid_jdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>Cubrid</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:cubrid:serverhost:33000:databasename</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

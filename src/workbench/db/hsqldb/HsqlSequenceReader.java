@@ -270,4 +270,10 @@ public class HsqlSequenceReader
 			SqlUtil.closeAll(rs, pstmt);
 		}
 	}
+
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

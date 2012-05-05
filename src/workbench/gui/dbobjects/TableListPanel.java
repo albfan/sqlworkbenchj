@@ -1331,20 +1331,17 @@ public class TableListPanel
 				SynonymDDLHandler synHandler = new SynonymDDLHandler();
 				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, true);
 			}
-			else if ("sequence".equalsIgnoreCase(type))
+			else if (meta.isSequenceType(type))
 			{
-				SequenceReader reader = meta.getSequenceReader();
-				if (reader != null)
+				SequenceReader sequenceReader = meta.getSequenceReader();
+				CharSequence seqSql = sequenceReader.getSequenceSource(selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
+				if (StringUtil.isEmptyString(seqSql))
 				{
-					CharSequence seqSql = reader.getSequenceSource(selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
-					if (StringUtil.isEmptyString(seqSql))
-					{
-						sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
-					}
-					else
-					{
-						sql = seqSql.toString();
-					}
+					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
+				}
+				else
+				{
+					sql = seqSql.toString();
 				}
 			}
 			else if (meta.isTableType(type))
@@ -1858,7 +1855,7 @@ public class TableListPanel
 				boolean ctrlPressed = WbAction.isCtrlPressed(e);
 				String sql = buildSqlForTable(false);
 				if (sql == null) return;
-				
+
 				if (ctrlPressed)
 				{
 					sql = CreateSnippetAction.makeJavaString(sql, true);

@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import workbench.db.cubrid.CubridSequenceReader;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySequenceReader;
 import workbench.db.firebird.FirebirdConstraintReader;
@@ -104,6 +105,10 @@ public class ReaderFactory
 		if (meta.getDbId().startsWith("db2"))
 		{
 			return new Db2SequenceReader(con, meta.getDbId());
+		}
+		if (meta.getDbId().equals("cubrid"))
+		{
+			return new CubridSequenceReader(con);
 		}
 		return null;
 	}

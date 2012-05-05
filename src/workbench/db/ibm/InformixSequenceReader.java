@@ -231,4 +231,9 @@ public class InformixSequenceReader
 		return result;
 	}
 
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

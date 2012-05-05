@@ -404,5 +404,64 @@ and   t.schemaid = s.schemaid
    </object>
   </void>
 
+  <void method="put">
+   <string>CUBRID</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select 'CREATE TRIGGER '||trigger_name||'\n'||
+        '   '||trigger_type||' '||trigger_event||' ON '||table_name||'\n'||
+        '   IF '||condition||'\n'
+        'EXECUTE '||
+        case
+           when action_type = 1 then
+                case when trigger_event in (1,2) then 'UPDATE'
+                     when trigger_event in (2,3) then 'DELETE'
+                     when trigger_event in (4,5) then 'INSERT'
+                     else ''
+                end
+           when action_type = 2 then 'REJECT'
+           when action_type = 3 then 'INVALIDATE_TRANSACTION'
+           when action_type = 4 then 'PRINT'
+           else ''
+        end
+from (
+  select trg.trigger_name,
+         case
+            when trg.action_time = 1 then 'BEFORE'
+            when trg.action_time = 2 then 'AFTER'
+            else 'DEFERRED'
+         end as trigger_type,
+         case
+           when tdef.event = 0 then 'UPDATE'
+           when tdef.event = 1 then 'UPDATE STATEMENT'
+           when tdef.event = 2 then 'DELETE'
+           when tdef.event = 3 then 'DELETE STATEMENT'
+           when tdef.event = 4 then 'INSERT'
+           when tdef.event = 5 then 'INSERT STATEMENT'
+           when tdef.event = 8 then 'COMMIT'
+           when tdef.event = 9 then 'ROLLBACK'
+           else 'unknown'
+         end as trigger_event,
+         trg.target_class_name as table_name,
+         null as remarks,
+         case
+            when tdef.status = 1 then 'INACTIVE'
+            else 'ACTIVE'
+         end as status,
+         tdef.condition,
+         tdef.action_type
+  from db_trig trg
+    join db_trigger tdef on tdef.name = trg.trigger_name
+    join db_class t on trg.target_class_name = t.class_name
+) t
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>trigger_name</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

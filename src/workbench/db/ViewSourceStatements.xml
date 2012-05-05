@@ -362,5 +362,17 @@ FROM _SYSTEM.SYS_TABLES
     </object>
   </void>
 
+  <void method="put">
+   <string>CUBRID</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select vclass_def from db_vclass</string>
+    </void>
+    <void property="objectNameField">
+     <string>vclass_name</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

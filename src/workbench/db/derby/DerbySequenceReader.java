@@ -244,4 +244,9 @@ public class DerbySequenceReader
 		return result;
 	}
 
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }

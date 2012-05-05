@@ -402,4 +402,11 @@ public class Db2SequenceReader
 	{
 		quoteKeyword = flag;
 	}
+
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
+
 }

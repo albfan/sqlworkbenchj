@@ -21,18 +21,24 @@ import workbench.storage.DataStore;
  */
 public interface SequenceReader
 {
+	static final String DEFAULT_TYPE_NAME = "SEQUENCE";
+
 	/**
 	 *	Return a SQL String to recreate the given sequence
 	 */
 	CharSequence getSequenceSource(String catalog, String schema, String sequence);
 	void readSequenceSource(SequenceDefinition def);
-	
+
 	/**
-	 * 	Get a list of sequences for the given owner. 
+	 * 	Get a list of sequences for the given owner.
 	 */
 	List<SequenceDefinition> getSequences(String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException;
-	
+
 	SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence);
 	DataStore getRawSequenceDefinition(String catalog, String schema, String sequence);
+
+	String getSequenceTypeName();
+
+
 }

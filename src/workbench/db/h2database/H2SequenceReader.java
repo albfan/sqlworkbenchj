@@ -203,4 +203,10 @@ public class H2SequenceReader
 		}
 		return ds;
 	}
+
+	@Override
+	public String getSequenceTypeName()
+	{
+		return SequenceReader.DEFAULT_TYPE_NAME;
+	}
 }
