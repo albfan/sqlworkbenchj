@@ -135,6 +135,12 @@ public class PostgresUtil
 		{
 			con.rollback(sp);
 			LogMgr.logError("PostgresUtil.getSearchPath()", "Could not read search path", sql);
+			if (result.isEmpty())
+			{
+				LogMgr.logWarning("PostgresUtil.getSearchPath()", "Using public as the default search path");
+				// Fallback. At least look in the public schema
+				result.add("public");
+			}
 		}
 		finally
 		{
