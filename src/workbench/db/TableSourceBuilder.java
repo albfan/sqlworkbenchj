@@ -265,11 +265,11 @@ public class TableSourceBuilder
 		result.append(";\n");
 		// end of CREATE TABLE
 
-		// Add additional column information provided by any specialized descendant class
-		String colInfo = getAdditionalColumnSql(table, columns, indexList);
-		if (StringUtil.isNonBlank(colInfo))
+		// Add additional information provided by any specialized descendant class
+		String info = getAdditionalTableInfo(table, columns, indexList);
+		if (StringUtil.isNonBlank(info))
 		{
-			result.append(colInfo);
+			result.append(info);
 			result.append("\n\n");
 		}
 
@@ -394,7 +394,7 @@ public class TableSourceBuilder
 		return null;
 	}
 
-	protected String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	protected String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		return null;
 	}

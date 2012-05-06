@@ -63,6 +63,7 @@ public class PostgresTableSourceBuilder
 		Savepoint sp = null;
 		try
 		{
+			// Retrieve parent table(s) for this table
 			sp = dbConnection.setSavepoint();
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, table.getSchema());
@@ -87,6 +88,9 @@ public class PostgresTableSourceBuilder
 				}
 				result.append(')');
 			}
+
+			// retrieve child tables for this table
+
 			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
@@ -212,7 +216,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
 		}
 		finally
 		{
@@ -289,22 +293,25 @@ public class PostgresTableSourceBuilder
 	 * @return
 	 */
 	@Override
-	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
 		String schema = table.getSchemaToUse(this.dbConnection);
 		CharSequence enums = getEnumInformation(columns, schema);
 		CharSequence domains = getDomainInformation(columns, schema);
 		CharSequence sequences = getColumnSequenceInformation(table, columns);
+		CharSequence children = getChildTables(table);
 
-		if (enums == null && domains == null && sequences == null) return null;
+		if (enums == null && domains == null && sequences == null && children == null) return null;
 
 		int enumLen = (enums != null ? enums.length() : 0);
 		int domainLen = (domains != null ? domains.length() : 0);
+		int childLen = (children != null ? children.length() : 0);
 
-		StringBuilder result = new StringBuilder(enumLen + domainLen);
+		StringBuilder result = new StringBuilder(enumLen + domainLen + childLen);
 		if (enums != null) result.append(enums);
 		if (domains != null) result.append(domains);
 		if (sequences != null) result.append(sequences);
+		if (children != null) result.append(children);
 
 		return result.toString();
 	}
@@ -409,4 +416,63 @@ public class PostgresTableSourceBuilder
 
 		return result;
 	}
+
+	protected CharSequence getChildTables(TableIdentifier table)
+	{
+		if (table == null) return null;
+
+		StringBuilder result = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "select bt.relname as table_name, bns.nspname as table_schema \n" +
+             "from pg_class ct \n" +
+             "    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
+             "    join pg_inherits i on i.inhparent = ct.oid and ct.relname = ? \n" +
+             "    join pg_class bt on i.inhrelid = bt.oid \n" +
+             "    join pg_namespace bns on bt.relnamespace = bns.oid";
+
+		Savepoint sp = null;
+		try
+		{
+			// Retrieve child table(s) for this table
+			sp = dbConnection.setSavepoint();
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, table.getSchema());
+			pstmt.setString(2, table.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresTableSourceBuilder.getChildTables()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			int count = 0;
+			while (rs.next())
+			{
+				if (count == 0)
+				{
+					result = new StringBuilder(50);
+					result.append("\n-- Child tables:");
+				}
+				String tableName = rs.getString(1);
+				String schemaName = rs.getString(2);
+				result.append("\n--    ");
+				result.append(schemaName);
+				result.append('.');
+				result.append(tableName);
+				count ++;
+			}
+			dbConnection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logError("PostgresTableSourceBuilder.getChildTables()", "Error retrieving table options", e);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return result;
+	}
+
 }
