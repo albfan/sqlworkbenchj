@@ -174,9 +174,9 @@ public class PostgresSequenceReader
 	 *	@return The SQL to recreate the given sequence
 	 */
 	@Override
-	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
+	public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
 		return def.getSource();
 	}
 
@@ -184,7 +184,7 @@ public class PostgresSequenceReader
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
 	@Override
-	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String schema, String namePattern)
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
@@ -197,19 +197,15 @@ public class PostgresSequenceReader
 		{
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
-			rs = meta.getTables(null, owner, namePattern, new String[] { "SEQUENCE"} );
+			rs = meta.getTables(null, schema, namePattern, new String[] { "SEQUENCE"} );
 			while (rs.next())
 			{
-				String name = rs.getString("TABLE_NAME");
-				String schema = rs.getString("TABLE_SCHEM");
-				result.add(getSequenceDefinition(catalog, schema, name));
+				String seqName = rs.getString("TABLE_NAME");
+				String seqSchema = rs.getString("TABLE_SCHEM");
+				String remarks = rs.getString("REMARKS");
+				result.add(retrieveSequenceDetails(seqSchema, seqName, remarks));
 			}
 			this.dbConnection.releaseSavepoint(sp);
-
-			for (SequenceDefinition def : result)
-			{
-				updateProperties(def);
-			}
 		}
 		catch (SQLException e)
 		{
@@ -225,7 +221,6 @@ public class PostgresSequenceReader
 	}
 
 	private SequenceDefinition createDefinition(String name, String schema, String comment, DataStore ds)
-		throws SQLException
 	{
 		SequenceDefinition def = new SequenceDefinition(schema, name);
 		def.setSequenceProperty("INCREMENT", ds.getValue(0, "increment_by"));
@@ -238,38 +233,40 @@ public class PostgresSequenceReader
 		return def;
 	}
 
-	private SequenceDefinition getSequence(String owner, String sequence)
+	private SequenceDefinition retrieveSequenceDetails(String schema, String sequence, String comment)
 	{
-		SequenceDefinition result = null;
+		DataStore ds = getRawSequenceDefinition(null, schema, sequence);
+		SequenceDefinition result = createDefinition(sequence, schema, comment, ds);
+		readRelatedTable(result);
+		readSequenceSource(result); // should be called after readRelatedTable() !!
+		return result;
+	}
 
+	@Override
+	public SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence)
+	{
 		ResultSet rs = null;
 		Savepoint sp = null;
+
+		boolean exists = false;
+		String comment = null;
 
 		try
 		{
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
-			rs = meta.getTables(null, owner, sequence, new String[] { "SEQUENCE"} );
-			boolean exists = false;
-			String comment = null;
+			rs = meta.getTables(null, schema, sequence, new String[] {"SEQUENCE"});
 			if (rs.next())
 			{
 				comment = rs.getString("REMARKS");
 				exists = true;
 			}
 			this.dbConnection.releaseSavepoint(sp);
-			if (exists)
-			{
-				DataStore ds = getRawSequenceDefinition(null, owner, sequence);
-				result = createDefinition(sequence, owner, comment, ds);
-				readRelatedTable(result);
-				readSequenceSource(result); // should be called after readRelatedTable() !!
-			}
 		}
 		catch (SQLException e)
 		{
 			this.dbConnection.rollback(sp);
-			LogMgr.logError("PostgresSequenceReader.getSequence()", "Error retrieving sequences", e);
+			LogMgr.logError("PostgresSequenceReader.getSequenceDefinition()", "Error retrieving sequences", e);
 			return null;
 		}
 		finally
@@ -277,47 +274,19 @@ public class PostgresSequenceReader
 			SqlUtil.closeResult(rs);
 		}
 
-		return result;
-	}
-
-	private void updateProperties(SequenceDefinition def)
-	{
-		if (def == null) return;
-
-		DataStore ds = getRawSequenceDefinition(null, def.getSequenceOwner(), def.getSequenceName());
-		if (ds == null) return;
-		if (ds.getRowCount() == 0) return;
-
-		long min = ds.getValueAsLong(0, 0, -1);
-		long max = ds.getValueAsLong(0, 1, -1);
-		long inc = ds.getValueAsLong(0, 2, 1);
-		long cache = ds.getValueAsLong(0, 3, 1);
-		String cycle = ds.getValueAsString(0, 4);
-
-		def.setSequenceProperty("INCREMENT", Long.valueOf(inc));
-		def.setSequenceProperty("MINVALUE", Long.valueOf(min));
-		def.setSequenceProperty("CACHE", cache);
-		def.setSequenceProperty("CYCLE", cycle);
-		def.setSequenceProperty("MAXVALUE", Long.valueOf(max));
-		readSequenceSource(def);
+		if (exists)
+		{
+			return retrieveSequenceDetails(schema, sequence, comment);
+		}
+		return null;
 	}
 
 	@Override
-	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
-	{
-		return getSequence(owner, sequence);
-	}
-
-	@Override
-	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String catalog, String schema, String sequence)
 	{
 		if (sequence == null) return null;
 
-		int pos = sequence.indexOf('.');
-		if (pos > 0)
-		{
-			sequence = sequence.substring(pos);
-		}
+		String fullname = (schema == null ? sequence : schema + "." + sequence);
 
 		DataStore result = null;
 		Statement stmt = null;
@@ -325,11 +294,11 @@ public class PostgresSequenceReader
 		Savepoint sp = null;
 		try
 		{
-			String sql = baseSql + sequence;
+			String sql = baseSql + fullname;
 			sp = this.dbConnection.setSavepoint();
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
-			result = new DataStore(rs, this.dbConnection, true);
+			result = new DataStore(rs, true);
 			this.dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)

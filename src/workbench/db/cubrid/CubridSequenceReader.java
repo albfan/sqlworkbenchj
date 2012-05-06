@@ -94,7 +94,7 @@ public class CubridSequenceReader
 	}
 
 	/**
-	 *	Return the source SQL for a PostgreSQL sequence definition.
+	 *	Return the source SQL for a Cubrid SERIAL (sequence) definition.
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
