@@ -295,7 +295,7 @@ public class TableSelectorPanel
 
 			for (TableIdentifier table : tables)
 			{
-				if (table.getType().equalsIgnoreCase("sequence")) continue;
+				if (dbConnection.getMetadata().isSequenceType(table.getType())) continue;
 				table.setShowTablenameOnly(true);
 				tableSelector.addItem(table);
 			}

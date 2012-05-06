@@ -13,7 +13,6 @@ package workbench.util;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -23,7 +22,6 @@ import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 
 /**
@@ -165,36 +163,7 @@ public class SqlUtilTest
 		assertEquals("\"1,2\"", params.get(0));
 	}
 
-	@Test
-	public void testIsSelectIntoNewTable()
-		throws Exception
-	{
-		String p = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.selectinto.pattern", null);
 
-		Pattern selectIntoPattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
-
-		String sql = "select * into new_table from old_table;";
-		assertTrue("Pattern for SQL Server not working", SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
-
-		sql = "-- Test\n" +
-					"select * into #temp2 from #temp1;\n";
-		assertTrue("Pattern for SQL Server not working", SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
-
-
-		p = Settings.getInstance().getProperty("workbench.db.postgresql.selectinto.pattern", null);
-		selectIntoPattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
-		sql = "select * into new_table from old_table;";
-		assertTrue("Pattern for Postgres not working", SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
-
-		sql = "-- Test\n" +
-					"select * into new_table from old_table;\n";
-		assertTrue("Pattern for Postgres not working", SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
-
-		p = Settings.getInstance().getProperty("workbench.db.informix-online.selectinto.pattern", null);
-		selectIntoPattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
-		sql = "select * from old_table into new_table";
-		assertTrue(SqlUtil.isSelectIntoNewTable(selectIntoPattern, sql));
-	}
 
 	@Test
 	public void testGetCreateType()

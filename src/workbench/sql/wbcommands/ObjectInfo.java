@@ -115,7 +115,7 @@ public class ObjectInfo
 			}
 		}
 
-		if (toDescribe != null && "SEQUENCE".equals(toDescribe.getType()))
+		if (toDescribe != null && connection.getMetadata().isSequenceType(toDescribe.getType()))
 		{
 			try
 			{

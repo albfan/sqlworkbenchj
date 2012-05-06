@@ -271,6 +271,7 @@ public class CommandMapper
 			// use the generic SqlCommand implementation for this and not the SelectCommand
 			cmd = this.cmdDispatch.get("*");
 		}
+
 		// checking for the collection size before checking for the presence
 		// is a bit faster because of the hashing that is necessary to look up
 		// the entry. Again this doesn't matter for a single command, but when

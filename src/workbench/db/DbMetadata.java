@@ -60,7 +60,6 @@ import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresColumnEnhancer;
-import workbench.db.postgres.PostgresDDLFilter;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -116,7 +115,6 @@ public class DbMetadata
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
 	private List<ObjectListExtender> extenders = new ArrayList<ObjectListExtender>();
-	private DDLFilter ddlFilter;
 
 	private DbmsOutput oraOutput;
 
@@ -135,8 +133,6 @@ public class DbMetadata
 	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet();
 	private final Set<String> reservedWords = CollectionUtil.caseInsensitiveSet();
 
-	private Pattern selectIntoPattern;
-
 	private String baseTableTypeName;
 
 	private Set<String> tableTypesList;
@@ -147,8 +143,8 @@ public class DbMetadata
 
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
-	private List<String> driverKeywords;
 	private char catalogSeparator;
+	private SelectIntoVerifier selectIntoVerifier;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -185,7 +181,6 @@ public class DbMetadata
 		try
 		{
 			this.productName = this.metaData.getDatabaseProductName();
-			this.dbId = null;
 		}
 		catch (SQLException e)
 		{
@@ -200,12 +195,6 @@ public class DbMetadata
 			this.isPostgres = true;
 			this.dataTypeResolver = new PostgresDataTypeResolver();
 
-			// Starting with the version 8.2 the driver supports the dollar quoting
-			// out of the box, so there is no need to use our own workaround
-			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.2"))
-			{
-				this.ddlFilter = new PostgresDDLFilter();
-			}
 			extenders.add(new PostgresDomainReader());
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection.getSqlConnection(), "8.3"))
 			{
@@ -233,7 +222,7 @@ public class DbMetadata
 			{
 				// HSQLDB 2.0 has a completely different set of system tables
 				// so the dynamically configured queries in the XML files need
-				// to be different, therefor the product name is "patched" to include the version number
+				// to be different. Therefor the product name is "patched" to include the version number
 				productName += " 2.0";
 				columnEnhancer = new HsqlColumnEnhancer();
 			}
@@ -313,15 +302,6 @@ public class DbMetadata
 			synonymReader = imeta;
 			sequenceReader = imeta;
 		}
-		else if (productLower.indexOf("mckoi") > -1)
-		{
-			// McKoi reports the version in the database product name
-			// which makes setting up the meta data stuff lookups
-			// too complicated, so we'll strip the version info
-			int pos = this.productName.indexOf('(');
-			if (pos == -1) pos = this.productName.length() - 1;
-			productName = this.productName.substring(0, pos).trim();
-		}
 		else if (productLower.indexOf("sqlite") > -1)
 		{
 			dataTypeResolver = new SQLiteDataTypeResolver();
@@ -373,7 +353,7 @@ public class DbMetadata
 		String quote = dbSettings.getQuoteEscapeCharacter();
 		if (quote != null)
 		{
-			this.quoteCharacter = "\"";
+			this.quoteCharacter = quote;
 			LogMgr.logDebug("DbMetadata.<init>", "Using configured quote escape character: " + quoteCharacter);
 		}
 
@@ -413,32 +393,7 @@ public class DbMetadata
 		}
 
 		selectableTypes = StringUtil.toArray(types, true);
-
-		String pattern = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectinto.pattern", null);
-		if (pattern != null)
-		{
-			try
-			{
-				this.selectIntoPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.<init>", "Incorrect Pattern for detecting SELECT ... INTO <new table> specified", e);
-				this.selectIntoPattern = null;
-			}
-		}
-		try
-		{
-			String words = metaData.getSQLKeywords();
-			if (StringUtil.isNonBlank(words))
-			{
-				driverKeywords = StringUtil.stringToList(words, ",");
-			}
-		}
-		catch (SQLException sql)
-		{
-			LogMgr.logDebug("DbMetadata.<init>", "Could not read SQL keywords from driver", sql);
-		}
+		selectIntoVerifier = new SelectIntoVerifier(getDbId());
 
 		String sep = getDbSettings().getCatalogSeparator();
 		if (sep == null)
@@ -687,34 +642,14 @@ public class DbMetadata
 		return this.dbSettings;
 	}
 
-	/**
-	 * Returns true if the current DBMS supports a SELECT syntax
-	 * which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
-	 *
-	 * It simply checks if a regular expression has been defined to
-	 * detect this kind of statements
-	 *
-	 * @see #isSelectIntoNewTable(String)
-	 */
-	public boolean supportsSelectIntoNewTable()
-	{
-		return this.selectIntoPattern != null;
-	}
-
-	/**
-	 * Checks if the given SQL string is actually some kind of table
-	 * creation "disguised" as a SELECT.
-	 * Whether a statement is identified as a SELECT into a new table
-	 * is defined through the regular expression that can be set for
-	 * the DBMS using the property:
-	 * <tt>workbench.sql.[dbid].selectinto.pattern</tt>
-	 *
-	 * This method returns true if a Regex has been defined and matches the given SQL
-	 */
 	public boolean isSelectIntoNewTable(String sql)
 	{
-		if (this.selectIntoPattern == null) return false;
-		return SqlUtil.isSelectIntoNewTable(this.selectIntoPattern, sql);
+		return selectIntoVerifier.isSelectIntoNewTable(sql);
+	}
+
+	public boolean supportsSelectIntoNewTable()
+	{
+		return selectIntoVerifier != null && selectIntoVerifier.supportsSelectIntoNewTable();
 	}
 
 	public boolean isMySql() { return this.isMySql; }
@@ -725,24 +660,6 @@ public class DbMetadata
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 	public boolean isH2() { return this.isH2; }
-
-	/**
-	 * If a DDLFilter is registered for the current DBMS, this
-	 * method will replace all "problematic" characters in the
-	 * SQL string, and will return a String that the DBMS will
-	 * understand.
-	 * <br/>
-	 * Currently this is only implemented for PostgreSQL to
-	 * fix the lack of $$ in older JDBC drivers
-	 *
-	 * @see workbench.db.postgres.PostgresDDLFilter
-	 * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
-	 */
-	public String filterDDL(String sql)
-	{
-		if (this.ddlFilter == null) return sql;
-		return this.ddlFilter.adjustDDL(sql);
-	}
 
 	/**
 	 * Clears the cached list of catalogs to ignore.
@@ -1092,9 +1009,19 @@ public class DbMetadata
 				SqlKeywordHelper helper = new SqlKeywordHelper(this.getDbId());
 				keywords.addAll(helper.getKeywords());
 				keywords.addAll(helper.getOperators());
-				if (driverKeywords != null)
+
+				try
 				{
-					keywords.addAll(driverKeywords);
+					String words = metaData.getSQLKeywords();
+					if (StringUtil.isNonBlank(words))
+					{
+						List<String> driverKeywords = StringUtil.stringToList(words, ",");
+						keywords.addAll(driverKeywords);
+					}
+				}
+				catch (SQLException sql)
+				{
+					LogMgr.logDebug("DbMetadata.isKeyword()", "Could not read SQL keywords from driver", sql);
 				}
 			}
 			return this.keywords.contains(name);
@@ -1436,6 +1363,7 @@ public class DbMetadata
 		String escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
 		String escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
 		String escapedCatalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(catalogPattern), escape);
+		String sequenceType = getSequenceReader() != null ? getSequenceReader().getSequenceTypeName() : null;
 
 		ResultSet tableRs = null;
 		try
@@ -1509,7 +1437,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, remarks);
-				if (!sequencesReturned && "SEQUENCE".equals(ttype)) sequencesReturned = true;
+				if (!sequencesReturned && StringUtil.equalString(sequenceType, ttype)) sequencesReturned = true;
 			}
 		}
 		finally

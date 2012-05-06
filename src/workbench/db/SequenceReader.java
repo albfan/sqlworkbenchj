@@ -40,5 +40,4 @@ public interface SequenceReader
 
 	String getSequenceTypeName();
 
-
 }

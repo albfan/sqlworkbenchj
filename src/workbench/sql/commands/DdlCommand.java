@@ -79,7 +79,6 @@ public class DdlCommand
 		{
 			this.currentStatement = currentConnection.createStatement();
 
-			sql = currentConnection.getMetadata().filterDDL(sql);
 			sql = getSqlToExecute(sql);
 
 			result.setSuccess();

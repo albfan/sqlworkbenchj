@@ -772,7 +772,7 @@ public class TableIdentifier
 		{
 			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
 		}
-		else if ("SEQUENCE".equalsIgnoreCase(type))
+		else if (con.getMetadata().isSequenceType(type))
 		{
 			SequenceReader reader = meta.getSequenceReader();
 			source = (reader != null ? reader.getSequenceSource(getCatalog(), getSchema(), getTableName()) : null);

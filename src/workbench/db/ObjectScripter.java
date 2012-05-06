@@ -13,13 +13,13 @@ package workbench.db;
 
 import java.util.Collection;
 import java.util.List;
-import workbench.resource.ResourceMgr;
-import workbench.util.ExceptionUtil;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -29,7 +29,6 @@ import workbench.util.StringUtil;
 public class ObjectScripter
 	implements Scripter
 {
-	public static final String TYPE_SEQUENCE = "sequence";
 	public static final String TYPE_TABLE = "table";
 	public static final String TYPE_VIEW = "view";
 	public static final String TYPE_SYNONYM = "synonym";
@@ -54,16 +53,24 @@ public class ObjectScripter
 	private boolean appendCommit;
 	private boolean useSeparator = true;
 	private Collection<String> typesWithoutSeparator;
+	private String sequenceType = "sequence";
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
 
-		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_SEQUENCE,
-			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG,
-			TYPE_DOMAIN, TYPE_ENUM);
-
+		SequenceReader reader = aConnection.getMetadata().getSequenceReader();
+		if (reader != null)
+		{
+			sequenceType = reader.getSequenceTypeName();
+		}
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM,
+			TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM);
+		if (sequenceType != null)
+		{
+			commitTypes.add(sequenceType.toLowerCase());
+		}
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 	}
 
@@ -99,7 +106,7 @@ public class ObjectScripter
 			this.dbConnection.setBusy(true);
 			this.cancel = false;
 			this.script = new StringBuilder(this.objectList.size() * 500);
-			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
+			if (!cancel && sequenceType != null) this.appendObjectType(sequenceType);
 			if (!cancel) this.appendObjectType(TYPE_ENUM);
 			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
@@ -214,7 +221,7 @@ public class ObjectScripter
 				{
 					this.script.append("-- BEGIN ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
 				}
-				
+
 				this.script.append(source);
 
 				if (!StringUtil.endsWith(source, nl))

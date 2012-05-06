@@ -163,7 +163,7 @@ public class WbConnection
 			fireConnectionStateChanged("readonly", null, null);
 		}
 	}
-	
+
 	public void resetSessionFlags()
 	{
 		boolean wasSet = sessionReadOnly != null;

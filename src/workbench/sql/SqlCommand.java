@@ -11,22 +11,24 @@
  */
 package workbench.sql;
 
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.interfaces.ParameterPrompter;
-import workbench.util.ArgumentParser;
-import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
+import workbench.util.ArgumentParser;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;

@@ -769,7 +769,7 @@ public class StringUtil
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setKeepQuotes(keepQuotes);
 		tok.setCheckBrackets(checkBrackets);
-		List<String> result = new LinkedList<String>();
+		List<String> result = new ArrayList<String>();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();
