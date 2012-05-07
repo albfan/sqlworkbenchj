@@ -1336,6 +1336,7 @@ public class DbMetadata
 
 		if (schemaPattern != null) schemaPattern = StringUtil.trimQuotes(StringUtil.replace(schemaPattern, "*", "%"));
 		if (namePattern != null) namePattern = StringUtil.trimQuotes(StringUtil.replace(namePattern, "*", "%"));
+
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30, 12, 10, 10, 20};
@@ -1370,8 +1371,9 @@ public class DbMetadata
 		{
 			escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
 			escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
-			escapedCatalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(catalogPattern), escape);
+			escapedCatalog = SqlUtil.escapeUnderscore(catalogPattern, escape);
 		}
+		
 		String sequenceType = getSequenceReader() != null ? getSequenceReader().getSequenceTypeName() : null;
 
 		ResultSet tableRs = null;

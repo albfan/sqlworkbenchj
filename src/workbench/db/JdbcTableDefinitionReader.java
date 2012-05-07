@@ -50,9 +50,16 @@ public class JdbcTableDefinitionReader
 		DbSettings dbSettings = dbConnection.getDbSettings();
 		DbMetadata dbmeta = dbConnection.getMetadata();
 
+		String tablename = StringUtil.trimQuotes(table.getTableName());
+		String schema = StringUtil.trimQuotes(table.getSchema());
 		String catalog = StringUtil.trimQuotes(table.getCatalog());
-		String schema = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getSchema()), dbConnection);
-		String tablename = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(table.getTableName()), dbConnection);
+
+		if (dbConnection.getDbSettings().supportsMetaDataWildcards())
+		{
+			tablename = SqlUtil.escapeUnderscore(tablename, dbConnection);
+			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+			catalog = SqlUtil.escapeUnderscore(catalog, dbConnection);
+		}
 
 		ResultSet rs = null;
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();

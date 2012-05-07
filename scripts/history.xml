@@ -12,6 +12,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="6" type="fix">For SQL Server it was no longer possible to display databases with an underscore in their name in the DbExplorer</entry>
     <entry dev-build="5" type="fix">For PostgreSQL the table source was not displayed if the table contained a unique index together with non-unique indexes</entry>
     <entry dev-build="5" type="fix">Auto completion was not working with Postgres 8.3 (and before)</entry>
     <entry dev-build="5" type="fix">Setting a result's name using @wbresult in the comment only worked in the first line comment</entry>
