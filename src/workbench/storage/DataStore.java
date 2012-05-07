@@ -590,6 +590,15 @@ public class DataStore
 	}
 
 	/**
+	 * Only for test purposes!
+	 * @param tbl the update table to be used without checking
+	 */
+	public void forceUpdateTable(TableIdentifier tbl)
+	{
+		this.updateTable = (tbl == null ? null : tbl.createCopy());
+	}
+
+	/**
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
 	 * will be retrieved using {@link workbench.db.DbMetadata}
