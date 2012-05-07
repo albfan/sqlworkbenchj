@@ -29,7 +29,7 @@ public class SQLServerTestUtil
 	public static final String TEST_USER = "wbjunit";
 	public static final String TEST_PWD = "wbjunit";
 	public static final String PROFILE_NAME = "WBJUnitMSSQL";
-	public static final String DB_NAME = "wbjunit";
+	public static final String DB_NAME = "wb_junit";
 
 	/**
 	 * Return a connection to a locally running SQL Server database on port 1433

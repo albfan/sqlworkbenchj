@@ -76,7 +76,7 @@ public class SqlServerSynonymReaderTest
 		String source = syns.get(0).getSource(conn).toString().trim();
 		String expected =
 				"CREATE SYNONYM s_person\n" +
-				"   FOR wbjunit.dbo.person;";
+				"   FOR " + SQLServerTestUtil.DB_NAME + ".dbo.person;";
 		assertEquals(expected, source);
 		TableIdentifier table = conn.getMetadata().getSynonymTable(syns.get(0));
 		assertNotNull(table);
