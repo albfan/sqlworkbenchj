@@ -206,7 +206,10 @@ public class JdbcIndexReader
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, indexDefinition.getUniqueConstraintName());
-
+		if (!sql.endsWith(";"))
+		{
+			sql += ";";
+		}
 		return sql;
 	}
 

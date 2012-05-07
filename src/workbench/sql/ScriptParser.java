@@ -472,15 +472,13 @@ public class ScriptParser
 		{
 			p = new IteratingScriptParser();
 			((IteratingScriptParser)p).setSupportIdioticQuotes(this.supportIdioticQuotes);
-//			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");
 		}
 		else
 		{
 			p = new LexerBasedParser();
-//			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using LexerBasedParser");
 		}
 		p.setSupportOracleInclude(this.supportOracleInclude);
-		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator);
+		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator && !useAlternateDelimiter);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
