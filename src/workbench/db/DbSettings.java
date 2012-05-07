@@ -1438,4 +1438,9 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "fk.inline", false);
 	}
 
+	public boolean supportsMetaDataWildcards()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards", true);
+	}
+	
 }

@@ -258,7 +258,8 @@ public class DbMetadata
 			columnEnhancer = new SqlServerColumnEnhancer();
 			objectListEnhancer = new SqlServerObjectListEnhancer();
 			dataTypeResolver = new SqlServerDataTypeResolver();
-			if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.use.schemareader", true))
+			if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.use.schemareader", true)
+				  && JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0"))
 			{
 				// SqlServerSchemaInfoReader will cache the user's default schema
 				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection.getSqlConnection());
@@ -1360,9 +1361,17 @@ public class DbMetadata
 		Set<String> processed = new TreeSet<String>();
 
 		String escape = dbConnection.getSearchStringEscape();
-		String escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
-		String escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
-		String escapedCatalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(catalogPattern), escape);
+
+		String escapedNamePattern = namePattern;
+		String escapedSchema = schemaPattern;
+		String escapedCatalog = StringUtil.trimQuotes(catalogPattern);
+
+		if (getDbSettings().supportsMetaDataWildcards())
+		{
+			escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
+			escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
+			escapedCatalog = SqlUtil.escapeUnderscore(StringUtil.trimQuotes(catalogPattern), escape);
+		}
 		String sequenceType = getSequenceReader() != null ? getSequenceReader().getSequenceTypeName() : null;
 
 		ResultSet tableRs = null;
