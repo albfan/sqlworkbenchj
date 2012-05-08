@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import workbench.db.ConstraintDefinition;
 
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
@@ -103,7 +104,8 @@ public class SqlServerUniqueConstraintReader
 				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
 				if (def != null)
 				{
-					def.setUniqueConstraintName(consName);
+					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+					def.setUniqueConstraint(cons);
 				}
 			}
 		}

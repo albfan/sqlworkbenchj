@@ -39,6 +39,7 @@ public class MetaDataSqlManager
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
 	public static final String DEFERRABLE = "%deferrable%";
+	public static final String DEFERRED = "%deferred%";
 	public static final String GENERAL_SQL = "All";
 
 	private String productName;

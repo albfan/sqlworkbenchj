@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
+import workbench.db.ConstraintDefinition;
 
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
@@ -46,7 +47,11 @@ public class PostgresUniqueConstraintReader
 		if (JdbcUtils.hasMinimumServerVersion(con, "9.0"))
 		{
 			baseSql =
-				"  select ind.relname as index_name, indschem.nspname as index_schema, cons.conname as constraint_name \n" +
+				"  select ind.relname as index_name, \n" +
+				"         indschem.nspname as index_schema, \n" +
+				"         cons.conname as constraint_name, \n" +
+				"         cons.condeferrable as deferrable, \n" +
+				"         cons.condeferred as deferred \n" +
 				"  from pg_constraint cons \n" +
 				"    join pg_class tbl ON tbl.oid = cons.conrelid \n" +
 				"    join pg_namespace ns ON ns.oid = tbl.relnamespace \n" +
@@ -61,7 +66,9 @@ public class PostgresUniqueConstraintReader
 			baseSql =
 				"  select cons.conname as index_name,  \n" +
 				"         cns.nspname as index_schema, \n" +
-				"         cons.conname as constraint_name \n" +
+				"         cons.conname as constraint_name, \n" +
+				"         false as deferrable, \n" +
+				"         false as deferred \n" +
 				"  from pg_constraint cons  \n" +
 				"    join pg_class tbl ON tbl.oid = cons.conrelid  \n" +
 				"    join pg_namespace cns on cns.oid = cons.connamespace \n" +
@@ -126,10 +133,15 @@ public class PostgresUniqueConstraintReader
 				String idxName = rs.getString(1);
 				String idxSchema = rs.getString(2);
 				String consName = rs.getString(3);
+				boolean deferrable = rs.getBoolean("deferrable");
+				boolean deferred = rs.getBoolean("deferred");
 				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
 				if (def != null)
 				{
-					def.setUniqueConstraintName(consName);
+					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+					cons.setDeferrable(deferrable);
+					cons.setInitiallyDeferred(deferred);
+					def.setUniqueConstraint(cons);
 				}
 			}
 			con.releaseSavepoint(sp);

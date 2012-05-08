@@ -94,10 +94,12 @@ public class WbGenerateScript
 		{
 			for (String table : names)
 			{
+				String tname = currentConnection.getMetadata().adjustObjectnameCase(table);
 				for (String schema : schemas)
 				{
 					if (isCancelled) break;
-					List<TableIdentifier> elements = currentConnection.getMetadata().getObjectList(table, schema, null);
+
+					List<TableIdentifier> elements = currentConnection.getMetadata().getObjectList(tname, schema, null);
 					objects.addAll(elements);
 				}
 				if (isCancelled) break;

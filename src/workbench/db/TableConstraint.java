@@ -19,42 +19,15 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class TableConstraint
+	extends ConstraintDefinition
 	implements Comparable<TableConstraint>
 {
-	private String name;
 	private String expression;
-	private boolean isSystemName;
-	private String comment;
 
 	public TableConstraint(String cName, String expr)
 	{
-		name = cName;
+		super(cName);
 		expression = StringUtil.isNonBlank(expr) ? expr.trim() : null;
-	}
-
-	public void setIsSystemName(boolean flag)
-	{
-		this.isSystemName = flag;
-	}
-
-	public boolean isSystemName()
-	{
-		return this.isSystemName;
-	}
-
-	public String getConstraintName()
-	{
-		return this.name;
-	}
-
-	public void setComment(String remark)
-	{
-		comment = remark;
-	}
-
-	public String getComment()
-	{
-		return comment;
 	}
 
 	public String getExpression()
@@ -66,11 +39,11 @@ public class TableConstraint
 	public int compareTo(TableConstraint other)
 	{
 		if (other == null) return -1;
-		if (isSystemName && other.isSystemName)
+		if (isSystemName() && other.isSystemName())
 		{
 			return StringUtil.compareStrings(this.expression, other.expression, false);
 		}
-		int c = StringUtil.compareStrings(this.name, other.name, true);
+		int c = StringUtil.compareStrings(this.getConstraintName(), other.getConstraintName(), true);
 		if (c == 0)
 		{
 			c = StringUtil.compareStrings(this.expression, other.expression, false);
@@ -126,10 +99,10 @@ public class TableConstraint
 	{
 		StringBuilder result = new StringBuilder(50);
 
-		if (StringUtil.isNonBlank(name) && !isSystemName())
+		if (StringUtil.isNonBlank(getConstraintName()) && !isSystemName())
 		{
 			result.append("CONSTRAINT ");
-			result.append(name);
+			result.append(getConstraintName());
 			result.append(' ');
 		}
 
@@ -143,4 +116,5 @@ public class TableConstraint
 		result.append(expression);
 		return result.toString();
 	}
+
 }

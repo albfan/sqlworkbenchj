@@ -255,7 +255,7 @@ public class TableSourceBuilder
 		result.append('\n');
 		result.append(")");
 		String options = getAdditionalTableOptions(table, columns, indexList);
-		if (options != null)
+		if (StringUtil.isNonEmpty(options))
 		{
 			result.append('\n');
 			result.append(options);

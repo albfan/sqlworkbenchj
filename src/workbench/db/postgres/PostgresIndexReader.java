@@ -91,7 +91,6 @@ public class PostgresIndexReader
 				{
 					String constraint = getUniqueConstraint(table, index);
 					source.append(constraint);
-					source.append(';');
 					source.append(nl);
 				}
 				else

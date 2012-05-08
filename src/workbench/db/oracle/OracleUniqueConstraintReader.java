@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
@@ -22,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -39,7 +41,7 @@ public class OracleUniqueConstraintReader
 
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
-			"select index_name, constraint_name \n" +
+			"select index_name, constraint_name, deferrable, deferred \n" +
 			"from all_constraints \n" +
 			"where constraint_type = 'U' \n" +
 			" AND (");
@@ -55,7 +57,7 @@ public class OracleUniqueConstraintReader
 				// Non-Unique indexes can still back a unique constraint...
 				continue;
 			}
-			
+
 			if (first)
 			{
 				first = false;
@@ -96,10 +98,15 @@ public class OracleUniqueConstraintReader
 			{
 				String idxName = rs.getString(1);
 				String consName = rs.getString(2);
+				String deferrable = rs.getString("deferrable");
+				String deferred = rs.getString("deferred");
 				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, null);
 				if (def != null)
 				{
-					def.setUniqueConstraintName(consName);
+					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+					cons.setDeferrable(StringUtil.equalStringIgnoreCase("DEFERRABLE", deferrable));
+					cons.setInitiallyDeferred(StringUtil.equalStringIgnoreCase("DEFERRED", deferred));
+					def.setUniqueConstraint(cons);
 				}
 			}
 		}

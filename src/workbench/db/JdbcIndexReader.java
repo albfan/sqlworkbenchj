@@ -206,6 +206,38 @@ public class JdbcIndexReader
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, indexDefinition.getUniqueConstraintName());
+		ConstraintDefinition constraint = indexDefinition.getUniqueConstraint();
+
+		Boolean deferred = constraint == null ? false : constraint.isInitiallyDeferred();
+		Boolean deferrable = constraint == null ? false : constraint.isDeferrable();
+
+		if (deferrable == null)
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRABLE, "");
+			sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRED, "");
+		}
+		else
+		{
+			if (Boolean.TRUE.equals(deferrable))
+			{
+				sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRABLE, "DEFERRABLE");
+				if (Boolean.TRUE.equals(deferred))
+				{
+					sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRED, "INITIALLY DEFERRED");
+				}
+				else
+				{
+					sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRED, "INITIALLY IMMEDIATE");
+				}
+			}
+			else
+			{
+				sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRABLE, "");
+				sql = StringUtil.replace(sql, MetaDataSqlManager.DEFERRED, "");
+			}
+		}
+		sql = sql.trim();
+
 		if (!sql.endsWith(";"))
 		{
 			sql += ";";
@@ -229,7 +261,7 @@ public class JdbcIndexReader
 		if (indexDefinition.isUniqueConstraint())
 		{
 			uniqueConstraint = getUniqueConstraint(table, indexDefinition);
-			if (indexDefinition.isUnique() && indexDefinition.getUniqueConstraintName().equals(indexDefinition.getName()))
+			if (indexDefinition.getUniqueConstraintName().equals(indexDefinition.getName()))
 			{
 				return uniqueConstraint;
 			}
