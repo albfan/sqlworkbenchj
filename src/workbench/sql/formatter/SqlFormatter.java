@@ -11,18 +11,16 @@
  */
 package workbench.sql.formatter;
 
-import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Set;
+
 import workbench.resource.Settings;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ArgumentParser;
-import workbench.util.CharSequenceReader;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -48,7 +46,6 @@ public class SqlFormatter
 	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
-
 	// keywords terminating the FROM part
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
 		"WHERE", "START WITH", "CONNECT BY");
@@ -69,6 +66,7 @@ public class SqlFormatter
 	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(";");
 
 	public static final Set<String> SELECT_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM");
+
 	private final Set<String> SET_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM", "WHERE");
 
 	private CharSequence sql;
@@ -89,6 +87,7 @@ public class SqlFormatter
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
+	private JoinWrapStyle joinWrapping = JoinWrapStyle.onlyMultiple;
 	private String dbId;
 	private char catalogSeparator = '.';
 
@@ -120,9 +119,6 @@ public class SqlFormatter
 	private SqlFormatter(CharSequence aScript, int indentCount, int maxLength, String dbId)
 	{
 		this.sql = aScript;
-		Reader in = new CharSequenceReader(this.sql);
-		this.lexer = new SQLLexer(in);
-		this.result = new StringBuilder(this.sql.length() + 100);
 		if (indentCount > 0)
 		{
 			this.indent = new StringBuilder(indentCount);
@@ -135,7 +131,13 @@ public class SqlFormatter
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
+		joinWrapping = Settings.getInstance().getFormatterJoinWrapStyle();
 		setDbId(dbId);
+	}
+
+	public void setJoinWrapping(JoinWrapStyle style)
+	{
+		joinWrapping = style;
 	}
 
 	public void setUseLowerCaseFunctions(boolean flag)
@@ -236,6 +238,9 @@ public class SqlFormatter
 	{
 		saveLeadingWhitespace();
 		if (this.sql.length() == 0) return "";
+
+		this.lexer = new SQLLexer(this.sql);
+		this.result = new StringBuilder(this.sql.length() + 100);
 
 		this.formatSql();
 		StringUtil.trimTrailingWhitespace(result);
@@ -564,21 +569,36 @@ public class SqlFormatter
 			}
 			else if ("AND".equals(text) || "OR".equals(text))
 			{
-				if (onPos > 0)
+				if (joinWrapping != JoinWrapStyle.none)
 				{
-					String lb = "\n" + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
-					this.result.insert(onPos, lb);
-					realLength += lb.length();
+					if (onPos > 0)
+					{
+						String lb = "\n" + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
+						this.result.insert(onPos, lb);
+						realLength += lb.length();
+					}
+					appendNewline();
+					indent(indentPos - text.length());
 				}
-				appendNewline();
-				indent(indentPos - text.length());
+				else
+				{
+					appendText(' ');
+				}
 				appendTokenText(t);
 			}
 			else
 			{
 				if ("ON".equals(text))
 				{
-					onPos = result.length();
+					if (joinWrapping == JoinWrapStyle.onlyMultiple)
+					{
+						onPos = result.length();
+					}
+					else if (joinWrapping == JoinWrapStyle.always)
+					{
+						appendNewline();
+						indent(indentPos - text.length() - 1);
+					}
 				}
 				if (needsWhitespace(last, t)) appendText(' ');
 				appendTokenText(t);

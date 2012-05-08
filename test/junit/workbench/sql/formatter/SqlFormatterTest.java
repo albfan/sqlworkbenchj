@@ -1400,6 +1400,62 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testJoinWrapping()
+	{
+		String sql = "select * from foo join bar on foo.id = bar.fid";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		f.setJoinWrapping(JoinWrapStyle.none);
+
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar ON foo.id = bar.fid";
+		assertEquals(expected, formatted);
+
+		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar ON foo.id = bar.fid";
+		assertEquals(expected, formatted);
+
+		f.setJoinWrapping(JoinWrapStyle.always);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar\n" +
+			"    ON foo.id = bar.fid";
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and x = 1", 100);
+		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar\n" +
+			"    ON foo.id = bar.fid\n"  +
+			"   AND x = 1";
+		assertEquals(expected, formatted);
+
+		f.setJoinWrapping(JoinWrapStyle.always);
+		formatted = f.getFormattedSql();
+		assertEquals(expected, formatted);
+
+		f.setJoinWrapping(JoinWrapStyle.none);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar ON foo.id = bar.fid AND x = 1";
+//		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testGetFormattedSql()
 		throws Exception
 	{

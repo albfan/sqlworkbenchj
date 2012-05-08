@@ -51,6 +51,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.formatter.JoinWrapStyle;
 import workbench.storage.PkMapping;
 import workbench.util.*;
 
@@ -776,6 +777,30 @@ public class Settings
 	{
 	    setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
 	}
+
+	public void setFormatterJoinWrapStyle(JoinWrapStyle style)
+	{
+		setProperty("workbench.sql.formatter.join.condition.wrapstyle", style.toString());
+	}
+
+	public JoinWrapStyle getFormatterJoinWrapStyle()
+	{
+		String style = getProperty("workbench.sql.formatter.join.condition.wrapstyle", JoinWrapStyle.onlyMultiple.toString());
+		try
+		{
+			return JoinWrapStyle.valueOf(style);
+		}
+		catch (Exception e)
+		{
+			return JoinWrapStyle.onlyMultiple;
+		}
+	}
+
+	public void setFormatterWrapMultipleJoinConditions(boolean flag)
+	{
+	    setProperty("workbench.sql.formatter.join.condition.multiple.wrap", flag);
+	}
+
 
 	public boolean getFormatterAddSpaceAfterLineBreakComma()
 	{
