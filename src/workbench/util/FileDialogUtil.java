@@ -236,7 +236,7 @@ public class FileDialogUtil
 		String fname = f.getName();
 		File dir = f.getParentFile();
 		File config = Settings.getInstance().getConfigDir();
-		if (dir.equals(config))
+		if (dir != null && dir.equals(config))
 		{
 			return fname;
 		}
