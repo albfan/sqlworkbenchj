@@ -305,7 +305,8 @@ public class SqlFormatterTest
 		String expected =
 			"SELECT *\n" +
 			"FROM table1\n"+
-			"  JOIN table2 ON table1.col1 = table2.col1\n" +
+			"  JOIN table2\n" +
+			"    ON table1.col1 = table2.col1\n" +
 			"   AND table1.col3 IN (1, 2, 3, 4, 5)";
 		String formatted = f.getFormattedSql().trim();
 //		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
@@ -594,7 +595,8 @@ public class SqlFormatterTest
              "       edh.DepartmentID,\n" +
              "       0 AS Level\n" +
              "FROM HumanResources.Employee AS e\n" +
-             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh\n" +
+			       "          ON e.EmployeeID = edh.EmployeeID\n" +
 			       "         AND edh.EndDate IS NULL\n" +
              "WHERE ManagerID IS NULL\n" +
              "UNION ALL\n" +
@@ -604,7 +606,8 @@ public class SqlFormatterTest
              "       edh.DepartmentID,\n" +
              "       Level + 1\n" +
              "FROM HumanResources.Employee AS e\n" +
-             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh\n" +
+			       "          ON e.EmployeeID = edh.EmployeeID\n" +
 			       "         AND edh.EndDate IS NULL\n" +
              "  INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
@@ -735,7 +738,8 @@ public class SqlFormatterTest
 						"         edh.DepartmentID,\n" +
 						"         0 AS Level\n" +
 						"  FROM HumanResources.Employee AS e\n" +
-						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh\n" +
+			      "            ON e.EmployeeID = edh.EmployeeID\n" +
 			      "           AND edh.EndDate IS NULL\n" +
 						"  WHERE ManagerID IS NULL\n" +
 						"  UNION ALL\n" +
@@ -746,7 +750,8 @@ public class SqlFormatterTest
 						"         edh.DepartmentID,\n" +
 						"         Level + 1\n" +
 						"  FROM HumanResources.Employee AS e\n" +
-						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh\n" +
+			      "            ON e.EmployeeID = edh.EmployeeID\n" +
 			      "           AND edh.EndDate IS NULL\n" +
 						"    INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID\n" +
 						")\n" +
@@ -1386,7 +1391,8 @@ public class SqlFormatterTest
 		expected =
 			"SELECT *\n" +
 			"FROM table1\n"+
-			"  JOIN table2 ON table1.col1 = table2.col1\n" +
+			"  JOIN table2\n" +
+			"    ON table1.col1 = table2.col1\n" +
 			"   AND table1.col3 IN (1, 2, 3, 4, 5)";
 		formatted = f.getFormattedSql().trim();
 //		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");

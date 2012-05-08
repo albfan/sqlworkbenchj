@@ -533,6 +533,7 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		int indentPos = last.getText().length() + 2;
+		int onPos = 0;
 		int bracketCount = 0;
 		while (t != null)
 		{
@@ -563,12 +564,22 @@ public class SqlFormatter
 			}
 			else if ("AND".equals(text) || "OR".equals(text))
 			{
+				if (onPos > 0)
+				{
+					String lb = "\n" + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
+					this.result.insert(onPos, lb);
+					realLength += lb.length();
+				}
 				appendNewline();
 				indent(indentPos - text.length());
 				appendTokenText(t);
 			}
 			else
 			{
+				if ("ON".equals(text))
+				{
+					onPos = result.length();
+				}
 				if (needsWhitespace(last, t)) appendText(' ');
 				appendTokenText(t);
 			}
@@ -577,6 +588,7 @@ public class SqlFormatter
 		}
 		return t;
 	}
+
 	private SQLToken processList(SQLToken last, int indentCount, Set<String> terminalKeys)
 	{
 		StringBuilder b = new StringBuilder(indentCount);
