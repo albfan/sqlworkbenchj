@@ -304,9 +304,11 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql);
 		String expected =
 			"SELECT *\n" +
-			"FROM table1 \n"+
-			"  JOIN table2 ON table1.col1 = table2.col1 AND table1.col3 IN (1,2,3,4,5)";
+			"FROM table1\n"+
+			"  JOIN table2 ON table1.col1 = table2.col1\n" +
+			"   AND table1.col3 IN (1, 2, 3, 4, 5)";
 		String formatted = f.getFormattedSql().trim();
+//		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
 		assertEquals(expected, formatted);
 	}
 
@@ -591,8 +593,9 @@ public class SqlFormatterTest
              "       e.Title,\n" +
              "       edh.DepartmentID,\n" +
              "       0 AS Level\n" +
-             "FROM HumanResources.Employee AS e \n" +
-             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
+             "FROM HumanResources.Employee AS e\n" +
+             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+			       "         AND edh.EndDate IS NULL\n" +
              "WHERE ManagerID IS NULL\n" +
              "UNION ALL\n" +
              "SELECT e.ManagerID,\n" +
@@ -600,8 +603,9 @@ public class SqlFormatterTest
              "       e.Title,\n" +
              "       edh.DepartmentID,\n" +
              "       Level + 1\n" +
-             "FROM HumanResources.Employee AS e \n" +
-             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "FROM HumanResources.Employee AS e\n" +
+             "  INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+			       "         AND edh.EndDate IS NULL\n" +
              "  INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
@@ -730,8 +734,9 @@ public class SqlFormatterTest
 						"         e.Title,\n" +
 						"         edh.DepartmentID,\n" +
 						"         0 AS Level\n" +
-						"  FROM HumanResources.Employee AS e \n" +
-						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
+						"  FROM HumanResources.Employee AS e\n" +
+						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+			      "           AND edh.EndDate IS NULL\n" +
 						"  WHERE ManagerID IS NULL\n" +
 						"  UNION ALL\n" +
 						"  -- Recursive member definition \n" +
@@ -740,8 +745,9 @@ public class SqlFormatterTest
 						"         e.Title,\n" +
 						"         edh.DepartmentID,\n" +
 						"         Level + 1\n" +
-						"  FROM HumanResources.Employee AS e \n" +
-						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+						"  FROM HumanResources.Employee AS e\n" +
+						"    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID\n" +
+			      "           AND edh.EndDate IS NULL\n" +
 						"    INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID\n" +
 						")\n" +
 						"-- Statement that executes the CTE \n" +
@@ -749,7 +755,7 @@ public class SqlFormatterTest
 						"       EmployeeID,\n" +
 						"       Title,\n" +
 						"       Level\n" +
-						"FROM DirectReports \n" +
+						"FROM DirectReports\n" +
 						"  INNER JOIN HumanResources.Department AS dp ON DirectReports.DeptID = dp.DepartmentID\n" +
 						"WHERE dp.GroupName = N 'Research and Development'\n" +
 						"OR    Level = 0";
@@ -815,7 +821,7 @@ public class SqlFormatterTest
              "  SELECT 1, 2 FROM dual\n" +
              ")\n" +
              "SELECT *\n" +
-             "FROM first_cte f \n" +
+             "FROM first_cte f\n" +
              "  JOIN second_cte s ON (f.col1 = s.col2)";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
@@ -886,7 +892,7 @@ public class SqlFormatterTest
 			"         WHEN 1 THEN d.dname\n" +
 			"         ELSE NULL\n" +
 			"       END AS department\n" +
-			"FROM emp e \n" +
+			"FROM emp e\n" +
 			"  INNER JOIN dept d ON (e.deptno = d.deptno)\n" +
 			"ORDER BY d.deptno,\n" +
 			"         e.empno";
@@ -894,7 +900,7 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		String formatted = f.getFormattedSql();
-//		System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//		System.out.println("************** result:\n" + formatted + "\n********** expected:\n" + expected);
 		assertEquals(expected, formatted);
 	}
 
@@ -1372,7 +1378,6 @@ public class SqlFormatterTest
 		f.setAddSpaceAfterCommInList(true);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a\nFROM b\nWHERE c IN (1, 2, 3);";
-//		System.out.println("*****************\n" + formatted + "\n*************\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 
 		sql = "select * from table1 join table2 on table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
@@ -1380,9 +1385,11 @@ public class SqlFormatterTest
 		f.setAddSpaceAfterCommInList(true);
 		expected =
 			"SELECT *\n" +
-			"FROM table1 \n"+
-			"  JOIN table2 ON table1.col1 = table2.col1 AND table1.col3 IN (1, 2, 3, 4, 5)";
+			"FROM table1\n"+
+			"  JOIN table2 ON table1.col1 = table2.col1\n" +
+			"   AND table1.col3 IN (1, 2, 3, 4, 5)";
 		formatted = f.getFormattedSql().trim();
+//		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 	}
 

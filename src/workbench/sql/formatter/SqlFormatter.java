@@ -13,6 +13,7 @@ package workbench.sql.formatter;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 import workbench.resource.Settings;
@@ -47,9 +48,14 @@ public class SqlFormatter
 	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
+
 	// keywords terminating the FROM part
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
 		"WHERE", "START WITH", "CONNECT BY");
+
+	// keywords terminating a a JOIN clause
+	public static final Set<String> JOIN_TERMINAL = CollectionUtil.caseInsensitiveSet(
+		"WHERE", "ORDER BY", "GROUP BY");
 
 	// keywords terminating an GROUP BY clause
 	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
@@ -424,13 +430,14 @@ public class SqlFormatter
 		SQLToken lastToken = last;
 		int bracketCount = 0;
 		boolean inJoin = false;
+		Set<String> joinKeywords = SqlUtil.getJoinKeyWords();
 
 		while (t != null)
 		{
 			String text = t.getContents();
 			if (!inJoin)
 			{
-				inJoin = SqlUtil.getJoinKeyWords().contains(text);
+				inJoin = joinKeywords.contains(text);
 			}
 
 			if (FROM_TERMINAL.contains(text.toUpperCase()))
@@ -457,6 +464,14 @@ public class SqlFormatter
 			{
 				this.appendText(text);
 				bracketCount --;
+			}
+			else if (inJoin)
+			{
+				appendNewline();
+				indent(2);
+				this.appendTokenText(t);
+				t = processJoin(t);
+				continue;
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -492,7 +507,7 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
-					if (SqlUtil.getJoinKeyWords().contains(text))
+					if (joinKeywords.contains(text))
 					{
 						indent(2);
 					}
@@ -514,6 +529,54 @@ public class SqlFormatter
 		return null;
 	}
 
+	private SQLToken processJoin(SQLToken last)
+	{
+		SQLToken t = this.lexer.getNextToken(true, false);
+		int indentPos = last.getText().length() + 2;
+		int bracketCount = 0;
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (JOIN_TERMINAL.contains(text) || SqlUtil.getJoinKeyWords().contains(text))
+			{
+				return t;
+			}
+			else if (t.isComment())
+			{
+				this.appendComment(t.getText());
+			}
+			else if ("(".equals(text))
+			{
+				appendText(' ');
+				bracketCount ++;
+				this.appendTokenText(t);
+				if (last.getContents().equals("IN"))
+				{
+					t = this.lexer.getNextToken(true, false);
+					t = processInList(t);
+				}
+			}
+			else if (")".equals(text))
+			{
+				bracketCount --;
+				appendText(')');
+			}
+			else if ("AND".equals(text) || "OR".equals(text))
+			{
+				appendNewline();
+				indent(indentPos - text.length());
+				appendTokenText(t);
+			}
+			else
+			{
+				if (needsWhitespace(last, t)) appendText(' ');
+				appendTokenText(t);
+			}
+			last = t;
+			t =  this.lexer.getNextToken(true, false);
+		}
+		return t;
+	}
 	private SQLToken processList(SQLToken last, int indentCount, Set<String> terminalKeys)
 	{
 		StringBuilder b = new StringBuilder(indentCount);
