@@ -81,7 +81,8 @@ public class OracleStatementHook
 		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
 		WbDisableOraOutput.VERB, WbEnableOraOutput.VERB, WbStartBatch.VERB, WbEndBatch.VERB, WbHelp.VERB,
 		WbIsolationLevel.VERB, WbLoadPkMapping.VERB, WbListPkDef.VERB, WbMode.VERB, WbListVars.VERB, WbSetProp.VERB,
-		WbSysProps.VERB, WbXslt.VERB, SetCommand.VERB, SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.ROLLBACK.getVerb());
+		WbSetProp.ALTERNATE_VERB, WbSysProps.VERB, WbXslt.VERB, SetCommand.VERB, SingleVerbCommand.COMMIT.getVerb(),
+		SingleVerbCommand.ROLLBACK.getVerb());
 
 	/**
 	 * Stores the statistic values before the execution of the statement.

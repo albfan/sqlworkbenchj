@@ -102,6 +102,7 @@ public class CommandTester
 		commands.add(WbOraShow.VERB);
 		commands.add(WbGenDrop.VERB);
 		commands.add(WbSetProp.VERB);
+		commands.add(WbSetProp.ALTERNATE_VERB);
 		commands.add(WbGenerateScript.VERB);
 	}
 
@@ -144,6 +145,7 @@ public class CommandTester
 			formattedWords.put(WbSysExec.VERB, "WbSysExec");
 			formattedWords.put(WbGenDrop.VERB, "WbGenerateDrop");
 			formattedWords.put(WbSetProp.VERB, "WbSetProp");
+			formattedWords.put(WbSetProp.ALTERNATE_VERB, "WbSetConfig");
 			formattedWords.put(WbGenerateScript.VERB, "WbGenerateScript");
 		}
 		return formattedWords;

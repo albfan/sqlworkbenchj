@@ -18,6 +18,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -28,6 +29,7 @@ public class WbSetProp
 	extends SqlCommand
 {
 	public static final String VERB = "WBSETPROP";
+	public static final String ALTERNATE_VERB = "WBSETCONFIG";
 	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_PROP = "property";
 	public static final String PARAM_VALUE = "value";
@@ -47,6 +49,8 @@ public class WbSetProp
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
+		String verb = SqlUtil.getSqlVerb(sql);
+		boolean isConfig = verb.equalsIgnoreCase(ALTERNATE_VERB);
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
@@ -65,7 +69,7 @@ public class WbSetProp
 				value = prop.substring(pos + 1);
 				prop = prop.substring(0, pos);
 			}
-			
+
 			if (prop == null)
 			{
 				result.setFailure();
@@ -95,8 +99,18 @@ public class WbSetProp
 			String[] pair = args.split("=");
 			if (pair.length == 2)
 			{
-				Settings.getInstance().setTemporaryProperty(pair[0], pair[1]);
-				result.addMessage(pair[0]  + " set to "  + pair[1]);
+				String prop	= pair[0];
+				String value = pair[1];
+				if (isConfig && prop.startsWith("workbench"))
+				{
+					Settings.getInstance().setProperty(prop, value);
+					result.addMessage(prop  + " permanently set to "  + value);
+				}
+				else
+				{
+					Settings.getInstance().setTemporaryProperty(prop, value);
+					result.addMessage(prop  + " set to "  + value);
+				}
 			}
 		}
 		else
@@ -113,6 +127,12 @@ public class WbSetProp
 	{
 		return VERB;
 	}
+	@Override
+	public String getAlternateVerb()
+	{
+		return ALTERNATE_VERB;
+	}
+
 
 	@Override
 	protected boolean isConnectionRequired()
