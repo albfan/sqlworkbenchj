@@ -445,7 +445,17 @@ public class WbCall
 				// for the first procedure in case none matched
 				procParams.add(params);
 
-				if (params.getRowCount() == sqlParams.size())
+				int paramCount = params.getRowCount();
+
+				// if a function is found, it will contain at least one parameter for the return value
+				// the "return parameter" should not be considered when checking comparing the procedure/function
+				// parameters against the number of parameters supplied by the user
+				if (proc.isFunction())
+				{
+					paramCount --;
+				}
+
+				if (paramCount == sqlParams.size())
 				{
 					procDef = proc;
 					break;
