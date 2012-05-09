@@ -94,7 +94,7 @@ public class QueryCopySource
 
 		try
 		{
-			if (this.sourceConnection.getDbSettings().selectStartsTransaction())
+			if (this.sourceConnection.supportsSavepoints() && this.sourceConnection.getDbSettings().selectStartsTransaction())
 			{
 				sp = sourceConnection.setSavepoint();
 			}
