@@ -91,7 +91,10 @@ public class WbAbout
 		Savepoint sp = null;
 		try
 		{
-			sp = currentConnection.setSavepoint();
+			if (currentConnection.getDbSettings().useSavePointForDML())
+			{
+				sp = currentConnection.setSavepoint();
+			}
 			DatabaseMetaData meta = currentConnection.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = currentConnection.getMetadata();
 
