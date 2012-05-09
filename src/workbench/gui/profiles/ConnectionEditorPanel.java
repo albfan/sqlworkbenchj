@@ -271,6 +271,7 @@ public class ConnectionEditorPanel
     tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfURL.setMaximumSize(new java.awt.Dimension(2147483647, 20));
     tfURL.setName("url"); // NOI18N
+    tfURL.addFocusListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -304,7 +305,7 @@ public class ConnectionEditorPanel
     asSysDBA.setText(ResourceMgr.getString("LblSysDba")); // NOI18N
     asSysDBA.setToolTipText(ResourceMgr.getString("d_LblSysDba")); // NOI18N
     asSysDBA.setBorder(null);
-    asSysDBA.setName("oracleSysDBA");
+    asSysDBA.setName("oracleSysDBA"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
@@ -519,7 +520,7 @@ public class ConnectionEditorPanel
     checkOpenTrans.setToolTipText(ResourceMgr.getString("d_LblCheckUncommitted")); // NOI18N
     checkOpenTrans.setBorder(null);
     checkOpenTrans.setMargin(new java.awt.Insets(2, 0, 2, 2));
-    checkOpenTrans.setName("detectOpenTransaction");
+    checkOpenTrans.setName("detectOpenTransaction"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -533,7 +534,7 @@ public class ConnectionEditorPanel
 
     preventNoWhere.setText(ResourceMgr.getString("LblConnPreventNoWhere")); // NOI18N
     preventNoWhere.setBorder(null);
-    preventNoWhere.setName("preventDMLWithoutWhere");
+    preventNoWhere.setName("preventDMLWithoutWhere"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -814,7 +815,7 @@ public class ConnectionEditorPanel
 
   // Code for dispatching events from components to event handlers.
 
-  private class FormListener implements java.awt.event.ActionListener, java.awt.event.ItemListener, java.awt.event.MouseListener
+  private class FormListener implements java.awt.event.ActionListener, java.awt.event.FocusListener, java.awt.event.ItemListener, java.awt.event.MouseListener
   {
     FormListener() {}
     public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -826,6 +827,18 @@ public class ConnectionEditorPanel
       else if (evt.getSource() == editFilterButton)
       {
         ConnectionEditorPanel.this.editFilterButtonActionPerformed(evt);
+      }
+    }
+
+    public void focusGained(java.awt.event.FocusEvent evt)
+    {
+    }
+
+    public void focusLost(java.awt.event.FocusEvent evt)
+    {
+      if (evt.getSource() == tfURL)
+      {
+        ConnectionEditorPanel.this.tfURLFocusLost(evt);
       }
     }
 
@@ -897,6 +910,9 @@ public class ConnectionEditorPanel
 				LogMgr.logError("ConnectionProfilePanel.cbDriversItemStateChanged()", "Error changing driver", e);
 			}
 
+			checkOracle();
+			checkUncommitted();
+
 			if (!newDriver.canReadLibrary())
 			{
 				final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this).getParent());
@@ -929,6 +945,11 @@ public class ConnectionEditorPanel
 		EditConnectionFiltersPanel.editFilter(d, this.getProfile());
 		checkFilters();
 	}//GEN-LAST:event_editFilterButtonActionPerformed
+
+  private void tfURLFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_tfURLFocusLost
+  {//GEN-HEADEREND:event_tfURLFocusLost
+    checkOracle();
+  }//GEN-LAST:event_tfURLFocusLost
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
