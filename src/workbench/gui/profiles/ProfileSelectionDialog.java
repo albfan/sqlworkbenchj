@@ -145,7 +145,7 @@ public class ProfileSelectionDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(650, 510);
+			this.setSize(650, 520);
 		}
 	}
 
