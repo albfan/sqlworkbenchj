@@ -62,6 +62,7 @@ public class LnFManager
 		}
 		Comparator<LnFDefinition> nameComp = new Comparator<LnFDefinition>()
 		{
+			@Override
 			public int compare(LnFDefinition first, LnFDefinition second)
 			{
 				return StringUtil.compareStrings(first.getName(), second.getName(), true);

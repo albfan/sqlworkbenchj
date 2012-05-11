@@ -61,6 +61,7 @@ public class LnFDefinition
 		       && !StringUtil.isEmptyString(this.library);
 	}
 
+	@Override
 	public String toString()
 	{
 		return getName();
@@ -102,6 +103,7 @@ public class LnFDefinition
 		return new LnFDefinition(getName(), getClassName(), getLibrary());
 	}
 
+	@Override
 	public int compareTo(LnFDefinition o)
 	{
 		String cls = o.getClassName();

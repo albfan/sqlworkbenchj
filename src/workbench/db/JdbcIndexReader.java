@@ -479,6 +479,7 @@ public class JdbcIndexReader
 		catch (Exception e)
 		{
 			LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Could not retrieve indexes", e);
+			result = new ArrayList<IndexDefinition>(0);
 		}
 		finally
 		{

@@ -14,6 +14,7 @@ package workbench.gui.lnf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.lang.reflect.Method;
 import java.util.Set;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
@@ -174,6 +175,12 @@ public class LnFHelper
 				LnFLoader loader = new LnFLoader(def);
 				LookAndFeel lnf = loader.getLookAndFeel();
 
+				if (className.startsWith("com.jgoodies.looks.plastic"))
+				{
+					String theme = Settings.getInstance().getProperty("workbench.gui.lnf.jgoodies.theme", "DesertBlue");
+					setJGoodiesTheme(loader, theme);
+				}
+
 				UIManager.setLookAndFeel(lnf);
 			}
 		}
@@ -186,6 +193,28 @@ public class LnFHelper
 		checkWindowsClassic(UIManager.getLookAndFeel().getClass().getName());
 	}
 
+	private void setJGoodiesTheme(LnFLoader loader, String themeName)
+	{
+		if (StringUtil.isBlank(themeName)) return;
+		try
+		{
+			String className = "com.jgoodies.looks.plastic.theme." + themeName;
+			LogMgr.logDebug("LnFHelper.setJGoodiesTheme()", "Trying to set theme: " + className);
+
+			Class lnf = loader.loadClass("com.jgoodies.looks.plastic.PlasticLookAndFeel");
+			Class baseThemeClass = loader.loadClass("com.jgoodies.looks.plastic.PlasticTheme");
+			Class themeClass = loader.loadClass(className);
+
+			Object themeInstance = themeClass.newInstance();
+			Method setTheme = lnf.getMethod("setPlasticTheme", baseThemeClass);
+			setTheme.invoke(null, themeInstance);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("LnFHelper.setJGoodiesTheme()", "Could not set theme", th);
+		}
+
+	}
 	private void setSystemLnF()
 	{
 		try

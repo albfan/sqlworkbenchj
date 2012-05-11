@@ -108,6 +108,12 @@ public class LnFLoader
 	public Class loadClass()
 		throws ClassNotFoundException
 	{
+		return loadClass(this.lnfDef.getClassName());
+	}
+
+	public Class loadClass(String lnfClassName)
+		throws ClassNotFoundException
+	{
 		Class lnfClass = null;
 		try
 		{
@@ -119,7 +125,7 @@ public class LnFLoader
 				// initialize correctly
 				UIManager.getDefaults().put("ClassLoader", loader);
 				Thread.currentThread().setContextClassLoader(loader);
-				lnfClass = loader.loadClass(this.lnfDef.getClassName());
+				lnfClass = loader.loadClass(lnfClassName);
 			}
 			else
 			{
@@ -128,12 +134,12 @@ public class LnFLoader
 				// My tests showed that the property is not set initially
 				// so I assume this means "use system classloader"
 				UIManager.getDefaults().put("ClassLoader", null);
-				lnfClass = Class.forName(this.lnfDef.getClassName());
+				lnfClass = Class.forName(lnfClassName);
 			}
 		}
 		catch (Exception e)
 		{
-			throw new ClassNotFoundException("Could not load class " + this.lnfDef.getClassName(),e);
+			throw new ClassNotFoundException("Could not load class " + lnfClassName,e);
 		}
 		return lnfClass;
 	}
