@@ -26,6 +26,8 @@ Features:
 - search BLOB columns as Text in "Search table data"
 - DbExplorer rowcount for all tables
 - Multi-Threaded WbImport
+- "Generate Default ..." in DbExplorer for jOOQ
+- SQL Export type as jOOQ Queries
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
