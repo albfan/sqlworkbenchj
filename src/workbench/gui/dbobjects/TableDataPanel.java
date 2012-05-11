@@ -12,17 +12,21 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -33,48 +37,43 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
+import workbench.WbManager;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.gui.actions.SelectionFilterAction;
-import workbench.gui.components.FlatButton;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Resettable;
-import workbench.resource.GuiSettings;
-import workbench.util.ExceptionUtil;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.StopAction;
-import workbench.gui.components.WbButton;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.sql.DwPanel;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.TableDeleteListener;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
-import workbench.util.WbThread;
-import workbench.interfaces.JobErrorHandler;
-import java.awt.Cursor;
-import java.beans.PropertyChangeListener;
-import java.sql.Savepoint;
-import java.util.ArrayList;
-import java.util.Collections;
-import workbench.WbManager;
 import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FilterPickerAction;
+import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.SelectionFilterAction;
+import workbench.gui.actions.StopAction;
 import workbench.gui.components.ColumnOrderMgr;
+import workbench.gui.components.FlatButton;
+import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.sql.DwPanel;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.interfaces.TableDeleteListener;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.NamedSortDefinition;
+import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
-import workbench.util.StringUtil;
+import workbench.util.SqlUtil;
+import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 /**
@@ -83,7 +82,7 @@ import workbench.util.WbWorkspace;
  */
 public class TableDataPanel
   extends JPanel
-	implements ActionListener, PropertyChangeListener, Reloadable, Interruptable,
+	implements ActionListener, Reloadable, Interruptable,
 		TableDeleteListener, Resettable, DbExecutionNotifier
 {
 	private WbConnection dbConnection;
@@ -109,7 +108,6 @@ public class TableDataPanel
 	private List<DbExecutionListener> execListener;
 	private Savepoint currentSavepoint;
 	private Statement rowCountRetrieveStmt;
-	private boolean rememberSort;
 	private NamedSortDefinition lastSort;
 
 	private boolean initialized;
@@ -244,8 +242,6 @@ public class TableDataPanel
 		mytoolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
-		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_REMEMBER_SORT);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(dataDisplay);
 		policy.setDefaultComponent(dataDisplay);
@@ -297,12 +293,6 @@ public class TableDataPanel
 		return this.dataDisplay.isModified();
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
-	}
-
 	public void setResultContainer(MainWindow container)
 	{
 		if (this.dataDisplay != null && container != null)
@@ -325,7 +315,6 @@ public class TableDataPanel
 	{
 		if (!initialized) return;
 		this.reset();
-		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	public void disconnect()
@@ -340,7 +329,7 @@ public class TableDataPanel
 		if (!initialized) return;
 
 		if (this.isRetrieving()) return;
-		if (this.rememberSort)
+		if (Settings.getInstance().getRememberSortInDbExplorer())
 		{
 			// getCurrentSort() must be called before calling
 			// clearContent() as the sort definition is maintained

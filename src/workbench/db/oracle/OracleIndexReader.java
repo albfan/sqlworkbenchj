@@ -64,10 +64,13 @@ public class OracleIndexReader
 	 * <br/>
 	 * Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
 	 * requested which slows down the retrieval of index information.
-	 * (and is not necessary at all for SQL Workbench, as we the cardinality field isn't used anyway)
+	 * (and is not necessary at all for SQL Workbench, as  the cardinality field isn't displayed anyway)
 	 * <br/>
 	 * Additionally, function based indexes are not returned correctly by the Oracle driver
-	 * which is also fixed with this method
+	 * which is also fixed with this method.
+	 * <br/>
+	 * When the workbench property <tt>workbench.db.oracle.indexlist.usejdbc</tt> is set to <tt>true</tt>
+	 * the original driver API will be used.
 	 */
 	@Override
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)

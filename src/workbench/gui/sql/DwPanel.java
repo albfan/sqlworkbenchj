@@ -632,7 +632,15 @@ public class DwPanel
 		DataStoreTableModel model = this.dataTable.getDataStoreTableModel();
 		if (model != null)
 		{
-			model.setSortDefinition(sort);
+			try
+			{
+				this.dataTable.sortingStarted();
+				model.setSortDefinition(sort);
+			}
+			finally
+			{
+				this.dataTable.sortingFinished();
+			}
 		}
 	}
 
