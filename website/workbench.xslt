@@ -42,12 +42,11 @@
     <xsl:param name="currentPage"/>
 
     <div id="navigation">
-
       <ul class="toc">
         <xsl:for-each select="/site/page[@toc='main']">
-          <xsl:call-template name="toc-entry">
-            <xsl:with-param name="currentPage" select="$currentPage"/>
-          </xsl:call-template>
+            <xsl:call-template name="toc-entry">
+              <xsl:with-param name="currentPage" select="$currentPage"/>
+            </xsl:call-template>
         </xsl:for-each>
         <li class="toclist" id="manual">
           <a class="list" title="Display the online manual of the current stable release" href="manual/workbench-manual.html">Manual</a>
@@ -369,13 +368,6 @@
 
   <xsl:template match="dev-build">
     <xsl:if test="$includeDev = 1">
-      <h3 id="dev_build" style="margin-top:20px">Development build</h3>
-      <p>
-        A development build is generated while testing and implementing new features for the next stable build.
-        <br/>
-        Bugfixes will show up in these builds first.
-        <br/>
-      </p>
       <p>Current dev-build: <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/> (<a href="dev-history.html">Change Log</a>)</p>
       <ul>
         <li>
@@ -389,13 +381,20 @@
         </li>
       </ul>
     </xsl:if>
+    <xsl:if test="$includeDev = 0 ">
+      <p style="color:gray">
+      (Currently there is no development build available)
+      </p>
+    </xsl:if>
+
+
   </xsl:template>
 
   <xsl:template match="dev-build-info">
     <xsl:if test="$includeDev = 1">
       <br/>Current development build:
       <span style="font-weight:bold">
-        <a href="downloads.html#dev_build">
+        <a href="dev-download.html">
           <xsl:value-of select="$devBuildNumber"/> (
           <xsl:value-of select="$devBuildDate"/>)
         </a>
