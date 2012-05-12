@@ -27,7 +27,7 @@ public class FkTemplate
 
 	private final String defaultInlineSQL =
 		"CONSTRAINT %constraint_name% FOREIGN KEY (%columnlist%) REFERENCES %targettable% (%targetcolumnlist%)\n" +
-		"              %fk_update_rule%%fk_delete_rule%%deferrable%";
+		"    %fk_update_rule%%fk_delete_rule% %deferrable%";
 
 	private String sql;
 

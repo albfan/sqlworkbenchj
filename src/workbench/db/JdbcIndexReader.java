@@ -24,6 +24,7 @@ import workbench.db.oracle.OracleUniqueConstraintReader;
 import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -487,7 +488,7 @@ public class JdbcIndexReader
 			indexInfoProcessed();
 		}
 		UniqueConstraintReader reader = getUniqueConstraintReader();
-		if (reader != null)
+		if (reader != null && CollectionUtil.isNonEmpty(result))
 		{
 			reader.processIndexList(result, this.metaData.getWbConnection());
 		}

@@ -1804,6 +1804,7 @@ public class SqlFormatter
 		{
 			SQLLexer lex = new SQLLexer(col.toString());
 			SQLToken column = lex.getNextToken(false, false);
+			if (column == null) continue;
 			String colname = column.getContents();
 
 			int len = colname.length();

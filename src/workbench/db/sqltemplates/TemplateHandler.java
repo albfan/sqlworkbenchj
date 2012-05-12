@@ -57,6 +57,16 @@ public abstract class TemplateHandler
 		return sql;
 	}
 
+	/**
+	 * Remove the placeholder completely from the template SQL.
+	 *
+	 * @param sql          the sql template
+	 * @param placeholder  the placeholder
+	 * @param withNL       controls replacing of newlines after the placeholder.
+	 *                     if true, newlines after and whitespace before the placeholder are removed as well.
+	 *
+	 * @return the template with the placeholder removed
+	 */
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{
 		String s;
@@ -73,6 +83,44 @@ public abstract class TemplateHandler
 			s = StringUtil.quoteRegexMeta(placeholder);
 		}
 		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
+	}
+
+	/**
+	 * Replace the placeholder in the given SQL template.
+	 *
+	 * If the template does not have whitespace before or after the placeholder a whitespace will be inserted.
+	 *
+	 * @param sql           the SQL template
+	 * @param placeholder   the placeholder
+	 * @param replacement   the replacement
+	 * @return the template with the placeholder replaced
+	 */
+	public static String replacePlaceHolder(String sql, String placeholder, String replacement)
+	{
+		if (StringUtil.isEmptyString(replacement)) return removePlaceholder(sql, placeholder, false);
+		int pos = sql.indexOf(placeholder);
+		if (pos < 0) return sql;
+
+		String realReplacement = replacement;
+
+		if (pos > 1)
+		{
+			char prev = sql.charAt(pos - 1);
+			if (!Character.isWhitespace(prev))
+			{
+				realReplacement = " " + realReplacement;
+			}
+		}
+
+		if (pos + placeholder.length() < sql.length())
+		{
+			char next = sql.charAt(pos + placeholder.length());
+			if (!Character.isWhitespace(next))
+			{
+				realReplacement = realReplacement + " ";
+			}
+		}
+		return StringUtil.replace(sql, placeholder, realReplacement);
 	}
 
 }

@@ -670,9 +670,9 @@ public class TableSourceBuilder
 			}
 
 			String entry = StringUtil.listToString(colList, ", ", false);
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
+			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
 			String rule = updateRules.get(fkname);
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
+			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
 			rule = deleteRules.get(fkname);
 			if (meta.isOracle())
 			{
@@ -684,12 +684,12 @@ public class TableSourceBuilder
 				}
 				else
 				{
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
+					stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
 				}
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
+				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
 			}
 
 			rule = getDeferrableVerb(deferrable.get(fkname));
@@ -699,7 +699,7 @@ public class TableSourceBuilder
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
+				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
 			}
 
 			colList = fkTarget.get(fkname);
@@ -734,8 +734,8 @@ public class TableSourceBuilder
 				}
 				colListBuffer.append(col.substring(pos + 1));
 			}
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
+			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
+			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(fkname, stmt.trim());
 		}
 		StringBuilder fk = new StringBuilder();
@@ -765,7 +765,7 @@ public class TableSourceBuilder
 	private String getDeferrableVerb(String type)
 	{
 		if (dbConnection.getDbSettings().isNotDeferrable(type)) return StringUtil.EMPTY_STRING;
-		return " DEFERRABLE " + type;
+		return "DEFERRABLE " + type;
 	}
 
 }
