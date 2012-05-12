@@ -8,12 +8,18 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.storage;
+package workbench.db.postgres;
 
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.storage.ColumnData;
+import workbench.storage.DataStore;
+import workbench.storage.MergeGenerator;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CollectionUtil;
 
 /**
@@ -25,6 +31,7 @@ public class PostgresMergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 	private WbConnection dbConn;
+
 	public PostgresMergeGenerator(WbConnection con)
 	{
 		this.dbConn = con;
@@ -94,15 +101,19 @@ public class PostgresMergeGenerator
 		sql.append(" m\n");
 		ResultInfo info = data.getResultInfo();
 
+		int colCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)
 		{
-			if (col == 0) sql.append("     set ");
-			if (col > 0) sql.append(",\n         ");
+			if (info.getColumn(col).isPkColumn()) continue;
+			if (colCount == 0) sql.append("     set ");
+			if (colCount > 0) sql.append(",\n         ");
 			sql.append("m.");
 			sql.append(info.getColumnName(col));
 			sql.append(" = md.");
 			sql.append(info.getColumnName(col));
+			colCount++;
 		}
+		
 		sql.append("\n  from merge_data md\n");
 		int pkCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)

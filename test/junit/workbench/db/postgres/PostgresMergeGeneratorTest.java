@@ -1,0 +1,117 @@
+/*
+ * PostgresMergeGeneratorTest.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2012, Thomas Kellerer
+ * No part of this code may be reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.db.postgres;
+
+import java.sql.Types;
+import java.util.List;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import workbench.WbTestCase;
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class PostgresMergeGeneratorTest
+	extends WbTestCase
+{
+	public PostgresMergeGeneratorTest()
+	{
+		super("PostgresMergeGeneratorTest");
+	}
+
+	@Test
+	public void testGenerateMerge()
+	{
+		ColumnIdentifier id = new ColumnIdentifier("id", Types.INTEGER);
+		id.setIsPkColumn(true);
+		ColumnIdentifier fname = new ColumnIdentifier("fname", Types.VARCHAR);
+		ColumnIdentifier lname = new ColumnIdentifier("lname", Types.VARCHAR);
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, fname, lname });
+
+		TableIdentifier tbl = new TableIdentifier("person");
+		info.setUpdateTable(tbl);
+		DataStore ds = new DataStore(info);
+		ds.forceUpdateTable(tbl);
+		int row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(42));
+		ds.setValue(row, 1, "Arthur");
+		ds.setValue(row, 2, "Dent");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(24));
+		ds.setValue(row, 1, "Ford");
+		ds.setValue(row, 2, "Prefect");
+
+		PostgresMergeGenerator generator = new PostgresMergeGenerator(null);
+		List<String> result = generator.generateMerge(ds, null, 0);
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		String sql = result.get(0);
+		String expected =
+			"with merge_data (id, fname, lname) as \n" +
+			"(\n" +
+			"  values\n" +
+			"    (42,'Arthur','Dent'),\n" +
+			"    (24,'Ford','Prefect')\n" +
+			"),\n" +
+			"upsert as\n" +
+			"(\n" +
+			"  update person m\n" +
+			"     set m.fname = md.fname,\n" +
+			"         m.lname = md.lname\n" +
+			"  from merge_data md\n" +
+			"  where m.id = md.id\n" +
+			"  returning m.*\n" +
+			")\n" +
+			"insert into person (id, fname, lname)\n" +
+			"select id, fname, lname\n" +
+			"from merge_data\n" +
+			"where not exists (select 1\n" +
+			"                  from upsert up\n" +
+			"                  where up.id = md.id)";
+//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
+		assertEquals(expected, sql);
+
+		result = generator.generateMerge(ds, new int[] { 1 }, 0);
+		expected =
+			"with merge_data (id, fname, lname) as \n" +
+			"(\n" +
+			"  values\n" +
+			"    (24,'Ford','Prefect')\n" +
+			"),\n" +
+			"upsert as\n" +
+			"(\n" +
+			"  update person m\n" +
+			"     set m.fname = md.fname,\n" +
+			"         m.lname = md.lname\n" +
+			"  from merge_data md\n" +
+			"  where m.id = md.id\n" +
+			"  returning m.*\n" +
+			")\n" +
+			"insert into person (id, fname, lname)\n" +
+			"select id, fname, lname\n" +
+			"from merge_data\n" +
+			"where not exists (select 1\n" +
+			"                  from upsert up\n" +
+			"                  where up.id = md.id)";
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		sql = result.get(0);
+//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
+		assertEquals(expected, sql);
+	}
+
+}

@@ -141,7 +141,7 @@ public class DataStore
 		this.initData(aResultSet);
   }
 
-	DataStore(ResultInfo metaData)
+	public DataStore(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
 		this.data = createData();
