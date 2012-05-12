@@ -766,7 +766,7 @@ public class TableDataPanel
 					dataDisplay.getSelectKeysAction().setEnabled(true);
 					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 					dataDisplay.setPrintHeader(header);
-					dataDisplay.showlastExecutionTime();
+					dataDisplay.showLastExecutionDuration();
 
 					if (lastSort != null)
 					{

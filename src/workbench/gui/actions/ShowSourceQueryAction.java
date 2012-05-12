@@ -11,16 +11,22 @@
  */
 package workbench.gui.actions;
 
+import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -30,7 +36,7 @@ public class ShowSourceQueryAction
 	extends WbAction
 {
 	private SqlPanel panel;
-	
+
 	public ShowSourceQueryAction(SqlPanel handler)
 	{
 		panel = handler;
@@ -38,11 +44,12 @@ public class ShowSourceQueryAction
 		initMenuDefinition("MnuTxtShowQuery");
 	}
 
+	@Override
 	public boolean isEnabled()
 	{
 		return (panel != null && panel.getSourceQuery() != null);
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -51,11 +58,14 @@ public class ShowSourceQueryAction
 
 	public void showQuery()
 	{
-		final EditorPanel p = EditorPanel.createSqlEditor();
+		final EditorPanel editor = EditorPanel.createSqlEditor();
 		String sql = panel.getSourceQuery();
-		p.setText(sql);
-		p.setCaretPosition(0);
-		p.setEditable(false);
+
+		JPanel display = new JPanel(new BorderLayout());
+
+		editor.setText(sql);
+		editor.setCaretPosition(0);
+		editor.setEditable(false);
 		Window w = SwingUtilities.getWindowAncestor(panel);
 		Frame f = null;
 		if (w instanceof Frame)
@@ -67,13 +77,21 @@ public class ShowSourceQueryAction
 			f = WbManager.getInstance().getCurrentWindow();
 		}
 
-		ValidatingDialog d = new ValidatingDialog(f, "SQL", p, false);
+		String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
+		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt);
+		JLabel lbl = new JLabel(msg);
+		lbl.setBorder(new EmptyBorder(0, 2, 3, 0));
+
+		display.add(editor, BorderLayout.CENTER);
+		display.add(lbl, BorderLayout.NORTH);
+
+		ValidatingDialog d = new ValidatingDialog(f, "SQL", display, false);
 		if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))
 		{
 			d.setSize(500,350);
 		}
 		WbSwingUtilities.center(d, f);
-		WbSwingUtilities.repaintLater(p);
+		WbSwingUtilities.repaintLater(editor);
 		d.setVisible(true);
 		Settings.getInstance().storeWindowSize(d,"workbench.resultquery.display");
 	}

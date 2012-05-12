@@ -95,6 +95,8 @@ public class DataStore
 	private int currentInsertRow;
 	private int currentDeleteRow;
 
+	private long loadedAt;
+
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
@@ -1192,7 +1194,6 @@ public class DataStore
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
 		}
 
-
 		boolean trimCharData = false;
 		if (this.originalConnection != null)
 		{
@@ -1202,6 +1203,8 @@ public class DataStore
 				trimCharData = prof.getTrimCharData();
 			}
 		}
+
+		this.loadedAt = StringUtil.now().getTime();
 
 		this.cancelRetrieve = false;
 		boolean lowMemory = false;
@@ -1268,6 +1271,14 @@ public class DataStore
 		{
 			throw new LowMemoryException();
 		}
+	}
+
+	/**
+	 * Return the system time this DataStore was retrieved.
+	 */
+	public long getLoadedAt()
+	{
+		return loadedAt;
 	}
 
 	/**

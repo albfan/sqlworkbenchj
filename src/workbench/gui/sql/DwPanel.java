@@ -105,7 +105,6 @@ public class DwPanel
 
 	protected WbScrollPane scrollPane;
 	private long lastExecutionDuration;
-
 	private boolean showLoadProgress;
 	private boolean savingData = false;
 
@@ -620,9 +619,9 @@ public class DwPanel
 	}
 
 	/**
-	 * Displays the last execution time in the status bar
+	 * Displays the last execution duration in the status bar
 	 */
-	public void showlastExecutionTime()
+	public void showLastExecutionDuration()
 	{
 		statusBar.setExecutionTime(lastExecutionDuration);
 	}
@@ -883,8 +882,10 @@ public class DwPanel
 		int index = getTabIndex(tab);
 		if (index == -1) return;
 
-		String time = StringUtil.getCurrentTimestamp();
-		String tip = "<html><pre>(" + time + ")<br>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
+		String timeString  = StringUtil.formatIsoTimestamp(getDataStore().getLoadedAt());
+		String msg = ResourceMgr.getFormattedString("TxtLastExec", timeString);
+
+		String tip = "<html>(" + msg + ")<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
 	}

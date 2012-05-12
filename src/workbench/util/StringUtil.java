@@ -14,6 +14,7 @@ package workbench.util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -50,6 +51,13 @@ public class StringUtil
 		return new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	}
 
+	public static String formatIsoTimestamp(long millis)
+	{
+		synchronized (ISO_TIMESTAMP_FORMAT)
+		{
+			return ISO_TIMESTAMP_FORMATTER.format(new java.util.Date(millis));
+		}
+	}
 	public static String getCurrentTimestamp()
 	{
 		synchronized (ISO_TIMESTAMP_FORMAT)
@@ -87,7 +95,7 @@ public class StringUtil
 		return null;
 	}
 
-	private static java.util.Date now()
+	public static java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
 	}

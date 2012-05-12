@@ -2413,6 +2413,14 @@ public class SqlPanel
 		return null;
 	}
 
+	public long getLoadedAt()
+	{
+		if (currentData == null) return 0;
+		DataStore ds = currentData.getDataStore();
+		if (ds == null) return 0;
+		return ds.getLoadedAt();
+	}
+	
 	public String getSourceQuery()
 	{
 		if (currentData == null) return null;
