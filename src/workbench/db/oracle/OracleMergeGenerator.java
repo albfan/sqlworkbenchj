@@ -10,17 +10,17 @@
  */
 package workbench.db.oracle;
 
-import java.util.List;
+
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
-import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataContainer;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CollectionUtil;
 
 /**
  *
@@ -39,40 +39,58 @@ public class OracleMergeGenerator
 	}
 
 	@Override
-	public List<String> generateMerge(DataStore data, int[] rows, int chunkSize)
+	public String generateMergeStart(RowDataContainer data)
 	{
-		StringBuilder sql = new StringBuilder(rows == null ? data.getRowCount() : rows.length * 100);
-
-		generateStart(sql, data, rows);
-		appendUpdate(sql, data, rows);
-		appendInsert(sql, data, rows);
-		return CollectionUtil.arrayList(sql.toString());
+		StringBuilder result = new StringBuilder(100);
+		return result.toString();
 	}
 
-	private void generateStart(StringBuilder sql, DataStore data, int[] rows)
+	@Override
+	public String addRow(ResultInfo info, RowData row, long rowIndex)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public String generateMergeEnd(RowDataContainer data)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public String generateMerge(RowDataContainer data)
+	{
+		StringBuilder sql = new StringBuilder(data.getRowCount());
+
+		generateStart(sql, data, true);
+		appendJoin(sql, data);
+		appendUpdate(sql, data);
+		appendInsert(sql, data);
+		return sql.toString();
+	}
+
+	private void generateStart(StringBuilder sql, RowDataContainer data, boolean withData)
 	{
 		TableIdentifier tbl = data.getUpdateTable();
-		ResultInfo info = data.getResultInfo();
 		sql.append("merge into ");
 		sql.append(tbl.getTableExpression(this.dbConn));
 		sql.append(" ut\nusing\n(\n");
-		if (rows == null)
+		if (withData)
 		{
+			ResultInfo info = data.getResultInfo();
 			for (int row=0; row < data.getRowCount(); row++)
 			{
 				if (row > 0) sql.append("\n  union all\n");
-				appendValues(sql, data, row, row == 0);
+				appendValues(sql, info, data.getRow(row), row == 0);
 			}
+			sql.append("\n)");
 		}
-		else
-		{
-			for (int i=0; i < rows.length; i++)
-			{
-				if (i > 0) sql.append("union all\n");
-				appendValues(sql, data, rows[i], i == 0);
-			}
-		}
-		sql.append("\n) md on (");
+	}
+
+	private void appendJoin(StringBuilder sql, RowDataContainer data)
+	{
+		ResultInfo info = data.getResultInfo();
+		sql.append(" md on (");
 		int pkCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)
 		{
@@ -88,11 +106,10 @@ public class OracleMergeGenerator
 		sql.append(")");
 	}
 
-	private void appendValues(StringBuilder sql, DataStore ds, int row, boolean useAlias)
+	private void appendValues(StringBuilder sql, ResultInfo info, RowData rd, boolean useAlias)
 	{
-		ResultInfo info = ds.getResultInfo();
 		sql.append("  select ");
-		RowData rd = ds.getRow(row);
+
 		for (int col=0; col < info.getColumnCount(); col++)
 		{
 			if (col > 0) sql.append(", ");
@@ -107,7 +124,7 @@ public class OracleMergeGenerator
 		sql.append(" from dual");
 	}
 
-	private void appendUpdate(StringBuilder sql, DataStore data, int[] rows)
+	private void appendUpdate(StringBuilder sql, RowDataContainer data)
 	{
 		sql.append("\nwhen matched then update");
 		ResultInfo info = data.getResultInfo();
@@ -127,7 +144,7 @@ public class OracleMergeGenerator
 		}
 	}
 
-	private void appendInsert(StringBuilder sql, DataStore data, int[] rows)
+	private void appendInsert(StringBuilder sql, RowDataContainer data)
 	{
 		sql.append("\nwhen not matched then\n  insert (");
 		ResultInfo info = data.getResultInfo();
@@ -147,7 +164,7 @@ public class OracleMergeGenerator
 		sql.append(")\n");
 		sql.append("  values (");
 		sql.append(columns);
-		sql.append(");");
+		sql.append(");\n");
 	}
 
 }

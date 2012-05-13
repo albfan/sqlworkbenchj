@@ -62,6 +62,7 @@ import workbench.util.ValueConverter;
  * @author Thomas Kellerer
  */
 public class DataStore
+	implements RowDataContainer
 {
 	private RowActionMonitor rowActionMonitor;
 
@@ -338,8 +339,16 @@ public class DataStore
 		return newIndex;
 	}
 
-  public int getRowCount() { return this.data.size(); }
-	public int getColumnCount() { return this.resultInfo.getColumnCount(); }
+	@Override
+	public int getRowCount()
+	{
+		return this.data.size();
+	}
+
+	public int getColumnCount()
+	{
+		return this.resultInfo.getColumnCount();
+	}
 
 	/**
 	 *	Returns the total number of modified, new or deleted rows
@@ -735,6 +744,7 @@ public class DataStore
 	 *
 	 * @see #setGeneratingSql(String)
 	 */
+	@Override
 	public TableIdentifier getUpdateTable()
 	{
 		if (this.updateTable == null) return null;
@@ -1135,6 +1145,7 @@ public class DataStore
 		return this.resultInfo.findColumn(name);
 	}
 
+	@Override
 	public RowData getRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
@@ -2006,6 +2017,7 @@ public class DataStore
 		this.missingPkcolumns = null;
 	}
 
+	@Override
 	public ResultInfo getResultInfo()
 	{
 		return this.resultInfo;
@@ -2076,4 +2088,6 @@ public class DataStore
 	{
 		return Integer.toString(getRowCount()) + " rows";
 	}
+
+
 }

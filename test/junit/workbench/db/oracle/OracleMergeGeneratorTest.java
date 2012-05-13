@@ -19,6 +19,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+import workbench.storage.RowDataContainer;
 
 /**
  *
@@ -56,9 +57,8 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 2, "Prefect");
 
 		OracleMergeGenerator generator = new OracleMergeGenerator(null);
-		List<String> result = generator.generateMerge(ds, null, 0);
-		assertNotNull(result);
-		assertEquals(1, result.size());
+		String sql = generator.generateMerge(ds);
+		assertNotNull(sql);
 		String expected =
 			"merge into person ut\n" +
 			"using\n" +
@@ -73,13 +73,13 @@ public class OracleMergeGeneratorTest
 			"when not matched then\n" +
 			"  insert (ut.id, ut.fname, ut.lname)\n" +
 			"  values (md.id, md.fname, md.lname);";
-		String sql = result.get(0);
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
-		assertEquals(expected, sql);
+		assertEquals(expected, sql.trim());
 
-		result = generator.generateMerge(ds, new int[] {0}, 0);
-		assertNotNull(result);
-		assertEquals(1, result.size());
+		RowDataContainer selected = RowDataContainer.Factory.createContainer(ds, new int[] {0});
+		sql = generator.generateMerge(selected);
+		assertNotNull(sql);
+
 		expected =
 			"merge into person ut\n" +
 			"using\n" +
@@ -92,9 +92,8 @@ public class OracleMergeGeneratorTest
 			"when not matched then\n" +
 			"  insert (ut.id, ut.fname, ut.lname)\n" +
 			"  values (md.id, md.fname, md.lname);";
-		sql = result.get(0);
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
-		assertEquals(expected, sql);
+		assertEquals(expected, sql.trim());
 	}
 
 }

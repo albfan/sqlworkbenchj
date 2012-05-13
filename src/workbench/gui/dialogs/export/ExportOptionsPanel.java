@@ -264,6 +264,7 @@ public class ExportOptionsPanel
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_MERGE:
 				setTypeSql();
 				break;
 			case TEXT:

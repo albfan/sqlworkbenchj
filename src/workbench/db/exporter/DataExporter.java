@@ -762,6 +762,7 @@ public class DataExporter
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_MERGE:
 				this.exportWriter = new SqlExportWriter(this);
 				break;
 			case TEXT:

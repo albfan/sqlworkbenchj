@@ -20,6 +20,7 @@ public enum ExportType
 	SQL_INSERT("SQL"),
 	SQL_UPDATE("SQL Update"),
 	SQL_DELETE_INSERT("SQL Delete/Insert"),
+	SQL_MERGE("SQL MERGE"),
 	HTML("HTML"),
 	TEXT("Text"),
 	XML("XML"),
@@ -48,6 +49,8 @@ public enum ExportType
 		if (type.equalsIgnoreCase("sqlinsert")) return SQL_INSERT;
 		if (type.equalsIgnoreCase("sqlupdate")) return SQL_UPDATE;
 		if (type.equalsIgnoreCase("sqldeleteinsert")) return SQL_DELETE_INSERT;
+		if (type.equalsIgnoreCase("sqlmerge")) return SQL_MERGE;
+		if (type.equalsIgnoreCase("merge")) return SQL_MERGE;
 
 		try
 		{

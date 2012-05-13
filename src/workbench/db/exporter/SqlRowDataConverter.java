@@ -24,8 +24,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
+import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataContainer;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 import workbench.util.CollectionUtil;
@@ -65,6 +67,7 @@ public class SqlRowDataConverter
 	private boolean doFormatting = true;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean ignoreRowStatus = true;
+	private MergeGenerator mergeGenerator;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -77,6 +80,7 @@ public class SqlRowDataConverter
 	{
 		super.setOriginalConnection(con);
 		this.literalFormatter = new SqlLiteralFormatter(con);
+		this.mergeGenerator = MergeGenerator.Factory.createGenerator(con);
 	}
 
 	@Override
@@ -98,7 +102,7 @@ public class SqlRowDataConverter
 
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
-		if (!keysPresent && (this.sqlType == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_UPDATE))
+		if (!keysPresent && (this.sqlType == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_UPDATE || this.sqlType == ExportType.SQL_MERGE))
 		{
 			String tbl = "";
 			if (meta.getUpdateTable() != null)
@@ -165,6 +169,9 @@ public class SqlRowDataConverter
 			case SQL_DELETE_INSERT:
 				this.setCreateInsertDelete();
 				break;
+			case SQL_MERGE:
+				this.setCreateMerge();
+				break;
 			default:
 				throw new IllegalArgumentException("Invalid type specified");
 		}
@@ -173,6 +180,11 @@ public class SqlRowDataConverter
 	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
+		if (sqlTypeToUse == ExportType.SQL_MERGE)
+		{
+			return generateMerge(row);
+		}
+
 		StrBuffer result = new StrBuffer();
 		DmlStatement dml = null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
@@ -184,6 +196,7 @@ public class SqlRowDataConverter
 			result.append(';');
 			result.append(lineTerminator);
 		}
+
 		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_INSERT)
 		{
 			dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
@@ -222,6 +235,19 @@ public class SqlRowDataConverter
 		return result;
 	}
 
+	private StrBuffer generateMerge(RowData row)
+	{
+		MergeGenerator generator = MergeGenerator.Factory.createGenerator(originalConnection);
+		if (generator != null)
+		{
+			RowDataContainer container = RowDataContainer.Factory.createContainer(row, metaData);
+			String merge = generator.generateMerge(container);
+			StrBuffer result = new StrBuffer(merge);
+			return result;
+		}
+		return null;
+	}
+
 	@Override
 	public StrBuffer getStart()
 	{
@@ -250,6 +276,13 @@ public class SqlRowDataConverter
 		this.sqlType = ExportType.SQL_INSERT;
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
+	}
+
+	public void setCreateMerge()
+	{
+		this.sqlType = ExportType.SQL_MERGE;
+		this.sqlTypeToUse = this.sqlType;
+		this.doFormatting = false;
 	}
 
 	public void setCreateUpdate()

@@ -10,8 +10,6 @@
  */
 package workbench.storage;
 
-import java.util.List;
-
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
@@ -23,28 +21,28 @@ import workbench.db.postgres.PostgresMergeGenerator;
 public interface MergeGenerator
 {
 	/**
-	 * Generate MERGE statments (or something equivalent depending on the DBMS)
-	 * based on the data in the DataStore.
+	 * Generate a single MERGE statment (or something equivalent depending on the DBMS)
+	 * based on the passed data.
 	 *
 	 * Depending on the capabilities of the DBMS, the result might be one
 	 * statement for each row or one statement for all rows.
 	 *
 	 * @param data       the data source
-	 * @param rows       the rows to generate the merge for. If null, it will be generated for all rows.
-	 * @param chunksize  the number of rows to combine into one statement
-	 *                   -1 let the generator decide
-	 *                    0 everything in one statement
-	 *                   >0 one statement per chunkSize rows
-	 *                   the generator is free to ignore the chunksize parameter
 	 *
 	 * @return one or more SQL statements to merge the data into an existing table.
 	 *         might be null (e.g. if no update table is present)
 	 */
-	List<String> generateMerge(DataStore data, int[] rows, int chunkSize);
+	String generateMerge(RowDataContainer data);
+
+	String generateMergeStart(RowDataContainer data);
+
+	String addRow(ResultInfo info, RowData row, long rowIndex);
+
+	String generateMergeEnd(RowDataContainer data);
 
 	public final class Factory
 	{
-		public static MergeGenerator getGenerator(WbConnection conn)
+		public static MergeGenerator createGenerator(WbConnection conn)
 		{
 			if (conn == null) return null;
 			if (conn.getMetadata().isOracle())

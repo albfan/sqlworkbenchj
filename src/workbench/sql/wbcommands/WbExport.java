@@ -35,6 +35,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.MergeGenerator;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -115,7 +116,7 @@ public class WbExport
 	private boolean showProgress = true;
 	private int progressInterval = 1;
 
-	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
+	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,sqlmerge,ods,xlsm,html,xlsx,xls";
 
 	public WbExport()
 	{
@@ -303,6 +304,18 @@ public class WbExport
 			addWrongArgumentsMessage(result);
 			result.setFailure();
 			return result;
+		}
+
+
+		if (type.equals("sqlmerge"))
+		{
+			boolean mergeAvailable = MergeGenerator.Factory.createGenerator(currentConnection) != null;
+			if (!mergeAvailable)
+			{
+				result.addMessage("MERGE not supported for: " + currentConnection.getMetadata().getProductName());
+				result.setFailure();
+				return result;
+			}
 		}
 
 		if ((type.equals("xls") || type.equals("xlsx")) && !PoiHelper.isPoiAvailable())

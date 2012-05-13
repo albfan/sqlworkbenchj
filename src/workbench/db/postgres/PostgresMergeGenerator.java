@@ -10,17 +10,15 @@
  */
 package workbench.db.postgres;
 
-import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
-import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataContainer;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CollectionUtil;
 
 /**
  *
@@ -39,16 +37,41 @@ public class PostgresMergeGenerator
 	}
 
 	@Override
-	public List<String> generateMerge(DataStore data, int[] rows, int chunkSize)
+	public String generateMergeStart(RowDataContainer data)
 	{
-		StringBuilder sql = new StringBuilder(rows == null ? data.getRowCount() : rows.length * 100);
-		generateCte(sql, data, rows);
-		appendUpdate(sql, data, rows);
-		appendInsert(sql, data, rows);
-		return CollectionUtil.arrayList(sql.toString());
+		StringBuilder result = new StringBuilder(100);
+		generateCte(result, data, false);
+		return result.toString();
 	}
 
-	private void generateCte(StringBuilder sql, DataStore data, int[] rows)
+	@Override
+	public String addRow(ResultInfo info, RowData row, long rowIndex)
+	{
+		StringBuilder result = new StringBuilder(100);
+		appendValues(result, row, info, rowIndex);
+		return result.toString();
+	}
+
+	@Override
+	public String generateMergeEnd(RowDataContainer data)
+	{
+		StringBuilder sql = new StringBuilder(100);
+		appendUpdate(sql, data);
+		appendInsert(sql, data);
+		return sql.toString();
+	}
+
+	@Override
+	public String generateMerge(RowDataContainer data)
+	{
+		StringBuilder sql = new StringBuilder(data.getRowCount());
+		generateCte(sql, data, true);
+		appendUpdate(sql, data);
+		appendInsert(sql, data);
+		return sql.toString();
+	}
+
+	private void generateCte(StringBuilder sql, RowDataContainer data, boolean withData)
 	{
 		sql.append("with merge_data (");
 		ResultInfo info = data.getResultInfo();
@@ -58,30 +81,19 @@ public class PostgresMergeGenerator
 			sql.append(info.getColumnName(col));
 		}
 		sql.append(") as \n(\n  values\n");
-		if (rows == null)
+		if (withData)
 		{
 			for (int row=0; row < data.getRowCount(); row++)
 			{
-				if (row > 0) sql.append(",\n");
-				appendValues(sql, data, row);
+				appendValues(sql, data.getRow(row), info, row);
 			}
 		}
-		else
-		{
-			for (int i=0; i < rows.length; i++)
-			{
-				if (i > 0) sql.append(",\n");
-				appendValues(sql, data, rows[i]);
-			}
-		}
-		sql.append("\n)");
 	}
 
-	private void appendValues(StringBuilder sql, DataStore ds, int row)
+	private void appendValues(StringBuilder sql, RowData rd, ResultInfo info, long rowNumber)
 	{
-		ResultInfo info = ds.getResultInfo();
+		if (rowNumber > 0) sql.append(",\n");
 		sql.append("    (");
-		RowData rd = ds.getRow(row);
 		for (int col=0; col < info.getColumnCount(); col++)
 		{
 			if (col > 0) sql.append(',');
@@ -91,11 +103,11 @@ public class PostgresMergeGenerator
 		sql.append(')');
 	}
 
-	private void appendUpdate(StringBuilder sql, DataStore data, int[] rows)
+	private void appendUpdate(StringBuilder sql, RowDataContainer data)
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 
-		sql.append(",\nupsert as\n(\n");
+		sql.append("\n),\nupsert as\n(\n");
 		sql.append("  update ");
 		sql.append(tbl.getTableExpression(dbConn));
 		sql.append(" m\n");
@@ -113,7 +125,7 @@ public class PostgresMergeGenerator
 			sql.append(info.getColumnName(col));
 			colCount++;
 		}
-		
+
 		sql.append("\n  from merge_data md\n");
 		int pkCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)
@@ -132,7 +144,7 @@ public class PostgresMergeGenerator
 		sql.append("\n)");
 	}
 
-	private void appendInsert(StringBuilder sql, DataStore data, int[] rows)
+	private void appendInsert(StringBuilder sql, RowDataContainer data)
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 
@@ -165,6 +177,6 @@ public class PostgresMergeGenerator
 			sql.append(info.getColumnName(col));
 			pkCount ++;
 		}
-		sql.append(")");
+		sql.append(");\n");
 	}
 }
