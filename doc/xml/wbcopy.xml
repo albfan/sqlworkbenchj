@@ -280,6 +280,19 @@
 								will be created, if it doesn't exist.
 								Valid values are <literal>true</literal> or <literal>false</literal>.
 							</para>
+              <important>
+                <para>
+                  Using <literal>-createTarget=true</literal> is intended as a quick (and dirty) way of
+                  creating a target table "on the fly" during the copy process. Tables created this way should not
+                  be considered "production-ready". The created tables will only have the primary key and not-null constraints created.
+                  All other constraints from the source table are ignored.
+                </para>
+                <para>
+                  This feature is not intended (nor suitable) to synchonize the schema of two databases and should not be considered
+                  as a replacement of a proper schema (script) management. If you have the requirement to
+                  keep the schema definition of different DBMS in sync please consider a tool like <ulink url="http://liquibase.org/">Liquibase</ulink>
+                </para>
+              </important>
 							<para>
 								When using this option with different source and target DBMS, the information
 								about the datatypes to be used in the target database are retrieved from
