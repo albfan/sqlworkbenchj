@@ -164,6 +164,7 @@ class SchemaCopy
 			{
 				targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
 				targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
+				targetTable.adjustCase(targetConnection);
 			}
 			else
 			{
