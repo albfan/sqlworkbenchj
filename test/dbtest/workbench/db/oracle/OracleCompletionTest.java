@@ -12,6 +12,7 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -85,18 +86,27 @@ public class OracleCompletionTest
 		assertEquals(3, data.size());
 
 		sql = "select  from " + OracleTestUtil.SCHEMA_NAME + ".";
-		context = new StatementContext(con, sql, sql.indexOf(".") + 1);
+		context = new StatementContext(con, sql, sql.indexOf('.') + 1);
 		analyzer = context.getAnalyzer();
 		data = context.getData();
 		assertNotNull(data);
 		assertEquals(1, data.size());
 
 		sql = "select data. from data";
-		context = new StatementContext(con, sql, sql.indexOf(".") + 1);
+		context = new StatementContext(con, sql, sql.indexOf('.') + 1);
 		analyzer = context.getAnalyzer();
 		data = context.getData();
 		assertNotNull(data);
 		assertEquals(3, data.size());
+
+		Set<TableIdentifier> tables = con.getObjectCache().getTables(OracleTestUtil.SCHEMA_NAME.toLowerCase());
+		assertEquals(1, tables.size());
+		assertTrue(tables.contains(new TableIdentifier("DATA")));
+
+		tables = con.getObjectCache().getTables(OracleTestUtil.SCHEMA_NAME);
+		assertEquals(1, tables.size());
+		assertTrue(tables.contains(new TableIdentifier("DATA")));
+
 	}
 
 	@Test
@@ -133,7 +143,7 @@ public class OracleCompletionTest
 		assertEquals("DATA", tbl.getTableName());
 
 		sql = "insert into data (   ) values ";
-		context = new StatementContext(con, sql, sql.indexOf("(") + 2);
+		context = new StatementContext(con, sql, sql.indexOf('(') + 2);
 		data = context.getData();
 		assertNotNull(data);
 		assertEquals(2, data.size());

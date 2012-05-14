@@ -505,7 +505,8 @@ public class TestUtil
 			{
 				if (printError)
 				{
-					System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql);
+					System.out.println("**** Error executing statement at index= " + i + ", sql=" + sql + ", error: " + e.getMessage());
+					e.printStackTrace();
 				}
 				throw e;
 			}

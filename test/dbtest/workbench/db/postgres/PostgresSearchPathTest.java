@@ -13,6 +13,7 @@ package workbench.db.postgres;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -124,6 +125,11 @@ public class PostgresSearchPathTest
 		assertEquals(2, columns.size());
 		assertEquals("id2", columns.get(0).getColumnName());
 		assertEquals("c2", columns.get(1).getColumnName());
+
+		Set<TableIdentifier> tables = con.getObjectCache().getTables("PATH_1");
+		assertNotNull(tables);
+		assertEquals(1, tables.size());
+		assertTrue(tables.contains(new TableIdentifier("t1")));
 	}
 
 	@Test
@@ -150,5 +156,5 @@ public class PostgresSearchPathTest
 		assertEquals(1, result.getDataStores().size());
 		assertEquals("path_2.t2", result.getDataStores().get(0).getResultName());
 	}
-	
+
 }
