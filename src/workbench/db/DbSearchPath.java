@@ -37,7 +37,7 @@ public interface DbSearchPath
 			{
 				return Collections.emptyList();
 			}
-			return Collections.singletonList(defaultSchema);
+			return Collections.singletonList(dbConn.getMetadata().adjustSchemaNameCase(defaultSchema));
 		}
 	};
 
