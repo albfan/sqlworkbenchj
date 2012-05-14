@@ -115,14 +115,6 @@ public class ResourceMgr
 		window.setIconImages(icons);
 	}
 
-	public static void setMainWindowIcons(JFrame window)
-	{
-		List<Image> icons = new ArrayList<Image>(2);
-		icons.add(retrieveImage("workbench16.png").getImage());
-		icons.add(retrieveImage("workbench32.png").getImage());
-		window.setIconImages(icons);
-	}
-
 	public static String getDefaultTabLabel()
 	{
 		return Settings.getInstance().getProperty("workbench.gui.tabs.defaultlabel", getString("LblTabStatement"));

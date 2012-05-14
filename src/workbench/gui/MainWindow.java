@@ -227,7 +227,7 @@ public class MainWindow
 
 		initMenu();
 
-		ResourceMgr.setMainWindowIcons(this);
+		ResourceMgr.setWindowIcons(this, "workbench");
 
 		getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
