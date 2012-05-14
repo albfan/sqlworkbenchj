@@ -25,7 +25,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
