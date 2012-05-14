@@ -118,7 +118,7 @@
     <property name="pub.build.name" value="development"/>
     <property name="pub.build.number" value="${dev.build.number}"/>
     <property name="dev.build" value="1"/>
-    <property name="rss.url" value="http://www.sql-workbench.net/downloads.html"/>
+    <property name="rss.url" value="http://www.sql-workbench.net/dev-download.html"/>
   </target>
 
   <target name="makeHTML" depends="clean">

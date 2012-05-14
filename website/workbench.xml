@@ -345,13 +345,9 @@ WHERE id=42;</p>
             You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases
         </p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
-        <!--
-        <p>
-          Looking for a free entity relationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
-        </p>
-        -->
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
         <p><a href="macos.html">A note to Mac OS X users</a></p>
+        <dev-build-info/>
     </content>
   </page>
 
@@ -394,6 +390,13 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 111<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build111.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build111-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build111.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 110<br/>
           <ul>
             <li><a href="archive/Workbench-Build110.zip">All Platforms</a></li>

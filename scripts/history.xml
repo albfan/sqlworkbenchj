@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-05-07">
+  <release build="-1" date="2012-05-14">
     <entry dev-build="6" type="enh">For PostgreSQL, the generated table source now shows child tables (as a comment)</entry>
     <entry dev-build="5" type="enh">If a connection profile is set to read-only, this is now shown with an icon in the connection info of the main window</entry>
     <entry dev-build="4" type="enh">In the DbExplorer "Put SELECT into" can now also put the statement into the clipboard.</entry>
