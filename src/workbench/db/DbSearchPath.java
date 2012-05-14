@@ -46,6 +46,10 @@ public interface DbSearchPath
 		@Override
 		public List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 		{
+			if (defaultSchema != null && dbConn != null)
+			{
+				return Collections.singletonList(dbConn.getMetadata().adjustSchemaNameCase(defaultSchema));
+			}
 			return PostgresUtil.getSearchPath(dbConn);
 		}
 	};

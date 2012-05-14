@@ -47,7 +47,15 @@ public class TemplateHandlerTest
 
 		result = TemplateHandler.replacePlaceHolder("%bar% foo", "%bar%", "newbar");
 		assertEquals("newbar foo", result);
-	}
 
+		result = TemplateHandler.replacePlaceHolder("some_table(%column_list%)", "%column_list%", "a,b");
+		assertEquals("some_table(a,b)", result);
+
+		result = TemplateHandler.replacePlaceHolder("[%some_table%]", "%some_table%", "foobar");
+		assertEquals("[foobar]", result);
+
+		result = TemplateHandler.replacePlaceHolder("\"%some_table%\"", "%some_table%", "foobar");
+		assertEquals("\"foobar\"", result);
+	}
 
 }

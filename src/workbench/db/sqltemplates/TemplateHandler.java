@@ -105,8 +105,9 @@ public abstract class TemplateHandler
 
 		if (pos > 1)
 		{
+			String opening = "([\"'`";
 			char prev = sql.charAt(pos - 1);
-			if (!Character.isWhitespace(prev))
+			if (!Character.isWhitespace(prev) && opening.indexOf(prev) == -1)
 			{
 				realReplacement = " " + realReplacement;
 			}
@@ -114,8 +115,9 @@ public abstract class TemplateHandler
 
 		if (pos + placeholder.length() < sql.length())
 		{
+			String closing = ")]\"'`";
 			char next = sql.charAt(pos + placeholder.length());
-			if (!Character.isWhitespace(next))
+			if (!Character.isWhitespace(next) && closing.indexOf(next) == -1)
 			{
 				realReplacement = realReplacement + " ";
 			}

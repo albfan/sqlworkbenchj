@@ -40,6 +40,12 @@ public class Db2SearchPath
 	public List<String> getSearchPath(WbConnection con, String defaultSchema)
 	{
 		if (con == null) return Collections.emptyList();
+
+		if (defaultSchema != null)
+		{
+			return Collections.singletonList(con.getMetadata().adjustSchemaNameCase(defaultSchema));
+		}
+		
 		List<String> result = new ArrayList<String>();
 
 		ResultSet rs = null;
@@ -69,11 +75,6 @@ public class Db2SearchPath
 		}
 
 		List<String> searchPath = parseResult(result);
-
-		if (defaultSchema != null && searchPath.isEmpty())
-		{
-			searchPath.add(defaultSchema);
-		}
 
 		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + searchPath.toString());
 		return searchPath;
