@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import workbench.db.CommentSqlManager;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectChanger;
@@ -80,19 +81,31 @@ public class AlterObjectAction
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		if (ds == null) return false;
 
-		List<String> types = CollectionUtil.arrayList();
+		List<String> renameTypes = CollectionUtil.arrayList();
+		List<String> commentTypes = CollectionUtil.arrayList();
+
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
-			if (ds.isRowModified(row))
+			String type = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			if (ds.isColumnModified(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME))
 			{
-				String type = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-				types.add(type);
+				renameTypes.add(type);
+			}
+			if (ds.isColumnModified(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS))
+			{
+				commentTypes.add(type);
 			}
 		}
 
-		for (String type : types)
+		for (String type : renameTypes)
 		{
 			if (db.getRenameObjectSql(type) != null) return true;
+		}
+
+		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getDbId());
+		for (String type : commentTypes)
+		{
+			if (mgr.getCommentSqlTemplate(type) != null) return true;
 		}
 		return false;
 	}
