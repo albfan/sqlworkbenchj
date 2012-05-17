@@ -14,6 +14,7 @@ package workbench.gui.renderer;
 
 
 import javax.swing.JLabel;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 
 /**
@@ -38,21 +39,28 @@ public class SqlTypeRenderer
 	{
 		if (value != null)
 		{
+			int type = -1;
 			try
 			{
-				int type = ((Integer)value).intValue();
+				type = ((Integer)value).intValue();
 				displayValue = SqlUtil.getTypeName(type);
+				StringBuilder tip = new StringBuilder(displayValue.length() + 8);
+				tip.append(displayValue);
+				tip.append(" (");
+				tip.append(NumberStringCache.getNumberString(type));
+				tip.append(')');
+				setTooltip(tip.toString());
 			}
 			catch (Exception e)
 			{
 				displayValue = value.toString();
+				setTooltip(displayValue);
 			}
-			setToolTipText(displayValue);
 		}
 		else
 		{
 			displayValue = "";
-			this.setToolTipText(null);
+			setTooltip(null);
 		}
 	}
 

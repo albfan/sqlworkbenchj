@@ -493,6 +493,7 @@ public class StatementRunner
 
 	public void done()
 	{
+		LogMgr.logDebug("StatementRunner.done()", "Cleaning up");
 		if (this.result != null) this.result.clear();
 		this.result = null;
 		this.releaseSavepoint();

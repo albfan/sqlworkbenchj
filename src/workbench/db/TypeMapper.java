@@ -24,7 +24,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to map datatypes from one JDBC types to DBMS types.
+ * A class to map datatypes from JDBC types to DBMS types.
  *
  * @author Thomas Kellerer
  */
@@ -32,7 +32,7 @@ public class TypeMapper
 {
 	public static final String PLACEHOLDER_DIGITS = "$digits";
 	public static final String PLACEHOLDER_SIZE = "$size";
-	
+
 	private WbConnection targetDb;
 	private Map<Integer, String> typeInfo;
 	private Map<Integer, String> userMapping;
@@ -108,7 +108,7 @@ public class TypeMapper
 	 * If a user type-mappin is available for the given type, this will
 	 * be returned, with the placeholders <tt>$size</tt> and <tt>$digits</tt>
 	 * replaced in the type definition.
-	 * 
+	 *
 	 * @param type
 	 * @param size
 	 * @param digits
@@ -136,8 +136,8 @@ public class TypeMapper
 		String name = this.typeInfo.get(key);
 
 		// BLOBs and CLOBs are mapped to different types in different
-		// DBMS and not all are using the same java.sql.Types value
-		// this code tries to find a mapping even if the "desired" input
+		// DBMS and not all are using the same java.sql.Types value.
+		// This code tries to find a mapping even if the "desired" input
 		// type was not part of the type info returned by the driver
 		if (name == null)
 		{
@@ -176,12 +176,12 @@ public class TypeMapper
 	 * the data type is used
 	 *
 	 * @param mapping
-	 * @see #getTypeName(int, int, int) 
+	 * @see #getTypeName(int, int, int)
 	 */
 	public void parseUserTypeMap(String mapping)
 	{
 		userMapping = new HashMap<Integer, String>();
-		
+
 		if (StringUtil.isBlank(mapping)) return;
 		List<String> types = StringUtil.stringToList(mapping, ";", true, true, false, false);
 

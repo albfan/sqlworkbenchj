@@ -146,7 +146,6 @@ import workbench.gui.editor.actions.IndentSelection;
 import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
-import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -1730,10 +1729,11 @@ public class SqlPanel
 			cancelExecution = true;
 			setCancelState(false);
 			stmtRunner.cancel();
+			Thread.yield();
 			if (this.executionThread != null)
 			{
 				// Wait for the execution thread to finish because of the cancel() call.
-				// but wait at most 5 seconds (configurable) for the statement to respond
+				// but wait at most 2.5 seconds (configurable) for the statement to respond
 				// to the cancel() call. Depending on the sate of the statement, calling Statement.cancel()
 				// might not have any effect.
 				try
@@ -2420,7 +2420,7 @@ public class SqlPanel
 		if (ds == null) return 0;
 		return ds.getLoadedAt();
 	}
-	
+
 	public String getSourceQuery()
 	{
 		if (currentData == null) return null;
