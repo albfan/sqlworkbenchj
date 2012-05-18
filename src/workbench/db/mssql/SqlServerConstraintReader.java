@@ -12,7 +12,6 @@
 package workbench.db.mssql;
 
 import workbench.db.AbstractConstraintReader;
-import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
 /**
@@ -28,7 +27,7 @@ public class SqlServerConstraintReader
 
 	public SqlServerConstraintReader(WbConnection con)
 	{
-		if (!JdbcUtils.hasMinimumServerVersion(con, "9.0"))
+		if (!SqlServerUtil.isSqlServer2005(con))
 		{
 			is2000 = true;
 		}

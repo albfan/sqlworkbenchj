@@ -190,23 +190,26 @@ public class SqlCommand
 	public void cancel()
 		throws SQLException
 	{
-		isCancelled = true;
-		if (currentRetrievalData != null)
+		synchronized (this)
 		{
-			currentRetrievalData.cancelRetrieve();
-		}
-
-		if (currentStatement != null)
-		{
-			try
+			isCancelled = true;
+			if (currentRetrievalData != null)
 			{
-				LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution (" + StringUtil.getMaxSubstring(currentStatement.toString(), 80) + ")");
-				currentStatement.cancel();
-				LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
+				currentRetrievalData.cancelRetrieve();
 			}
-			catch (Throwable th)
+
+			if (currentStatement != null)
 			{
-				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
+				try
+				{
+					LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution (" + StringUtil.getMaxSubstring(currentStatement.toString(), 80) + ")");
+					currentStatement.cancel();
+					LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
+				}
+				catch (Throwable th)
+				{
+					LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
+				}
 			}
 		}
 	}
@@ -224,24 +227,27 @@ public class SqlCommand
 	 */
 	public void done()
 	{
-		if (currentStatement != null)
+		synchronized (this)
 		{
-			try { currentStatement.clearBatch(); } catch (Exception th) {}
-			try { currentStatement.clearWarnings(); } catch (Exception th) {}
-			try { currentConnection.clearWarnings(); } catch (Exception e) {}
+			if (currentStatement != null)
+			{
+				try { currentStatement.clearBatch(); } catch (Exception th) {}
+				try { currentStatement.clearWarnings(); } catch (Exception th) {}
+				try { currentConnection.clearWarnings(); } catch (Exception e) {}
 
-			try
-			{
-				currentStatement.close();
+				try
+				{
+					currentStatement.close();
+				}
+				catch (Exception th)
+				{
+					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement", th);
+				}
 			}
-			catch (Exception th)
-			{
-				LogMgr.logError("SqlCommand.done()", "Error when closing the current statement", th);
-			}
+			currentStatement = null;
+			isCancelled = false;
+			currentRetrievalData = null;
 		}
-		currentStatement = null;
-		isCancelled = false;
-		currentRetrievalData = null;
 	}
 
 	/**

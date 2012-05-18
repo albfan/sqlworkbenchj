@@ -53,6 +53,7 @@ public class IconHandler
 	protected void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
+		flush();
 	}
 
 	protected void flush()

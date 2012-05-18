@@ -18,7 +18,6 @@ import java.util.List;
 import workbench.db.ConstraintDefinition;
 
 import workbench.db.IndexDefinition;
-import workbench.db.JdbcUtils;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -121,7 +120,7 @@ public class SqlServerUniqueConstraintReader
 
 	private boolean isSupported(WbConnection con)
 	{
-		return JdbcUtils.hasMinimumServerVersion(con.getSqlConnection(), "9.0");
+		return SqlServerUtil.isSqlServer2005(con);
 	}
 
 

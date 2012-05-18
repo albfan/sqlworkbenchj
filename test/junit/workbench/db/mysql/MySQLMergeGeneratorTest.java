@@ -1,5 +1,5 @@
 /*
- * OracleMergeGeneratorTest.java
+ * MySQLMergeGeneratorTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -8,31 +8,55 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.oracle;
+package workbench.db.mysql;
 
 import java.sql.Types;
-import java.util.List;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataContainer;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class OracleMergeGeneratorTest
+public class MySQLMergeGeneratorTest
 	extends WbTestCase
 {
-	public OracleMergeGeneratorTest()
+	public MySQLMergeGeneratorTest()
 	{
-		super("OracleMergeGeneratorTest");
+		super("MySQLMergeGeneratorTest");
 	}
 
+	@BeforeClass
+	public static void setUpClass()
+	{
+	}
+
+	@AfterClass
+	public static void tearDownClass()
+	{
+	}
+
+	@Before
+	public void setUp()
+	{
+	}
+
+	@After
+	public void tearDown()
+	{
+	}
+	/**
+	 * Test of generateMerge method, of class MySQLMergeGenerator.
+	 */
 	@Test
 	public void testGenerateMerge()
 	{
@@ -55,44 +79,18 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 0, Integer.valueOf(24));
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
-
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		MySQLMergeGenerator generator = new MySQLMergeGenerator(null);
 		String sql = generator.generateMerge(ds);
-		assertNotNull(sql);
+
 		String expected =
-			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
-			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
-			"WHEN MATCHED THEN UPDATE\n" +
-			"     SET ut.fname = md.fname,\n" +
-			"         ut.lname = md.lname\n" +
-			"WHEN NOT MATCHED THEN\n" +
-			"  INSERT (id, fname, lname)\n" +
-			"  VALUES (md.id, md.fname, md.lname);";
-//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
-		assertEquals(expected, sql);
-
-		RowDataContainer selected = RowDataContainer.Factory.createContainer(ds, new int[] {0});
-		sql = generator.generateMerge(selected);
-		assertNotNull(sql);
-
-		expected =
-			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
-			"WHEN MATCHED THEN UPDATE\n" +
-			"     SET ut.fname = md.fname,\n" +
-			"         ut.lname = md.lname\n" +
-			"WHEN NOT MATCHED THEN\n" +
-			"  INSERT (id, fname, lname)\n" +
-			"  VALUES (md.id, md.fname, md.lname);";
-//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
+			"INSERT INTO person\n" +
+			"  (id, fname, lname)\n" +
+			"VALUES\n" +
+			"  (42,'Arthur','Dent'),\n" +
+			"  (24,'Ford','Prefect')\n" +
+			"ON DUPLICATE KEY UPDATE\n" +
+			"  fname = values(fname),\n" +
+			"  lname = values(lname);";
 		assertEquals(expected, sql);
 	}
 
@@ -119,9 +117,10 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		MySQLMergeGenerator generator = new MySQLMergeGenerator(null);
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
+
 		result.append(part);
 		part = generator.addRow(info, ds.getRow(0), 0);
 		result.append(part);
@@ -129,23 +128,18 @@ public class OracleMergeGeneratorTest
 		part = generator.addRow(info, ds.getRow(1), 1);
 		result.append(part);
 
-		result.append(generator.generateMergeEnd(ds));
+		part = generator.generateMergeEnd(ds);
+		result.append(part);
 
 		String expected =
-			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
-			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
-			"WHEN MATCHED THEN UPDATE\n" +
-			"     SET ut.fname = md.fname,\n" +
-			"         ut.lname = md.lname\n" +
-			"WHEN NOT MATCHED THEN\n" +
-			"  INSERT (id, fname, lname)\n" +
-			"  VALUES (md.id, md.fname, md.lname);";
-//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
+			"INSERT INTO person\n" +
+			"  (id, fname, lname)\n" +
+			"VALUES\n" +
+			"  (42,'Arthur','Dent'),\n" +
+			"  (24,'Ford','Prefect')\n" +
+			"ON DUPLICATE KEY UPDATE\n" +
+			"  fname = values(fname),\n" +
+			"  lname = values(lname);";
 		assertEquals(expected, result.toString());
 	}
 }

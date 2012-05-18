@@ -16,7 +16,6 @@ import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
 import workbench.db.DbMetadata;
-import workbench.db.JdbcUtils;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -72,7 +71,7 @@ public class SqlServerObjectListEnhancer
 		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 		String sql = null;
 
-		if (JdbcUtils.hasMinimumServerVersion(con, "9.0"))
+		if (SqlServerUtil.isSqlServer2005(con))
 		{
 			sql = "SELECT objtype, objname, cast(value as varchar) as value \n" +
       "FROM fn_listextendedproperty ('" + propName + "','schema', ?, ?, ";

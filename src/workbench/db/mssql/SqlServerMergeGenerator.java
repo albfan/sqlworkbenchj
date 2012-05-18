@@ -8,9 +8,7 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.oracle;
-
-
+package workbench.db.mssql;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -26,13 +24,13 @@ import workbench.storage.SqlLiteralFormatter;
  *
  * @author Thomas Kellerer
  */
-public class OracleMergeGenerator
+public class SqlServerMergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 	private WbConnection dbConn;
 
-	public OracleMergeGenerator(WbConnection con)
+	public SqlServerMergeGenerator(WbConnection con)
 	{
 		this.dbConn = con;
 		this.formatter = new SqlLiteralFormatter(con);
@@ -97,7 +95,7 @@ public class OracleMergeGenerator
 	private void appendJoin(StringBuilder sql, RowDataContainer data)
 	{
 		ResultInfo info = data.getResultInfo();
-		sql.append("\n) md ON (");
+		sql.append("\n) AS md ON (");
 		int pkCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)
 		{
@@ -128,7 +126,6 @@ public class OracleMergeGenerator
 				sql.append(info.getColumnName(col));
 			}
 		}
-		sql.append(" FROM dual");
 	}
 
 	private void appendUpdate(StringBuilder sql, RowDataContainer data)

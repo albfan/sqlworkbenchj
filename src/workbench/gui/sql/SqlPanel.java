@@ -1753,7 +1753,7 @@ public class SqlPanel
 		}
 		finally
 		{
-			iconHandler.showBusyIcon(false);
+//			iconHandler.showBusyIcon(false);
 		}
 	}
 
@@ -1890,7 +1890,7 @@ public class SqlPanel
 			clearStatusMessage();
 			setCancelState(false);
 			updateResultInfos();
-
+			iconHandler.showBusyIcon(false);
 			// setBusy(false) should be called after dbExecEnd()
 			// otherwise the panel would indicate it's not busy, but
 			// the connection would still be marked as busy

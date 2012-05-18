@@ -1,5 +1,5 @@
 /*
- * OracleMergeGeneratorTest.java
+ * SqlServerMergeGeneratorTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -8,10 +8,9 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.oracle;
+package workbench.db.mssql;
 
 import java.sql.Types;
-import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.WbTestCase;
@@ -25,12 +24,12 @@ import workbench.storage.RowDataContainer;
  *
  * @author Thomas Kellerer
  */
-public class OracleMergeGeneratorTest
+public class SqlServerMergeGeneratorTest
 	extends WbTestCase
 {
-	public OracleMergeGeneratorTest()
+	public SqlServerMergeGeneratorTest()
 	{
-		super("OracleMergeGeneratorTest");
+		super("SqlServerMergeGeneratorTest");
 	}
 
 	@Test
@@ -56,17 +55,17 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		SqlServerMergeGenerator generator = new SqlServerMergeGenerator(null);
 		String sql = generator.generateMerge(ds);
 		assertNotNull(sql);
 		String expected =
 			"MERGE INTO person ut\n" +
 			"USING\n" +
 			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
+			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
 			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
+			"  SELECT 24, 'Ford', 'Prefect'\n" +
+			") AS md ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
@@ -74,7 +73,7 @@ public class OracleMergeGeneratorTest
 			"  INSERT (id, fname, lname)\n" +
 			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
-		assertEquals(expected, sql);
+		assertEquals(expected, sql.trim());
 
 		RowDataContainer selected = RowDataContainer.Factory.createContainer(ds, new int[] {0});
 		sql = generator.generateMerge(selected);
@@ -84,8 +83,8 @@ public class OracleMergeGeneratorTest
 			"MERGE INTO person ut\n" +
 			"USING\n" +
 			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
+			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
+			") AS md ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
@@ -93,7 +92,7 @@ public class OracleMergeGeneratorTest
 			"  INSERT (id, fname, lname)\n" +
 			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
-		assertEquals(expected, sql);
+		assertEquals(expected, sql.trim());
 	}
 
 	@Test
@@ -119,7 +118,7 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		SqlServerMergeGenerator generator = new SqlServerMergeGenerator(null);
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
 		result.append(part);
@@ -135,17 +134,17 @@ public class OracleMergeGeneratorTest
 			"MERGE INTO person ut\n" +
 			"USING\n" +
 			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
+			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
 			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +
-			") md ON (ut.id = md.id)\n" +
+			"  SELECT 24, 'Ford', 'Prefect'\n" +
+			") AS md ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
 			"WHEN NOT MATCHED THEN\n" +
 			"  INSERT (id, fname, lname)\n" +
 			"  VALUES (md.id, md.fname, md.lname);";
-//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
+		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
 		assertEquals(expected, result.toString());
 	}
 }

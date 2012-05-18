@@ -10,7 +10,10 @@
  */
 package workbench.storage;
 
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerMergeGenerator;
+import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
 
@@ -52,6 +55,14 @@ public interface MergeGenerator
 			if (conn.getMetadata().isPostgres())
 			{
 				return new PostgresMergeGenerator(conn);
+			}
+			if (conn.getMetadata().isMySql())
+			{
+				return new MySQLMergeGenerator(conn);
+			}
+			if (conn.getMetadata().isSqlServer())
+			{
+				return new SqlServerMergeGenerator(conn);
 			}
 			return null;
 		}

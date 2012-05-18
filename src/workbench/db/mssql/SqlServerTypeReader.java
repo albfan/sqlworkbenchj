@@ -53,7 +53,7 @@ public class SqlServerTypeReader
 
 	public static boolean versionSupportsTypes(WbConnection con)
 	{
-		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
+		return SqlServerUtil.isSqlServer2005(con);
 	}
 
 	@Override

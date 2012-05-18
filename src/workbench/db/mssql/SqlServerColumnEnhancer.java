@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
-import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -51,7 +50,7 @@ public class SqlServerColumnEnhancer
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
 	{
-		if (JdbcUtils.hasMinimumServerVersion(conn, "9.0"))
+		if (SqlServerUtil.isSqlServer2005(conn))
 		{
 			updateComputedColumns(table, conn);
 		}
@@ -74,7 +73,7 @@ public class SqlServerColumnEnhancer
 
 		String sql = "SELECT objname, cast(value as varchar) as value \n FROM ";
 
-		if (JdbcUtils.hasMinimumServerVersion(conn, "9.0"))
+		if (SqlServerUtil.isSqlServer2005(conn))
 		{
 			sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
 		}

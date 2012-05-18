@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.DbMetadata;
-import workbench.db.JdbcUtils;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -47,7 +46,7 @@ public class SqlServerSynonymReader
 
 	public static boolean supportsSynonyms(WbConnection con)
 	{
-		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
+		return SqlServerUtil.isSqlServer2005(con);
 	}
 
 	@Override
