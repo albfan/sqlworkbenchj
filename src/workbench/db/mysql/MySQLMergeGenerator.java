@@ -12,7 +12,6 @@ package workbench.db.mysql;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
@@ -28,12 +27,10 @@ public class MySQLMergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
-	private WbConnection dbConn;
 
-	public MySQLMergeGenerator(WbConnection con)
+	public MySQLMergeGenerator(String dbid)
 	{
-		this.dbConn = con;
-		this.formatter = new SqlLiteralFormatter(con);
+		this.formatter = new SqlLiteralFormatter(dbid);
 	}
 
 	@Override
@@ -93,7 +90,7 @@ public class MySQLMergeGenerator
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("INSERT INTO ");
-		sql.append(tbl.getTableExpression(this.dbConn));
+		sql.append(tbl.getTableExpression());
 		sql.append("\n  (");
 		ResultInfo info = data.getResultInfo();
 

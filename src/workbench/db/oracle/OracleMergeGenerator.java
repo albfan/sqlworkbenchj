@@ -14,7 +14,6 @@ package workbench.db.oracle;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
@@ -30,12 +29,10 @@ public class OracleMergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
-	private WbConnection dbConn;
 
-	public OracleMergeGenerator(WbConnection con)
+	public OracleMergeGenerator(String dbid)
 	{
-		this.dbConn = con;
-		this.formatter = new SqlLiteralFormatter(con);
+		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 	}
 
 	@Override
@@ -81,7 +78,7 @@ public class OracleMergeGenerator
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("MERGE INTO ");
-		sql.append(tbl.getTableExpression(this.dbConn));
+		sql.append(tbl.getTableExpression());
 		sql.append(" ut\nUSING\n(\n");
 		if (withData)
 		{

@@ -12,7 +12,6 @@ package workbench.db.mssql;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
@@ -28,12 +27,10 @@ public class SqlServerMergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
-	private WbConnection dbConn;
 
-	public SqlServerMergeGenerator(WbConnection con)
+	public SqlServerMergeGenerator(String dbid)
 	{
-		this.dbConn = con;
-		this.formatter = new SqlLiteralFormatter(con);
+		this.formatter = new SqlLiteralFormatter(dbid);
 	}
 
 	@Override
@@ -79,7 +76,7 @@ public class SqlServerMergeGenerator
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("MERGE INTO ");
-		sql.append(tbl.getTableExpression(this.dbConn));
+		sql.append(tbl.getTableExpression());
 		sql.append(" ut\nUSING\n(\n");
 		if (withData)
 		{

@@ -67,7 +67,6 @@ public class SqlRowDataConverter
 	private boolean doFormatting = true;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean ignoreRowStatus = true;
-	private MergeGenerator mergeGenerator;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -80,7 +79,6 @@ public class SqlRowDataConverter
 	{
 		super.setOriginalConnection(con);
 		this.literalFormatter = new SqlLiteralFormatter(con);
-		this.mergeGenerator = MergeGenerator.Factory.createGenerator(con);
 	}
 
 	@Override

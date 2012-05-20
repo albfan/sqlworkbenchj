@@ -10,7 +10,6 @@
  */
 package workbench.storage;
 
-import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
@@ -37,32 +36,78 @@ public interface MergeGenerator
 	 */
 	String generateMerge(RowDataContainer data);
 
+	/**
+	 * Generate the start of a MERGE statement.
+	 * <br/>
+	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+	 *
+	 * @param data the data source
+	 * @return  the start of a MERGE statement
+	 */
 	String generateMergeStart(RowDataContainer data);
 
+	/**
+	 * Generate the SQL for a single row in a MERGE statement.
+	 *
+	 * <br/>
+	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+	 *
+	 * @param data the data source
+	 * @return  the SQL for a single row inside a MERGE statement.
+	 */
 	String addRow(ResultInfo info, RowData row, long rowIndex);
 
+	/**
+	 * Generate the end of a MERGE statement.
+	 * <br/>
+	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+	 *
+	 * @param data the data source
+	 * @return  the end of a MERGE statement
+	 */
 	String generateMergeEnd(RowDataContainer data);
 
+
+	/**
+	 * The factory go create MergeGenerator instances depending on the DBMS.
+	 */
 	public final class Factory
 	{
+		/**
+		 * Create a MergeGenerator for the DBMS identified by the connection.
+		 *
+		 * @param conn the connection identifying the DBMS
+		 * @return the generator, might be null.
+		 */
 		public static MergeGenerator createGenerator(WbConnection conn)
 		{
-			if (conn == null) return null;
-			if (conn.getMetadata().isOracle())
+			return createGenerator(conn == null ? null : conn.getDbId());
+		}
+
+		/**
+		 * Create a MergeGenerator for the specify DBMS.
+		 *
+		 * @param dbid the database identifier identifying the DBMS
+		 * @return the generator, might be null.
+		 */
+		public static MergeGenerator createGenerator(String dbid)
+		{
+			if (dbid == null) return null;
+			if ("oracle".equals(dbid))
 			{
-				return new OracleMergeGenerator(conn);
+				return new OracleMergeGenerator(dbid);
 			}
-			if (conn.getMetadata().isPostgres())
+			if ("postgresql".equals(dbid))
 			{
-				return new PostgresMergeGenerator(conn);
+				return new PostgresMergeGenerator(dbid);
 			}
-			if (conn.getMetadata().isMySql())
+			if ("mysql".equals(dbid))
 			{
-				return new MySQLMergeGenerator(conn);
+				return new MySQLMergeGenerator(dbid);
 			}
-			if (conn.getMetadata().isSqlServer())
+			if ("microsoft_sql_server".equals(dbid))
 			{
-				return new SqlServerMergeGenerator(conn);
+				return new SqlServerMergeGenerator(dbid);
 			}
 			return null;
 		}

@@ -69,7 +69,7 @@ public class SqlLiteralFormatter
 	 */
 	public SqlLiteralFormatter()
 	{
-		this(null);
+		this((String)null);
 	}
 
 	/**
@@ -85,14 +85,20 @@ public class SqlLiteralFormatter
   */
 	public SqlLiteralFormatter(WbConnection con)
 	{
-		String product = null;
+		String dbid = null;
 		isDbId = false;
 		if (con != null && con.getMetadata() != null)
 		{
-			product = con.getMetadata().getDbId();
+			dbid = con.getMetadata().getDbId();
 			isDbId = true;
 		}
-		setDateLiteralType(product);
+		setDateLiteralType(dbid);
+	}
+
+	public SqlLiteralFormatter(String dbid)
+	{
+		isDbId = true;
+		setDateLiteralType(dbid);
 	}
 
 	/**
@@ -105,9 +111,9 @@ public class SqlLiteralFormatter
 	{
 		if (con != null)
 		{
-			String product = con.getMetadata().getDbId();
+			String dbid = con.getMetadata().getDbId();
 			isDbId = true;
-			this.setDateLiteralType(product);
+			this.setDateLiteralType(dbid);
 			this.dbSettings = con.getDbSettings();
 		}
 	}

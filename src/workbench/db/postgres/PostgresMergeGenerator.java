@@ -12,7 +12,6 @@ package workbench.db.postgres;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.storage.ColumnData;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
@@ -28,12 +27,10 @@ public class PostgresMergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
-	private WbConnection dbConn;
 
-	public PostgresMergeGenerator(WbConnection con)
+	public PostgresMergeGenerator(String dbid)
 	{
-		this.dbConn = con;
-		this.formatter = new SqlLiteralFormatter(con);
+		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 	}
 
 	@Override
@@ -109,7 +106,7 @@ public class PostgresMergeGenerator
 
 		sql.append("\n),\nupsert as\n(\n");
 		sql.append("  update ");
-		sql.append(tbl.getTableExpression(dbConn));
+		sql.append(tbl.getTableExpression());
 		sql.append(" m\n");
 		ResultInfo info = data.getResultInfo();
 
@@ -149,7 +146,7 @@ public class PostgresMergeGenerator
 		TableIdentifier tbl = data.getUpdateTable();
 
 		sql.append("\ninsert into ");
-		sql.append(tbl.getTableExpression(dbConn));
+		sql.append(tbl.getTableExpression());
 		sql.append(" (");
 		ResultInfo info = data.getResultInfo();
 		StringBuilder columns = new StringBuilder(info.getColumnCount() * 15);

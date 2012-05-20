@@ -11,6 +11,7 @@
 package workbench.db.postgres;
 
 import java.sql.Types;
+import java.util.GregorianCalendar;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.WbTestCase;
@@ -39,7 +40,8 @@ public class PostgresMergeGeneratorTest
 		id.setIsPkColumn(true);
 		ColumnIdentifier fname = new ColumnIdentifier("fname", Types.VARCHAR);
 		ColumnIdentifier lname = new ColumnIdentifier("lname", Types.VARCHAR);
-		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, fname, lname });
+		ColumnIdentifier dob = new ColumnIdentifier("dob", Types.DATE);
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, fname, lname, dob });
 
 		TableIdentifier tbl = new TableIdentifier("person");
 		info.setUpdateTable(tbl);
@@ -50,32 +52,36 @@ public class PostgresMergeGeneratorTest
 		ds.setValue(row, 1, "Arthur");
 		ds.setValue(row, 2, "Dent");
 
+		ds.setValue(row, 3, new GregorianCalendar(2012, 0, 1).getTime());
+
 		row = ds.addRow();
 		ds.setValue(row, 0, Integer.valueOf(24));
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
+		ds.setValue(row, 3, new GregorianCalendar(2012, 0, 2).getTime());
 
 		PostgresMergeGenerator generator = new PostgresMergeGenerator(null);
 		String sql = generator.generateMerge(ds);
 		assertNotNull(sql);
 		String expected =
-			"with merge_data (id, fname, lname) as \n" +
+			"with merge_data (id, fname, lname, dob) as \n" +
 			"(\n" +
 			"  values\n" +
-			"    (42,'Arthur','Dent'),\n" +
-			"    (24,'Ford','Prefect')\n" +
+			"    (42,'Arthur','Dent',DATE '2012-01-01'),\n" +
+			"    (24,'Ford','Prefect',DATE '2012-01-02')\n" +
 			"),\n" +
 			"upsert as\n" +
 			"(\n" +
 			"  update person m\n" +
 			"     set m.fname = md.fname,\n" +
-			"         m.lname = md.lname\n" +
+			"         m.lname = md.lname,\n" +
+			"         m.dob = md.dob\n" +
 			"  from merge_data md\n" +
 			"  where m.id = md.id\n" +
 			"  returning m.*\n" +
 			")\n" +
-			"insert into person (id, fname, lname)\n" +
-			"select id, fname, lname\n" +
+			"insert into person (id, fname, lname, dob)\n" +
+			"select id, fname, lname, dob\n" +
 			"from merge_data\n" +
 			"where not exists (select 1\n" +
 			"                  from upsert up\n" +
@@ -86,22 +92,23 @@ public class PostgresMergeGeneratorTest
 		RowDataContainer selected = RowDataContainer.Factory.createContainer(ds, new int[] { 1 });
 		sql = generator.generateMerge(selected);
 		expected =
-			"with merge_data (id, fname, lname) as \n" +
+			"with merge_data (id, fname, lname, dob) as \n" +
 			"(\n" +
 			"  values\n" +
-			"    (24,'Ford','Prefect')\n" +
+			"    (24,'Ford','Prefect',DATE '2012-01-02')\n" +
 			"),\n" +
 			"upsert as\n" +
 			"(\n" +
 			"  update person m\n" +
 			"     set m.fname = md.fname,\n" +
-			"         m.lname = md.lname\n" +
+			"         m.lname = md.lname,\n" +
+			"         m.dob = md.dob\n" +
 			"  from merge_data md\n" +
 			"  where m.id = md.id\n" +
 			"  returning m.*\n" +
 			")\n" +
-			"insert into person (id, fname, lname)\n" +
-			"select id, fname, lname\n" +
+			"insert into person (id, fname, lname, dob)\n" +
+			"select id, fname, lname, dob\n" +
 			"from merge_data\n" +
 			"where not exists (select 1\n" +
 			"                  from upsert up\n" +
