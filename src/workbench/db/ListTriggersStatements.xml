@@ -175,6 +175,7 @@ from syscat.triggers</string>
               '' as remarks,
               status
       FROM all_triggers
+      WHERE trigger_name not like 'BIN$%'
     </string>
     </void>
     <void property="objectNameField">
