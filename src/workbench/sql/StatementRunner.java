@@ -460,20 +460,23 @@ public class StatementRunner
 
 	public void cancel()
 	{
-		try
+		synchronized (this)
 		{
-			if (this.currentConsumer != null)
+			try
 			{
-				this.currentConsumer.cancel();
+				if (this.currentConsumer != null)
+				{
+					this.currentConsumer.cancel();
+				}
+				if (this.currentCommand != null)
+				{
+					this.currentCommand.cancel();
+				}
 			}
-			if (this.currentCommand != null)
+			catch (Exception th)
 			{
-				this.currentCommand.cancel();
+				LogMgr.logWarning("StatementRunner.cancel()", "Error when cancelling statement", th);
 			}
-		}
-		catch (Exception th)
-		{
-			LogMgr.logWarning("StatementRunner.cancel()", "Error when cancelling statement", th);
 		}
 	}
 
@@ -493,16 +496,19 @@ public class StatementRunner
 
 	public void done()
 	{
-		LogMgr.logDebug("StatementRunner.done()", "Cleaning up");
-		if (this.result != null) this.result.clear();
-		this.result = null;
-		this.releaseSavepoint();
-		this.statementDone();
-		this.currentConsumer = null;
-		this.restoreMainConnection();
-		if (currentConnection != null)
+		synchronized (this)
 		{
-			this.currentConnection.clearWarnings();
+			LogMgr.logDebug("StatementRunner.done()", "SQL execution finished");
+			if (this.result != null) this.result.clear();
+			this.result = null;
+			this.releaseSavepoint();
+//			this.statementDone();
+			this.currentConsumer = null;
+			this.restoreMainConnection();
+			if (currentConnection != null)
+			{
+				this.currentConnection.clearWarnings();
+			}
 		}
 	}
 

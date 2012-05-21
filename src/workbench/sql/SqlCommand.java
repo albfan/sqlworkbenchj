@@ -231,6 +231,8 @@ public class SqlCommand
 		{
 			if (currentStatement != null)
 			{
+				LogMgr.logDebug("SqlCommand.done()", "Cleaning up SqlCommand", new Exception());
+
 				try { currentStatement.clearBatch(); } catch (Exception th) {}
 				try { currentStatement.clearWarnings(); } catch (Exception th) {}
 				try { currentConnection.clearWarnings(); } catch (Exception e) {}

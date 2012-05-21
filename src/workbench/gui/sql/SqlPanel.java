@@ -1823,7 +1823,7 @@ public class SqlPanel
 		this.startExecution(sql, 0, -1, true, this.appendResults);
 	}
 
-	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight, final boolean appendResult)
+	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult)
 	{
 		if (this.isBusy()) return;
 
@@ -1849,7 +1849,7 @@ public class SqlPanel
 			@Override
 			public void run()
 			{
-				runStatement(sql, offset, commandAtIndex, highlight, appendResult);
+				runStatement(sql, offset, commandAtIndex, highlightError, appendResult);
 			}
 		};
 		this.executionThread.start();

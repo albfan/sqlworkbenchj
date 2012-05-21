@@ -74,7 +74,7 @@ public class SelectCommand
 
 			try
 			{
-				if (this.queryTimeout >= 0 && currentConnection.supportsQueryTimeout())
+				if (this.queryTimeout > 0 && currentConnection.supportsQueryTimeout())
 				{
 					this.currentStatement.setQueryTimeout(this.queryTimeout);
 				}
