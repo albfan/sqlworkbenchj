@@ -37,6 +37,7 @@ import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresProcedureReader;
 import workbench.db.postgres.PostgresSequenceReader;
+import workbench.db.vertica.VerticaSequenceReader;
 import workbench.resource.Settings;
 
 /**
@@ -109,6 +110,10 @@ public class ReaderFactory
 		if (meta.getDbId().equals("cubrid"))
 		{
 			return new CubridSequenceReader(con);
+		}
+		if (meta.getDbId().equals("vertica_database"))
+		{
+			return new VerticaSequenceReader(con);
 		}
 		return null;
 	}

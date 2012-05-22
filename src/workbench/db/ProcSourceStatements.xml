@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <java version="1.5" class="java.beans.XMLDecoder">
- <object class="java.util.HashMap"> 
+ <object class="java.util.HashMap">
 
-  <void method="put">  
-   <string>Apache Derby</string>  
-   <object id="derby_proc_source" class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>SELECT a.aliasinfo FROM sys.sysaliases a, sys.sysschemas s WHERE a.schemaid = s.schemaid</string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>a.alias</string>  
-    </void>  
-    <void property="schemaField">  
-     <string>s.schemaname</string>  
-    </void>  
-   </object>  
-  </void>  
- 
-  <void method="put">  
-   <string>Cloudscape</string>  
+  <void method="put">
+   <string>Apache Derby</string>
+   <object id="derby_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT a.aliasinfo FROM sys.sysaliases a, sys.sysschemas s WHERE a.schemaid = s.schemaid</string>
+    </void>
+    <void property="objectNameField">
+     <string>a.alias</string>
+    </void>
+    <void property="schemaField">
+     <string>s.schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Cloudscape</string>
    <object idref="derby_proc_source"/>
 	</void>
 
@@ -43,23 +43,23 @@
    <object idref="db2_host_proc_source"/>
 	</void>
 
-	<void method="put">  
-   <string>DB2/NT</string>  
-   <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>SELECT text FROM syscat.routines</string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>ROUTINENAME</string>  
-    </void>  
-    <void property="schemaField">  
-     <string>ROUTINESCHEMA</string>  
-    </void>  
-   </object>  
-  </void>  
+	<void method="put">
+   <string>DB2/NT</string>
+   <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM syscat.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>ROUTINENAME</string>
+    </void>
+    <void property="schemaField">
+     <string>ROUTINESCHEMA</string>
+    </void>
+   </object>
+  </void>
 
-	<void method="put">  
-   <string>DB2/LINUX</string>  
+	<void method="put">
+   <string>DB2/LINUX</string>
    <object idref="db2_proc_source"/>
 	</void>
 
@@ -73,45 +73,45 @@
    <object idref="db2_proc_source"/>
 	</void>
 
-  <void method="put"> 
-   <string>Oracle</string> 
-   <object id="ora_proc_source" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text FROM all_source</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY TYPE,LINE</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>owner</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="put">
+   <string>Oracle</string>
+   <object id="ora_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM all_source</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY TYPE,LINE</string>
+    </void>
+    <void property="schemaField">
+     <string>owner</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>Oracle8</string> 
-   <object idref="ora_proc_source"/> 
-  </void> 
-  
-  <void method="put">  
-   <string>MySQL</string>  
-   <object class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>select routine_definition from information_schema.routines</string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>routine_name</string>  
-    </void>  
-    <void property="schemaField">  
-     <string>routine_schema</string>  
-    </void>  
-   </object>  
+  <void method="put">
+   <string>Oracle8</string>
+   <object idref="ora_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>MySQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select routine_definition from information_schema.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>routine_name</string>
+    </void>
+    <void property="schemaField">
+     <string>routine_schema</string>
+    </void>
+   </object>
   </void>
 
   <void method="put">
@@ -134,115 +134,115 @@
    <object idref="hsql_proc_source"/>
   </void>
 
-  <void method="put"> 
-   <string>ThinkSQL Relational Database Management System</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT routine_definition FROM information_schema.routines</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>ROUTINE_NAME</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>ROUTINE_SCHEMA</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="put">
+   <string>ThinkSQL Relational Database Management System</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT routine_definition FROM information_schema.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>ROUTINE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>ROUTINE_SCHEMA</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>false</boolean>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>Microsoft SQL Server</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>exec sp_helptext</string> 
-    </void> 
-    <void property="isProcedureCall"> 
-     <boolean>true</boolean> 
-    </void> 
-    <void property="objectNameArgumentPos"> 
-     <int>1</int> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Firebird</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>RDB$PROCEDURE_NAME</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>RDB$OWNER_NAME</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Adaptive Server Enterprise</string> 
-   <object id="ase_proc_source" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select syscomments.text  
- from sysobjects, syscomments  
- where sysobjects.id = syscomments.id  
-and  sysobjects.type = &apos;P&apos;</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>sysobjects.name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string> order by syscomments.colid</string> 
-    </void> 
-   </object> 
-  </void> 
-	
-  <void method="put"> 
-   <string>Adaptive Server Anywhere</string> 
+  <void method="put">
+   <string>Microsoft SQL Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>exec sp_helptext</string>
+    </void>
+    <void property="isProcedureCall">
+     <boolean>true</boolean>
+    </void>
+    <void property="objectNameArgumentPos">
+     <int>1</int>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES</string>
+    </void>
+    <void property="objectNameField">
+     <string>RDB$PROCEDURE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>RDB$OWNER_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Enterprise</string>
+   <object id="ase_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select syscomments.text
+ from sysobjects, syscomments
+ where sysobjects.id = syscomments.id
+and  sysobjects.type = &apos;P&apos;</string>
+    </void>
+    <void property="objectNameField">
+     <string>sysobjects.name</string>
+    </void>
+    <void property="orderBy">
+     <string> order by syscomments.colid</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Anywhere</string>
 		<object idref="ase_proc_source"/>
-  </void> 
-	
-  <void method="put"> 
-   <string>INGRES</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT text_segment FROM iiprocedures</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>procedure_name</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
-    </void> 
-    <void property="schemaField"> 
-     <string>procedure_owner</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by text_sequence</string> 
-    </void> 
-   </object> 
-  </void> 
+  </void>
 
-  <void method="put"> 
-   <string>Informix Dynamic Server</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string> SELECT B.data, B.seqno FROM informix.sysprocedures P,informix.sysprocbody  B WHERE P.procid=B.procid and B.datakey = 'T' </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>P.procname</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>P.owner</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>order by B.seqno</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="put">
+   <string>INGRES</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text_segment FROM iiprocedures</string>
+    </void>
+    <void property="objectNameField">
+     <string>procedure_name</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>false</boolean>
+    </void>
+    <void property="schemaField">
+     <string>procedure_owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by text_sequence</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string> SELECT B.data, B.seqno FROM informix.sysprocedures P,informix.sysprocbody  B WHERE P.procid=B.procid and B.datakey = 'T' </string>
+    </void>
+    <void property="objectNameField">
+     <string>P.procname</string>
+    </void>
+    <void property="schemaField">
+     <string>P.owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by B.seqno</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
     <string>LucidDB</string>
@@ -277,5 +277,24 @@ and  sysobjects.type = &apos;P&apos;</string>
     </object>
   </void>
 
- </object> 
-</java> 
+
+  <void method="put">
+   <string>Vertica Database</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>
+            select 'CREATE FUNCTION '||function_name||'('||function_argument_type||')\nRETURN '||function_return_type||'\nAS BEGIN\n  '||function_definition||';\nEND;'
+            from v_catalog.user_functions
+        </string>
+      </void>
+      <void property="objectNameField">
+        <string>function_name</string>
+      </void>
+      <void property="schemaField">
+        <string>schema_name</string>
+      </void>
+    </object>
+  </void>
+
+ </object>
+</java>

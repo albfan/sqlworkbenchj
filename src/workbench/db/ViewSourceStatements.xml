@@ -374,5 +374,20 @@ FROM _SYSTEM.SYS_TABLES
    </object>
   </void>
 
+  <void method="put">
+   <string>Vertica Database</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select view_definition from v_catalog.views</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="schemaField">
+     <string>table_schema</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

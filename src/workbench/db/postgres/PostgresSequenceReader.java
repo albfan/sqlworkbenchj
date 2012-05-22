@@ -189,7 +189,6 @@ public class PostgresSequenceReader
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
 		ResultSet rs = null;
-		PreparedStatement stmt = null;
 		Savepoint sp = null;
 		if (namePattern == null) namePattern = "%";
 
@@ -215,7 +214,7 @@ public class PostgresSequenceReader
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
