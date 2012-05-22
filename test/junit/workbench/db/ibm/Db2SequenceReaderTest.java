@@ -16,7 +16,6 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import junit.framework.TestCase;
 import org.junit.Before;
 import workbench.TestUtil;
 import workbench.db.DbObject;
@@ -24,15 +23,15 @@ import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
 import static org.junit.Assert.*;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class Db2SequenceReaderTest
-	extends TestCase
+	extends WbTestCase
 {
-
 	private WbConnection db;
 
 	public Db2SequenceReaderTest()
@@ -44,8 +43,7 @@ public class Db2SequenceReaderTest
 	public void setUp()
 		throws Exception
 	{
-		super.setUp();
-		TestUtil util = new TestUtil(getName());
+		TestUtil util = getTestUtil();
 		db = util.getConnection("fake_db2");
 		TestUtil.executeScript(db,
 			"create schema syscat;\n" +
@@ -119,6 +117,7 @@ public class Db2SequenceReaderTest
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
+			@Override
 			public int compare(DbObject o1, DbObject o2)
 			{
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
@@ -146,6 +145,7 @@ public class Db2SequenceReaderTest
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
+			@Override
 			public int compare(DbObject o1, DbObject o2)
 			{
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
@@ -173,6 +173,7 @@ public class Db2SequenceReaderTest
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
+			@Override
 			public int compare(DbObject o1, DbObject o2)
 			{
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);

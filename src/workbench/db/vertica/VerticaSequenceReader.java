@@ -79,8 +79,12 @@ public class VerticaSequenceReader
 				buf.append("\n       MAXVALUE ");
 				buf.append(max.toString());
 			}
-			buf.append("\n       CACHE ");
-			buf.append(cache);
+
+			if (cache != null && cache.longValue() != 250000)
+			{
+				buf.append("\n       CACHE ");
+				buf.append(cache);
+			}
 			buf.append("\n       ");
 			if (!cycle.booleanValue())
 			{
@@ -157,9 +161,9 @@ public class VerticaSequenceReader
 
 	private SequenceDefinition createDefinition(DataStore ds, int row)
 	{
+		String catalog = ds.getValueAsString(row, "sequence_catalog");
 		String name = ds.getValueAsString(row, "sequence_name");
 		String schema = ds.getValueAsString(row, "sequence_schema");
-		String catalog = ds.getValueAsString(row, "sequence_catalog");
 		SequenceDefinition def = new SequenceDefinition(catalog, schema, name);
 		def.setSequenceProperty("INCREMENT", ds.getValue(0, "increment_by"));
 		def.setSequenceProperty("MAXVALUE", ds.getValue(0, "maximum"));

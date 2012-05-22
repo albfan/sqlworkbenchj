@@ -176,8 +176,14 @@ public class TestUtil
 	public WbConnection getHSQLConnection(String dbName)
 		throws SQLException, ClassNotFoundException
 	{
+		return getHSQLConnection(dbName, "");
+	}
+
+	public WbConnection getHSQLConnection(String dbName, String urlParameters)
+		throws SQLException, ClassNotFoundException
+	{
 		ArgumentParser parser = new AppArguments();
-		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + urlParameters + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(dbName);
 		ConnectionMgr.getInstance().addProfile(prof);

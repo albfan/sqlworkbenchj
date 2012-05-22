@@ -36,6 +36,7 @@ public class WbTestCase
 	protected final void prepare()
 	{
 		System.setProperty("workbench.log.console", "false");
+		System.setProperty("workbench.dbmetadata.debugmetasql", "true");
 		getTestUtil();
 	}
 
