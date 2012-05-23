@@ -694,4 +694,9 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.showmnemonics", true);
 	}
+
+	public static boolean getTransformSequenceDisplay()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.sequence.transpose", true);
+	}
 }

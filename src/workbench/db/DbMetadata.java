@@ -67,9 +67,12 @@ import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.storage.DataStore;
+import workbench.storage.DatastoreTransposer;
 import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
@@ -1373,7 +1376,7 @@ public class DbMetadata
 			escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
 			escapedCatalog = SqlUtil.escapeUnderscore(catalogPattern, escape);
 		}
-		
+
 		String sequenceType = getSequenceReader() != null ? getSequenceReader().getSequenceTypeName() : null;
 
 		ResultSet tableRs = null;
@@ -2085,7 +2088,18 @@ public class DbMetadata
 			String schema = StringUtil.trimQuotes(table.getSchema());
 			String seqname = StringUtil.trimQuotes(table.getObjectName());
 			String catalog = StringUtil.trimQuotes(table.getCatalog());
-			def = getSequenceReader().getRawSequenceDefinition(catalog, schema, seqname);
+			DataStore seqDef = getSequenceReader().getRawSequenceDefinition(catalog, schema, seqname);
+			if (GuiSettings.getTransformSequenceDisplay() && seqDef != null && seqDef.getRowCount() == 1)
+			{
+				DatastoreTransposer transpose = new DatastoreTransposer(seqDef);
+				def = transpose.transposeRow(0);
+				def.getColumns()[0].setColumnName(ResourceMgr.getString("TxtAttribute"));
+				def.getColumns()[1].setColumnName(ResourceMgr.getString("TxtValue"));
+			}
+			else
+			{
+				def = seqDef;
+			}
 		}
 		else if (def == null)
 		{

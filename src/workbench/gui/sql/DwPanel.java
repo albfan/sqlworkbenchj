@@ -668,11 +668,13 @@ public class DwPanel
 		String generatingSql = ds.getGeneratingSql();
 		if (generatingSql == null) return;
 		runQuery(generatingSql, respectMaxRows);
+
 		if (GuiSettings.getShowMaxRowsReached())
 		{
-			checkLimitReachedDisplay(); // this will also re-create the tooltip
+			checkLimitReachedDisplay();
 		}
-		else if (showSQLAsTooltip)
+
+		if (showSQLAsTooltip)
 		{
 			showGeneratingSQLAsTooltip(); // re-create the tooltip because it contains the last execution time
 		}
@@ -852,8 +854,10 @@ public class DwPanel
 		return index;
 	}
 
-	public boolean maxRowsReached()
+	private boolean maxRowsReached()
 	{
+		if (!GuiSettings.getShowMaxRowsReached()) return false;
+
 		int maxRows = getMaxRows();
 		int rowCount = getTable().getRowCount();
 
@@ -878,7 +882,7 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip()
 	{
-		showGeneratingSQLAsTooltip(false);
+		showGeneratingSQLAsTooltip(maxRowsReached());
 	}
 
 	public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
@@ -906,8 +910,6 @@ public class DwPanel
 
 	public void checkLimitReachedDisplay()
 	{
-		if (!GuiSettings.getShowMaxRowsReached()) return;
-
 		JTabbedPane tab = getTabParent();
 		int index = getTabIndex(tab);
 
@@ -921,10 +923,6 @@ public class DwPanel
 			else
 			{
 				clearWarningIcon();
-			}
-			if (showSQLAsTooltip)
-			{
-				showGeneratingSQLAsTooltip(maxRows);
 			}
 		}
 	}
