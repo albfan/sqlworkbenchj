@@ -668,7 +668,11 @@ public class DwPanel
 		String generatingSql = ds.getGeneratingSql();
 		if (generatingSql == null) return;
 		runQuery(generatingSql, respectMaxRows);
-		if (showSQLAsTooltip)
+		if (GuiSettings.getShowMaxRowsReached())
+		{
+			checkLimitReachedDisplay(); // this will also re-create the tooltip
+		}
+		else if (showSQLAsTooltip)
 		{
 			showGeneratingSQLAsTooltip(); // re-create the tooltip because it contains the last execution time
 		}
@@ -874,6 +878,11 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip()
 	{
+		showGeneratingSQLAsTooltip(false);
+	}
+
+	public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
+	{
 		if (sql == null)
 		{
 			return;
@@ -883,9 +892,14 @@ public class DwPanel
 		if (index == -1) return;
 
 		String timeString  = StringUtil.formatIsoTimestamp(getDataStore().getLoadedAt());
-		String msg = ResourceMgr.getFormattedString("TxtLastExec", timeString);
 
-		String tip = "<html>(" + msg + ")<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
+		String msg = ResourceMgr.getFormattedString("TxtLastExec", timeString);
+		String tip = "<html>";
+		if (includeMaxRowsWarning)
+		{
+			tip += "<b>" + ResourceMgr.getString("MsgRetrieveAbort") + "</b><br>";
+		}
+		tip += "(" + msg + ")<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
 	}
@@ -899,28 +913,18 @@ public class DwPanel
 
 		if (index > -1)
 		{
-			String tooltip = tab.getToolTipTextAt(index);
-			if (maxRowsReached())
+			boolean maxRows = maxRowsReached();
+			if (maxRows)
 			{
 				tab.setIconAt(index, getWarningIcon());
-				String msg = ResourceMgr.getString("MsgRetrieveAbort");
-				if (tooltip == null)
-				{
-					tab.setToolTipTextAt(index, msg);
-				}
-				else
-				{
-					String tip = "<html><b style=\"font-size:105%\">" + msg + "</b><pre>" + sql.trim() + "</pre></html>";
-					tab.setToolTipTextAt(index, tip);
-				}
 			}
 			else
 			{
 				clearWarningIcon();
-				if (showSQLAsTooltip)
-				{
-					showGeneratingSQLAsTooltip();
-				}
+			}
+			if (showSQLAsTooltip)
+			{
+				showGeneratingSQLAsTooltip(maxRows);
 			}
 		}
 	}
