@@ -523,7 +523,7 @@ public class TextFileParser
 
 	public void setDelimiter(String delimit)
 	{
-		if (delimit == null) return;
+		if (StringUtil.isEmptyString(delimit)) return;
 		this.delimiter = delimit;
 		if (this.delimiter.contains("\\t"))
 		{

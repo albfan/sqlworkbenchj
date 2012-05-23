@@ -393,6 +393,12 @@ public class WbImport
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
 			textParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
+			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isBlank(delimiter))
+			{
+				result.addMessageByKey("ErrImpDelimEmpty");
+				result.setFailure();
+				return result;
+			}
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
