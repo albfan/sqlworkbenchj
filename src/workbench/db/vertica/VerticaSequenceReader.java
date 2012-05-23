@@ -38,12 +38,11 @@ public class VerticaSequenceReader
               "select current_database as sequence_catalog, \n" +
 						  "       sequence_schema,  \n" +
               "       sequence_name, \n" +
-              "       identity_table_name, \n" +
-              "       allow_cycle, \n" +
-              "       increment_by, \n" +
               "       minimum, \n" +
               "       maximum, \n" +
-              "       session_cache_count \n" +
+              "       increment_by, \n" +
+              "       session_cache_count, \n" +
+              "       allow_cycle \n" +
               "from v_catalog.sequences";
 	public VerticaSequenceReader(WbConnection conn)
 	{
@@ -60,27 +59,30 @@ public class VerticaSequenceReader
 		try
 		{
 			String name = def.getSequenceName();
-			Long max = (Long) def.getSequenceProperty("MAXVALUE");
-			Long min = (Long) def.getSequenceProperty("MINVALUE");
-			Long inc = (Long) def.getSequenceProperty("INCREMENT");
-			Long cache = (Long) def.getSequenceProperty("CACHE");
+			Long maxO = (Long) def.getSequenceProperty("MAXVALUE");
+			Long minO = (Long) def.getSequenceProperty("MINVALUE");
+			Long incO = (Long) def.getSequenceProperty("INCREMENT");
+			Long cacheO = (Long) def.getSequenceProperty("CACHE");
 			Boolean cycle = (Boolean) def.getSequenceProperty("CYCLE");
 			if (cycle == null) cycle = Boolean.FALSE;
+
+			long max = (maxO == null ? Long.MAX_VALUE : maxO.longValue());
+			long min = (minO == null ? 1 : minO.longValue());
+			long inc = (incO == null ? 1 : incO.longValue());
+			long cache = (cacheO == null ? 250000 : cacheO.longValue());
 
 			buf.append("CREATE SEQUENCE ");
 			buf.append(name);
 			buf.append("\n       INCREMENT BY ");
 			buf.append(inc);
+
 			buf.append("\n       MINVALUE ");
 			buf.append(min);
-			long maxMarker = 9223372036854775807L;
-			if (max != maxMarker)
-			{
-				buf.append("\n       MAXVALUE ");
-				buf.append(max.toString());
-			}
 
-			if (cache != null && cache.longValue() != 250000)
+			buf.append("\n       MAXVALUE ");
+			buf.append(Long.toString(max));
+
+			if (cache != 250000)
 			{
 				buf.append("\n       CACHE ");
 				buf.append(cache);
