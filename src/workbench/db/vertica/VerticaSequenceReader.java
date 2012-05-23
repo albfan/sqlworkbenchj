@@ -79,9 +79,12 @@ public class VerticaSequenceReader
 			buf.append("\n       MINVALUE ");
 			buf.append(min);
 
-			buf.append("\n       MAXVALUE ");
-			buf.append(Long.toString(max));
-
+			if (max != Long.MAX_VALUE)
+			{
+				buf.append("\n       MAXVALUE ");
+				buf.append(Long.toString(max));
+			}
+			
 			if (cache != 250000)
 			{
 				buf.append("\n       CACHE ");
