@@ -1442,5 +1442,5 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards", true);
 	}
-	
+
 }

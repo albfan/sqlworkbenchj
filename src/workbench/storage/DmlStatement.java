@@ -91,6 +91,7 @@ public class DmlStatement
 		PreparedStatement stmt = null;
 		int rows = -1;
 
+		boolean useSetNull = aConnection.getDbSettings().useSetNull();
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
@@ -101,7 +102,7 @@ public class DmlStatement
 				Object value = data.getValue();
 				if (value == null)
 				{
-					if (aConnection.getDbSettings().useSetNull())
+					if (useSetNull)
 					{
 						stmt.setNull(i+1, type);
 					}
