@@ -50,7 +50,7 @@ public class XsltTransformerTest
 			XsltTransformer transformer = new XsltTransformer();
 			transformer.transform(inputFileName, outputFileName, xslFileName);
 			assertTrue(output.exists());
-			List<String> lines = TestUtil.readLines(output);
+			List<String> lines = StringUtil.readLines(output);
 			assertNotNull(lines);
 			assertEquals(6, lines.size());
 		}

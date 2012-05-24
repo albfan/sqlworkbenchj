@@ -24,6 +24,7 @@ import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import static org.junit.Assert.*;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -126,7 +127,7 @@ public class PostgresCopyStatementWriterTest
 			WbFile formatFile = new WbFile(util.getBaseDir(), "copy_export.sql");
 			assertTrue(formatFile.exists());
 
-			List<String> contents = TestUtil.readLines(formatFile);
+			List<String> contents = StringUtil.readLines(formatFile);
 			assertNotNull(contents);
 			System.out.println(contents.get(0));
 			String expected = "copy person (id, firstname, lastname) from '";

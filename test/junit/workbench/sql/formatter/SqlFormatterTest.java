@@ -18,6 +18,7 @@ import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -1119,7 +1120,7 @@ public class SqlFormatterTest
 		sql = "create table person (id1 integer not null, id2 integer not null, id3 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2), foreign key (id3) references othertable(id));";
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
-		lines = TestUtil.getLines(formatted);
+		lines = StringUtil.getLines(formatted);
 //		System.out.println("***\n" + formatted + "\n***");
 		assertEquals("  id1         INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2),", lines.get(7));
@@ -1128,13 +1129,13 @@ public class SqlFormatterTest
 		sql = "create table person (somecol integer primary key, firstname varchar(50), lastname varchar(50));";
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
-		lines = TestUtil.getLines(formatted);
+		lines = StringUtil.getLines(formatted);
 		assertEquals("  somecol     INTEGER PRIMARY KEY,", lines.get(2));
 
 		sql = "create table person (id1 integer not null, id2 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2));";
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
-		lines = TestUtil.getLines(formatted);
+		lines = StringUtil.getLines(formatted);
 		assertEquals("  id1         INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 

@@ -53,7 +53,7 @@ public class FileVersionerTest
 		TestUtil.writeFile(main, "1 this is a test\n");
 		File bck = new File(util.getBaseDir(), "mystuff.conf.1");
 		assertTrue(bck.exists());
-		List<String> lines = TestUtil.readLines(bck);
+		List<String> lines = StringUtil.readLines(bck);
 		assertEquals("this is a test", lines.get(0));
 
 		// second backup
@@ -61,13 +61,13 @@ public class FileVersionerTest
 		TestUtil.writeFile(main, "2 this is a test\n");
 		bck = new File(util.getBaseDir(), "mystuff.conf.2");
 		assertTrue(bck.exists());
-		lines = TestUtil.readLines(bck);
+		lines = StringUtil.readLines(bck);
 		assertEquals("1 this is a test", lines.get(0));
 
 		// test that version 1 is still the original file
 		bck = new File(util.getBaseDir(), "mystuff.conf.1");
 		assertTrue(bck.exists());
-		lines = TestUtil.readLines(bck);
+		lines = StringUtil.readLines(bck);
 		assertEquals("this is a test", lines.get(0));
 
 		// third backup, still no rollover expected
@@ -75,18 +75,18 @@ public class FileVersionerTest
 		TestUtil.writeFile(main, "3 this is a test\n");
 		bck = new File(util.getBaseDir(), "mystuff.conf.3");
 		assertTrue(bck.exists());
-		lines = TestUtil.readLines(bck);
+		lines = StringUtil.readLines(bck);
 		assertEquals("2 this is a test", lines.get(0));
 
 		// version two and one should still contain the same contents
 		bck = new File(util.getBaseDir(), "mystuff.conf.1");
 		assertTrue(bck.exists());
-		lines = TestUtil.readLines(bck);
+		lines = StringUtil.readLines(bck);
 		assertEquals("this is a test", lines.get(0));
 
 		bck = new File(util.getBaseDir(), "mystuff.conf.2");
 		assertTrue(bck.exists());
-		lines = TestUtil.readLines(bck);
+		lines = StringUtil.readLines(bck);
 		assertEquals("1 this is a test", lines.get(0));
 
 		// forth backup, rollover expected
@@ -96,7 +96,7 @@ public class FileVersionerTest
 		{
 			bck = new File(util.getBaseDir(), "mystuff.conf." + i);
 			assertTrue(bck.exists());
-			lines = TestUtil.readLines(bck);
+			lines = StringUtil.readLines(bck);
 			assertEquals(i + " this is a test", lines.get(0));
 		}
 		util.emptyBaseDirectory();

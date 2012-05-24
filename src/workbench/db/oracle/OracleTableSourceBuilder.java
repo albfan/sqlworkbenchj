@@ -115,6 +115,16 @@ public class OracleTableSourceBuilder
 				result.append(tablespace);
 			}
 		}
+
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
+		{
+			OracleExternalTableReader reader = new OracleExternalTableReader();
+			CharSequence ext = reader.getDefinition(table, dbConnection);
+			if (ext != null)
+			{
+				result.append(ext);
+			}
+		}
 		return result.toString();
 	}
 

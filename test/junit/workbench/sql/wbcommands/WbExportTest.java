@@ -246,7 +246,7 @@ public class WbExportTest
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 
-			List<String> lines = TestUtil.readLines(exportFile);
+			List<String> lines = StringUtil.readLines(exportFile);
 			assertEquals("Not enough lines exported", 3, lines.size());
 			assertEquals("Wrong second line", "2\twith\\\"quote", lines.get(1));
 			assertEquals("Wrong third line", "3\t\"with\ttab\"", lines.get(2));
@@ -256,7 +256,7 @@ public class WbExportTest
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 
-			lines = TestUtil.readLines(exportFile);
+			lines = StringUtil.readLines(exportFile);
 			assertEquals("Not enough lines exported", 3, lines.size());
 			assertEquals("Wrong second line", "2\twith\"\"quote", lines.get(1));
 
@@ -265,7 +265,7 @@ public class WbExportTest
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 
-			lines = TestUtil.readLines(exportFile);
+			lines = StringUtil.readLines(exportFile);
 			assertEquals("Not enough lines exported", 3, lines.size());
 			assertEquals("Wrong second line", "2\twith\"quote", lines.get(1));
 			assertEquals("Wrong third line", "3\t'with\ttab'", lines.get(2));
@@ -703,14 +703,14 @@ public class WbExportTest
 		File ctl = new File(this.basedir, "export.ctl");
 		assertEquals("Control file not created", true, ctl.exists());
 
-		List<String> lines = TestUtil.readLines(ctl);
+		List<String> lines = StringUtil.readLines(ctl);
 //			System.out.println("first line: " + lines.get(0));
 		assertTrue(lines.get(0).startsWith("--"));
 		assertTrue(lines.get(1).indexOf("skip=1") > -1);
 
 		File bcp = new File(this.basedir, "export.fmt");
 		assertEquals("BCP format file not created", true, bcp.exists());
-		lines = TestUtil.readLines(bcp);
+		lines = StringUtil.readLines(bcp);
 		assertEquals("7.0", lines.get(0));
 		assertEquals("3", lines.get(1));
 		assertTrue(lines.get(2).indexOf(" NR") > -1);

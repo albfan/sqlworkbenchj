@@ -24,6 +24,7 @@ import workbench.util.WbFile;
 import org.junit.Test;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -128,7 +129,7 @@ public class OracleControlFileWriterTest
 			writer.writeFormatFile(exporter, converter);
 			WbFile formatFile = new WbFile(util.getBaseDir(), "export.ctl");
 			assertTrue(formatFile.exists());
-			List<String> lines = TestUtil.readLines(formatFile);
+			List<String> lines = StringUtil.readLines(formatFile);
 			assertNotNull(lines);
 			assertEquals(15, lines.size());
 

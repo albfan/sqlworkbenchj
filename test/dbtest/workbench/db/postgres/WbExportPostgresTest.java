@@ -76,7 +76,7 @@ public class WbExportPostgresTest
 		runner.runStatement("WbExport -file='" + output.getAbsolutePath() + "' -type=text -header=false -type=text -dateFormat='yyyy-MM-dd'");
 		runner.runStatement("select start_date, end_date from ranges order by start_date");
 		assertTrue(output.exists());
-		List<String> lines = TestUtil.readLines(output);
+		List<String> lines = StringUtil.readLines(output);
 		assertEquals(3, lines.size());
 		List<String> elements = StringUtil.stringToList(lines.get(0), "\t");
 		assertEquals(2, elements.size());

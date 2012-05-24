@@ -35,7 +35,8 @@ public class HelpContactAction
 		initMenuDefinition("MnuTxtHelpContact");
 		removeIcon();
 	}
-	
+
+	@Override
 	public synchronized void executeAction(ActionEvent e)
 	{
 		try

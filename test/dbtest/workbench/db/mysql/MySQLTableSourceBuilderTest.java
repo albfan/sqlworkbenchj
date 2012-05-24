@@ -21,6 +21,7 @@ import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -77,13 +78,13 @@ public class MySQLTableSourceBuilderTest
 		MySQLTableSourceBuilder builder = (MySQLTableSourceBuilder)TableSourceBuilderFactory.getBuilder(con);
 
 		String options = builder.getAdditionalTableOptions(isam, null, null);
-		List<String> lines = TestUtil.getLines(options);
+		List<String> lines = StringUtil.getLines(options);
 		assertEquals(2, lines.size());
 		assertEquals("ENGINE=MyISAM", lines.get(0));
 		assertEquals("COMMENT='myisam table'", lines.get(1));
 
 		options = builder.getAdditionalTableOptions(inno, null, null);
-		lines = TestUtil.getLines(options);
+		lines = StringUtil.getLines(options);
 		assertEquals(2, lines.size());
 		assertEquals("ENGINE=InnoDB", lines.get(0));
 		assertEquals("COMMENT='innodb table'", lines.get(1));

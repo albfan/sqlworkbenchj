@@ -11,11 +11,16 @@
  */
 package workbench.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -1474,6 +1479,58 @@ public class StringUtil
 			return quote + input + quote;
 		}
 		return input;
+	}
+
+	/**
+	 * Returns all lines from the source.
+	 * @param source the source
+	 * @return all lines 
+	 * @throws IOException
+	 */
+	public static List<String> readLines(Reader source)
+		throws IOException
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		BufferedReader in = null;
+		try
+		{
+			in = new BufferedReader(source);
+			String s = in.readLine();
+			while (s != null)
+			{
+				result.add(s);
+				s = in.readLine();
+			}
+		}
+		finally
+		{
+			try
+			{
+				in.close();
+			}
+			catch (Throwable th)
+			{
+			}
+		}
+		return result;
+	}
+
+	public static List<String> readLines(File f)
+		throws IOException
+	{
+		return readLines(new FileReader(f));
+	}
+
+	public static List<String> getLines(String s)
+	{
+		try
+		{
+			return readLines(new StringReader(s));
+		}
+		catch (IOException io)
+		{
+			return Collections.emptyList();
+		}
 	}
 
 }

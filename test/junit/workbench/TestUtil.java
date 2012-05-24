@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.sql.Connection;
@@ -348,48 +347,6 @@ public class TestUtil
 		File target = new File(basedir, filename);
 		OutputStream out = new FileOutputStream(target);
 		FileUtil.copy(in, out);
-	}
-
-	public static List<String> getLines(String s)
-	{
-		try
-		{
-			return readLines(new StringReader(s));
-		}
-		catch (IOException io)
-		{
-			// Cannot happen
-			return Collections.emptyList();
-		}
-	}
-
-	public static List<String> readLines(File f)
-		throws IOException
-	{
-		return readLines(new FileReader(f));
-	}
-
-	public static List<String> readLines(Reader source)
-		throws IOException
-	{
-		ArrayList<String> result = new ArrayList<String>();
-		BufferedReader in = null;
-
-		try
-		{
-			in = new BufferedReader(source);
-			String s = in.readLine();
-			while (s != null)
-			{
-				result.add(s);
-				s = in.readLine();
-			}
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
-		return result;
 	}
 
 	public static int countLines(File f)
