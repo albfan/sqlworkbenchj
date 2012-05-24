@@ -77,12 +77,12 @@ public class OracleSequenceReaderTest
 		assertNotNull(one);
 		String sql = one.getSource(con).toString().trim();
 		String expected = "CREATE SEQUENCE SEQ_ONE\n" +
-             "      INCREMENT BY 1\n" +
-             "      NOMINVALUE\n" +
-             "      NOMAXVALUE\n" +
-             "      CACHE 20\n" +
-             "      NOCYCLE\n" +
-             "      NOORDER;";
+             "       INCREMENT BY 1\n" +
+             "       NOMINVALUE\n" +
+             "       NOMAXVALUE\n" +
+             "       CACHE 20\n" +
+             "       NOCYCLE\n" +
+             "       NOORDER;";
 //		System.out.println(sql + "\n------------\n" + expected + "\n------------");
 		assertEquals(expected, sql);
 
@@ -90,12 +90,12 @@ public class OracleSequenceReaderTest
 		assertNotNull(two);
 		sql = two.getSource(con).toString().trim();
 		expected = "CREATE SEQUENCE SEQ_TWO\n" +
-             "      INCREMENT BY 12\n" +
-             "      MINVALUE 33\n" +
-             "      NOMAXVALUE\n" +
-             "      CACHE 42\n" +
-             "      NOCYCLE\n" +
-             "      NOORDER;";
+             "       INCREMENT BY 12\n" +
+             "       MINVALUE 33\n" +
+             "       NOMAXVALUE\n" +
+             "       CACHE 42\n" +
+             "       NOCYCLE\n" +
+             "       NOORDER;";
 //		System.out.println(sql + "\n------------\n" + expected + "\n------------");
 		assertEquals(expected, sql);
 

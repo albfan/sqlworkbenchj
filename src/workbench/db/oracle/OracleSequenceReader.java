@@ -157,42 +157,42 @@ public class OracleSequenceReader
 		String order = (String) def.getSequenceProperty("ORDER_FLAG");
 		Number cache = (Number) def.getSequenceProperty("CACHE_SIZE");
 
-		result.append(nl).append("      INCREMENT BY ");
+		result.append(nl).append("       INCREMENT BY ");
 		result.append(increment);
 
 		if (minValue != null && minValue.intValue() != 1)
 		{
-			result.append(nl).append("      MINVALUE ");
+			result.append(nl).append("       MINVALUE ");
 			result.append(minValue);
 		}
 		else
 		{
-			result.append(nl).append("      NOMINVALUE");
+			result.append(nl).append("       NOMINVALUE");
 		}
 
 		if (maxValue != null && !maxValue.toString().startsWith("999999999999999999999999999"))
 		{
-			result.append(nl).append("      MAXVALUE ");
+			result.append(nl).append("       MAXVALUE ");
 			result.append(maxValue);
 		}
 		else
 		{
-			result.append(nl).append("      NOMAXVALUE");
+			result.append(nl).append("       NOMAXVALUE");
 		}
 
 		if (cache != null && cache.longValue() > 0)
 		{
-			result.append(nl).append("      CACHE ");
+			result.append(nl).append("       CACHE ");
 			result.append(cache);
 		}
 		else
 		{
-			result.append(nl).append("      NOCACHE");
+			result.append(nl).append("       NOCACHE");
 		}
-		result.append(nl).append("      ");
+		result.append(nl).append("       ");
 		result.append(cycle);
 
-		result.append(nl).append("      ");
+		result.append(nl).append("       ");
 		result.append(order);
 
 		result.append(';');
