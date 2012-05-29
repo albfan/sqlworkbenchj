@@ -2,6 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-05-14">
+    <entry dev-build="7" type="enh">The SQL source for external tables is now shown correctly for Oracle</entry>
+    <entry dev-build="7" type="enh">For Cubrid, support for views, sequences and triggers has been added to the DbExplorer</entry>
+    <entry dev-build="7" type="enh">For Vertica, support for views, sequences and functions has been added to the DbExplorer</entry>
     <entry dev-build="6" type="enh">For PostgreSQL, the generated table source now shows child tables (as a comment)</entry>
     <entry dev-build="5" type="enh">If a connection profile is set to read-only, this is now shown with an icon in the connection info of the main window</entry>
     <entry dev-build="4" type="enh">In the DbExplorer "Put SELECT into" can now also put the statement into the clipboard.</entry>
