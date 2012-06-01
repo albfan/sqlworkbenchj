@@ -28,9 +28,9 @@ public class MySQLMergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 
-	public MySQLMergeGenerator(String dbid)
+	public MySQLMergeGenerator()
 	{
-		this.formatter = new SqlLiteralFormatter(dbid);
+		this.formatter = new SqlLiteralFormatter("mysql");
 	}
 
 	@Override

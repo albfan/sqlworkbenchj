@@ -79,7 +79,7 @@ public class MySQLMergeGeneratorTest
 		ds.setValue(row, 0, Integer.valueOf(24));
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
-		MySQLMergeGenerator generator = new MySQLMergeGenerator(null);
+		MySQLMergeGenerator generator = new MySQLMergeGenerator();
 		String sql = generator.generateMerge(ds);
 
 		String expected =
@@ -117,7 +117,7 @@ public class MySQLMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		MySQLMergeGenerator generator = new MySQLMergeGenerator(null);
+		MySQLMergeGenerator generator = new MySQLMergeGenerator();
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
 

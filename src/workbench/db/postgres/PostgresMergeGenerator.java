@@ -28,7 +28,7 @@ public class PostgresMergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 
-	public PostgresMergeGenerator(String dbid)
+	public PostgresMergeGenerator()
 	{
 		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 	}

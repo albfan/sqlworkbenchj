@@ -60,7 +60,7 @@ public class PostgresMergeGeneratorTest
 		ds.setValue(row, 2, "Prefect");
 		ds.setValue(row, 3, new GregorianCalendar(2012, 0, 2).getTime());
 
-		PostgresMergeGenerator generator = new PostgresMergeGenerator(null);
+		PostgresMergeGenerator generator = new PostgresMergeGenerator();
 		String sql = generator.generateMerge(ds);
 		assertNotNull(sql);
 		String expected =
@@ -141,7 +141,7 @@ public class PostgresMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		PostgresMergeGenerator generator = new PostgresMergeGenerator(null);
+		PostgresMergeGenerator generator = new PostgresMergeGenerator();
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
 

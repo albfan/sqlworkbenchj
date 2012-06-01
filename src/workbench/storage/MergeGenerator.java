@@ -10,11 +10,13 @@
  */
 package workbench.storage;
 
+import java.util.List;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -95,15 +97,15 @@ public interface MergeGenerator
 			if (dbid == null) return null;
 			if ("oracle".equals(dbid))
 			{
-				return new OracleMergeGenerator(dbid);
+				return new OracleMergeGenerator();
 			}
 			if ("postgresql".equals(dbid))
 			{
-				return new PostgresMergeGenerator(dbid);
+				return new PostgresMergeGenerator();
 			}
 			if ("mysql".equals(dbid))
 			{
-				return new MySQLMergeGenerator(dbid);
+				return new MySQLMergeGenerator();
 			}
 			if ("microsoft_sql_server".equals(dbid))
 			{
@@ -111,5 +113,33 @@ public interface MergeGenerator
 			}
 			return null;
 		}
+
+		public static MergeGenerator createGeneratorByType(String type)
+		{
+			if (type == null) return null;
+			if ("oracle".equals(type))
+			{
+				return new OracleMergeGenerator();
+			}
+			if (type.startsWith("postgres"))
+			{
+				return new PostgresMergeGenerator();
+			}
+			if ("mysql".equals(type))
+			{
+				return new MySQLMergeGenerator();
+			}
+			if ("sqlserver".equals(type))
+			{
+				return new SqlServerMergeGenerator("microsoft_sql_server");
+			}
+			return null;
+		}
+
+		public static List<String> getSupportedTypes()
+		{
+			return CollectionUtil.arrayList("oracle", "postgres", "mysql", "sqlserver", "default");
+		}
+		
 	}
 }

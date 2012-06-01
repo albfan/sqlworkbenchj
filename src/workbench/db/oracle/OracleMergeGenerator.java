@@ -30,7 +30,7 @@ public class OracleMergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 
-	public OracleMergeGenerator(String dbid)
+	public OracleMergeGenerator()
 	{
 		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 	}

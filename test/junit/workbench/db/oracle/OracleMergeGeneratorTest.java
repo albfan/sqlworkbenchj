@@ -56,7 +56,7 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		OracleMergeGenerator generator = new OracleMergeGenerator();
 		String sql = generator.generateMerge(ds);
 		assertNotNull(sql);
 		String expected =
@@ -119,7 +119,7 @@ public class OracleMergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		OracleMergeGenerator generator = new OracleMergeGenerator(null);
+		OracleMergeGenerator generator = new OracleMergeGenerator();
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
 		result.append(part);
