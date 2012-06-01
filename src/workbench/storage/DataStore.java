@@ -257,6 +257,7 @@ public class DataStore
 	 * Return the connection that was used to retrieve the result.
 	 * Can be null if the DataStore was not populated using a ResultSet
 	 */
+	@Override
 	public WbConnection getOriginalConnection()
 	{
 		return this.originalConnection;

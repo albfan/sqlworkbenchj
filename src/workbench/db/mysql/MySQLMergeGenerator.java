@@ -90,7 +90,7 @@ public class MySQLMergeGenerator
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("INSERT INTO ");
-		sql.append(tbl.getTableExpression());
+		sql.append(tbl.getTableExpression(data.getOriginalConnection()));
 		sql.append("\n  (");
 		ResultInfo info = data.getResultInfo();
 

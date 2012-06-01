@@ -11,6 +11,7 @@
 package workbench.storage;
 
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -22,6 +23,7 @@ public interface RowDataContainer
 	RowData getRow(int rowIndex);
 	ResultInfo getResultInfo();
 	TableIdentifier getUpdateTable();
+	WbConnection getOriginalConnection();
 
 	public static class Factory
 	{
@@ -30,14 +32,14 @@ public interface RowDataContainer
 			return data;
 		}
 
-		public static RowDataContainer createContainer(RowData row, ResultInfo info)
+		public static RowDataContainer createContainer(WbConnection conn, RowData row, ResultInfo info)
 		{
-			return new SingleRowDataContainer(row, info);
+			return new SingleRowDataContainer(conn, row, info);
 		}
 
 		public static RowDataContainer createContainer(DataStore data, int row)
 		{
-			return new SingleRowDataContainer(data.getRow(row), data.getResultInfo());
+			return new SingleRowDataContainer(data.getOriginalConnection(), data.getRow(row), data.getResultInfo());
 		}
 
 		public static RowDataContainer createContainer(DataStore data, int[] selectedRows)
@@ -47,16 +49,25 @@ public interface RowDataContainer
 	}
 }
 
+
 class SingleRowDataContainer
 	implements RowDataContainer
 {
 	private RowData row;
 	private ResultInfo info;
+	private WbConnection connection;
 
-	SingleRowDataContainer(RowData row, ResultInfo info)
+	SingleRowDataContainer(WbConnection conn, RowData row, ResultInfo info)
 	{
 		this.row = row;
 		this.info = info;
+		this.connection = conn;
+	}
+
+	@Override
+	public WbConnection getOriginalConnection()
+	{
+		return connection;
 	}
 
 	@Override
@@ -95,6 +106,12 @@ class SelectionRowDataContainer
 	{
 		this.data = data;
 		this.selection = rows;
+	}
+
+	@Override
+	public WbConnection getOriginalConnection()
+	{
+		return data.getOriginalConnection();
 	}
 
 	@Override

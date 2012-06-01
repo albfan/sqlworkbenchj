@@ -10,8 +10,11 @@
  */
 package workbench.storage;
 
-import java.util.List;
+import java.util.Collection;
 import workbench.db.WbConnection;
+import workbench.db.h2database.H2MergeGenerator;
+import workbench.db.hsqldb.HsqlMergeGenerator;
+import workbench.db.ibm.Db2MergeGenerator;
 import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
@@ -83,63 +86,61 @@ public interface MergeGenerator
 		 */
 		public static MergeGenerator createGenerator(WbConnection conn)
 		{
-			return createGenerator(conn == null ? null : conn.getDbId());
+			if (conn == null) return null;
+			return createGenerator(conn.getDbId());
 		}
 
 		/**
 		 * Create a MergeGenerator for the specify DBMS.
 		 *
-		 * @param dbid the database identifier identifying the DBMS
+		 * @param type the database identifier identifying the DBMS
 		 * @return the generator, might be null.
 		 */
-		public static MergeGenerator createGenerator(String dbid)
-		{
-			if (dbid == null) return null;
-			if ("oracle".equals(dbid))
-			{
-				return new OracleMergeGenerator();
-			}
-			if ("postgresql".equals(dbid))
-			{
-				return new PostgresMergeGenerator();
-			}
-			if ("mysql".equals(dbid))
-			{
-				return new MySQLMergeGenerator();
-			}
-			if ("microsoft_sql_server".equals(dbid))
-			{
-				return new SqlServerMergeGenerator(dbid);
-			}
-			return null;
-		}
-
-		public static MergeGenerator createGeneratorByType(String type)
+		public static MergeGenerator createGenerator(String type)
 		{
 			if (type == null) return null;
+			
 			if ("oracle".equals(type))
 			{
 				return new OracleMergeGenerator();
 			}
+
 			if (type.startsWith("postgres"))
 			{
 				return new PostgresMergeGenerator();
 			}
+
 			if ("mysql".equals(type))
 			{
 				return new MySQLMergeGenerator();
 			}
-			if ("sqlserver".equals(type))
+
+			if ("microsoft_sql_server".equals(type) || "sqlserver".equals(type))
 			{
-				return new SqlServerMergeGenerator("microsoft_sql_server");
+				return new SqlServerMergeGenerator(type);
+			}
+
+			if (type.startsWith("hsql"))
+			{
+				return new HsqlMergeGenerator();
+			}
+
+			if (type.startsWith("db2"))
+			{
+				return new Db2MergeGenerator();
+			}
+
+			if (type.startsWith("h2"))
+			{
+				return new H2MergeGenerator();
 			}
 			return null;
 		}
 
-		public static List<String> getSupportedTypes()
+		public static Collection<String> getSupportedTypes()
 		{
-			return CollectionUtil.arrayList("oracle", "postgres", "mysql", "sqlserver", "default");
+			return CollectionUtil.treeSet("oracle", "postgres", "mysql", "sqlserver", "db2", "hsqldb", "h2database");
 		}
-		
+
 	}
 }

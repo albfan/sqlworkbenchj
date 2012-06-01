@@ -78,7 +78,7 @@ public class OracleMergeGenerator
 	{
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("MERGE INTO ");
-		sql.append(tbl.getTableExpression());
+		sql.append(tbl.getTableExpression(data.getOriginalConnection()));
 		sql.append(" ut\nUSING\n(\n");
 		if (withData)
 		{

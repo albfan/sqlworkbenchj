@@ -209,7 +209,7 @@ public class ClipBoardCopier
 	{
 		if (this.data.getRowCount() <= 0) return;
 
-		if (needsPK(type));
+		if (needsPK(type))
 		{
 			boolean pkOK = this.data.hasPkColumns();
 			if (!pkOK && this.client != null)
@@ -238,7 +238,6 @@ public class ClipBoardCopier
 				client.getDataStore().setUpdateTable(updateTable);
 			}
 		}
-
 
 		List<ColumnIdentifier> columnsToInclude = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
@@ -325,6 +324,7 @@ public class ClipBoardCopier
 				}
 				StrBuffer sql = converter.convertRowData(rowdata, row);
 				sql.appendTo(result);
+				result.append('\n');
 			}
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();

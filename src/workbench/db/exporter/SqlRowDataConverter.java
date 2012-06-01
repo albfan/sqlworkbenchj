@@ -238,7 +238,7 @@ public class SqlRowDataConverter
 		MergeGenerator generator = MergeGenerator.Factory.createGenerator(originalConnection);
 		if (generator != null)
 		{
-			RowDataContainer container = RowDataContainer.Factory.createContainer(row, metaData);
+			RowDataContainer container = RowDataContainer.Factory.createContainer(originalConnection, row, metaData);
 			String merge = generator.generateMerge(container);
 			StrBuffer result = new StrBuffer(merge);
 			return result;

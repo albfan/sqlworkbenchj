@@ -106,7 +106,7 @@ public class PostgresMergeGenerator
 
 		sql.append("\n),\nupsert as\n(\n");
 		sql.append("  update ");
-		sql.append(tbl.getTableExpression());
+		sql.append(tbl.getTableExpression(data.getOriginalConnection()));
 		sql.append(" m\n");
 		ResultInfo info = data.getResultInfo();
 
