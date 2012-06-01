@@ -1,5 +1,5 @@
 /*
- * CopyAsSqlUpdateAction.java
+ * CopyAsSqlInsertAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -19,21 +19,19 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
- * Action to copy the contents of the data as SQL update statements into the clipboard.
- *
+ * Action to copy the contents of a table to the clipboard as SQL INSERT statements
  * @see workbench.gui.components.ClipBoardCopier
  * @author  Thomas Kellerer
  */
-public class CopyAsSqlUpdateAction
-	extends WbAction
+public class CopyAsSqlMergeAction extends WbAction
 {
 	private WbTable client;
 
-	public CopyAsSqlUpdateAction(WbTable aClient)
+	public CopyAsSqlMergeAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopyAsSqlUpdate",null);
+		this.initMenuDefinition("MnuTxtCopyAsSqlMerge");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}
@@ -47,7 +45,7 @@ public class CopyAsSqlUpdateAction
 	@Override
 	public boolean hasShiftModifier()
 	{
-		return false;
+		return true;
 	}
 
 	@Override
@@ -59,7 +57,7 @@ public class CopyAsSqlUpdateAction
 		{
 			selectColumns = isCtrlPressed(e) ;
 		}
-		copier.copyAsSql(ExportType.SQL_UPDATE, false, selectColumns);
+		copier.copyAsSql(ExportType.SQL_MERGE, false, selectColumns);
 	}
 
 }

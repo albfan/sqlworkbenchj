@@ -25,6 +25,7 @@ import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -149,12 +150,12 @@ public class ClipBoardCopier
 
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
-		this.copyAsSql(false, selectedOnly, showSelectColumns, false);
+		this.copyAsSql(ExportType.SQL_INSERT, selectedOnly, showSelectColumns);
 	}
 
 	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
-		this.copyAsSql(false, selectedOnly, showSelectColumns, true);
+		this.copyAsSql(ExportType.SQL_DELETE_INSERT, selectedOnly, showSelectColumns);
 	}
 
 	/**
@@ -168,14 +169,14 @@ public class ClipBoardCopier
 	 */
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
-		copyAsSql(true, selectedOnly, showSelectColumns, false);
+		copyAsSql(ExportType.SQL_UPDATE, selectedOnly, showSelectColumns);
 	}
 
 
 	/**
 	 * 	Copy the data of the client table into the clipboard using SQL statements
 	 */
-	public void copyAsSql(final boolean useUpdate, final boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
+	public void copyAsSql(final ExportType type, final boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.data == null)
 		{
@@ -193,17 +194,22 @@ public class ClipBoardCopier
 			@Override
 			public void run()
 			{
-				_copyAsSql(useUpdate, selectedOnly, showSelectColumns, includeDelete);
+				_copyAsSql(type, selectedOnly, showSelectColumns);
 			}
 		};
 		t.start();
 	}
 
-	protected void _copyAsSql(final boolean useUpdate, boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
+	private boolean needsPK(ExportType type)
+	{
+		return type == ExportType.SQL_UPDATE || type == ExportType.SQL_MERGE || type == ExportType.SQL_DELETE_INSERT;
+	}
+
+	protected void _copyAsSql(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.data.getRowCount() <= 0) return;
 
-		if (useUpdate || includeDelete)
+		if (needsPK(type));
 		{
 			boolean pkOK = this.data.hasPkColumns();
 			if (!pkOK && this.client != null)
@@ -250,7 +256,7 @@ public class ClipBoardCopier
 
 		// Now check if the selected columns are different to the key columns.
 		// If only key columns are selected then creating an UPDATE statement does not make sense.
-		if (useUpdate)
+		if (type == ExportType.SQL_UPDATE)
 		{
 			List<ColumnIdentifier> keyColumns = new ArrayList<ColumnIdentifier>();
 			for (ColumnIdentifier col : data.getResultInfo().getColumns())
@@ -279,17 +285,10 @@ public class ClipBoardCopier
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setResultInfo(data.getResultInfo());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
-			if (useUpdate)
+			converter.setType(type);
+
+			if (type == ExportType.SQL_INSERT || type == ExportType.SQL_DELETE_INSERT)
 			{
-				converter.setCreateUpdate();
-			}
-			else if (includeDelete)
-			{
-				converter.setCreateInsertDelete();
-			}
-			else
-			{
-				converter.setCreateInsert();
 				if (data.getResultInfo().getUpdateTable() == null)
 				{
 					String tbl = data.getInsertTable();
@@ -297,21 +296,33 @@ public class ClipBoardCopier
 					converter.setAlternateUpdateTable(table);
 				}
 			}
+
 			converter.setColumnsToExport(columnsToInclude);
 			converter.setBlobMode(BlobMode.DbmsLiteral);
 
-			int count = 0;
-			if (rows != null) count = rows.length;
-			else count = data.getRowCount();
+			int count;
+			if (rows != null)
+			{
+				count = rows.length;
+			}
+			else
+			{
+				count = data.getRowCount();
+			}
 
 			StringBuilder result = new StringBuilder(count * 100);
 			RowData rowdata = null;
 
 			for (int row = 0; row < count; row ++)
 			{
-				if (rows == null) rowdata = this.data.getRow(row);
-				else rowdata = data.getRow(rows[row]);
-
+				if (rows == null)
+				{
+					rowdata = this.data.getRow(row);
+				}
+				else
+				{
+					rowdata = data.getRow(rows[row]);
+				}
 				StrBuffer sql = converter.convertRowData(rowdata, row);
 				sql.appendTo(result);
 			}

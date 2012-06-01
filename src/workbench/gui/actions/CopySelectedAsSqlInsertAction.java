@@ -22,7 +22,8 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.components.ClipBoardCopier
  * @author  Thomas Kellerer
  */
-public class CopySelectedAsSqlInsertAction extends WbAction
+public class CopySelectedAsSqlInsertAction
+	extends WbAction
 {
 	private WbTable client;
 
@@ -35,16 +36,26 @@ public class CopySelectedAsSqlInsertAction extends WbAction
 		this.setEnabled(false);
 	}
 
-	public boolean hasCtrlModifier() { return true; }
-	public boolean hasShiftModifier() { return true; }
-	
+	@Override
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean hasShiftModifier()
+	{
+		return true;
+	}
+
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
 		boolean selectColumns = false;
 		if (invokedByMouse(e))
 		{
-			selectColumns = isCtrlPressed(e) ;
+			selectColumns = isCtrlPressed(e);
 		}
 		copier.copyAsSqlInsert(true, selectColumns);
 	}

@@ -34,6 +34,7 @@ import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -73,15 +74,25 @@ public class WbGenerateScript
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
-		if (cmdLine.hasUnknownArguments())
-		{
-			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenScriptWrongParam"));
-			return result;
-		}
+		List<String> schemas = null;
+		List<String> types = null;
+		List<String> names = null;
 
-		List<String> schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
-		List<String> types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
-		List<String> names = cmdLine.getListValue(CommonArgs.ARG_OBJECTS);
+		if (!cmdLine.hasArguments())
+		{
+			names = StringUtil.stringToList(args, " ");
+		}
+		else
+		{
+			if (cmdLine.hasUnknownArguments())
+			{
+				setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenScriptWrongParam"));
+				return result;
+			}
+			names = cmdLine.getListValue(CommonArgs.ARG_OBJECTS);
+			schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
+			types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
+		}
 
 		List<DbObject> objects = new ArrayList<DbObject>();
 

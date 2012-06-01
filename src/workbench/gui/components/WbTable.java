@@ -76,6 +76,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAllColumnNamesAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlInsertAction;
@@ -83,6 +84,7 @@ import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.CopyColumnNameAction;
+import workbench.gui.actions.CopySelectedAsSqlMergeAction;
 import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
@@ -120,6 +122,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataConverter;
 import workbench.storage.DataStore;
+import workbench.storage.MergeGenerator;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowDataFactory;
@@ -163,10 +166,12 @@ public class WbTable
 
 	private CopyAsTextAction copyAsTextAction;
 	private CopyAsSqlInsertAction copyInsertAction;
+	private CopyAsSqlMergeAction copyMergeAction;
 	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
 	private CopyAsSqlUpdateAction copyUpdateAction;
 
 	private CopySelectedAsTextAction copySelectedAsTextAction;
+	private CopySelectedAsSqlMergeAction copySelectedAsMergeAction;
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
@@ -279,8 +284,10 @@ public class WbTable
 			this.copyInsertAction = new CopyAsSqlInsertAction(this);
 			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
 			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
+			this.copyMergeAction = new CopyAsSqlMergeAction(this);
 
 			this.addPopupAction(this.copyUpdateAction, false);
+			this.addPopupAction(this.copyMergeAction, false);
 			this.addPopupAction(this.copyInsertAction, false);
 			this.addPopupAction(this.copyDeleteInsertAction, false);
 
@@ -631,6 +638,11 @@ public class WbTable
 			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
 		}
 
+		if (copySelectedAsMergeAction == null && this.copyMergeAction != null)
+		{
+			copySelectedAsMergeAction = new CopySelectedAsSqlMergeAction(this);
+		}
+
 		if (copySelectedAsDeleteInsertAction == null && copyDeleteInsertAction != null)
 		{
 			copySelectedAsDeleteInsertAction = new CopySelectedAsSqlDeleteInsertAction(this);
@@ -645,6 +657,7 @@ public class WbTable
 
 		if (copySelectedAsUpdateAction != null) copyMenu.add(copySelectedAsUpdateAction);
 		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
+		if (copySelectedAsMergeAction != null) copyMenu.add(copySelectedAsMergeAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
 	}
 
@@ -820,6 +833,11 @@ public class WbTable
 		if (this.copySelectedAsInsertAction != null)
 		{
 			this.copySelectedAsInsertAction.setEnabled(selected);
+		}
+
+		if (this.copySelectedAsMergeAction != null && this.supportsMerge())
+		{
+			this.copySelectedAsMergeAction.setEnabled(selected);
 		}
 
 		if (this.copySelectedAsUpdateAction != null)
@@ -2190,10 +2208,21 @@ public class WbTable
 		return ds.hasPkColumns();
 	}
 
+	private boolean supportsMerge()
+	{
+		if (this.getRowCount() <= 0) return false;
+		DataStore ds = this.getDataStore();
+		if (ds == null) return false;
+		WbConnection conn = ds.getOriginalConnection();
+		if (conn == null) return false;
+		return MergeGenerator.Factory.createGenerator(conn) != null;
+	}
+
 	/**
 	 * Enables the actions related to copying data to the clipboard
-	 * if this table contains rows. If this table is empty
-	 * the actions are disabled
+	 * if this table contains rows.
+	 *
+	 * If this table does not contain any rows the actions are disabled.
 	 */
 	public void checkCopyActions()
 	{
@@ -2207,6 +2236,11 @@ public class WbTable
 		if (this.copyAsTextAction != null)
 		{
 			this.copyAsTextAction.setEnabled(hasRows);
+		}
+
+		if (this.copyMergeAction != null && supportsMerge())
+		{
+			this.copyMergeAction.setEnabled(hasRows);
 		}
 
 		if (this.copyInsertAction != null)
