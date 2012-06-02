@@ -54,7 +54,7 @@ public class H2MergeGenerator
 	@Override
 	public String generateMergeEnd(RowDataContainer data)
 	{
-		return ";";
+		return ";\n";
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class H2MergeGenerator
 	{
 		StringBuilder sql = new StringBuilder(data.getRowCount());
 		generateStart(sql, data, true);
-		sql.append(';');
+		sql.append(";\n");
 		return sql.toString();
 	}
 

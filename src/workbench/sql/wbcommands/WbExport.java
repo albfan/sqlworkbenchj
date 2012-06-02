@@ -104,6 +104,7 @@ public class WbExport
 	public static final String ARG_TIMEFORMAT = "timeFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_INFINITY_LITERALS = "infinityLiterals";
+	public static final String ARG_MERGE_TYPE = "mergeType";
 	// </editor-fold>
 
 	private DataExporter exporter;
@@ -184,6 +185,7 @@ public class WbExport
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_INFINITY_LITERALS, ArgumentType.ListArgument);
+		cmdLine.addArgument(ARG_MERGE_TYPE, MergeGenerator.Factory.getSupportedTypes());
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -521,6 +523,7 @@ public class WbExport
 			exporter.setChrFunction(cmdLine.getValue(ARG_CHARFUNC));
 			exporter.setConcatFunction(cmdLine.getValue(ARG_CONCAT_FUNCTION));
 			exporter.setConcatString(cmdLine.getValue(ARG_CONCAT_OPERATOR));
+			exporter.setMergeType(cmdLine.getValue(ARG_MERGE_TYPE, currentConnection.getDbId()));
 
 			CommonArgs.setCommitEvery(exporter, cmdLine);
 

@@ -53,7 +53,7 @@ public class SqlRowDataConverter
 	private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
 	private ExportType sqlType = ExportType.SQL_INSERT;
 
-	private boolean createTable = false;
+	private boolean createTable;
 	private TableIdentifier alternateUpdateTable;
 	private int commitEvery;
 	private String concatString;
@@ -67,6 +67,7 @@ public class SqlRowDataConverter
 	private boolean doFormatting = true;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean ignoreRowStatus = true;
+	private String mergeType;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -118,6 +119,11 @@ public class SqlRowDataConverter
 			this.sqlTypeToUse = ExportType.SQL_INSERT;
 		}
 
+	}
+
+	public void setMergeType(String type)
+	{
+		this.mergeType = type;
 	}
 
 	public void setDateLiteralType(String type)
@@ -235,7 +241,16 @@ public class SqlRowDataConverter
 
 	private StrBuffer generateMerge(RowData row)
 	{
-		MergeGenerator generator = MergeGenerator.Factory.createGenerator(originalConnection);
+		MergeGenerator generator = null;
+		if (mergeType != null)
+		{
+			generator = MergeGenerator.Factory.createGenerator(mergeType);
+		}
+		else
+		{
+			generator = MergeGenerator.Factory.createGenerator(originalConnection);
+		}
+
 		if (generator != null)
 		{
 			RowDataContainer container = RowDataContainer.Factory.createContainer(originalConnection, row, metaData);

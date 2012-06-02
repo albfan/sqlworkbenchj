@@ -1,5 +1,5 @@
 /*
- * H2MergeGeneratorTest.java
+ * AnsiSQLMergeGeneratorTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -8,14 +8,12 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.h2database;
+package workbench.db;
 
 import java.sql.Types;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.WbTestCase;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowDataContainer;
@@ -24,12 +22,12 @@ import workbench.storage.RowDataContainer;
  *
  * @author Thomas Kellerer
  */
-public class H2MergeGeneratorTest
+public class AnsiSQLMergeGeneratorTest
 	extends WbTestCase
 {
-	public H2MergeGeneratorTest()
+	public AnsiSQLMergeGeneratorTest()
 	{
-		super("H2MergeGeneratorTest");
+		super("AnsiSQLMergeGeneratorTest");
 	}
 
 	@Test
@@ -55,15 +53,22 @@ public class H2MergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		H2MergeGenerator generator = new H2MergeGenerator();
+		AnsiSQLMergeGenerator generator = new AnsiSQLMergeGenerator();
 		String sql = generator.generateMerge(ds);
 		assertNotNull(sql);
 		String expected =
-			"MERGE INTO person (id, fname, lname)\n" +
-			"  KEY (id)\n" +
-			"VALUES\n" +
-			"  (42, 'Arthur', 'Dent'),\n" +
-			"  (24, 'Ford', 'Prefect');";
+			"MERGE INTO person ut\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent'),\n" +
+			"    (24, 'Ford', 'Prefect')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
+			"WHEN MATCHED THEN UPDATE\n" +
+			"     SET fname = md.fname,\n" +
+			"         lname = md.lname\n" +
+			"WHEN NOT MATCHED THEN\n" +
+			"  INSERT (id, fname, lname)\n" +
+			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
 		assertEquals(expected, sql.trim());
 
@@ -72,10 +77,17 @@ public class H2MergeGeneratorTest
 		assertNotNull(sql);
 
 		expected =
-			"MERGE INTO person (id, fname, lname)\n" +
-			"  KEY (id)\n" +
-			"VALUES\n" +
-			"  (42, 'Arthur', 'Dent');";
+			"MERGE INTO person ut\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
+			"WHEN MATCHED THEN UPDATE\n" +
+			"     SET fname = md.fname,\n" +
+			"         lname = md.lname\n" +
+			"WHEN NOT MATCHED THEN\n" +
+			"  INSERT (id, fname, lname)\n" +
+			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + sql + "\n-------");
 		assertEquals(expected, sql.trim());
 	}
@@ -103,7 +115,7 @@ public class H2MergeGeneratorTest
 		ds.setValue(row, 1, "Ford");
 		ds.setValue(row, 2, "Prefect");
 
-		H2MergeGenerator generator = new H2MergeGenerator();
+		AnsiSQLMergeGenerator generator = new AnsiSQLMergeGenerator();
 		StringBuilder result = new StringBuilder(100);
 		String part = generator.generateMergeStart(ds);
 		result.append(part);
@@ -116,11 +128,18 @@ public class H2MergeGeneratorTest
 		result.append(generator.generateMergeEnd(ds));
 
 		String expected =
-			"MERGE INTO person (id, fname, lname)\n" +
-			"  KEY (id)\n" +
-			"VALUES\n" +
-			"  (42, 'Arthur', 'Dent'),\n" +
-			"  (24, 'Ford', 'Prefect');";
+			"MERGE INTO person ut\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent'),\n" +
+			"    (24, 'Ford', 'Prefect')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
+			"WHEN MATCHED THEN UPDATE\n" +
+			"     SET fname = md.fname,\n" +
+			"         lname = md.lname\n" +
+			"WHEN NOT MATCHED THEN\n" +
+			"  INSERT (id, fname, lname)\n" +
+			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
 		assertEquals(expected, result.toString().trim());
 	}

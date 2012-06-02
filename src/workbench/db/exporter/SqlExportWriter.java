@@ -65,6 +65,7 @@ public class SqlExportWriter
 		try
 		{
 			conv.setType(exporter.getExportType());
+			conv.setMergeType(exporter.getMergeType());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -78,7 +79,6 @@ public class SqlExportWriter
 			conv.setAlternateUpdateTable(new TableIdentifier(table, exporter.getConnection()));
 		}
 		conv.setCreateTable(exporter.isIncludeCreateTable());
-
 	}
 
 }

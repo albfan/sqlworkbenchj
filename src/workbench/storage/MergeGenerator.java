@@ -10,7 +10,8 @@
  */
 package workbench.storage;
 
-import java.util.Collection;
+import java.util.List;
+import workbench.db.AnsiSQLMergeGenerator;
 import workbench.db.WbConnection;
 import workbench.db.h2database.H2MergeGenerator;
 import workbench.db.hsqldb.HsqlMergeGenerator;
@@ -86,7 +87,7 @@ public interface MergeGenerator
 		 */
 		public static MergeGenerator createGenerator(WbConnection conn)
 		{
-			if (conn == null) return null;
+			if (conn == null) return new AnsiSQLMergeGenerator();
 			return createGenerator(conn.getDbId());
 		}
 
@@ -99,7 +100,7 @@ public interface MergeGenerator
 		public static MergeGenerator createGenerator(String type)
 		{
 			if (type == null) return null;
-			
+
 			if ("oracle".equals(type))
 			{
 				return new OracleMergeGenerator();
@@ -134,12 +135,13 @@ public interface MergeGenerator
 			{
 				return new H2MergeGenerator();
 			}
-			return null;
+			
+			return new AnsiSQLMergeGenerator();
 		}
 
-		public static Collection<String> getSupportedTypes()
+		public static List<String> getSupportedTypes()
 		{
-			return CollectionUtil.treeSet("oracle", "postgres", "mysql", "sqlserver", "db2", "hsqldb", "h2database");
+			return CollectionUtil.arrayList("ansi", "db2", "h2database", "hsqldb", "mysql", "oracle", "postgres", "sqlserver");
 		}
 
 	}

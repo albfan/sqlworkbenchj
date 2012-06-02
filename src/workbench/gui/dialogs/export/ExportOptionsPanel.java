@@ -36,6 +36,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
 
@@ -171,8 +172,10 @@ public class ExportOptionsPanel
 		dataStoreColumns = (source == null ? null : source.getResultInfo());
 		boolean insert = (source != null && source.canSaveAsSqlInsert());
 		boolean update = (source != null && source.hasPkColumns());
+		boolean merge = update && MergeGenerator.Factory.createGenerator(source.getOriginalConnection()) != null;
 		sqlOptions.setIncludeUpdate(update);
 		sqlOptions.setIncludeDeleteInsert(insert && update);
+		sqlOptions.setIncludeMerge(merge);
 	}
 
 	public void setQuerySql(String sql, WbConnection con)
@@ -186,6 +189,11 @@ public class ExportOptionsPanel
 		{
 			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
 		}
+	}
+
+	public void setIncludeMerge(boolean flag)
+	{
+		this.sqlOptions.setIncludeMerge(flag);
 	}
 
 	public void setIncludeSqlUpdate(boolean flag)

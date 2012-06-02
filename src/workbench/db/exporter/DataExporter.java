@@ -82,6 +82,7 @@ public class DataExporter
 	private String xsltFile;
 	private String transformOutputFile;
 	private ExportType exportType = ExportType.TEXT;
+	private String mergeType;
 	private boolean exportHeaders;
 	private String rowIndexColumnName;
 	private boolean includeCreateTable;
@@ -180,6 +181,16 @@ public class DataExporter
 		this.jobQueue = new LinkedList<ExportJobEntry>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
+	}
+	
+	public String getMergeType()
+	{
+		return mergeType;
+	}
+
+	public void setMergeType(String type)
+	{
+		this.mergeType = type;
 	}
 
 	public boolean getEnableFixedHeader()
