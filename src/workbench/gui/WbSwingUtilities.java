@@ -1036,4 +1036,19 @@ public class WbSwingUtilities
 			System.out.println("Nothing mapped");
 		}
 	}
+
+	public static void setMinimumSize(JComponent component, int numChars)
+	{
+		Font font = component.getFont();
+		if (font != null)
+		{
+			FontMetrics fm = component.getFontMetrics(font);
+			int width = fm.stringWidth("M");
+			Dimension current = component.getPreferredSize();
+			Dimension d = new Dimension(width * numChars, current.height);
+			component.setPreferredSize(d);
+			component.setPreferredSize(d);
+		}
+	}
+
 }

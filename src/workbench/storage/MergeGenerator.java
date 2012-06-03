@@ -11,8 +11,11 @@
 package workbench.storage;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import workbench.db.AnsiSQLMergeGenerator;
 import workbench.db.WbConnection;
+import workbench.db.firebird.FirebirdMergeGenerator;
 import workbench.db.h2database.H2MergeGenerator;
 import workbench.db.hsqldb.HsqlMergeGenerator;
 import workbench.db.ibm.Db2MergeGenerator;
@@ -20,6 +23,7 @@ import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
 /**
@@ -79,11 +83,22 @@ public interface MergeGenerator
 	 */
 	public final class Factory
 	{
+		private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		static
+		{
+			DBID_TO_TYPE_MAP.put("postgresql", "postgres");
+			DBID_TO_TYPE_MAP.put("h2database", "h2");
+			DBID_TO_TYPE_MAP.put("microsoft_sql_server", "sqlserver");
+			DBID_TO_TYPE_MAP.put("db2i", "db2");
+			DBID_TO_TYPE_MAP.put("db2h", "db2");
+			DBID_TO_TYPE_MAP.put("hsql_database_engine", "hsqldb");
+		}
+
 		/**
 		 * Create a MergeGenerator for the DBMS identified by the connection.
 		 *
 		 * @param conn the connection identifying the DBMS
-		 * @return the generator, might be null.
+		 * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
 		 */
 		public static MergeGenerator createGenerator(WbConnection conn)
 		{
@@ -94,8 +109,8 @@ public interface MergeGenerator
 		/**
 		 * Create a MergeGenerator for the specify DBMS.
 		 *
-		 * @param type the database identifier identifying the DBMS
-		 * @return the generator, might be null.
+		 * @param type the database identifier or the "generator type"
+		 * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
 		 */
 		public static MergeGenerator createGenerator(String type)
 		{
@@ -135,14 +150,26 @@ public interface MergeGenerator
 			{
 				return new H2MergeGenerator();
 			}
-			
+
+			if ("firebird".equals(type))
+			{
+				return new FirebirdMergeGenerator();
+			}
+
 			return new AnsiSQLMergeGenerator();
 		}
 
 		public static List<String> getSupportedTypes()
 		{
-			return CollectionUtil.arrayList("ansi", "db2", "h2database", "hsqldb", "mysql", "oracle", "postgres", "sqlserver");
+			return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "sqlserver");
 		}
 
+		public static String getTypeForDBID(String dbid)
+		{
+			if (dbid == null) return "ansi";
+			String type = DBID_TO_TYPE_MAP.get(dbid);
+			if (type == null) return "ansi";
+			return type;
+		}
 	}
 }

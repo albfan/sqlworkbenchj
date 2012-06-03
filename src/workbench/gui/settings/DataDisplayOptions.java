@@ -43,16 +43,7 @@ public class DataDisplayOptions
 	{
 		super();
 		initComponents();
-		Font font = selectionBlend.getFont();
-		if (font != null)
-		{
-			FontMetrics fm = selectionBlend.getFontMetrics(font);
-			int width = fm.stringWidth("0");
-			Dimension current = selectionBlend.getPreferredSize();
-			Dimension d = new Dimension(width * 5, current.height);
-			selectionBlend.setPreferredSize(d);
-			alternateBlend.setPreferredSize(d);
-		}
+		WbSwingUtilities.setMinimumSize(alternateBlend, 5);
 	}
 
 	@Override

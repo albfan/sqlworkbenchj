@@ -36,7 +36,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
 
@@ -169,13 +168,17 @@ public class ExportOptionsPanel
 
 	public void updateSqlOptions(DataStore source)
 	{
+		WbConnection conn = source.getOriginalConnection();
 		dataStoreColumns = (source == null ? null : source.getResultInfo());
 		boolean insert = (source != null && source.canSaveAsSqlInsert());
 		boolean update = (source != null && source.hasPkColumns());
-		boolean merge = update && MergeGenerator.Factory.createGenerator(source.getOriginalConnection()) != null;
 		sqlOptions.setIncludeUpdate(update);
 		sqlOptions.setIncludeDeleteInsert(insert && update);
-		sqlOptions.setIncludeMerge(merge);
+		sqlOptions.setIncludeMerge(insert && update);
+		if (conn != null)
+		{
+			sqlOptions.setDbId(conn.getDbId());
+		}
 	}
 
 	public void setQuerySql(String sql, WbConnection con)

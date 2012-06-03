@@ -12,6 +12,7 @@
 package workbench.gui.dialogs.export;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -33,11 +34,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.KeyColumnSelectorPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
 import workbench.util.StringUtil;
 
@@ -61,6 +64,14 @@ public class SqlOptionsPanel
 		List<String> types = Settings.getInstance().getLiteralTypeList();
 		ComboBoxModel model = new DefaultComboBoxModel(types.toArray());
 		literalTypes.setModel(model);
+
+		List<String> mTypes = MergeGenerator.Factory.getSupportedTypes();
+		ComboBoxModel mergeModel = new DefaultComboBoxModel(mTypes.toArray());
+		mergeTypes.setModel(mergeModel);
+
+		WbSwingUtilities.setMinimumSize(commitCount, 4);
+		WbSwingUtilities.setMinimumSize(alternateTable, 12);
+
 	}
 
 	public final void setResultInfo(ResultInfo info)
@@ -149,10 +160,17 @@ public class SqlOptionsPanel
 		return result;
 	}
 
+	public void setDbId(String dbid)
+	{
+		String currentType = MergeGenerator.Factory.getTypeForDBID(dbid);
+		mergeTypes.setSelectedItem(currentType);
+	}
+	
 	public void setIncludeMerge(boolean flag)
 	{
-		
+		useMerge.setEnabled(flag);
 	}
+
 	public void setIncludeUpdate(boolean flag)
 	{
 		useUpdate.setEnabled(flag);
@@ -281,16 +299,19 @@ public class SqlOptionsPanel
     createTable = new JCheckBox();
     useUpdate = new JRadioButton();
     useInsert = new JRadioButton();
+    useDeleteInsert = new JRadioButton();
+    useMerge = new JRadioButton();
     alternateTable = new JTextField();
     jLabel1 = new JLabel();
-    useDeleteInsert = new JRadioButton();
     selectKeys = new JButton();
-    jPanel1 = new JPanel();
-    jLabel2 = new JLabel();
-    literalTypes = new JComboBox();
     jPanel2 = new JPanel();
     commitLabel = new JLabel();
     commitCount = new JTextField();
+    jPanel4 = new JPanel();
+    literalTypesLabel = new JLabel();
+    literalTypes = new JComboBox();
+    mergeTypesLabel = new JLabel();
+    mergeTypes = new JComboBox();
 
     setLayout(new GridBagLayout());
 
@@ -308,6 +329,7 @@ public class SqlOptionsPanel
     useUpdate.setText(ResourceMgr.getString("LblExportSqlUpdate")); // NOI18N
     useUpdate.setToolTipText(ResourceMgr.getString("d_LblExportSqlUpdate")); // NOI18N
     useUpdate.setEnabled(false);
+    useUpdate.setMargin(new Insets(0, 2, 0, 0));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -318,77 +340,117 @@ public class SqlOptionsPanel
     useInsert.setSelected(true);
     useInsert.setText(ResourceMgr.getString("LblExportSqlInsert")); // NOI18N
     useInsert.setToolTipText(ResourceMgr.getString("d_LblExportSqlInsert")); // NOI18N
+    useInsert.setMargin(new Insets(0, 2, 0, 0));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 0, 0, 0);
     add(useInsert, gridBagConstraints);
 
-    alternateTable.setColumns(15);
+    typeGroup.add(useDeleteInsert);
+    useDeleteInsert.setText(ResourceMgr.getString("LblExportSqlDeleteInsert")); // NOI18N
+    useDeleteInsert.setToolTipText(ResourceMgr.getString("d_LblExportSqlDeleteInsert")); // NOI18N
+    useDeleteInsert.setEnabled(false);
+    useDeleteInsert.setMargin(new Insets(0, 2, 0, 0));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    add(useDeleteInsert, gridBagConstraints);
+
+    typeGroup.add(useMerge);
+    useMerge.setText(ResourceMgr.getString("LblExportSqlMerge")); // NOI18N
+    useMerge.setToolTipText(ResourceMgr.getString("d_LblExportSqlMerge")); // NOI18N
+    useMerge.setEnabled(false);
+    useMerge.setMargin(new Insets(0, 2, 0, 0));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    add(useMerge, gridBagConstraints);
+
+    alternateTable.setMinimumSize(new Dimension(40, 20));
+    alternateTable.setPreferredSize(new Dimension(40, 20));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(2, 4, 0, 0);
     add(alternateTable, gridBagConstraints);
 
     jLabel1.setText(ResourceMgr.getString("LblUseExportTableName")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 4, 0, 0);
     add(jLabel1, gridBagConstraints);
-
-    typeGroup.add(useDeleteInsert);
-    useDeleteInsert.setText(ResourceMgr.getString("LblExportSqlDeleteInsert")); // NOI18N
-    useDeleteInsert.setToolTipText(ResourceMgr.getString("d_LblExportSqlDeleteInsert")); // NOI18N
-    useDeleteInsert.setEnabled(false);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    add(useDeleteInsert, gridBagConstraints);
 
     selectKeys.setText(ResourceMgr.getString("LblSelectKeyColumns")); // NOI18N
     selectKeys.setToolTipText(ResourceMgr.getString("d_LblSelectKeyColumns")); // NOI18N
     selectKeys.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     add(selectKeys, gridBagConstraints);
-
-    jPanel1.setLayout(new BorderLayout(10, 0));
-
-    jLabel2.setText(ResourceMgr.getString("LblLiteralType")); // NOI18N
-    jPanel1.add(jLabel2, BorderLayout.WEST);
-
-    literalTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
-    jPanel1.add(literalTypes, BorderLayout.CENTER);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(6, 4, 0, 0);
-    add(jPanel1, gridBagConstraints);
 
     jPanel2.setLayout(new BorderLayout(10, 0));
 
     commitLabel.setText(ResourceMgr.getString("LblExportCommitEvery")); // NOI18N
     jPanel2.add(commitLabel, BorderLayout.WEST);
 
-    commitCount.setColumns(5);
+    commitCount.setMinimumSize(new Dimension(32, 20));
+    commitCount.setPreferredSize(new Dimension(32, 20));
     jPanel2.add(commitCount, BorderLayout.CENTER);
 
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 4, 0, 21);
     add(jPanel2, gridBagConstraints);
+
+    jPanel4.setLayout(new GridBagLayout());
+
+    literalTypesLabel.setText(ResourceMgr.getString("LblLiteralType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    jPanel4.add(literalTypesLabel, gridBagConstraints);
+
+    literalTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    jPanel4.add(literalTypes, gridBagConstraints);
+
+    mergeTypesLabel.setText(ResourceMgr.getString("LblMergeType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    jPanel4.add(mergeTypesLabel, gridBagConstraints);
+
+    mergeTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    jPanel4.add(mergeTypes, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    add(jPanel4, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -411,14 +473,17 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
   public JLabel commitLabel;
   public JCheckBox createTable;
   public JLabel jLabel1;
-  public JLabel jLabel2;
-  public JPanel jPanel1;
   public JPanel jPanel2;
+  public JPanel jPanel4;
   public JComboBox literalTypes;
+  public JLabel literalTypesLabel;
+  public JComboBox mergeTypes;
+  public JLabel mergeTypesLabel;
   public JButton selectKeys;
   public ButtonGroup typeGroup;
   public JRadioButton useDeleteInsert;
   public JRadioButton useInsert;
+  public JRadioButton useMerge;
   public JRadioButton useUpdate;
   // End of variables declaration//GEN-END:variables
 
