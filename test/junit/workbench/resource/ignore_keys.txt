@@ -1,3 +1,4 @@
+LblMergeType
 TxtEdPrefix
 TxtZoom
 TxtFileFilterSqlInsDel
