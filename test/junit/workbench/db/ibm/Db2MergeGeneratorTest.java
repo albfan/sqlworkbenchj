@@ -143,6 +143,6 @@ public class Db2MergeGeneratorTest
 			"  INSERT (id, fname, lname)\n" +
 			"  VALUES (md.id, md.fname, md.lname);";
 //		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
-		assertEquals(expected, result.toString());
+		assertEquals(expected, result.toString().trim());
 	}
 }
