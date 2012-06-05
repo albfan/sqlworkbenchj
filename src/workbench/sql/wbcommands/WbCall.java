@@ -94,12 +94,13 @@ public class WbCall
 	 * Converts the passed sql to JDBC compliant call and runs the statement.
 	 */
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		String cleanSql = SqlUtil.stripVerb(aSql);
+		String verbUsed = SqlUtil.getSqlVerb(sql).toUpperCase();
+		String cleanSql = SqlUtil.stripVerb(sql);
 		sqlUsed = getSqlToPrepare(cleanSql, false);
 
 		this.inputParameters.clear();
@@ -149,7 +150,9 @@ public class WbCall
 				}
 			}
 
-			if (CollectionUtil.isEmpty(outParameters))
+			// only check for out parameters when using the (documented) WbCall syntax
+			// when using EXEC without parameters this saves a (costly - especially for Oracle) roundtrip to the database.
+			if (CollectionUtil.isEmpty(outParameters) && verbUsed.equals("WBCALL"))
 			{
 				try
 				{
@@ -224,7 +227,7 @@ public class WbCall
 						if (CollectionUtil.isNonEmpty(results) && refs.getValue() != null)
 						{
 							DataStore ds = results.get(results.size() - 1);
-							ds.setGeneratingSql(aSql);
+							ds.setGeneratingSql(sql);
 							if (ds.getResultName() == null)
 							{
 								String name = refs.getValue().getParameterName();
