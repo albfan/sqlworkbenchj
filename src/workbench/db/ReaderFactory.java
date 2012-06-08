@@ -28,6 +28,8 @@ import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
+import workbench.db.mssql.SqlServerSequenceReader;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
@@ -114,6 +116,10 @@ public class ReaderFactory
 		if (meta.getDbId().equals("vertica_database"))
 		{
 			return new VerticaSequenceReader(con);
+		}
+		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2012(con))
+		{
+			return new SqlServerSequenceReader(con);
 		}
 		return null;
 	}

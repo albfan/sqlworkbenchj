@@ -33,17 +33,18 @@ import workbench.util.StringUtil;
 public class SqlServerTypeReader
 	implements ObjectListExtender
 {
-	final String baseSql = "select db_name() as type_catalog, \n" +
-									 "       s.name as type_schema, \n" +
-									 "       t.name as type_name,  \n" +
-									 "       type_name(system_type_id) as data_type, \n" +
-									 "       t.is_nullable,  \n" +
-									 "       t.max_length,  \n" +
-									 "       t.scale,  \n" +
-									 "       t.precision,  \n" +
-									 "       t.collation_name \n" +
-									 "from sys.types t join sys.schemas s on t.schema_id = s.schema_id \n" +
-									 "where t.is_user_defined = 1";
+	final String baseSql =
+		"select db_name() as type_catalog, \n" +
+		"       s.name as type_schema, \n" +
+		"       t.name as type_name,  \n" +
+		"       type_name(system_type_id) as data_type, \n" +
+		"       t.is_nullable,  \n" +
+		"       t.max_length,  \n" +
+		"       t.scale,  \n" +
+		"       t.precision,  \n" +
+		"       t.collation_name \n" +
+		"from sys.types t join sys.schemas s on t.schema_id = s.schema_id \n" +
+		"where t.is_user_defined = 1";
 
 	// the data types for which the max_length information are valid
 	private Set<String> maxLengthTypes = CollectionUtil.treeSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");

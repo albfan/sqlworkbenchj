@@ -14,9 +14,10 @@ package workbench.db;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import workbench.storage.DataStore;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 
 
@@ -36,7 +37,7 @@ public class SequenceDefinition
 	private String relatedColumn;
 	private String typeName = SequenceReader.DEFAULT_TYPE_NAME;
 
-	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
+	private Map<String, Object> properties = new TreeMap<String, Object>(CaseInsensitiveComparator.INSTANCE);
 
 	public SequenceDefinition(String seqSchema, String seqName)
 	{
@@ -146,7 +147,7 @@ public class SequenceDefinition
 	{
 		typeName = name;
 	}
-	
+
 	@Override
 	public String getObjectName()
 	{
