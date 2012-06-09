@@ -117,7 +117,7 @@ public class InsertAnalyzer
 		TableIdentifier table = null;
 		if (tableName != null)
 		{
-			table = new TableIdentifier(tableName, catalogSeparator);
+			table = new TableIdentifier(tableName, catalogSeparator, SqlUtil.getSchemaSeparator(dbConnection));
 			table.adjustCase(dbConnection);
 		}
 

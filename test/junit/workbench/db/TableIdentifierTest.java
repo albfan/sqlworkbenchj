@@ -35,6 +35,21 @@ public class TableIdentifierTest
 	}
 
 	@Test
+	public void testGetParts()
+	{
+		String id = "foobar";
+		assertNull(TableIdentifier.getCatalogPart(id, '.'));
+		assertNull(TableIdentifier.getCatalogPart(id, ':'));
+		assertEquals("foo", TableIdentifier.getCatalogPart("foo.bar", '.'));
+		assertEquals("bar", TableIdentifier.getNamePart("foo.bar", '.'));
+
+		assertEquals("foo", TableIdentifier.getCatalogPart("foo:bar", ':'));
+		assertEquals("bar", TableIdentifier.getNamePart("foo/bar", '/'));
+
+		assertEquals("bar.tbl", TableIdentifier.getNamePart("foo/bar.tbl", '/'));
+	}
+
+	@Test
 	public void fullyQualifiedNewTable()
 	{
 		TableIdentifier tbl = new TableIdentifier("some_schema.new_table");
@@ -47,13 +62,18 @@ public class TableIdentifierTest
 	@Test
 	public void testAlternateSeparator()
 	{
-		TableIdentifier tbl = new TableIdentifier("somelib/sometable", '/');
+		TableIdentifier tbl = new TableIdentifier("somelib/sometable", '/', '/');
 		assertEquals("somelib", tbl.getSchema());
 		assertEquals("sometable", tbl.getTableName());
 
-		tbl = new TableIdentifier("somelib/sometable", '.');
+		tbl = new TableIdentifier("somelib/sometable", '.', '.');
 		assertNull(tbl.getSchema());
 		assertEquals("somelib/sometable", tbl.getTableName());
+
+		tbl = new TableIdentifier("somelib:someschema.tablename", ':', '.');
+		assertEquals("somelib", tbl.getCatalog());
+		assertEquals("someschema", tbl.getSchema());
+		assertEquals("tablename", tbl.getTableName());
 	}
 
 	@Test

@@ -580,7 +580,7 @@ public class DataStore
 		}
 		else
 		{
-			TableIdentifier tbl = new TableIdentifier(aTablename, SqlUtil.getCatalogSeparator(aConn));
+			TableIdentifier tbl = new TableIdentifier(aTablename, aConn);
 			tbl.setPreserveQuotes(true);
 			setUpdateTable(tbl, aConn);
 		}

@@ -44,7 +44,7 @@ public class DeleteAnalyzerTest
 		analyzer.checkContext();
 		TableIdentifier table = analyzer.getTableForColumnList();
 		assertNotNull(table);
-		assertEquals("mylib", table.getSchema());
+		assertEquals("mylib", table.getCatalog());
 		assertEquals("sometable", table.getTableName());
 	}
 }

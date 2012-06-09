@@ -51,7 +51,7 @@ public class DeleteAnalyzer
 			String table = SqlUtil.getDeleteTable(sql, catalogSeparator);
 			if (table != null)
 			{
-				tableForColumnList = new TableIdentifier(table, catalogSeparator);
+				tableForColumnList = new TableIdentifier(table, catalogSeparator, SqlUtil.getSchemaSeparator(dbConnection));
 				tableForColumnList.adjustCase(dbConnection);
 			}
 		}
@@ -61,7 +61,7 @@ public class DeleteAnalyzer
 	public List<TableAlias> getTables()
 	{
 		String table = SqlUtil.getDeleteTable(this.sql, this.catalogSeparator);
-		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection));
+		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection), SqlUtil.getSchemaSeparator(dbConnection));
 		List<TableAlias> result = new ArrayList<TableAlias>(1);
 		result.add(a);
 		return result;

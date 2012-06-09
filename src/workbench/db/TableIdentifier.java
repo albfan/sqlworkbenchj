@@ -12,7 +12,6 @@
 package workbench.db;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
@@ -64,18 +63,18 @@ public class TableIdentifier
 		this.setTable(aName);
 	}
 
-	public TableIdentifier(String aName, char catalogSeparator)
+	public TableIdentifier(String aName, char catalogSeparator, char schemaSeparator)
 	{
 		this.expression = null;
 		this.isNewTable = false;
-		this.setTable(aName, catalogSeparator);
+		this.setTable(aName, catalogSeparator, schemaSeparator);
 	}
 
 	public TableIdentifier(String aName, WbConnection conn)
 	{
 		this.expression = null;
 		this.isNewTable = false;
-		this.setTable(aName, SqlUtil.getCatalogSeparator(conn));
+		this.setTable(aName, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
 		this.adjustCase(conn);
 	}
 
@@ -323,13 +322,14 @@ public class TableIdentifier
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
 			String catalogToUse = getCatalogToUse(conn);
-			char separator = meta.getCatalogSeparator();
+			char catalogSeparator = meta.getCatalogSeparator();
+			char schemaSeparator = meta.getSchemaSeparator();
 			boolean hasCatalog = false;
 			if (StringUtil.isNonBlank(catalogToUse))
 			{
 				hasCatalog = true;
 				result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
-				result.append(separator);
+				result.append(catalogSeparator);
 			}
 
 			String schemaToUse = getSchemaToUse(conn);
@@ -344,7 +344,7 @@ public class TableIdentifier
 			if (StringUtil.isNonBlank(schemaToUse))
 			{
 				result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
-				result.append(separator);
+				result.append(schemaSeparator);
 			}
 			result.append(meta.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}
@@ -484,10 +484,10 @@ public class TableIdentifier
 
 	public final void setTable(String aTable)
 	{
-		setTable(aTable, '.');
+		setTable(aTable, '.', '.');
 	}
 
-	public final void setTable(String aTable, char catalogSeparator)
+	public final void setTable(String aTable, char catalogSeparator, char schemaSeparator)
 	{
 		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
 		{
@@ -502,21 +502,19 @@ public class TableIdentifier
 			return;
 		}
 
-		List<String> elements = new ArrayList<String>(4);
-		WbStringTokenizer tok = new WbStringTokenizer(catalogSeparator, "\"", true);
+		WbStringTokenizer tok = new WbStringTokenizer(schemaSeparator, "\"", true);
 		tok.setSourceString(aTable);
-		while (tok.hasMoreTokens())
-		{
-			elements.add(tok.nextToken());
-		}
+		List<String> elements = tok.getAllTokens();
 
 		if (elements.size() == 1)
 		{
-			setTablename(aTable);
+			setCatalog(getCatalogPart(aTable, catalogSeparator));
+			setTablename(getNamePart(aTable, catalogSeparator));
 		}
 		else if (elements.size() == 2)
 		{
-			setSchema(elements.get(0));
+			setCatalog(getCatalogPart(elements.get(0), catalogSeparator));
+			setSchema(getNamePart(elements.get(0), catalogSeparator));
 			setTablename(elements.get(1));
 		}
 		else if (elements.size() == 3)
@@ -534,6 +532,32 @@ public class TableIdentifier
 			setTablename(elements.get(3));
 		}
 		this.expression = null;
+	}
+
+	protected static String getCatalogPart(String identifier, char catalogSeparator)
+	{
+		if (identifier == null) return identifier;
+		WbStringTokenizer tok = new WbStringTokenizer(catalogSeparator, "\"", true);
+		tok.setSourceString(identifier);
+		List<String> tokens = tok.getAllTokens();
+		if (tokens.size() == 2)
+		{
+			return tokens.get(0);
+		}
+		return null;
+	}
+
+	protected static String getNamePart(String identifier, char catalogSeparator)
+	{
+		if (identifier == null) return identifier;
+		WbStringTokenizer tok = new WbStringTokenizer(catalogSeparator, "\"", true);
+		tok.setSourceString(identifier);
+		List<String> tokens = tok.getAllTokens();
+		if (tokens.size() == 2)
+		{
+			return tokens.get(1);
+		}
+		return tokens.get(0);
 	}
 
 	/**

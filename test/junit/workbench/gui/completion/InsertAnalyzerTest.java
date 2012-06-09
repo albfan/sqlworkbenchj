@@ -95,11 +95,11 @@ public class InsertAnalyzerTest
 	public void testAlternateSeparator()
 	{
 		String sql = "insert into mylib/sometable ( ) values ";
-		InsertAnalyzer analyzer = new InsertAnalyzer(null, sql, sql.indexOf("(") + 1);
+		InsertAnalyzer analyzer = new InsertAnalyzer(null, sql, sql.indexOf('(') + 1);
 		analyzer.setCatalogSeparator('/');
 		analyzer.checkContext();
 		TableIdentifier table = analyzer.getTableForColumnList();
-		assertEquals("mylib", table.getSchema());
+		assertEquals("mylib", table.getCatalog());
 		assertEquals("sometable", table.getTableName());
 	}
 
@@ -107,7 +107,7 @@ public class InsertAnalyzerTest
 	public void testSeparator()
 	{
 		String sql = "insert into public.sometable (  ) values ";
-		InsertAnalyzer analyzer = new InsertAnalyzer(null, sql, sql.indexOf("(") + 1);
+		InsertAnalyzer analyzer = new InsertAnalyzer(null, sql, sql.indexOf('(') + 1);
 		analyzer.checkContext();
 		TableIdentifier table = analyzer.getTableForColumnList();
 		assertEquals("public", table.getSchema());

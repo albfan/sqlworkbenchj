@@ -214,12 +214,20 @@ public class SqlUtil
 		return col.toString();
 	}
 
-public static char getCatalogSeparator(WbConnection conn)
+	public static char getCatalogSeparator(WbConnection conn)
 	{
 		if (conn == null) return '.';
 		DbMetadata meta = conn.getMetadata();
 		if (meta == null) return '.';
 		return meta.getCatalogSeparator();
+	}
+
+	public static char getSchemaSeparator(WbConnection conn)
+	{
+		if (conn == null) return '.';
+		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return '.';
+		return meta.getSchemaSeparator();
 	}
 
 	/**
@@ -1780,16 +1788,17 @@ public static char getCatalogSeparator(WbConnection conn)
 		}
 		else
 		{
-			char separator = meta.getCatalogSeparator();
+			char catalogSeparator = meta.getCatalogSeparator();
+			char schemaSeparator = meta.getSchemaSeparator();
 			if (StringUtil.isNonEmpty(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
 			{
 				result.append(meta.quoteObjectname(catalog));
-				result.append(separator);
+				result.append(catalogSeparator);
 			}
 			if (StringUtil.isNonEmpty(schema) && !conn.getMetadata().ignoreSchema(schema))
 			{
 				result.append(meta.quoteObjectname(schema));
-				result.append(separator);
+				result.append(schemaSeparator);
 			}
 			result.append(meta.quoteObjectname(name));
 		}

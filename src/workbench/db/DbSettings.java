@@ -1428,6 +1428,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "separator.catalog", null);
 	}
 
+	public String getSchemaSeparator()
+	{
+		return Settings.getInstance().getProperty(prefix + "separator.schema", ".");
+	}
+
 	public boolean createInlinePKConstraints()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "pk.inline", false);

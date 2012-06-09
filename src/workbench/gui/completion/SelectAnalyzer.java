@@ -153,7 +153,8 @@ public class SelectAnalyzer
 			}
 
 			this.addAllMarker = !afterWhere;
-			char separator = SqlUtil.getCatalogSeparator(dbConnection);
+			char catalogSep = SqlUtil.getCatalogSeparator(dbConnection);
+			char schemaSep = SqlUtil.getSchemaSeparator(dbConnection);
 
 			// check if the current qualifier is either one of the
 			// tables in the table list or one of the aliases used
@@ -162,7 +163,12 @@ public class SelectAnalyzer
 			String table = null;
 			if (currentWord != null)
 			{
-				int pos = currentWord.indexOf(separator);
+				int pos = currentWord.indexOf(catalogSep);
+				if (pos == -1)
+				{
+					pos = currentWord.indexOf(schemaSep);
+				}
+				
 				if (pos > -1)
 				{
 					table = currentWord.substring(0, pos);
@@ -171,7 +177,7 @@ public class SelectAnalyzer
 
 			if (table != null)
 			{
-				currentAlias = findAlias(table, tables, separator);
+				currentAlias = findAlias(table, tables, catalogSep, schemaSep);
 
 				if (currentAlias != null)
 				{
@@ -187,7 +193,7 @@ public class SelectAnalyzer
 					{
 						for (TableAlias outer : outerTables)
 						{
-							if (outer.isTableOrAlias(table, separator))
+							if (outer.isTableOrAlias(table, catalogSep, schemaSep))
 							{
 								tableForColumnList = outer.getTable();
 								currentAlias = outer;
@@ -198,7 +204,7 @@ public class SelectAnalyzer
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias(tables.get(0), separator);
+				TableAlias tbl = new TableAlias(tables.get(0), catalogSep, schemaSep);
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -209,7 +215,7 @@ public class SelectAnalyzer
 				this.elements = new ArrayList();
 				for (String entry : tables)
 				{
-					TableAlias tbl = new TableAlias(entry, separator);
+					TableAlias tbl = new TableAlias(entry, catalogSep, schemaSep);
 					this.elements.add(tbl);
 					setAppendDot(true);
 				}
@@ -221,13 +227,13 @@ public class SelectAnalyzer
 		}
 	}
 
-	private TableAlias findAlias(String toSearch, List<String> possibleTables, char separator)
+	private TableAlias findAlias(String toSearch, List<String> possibleTables, char catalogSeparator, char schemaSeparator)
 	{
 		for (String element : possibleTables)
 		{
-			TableAlias tbl = new TableAlias(element, separator);
+			TableAlias tbl = new TableAlias(element, catalogSeparator, schemaSeparator);
 
-			if (tbl.isTableOrAlias(toSearch, separator))
+			if (tbl.isTableOrAlias(toSearch, catalogSeparator, schemaSeparator))
 			{
 				return tbl;
 			}

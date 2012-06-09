@@ -420,6 +420,13 @@ public class DbMetadata
 		return catalogSeparator;
 	}
 
+	public char getSchemaSeparator()
+	{
+		String sep = dbSettings.getSchemaSeparator();
+		if (sep == null) return '.';
+		return sep.charAt(0);
+	}
+
 	public MetaDataSqlManager getMetaDataSQLMgr()
 	{
 		if (this.metaSqlMgr == null)

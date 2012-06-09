@@ -350,13 +350,13 @@ public class WbOraShow
 	private long roundToKb(long input)
 	{
 		if (input < ONE_KB) return input;
-		return (long)(input / ONE_KB);
+		return input / ONE_KB;
 	}
 
 	private long roundToMb(long input)
 	{
 		if (input < ONE_MB) return input;
-		return (long)(input / ONE_MB);
+		return input / ONE_MB;
 	}
 
 }

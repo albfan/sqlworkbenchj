@@ -81,7 +81,7 @@ public class ResultColumnMetaData
 			else
 			{
 				TableAlias alias = new TableAlias(table);
-				TableIdentifier tbl = new TableIdentifier(alias.getObjectName(), meta.getCatalogSeparator());
+				TableIdentifier tbl = new TableIdentifier(alias.getObjectName(), connection);
 				TableDefinition def = meta.getTableDefinition(tbl);
 				tableDefs.put(alias.getNameToUse().toLowerCase(), def);
 			}

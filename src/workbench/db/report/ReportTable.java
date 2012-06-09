@@ -94,7 +94,7 @@ public class ReportTable
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.ConstraintReader#getTableConstraints(workbench.db.WbConnection, workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportTable(TableIdentifier tbl, WbConnection conn, 
+	public ReportTable(TableIdentifier tbl, WbConnection conn,
 			boolean includeIndex,
 			boolean includeFk,
 			boolean includePk,
@@ -312,7 +312,7 @@ public class ReportTable
 				}
 				if (def.getForeignTable() == null)
 				{
-					def.setForeignTable(new ReportTable(new TableIdentifier(reftable, catalogSeparator), catalogSeparator));
+					def.setForeignTable(new ReportTable(new TableIdentifier(reftable, conn), catalogSeparator));
 				}
 				def.addReferenceColumn(col, refcolumn);
 				rcol.setForeignKeyReference(def.getColumnReference(col));

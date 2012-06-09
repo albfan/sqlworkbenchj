@@ -45,10 +45,10 @@ public class TableAliasTest
 	public void testDB2Separator()
 	{
 		String value = "mylib/table1";
-		TableAlias ta = new TableAlias(value, '/');
+		TableAlias ta = new TableAlias(value, '/', '.');
 		assertEquals("mylib/table1", ta.getObjectName());
 		TableIdentifier table = ta.getTable();
-		assertEquals("mylib", table.getSchema());
+		assertEquals("mylib", table.getCatalog());
 		assertEquals("table1", table.getTableName());
 	}
 
@@ -57,12 +57,12 @@ public class TableAliasTest
 	{
 		String value = "table1";
 		TableAlias ta = new TableAlias(value);
-		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("table1", '.'));
+		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("table1", '.', '.'));
 
 		value = "table1 t1";
 		ta = new TableAlias(value);
-		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("table1", '.'));
-		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("t1", '.'));
+		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("table1", '.', '.'));
+		assertEquals("Not recognized as the same", true, ta.isTableOrAlias("t1", '.', '.'));
 	}
 
 }
