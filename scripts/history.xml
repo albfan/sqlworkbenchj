@@ -2,6 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-05-14">
+    <entry dev-build="8" type="enh">Added support for SQL Server 2012 sequences</entry>
+    <entry dev-build="8" type="enh">Added support to display synonyms for Informix</entry>
+    <entry dev-build="8" type="enh">A new option to copy data as "MERGE" statements has been added. This is also available for WbExport</entry>
     <entry dev-build="7" type="enh">The SQL source for external tables is now shown correctly for Oracle</entry>
     <entry dev-build="7" type="enh">For Cubrid, support for views, sequences and triggers has been added to the DbExplorer</entry>
     <entry dev-build="7" type="enh">For Vertica, support for views, sequences and functions has been added to the DbExplorer</entry>
@@ -15,6 +18,8 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="8" type="fix">The SQL for the primary key in Informix was not created correctly</entry>
+    <entry dev-build="8" type="fix">Sequences for Informix where no longer displayed</entry>
     <entry dev-build="7" type="fix">For Oracle, DB2 and PostgreSQL auto-completion for tables in a schema did not work if the schema wasn't typed in the correct (upper/lower)case of the databse.</entry>
     <entry dev-build="7" type="fix">Using a JDBC driver that did not support savepoints as the source for the DataPumper or WbCopy copying failed</entry>
     <entry dev-build="7" type="fix">For Oracle, deferred unique constraints where not generated correctly in the SQL source of a table.</entry>
