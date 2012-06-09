@@ -32,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.derby.DerbyColumnEnhancer;
-import workbench.db.derby.DerbySynonymReader;
 import workbench.db.derby.DerbyTypeReader;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
@@ -44,20 +43,15 @@ import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
-import workbench.db.ibm.Db2SynonymReader;
-import workbench.db.ibm.InformixSynonymReader;
-import workbench.db.ingres.IngresMetadata;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
-import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetadata;
-import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresColumnEnhancer;
@@ -112,7 +106,6 @@ public class DbMetadata
 	private TableDefinitionReader definitionReader;
 	private ConstraintReader constraintReader;
 	private DataTypeResolver dataTypeResolver;
-	private SynonymReader synonymReader;
 	private SequenceReader sequenceReader;
 	private ProcedureReader procedureReader;
 	private ErrorInformationReader errorInfoReader;
@@ -212,7 +205,6 @@ public class DbMetadata
 		{
 			isOracle = true;
 			oracleMetaData = new OracleMetadata(this.dbConnection);
-			synonymReader = new OracleSynonymReader();
 			errorInfoReader = oracleMetaData;
 			dataTypeResolver = oracleMetaData;
 			definitionReader = oracleMetaData;
@@ -250,10 +242,6 @@ public class DbMetadata
 		else if (productLower.indexOf("sql server") > -1)
 		{
 			isSqlServer = true;
-			if (SqlServerSynonymReader.supportsSynonyms(dbConnection))
-			{
-				synonymReader = new SqlServerSynonymReader(this);
-			}
 
 			if (SqlServerTypeReader.versionSupportsTypes(dbConnection))
 			{
@@ -271,7 +259,6 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
-			synonymReader = new Db2SynonymReader();
 			procedureReader = new Db2ProcedureReader(dbConnection, getDbId());
 
 			// Generated columns are not available on the host version...
@@ -280,10 +267,6 @@ public class DbMetadata
 				columnEnhancer = new Db2ColumnEnhancer();
 				extenders.add(new DB2TypeReader());
 			}
-		}
-		else if (getDbId().equals("informix_dynamic_server"))
-		{
-			synonymReader = new InformixSynonymReader();
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
@@ -298,18 +281,11 @@ public class DbMetadata
 		else if (productLower.indexOf("derby") > -1)
 		{
 			this.isApacheDerby = true;
-			this.synonymReader = new DerbySynonymReader();
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.6"))
 			{
 				extenders.add(new DerbyTypeReader());
 			}
 			columnEnhancer = new DerbyColumnEnhancer();
-		}
-		else if (productLower.indexOf("ingres") > -1)
-		{
-			IngresMetadata imeta = new IngresMetadata(dbConnection);
-			synonymReader = imeta;
-			sequenceReader = imeta;
 		}
 		else if (productLower.indexOf("sqlite") > -1)
 		{
@@ -1493,10 +1469,11 @@ public class DbMetadata
 			sortNeeded = true;
 		}
 
-		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
+		SynonymReader synReader = this.getSynonymReader();
+		boolean retrieveSyns = (synReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
-			List<TableIdentifier> syns = synonymReader.getSynonymList(dbConnection, schemaPattern, namePattern);
+			List<TableIdentifier> syns = synReader.getSynonymList(dbConnection, schemaPattern, namePattern);
 			for (TableIdentifier synonym : syns)
 			{
 				int row = result.addRow();
@@ -2527,7 +2504,7 @@ public class DbMetadata
 		List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
 		result.addAll(addTypes);
 
-		if (this.synonymReader != null)
+		if (supportsSynonyms())
 		{
 			result.add("SYNONYM");
 		}
@@ -2579,7 +2556,7 @@ public class DbMetadata
 	 */
 	public boolean supportsSynonyms()
 	{
-		return this.synonymReader != null;
+		return getSynonymReader() != null;
 	}
 
 	/**
@@ -2592,7 +2569,6 @@ public class DbMetadata
 	 */
 	public TableIdentifier getSynonymTable(TableIdentifier synonym)
 	{
-		if (this.synonymReader == null) return null;
 		TableIdentifier tbl = synonym.createCopy();
 		tbl.adjustCase(this.dbConnection);
 		return getSynonymTable(tbl.getSchema(), tbl.getTableName());
@@ -2610,11 +2586,12 @@ public class DbMetadata
 	 */
 	public TableIdentifier getSynonymTable(String schema, String synonym)
 	{
-		if (this.synonymReader == null) return null;
+		SynonymReader reader = getSynonymReader();
+		if (reader == null) return null;
 		TableIdentifier id = null;
 		try
 		{
-			id = this.synonymReader.getSynonymTable(this.dbConnection, schema, synonym);
+			id = reader.getSynonymTable(this.dbConnection, schema, synonym);
 			if (id != null && id.getType() == null)
 			{
 				String type = getObjectType(id);
@@ -2630,7 +2607,7 @@ public class DbMetadata
 
 	public SynonymReader getSynonymReader()
 	{
-		return this.synonymReader;
+		return SynonymReader.Factory.getSynonymReader(dbConnection);
 	}
 
 	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, boolean includeDrop)

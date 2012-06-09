@@ -27,6 +27,7 @@ import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.InformixSequenceReader;
+import workbench.db.ingres.IngresSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mssql.SqlServerSequenceReader;
@@ -125,6 +126,10 @@ public class ReaderFactory
 		if (con.getDbId().equals("informix_dynamic_server"))
 		{
 			return new InformixSequenceReader(con);
+		}
+		if (con.getDbId().equals("ingres"))
+		{
+			return new IngresSequenceReader(con);
 		}
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * IngresMetadataTest.java
+ * IngresSequenceReaderTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -29,13 +29,13 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class IngresMetadataTest
+public class IngresSequenceReaderTest
 	extends WbTestCase
 {
 
 	private WbConnection db;
 
-	public IngresMetadataTest()
+	public IngresSequenceReaderTest()
 	{
 		super("IngresMetadataTest");
 	}
@@ -73,7 +73,7 @@ public class IngresMetadataTest
 	@Test
 	public void testGetSequences()
 	{
-		IngresMetadata instance = new IngresMetadata(db);
+		IngresSequenceReader instance = new IngresSequenceReader(db);
 		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
