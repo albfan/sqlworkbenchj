@@ -26,6 +26,7 @@ import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
+import workbench.db.ibm.InformixSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mssql.SqlServerSequenceReader;
@@ -120,6 +121,10 @@ public class ReaderFactory
 		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2012(con))
 		{
 			return new SqlServerSequenceReader(con);
+		}
+		if (con.getDbId().equals("informix_dynamic_server"))
+		{
+			return new InformixSequenceReader(con);
 		}
 		return null;
 	}

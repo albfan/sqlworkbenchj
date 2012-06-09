@@ -84,7 +84,7 @@ public class InformixSequenceReader
 		result.setSequenceProperty("START", ds.getValue(row, "start_val"));
 		result.setSequenceProperty("MINVALUE", ds.getValue(row, "min_val"));
 		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "max_val"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "inc_al"));
+		result.setSequenceProperty("INCREMENT", ds.getValue(row, "inc_val"));
 		result.setSequenceProperty("CYCLE", ds.getValue(row, "cycle"));
 		result.setSequenceProperty("ORDER", ds.getValue(row, "order"));
 		readSequenceSource(result);
@@ -181,7 +181,7 @@ public class InformixSequenceReader
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
-		if (start.longValue() > 0)
+		if (start != null && start.longValue() > 0)
 		{
 			if (doFormat) result.append(nl + "       ");
 			result.append("START WITH ");

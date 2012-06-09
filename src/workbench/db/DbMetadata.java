@@ -45,6 +45,7 @@ import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.ibm.Db2SynonymReader;
+import workbench.db.ibm.InformixSynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
@@ -279,6 +280,10 @@ public class DbMetadata
 				columnEnhancer = new Db2ColumnEnhancer();
 				extenders.add(new DB2TypeReader());
 			}
+		}
+		else if (getDbId().equals("informix_dynamic_server"))
+		{
+			synonymReader = new InformixSynonymReader();
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
