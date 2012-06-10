@@ -510,11 +510,6 @@ public class DbMetadata
 		}
 	}
 
-	public OracleMetadata getOracleMeta()
-	{
-		return this.oracleMetaData;
-	}
-
 	/**
 	 * Check if the given DB object type can contain data. i.e. if
 	 * a SELECT FROM can be run against this type.
