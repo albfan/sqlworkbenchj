@@ -1,5 +1,6 @@
 Features:
 ---------
+- save table sort in DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"
 - WbClipCopy: Copy result set data to the clipboard

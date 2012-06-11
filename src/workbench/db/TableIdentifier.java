@@ -30,7 +30,6 @@ public class TableIdentifier
 	private String schema;
 	private String catalog;
 	private String server; // for SQL Server syntax
-	private String expression;
 	private boolean isNewTable;
 	private boolean tableWasQuoted;
 	private boolean serverWasQuoted;
@@ -58,21 +57,18 @@ public class TableIdentifier
 
 	public TableIdentifier(String aName)
 	{
-		this.expression = null;
 		this.isNewTable = false;
 		this.setTable(aName);
 	}
 
 	public TableIdentifier(String aName, char catalogSeparator, char schemaSeparator)
 	{
-		this.expression = null;
 		this.isNewTable = false;
 		this.setTable(aName, catalogSeparator, schemaSeparator);
 	}
 
 	public TableIdentifier(String aName, WbConnection conn)
 	{
-		this.expression = null;
 		this.isNewTable = false;
 		this.setTable(aName, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
 		this.adjustCase(conn);
@@ -85,7 +81,6 @@ public class TableIdentifier
 	 */
 	public TableIdentifier()
 	{
-		this.expression = null;
 		this.schema = null;
 		this.catalog = null;
 		this.tablename = null;
@@ -252,7 +247,6 @@ public class TableIdentifier
 		copy.tablename = this.tablename;
 		copy.catalog = this.catalog;
 		copy.server = this.server;
-		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
 		copy.serverWasQuoted = this.serverWasQuoted;
 		copy.tableWasQuoted = this.tableWasQuoted;
@@ -270,8 +264,7 @@ public class TableIdentifier
 
 	public String getTableExpression()
 	{
-		if (this.expression == null) this.initExpression();
-		return this.expression;
+		return buildTableExpression(null);
 	}
 
 	@Override
@@ -283,11 +276,6 @@ public class TableIdentifier
 	public String getTableExpression(WbConnection conn)
 	{
 		return this.buildTableExpression(conn);
-	}
-
-	private void initExpression()
-	{
-		this.expression = this.buildTableExpression(null);
 	}
 
 	private String buildTableExpression(WbConnection conn)
@@ -389,7 +377,6 @@ public class TableIdentifier
 		if (this.tablename != null && !tableWasQuoted) this.tablename = meta.adjustObjectnameCase(this.tablename);
 		if (this.schema != null && !schemaWasQuoted) this.schema = meta.adjustSchemaNameCase(this.schema);
 		if (this.catalog != null && !catalogWasQuoted) this.catalog = meta.adjustObjectnameCase(this.catalog);
-		this.expression = null;
 	}
 
 	/**
@@ -466,19 +453,16 @@ public class TableIdentifier
 		{
 			this.tableWasQuoted = true;
 			this.tablename = this.tablename.substring(1, tablename.length() - 1);
-			this.expression = null;
 		}
 		if (meta.isQuoted(schema))
 		{
 			this.schemaWasQuoted = true;
 			this.schema = this.schema.substring(1, schema.length() - 1);
-			this.expression = null;
 		}
 		if (meta.isQuoted(catalog))
 		{
 			this.catalogWasQuoted = true;
 			this.catalog= this.catalog.substring(1, catalog.length() - 1);
-			this.expression = null;
 		}
 	}
 
@@ -498,7 +482,6 @@ public class TableIdentifier
 		{
 			this.tablename = null;
 			this.schema = null;
-			this.expression = null;
 			return;
 		}
 
@@ -531,7 +514,6 @@ public class TableIdentifier
 			setSchema(elements.get(2));
 			setTablename(elements.get(3));
 		}
-		this.expression = null;
 	}
 
 	protected static String getCatalogPart(String identifier, char catalogSeparator)
@@ -617,7 +599,6 @@ public class TableIdentifier
 			schemaWasQuoted = aSchema.trim().startsWith("\"");
 			this.schema = StringUtil.trimQuotes(aSchema).trim();
 		}
-		this.expression = null;
 	}
 
 	@Override
@@ -646,7 +627,6 @@ public class TableIdentifier
 			catalogWasQuoted = aCatalog.trim().startsWith("\"");
 			this.catalog = StringUtil.trimQuotes(aCatalog).trim();
 		}
-		this.expression = null;
 	}
 
 	@Override
@@ -676,7 +656,6 @@ public class TableIdentifier
 
 	public void setNewTable(boolean flag)
 	{
-		this.expression = null;
 		this.isNewTable = flag;
 	}
 
