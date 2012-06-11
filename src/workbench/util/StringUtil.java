@@ -1484,7 +1484,7 @@ public class StringUtil
 	/**
 	 * Returns all lines from the source.
 	 * @param source the source
-	 * @return all lines 
+	 * @return all lines
 	 * @throws IOException
 	 */
 	public static List<String> readLines(Reader source)
@@ -1533,4 +1533,14 @@ public class StringUtil
 		}
 	}
 
+	public static int stringLength(String ... values)
+	{
+		if (values == null) return 0;
+		int len = 0;
+		for (String str : values)
+		{
+			len += (str == null ? 0	: str.length());
+		}
+		return len;
+	}
 }
