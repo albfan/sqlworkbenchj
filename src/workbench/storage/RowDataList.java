@@ -126,10 +126,10 @@ public class RowDataList
 	public void remove(int index)
 	{
 		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
-		int count = size - index - 1;
 
 		synchronized (this.dataLock)
 		{
+			int count = size - index - 1;
 			if (count > 0)
 			{
 				System.arraycopy(data, index+1, data, index, count);
@@ -150,10 +150,9 @@ public class RowDataList
 			grow(DEFAULT_SIZE);
 		}
 
-		int newlen = this.size + 1;
-
 		synchronized (this.dataLock)
 		{
+			int newlen = this.size + 1;
 			if (newlen > this.data.length) grow(newlen);
 			this.data[newlen - 1] = row;
 			this.size = newlen;
