@@ -652,7 +652,11 @@ public class TableIdentifier
 			return this.getTableExpression();
 		}
 	}
-	public boolean isNewTable() { return this.isNewTable; }
+
+	public boolean isNewTable()
+	{
+		return this.isNewTable;
+	}
 
 	public void setNewTable(boolean flag)
 	{
