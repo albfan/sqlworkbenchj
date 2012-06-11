@@ -1158,7 +1158,10 @@ public class StringUtil
 						}
 						else
 						{
-							for (int k=0; k < i; k++) outBuffer.append(theString.charAt(x+k));
+							for (int k=0; k < i; k++)
+							{
+								outBuffer.append(theString.charAt(x+k));
+							}
 						}
 						x++;
 					}
