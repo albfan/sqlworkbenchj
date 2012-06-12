@@ -128,10 +128,10 @@ public class SqlServerColumnEnhancer
 
 		String tablename = table.getTable().getTableExpression(conn);
 
-		String sql = "select name, definition, is_persisted \n" +
-             "from sys.computed_columns where object_id = object_id('";
-		sql += tablename;
-		sql += "')";
+		String sql =
+			"select name, definition, is_persisted \n" +
+      "from sys.computed_columns with (nolock) \n" +
+			"where object_id = object_id('" + tablename + "')";
 
 		Map<String, String> expressions = new HashMap<String, String>();
 		try

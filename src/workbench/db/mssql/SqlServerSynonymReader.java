@@ -37,7 +37,8 @@ public class SqlServerSynonymReader
 
 	private final String baseSql =
 		"SELECT sc.name as schema_name, syn.name as synonym_name, syn.base_object_name \n" +
-    " FROM sys.synonyms syn JOIN sys.schemas sc ON syn.schema_id = sc.schema_id  ";
+    " FROM sys.synonyms syn with (nolock) \n " +
+		"   JOIN sys.schemas sc with (nolock) ON syn.schema_id = sc.schema_id  ";
 
 	public SqlServerSynonymReader(DbMetadata dbMeta)
 	{

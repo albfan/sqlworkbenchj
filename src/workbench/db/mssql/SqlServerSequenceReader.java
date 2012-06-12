@@ -12,6 +12,7 @@
 package workbench.db.mssql;
 
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -32,7 +33,7 @@ import workbench.util.StringUtil;
 
 /**
  * A sequence reader for SQL Server 2012
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class SqlServerSequenceReader
@@ -80,18 +81,18 @@ public class SqlServerSequenceReader
 			"       sq.maximum_value, \n       " +
 			"       sq.start_value , \n       " +
 			"       increment, \n       " +
-			"       case when is_cycling = 1 then 'cycle' else 'nocycle' end as cycle_flag, \n" +
+			"       case when is_cycling = 1 then 'CYCLE' else 'NO CYCLE' end as cycle_flag, \n" +
 			"       is_cached, \n" +
 			"       cache_size, \n" +
 			"       type_name(system_type_id) as data_type, \n" +
       "       type_name(user_type_id) as user_type, \n" +
       "       precision, \n" +
 			"       current_value \n" +
-			"FROM sys.sequences sq \n" +
-			"   join sys.schemas sc on sq.schema_id = sc.schema_id \n"  +
+			"FROM sys.sequences sq with (nolock) \n" +
+			"   join sys.schemas sc with (nolock) on sq.schema_id = sc.schema_id \n"  +
 			"WHERE sc.name = '");
 		sql.append(StringUtil.trimQuotes(schema));
-		sql.append("'\n ");
+		sql.append("' ");
 
 		if (StringUtil.isNonEmpty(sequence))
 		{
@@ -130,6 +131,10 @@ public class SqlServerSequenceReader
   {
 		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
 		if (def == null) return null;
+		if (def.getSource() == null)
+		{
+			readSequenceSource(def);
+		}
 		return def.getSource();
 	}
 
@@ -150,10 +155,25 @@ public class SqlServerSequenceReader
 		result.setSequenceProperty("data_type", ds.getValue(row, "data_type"));
 		result.setSequenceProperty("user_type", ds.getValue(row, "user_type"));
 		result.setSequenceProperty("precision", ds.getValue(row, "precision"));
-		readSequenceSource(result);
 		return result;
 	}
 
+
+	private BigDecimal getNumberValue(SequenceDefinition def, String property)
+	{
+		Object v = def.getSequenceProperty(property);
+		if (v == null) return null;
+		try
+		{
+			BigDecimal d = new BigDecimal(v.toString());
+			return d;
+		}
+		catch (NumberFormatException nfe)
+		{
+			LogMgr.logWarning("SqlServerSequenceReader.getNumberValue()", "Could not convert " + v + " to a number", nfe);
+		}
+		return null;
+	}
 
 	@Override
 	public void readSequenceSource(SequenceDefinition def)
@@ -167,10 +187,11 @@ public class SqlServerSequenceReader
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());
 
-		Number minValue = (Number) def.getSequenceProperty("minimum_value");
-		Number maxValue = (Number) def.getSequenceProperty("maximum_value");
+		Number minValue = getNumberValue(def, "minimum_value");
+		Number maxValue = getNumberValue(def, "maximum_value");
+		Number startValue = getNumberValue(def, "start_value");
 
-		Number increment = (Number) def.getSequenceProperty("increment");
+		Number increment = getNumberValue(def, "increment");
 
 		String cycle = (String) def.getSequenceProperty("cycle_flag");
 		Boolean isCached = (Boolean)def.getSequenceProperty("is_cached");
@@ -215,6 +236,15 @@ public class SqlServerSequenceReader
 		else
 		{
 			result.append(nl).append("       NO MAXVALUE");
+		}
+
+		if (startValue != null)
+		{
+			if (minValue != null && !startValue.equals(minValue) || minValue == null)
+			{
+				result.append(nl).append("       START WITH ");
+				result.append(startValue);
+			}
 		}
 
 		if (Boolean.TRUE.equals(isCached))

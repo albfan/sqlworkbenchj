@@ -48,9 +48,9 @@ public class SqlServerConstraintReader
 
 	private final String TABLE_SQL =
 		"select cons.name, cons.definition \n" +
-		"from sys.check_constraints cons \n" +
-		"  join sys.tables tab on cons.parent_object_id = tab.object_id \n" +
-		"  join sys.schemas s on s.schema_id = tab.schema_id \n" +
+		"from sys.check_constraints cons with (nolock) \n" +
+		"  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
+		"  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
 		"where tab.name = ?  \n" +
 		"  and s.name = ?";
 
@@ -60,10 +60,10 @@ public class SqlServerConstraintReader
 		"          when is_system_named = 1 then 'DEFAULT ' + cons.definition \n" +
 		"          else 'CONSTRAINT ' + cons.name + ' DEFAULT ' + cons.definition \n" +
 		"       end as value \n" +
-		"from sys.default_constraints cons \n" +
-		"  join sys.columns col on cons.object_id = col.default_object_id and cons.parent_column_id = col.column_id \n" +
-		"  join sys.tables tab on cons.parent_object_id = tab.object_id \n" +
-		"  join sys.schemas s on s.schema_id = tab.schema_id \n" +
+		"from sys.default_constraints cons with (nolock) \n" +
+		"  join sys.columns col with (nolock) on cons.object_id = col.default_object_id and cons.parent_column_id = col.column_id \n" +
+		"  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
+		"  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
 		"where cons.type = 'D' \n" +
 		"  and tab.name = ? \n" +
 		"  and s.name = ? ";

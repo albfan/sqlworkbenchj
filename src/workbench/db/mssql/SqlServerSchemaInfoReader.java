@@ -31,7 +31,7 @@ public class SqlServerSchemaInfoReader
 	{
 		// As the default schema is a property of the user definition and nothing that can change at runtime (at least not easily)
 		// I assume it's safe to cache the current schema.
-		String sql = "SELECT default_schema_name FROM sys.database_principals WHERE type = 'S' AND name = current_user";
+		String sql = "SELECT default_schema_name FROM sys.database_principals with (nolock) WHERE type = 'S' AND name = current_user";
 		Statement stmt = null;
 		ResultSet rs = null;
 		try

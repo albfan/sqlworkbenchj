@@ -43,7 +43,8 @@ public class SqlServerTypeReader
 		"       t.scale,  \n" +
 		"       t.precision,  \n" +
 		"       t.collation_name \n" +
-		"from sys.types t join sys.schemas s on t.schema_id = s.schema_id \n" +
+		"from sys.types t with (nolock) \n" +
+		"  join sys.schemas s with (nolock) on t.schema_id = s.schema_id \n" +
 		"where t.is_user_defined = 1";
 
 	// the data types for which the max_length information are valid

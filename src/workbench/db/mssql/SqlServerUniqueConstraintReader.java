@@ -44,10 +44,10 @@ public class SqlServerUniqueConstraintReader
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
 			"select ind.name as indname, sch.name as indschema, cons.name as consname \n" +
-			"from sys.indexes ind \n" +
-			"  join sys.objects obj on ind.object_id = obj.object_id \n" +
-			"  join sys.schemas sch on sch.schema_id = obj.schema_id \n" +
-			"  join sys.key_constraints cons on cons.unique_index_id  = ind.index_id \n" +
+			"from sys.indexes ind with (nolock) \n" +
+			"  join sys.objects obj with (nolock) on ind.object_id = obj.object_id \n" +
+			"  join sys.schemas sch with (nolock) on sch.schema_id = obj.schema_id \n" +
+			"  join sys.key_constraints cons with (nolock) on cons.unique_index_id  = ind.index_id \n" +
 			"where is_unique = 1  \n" +
 			"and is_unique_constraint = 1 \n" +
 			"and (");
