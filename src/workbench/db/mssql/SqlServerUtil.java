@@ -68,7 +68,8 @@ public class SqlServerUtil
 		Statement stmt = null;
 		try
 		{
-			conn.createStatement();
+			stmt = conn.createStatement();
+			LogMgr.logInfo("SqlServerUtil.setLockTimeout()", "Setting lock timeout: " + millis + "ms");
 			stmt.execute("SET LOCK_TIMEOUT " + Integer.toString(millis <= 0 ? -1 : millis ));
 		}
 		catch (SQLException sql)
