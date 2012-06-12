@@ -46,6 +46,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
 import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.DbExecutionListener;
 import workbench.util.ExceptionUtil;
@@ -575,7 +576,18 @@ public class DbExplorerPanel
 				// does not work. If we have separate connections for each tab
 				// we can safely disable the DBMS_OUTPUT on this connection
 				// as there won't be a way to view the output anyway
-				if (separateConnection) aConnection.getMetadata().disableOutput();
+				if (separateConnection)
+				{
+					aConnection.getMetadata().disableOutput();
+					if (aConnection.getMetadata().isSqlServer())
+					{
+						int timeout =  aConnection.getDbSettings().getLockTimoutForSqlServer();
+						if (timeout > 0)
+						{
+							SqlServerUtil.setLockTimeout(aConnection, timeout);
+						}
+					}
+				}
 			}
 
 			this.connectionInitPending = true;

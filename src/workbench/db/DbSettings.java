@@ -1448,4 +1448,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards", true);
 	}
 
+	public int getLockTimoutForSqlServer()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "dbexplorer.locktimeout", 2500);
+	}
 }

@@ -10,8 +10,12 @@
  */
 package workbench.db.mssql;
 
+import java.sql.SQLException;
+import java.sql.Statement;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -57,6 +61,24 @@ public class SqlServerUtil
 	public static boolean isSqlServer2000(WbConnection conn)
 	{
 		return JdbcUtils.hasMinimumServerVersion(conn, "8.0");
+	}
+
+	public static void setLockTimeout(WbConnection conn, int millis)
+	{
+		Statement stmt = null;
+		try
+		{
+			conn.createStatement();
+			stmt.execute("SET LOCK_TIMEOUT " + Integer.toString(millis <= 0 ? -1 : millis ));
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("SqlServerUtil.setLockTimeout()", "Could not set lock timeout", sql);
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
 	}
 
 }
