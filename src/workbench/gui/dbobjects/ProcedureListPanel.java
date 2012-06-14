@@ -42,6 +42,7 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.objectcache.SourceCache;
 import workbench.db.oracle.OraclePackageParser;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -108,6 +109,7 @@ public class ProcedureListPanel
 	private FilteredProperties workspaceSettings;
 
   private EditorTabSelectMenu generateWbCall;
+	private SourceCache cache;
 
 	public ProcedureListPanel(MainWindow window)
 	{
@@ -255,6 +257,11 @@ public class ProcedureListPanel
 		if (!initialized) return;
 		procList.saveColumnOrder();
 
+		if (this.cache != null)
+		{
+			this.cache.clear();
+		}
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -273,6 +280,10 @@ public class ProcedureListPanel
 		if (source != null) this.source.setDatabaseConnection(aConnection);
 		this.reset();
 		if (compileAction != null) this.compileAction.setConnection(aConnection);
+		if (this.dbConnection != null)
+		{
+			cache = new SourceCache(dbConnection.getDbId());
+		}
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -531,6 +542,34 @@ public class ProcedureListPanel
 		return def;
 	}
 
+	private CharSequence getSourceFromCache(ProcedureDefinition def)
+	{
+		if (def == null) return null;
+		if (def.isOraclePackage())
+		{
+			String pckName = def.getSchema() + "." + def.getPackageName();
+			return cache.getSource("package", pckName);
+		}
+		else
+		{
+			return cache.getSource(def.getObjectType(), def.getObjectNameForDrop(dbConnection));
+		}
+	}
+
+	private void putSourceToCache(ProcedureDefinition def, CharSequence source)
+	{
+		if (source == null) return;
+		if (def.isOraclePackage())
+		{
+			String pckName = def.getSchema() + "." + def.getPackageName();
+			cache.addSource("package", pckName, source);
+		}
+		else
+		{
+			cache.addSource(def.getObjectType(), def.getObjectNameForDrop(dbConnection), source);
+		}
+	}
+
 	private void retrieveProcDefinition(ProcedureDefinition def )
 	{
 		if (this.dbConnection == null) return;
@@ -565,7 +604,12 @@ public class ProcedureListPanel
 
 			try
 			{
-				sql = def.getSource(this.dbConnection);
+				sql = getSourceFromCache(def);
+				if (sql == null)
+				{
+					sql = def.getSource(this.dbConnection);
+					putSourceToCache(def, sql);
+				}
 				source.setText(sql == null ? "" : sql.toString());
 			}
 			catch (Throwable ex)
