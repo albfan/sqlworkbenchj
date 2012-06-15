@@ -151,7 +151,7 @@ public class ProcedureListPanel
 				try
 				{
 					dbConnection.setBusy(true);
-					retrieveCurrentProcedure();
+					retrieveCurrentProcedure(false);
 				}
 				finally
 				{
@@ -471,7 +471,7 @@ public class ProcedureListPanel
 		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 
-		retrieveCurrentProcedure();
+		retrieveCurrentProcedure(true);
 
 		if (e.getSource() == this.procList.getSelectionModel())
 		{
@@ -482,7 +482,7 @@ public class ProcedureListPanel
 		}
 	}
 
-	protected void retrieveCurrentProcedure()
+	protected void retrieveCurrentProcedure(final boolean useCache)
 	{
 		final ProcedureDefinition def = getCurrentProcedureDefinition();
 		if (def == null) return;
@@ -492,7 +492,7 @@ public class ProcedureListPanel
 			@Override
 			public void run()
 			{
-				retrieveProcDefinition(def);
+				retrieveProcDefinition(def, useCache);
 			}
 		});
 	}
@@ -564,7 +564,7 @@ public class ProcedureListPanel
 		cache.addSource(CACHE_TYPE, getCacheKey(def), source);
 	}
 
-	private void retrieveProcDefinition(ProcedureDefinition def )
+	private void retrieveProcDefinition(ProcedureDefinition def, boolean useCache)
 	{
 		if (this.dbConnection == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -598,7 +598,7 @@ public class ProcedureListPanel
 
 			try
 			{
-				sql = getSourceFromCache(def);
+				sql = useCache ? getSourceFromCache(def) : null;
 				if (sql == null)
 				{
 					sql = def.getSource(this.dbConnection);
