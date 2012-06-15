@@ -109,6 +109,7 @@ public class ProcedureListPanel
 	private FilteredProperties workspaceSettings;
 
   private EditorTabSelectMenu generateWbCall;
+	private static final String CACHE_TYPE = "procedure";
 	private SourceCache cache;
 
 	public ProcedureListPanel(MainWindow window)
@@ -542,32 +543,25 @@ public class ProcedureListPanel
 		return def;
 	}
 
+	private String getCacheKey(ProcedureDefinition def)
+	{
+		if (def.isOraclePackage())
+		{
+			return def.getSchema() + "." + def.getPackageName();
+		}
+		return def.getObjectNameForDrop(dbConnection);
+	}
+
 	private CharSequence getSourceFromCache(ProcedureDefinition def)
 	{
 		if (def == null) return null;
-		if (def.isOraclePackage())
-		{
-			String pckName = def.getSchema() + "." + def.getPackageName();
-			return cache.getSource("package", pckName);
-		}
-		else
-		{
-			return cache.getSource(def.getObjectType(), def.getObjectNameForDrop(dbConnection));
-		}
+		return cache.getSource(CACHE_TYPE, getCacheKey(def));
 	}
 
 	private void putSourceToCache(ProcedureDefinition def, CharSequence source)
 	{
 		if (source == null) return;
-		if (def.isOraclePackage())
-		{
-			String pckName = def.getSchema() + "." + def.getPackageName();
-			cache.addSource("package", pckName, source);
-		}
-		else
-		{
-			cache.addSource(def.getObjectType(), def.getObjectNameForDrop(dbConnection), source);
-		}
+		cache.addSource(CACHE_TYPE, getCacheKey(def), source);
 	}
 
 	private void retrieveProcDefinition(ProcedureDefinition def )
