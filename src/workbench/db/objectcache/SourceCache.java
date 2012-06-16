@@ -39,12 +39,14 @@ public class SourceCache
 		return null;
 	}
 
-	public void addSource(String type, String key, CharSequence source)
+	public boolean addSource(String type, String key, CharSequence source)
 	{
 		if (shouldCache(type))
 		{
 			cachedSources.put(getRealKey(type, key), source);
+			return true;
 		}
+		return false;
 	}
 
 	private String getRealKey(String type, String key)
@@ -55,7 +57,8 @@ public class SourceCache
 
 	public boolean shouldCache(String type)
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".source.cache." + type, false);
+		if (type == null) return false;
+		return Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".source.cache." + type.toLowerCase(), false);
 	}
 
 	public void clear()

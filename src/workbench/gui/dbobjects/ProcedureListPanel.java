@@ -109,7 +109,6 @@ public class ProcedureListPanel
 	private FilteredProperties workspaceSettings;
 
   private EditorTabSelectMenu generateWbCall;
-	private static final String CACHE_TYPE = "procedure";
 	private SourceCache cache;
 
 	public ProcedureListPanel(MainWindow window)
@@ -555,13 +554,17 @@ public class ProcedureListPanel
 	private CharSequence getSourceFromCache(ProcedureDefinition def)
 	{
 		if (def == null) return null;
-		return cache.getSource(CACHE_TYPE, getCacheKey(def));
+		return cache.getSource(def.getObjectType(), getCacheKey(def));
 	}
 
 	private void putSourceToCache(ProcedureDefinition def, CharSequence source)
 	{
 		if (source == null) return;
-		cache.addSource(CACHE_TYPE, getCacheKey(def), source);
+		if (cache.addSource(def.getObjectType(), getCacheKey(def), source))
+		{
+			// make sure the source code is not stored twice
+			def.setSource(null);
+		}
 	}
 
 	private void retrieveProcDefinition(ProcedureDefinition def, boolean useCache)
@@ -596,9 +599,18 @@ public class ProcedureListPanel
 				procColumns.reset();
 			}
 
+			if (useCache)
+			{
+				sql = getSourceFromCache(def);
+			}
+			else
+			{
+				// make sure the cached source in the instance is cleared to force a reload from the database
+				def.setSource(null);
+			}
+
 			try
 			{
-				sql = useCache ? getSourceFromCache(def) : null;
 				if (sql == null)
 				{
 					sql = def.getSource(this.dbConnection);
