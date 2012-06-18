@@ -13,6 +13,7 @@ package workbench.gui.lnf;
 
 import java.awt.Font;
 import java.awt.Toolkit;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -43,6 +44,7 @@ public class FontScaler
 		{
 			scaleFactor = ((float)dpi / (float)defaultDPI);
 		}
+		LogMgr.logDebug("FontScaler.<init>", "Current DPI: "  + dpi + ", Default DPI: " + defaultDPI + ", scale factor: " + scaleFactor + ", font scaling enabled: " + scaleFont);
 	}
 
 	public Font scaleFont(Font baseFont)
