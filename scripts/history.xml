@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-06-12">
+    <entry dev-build="9" type="enh">The editor now supports "Delete current line" and "Duplicate current line"</entry>
     <entry dev-build="8" type="enh">Added support for SQL Server 2012 sequences</entry>
     <entry dev-build="8" type="enh">Added support to display synonyms for Informix</entry>
     <entry dev-build="8" type="enh">A new option to copy data as "MERGE" statements has been added. This is also available for WbExport</entry>
