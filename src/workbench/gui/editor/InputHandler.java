@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
-
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -38,15 +38,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
+
 import workbench.gui.actions.WbAction;
-import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.editor.actions.DelPrevWord;
 import workbench.gui.editor.actions.DeleteChar;
+import workbench.gui.editor.actions.DeleteCurrentLine;
 import workbench.gui.editor.actions.DeleteWord;
 import workbench.gui.editor.actions.DocumentEnd;
 import workbench.gui.editor.actions.DocumentHome;
+import workbench.gui.editor.actions.DuplicateCurrentLine;
 import workbench.gui.editor.actions.EditorAction;
-import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.editor.actions.LineEnd;
 import workbench.gui.editor.actions.LineStart;
 import workbench.gui.editor.actions.NextChar;
@@ -57,7 +58,6 @@ import workbench.gui.editor.actions.PrevWord;
 import workbench.gui.editor.actions.PreviousChar;
 import workbench.gui.editor.actions.PreviousLine;
 import workbench.gui.editor.actions.PreviousPage;
-import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.editor.actions.SelectDocumentEnd;
 import workbench.gui.editor.actions.SelectDocumentHome;
 import workbench.gui.editor.actions.SelectLineEnd;
@@ -70,6 +70,9 @@ import workbench.gui.editor.actions.SelectPrevWord;
 import workbench.gui.editor.actions.SelectPreviousChar;
 import workbench.gui.editor.actions.SelectPreviousLine;
 import workbench.gui.editor.actions.SelectPreviousPage;
+import workbench.gui.fontzoom.DecreaseFontSize;
+import workbench.gui.fontzoom.IncreaseFontSize;
+import workbench.gui.fontzoom.ResetFontSize;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
@@ -224,6 +227,8 @@ public class InputHandler
 		addKeyBinding(INCREASE_FONT);
 		addKeyBinding(DECREASE_FONT);
 		addKeyBinding(RESET_FONT);
+		addKeyBinding(new DeleteCurrentLine());
+		addKeyBinding(new DuplicateCurrentLine());
 		expandKey = GuiSettings.getExpansionKey();
 	}
 
