@@ -84,7 +84,7 @@ public class VerticaSequenceReader
 				buf.append("\n       MAXVALUE ");
 				buf.append(Long.toString(max));
 			}
-			
+
 			if (cache != 250000)
 			{
 				buf.append("\n       CACHE ");
@@ -138,9 +138,9 @@ public class VerticaSequenceReader
 		Savepoint sp = null;
 		if (namePattern == null) namePattern = "%";
 
+		String sql = buildSql(schema, null);
 		try
 		{
-			String sql = buildSql(schema, null);
 			stmt = dbConnection.createStatementForQuery();
 
 			rs = stmt.executeQuery(sql);
@@ -154,8 +154,8 @@ public class VerticaSequenceReader
 		catch (SQLException e)
 		{
 			this.dbConnection.rollback(sp);
-			LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences", e);
-			return null;
+			LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql: " + sql, e);
+			return result;
 		}
 		finally
 		{
@@ -230,27 +230,31 @@ public class VerticaSequenceReader
 	{
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(baseSql);
-		sql.append(" WHERE ");
-		boolean needAnd = false;
 
-		if (sequence != null)
+		if (schema != null || sequence != null)
 		{
-			SqlUtil.appendExpression(sql, "sequence_name", sequence, dbConnection);
-			needAnd = true;
-		}
+			sql.append(" WHERE ");
+			boolean needAnd = false;
 
-		if (needAnd)
-		{
-			SqlUtil.appendAndCondition(sql, "sequence_schema", schema, dbConnection);
-		}
-		else
-		{
-			SqlUtil.appendExpression(sql, "sequence_schema", schema, dbConnection);
-			needAnd = true;
-		}
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("VerticaSequenceReader.buildSql()", "Using SQL=\n" + sql);
+			if (sequence != null)
+			{
+				SqlUtil.appendExpression(sql, "sequence_name", sequence, dbConnection);
+				needAnd = true;
+			}
+
+			if (needAnd)
+			{
+				SqlUtil.appendAndCondition(sql, "sequence_schema", schema, dbConnection);
+			}
+			else
+			{
+				SqlUtil.appendExpression(sql, "sequence_schema", schema, dbConnection);
+				needAnd = true;
+			}
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("VerticaSequenceReader.buildSql()", "Using SQL=\n" + sql);
+			}
 		}
 		return sql.toString();
 	}

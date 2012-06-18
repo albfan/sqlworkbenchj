@@ -120,6 +120,11 @@ public class VerticaSequenceReaderTest
 		SequenceDefinition def = reader.getSequenceDefinition(null, "public", "foo_sequence");
 		create = def.getSource().toString();
 		assertEquals(expected, create.trim());
+
+		sequences = reader.getSequences(null, null, null);
+		assertEquals(1, sequences.size());
+		System.out.println("num: " + sequences.size());
+
 	}
 
 
