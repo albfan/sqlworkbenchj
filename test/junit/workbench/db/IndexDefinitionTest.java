@@ -1,0 +1,33 @@
+/*
+ * IndexDefinitionTest.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2012, Thomas Kellerer
+ * No part of this code may be reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.db;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class IndexDefinitionTest
+{
+	public IndexDefinitionTest()
+	{
+	}
+
+	@Test
+	public void testNameQuoting()
+	{
+		IndexDefinition def = new IndexDefinition(new TableIdentifier("\"foo.bar\""), "\"foo.bar_pkey\"");
+		assertEquals("\"foo.bar_pkey\"",def.getObjectExpression(null));
+	}
+
+}

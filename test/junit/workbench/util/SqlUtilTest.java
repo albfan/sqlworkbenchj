@@ -765,6 +765,10 @@ public class SqlUtilTest
 		l = SqlUtil.getTables("select * from some_table as something;");
 		assertEquals(l.size(), 1);
 		assertEquals("some_table", l.get(0));
+
+		l = SqlUtil.getTables("select * from \"foo.bar\";");
+		assertEquals(l.size(), 1);
+		assertEquals(l.get(0), "\"foo.bar\"");
 	}
 
 	@Test

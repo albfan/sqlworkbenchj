@@ -1950,7 +1950,7 @@ public class TableListPanel
 		String catalog = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 		String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 		String comment = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
-		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+		TableIdentifier tbl = new TableIdentifier(catalog, schema, name, false);
 		tbl.setType(type);
 		tbl.setNeverAdjustCase(true);
 		tbl.setComment(comment);

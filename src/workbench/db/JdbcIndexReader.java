@@ -206,7 +206,7 @@ public class JdbcIndexReader
 		String tableName = table.getTableExpression(this.metaData.getWbConnection());
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
-		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, indexDefinition.getUniqueConstraintName());
+		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, this.metaData.quoteObjectname(indexDefinition.getUniqueConstraintName()));
 		ConstraintDefinition constraint = indexDefinition.getUniqueConstraint();
 
 		Boolean deferred = constraint == null ? false : constraint.isInitiallyDeferred();

@@ -2245,7 +2245,7 @@ public class DbMetadata
 		String t = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_NAME);
 		String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);
 		String c = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_CATALOG);
-		TableIdentifier tbl = new TableIdentifier(c, s, t);
+		TableIdentifier tbl = new TableIdentifier(c, s, t, false);
 		tbl.setNeverAdjustCase(true);
 		tbl.setType(ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_TYPE));
 		tbl.setComment(ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_REMARKS));

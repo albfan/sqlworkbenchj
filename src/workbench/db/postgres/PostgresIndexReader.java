@@ -83,7 +83,7 @@ public class PostgresIndexReader
 		{
 			for (IndexDefinition index : indexList)
 			{
-				String idxName = index.getName();
+				String idxName = index.getObjectExpression(con);
 
 				if (index.isPrimaryKeyIndex()) continue;
 

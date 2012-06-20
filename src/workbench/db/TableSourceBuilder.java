@@ -526,15 +526,13 @@ public class TableSourceBuilder
 			pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
 		}
 
-		if (meta.isKeyword(pkName)) pkName = meta.getQuoteCharacter() + pkName + meta.getQuoteCharacter() ;
-
 		if (StringUtil.isEmptyString(pkName))
 		{
 			pkName = ""; // remove placeholder if no name is available
 			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if no name is available
 		}
 
-		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
+		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, meta.quoteObjectname(pkName));
 		result.append(template);
 		if (!forInlineUse)
 		{

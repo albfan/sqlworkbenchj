@@ -34,6 +34,7 @@ public class TableIdentifierTest
 		super("TableIdentifierTest");
 	}
 
+
 	@Test
 	public void testGetParts()
 	{
@@ -145,6 +146,27 @@ public class TableIdentifierTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
+
+	@Test
+	public void testQuotedSeparator()
+	{
+		TableIdentifier tbl = new TableIdentifier("\"foo.bar\"");
+		assertEquals("foo.bar", tbl.getTableName());
+		assertEquals(null, tbl.getSchema());
+
+		tbl = new TableIdentifier("schema.\"foo.bar\"");
+		assertEquals("foo.bar", tbl.getTableName());
+		assertEquals("schema", tbl.getSchema());
+		assertEquals("schema.\"foo.bar\"", tbl.getTableExpression());
+	}
+
+	@Test
+	public void testSpecialNaming()
+	{
+		TableIdentifier tbl = new TableIdentifier(null, "schema", "foo.bar", false);
+		System.out.println(tbl.getTableExpression());
+	}
+
 
 	@Test
 	public void testQuoteSpecialChars()

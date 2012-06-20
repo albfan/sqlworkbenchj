@@ -101,6 +101,20 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public TableIdentifier(String aCatalog, String aSchema, String aTable, boolean parseNames)
+	{
+		if (parseNames)
+		{
+			this.setTable(aTable);
+		}
+		else
+		{
+			this.setTablename(aTable);
+		}
+		this.setCatalog(aCatalog);
+		this.setSchema(aSchema);
+	}
+
 	/**
 	 * Return the tablespace used for this table (if applicable)
 	 */
