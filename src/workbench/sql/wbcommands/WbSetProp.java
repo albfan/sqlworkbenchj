@@ -16,9 +16,11 @@ import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -115,8 +117,8 @@ public class WbSetProp
 		}
 		else
 		{
-			String value = Settings.getInstance().getProperty(args, "");
-			result.addMessage(args + "=" + value);
+			DataStore ds = WbSysProps.getWbProperties(args);
+			result.addDataStore(ds);
 		}
 		result.setSuccess();
 		return result;

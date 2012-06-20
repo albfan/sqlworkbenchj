@@ -1,5 +1,6 @@
 <section id="settings">
   <title>Advanced configuration options</title>
+  <indexterm><primary>Configuration</primary><secondary>advanced configuration properties</secondary></indexterm>
 
   <para>
 		This section describes the additional options for &wb-productname; which
@@ -13,6 +14,10 @@
 		simply create a new line with the property name and the value as described here.
 		The position where you add this entry does not matter.
 	</para>
+  <para>
+    You can also change the values for these properties while the application is running by using the
+    command <link linkend="command-setconfig">WbSetConfig</link>.
+  </para>
 
   <note>
     <para>

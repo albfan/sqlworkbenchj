@@ -58,7 +58,7 @@ public class WbSysProps
 
 		if (types.contains("wb"))
 		{
-			result.addDataStore(getWbProperties());
+			result.addDataStore(getWbProperties(null));
 		}
 		if (types.isEmpty() || types.contains("system"))
 		{
@@ -68,19 +68,14 @@ public class WbSysProps
 		return result;
 	}
 
-	private DataStore getWbProperties()
+	static DataStore getWbProperties(String prefix)
 	{
 		DataStore data = new PropertyDataStore(true);
 		Set<String> keys = Settings.getInstance().getKeys();
 
 		for (String key : keys)
 		{
-			if (key.startsWith("workbench.db.")
-			    || key.startsWith("workbench.settings.")
-			    || (key.startsWith("workbench.sql.") && !key.startsWith("workbench.sql.replace.")
-				                                       && !key.startsWith("workbench.sql.formatter.")
-				                                       && !key.startsWith("workbench.sql.search."))
-				)
+			if (isWorkbenchProperty(key) && (prefix == null || key.startsWith(prefix)))
 			{
 				int row = data.addRow();
 				data.setValue(row, 0, key);
@@ -93,6 +88,14 @@ public class WbSysProps
 		return data;
 	}
 
+	private static boolean isWorkbenchProperty(String key)
+	{
+		return key.startsWith("workbench.db.")
+			    || key.startsWith("workbench.settings.")
+			    || (key.startsWith("workbench.sql.") && !key.startsWith("workbench.sql.replace.")
+				                                       && !key.startsWith("workbench.sql.formatter.")
+				                                       && !key.startsWith("workbench.sql.search."));
+	}
 
 	private DataStore getSystemProperties()
 	{
@@ -122,7 +125,7 @@ public class WbSysProps
 		return false;
 	}
 
-	class PropertyDataStore
+	static class PropertyDataStore
 		extends DataStore
 	{
 		private boolean wbProps;
