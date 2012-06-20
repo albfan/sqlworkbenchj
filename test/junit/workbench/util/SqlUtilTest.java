@@ -123,6 +123,10 @@ public class SqlUtilTest
 		quoted = SqlUtil.quoteObjectname(name);
 		assertEquals("\"stupid-name\"", quoted);
 
+		name = "foo.bar_pkey";
+		quoted = SqlUtil.quoteObjectname(name, false, true, '"');
+		assertEquals("\"foo.bar_pkey\"", quoted);
+
 	}
 
 	@Test

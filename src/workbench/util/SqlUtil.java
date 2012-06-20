@@ -196,7 +196,7 @@ public class SqlUtil
 			doQuote = !m.matches();
 		}
 
-		if (checkReservedWords)
+		if (!doQuote && checkReservedWords) // no need to check for reserved words if we already need quoting
 		{
 			SqlKeywordHelper helper = new SqlKeywordHelper();
 			doQuote = helper.getReservedWords().contains(objectName);

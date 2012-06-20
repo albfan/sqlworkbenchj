@@ -329,7 +329,10 @@ public class TableSourceBuilder
 			result.append("   ");
 			result.append(quotedColName);
 
-			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
+			for (int k=0; k < maxColLength - quotedColName.length(); k++)
+			{
+				result.append(' ');
+			}
 			String coldef = getColumnSQL(column, maxTypeLength, constraints.get(column.getColumnName()));
 
 			result.append(coldef);
@@ -532,7 +535,8 @@ public class TableSourceBuilder
 			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if no name is available
 		}
 
-		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, meta.quoteObjectname(pkName));
+		pkName = SqlUtil.quoteObjectname(pkName, false, true, meta.getQuoteCharacter().charAt(0));
+		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
 		result.append(template);
 		if (!forInlineUse)
 		{
