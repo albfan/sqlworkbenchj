@@ -36,7 +36,7 @@ public class DbObjectCache
 
 	public void addTable(TableDefinition table)
 	{
-		objectCache.addTable(table);
+		objectCache.addTable(table, dbConnection);
 	}
 
 	public void addTableList(DataStore tables, String schema)

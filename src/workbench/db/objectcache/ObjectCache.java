@@ -18,6 +18,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 /**
  * A cache for database objects to support Auto-completion in the editor
@@ -330,21 +331,22 @@ class ObjectCache
 		return tbl;
 	}
 
-	public synchronized void addTable(TableDefinition definition)
+	public synchronized void addTable(TableDefinition definition, WbConnection conn)
 	{
 		if (definition != null)
 		{
 			TableIdentifier table = definition.getTable();
 			if (table.getSchema() != null)
 			{
+				String tbName = table.getTableExpression(SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
 				List<ColumnIdentifier> old = this.objects.put(definition.getTable(), definition.getColumns());
 				if (old == null)
 				{
-					LogMgr.logDebug("ObjectCache.addTable()", "Added table definition for " + table.getTableExpression());
+					LogMgr.logDebug("ObjectCache.addTable()", "Added table definition for " + tbName);
 				}
 				else
 				{
-					LogMgr.logDebug("ObjectCache.addTable()", "Replaced existing table definition for " + table.getTableExpression());
+					LogMgr.logDebug("ObjectCache.addTable()", "Replaced existing table definition for " + tbName);
 				}
 			}
 		}

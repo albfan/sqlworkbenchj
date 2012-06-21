@@ -278,7 +278,12 @@ public class TableIdentifier
 
 	public String getTableExpression()
 	{
-		return buildTableExpression(null);
+		return buildTableExpression(null, '.', '.');
+	}
+
+	public String getTableExpression(char catalogSeparator, char schemaSeparator)
+	{
+		return this.buildTableExpression(null, catalogSeparator, schemaSeparator);
 	}
 
 	@Override
@@ -289,10 +294,12 @@ public class TableIdentifier
 
 	public String getTableExpression(WbConnection conn)
 	{
-		return this.buildTableExpression(conn);
+		char catalogSeparator = SqlUtil.getCatalogSeparator(conn);
+		char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
+		return this.buildTableExpression(conn, catalogSeparator, schemaSeparator);
 	}
 
-	private String buildTableExpression(WbConnection conn)
+	private String buildTableExpression(WbConnection conn, char catalogSeparator, char schemaSeparator)
 	{
 		if (this.isNewTable && this.tablename == null)
 		{
@@ -310,12 +317,12 @@ public class TableIdentifier
 			if (this.catalog != null)
 			{
 				result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted));
-				result.append('.');
+				result.append(catalogSeparator);
 			}
 			if (this.schema != null)
 			{
 				result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted));
-				result.append('.');
+				result.append(schemaSeparator);
 			}
 			result.append(SqlUtil.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}
@@ -324,8 +331,6 @@ public class TableIdentifier
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
 			String catalogToUse = getCatalogToUse(conn);
-			char catalogSeparator = meta.getCatalogSeparator();
-			char schemaSeparator = meta.getSchemaSeparator();
 			boolean hasCatalog = false;
 			if (StringUtil.isNonBlank(catalogToUse))
 			{

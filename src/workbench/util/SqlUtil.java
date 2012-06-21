@@ -994,15 +994,15 @@ public class SqlUtil
 	 */
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
-		return getTables(sql, includeAlias, '.');
+		return getTables(sql, includeAlias, '.', '.');
 	}
 
 	public static List<String> getTables(String sql, boolean includeAlias, WbConnection conn)
 	{
-		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn));
+		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
 	}
 
-	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator)
+	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator)
 	{
 		String from = getFromPart(sql);
 		if (StringUtil.isBlank(from)) return Collections.emptyList();
@@ -1068,8 +1068,9 @@ public class SqlUtil
 					}
 					else if (collectTable && !s.equals("("))
 					{
-						int size = currentTable.length();
-						if (size > 0 && s.charAt(0) != catalogSeparator && currentTable.charAt(size-1) != catalogSeparator)
+						if (currentTable.length() > 0
+							  && !startsWithSeparator(s, schemaSeparator, catalogSeparator)
+							  && !endsWithSeparator(currentTable, schemaSeparator, catalogSeparator))
 						{
 							currentTable.append(' ');
 						}
@@ -1089,6 +1090,25 @@ public class SqlUtil
 			LogMgr.logError("SqlUtil.getTable()", "Error parsing sql", e);
 		}
 		return result;
+	}
+
+	private static boolean endsWithSeparator(CharSequence sql, char catSep, char schemaSep)
+	{
+		if (sql == null) return false;
+		int len = sql.length();
+		if (len < 1) return false;
+		if (sql.charAt(len - 1) == catSep) return true;
+		if (sql.charAt(len - 1) == schemaSep) return true;
+		return false;
+	}
+
+	private static boolean startsWithSeparator(CharSequence sql, char catSep, char schemaSep)
+	{
+		if (sql == null) return false;
+		if (sql.length() == 0) return false;
+		if (sql.charAt(0) == catSep) return true;
+		if (sql.charAt(0) == schemaSep) return true;
+		return false;
 	}
 
 	/**

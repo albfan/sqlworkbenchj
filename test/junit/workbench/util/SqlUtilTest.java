@@ -41,9 +41,13 @@ public class SqlUtilTest
 	public void testDb2Parsing()
 	{
 		String select = "select * from mylib/sometable where belegid=20100234";
-		List<String> tables = SqlUtil.getTables(select, true, '/');
+		List<String> tables = SqlUtil.getTables(select, true, '/', '.');
 		assertEquals(1, tables.size());
 		assertEquals("mylib/sometable", tables.get(0));
+
+		tables = SqlUtil.getTables("select * from ordermgmt.\"FOO.BAR\";", false, '/', '.');
+		assertEquals(tables.size(), 1);
+		assertEquals("ordermgmt.\"FOO.BAR\"", tables.get(0));
 	}
 
 	@Test
@@ -772,7 +776,11 @@ public class SqlUtilTest
 
 		l = SqlUtil.getTables("select * from \"foo.bar\";");
 		assertEquals(l.size(), 1);
-		assertEquals(l.get(0), "\"foo.bar\"");
+		assertEquals("\"foo.bar\"", l.get(0));
+
+		l = SqlUtil.getTables("select * from public.\"foo.bar\";");
+		assertEquals(l.size(), 1);
+		assertEquals("public.\"foo.bar\"", l.get(0));
 	}
 
 	@Test
