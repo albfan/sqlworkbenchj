@@ -48,6 +48,10 @@ public class SqlUtilTest
 		tables = SqlUtil.getTables("select * from ordermgmt.\"FOO.BAR\";", false, '/', '.');
 		assertEquals(tables.size(), 1);
 		assertEquals("ordermgmt.\"FOO.BAR\"", tables.get(0));
+
+		tables = SqlUtil.getTables("select * from RICH/\"TT.PBILL\";", false, '/', '.');
+		assertEquals(tables.size(), 1);
+		System.out.println(tables.get(0));
 	}
 
 	@Test

@@ -20,7 +20,6 @@ import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 
 /**
@@ -113,6 +112,13 @@ public class WbSetProp
 					Settings.getInstance().setTemporaryProperty(prop, value);
 					result.addMessage(prop  + " set to "  + value);
 				}
+			}
+			else if (pair.length == 1)
+			{
+				String prop	= pair[0];
+				// no value specified, remove property
+				Settings.getInstance().removeProperty(prop);
+				result.addMessage(prop  + " removed");
 			}
 		}
 		else

@@ -744,20 +744,19 @@ public class DbMetadata
 		{
 			String tblSchema = table.getSchema();
 
-			// Object names may never be prefixed with PUBLIC
+			// Object names may never be prefixed with PUBLIC in Oracle
 			if (this.isOracle && "PUBLIC".equalsIgnoreCase(tblSchema)) return false;
 
 			if (dbSettings.alwaysUseSchema()) return true;
 
 			String currentSchema = getCurrentSchema();
 
-			if (StringUtil.isBlank(currentSchema))
-			{
-				 return (!ignoreSchema(tblSchema, currentSchema));
-			}
-
 			// If the current schema is not the one of the table, the schema is needed in DML statements
-			return (!currentSchema.equalsIgnoreCase(tblSchema));
+			// to avoid wrong implicit schema resolution
+			if (!currentSchema.equalsIgnoreCase(tblSchema)) return true;
+
+			// otherwise check if the schema should be ignored
+		  return (!ignoreSchema(tblSchema, currentSchema));
 		}
 		catch (Throwable th)
 		{
@@ -780,7 +779,6 @@ public class DbMetadata
 	 * @see #ignoreCatalog(java.lang.String)
 	 * @see #supportsCatalogs()
 	 * @see DbSettings#needsCatalogIfNoCurrent()
-	 * @see #getCurrentCatalog()
 	 */
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
@@ -808,7 +806,7 @@ public class DbMetadata
 		{
 			return this.dbSettings.needsCatalogIfNoCurrent();
 		}
-		return !cat.equalsIgnoreCase(currentCat);
+		return false;
 	}
 
 	/**

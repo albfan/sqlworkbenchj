@@ -48,6 +48,11 @@ public class TableIdentifierTest
 		assertEquals("bar", TableIdentifier.getNamePart("foo/bar", '/'));
 
 		assertEquals("bar.tbl", TableIdentifier.getNamePart("foo/bar.tbl", '/'));
+
+		TableIdentifier tbl = new TableIdentifier("RICH/\"FOO.BAR\"", '/', '.');
+		assertEquals("RICH", tbl.getCatalog());
+		assertEquals("FOO.BAR", tbl.getTableName());
+		assertNull(tbl.getSchema());
 	}
 
 	@Test
@@ -159,14 +164,6 @@ public class TableIdentifierTest
 		assertEquals("schema", tbl.getSchema());
 		assertEquals("schema.\"foo.bar\"", tbl.getTableExpression());
 	}
-
-	@Test
-	public void testSpecialNaming()
-	{
-		TableIdentifier tbl = new TableIdentifier(null, "schema", "foo.bar", false);
-		System.out.println(tbl.getTableExpression());
-	}
-
 
 	@Test
 	public void testQuoteSpecialChars()
