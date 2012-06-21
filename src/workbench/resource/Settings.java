@@ -1260,6 +1260,12 @@ public class Settings
 		return PlatformHelper.isWindows() && getBoolProperty("workbench.gui.desktop.scalefonts", true);
 	}
 
+	public void setScaleFonts(boolean flag)
+	{
+		setProperty("workbench.gui.desktop.scalefonts", flag);
+	}
+
+
 	/**
 	 *	Returns the font configured for this keyword
 	 */

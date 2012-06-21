@@ -20,7 +20,18 @@ public class PlatformHelper
 
 	public static boolean isWindows()
 	{
-		return System.getProperty("os.name").indexOf("Windows") > -1;
+		return System.getProperty("os.name").toLowerCase().contains("windows");
+	}
+
+	public static boolean isWindowsXP()
+	{
+		if (isWindows())
+		{
+			VersionNumber current = new VersionNumber(System.getProperty("os.version"));
+			VersionNumber vista = new VersionNumber(5,1);
+			return current.isNewerOrEqual(vista);
+		}
+		return false;
 	}
 
 	public static boolean isMacOS()

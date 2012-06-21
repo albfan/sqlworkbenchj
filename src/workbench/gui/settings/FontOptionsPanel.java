@@ -14,12 +14,14 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.gui.components.WbFontPicker;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.PlatformHelper;
 
 /**
  *
@@ -38,6 +40,11 @@ public class FontOptionsPanel
 		editorFont.setAllowFontReset(true);
 		dataFont.setAllowFontReset(true);
 		msgLogFont.setAllowFontReset(true);
+		if (!PlatformHelper.isWindows())
+		{
+			scaleFonts.setVisible(false);
+			scaleFonts.setEnabled(false);
+		}
 	}
 
 	@Override
@@ -47,6 +54,10 @@ public class FontOptionsPanel
 		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
 		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
+		if (scaleFonts.isVisible())
+		{
+			scaleFonts.setSelected(Settings.getInstance().getScaleFonts());
+		}
 	}
 
 	@Override
@@ -56,6 +67,10 @@ public class FontOptionsPanel
 		Settings.getInstance().setDataFont(dataFont.getSelectedFont());
 		Settings.getInstance().setStandardFont(standardFont.getSelectedFont());
 		Settings.getInstance().setMsgLogFont(msgLogFont.getSelectedFont());
+		if (scaleFonts.isVisible())
+		{
+			Settings.getInstance().setScaleFonts(scaleFonts.isSelected());
+		}
 	}
 
 	/** This method is called from within the constructor to
@@ -65,7 +80,8 @@ public class FontOptionsPanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+  private void initComponents()
+  {
 		GridBagConstraints gridBagConstraints;
 
     dataFontLabel = new JLabel();
@@ -76,6 +92,7 @@ public class FontOptionsPanel
     msgLogFont = new WbFontPicker();
     editorFont = new WbFontPicker();
     editorFontLabel = new JLabel();
+    scaleFonts = new JCheckBox();
     jPanel1 = new JPanel();
 
     setLayout(new GridBagLayout());
@@ -152,6 +169,17 @@ public class FontOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(10, 12, 5, 0);
     add(editorFontLabel, gridBagConstraints);
+
+    scaleFonts.setText(ResourceMgr.getString("LblScaleFont")); // NOI18N
+    scaleFonts.setToolTipText(ResourceMgr.getString("d_LblScaleFont")); // NOI18N
+    scaleFonts.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(7, 12, 5, 0);
+    add(scaleFonts, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 8;
@@ -166,6 +194,7 @@ public class FontOptionsPanel
   private JPanel jPanel1;
   private JLabel msgFontLabel;
   private WbFontPicker msgLogFont;
+  private JCheckBox scaleFonts;
   private WbFontPicker standardFont;
   private JLabel standardFontLabel;
   // End of variables declaration//GEN-END:variables
