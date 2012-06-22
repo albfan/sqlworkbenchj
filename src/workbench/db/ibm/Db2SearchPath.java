@@ -20,6 +20,7 @@ import java.util.List;
 import workbench.db.DbSearchPath;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -45,12 +46,14 @@ public class Db2SearchPath
 		{
 			return Collections.singletonList(con.getMetadata().adjustSchemaNameCase(defaultSchema));
 		}
-		
+
 		List<String> result = new ArrayList<String>();
 
 		ResultSet rs = null;
 		Statement stmt = null;
-		String sql = "values(current_path)";
+		String sql = getSQL(con.getDbId());
+		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using statement: " + sql);
+
 		try
 		{
 			stmt = con.createStatementForQuery();
@@ -80,6 +83,11 @@ public class Db2SearchPath
 		return searchPath;
 	}
 
+	private String getSQL(String dbid)
+	{
+		return Settings.getInstance().getProperty("workbench.db." + dbid + ".retrieve.searchpath", "values(current_path)");
+	}
+	
 	List<String> parseResult(List<String> entries)
 	{
 		List<String> searchPath = new ArrayList<String>(entries.size());
