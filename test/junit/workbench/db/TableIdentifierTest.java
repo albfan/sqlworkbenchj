@@ -49,10 +49,10 @@ public class TableIdentifierTest
 
 		assertEquals("bar.tbl", TableIdentifier.getNamePart("foo/bar.tbl", '/'));
 
-		TableIdentifier tbl = new TableIdentifier("RICH/\"FOO.BAR\"", '/', '.');
-		assertEquals("RICH", tbl.getCatalog());
+		TableIdentifier tbl = new TableIdentifier("RICH/\"FOO.BAR\"", '/', '/');
+		assertEquals("RICH", tbl.getSchema());
 		assertEquals("FOO.BAR", tbl.getTableName());
-		assertNull(tbl.getSchema());
+		assertNull(tbl.getCatalog());
 	}
 
 	@Test

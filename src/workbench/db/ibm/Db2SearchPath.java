@@ -51,7 +51,7 @@ public class Db2SearchPath
 
 		ResultSet rs = null;
 		Statement stmt = null;
-		String sql = getSQL(con.getDbId());
+		String sql = getSQL(con);
 		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using statement: " + sql);
 
 		try
@@ -83,11 +83,20 @@ public class Db2SearchPath
 		return searchPath;
 	}
 
-	private String getSQL(String dbid)
+	private String getSQL(WbConnection con)
 	{
-		return Settings.getInstance().getProperty("workbench.db." + dbid + ".retrieve.searchpath", "values(current_path)");
+		String sql = Settings.getInstance().getProperty("workbench.db." + con.getDbId() + ".retrieve.searchpath", null);
+		if (sql == null)
+		{
+			StringBuilder result = new StringBuilder(50);
+			result.append("select current_path from SYSIBM");
+			result.append(con.getMetadata().getSchemaSeparator());
+			result.append("SYSDUMMY1");
+			sql = result.toString();
+		}
+		return sql;
 	}
-	
+
 	List<String> parseResult(List<String> entries)
 	{
 		List<String> searchPath = new ArrayList<String>(entries.size());

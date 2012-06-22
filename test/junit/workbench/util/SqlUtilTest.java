@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.Test;
+import workbench.db.TableIdentifier;
 import static org.junit.Assert.*;
 
 import workbench.TestUtil;
@@ -49,9 +50,13 @@ public class SqlUtilTest
 		assertEquals(tables.size(), 1);
 		assertEquals("ordermgmt.\"FOO.BAR\"", tables.get(0));
 
-		tables = SqlUtil.getTables("select * from RICH/\"TT.PBILL\";", false, '/', '.');
+		tables = SqlUtil.getTables("select * from RICH/\"TT.PBILL\";", false, '/', '/');
 		assertEquals(tables.size(), 1);
-		System.out.println(tables.get(0));
+
+		assertEquals("RICH/\"TT.PBILL\"", tables.get(0));
+		TableIdentifier tbl = new TableIdentifier(tables.get(0), '/', '/');
+		assertEquals("RICH", tbl.getSchema());
+		assertEquals("TT.PBILL", tbl.getTableName());
 	}
 
 	@Test
