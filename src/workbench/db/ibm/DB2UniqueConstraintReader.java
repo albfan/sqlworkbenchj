@@ -38,8 +38,12 @@ public class DB2UniqueConstraintReader
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
+		String dbid = con.getDbId();
+		// Not supported for db2 iSeries
+		if (dbid.equals("db2i")) return;
+
 		StringBuilder sql = new StringBuilder(500);
-		if (con.getDbSettings().getDbId().equals("db2"))
+		if (dbid.equals("db2"))
 		{
 			// DB2 LUW
 			sql.append(
@@ -51,7 +55,7 @@ public class DB2UniqueConstraintReader
 			  ") \n " +
 				"where (");
 		}
-		else if (con.getDbSettings().getDbId().equals("db2h"))
+		else if (dbid.equals("db2h"))
 		{
 			// DB2 host
 			sql.append(
@@ -62,11 +66,6 @@ public class DB2UniqueConstraintReader
 				"    where type = 'U' \n " +
 				") \n " +
 				"where (");
-		}
-		else
-		{
-			// Not supported for db2 iSeries
-			return;
 		}
 
 		boolean first = true;

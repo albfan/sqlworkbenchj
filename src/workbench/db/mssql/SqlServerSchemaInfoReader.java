@@ -58,5 +58,12 @@ public class SqlServerSchemaInfoReader
 	{
 		return defaultSchema;
 	}
+	
+	@Override
+	public void dispose()
+	{
+		// nothing to do
+	}
+
 
 }

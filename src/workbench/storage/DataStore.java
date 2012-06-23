@@ -2056,9 +2056,6 @@ public class DataStore
 
 		// If we have found a single update table, but no Primary Keys
 		// we try to find a user-defined PK mapping.
-		// there is no need to call readPkDefinition() as that
-		// will only try to find the PK columns of the update table
-		// first, which we have already tried in checkUpdateTable()
 		if (this.updateTable != null && !this.hasPkColumns())
 		{
 			LogMgr.logDebug("Datastore.updatePkInformation()", "Trying to retrieve PK information from user-defined PK mapping");

@@ -141,9 +141,11 @@ public class JdbcIndexReader
 				SqlUtil.closeResult(keysRs);
 				primaryKeysResultDone();
 			}
-			if (pkName != null && cols.size() > 0)
+
+			LogMgr.logDebug("JdbcIndexreader.getPrimaryKeyIndex()", "PK Information for " + tbl.getTableName() + ", PK Name=" + pkName + ", PK Index=" + pkIndexName + ", columns=" + cols);
+			if (cols.size() > 0)
 			{
-				pk = new PkDefinition(pkName, cols);
+				pk = new PkDefinition(getPkName(pkName, pkIndexName, tbl), cols);
 				pk.setPkIndexName(pkIndexName);
 				if (tbl.getPrimaryKey() == null)
 				{
@@ -152,6 +154,15 @@ public class JdbcIndexReader
 			}
 		}
 		return pk;
+	}
+
+	private String getPkName(String pkName, String indexName, TableIdentifier tbl)
+	{
+		if (pkName != null) return pkName;
+		if (indexName != null) return indexName;
+		String name = "pk_" + SqlUtil.cleanupIdentifier(tbl.getRawTableName()).toLowerCase();
+		LogMgr.logInfo("JdbcIndexReader.getPkName()","Using generated PK name " + name + " for " + tbl.getTableName());
+		return name;
 	}
 
 	protected void primaryKeysResultDone()
@@ -445,7 +456,7 @@ public class JdbcIndexReader
 		{
 			return new OracleUniqueConstraintReader();
 		}
-		if (this.metaData.getDbId().startsWith("db2"))
+		if (this.metaData.getDbId().equals("db2") || this.metaData.getDbId().equals("db2h"))
 		{
 			return new DB2UniqueConstraintReader();
 		}

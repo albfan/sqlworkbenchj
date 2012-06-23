@@ -85,7 +85,7 @@ public class Db2SearchPath
 
 	private String getSQL(WbConnection con)
 	{
-		String sql = Settings.getInstance().getProperty("workbench.db." + con.getDbId() + ".retrieve.searchpath", null);
+		String sql = Settings.getInstance().getProperty("workbench.db." + con.getDbId() + "searchpath.sql", null);
 		if (sql == null)
 		{
 			StringBuilder result = new StringBuilder(50);

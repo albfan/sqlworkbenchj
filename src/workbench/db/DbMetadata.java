@@ -403,6 +403,7 @@ public class DbMetadata
 
 	public char getSchemaSeparator()
 	{
+		if (dbSettings.useCatalogSeparatorForSchema()) return getCatalogSeparator();
 		String sep = dbSettings.getSchemaSeparator();
 		if (sep == null) return '.';
 		return sep.charAt(0);
@@ -1964,13 +1965,18 @@ public class DbMetadata
 	}
 
 	/**
-	 * Release any resources for this object. After a call
-	 * to close(), this object should not be used any longer
+	 * Release any resources for this object.
+	 *
+	 * After a call to close(), this instance should not be used any longer.
+	 * @see DbmsOutput#close()
+	 * @see OracleMetadata#done()
+	 * @see SchemaInformationReader#dispose()
 	 */
 	public void close()
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
+		if (this.schemaInfoReader != null) this.schemaInfoReader.dispose();
 	}
 
 	public boolean isExtendedObject(DbObject o)

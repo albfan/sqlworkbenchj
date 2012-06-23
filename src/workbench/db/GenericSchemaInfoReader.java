@@ -11,6 +11,9 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -25,22 +28,80 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class GenericSchemaInfoReader
-	implements SchemaInformationReader
+	implements SchemaInformationReader, PropertyChangeListener
 {
-	private String schemaQuery = null;
-	private boolean useSavepoint = false;
+	private String schemaQuery;
+	private boolean useSavepoint;
+	private boolean isCacheable;
+	private boolean reuseStmt;
+
+	private PreparedStatement query;
+	private String cachedSchema;
+
+	private String reuseProp;
+	private String queryProp;
+	private String cacheProp;
+	private int callCount;
 
 	public GenericSchemaInfoReader(String dbid)
 	{
-		schemaQuery = Settings.getInstance().getProperty("workbench.db." + dbid + ".currentschema.query", null);
 		useSavepoint = Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".currentschema.query.usesavepoint", false);
+
+		queryProp = "workbench.db." + dbid + ".currentschema.query";
+		cacheProp = "workbench.db." + dbid + ".currentschema.cacheable";
+		reuseProp = "workbench.db." + dbid + ".currentschema.reuse.stmt";
+
+		schemaQuery = Settings.getInstance().getProperty(queryProp, null);
+		isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
+		reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
+		Settings.getInstance().addPropertyChangeListener(this, cacheProp, queryProp, reuseProp);
+		logSettings();
 	}
+
+	private void logSettings()
+	{
+		LogMgr.logDebug("GenericSchemaInfoReader.logSettings()", "Keep statement: " + reuseStmt + ", cache value: "+ isCacheable + ", SQL: " + schemaQuery);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(queryProp))
+		{
+			SqlUtil.closeStatement(query);
+			this.query = null;
+			this.schemaQuery = Settings.getInstance().getProperty(queryProp, null);
+		}
+		if (evt.getPropertyName().equals(cacheProp))
+		{
+			isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
+			if (!isCacheable)
+			{
+				cachedSchema = null;
+			}
+		}
+		if (evt.getPropertyName().equals(reuseProp))
+		{
+			reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
+			if (!reuseStmt)
+			{
+				SqlUtil.closeStatement(query);
+				query = null;
+			}
+		}
+		logSettings();
+	}
+
+
 
 	/**
 	 * Retrieves the currently active schema from the server.
+	 *
 	 * This is done by running the query configured for the passed dbid.
-	 * If no query is configured or an error is thrown, this method
-	 * returns null
+	 * If no query is configured or an error is thrown, this method returns null
+	 *
+	 * If a configured query throws an error, the query will be ignored for all subsequent calls. 
+	 *
 	 * @see #GenericSchemaInfoReader(String)
 	 * @see workbench.db.DbMetadata#getDbId()
 	 */
@@ -49,11 +110,14 @@ public class GenericSchemaInfoReader
 	{
 		if (conn == null) return null;
 		if (StringUtil.isEmptyString(this.schemaQuery)) return null;
-		Statement stmt = null;
+		if (isCacheable && cachedSchema != null) return cachedSchema;
+
+		callCount ++;
 		String currentSchema = null;
 
 		Savepoint sp = null;
 		ResultSet rs = null;
+		Statement stmt = null;
 
 		try
 		{
@@ -61,9 +125,21 @@ public class GenericSchemaInfoReader
 			{
 				sp = conn.setSavepoint();
 			}
-			stmt = conn.createStatementForQuery();
-			stmt.execute(schemaQuery);
-			rs = stmt.getResultSet();
+
+			if (reuseStmt)
+			{
+				if (query == null)
+				{
+					query = conn.getSqlConnection().prepareStatement(schemaQuery);
+				}
+				rs = query.executeQuery();
+			}
+			else
+			{
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(schemaQuery);
+			}
+
 			if (rs != null && rs.next())
 			{
 				currentSchema = rs.getString(1);
@@ -80,14 +156,35 @@ public class GenericSchemaInfoReader
 				// When a SQLException is thrown, we assume an error with the configured
 				// query, so it's disabled to avoid subsequent errors
 				this.schemaQuery = null;
+				SqlUtil.closeStatement(query);
+				this.query = null;
 			}
 			currentSchema = null;
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeResult(rs);
+			SqlUtil.closeStatement(stmt);
+		}
+
+		if (isCacheable)
+		{
+			cachedSchema = currentSchema;
 		}
 		return currentSchema;
 	}
 
+	@Override
+	public void dispose()
+	{
+		if (query != null)
+		{
+			LogMgr.logDebug("GenericSchemaInformationReader.dispose()", "Freeing statement.");
+			SqlUtil.closeStatement(query);
+			query = null;
+		}
+		cachedSchema = null;
+		Settings.getInstance().removePropertyChangeListener(this);
+		LogMgr.logDebug("GenericSchemaInformationReader.dispose()", "Called: " + callCount + " times");
+	}
 }
