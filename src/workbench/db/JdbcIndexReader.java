@@ -38,12 +38,11 @@ public class JdbcIndexReader
 	implements IndexReader
 {
 	protected DbMetadata metaData;
-	protected boolean separatePkIndexName;
+	protected String pkIndexNameColumn;
 
 	public JdbcIndexReader(DbMetadata meta)
 	{
 		this.metaData = meta;
-		separatePkIndexName = false;
 	}
 
 	/**
@@ -93,7 +92,7 @@ public class JdbcIndexReader
 	 * @param tbl the table for which the PK should be retrieved
 	 */
 	@Override
-	public PkDefinition getPrimaryKeyIndex(TableIdentifier tbl)
+	public PkDefinition getPrimaryKey(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
 		if (metaData.getDbSettings().isViewType(tbl.getType())) return null;
@@ -112,29 +111,31 @@ public class JdbcIndexReader
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = getPrimaryKeyIndex(catalog, schema, tbl.getTableName());
+				keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getTableName());
 				while (keysRs.next())
 				{
 					if (pkName == null)
 					{
 						pkName = keysRs.getString("PK_NAME");
 					}
-					if (separatePkIndexName && pkIndexName == null)
+					if (pkIndexNameColumn != null && pkIndexName == null)
 					{
-						pkIndexName = keysRs.getString("PK_INDEX_NAME");
+						// this is supplied by our own statement that is used
+						// by the OracleIndexReader
+						pkIndexName = keysRs.getString(pkIndexNameColumn);
 					}
 					String colName = keysRs.getString("COLUMN_NAME");
 					int sequence = keysRs.getInt("KEY_SEQ");
 					if (sequence < 1)
 					{
-						LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");
+						LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");
 					}
 					cols.add(new IndexColumn(colName, sequence));
 				}
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("JdbcIndexReader.getPrimaryKeyIndex()", "Error retrieving PK information", e);
+				LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Error retrieving PK information", e);
 			}
 			finally
 			{
@@ -142,18 +143,47 @@ public class JdbcIndexReader
 				primaryKeysResultDone();
 			}
 
-			LogMgr.logDebug("JdbcIndexreader.getPrimaryKeyIndex()", "PK Information for " + tbl.getTableName() + ", PK Name=" + pkName + ", PK Index=" + pkIndexName + ", columns=" + cols);
+			LogMgr.logDebug("JdbcIndexreader.getPrimaryKey()", "PK Information for " + tbl.getTableName() + ", PK Name=" + pkName + ", PK Index=" + pkIndexName + ", columns=" + cols);
+
 			if (cols.size() > 0)
 			{
 				pk = new PkDefinition(getPkName(pkName, pkIndexName, tbl), cols);
 				pk.setPkIndexName(pkIndexName);
-				if (tbl.getPrimaryKey() == null)
-				{
-					tbl.setPrimaryKey(pk);
-				}
 			}
 		}
+
+		if (pk == null && metaData.getDbSettings().pkIndexHasTableName())
+		{
+			LogMgr.logDebug("JdbcIndexreader.getPrimaryKey()", "No primary key returned from the driver, checking the unique indexes");
+			pk = findPKFromIndexList(tbl);
+		}
+
+		if (pk != null && tbl.getPrimaryKey() == null)
+		{
+			tbl.setPrimaryKey(pk);
+		}
+
 		return pk;
+	}
+
+	private PkDefinition findPKFromIndexList(TableIdentifier tbl)
+	{
+		List<IndexDefinition> unique = getUniqueIndexes(tbl);
+		if (CollectionUtil.isEmpty(unique)) return null;
+
+		// try to find one index that was marked as the PK because of to the "pk index has the same name as the table" property
+		// see DbSettings.pkIndexHasTableName()
+		// this will be checked in processIndexResult
+		for (IndexDefinition idx : unique)
+		{
+			if (idx.isPrimaryKeyIndex())
+			{
+				LogMgr.logInfo("JdbcIndexreader.findPKFromIndexList()", "Using unique index " + idx.getObjectName() + " as a primary key");
+				return new PkDefinition(idx.getObjectName(), idx.getColumns());
+			}
+		}
+
+		return null;
 	}
 
 	private String getPkName(String pkName, String indexName, TableIdentifier tbl)
@@ -169,7 +199,7 @@ public class JdbcIndexReader
 	{
 	}
 
-	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String tableName)
+	protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String tableName)
 		throws SQLException
 	{
 		return this.metaData.getJdbcMetaData().getPrimaryKeys(catalog, schema, tableName);
@@ -474,6 +504,17 @@ public class JdbcIndexReader
 	@Override
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
 	{
+		return getTableIndexList(table, false);
+	}
+
+	@Override
+	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
+	{
+		return getTableIndexList(table, true);
+	}
+
+	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly)
+	{
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(metaData.getWbConnection());
@@ -483,9 +524,9 @@ public class JdbcIndexReader
 		try
 		{
 			PkDefinition pk = tbl.getPrimaryKey();
-			if (pk == null) pk = getPrimaryKeyIndex(tbl);
+			if (pk == null) pk = getPrimaryKey(tbl);
 
-			idxRs = getIndexInfo(tbl, false);
+			idxRs = getIndexInfo(tbl, uniqueOnly);
 			result = processIndexResult(idxRs, pk, tbl);
 		}
 		catch (Exception e)

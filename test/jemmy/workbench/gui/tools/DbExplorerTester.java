@@ -54,18 +54,20 @@ public class DbExplorerTester
 		chooser.setName("dbtablelist");
 		JComponentOperator listComp = new JComponentOperator(tableComp, chooser);
 		WbTable tableList = (WbTable)listComp.getSource();
-		assertEquals(3, tableList.getRowCount());
+		assertTrue(tableList.getRowCount() > 0);
 
-		int row = 0;
-		for (int i=0; i < 3; i++)
+		int personRow = -1;
+		for (int row=0; row < tableList.getRowCount(); row++)
 		{
-			String tableName = tableList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String tableName = tableList.getValueAsString(0, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			if (tableName.equals("PERSON"))
 			{
-				row = i;
+				personRow = row;
+				break;
 			}
 		}
-		tableList.getSelectionModel().setSelectionInterval(row, row);
+		assertTrue(personRow > -1);
+		tableList.getSelectionModel().setSelectionInterval(personRow, personRow);
 
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();

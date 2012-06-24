@@ -128,7 +128,7 @@ public class IndexDefinition
 	{
 		return uniqueConstraint;
 	}
-	
+
 	public void addColumn(String column, String direction)
 	{
 		this.columns.add(new IndexColumn(column, direction));
@@ -194,7 +194,10 @@ public class IndexDefinition
 		return columns;
 	}
 
-	public String getIndexType() { return this.indexType; }
+	public String getIndexType()
+	{
+		return this.indexType;
+	}
 
 	@Override
 	public String toString()

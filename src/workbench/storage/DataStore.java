@@ -28,6 +28,10 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.DeleteScriptGenerator;
+import workbench.db.IndexColumn;
+import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
+import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -699,12 +703,42 @@ public class DataStore
 			{
 				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
 			}
+
+			if (!hasPkColumns() && meta.getDbSettings().checkUniqueIndexesForPK())
+			{
+				checkUniqueIndexesForPK(conn);
+			}
+
 			this.resultInfo.setUpdateTable(updateTable);
 		}
 		catch (Exception e)
 		{
 			this.updateTable = null;
 			LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
+		}
+	}
+
+	private void checkUniqueIndexesForPK(WbConnection con)
+	{
+		if (this.updateTable == null) return;
+
+		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "No PK found for table " + updateTable.getTableName()+ " Trying to find an unique index.");
+		IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
+
+		List<IndexDefinition> indexes = reader.getUniqueIndexes(updateTable);
+		if (CollectionUtil.isEmpty(indexes)) return;
+
+		IndexDefinition idx = indexes.get(0);
+		List<IndexColumn> columns = idx.getColumns();
+		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "Using unique index " + idx.getObjectName() + " as a surrogate PK");
+		for (IndexColumn col : columns)
+		{
+			int index = this.findColumn(col.getColumn());
+			if (index > -1)
+			{
+				this.resultInfo.setIsPkColumn(index, true);
+				this.resultInfo.setIsNullable(index, false);
+			}
 		}
 	}
 

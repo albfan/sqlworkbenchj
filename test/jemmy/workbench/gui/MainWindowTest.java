@@ -119,6 +119,7 @@ public class MainWindowTest
 
 		new JMenuBarOperator(mainWindowOp).pushMenu("Tools|Show Database Explorer", "|");
 		tool.waitEmpty();
+
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("dbexplorer");
 		JComponentOperator panel = new JComponentOperator(mainWindowOp, chooser);

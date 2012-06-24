@@ -23,8 +23,7 @@ import workbench.util.StringUtil;
 
 
 /**
- * The newer versions of H2 correctly return the defined name for a Primary key
- * in the getPrimaryKeys() call.
+ * An index reader for H2
  *
  * Because of that, the name of the primary key might not match the index supporting that primary key.
  * <br/>
@@ -39,16 +38,27 @@ public class H2IndexReader
 	extends JdbcIndexReader
 {
 	private Statement primaryKeysStatement;
+	private boolean useJDBCRetrieval;
 
 	public H2IndexReader(DbMetadata meta)
 	{
 		super(meta);
+		this.useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.h2.getprimarykeyindex.usejdbc", false);
+		if (!this.useJDBCRetrieval)
+		{
+			this.pkIndexNameColumn = "PK_INDEX_NAME";
+		}
 	}
 
 	@Override
-	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String table)
+	protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String table)
 		throws SQLException
 	{
+		if (useJDBCRetrieval)
+		{
+			return super.getPrimaryKeyInfo(catalog, schema, table);
+		}
+
 		if (primaryKeysStatement != null)
 		{
 			LogMgr.logWarning("H2IndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
@@ -56,11 +66,12 @@ public class H2IndexReader
 		}
 
 		String sql = "" +
-			"SELECT index_name as pk_name, \n" +
+			"SELECT constraint_name as pk_name, \n" +
+			"       index_name as pk_index_name, \n" +
 			"       column_name, \n " +
 			"       ordinal_position as key_seq\n " +
       "FROM information_schema.indexes \n" +
-      "WHERE index_type_name = 'PRIMARY KEY' \n";
+      "WHERE primary_key = true \n";
 
 		primaryKeysStatement = this.metaData.getSqlConnection().createStatement();
 		if (StringUtil.isNonBlank(schema))

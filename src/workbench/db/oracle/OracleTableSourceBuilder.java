@@ -231,7 +231,7 @@ public class OracleTableSourceBuilder
 		PkDefinition pk = table.getPrimaryKey();
 		if (pk == null)
 		{
-			pk = reader.getPrimaryKeyIndex(table);
+			pk = reader.getPrimaryKey(table);
 		}
 
 		String sql = super.getPkSource(table, pkCols, pkName).toString();

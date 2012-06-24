@@ -21,6 +21,9 @@ import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.IndexReader;
+import workbench.db.PkDefinition;
+import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -487,17 +490,27 @@ public class ResultInfo
 		if (aConnection == null) return;
 		if (this.updateTable == null) return;
 
-		Connection sqlConn = aConnection.getSqlConnection();
-		DatabaseMetaData meta = sqlConn.getMetaData();
-		String table = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getTableName());
-		String schema = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getSchema());
-
 		resetPkColumns();
 
-		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
-		boolean found = this.readPkColumns(rs);
+		PkDefinition pk = updateTable.getPrimaryKey();
+		if (pk == null)
+		{
+			IndexReader reader = ReaderFactory.getIndexReader(aConnection.getMetadata());
+			pk = reader.getPrimaryKey(this.updateTable);
+		}
 
-		if (!found)
+		if (pk != null)
+		{
+			for (String colName : pk.getColumns())
+			{
+				int index = findColumn(colName);
+				if (index > -1)
+				{
+					this.columns[index].setIsPkColumn(true);
+				}
+			}
+		}
+		else
 		{
 			readPkColumnsFromMapping();
 		}
@@ -547,33 +560,6 @@ public class ResultInfo
 			LogMgr.logInfo("ResultInfo.readPkColumnsFromMapping()", "Using pk definition for " + updateTable.getTableName() + " from mapping file: " + StringUtil.listToString(cols, ',', false));
 		}
 		return isUserDefinedPK;
-	}
-
-	private boolean readPkColumns(ResultSet rs)
-	{
-		boolean found = false;
-		try
-		{
-			while (rs.next())
-			{
-				String col = rs.getString("COLUMN_NAME");
-				int index = this.findColumn(col);
-				if (index > -1)
-				{
-					this.setIsPkColumn(index, true);
-					found = true;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ResultInfo.readPkColumns()", "Error when reading ResultSet for key columns", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return found;
 	}
 
 }

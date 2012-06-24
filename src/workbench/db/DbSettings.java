@@ -1457,4 +1457,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getIntProperty(prefix + "dbexplorer.locktimeout", 2500);
 	}
+
+	public boolean checkUniqueIndexesForPK()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", false);
+	}
+
 }

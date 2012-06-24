@@ -82,7 +82,8 @@ public interface IndexReader
 	String buildCreateIndexSql(TableIdentifier table, String indexName, boolean unique, List<IndexColumn> columnList);
 
 	/**
-	 * Post-Process the index definitions contained in the List
+	 * Post-Process the index definitions contained in the List.
+	 * 
 	 * This can be used to e.g. retrieve additional index information
 	 * that can't be read with getIndexInfo()
 	 */
@@ -98,20 +99,34 @@ public interface IndexReader
 	DataStore getTableIndexInformation(TableIdentifier table);
 
 	/**
-	 * Returns a list of indexes defined for the given table
+	 * Returns all indexes defined for the given table.
+	 *
 	 * @param table the table to get the indexes for
 	 */
 	List<IndexDefinition> getTableIndexList(TableIdentifier table);
 
 	/**
-	 * Returns the name of the index that supports the Primary Key
+	 * Returns a list of unique indexes defined for the given table.
+	 *
+	 * @param table the table to get the indexes for
 	 */
-	PkDefinition getPrimaryKeyIndex(TableIdentifier table);
+	List<IndexDefinition> getUniqueIndexes(TableIdentifier table);
+
+	/**
+	 * Returns the name of the index that supports the Primary Key
+	 * If the passed table did not have a PkDefinitioin associated with it,
+	 * the returned PK will also be set as the table's PK.
+	 *
+	 * @see TableIdentifier#setPrimaryKey(workbench.db.PkDefinition)
+	 */
+	PkDefinition getPrimaryKey(TableIdentifier table);
 
 	/**
 	 * Return any addition option that should be appended to a CREATE INDEX statement
-	 * @param index
-	 * @return
+	 *
+	 * @param index the index to check
+	 * @return additionial option
+	 *
 	 */
 	String getIndexOptions(IndexDefinition index);
 }

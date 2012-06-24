@@ -52,6 +52,8 @@ public class PkDefinition
 
 	public List<String> getColumns()
 	{
+		if (columns == null) return Collections.emptyList();
+		
 		if (columns.size() > 1)
 		{
 			Collections.sort(this.columns, IndexColumn.getSequenceSorter());

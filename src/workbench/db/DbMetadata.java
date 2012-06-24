@@ -1714,8 +1714,7 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			String tablename = table.getRawTableName(); //SqlUtil.escapeUnderscore(table.getRawTableName(), dbConnection);
-			//schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+			String tablename = table.getRawTableName(); 
 
 			DataStore ds = getObjects(catalog, schema, tablename, types);
 
@@ -2151,7 +2150,7 @@ public class DbMetadata
 			}
 		}
 
-		PkDefinition pk = getIndexReader().getPrimaryKeyIndex(retrieve);
+		PkDefinition pk = getIndexReader().getPrimaryKey(retrieve);
 		retrieve.setPrimaryKey(pk);
 
 		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, dbConnection, dataTypeResolver);

@@ -49,7 +49,10 @@ public class OracleIndexReader
 		super(meta);
 		useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.usejdbc", false);
 		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
-		separatePkIndexName = !useJDBC;
+		if (!useJDBC)
+		{
+			pkIndexNameColumn = "PK_INDEX_NAME";
+		}
 	}
 
 	@Override
@@ -174,7 +177,7 @@ public class OracleIndexReader
 			PkDefinition pkIndex = table.getPrimaryKey();
 			if (pkIndex == null)
 			{
-				pkIndex = getPrimaryKeyIndex(table);
+				pkIndex = getPrimaryKey(table);
 			}
 			List<IndexDefinition> result = processIndexResult(rs, pkIndex, table);
 			if (result.isEmpty())
@@ -419,10 +422,17 @@ public class OracleIndexReader
 	 * @return the name of the index supporting the primary key
 	 */
 	@Override
-	protected ResultSet getPrimaryKeyIndex(String catalog, String schema, String table)
+	protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String table)
 		throws SQLException
 	{
-			String sql =
+		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
+
+		if (useJDBC)
+		{
+			return super.getPrimaryKeyInfo(catalog, schema, table);
+		}
+
+		String sql =
 				"select cons.constraint_name as pk_name, \n" +
 				"       cols.column_name, \n" +
 				"       cols.position as key_seq, \n" +
@@ -432,12 +442,6 @@ public class OracleIndexReader
 				"where cons.constraint_type = 'P' \n" +
 				" and cons.owner = ? \n" +
 				" and cons.table_name = ? ";
-		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
-
-		if (useJDBC)
-		{
-			return super.getPrimaryKeyIndex(catalog, schema, table);
-		}
 
 		if (pkStament != null)
 		{
