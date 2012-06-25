@@ -168,7 +168,7 @@ public class JdbcIndexReader
 
 	private PkDefinition findPKFromIndexList(TableIdentifier tbl)
 	{
-		List<IndexDefinition> unique = getUniqueIndexes(tbl);
+		List<IndexDefinition> unique = getTableIndexList(tbl, true, false);
 		if (CollectionUtil.isEmpty(unique)) return null;
 
 		// try to find one index that was marked as the PK because of to the "pk index has the same name as the table" property
@@ -504,16 +504,16 @@ public class JdbcIndexReader
 	@Override
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
 	{
-		return getTableIndexList(table, false);
+		return getTableIndexList(table, false, true);
 	}
 
 	@Override
 	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
 	{
-		return getTableIndexList(table, true);
+		return getTableIndexList(table, true, true);
 	}
 
-	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly)
+	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK)
 	{
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
@@ -524,7 +524,7 @@ public class JdbcIndexReader
 		try
 		{
 			PkDefinition pk = tbl.getPrimaryKey();
-			if (pk == null) pk = getPrimaryKey(tbl);
+			if (pk == null && checkPK) pk = getPrimaryKey(tbl);
 
 			idxRs = getIndexInfo(tbl, uniqueOnly);
 			result = processIndexResult(idxRs, pk, tbl);
