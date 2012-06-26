@@ -187,7 +187,7 @@ public class TestUtil
 		prof.setName(dbName);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
-		dropAll(con, false);
+		dropAll(con);
 		return con;
 	}
 
@@ -200,7 +200,7 @@ public class TestUtil
 		prof.setName(dbName);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, dbName);
-		dropAll(con, false);
+		dropAll(con);
 		return con;
 	}
 
@@ -228,21 +228,21 @@ public class TestUtil
 		prof.setStorePassword(true);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
-		dropAll(con, true);
+		dropAll(con);
 		return con;
 	}
 
-	private void dropAll(WbConnection con, boolean isH2)
+	public void dropAll(WbConnection con)
 	{
 		Statement stmt = null;
 		try
 		{
 			stmt = con.createStatement();
-			if (isH2)
+			if (con.getMetadata().isH2())
 			{
 				stmt.executeUpdate("DROP ALL OBJECTS");
 			}
-			else
+			else if (con.getMetadata().isHsql())
 			{
 				stmt.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
 			}

@@ -60,8 +60,10 @@ public class DataStoreTest
 		util.emptyBaseDirectory();
 		WbConnection con = util.getConnection("pkTestDb");
 		Statement stmt = con.createStatement();
-		stmt.executeUpdate("CREATE TABLE junit_test (id1 integer, id2 integer, id3 integer, some_data varchar(100), primary key (id1, id2, id3))");
-		stmt.executeUpdate("insert into junit_test (id1,id2,id3, some_data) values (1,2,3,'bla')");
+		TestUtil.executeScript(con,
+			"CREATE TABLE junit_test (id1 integer, id2 integer, id3 integer, some_data varchar(100), primary key (id1, id2, id3));\n" +
+			"insert into junit_test (id1,id2,id3, some_data) values (1,2,3,'bla');\n" +
+			"commit;");
 
 		String sql = "select id1, id2, some_data from JUnit_Test";
 
@@ -79,6 +81,30 @@ public class DataStoreTest
 	}
 
 	@Test
+	public void testSpecialName()
+		throws Exception
+	{
+		util.emptyBaseDirectory();
+		WbConnection con = util.getConnection("pkTestDb");
+		TestUtil.executeScript(con,
+			"create table \"FOO.BAR\" (id integer primary key, somedata varchar(50));\n" +
+			"insert into \"FOO.BAR\" values (1, 'foobar');\n" +
+			"commit;");
+
+		String sql = "select id, somedata from \"FOO.BAR\"";
+
+		Statement stmt = con.createStatement();
+		ResultSet rs = stmt.executeQuery(sql);
+		DataStore ds = new DataStore(rs, con);
+		SqlUtil.closeAll(rs, stmt);
+		ds.setGeneratingSql(sql);
+		ds.updatePkInformation();
+		assertTrue(ds.hasPkColumns());
+		TableIdentifier tbl = ds.getUpdateTable();
+		assertEquals("FOO.BAR", tbl.getTableName());
+	}
+
+	@Test
 	public void testDefinePK()
 		throws Exception
 	{
@@ -88,6 +114,7 @@ public class DataStoreTest
 		stmt.executeUpdate("CREATE TABLE junit_test (id1 integer, some_data varchar(100))");
 		stmt.executeUpdate("insert into junit_test (id1, some_data) values (1,'General Failure')");
 		stmt.executeUpdate("insert into junit_test (id1, some_data) values (2,'Major Bug')");
+		con.commit();
 
 		String sql = "select id1, some_data from JUnit_Test";
 
