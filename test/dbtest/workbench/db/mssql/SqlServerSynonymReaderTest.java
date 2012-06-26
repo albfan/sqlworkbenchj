@@ -81,5 +81,8 @@ public class SqlServerSynonymReaderTest
 		TableIdentifier table = conn.getMetadata().getSynonymTable(syns.get(0));
 		assertNotNull(table);
 		assertEquals("person", table.getTableName());
+
+		syns = reader.getSynonymList(conn, "dbo", "s_person");
+		assertEquals(1, syns.size());
 	}
 }

@@ -98,8 +98,16 @@ public class OracleTypeReader
 				select.append(" WHERE ");
 				nameIndex = 1;
 			}
-			select.append(" type_name LIKE ? ");
-			SqlUtil.appendEscapeClause(select, con, name);
+			if (name.indexOf('%') > 0)
+			{
+				select.append(" type_name LIKE ? ");
+				SqlUtil.appendEscapeClause(select, con, name);
+				name = SqlUtil.escapeUnderscore(name, con);
+			}
+			else
+			{
+				select.append(" type_name = ? ");
+			}
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())

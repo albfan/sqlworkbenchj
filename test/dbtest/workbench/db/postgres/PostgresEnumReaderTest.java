@@ -95,6 +95,10 @@ public class PostgresEnumReaderTest
 		assertEquals(create, "CREATE TYPE stimmung_enum AS ENUM ('sad','ok','happy')");
 		String comment = parser.getCommand(1);
 		assertEquals(comment, "COMMENT ON TYPE stimmung_enum IS 'my enum'");
+
+		enums = reader.getDefinedEnums(con, TEST_ID, "stimmung_enum");
+		assertEquals(1, enums.size());
+
 	}
 
 }

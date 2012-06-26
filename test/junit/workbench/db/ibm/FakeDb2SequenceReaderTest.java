@@ -1,5 +1,5 @@
 /*
- * Db2SequenceReaderTest.java
+ * FakeDb2SequenceReaderTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -29,12 +29,12 @@ import workbench.WbTestCase;
  *
  * @author Thomas Kellerer
  */
-public class Db2SequenceReaderTest
+public class FakeDb2SequenceReaderTest
 	extends WbTestCase
 {
 	private WbConnection db;
 
-	public Db2SequenceReaderTest()
+	public FakeDb2SequenceReaderTest()
 	{
 		super("Db2SequenceReaderTest");
 	}

@@ -1977,6 +1977,7 @@ public class SqlUtil
 	{
 		if (searchValue == null) return;
 		if (searchValue.indexOf('_') < 0) return;
+		if (searchValue.indexOf('%') < 0) return; // no LIKE will be used then anyway
 		if (con == null) return;
 		String escape = con.getSearchStringEscape();
 		if (StringUtil.isEmptyString(escape)) return;

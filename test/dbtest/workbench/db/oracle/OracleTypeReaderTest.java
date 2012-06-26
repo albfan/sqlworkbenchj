@@ -102,6 +102,10 @@ public class OracleTypeReaderTest
 		ScriptParser p = new ScriptParser(source);
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		assertEquals(2, p.getSize());
+
+		types = reader.getTypes(con, "WBJUNIT", "ADDRESS_TYPE");
+		assertNotNull(types);
+		assertEquals(1, types.size());
 	}
 
 }

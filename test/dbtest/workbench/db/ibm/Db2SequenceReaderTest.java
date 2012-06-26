@@ -1,11 +1,11 @@
 /*
  * Db2SequenceReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.ibm;
@@ -25,11 +25,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class Db2SequenceReaderTester
+public class Db2SequenceReaderTest
 	extends WbTestCase
 {
 
-	public Db2SequenceReaderTester()
+	public Db2SequenceReaderTest()
 	{
 		super("Db2SequenceReaderTest");
 	}
@@ -91,5 +91,9 @@ public class Db2SequenceReaderTester
     "       NO CYCLE\n" +
     "       NO ORDER;";
 		assertEquals(src, sql.trim());
+
+		seqs = reader.getSequences(null, schema, "WB_SEQUENCE_A");
+		assertNotNull(seqs);
+		assertEquals(1, seqs.size());
 	}
 }

@@ -140,6 +140,13 @@ public class OracleMetadata
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
 		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
+
+		if (!JdbcUtils.hasMiniumDriverVersion(connection.getSqlConnection(), "11.0")
+			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true))
+		{
+			LogMgr.logWarning("OracleMetadata.<init>", "Old JDBC driver detected. Overwriting searchstringescape with '/' to fix driver bug");
+			System.setProperty("workbench.db.oracle.searchstringescape", "/");
+		}
 	}
 
 	protected final boolean fixNVARCHARSemantics()

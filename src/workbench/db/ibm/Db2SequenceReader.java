@@ -92,7 +92,7 @@ public class Db2SequenceReader
 		String name = getDSValueString(ds, row, "SEQNAME", "NAME", "SEQUENCE_NAME");
 		String schema = getDSValueString(ds, row, "SEQUENCE_SCHEMA", "SEQSCHEMA", "SCHEMA");
 
-		SequenceDefinition result = new SequenceDefinition(schema, name);
+		SequenceDefinition result = new SequenceDefinition(schema != null ? schema.trim() : null, name.trim());
 
 		result.setSequenceProperty("START", ds.getValue(row, "START"));
 		result.setSequenceProperty("MINVALUE", getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
@@ -209,8 +209,16 @@ public class Db2SequenceReader
 				query.append(" WHERE ");
 				nameIndex = 1;
 			}
-			query.append(nameCol).append(" LIKE ? ");
-			SqlUtil.appendEscapeClause(query, connection, namePattern);
+			if (namePattern.indexOf('%') > 0)
+			{
+				query.append(nameCol).append(" LIKE ? ");
+				SqlUtil.appendEscapeClause(query, connection, namePattern);
+				namePattern = SqlUtil.escapeUnderscore(namePattern, connection);
+			}
+			else
+			{
+				query.append(nameCol).append(" = ? ");
+			}
 		}
 
 		String sql = query.toString();

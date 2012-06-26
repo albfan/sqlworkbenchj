@@ -78,8 +78,16 @@ public class IngresSequenceReader
 				sql.append(" WHERE ");
 				nameIndex = 1;
 			}
-			sql.append(" seq_name LIKE ? ");
-			SqlUtil.appendEscapeClause(sql, this.dbConn, namePattern);
+			if (namePattern.indexOf('%') > 0)
+			{
+				sql.append(" seq_name LIKE ? ");
+				SqlUtil.appendEscapeClause(sql, this.dbConn, namePattern);
+				namePattern = SqlUtil.escapeUnderscore(namePattern, dbConn);
+			}
+			else
+			{
+				sql.append(" seq_name = ? ");
+			}
 		}
 
 		ResultSet rs = null;

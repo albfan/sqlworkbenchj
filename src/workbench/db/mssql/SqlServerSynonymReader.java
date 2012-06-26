@@ -82,8 +82,8 @@ public class SqlServerSynonymReader
 			if (namePattern.indexOf('%') > -1)
 			{
 				sql.append(" syn.name LIKE ? ");
-				SqlUtil.appendEscapeClause(sql, con, namePattern);
 				namePattern = SqlUtil.escapeUnderscore(namePattern, con);
+				SqlUtil.appendEscapeClause(sql, con, namePattern);
 			}
 			else
 			{

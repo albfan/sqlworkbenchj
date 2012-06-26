@@ -121,7 +121,7 @@ public class PostgresEnumReader
 		if (StringUtil.isNonBlank(namePattern))
 		{
 			sql.append("\n WHERE enum_name like '");
-			sql.append(namePattern);
+			sql.append(SqlUtil.escapeUnderscore(namePattern, con));
 			sql.append("%' ");
 			SqlUtil.appendEscapeClause(sql, con, namePattern);
 			whereAdded = true;
