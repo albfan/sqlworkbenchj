@@ -164,6 +164,7 @@ public class ColumnChanger
 
 		String dataType = newCol.getDbmsType();
 		sql = sql.replace(PARAM_NEW_DATATYPE, dataType);
+		sql = sql.replace(PARAM_DATATYPE, dataType);
 
 		return sql;
 	}

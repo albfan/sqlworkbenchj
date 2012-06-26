@@ -191,6 +191,7 @@ public class ColumnChangerTest
 		newCol.setIsNullable(false);
 
 		String alterScript = changer.getAlterScript(table, oldCol, newCol);
-		assertEquals("ALTER TABLE PERSON CHANGE FIRST_NAME FIRSTNAME VARCHAR(20) NOT NULL  COMMENT '';", alterScript.trim());
+		System.out.println(alterScript);
+		assertEquals("ALTER TABLE PERSON CHANGE FIRST_NAME FIRSTNAME VARCHAR(20) NOT NULL ;", alterScript.trim());
 	}
 }
