@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-06-19">
+  <release build="-1" date="2012-06-26">
     <entry dev-build="9" type="enh">The editor now supports "Delete current line" and "Duplicate current line"</entry>
     <entry dev-build="8" type="enh">Added support for SQL Server 2012 sequences</entry>
     <entry dev-build="8" type="enh">Added support to display synonyms for Informix</entry>
@@ -19,6 +19,9 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="10" type="fix">Tables that contained a dot in there name ("FOO.BAR") were not handled properly</entry>
+    <entry dev-build="10" type="fix">For DB2 primary keys are not correctly displayed for tables that were created through DDS</entry>
+    <entry dev-build="10" type="fix">Retrieving synonym definition did not work in SQL Server if the synonym contained an underscore. This also prevented several commands from finding tables (or other objects) that contained an underscore</entry>
     <entry dev-build="9" type="fix">Displaying object list in the DbExplorer did not work for Vertica if no schema was selected</entry>
     <entry dev-build="9" type="fix">Displaying object list in the DbExplorer did not work for Informix if the schema name contained an underscore</entry>
     <entry dev-build="8" type="fix">The SQL for the primary key in Informix was not created correctly</entry>
