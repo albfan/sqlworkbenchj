@@ -198,7 +198,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("MySQLColumnEnhancer.readCollations()", "Could not read default collation", e);
+			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read default collation", e);
 		}
 		finally
 		{

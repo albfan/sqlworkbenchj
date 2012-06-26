@@ -1932,10 +1932,10 @@ public class SqlUtil
 		}
 	}
 
-	public static String replaceParameters(String sql, Object ... values)
+	public static String replaceParameters(CharSequence sql, Object ... values)
 	{
-		if (values == null) return sql;
-		if (values.length == 0) return sql;
+		if (values == null) return null;
+		if (values.length == 0) return sql.toString();
 
 		int valuePos = 0;
 		SQLLexer lexer = new SQLLexer(sql);

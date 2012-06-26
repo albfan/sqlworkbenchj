@@ -48,6 +48,7 @@ import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerTypeReader;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.DbmsOutput;
@@ -247,11 +248,16 @@ public class DbMetadata
 			{
 				extenders.add(new SqlServerTypeReader());
 			}
-			columnEnhancer = new SqlServerColumnEnhancer();
+			
+			if (SqlServerUtil.isSqlServer2005(dbConnection))
+			{
+				columnEnhancer = new SqlServerColumnEnhancer();
+			}
+
 			objectListEnhancer = new SqlServerObjectListEnhancer();
 			dataTypeResolver = new SqlServerDataTypeResolver();
 			if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.use.schemareader", true)
-				  && JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0"))
+				  && SqlServerUtil.isSqlServer2008(dbConnection))
 			{
 				// SqlServerSchemaInfoReader will cache the user's default schema
 				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection.getSqlConnection());
@@ -1714,7 +1720,7 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			String tablename = table.getRawTableName(); 
+			String tablename = table.getRawTableName();
 
 			DataStore ds = getObjects(catalog, schema, tablename, types);
 

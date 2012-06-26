@@ -81,7 +81,8 @@ public class SqlServerSynonymReader
 			}
 			if (namePattern.indexOf('%') > -1)
 			{
-				sql.append(" syn.name LIKE ?");
+				sql.append(" syn.name LIKE ? ");
+				SqlUtil.appendEscapeClause(sql, con, namePattern);
 				namePattern = SqlUtil.escapeUnderscore(namePattern, con);
 			}
 			else
@@ -89,14 +90,13 @@ public class SqlServerSynonymReader
 				sql.append(" syn.name = ? ");
 			}
 
-			SqlUtil.appendEscapeClause(sql, con, namePattern);
 			if (schemaIndex == 1) nameIndex = 2;
 			else nameIndex = 1;
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
+			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, owner, namePattern));
 		}
 
 		PreparedStatement stmt = null;
