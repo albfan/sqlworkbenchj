@@ -142,7 +142,8 @@ public class OracleMetadata
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
 
 		if (!JdbcUtils.hasMiniumDriverVersion(connection.getSqlConnection(), "11.0")
-			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true))
+			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true)
+			&& Settings.getInstance().getProperty("workbench.db.oracle.searchstringescape", null) == null)
 		{
 			LogMgr.logWarning("OracleMetadata.<init>", "Old JDBC driver detected. Turning off wildcard handling for objects retrieval to work around driver bug");
 			System.setProperty("workbench.db.oracle.metadata.retrieval.wildcards", "false");
