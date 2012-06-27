@@ -248,7 +248,7 @@ public class DbMetadata
 			{
 				extenders.add(new SqlServerTypeReader());
 			}
-			
+
 			if (SqlServerUtil.isSqlServer2005(dbConnection))
 			{
 				columnEnhancer = new SqlServerColumnEnhancer();
@@ -351,8 +351,9 @@ public class DbMetadata
 		if (StringUtil.isBlank(quoteCharacter))
 		{
 			this.quoteCharacter = "\"";
-			LogMgr.logDebug("DbMetadata.<init>", "Using quote escape character: " + quoteCharacter);
 		}
+		LogMgr.logInfo("DbMetadata.<init>", "Using quote escape character: " + quoteCharacter);
+		LogMgr.logInfo("DbMetadata.<init>", "Using search string escape character: " + getSearchStringEscape());
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 
@@ -400,6 +401,32 @@ public class DbMetadata
 			catalogSeparator = sep.charAt(0);
 		}
 		LogMgr.logDebug("DbMetadata.<init>", "Using catalog separator: [" + catalogSeparator + "]");
+	}
+
+	/**
+	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
+	 *
+	 * @return the escape characters to mask wildcards in a string literal
+	 */
+	public String getSearchStringEscape()
+	{
+		// using a config property to override the driver's behaviour
+		// is necessary because some Oracle drivers return the wrong escape character
+		String escape = getDbSettings().getSearchStringEscape();
+		if (escape != null)
+		{
+			return escape;
+		}
+
+		try
+		{
+			return metaData.getSearchStringEscape();
+		}
+		catch (Throwable e)
+		{
+			// Should not happen
+			return null;
+		}
 	}
 
 	public char getCatalogSeparator()

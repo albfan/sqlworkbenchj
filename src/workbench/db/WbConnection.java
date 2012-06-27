@@ -877,26 +877,12 @@ public class WbConnection
 	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
 	 *
 	 * @return the escape characters to mask wildcards in a string literal
+	 * @see DbMetadata#getSearchStringEscape() 
 	 */
 	public String getSearchStringEscape()
 	{
-		// using a config property to override the driver's behaviour
-		// is necessary because some Oracle drivers return the wrong escape character
-		String escape = getDbSettings().getSearchStringEscape();
-		if (escape != null)
-		{
-			return escape;
-		}
-
-		try
-		{
-			return this.sqlConnection.getMetaData().getSearchStringEscape();
-		}
-		catch (Throwable e)
-		{
-			// Should not happen
-			return null;
-		}
+		if (metaData == null) return "\\";
+		return metaData.getSearchStringEscape();
 	}
 
 	public String getUrl()

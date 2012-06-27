@@ -404,6 +404,20 @@ public class SqlUtil
 		return StringUtil.replace(name, "_", escaped);
 	}
 
+	public static void appendEscapeClause(StringBuilder sql, WbConnection con, String searchValue)
+	{
+		if (searchValue == null) return;
+		if (searchValue.indexOf('_') < 0) return;
+		if (searchValue.indexOf('%') < 0) return; // no LIKE will be used then anyway
+		if (con == null) return;
+		if (!con.getDbSettings().doEscapeSearchString()) return;
+		String escape = con.getSearchStringEscape();
+		if (StringUtil.isEmptyString(escape)) return;
+		sql.append(" ESCAPE '");
+		sql.append(escape);
+		sql.append('\'');
+	}
+
 	/**
 	 * Returns the type that is beeing created e.g. TABLE, VIEW, PROCEDURE
 	 */
@@ -1971,19 +1985,6 @@ public class SqlUtil
 			t = lexer.getNextToken(true, true);
 		}
 		return result.toString();
-	}
-
-	public static void appendEscapeClause(StringBuilder sql, WbConnection con, String searchValue)
-	{
-		if (searchValue == null) return;
-		if (searchValue.indexOf('_') < 0) return;
-		if (searchValue.indexOf('%') < 0) return; // no LIKE will be used then anyway
-		if (con == null) return;
-		String escape = con.getSearchStringEscape();
-		if (StringUtil.isEmptyString(escape)) return;
-		sql.append(" ESCAPE '");
-		sql.append(escape);
-		sql.append('\'');
 	}
 
 }

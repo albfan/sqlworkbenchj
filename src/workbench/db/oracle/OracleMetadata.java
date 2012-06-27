@@ -144,8 +144,9 @@ public class OracleMetadata
 		if (!JdbcUtils.hasMiniumDriverVersion(connection.getSqlConnection(), "11.0")
 			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true))
 		{
-			LogMgr.logWarning("OracleMetadata.<init>", "Old JDBC driver detected. Overwriting searchstringescape with '/' to fix driver bug");
-			System.setProperty("workbench.db.oracle.searchstringescape", "/");
+			LogMgr.logWarning("OracleMetadata.<init>", "Old JDBC driver detected. Turning off wildcard handling for objects retrieval to work around driver bug");
+			System.setProperty("workbench.db.oracle.metadata.retrieval.wildcards", "false");
+			System.setProperty("workbench.db.oracle.escape.searchstrings", "false");
 		}
 	}
 
