@@ -77,6 +77,7 @@ public class GeneralOptionsPanel
 		useSystemTray.setVisible(SystemTray.isSupported());
 		WbSwingUtilities.repaintLater(iconCombobox);
 		WbSwingUtilities.repaintLater(cancelIconCombo);
+		useSystemTray.setEnabled(SystemTray.isSupported());
 	}
 
 	@Override
@@ -138,10 +139,8 @@ public class GeneralOptionsPanel
 		closeButtonRightSide.setSelected(GuiSettings.getShowCloseButtonOnRightSide());
 		tabLRUclose.setSelected(GuiSettings.getUseLRUForTabs());
 		showFinishAlert.setSelected(GuiSettings.showScriptFinishedAlert());
-		if (SystemTray.isSupported())
-		{
-			useSystemTray.setSelected(GuiSettings.useSystemTrayForAlert());
-		}
+		useSystemTray.setEnabled(SystemTray.isSupported() && GuiSettings.showScriptFinishedAlert());
+		useSystemTray.setSelected(GuiSettings.useSystemTrayForAlert());
 		long duration = GuiSettings.getScriptFinishedAlertDuration();
 		String durationDisplay = KeepAliveDaemon.getTimeDisplay(duration);
 		alertDuration.setText(durationDisplay);
@@ -692,7 +691,7 @@ public class GeneralOptionsPanel
 	private void showFinishAlertActionPerformed(ActionEvent evt)//GEN-FIRST:event_showFinishAlertActionPerformed
 	{//GEN-HEADEREND:event_showFinishAlertActionPerformed
 		this.alertDuration.setEnabled(showFinishAlert.isSelected());
-		this.useSystemTray.setEnabled(showFinishAlert.isSelected());
+		this.useSystemTray.setEnabled(SystemTray.isSupported() && showFinishAlert.isSelected());
 	}//GEN-LAST:event_showFinishAlertActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
