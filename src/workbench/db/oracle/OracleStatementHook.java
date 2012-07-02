@@ -221,40 +221,80 @@ public class OracleStatementHook
 
 		if (!useStatisticsHint())
 		{
+			// no hint for gathering statistics is necessary
+
 			if (showStatistics)
 			{
-				// if statistics should be displayed we have to get the execution plan
-				// after retrieving the statistics. In that case we must make the SQL "identifiable" using the prefix
+				// if statistics should be displayed we have to get the execution plan.
+				// AFTER retrieving the statistics. In that case we must make the SQL "identifiable" using a unique prefix
 				return getIDPrefix() + "  " + sql;
 			}
+
+			// we don't show statistics so we can directly call dbms_xplan() after running the statement
+			// as the session is modified using changeStatisticsLevel() there is no need to add the gather_plan_statistics hint
 			return sql;
 		}
 
-		SQLLexer lexer = new SQLLexer(sql);
-		SQLToken verb = lexer.getNextToken(false, false);
-
-		if (verb == null) return getIDPrefix() + "  " + sql;
-		int pos = verb.getCharEnd();
-
-		if (pos >= sql.length()) return sql;
-
-		if (pos < 0)
-		{
-			LogMgr.logWarning("OracleStatementHook.adjustSql()", "Wrong char end " + pos + " for first SQL verb: " + verb);
-			return getIDPrefix() + "  " + sql;
-		}
+		sql = injectHint(sql);
 
 		if (showStatistics)
 		{
 			// if statistics should be displayed we have to get the execution plan
 			// after retrieving the statistics. In that case we must make the SQL "identifiable" using the prefix
-			return getIDPrefix() + "  " + sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
+			return getIDPrefix() + " " + sql;
 		}
 
 		// if no statistics are required we can use dbms_xplan() without parameters to get the plan
 		// of the last statement (as our own statistics retrieval will not be the "last" statement
-		return sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
+		return sql;
 	}
+
+	protected String injectHint(String sql)
+	{
+		boolean addComment = false;
+		int pos = -1;
+
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken verb = lexer.getNextToken(false, false);
+
+		if (verb == null) return getIDPrefix() + "  " + sql;
+		SQLToken secondElement = lexer.getNextToken(true, false);
+
+		if (secondElement == null) return getIDPrefix() + "  " + sql;
+
+		addComment = true;
+		if (secondElement.isComment())
+		{
+			String comment = secondElement.getContents();
+			if (comment.startsWith("/*+"))
+			{
+				addComment = false;
+				pos = secondElement.getCharBegin();
+			}
+		}
+
+		if (pos < 0)
+		{
+			pos = verb.getCharEnd();
+		}
+
+		if (pos < 0) return sql;
+
+		if (addComment)
+		{
+			// no comment with a hint found
+			sql = sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
+		}
+		else
+		{
+			sql = sql.substring(0, pos + 3) + " gather_plan_statistics " + sql.substring(pos + 3);
+		}
+
+		// if no statistics are required we can use dbms_xplan() without parameters to get the plan
+		// of the last statement (as our own statistics retrieval will not be the "last" statement
+		return sql;
+	}
+
 
 	private String getIDPrefix()
 	{
@@ -367,6 +407,13 @@ public class OracleStatementHook
 		ResultSet rs = null;
 		DataStore result = null;
 
+		String defaultOptions = "PARTITION ALIAS BYTES COST NOTE ROWS ALLSTATS LAST";
+		String options = Settings.getInstance().getProperty("workbench.db.oracle.xplan.options", defaultOptions);
+		if (StringUtil.isEmptyString(options))
+		{
+			options = defaultOptions;
+		}
+
 		boolean searchSQL = false;
 		try
 		{
@@ -376,13 +423,13 @@ public class OracleStatementHook
 			{
 				// if statistics were retrieved, the last statement was the statistic retrieval.
 				// Therefor we have to find the SQL_ID for the statement that was executed.
-				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(?, ?, 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(?, ?, ?))";
 				searchSQL = true;
 			}
 			else
 			{
 				// if statistics were not retrieved, there is no need to search V$SQL (which is quite expensive)
-				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(format => 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(format => ?))";
 				searchSQL = false;
 			}
 
@@ -398,12 +445,14 @@ public class OracleStatementHook
 					int childNumber = rs.getInt(2);
 					planStatement.setString(1, sqlid);
 					planStatement.setInt(2, childNumber);
+					planStatement.setString(3, options);
 					SqlUtil.closeResult(rs);
 					LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Getting plan for sqlid=" + sqlid + ", child=" + childNumber);
 				}
 			}
 			else
 			{
+				planStatement.setString(1, options);
 				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Retrieving execution plan for last SQL");
 			}
 
