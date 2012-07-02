@@ -70,6 +70,38 @@
          In order to see the "real" execution plan, use <literal>set autotrace traceonly realplan</literal> instead
          of <literal>set autotrace traceonly explain</literal>.
        </para>
+       <para>
+         When using <literal>statistics</literal> together with <literal>explain</literal> or <literal>realplan</literal>,
+         &wb-productname; will have to retrieve the generated <literal>SQL_ID</literal> in order to get the
+         execution plan using <literal>dbms_xplan.display_cursor()</literal>. To use that function the SQL_ID is required
+         which is retrieved from <literal>V$SQL</literal> using a unique comment that is added to the SQL statement
+         before it is sent to the database. Querying <literal>V$SQL</literal> based on the column <literal>SQL_TEXT</literal>
+         is quite an expensive operation and might create unwanted latch contention on the server. If you want to
+         avoid that overhead do not use the <literal>statistics</literal> option when also displaying the execution plan.
+       </para>
+       <section id="ora-autotrace-examples">
+         <title>Examples</title>
+         <para>
+           Show statistics without retrieving the actual data:
+         </para>
+         <programlisting>set autotrace traceonly statistics</programlisting>
+
+         <para>
+           Retrieve the data and show statistics
+         </para>
+         <programlisting>set autotrace on statistics</programlisting>
+
+         <para>
+           Display the statistics and the execution plan but do not retrieve the data
+         </para>
+         <programlisting>set autotrace traceonly explain statistics</programlisting>
+
+         <para>
+           Display the statistics and the actual execution plan but do not retrieve the data
+         </para>
+         <programlisting>set autotrace traceonly realplan statistics</programlisting>
+
+       </section>
      </section>
 
   </section>
