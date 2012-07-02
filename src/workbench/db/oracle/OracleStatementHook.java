@@ -114,7 +114,7 @@ public class OracleStatementHook
 	@Override
 	public String preExec(StatementRunner runner, String sql)
 	{
-		if (!autotrace || !traceStatement(sql))
+		if (!autotrace || !shouldTraceStatement(sql))
 		{
 			return sql;
 		}
@@ -152,7 +152,7 @@ public class OracleStatementHook
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
 		checkRunnerSession(runner);
-		if (!autotrace || !traceStatement(sql))
+		if (!autotrace || !shouldTraceStatement(sql))
 		{
 			return;
 		}
@@ -239,7 +239,8 @@ public class OracleStatementHook
 		return sql;
 	}
 
-	private String getIDPrefix() {
+	private String getIDPrefix()
+	{
 		if (lastExplainID == null)
 		{
 			return "";
@@ -304,7 +305,7 @@ public class OracleStatementHook
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 	}
 
-	private boolean traceStatement(String sql)
+	private boolean shouldTraceStatement(String sql)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
@@ -327,6 +328,8 @@ public class OracleStatementHook
 				"where sql_text like '" + getIDPrefix() + "%' \n" +
 				"order by last_active_time desc";
 
+		LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "SQL to find last explained statement: \n" + findSql);
+
 		PreparedStatement planStatement = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -340,12 +343,13 @@ public class OracleStatementHook
 			rs = stmt.executeQuery(findSql);
 			if (rs.next())
 			{
-				String sqlId = rs.getString(1);
+				String sqlid = rs.getString(1);
 				int childNumber = rs.getInt(2);
-				planStatement.setString(1, sqlId);
+				planStatement.setString(1, sqlid);
 				planStatement.setInt(2, childNumber);
 
 				SqlUtil.closeResult(rs);
+				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Getting plan for sqlid=" + sqlid + ", child=" + childNumber);
 				rs = planStatement.executeQuery();
 				result = new DataStore(rs, true);
 				result.setGeneratingSql(sql);
@@ -400,6 +404,8 @@ public class OracleStatementHook
 
 		String explainSql = "EXPLAIN PLAN FOR " + sql;
 		String retrievePlan = "SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY())";
+
+		LogMgr.logDebug("OracleStatementHook", "Running EXPLAIN PLAN for last SQL statement");
 
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -543,7 +549,7 @@ public class OracleStatementHook
 		if (!autotrace) return true;
 		if (traceOnly)
 		{
-			return showStatistics;
+			return showStatistics || showRealPlan;
 		}
 		return true;
 	}
