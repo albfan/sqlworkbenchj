@@ -186,7 +186,7 @@ public class OracleStatementHook
 		}
 
 		DataStore plan = null;
-		if (showRealPlan && lastExplainID != null)
+		if (showRealPlan)
 		{
 			plan = retrieveRealExecutionPlan(runner, sql);
 		}
@@ -218,10 +218,18 @@ public class OracleStatementHook
 	private String adjustSql(String sql)
 	{
 		lastExplainID = UUID.randomUUID().toString();
+
 		if (!useStatisticsHint())
 		{
-			return getIDPrefix() + "  " + sql;
+			if (showStatistics)
+			{
+				// if statistics should be displayed we have to get the execution plan
+				// after retrieving the statistics. In that case we must make the SQL "identifiable" using the prefix
+				return getIDPrefix() + "  " + sql;
+			}
+			return sql;
 		}
+
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
 
@@ -235,8 +243,17 @@ public class OracleStatementHook
 			LogMgr.logWarning("OracleStatementHook.adjustSql()", "Wrong char end " + pos + " for first SQL verb: " + verb);
 			return getIDPrefix() + "  " + sql;
 		}
-		sql = getIDPrefix() + "  " + sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
-		return sql;
+
+		if (showStatistics)
+		{
+			// if statistics should be displayed we have to get the execution plan
+			// after retrieving the statistics. In that case we must make the SQL "identifiable" using the prefix
+			return getIDPrefix() + "  " + sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
+		}
+
+		// if no statistics are required we can use dbms_xplan() without parameters to get the plan
+		// of the last statement (as our own statistics retrieval will not be the "last" statement
+		return sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
 	}
 
 	private String getIDPrefix()
@@ -318,6 +335,21 @@ public class OracleStatementHook
 		return true;
 	}
 
+	/**
+	 * Retrieve the real execution plan of the last statement using dbms_xplan.display_cursor().
+	 *
+	 * If statements statistics are requested (set autotrace statistics ...) then it is expected
+	 * that the statement has been "marked" using getIDPrefix(). This method will then search v$sql
+	 * for that prefix to find the correct sql_id. dbms_xplan.display_cursor() is then called
+	 * with a SQL_ID and a child number
+	 *
+	 * If no statistics should be displayed, dbms_xplan.display_cursor() is then called with the
+	 * format parameter only.
+	 *
+	 * @param runner
+	 * @param sql the sql that was executed
+	 * @return the execution plan, might be null if the SQL statement was not found in v$sql
+	 */
 	private DataStore retrieveRealExecutionPlan(StatementRunner runner, String sql)
 	{
 		WbConnection con = runner.getConnection();
@@ -334,28 +366,52 @@ public class OracleStatementHook
 		Statement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
+
+		boolean searchSQL = false;
 		try
 		{
-			String retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(?, ?, 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+			String retrievePlan;
+
+			if (showStatistics && lastExplainID != null)
+			{
+				// if statistics were retrieved, the last statement was the statistic retrieval.
+				// Therefor we have to find the SQL_ID for the statement that was executed.
+				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(?, ?, 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+				searchSQL = true;
+			}
+			else
+			{
+				// if statistics were not retrieved, there is no need to search V$SQL (which is quite expensive)
+				retrievePlan = "SELECT * FROM table(dbms_xplan.display_cursor(format => 'BYTES COST NOTE ROWS ALLSTATS LAST'))";
+				searchSQL = false;
+			}
+
 			planStatement = con.getSqlConnection().prepareStatement(retrievePlan);
 
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(findSql);
-			if (rs.next())
+			if (searchSQL)
 			{
-				String sqlid = rs.getString(1);
-				int childNumber = rs.getInt(2);
-				planStatement.setString(1, sqlid);
-				planStatement.setInt(2, childNumber);
-
-				SqlUtil.closeResult(rs);
-				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Getting plan for sqlid=" + sqlid + ", child=" + childNumber);
-				rs = planStatement.executeQuery();
-				result = new DataStore(rs, true);
-				result.setGeneratingSql(sql);
-				result.setResultName("Execution plan");
-				result.resetStatus();
+				rs = stmt.executeQuery(findSql);
+				if (rs.next())
+				{
+					String sqlid = rs.getString(1);
+					int childNumber = rs.getInt(2);
+					planStatement.setString(1, sqlid);
+					planStatement.setInt(2, childNumber);
+					SqlUtil.closeResult(rs);
+					LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Getting plan for sqlid=" + sqlid + ", child=" + childNumber);
+				}
 			}
+			else
+			{
+				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "Retrieving execution plan for last SQL");
+			}
+
+			rs = planStatement.executeQuery();
+			result = new DataStore(rs, true);
+			result.setGeneratingSql(sql);
+			result.setResultName("Execution plan");
+			result.resetStatus();
 		}
 		catch (SQLException ex)
 		{
@@ -403,7 +459,7 @@ public class OracleStatementHook
 		WbConnection con = runner.getConnection();
 
 		String explainSql = "EXPLAIN PLAN FOR " + sql;
-		String retrievePlan = "SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY())";
+		String retrievePlan = "SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(format => 'TYPICAL ALIAS PROJECTION'))";
 
 		LogMgr.logDebug("OracleStatementHook", "Running EXPLAIN PLAN for last SQL statement");
 
