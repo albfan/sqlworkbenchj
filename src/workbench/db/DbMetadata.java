@@ -408,7 +408,7 @@ public class DbMetadata
 	 *
 	 * @return the escape characters to mask wildcards in a string literal
 	 */
-	public String getSearchStringEscape()
+	public final String getSearchStringEscape()
 	{
 		// using a config property to override the driver's behaviour
 		// is necessary because some Oracle drivers return the wrong escape character
