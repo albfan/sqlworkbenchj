@@ -146,6 +146,23 @@ public class AutotraceTest
 			assertEquals(2, data.size());
 			assertEquals("tabledata", data.get(0).getResultName());
 			assertEquals("Execution plan", data.get(1).getResultName());
+
+			runner.runStatement("set autotrace traceonly statistics realplan");
+			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
+			result = runner.getResult();
+			data = result.getDataStores();
+			assertEquals(2, data.size());
+			assertEquals("Statistics", data.get(0).getResultName());
+			assertEquals("Execution plan", data.get(1).getResultName());
+			StringBuilder plan = new StringBuilder();
+			for (int row=0; row < data.get(1).getRowCount(); row++)
+			{
+				plan.append(data.get(1).getValueAsString(row, 0));
+				plan.append('\n');
+			}
+			assertTrue(plan.indexOf("A-Rows") > 0); // make sure the real plan was retrieved, not a "regular" explain plan
+			assertTrue(plan.indexOf("A-Time") > 0); // make sure the real plan was retrieved, not a "regular" explain plan
+			assertTrue(plan.indexOf("/*+ gather_plan_statistics */") > 0); // make sure the real plan was retrieved, not a "regular" explain plan
 		}
 		finally
 		{
