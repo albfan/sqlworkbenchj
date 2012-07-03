@@ -1068,7 +1068,7 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public boolean canClosePanel(boolean firstCheck)
+	public boolean canClosePanel(boolean checkTransactions)
 	{
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (!isModified()) return true;

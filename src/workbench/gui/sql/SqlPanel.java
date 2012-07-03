@@ -1299,10 +1299,10 @@ public class SqlPanel
 	 *  because of the check for unsaved changes in the current editor file
 	 */
 	@Override
-	public boolean canClosePanel(boolean firstCheck)
+	public boolean canClosePanel(boolean checkTransAction)
 	{
 		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
-		if (firstCheck)
+		if (checkTransAction)
 		{
 			fileOk = fileOk && confirmDiscardTransaction();
 		}
