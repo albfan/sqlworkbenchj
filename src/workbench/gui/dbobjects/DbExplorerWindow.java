@@ -186,7 +186,7 @@ public class DbExplorerWindow
 	@Override
 	public void windowClosing(WindowEvent e)
 	{
-		if (panel.canClosePanel())
+		if (panel.canClosePanel(true))
 		{
 			closeWindow();
 		}

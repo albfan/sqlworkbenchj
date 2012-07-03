@@ -2158,7 +2158,7 @@ public class MainWindow
 						// tabSelected will not be run because tabRemovalInProgress == true
 						tabSelected(index);
 					}
-					if (p.canClosePanel())
+					if (p.canClosePanel(true))
 					{
 						removeTab(index, false);
 					}
@@ -2445,10 +2445,15 @@ public class MainWindow
 		if (checkUnsaved)
 		{
 			int count = this.sqlTab.getTabCount();
+			boolean first = true;
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
-				if (!p.canClosePanel()) return;
+				if (currentConnection != null)
+				{
+					first = i == 0;
+				}
+				if (!p.canClosePanel(first)) return;
 			}
 		}
 
@@ -2561,10 +2566,16 @@ public class MainWindow
 
 			if (checkUnsaved)
 			{
+				boolean first = true;
 				for (int i=0; i < count; i++)
 				{
 					MainPanel p = (MainPanel)this.sqlTab.getComponentAt(i);
-					if (!p.canClosePanel()) return false;
+					if (currentConnection != null)
+					{
+						// for a global connection only the first tab needs to check open transactions
+						first = (i == 0);
+					}
+					if (!p.canClosePanel(first)) return false;
 				}
 			}
 			w = new WbWorkspace(realFilename, true);
@@ -2950,7 +2961,7 @@ public class MainWindow
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
-		if (!panel.canClosePanel()) return;
+		if (!panel.canClosePanel(true)) return;
 
 		if (GuiSettings.getConfirmTabClose())
 		{

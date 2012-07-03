@@ -1278,7 +1278,16 @@ public class SqlPanel
 		TransactionChecker checker = con.getTransactionChecker();
 		if (checker.hasUncommittedChanges(con))
 		{
-			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", getRealTabTitle());
+			String tabTitle = null;
+			if (con.getProfile().getUseSeparateConnectionPerTab())
+			{
+				tabTitle = getRealTabTitle();
+			}
+			else
+			{
+				tabTitle = con.getProfile().getName();
+			}
+			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", tabTitle);
 		}
 		return true;
 	}
@@ -1290,9 +1299,13 @@ public class SqlPanel
 	 *  because of the check for unsaved changes in the current editor file
 	 */
 	@Override
-	public boolean canClosePanel()
+	public boolean canClosePanel(boolean firstCheck)
 	{
-		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1) && confirmDiscardTransaction();
+		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
+		if (firstCheck)
+		{
+			fileOk = fileOk && confirmDiscardTransaction();
+		}
 		return fileOk;
 	}
 
