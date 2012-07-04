@@ -53,7 +53,7 @@ public class BlobHandler
 		return getByteDisplay(l);
 	}
 
-	public boolean setToNull() 
+	public boolean setToNull()
 	{
 		return this.setToNull;
 	}
@@ -64,7 +64,7 @@ public class BlobHandler
 		if (this.uploadFile != null) return uploadFile;
 		return newValue;
 	}
-	
+
 	public File getUploadFile()
 	{
 		return uploadFile;
@@ -315,6 +315,7 @@ public class BlobHandler
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				w.setInfoText(ResourceMgr.getString("LblFileEncoding") + ": " + encoding);
