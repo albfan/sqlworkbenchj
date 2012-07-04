@@ -19,8 +19,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -83,6 +85,7 @@ public class TableDeleteSync
 	private XmlRowDataConverter xmlConverter;
 	private boolean cancelExecution;
 	private int progressInterval = 10;
+	private Set<String> alternatePKColumns;
 
 	public TableDeleteSync(WbConnection deleteFrom, WbConnection compareTo)
 		throws SQLException
@@ -168,6 +171,20 @@ public class TableDeleteSync
 	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete)
 		throws SQLException
 	{
+		setTableName(tableToCheck, tableToDelete, new HashSet<String>(0));
+	}
+
+	/**
+	 * Define the table to be checked.
+	 *
+	 * @param tableToCheck the table with the "reference" data
+	 * @param tableToDelete the table from which obsolete rows should be deleted
+	 * @param alternatePK alternate PK columns to be used
+	 * @throws java.sql.SQLException
+	 */
+	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete, Set<String> alternatePK)
+		throws SQLException
+	{
 		if (tableToCheck == null) throw new IllegalArgumentException("Source table may not be null!");
 		if (tableToDelete == null) throw new IllegalArgumentException("Target table (for source: " + tableToCheck.getTableName() + ") may not be null!");
 
@@ -178,6 +195,8 @@ public class TableDeleteSync
 		firstDelete = true;
 		this.columnMap.clear();
 
+		this.alternatePKColumns = (alternatePK == null ? new HashSet<String>(0) : alternatePK);
+
 		List<ColumnIdentifier> columns = this.toDelete.getMetadata().getTableColumns(deleteTable);
 		if (columns == null || columns.isEmpty()) throw new SQLException("Table " + deleteTable.getTableName() + " not found in target database");
 		String where = " WHERE ";
@@ -185,7 +204,7 @@ public class TableDeleteSync
 
 		for (ColumnIdentifier col : columns)
 		{
-			if (col.isPkColumn())
+			if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
 			{
 				if (colIndex > 1)
 				{
@@ -221,7 +240,7 @@ public class TableDeleteSync
 		String selectColumns = "";
 		for (ColumnIdentifier col : columns)
 		{
-			if (col.isPkColumn())
+			if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
 			{
 				if (!first)
 				{

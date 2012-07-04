@@ -17,12 +17,14 @@ import workbench.WbTestCase;
 import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Set;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -36,7 +38,7 @@ public class TableDeleteSyncTest
 	private int rowCount = 127;
 	private int toDelete = 53;
 	private TestUtil util;
-	
+
 	public TableDeleteSyncTest()
 	{
 		super("syncDelete");
@@ -49,7 +51,7 @@ public class TableDeleteSyncTest
 	{
 		Statement sourceStmt = null;
 		Statement targetStmt = null;
-		
+
 		try
 		{
 			source = util.getConnection("sync_delete_reference");
@@ -76,7 +78,7 @@ public class TableDeleteSyncTest
 				targetStmt.executeUpdate("INSERT INTO person_t (id1, id2, firstname, lastname) " +
 					"VALUES (" + i + ", " + (i + 1) + ", 'first" + i + "', 'last" + i + "')");
 			}
-			
+
 			for (int i=10000; i < 10000 + toDelete; i++)
 			{
 				targetStmt.executeUpdate("INSERT INTO person_t (id1, id2, firstname, lastname) " +
@@ -118,7 +120,7 @@ public class TableDeleteSyncTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
+
 	}
 
 	@Test
@@ -132,11 +134,22 @@ public class TableDeleteSyncTest
 			sync.setOutputWriter(writer, "\n", "UTF-8");
 			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
 			sync.doSync();
-			
+
 			String sql = writer.toString();
 			ScriptParser parser = new ScriptParser(sql);
 			int count = parser.getSize();
 			assertEquals("Wrong DELETE count", toDelete, count);
+
+			writer = new StringWriter();
+			sync.setOutputWriter(writer, "\n", "UTF-8");
+			Set<String> pk = CollectionUtil.caseInsensitiveSet("firstname", "lastname");
+			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"), pk);
+			sync.doSync();
+			sql = writer.toString();
+			assertFalse(sql.indexOf("WHERE ID1 =") > -1);
+			assertFalse(sql.indexOf("AND ID2 =") > -1);
+			assertTrue(sql.indexOf("WHERE FIRSTNAME =") > -1);
+			assertTrue(sql.indexOf("AND LASTNAME =") > -1);
 		}
 		catch(Exception e)
 		{
@@ -144,5 +157,5 @@ public class TableDeleteSyncTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 }

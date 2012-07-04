@@ -152,7 +152,7 @@ public class TableDataDiff
 
 	public void setAlternateKeys(Map<String, Set<String>> mapping)
 	{
-		if (mapping == null)
+		if (CollectionUtil.isEmpty(mapping))
 		{
 			this.alternateKeys = null;
 		}
