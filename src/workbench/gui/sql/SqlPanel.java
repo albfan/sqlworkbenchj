@@ -1263,14 +1263,15 @@ public class SqlPanel
 		boolean isModified = (index == -1 ? isModified() : isPanelModified(index));
 		if (!isModified) return true;
 		String title = getRealTabTitle();
-		if (index != -1)
-		{
-			title = resultTab.getTitleAt(index);
-		}
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
-		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", title);
+		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", cleanHTML(title));
 	}
 
+	private String cleanHTML(String input)
+	{
+		return input.replaceAll("\\<.*?\\>", "");
+	}
+	
 	private boolean confirmDiscardTransaction()
 	{
 		WbConnection con = getConnection();
@@ -1287,7 +1288,7 @@ public class SqlPanel
 			{
 				tabTitle = con.getProfile().getName();
 			}
-			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", tabTitle);
+			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", cleanHTML(tabTitle));
 		}
 		return true;
 	}
