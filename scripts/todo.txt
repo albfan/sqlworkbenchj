@@ -1,6 +1,6 @@
 Features:
 ---------
-- save table sort in DbExplorer in Workspace
+- save table sort of DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"
 - WbClipCopy: Copy result set data to the clipboard
@@ -8,6 +8,7 @@ Features:
 - Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
 - DbExplorer panel showing all indexes (will also enable auto completion for DROP INDEX)
 - Oracle's BFILE, Postgres' LargeObjects wie BLOBs behandeln (SQL Server...)
+- support auto-completion for CTEs. Probably only possible if the WITH defines the columns: WITH foo (id, foo, bar) as ( ...
 - Support external SQL formatter
 - Convert DDL from one DBMS to another  using "intelligent" search & replace (MySQL -> PG, PG -> Oracle)
 - Support N'   ' strings for SQL generation
