@@ -173,7 +173,7 @@ public class ProcedureListPanel
 			@Override
 			public TableCellRenderer getCellRenderer(int row, int column)
 			{
-				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
+				if (column == convertColumnIndexToView(ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE)) return statusRenderer;
 				return super.getCellRenderer(row, column);
 			}
 		};

@@ -33,7 +33,6 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -80,7 +79,6 @@ public class TriggerListPanel
 	private boolean shouldRetrieve;
 	private JLabel infoLabel;
 	private boolean isRetrieving;
-	protected ProcStatusRenderer statusRenderer;
 
 	private CompileDbObjectAction compileAction;
 	private DropDbObjectAction dropAction;
@@ -135,7 +133,6 @@ public class TriggerListPanel
 		this.source = new DbObjectSourcePanel(parentWindow, sourceReload);
 
 		JPanel listPanel = new JPanel();
-		this.statusRenderer = new ProcStatusRenderer();
 		this.triggerList = new WbTable(true, false, false);
 
 		this.triggerList.setRendererSetup(RendererSetup.getBaseSetup());

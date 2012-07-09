@@ -329,8 +329,17 @@ public class TableDefinitionPanel
 						reloadAction.setEnabled(false);
 						String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + currentTable.getTableName() + "</b></html>";
 						tableNameLabel.setText(msg);
+						if (StringUtil.isEmptyString(currentTable.getComment()))
+						{
+							tableNameLabel.setToolTipText(null);
+						}
+						else
+						{
+							tableNameLabel.setToolTipText(currentTable.getComment());
+						}
 					}
 				});
+
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getObjectDetails(currentTable);
 				final TableModel model = def == null ? EmptyTableModel.EMPTY_MODEL : new DataStoreTableModel(def) ;

@@ -1333,10 +1333,19 @@ public class WbTable
 		return this.printDataAction;
 	}
 
-	public String getValueAsString(int row, int column)
+	/**
+	 * Return the value of the specified model column as a string.
+	 * If the columns have been re-arranged this will still work.
+	 *
+	 * @param row the row
+	 * @param modelColumnIndex the column index in the model (not the view).
+	 * @return the value as a String
+	 * @throws IndexOutOfBoundsException
+	 */
+	public String getValueAsString(int row, int modelColumnIndex)
 		throws IndexOutOfBoundsException
 	{
-		Object value = this.getValueAt(row, column);
+		Object value = this.getValueAt(row, convertColumnIndexToView(modelColumnIndex));
 		if (value == null) return null;
 		return value.toString();
 	}

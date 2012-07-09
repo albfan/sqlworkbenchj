@@ -13,6 +13,7 @@ package workbench.gui.renderer;
 
 import javax.swing.JLabel;
 import workbench.db.JdbcProcedureReader;
+import workbench.log.LogMgr;
 
 /**
  * Displays the return type of a stored procedure as a readable text.
@@ -34,8 +35,16 @@ public class ProcStatusRenderer
 	@Override
 	public void prepareDisplay(Object value)
 	{
-		Integer status = (Integer)value;
-		this.displayValue = JdbcProcedureReader.convertProcType(status.intValue());
+		try
+		{
+			Integer status = (Integer)value;
+			this.displayValue = JdbcProcedureReader.convertProcType(status.intValue());
+		}
+		catch (ClassCastException cce)
+		{
+			LogMgr.logWarning("ProdStatusRenderer.prepareDisplay()", "The current value (" + value + ") is not an Integer!", cce);
+			this.displayValue = (value == null ? "" : value.toString());
+		}
 	}
 
 }
