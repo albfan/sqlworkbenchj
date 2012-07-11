@@ -799,19 +799,14 @@ public class DbMetadata
 	}
 
 	/**
-	 * Check if the given {@link TableIdentifier} requires
-	 * the usage of a catalog name for a DML statement.
-	 * <br/>
-	 * First the result of ignoreCatalog() is tested. If that is true, then this method returns false.
+	 * Check if the given {@link TableIdentifier} requires the usage of a catalog name for a DML statement.
 	 * <br/>
 	 * If the current DB engine is Microsoft Access, this method always returns true.
-	 * If the current DBMS does not support catalogs, false is returned
 	 * <br/>
-	 * For all other DBMS, the result of this method depends on the setting if
-	 * a catalog is needed in case it's not the current catalog.
    *
 	 * @see #ignoreCatalog(java.lang.String)
-	 * @see #supportsCatalogs()
+	 * @see DbSettings#alwaysUseCatalog()
+	 * @see DbSettings#useCatalogInDML()
 	 * @see DbSettings#needsCatalogIfNoCurrent()
 	 */
 	public boolean needCatalogInDML(TableIdentifier table)
