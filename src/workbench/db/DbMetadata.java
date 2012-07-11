@@ -822,12 +822,10 @@ public class DbMetadata
 
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
-		if (ignoreCatalog(cat)) return false;
-
-		String currentCat = getCurrentCatalog();
 
 		if (this.isExcel)
 		{
+			String currentCat = getCurrentCatalog();
 			// Excel puts the directory into the catalog
 			// so we need to normalize the directory name
 			File c1 = new File(cat);
@@ -836,11 +834,15 @@ public class DbMetadata
 			return true;
 		}
 
-		if (StringUtil.isEmptyString(currentCat))
+		if (this.dbSettings.needsCatalogIfNoCurrent())
 		{
-			return this.dbSettings.needsCatalogIfNoCurrent();
+			String currentCat = getCurrentCatalog();
+			if (StringUtil.isEmptyString(currentCat))
+			{
+				return true;
+			}
 		}
-		return false;
+		return !ignoreCatalog(cat);
 	}
 
 	/**
