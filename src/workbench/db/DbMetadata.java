@@ -812,6 +812,8 @@ public class DbMetadata
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
 		if (this.isAccess) return true;
+		
+		String cat = table.getCatalog();
 		if (this.isExcel)
 		{
 			String currentCat = getCurrentCatalog();
@@ -826,7 +828,6 @@ public class DbMetadata
 		if (!dbSettings.useCatalogInDML()) return false;
 		if (dbSettings.alwaysUseCatalog()) return true;
 
-		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 
 		if (this.dbSettings.needsCatalogIfNoCurrent())
