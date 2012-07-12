@@ -88,7 +88,7 @@ public class CatalogChanger
 		{
 			conn.catalogChanged(old, newCatalog);
 		}
-		LogMgr.logDebug("DbMetadata.setCurrentCatalog()", "Catalog changed to " + newCat);
+		LogMgr.logDebug("CatalogChanger.setCurrentCatalog()", "Catalog changed to " + newCat);
 
 		return true;
 	}
