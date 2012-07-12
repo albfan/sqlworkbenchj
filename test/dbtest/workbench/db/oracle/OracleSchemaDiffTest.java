@@ -15,7 +15,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.Writer;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
@@ -44,8 +43,12 @@ public class OracleSchemaDiffTest
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
-		WbConnection con1 = OracleTestUtil.getOracleConnection();
-		if (con1 == null) return;
+		OracleTestUtil.initTestCase(OracleTestUtil.SCHEMA2_NAME);
+	}
+
+	private void createTables(WbConnection con1, WbConnection con2)
+		throws Exception
+	{
 		String sql1 =
 			"create table person (\n" +
 			"   id integer not null primary key, " +
@@ -57,7 +60,6 @@ public class OracleSchemaDiffTest
 
 		TestUtil.executeScript(con1, sql1);
 
-		WbConnection con2 = OracleTestUtil.getOracleConnection2();
 		OracleTestUtil.initTestCase(OracleTestUtil.SCHEMA2_NAME);
 		if (con2 == null) return;
 		String sql2 =
@@ -71,14 +73,6 @@ public class OracleSchemaDiffTest
 		TestUtil.executeScript(con2, sql2);
 	}
 
-	@AfterClass
-	public static void tearDownClass()
-		throws Exception
-	{
-		OracleTestUtil.cleanUpTestCase();
-		OracleTestUtil.cleanUpTestCase(OracleTestUtil.SCHEMA2_NAME);
-	}
-
 	@Test
 	public void testDiff()
 		throws Exception
@@ -90,25 +84,35 @@ public class OracleSchemaDiffTest
 			return;
 		}
 
-		SchemaDiff diff = new SchemaDiff(reference, target);
-		diff.setIncludeViews(true);
-		diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
-		TestUtil util = getTestUtil();
-		File outfile = new File(util.getBaseDir(), "ora_diff.xml");
-		Writer out = new FileWriter(outfile);
-		diff.writeXml(out);
-		FileUtil.closeQuietely(out);
-		assertTrue(outfile.exists());
-		assertTrue(outfile.length() > 0);
-		Reader in = new FileReader(outfile);
-		String xml = FileUtil.readCharacters(in);
-		assertNotNull(xml);
+		try
+		{
+			createTables(reference, target);
 
-		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME'])");
-		assertEquals("1", value);
+			SchemaDiff diff = new SchemaDiff(reference, target);
+			diff.setIncludeViews(true);
+			diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
+			TestUtil util = getTestUtil();
+			File outfile = new File(util.getBaseDir(), "ora_diff.xml");
+			Writer out = new FileWriter(outfile);
+			diff.writeXml(out);
+			FileUtil.closeQuietely(out);
+			assertTrue(outfile.exists());
+			assertTrue(outfile.length() > 0);
+			Reader in = new FileReader(outfile);
+			String xml = FileUtil.readCharacters(in);
+			assertNotNull(xml);
 
-		value = TestUtil.getXPathValue(xml, "count(/schema-diff/update-view[@type='MATERIALIZED VIEW']/view-def[@name='V_PERSON'])");
-		assertEquals("1", value);
+			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME'])");
+			assertEquals("1", value);
+
+			value = TestUtil.getXPathValue(xml, "count(/schema-diff/update-view[@type='MATERIALIZED VIEW']/view-def[@name='V_PERSON'])");
+			assertEquals("1", value);
+		}
+		finally
+		{
+			OracleTestUtil.dropAllObjects(reference);
+			OracleTestUtil.dropAllObjects(target);
+		}
 	}
 
 	@Test
@@ -133,34 +137,43 @@ public class OracleSchemaDiffTest
 		{
 			return;
 		}
-		// Remove other tables
-		TestUtil.executeScript(reference, " DROP MATERIALIZED VIEW V_PERSON; DROP TABLE person CASCADE CONSTRAINTS;");
-		TestUtil.executeScript(target, "DROP MATERIALIZED VIEW V_PERSON; DROP TABLE person CASCADE CONSTRAINTS;");
 
-		TestUtil.executeScript(reference, sql);
-		TestUtil.executeScript(target, sql);
+		try
+		{
+			// Make sure no tables are there
+			OracleTestUtil.dropAllObjects(reference);
+			OracleTestUtil.dropAllObjects(target);
 
-		SchemaDiff diff = new SchemaDiff(reference, target);
-		diff.setIncludeViews(true);
-		diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
-		diff.setCompareConstraintsByName(true);
-		diff.setIncludeTableConstraints(true);
-		TestUtil util = getTestUtil();
-		File outfile = new File(util.getBaseDir(), "ora_diff2.xml");
-		Writer out = new FileWriter(outfile);
-		diff.writeXml(out);
-		FileUtil.closeQuietely(out);
-		assertTrue(outfile.exists());
-		assertTrue(outfile.length() > 0);
-		Reader in = new FileReader(outfile);
-		String xml = FileUtil.readCharacters(in);
-		assertNotNull(xml);
+			TestUtil.executeScript(reference, sql);
+			TestUtil.executeScript(target, sql);
 
-		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
-		assertEquals("0", value);
+			SchemaDiff diff = new SchemaDiff(reference, target);
+			diff.setIncludeViews(true);
+			diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
+			diff.setCompareConstraintsByName(true);
+			diff.setIncludeTableConstraints(true);
+			TestUtil util = getTestUtil();
+			File outfile = new File(util.getBaseDir(), "ora_diff2.xml");
+			Writer out = new FileWriter(outfile);
+			diff.writeXml(out);
+			FileUtil.closeQuietely(out);
+			assertTrue(outfile.exists());
+			assertTrue(outfile.length() > 0);
+			Reader in = new FileReader(outfile);
+			String xml = FileUtil.readCharacters(in);
+			assertNotNull(xml);
 
-		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='FOO']/table-constraints)");
-		assertEquals("0", value);
+			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+			assertEquals("0", value);
+
+			value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='FOO']/table-constraints)");
+			assertEquals("0", value);
+		}
+		finally
+		{
+			OracleTestUtil.dropAllObjects(reference);
+			OracleTestUtil.dropAllObjects(target);
+		}
 	}
 
 }
