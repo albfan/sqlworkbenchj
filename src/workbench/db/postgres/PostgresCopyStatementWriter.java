@@ -13,7 +13,6 @@ package workbench.db.postgres;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
@@ -59,11 +58,11 @@ public class PostgresCopyStatementWriter
 			out.print(")");
 
 
-			out.print(" from ");
+			out.print("\n     from ");
 			out.print("'" + baseFile.getFullPath() + "'");
 
 			String delim = exporter.getTextDelimiter();
-			out.print(" with (format csv");
+			out.print("\n     with (format csv");
 
 			out.print(", delimiter '" + delim + "'");  // a tab should be written as a tab!
 
@@ -81,7 +80,7 @@ public class PostgresCopyStatementWriter
 			{
 				out.print(", encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
 			}
-			out.println(")");
+			out.println(");");
 		}
 		catch (Exception e)
 		{

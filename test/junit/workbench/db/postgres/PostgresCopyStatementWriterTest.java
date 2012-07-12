@@ -129,11 +129,10 @@ public class PostgresCopyStatementWriterTest
 
 			List<String> contents = StringUtil.readLines(formatFile);
 			assertNotNull(contents);
-			System.out.println(contents.get(0));
-			String expected = "copy person (id, firstname, lastname) from '";
-			expected += export.getFullPath();
-			expected += "' with (format csv, delimiter '\t', header true, quote '\"', encoding 'UTF-8')";
-			assertEquals(contents.get(0), expected);
+			assertEquals(3, contents.size());
+			assertEquals("copy person (id, firstname, lastname)", contents.get(0).trim());
+			assertEquals("from '" + export.getFullPath() + "'", contents.get(1).trim());
+			assertEquals("with (format csv, delimiter '\t', header true, quote '\"', encoding 'UTF-8');", contents.get(2).trim());
 		}
 		finally
 		{
