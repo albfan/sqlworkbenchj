@@ -36,6 +36,25 @@ public class TableIdentifierTest
 
 
 	@Test
+	public void testTwoElement()
+	{
+		TableIdentifier tbl = new TableIdentifier("cat.table", '.', '.', true, false);
+		assertNull(tbl.getSchema());
+		assertEquals("cat", tbl.getCatalog());
+		assertEquals("table", tbl.getTableName());
+
+		tbl = new TableIdentifier("schema.table", '.', '.', false, true);
+		assertNull(tbl.getCatalog());
+		assertEquals("schema", tbl.getSchema());
+		assertEquals("table", tbl.getTableName());
+
+		tbl = new TableIdentifier("schema.table", '.', '.', true, true);
+		assertNull(tbl.getCatalog());
+		assertEquals("schema", tbl.getSchema());
+		assertEquals("table", tbl.getTableName());
+	}
+
+	@Test
 	public void testGetParts()
 	{
 		String id = "foobar";

@@ -1510,7 +1510,7 @@ public class DataPumper
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), def);
 				if (name != null)
 				{
-					theTarget.setTable(name);
+					theTarget.parseTableIdentifier(name);
 					this.targetTable.repaint();
 				}
 			}

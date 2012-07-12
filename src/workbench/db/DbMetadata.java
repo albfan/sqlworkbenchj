@@ -2175,7 +2175,7 @@ public class DbMetadata
 				catalog = null;
 				retrieve = table.createCopy();
 				retrieve.setSchema(schema);
-				retrieve.setTable(tablename);
+				retrieve.parseTableIdentifier(tablename);
 				retrieve.setCatalog(null);
 			}
 		}

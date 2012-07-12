@@ -1382,7 +1382,7 @@ public class DataStore
 			this.updateTableToBeUsed = null;
 			this.setUpdateTable(ut, aConn);
 		}
-		else
+		else if (this.updateTable == null)
 		{
 			if (this.sql == null) return false;
 			List<String> tables = SqlUtil.getTables(this.sql, false, aConn);
@@ -1391,7 +1391,7 @@ public class DataStore
 			LogMgr.logDebug("DataStore.checkUpdateTable()", "Using table name: " + table);
 			this.setUpdateTable(table, aConn);
 		}
-		return true;
+		return this.updateTable != null;
 	}
 
 	/**

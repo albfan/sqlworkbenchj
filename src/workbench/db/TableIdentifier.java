@@ -58,19 +58,28 @@ public class TableIdentifier
 	public TableIdentifier(String aName)
 	{
 		this.isNewTable = false;
-		this.setTable(aName);
+		this.parseTableIdentifier(aName);
 	}
 
 	public TableIdentifier(String aName, char catalogSeparator, char schemaSeparator)
 	{
 		this.isNewTable = false;
-		this.setTable(aName, catalogSeparator, schemaSeparator);
+		this.parseTableIdentifier(aName, catalogSeparator, schemaSeparator, true, true);
+	}
+
+	public TableIdentifier(String aName, char catalogSeparator, char schemaSeparator, boolean supportsCatalogs, boolean supportsSchemas)
+	{
+		this.isNewTable = false;
+		this.parseTableIdentifier(aName, catalogSeparator, schemaSeparator, supportsCatalogs, supportsSchemas);
 	}
 
 	public TableIdentifier(String aName, WbConnection conn)
 	{
 		this.isNewTable = false;
-		this.setTable(aName, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
+		DbSettings settings = (conn == null ? null : conn.getDbSettings());
+		boolean supportsCatalogs = settings == null ? true : settings.supportsCatalogs();
+		boolean supportsSchemas = settings == null ? true : settings.supportsSchemas();
+		this.parseTableIdentifier(aName, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn), supportsCatalogs, supportsSchemas);
 		this.adjustCase(conn);
 	}
 
@@ -90,13 +99,13 @@ public class TableIdentifier
 	public TableIdentifier(String aSchema, String aTable)
 	{
 		this.setCatalog(null);
-		this.setTable(aTable);
+		this.parseTableIdentifier(aTable);
 		this.setSchema(aSchema);
 	}
 
 	public TableIdentifier(String aCatalog, String aSchema, String aTable)
 	{
-		this.setTable(aTable);
+		this.parseTableIdentifier(aTable);
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
 	}
@@ -105,7 +114,7 @@ public class TableIdentifier
 	{
 		if (parseNames)
 		{
-			this.setTable(aTable);
+			this.parseTableIdentifier(aTable);
 		}
 		else
 		{
@@ -485,42 +494,73 @@ public class TableIdentifier
 		}
 	}
 
-	public final void setTable(String aTable)
+	public final void parseTableIdentifier(String aTable)
 	{
-		setTable(aTable, '.', '.');
+		parseTableIdentifier(aTable, '.', '.', true, true);
 	}
 
-	public final void setTable(String aTable, char catalogSeparator, char schemaSeparator)
+	/**
+	 * Parse a table identifier into the different parts.
+	 *
+	 * If a name with two elements (e.g. foo.bar) is passed, the flags for schema/catalogs determine what the
+	 * first part is used for. If both are supported or only schemas, the first part is a schema. If only catalogs
+	 * are supported the first part is a catalog.
+	 *
+	 * @param tableId  the identifier (name) e.g. used by the user
+	 * @param catalogSeparator  the catalog separator
+	 * @param schemaSeparator   the schema separator
+	 * @param supportsCatalogs  flag if catalogs are supported
+	 * @param supportsSchemas   flag if schemas are supported
+	 */
+	public final void parseTableIdentifier(String tableId, char catalogSeparator, char schemaSeparator, boolean supportsCatalogs, boolean supportsSchemas)
 	{
-		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
+		if (!this.isNewTable && (StringUtil.isBlank(tableId)))
 		{
-			throw new IllegalArgumentException("Table name may not be null");
+			throw new IllegalArgumentException("Table name may not be empty");
 		}
 
-		if (aTable == null)
+		if (tableId == null)
 		{
+			// this is a "new table"
 			this.tablename = null;
 			this.schema = null;
+			this.catalog = null;
 			return;
 		}
 
 		WbStringTokenizer tok = new WbStringTokenizer(schemaSeparator, "\"", true);
-		tok.setSourceString(aTable);
+		tok.setSourceString(tableId);
 		List<String> elements = tok.getAllTokens();
 
 		if (elements.size() == 1)
 		{
-			setCatalog(getCatalogPart(aTable, catalogSeparator));
-			setTablename(getNamePart(aTable, catalogSeparator));
+			// if only one element is found it could still be a two element identifier
+			// in case the catalog separator is different from the schema separator (e.g. DB2 for iSeries)
+			setCatalog(getCatalogPart(tableId, catalogSeparator));
+			setTablename(getNamePart(tableId, catalogSeparator));
 		}
 		else if (elements.size() == 2)
 		{
-			setCatalog(getCatalogPart(elements.get(0), catalogSeparator));
-			setSchema(getNamePart(elements.get(0), catalogSeparator));
+			if (supportsSchemas && supportsCatalogs)
+			{
+				setCatalog(getCatalogPart(elements.get(0), catalogSeparator));
+				setSchema(getNamePart(elements.get(0), catalogSeparator));
+			}
+			if (supportsSchemas && !supportsCatalogs)
+			{
+				// no catalog supported, the first element must be the schema
+				setSchema(elements.get(0));
+			}
+			if (supportsCatalogs && !supportsSchemas)
+			{
+				// e.g. MySQL qualifier: database.tablename
+				setCatalog(elements.get(0));
+			}
 			setTablename(elements.get(1));
 		}
 		else if (elements.size() == 3)
 		{
+			// no ambiguity if three elements are used
 			setCatalog(elements.get(0));
 			setSchema(elements.get(1));
 			setTablename(elements.get(2));

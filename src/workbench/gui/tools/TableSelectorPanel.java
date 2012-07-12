@@ -110,7 +110,7 @@ public class TableSelectorPanel
 		if (this.newTableId != null)
 		{
 			this.newTableId.setNewTable(true);
-			this.newTableId.setTable(null);
+			this.newTableId.parseTableIdentifier(null);
 			this.newTableId.setSchema(null);
 			WbSwingUtilities.repaintNow(this);
 		}
@@ -408,7 +408,7 @@ public class TableSelectorPanel
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), name);
 				if (name != null)
 				{
-					id.setTable(name);
+					id.parseTableIdentifier(name);
 					this.tableSelector.repaint();
 				}
 			}
