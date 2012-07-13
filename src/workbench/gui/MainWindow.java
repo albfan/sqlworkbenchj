@@ -1814,7 +1814,17 @@ public class MainWindow
 		}
 	}
 
-	private void selectCurrentEditor()
+	public void requestEditorFocus()
+	{
+		MainPanel p = this.getCurrentPanel();
+		if (p instanceof SqlPanel)
+		{
+			SqlPanel sql = (SqlPanel)p;
+			sql.requestEditorFocus();
+		}
+	}
+
+	public void selectCurrentEditor()
 	{
 		MainPanel p = this.getCurrentPanel();
 		if (p instanceof SqlPanel)

@@ -963,6 +963,8 @@ public class WbSwingUtilities
 
 	public static void requestFocus(final JComponent comp)
 	{
+		if (comp == null) return;
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override

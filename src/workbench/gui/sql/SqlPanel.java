@@ -995,6 +995,15 @@ public class SqlPanel
 		}
 	}
 
+	public void requestEditorFocus()
+	{
+		if (editor != null)
+		{
+			editor.requestFocus();
+			editor.requestFocusInWindow();
+		}
+	}
+
 	@Override
 	public String getText()
 	{
@@ -1271,7 +1280,7 @@ public class SqlPanel
 	{
 		return input.replaceAll("\\<.*?\\>", "");
 	}
-	
+
 	private boolean confirmDiscardTransaction()
 	{
 		WbConnection con = getConnection();

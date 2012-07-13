@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.macros.MacroPopup;
 import workbench.resource.ResourceMgr;
 
@@ -52,7 +53,7 @@ public class ShowMacroPopupAction
 		createPopup();
 		macroWindow.setVisible(true);
 	}
-	
+
 	private void createPopup()
 	{
 		if (this.macroWindow == null)
@@ -61,6 +62,7 @@ public class ShowMacroPopupAction
 			EventQueue.invokeLater(new Runnable()
 			{
 
+				@Override
 				public void run()
 				{
 					client.addWindowFocusListener(ShowMacroPopupAction.this);
@@ -70,26 +72,31 @@ public class ShowMacroPopupAction
 		}
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		showPopup();
 	}
 
+	@Override
 	public void windowGainedFocus(WindowEvent e)
 	{
 		if (macroWindow != null && e.getWindow() == client && !macroWindow.isShowing())
 		{
 			macroWindow.setVisible(true);
+			client.requestFocus();
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
-					client.requestFocus();
+					client.requestEditorFocus();
 				}
 			});
 		}
 	}
 
+	@Override
 	public void windowLostFocus(WindowEvent e)
 	{
 		if (macroWindow != null
@@ -101,10 +108,12 @@ public class ShowMacroPopupAction
 		}
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		if (e.getWindow() == macroWindow)
@@ -113,6 +122,7 @@ public class ShowMacroPopupAction
 		}
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 		if (e.getWindow() == macroWindow)
@@ -122,21 +132,25 @@ public class ShowMacroPopupAction
 		}
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
-		if (e.getWindow() == macroWindow && e.getOppositeWindow() != client 
+		if (e.getWindow() == macroWindow && e.getOppositeWindow() != client
 				&& macroWindow.isShowing() && !macroWindow.isClosing())
 		{
 			macroWindow.setVisible(false);
