@@ -19,7 +19,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.macros.MacroPopup;
 import workbench.resource.ResourceMgr;
 

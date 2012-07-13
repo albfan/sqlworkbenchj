@@ -223,7 +223,6 @@ public class MacroPopup
 						if (expander != null)
 						{
 							expander.insertMacroText(macro.getText());
-							panel.selectEditorLater();
 						}
 					}
 					else
@@ -231,6 +230,7 @@ public class MacroPopup
 						MacroRunner runner = new MacroRunner();
 						runner.runMacro(macro, panel, WbAction.isShiftPressed(e.getModifiers()));
 					}
+					WbSwingUtilities.requestFocus(mainWindow, panel);
 				}
 			}
 		}
