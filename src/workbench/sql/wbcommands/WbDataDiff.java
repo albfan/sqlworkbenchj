@@ -23,6 +23,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDataDiff;
 import workbench.db.compare.TableDeleteSync;
+import workbench.db.compare.TableDiffStatus;
 import workbench.db.exporter.BlobMode;
 import workbench.db.importer.TableDependencySorter;
 import workbench.log.LogMgr;
@@ -334,14 +335,28 @@ public class WbDataDiff
 				{
 					dataDiff.setOutputWriters(updates, inserts, nl, encoding);
 					dataDiff.setBaseDir(outputDir);
-					if (dataDiff.setTableName(refTable, targetTable))
+					TableDiffStatus status = dataDiff.setTableName(refTable, targetTable);
+					switch (status)
 					{
-						dataDiff.doSync();
-					}
-					else
-					{
-						result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
-						result.setWarning(true);
+						case OK:
+							dataDiff.doSync();
+							break;
+						case ReferenceNotFound:
+							result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", refTable.getTableName()));
+							result.setWarning(true);
+							break;
+						case TargetNotFound:
+							result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", targetTable.getTableName()));
+							result.setWarning(true);
+							break;
+						case NoPK:
+							result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoPK", refTable.getTableName()));
+							result.setWarning(true);
+							break;
+						case ColumnMismatch:
+							result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
+							result.setWarning(true);
+							break;
 					}
 				}
 				finally
@@ -370,8 +385,17 @@ public class WbDataDiff
 							deleteSync.setTypeSql();
 						}
 						Set<String> keys = alternatekeys.get(targetTable.getTableName());
-						deleteSync.setTableName(refTable, targetTable, keys);
-						deleteSync.doSync();
+						TableDiffStatus status = deleteSync.setTableName(refTable, targetTable, keys);
+						if (status == TableDiffStatus.OK)
+						{
+							deleteSync.doSync();
+						}
+						else if (status == TableDiffStatus.NoPK)
+						{
+							// if the table does not have a PK, a warning was already added during the compare step
+							// so there is nothing to do here.
+							LogMgr.logDebug("WbDataDiff.execute()", "No delete performed for " + targetTable.getTableName() + " because not PK was found");
+						}
 					}
 					finally
 					{

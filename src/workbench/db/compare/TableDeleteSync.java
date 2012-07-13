@@ -182,7 +182,7 @@ public class TableDeleteSync
 	 * @param alternatePK alternate PK columns to be used
 	 * @throws java.sql.SQLException
 	 */
-	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete, Set<String> alternatePK)
+	public TableDiffStatus setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete, Set<String> alternatePK)
 		throws SQLException
 	{
 		if (tableToCheck == null) throw new IllegalArgumentException("Source table may not be null!");
@@ -219,7 +219,8 @@ public class TableDeleteSync
 
 		if (columnMap.isEmpty())
 		{
-			throw new SQLException("No primary key found to delete rows from target table " + tableToDelete.getTableName());
+			LogMgr.logWarning("TableDeleteSync.setTableName()", "No primary key found to delete rows from target table " + tableToDelete.getTableName(), null);
+			return TableDiffStatus.NoPK;
 		}
 
 		if (outputWriter == null)
@@ -230,6 +231,7 @@ public class TableDeleteSync
 			this.deleteStatement = new BatchedStatement(deleteStmt, toDelete, batchSize);
 			LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
 		}
+		return TableDiffStatus.OK;
 	}
 
 	public void doSync()

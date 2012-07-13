@@ -262,7 +262,7 @@ public class TableDataDiff
 	 * @throws java.sql.SQLException if the refTable does not have a primary key
 	 * or the tableToVerify is not found
 	 */
-	public boolean setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
+	public TableDiffStatus setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
 		throws SQLException
 	{
 		firstUpdate = true;
@@ -270,7 +270,8 @@ public class TableDataDiff
 		referenceTable = this.reference.getMetadata().findSelectableObject(refTable);
 		if (referenceTable == null)
 		{
-			throw new SQLException("Reference table " + refTable.getTableName() + " not found!");
+			LogMgr.logError("TableDataDiff.setTableName()", "Reference table " + refTable.getTableName() + " not found!", null);
+			return TableDiffStatus.ReferenceNotFound;
 		}
 		List<ColumnIdentifier> cols = this.reference.getMetadata().getTableColumns(referenceTable);
 		this.pkColumns = new ArrayList<ColumnIdentifier>();
@@ -299,13 +300,14 @@ public class TableDataDiff
 
 		if (CollectionUtil.isEmpty(pkColumns))
 		{
-			throw new SQLException("No primary key found for table " + referenceTable);
+			return TableDiffStatus.NoPK; //throw new SQLException("No primary key found for table " + referenceTable);
 		}
 
 		tableToSync = this.toSync.getMetadata().findTable(tableToVerify, false);
 		if (tableToSync == null)
 		{
-			throw new SQLException("Target table " + tableToVerify.getTableName() + " not found!");
+			LogMgr.logError("TableDataDiff.setTableName()", "Target table " + tableToVerify.getTableName() + " not found!", null);
+			return TableDiffStatus.TargetNotFound;
 		}
 		else
 		{
@@ -313,16 +315,16 @@ public class TableDataDiff
 			tableToSync = toSyncDef.getTable();
 		}
 
-		boolean columnMatch = true;
+		TableDiffStatus status = TableDiffStatus.OK;
 		for (ColumnIdentifier col : cols)
 		{
 			if (findTargetColumn(col) == null)
 			{
-				columnMatch = false;
+				status = TableDiffStatus.ColumnMismatch;
 				LogMgr.logError("TableDataDiff.setTableName()", "Reference column " + col.getColumnName() + " not found in target table!", null);
 			}
 		}
-		return columnMatch;
+		return status;
 	}
 
 	public void cancel()

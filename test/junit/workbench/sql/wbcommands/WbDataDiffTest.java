@@ -61,6 +61,67 @@ public class WbDataDiffTest
 		this.target = util.getConnection("dataDiffTarget");
 	}
 
+
+	@Test
+	public void testNoPkTables()
+		throws Exception
+	{
+		String script = "drop all objects;\n" +
+			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id)); \n" +
+			"create table foobar (the_answer integer); \n" +
+			"alter table person_address add constraint fk_adr foreign key (address_id) references address (address_id);\n" +
+			"alter table person_address add constraint fk_per foreign key (person_id) references person (person_id);\n";
+
+		setupConnections();
+
+		Statement srcStmt;
+		Statement targetStmt;
+
+		try
+		{
+			util.prepareEnvironment();
+			TestUtil.executeScript(source, script);
+			TestUtil.executeScript(target, script);
+
+			srcStmt = source.createStatement();
+			insertData(srcStmt);
+			source.commit();
+
+			targetStmt = target.createStatement();
+			insertData(targetStmt);
+
+			targetStmt.executeUpdate("DELETE FROM person_address WHERE person_id in (10,14)");
+			targetStmt.executeUpdate("DELETE FROM address WHERE address_id in (10, 14)");
+			targetStmt.executeUpdate("DELETE FROM person WHERE person_id in (10, 14)");
+			target.commit();
+
+			TestUtil.executeScript(source, "insert into foobar values (42);");
+
+			util.emptyBaseDirectory();
+
+			StatementRunner runner = new StatementRunner();
+			runner.setBaseDir(util.getBaseDir());
+			String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.sql -encoding=UTF8";
+			runner.runStatement(sql);
+
+			StatementRunnerResult result = runner.getResult();
+			System.out.println(result.getMessageBuffer());
+			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
+			assertTrue(main.exists());
+
+			Reader r = EncodingUtil.createReader(main, "UTF-8");
+			String sync = FileUtil.readCharacters(r);
+			System.out.println(sync);
+		}
+		finally
+		{
+			source.disconnect();
+			target.disconnect();
+		}
+	}
+
 	@Test
 	public void testExecute()
 		throws Exception
