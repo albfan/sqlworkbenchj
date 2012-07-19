@@ -225,7 +225,7 @@
 			</para>
 			<para>
 				When you have comments defined in your Oracle database and use the <link linkend="command-schema-report">WbSchemaReport</link>
-				command, then you have to enable the remrks reporting, otherwise the comments will not show up in the report.
+				command, then you have to enable the remarks reporting, otherwise the comments will not show up in the report.
 			</para>
 		</section>
 
