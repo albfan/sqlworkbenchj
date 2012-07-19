@@ -17,6 +17,7 @@ package workbench.db;
  */
 public interface SchemaInformationReader
 {
-	String getCurrentSchema(WbConnection conn);
+	String getCurrentSchema();
+	String getCachedSchema();
 	void dispose();
 }

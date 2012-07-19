@@ -30,6 +30,7 @@ import workbench.util.StringUtil;
 public class GenericSchemaInfoReader
 	implements SchemaInformationReader, PropertyChangeListener
 {
+	private WbConnection connection;
 	private String schemaQuery;
 	private boolean useSavepoint;
 	private boolean isCacheable;
@@ -43,8 +44,9 @@ public class GenericSchemaInfoReader
 	private String cacheProp;
 	private int callCount;
 
-	public GenericSchemaInfoReader(String dbid)
+	public GenericSchemaInfoReader(WbConnection conn, String dbid)
 	{
+		connection = conn;
 		useSavepoint = Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".currentschema.query.usesavepoint", false);
 
 		queryProp = "workbench.db." + dbid + ".currentschema.query";
@@ -55,6 +57,8 @@ public class GenericSchemaInfoReader
 		isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
 		reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
 		Settings.getInstance().addPropertyChangeListener(this, cacheProp, queryProp, reuseProp);
+
+		connection.addChangeListener(this);
 		logSettings();
 	}
 
@@ -66,6 +70,12 @@ public class GenericSchemaInfoReader
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
+		if (evt.getSource() == this.connection && evt.getPropertyName().equals(WbConnection.PROP_SCHEMA))
+		{
+			this.cachedSchema = null;
+			return;
+		}
+
 		if (evt.getPropertyName().equals(queryProp))
 		{
 			SqlUtil.closeStatement(query);
@@ -93,22 +103,21 @@ public class GenericSchemaInfoReader
 	}
 
 
-
 	/**
 	 * Retrieves the currently active schema from the server.
 	 *
 	 * This is done by running the query configured for the passed dbid.
 	 * If no query is configured or an error is thrown, this method returns null
 	 *
-	 * If a configured query throws an error, the query will be ignored for all subsequent calls. 
+	 * If a configured query throws an error, the query will be ignored for all subsequent calls.
 	 *
 	 * @see #GenericSchemaInfoReader(String)
 	 * @see workbench.db.DbMetadata#getDbId()
 	 */
 	@Override
-	public String getCurrentSchema(WbConnection conn)
+	public String getCurrentSchema()
 	{
-		if (conn == null) return null;
+		if (this.connection == null) return null;
 		if (StringUtil.isEmptyString(this.schemaQuery)) return null;
 		if (isCacheable && cachedSchema != null) return cachedSchema;
 
@@ -123,20 +132,20 @@ public class GenericSchemaInfoReader
 		{
 			if (useSavepoint)
 			{
-				sp = conn.setSavepoint();
+				sp = connection.setSavepoint();
 			}
 
 			if (reuseStmt)
 			{
 				if (query == null)
 				{
-					query = conn.getSqlConnection().prepareStatement(schemaQuery);
+					query = connection.getSqlConnection().prepareStatement(schemaQuery);
 				}
 				rs = query.executeQuery();
 			}
 			else
 			{
-				stmt = conn.createStatement();
+				stmt = connection.createStatement();
 				rs = stmt.executeQuery(schemaQuery);
 			}
 
@@ -145,11 +154,11 @@ public class GenericSchemaInfoReader
 				currentSchema = rs.getString(1);
 			}
 			if (currentSchema != null) currentSchema = currentSchema.trim();
-			conn.releaseSavepoint(sp);
+			connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			conn.rollback(sp);
+			connection.rollback(sp);
 			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema using query: " + schemaQuery, e);
 			if (e instanceof SQLException)
 			{
@@ -175,6 +184,12 @@ public class GenericSchemaInfoReader
 	}
 
 	@Override
+	public String getCachedSchema()
+	{
+		return cachedSchema;
+	}
+	
+	@Override
 	public void dispose()
 	{
 		if (query != null)
@@ -184,6 +199,7 @@ public class GenericSchemaInfoReader
 			query = null;
 		}
 		cachedSchema = null;
+		connection = null;
 		Settings.getInstance().removePropertyChangeListener(this);
 		LogMgr.logDebug("GenericSchemaInformationReader.dispose()", "Called: " + callCount + " times");
 	}

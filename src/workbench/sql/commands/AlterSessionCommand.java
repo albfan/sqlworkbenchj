@@ -98,7 +98,18 @@ public class AlterSessionCommand
 				String schema = meta.getCurrentSchema();
 				if (!oldSchema.equalsIgnoreCase(schema))
 				{
-					currentConnection.schemaChanged(oldSchema, schema);
+					boolean busy = currentConnection.isBusy();
+					try
+					{
+						// schemaChanged will trigger an update of the ConnectionInfo display
+						// but that only retrieves the current schema if the connection isn't busy
+						currentConnection.setBusy(false);
+						currentConnection.schemaChanged(oldSchema, schema);
+					}
+					finally
+					{
+						currentConnection.setBusy(busy);
+					}
 					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", schema));
 				}
 			}

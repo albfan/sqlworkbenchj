@@ -10,7 +10,6 @@
  */
 package workbench.db.mssql;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import workbench.db.SchemaInformationReader;
@@ -27,7 +26,7 @@ public class SqlServerSchemaInfoReader
 {
 	private String defaultSchema;
 
-	public SqlServerSchemaInfoReader(Connection con)
+	public SqlServerSchemaInfoReader(WbConnection con)
 	{
 		// As the default schema is a property of the user definition and nothing that can change at runtime (at least not easily)
 		// I assume it's safe to cache the current schema.
@@ -54,11 +53,17 @@ public class SqlServerSchemaInfoReader
 	}
 
 	@Override
-	public String getCurrentSchema(WbConnection conn)
+	public String getCachedSchema()
 	{
 		return defaultSchema;
 	}
-	
+
+	@Override
+	public String getCurrentSchema()
+	{
+		return defaultSchema;
+	}
+
 	@Override
 	public void dispose()
 	{

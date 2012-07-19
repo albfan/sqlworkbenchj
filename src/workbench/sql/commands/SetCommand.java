@@ -87,7 +87,7 @@ public class SetCommand
 			}
 
 			boolean execSql = true;
-			boolean checkSchema = false;
+			boolean pgSchemaChange = false;
 
 			if (command != null)
 			{
@@ -159,7 +159,7 @@ public class SetCommand
 				}
 				else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
 				{
-					checkSchema = true;
+					pgSchemaChange = true;
 				}
 			}
 
@@ -167,7 +167,7 @@ public class SetCommand
 			if (execSql)
 			{
 				String oldSchema = null;
-				if (checkSchema)
+				if (pgSchemaChange)
 				{
 					oldSchema = currentConnection.getCurrentSchema();
 				}
@@ -186,18 +186,20 @@ public class SetCommand
 				boolean hasResult = this.currentStatement.execute(aSql);
 				processMoreResults(aSql, result, hasResult);
 				result.setSuccess();
-				appendSuccessMessage(result);
+
+				if (!pgSchemaChange)
+				{
+					appendSuccessMessage(result);
+				}
 
 				currentConnection.releaseSavepoint(sp);
 
-				if (checkSchema)
+				if (pgSchemaChange)
 				{
-					LogMgr.logDebug("SetCommand.execute()", "Updating current schema");
-					String newSchema = currentConnection.getCurrentSchema();
-					currentConnection.schemaChanged(oldSchema, newSchema);
+					String newSchema = handlePgSchemaChange(oldSchema);
+					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
 				}
 			}
-
 		}
 		catch (Exception e)
 		{
@@ -226,6 +228,27 @@ public class SetCommand
 		}
 
 		return result;
+	}
+
+	private String handlePgSchemaChange(String oldSchema)
+	{
+		boolean busy = currentConnection.isBusy();
+		String newSchema = null;
+		try
+		{
+			currentConnection.setBusy(false);
+			LogMgr.logDebug("SetCommand.execute()", "Updating current schema");
+			newSchema = currentConnection.getCurrentSchema();
+
+			// schemaChanged will trigger an update of the ConnectionInfo
+			// but that only retrieves the current schema if the connection isn't busy
+			currentConnection.schemaChanged(oldSchema, newSchema);
+		}
+		finally
+		{
+			currentConnection.setBusy(busy);
+		}
+		return newSchema;
 	}
 
 	private StatementRunnerResult handleAutotrace(String parameter)

@@ -877,7 +877,7 @@ public class WbConnection
 	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
 	 *
 	 * @return the escape characters to mask wildcards in a string literal
-	 * @see DbMetadata#getSearchStringEscape() 
+	 * @see DbMetadata#getSearchStringEscape()
 	 */
 	public String getSearchStringEscape()
 	{
@@ -950,8 +950,8 @@ public class WbConnection
 				buff.append(catalog);
 			}
 
-			String schema = isBusy ? null : meta.getSchemaToUse();
-			if (schema != null && !schema.equalsIgnoreCase(user))
+			String schema = isBusy ? null : meta.getCurrentSchema();
+			if (schema != null && !schema.equalsIgnoreCase(user) && !meta.ignoreSchema(schema, "%.INVALID.%"))
 			{
 				String schemaName = meta.getSchemaTerm();
 				buff.append(", ");
@@ -1233,7 +1233,7 @@ public class WbConnection
 
 	public void schemaChanged(String oldSchema, String newSchema)
 	{
-		boolean changed = currentSchema != null && !currentSchema.equals(newSchema);
+		boolean changed = (currentSchema != null && !currentSchema.equals(newSchema)) || !StringUtil.equalString(oldSchema, newSchema);
 		this.currentSchema = newSchema;
 		if (changed)
 		{

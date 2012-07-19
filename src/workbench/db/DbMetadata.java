@@ -260,7 +260,7 @@ public class DbMetadata
 				  && SqlServerUtil.isSqlServer2008(dbConnection))
 			{
 				// SqlServerSchemaInfoReader will cache the user's default schema
-				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection.getSqlConnection());
+				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection);
 			}
 		}
 		else if (productLower.indexOf("db2") > -1)
@@ -315,7 +315,7 @@ public class DbMetadata
 
 		if (schemaInfoReader == null)
 		{
-			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
+			this.schemaInfoReader = new GenericSchemaInfoReader(this.dbConnection, this.getDbId());
 		}
 
 		if (this.dataTypeResolver == null)
@@ -812,7 +812,7 @@ public class DbMetadata
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
 		if (this.isAccess) return true;
-		
+
 		String cat = table.getCatalog();
 		if (this.isExcel)
 		{
@@ -1280,7 +1280,7 @@ public class DbMetadata
 	{
 		if (dbSettings.supportsSchemas() && this.schemaInfoReader != null)
 		{
-			return this.schemaInfoReader.getCurrentSchema(this.dbConnection);
+			return this.schemaInfoReader.getCurrentSchema();
 		}
 		return null;
 	}
