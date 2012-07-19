@@ -11,19 +11,18 @@
  */
 package workbench.sql.wbcommands;
 
-import java.sql.Statement;
-import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.wbcommands.CommonDiffParameters.TableMapping;
 import workbench.util.ArgumentParser;
-import static org.junit.Assert.*;
-import workbench.sql.StatementRunner;
 
 /**
  *

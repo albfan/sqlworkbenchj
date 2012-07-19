@@ -369,10 +369,15 @@ public final class WbManager
 		{
 			if (Settings.getInstance().wasExternallyModified())
 			{
+				if (Settings.getInstance().getBoolProperty("workbench.debug.trace.configcheck", true))
+				{
+					LogMgr.logDebug("WbManager.canExit()", "Confirm overwrite called", new Exception("BackTrack"));
+				}
 				String msg = ResourceMgr.getFormattedString("MsgSettingsChanged", Settings.getInstance().getConfigFile().getFullPath());
-				int result = WbSwingUtilities.getYesNoCancel(getCurrentWindow(), msg);
-				this.overWriteGlobalSettingsFile = (result == JOptionPane.OK_OPTION);
-				return result != JOptionPane.CANCEL_OPTION;
+				int choice = WbSwingUtilities.getYesNoCancel(getCurrentWindow(), msg);
+				LogMgr.logDebug("WbManager.canExit()", "Config file overwrite choice: " + WbSwingUtilities.choiceToString(choice));
+				this.overWriteGlobalSettingsFile = (choice == JOptionPane.OK_OPTION);
+				return choice != JOptionPane.CANCEL_OPTION;
 			}
 			return true;
 		}

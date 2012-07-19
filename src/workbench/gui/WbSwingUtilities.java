@@ -964,7 +964,7 @@ public class WbSwingUtilities
 	public static void requestFocus(final JComponent comp)
 	{
 		if (comp == null) return;
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -1053,4 +1053,20 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static String choiceToString(int choice)
+	{
+		switch (choice)
+		{
+			case JOptionPane.OK_OPTION:
+				return "OK_OPTION";
+			case JOptionPane.CANCEL_OPTION:
+				return "CANCEL_OPTION";
+			case JOptionPane.NO_OPTION:
+				return "NO_OPTION";
+			case JOptionPane.CLOSED_OPTION:
+				return "CLOSED_OPTION";
+			default:
+				return Integer.toString(choice);
+		}
+	}
 }

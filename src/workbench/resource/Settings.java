@@ -167,7 +167,7 @@ public class Settings
 		if (WbManager.getInstance() != null)
 		{
 			// Make the installation directory available as a system property as well.
-			// this can e.g. be used to defined the location of the logfile relative
+			// this can e.g. be used to define the location of the logfile relative
 			// to the installation path
 			System.setProperty("workbench.install.dir", WbManager.getInstance().getJarPath());
 		}
@@ -234,12 +234,13 @@ public class Settings
 		{
 			initLogging();
 
-			// This message should not be logged before initLogging() has been called!
-			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+			// These messages should not be logged before initLogging() has been called!
+			LogMgr.logInfo("Settings.initialize()", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+			LogMgr.logDebug("Settings.initialize()", "Last modification time of loaded config file: " + this.fileTime);
 
 			if (getBoolProperty("workbench.db.resetdefaults"))
 			{
-				LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
+				LogMgr.logInfo("Settings.initialize()", "Resetting database properties to built-in defaults");
 				resetDefaults();
 			}
 		}
@@ -343,7 +344,7 @@ public class Settings
 			LogMgr.setOutputFile(logfile, maxSize);
 			if (old != null)
 			{
-				LogMgr.logWarning("Settings.<init>", "Could not write requested logfile '" + old + "'");
+				LogMgr.logWarning("Settings.initLogging()", "Could not write requested logfile '" + old + "'");
 			}
 		}
 		catch (Throwable e)
@@ -3108,6 +3109,8 @@ public class Settings
 	public boolean wasExternallyModified()
 	{
 		long time = this.configfile.lastModified();
+		LogMgr.logDebug("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
+		if (time == 0) return false;
 		return time > this.fileTime;
 	}
 
