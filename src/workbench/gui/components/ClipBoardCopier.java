@@ -324,7 +324,10 @@ public class ClipBoardCopier
 				}
 				StrBuffer sql = converter.convertRowData(rowdata, row);
 				sql.appendTo(result);
-				result.append('\n');
+				if (!sql.endsWith('\n'))
+				{
+					result.append('\n');
+				}
 			}
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();

@@ -768,6 +768,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.comma.spaceafter", flag);
 	}
 
+	public boolean getFormatterIndentInsert()
+	{
+	    return getBoolProperty("workbench.sql.formatter.insert.indent", true);
+	}
+
+	public void setFormatterIndentInsert(boolean flag)
+	{
+	    setProperty("\"workbench.sql.formatter.insert.indent", flag);
+	}
+
 	public boolean getFormatterCommaAfterLineBreak()
 	{
 	    return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);

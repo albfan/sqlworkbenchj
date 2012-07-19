@@ -87,6 +87,7 @@ public class SqlFormatter
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
+	private boolean indentInsert = true;
 	private JoinWrapStyle joinWrapping = JoinWrapStyle.onlyMultiple;
 	private String dbId;
 	private char catalogSeparator = '.';
@@ -132,6 +133,7 @@ public class SqlFormatter
 		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		joinWrapping = Settings.getInstance().getFormatterJoinWrapStyle();
+		indentInsert = Settings.getInstance().getFormatterIndentInsert();
 		setDbId(dbId);
 	}
 
@@ -366,7 +368,7 @@ public class SqlFormatter
 		}
 	}
 
-	private void indent(StringBuilder text)
+	private void indent(CharSequence text)
 	{
 		this.result.append(text);
 	}
@@ -611,8 +613,7 @@ public class SqlFormatter
 
 	private SQLToken processList(SQLToken last, int indentCount, Set<String> terminalKeys)
 	{
-		StringBuilder b = new StringBuilder(indentCount);
-		for (int i=0; i < indentCount; i++) b.append(' ');
+		String myIndent = StringUtil.padRight(" ", indentCount);
 
 		int currentColumnCount = 0;
 		boolean isSelect = last.getContents().equals("SELECT");
@@ -701,7 +702,7 @@ public class SqlFormatter
 				{
 					currentColumnCount = 0;
 					this.appendNewline();
-					this.indent(b);
+					this.indent(myIndent);
 					if (commaAfterLineBreak)
 					{
 						this.appendText(',');
@@ -822,13 +823,11 @@ public class SqlFormatter
 
 	private SQLToken processDecode(int myIndent)
 	{
-		StringBuilder current = new StringBuilder(myIndent);
+		String current = StringUtil.padRight(" ", myIndent);
 
-		for (int i=0; i < myIndent; i++) current.append(' ');
-
-		StringBuilder b = new StringBuilder(myIndent + 2);
-		for (int i=0; i < myIndent; i++) b.append(' ');
-		b.append("      ");
+		StringBuilder decodeIndent = new StringBuilder(myIndent + 2);
+		for (int i=0; i < myIndent; i++) decodeIndent.append(' ');
+		decodeIndent.append("      ");
 
 		SQLToken t = this.lexer.getNextToken(true,true);
 		int commaCount = 0;
@@ -859,7 +858,7 @@ public class SqlFormatter
 				if (commaCount % 2 == 1)
 				{
 					this.appendNewline();
-					this.indent(b);
+					this.indent(decodeIndent);
 				}
 			}
 			else if (")".equalsIgnoreCase(text) && !inQuotes && bracketCount == 0)
@@ -879,15 +878,12 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processCase(int myIndent)
+	private SQLToken processCase(int indentCount)
 	{
-		StringBuilder current = new StringBuilder(myIndent);
-
-		for (int i=0; i < myIndent; i++) current.append(' ');
-
-		StringBuilder b = new StringBuilder(myIndent + 2);
-		for (int i=0; i < myIndent; i++) b.append(' ');
-		b.append("  ");
+		String current = StringUtil.padRight(" ", indentCount);
+		StringBuilder myIndent = new StringBuilder(indentCount + 2);
+		for (int i=0; i < indentCount; i++) myIndent.append(' ');
+		myIndent.append("  ");
 
 		SQLToken last = null;
 		SQLToken t = this.lexer.getNextToken(true,false);
@@ -904,7 +900,7 @@ public class SqlFormatter
 			else if ("WHEN".equals(text) || "ELSE".equals(text))
 			{
 				this.appendNewline();
-				this.indent(b);
+				this.indent(myIndent);
 				this.appendText(text);
 			}
 			else if ("THEN".equals(text))
@@ -960,10 +956,8 @@ public class SqlFormatter
 
 	private SQLToken processWbCommand(String wbVerb)
 	{
-		int myindent = wbVerb.length() + 1;
-		StringBuilder b = new StringBuilder(myindent);
-
-		for (int i=0; i < myindent; i++) b.append(' ');
+		int indentCount = wbVerb.length() + 1;
+		String myIndent = StringUtil.padRight(" ", indentCount);
 		this.appendText(' ');
 
 		CommandMapper mapper = new CommandMapper();
@@ -1004,7 +998,7 @@ public class SqlFormatter
 				if (!first)
 				{
 					this.appendNewline();
-					this.indent(b);
+					this.indent(myIndent);
 				}
 				isParm = true;
 			}
@@ -1027,21 +1021,20 @@ public class SqlFormatter
 
 	private SQLToken processBracketList(int indentCount, int elementsPerLine)
 	{
-		StringBuilder b = new StringBuilder(indentCount);
-
-		for (int i=0; i < indentCount; i++) b.append(' ');
+		StringBuilder myIndent = new StringBuilder(indentCount);
+		for (int i=0; i < indentCount; i++) myIndent.append(' ');
 
 		this.appendNewline();
 		if (elementsPerLine == 1)
 		{
 			this.appendText('(');
 			this.appendNewline();
-			this.appendText(b);
+			this.appendText(myIndent);
 		}
 		else
 		{
-			this.appendText(b);
-			b.append(' ');
+			this.appendText(myIndent);
+			myIndent.append(' ');
 			this.appendText("(");
 		}
 
@@ -1078,7 +1071,7 @@ public class SqlFormatter
 					if (elementsPerLine == 1)
 					{
 						appendNewline();
-						indent(b);
+						indent(myIndent);
 					}
 					bracketCount ++;
 				}
@@ -1097,7 +1090,7 @@ public class SqlFormatter
 				if (commaAfterLineBreak && (elementCount == 0 || elementCount >= elementsPerLine))
 				{
 					this.appendNewline();
-					this.indent(b);
+					this.indent(myIndent);
 					elementCount = 0;
 				}
 				this.appendText(",");
@@ -1105,7 +1098,7 @@ public class SqlFormatter
 				if (!commaAfterLineBreak && elementCount >= elementsPerLine)
 				{
 					this.appendNewline();
-					this.indent(b);
+					this.indent(myIndent);
 					elementCount = 0;
 				}
 				else if (!commaAfterLineBreak || (commaAfterLineBreak && addSpaceAfterLineBreakComma))
@@ -1210,8 +1203,7 @@ public class SqlFormatter
 	private void appendCommaList(List<StringBuilder> aList)
 	{
 		int indentCount = this.getCurrentLineLength();
-		StringBuilder ind = new StringBuilder(indentCount);
-		for (int i=0; i < indentCount; i++) ind.append(' ');
+		String ind = StringUtil.padRight(" ", indentCount);
 		boolean newline = (aList.size() > 10);
 		int count = aList.size();
 		for (int i=0; i < count; i++)
@@ -1370,7 +1362,7 @@ public class SqlFormatter
 					if (t != null && t.getContents().equals("("))
 					{
 						int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
-						t = this.processBracketList(2, colsPerLine);
+						t = this.processBracketList(indentInsert ? 2 : 0, colsPerLine);
 					}
 					if (t == null) return;
 					continue;
@@ -1633,7 +1625,7 @@ public class SqlFormatter
 			else if (t.isSeparator() && t.getContents().equals("("))
 			{
 				int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
-				return this.processBracketList(2, colsPerLine);
+				return this.processBracketList(indentInsert ? 2 : 0, colsPerLine);
 			}
 		}
 		return t;
@@ -2033,8 +2025,7 @@ public class SqlFormatter
 	 */
 	private void outputElements(List elements, int maxElements, int indentCount)
 	{
-		StringBuilder myIndent = new StringBuilder(indentCount);
-		for (int i=0; i<indentCount; i++) myIndent.append(' ');
+		String myIndent = StringUtil.padRight(" ", indentCount);
 
 		int count = elements.size();
 
