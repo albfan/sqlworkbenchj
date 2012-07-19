@@ -259,8 +259,9 @@ public class TableDataDiff
 	 *
 	 * @param refTable the table with the "reference" data
 	 * @param tableToVerify the table from which obsolete rows should be deleted
-	 * @throws java.sql.SQLException if the refTable does not have a primary key
-	 * or the tableToVerify is not found
+	 * @return status information if the tables can be compared
+	 *
+	 * @throws java.sql.SQLException if something went wrong retrieving the table meta data
 	 */
 	public TableDiffStatus setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
 		throws SQLException

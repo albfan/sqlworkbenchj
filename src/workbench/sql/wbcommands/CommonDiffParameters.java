@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
@@ -24,6 +25,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -130,6 +132,8 @@ public class CommonDiffParameters
 		this.missingRefTables.clear();
 		this.missingTargetTables.clear();
 
+		boolean multipleSchema = false;
+
 		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA))
 		{
 			String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
@@ -195,7 +199,27 @@ public class CommonDiffParameters
 			tableNames = cmdLine.getValue(PARAM_TARGETTABLES);
 			if (StringUtil.isBlank(tableNames))
 			{
-				targetTables = targetCon.getMetadata().getTableList();
+				Set<String> schemas = CollectionUtil.caseInsensitiveSet();
+				targetTables = new ArrayList<TableIdentifier>(refTables.size());
+				for (TableIdentifier tbl : refTables)
+				{
+					if (tbl.getSchema() != null)
+					{
+						schemas.add(tbl.getSchema());
+					}
+				}
+				if (schemas.size() > 0)
+				{
+					for (String schema : schemas)
+					{
+						targetTables.addAll(targetCon.getMetadata().getTableList(null, schema));
+					}
+				}
+				else
+				{
+					targetTables.addAll(targetCon.getMetadata().getTableList());
+				}
+				multipleSchema = schemas.size() > 1;
 			}
 			else
 			{
@@ -217,7 +241,8 @@ public class CommonDiffParameters
 		int index = 0;
 		for (TableIdentifier refTable : refTables)
 		{
-			if (TableIdentifier.findTableByName(excluded, refTable) != null) continue;
+			if (multipleSchema && TableIdentifier.findTableByNameAndSchema(excluded, refTable) != null) continue;
+			if (!multipleSchema && TableIdentifier.findTableByName(excluded, refTable) != null) continue;
 
 			if (matchNames)
 			{

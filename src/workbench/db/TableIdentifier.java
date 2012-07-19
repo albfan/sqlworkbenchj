@@ -877,6 +877,27 @@ public class TableIdentifier
 		return null;
 	}
 
+	public static TableIdentifier findTableByNameAndSchema(List<TableIdentifier> tables, TableIdentifier toFind)
+	{
+		if (tables == null) return null;
+		String nameToFind = getQualifiedName(toFind);
+
+		for (TableIdentifier table : tables)
+		{
+			String name = getQualifiedName(table);
+			if (name.equalsIgnoreCase(nameToFind)) return table;
+		}
+		return null;
+	}
+
+	private static String getQualifiedName(TableIdentifier table)
+	{
+		String name = table.getTableName();
+		String schema = table.getSchema();
+		if (StringUtil.isEmptyString(schema)) return name;
+		return schema + "." + name;
+	}
+
 	public static boolean tablesAreEqual(TableIdentifier one, TableIdentifier other, WbConnection con)
 	{
 		if (one == null || other == null) return false;

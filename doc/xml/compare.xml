@@ -134,6 +134,15 @@
 				</row>
 
 				<row>
+					<entry>-excludeTables</entry>
+					<entry>
+						A comma separated list of tables that should not be compared. If tables from
+            several schemas are compared (using <literal>-referenceTables=schema_one.*, schema_two.*</literal>) then
+            the listed tables must be qualified with a schema, e.g. <literal>-excludeTables=schema_one.foobar, schema_two.fubar</literal>
+					</entry>
+				</row>
+
+				<row>
 					<entry>-encoding</entry>
 					<entry>The encoding to be used for the XML file. The default is UTF-8</entry>
 				</row>
@@ -460,6 +469,15 @@
 					<entry>-targetSchema</entry>
 					<entry>
 						A schema in the target connection to be compared to the tables from the reference schema.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-excludeTables</entry>
+					<entry>
+						A comma separated list of tables that should not be compared. If tables from
+            several schemas are compared (using <literal>-referenceTables=schema_one.*, schema_two.*</literal>) then
+            the listed tables must be qualified with a schema, e.g. <literal>-excludeTables=schema_one.foobar, schema_two.fubar</literal>
 					</entry>
 				</row>
 

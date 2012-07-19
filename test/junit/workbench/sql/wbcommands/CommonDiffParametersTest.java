@@ -11,6 +11,8 @@
  */
 package workbench.sql.wbcommands;
 
+import java.sql.Statement;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +23,7 @@ import workbench.db.WbConnection;
 import workbench.sql.wbcommands.CommonDiffParameters.TableMapping;
 import workbench.util.ArgumentParser;
 import static org.junit.Assert.*;
+import workbench.sql.StatementRunner;
 
 /**
  *
@@ -53,6 +56,49 @@ public class CommonDiffParametersTest
 	{
 		this.source.disconnect();
 		this.target.disconnect();
+	}
+
+	@Test
+	public void testMultipleSchemas()
+		throws Exception
+	{
+		String script =
+			"drop all objects;\n" +
+			"create schema one;\n "  +
+			"create schema two;\n " +
+			"create table one.person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table one.address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table two.person_address (person_id integer, address_id integer, primary key (person_id, address_id)); \n" +
+			"alter table two.person_address add constraint fk_adr foreign key (address_id) references one.address (address_id);\n" +
+			"alter table two.person_address add constraint fk_per foreign key (person_id) references one.person (person_id);\n" +
+			"create table two.foobar (id integer primary key);\n" +
+			"create table one.foobar (id integer primary key);\n" +
+			"commit;";
+
+		try
+		{
+			util.prepareEnvironment();
+			TestUtil.executeScript(source, script);
+			TestUtil.executeScript(target, script);
+
+			ArgumentParser cmdLine = new ArgumentParser();
+
+			CommonDiffParameters params = new CommonDiffParameters(cmdLine);
+			cmdLine.parse("-referenceTables=one.*,two.* -excludeTables=two.foobar");
+			TableMapping mapping = params.getTables(source, target);
+
+			assertEquals(4, mapping.referenceTables.size());
+			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("PERSON")));
+			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("ADDRESS")));
+			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("PERSON_ADDRESS")));
+			assertNotNull(TableIdentifier.findTableByNameAndSchema(mapping.referenceTables, new TableIdentifier("ONE.FOOBAR")));
+			assertNull(TableIdentifier.findTableByNameAndSchema(mapping.referenceTables, new TableIdentifier("TWO.FOOBAR")));
+		}
+		finally
+		{
+			source.disconnect();
+			target.disconnect();
+		}
 	}
 
 	@Test
