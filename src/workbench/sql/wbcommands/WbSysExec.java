@@ -10,8 +10,10 @@
  */
 package workbench.sql.wbcommands;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class WbSysExec
 	public static final String ARG_PROGRAM = "program";
 	public static final String ARG_PRG_ARG = "argument";
 	public static final String ARG_WORKING_DIR = "dir";
+	public static final String ARG_DOCUMENT = "document";
 
 	private Process task;
 
@@ -42,6 +45,7 @@ public class WbSysExec
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROGRAM);
 		cmdLine.addArgument(ARG_WORKING_DIR);
+		cmdLine.addArgument(ARG_DOCUMENT);
 		cmdLine.addArgument(ARG_PRG_ARG, ArgumentType.Repeatable);
 	}
 
@@ -68,12 +72,14 @@ public class WbSysExec
 			result.addMessageByKey("ErrExecNoParm");
 			return result;
 		}
+
 		BufferedReader stdIn = null;
 		BufferedReader stdError = null;
 		try
 		{
 			cmdLine.parse(command);
 			String prg = cmdLine.getValue(ARG_PROGRAM);
+			String doc = cmdLine.getValue(ARG_DOCUMENT);
 			if (StringUtil.isNonBlank(prg))
 			{
 				List<String> args = new ArrayList<String>();
@@ -87,6 +93,20 @@ public class WbSysExec
 					pb.directory(new File(dir));
 				}
 				this.task = pb.start();
+			}
+			else if (StringUtil.isNonBlank(doc) && Desktop.isDesktopSupported())
+			{
+				try
+				{
+					Desktop.getDesktop().open(new File(doc));
+					result.setSuccess();
+				}
+				catch (IOException io)
+				{
+					result.setFailure();
+					result.addMessage(io.getLocalizedMessage());
+				}
+				return result;
 			}
 			else
 			{
