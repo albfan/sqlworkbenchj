@@ -100,6 +100,7 @@ public class CommandMapper
 		addCommand(new WbIsolationLevel());
 		addCommand(new WbConnInfo());
 		addCommand(new WbSysExec());
+		addCommand(new WbSysOpen());
 		addCommand(new WbSysProps());
 		addCommand(new WbSetProp());
 		addCommand(new WbStoreProfile());
