@@ -21,6 +21,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import workbench.resource.ResourceMgr;
 import workbench.sql.macros.MacroDefinition;
+import workbench.util.StringUtil;
 
 /**
  * A tree cell renderer that can indicate a drop target
@@ -76,9 +77,14 @@ public class MacroTreeCellRenderer
 				{
 					setIcon(ResourceMgr.getPng("macro"));
 				}
+				setToolTipText(StringUtil.getMaxSubstring(macro.getText(), 100));
+			}
+			else
+			{
+				setToolTipText(null);
 			}
 		}
-		
+
 		if (dropTarget == value && type == DragType.moveItems)
 		{
 			setBorder(moveToGroupBorder);
