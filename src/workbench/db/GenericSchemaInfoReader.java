@@ -42,7 +42,6 @@ public class GenericSchemaInfoReader
 	private String reuseProp;
 	private String queryProp;
 	private String cacheProp;
-	private int callCount;
 
 	public GenericSchemaInfoReader(WbConnection conn, String dbid)
 	{
@@ -64,7 +63,7 @@ public class GenericSchemaInfoReader
 
 	private void logSettings()
 	{
-		LogMgr.logDebug("GenericSchemaInfoReader.logSettings()", "Keep statement: " + reuseStmt + ", cache value: "+ isCacheable + ", SQL: " + schemaQuery);
+		LogMgr.logDebug("GenericSchemaInfoReader.logSettings()", "Re-Use statement: " + reuseStmt + ", cache current schema: "+ isCacheable + ", SQL: " + schemaQuery);
 	}
 
 	@Override
@@ -119,9 +118,12 @@ public class GenericSchemaInfoReader
 	{
 		if (this.connection == null) return null;
 		if (StringUtil.isEmptyString(this.schemaQuery)) return null;
-		if (isCacheable && cachedSchema != null) return cachedSchema;
+		if (isCacheable && cachedSchema != null)
+		{
+			LogMgr.logDebug("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
+			return cachedSchema;
+		}
 
-		callCount ++;
 		String currentSchema = null;
 
 		Savepoint sp = null;
@@ -188,7 +190,7 @@ public class GenericSchemaInfoReader
 	{
 		return cachedSchema;
 	}
-	
+
 	@Override
 	public void dispose()
 	{
@@ -201,6 +203,5 @@ public class GenericSchemaInfoReader
 		cachedSchema = null;
 		connection = null;
 		Settings.getInstance().removePropertyChangeListener(this);
-		LogMgr.logDebug("GenericSchemaInformationReader.dispose()", "Called: " + callCount + " times");
 	}
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import workbench.gui.MainWindow;
@@ -115,10 +116,12 @@ public class MacroPopup
 		tree.addPopupAction(save, false);
 
 		MacroManager.getInstance().getMacros().addChangeListener(this);
+		ToolTipManager.sharedInstance().registerComponent(tree);
 	}
 
 	private void closeWindow()
 	{
+		ToolTipManager.sharedInstance().unregisterComponent(tree);
 		setVisible(false);
 		MacroManager.getInstance().getMacros().removeChangeListener(this);
 		dispose();

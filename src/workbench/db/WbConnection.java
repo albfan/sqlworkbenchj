@@ -305,12 +305,12 @@ public class WbConnection
 
 	void runPreDisconnectScript()
 	{
-		if (this.profile == null) return;
-		if (this.sqlConnection == null) return;
 		if (this.keepAlive != null)
 		{
 			this.keepAlive.shutdown();
 		}
+		if (this.profile == null) return;
+		if (this.sqlConnection == null) return;
 		String sql = profile.getPreDisconnectScript();
 		runConnectScript(sql, "disconnect");
 	}
@@ -321,6 +321,13 @@ public class WbConnection
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPostConnectScript();
 		runConnectScript(sql, "connect");
+	}
+
+	public boolean hasPostConnectScript()
+	{
+		if (this.profile == null) return false;
+		if (this.sqlConnection == null) return false;
+		return StringUtil.isNonEmpty(profile.getPostConnectScript());
 	}
 
 	private void runConnectScript(String sql, String type)
@@ -929,6 +936,10 @@ public class WbConnection
 	 */
 	public String getDisplayString()
 	{
+		return getDisplayString(false);
+	}
+	public String getDisplayString(boolean useDisplaySchema)
+	{
 		String displayString;
 		boolean isBusy = this.isBusy();
 		try
@@ -950,7 +961,16 @@ public class WbConnection
 				buff.append(catalog);
 			}
 
-			String schema = isBusy ? null : meta.getCurrentSchema();
+			String schema = useDisplaySchema ? getDisplaySchema() : null;
+			if (schema == null)
+			{
+				schema = isBusy ? null : meta.getCurrentSchema();
+			}
+			if (schema != null)
+			{
+				currentSchema = schema;
+			}
+
 			if (schema != null && !schema.equalsIgnoreCase(user) && !meta.ignoreSchema(schema, "%.INVALID.%"))
 			{
 				String schemaName = meta.getSchemaTerm();

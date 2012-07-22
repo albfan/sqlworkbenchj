@@ -45,6 +45,7 @@ public class ConnectionInfo
 	private WbLabelField infoText;
 	private JLabel iconLabel;
 	private final Runnable updater;
+	private boolean useCachedSchema;
 
 	public ConnectionInfo(Color aBackground)
 	{
@@ -116,7 +117,15 @@ public class ConnectionInfo
 			setBackground(bkg);
 		}
 
-		updateDisplay();
+		useCachedSchema = true;
+		try
+		{
+			updateDisplay();
+		}
+		finally
+		{
+			useCachedSchema = false;
+		}
 	}
 
 	private void updateDisplay()
@@ -128,7 +137,7 @@ public class ConnectionInfo
 	{
 		if (this.sourceConnection != null)
 		{
-			infoText.setText(this.sourceConnection.getDisplayString());
+			infoText.setText(this.sourceConnection.getDisplayString(useCachedSchema));
 			StringBuilder tip = new StringBuilder(30);
 			tip.append("<html>");
 			tip.append(this.sourceConnection.getDatabaseProductName());
@@ -163,7 +172,7 @@ public class ConnectionInfo
 	{
 		if (evt.getSource() == this.sourceConnection)
 		{
-			this.updateDisplay();
+			updateDisplay();
 		}
 	}
 

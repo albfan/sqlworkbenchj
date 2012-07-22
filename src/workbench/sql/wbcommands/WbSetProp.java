@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
@@ -106,6 +107,8 @@ public class WbSetProp
 				{
 					Settings.getInstance().setProperty(prop, value);
 					result.addMessage(prop  + " permanently set to "  + value);
+					LogMgr.logInfo("WbSetConfig.execute()", "Changed configuration property: " + prop + "=" + value);
+					Settings.getInstance().setCreatBackupOnSave(true);
 				}
 				else
 				{

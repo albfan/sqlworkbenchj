@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.ToolTipManager;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -97,6 +98,12 @@ public class MacroManagerGui
 
 		add(splitPane, BorderLayout.CENTER);
 		macroTree.addTreeSelectionListener(this);
+		ToolTipManager.sharedInstance().registerComponent(macroTree);
+	}
+
+	public void dispose()
+	{
+		ToolTipManager.sharedInstance().unregisterComponent(macroTree);
 	}
 
 	public void setCurrentConnection(WbConnection conn)

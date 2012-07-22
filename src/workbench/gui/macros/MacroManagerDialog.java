@@ -265,6 +265,7 @@ public class MacroManagerDialog
 		Settings.getInstance().storeWindowSize(this);
 		macroPanel.saveSettings();
 		Settings.getInstance().setProperty("workbench.gui.macros.replaceOnRun", this.replaceEditorText.isSelected());
+		macroPanel.dispose();
 		setVisible(false);
 	}
 

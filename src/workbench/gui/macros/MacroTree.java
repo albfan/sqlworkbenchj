@@ -19,10 +19,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.LinkedList;
-import java.util.List;
+
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
+import javax.swing.JToolTip;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeModelEvent;
@@ -32,8 +32,13 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.ExpandableTree;
@@ -108,7 +113,7 @@ public class MacroTree
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 
-	public void loadMacros()
+	public final void loadMacros()
 	{
 		if (macroModel != null)
 		{
@@ -645,6 +650,14 @@ public class MacroTree
 						);
 			scrollRectToVisible(scrollRect);
 		}
+	}
+
+	@Override
+	public JToolTip createToolTip()
+	{
+		JToolTip tip = new MultiLineToolTip();
+		tip.setComponent(this);
+		return tip;
 	}
 
 }

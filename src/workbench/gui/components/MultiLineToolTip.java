@@ -29,7 +29,8 @@ public class MultiLineToolTip
 		updateUI();
 	}
 
-	public void updateUI()
+	@Override
+	public final void updateUI()
 	{
 		setUI(SHARED_UI);
 	}

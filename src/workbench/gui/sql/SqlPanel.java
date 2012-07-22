@@ -1531,7 +1531,10 @@ public class SqlPanel
 			this.stmtRunner.setResultLogger(this);
 		}
 
-		if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
+		if (this.connectionInfo != null)
+		{
+			this.connectionInfo.setConnection(aConnection);
+		}
 		this.setExecuteActionStates(aConnection != null);
 
 		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
@@ -1539,10 +1542,16 @@ public class SqlPanel
 		if (this.dbConnection != null)
 		{
 			this.dbConnection.addChangeListener(this);
+			// avoid the IDLE in transaction for Postgres
+			if (!dbConnection.hasPostConnectScript() && dbConnection.getDbSettings().endTransactionAfterConnect())
+			{
+				dbConnection.rollbackSilently();
+			}
 		}
 
 		this.checkResultSetActions();
 		this.checkCommitAction();
+
 	}
 
 	/**

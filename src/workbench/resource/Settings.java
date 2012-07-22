@@ -129,6 +129,7 @@ public class Settings
 	private List<SettingsListener> saveListener = new ArrayList<SettingsListener>(5);
 
 	private long fileTime;
+	private boolean createBackup;
 
 	/**
 	 * Thread safe singleton-instance
@@ -404,6 +405,11 @@ public class Settings
 				setProperty(key, defaults.getProperty(key));
 			}
 		}
+	}
+
+	public void setCreatBackupOnSave(boolean flag)
+	{
+		this.createBackup = flag;
 	}
 
 	/**
@@ -3109,8 +3115,20 @@ public class Settings
 	public boolean wasExternallyModified()
 	{
 		long time = this.configfile.lastModified();
-		LogMgr.logDebug("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
-		if (time == 0) return false;
+
+		if (time <= 0)
+		{
+			LogMgr.logWarning("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
+		}
+		else
+		{
+			LogMgr.logDebug("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
+		}
+		if (time <= 0) return false;
+		if (time < this.fileTime)
+		{
+			LogMgr.logWarning("Settings.wasExternallyModified()", "Current modified time: " + time + " original modified time: " + fileTime);
+		}
 		return time > this.fileTime;
 	}
 
@@ -3122,6 +3140,11 @@ public class Settings
 	public boolean makeBackups()
 	{
 		return getBoolProperty("workbench.settings.makebackup", false);
+	}
+
+	public void setMakeBackups(boolean flag)
+	{
+		setProperty("workbench.settings.makebackup", flag);
 	}
 
 	/**
@@ -3143,7 +3166,7 @@ public class Settings
 
 		ShortcutManager.getInstance().saveSettings();
 
-		if (renameExistingFile)
+		if (renameExistingFile || (createBackup && !makeBackups()))
 		{
 			this.configfile.makeBackup();
 		}

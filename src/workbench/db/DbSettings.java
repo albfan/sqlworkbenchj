@@ -1463,4 +1463,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", false);
 	}
 
+	public boolean endTransactionAfterConnect()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "afterconnect.finishtrans", false);
+	}
 }
