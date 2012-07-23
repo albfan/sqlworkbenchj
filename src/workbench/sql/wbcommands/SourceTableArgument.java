@@ -52,7 +52,6 @@ public class SourceTableArgument
 	public SourceTableArgument(String includeTables, String excludeTables, String schema, WbConnection dbConn)
 		throws SQLException
 	{
-		if (StringUtil.isEmptyString(includeTables)) return;
 		if (dbConn == null) return;
 
 		String[] types = dbConn.getMetadata().getTableTypesArray();
@@ -104,7 +103,12 @@ public class SourceTableArgument
 
 		List<TableIdentifier> result = CollectionUtil.arrayList();
 
-		if (argCount <= 0) return result;
+		if (argCount <= 0 && StringUtil.isBlank(schema)) return result;
+		if (argCount <= 0 && StringUtil.isNonBlank(schema))
+		{
+			// a schema was specified by no table --> take all tables from that schema
+			args = CollectionUtil.arrayList("*");
+		}
 
 		String schemaToUse = StringUtil.isBlank(schema) ? dbConn.getMetadata().getSchemaToUse() : schema;
 		for (String t : args)
@@ -142,7 +146,7 @@ public class SourceTableArgument
 	{
 		return missingTables;
 	}
-	
+
 	/**
 	 * Returns all DB Object names from the comma separated list.
 	 * This is different to stringToList() as it keeps any quotes that

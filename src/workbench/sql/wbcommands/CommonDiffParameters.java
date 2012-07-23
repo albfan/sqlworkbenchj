@@ -134,6 +134,7 @@ public class CommonDiffParameters
 
 		boolean multipleSchema = false;
 
+		String excludedNames = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA))
 		{
 			String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
@@ -141,7 +142,7 @@ public class CommonDiffParameters
 
 			if (refSchema == null)
 			{
-				refSchema = referenceConn.getMetadata().getSchemaToUse();
+				refSchema = referenceConn.getCurrentSchema();
 			}
 			else
 			{
@@ -150,7 +151,7 @@ public class CommonDiffParameters
 
 			if (targetSchema == null)
 			{
-				targetSchema = targetCon.getMetadata().getSchemaToUse();
+				targetSchema = targetCon.getCurrentSchema();
 			}
 			else
 			{
@@ -179,35 +180,27 @@ public class CommonDiffParameters
 			else
 			{
 				targetTables = targetCon.getMetadata().getTableList(null, targetSchema);
-				matchNames = true;
 			}
+			matchNames = true;
 		}
 		else
 		{
 			String tableNames = cmdLine.getValue(PARAM_REFERENCETABLES);
+			String refSchema = null;
 			if (StringUtil.isBlank(tableNames))
 			{
-				refTables = referenceConn.getMetadata().getTableList();
+				refSchema = referenceConn.getCurrentSchema();
 			}
-			else
-			{
-				SourceTableArgument refTableArgs = new SourceTableArgument(tableNames, referenceConn);
-				refTables = refTableArgs.getTables();
-				missingRefTables.addAll(refTableArgs.getMissingTables());
-			}
+			SourceTableArgument refTableArgs = new SourceTableArgument(tableNames, excludedNames, refSchema, referenceConn);
+			refTables = refTableArgs.getTables();
+			missingRefTables.addAll(refTableArgs.getMissingTables());
+			matchNames = refTableArgs.wasWildCardArgument();
 
 			tableNames = cmdLine.getValue(PARAM_TARGETTABLES);
 			if (StringUtil.isBlank(tableNames))
 			{
-				Set<String> schemas = CollectionUtil.caseInsensitiveSet();
 				targetTables = new ArrayList<TableIdentifier>(refTables.size());
-				for (TableIdentifier tbl : refTables)
-				{
-					if (tbl.getSchema() != null)
-					{
-						schemas.add(tbl.getSchema());
-					}
-				}
+				Set<String> schemas = getSchemas(refTables);
 				if (schemas.size() > 0)
 				{
 					for (String schema : schemas)
@@ -219,34 +212,34 @@ public class CommonDiffParameters
 				{
 					targetTables.addAll(targetCon.getMetadata().getTableList());
 				}
-				multipleSchema = schemas.size() > 1;
+				matchNames = true;
 			}
 			else
 			{
-				SourceTableArgument tableArgs = new SourceTableArgument(tableNames, targetCon);
+				SourceTableArgument tableArgs = new SourceTableArgument(tableNames, excludedNames, null, targetCon);
 				targetTables = tableArgs.getTables();
 				missingTargetTables.addAll(tableArgs.getMissingTables());
-				matchNames = false;
+				matchNames = matchNames || tableArgs.wasWildCardArgument();
 			}
 		}
 
-		String exNames = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
-		List<TableIdentifier> excluded = null;
-		if (exNames != null)
-		{
-			SourceTableArgument args = new SourceTableArgument(exNames, referenceConn);
-			excluded = args.getTables();
-		}
+		multipleSchema = getSchemas(refTables).size() > 1 || getSchemas(targetTables).size() > 1;
+		matchNames = matchNames || multipleSchema;
 
 		int index = 0;
 		for (TableIdentifier refTable : refTables)
 		{
-			if (multipleSchema && TableIdentifier.findTableByNameAndSchema(excluded, refTable) != null) continue;
-			if (!multipleSchema && TableIdentifier.findTableByName(excluded, refTable) != null) continue;
-
 			if (matchNames)
 			{
-				TableIdentifier other = TableIdentifier.findTableByName(targetTables, refTable);
+				TableIdentifier other = null;
+				if (multipleSchema)
+				{
+					other = TableIdentifier.findTableByNameAndSchema(targetTables, refTable);
+				}
+				else
+				{
+					other = TableIdentifier.findTableByName(targetTables, refTable);
+				}
 				if (other != null)
 				{
 					mapping.referenceTables.add(refTable);
@@ -265,6 +258,19 @@ public class CommonDiffParameters
 		}
 
 		return mapping;
+	}
+
+	private Set<String> getSchemas(List<TableIdentifier> tables)
+	{
+		Set<String> schemas = CollectionUtil.caseInsensitiveSet();
+		for (TableIdentifier tbl : tables)
+		{
+			if (tbl.getSchema() != null)
+			{
+				schemas.add(tbl.getSchema());
+			}
+		}
+		return schemas;
 	}
 
 	public List<String> getMissingReferenceTables()

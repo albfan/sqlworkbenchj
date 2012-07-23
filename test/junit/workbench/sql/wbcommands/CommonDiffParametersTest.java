@@ -68,10 +68,10 @@ public class CommonDiffParametersTest
 			"create table one.person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
 			"create table one.address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
 			"create table two.person_address (person_id integer, address_id integer, primary key (person_id, address_id)); \n" +
+			"create table one.foobar (id integer primary key);\n" +
 			"alter table two.person_address add constraint fk_adr foreign key (address_id) references one.address (address_id);\n" +
 			"alter table two.person_address add constraint fk_per foreign key (person_id) references one.person (person_id);\n" +
 			"create table two.foobar (id integer primary key);\n" +
-			"create table one.foobar (id integer primary key);\n" +
 			"commit;";
 
 		try
@@ -87,11 +87,44 @@ public class CommonDiffParametersTest
 			TableMapping mapping = params.getTables(source, target);
 
 			assertEquals(4, mapping.referenceTables.size());
-			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("PERSON")));
-			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("ADDRESS")));
-			assertNotNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("PERSON_ADDRESS")));
-			assertNotNull(TableIdentifier.findTableByNameAndSchema(mapping.referenceTables, new TableIdentifier("ONE.FOOBAR")));
+			assertEquals(mapping.referenceTables.size(), mapping.targetTables.size());
+			for (int i=0; i < mapping.referenceTables.size(); i++)
+			{
+				TableIdentifier t1 = mapping.referenceTables.get(i);
+				TableIdentifier t2 = mapping.targetTables.get(i);
+				assertEquals(t1.getTableName(), t2.getTableName());
+				assertEquals(t1.getSchema(), t2.getSchema());
+			}
 			assertNull(TableIdentifier.findTableByNameAndSchema(mapping.referenceTables, new TableIdentifier("TWO.FOOBAR")));
+
+			cmdLine.parse("-referenceTables=one.* -targetTables=one.* -excludeTables=one.foobar");
+			mapping = params.getTables(source, target);
+			assertEquals(2, mapping.referenceTables.size());
+			assertEquals(mapping.referenceTables.size(), mapping.targetTables.size());
+			for (int i=0; i < mapping.referenceTables.size(); i++)
+			{
+				TableIdentifier t1 = mapping.referenceTables.get(i);
+				TableIdentifier t2 = mapping.targetTables.get(i);
+				assertEquals(t1.getTableName(), t2.getTableName());
+				assertEquals(t1.getSchema(), t2.getSchema());
+			}
+			assertNull(TableIdentifier.findTableByName(mapping.referenceTables, new TableIdentifier("PERSON_ADDRESS")));
+			assertNull(TableIdentifier.findTableByName(mapping.targetTables, new TableIdentifier("PERSON_ADDRESS")));
+
+			cmdLine.parse("-referenceTables=one.*,two.* -targetTables=one.*,two.* -excludeTables=two.person_address");
+			mapping = params.getTables(source, target);
+
+			assertEquals(4, mapping.referenceTables.size());
+			assertEquals(mapping.referenceTables.size(), mapping.targetTables.size());
+			for (int i=0; i < mapping.referenceTables.size(); i++)
+			{
+				TableIdentifier t1 = mapping.referenceTables.get(i);
+				TableIdentifier t2 = mapping.targetTables.get(i);
+				assertEquals(t1.getTableName(), t2.getTableName());
+				assertEquals(t1.getSchema(), t2.getSchema());
+			}
+			assertNull(TableIdentifier.findTableByNameAndSchema(mapping.referenceTables, new TableIdentifier("TWO", "PERSON_ADDRESS")));
+			assertNull(TableIdentifier.findTableByNameAndSchema(mapping.targetTables, new TableIdentifier("TWO", "PERSON_ADDRESS")));
 		}
 		finally
 		{
