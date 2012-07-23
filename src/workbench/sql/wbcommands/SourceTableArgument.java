@@ -45,8 +45,9 @@ public class SourceTableArgument
 	 *
 	 * @param includeTables the parameter value to include tables
 	 * @param excludeTables the parameter value to exclude tables
-	 * @param types the parameter value for the table types
-	 * @param dbConn the connection to use
+	 * @param types         the parameter value for the table types
+	 * @param dbConn        the connection to use
+	 * <p/>
 	 * @throws SQLException
 	 */
 	public SourceTableArgument(String includeTables, String excludeTables, String schema, WbConnection dbConn)
@@ -58,6 +59,17 @@ public class SourceTableArgument
 		initTableList(includeTables, excludeTables, schema, types, dbConn);
 	}
 
+	/**
+	 *
+	 * @param includeTables  the tables to include may be null if a schema name is supplied
+	 * @param excludeTables  tablename to exclude
+	 * @param schema         the schema to use. May be null if table names are supplied
+	 *                       if no table names are supplied, "%" or "*" can be used to return all tables from all schemas
+	 * @param types          the object types to retrieve
+	 * @param dbConn         the connection
+	 *
+	 * @throws SQLException
+	 */
 	public SourceTableArgument(String includeTables, String excludeTables, String schema, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
@@ -110,7 +122,19 @@ public class SourceTableArgument
 			args = CollectionUtil.arrayList("*");
 		}
 
-		String schemaToUse = StringUtil.isBlank(schema) ? dbConn.getMetadata().getSchemaToUse() : schema;
+		String schemaToUse;
+		if (StringUtil.isBlank(schema))
+		{
+			schemaToUse = dbConn.getMetadata().getCurrentSchema();
+		}
+		else if (schema.equals("*") || schema.equals("%"))
+		{
+			schemaToUse = null;
+		}
+		else
+		{
+			schemaToUse = schema;
+		}
 		for (String t : args)
 		{
 			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
@@ -140,6 +164,12 @@ public class SourceTableArgument
 			}
 		}
 		return result;
+	}
+
+	private boolean allSchemas(String schema)
+	{
+		if (StringUtil.isBlank(schema)) return true;
+		return schema.equals("%") || schema.equals("*");
 	}
 
 	public List<String> getMissingTables()

@@ -118,28 +118,30 @@ public class WbSchemaReport
 
 		String tableNames = this.cmdLine.getValue(PARAM_TABLE_NAMES);
 		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
 
-		SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, "%", this.currentConnection);
-
-		List<TableIdentifier> tables = tableArg.getTables();
-		if (tables != null && tables.size() > 0)
+		if (StringUtil.isNonEmpty(tableNames))
 		{
-			// The SchemaReporter needs fully initialized TableIdentifiers
-			List<TableIdentifier> dbTables = new ArrayList<TableIdentifier>(tables.size());
-			for (TableIdentifier tbl : tables)
+			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, "%", this.currentConnection);
+			List<TableIdentifier> tables = tableArg.getTables();
+			if (tables != null && tables.size() > 0)
 			{
-				TableIdentifier table = currentConnection.getMetadata().findSelectableObject(tbl);
-				if (table != null)
+				// The SchemaReporter needs fully initialized TableIdentifiers
+				List<TableIdentifier> dbTables = new ArrayList<TableIdentifier>(tables.size());
+				for (TableIdentifier tbl : tables)
 				{
-					dbTables.add(table);
+					TableIdentifier table = currentConnection.getMetadata().findSelectableObject(tbl);
+					if (table != null)
+					{
+						dbTables.add(table);
+					}
 				}
+				this.reporter.setTableList(dbTables);
 			}
-			this.reporter.setTableList(dbTables);
 		}
-		else
+		else if (StringUtil.isNonEmpty(schemaNames))
 		{
-			String arg = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
-			List<String> schemas = StringUtil.stringToList(arg, ",");
+			List<String> schemas = StringUtil.stringToList(schemaNames, ",");
 			this.reporter.setSchemas(schemas);
 		}
 

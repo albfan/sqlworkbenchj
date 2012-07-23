@@ -93,7 +93,7 @@ public class WbSchemaReportTest
 
 			File output = new File(util.getBaseDir(), "report.xml");
 			output.delete();
-			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=true -includeTableGrants=true");
+			StatementRunnerResult result = report.execute("WbSchemaReport -file='" + output.getAbsolutePath() + "' -includeSequences=true -includeTableGrants=true");
 			assertTrue(result.isSuccess());
 			assertTrue("File not created", output.exists());
 
@@ -158,7 +158,7 @@ public class WbSchemaReportTest
 			{
 				File output = new File(utl.getBaseDir(), "report_" + i + ".xml");
 				output.delete();
-				StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -schemas=schema_" + i);
+				StatementRunnerResult result = report.execute("WbSchemaReport -file='" + output.getAbsolutePath() + "' -schemas=schema_" + i);
 				assertTrue(result.isSuccess());
 				assertTrue("File not created", output.exists());
 

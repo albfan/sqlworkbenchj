@@ -180,6 +180,10 @@ public class SourceTableArgumentTest
 				assertTrue(names.remove(tbl.getTableName()));
 			}
 			assertEquals(0, names.size());
+
+			parser = new SourceTableArgument(null, null, "%", con);
+			tables = parser.getTables();
+			assertEquals("Wrong number of table", 4, tables.size());
     }
     finally
     {
