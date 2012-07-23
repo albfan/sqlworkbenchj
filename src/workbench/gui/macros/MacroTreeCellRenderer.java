@@ -77,7 +77,7 @@ public class MacroTreeCellRenderer
 				{
 					setIcon(ResourceMgr.getPng("macro"));
 				}
-				setToolTipText(StringUtil.getMaxSubstring(macro.getText(), 100));
+				setToolTipText(StringUtil.getMaxSubstring(macro.getText(), 350));
 			}
 			else
 			{
