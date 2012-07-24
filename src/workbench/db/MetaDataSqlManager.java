@@ -14,6 +14,7 @@ package workbench.db;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.HashMap;
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.WbPersistence;
@@ -121,7 +122,7 @@ public class MetaDataSqlManager
 			WbPersistence reader = new WbPersistence();
 			value = reader.readObject(in);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("MetaDataSqlManager.readStatementTemplate()", "Error reading internal templates file " + aFilename,e);
 			value = null;
@@ -132,12 +133,18 @@ public class MetaDataSqlManager
 			result = (HashMap)value;
 		}
 
-		// Try to read the file in the current directory.
-		File f = new File(aFilename);
+
+		File f = new File(Settings.getInstance().getConfigDir(), aFilename);
 		if (!f.exists())
 		{
-			// Not in the current directory, check the config-dir
-			f = new File(Settings.getInstance().getConfigDir(), aFilename);
+			// not in the config directory, try the directory where the sqlworkbench.jar is located
+			f = new File(WbManager.getInstance().getJarPath(), aFilename);
+		}
+
+		if (!f.exists())
+		{
+			// not in the config directory, not in the jar file's directry, try the current directory
+			f = new File(aFilename);
 		}
 
 		if (f.exists())
@@ -148,7 +155,7 @@ public class MetaDataSqlManager
 				value = reader.readObject();
 				LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Retrieved user defined template file " + f.getAbsolutePath());
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				LogMgr.logWarning("MetaDataSqlManager.readStatementTemplate()", "Error reading template file " + f.getAbsolutePath(), e);
 			}
@@ -161,6 +168,7 @@ public class MetaDataSqlManager
 				}
 				else
 				{
+					// no built-in file found. Should not happen.
 					result = m;
 				}
 			}

@@ -67,6 +67,39 @@
    </object>
   </void>
 
+  <void method="put">
+   <string>INFORMIX-SQL</string>
+   <object id="list_informix_sql_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+        SELECT trg.trigname trigger_name,
+               "DELETE" trigger_type,
+               t.tabname trigger_table
+        from informix.systriggers trg, informix.systables t
+        where trg.tabid = t.tabid and trg.event='D'
+        UNION
+        SELECT trg.trigname,
+               "UPDATE",
+                t.tabname
+        from informix.systriggers trg, informix.systables t
+        where trg.tabid = t.tabid and trg.event='U'
+        UNION
+        SELECT trg.trigname,
+               "INSERT",
+               t.tabname
+        from informix.systriggers trg, informix.systables t
+        where trg.tabid = t.tabid and trg.event='I';
+    </string>
+    </void>
+    <void property="objectNameField">
+     <string>t.tabname</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY 1</string>
+    </void>
+   </object>
+  </void>
+
   <!-- DB2 for z/OS identifies itself as DB2 -->
   <void method="put">
    <string>DB2</string>
