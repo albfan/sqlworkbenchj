@@ -1400,7 +1400,7 @@ public class DbMetadata
 				LogMgr.logDebug("DbMetadata.getObjects()", "Calling getTables() using: catalog="+ escapedCatalog +
 					", schema=" + escapedSchema +
 					", name=" + escapedNamePattern +
-					", types=" + (types == null ? "NULL" : Arrays.asList(types).toString()));
+					", types=" + (types == null ? "null" : Arrays.asList(types).toString()));
 			}
 
 			tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, types);
