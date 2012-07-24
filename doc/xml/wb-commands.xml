@@ -1698,6 +1698,15 @@ WHERE id=42;</programlisting>
     <programlisting>WbSysExec -program='cmd.exe' -argument='/c' -argument='dir /n' -dir='c:\temp\'</programlisting>
   </section>
 
+  <section id="command-wbexec">
+    <title>Opening a file with the default application - WbSysOpen</title>
+    <para>
+      <literal>WbSyOpen</literal> can be used to open a file with the default application of the operating system.
+    </para>
+    <programlisting>WbExport -file=c:/temp/person.txt -sourceTable=person -type=text -header=true;
+WbSysOpen c:/temp/person.txt;</programlisting>
+
+  </section>
   <section id="command-dbms-output" xreflabel="ENABLEOUT">
     <title>Using Oracle's DBMS_OUTPUT package</title>
     <indexterm><primary>Oracle</primary><secondary>dbms_output</secondary></indexterm>
