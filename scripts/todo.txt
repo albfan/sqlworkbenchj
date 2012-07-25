@@ -35,6 +35,7 @@ Features:
 - Scripting (Groovy, JavaScript, awk, ..)
 - ResultSet info display
 - Import profiles from other WbProfiles.xml
+- Import macros
 - Allow full script in DataPumper as SQL Query source
   (pre-copy and post-copy scripts)
 - History of selected tables in DbExplorer
@@ -55,4 +56,3 @@ ToDo/Cleanup
 --------------------
 - Change print header and font for header in print preview
 - Rework printing
-- Refactor TextFileParser/XmlDataParser: too much similar code
