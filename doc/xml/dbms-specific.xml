@@ -18,6 +18,15 @@
          The checking for un-committed changes can be controlled through the <link linkend="profile-open-trans">connection profile</link>.
        </para>
      </section>
+     <section id="postgres-open-trans">
+       <indexterm><primary>PostgreSQL</primary><secondary>COPY</secondary></indexterm>
+       <title>Using the COPY API for client side files</title>
+       <para>
+         <link linkend="command-import">WbImport</link> can make use of PostgreSQL's <literal>COPY</literal> API
+         to send client side files to the server. <literal>COPY from stdin</literal> does not work through
+         the JDBC API, but when using WbImport, the file contents can be <link linkend="import-pg-copy">sent through the COPY API</link>
+       </para>
+     </section>
   </section>
 
   <section id="dbms-specific-oracle">
