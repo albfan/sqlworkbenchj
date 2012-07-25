@@ -57,6 +57,7 @@ class ExcelDataFormat
 		setUpDecimal(wb);
 		setUpInteger(wb);
 		setUpTs(wb);
+		setUpMultiline(wb);
 	}
 
 	protected void setUpMultiline(Workbook wb)
