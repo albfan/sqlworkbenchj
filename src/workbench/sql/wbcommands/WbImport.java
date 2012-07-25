@@ -517,8 +517,21 @@ public class WbImport
 					return result;
 				}
 			}
-			if (cmdLine.getBoolean(ARG_PG_COPY))
+
+			if (cmdLine.isArgPresent(ARG_PG_COPY) && currentConnection.getMetadata().isPostgres())
 			{
+				if (!imp.isModeInsert())
+				{
+					result.addMessage("COPY only possible with -mode=insert");
+					result.setFailure();
+					return result;
+				}
+				if (textParser.getBlobMode() != null && textParser.getBlobMode() != BlobMode.None)
+				{
+					result.addMessage("blobMode not possible when using -usePgCopy");
+					result.setFailure();
+					return result;
+				}
 				PgCopyImporter pg = new PgCopyImporter(currentConnection);
 				textParser.setStreamImporter(pg);
 			}

@@ -1,5 +1,5 @@
 /*
- * RowDataReceiver.java
+ * DataReceiver.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -21,7 +21,7 @@ import workbench.db.TableIdentifier;
  *
  * @author Thomas Kellerer
  */
-public interface RowDataReceiver
+public interface DataReceiver
 {
 	/**
 	 * Returns true if the receiver will create the target table "on the fly"
@@ -47,7 +47,7 @@ public interface RowDataReceiver
 
 	void processFile(StreamImporter stream)
 		throws SQLException, IOException;
-	
+
 	/**
 	 * Import a single row into the table previously defined by setTargetTable().
 	 *

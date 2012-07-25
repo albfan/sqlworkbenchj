@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import workbench.db.WbConnection;
 import workbench.db.importer.RowDataProducer;
-import workbench.db.importer.RowDataReceiver;
+import workbench.db.importer.DataReceiver;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
@@ -41,7 +41,7 @@ import workbench.util.ValueConverter;
 public class QueryCopySource
 		implements RowDataProducer
 {
-	private RowDataReceiver receiver;
+	private DataReceiver receiver;
 	private boolean keepRunning = true;
 	private boolean regularStop = false;
 	private WbConnection sourceConnection;
@@ -76,7 +76,7 @@ public class QueryCopySource
 	}
 
 	@Override
-	public void setReceiver(RowDataReceiver rec)
+	public void setReceiver(DataReceiver rec)
 	{
 		this.receiver = rec;
 	}

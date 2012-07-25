@@ -25,7 +25,7 @@ import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.DeleteType;
-import workbench.db.importer.RowDataReceiver;
+import workbench.db.importer.DataReceiver;
 import workbench.db.importer.TableDependencySorter;
 import workbench.db.importer.TableStatements;
 import workbench.log.LogMgr;
@@ -89,7 +89,7 @@ class SchemaCopy
 		int currentTable = 0;
 		int count = toCopy.size();
 
-		RowDataReceiver receiver = this.copier.getReceiver();
+		DataReceiver receiver = this.copier.getReceiver();
 		receiver.setTableCount(count);
 
 		try

@@ -30,15 +30,21 @@ public class BlobDecoder
 		mode = BlobMode.SaveToFile;
 	}
 
+	public BlobMode getBlobMode()
+	{
+		return mode;
+	}
+
 	public void setBlobMode(BlobMode bmode)
 	{
 		mode = bmode;
 	}
+
 	public void setBaseDir(File dir)
 	{
 		baseDir = dir;
 	}
-	
+
 	public Object decodeBlob(String value)
 		throws IOException
 	{
@@ -62,7 +68,7 @@ public class BlobDecoder
 		}
 		return value;
 	}
-	
+
 	public byte[] decodeString(String value, BlobLiteralType type)
 		throws IOException
 	{

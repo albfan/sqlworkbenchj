@@ -160,6 +160,11 @@ public class TextFileParser
 		this.illegalDateIsNull = flag;
 	}
 
+	public BlobMode getBlobMode()
+	{
+		return blobDecoder.getBlobMode();
+	}
+
 	public void setBlobMode(BlobMode mode)
 	{
 		blobDecoder.setBlobMode(mode);

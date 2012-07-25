@@ -59,7 +59,7 @@ public abstract class AbstractImportFileParser
 	protected boolean cancelImport;
 	protected boolean regularStop;
 
-	protected RowDataReceiver receiver;
+	protected DataReceiver receiver;
 	protected boolean abortOnError;
 	protected WbConnection connection;
 
@@ -118,7 +118,7 @@ public abstract class AbstractImportFileParser
 	}
 
 	@Override
-	public void setReceiver(RowDataReceiver rec)
+	public void setReceiver(DataReceiver rec)
 	{
 		this.receiver = rec;
 	}

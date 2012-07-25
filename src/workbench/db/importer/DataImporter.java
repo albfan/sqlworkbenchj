@@ -66,7 +66,7 @@ import workbench.util.MessageBuffer;
  * @author  Thomas Kellerer
  */
 public class DataImporter
-	implements Interruptable, RowDataReceiver, ProgressReporter, BatchCommitter
+	implements Interruptable, DataReceiver, ProgressReporter, BatchCommitter
 {
 	public static final int MODE_INSERT = 0;
 	public static final int MODE_UPDATE = 1;

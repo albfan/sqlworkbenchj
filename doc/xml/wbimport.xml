@@ -1020,6 +1020,45 @@
 						</entry>
 					</row>
 
+					<row>
+						<entry>-usePgCopy</entry>
+						<entry>
+              <para>
+                If this parameter is specified, then the input file is sent to the PostgreSQL server
+                using PostgreSQL's <ulink url="http://jdbc.postgresql.org/documentation/publicapi/org/postgresql/copy/CopyManager.html">JDBC support</ulink>
+                for <ulink url="http://www.postgresql.org/docs/current/static/sql-copy.html">COPY</ulink>
+             </para>
+              <para>
+                The specified file(s) must conform to the format expected by PostgreSQL's COPY command. &wb-productname;
+                creates a <literal>COPY tablename (column, ...) FROM stdin WITH (format csv, delimiter '|', header true)</literal>
+                statement and then executes this, passing the actual file contents through the JDBC API.
+              </para>
+              <para>
+                As <literal>COPY</literal> does not support "merging" of data, the only allowed import mode is <literal>insert</literal>.
+                If a different mode is specified using <literal>-mode</literal> an error will be reported.
+              </para>
+              <para>
+                The options defined in the <literal>WITH (...)</literal> part are influenced by the parameters
+                passed to <literal>WbImport</literal>. However <literal>COPY</literal> does not support all
+                options that <literal>WbImport</literal> does.
+
+                To control the format of the input file(s) <emphasis role="bold">Only</emphasis> the following parameters
+                are relevant when using <literal>-usePgCopy</literal>:
+								<itemizedlist>
+									<listitem><simpara>-header</simpara></listitem>
+									<listitem><simpara>-encoding</simpara></listitem>
+									<listitem><simpara>-delimiter</simpara></listitem>
+								</itemizedlist>
+                Especially the formatting options for dates/timestamps and numbers will have
+                <emphasis role="bold">no</emphasis> effect. So the input file must be formatted properly.
+              </para>
+              <para>
+                All parameters controlling the table involved, the columns, the source directory and so on still work.
+                Including the import directly from a ZIP archive.
+              </para>
+              <para>This parameter has no value, it's presence turns the feature on.</para>
+						</entry>
+					</row>
 				</tbody>
 			</tgroup>
 		</informaltable>

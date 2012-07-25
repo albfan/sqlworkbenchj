@@ -30,12 +30,12 @@ import workbench.util.ClipboardFile;
 import workbench.util.MessageBuffer;
 
 /**
- * A RowDataReceiver to import text files (either from a file or from a String)
+ * A DataReceiver to import text files (either from a file or from a String)
  * into a DataStore.
  * @author Thomas Kellerer
  */
 public class DataStoreImporter
-	implements RowDataReceiver, Interruptable
+	implements DataReceiver, Interruptable
 {
 	private DataStore target;
 	private RowDataProducer source;

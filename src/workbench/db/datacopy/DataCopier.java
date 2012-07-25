@@ -110,7 +110,7 @@ public class DataCopier
 		return this.sourceData;
 	}
 
-	public RowDataReceiver getReceiver()
+	public DataReceiver getReceiver()
 	{
 		return this.importer;
 	}

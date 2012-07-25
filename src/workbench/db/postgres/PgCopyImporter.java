@@ -21,6 +21,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.StreamImporter;
 import workbench.db.importer.TextImportOptions;
+import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 
 /**
@@ -54,6 +55,7 @@ public class PgCopyImporter
 		CopyManager copyMgr = new CopyManager((BaseConnection)connection.getSqlConnection());
 		try
 		{
+			LogMgr.logDebug("PgCopyImporter.processStreamData()", "Sending file contents using: " + this.sql);
 			return copyMgr.copyIn(sql, data);
 		}
 		finally

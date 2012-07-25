@@ -25,8 +25,8 @@ import workbench.util.ValueConverter;
 public interface RowDataProducer
 {
 	String SKIP_INDICATOR = "$wb_skip$";
-	
-	void setReceiver(RowDataReceiver receiver);
+
+	void setReceiver(DataReceiver receiver);
 	void start() throws Exception;
 	void cancel();
 	void stop();
@@ -36,15 +36,15 @@ public interface RowDataProducer
 	boolean hasErrors();
 	boolean hasWarnings();
 	void setValueConverter(ValueConverter converter);
-	
+
 	/**
-	 * Return the last "raw" record that was sent to the RowDataReceiver.
+	 * Return the last "raw" record that was sent to the DataReceiver.
 	 * This is used to log invalid records
 	 */
 	String getLastRecord();
 
 	/**
-	 * Return the column value from the input file for each column 
+	 * Return the column value from the input file for each column
 	 * passed in to the function.
 	 * @param inputFileIndexes the index of each column in the input file
 	 * @return for each column index the value in the inputfile
