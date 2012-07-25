@@ -12,6 +12,7 @@
 package workbench.db.importer;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +55,12 @@ public class DataStoreImporter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
 		}
 		this.errorHandler = handler;
+	}
+
+	@Override
+	public void processFile(StreamImporter stream)
+		throws SQLException, IOException
+	{
 	}
 
 	public void startImport()

@@ -28,6 +28,7 @@ import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
+import workbench.db.postgres.PgCopyImporter;
 import workbench.interfaces.ImportFileParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
@@ -85,6 +86,7 @@ public class WbImport
 	public static final String ARG_INSERT_START = "insertSQL";
 	public static final String ARG_ILLEGAL_DATE_NULL = "illegalDateIsNull";
 	public static final String ARG_EMPTY_FILE = "emptyFile";
+	public static final String ARG_PG_COPY = "usePgCopy";
 
 	private DataImporter imp;
 
@@ -143,6 +145,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_QUOTE_ALWAYS);
 		cmdLine.addArgument(ARG_INSERT_START);
+		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolArgument);
 		ModifierArguments.addArguments(cmdLine);
 	}
 
@@ -399,12 +402,12 @@ public class WbImport
 				result.setFailure();
 				return result;
 			}
-			if (delimiter != null) textParser.setDelimiter(delimiter);
+			if (delimiter != null) textParser.setTextDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
-			if (quote != null) textParser.setQuoteChar(quote);
+			if (quote != null) textParser.setTextQuoteChar(quote);
 
-			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE, false));
+			textParser.setDecode(cmdLine.getBoolean(ARG_DECODE, false));
 
 			if (encoding != null) textParser.setEncoding(encoding);
 
@@ -513,6 +516,11 @@ public class WbImport
 					result.setFailure();
 					return result;
 				}
+			}
+			if (cmdLine.getBoolean(ARG_PG_COPY))
+			{
+				PgCopyImporter pg = new PgCopyImporter(currentConnection);
+				textParser.setStreamImporter(pg);
 			}
 			imp.setProducer(textParser);
 		}

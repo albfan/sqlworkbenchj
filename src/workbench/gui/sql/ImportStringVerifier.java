@@ -88,7 +88,7 @@ public class ImportStringVerifier
 			// columns from the result set.
 			if (!textOptions.getContainsHeader()) return true;
 
-			parser.setDelimiter(textOptions.getTextDelimiter());
+			parser.setTextDelimiter(textOptions.getTextDelimiter());
 		}
 		List<ColumnIdentifier> cols = parser.getColumnsFromFile();
 

@@ -180,6 +180,11 @@ public class ValueConverter
 		bigDecimalTrue = BigDecimal.valueOf(trueValue);
 	}
 
+	public char getDecimalCharacter()
+	{
+		return this.decimalCharacter;
+	}
+	
 	public void setDecimalCharacter(char aChar)
 	{
 		this.decimalCharacter = aChar;
@@ -813,4 +818,5 @@ public class ValueConverter
 		}
 		return null;
 	}
+
 }

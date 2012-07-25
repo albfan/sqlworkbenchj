@@ -529,7 +529,6 @@ public class WbImportTest
 				}
 				String firstname = rs.getString(3);
 				assertNull("Omitted column imported", firstname);
-
 			}
 			assertEquals("Wrong number of rows", rowCount, 3);
 			rs.close();
@@ -654,7 +653,7 @@ public class WbImportTest
 
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=qtest";
 			StatementRunnerResult result = importCmd.execute(cmd);
-			assertEquals("Import did not succeed", result.isSuccess(), true);
+			assertEquals("Import did not succeed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from qtest");
 			int rows = 0;
@@ -757,7 +756,7 @@ public class WbImportTest
 
 			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			result = importCmd.execute(cmd);
-			assertEquals("Import failed", true, result.isSuccess());
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), true, result.isSuccess());
 
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
@@ -3675,7 +3674,12 @@ public class WbImportTest
 
 			WbFile f = new WbFile(basedir);
 			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=xml -checkDependencies=true");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			String msg = result.getMessageBuffer().toString();
+			if (!result.isSuccess())
+			{
+				System.out.println(msg);
+			}
+			assertEquals("Import failed", result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");

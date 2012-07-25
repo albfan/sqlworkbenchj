@@ -196,7 +196,7 @@ public class ProducerFactory
 			setImportColumns(targetColumns);
 		}
 	}
-	
+
 	public void setImportColumns(List<ColumnIdentifier> cols)
 		throws Exception
 	{
@@ -209,9 +209,9 @@ public class ProducerFactory
 		TextFileParser parser = new TextFileParser(inputFile);
 		parser.setEncoding(this.generalOptions.getEncoding());
 		parser.setContainsHeader(this.textOptions.getContainsHeader());
-		parser.setQuoteChar(this.textOptions.getTextQuoteChar());
-		parser.setDecodeUnicode(this.textOptions.getDecode());
-		parser.setDelimiter(this.textOptions.getTextDelimiter());
+		parser.setTextQuoteChar(this.textOptions.getTextQuoteChar());
+		parser.setDecode(this.textOptions.getDecode());
+		parser.setTextDelimiter(this.textOptions.getTextDelimiter());
 		parser.setConnection(this.connection);
 		parser.setQuoteEscaping(textOptions.getQuoteEscaping());
 		parser.setAlwaysQuoted(textOptions.getQuoteAlways());
@@ -301,7 +301,10 @@ public class ProducerFactory
 		StringBuilder result = new StringBuilder(150);
 		StringBuilder indent = new StringBuilder();
 		indent.append('\n');
-		for (int i=0; i < WbImport.VERB.length(); i++) indent.append(' ');
+		for (int i = 0; i < WbImport.VERB.length(); i++)
+		{
+			indent.append(' ');
+		}
 		indent.append(' ');
 		CommandTester ct = new CommandTester();
 		String verb = ct.formatVerb(WbImport.VERB);

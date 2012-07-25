@@ -14,8 +14,13 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import java.sql.SQLException;
 import java.sql.Types;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,31 +29,26 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.XmlRowDataConverter;
-import workbench.db.importer.modifier.ImportValueModifier;
+import workbench.interfaces.ImportFileParser;
 import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
-import workbench.interfaces.ImportFileParser;
-import workbench.log.LogMgr;
-import workbench.util.BlobDecoder;
 import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.ValueConverter;
-import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
@@ -56,13 +56,9 @@ import workbench.util.WbStringTokenizer;
  * @author  Thomas Kellerer
  */
 public class XmlDataFileParser
-	extends DefaultHandler
+	extends AbstractImportFileParser
 	implements RowDataProducer, ImportFileParser
 {
-	private File inputFile;
-	private ImportFileLister sourceFiles;
-
-	private String tableName;
 	private String tableNameFromFile;
 
 	private int currentRowNumber = 1;
@@ -71,19 +67,14 @@ public class XmlDataFileParser
 
 	private List<ColumnIdentifier> columnsToImport;
 	private ColumnIdentifier[] columns;
-	private String encoding = "UTF-8";
 
 	private Object[] currentRow;
-	private RowDataReceiver receiver;
-	private boolean ignoreCurrentRow = false;
-	private boolean abortOnError = false;
 
 	private boolean[] warningAdded;
-	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = true;
 	private boolean formatKnown = false;
 	private String missingColumn;
-	private MessageBuffer messages;
+	private boolean ignoreCurrentRow;
 
 	private int currentColIndex = 0;
 	private int realColIndex = 0;
@@ -92,24 +83,12 @@ public class XmlDataFileParser
 	private boolean isNull = false;
 	private StringBuilder chars;
 	private boolean keepRunning;
-	private boolean regularStop;
 	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
 
-	private boolean hasErrors = false;
-	private boolean hasWarnings = false;
-
-	private boolean multiFileImport = false;
-	private boolean trimValues = false;
-
 	private SAXParser saxParser;
-	private ImportFileHandler fileHandler = new ImportFileHandler();
-	private WbConnection dbConn;
 
-	private ValueConverter converter = new ValueConverter();
-	private ImportValueModifier valueModifier;
-	private BlobDecoder blobDecoder = new BlobDecoder();
-	private List<File> filesProcessed = new ArrayList<File>();
+	private DefaultHandler handler = new SaxHandler();
 
   public XmlDataFileParser()
   {
@@ -135,50 +114,6 @@ public class XmlDataFileParser
 	}
 
 	@Override
-	public void setTrimValues(boolean flag)
-	{
-		this.trimValues = flag;
-	}
-
-	/**
-	 * Enables or disables multi-file import. If multi file
-	 * import is enabled, all import files will be
-	 * imported into the same table defined by {@link #setTableName(java.lang.String) }
-	 *
-	 * @param flag
-	 * @see #setSourceFiles(workbench.db.importer.ImportFileLister)
-	 */
-	@Override
-	public void setMultiFileImport(boolean flag)
-	{
-		this.multiFileImport = flag;
-	}
-
-	@Override
-	public List<File> getProcessedFiles()
-	{
-		return filesProcessed;
-	}
-
-	@Override
-	public boolean isMultiFileImport()
-	{
-		return this.multiFileImport;
-	}
-
-	@Override
-	public void setValueModifier(ImportValueModifier mod)
-	{
-		this.valueModifier = mod;
-	}
-
-	@Override
-	public ImportFileHandler getFileHandler()
-	{
-		return this.fileHandler;
-	}
-
-	@Override
 	public String getColumns()
 	{
 		return StringUtil.listToString(this.columnsToImport, ',', false);
@@ -197,27 +132,21 @@ public class XmlDataFileParser
 	}
 
 	@Override
-	public boolean hasErrors()
+	protected TablenameResolver getTableNameResolver()
 	{
-		return this.hasErrors;
+		return new XmlTableNameResolver(encoding);
 	}
 
 	@Override
 	public boolean hasWarnings()
 	{
-		if (this.hasWarnings) return true;
+		if (super.hasWarnings()) return true;
 		if (this.warningAdded == null) return false;
 		for (boolean b : warningAdded)
 		{
 			if (b) return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void setValueConverter(ValueConverter convert)
-	{
-		this.converter = convert;
 	}
 
 	public void setColumns(String columnList)
@@ -270,11 +199,6 @@ public class XmlDataFileParser
 		checkImportColumns();
 	}
 
-	public void setConnection(WbConnection conn)
-	{
-		this.dbConn = conn;
-	}
-
 	/**
 	 * Check if all columns defined for the import (through the table definition
 	 * as part of the XML file, or passed by the user on the command line) are
@@ -289,10 +213,10 @@ public class XmlDataFileParser
 	public void checkTargetColumns()
 		throws SQLException
 	{
-		if (this.dbConn == null) return;
+		if (this.connection == null) return;
 		if (this.columns == null) return;
 		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
-		if (!this.dbConn.getMetadata().tableExists(tbl))
+		if (!this.connection.getMetadata().tableExists(tbl))
 		{
 			if (this.receiver.getCreateTarget())
 			{
@@ -307,7 +231,7 @@ public class XmlDataFileParser
 				throw new SQLException("Table '" + tbl.getTableName() + "' not found!");
 			}
 		}
-		List<ColumnIdentifier> tableCols = this.dbConn.getMetadata().getTableColumns(tbl);
+		List<ColumnIdentifier> tableCols = this.connection.getMetadata().getTableColumns(tbl);
 		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
 
 		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
@@ -392,7 +316,10 @@ public class XmlDataFileParser
 	 *	@see #setColumns(String)
 	 *  @see #setColumns(List)
 	 */
-	public String getMissingColumn() { return this.missingColumn; }
+	public String getMissingColumn()
+	{
+		return this.missingColumn;
+	}
 
 	private boolean containsColumn(ColumnIdentifier col)
 	{
@@ -402,12 +329,6 @@ public class XmlDataFileParser
 			if (this.columns[i].equals(col)) return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void setTableName(String aName)
-	{
-		this.tableName = aName;
 	}
 
 	@Override
@@ -495,32 +416,7 @@ public class XmlDataFileParser
 	}
 
 	@Override
-	public String getSourceFilename()
-	{
-		if (this.inputFile == null) return null;
-		return this.inputFile.getAbsolutePath();
-	}
-
-	@Override
-	public void setInputFile(File file)
-	{
-		this.sourceFiles = null;
-		this.inputFile = file;
-	}
-
-	@Override
-	public void setSourceFiles(ImportFileLister source)
-	{
-		this.sourceFiles = source;
-	}
-
-	@Override
-	public void setAbortOnError(boolean flag)
-	{
-		this.abortOnError = flag;
-	}
-
-	private void processOneFile()
+	protected void processOneFile()
 		throws Exception
 	{
 		this.keepRunning = true;
@@ -559,7 +455,7 @@ public class XmlDataFileParser
 		{
 			in = this.fileHandler.getMainFileReader();
 			InputSource source = new InputSource(in);
-			saxParser.parse(source, this);
+			saxParser.parse(source, handler);
 			filesProcessed.add(inputFile);
 		}
 		catch (ParsingInterruptedException e)
@@ -605,10 +501,10 @@ public class XmlDataFileParser
 		}
 	}
 
-	private void reset()
+	@Override
+	protected void resetForFile()
 	{
-		messages = new MessageBuffer();
-		if (!multiFileImport) tableName = null;
+		super.resetForFile();
 		tableNameFromFile = null;
 		ignoreCurrentRow = false;
 		currentColIndex = 0;
@@ -621,126 +517,6 @@ public class XmlDataFileParser
 		keepRunning = true;
 	}
 
-	private void processDirectory()
-		throws Exception
-	{
-		if (this.sourceFiles == null) throw new IllegalStateException("Cannot process source directory without FileNameSorter");
-		boolean verbose = this.verboseFormat;
-
-    if (!sourceFiles.containsFiles())
-    {
-			String msg = ResourceMgr.getFormattedString("ErrImpNoFiles", sourceFiles.getExtension(), sourceFiles.getDirectory());
-			this.messages.append(msg);
-			this.hasErrors = true;
-      throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
-    }
-
-		sourceFiles.setTableNameResolver(new XmlTableNameResolver(encoding));
-
-		List<WbFile> toProcess = null;
-		try
-		{
-			toProcess = sourceFiles.getFiles();
-		}
-		catch (CycleErrorException e)
-		{
-			hasErrors = true;
-			LogMgr.logError("XmlDataFileParser.processDirectory()", "Error when checking dependencies", e);
-			throw e;
-		}
-
-		int count = toProcess == null ? 0 : toProcess.size();
-		if (count == 0)
-		{
-			String msg = ResourceMgr.getFormattedString("ErrImpNoMatch", sourceFiles.getDirectory());
-			this.messages.append(msg);
-			this.hasErrors = true;
-      throw new SQLException("No matching tables found for files in directory " + sourceFiles.getDirectory());
-		}
-
-		// The receiver only needs to pre-process the full table list
-		// if checkDependencies is turned on, otherwise a possible
-		// table delete can be done during the single table import
-		this.receiver.setTableList(sourceFiles.getTableList());
-
-		this.receiver.setTableCount(toProcess.size());
-
-		for (WbFile sourceFile : toProcess)
-		{
-			if (!this.keepRunning) break;
-			try
-			{
-				this.inputFile = sourceFile;
-				this.reset();
-
-				// readTableDefinition() might reset the verbose
-				// flag if a new XML structure is used
-				// this ensures, that the flag specified by the
-				// user will be used for files that do not have the
-				// flag in the meta-data tag
-				this.verboseFormat = verbose;
-				this.processOneFile();
-			}
-			catch (ParsingInterruptedException e)
-			{
-				// cancel the import
-				break;
-			}
-			catch (Exception e)
-			{
-				if (this.abortOnError) throw e;
-			}
-		}
-	}
-
-	@Override
-	public void start()
-		throws Exception
-	{
-		this.hasErrors = false;
-		this.hasWarnings = false;
-		this.keepRunning = true;
-
-		this.receiver.setTableCount(-1); // clear multi-table flag in receiver
-		this.receiver.setCurrentTable(-1);
-
-		try
-		{
-			if (this.sourceFiles == null)
-			{
-				processOneFile();
-			}
-			else
-			{
-				processDirectory();
-			}
-		}
-		finally
-		{
-			try { this.fileHandler.done(); } catch (Throwable th) {}
-		}
-	}
-
-	@Override
-	public void stop()
-	{
-		this.keepRunning = false;
-		this.regularStop = true;
-	}
-
-	@Override
-	public boolean isCancelled()
-	{
-		return !this.keepRunning && !regularStop;
-	}
-
-	@Override
-	public void cancel()
-	{
-		this.keepRunning = false;
-		this.regularStop = false;
-	}
-
 	private void clearRowData()
 	{
 		for (int i=0; i < this.realColCount; i++)
@@ -749,171 +525,6 @@ public class XmlDataFileParser
 		}
 		this.currentColIndex = 0;
 		this.realColIndex = 0;
-	}
-
-	@Override
-	public String getEncoding()
-	{
-		return this.encoding;
-	}
-
-	public void setEncoding(String enc)
-	{
-		this.encoding = enc;
-	}
-
-	@Override
-	public void setReceiver(RowDataReceiver aReceiver)
-	{
-		this.receiver = aReceiver;
-	}
-
-	@Override
-	public void startDocument()
-		throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-	}
-
-	@Override
-	public void endDocument()
-		throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-	}
-
-	@Override
-	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
-		throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-
-		if (qName.equals(this.rowTag))
-		{
-			// row definition ended, start a new row
-			this.clearRowData();
-			this.chars = null;
-		}
-		else if (qName.equals(this.columnTag))
-		{
-			this.chars = new StringBuilder();
-			String attrValue = attrs.getValue(XmlRowDataConverter.ATTR_LONGVALUE);
-			if (attrValue != null)
-			{
-				try
-				{
-					columnLongValue = Long.parseLong(attrValue);
-				}
-				catch (NumberFormatException e)
-				{
-					LogMgr.logError("XmlDataFileParser.startElement()", "Error converting longvalue", e);
-				}
-			}
-			attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
-			isNull = "true".equals(attrValue);
-			columnDataFile = attrs.getValue(XmlRowDataConverter.ATTR_DATA_FILE);
-		}
-		else
-		{
-			this.chars = null;
-		}
-	}
-
-	@Override
-	public void endElement(String namespaceURI, String sName, String qName)
-		throws SAXException
-	{
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-		if (qName.equals(this.rowTag))
-		{
-			if (!this.receiver.shouldProcessNextRow())
-			{
-				this.receiver.nextRowSkipped();
-			}
-			else
-			{
-				if (!this.ignoreCurrentRow)
-				{
-					try
-					{
-						this.sendRowData();
-					}
-					catch (Exception e)
-					{
-						// don't need to log the error as sendRowData() has already done that.
-						if (this.abortOnError) throw new ParsingInterruptedException();
-					}
-				}
-			}
-			this.ignoreCurrentRow = false;
-			this.currentRowNumber ++;
-		}
-		else if (qName.equals(this.columnTag))
-		{
-			this.buildColumnData();
-			this.currentColIndex ++;
-		}
-		this.chars = null;
-	}
-
-	@Override
-	public void characters(char[] buf, int offset, int len)
-		throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-		if (chars != null)
-		{
-			this.chars.append(buf, offset, len);
-		}
-	}
-
-	/**	Only implemented to have even more possibilities for cancelling the import */
-	@Override
-	public void ignorableWhitespace(char[] ch,int start,int length)
-    throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-	}
-
-	@Override
-	public void processingInstruction(String target,String data)
-		throws SAXException
-	{
-		Thread.yield();
-		if (!this.keepRunning) throw new ParsingInterruptedException();
-	}
-
-	@Override
-	public void error(SAXParseException e)
-		throws SAXParseException
-	{
-		String msg = "XML Parse error in line=" + e.getLineNumber() + ",data-row=" + (this.currentRowNumber);
-		LogMgr.logError("XmlDataFileParser.error()", msg, e);
-		this.ignoreCurrentRow = true;
-	}
-
-	@Override
-	public void fatalError(SAXParseException e)
-		throws SAXParseException
-	{
-		String msg = "Fatal XML parse error in line=" + e.getLineNumber() + ",data-row=" + (this.currentRowNumber) + "\nRest of file will be ignored!";
-		LogMgr.logError("XmlDataFileParser.fatalError()", msg, e);
-		this.ignoreCurrentRow = true;
-	}
-
-	// dump warnings too
-	@Override
-	public void warning(SAXParseException err)
-		throws SAXParseException
-	{
-		this.messages.append(ExceptionUtil.getDisplay(err));
-		this.messages.appendNewLine();
-		if (!this.keepRunning) throw err;
 	}
 
 	/**
@@ -1029,7 +640,7 @@ public class XmlDataFileParser
 		this.realColIndex ++;
 	}
 
-	private TableIdentifier getTargetTable()
+	private TableIdentifier getImportTable()
 	{
 		TableIdentifier tbl = null;
 		if (this.tableName == null)
@@ -1048,7 +659,7 @@ public class XmlDataFileParser
 	{
 		try
 		{
-			TableIdentifier tbl = getTargetTable();
+			TableIdentifier tbl = getImportTable();
 
 			checkTargetColumns();
 			if (this.columnsToImport == null)
@@ -1110,12 +721,6 @@ public class XmlDataFileParser
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 
-	@Override
-	public MessageBuffer getMessages()
-	{
-		return this.messages;
-	}
-
 	private void setUseVerboseFormat(boolean flag)
 	{
 		this.formatKnown = true;
@@ -1132,10 +737,186 @@ public class XmlDataFileParser
 		}
 	}
 
-	@Override
-    public void setErrorHandler(JobErrorHandler handler)
+	private class SaxHandler
+		extends DefaultHandler
+	{
+		private SaxHandler()
 		{
-			this.errorHandler = handler;
-    }
+			super();
+		}
+
+		@Override
+		public void startDocument()
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning) throw new ParsingInterruptedException();
+		}
+
+		@Override
+		public void endDocument()
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+		}
+
+		@Override
+		public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+
+			if (qName.equals(rowTag))
+			{
+				// row definition ended, start a new row
+				clearRowData();
+				chars = null;
+			}
+			else if (qName.equals(columnTag))
+			{
+				chars = new StringBuilder();
+				String attrValue = attrs.getValue(XmlRowDataConverter.ATTR_LONGVALUE);
+				if (attrValue != null)
+				{
+					try
+					{
+						columnLongValue = Long.parseLong(attrValue);
+					}
+					catch (NumberFormatException e)
+					{
+						LogMgr.logError("XmlDataFileParser.startElement()", "Error converting longvalue", e);
+					}
+				}
+				attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
+				isNull = "true".equals(attrValue);
+				columnDataFile = attrs.getValue(XmlRowDataConverter.ATTR_DATA_FILE);
+			}
+			else
+			{
+				chars = null;
+			}
+		}
+
+		@Override
+		public void endElement(String namespaceURI, String sName, String qName)
+			throws SAXException
+		{
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+			if (qName.equals(rowTag))
+			{
+				if (!receiver.shouldProcessNextRow())
+				{
+					receiver.nextRowSkipped();
+				}
+				else
+				{
+					if (!ignoreCurrentRow)
+					{
+						try
+						{
+							sendRowData();
+						}
+						catch (Exception e)
+						{
+							// don't need to log the error as sendRowData() has already done that.
+							if (abortOnError)
+							{
+								throw new ParsingInterruptedException();
+							}
+						}
+					}
+				}
+				ignoreCurrentRow = false;
+				currentRowNumber++;
+			}
+			else if (qName.equals(columnTag))
+			{
+				buildColumnData();
+				currentColIndex++;
+			}
+			chars = null;
+		}
+
+		@Override
+		public void characters(char[] buf, int offset, int len)
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+			if (chars != null)
+			{
+				chars.append(buf, offset, len);
+			}
+		}
+
+		/** Only implemented to have even more possibilities for cancelling the import */
+		@Override
+		public void ignorableWhitespace(char[] ch, int start, int length)
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+		}
+
+		@Override
+		public void processingInstruction(String target, String data)
+			throws SAXException
+		{
+			Thread.yield();
+			if (!keepRunning)
+			{
+				throw new ParsingInterruptedException();
+			}
+		}
+
+		@Override
+		public void error(SAXParseException e)
+			throws SAXParseException
+		{
+			String msg = "XML Parse error in line=" + e.getLineNumber() + ",data-row=" + (currentRowNumber);
+			LogMgr.logError("XmlDataFileParser.error()", msg, e);
+			ignoreCurrentRow = true;
+		}
+
+		@Override
+		public void fatalError(SAXParseException e)
+			throws SAXParseException
+		{
+			String msg = "Fatal XML parse error in line=" + e.getLineNumber() + ",data-row=" + (currentRowNumber) + "\nRest of file will be ignored!";
+			LogMgr.logError("XmlDataFileParser.fatalError()", msg, e);
+			ignoreCurrentRow = true;
+		}
+
+		// dump warnings too
+		@Override
+		public void warning(SAXParseException err)
+			throws SAXParseException
+		{
+			messages.append(ExceptionUtil.getDisplay(err));
+			messages.appendNewLine();
+			if (!keepRunning)
+			{
+				throw err;
+			}
+		}
+
+	}
 
 }

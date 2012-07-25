@@ -11,6 +11,7 @@
  */
 package workbench.db.importer;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
@@ -26,38 +27,58 @@ public interface RowDataReceiver
 	 * Returns true if the receiver will create the target table "on the fly"
 	 */
 	boolean getCreateTarget();
-	boolean shouldProcessNextRow(); 
+	boolean shouldProcessNextRow();
 	void nextRowSkipped();
-	
+
 	/**
-	 * Set the list of tables that will be processed by the 
-	 * row data producer
-	 * 
+	 * Set the list of tables that will be processed by the row data producer
+	 *
 	 * @param targetTables
 	 */
 	void setTableList(List<TableIdentifier> targetTables);
-	
+
 	void deleteTargetTables()
 		throws SQLException;
-	
+
 	void beginMultiTable()
 		throws SQLException;
-		
+
 	void endMultiTable();
+
+	void processFile(StreamImporter stream)
+		throws SQLException, IOException;
 	
-	void processRow(Object[] row) throws SQLException;
+	/**
+	 * Import a single row into the table previously defined by setTargetTable().
+	 *
+	 * @param row  the row to insert
+	 * @throws SQLException
+	 * @see #setTargetTable(workbench.db.TableIdentifier, java.util.List)
+	 */
+	void processRow(Object[] row)
+		throws SQLException;
+
 	void setTableCount(int total);
 	void setCurrentTable(int current);
-	void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)	throws SQLException;
+	/**
+	 * Initialize the import for the target table and the columns.
+	 *
+	 * @param table    the table to process
+	 * @param columns  the columns of that column to be used for inserting
+	 * @throws SQLException
+	 */
+	void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
+		throws SQLException;
+
 	void importFinished();
 	void importCancelled();
 	void tableImportError();
 	void tableImportFinished()
 		throws SQLException;
-	
+
 	/**
 	 * Log an error with the receiver that might have occurred
-	 * during parsing of the source data. 
+	 * during parsing of the source data.
 	 */
 	void recordRejected(String record, long importRow, Throwable e);
 }

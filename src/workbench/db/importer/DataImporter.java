@@ -45,6 +45,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
+import workbench.db.DbSettings;
 import workbench.db.compare.BatchedStatement;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -902,6 +903,17 @@ public class DataImporter
 	{
 		this.currentImportRow ++;
 	}
+
+	@Override
+	public void processFile(StreamImporter stream)
+		throws SQLException, IOException
+	{
+		if (stream != null)
+		{
+			this.insertedRows += stream.processStreamData();
+		}
+	}
+
 
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
