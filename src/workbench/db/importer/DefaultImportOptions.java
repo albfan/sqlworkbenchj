@@ -11,7 +11,6 @@
  */
 package workbench.db.importer;
 
-import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.resource.Settings;
 
 /**

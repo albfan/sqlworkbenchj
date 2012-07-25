@@ -11,6 +11,7 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import workbench.db.importer.ImportOptions;
 import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.HistoryTextField;

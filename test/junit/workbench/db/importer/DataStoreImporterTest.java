@@ -17,8 +17,6 @@ import java.sql.Types;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.gui.dialogs.dataimport.ImportOptions;
-import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.storage.DataStore;
 import static org.junit.Assert.*;
 

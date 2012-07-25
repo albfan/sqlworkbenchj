@@ -11,6 +11,7 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import workbench.db.importer.XmlImportOptions;
 import javax.swing.JPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;

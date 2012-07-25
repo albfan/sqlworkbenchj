@@ -11,6 +11,9 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import workbench.db.importer.ImportOptions;
+import workbench.db.importer.TextImportOptions;
+import workbench.db.importer.XmlImportOptions;
 import java.awt.Component;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;

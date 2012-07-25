@@ -26,7 +26,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.gui.dialogs.dataimport.TextImportOptions;
+import workbench.db.importer.TextImportOptions;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.QuoteEscapeType;

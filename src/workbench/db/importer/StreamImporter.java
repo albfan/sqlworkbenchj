@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.gui.dialogs.dataimport.TextImportOptions;
 
 /**
  *

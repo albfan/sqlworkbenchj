@@ -11,7 +11,6 @@
  */
 package workbench.db.importer;
 
-import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.resource.Settings;
 import workbench.util.QuoteEscapeType;
 

@@ -11,6 +11,9 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import workbench.db.importer.ImportOptions;
+import workbench.db.importer.TextImportOptions;
+import workbench.db.importer.XmlImportOptions;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
@@ -50,7 +53,7 @@ public class ImportOptionsPanel
 		super();
 		setLayout(new BorderLayout(0,2));
 		generalOptions = new GeneralImportOptionsPanel();
-		
+
 		JPanel generalContainer = new JPanel();
 		generalContainer.setLayout(new BorderLayout(0,0));
 		generalContainer.add(this.generalOptions, BorderLayout.CENTER);

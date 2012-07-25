@@ -11,6 +11,7 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import workbench.db.importer.TextImportOptions;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
