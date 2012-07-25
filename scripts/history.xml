@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-07-22">
+    <entry dev-build="16" type="enh">WbImport can now use PostgreSQL's COPY mode (this can be turned on using -usePgCopy=true)</entry>
     <entry dev-build="14" type="enh">WbDataDiff shows a warning now if a table without a primary key is found.</entry>
     <entry dev-build="9" type="enh">The editor now supports "Delete current line" and "Duplicate current line"</entry>
     <entry dev-build="8" type="enh">Added support for SQL Server 2012 sequences</entry>
@@ -20,7 +21,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
-    <entry dev-build="15" type="fix">-excludeTables (for WbDataDiff and WbSchemaDiff) was not working properly when the tables were specified using -referenceTables (rather than -referenceSchema)</entry>
+    <entry dev-build="16" type="fix">-excludeTables (for WbDataDiff and WbSchemaDiff) was not working properly when the tables were specified using -referenceTables and -targetTables at the same time</entry>
     <entry dev-build="13" type="fix">For MySQL tables from a database other than the current one weren't handled properly.</entry>
     <entry dev-build="12" type="fix">When re-ordering columns in the DbExplorer's table (or procedure) list, displaying the details of the objects did not longer work</entry>
     <entry dev-build="11" type="fix">When using alternate primary key columns for WbDataDiff the generated DELETE statements did not use the alternate PK</entry>

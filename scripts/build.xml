@@ -195,6 +195,7 @@
       <classpath>
           <fileset dir="../etc/poi" includes="poi*.jar"/>
           <fileset dir="../etc/log4j" includes="log4j*.jar"/>
+          <fileset dir="../junit" includes="postgresql*.jar"/>
       </classpath>
     </javac>
 
