@@ -2004,9 +2004,12 @@ public class DbMetadata
 	 */
 	public void close()
 	{
-		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
-		if (this.schemaInfoReader != null) this.schemaInfoReader.dispose();
+		if  (this.dbConnection != null && !this.dbConnection.isBusy())
+		{
+			if (this.oraOutput != null) 	this.oraOutput.close();
+			if (this.schemaInfoReader != null) this.schemaInfoReader.dispose();
+		}
 	}
 
 	public boolean isExtendedObject(DbObject o)
