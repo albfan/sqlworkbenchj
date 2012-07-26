@@ -52,11 +52,21 @@ public class PgCopyImporter
 	public long processStreamData()
 		throws SQLException, IOException
 	{
-		CopyManager copyMgr = new CopyManager((BaseConnection)connection.getSqlConnection());
+		if (data == null || sql == null)
+		{
+			throw new IllegalStateException("CopyImporter not initialized");
+		}
+
 		try
 		{
+			CopyManager copyMgr = new CopyManager((BaseConnection)connection.getSqlConnection());
 			LogMgr.logDebug("PgCopyImporter.processStreamData()", "Sending file contents using: " + this.sql);
 			return copyMgr.copyIn(sql, data);
+		}
+		catch (ClassCastException ce)
+		{
+			LogMgr.logError("PgCopyImporter.processStreamData()", "Not a Postgres connection!", ce);
+			throw new SQLException("No Postgres connection!");
 		}
 		finally
 		{
