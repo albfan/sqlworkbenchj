@@ -44,7 +44,7 @@ public class RunMacroAction
 			String title = ResourceMgr.getPlainString("LblRunMacro");
 			setMenuText(title);
 			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-			desc = StringUtil.replace(desc, " %macro%", "");
+			desc = desc.replaceAll("[ ]*(%macro%)[ ]*", " ");
 			this.putValue(Action.SHORT_DESCRIPTION, desc);
 		}
 		else
@@ -56,7 +56,7 @@ public class RunMacroAction
 			}
 			this.setMenuText(menuTitle);
 			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-			desc = StringUtil.replace(desc, "%macro%", macro.getName());
+			desc = StringUtil.replace(desc, "%macro%", "'" + macro.getName() + "'");
 			this.putValue(Action.SHORT_DESCRIPTION, desc);
 			StoreableKeyStroke key = macro.getShortcut();
 			if (key != null)
