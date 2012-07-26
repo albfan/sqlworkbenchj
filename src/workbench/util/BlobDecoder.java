@@ -30,11 +30,6 @@ public class BlobDecoder
 		mode = BlobMode.SaveToFile;
 	}
 
-	public BlobMode getBlobMode()
-	{
-		return mode;
-	}
-
 	public void setBlobMode(BlobMode bmode)
 	{
 		mode = bmode;

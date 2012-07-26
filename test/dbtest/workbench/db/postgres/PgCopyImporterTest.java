@@ -48,6 +48,7 @@ public class PgCopyImporterTest
 	public void testImport()
 		throws Exception
 	{
+		PostgresTestUtil.initTestCase("copy_importer");
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
 		if (conn == null) return;
 

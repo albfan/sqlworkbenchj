@@ -526,12 +526,6 @@ public class WbImport
 					result.setFailure();
 					return result;
 				}
-				if (textParser.getBlobMode() != null && textParser.getBlobMode() != BlobMode.None)
-				{
-					result.addMessage("blobMode not possible when using -usePgCopy");
-					result.setFailure();
-					return result;
-				}
 				PgCopyImporter pg = new PgCopyImporter(currentConnection);
 				textParser.setStreamImporter(pg);
 			}
