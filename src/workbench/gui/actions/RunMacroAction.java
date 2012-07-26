@@ -44,7 +44,7 @@ public class RunMacroAction
 			String title = ResourceMgr.getPlainString("LblRunMacro");
 			setMenuText(title);
 			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-			desc = StringUtil.replace(desc, "%macro% ", "");
+			desc = StringUtil.replace(desc, " %macro%", "");
 			this.putValue(Action.SHORT_DESCRIPTION, desc);
 		}
 		else
