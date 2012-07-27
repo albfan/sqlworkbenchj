@@ -55,6 +55,107 @@ public class WbCopyTest
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
+
+	@Test
+	public void testSchemaCopy()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("WbCopyTest");
+		util.prepareEnvironment();
+
+		WbConnection source = util.getConnection("namedSchemaCopySource");
+		WbConnection target = util.getHSQLConnection("namedSchemaCopyTarget");
+
+		try
+		{
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(source);
+
+			TestUtil.executeScript(source,
+				"create schema scott;\n" +
+				"create schema tiger;\n" +
+				"set schema scott;\n" +
+				"create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" +
+				"create table address (person_id integer, address_details varchar(100));\n" +
+
+				"insert into person (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01');\n"+
+				"insert into person (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202');\n" +
+				"insert into person (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303');\n" +
+				"insert into person (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404');\n" +
+
+				"insert into address (person_id, address_details) values (1, 'Arlington');\n" +
+				"insert into address (person_id, address_details) values (2, 'Heart of Gold');\n" +
+				"insert into address (person_id, address_details) values (3, 'Sleepy by Lane');\n" +
+				"insert into address (person_id, address_details) values (4, 'Betelgeuse');\n"+
+				"commit;\n" +
+				"set schema scott;\n" +
+				"create table tiger.person (nr integer not null primary key, lastname varchar(50), firstname varchar(50));\n" +
+				"insert into tiger.person (nr, lastname, firstname) values (100,'Dent-x', 'Arthur');\n"+
+				"insert into tiger.person (nr, lastname, firstname) values (200,'Beeblebrox-x', 'Zaphod');\n" +
+				"insert into tiger.person (nr, lastname, firstname) values (300,'Moviestar-x', 'Mary');\n" +
+				"insert into tiger.person (nr, lastname, firstname) values (400,'Perfect-x', 'Ford');\n" +
+				"commit;");
+
+			TestUtil.executeScript(target,
+				"create schema scott;\n" +
+				"create schema tiger;\n" +
+				"create table tiger.person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob);\n" +
+				"create table tiger.address (person_id integer, address_details varchar(100));\n" +
+				"create schema other;\n" +
+				"alter user sa set initial schema other;\n" +
+				"create table scott.person (nr integer not null primary key, lastname varchar(50), firstname varchar(50));\n" +
+				"insert into scott.person (nr, lastname, firstname) values (100,'Dent', 'Arthur');\n"+
+				"insert into scott.person (nr, lastname, firstname) values (2,'Beeblebrox', 'Zaphod');\n" +
+				"commit;");
+
+			String sql =
+				"wbcopy -deleteTarget=true " +
+				"       -sourceSchema=scott " +
+				"       -targetSchema=tiger " +
+				"       -deleteTarget=true " +
+				"       -sourceProfile='namedSchemaCopySource' " +
+				"       -targetProfile='namedSchemaCopyTarget'";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Statement ttstmt = target.createStatement();
+			ResultSet rs = ttstmt.executeQuery("select nr, lastname, firstname from tiger.person");
+			int count = 0;
+			while (rs.next())
+			{
+				count ++;
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+			assertEquals(4, count);
+			rs = ttstmt.executeQuery("select count(*) from scott.person");
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			SqlUtil.closeResult(rs);
+			assertEquals(2, count);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().removeProfile(source.getProfile());
+			ConnectionMgr.getInstance().removeProfile(target.getProfile());
+		}
+	}
+
 	@Test
 	public void testTableWithSchema()
 		throws Exception

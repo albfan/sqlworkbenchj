@@ -158,6 +158,11 @@ class TableCopy
 	}
 
 	@Override
+	public void setTargetSchemaAndCatalog(String schema, String catalog)
+	{
+	}
+
+	@Override
 	public boolean isSuccess()
 	{
 		if (this.copier == null) return true;

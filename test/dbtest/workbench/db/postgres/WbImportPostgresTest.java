@@ -100,8 +100,47 @@ public class WbImportPostgresTest
 		}
 		finally
 		{
+			SqlUtil.closeResult(rs);
+		}
+
+		content = "id\tfirstname\tlastname\n1\tArthur\tDent\n2\tFord\tPrefect\n";
+		TestUtil.writeFile(data, content, "UTF-8");
+
+		runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
+		result = runner.getResult();
+
+		try
+		{
+			rs = stmt.executeQuery("select id, firstname, lastname from foo");
+			rows = 0;
+			while (rs.next())
+			{
+				rows++;
+				int id = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				if (id == 1)
+				{
+					assertEquals("Arthur", fname);
+					assertEquals("Dent", lname);
+				}
+				else if (id == 2)
+				{
+					assertEquals("Ford", fname);
+					assertEquals("Prefect", lname);
+				}
+				else
+				{
+					fail("Incorrect id imported");
+				}
+			}
+			assertEquals(2, rows);
+		}
+		finally
+		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 	}
 
 }

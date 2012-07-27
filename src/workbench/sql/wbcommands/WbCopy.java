@@ -42,6 +42,8 @@ public class WbCopy
 	public static final String VERB = "WBCOPY";
 
 	public static final String PARAM_SOURCETABLE = "sourceTable";
+	public static final String PARAM_SOURCESCHEMA = "sourceSchema";
+	public static final String PARAM_TARGETSCHEMA = "targetSchema";
 	public static final String PARAM_SOURCEQUERY = "sourceQuery";
 	public static final String PARAM_TARGETTABLE = "targetTable";
 	public static final String PARAM_SOURCEPROFILE = "sourceProfile";
@@ -93,7 +95,9 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
+		cmdLine.addArgument(PARAM_SOURCESCHEMA);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
+		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
@@ -177,6 +181,7 @@ public class WbCopy
 		ProfileKey targetKey = getTargetProfile();
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
+		String sourceSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 
 		boolean doSyncDelete = cmdLine.getBoolean(PARAM_DELETE_SYNC, false);
@@ -187,7 +192,7 @@ public class WbCopy
 			return result;
 		}
 
-		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery))
+		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery) && StringUtil.isBlank(sourceSchema))
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
 			addWrongParams(result);
@@ -210,7 +215,7 @@ public class WbCopy
 		SourceTableArgument sourceTables = null;
 		try
 		{
-			sourceTables = new SourceTableArgument(sourcetable, sourceCon);
+			sourceTables = new SourceTableArgument(sourcetable, null, sourceSchema, sourceCon);
 			tablesToExport = sourceTables.getTables();
 			if (tablesToExport.isEmpty() && sourceTables.wasWildCardArgument())
 			{
@@ -232,6 +237,8 @@ public class WbCopy
 		if (schemaCopy)
 		{
 			this.copier = new SchemaCopy(tablesToExport);
+			// TODO: add support for catalogs
+			this.copier.setTargetSchemaAndCatalog(cmdLine.getValue(PARAM_TARGETSCHEMA), null);
 		}
 		else
 		{

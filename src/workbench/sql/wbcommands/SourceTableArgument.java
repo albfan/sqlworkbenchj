@@ -111,16 +111,10 @@ public class SourceTableArgument
 		throws SQLException
 	{
 		List<String> args = getObjectNames(arg);
-		int argCount = args.size();
 
 		List<TableIdentifier> result = CollectionUtil.arrayList();
 
-		if (argCount <= 0 && StringUtil.isBlank(schema)) return result;
-		if (argCount <= 0 && StringUtil.isNonBlank(schema))
-		{
-			// a schema was specified but no table --> take all tables from that schema
-			args = CollectionUtil.arrayList("*");
-		}
+		if (args.size() <= 0 && StringUtil.isBlank(schema)) return result;
 
 		String schemaToUse;
 		if (StringUtil.isBlank(schema))
@@ -129,37 +123,48 @@ public class SourceTableArgument
 		}
 		else if (schema.equals("*") || schema.equals("%"))
 		{
+			// all tables from all schemas
 			schemaToUse = null;
+			args = CollectionUtil.arrayList("*");
 		}
 		else
 		{
-			schemaToUse = schema;
+			schemaToUse =  dbConn.getMetadata().adjustSchemaNameCase(schema);
 		}
-		for (String t : args)
+
+		if (args.isEmpty() && schemaToUse != null)
 		{
-			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
+			List<TableIdentifier> l = dbConn.getMetadata().getObjectList(null, schemaToUse, types);
+			result.addAll(l);
+		}
+		else
+		{
+			for (String t : args)
 			{
-				if (checkWildcard) this.wildcardsPresent = true;
-				TableIdentifier tbl = new TableIdentifier(t);
-				if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%")))
+				if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
 				{
-					tbl.setSchema(schemaToUse);
-				}
-				tbl.adjustCase(dbConn);
-				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
-				result.addAll(l);
-			}
-			else
-			{
-				TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t, dbConn));
-				if (tbl != null)
-				{
-					result.add(tbl);
+					if (checkWildcard) this.wildcardsPresent = true;
+					TableIdentifier tbl = new TableIdentifier(t);
+					if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%")))
+					{
+						tbl.setSchema(schemaToUse);
+					}
+					tbl.adjustCase(dbConn);
+					List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
+					result.addAll(l);
 				}
 				else
 				{
-					missingTables.add(t);
-					LogMgr.logDebug("SourceTableArgument.parseArgument()", "Table " + t + " not found!");
+					TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t, dbConn));
+					if (tbl != null)
+					{
+						result.add(tbl);
+					}
+					else
+					{
+						missingTables.add(t);
+						LogMgr.logDebug("SourceTableArgument.parseArgument()", "Table " + t + " not found!");
+					}
 				}
 			}
 		}

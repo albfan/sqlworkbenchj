@@ -19,20 +19,24 @@ import workbench.util.ArgumentParser;
 
 /**
  * An interface to define a single copy task.
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface CopyTask
 {
+
+	void setTargetSchemaAndCatalog(String schema, String catalog);
+
 	boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException;
-	
+
+
 	long copyData()
 		throws SQLException, Exception;
-	
+
 	boolean isSuccess();
-	
+
 	CharSequence getMessages();
-	
+
 	void cancel();
 }

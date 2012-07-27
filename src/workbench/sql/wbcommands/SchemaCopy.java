@@ -60,13 +60,22 @@ class SchemaCopy
 	private Map<TableIdentifier, TableIdentifier> targetToSourceMap;
 
 	private RowActionMonitor rowMonitor;
-	private boolean cancel = false;
-	private boolean doSyncDelete = false;
-	private String cmdLineMode = null;
+	private boolean cancel;
+	private boolean doSyncDelete;
+	private String cmdLineMode;
+	private String targetSchema;
+	private String targetCatalog;
 
 	SchemaCopy(List<TableIdentifier> tables)
 	{
 		this.sourceTables = tables;
+	}
+
+	@Override
+	public void setTargetSchemaAndCatalog(String schema, String catalog)
+	{
+		this.targetSchema = schema;
+		this.targetCatalog = catalog;
 	}
 
 	@Override
@@ -156,20 +165,28 @@ class SchemaCopy
 	{
 		targetToSourceMap = new HashMap<TableIdentifier, TableIdentifier>(sourceTables.size());
 
+		String schema = this.targetSchema != null ? targetConnection.getMetadata().adjustSchemaNameCase(targetSchema) : this.targetConnection.getMetadata().getCurrentSchema();
+		String catalog = this.targetCatalog != null ? targetConnection.getMetadata().adjustObjectnameCase(targetCatalog) : this.targetConnection.getMetadata().getCurrentCatalog();
+
 		for (TableIdentifier sourceTable : sourceTables)
 		{
 			TableIdentifier targetTable = sourceTable.createCopy();
 
+			if (this.targetSchema != null || targetCatalog != null)
+			{
+				targetTable.setSchema(schema);
+				targetTable.setCatalog(catalog);
+			}
+
 			if (createTargetTable())
 			{
-				targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
 				targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
 				targetTable.adjustCase(targetConnection);
 			}
 			else
 			{
 				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
-				if (targetTable == null)
+				if (targetTable == null && targetSchema == null && targetCatalog == null)
 				{
 					// if the table was not found using the schema/catalog as specified in the source
 					// table, try the default schema and catalog.
@@ -202,6 +219,7 @@ class SchemaCopy
 					}
 				}
 			}
+			LogMgr.logTrace("SchemaCopy.mapTables()", "Copying " + sourceTable.getFullyQualifiedName(sourceConnection) + " to "  + targetTable.getFullyQualifiedName(targetConnection));
 			targetToSourceMap.put(targetTable, sourceTable);
 		}
 	}
