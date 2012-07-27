@@ -118,7 +118,7 @@ public class SourceTableArgument
 		if (argCount <= 0 && StringUtil.isBlank(schema)) return result;
 		if (argCount <= 0 && StringUtil.isNonBlank(schema))
 		{
-			// a schema was specified by no table --> take all tables from that schema
+			// a schema was specified but no table --> take all tables from that schema
 			args = CollectionUtil.arrayList("*");
 		}
 
