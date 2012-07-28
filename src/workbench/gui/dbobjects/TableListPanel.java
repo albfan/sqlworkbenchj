@@ -769,13 +769,20 @@ public class TableListPanel
 			}
 
 			String tableView = this.dbConnection.getMetadata().getBaseTableTypeName() + "," + this.dbConnection.getMetadata().getViewTypeName();
-			String add = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", tableView);
+			String add = Settings.getInstance().getProperty("workbench.dbexplorer." + dbConnection.getDbId() + ".typefilter.additional", null);
+
+			if (add == null)
+			{
+				// no DBMS specific configuration use a global one
+				add = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", tableView);
+			}
+			
 			List<String> userFilter = StringUtil.stringToList(add, ";", true, true);
 
 			for (String t : userFilter)
 			{
 				List<String> l = StringUtil.stringToList(t, ",");
-				l.retainAll(types);
+				l.retainAll(types); // make sure only types are used that are actually valid.
 				String newFilter = StringUtil.listToString(l, ',');
 				if (StringUtil.isNonBlank(newFilter) && !types.contains(newFilter) )
 				{

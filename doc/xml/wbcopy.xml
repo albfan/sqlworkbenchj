@@ -234,6 +234,15 @@
 				</thead>
 				<tbody valign="top">
 					<row>
+					 <entry>-sourceSchema</entry>
+						<entry>
+              The name of the schema to be copied. When using this parameter, all tables
+              from the specified schema are copied to the target. You must specify either
+              <literal>-sourceSchema</literal>, <literal>-sourceTable</literal> or <literal>-sourceQuery</literal>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-sourceTable</entry>
 						<entry>
 							The name of the table(s) to be copied. You can either specifiy a
@@ -254,6 +263,14 @@
 								When <literal>-checkDependencies=true</literal> is passed, &wb-productname; will
 								check the foreign key dependencies for the tables specified with <literal>-sourceTable</literal>
 							</para>
+						</entry>
+					</row>
+
+					<row>
+					 <entry>-targetSchema</entry>
+						<entry>
+              The name of the target schema into which the tables should be copied. When this
+              parameter is not specified, the default schema of the target connection is used.
 						</entry>
 					</row>
 

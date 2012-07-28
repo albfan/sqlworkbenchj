@@ -1023,6 +1023,7 @@
 					<row>
 						<entry id="import-pg-copy">-usePgCopy</entry>
 						<entry>
+              <para>This parameter has no value, its presence turns the feature on.</para>
               <para>
                 If this parameter is specified, then the input file is sent to the PostgreSQL server
                 using PostgreSQL's <ulink url="http://jdbc.postgresql.org/documentation/publicapi/org/postgresql/copy/CopyManager.html">JDBC support</ulink>
@@ -1056,7 +1057,6 @@
                 All parameters controlling the target table(s), the columns, the source directory and so on still work.
                 Including the import directly from a ZIP archive.
               </para>
-              <para>This parameter has no value, its presence turns the feature on.</para>
 						</entry>
 					</row>
 				</tbody>
