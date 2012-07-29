@@ -18,7 +18,7 @@
          The checking for un-committed changes can be controlled through the <link linkend="profile-open-trans">connection profile</link>.
        </para>
      </section>
-     <section id="postgres-open-trans">
+     <section id="postgres-copy-api">
        <indexterm><primary>PostgreSQL</primary><secondary>COPY</secondary></indexterm>
        <title>Using the COPY API for client side files</title>
        <para>
