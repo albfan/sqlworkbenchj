@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-07-22">
+  <release build="-1" date="2012-07-29">
     <entry dev-build="16" type="enh">WbCopy now supports -sourceSchema and -targetSchema parameters to be able to copy to and from schemas that are not the "default" schema</entry>
     <entry dev-build="16" type="enh">WbImport can now use PostgreSQL's COPY mode (this can be turned on using -usePgCopy)</entry>
     <entry dev-build="14" type="enh">WbDataDiff now only shows a warning if a table without a primary key is found instead of aborting.</entry>
