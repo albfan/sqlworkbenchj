@@ -1698,7 +1698,7 @@ WHERE id=42;</programlisting>
     <programlisting>WbSysExec -program='cmd.exe' -argument='/c' -argument='dir /n' -dir='c:\temp\'</programlisting>
   </section>
 
-  <section id="command-wbexec">
+  <section id="command-sysopen">
     <title>Opening a file with the default application - WbSysOpen</title>
     <para>
       <literal>WbSyOpen</literal> can be used to open a file with the default application of the operating system.
