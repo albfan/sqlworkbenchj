@@ -144,6 +144,7 @@
     <indexterm><primary>Problems</primary><secondary>Oracle</secondary></indexterm>
     <indexterm><primary>Oracle</primary><secondary>Problems</secondary></indexterm>
 
+    <!--
 		<section id="oracle-db-exp-tables">
 			<title>No Views or tables visible in the DbExplorer</title>
 			<para>
@@ -175,7 +176,8 @@
         This bug was fixed in the 11.2 drivers.
       </para>
 		</section>
-
+    -->
+    
 		<section id="oracle-long-problems">
 			<title>Error: "Stream has already been closed"</title>
 			<para>
