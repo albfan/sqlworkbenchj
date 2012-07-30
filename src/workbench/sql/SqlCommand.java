@@ -97,6 +97,20 @@ public class SqlCommand
 		return this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK");
 	}
 
+	protected String getSuccessMessage(String sql)
+	{
+		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		if (info != null)
+		{
+			String msg = getSuccessMessage(info);
+			if (msg != null)
+			{
+				return msg;
+			}
+		}
+		return null;
+	}
+
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
 		result.addMessage(getDefaultSuccessMessage());
@@ -298,6 +312,7 @@ public class SqlCommand
 			boolean hasResult = this.currentStatement.execute(sql);
 			result.setSuccess();
 			processResults(result, hasResult);
+			appendSuccessMessage(result);
 			runner.releaseSavepoint();
 		}
 		catch (Exception e)
@@ -841,4 +856,44 @@ public class SqlCommand
 		return false;
 	}
 
+	protected String getSuccessMessage(SqlUtil.DdlObjectInfo info)
+	{
+		String verb = getVerb();
+		if ("DROP".equals(verb))
+		{
+			if (info == null || info.objectType == null)
+			{
+				return ResourceMgr.getString("MsgGenDropSuccess");
+			}
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
+			}
+		}
+		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
+		{
+			if (info == null || info.objectType == null)
+			{
+				return ResourceMgr.getString("MsgGenCreateSuccess");
+			}
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
+			}
+		}
+		else if ("ANALYZE".equals(verb) || this.currentConnection.getMetadata().isOracle())
+		{
+			String name = currentConnection.getMetadata().adjustObjectnameCase(info.objectName);
+			return ResourceMgr.getFormattedString("MsgObjectAnalyzed", StringUtil.capitalize(info.objectType), name);
+		}
+		return null;
+	}
 }

@@ -28,6 +28,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 
 /**
@@ -198,39 +199,15 @@ public class DdlCommand
 		return m.find();
 	}
 
-	private String getSuccessMessage(SqlUtil.DdlObjectInfo info)
+	@Override
+	protected String getSuccessMessage(DdlObjectInfo info)
 	{
-		if ("DROP".equals(verb))
+		String msg = super.getSuccessMessage(info);
+		if (msg == null)
 		{
-			if (info == null || info.objectType == null)
-			{
-				return ResourceMgr.getString("MsgGenDropSuccess");
-			}
-			if (StringUtil.isNonBlank(info.objectName))
-			{
-				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
-			}
-			else
-			{
-				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
-			}
+			return getDefaultSuccessMessage();
 		}
-		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
-		{
-			if (info == null || info.objectType == null)
-			{
-				return ResourceMgr.getString("MsgGenCreateSuccess");
-			}
-			if (StringUtil.isNonBlank(info.objectName))
-			{
-				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
-			}
-			else
-			{
-				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
-			}
-		}
-		return getDefaultSuccessMessage();
+		return msg;
 	}
 
 	/**

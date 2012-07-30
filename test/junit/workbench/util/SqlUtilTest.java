@@ -376,6 +376,16 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("hstore", info.objectName);
 		assertEquals("EXTENSION", info.objectType);
+
+		sql = "analyze table foo validate structure";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("foo", info.objectName);
+		assertEquals("TABLE", info.objectType);
+
+		sql = "analyze index foo_idx validate structure";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("foo_idx", info.objectName);
+		assertEquals("INDEX", info.objectType);
 	}
 
 	@Test

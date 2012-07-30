@@ -292,8 +292,9 @@ public class SqlUtil
 
 		if (t == null) return null;
 		String verb = t.getContents();
+		Set<String> verbs = CollectionUtil.caseInsensitiveSet("DROP", "RECREATE", "ALTER", "ANALYZE");
 
-		if (!verb.startsWith("CREATE") && !verb.equals("DROP") && !verb.equals("RECREATE") && !verb.equals("ALTER")) return null;
+		if (!verb.startsWith("CREATE") && !verbs.contains(verb)) return null;
 
 		try
 		{
