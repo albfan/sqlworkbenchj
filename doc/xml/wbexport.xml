@@ -1344,6 +1344,7 @@ SELECT * FROM data_table;</programlisting>
 
 <programlisting>WbImport -type=text
          -sourceDir=c:/data/export
+         -extensioin=zip
          -checkDependencies=true;</programlisting>
 		</section>
 
