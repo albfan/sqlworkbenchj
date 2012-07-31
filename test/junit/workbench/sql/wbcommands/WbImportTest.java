@@ -122,6 +122,7 @@ public class WbImportTest
 
 	@Test
 	public void testPreAndPostStatements()
+		throws Exception
 	{
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -179,11 +180,6 @@ public class WbImportTest
 				}
 			}
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
@@ -194,66 +190,57 @@ public class WbImportTest
 	public void testFunctionConstant()
 		throws Exception
 	{
-		try
+		File importFile  = new File(this.basedir, "constant_func_import.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("firstname\tlastname");
+		out.println("Arthur\tDent");
+		out.println("Ford\tPrefect");
+		out.println("Zaphod\tBeeblebrox");
+		out.close();
+
+		Statement stmt = this.connection.createStatementForQuery();
+		stmt.executeUpdate("create sequence seq_junit start with 1");
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"nr=${next value for seq_junit}\" -type=text -header=true -continueonerror=false -table=junit_test_pk");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		ResultSet rs = stmt.executeQuery("select count(*) from junit_test_pk");
+		int count = -1;
+		if (rs.next())
 		{
-			File importFile  = new File(this.basedir, "constant_func_import.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("firstname\tlastname");
-			out.println("Arthur\tDent");
-			out.println("Ford\tPrefect");
-			out.println("Zaphod\tBeeblebrox");
-			out.close();
-
-			Statement stmt = this.connection.createStatementForQuery();
-			stmt.executeUpdate("create sequence seq_junit start with 1");
-
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"nr=${next value for seq_junit}\" -type=text -header=true -continueonerror=false -table=junit_test_pk");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test_pk");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values imported", 3, count);
-
-			rs.close();
-
-			rs = stmt.executeQuery("select nr, lastname, firstname from junit_test_pk order by nr");
-			if (rs.next())
-			{
-				int id = rs.getInt(1);
-				String lname = rs.getString(2);
-				String fname = rs.getString(3);
-				if (id == 1)
-				{
-					assertEquals("Wrong lastname", "Dent", lname);
-					assertEquals("Wrong firstname", "Arthur", fname);
-				}
-				else if (id == 2)
-				{
-					assertEquals("Wrong lastname", "Prefect", lname);
-					assertEquals("Wrong firstname", "Ford", fname);
-				}
-			}
-			else
-			{
-				fail("First row not imported");
-			}
-			rs.close();
-
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
+			count = rs.getInt(1);
 		}
-		catch (Exception e)
+		assertEquals("Not enough values imported", 3, count);
+
+		rs.close();
+
+		rs = stmt.executeQuery("select nr, lastname, firstname from junit_test_pk order by nr");
+		if (rs.next())
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			int id = rs.getInt(1);
+			String lname = rs.getString(2);
+			String fname = rs.getString(3);
+			if (id == 1)
+			{
+				assertEquals("Wrong lastname", "Dent", lname);
+				assertEquals("Wrong firstname", "Arthur", fname);
+			}
+			else if (id == 2)
+			{
+				assertEquals("Wrong lastname", "Prefect", lname);
+				assertEquals("Wrong firstname", "Ford", fname);
+			}
+		}
+		else
+		{
+			fail("First row not imported");
+		}
+		rs.close();
+
+		stmt.close();
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
 		}
 	}
 
@@ -1125,52 +1112,44 @@ public class WbImportTest
 	public void testColumnLimit()
 		throws Exception
 	{
-		try
+		File importFile  = new File(this.basedir, "col_limit.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("nr\tfirstname\tlastname");
+		out.println("x1\tArthur\tDent");
+		out.println("x2\tZaphod\tBeeblebrox");
+		out.close();
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = this.connection.createStatementForQuery();
+		ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+		while (rs.next())
 		{
-			File importFile  = new File(this.basedir, "col_limit.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			out.println("x1\tArthur\tDent");
-			out.println("x2\tZaphod\tBeeblebrox");
-			out.close();
-
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			while (rs.next())
+			int nr = rs.getInt(1);
+			String fname = rs.getString(2);
+			String lname = rs.getString(3);
+			if (nr == 1)
 			{
-				int nr = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				if (nr == 1)
-				{
-					assertEquals("Wrong lastname", "Dent", lname);
-					assertEquals("Wrong firstname", "Arthur", fname);
-				}
-				else if (nr == 2)
-				{
-					assertEquals("Wrong lastname", "Beeb", lname);
-					assertEquals("Wrong firstname", "Zaphod", fname);
-				}
-				else
-				{
-					fail("Wrong lines imported");
-				}
+				assertEquals("Wrong lastname", "Dent", lname);
+				assertEquals("Wrong firstname", "Arthur", fname);
 			}
-
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
+			else if (nr == 2)
 			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
+				assertEquals("Wrong lastname", "Beeb", lname);
+				assertEquals("Wrong firstname", "Zaphod", fname);
 			}
-
+			else
+			{
+				fail("Wrong lines imported");
+			}
 		}
-		catch (Exception e)
+
+		rs.close();
+		stmt.close();
+		if (!importFile.delete())
 		{
-			fail(e.getMessage());
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
 		}
 	}
 
@@ -1178,101 +1157,93 @@ public class WbImportTest
 	public void testSkipImport()
 		throws Exception
 	{
-		try
+		File importFile  = new File(this.basedir, "partial_skip.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("nr\tfirstname\tlastname");
+		out.println("1\tArthur\tDent");
+		out.println("2\tZaphod\tBeeblebrox");
+		out.close();
+
+		StatementRunnerResult result = importCmd.execute(
+			"-- this is the import test\nwbimport " +
+			"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
+			"-filecolumns=nr,$wb_skip$,lastname -type=text " +
+			"-header=true -continueonerror=false -table=junit_test");
+		String msg = result.getMessageBuffer().toString();
+		assertEquals("Import failed: " + msg, result.isSuccess(), true);
+		String[] lines = msg.split(StringUtil.REGEX_CRLF);
+		assertEquals(3, lines.length);
+		assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
+		assertEquals("2 row(s) inserted", lines[1]);
+		assertEquals("0 row(s) updated", lines[2]);
+
+		Statement stmt = this.connection.createStatementForQuery();
+		ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+		while (rs.next())
 		{
-			File importFile  = new File(this.basedir, "partial_skip.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			out.println("1\tArthur\tDent");
-			out.println("2\tZaphod\tBeeblebrox");
-			out.close();
-
-			StatementRunnerResult result = importCmd.execute(
-				"-- this is the import test\nwbimport " +
-				"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
-				"-filecolumns=nr,$wb_skip$,lastname -type=text " +
-				"-header=true -continueonerror=false -table=junit_test");
-			String msg = result.getMessageBuffer().toString();
-			assertEquals("Import failed: " + msg, result.isSuccess(), true);
-			String[] lines = msg.split(StringUtil.REGEX_CRLF);
-			assertEquals(3, lines.length);
-			assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
-			assertEquals("2 row(s) inserted", lines[1]);
-			assertEquals("0 row(s) updated", lines[2]);
-
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			while (rs.next())
+			int nr = rs.getInt(1);
+			String fname = rs.getString(2);
+			String lname = rs.getString(3);
+			assertNull("Firstname imported for nr=" + nr, fname);
+			if (nr == 1)
 			{
-				int nr = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				assertNull("Firstname imported for nr=" + nr, fname);
-				if (nr == 1)
-				{
-					assertEquals("Wrong lastname", "Dent", lname);
-				}
-				else if (nr == 2)
-				{
-					assertEquals("Wrong lastname", "Beeblebrox", lname);
-				}
-				else
-				{
-					fail("Wrong lines imported");
-				}
+				assertEquals("Wrong lastname", "Dent", lname);
 			}
-			rs.close();
-
-
-			stmt.executeUpdate("delete from junit_test");
-			connection.commit();
-
-			result = importCmd.execute(
-				"-- this is the import test\nwbimport " +
-				"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
-				"-filecolumns=nr,firstnae,lastname -importColumns=nr,lastname -type=text " +
-				"-header=true -continueonerror=false -table=junit_test");
-			
-			msg = result.getMessageBuffer().toString();
-			assertEquals("Import failed: " + msg, result.isSuccess(), true);
-			lines = msg.split(StringUtil.REGEX_CRLF);
-			assertEquals(3, lines.length);
-			assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
-			assertEquals("2 row(s) inserted", lines[1]);
-			assertEquals("0 row(s) updated", lines[2]);
-
-			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			while (rs.next())
+			else if (nr == 2)
 			{
-				int nr = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				assertNull("Firstname imported for nr=" + nr, fname);
-				if (nr == 1)
-				{
-					assertEquals("Wrong lastname", "Dent", lname);
-				}
-				else if (nr == 2)
-				{
-					assertEquals("Wrong lastname", "Beeblebrox", lname);
-				}
-				else
-				{
-					fail("Wrong lines imported");
-				}
+				assertEquals("Wrong lastname", "Beeblebrox", lname);
 			}
-			rs.close();
-
-			stmt.close();
-			if (!importFile.delete())
+			else
 			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
+				fail("Wrong lines imported");
 			}
-
 		}
-		catch (Exception e)
+		rs.close();
+
+
+		stmt.executeUpdate("delete from junit_test");
+		connection.commit();
+
+		result = importCmd.execute(
+			"-- this is the import test\nwbimport " +
+			"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
+			"-filecolumns=nr,firstnae,lastname -importColumns=nr,lastname -type=text " +
+			"-header=true -continueonerror=false -table=junit_test");
+
+		msg = result.getMessageBuffer().toString();
+		assertEquals("Import failed: " + msg, result.isSuccess(), true);
+		lines = msg.split(StringUtil.REGEX_CRLF);
+		assertEquals(3, lines.length);
+		assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
+		assertEquals("2 row(s) inserted", lines[1]);
+		assertEquals("0 row(s) updated", lines[2]);
+
+		rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+		while (rs.next())
 		{
-			fail(e.getMessage());
+			int nr = rs.getInt(1);
+			String fname = rs.getString(2);
+			String lname = rs.getString(3);
+			assertNull("Firstname imported for nr=" + nr, fname);
+			if (nr == 1)
+			{
+				assertEquals("Wrong lastname", "Dent", lname);
+			}
+			else if (nr == 2)
+			{
+				assertEquals("Wrong lastname", "Beeblebrox", lname);
+			}
+			else
+			{
+				fail("Wrong lines imported");
+			}
+		}
+		rs.close();
+
+		stmt.close();
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
 		}
 	}
 
