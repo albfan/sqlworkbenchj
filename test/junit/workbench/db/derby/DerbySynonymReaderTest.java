@@ -51,7 +51,7 @@ public class DerbySynonymReaderTest
 	public void testGetSynonymList()
 		throws Exception
 	{
-		WbConnection con = DerbyTestUtil.getDerbyConnection(getTestUtil().getBaseDir(), "syntest");
+		WbConnection con = DerbyTestUtil.getDerbyConnection(getTestUtil().getBaseDir());
 		String sql =
 			"create table foo (bar integer);\n" +
 			"create synonym foobar for foo;\n";

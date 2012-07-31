@@ -32,7 +32,7 @@ public class DerbyTestUtil
 	/**
 	 * Return a connection to an embedded Derby engine
 	 */
-	public static WbConnection getDerbyConnection(String basedir, String schema)
+	public static WbConnection getDerbyConnection(String basedir)
 	{
 		try
 		{

@@ -53,7 +53,7 @@ public class DerbySequenceReaderTest
 	public void testGetSequences()
 		throws Exception
 	{
-		WbConnection con = DerbyTestUtil.getDerbyConnection(getTestUtil().getBaseDir(), "seqtest");
+		WbConnection con = DerbyTestUtil.getDerbyConnection(getTestUtil().getBaseDir());
 		String sql =
 			"create sequence big_seq as bigint;\n" +
 			"create sequence seq_one;\n";

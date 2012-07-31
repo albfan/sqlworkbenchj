@@ -33,7 +33,6 @@ public class GenericSchemaInfoReader
 	private WbConnection connection;
 	private String schemaQuery;
 	private boolean useSavepoint;
-	private boolean isCacheable;
 	private boolean reuseStmt;
 
 	private PreparedStatement query;
@@ -52,12 +51,11 @@ public class GenericSchemaInfoReader
 		queryProp = "workbench.db." + dbid + ".currentschema.query";
 		cacheProp = "workbench.db." + dbid + ".currentschema.cacheable";
 		reuseProp = "workbench.db." + dbid + ".currentschema.reuse.stmt";
-		reuseProp = "workbench.db." + dbid + ".currentschema.timeout";
+		timeoutProp = "workbench.db." + dbid + ".currentschema.timeout";
 
 		schemaQuery = Settings.getInstance().getProperty(queryProp, null);
-		isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
 		reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
-		Settings.getInstance().addPropertyChangeListener(this, cacheProp, queryProp, reuseProp, timeoutProp);
+		Settings.getInstance().addPropertyChangeListener(this, queryProp, reuseProp);
 
 		connection.addChangeListener(this);
 		logSettings();
@@ -65,7 +63,12 @@ public class GenericSchemaInfoReader
 
 	private void logSettings()
 	{
-		LogMgr.logDebug("GenericSchemaInfoReader.logSettings()", "Re-Use statement: " + reuseStmt + ", cache current schema: "+ isCacheable + ", SQL: " + schemaQuery);
+		LogMgr.logDebug("GenericSchemaInfoReader.logSettings()", "Re-Use statement: " + reuseStmt + ", cache current schema: "+ isCacheable() + ", SQL: " + schemaQuery);
+	}
+
+	private boolean isCacheable()
+	{
+		return Settings.getInstance().getBoolProperty(cacheProp, false);
 	}
 
 	@Override
@@ -85,11 +88,7 @@ public class GenericSchemaInfoReader
 		}
 		if (evt.getPropertyName().equals(cacheProp))
 		{
-			isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
-			if (!isCacheable)
-			{
-				cachedSchema = null;
-			}
+			cachedSchema = null;
 		}
 		if (evt.getPropertyName().equals(reuseProp))
 		{
@@ -126,6 +125,8 @@ public class GenericSchemaInfoReader
 	{
 		if (this.connection == null) return null;
 		if (StringUtil.isEmptyString(this.schemaQuery)) return null;
+
+		boolean isCacheable = isCacheable();
 		if (isCacheable && cachedSchema != null)
 		{
 			LogMgr.logDebug("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
