@@ -42,6 +42,7 @@ public class GenericSchemaInfoReader
 	private String reuseProp;
 	private String queryProp;
 	private String cacheProp;
+	private String timeoutProp;
 
 	public GenericSchemaInfoReader(WbConnection conn, String dbid)
 	{
@@ -51,11 +52,12 @@ public class GenericSchemaInfoReader
 		queryProp = "workbench.db." + dbid + ".currentschema.query";
 		cacheProp = "workbench.db." + dbid + ".currentschema.cacheable";
 		reuseProp = "workbench.db." + dbid + ".currentschema.reuse.stmt";
+		reuseProp = "workbench.db." + dbid + ".currentschema.timeout";
 
 		schemaQuery = Settings.getInstance().getProperty(queryProp, null);
 		isCacheable = Settings.getInstance().getBoolProperty(cacheProp, false);
 		reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
-		Settings.getInstance().addPropertyChangeListener(this, cacheProp, queryProp, reuseProp);
+		Settings.getInstance().addPropertyChangeListener(this, cacheProp, queryProp, reuseProp, timeoutProp);
 
 		connection.addChangeListener(this);
 		logSettings();
@@ -101,6 +103,12 @@ public class GenericSchemaInfoReader
 		logSettings();
 	}
 
+	private int getQueryTimeout()
+	{
+		int timeout = Settings.getInstance().getIntProperty(timeoutProp, 0);
+		if (timeout < 0) return 0;
+		return timeout;
+	}
 
 	/**
 	 * Retrieves the currently active schema from the server.
@@ -143,11 +151,13 @@ public class GenericSchemaInfoReader
 				{
 					query = connection.getSqlConnection().prepareStatement(schemaQuery);
 				}
+				setQueryTimeout(query);
 				rs = query.executeQuery();
 			}
 			else
 			{
 				stmt = connection.createStatement();
+				setQueryTimeout(stmt);
 				rs = stmt.executeQuery(schemaQuery);
 			}
 
@@ -183,6 +193,23 @@ public class GenericSchemaInfoReader
 			cachedSchema = currentSchema;
 		}
 		return currentSchema;
+	}
+
+	private void setQueryTimeout(Statement stmt)
+	{
+		int timeout = getQueryTimeout();
+		try
+		{
+			if (timeout > 0)
+			{
+				stmt.setQueryTimeout(timeout);
+			}
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logWarning("GenericSchemaInformationReader.setQueryTimeout()", "Could not set query timeout to " + timeout +
+				" Please adjust the value of the property: " + queryProp, sql);
+		}
 	}
 
 	@Override

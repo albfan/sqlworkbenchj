@@ -183,12 +183,6 @@ public class QueryCopySource
 	}
 
 	@Override
-	public boolean isCancelled()
-	{
-		return !keepRunning && !regularStop;
-	}
-
-	@Override
 	public MessageBuffer getMessages()
 	{
 		return null;

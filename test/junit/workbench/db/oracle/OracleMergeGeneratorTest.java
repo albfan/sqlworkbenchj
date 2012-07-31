@@ -11,7 +11,6 @@
 package workbench.db.oracle;
 
 import java.sql.Types;
-import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.WbTestCase;

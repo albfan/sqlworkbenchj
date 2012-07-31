@@ -430,9 +430,6 @@ public class TextFileParser
 	protected void processOneFile()
 		throws Exception
 	{
-		this.cancelImport = false;
-		this.regularStop = false;
-
 		if (this.inputFile.isAbsolute())
 		{
 			this.baseDir = this.inputFile.getParentFile();

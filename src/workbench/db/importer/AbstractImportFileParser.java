@@ -290,18 +290,21 @@ public abstract class AbstractImportFileParser
 		this.abortOnError = flag;
 	}
 
+	/**
+	 * Stop processing the current input file.
+	 *
+	 * This is used by the DataImporter to signal that all selected rows
+	 * were imported (in case not all rows should be imported).
+	 *
+	 * This sets cancelImport to true, but to distinguish this
+	 * from a "normal" cancel, it also sets regularStop to true.
+	 */
 	@Override
 	public void stop()
 	{
 		LogMgr.logDebug("AbstractImportFileParser.stop()", "Stopping import");
 		this.cancelImport = true;
 		this.regularStop = true;
-	}
-
-	@Override
-	public boolean isCancelled()
-	{
-		return this.cancelImport;
 	}
 
 	@Override
@@ -357,6 +360,8 @@ public abstract class AbstractImportFileParser
 	 */
 	protected void resetForFile()
 	{
+		this.cancelImport = false;
+		this.regularStop = false;
 		messages = new MessageBuffer();
 		if (!multiFileImport) tableName = null;
 	}

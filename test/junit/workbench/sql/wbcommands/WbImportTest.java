@@ -2321,7 +2321,6 @@ public class WbImportTest
 
 		try
 		{
-			TestUtil util = getTestUtil();
 			WbFile ta = new WbFile(util.getBaseDir(), "a.xml");
 			TestUtil.writeFile(ta, xml1, "UTF-8");
 
@@ -2338,6 +2337,16 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute(cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals("Import failed: " + msg, result.isSuccess(), true);
+			String[] lines = msg.split(StringUtil.REGEX_CRLF);
+			assertTrue(lines.length == 6);
+
+			assertTrue(lines[0].endsWith("into table a"));
+			assertEquals("15 row(s) inserted", lines[1]);
+			assertEquals("0 row(s) updated", lines[2]);
+
+			assertTrue(lines[3].endsWith("into table b"));
+			assertEquals("15 row(s) inserted", lines[4]);
+			assertEquals("0 row(s) updated", lines[5]);
 
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from a");

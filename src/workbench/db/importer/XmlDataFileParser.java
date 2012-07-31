@@ -82,7 +82,6 @@ public class XmlDataFileParser
 	private String columnDataFile = null;
 	private boolean isNull = false;
 	private StringBuilder chars;
-	private boolean keepRunning;
 	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
 
@@ -173,7 +172,8 @@ public class XmlDataFileParser
 		checkImportColumns();
 	}
 
-	/**	 Define the columns to be imported
+	/**
+	 * Define the columns to be imported
 	 */
 	@Override
 	public void setColumns(List<ColumnIdentifier> cols)
@@ -419,12 +419,13 @@ public class XmlDataFileParser
 	protected void processOneFile()
 		throws Exception
 	{
-		this.keepRunning = true;
-		this.regularStop = false;
-
 		// readTableDefinition relies on the fileHandler, so this
 		// has to be called after initializing the fileHandler
-		if (this.columns == null) this.readXmlTableDefinition();
+		if (this.columns == null)
+		{
+			this.readXmlTableDefinition();
+		}
+
 		if (!this.formatKnown)
 		{
 			detectTagFormat();
@@ -449,7 +450,6 @@ public class XmlDataFileParser
 		this.messages = new MessageBuffer();
 		this.sendTableDefinition();
 		Reader in = null;
-		boolean finished = false;
 
 		try
 		{
@@ -457,23 +457,18 @@ public class XmlDataFileParser
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, handler);
 			filesProcessed.add(inputFile);
-			if (!cancelImport)
-			{
-				receiver.tableImportFinished();
-			}
+			this.receiver.tableImportFinished();
 		}
 		catch (ParsingInterruptedException e)
 		{
 			if (this.regularStop)
 			{
-				this.receiver.importFinished();
+				this.receiver.tableImportFinished();
 			}
 			else
 			{
-				this.receiver.importCancelled();
 				this.hasErrors = true;
 			}
-			finished = true;
 		}
 		catch (ParsingConverterException pce)
 		{
@@ -498,10 +493,6 @@ public class XmlDataFileParser
 		finally
 		{
 			FileUtil.closeQuietely(in);
-			if (!finished)
-			{
-				this.receiver.importFinished();
-			}
 		}
 	}
 
@@ -518,7 +509,6 @@ public class XmlDataFileParser
 		chars = null;
 		columns = null;
 		columnsToImport = null;
-		keepRunning = true;
 	}
 
 	private void clearRowData()
@@ -722,7 +712,7 @@ public class XmlDataFileParser
 
 			}
 		}
-		if (!this.keepRunning) throw new ParsingInterruptedException();
+		if (this.cancelImport) throw new ParsingInterruptedException();
 	}
 
 	private void setUseVerboseFormat(boolean flag)
@@ -754,7 +744,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning) throw new ParsingInterruptedException();
+			if (cancelImport) throw new ParsingInterruptedException();
 		}
 
 		@Override
@@ -762,7 +752,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -773,7 +763,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -813,7 +803,7 @@ public class XmlDataFileParser
 		public void endElement(String namespaceURI, String sName, String qName)
 			throws SAXException
 		{
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -857,7 +847,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -873,7 +863,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -884,7 +874,7 @@ public class XmlDataFileParser
 			throws SAXException
 		{
 			Thread.yield();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw new ParsingInterruptedException();
 			}
@@ -915,7 +905,7 @@ public class XmlDataFileParser
 		{
 			messages.append(ExceptionUtil.getDisplay(err));
 			messages.appendNewLine();
-			if (!keepRunning)
+			if (cancelImport)
 			{
 				throw err;
 			}
