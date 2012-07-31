@@ -327,10 +327,23 @@ public class SqlUtil
 					name = lexer.getNextToken(false, false);
 					if (name == null) return null;
 				}
+				SQLToken next = lexer.getNextToken(false, false);
+				if (next != null && next.getContents().equals("."))
+				{
+					next = lexer.getNextToken();
+					if (next != null) name = next;
+				}
+				
 				info.objectName = name.getContents();
+
 				if (content.equals("#"))
 				{
 					info.objectName = "#" + info.objectName;
+				}
+
+				if (info.objectName != null)
+				{
+					info.objectName = removeQuoting(info.objectName);
 				}
 			}
 			return info;

@@ -94,7 +94,7 @@ public class SqlCommand
 
 	protected String getDefaultSuccessMessage(StatementRunnerResult result)
 	{
-		String msg = getSuccessMessage(result.getSourceCommand());
+		String msg = result == null ? null : getSuccessMessage(result.getSourceCommand());
 		if (msg != null) return msg;
 
 		String verb = getVerb();

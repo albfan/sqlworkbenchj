@@ -391,6 +391,11 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("foobar", info.objectName);
 		assertEquals("TABLE", info.objectType);
+
+		sql = "create index \"FOO\".\"IDX\" on foo.bar (id);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("IDX", info.objectName);
+		assertEquals("INDEX", info.objectType);
 	}
 
 	@Test
