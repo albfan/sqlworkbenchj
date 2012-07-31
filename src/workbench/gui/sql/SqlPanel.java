@@ -1501,7 +1501,7 @@ public class SqlPanel
 	}
 
 	@Override
-	public void setConnection(WbConnection aConnection)
+	public void setConnection(final WbConnection aConnection)
 	{
 		synchronized (this.connectionLock)
 		{
@@ -1533,7 +1533,17 @@ public class SqlPanel
 
 		if (this.connectionInfo != null)
 		{
-			this.connectionInfo.setConnection(aConnection);
+			WbThread info = new WbThread("Update connection info " + this.getId() )
+			{
+				@Override
+				public void run()
+				{
+					// eonncection info might access the database. In order to not block the GUI
+					// this is done in a separate thread.
+					connectionInfo.setConnection(aConnection);
+				}
+			};
+			info.start();
 		}
 		this.setExecuteActionStates(aConnection != null);
 
@@ -1551,7 +1561,6 @@ public class SqlPanel
 
 		this.checkResultSetActions();
 		this.checkCommitAction();
-
 	}
 
 	/**
