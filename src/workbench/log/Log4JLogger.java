@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
+import workbench.WbManager;
 import workbench.util.StringUtil;
 
 /**
@@ -314,7 +315,10 @@ public class Log4JLogger
 	public void shutdownWbLog()
 	{
 		getLogger(getClass()).info("=================== Log stopped ===================");
-		LogManager.shutdown();
+		if (WbManager.doExit())
+		{
+			LogManager.shutdown();
+		}
 	}
 
 	@Override

@@ -543,8 +543,12 @@ public final class WbManager
 		LogMgr.shutdown();
 		// The property workbench.system.doexit can be used to embedd the sqlworkbench.jar
 		// in other applications and still be able to call doShutdown()
-		boolean doExit = "true".equals(System.getProperty("workbench.system.doexit", "true"));
-		if (doExit) System.exit(errorCode);
+		if (doExit()) System.exit(errorCode);
+	}
+
+	public static boolean doExit()
+	{
+		return "true".equals(System.getProperty("workbench.system.doexit", "true"));
 	}
 
 	private boolean checkAbort(MainWindow win)
