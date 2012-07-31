@@ -287,6 +287,8 @@ public class SqlUtil
 	 */
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
 	{
+		if (StringUtil.isEmptyString(sql)) return null;
+
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
@@ -333,7 +335,7 @@ public class SqlUtil
 					next = lexer.getNextToken();
 					if (next != null) name = next;
 				}
-				
+
 				info.objectName = name.getContents();
 
 				if (content.equals("#"))
