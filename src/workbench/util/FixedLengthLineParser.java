@@ -67,7 +67,10 @@ public class FixedLengthLineParser
 			return null;
 		}
 		int end = currentLineIndex + widths[currentColIndex];
-		if (end > line.length()) return null;
+		if (end > line.length())
+		{
+			end = line.length();
+		}
 		String result = line.substring(currentLineIndex, end);
 		currentLineIndex += widths[currentColIndex];
 		currentColIndex++;

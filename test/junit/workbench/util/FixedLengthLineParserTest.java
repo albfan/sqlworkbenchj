@@ -58,5 +58,30 @@ public class FixedLengthLineParserTest
 		assertEquals("H", second);
 		third = parser.getNext();
 		assertEquals("        10", third);
+
+
+		cols = new ArrayList<Integer>();
+		cols.add(new Integer(2));
+		cols.add(new Integer(2));
+		cols.add(new Integer(4));
+		parser = new FixedLengthLineParser(cols);
+		parser.setLine("1122333");
+		parser.setTrimValues(false);
+		first = parser.getNext();
+		assertEquals("11", first);
+		second = parser.getNext();
+		assertEquals("22", second);
+		third = parser.getNext();
+		assertEquals("333", third);
+
+		parser.setLine("112244444444444");
+		parser.setTrimValues(false);
+		first = parser.getNext();
+		assertEquals("11", first);
+		second = parser.getNext();
+		assertEquals("22", second);
+		third = parser.getNext();
+		assertEquals("4444", third);
+
 	}
 }

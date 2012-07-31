@@ -3571,33 +3571,39 @@ public class WbImportTest
 			connection.commit();
 			stmt.close();
 
-			result = importCmd.execute("wbimport -encoding=utf8 -trimValues=false " +
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("10Mary  Moviestar ");
+			out.println("20Harry Handsome  ");
+			out.println("30ZaphodBeeblebrox");
+			out.close();
+
+			result = importCmd.execute(
+				"wbimport -encoding=utf8 -trimValues=true " +
 				"-file='" + importFile.getAbsolutePath() + "' " +
 				"-multiline=false -type=text -header=false " +
-				"-filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+				"-filecolumns=nr,firstname,lastname -importColumns=nr,lastname -columnWidths='nr=2,firstname=6,lastname=10' " +
+				"-continueonerror=true -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
+			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test where nr > 5 order by nr");
 			while (rs.next())
 			{
 				int id = rs.getInt(1);
 				String firstname = rs.getString(2);
 				String lastname = rs.getString(3);
-				if (id == 1)
+				assertNull(firstname);
+				if (id == 10)
 				{
-					assertEquals("Wrong Firstname imported", "      Mary", firstname);
-					assertEquals("Wrong Lastname imported", "Moviestar      ", lastname);
+					assertEquals("Wrong Lastname imported", "Moviestar", lastname);
 				}
-				else if (id == 2)
+				else if (id == 20)
 				{
-					assertEquals("Wrong Firstname imported", "     Harry", firstname);
-					assertEquals("Wrong Lastname imported", "Handsome       ", lastname);
+					assertEquals("Wrong Lastname imported", "Handsome", lastname);
 				}
-				else if (id == 3)
+				else if (id == 30)
 				{
-					assertEquals("Wrong Firstname imported", "Zaphod    ", firstname);
-					assertEquals("Wrong Lastname imported", "Beeblebrox     ", lastname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox", lastname);
 				}
 				else
 				{

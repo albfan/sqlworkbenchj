@@ -194,12 +194,12 @@ public class TextFileParser
 	 * Define the columns in the input file.
 	 * If a column name equals RowDataProducer.SKIP_INDICATOR
 	 * then the column will not be imported.
-	 * @param columnList the list of columns present in the input file
-	 * @param toImport the list of columns to import, if null all columns are imported
+	 * @param fileColumns the list of columns present in the input file
+	 * @param columnsToImport the list of columns to import, if null all columns are imported
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
-	public void setColumns(List<ColumnIdentifier> columnList, List<ColumnIdentifier> toImport)
+	public void setColumns(List<ColumnIdentifier> fileColumns, List<ColumnIdentifier> columnsToImport)
 		throws SQLException
 	{
 		TableDefinition target = getTargetTable();
@@ -215,24 +215,26 @@ public class TextFileParser
 		importColumns = ImportFileColumn.createList();
 
 		int colCount = 0;
-		if (toImport == null)
+		if (columnsToImport == null)
 		{
-			toImport = Collections.emptyList();
+			columnsToImport = Collections.emptyList();
 		}
 
 		try
 		{
-			for (ColumnIdentifier sourceCol : columnList)
+			for (ColumnIdentifier sourceCol : fileColumns)
 			{
 				boolean ignoreColumn = sourceCol.getColumnName().equalsIgnoreCase(RowDataProducer.SKIP_INDICATOR);
-				if (!ignoreColumn && !toImport.isEmpty())
+				if (!ignoreColumn && !columnsToImport.isEmpty())
 				{
-					ignoreColumn = !toImport.contains(sourceCol);
+					ignoreColumn = !columnsToImport.contains(sourceCol);
 				}
 
 				if (ignoreColumn)
 				{
-					importColumns.add(ImportFileColumn.SKIP_COLUMN);
+					ImportFileColumn col = new ImportFileColumn(sourceCol);
+					col.setTargetIndex(-1);
+					importColumns.add(col);
 					continue;
 				}
 				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
