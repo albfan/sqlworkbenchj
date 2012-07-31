@@ -457,6 +457,10 @@ public class XmlDataFileParser
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, handler);
 			filesProcessed.add(inputFile);
+			if (!cancelImport)
+			{
+				receiver.tableImportFinished();
+			}
 		}
 		catch (ParsingInterruptedException e)
 		{

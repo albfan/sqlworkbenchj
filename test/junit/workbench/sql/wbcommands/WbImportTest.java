@@ -2205,6 +2205,170 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testMultipleXmlImport()
+		throws Exception
+	{
+		String xml1 =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+			"<wb-export> \n" +
+			"  <meta-data> \n" +
+			" \n" +
+			"    <generating-sql> \n" +
+			"    <![CDATA[ \n" +
+			"    SELECT id_a FROM a \n" +
+			"    ]]> \n" +
+			"    </generating-sql> \n" +
+			" \n" +
+			"    <created>2012-07-31 17:52:46.265 MESZ</created> \n" +
+			"    <jdbc-driver>PostgreSQL Native Driver</jdbc-driver> \n" +
+			"    <jdbc-driver-version>PostgreSQL 9.1 JDBC4 (build 902)</jdbc-driver-version> \n" +
+			"    <connection>User=thomas, URL=jdbc:postgresql://localhost/wbtest</connection> \n" +
+			"    <schema>public</schema> \n" +
+			"    <catalog></catalog> \n" +
+			"    <database-product-name>PostgreSQL</database-product-name> \n" +
+			"    <database-product-version>9.1.3</database-product-version> \n" +
+			"    <wb-tag-format>short</wb-tag-format> \n" +
+			"  </meta-data> \n" +
+			" \n" +
+			"  <table-def> \n" +
+			" \n" +
+			"    <table-name>a</table-name> \n" +
+			"    <column-count>1</column-count> \n" +
+			" \n" +
+			"    <column-def index=\"0\"> \n" +
+			"      <column-name>id_a</column-name> \n" +
+			"      <java-class>java.lang.Integer</java-class> \n" +
+			"      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+			"      <java-sql-type>4</java-sql-type> \n" +
+			"      <dbms-data-type>integer</dbms-data-type> \n" +
+			"      <primary-key>false</primary-key> \n" +
+			"    </column-def> \n" +
+			"  </table-def> \n" +
+			" \n" +
+			"<data> \n" +
+			"<rd><cd>1</cd></rd> \n" +
+			"<rd><cd>2</cd></rd> \n" +
+			"<rd><cd>3</cd></rd> \n" +
+			"<rd><cd>4</cd></rd> \n" +
+			"<rd><cd>5</cd></rd> \n" +
+			"<rd><cd>6</cd></rd> \n" +
+			"<rd><cd>7</cd></rd> \n" +
+			"<rd><cd>8</cd></rd> \n" +
+			"<rd><cd>9</cd></rd> \n" +
+			"<rd><cd>10</cd></rd> \n" +
+			"<rd><cd>11</cd></rd> \n" +
+			"<rd><cd>12</cd></rd> \n" +
+			"<rd><cd>13</cd></rd> \n" +
+			"<rd><cd>14</cd></rd> \n" +
+			"<rd><cd>15</cd></rd> \n" +
+			"</data> \n" +
+			"</wb-export>";
+
+		String xml2 =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+			"<wb-export> \n" +
+			"  <meta-data> \n" +
+			" \n" +
+			"    <generating-sql> \n" +
+			"    <![CDATA[ \n" +
+			"    SELECT id_b FROM b \n" +
+			"    ]]> \n" +
+			"    </generating-sql> \n" +
+			" \n" +
+			"    <created>2012-07-31 17:52:46.265 MESZ</created> \n" +
+			"    <jdbc-driver>PostgreSQL Native Driver</jdbc-driver> \n" +
+			"    <jdbc-driver-version>PostgreSQL 9.1 JDBC4 (build 902)</jdbc-driver-version> \n" +
+			"    <connection>User=thomas, URL=jdbc:postgresql://localhost/wbtest</connection> \n" +
+			"    <schema>public</schema> \n" +
+			"    <catalog></catalog> \n" +
+			"    <database-product-name>PostgreSQL</database-product-name> \n" +
+			"    <database-product-version>9.1.3</database-product-version> \n" +
+			"    <wb-tag-format>short</wb-tag-format> \n" +
+			"  </meta-data> \n" +
+			" \n" +
+			"  <table-def> \n" +
+			"    <table-name>b</table-name> \n" +
+			"    <column-count>1</column-count> \n" +
+			" \n" +
+			"    <column-def index=\"0\"> \n" +
+			"      <column-name>id_b</column-name> \n" +
+			"      <java-class>java.lang.Integer</java-class> \n" +
+			"      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+			"      <java-sql-type>4</java-sql-type> \n" +
+			"      <dbms-data-type>integer</dbms-data-type> \n" +
+			"      <primary-key>false</primary-key> \n" +
+			"    </column-def> \n" +
+			"  </table-def> \n" +
+			" \n" +
+			"<data> \n" +
+			"<rd><cd>10</cd></rd> \n" +
+			"<rd><cd>20</cd></rd> \n" +
+			"<rd><cd>30</cd></rd> \n" +
+			"<rd><cd>40</cd></rd> \n" +
+			"<rd><cd>50</cd></rd> \n" +
+			"<rd><cd>60</cd></rd> \n" +
+			"<rd><cd>70</cd></rd> \n" +
+			"<rd><cd>80</cd></rd> \n" +
+			"<rd><cd>90</cd></rd> \n" +
+			"<rd><cd>100</cd></rd> \n" +
+			"<rd><cd>110</cd></rd> \n" +
+			"<rd><cd>120</cd></rd> \n" +
+			"<rd><cd>130</cd></rd> \n" +
+			"<rd><cd>140</cd></rd> \n" +
+			"<rd><cd>150</cd></rd> \n" +
+			"</data> \n" +
+			"</wb-export>";
+
+		try
+		{
+			TestUtil util = getTestUtil();
+			WbFile ta = new WbFile(util.getBaseDir(), "a.xml");
+			TestUtil.writeFile(ta, xml1, "UTF-8");
+
+			WbFile tb = new WbFile(util.getBaseDir(), "b.xml");
+			TestUtil.writeFile(tb, xml2, "UTF-8");
+
+			TestUtil.executeScript(connection,
+				"create table a (id_a integer); \n" +
+				"create table b (id_b integer); \n" +
+				"commit;\n");
+
+			String cmd = "wbimport -encoding='UTF-8' -sourceDir='" + ta.getParent() + "' -type=xml -batchSize=10";
+
+			StatementRunnerResult result = importCmd.execute(cmd);
+			String msg = result.getMessageBuffer().toString();
+			assertEquals("Import failed: " + msg, result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select count(*) from a");
+			int rowCount = 0;
+
+			if (rs.next())
+			{
+				rowCount = rs.getInt(1);
+			}
+			rs.close();
+			assertEquals("Wrong number of rows for table a", 15, rowCount);
+
+			rs = stmt.executeQuery("select count(*) from a");
+			rowCount = 0;
+
+			if (rs.next())
+			{
+				rowCount = rs.getInt(1);
+			}
+			rs.close();
+			assertEquals("Wrong number of rows for table a", 15, rowCount);
+
+			stmt.close();
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
 	public void testXmlImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -3356,11 +3520,17 @@ public class WbImportTest
 			out.println("  3Zaphod    Beeblebrox     ");
 			out.close();
 
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -trimValues=true -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=false -filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+			StatementRunnerResult result = importCmd.execute(
+				"wbimport -encoding=utf8 -trimValues=true " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-multiline=false -type=text -header=false " +
+				"-filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' " +
+				"-continueonerror=true -table=junit_test");
+
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
+			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
 			while (rs.next())
 			{
 				int id = rs.getInt(1);
@@ -3369,21 +3539,21 @@ public class WbImportTest
 				if (id == 1)
 				{
 					assertEquals("Wrong Firstname imported", "Mary", firstname);
-					assertEquals("Wrong Lastname imported", "Moviestar", firstname);
+					assertEquals("Wrong Lastname imported", "Moviestar", lastname);
 				}
 				else if (id == 2)
 				{
 					assertEquals("Wrong Firstname imported", "Harry", firstname);
-					assertEquals("Wrong Lastname imported", "Handsome", firstname);
+					assertEquals("Wrong Lastname imported", "Handsome", lastname);
 				}
-				else if (id == 2)
+				else if (id == 3)
 				{
 					assertEquals("Wrong Firstname imported", "Zaphod", firstname);
-					assertEquals("Wrong Lastname imported", "Beeblebrox", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox", lastname);
 				}
 				else
 				{
-					fail("Wrong id retrieved");
+					fail("Wrong id "+ id + " retrieved");
 				}
 			}
 
@@ -3392,11 +3562,14 @@ public class WbImportTest
 			connection.commit();
 			stmt.close();
 
-			result = importCmd.execute("wbimport -encoding=utf8 -trimValues=false -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=false -filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
+			result = importCmd.execute("wbimport -encoding=utf8 -trimValues=false " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-multiline=false -type=text -header=false " +
+				"-filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' -continueonerror=true -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
+			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
 			while (rs.next())
 			{
 				int id = rs.getInt(1);
@@ -3405,21 +3578,21 @@ public class WbImportTest
 				if (id == 1)
 				{
 					assertEquals("Wrong Firstname imported", "      Mary", firstname);
-					assertEquals("Wrong Lastname imported", "Moviestar      ", firstname);
+					assertEquals("Wrong Lastname imported", "Moviestar      ", lastname);
 				}
 				else if (id == 2)
 				{
 					assertEquals("Wrong Firstname imported", "     Harry", firstname);
-					assertEquals("Wrong Lastname imported", "Handsome       ", firstname);
+					assertEquals("Wrong Lastname imported", "Handsome       ", lastname);
 				}
-				else if (id == 2)
+				else if (id == 3)
 				{
 					assertEquals("Wrong Firstname imported", "Zaphod    ", firstname);
-					assertEquals("Wrong Lastname imported", "Beeblebrox     ", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox     ", lastname);
 				}
 				else
 				{
-					fail("Wrong id retrieved");
+					fail("Wrong id "+ id + " retrieved");
 				}
 			}
 
