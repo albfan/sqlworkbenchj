@@ -92,17 +92,34 @@ public class SqlCommand
 		this.errorMessagesOnly = flag;
 	}
 
-	protected String getDefaultSuccessMessage()
+	protected String getDefaultSuccessMessage(StatementRunnerResult result)
 	{
-		return this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK");
+		String msg = getSuccessMessage(result.getSourceCommand());
+		if (msg != null) return msg;
+
+		String verb = getVerb();
+		if (StringUtil.isEmptyString(verb) && result != null)
+		{
+			verb = SqlUtil.getSqlVerb(result.getSourceCommand());
+		}
+		if (StringUtil.isEmptyString(verb))
+		{
+			verb = ResourceMgr.getString("TxtStatement");
+		}
+		return ResourceMgr.getFormattedString("MsgKnownStatementOK", verb);
 	}
 
 	protected String getSuccessMessage(String sql)
 	{
+		String verb = getVerb();
+		if (StringUtil.isEmptyString(verb))
+		{
+			verb = SqlUtil.getSqlVerb(sql);
+		}
 		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 		if (info != null)
 		{
-			String msg = getSuccessMessage(info);
+			String msg = getSuccessMessage(info, verb);
 			if (msg != null)
 			{
 				return msg;
@@ -111,9 +128,49 @@ public class SqlCommand
 		return null;
 	}
 
+	protected String getSuccessMessage(SqlUtil.DdlObjectInfo info, String verb)
+	{
+		if ("DROP".equals(verb))
+		{
+			if (info == null || info.objectType == null)
+			{
+				return ResourceMgr.getString("MsgGenDropSuccess");
+			}
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
+			}
+		}
+		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
+		{
+			if (info == null || info.objectType == null)
+			{
+				return ResourceMgr.getString("MsgGenCreateSuccess");
+			}
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
+			}
+		}
+		else if ("ANALYZE".equals(verb))
+		{
+			String name = currentConnection.getMetadata().adjustObjectnameCase(info.objectName);
+			return ResourceMgr.getFormattedString("MsgObjectAnalyzed", StringUtil.capitalize(info.objectType), name);
+		}
+		return null;
+	}
+
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
-		result.addMessage(getDefaultSuccessMessage());
+		result.addMessage(getDefaultSuccessMessage(result));
 	}
 
 	public void setParameterPrompter(ParameterPrompter p)
@@ -856,44 +913,4 @@ public class SqlCommand
 		return false;
 	}
 
-	protected String getSuccessMessage(SqlUtil.DdlObjectInfo info)
-	{
-		String verb = getVerb();
-		if ("DROP".equals(verb))
-		{
-			if (info == null || info.objectType == null)
-			{
-				return ResourceMgr.getString("MsgGenDropSuccess");
-			}
-			if (StringUtil.isNonBlank(info.objectName))
-			{
-				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
-			}
-			else
-			{
-				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
-			}
-		}
-		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
-		{
-			if (info == null || info.objectType == null)
-			{
-				return ResourceMgr.getString("MsgGenCreateSuccess");
-			}
-			if (StringUtil.isNonBlank(info.objectName))
-			{
-				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
-			}
-			else
-			{
-				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
-			}
-		}
-		else if ("ANALYZE".equals(verb) || this.currentConnection.getMetadata().isOracle())
-		{
-			String name = currentConnection.getMetadata().adjustObjectnameCase(info.objectName);
-			return ResourceMgr.getFormattedString("MsgObjectAnalyzed", StringUtil.capitalize(info.objectType), name);
-		}
-		return null;
-	}
 }

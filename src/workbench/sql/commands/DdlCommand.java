@@ -95,7 +95,7 @@ public class DdlCommand
 				try
 				{
 					this.currentStatement.executeUpdate(sql);
-					result.addMessage(getSuccessMessage(info));
+					result.addMessage(getSuccessMessage(info, getVerb()));
 				}
 				catch (Exception th)
 				{
@@ -126,7 +126,7 @@ public class DdlCommand
 
 				if (result.isSuccess())
 				{
-					result.addMessage(getSuccessMessage(info));
+					result.addMessage(getSuccessMessage(info, getVerb()));
 				}
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
@@ -200,12 +200,12 @@ public class DdlCommand
 	}
 
 	@Override
-	protected String getSuccessMessage(DdlObjectInfo info)
+	protected String getSuccessMessage(DdlObjectInfo info, String verb)
 	{
-		String msg = super.getSuccessMessage(info);
+		String msg = super.getSuccessMessage(info, getVerb());
 		if (msg == null)
 		{
-			return getDefaultSuccessMessage();
+			return getDefaultSuccessMessage(null);
 		}
 		return msg;
 	}

@@ -386,6 +386,11 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("foo_idx", info.objectName);
 		assertEquals("INDEX", info.objectType);
+
+		sql = "analyze local table foobar";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("foobar", info.objectName);
+		assertEquals("TABLE", info.objectType);
 	}
 
 	@Test
