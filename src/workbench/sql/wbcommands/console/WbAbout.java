@@ -99,7 +99,7 @@ public class WbAbout
 			DbMetadata wbmeta = currentConnection.getMetadata();
 
 			content.append(ResourceMgr.getString("LblDbProductName") + ": " + wbmeta.getProductName() + "\n");
-			content.append(ResourceMgr.getString("LblDbProductVersion") + ": " + currentConnection.getDatabaseVersion() + "\n");
+			content.append(ResourceMgr.getString("LblDbProductVersion") + ": " + currentConnection.getDatabaseVersion().toString() + "\n");
 			content.append(ResourceMgr.getString("LblDbProductInfo") + ": " + meta.getDatabaseProductVersion() + "\n");
 			content.append(ResourceMgr.getString("LblDriverInfoName") + ": " + meta.getDriverName() + "\n");
 			content.append(ResourceMgr.getString("LblDriverInfoClass") + ": " + currentConnection.getProfile().getDriverclass() + "\n");

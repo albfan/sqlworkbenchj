@@ -40,6 +40,7 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.VersionNumber;
 
 /**
  *
@@ -54,6 +55,11 @@ public class WbConnection
 	public static final String PROP_CONNECTION_STATE = "state";
 	public static final String CONNECTION_CLOSED = "closed";
 	public static final String CONNECTION_OPEN = "open";
+
+	// version information is cached to avoid
+	// blocks on the connection if getDatabaseVersion() is called in the background.
+	private VersionNumber dbVersion;
+	private String dbProductVersion;
 
   private String id;
 	private StringBuilder scriptError;
@@ -938,6 +944,7 @@ public class WbConnection
 	{
 		return getDisplayString(false);
 	}
+
 	public String getDisplayString(boolean useDisplaySchema)
 	{
 		String displayString;
@@ -1016,16 +1023,20 @@ public class WbConnection
 	 */
 	public String getDatabaseProductVersion()
 	{
-		try
+		if (dbProductVersion == null)
 		{
-			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
-			return jdbcmeta.getDatabaseProductVersion();
+			try
+			{
+				DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
+				dbProductVersion = jdbcmeta.getDatabaseProductVersion();
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("WbConnection.getDatabaseProductVersion()", "Error retrieving DB product ersion (" + ExceptionUtil.getDisplay(e) + ")");
+				dbProductVersion = "";
+			}
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logWarning("WbConnection.getDatabaseProductVersion()", "Error retrieving DB product ersion (" + ExceptionUtil.getDisplay(e) + ")");
-			return "";
-		}
+		return dbProductVersion;
 	}
 
 	/**
@@ -1033,21 +1044,24 @@ public class WbConnection
 	 *
 	 * @return a string with the major and minor version concatenated with a dot.
 	 */
-	public String getDatabaseVersion()
+	public VersionNumber getDatabaseVersion()
 	{
-		try
+		if (dbVersion == null)
 		{
-			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
-			int major = jdbcmeta.getDatabaseMajorVersion();
-			int minor = jdbcmeta.getDatabaseMinorVersion();
-
-			return major + "." + minor;
+			try
+			{
+				DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
+				int major = jdbcmeta.getDatabaseMajorVersion();
+				int minor = jdbcmeta.getDatabaseMinorVersion();
+				dbVersion = new VersionNumber(major, minor);
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("WbConnection.getDatabaseVersion()", "Error retrieving DB version (" + ExceptionUtil.getDisplay(e) + ")");
+				dbVersion = new VersionNumber(0,0);
+			}
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logWarning("WbConnection.getDatabaseVersion()", "Error retrieving DB version (" + ExceptionUtil.getDisplay(e) + ")");
-			return "n/a";
-		}
+		return dbVersion;
 	}
 
 	public String getDatabaseProductName()

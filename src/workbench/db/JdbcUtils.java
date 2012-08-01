@@ -32,11 +32,14 @@ public class JdbcUtils
 	 *
 	 * @return true if the server's version is at least the one requested or higher.
 	 * @see VersionNumber
+	 * @see WbConnection#getDatabaseVersion() 
 	 */
 	public static boolean hasMinimumServerVersion(WbConnection con, String targetVersion)
 	{
 		if (con == null) return false;
-		return hasMinimumServerVersion(con.getSqlConnection(), targetVersion);
+		VersionNumber server = con.getDatabaseVersion();
+		VersionNumber target = new VersionNumber(targetVersion);
+		return server.isNewerOrEqual(target);
 	}
 
 	/**

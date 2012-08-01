@@ -204,6 +204,7 @@ public class GenericSchemaInfoReader
 			if (timeout > 0)
 			{
 				stmt.setQueryTimeout(timeout);
+				LogMgr.logDebug("GenericSchemaInfoReader.setQueryTimeout", "Timeout set to " + timeout + "s");
 			}
 		}
 		catch (SQLException sql)

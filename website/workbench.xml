@@ -131,7 +131,6 @@ WHERE id=42;</p>
     </content>
   </page>
 
-
   <page name="screenshots" title="Screenshots" toc="main">
     <title>Screenshots</title>
     <content>
@@ -165,7 +164,7 @@ WHERE id=42;</p>
       <h3>Prerequisites</h3>
       <p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
-        You have to install Java 6 before you can run SQL Workbench/J.
+        You have to install Java 6 (or higher) before you can run SQL Workbench/J.
       </p>
 
       <h3 style="padding-top:10px">Installation</h3>
@@ -637,11 +636,12 @@ WHERE id=42;</p>
           files <tt>jarbundler-2.1.0.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
         </li>
         <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> unzip the distribution to ${wbroot}/etc/poi</li>
-        <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
+        <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> and copy the jar file into the directory <tt>${wbroot}/etc/log4j</tt></li>
+        <li>Download the Postgres JDBC driver from <a href="http://jdbc.postgresql.org/download.html">http://jdbc.postgresql.org/download.html</a> and copy the jar file into <tt>${wbroot}/junit</tt> (Not needed if you get everything from the SVN repository)</li>
         <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a> (Required to run the JUnit test. Not needed if you get everything from the SVN repository)</li>
         <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a> (Required to run the JUnit test. Not needed if you get everything from the SVN repository)</li>
         <li>Download the Jemmy library from <a href="http://java.net/projects/jemmy">http://java.net/projects/jemmy</a> (Required to run the GUI tests. Not needed if you get everything from the SVN repository)</li>
-        <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory (Not needed if you get everything from the SVN repository)</li>
+        <li>Copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into <tt>${wbroot}/junit</tt> (Not needed if you get everything from the SVN repository)</li>
       </ul>
       <p>
         If you check out the subversion repository, the junit directory will be available automatically.
@@ -657,10 +657,10 @@ WHERE id=42;</p>
       <h3>Building the manual</h3>
       <p>
         To build the manual you need to download <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
-        (Version 1.72) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (fop-0.94-bin-jdk1.4.zip).
+        (Version 1.72 or later) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (Version 0.95 or later).
       </p>
       <ul>
-        <li>Copy the Docbook distribution to <tt>${wbroot}/doc/docbook</tt></li>
+        <li>Copy the Docbook distribution to <tt>${wbroot}/etc/docbook</tt></li>
         <li>Copy the FOP distribution to <tt>${wbroot}/etc/fop</tt></li>
       </ul>
       <p>
@@ -669,4 +669,26 @@ WHERE id=42;</p>
       </p>
     </content>
   </page>
+
+  <!--
+  <page name="forum" title="Forum" toc="main">
+    <title>Google Groups Forum</title>
+    <content>
+        <iframe id="forum_embed"
+          src="javascript:void(0)"
+          scrolling="no"
+          frameborder="0"
+          width="100%"
+          height="100%">
+        </iframe>
+        <script type="text/javascript">
+          document.getElementById('forum_embed').src =
+             'https://groups.google.com/forum/embed/?place=forum/sql-workbench'
+             + '&amp;showsearch=true&amp;showpopout=true&amp;showtabs=false'
+             + '&amp;parenturl=' + encodeURIComponent(window.location.href);
+        </script>
+    </content>
+  </page>
+  -->
+
 </site>

@@ -14,13 +14,8 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import java.sql.SQLException;
 import java.sql.Types;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -133,7 +131,7 @@ public class XmlDataFileParser
 	@Override
 	protected TablenameResolver getTableNameResolver()
 	{
-		return new XmlTableNameResolver(encoding);
+		return new XmlTableNameResolver(getEncoding());
 	}
 
 	@Override
@@ -355,7 +353,7 @@ public class XmlDataFileParser
 	{
 		try
 		{
-			fileHandler.setMainFile(this.inputFile, this.encoding);
+			fileHandler.setMainFile(this.inputFile, getEncoding());
 			XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 			String mode = tableDef.getBlobEncoding();
 			if (StringUtil.isNonBlank(mode))
@@ -371,11 +369,17 @@ public class XmlDataFileParser
 		}
 	}
 
+	@Override
+	public String getEncoding()
+	{
+		return (StringUtil.isEmptyString(this.encoding) ? "UTF-8" : this.encoding);
+	}
+
 	private void detectTagFormat()
 	{
 		try
 		{
-			fileHandler.setMainFile(this.inputFile, this.encoding);
+			fileHandler.setMainFile(this.inputFile, getEncoding());
 			XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 			detectTagFormat(tableDef);
 		}
@@ -405,7 +409,7 @@ public class XmlDataFileParser
 	private void readXmlTableDefinition()
 		throws IOException, SAXException
 	{
-		fileHandler.setMainFile(this.inputFile, this.encoding);
+		fileHandler.setMainFile(this.inputFile, getEncoding());
 
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
 		this.columns = tableDef.getColumns();
@@ -443,7 +447,7 @@ public class XmlDataFileParser
 
 		// Re-initialize the reader in case we are reading from a ZIP archive
 		// because readTableDefinition() can change the file handler
-		this.fileHandler.setMainFile(this.inputFile, this.encoding);
+		this.fileHandler.setMainFile(this.inputFile, getEncoding());
 
 		blobDecoder.setBaseDir(inputFile.getParentFile());
 

@@ -194,7 +194,7 @@ public class DbMetadata
 			this.dataTypeResolver = new PostgresDataTypeResolver();
 
 			extenders.add(new PostgresDomainReader());
-			if (JdbcUtils.hasMinimumServerVersion(dbConnection.getSqlConnection(), "8.3"))
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.3"))
 			{
 				extenders.add(new PostgresEnumReader());
 			}

@@ -142,7 +142,7 @@ public class ConnectionInfo
 			tip.append("<html>");
 			tip.append(this.sourceConnection.getDatabaseProductName());
 			tip.append(" ");
-			tip.append(this.sourceConnection.getDatabaseVersion());
+			tip.append(this.sourceConnection.getDatabaseVersion().toString());
 			tip.append("<br>");
 			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
 			tip.append("</html>");

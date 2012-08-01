@@ -505,8 +505,7 @@
         <exclude name="**/*.class"/>
         <exclude name="**/*.java~"/>
         <exclude name="**/workbench.settings"/>
-        <exclude name="**/CVS/*"/>
-        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svn/**"/>
         <exclude name="**/.nb*"/>
         <exclude name="**/tags"/>
         <exclude name="**/Test/*"/>
@@ -673,12 +672,13 @@
   </target>
 
   <target name="release-package" depends="fixshellscripts,html-history">
+
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="${jarfile}"/>
         <include name="SQLWorkbench-Manual.pdf"/>
       </zipfileset>
-      <zipfileset dir="..\launcher">
+      <zipfileset dir="../launcher">
         <include name="SQLWorkbench.exe"/>
         <include name="sqlwbconsole.exe"/>
         <include name="SQLWorkbench64.exe"/>
@@ -693,6 +693,9 @@
         <include name="history.html"/>
         <include name="SQLWorkbench.desktop"/>
       </zipfileset>
+      <zipfileset dir="${src}/workbench/resource/images">
+        <include name="workbench32.png"/>
+      </zipfileset>
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
@@ -703,7 +706,9 @@
         <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </zip>
+
     <delete file="docbook-history.xml" failonerror="false"/>
+
   </target>
 
   <target name="release-src-zip" depends="init,fixshellscripts">
@@ -712,8 +717,6 @@
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
         <exclude name="**/workbench.settings"/>
-        <exclude name="**/CVS/*"/>
-        <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
         <exclude name="**/*.dfPackage"/>
         <exclude name="**/tags"/>
@@ -743,8 +746,6 @@
         <include name="css/*.*"/>
         <include name="xml/*.*"/>
         <include name="xsl/*.*"/>
-        <exclude name="**/CVS/*"/>
-        <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
         <exclude name="**/tags"/>
         <exclude name="**/*.tws"/>
