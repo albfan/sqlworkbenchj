@@ -103,8 +103,8 @@ public class SetCommand
 				}
 				else if (currentConnection.getMetadata().isOracle())
 				{
-					Set<String> allowed = CollectionUtil.caseInsensitiveSet();
-					List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "constraints,constraint,transaction,role");
+					Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");
+					List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "");
 					allowed.addAll(options);
 
 					execSql = false;
