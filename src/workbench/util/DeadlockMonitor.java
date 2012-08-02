@@ -39,7 +39,10 @@ public class DeadlockMonitor
 				long start = System.currentTimeMillis();
 				String dump = monitor.getDeadlockDump();
 				long duration = System.currentTimeMillis() - start;
-				LogMgr.logDebug("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
+				if (duration > 50)
+				{
+					LogMgr.logInfo("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
+				}
 				if (dump != null)
 				{
 					LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);

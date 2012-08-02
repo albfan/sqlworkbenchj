@@ -914,7 +914,7 @@ public final class WbManager
 			openNewWindow(true);
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enable", false))
+		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enabled", false))
 		{
 			deadlockMonitor = new WbThread(new DeadlockMonitor(), "WbDeadlockMonitor");
 			deadlockMonitor.start();
