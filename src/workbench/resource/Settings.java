@@ -3120,16 +3120,17 @@ public class Settings
 		{
 			LogMgr.logWarning("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
 		}
-		else
-		{
-			LogMgr.logDebug("Settings.wasExternallyModified()", "ConfigFile lastModified(): " + time);
-		}
-		if (time <= 0) return false;
+
 		if (time < this.fileTime)
 		{
 			LogMgr.logWarning("Settings.wasExternallyModified()", "Current modified time: " + time + " original modified time: " + fileTime);
 		}
-		return time > this.fileTime;
+		boolean wasModified = time > this.fileTime;
+		if (wasModified)
+		{
+			LogMgr.logInfo("Settings.wasExternallyModified()", "Config file was externally modified. Current time: " + time + " original time: " + fileTime);
+		}
+		return wasModified;
 	}
 
 	public WbFile getConfigFile()

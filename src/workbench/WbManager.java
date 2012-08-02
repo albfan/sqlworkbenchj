@@ -54,8 +54,10 @@ import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
+import workbench.util.DeadlockMonitor;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
+import workbench.util.ThreadDumper;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -78,6 +80,8 @@ public final class WbManager
 	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
+	private WbThread deadlockMonitor;
+
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
 	private JDialog closeMessage;
@@ -341,6 +345,7 @@ public final class WbManager
 
 		if (!settingsSaved)
 		{
+			LogMgr.logDebug("WbManager.saveSettings()", "No MainWindow with focus found. Calling saveSettings() for all windows");
 			for (MainWindow win : mainWindows)
 			{
 				if (win != null)
@@ -371,7 +376,7 @@ public final class WbManager
 			{
 				if (Settings.getInstance().getBoolProperty("workbench.debug.trace.configcheck", true))
 				{
-					LogMgr.logDebug("WbManager.canExit()", "Confirm overwrite called", new Exception("BackTrack"));
+					ThreadDumper.logThreadDump();
 				}
 				String msg = ResourceMgr.getFormattedString("MsgSettingsChanged", Settings.getInstance().getConfigFile().getFullPath());
 				int choice = WbSwingUtilities.getYesNoCancel(getCurrentWindow(), msg);
@@ -383,6 +388,7 @@ public final class WbManager
 		}
 		else
 		{
+			LogMgr.logDebug("WbManager.canExit()", "saveWindowSettings() returned false!");
 			return false;
 		}
 	}
@@ -531,6 +537,10 @@ public final class WbManager
 		{
 			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 			this.shutdownHook = null;
+		}
+		if (this.deadlockMonitor != null)
+		{
+			this.deadlockMonitor.interrupt();
 		}
 	}
 
@@ -902,6 +912,12 @@ public final class WbManager
 		else
 		{
 			openNewWindow(true);
+		}
+
+		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enable", false))
+		{
+			deadlockMonitor = new WbThread(new DeadlockMonitor(), "WbDeadlockMonitor");
+			deadlockMonitor.start();
 		}
 
 		UpdateCheck upd = new UpdateCheck();
