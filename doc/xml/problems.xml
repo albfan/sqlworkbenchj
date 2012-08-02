@@ -177,7 +177,7 @@
       </para>
 		</section>
     -->
-    
+
 		<section id="oracle-long-problems">
 			<title>Error: "Stream has already been closed"</title>
 			<para>
@@ -334,6 +334,22 @@ SELECT 42 FROM dual;</programlisting>
 		<title>Microsoft SQL Server Problems</title>
     <indexterm><primary>Problems</primary><secondary>Microsoft SQL Server</secondary></indexterm>
     <indexterm><primary>Microsoft SQL Server</primary><secondary>Problems</secondary></indexterm>
+
+		<section id="mssql-remarks-nodisplay">
+		  <title>Column and table comments are not displayed</title>
+		  <para>
+        SQL Server does not support standard object remarks using <literal>COMMENT ON</literal> and the
+        JDBC drivers (jTDS and Microsoft's driver) do not return the so called "extended attributes"
+        through the JDBC API calls. To retrieve table and column remarks that are defined through
+        the stored procedure <literal>sp_addextendedproperty()</literal>, &wb-productname; must
+        run additional statements to retrieve the extended properties. As these statements
+        can impact the performance of the DbExplorer, this is turned off by default.
+		  </para>
+		  <para>
+        To turn the retrieval of the extended properties on, please configure the necessary properties.
+        For details, see the section <link linkend="dbexplorer-ms-remarks">Retrieving remarks for Microsoft SQL Server</link>.
+		  </para>
+		</section>
 
 		<section id="mssql-cloned-connection">
 		  <title>Can't start a cloned connection while in manual transaction mode</title>

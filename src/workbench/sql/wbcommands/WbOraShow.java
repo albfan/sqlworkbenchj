@@ -94,6 +94,10 @@ public class WbOraShow
 		{
 			return getSGAInfo();
 		}
+		else if (verb.equals("recyclebin"))
+		{
+			return showRecycleBin();
+		}
 		else if (verb.equals("user"))
 		{
 			result.addMessage("USER is " + currentConnection.getCurrentUser());
@@ -121,6 +125,45 @@ public class WbOraShow
 		{
 			result.addMessage(ResourceMgr.getString("ErrOraShow"));
 			result.setFailure();
+		}
+		return result;
+	}
+
+	private StatementRunnerResult showRecycleBin()
+	{
+		StatementRunnerResult result = new StatementRunnerResult("SHOW RECYCLEBIN");
+		String sql =
+				"SELECT original_name as \"ORIGINAL NAME\", \n" +
+				"       object_name as \"RECYCLEBIN NAME\", \n" +
+				"       type as \"OBJECT TYPE\", \n" +
+				"       droptime as \"DROP TIME\" \n" +
+				"FROM user_recyclebin \n" +
+				"WHERE can_undrop = 'YES' \n" +
+				"ORDER BY original_name, \n" +
+				"         droptime desc, \n" +
+				"         object_name";
+
+		ResultSet rs = null;
+
+		try
+		{
+			currentStatement = this.currentConnection.createStatementForQuery();
+			rs = currentStatement.executeQuery(sql);
+			processResults(result, true, rs);
+			if (result.hasDataStores() && result.getDataStores().get(0).getRowCount() == 0)
+			{
+				result.clear();
+			}
+			result.setSuccess();
+		}
+		catch (SQLException ex)
+		{
+			result.setFailure();
+			result.addMessage(ex.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
