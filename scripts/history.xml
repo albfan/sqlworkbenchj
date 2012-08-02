@@ -22,6 +22,7 @@
     <entry dev-build="2" type="enh">A new option for the connection profile has been added to prevent running UPDATE or DELETE statements without a WHERE clause.</entry>
     <entry dev-build="2" type="enh">When using JOIN completion and the "previous" table in the join list does not have a FK relation to the current, a popup is now shown with all possible tables from the select statement.</entry>
     <entry dev-build="2" type="enh">A new option to automatically insert closing brackets in the SQL Editor is available. It is enabled by adding the bracket pairs to be completed (e.g. ()[])</entry>
+    <entry dev-build="18" type="fix">"SET ROLE" or "SET CONSTRAINTS" could not be run for Oracle</entry>
     <entry dev-build="17" type="fix">When using fixed width text files, ignoring columns by using -fileColumns and -importColumns together did not work</entry>
     <entry dev-build="17" type="fix">Using WbImport with XML files and the -sourceDir argument did not work any longer</entry>
     <entry dev-build="16" type="fix">-excludeTables (for WbDataDiff and WbSchemaDiff) was not working properly when the tables were specified using -referenceTables and -targetTables at the same time</entry>

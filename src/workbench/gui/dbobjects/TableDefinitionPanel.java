@@ -329,14 +329,6 @@ public class TableDefinitionPanel
 						reloadAction.setEnabled(false);
 						String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + currentTable.getTableName() + "</b></html>";
 						tableNameLabel.setText(msg);
-						if (StringUtil.isEmptyString(currentTable.getComment()))
-						{
-							tableNameLabel.setToolTipText(null);
-						}
-						else
-						{
-							tableNameLabel.setToolTipText(currentTable.getComment());
-						}
 					}
 				});
 
@@ -398,13 +390,30 @@ public class TableDefinitionPanel
 		tableDefinition.setPrintHeader(this.currentTable.getTableName());
 		tableDefinition.setAutoCreateColumnsFromModel(true);
 		tableDefinition.setModel(model, true);
+
+		TableIdentifier displayTable = currentTable;
+		if (model instanceof DataStoreTableModel)
+		{
+			DataStore ds = ((DataStoreTableModel)model).getDataStore();
+			if (ds instanceof TableColumnsDatastore)
+			{
+				TableIdentifier realTbl = ((TableColumnsDatastore)ds).getSourceTable();
+				if (realTbl != null)
+				{
+					displayTable = realTbl;
+				}
+			}
+		}
+
+		String displayName = displayTable.getTableExpression(dbConnection);
+
 		if (model instanceof EmptyTableModel)
 		{
 			tableNameLabel.setText("");
 		}
 		else
 		{
-			tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
+			tableNameLabel.setText("<html><b>" + displayName + "</b></html>");
 		}
 
 		TableColumnModel colmod = tableDefinition.getColumnModel();

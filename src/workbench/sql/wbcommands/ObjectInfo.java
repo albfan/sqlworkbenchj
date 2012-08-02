@@ -72,6 +72,7 @@ public class ObjectInfo
 		boolean showSchema = false;
 		TableIdentifier toDescribe = null;
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+		adjustPathForPostgres(searchPath, connection);
 		if (dbObject.getSchema() == null && !searchPath.isEmpty())
 		{
 			LogMgr.logDebug("ObjectInfo.getObjectInfo()", "Searching schemas: " + searchPath + " for " + objectName);
@@ -332,4 +333,14 @@ public class ObjectInfo
 		return result;
 	}
 
+	private void adjustPathForPostgres(List<String> path, WbConnection con)
+	{
+		if (con == null) return;
+		if (con.getMetadata().isPostgres() && !path.contains("pg_catalog"))
+		{
+			// pg_catalog is usually not explicitely listed in the search_path
+			// but it is effectively searched by Postgres for selects and other things
+			path.add("pg_catalog");
+		}
+	}
 }

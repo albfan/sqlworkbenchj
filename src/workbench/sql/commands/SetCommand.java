@@ -19,6 +19,7 @@ import java.util.Set;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
@@ -102,6 +103,10 @@ public class SetCommand
 				}
 				else if (currentConnection.getMetadata().isOracle())
 				{
+					Set<String> allowed = CollectionUtil.caseInsensitiveSet();
+					List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "constraints,constraint,transaction,role");
+					allowed.addAll(options);
+
 					execSql = false;
 					if (command.equalsIgnoreCase("serveroutput"))
 					{
@@ -114,6 +119,10 @@ public class SetCommand
 					else if (command.equalsIgnoreCase("autotrace"))
 					{
 						result = handleAutotrace(aSql.substring(commandEnd).trim());
+					}
+					else if (allowed.contains(command))
+					{
+						execSql = true;
 					}
 					else
 					{

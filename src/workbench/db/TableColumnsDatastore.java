@@ -99,9 +99,12 @@ public class TableColumnsDatastore
 	private static final int[] TYPES = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
 	private static final int[] SIZES = {20, 18, 5, 8, 10, 10, 25, 18, 2, 2, 2};
 
+	private TableIdentifier sourceTable;
+
 	public TableColumnsDatastore(TableDefinition table)
 	{
 		super(TABLE_DEFINITION_COLS, TYPES, SIZES);
+		this.sourceTable = table.getTable();
 		List<ColumnIdentifier> columns = table.getColumns();
 		if (columns != null)
 		{
@@ -125,6 +128,11 @@ public class TableColumnsDatastore
 		this.resetStatus();
 	}
 
+	public TableIdentifier getSourceTable()
+	{
+		return sourceTable;
+	}
+	
 	/**
 	 * Convert the contents of a DataStore back to a List of ColumnIdentifier
 	 *
