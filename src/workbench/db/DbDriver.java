@@ -48,7 +48,6 @@ public class DbDriver
 	private String driverClass;
 	private List<String> libraryList;
 	private boolean isInternal;
-	private boolean addToLibraryPath = true;
 	private String sampleUrl;
 
 	public DbDriver()
@@ -129,6 +128,11 @@ public class DbDriver
 		return createLibraryString(StringUtil.getPathSeparator());
 	}
 
+	private boolean doAddLibraryPath()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbdriver.fixlibrarypath", false);
+	}
+
 	private void addToLibraryPath()
 	{
 		if (this.libraryList == null) return;
@@ -158,6 +162,8 @@ public class DbDriver
 			newPath.append(File.pathSeparatorChar);
 			newPath.append(path);
 		}
+
+		LogMgr.logDebug("DbDriver.addToLibraryPath()", "Setting java.library.path=" + newPath);
 
 		System.setProperty("java.library.path", newPath.toString());
 
@@ -289,7 +295,7 @@ public class DbDriver
 				classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());
 			}
 
-			if (addToLibraryPath)
+			if (doAddLibraryPath())
 			{
 				addToLibraryPath();
 			}

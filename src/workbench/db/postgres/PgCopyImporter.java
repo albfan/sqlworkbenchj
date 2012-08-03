@@ -16,7 +16,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
-import org.postgresql.copy.CopyManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
@@ -34,61 +33,75 @@ import workbench.util.FileUtil;
 public class PgCopyImporter
 	implements StreamImporter
 {
+	private final Object lock = new Object();
 	private WbConnection connection;
 	private String sql;
 	private Reader data;
+	private Object copyManager;
+	private Method copyIn;
+	private boolean useDefaultClassloader;
 
 	public PgCopyImporter(WbConnection conn)
 	{
 		this.connection = conn;
 	}
 
+	/**
+	 * Instruct this instance to use the default (system) classloader
+	 * instead of the the ConnectionMgr.loadClassFromDriverLib().
+	 *
+	 * During unit testing the classloader in the ConnectionMgr is not initialized
+	 * because all drivers are alread on the classpath. Therefor this switch is needed
+	 *
+	 * @param flag if true, load the CopyManager from the system classpath, otherwise use the ConnectionMgr.
+	 */
+	public void setUseDefaultClassloader(boolean flag)
+	{
+		useDefaultClassloader = flag;
+	}
 	public boolean isSupported()
 	{
 		try
 		{
-			return createCopyManager() != null;
+			initialize();
+			return true;
 		}
 		catch (Throwable th)
 		{
+			LogMgr.logDebug("PgCopyImporter.isSupported()", "Error", th);
 			return false;
 		}
 	}
 
-	private CopyManager createCopyManager()
-		throws SQLException
-	{
-		try
-		{
-			Class drvClass = connection.getSqlConnection().getClass();
-
-			Method getMgr = drvClass.getMethod("getCopyAPI", (Class[])null);
-			Object result = getMgr.invoke(connection.getSqlConnection(), (Object[])null);
-			return (CopyManager)result;
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", th);
-			throw new SQLException("CopyManager not available");
-		}
-	}
-
-	private CopyManager _createCopyManager()
+	private void initialize()
 		throws ClassNotFoundException
 	{
-		Class copyMgrClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.copy.CopyManager");
-		Class baseConnClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.core.BaseConnection");
+		synchronized (lock)
+		{
+			try
+			{
+				Class baseConnClass = null;
+				Class copyMgrClass = null;
+				if (useDefaultClassloader)
+				{
+					baseConnClass = Class.forName("org.postgresql.core.BaseConnection");
+					copyMgrClass = Class.forName("org.postgresql.copy.CopyManager");
+				}
+				else
+				{
+					baseConnClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.core.BaseConnection");
+					copyMgrClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.copy.CopyManager");
+				}
 
-		try
-		{
-			Constructor constr = copyMgrClass.getConstructor(baseConnClass);
-			Object instance = constr.newInstance(connection.getSqlConnection());
-			return (CopyManager)instance;
-		}
-		catch (Throwable t)
-		{
-			LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", t);
-			throw new ClassNotFoundException("CopyManager");
+				Constructor constr = copyMgrClass.getConstructor(baseConnClass);
+				copyManager = constr.newInstance(connection.getSqlConnection());
+				copyIn = copyManager.getClass().getMethod("copyIn", String.class, Reader.class);
+			}
+			catch (Throwable t)
+			{
+				LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", t);
+				throw new ClassNotFoundException("CopyManager");
+			}
 		}
 	}
 
@@ -110,9 +123,41 @@ public class PgCopyImporter
 
 		try
 		{
-			CopyManager copyMgr = createCopyManager(); //new CopyManager((BaseConnection)connection.getSqlConnection());
+			// As the CopyManager is loaded through the ClassLoader of the DbDriver
+			// we cannot have any "hardcoded" references to the PostgreSQL classes
+			// that will throw a ClassNotFoundException even though the class was actually loaded
+			if (copyManager == null)
+			{
+				initialize();
+			}
+
 			LogMgr.logDebug("PgCopyImporter.processStreamData()", "Sending file contents using: " + this.sql);
-			return copyMgr.copyIn(sql, data);
+
+			if (copyIn != null)
+			{
+				Object rows = copyIn.invoke(copyManager, sql, data);
+				if (rows instanceof Number)
+				{
+					return ((Number)rows).longValue();
+				}
+			}
+			throw new SQLException("CopyAPI not available");
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw new SQLException("CopyAPI not available", e);
+		}
+		catch (Exception e)
+		{
+			if (e instanceof SQLException)
+			{
+				throw (SQLException)e;
+			}
+			if (e instanceof IOException)
+			{
+				throw (IOException)e;
+			}
+			throw new SQLException("Could not copy data", e);
 		}
 		finally
 		{

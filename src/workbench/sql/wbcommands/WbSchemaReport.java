@@ -122,7 +122,8 @@ public class WbSchemaReport
 
 		if (StringUtil.isNonEmpty(tableNames))
 		{
-			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, "%", this.currentConnection);
+			String schema = StringUtil.isEmptyString(tableNames) ? "%" : null;
+			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, this.currentConnection);
 			List<TableIdentifier> tables = tableArg.getTables();
 			if (tables != null && tables.size() > 0)
 			{
@@ -137,6 +138,15 @@ public class WbSchemaReport
 					}
 				}
 				this.reporter.setTableList(dbTables);
+			}
+			else
+			{
+				if (StringUtil.isNonBlank(tableNames))
+				{
+					result.setFailure();
+					result.addMessageByKey("ErrNoTablesFound");
+					return result;
+				}
 			}
 		}
 		else if (StringUtil.isNonEmpty(schemaNames))

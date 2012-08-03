@@ -61,6 +61,7 @@ public class PgCopyImporterTest
 		String content = "id|firstname|lastname\n1|Arthur|Dent\n2|Ford|Prefect\n";
 		TestUtil.writeFile(data, content, "UTF-8");
 		PgCopyImporter copy = new PgCopyImporter(conn);
+		copy.setUseDefaultClassloader(true);
 
 		TableDefinition def = conn.getMetadata().getTableDefinition(new TableIdentifier("foo"));
 		BufferedReader in = EncodingUtil.createBufferedReader(data, "UTF-8");

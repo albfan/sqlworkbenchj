@@ -83,7 +83,8 @@ public class SourceTableArgument
 		throws SQLException
 	{
 		missingTables.clear();
-		tables.addAll(parseArgument(includeTables, schema, true, types, dbConn));
+		List<TableIdentifier> toAdd = parseArgument(includeTables, schema, true, types, dbConn);
+		tables.addAll(toAdd);
 
 		if (StringUtil.isNonBlank(excludeTables))
 		{
