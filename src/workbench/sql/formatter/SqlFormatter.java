@@ -400,6 +400,7 @@ public class SqlFormatter
 		if (lastText.endsWith("'") && currentText.equals("''")) return false;
 		if (lastText.endsWith("'") && currentText.equals("}")) return false;
 		if (lastText.equals("''") && currentText.startsWith("'")) return false;
+		if (lastChar == '\'' && currChar == '\'') return false;
 
 		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
 		if (isCurrentOpenBracket && isDatatype(currentText)) return false;
