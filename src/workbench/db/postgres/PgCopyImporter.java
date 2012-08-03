@@ -12,11 +12,13 @@ package workbench.db.postgres;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
 import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.StreamImporter;
@@ -41,6 +43,55 @@ public class PgCopyImporter
 		this.connection = conn;
 	}
 
+	public boolean isSupported()
+	{
+		try
+		{
+			return createCopyManager() != null;
+		}
+		catch (Throwable th)
+		{
+			return false;
+		}
+	}
+
+	private CopyManager createCopyManager()
+		throws SQLException
+	{
+		try
+		{
+			Class drvClass = connection.getSqlConnection().getClass();
+
+			Method getMgr = drvClass.getMethod("getCopyAPI", (Class[])null);
+			Object result = getMgr.invoke(connection.getSqlConnection(), (Object[])null);
+			return (CopyManager)result;
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", th);
+			throw new SQLException("CopyManager not available");
+		}
+	}
+
+	private CopyManager _createCopyManager()
+		throws ClassNotFoundException
+	{
+		Class copyMgrClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.copy.CopyManager");
+		Class baseConnClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.core.BaseConnection");
+
+		try
+		{
+			Constructor constr = copyMgrClass.getConstructor(baseConnClass);
+			Object instance = constr.newInstance(connection.getSqlConnection());
+			return (CopyManager)instance;
+		}
+		catch (Throwable t)
+		{
+			LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", t);
+			throw new ClassNotFoundException("CopyManager");
+		}
+	}
+
 	@Override
 	public void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options)
 	{
@@ -59,14 +110,9 @@ public class PgCopyImporter
 
 		try
 		{
-			CopyManager copyMgr = new CopyManager((BaseConnection)connection.getSqlConnection());
+			CopyManager copyMgr = createCopyManager(); //new CopyManager((BaseConnection)connection.getSqlConnection());
 			LogMgr.logDebug("PgCopyImporter.processStreamData()", "Sending file contents using: " + this.sql);
 			return copyMgr.copyIn(sql, data);
-		}
-		catch (ClassCastException ce)
-		{
-			LogMgr.logError("PgCopyImporter.processStreamData()", "Not a Postgres connection!", ce);
-			throw new SQLException("No Postgres connection!");
 		}
 		finally
 		{

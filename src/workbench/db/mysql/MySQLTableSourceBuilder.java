@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.List;
 import workbench.db.*;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -70,7 +71,8 @@ public class MySQLTableSourceBuilder
 					appendOption(result, "COMMENT", comment);
 				}
 				String collation = rs.getString("table_collation");
-				if (!StringUtil.equalStringIgnoreCase(defaultCollation, collation))
+				boolean alwaysShowCollation = Settings.getInstance().getBoolProperty("workbench.db.mysql.tablesource.showcollation.always", false);
+				if (alwaysShowCollation || !StringUtil.equalStringIgnoreCase(defaultCollation, collation))
 				{
 					appendOption(result, "COLLATE", collation);
 				}

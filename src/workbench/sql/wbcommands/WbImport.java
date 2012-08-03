@@ -527,7 +527,15 @@ public class WbImport
 					return result;
 				}
 				PgCopyImporter pg = new PgCopyImporter(currentConnection);
-				textParser.setStreamImporter(pg);
+				if (pg.isSupported())
+				{
+					textParser.setStreamImporter(pg);
+				}
+				else
+				{
+					result.addMessage("PostgreSQL copy API not supported!");
+					result.setWarning(true);
+				}
 			}
 			imp.setProducer(textParser);
 		}

@@ -48,7 +48,7 @@ public class DbDriver
 	private String driverClass;
 	private List<String> libraryList;
 	private boolean isInternal;
-	private boolean addToLibraryPath;
+	private boolean addToLibraryPath = true;
 	private String sampleUrl;
 
 	public DbDriver()
@@ -263,6 +263,7 @@ public class DbDriver
 		throws ClassNotFoundException
 	{
 		if (this.classLoader == null) return null;
+		Thread.currentThread().setContextClassLoader(classLoader);
 		Class clz = this.classLoader.loadClass(className);
 		return clz;
 	}

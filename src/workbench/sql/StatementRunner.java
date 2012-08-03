@@ -407,9 +407,14 @@ public class StatementRunner
 
 		long sqlExecStart = System.currentTimeMillis();
 
+		// now run the statement ...
 		this.result = this.currentCommand.execute(realSql);
 
-		this.currentCommand.setFullErrorReporting(oldReporting);
+		if (currentCommand != null)
+		{
+			// the currentCommand can be null when abort() has been called
+			this.currentCommand.setFullErrorReporting(oldReporting);
+		}
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
 		{
