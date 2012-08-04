@@ -183,8 +183,8 @@ public class WbSchemaReportTest
 		}
 	}
 
-//	@Test
-	public void createHSQLDb()
+	@Test
+	public void testMultipleSchema()
 		throws Exception
 	{
 		util = new TestUtil("schemaReportTest");
@@ -248,6 +248,21 @@ public class WbSchemaReportTest
 
 		name = TestUtil.getXPathValue(xml, "/schema-report/proc-def[1]/proc-name");
 		assertEquals("TWO_HOURS_BEFORE", name);
+
+		output = new File(util.getBaseDir(), "proc_report_s2.xml");
+		result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -tables=s1.person");
+		assertTrue(result.isSuccess());
+		assertTrue(output.exists());
+		xml = FileUtil.readFile(output, "UTF-8");
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+		assertEquals("Incorrect table count", "1", count);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/table-schema");
+		assertEquals("S1", name);
+
+		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/column-def[1]/column-name");
+		assertEquals("ID1", name);
 	}
 
 	private void setupDatabase()

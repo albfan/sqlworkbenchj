@@ -132,7 +132,7 @@ public class SchemaReporter
 		}
 	}
 
-	public void setIncludeViews(boolean flag)
+	public final void setIncludeViews(boolean flag)
 	{
 		if (flag)
 		{
