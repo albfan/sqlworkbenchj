@@ -195,7 +195,6 @@
       <classpath>
           <fileset dir="../etc/poi" includes="poi*.jar"/>
           <fileset dir="../etc/log4j" includes="log4j*.jar"/>
-          <fileset dir="../junit" includes="postgresql*.jar"/>
       </classpath>
     </javac>
 
@@ -583,6 +582,7 @@
   </target>
 
   <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, make-jar"/>
+  <target name="cj" depends="set-dev-prop, compile, get-dev-build, replace-build-number, make-jar"/>
 
   <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
 
