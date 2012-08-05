@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-07-31">
+  <release build="-1" date="2012-08-05">
     <entry dev-build="18" type="enh">A new command WbSysOpen is available to open a file with the default application of the operating system.</entry>
     <entry dev-build="16" type="enh">WbCopy now supports -sourceSchema and -targetSchema parameters to be able to copy to and from schemas that are not the "default" schema</entry>
     <entry dev-build="16" type="enh">WbImport can now use PostgreSQL's COPY mode (this can be turned on using -usePgCopy)</entry>
