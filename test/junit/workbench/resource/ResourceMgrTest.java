@@ -23,8 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeSet;
 import workbench.util.FileUtil;
 import static org.junit.Assert.*;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -59,6 +62,7 @@ public class ResourceMgrTest
 		HashSet<String> ignoreKeys = new HashSet<String>(keys);
 
 		Enumeration<String> enKeys = enBundle.getKeys();
+		Set<String> wrongParameters = CollectionUtil.caseInsensitiveSet();
 		while (enKeys.hasMoreElements())
 		{
 			String key = enKeys.nextElement();
@@ -69,16 +73,35 @@ public class ResourceMgrTest
 			{
 				wrongKeys.add(key + ", en=" + enValue + ", de=" + deValue);
 			}
+			else
+			{
+				Set<String> enParms = getParameter(enValue);
+				Set<String> deParms = getParameter(deValue);
+				if (!enParms.equals(deParms))
+				{
+					wrongParameters.add(key + " en: " + enParms + ", de:" + deParms);
+				}
+			}
 		}
 
 		if (wrongKeys.size() > 0)
 		{
-			System.out.println("Keys not translated!");
+			System.out.println("Keys not translated:");
 			for (String key : wrongKeys)
 			{
-				System.out.println(key);
+				System.out.println("  " + key);
 			}
 			fail("Not all translation keys translated!");
+		}
+
+		if (wrongParameters.size() > 0)
+		{
+			System.out.println("Keys with wrong parameter definition:");
+			for (String key : wrongParameters)
+			{
+				System.out.println("  Parameter mismatch for " + key);
+			}
+			fail ("Not all parameters match between German and English");
 		}
 	}
 
@@ -106,5 +129,26 @@ public class ResourceMgrTest
 				fail("Key=" + key + " for language " + bundle.getLocale() + " uses incorrect single quotes for parameter marker");
 			}
 		}
+	}
+
+	private Set<String> getParameter(String message)
+	{
+		Set<String> result = new TreeSet<String>();
+		// first find all %foobar% parameters
+		Pattern oldParms = Pattern.compile("\\%[a-zA-Z]+\\%");
+		Matcher m = oldParms.matcher(message);
+		while (m.find())
+		{
+			String name = message.substring(m.start(), m.end());
+			result.add(name);
+		}
+		Pattern newParms = Pattern.compile("\\{[0-9]+\\}");
+		m = newParms.matcher(message);
+		while (m.find())
+		{
+			String name = message.substring(m.start(), m.end());
+			result.add(name);
+		}
+		return result;
 	}
 }
