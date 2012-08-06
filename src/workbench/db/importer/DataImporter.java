@@ -1570,9 +1570,7 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
-					String msg = ResourceMgr.getString("ErrImportTableNotCreated");
-					msg = StringUtil.replace(msg, "%table%", this.targetTable.getTableExpression(this.dbConn));
-					msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+					String msg = ResourceMgr.getFormattedString("ErrImportTableNotCreated", this.targetTable.getTableExpression(this.dbConn), ExceptionUtil.getDisplay(e));
 					this.messages.append(msg);
 					this.messages.appendNewLine();
 					LogMgr.logError("DataImporter.setTargetTable()", "Could not create target: " + this.targetTable, e);
@@ -1589,14 +1587,13 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
-					String msg = ResourceMgr.getFormattedString("ErrTableNotFound", this.targetTable.getTableExpression());
+					this.messages.append(ResourceMgr.getFormattedString("ErrTableNotFound", this.targetTable.getTableExpression()));
 					if (parser != null)
 					{
-						String s = ResourceMgr.getString("ErrImportFileNotProcessed");
-						msg = msg + " " + StringUtil.replace(s, "%filename%", this.parser.getSourceFilename());
+						this.messages.appendNewLine();
+						this.messages.append(ResourceMgr.getFormattedString("ErrImportFileNotProcessed", this.parser.getSourceFilename()));
 					}
 					this.hasErrors = true;
-					this.messages.append(msg);
 					this.messages.appendNewLine();
 					this.targetTable = null;
 					throw e;
