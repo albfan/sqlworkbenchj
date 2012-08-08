@@ -107,13 +107,13 @@ public class WbDataDiffTest
 			runner.runStatement(sql);
 
 			StatementRunnerResult result = runner.getResult();
-			System.out.println(result.getMessageBuffer());
+//			System.out.println(result.getMessageBuffer());
 			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
 			assertTrue(main.exists());
 
 			Reader r = EncodingUtil.createReader(main, "UTF-8");
 			String sync = FileUtil.readCharacters(r);
-			System.out.println(sync);
+			//System.out.println(sync);
 		}
 		finally
 		{
@@ -315,19 +315,25 @@ public class WbDataDiffTest
 				"foo2_$insert.xml",
 				"foo2_$update.xml",
 			};
-			String content = FileUtil.readCharacters(EncodingUtil.createReader(xml, "UTF-8"));
-			String value = TestUtil.getXPathValue(content, "count(/data-diff/summary/mapping)");
-			assertEquals("1", value);
 
-			content= FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "foo2_$update.xml"), "UTF-8"));
-			value = TestUtil.getXPathValue(content, "count(/table-data-diff/update)");
-			assertEquals("2", value);
+		for (String fname : expectedFiles)
+		{
+			File f = new File(util.getBaseDir(), fname);
+			assertTrue(f.exists());
+		}
+		String content = FileUtil.readCharacters(EncodingUtil.createReader(xml, "UTF-8"));
+		String value = TestUtil.getXPathValue(content, "count(/data-diff/summary/mapping)");
+		assertEquals("1", value);
 
-			value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[1]/col[@name='SOME_DATA']/text()");
-			assertEquals("one", value);
+		content= FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "foo2_$update.xml"), "UTF-8"));
+		value = TestUtil.getXPathValue(content, "count(/table-data-diff/update)");
+		assertEquals("2", value);
 
-			value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[2]/col[@name='SOME_DATA']/text()");
-			assertEquals("two", value);
+		value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[1]/col[@name='SOME_DATA']/text()");
+		assertEquals("one", value);
+
+		value = TestUtil.getXPathValue(content, "/table-data-diff[@name='FOO2']/update[2]/col[@name='SOME_DATA']/text()");
+		assertEquals("two", value);
 	}
 
 	private void insertData(Statement stmt)
@@ -519,5 +525,11 @@ public class WbDataDiffTest
 		assertTrue(foocols.contains("col1"));
 		assertTrue(foocols.contains("col2"));
 		assertTrue(foocols.contains("col3"));
+
+		arguments = " -alternateKey='person=\"id2\",\"id3\"'";
+		cmdLine.parse(arguments);
+		keys = diff.getAlternateKeys(cmdLine, result);
+		System.out.println(keys);
+
 	}
 }

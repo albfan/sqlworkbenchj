@@ -83,6 +83,7 @@ public class SqlFormatter
 
 	private static final String NL = "\n";
 	private boolean addColumnCommentForInsert;
+	private boolean newLineForSubSelects;
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
 	private boolean addSpaceAfterComma;
@@ -92,6 +93,7 @@ public class SqlFormatter
 	private JoinWrapStyle joinWrapping = JoinWrapStyle.onlyMultiple;
 	private String dbId;
 	private char catalogSeparator = '.';
+	private int colsPerInsert = -1;
 
 	SqlFormatter(CharSequence aScript)
 	{
@@ -129,6 +131,7 @@ public class SqlFormatter
 		maxSubselectLength = maxLength;
 		dbFunctions = CollectionUtil.caseInsensitiveSet();
 		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
+		newLineForSubSelects = Settings.getInstance().getFormatterSubselectInNewLine();
 		addColumnCommentForInsert = Settings.getInstance().getFormatterAddColumnNameComment();
 		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
@@ -139,11 +142,36 @@ public class SqlFormatter
 		setDbId(dbId);
 	}
 
+	public void setColumnsPerInsert(int cols)
+	{
+		if (cols > 0)
+		{
+			colsPerInsert = cols;
+		}
+	}
+
+	private int getColumnsPerInsert()
+	{
+		if (colsPerInsert < 0)
+		{
+			return Settings.getInstance().getFormatterMaxColumnsInInsert();
+		}
+		return colsPerInsert;
+	}
+
 	public void setJoinWrapping(JoinWrapStyle style)
 	{
 		joinWrapping = style;
 	}
 
+	public void setNewLineForSubselects(boolean flag)
+	{
+		newLineForSubSelects = flag;
+	}
+
+	/**
+	 * Controls if column names are added to the VALUES part of an INSERT statement.
+	 */
 	public void setAddColumnNameComment(boolean flag)
 	{
 		addColumnCommentForInsert = flag;
@@ -798,7 +826,15 @@ public class SqlFormatter
 			subSql.append("SELECT ");
 		}
 
-		int lastIndent = this.getCurrentLineLength();
+		int lastIndent = 0;
+		if (newLineForSubSelects)
+		{
+			lastIndent = indent == null ? 2 : indent.length() + 2;
+		}
+		else
+		{
+			lastIndent = this.getCurrentLineLength();
+		}
 
 		while (t != null)
 		{
@@ -827,15 +863,30 @@ public class SqlFormatter
 	private void appendSubSelect(StringBuilder subSql, int lastIndent)
 	{
 		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength, this.dbId);
+		f.setNewLineForSubselects(this.newLineForSubSelects);
+		f.setUseLowerCaseFunctions(this.lowerCaseFunctions);
+		f.setUseUpperCaseKeywords(this.upperCaseKeywords);
+		f.setAddColumnNameComment(this.addColumnCommentForInsert);
+		f.setAddSpaceAfterCommInList(this.addSpaceAfterComma);
+		f.setAddSpaceAfterLineBreakComma(this.addSpaceAfterLineBreakComma);
+		f.setCommaAfterLineBreak(this.commaAfterLineBreak);
+		f.setJoinWrapping(this.joinWrapping);
+		f.setColumnsPerInsert(colsPerInsert);
 		String s = f.getFormattedSql();
 		if (f.getRealLength() < this.maxSubselectLength)
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
 		}
-		//this.appendNewline();
-		//this.indent(2);
+		if (newLineForSubSelects)
+		{
+			appendNewline();
+			this.appendText(indent == null ? "  " : indent.toString());
+		}
 		this.appendText(s.trim());
-		//this.appendNewline();
+		if (newLineForSubSelects)
+		{
+			this.appendNewline();
+		}
 	}
 
 	private SQLToken processDecode(int myIndent)
@@ -1036,7 +1087,7 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processBracketList(int indentCount, int elementsPerLine)
+	private SQLToken processBracketList(int indentCount, int elementsPerLine, List<String> elementNames, boolean collectNames)
 	{
 		StringBuilder myIndent = new StringBuilder(indentCount);
 		for (int i=0; i < indentCount; i++) myIndent.append(' ');
@@ -1059,11 +1110,17 @@ public class SqlFormatter
 		SQLToken last = null;
 		int elementCount = 0;
 		int bracketCount = 1;
+		int elementIndex = 0;
+
 		while (t != null)
 		{
 			final String text = t.getContents();
 			if (text.equals(")"))
 			{
+				if (!collectNames && elementIndex < elementNames.size())
+				{
+						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
+				}
 				if (elementsPerLine == 1) this.appendNewline();
 				this.appendText(")");
 				SQLToken next = skipComments();
@@ -1106,11 +1163,20 @@ public class SqlFormatter
 			{
 				if (commaAfterLineBreak && (elementCount == 0 || elementCount >= elementsPerLine))
 				{
+					if (!collectNames && elementIndex < elementNames.size())
+					{
+						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
+					}
 					this.appendNewline();
 					this.indent(myIndent);
 					elementCount = 0;
+
 				}
 				this.appendText(",");
+				if (!collectNames && elementIndex < elementNames.size())
+				{
+						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
+				}
 				elementCount ++;
 				if (!commaAfterLineBreak && elementCount >= elementsPerLine)
 				{
@@ -1122,6 +1188,7 @@ public class SqlFormatter
 				{
 					this.appendText(' ');
 				}
+				elementIndex ++;
 			}
 			else if (isLobParameter(text))
 			{
@@ -1135,6 +1202,10 @@ public class SqlFormatter
 					appendText(' ');
 				}
 				this.appendTokenText(t);
+				if (collectNames)
+				{
+					elementNames.add(t.getText());
+				}
 				if (t.isComment()) this.appendText(' ');
 			}
 			last = t;
@@ -1260,6 +1331,8 @@ public class SqlFormatter
 		SQLToken lastToken = t;
 		CommandTester wbTester = new CommandTester();
 
+		List<String> insertColumns = new ArrayList<String>();
+
 		while (t != null)
 		{
 			final String word = t.getContents().toUpperCase();
@@ -1368,7 +1441,7 @@ public class SqlFormatter
 				if (word.equalsIgnoreCase("INTO"))
 				{
 					lastToken = t;
-					t = this.processIntoKeyword();
+					t = this.processIntoKeyword(insertColumns);
 					continue;
 				}
 
@@ -1378,8 +1451,7 @@ public class SqlFormatter
 					t = skipComments();//this.lexer.getNextToken(false, false);
 					if (t != null && t.getContents().equals("("))
 					{
-						int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
-						t = this.processBracketList(indentInsert ? 2 : 0, colsPerLine);
+						t = this.processBracketList(indentInsert ? 2 : 0, getColumnsPerInsert(), insertColumns, false);
 					}
 					if (t == null) return;
 					continue;
@@ -1622,7 +1694,7 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processIntoKeyword()
+	private SQLToken processIntoKeyword(List<String> columnNames)
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		// we expect an identifier now (the table name)
@@ -1641,8 +1713,8 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && t.getContents().equals("("))
 			{
-				int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
-				return this.processBracketList(indentInsert ? 2 : 0, colsPerLine);
+				columnNames.clear();
+				return this.processBracketList(indentInsert ? 2 : 0, getColumnsPerInsert(), columnNames, addColumnCommentForInsert);
 			}
 		}
 		return t;

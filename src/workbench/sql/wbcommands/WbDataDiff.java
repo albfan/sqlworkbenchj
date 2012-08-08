@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDataDiff;
@@ -133,13 +134,16 @@ public class WbDataDiff
 			return map;
 		}
 
+		CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
+		comp.setIgnoreQuotes(true);
+
 		for (String def : list)
 		{
 			String[] elements = def.split("=");
 			if (elements != null && elements.length == 2)
 			{
-				List<String> l = StringUtil.stringToList(elements[1], ",", true, true, false, false);
-				Set<String> cols = CollectionUtil.caseInsensitiveSet();
+				List<String> l = StringUtil.stringToList(elements[1], ",", true, true, false, true);
+				Set<String> cols = new TreeSet<String>(comp);
 				cols.addAll(l);
 				map.put(elements[0], cols);
 			}

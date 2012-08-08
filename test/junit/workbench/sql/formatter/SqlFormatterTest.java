@@ -328,7 +328,7 @@ public class SqlFormatterTest
 			"       other_col\n" +
 			"FROM foo";
 		String formatted = f.getFormattedSql();
-		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
+//		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
 		assertEquals(expected, formatted);
 		f = new SqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
@@ -465,7 +465,85 @@ public class SqlFormatterTest
              "FROM fact_eventplayerdamage f";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
+	}
 
+	@Test
+	public void testSubSelectWithNewLine()
+		throws Exception
+	{
+		String sql = "select foo from (select id, foo from some_table where some_flag) t where id > 1";
+		SqlFormatter f = new SqlFormatter(sql, 10);
+		f.setNewLineForSubselects(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT foo\n" +
+			"FROM (\n" +
+			"  SELECT id,\n" +
+			"         foo\n" +
+			"  FROM some_table\n" +
+			"  WHERE some_flag\n" +
+			") t\n" +
+			"WHERE id > 1";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		sql = "select foo from (select id, foo from (select nr as id, bar as foo from foobar where some_flag) x where nr > 0)  t where id > 1";
+		f = new SqlFormatter(sql, 10);
+		f.setNewLineForSubselects(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT foo\n" +
+			"FROM (\n" +
+			"  SELECT id,\n" +
+			"         foo\n" +
+			"  FROM (\n" +
+			"    SELECT nr AS id,\n" +
+			"           bar AS foo\n" +
+			"    FROM foobar\n" +
+			"    WHERE some_flag\n" +
+			"  ) x\n" +
+			"  WHERE nr > 0\n" +
+			") t\n" +
+			"WHERE id > 1";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testColumnComments()
+	{
+		String sql = "insert into foobar (id, foo, bar) values (42, 'arthur', 'dent');";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setAddColumnNameComment(true);
+		f.setColumnsPerInsert(1);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"INSERT INTO foobar\n" +
+			"(\n" +
+			"  id,\n" +
+			"  foo,\n" +
+			"  bar\n" +
+			")\n" +
+			"VALUES\n" +
+			"(\n" +
+			"  42, /* id */\n" +
+			"  'arthur', /* foo */\n" +
+			"  'dent' /* bar */\n" +
+			");";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter(sql);
+		f.setAddColumnNameComment(true);
+		f.setColumnsPerInsert(5);
+		formatted = f.getFormattedSql();
+		expected =
+			"INSERT INTO foobar\n" +
+			"  (id, foo, bar)\n" +
+			"VALUES\n" +
+			"  (42, /* id */ 'arthur', /* foo */ 'dent' /* bar */);";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
 	}
 
 	@Test

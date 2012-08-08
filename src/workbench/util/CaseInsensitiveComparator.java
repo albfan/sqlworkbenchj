@@ -25,6 +25,17 @@ public class CaseInsensitiveComparator
 
 	public static final CaseInsensitiveComparator INSTANCE = new CaseInsensitiveComparator();
 
+	private boolean ignoreQuotes;
+
+	public CaseInsensitiveComparator()
+	{
+	}
+
+	public void setIgnoreQuotes(boolean flag)
+	{
+		this.ignoreQuotes = flag;
+	}
+
 	/**
 	 * Compares to two strings.
 	 * null values are "sorted" after non-null values.
@@ -42,6 +53,10 @@ public class CaseInsensitiveComparator
 		if (value1 == null && value2 == null) return 0;
 		if (value1 == null) return -1;
 		if (value2 == null) return 1;
+		if (ignoreQuotes)
+		{
+			return StringUtil.trimQuotes(value1).compareToIgnoreCase(StringUtil.trimQuotes(value2));
+		}
 		return value1.compareToIgnoreCase(value2);
 	}
 }

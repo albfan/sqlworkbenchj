@@ -755,6 +755,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.functions.lowercase", flag);
 	}
 
+	public boolean getFormatterSubselectInNewLine()
+	{
+		return getBoolProperty("workbench.sql.formatter.subselect.newline", false);
+	}
+
+	public void setFormatterSubselectInNewLine(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.subselect.newline", flag);
+	}
+
 	public boolean getFormatterUpperCaseKeywords()
 	{
 		return getBoolProperty("workbench.sql.formatter.keywords.uppercase", true);
