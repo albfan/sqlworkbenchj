@@ -12,7 +12,6 @@
 package workbench.sql.formatter;
 
 import java.util.List;
-import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
@@ -329,6 +328,7 @@ public class SqlFormatterTest
 			"       other_col\n" +
 			"FROM foo";
 		String formatted = f.getFormattedSql();
+		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
 		assertEquals(expected, formatted);
 		f = new SqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
@@ -636,7 +636,6 @@ public class SqlFormatterTest
              "GROUP BY state)";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
-
 	}
 
 	@Test
@@ -914,22 +913,27 @@ public class SqlFormatterTest
 	public void testLowerCaseKeywords()
 		throws Exception
 	{
-		try
-		{
-			String sql = "SELECT foo FROM bar";
-			String expected =
-				"select foo\n" +
-				"from bar";
-			Settings.getInstance().setFormatterUpperCaseKeywords(false);
-			SqlFormatter f = new SqlFormatter(sql);
+		String sql = "SELECT foo FROM bar";
+		String expected =
+			"select foo\n" +
+			"from bar";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setUseLowerCaseFunctions(true);
+		f.setUseUpperCaseKeywords(false);
+			//Settings.getInstance().setFormatterUpperCaseKeywords(false);
 			String formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted);
-		}
-		finally
-		{
-			Settings.getInstance().setFormatterUpperCaseKeywords(true);
-		}
+
+		sql = "SELECT * FROM person WHERE LOWER(firstname) LIKE 'arthur%'";
+		f = new SqlFormatter(sql, 60, "oracle");
+		f.setUseLowerCaseFunctions(true);
+		f.setUseUpperCaseKeywords(false);
+
+		formatted = f.getFormattedSql();
+		expected = "select *\nfrom person\nwhere lower(firstname) like 'arthur%'";
+//		System.out.println("*******\n" + formatted + "\n----------\n" + expected + "\n**********");
+		assertEquals(expected, formatted);
 	}
 
 	@Test

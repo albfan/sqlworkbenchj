@@ -1,5 +1,13 @@
 Features:
 ---------
+- column names as comments in SQL Formatter
+  http://stackoverflow.com/questions/11862594/sql-formatter-commenting-inserted-column-values
+- subselects on new line in SQL Formatter
+      SELECT *     instead of    SELECT *
+      FROM (                     FROM (SELECT ...
+        SELECT                        ) t
+      ) t
+
 - save table sort of DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"

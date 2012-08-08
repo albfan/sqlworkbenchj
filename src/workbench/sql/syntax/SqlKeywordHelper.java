@@ -111,6 +111,16 @@ public class SqlKeywordHelper
 		return functions;
 	}
 
+	/**
+	 * Loads the keywords from the keyword file.
+	 * First the built-in "general" file is read, then the database specific one.
+	 *
+	 * After reading the built-in definitions, the file is also searched
+	 * for in the config directory.
+	 *
+	 * @param filename
+	 * @return
+	 */
 	private Set<String> loadKeywordsFromFile(String filename)
 	{
 		Set<String> result = readFile(filename);
@@ -126,6 +136,11 @@ public class SqlKeywordHelper
 		return result;
 	}
 
+	/**
+	 * Remove any item from the set that starts with '-'.
+	 *
+	 * @param items
+	 */
 	private void removeItems(Set<String> items)
 	{
 		Set<String> toRemove = CollectionUtil.caseInsensitiveSet();
@@ -152,13 +167,8 @@ public class SqlKeywordHelper
 			result.addAll(builtin);
 		}
 
-		// Try to read the file in the current directory.
-		File f = new File(filename);
-		if (!f.exists())
-		{
-			// nothing in the current directory, try the config dir
-			f = new File(Settings.getInstance().getConfigDir(), filename);
-		}
+		// Try to read the file from the current directory.
+		File f = f = new File(Settings.getInstance().getConfigDir(), filename);
 
 		if (f.exists())
 		{

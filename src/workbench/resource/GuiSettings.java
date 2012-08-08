@@ -72,6 +72,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
 	}
 
+	public static boolean getHighlightErrorStatement()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.execute.highlighterror", true);
+	}
+
+	public static void setHighlightErrorStatement(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.execute.highlighterror", flag);
+	}
+
 	public static boolean getAutoRetrieveFKTree()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);

@@ -177,7 +177,8 @@ public class SQLLexerTest
 					"left join\n"+
 					"left        outer join\n"+
 					"right join\n" +
-					"right \nouter\n\n join\njoin\n";
+					"right \nouter\n\n join\njoin\n" +
+			    "like";
 
 		List<SQLToken> tokens = getTokenList(sql);
 		for (int i = 0; i < tokens.size(); i++)
@@ -238,6 +239,9 @@ public class SQLLexerTest
 					break;
 				case 17:
 					assertEquals("JOIN",v);
+					break;
+				case 18:
+					assertEquals("LIKE",v);
 					break;
 			}
 		}

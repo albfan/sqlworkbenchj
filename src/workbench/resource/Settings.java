@@ -777,22 +777,37 @@ public class Settings
 
 	public boolean getFormatterIndentInsert()
 	{
-	    return getBoolProperty("workbench.sql.formatter.insert.indent", true);
+		return getBoolProperty("workbench.sql.formatter.insert.indent", true);
 	}
 
 	public void setFormatterIndentInsert(boolean flag)
 	{
-	    setProperty("\"workbench.sql.formatter.insert.indent", flag);
+		setProperty("\"workbench.sql.formatter.insert.indent", flag);
 	}
 
 	public boolean getFormatterCommaAfterLineBreak()
 	{
-	    return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);
+		return getBoolProperty("workbench.sql.formatter.comma.afterLineBreak", false);
 	}
 
 	public void setFormatterCommaAfterLineBreak(boolean flag)
 	{
-	    setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
+		setProperty("workbench.sql.formatter.comma.afterLineBreak", flag);
+	}
+
+	/**
+	 * Return if the SQL Formatter should add the name of the corresponding column in the VALUES part of INSERT
+	 * statements.
+	 *
+	 */
+	public boolean getFormatterAddColumnNameComment()
+	{
+		return getBoolProperty("workbench.sql.formatter.insert.values.columnname", false);
+	}
+
+	public void setFormatterAddColumnNameComment(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.insert.values.columnname", flag);
 	}
 
 	public void setFormatterJoinWrapStyle(JoinWrapStyle style)

@@ -82,6 +82,7 @@ public class SqlFormatter
 	private Set<String> keywords = CollectionUtil.caseInsensitiveSet();
 
 	private static final String NL = "\n";
+	private boolean addColumnCommentForInsert;
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
 	private boolean addSpaceAfterComma;
@@ -128,6 +129,7 @@ public class SqlFormatter
 		maxSubselectLength = maxLength;
 		dbFunctions = CollectionUtil.caseInsensitiveSet();
 		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
+		addColumnCommentForInsert = Settings.getInstance().getFormatterAddColumnNameComment();
 		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
@@ -140,6 +142,16 @@ public class SqlFormatter
 	public void setJoinWrapping(JoinWrapStyle style)
 	{
 		joinWrapping = style;
+	}
+
+	public void setAddColumnNameComment(boolean flag)
+	{
+		addColumnCommentForInsert = flag;
+	}
+
+	public void setUseUpperCaseKeywords(boolean flag)
+	{
+		upperCaseKeywords = flag;
 	}
 
 	public void setUseLowerCaseFunctions(boolean flag)
@@ -160,6 +172,7 @@ public class SqlFormatter
 		dataTypes.clear();
 		dbFunctions.clear();
 		keywords.addAll(helper.getKeywords());
+		keywords.addAll(helper.getReservedWords());
 		dataTypes.addAll(helper.getDataTypes());
 		dbFunctions.addAll(helper.getSqlFunctions());
 	}
@@ -648,7 +661,7 @@ public class SqlFormatter
 			else if ("CASE".equals(text))
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				this.appendText(text);
+				this.appendTokenText(t);
 				int caseIndent = indentCount;
 				if (!isSelect)
 				{
@@ -819,7 +832,10 @@ public class SqlFormatter
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
 		}
+		//this.appendNewline();
+		//this.indent(2);
 		this.appendText(s.trim());
+		//this.appendNewline();
 	}
 
 	private SQLToken processDecode(int myIndent)
@@ -902,18 +918,18 @@ public class SqlFormatter
 			{
 				this.appendNewline();
 				this.indent(myIndent);
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			else if ("THEN".equals(text))
 			{
 				if (last != null && this.needsWhitespace(last, t)) appendText(' ');
-				this.appendText(text);
+				this.appendTokenText(t);
 			}
 			else if ("END".equals(text) || "END CASE".equals(text))
 			{
 				this.appendNewline();
 				this.indent(current);
-				this.appendText(text);
+				this.appendTokenText(t);
 				// Get the next token after the END. If that is the keyword AS,
 				// the CASE statement ist not yet ended and we have to add the AS keyword
 				// and the alias that was given before returning to the caller
@@ -922,7 +938,7 @@ public class SqlFormatter
 				{
 					boolean aliasWithAs = t.getContents().equals("AS");
 					this.appendText(' ');
-					this.appendText(t.getContents());
+					this.appendTokenText(t);
 					t = this.lexer.getNextToken(true, false);
 					if (aliasWithAs)
 					{
@@ -930,7 +946,7 @@ public class SqlFormatter
 						if (t != null)
 						{
 							this.appendText(' ');
-							this.appendText(t.getContents());
+							this.appendTokenText(t);
 							t = this.lexer.getNextToken(true, false);
 						}
 					}
@@ -1583,7 +1599,7 @@ public class SqlFormatter
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				this.appendText(verb);
+				this.appendTokenText(t);
 			}
 
 			lastToken = t;

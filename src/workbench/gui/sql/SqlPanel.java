@@ -1830,14 +1830,14 @@ public class SqlPanel
 	{
 		String sql = this.editor.getText();
 		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, true, this.appendResults);
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults);
 	}
 
 	public void runSelectedStatement()
 	{
 		String sql = this.editor.getSelectedStatement();
 		int offset = 0;
-		boolean highlight = true;
+		boolean highlight = GuiSettings.getHighlightErrorStatement();
 		if (this.editor.isTextSelected())
 		{
 			offset = this.editor.getSelectionStart();
@@ -1861,7 +1861,7 @@ public class SqlPanel
 	public void runAll()
 	{
 		String sql = this.editor.getText();
-		this.startExecution(sql, 0, -1, true, this.appendResults);
+		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults);
 	}
 
 	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult)

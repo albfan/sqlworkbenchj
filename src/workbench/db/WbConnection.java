@@ -60,6 +60,8 @@ public class WbConnection
 	// blocks on the connection if getDatabaseVersion() is called in the background.
 	private VersionNumber dbVersion;
 	private String dbProductVersion;
+	private String dbProductName;
+	private String driverVersion;
 
   private String id;
 	private StringBuilder scriptError;
@@ -1066,8 +1068,14 @@ public class WbConnection
 
 	public String getDatabaseProductName()
 	{
-		if (metaData == null) return "";
-		return this.metaData.getProductName();
+		if (dbProductName == null)
+		{
+			if (metaData != null)
+			{
+				dbProductName = this.metaData.getProductName();
+			}
+		}
+		return dbProductName;
 	}
 
 	public String getOutputMessages()
@@ -1094,17 +1102,21 @@ public class WbConnection
 
 	public String getDriverVersion()
 	{
-		DatabaseMetaData db ;
-		try
+		if (driverVersion == null)
 		{
-			db = this.sqlConnection.getMetaData();
-			return db.getDriverVersion();
+			DatabaseMetaData db ;
+			try
+			{
+				db = this.sqlConnection.getMetaData();
+				driverVersion = db.getDriverVersion();
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logError("WbConnection.getDriverVersion()", "Error retrieving driver version", e);
+				driverVersion = "n/a";
+			}
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("WbConnection.getDriverVersion()", "Error retrieving driver version", e);
-			return "n/a";
-		}
+		return driverVersion;
 	}
 
 	/**
