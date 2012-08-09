@@ -1655,7 +1655,7 @@ public class SqlFormatter
 					// the end of the WHERE clause)
 					if (!this.isStartOfLine()) this.appendNewline();
 				}
-				this.appendText(verb);
+				this.appendTokenText(t);
 				if (!noBreakOnCondition)
 				{
 					this.appendText("  ");

@@ -991,17 +991,18 @@ public class SqlFormatterTest
 	public void testLowerCaseKeywords()
 		throws Exception
 	{
-		String sql = "SELECT foo FROM bar";
+		String sql = "SELECT foo FROM bar where x = 1 and y = 2";
 		String expected =
 			"select foo\n" +
-			"from bar";
+			"from bar\n" +
+			"where x = 1\n" +
+			"and   y = 2";
 		SqlFormatter f = new SqlFormatter(sql);
 		f.setUseLowerCaseFunctions(true);
 		f.setUseUpperCaseKeywords(false);
-			//Settings.getInstance().setFormatterUpperCaseKeywords(false);
-			String formatted = f.getFormattedSql();
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals(expected, formatted);
+		String formatted = f.getFormattedSql();
+//		System.out.println("**************\n" + formatted + "\n--------------- expected: \n" + expected + "\n**********");
+		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM person WHERE LOWER(firstname) LIKE 'arthur%'";
 		f = new SqlFormatter(sql, 60, "oracle");
