@@ -68,6 +68,7 @@ public class ScriptParser
 	 */
 	public ScriptParser(String aScript)
 	{
+		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 		this.setScript(aScript);
 	}
 
@@ -99,6 +100,7 @@ public class ScriptParser
 	public ScriptParser(File f, String encoding)
 		throws IOException
 	{
+		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 		setFile(f, encoding);
 	}
 

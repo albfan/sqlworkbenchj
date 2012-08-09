@@ -29,6 +29,7 @@ import workbench.util.WbFile;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -406,6 +407,64 @@ public class WbDataDiffTest
 	}
 
 	@Test
+	public void testQuoteIdentifier()
+		throws Exception
+	{
+		setupConnections();
+
+		try
+		{
+			TestUtil.executeScript(source, "DROP ALL OBJECTS;\n" +
+				"create table person (id integer primary key, \"p_Name\" varchar(50), \"NickName\" varchar(50));\n" +
+				"insert into person values (1, 'Arthur Dent', 'Earthling');\n" +
+				"insert into person values (2, 'Zaphod Beeblebrox', 'President');\n" +
+				"commit;\n");
+
+			TestUtil.executeScript(target, "DROP ALL OBJECTS;\n"
+				+ "create table person (id integer primary key, \"p_Name\" varchar(50), \"NickName\" varchar(50));\n"
+				+ "insert into person values (1, 'Arthur Dent2', 'Earthling');\n"
+				+ "insert into person values (2, 'Zaphod Beeblebrox2', 'President');\n"
+				+ "insert into person values (3, 'Ford Prefect', 'Hitchhiker');\n"
+				+ "commit;\n");
+
+			StatementRunner runner = new StatementRunner();
+			runner.setBaseDir(util.getBaseDir());
+			util.emptyBaseDirectory();
+
+			String sql = "WbDataDiff -alternateKey='person=\"NickName\"' -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -file=sync.sql -encoding=UTF8";
+			runner.runStatement(sql);
+			StatementRunnerResult result = runner.getResult();
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+
+			String[] expectedFiles = new String[]
+			{
+				"sync.sql",
+				"person_$update.sql",
+				"person_$delete.sql",
+			};
+
+			for (String fname : expectedFiles)
+			{
+				File f = new File(util.getBaseDir(), fname);
+				assertTrue(f.exists());
+			}
+
+			File update = new File(util.getBaseDir(), "person_$update.sql");
+			ScriptParser p = new ScriptParser(update);
+			assertEquals(2, p.getSize());
+			assertTrue(SqlUtil.getSqlVerb(p.getCommand(0)).equals("UPDATE"));
+			assertTrue(SqlUtil.getSqlVerb(p.getCommand(1)).equals("UPDATE"));
+		}
+		finally
+		{
+			source.disconnect();
+			target.disconnect();
+		}
+	}
+
+
+	@Test
 	public void testSingleTable()
 		throws Exception
 	{
@@ -529,7 +588,7 @@ public class WbDataDiffTest
 		arguments = " -alternateKey='person=\"id2\",\"id3\"'";
 		cmdLine.parse(arguments);
 		keys = diff.getAlternateKeys(cmdLine, result);
-		System.out.println(keys);
-
+		assertEquals(1, keys.size());
+		assertEquals(2, keys.get("person").size());
 	}
 }

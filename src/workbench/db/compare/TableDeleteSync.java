@@ -454,7 +454,7 @@ public class TableDeleteSync
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
 			if (i > 0) sql.append(',');
-			sql.append(info.getColumnName(i));
+			sql.append(reference.getMetadata().quoteObjectname(info.getColumnName(i)));
 		}
 		sql.append(" FROM ");
 		sql.append(this.checkTable.getTableExpression(reference));
@@ -467,7 +467,7 @@ public class TableDeleteSync
 			for (int c=0; c < info.getColumnCount(); c++)
 			{
 				if (c > 0) sql.append(" AND ");
-				sql.append(info.getColumnName(c));
+				sql.append(reference.getMetadata().quoteObjectname(info.getColumnName(c)));
 				sql.append(" = ");
 				Object value = rows.get(row).getValue(c);
 				ColumnIdentifier col = info.getColumn(c);

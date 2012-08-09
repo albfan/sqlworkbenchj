@@ -160,7 +160,7 @@ public class TableDataDiff
 		{
 			CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
 			comp.setIgnoreQuotes(true);
-			this.alternateKeys = new TreeMap<String, Set<String>>();
+			this.alternateKeys = new TreeMap<String, Set<String>>(comp);
 			this.alternateKeys.putAll(mapping);
 		}
 	}
