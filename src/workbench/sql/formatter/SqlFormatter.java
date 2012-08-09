@@ -876,14 +876,14 @@ public class SqlFormatter
 		boolean useFormattedQuery = f.getRealLength() > this.maxSubselectLength;
 		if (!useFormattedQuery)
 		{
-			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
+			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ").trim();
 		}
 		if (newLineForSubSelects && useFormattedQuery)
 		{
-			appendNewline();
-			this.appendText(indent == null ? "  " : indent.toString());
+			this.result.append(SqlFormatter.NL);  // do not use appendNewLine() as it will indent the new line
+			this.appendText(StringUtil.padRight(" ", lastIndent));
 		}
-		this.appendText(s.trim());
+		this.appendText(s);
 		if (newLineForSubSelects && useFormattedQuery)
 		{
 			this.appendNewline();

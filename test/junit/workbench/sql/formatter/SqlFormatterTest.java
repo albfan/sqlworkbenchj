@@ -518,6 +518,25 @@ public class SqlFormatterTest
 			"WHERE id IN (SELECT id FROM other_table)";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
+
+		sql = "select * from ( select x from ( select y from (select z from foo) a ) b) c";
+		f = new SqlFormatter(sql, 5);
+		f.setNewLineForSubselects(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM (\n" +
+			"  SELECT x\n" +
+			"  FROM (\n" +
+			"    SELECT y\n" +
+			"    FROM (\n" +
+			"      SELECT z\n" +
+			"      FROM foo\n" +
+			"    ) a\n" +
+			"  ) b\n" +
+			") c";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
 	}
 
 	@Test
