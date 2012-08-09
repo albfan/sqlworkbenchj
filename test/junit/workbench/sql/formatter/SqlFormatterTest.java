@@ -507,6 +507,17 @@ public class SqlFormatterTest
 			"WHERE id > 1";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
+
+		sql = "select foo from some_table where id in (select id from other_table)";
+		f = new SqlFormatter(sql, 100);
+		f.setNewLineForSubselects(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT foo\n" +
+			"FROM some_table\n" +
+			"WHERE id IN (SELECT id FROM other_table)";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
 	}
 
 	@Test

@@ -873,17 +873,18 @@ public class SqlFormatter
 		f.setJoinWrapping(this.joinWrapping);
 		f.setColumnsPerInsert(colsPerInsert);
 		String s = f.getFormattedSql();
-		if (f.getRealLength() < this.maxSubselectLength)
+		boolean useFormattedQuery = f.getRealLength() > this.maxSubselectLength;
+		if (!useFormattedQuery)
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ");
 		}
-		if (newLineForSubSelects)
+		if (newLineForSubSelects && useFormattedQuery)
 		{
 			appendNewline();
 			this.appendText(indent == null ? "  " : indent.toString());
 		}
 		this.appendText(s.trim());
-		if (newLineForSubSelects)
+		if (newLineForSubSelects && useFormattedQuery)
 		{
 			this.appendNewline();
 		}
