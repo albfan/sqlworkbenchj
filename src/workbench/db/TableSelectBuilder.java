@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -27,12 +28,36 @@ public class TableSelectBuilder
 	private WbConnection dbConnection;
 	private boolean includLobColumns = true;
 	private boolean useColumnAlias;
+	private String sqlTemplate;
 
 	public TableSelectBuilder(WbConnection source)
 	{
-		this.dbConnection = source;
+		this(source, null);
 	}
 
+	public TableSelectBuilder(WbConnection source, String templateKey)
+	{
+		this.dbConnection = source;
+		if (StringUtil.isNonBlank(templateKey))
+		{
+			sqlTemplate = source.getDbSettings().getTableSelectTemplate(templateKey.toLowerCase());
+		}
+
+		if (StringUtil.isBlank(sqlTemplate))
+		{
+			sqlTemplate = "SELECT " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\nFROM " + MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
+		}
+	}
+
+	/**
+	 * For testing purposes only.
+	 * @param template
+	 */
+	void setSqlTemplate(String template)
+	{
+		this.sqlTemplate = template;
+	}
+	
 	public void setExcludeLobColumns(boolean flag)
 	{
 		this.includLobColumns = !flag;
@@ -67,48 +92,50 @@ public class TableSelectBuilder
 			return null;
 		}
 
+		StringBuilder selectCols = new StringBuilder(columns.size() * 30);
+
 		if (columns.isEmpty())
 		{
 			String tbl = table.getTableExpression(this.dbConnection);
-			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not columns available for table " + tbl  + ". Using \"SELECT *\" instead");
-			return "SELECT * FROM " + tbl;
+			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "No columns available for table " + tbl  + ". Using \"SELECT *\" instead");
+			selectCols.append("*");
 		}
-
-		StringBuilder sql = new StringBuilder(columns.size() * 30);
-
-		sql.append("SELECT ");
-		int colsInList = 0;
-
-		for (ColumnIdentifier column : columns)
+		else
 		{
-			String expr = null;
-			int type  = column.getDataType();
-			String dbmsType = column.getDbmsType();
-			if (dbmsType == null)
-			{
-				dbmsType = SqlUtil.getTypeName(type);
-			}
+			int colsInList = 0;
 
-			if (includLobColumns || dbConnection.getDbSettings().isSearchable(dbmsType))
+			for (ColumnIdentifier column : columns)
 			{
-				expr = getColumnExpression(column);
-			}
-			else if (!SqlUtil.isBlobType(type) && !SqlUtil.isClobType(type))
-			{
-				expr = getColumnExpression(column);
-			}
+				String expr = null;
+				int type  = column.getDataType();
+				String dbmsType = column.getDbmsType();
+				if (dbmsType == null)
+				{
+					dbmsType = SqlUtil.getTypeName(type);
+				}
 
-			if (expr != null)
-			{
-				if (colsInList > 0) sql.append(",\n");
-				if (colsInList > 0) sql.append("       ");
-				sql.append(expr);
-				colsInList ++;
+				if (includLobColumns || dbConnection.getDbSettings().isSearchable(dbmsType))
+				{
+					expr = getColumnExpression(column);
+				}
+				else if (!SqlUtil.isBlobType(type) && !SqlUtil.isClobType(type))
+				{
+					expr = getColumnExpression(column);
+				}
+
+				if (expr != null)
+				{
+					if (colsInList > 0) selectCols.append(",\n");
+					if (colsInList > 0) selectCols.append("       ");
+					selectCols.append(expr);
+					colsInList ++;
+				}
 			}
 		}
-		sql.append("\nFROM ");
-		sql.append(table.getTableExpression(this.dbConnection));
-		return sql.toString();
+
+		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
+		select = select.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
+		return select;
 	}
 
 	public String getColumnExpression(ColumnIdentifier col)

@@ -11,10 +11,14 @@
  */
 package workbench.db;
 
+
+import java.util.ArrayList;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  *
@@ -27,6 +31,54 @@ public class TableSelectBuilderTest
 	public TableSelectBuilderTest()
 	{
 		super("TableSelectBuilderTest");
+	}
+
+	@Test
+	public void testTemplate()
+		throws Exception
+	{
+		String propname = "workbench.db.h2.junittabledata.select";
+		try
+		{
+			TestUtil util = getTestUtil();
+			WbConnection con = util.getConnection();
+			TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20))");
+
+			System.setProperty(propname, "select %columnlist%\nfrom %table_name% with (nolock)");
+
+			TableSelectBuilder builder = new TableSelectBuilder(con, "junittabledata");
+			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
+
+			String sql = builder.getSelectForTable(tbl);
+			String expected = "select NR,\n" +
+				"       FIRSTNAME,\n" +
+				"       LASTNAME\nfrom PERSON with (nolock)";
+			assertEquals(expected, sql);
+
+			sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
+			expected = "select *\nfrom PERSON with (nolock)";
+			assertEquals(expected, sql);
+		}
+		finally
+		{
+			System.clearProperty(propname);
+		}
+	}
+
+	@Test
+	public void testNoColumns()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20))");
+
+		TableSelectBuilder builder = new TableSelectBuilder(con);
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
+
+		String sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
+		String expected = "SELECT *\nFROM PERSON";
+		assertEquals(expected, sql);
 	}
 
 	@Test

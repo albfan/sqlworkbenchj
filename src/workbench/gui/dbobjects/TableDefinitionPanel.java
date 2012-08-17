@@ -659,7 +659,7 @@ public class TableDefinitionPanel
 	}
 
 	/**
-	 * Returns a SELECT statement for retrieve all rows and columns from the displayed table.
+	 * Returns a SELECT statement to  retrieve all rows and columns from the displayed table.
 	 *
 	 * @see TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
 	 */

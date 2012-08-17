@@ -1467,4 +1467,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "afterconnect.finishtrans", false);
 	}
+
+	public String getTableSelectTemplate(String keyname)
+	{
+		return Settings.getInstance().getProperty(prefix + keyname + ".select", null);
+	}
 }

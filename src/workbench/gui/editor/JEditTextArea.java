@@ -2078,10 +2078,18 @@ public class JEditTextArea
 
 					document.remove(rectStart, Math.min(lineEnd - rectStart, end - start));
 
-					if (lineNum < selectedLines.length)
+					// if the selected text is not empty, it needs to overwrite the currently selected text
+					if (StringUtil.isNonEmpty(selectedText))
 					{
-						if (StringUtil.isNonEmpty(selectedText))
+						// if the new text is only a single line (the default when e.g. typing a character)
+						// then use the full text
+						if (selectedLines.length == 1)
 						{
+							document.insertString(rectStart, selectedText, null);
+						}
+						else if (lineNum < selectedLines.length)
+						{
+							// if mutiple lines are passed, only use those that have a match
 							document.insertString(rectStart, selectedLines[lineNum], null);
 						}
 					}

@@ -578,7 +578,7 @@ public class TableDataPanel
 	{
 		if (tableDef == null) return null;
 
-		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection);
+		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, "tabledata");
 		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
 		return sql;
 	}
