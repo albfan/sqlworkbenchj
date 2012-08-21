@@ -554,7 +554,7 @@ public class DbSettings
 
 	public String getTruncateCommand(boolean cascade)
 	{
-		String truncate = Settings.getInstance().getProperty(prefix + "sql.truncate", "TRUNCATE TABLE %table_name%");
+		String truncate = Settings.getInstance().getProperty(prefix + "sql.truncate", null);
 		if (cascade)
 		{
 			truncate = Settings.getInstance().getProperty(prefix + "sql.truncate.cascade", truncate);
@@ -569,9 +569,7 @@ public class DbSettings
 
 	public boolean supportsTruncate()
 	{
-		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", StringUtil.EMPTY_STRING);
-		List l = StringUtil.stringToList(s, ",");
-		return l.contains(this.getDbId());
+		return getTruncateCommand(false) != null;
 	}
 
 	public boolean isViewType(String type)

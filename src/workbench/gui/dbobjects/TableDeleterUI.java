@@ -435,7 +435,7 @@ public class TableDeleterUI
 	protected void checkState()
 	{
 		boolean autoCommit = connection == null ? true : connection.getAutoCommit();
-		boolean useTruncate = useTruncateCheckBox.isSelected();
+		boolean useTruncate = useTruncateCheckBox.isSelected() && useTruncateCheckBox.isEnabled();
 		if (autoCommit)
 		{
 			commitAtEnd.setEnabled(false);
@@ -632,7 +632,7 @@ public class TableDeleterUI
 	public void windowOpened(WindowEvent e)
 	{
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public JCheckBox addMissingTables;
   public ButtonGroup buttonGroup1;

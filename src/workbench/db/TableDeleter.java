@@ -180,7 +180,7 @@ public class TableDeleter
 			}
 
 			boolean commitNeeded = !connection.getAutoCommit();
-			
+
 			if (commitNeeded && useTruncate)
 			{
 				commitNeeded = connection.getDbSettings().truncateNeedsCommit();
@@ -279,9 +279,12 @@ public class TableDeleter
 		if (useTruncate)
 		{
 			String sql = connection.getDbSettings().getTruncateCommand(cascade);
-			deleteSql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+			if (sql != null)
+			{
+				deleteSql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+			}
 		}
-		else
+		if (deleteSql == null)
 		{
 			deleteSql = "DELETE FROM " + tableName;
 		}

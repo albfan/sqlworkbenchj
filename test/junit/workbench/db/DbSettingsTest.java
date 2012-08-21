@@ -26,7 +26,7 @@ public class DbSettingsTest
 	{
 		super("DbSettingsTest");
 	}
-	
+
 	@Test
 	public void testOraDefaults()
 	{
@@ -61,4 +61,37 @@ public class DbSettingsTest
 		idCase = test.getObjectNameCase();
 		assertEquals(IdentifierCase.lower, idCase);
 	}
+
+	@Test
+	public void testTruncate()
+	{
+		DbSettings db = new DbSettings("oracle", "oracle");
+		assertTrue(db.supportsTruncate());
+		assertFalse(db.supportsCascadedTruncate());
+		assertFalse(db.truncateNeedsCommit());
+
+		db = new DbSettings("postgresql", "PostgreSQL");
+		assertTrue(db.supportsTruncate());
+		assertTrue(db.supportsCascadedTruncate());
+		assertTrue(db.truncateNeedsCommit());
+
+		db = new DbSettings("microsoft_sql_server", "SQL Server");
+		assertTrue(db.supportsTruncate());
+		assertFalse(db.supportsCascadedTruncate());
+		assertTrue(db.truncateNeedsCommit());
+
+		db = new DbSettings("mysql", "MySQL");
+		assertTrue(db.supportsTruncate());
+
+		db = new DbSettings("h2", "h2");
+		assertTrue(db.supportsTruncate());
+
+		db = new DbSettings("hsql_database_engine", "HyperSQL");
+		assertTrue(db.supportsTruncate());
+
+		db = new DbSettings("apache_derby", "Derby");
+		assertTrue(db.supportsTruncate());
+
+	}
+
 }
