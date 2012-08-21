@@ -554,7 +554,7 @@ public class DbSettings
 
 	public String getTruncateCommand(boolean cascade)
 	{
-		String truncate = Settings.getInstance().getProperty(prefix + "postgresql.sql.truncate", "TRUNCATE TABLE %table_name%");
+		String truncate = Settings.getInstance().getProperty(prefix + "sql.truncate", "TRUNCATE TABLE %table_name%");
 		if (cascade)
 		{
 			truncate = Settings.getInstance().getProperty(prefix + "sql.truncate.cascade", truncate);
