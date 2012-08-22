@@ -101,6 +101,18 @@ public class OracleProcedureReaderTest
 	}
 
 	@Test
+	public void testExists()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		OracleProcedureReader reader = (OracleProcedureReader)con.getMetadata().getProcedureReader();
+		assertTrue(reader.packageExists(OracleTestUtil.SCHEMA_NAME, "PROC_PCKG"));
+		assertFalse(reader.packageExists(OracleTestUtil.SCHEMA_NAME, "FOOBAR"));
+	}
+
+	@Test
 	public void testColumnTypes()
 		throws Exception
 	{
@@ -131,24 +143,24 @@ public class OracleProcedureReaderTest
 		assertEquals(1, procs.size());
 		ProcedureDefinition proc = procs.get(0);
 		assertFalse(proc.isFunction());
-		
+
 		DataStore cols = con.getMetadata().getProcedureReader().getProcedureColumns(proc);
 		assertEquals(2, cols.getRowCount());
 		String colname = cols.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 		assertEquals("SOME_VALUE", colname);
 		String inout = cols.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-		assertEquals("OUT", inout);		
+		assertEquals("OUT", inout);
 		colname = cols.getValueAsString(1, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 		assertEquals("SOME_ID", colname);
 		inout = cols.getValueAsString(1, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-		assertEquals("IN", inout);		
+		assertEquals("IN", inout);
 
 		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());
 		proc = procs.get(0);
 		assertTrue(proc.isFunction());
 		cols = con.getMetadata().getProcedureReader().getProcedureColumns(proc);
-		assertEquals(1, cols.getRowCount());		
+		assertEquals(1, cols.getRowCount());
 	}
 
 	@Test
@@ -210,6 +222,5 @@ public class OracleProcedureReaderTest
 		assertEquals("PROCESS_PKG_DATA2", procName2);
 		String status2 = ds2.getValueAsString(0, OracleProcedureReader.COLUMN_IDX_PROC_LIST_ORA_STATUS);
 		assertEquals("INVALID", status2);
-		
 	}
 }

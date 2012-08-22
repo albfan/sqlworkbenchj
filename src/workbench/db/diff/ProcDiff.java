@@ -24,37 +24,34 @@ public class ProcDiff
 	public static final String TAG_CREATE_PROC = "create-proc";
 	public static final String TAG_UPDATE_PROC = "update-proc";
 
-	public static final String TAG_CREATE_PKG = "create-package";
-	public static final String TAG_UPDATE_PKG = "update-package";
-
 	private ReportProcedure reference;
 	private ReportProcedure target;
 	private TagWriter writer;
 	private StrBuffer indent;
-	
+
 	public ProcDiff(ReportProcedure ref, ReportProcedure tar)
 	{
 		reference = ref;
 		target = tar;
 	}
-	
+
 	public StrBuffer getMigrateTargetXml()
 	{
 		StrBuffer result = new StrBuffer(500);
 		if (this.writer == null) this.writer = new TagWriter();
-		
+
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_PROC;
 
 		CharSequence refSource = reference.getSource();
 		CharSequence targetSource = target.getSource();
-		
+
 		if (targetSource != null)
 		{
-			isDifferent = !refSource.equals(targetSource);
+			isDifferent = !refSource.toString().trim().equals(targetSource.toString().trim());
 			tagToUse = TAG_UPDATE_PROC;
 		}
-		
+
 		StrBuffer myIndent = new StrBuffer(indent);
 		myIndent.append("  ");
 		if (isDifferent)
@@ -66,17 +63,17 @@ public class ProcDiff
 			writer.appendCloseTag(result, this.indent, tagToUse);
 		}
 		return result;
-	}	
-	
+	}
+
 	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to 
+	 *	Set the {@link workbench.db.report.TagWriter} to
 	 *  be used for writing the XML tags
 	 */
 	public void setTagWriter(TagWriter tagWriter)
 	{
 		this.writer = tagWriter;
 	}
-	
+
 	/**
 	 *	Set an indent for generating the XML
 	 */
@@ -85,7 +82,7 @@ public class ProcDiff
 		if (ind == null) this.indent = null;
 		this.indent = new StrBuffer(ind);
 	}
-	
+
 	/**
 	 *	Set an indent for generating the XML
 	 */
@@ -93,5 +90,5 @@ public class ProcDiff
 	{
 		this.indent = ind;
 	}
-		
+
 }

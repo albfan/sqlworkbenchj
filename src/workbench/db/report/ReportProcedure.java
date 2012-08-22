@@ -31,11 +31,6 @@ public class ReportProcedure
 	public static final String TAG_PROC_TYPE = "proc-type";
 	public static final String TAG_PROC_SOURCE = "proc-source";
 
-	public static final String TAG_PKG_DEF = "package-def";
-	public static final String TAG_PKG_NAME = "package-name";
-	public static final String TAG_PKG_SCHEMA = "package-schema";
-	public static final String TAG_PKG_SOURCE = "package-source";
-
 	private ProcedureDefinition procDef;
 	private WbConnection dbConn;
 	private TagWriter tagWriter = new TagWriter();
@@ -72,6 +67,11 @@ public class ReportProcedure
 		xml.writeTo(out);
 	}
 
+	public ProcedureDefinition getProcedure()
+	{
+		return procDef;
+	}
+
 	public String getProcedureName()
 	{
 		return procDef.getProcedureName();
@@ -92,42 +92,26 @@ public class ReportProcedure
 	public StrBuffer getXml(boolean includeSource)
 	{
 		StrBuffer result = new StrBuffer(500);
-		String mainTag = TAG_PROC_DEF;
-		String srcTag = TAG_PROC_SOURCE;
-		String schemaTag = TAG_PROC_SCHEMA;
-		String nameTag = TAG_PROC_NAME;
 		String objectName = procDef.getProcedureName();
 
-		if (procDef.isOraclePackage())
-		{
-			mainTag = TAG_PKG_DEF;
-			srcTag = TAG_PKG_SOURCE;
-			schemaTag = TAG_PKG_SCHEMA;
-			nameTag = TAG_PKG_NAME;
-			objectName = procDef.getPackageName();
-		}
-		tagWriter.appendOpenTag(result, indent, mainTag);
+		tagWriter.appendOpenTag(result, indent, TAG_PROC_DEF);
 
 		result.append('\n');
 		if (!procDef.isOraclePackage() && procDef.getCatalog() != null)
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_CATALOG, procDef.getCatalog());
 		}
-		tagWriter.appendTag(result, indent2, schemaTag, procDef.getSchema());
-		tagWriter.appendTag(result, indent2, nameTag, objectName);
+		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, procDef.getSchema());
+		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
 
-			// For an Oracle Package writing the type does not make sense
-		if (procDef.getPackageName() == null)
-		{
-			tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getObjectType(), "jdbcResultType", Integer.toString(procDef.getResultType()));
-		}
+		tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getObjectType(), "jdbcResultType", Integer.toString(procDef.getResultType()));
 
 		if (includeSource)
 		{
-			tagWriter.appendTag(result, indent2, srcTag, getSource(), true);
+			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, getSource(), true);
 			//result.append('\n');
 		}
-		tagWriter.appendCloseTag(result, indent, mainTag);
+		tagWriter.appendCloseTag(result, indent, TAG_PROC_DEF);
 		return result;
 	}
 }

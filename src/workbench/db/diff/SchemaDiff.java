@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +29,8 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.oracle.OracleProcedureReader;
+import workbench.db.report.ReportPackage;
 import workbench.db.report.ReportProcedure;
 import workbench.db.report.ReportSequence;
 import workbench.db.report.ReportTable;
@@ -54,6 +57,7 @@ public class SchemaDiff
 	public static final String TAG_DROP_PROC = "drop-procedure";
 	public static final String TAG_ADD_PROC = "add-procedure";
 	public static final String TAG_DROP_SEQUENCE = "drop-sequence";
+	public static final String TAG_DROP_PCKG = "drop-package";
 
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
@@ -61,6 +65,7 @@ public class SchemaDiff
 	public static final String TAG_VIEW_PAIR = "view-info";
 	public static final String TAG_TABLE_PAIR = "table-info";
 	public static final String TAG_PROC_PAIR = "procedure-info";
+	public static final String TAG_PKG_PAIR = "package-info";
 	public static final String TAG_SEQ_PAIR = "sequence-info";
 	public static final String TAG_INDEX_INFO = "include-index";
 	public static final String TAG_FK_INFO = "include-foreign-key";
@@ -77,6 +82,7 @@ public class SchemaDiff
 	private List<Object> objectsToCompare;
 	private List<TableIdentifier> tablesToDelete;
 	private List<ProcedureDefinition> procsToDelete;
+	private List<ReportPackage> packagesToDelete;
 	private List<TableIdentifier> viewsToDelete;
 	private List<SequenceDefinition> sequencesToDelete;
 
@@ -637,6 +643,9 @@ public class SchemaDiff
 	{
 		HashSet<String> refProcNames = new HashSet<String>();
 		this.procsToDelete = new ArrayList<ProcedureDefinition>();
+		this.packagesToDelete =new ArrayList<ReportPackage>();
+
+		Set<ReportPackage> refPackages = new HashSet<ReportPackage>();
 
 		DbMetadata targetMeta = this.targetDb.getMetadata();
 
@@ -663,17 +672,47 @@ public class SchemaDiff
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadProcInfo", refProc.getProcedureName()), -1, -1);
 			}
 
-			ProcDiffEntry entry = null;
-			ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, refProc.getProcedureName(), refProc.getResultType());
-			if (targetMeta.getProcedureReader().procedureExists(tp))
+			if (refProc.isOraclePackage())
 			{
-				entry = new ProcDiffEntry(refProc,tp);
+				// Handle packages differently than procedures to avoid
+				// comparing them once for each procedure or function
+				PackageDiffEntry entry = null;
+				ReportPackage pkg = new ReportPackage(refProc);
+				if (!refPackages.contains(pkg))
+				{
+					// keep track of processed packages as they are returned once for each procedure
+					refPackages.add(pkg);
+					if (targetMeta.isOracle())
+					{
+						OracleProcedureReader ora = (OracleProcedureReader)targetMeta.getProcedureReader();
+						boolean exists = ora.packageExists(targetSchema, refProc.getPackageName());
+						if (exists)
+						{
+							ReportPackage tpkg = new ReportPackage(targetSchema, refProc.getPackageName());
+							entry = new PackageDiffEntry(pkg, tpkg);
+						}
+						else
+						{
+							entry = new PackageDiffEntry(pkg, null);
+						}
+						objectsToCompare.add(entry);
+					}
+				}
 			}
 			else
 			{
-				entry = new ProcDiffEntry(refProc, null);
+				ProcDiffEntry entry = null;
+				ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, refProc.getProcedureName(), refProc.getResultType());
+				if (targetMeta.getProcedureReader().procedureExists(tp))
+				{
+					entry = new ProcDiffEntry(refProc,tp);
+				}
+				else
+				{
+					entry = new ProcDiffEntry(refProc, null);
+				}
+				objectsToCompare.add(entry);
 			}
-			objectsToCompare.add(entry);
 			refProcNames.add(refProc.getProcedureName());
 		}
 
@@ -682,6 +721,7 @@ public class SchemaDiff
 		for (ProcedureDefinition tProc : targetProcs)
 		{
 			if (tProc.isOracleObjectType()) continue;
+			if (tProc.isOraclePackage()) continue;
 
 			if (this.cancel)
 			{
@@ -695,8 +735,42 @@ public class SchemaDiff
 				this.procsToDelete.add(tProc);
 			}
 		}
+
+		if (targetMeta.isOracle())
+		{
+			Set<ReportPackage> deleted = new HashSet<ReportPackage>();
+			for (ProcedureDefinition tProc : targetProcs)
+			{
+				if (!tProc.isOraclePackage()) continue;
+
+				if (this.cancel)
+				{
+					this.objectsToCompare = null;
+					break;
+				}
+
+				ReportPackage tp = new ReportPackage(tProc);
+				if (!deleted.contains(tp))
+				{
+					ReportPackage pckg = findPackage(refPackages, tProc.getPackageName());
+					if (pckg == null)
+					{
+						this.packagesToDelete.add(tp);
+					}
+					deleted.add(tp);
+				}
+			}
+		}
 	}
 
+	private ReportPackage findPackage(Collection<ReportPackage> list, String packageName)
+	{
+		for (ReportPackage pckg : list)
+		{
+			if (pckg.getPackageName().equals(packageName)) return pckg;
+		}
+		return null;
+	}
 	/**
 	 * Define the reference tables to be compared with the matching
 	 * tables (based on the name) in the target connection. The list
@@ -796,6 +870,7 @@ public class SchemaDiff
 			Object o = objectsToCompare.get(i);
 			if (o instanceof ProcDiffEntry) continue;
 			if (o instanceof SequenceDiffEntry) continue;
+			if (o instanceof PackageDiffEntry) continue;
 
 			DiffEntry entry = (DiffEntry)o;
 			if (this.cancel) break;
@@ -883,6 +958,7 @@ public class SchemaDiff
 		if (this.diffProcs)
 		{
 			this.appendProcDiff(out, indent, tw);
+			this.appendPackageDiff(out, indent, tw);
 			out.write("\n");
 		}
 
@@ -966,6 +1042,51 @@ public class SchemaDiff
 			xml.writeTo(out);
 		}
 		writeTag(out, indent, TAG_DROP_PROC, false);
+	}
+
+	private void appendPackageDiff(Writer out, StrBuffer indent, TagWriter tw)
+		throws IOException
+	{
+		int count = this.objectsToCompare.size();
+		for (int i=0; i < count; i++)
+		{
+			Object o = objectsToCompare.get(i);
+			if (o instanceof PackageDiffEntry)
+			{
+				PackageDiffEntry entry = (PackageDiffEntry)o;
+				if (entry.reference != null)
+				{
+					entry.reference.readSource(referenceDb);
+				}
+				if (entry.target != null)
+				{
+					entry.target.readSource(targetDb);
+				}
+				PackageDiff diff = new PackageDiff(entry.reference, entry.target);
+				diff.setIndent(indent);
+				diff.setTagWriter(tw);
+				StrBuffer xml = diff.getMigrateTargetXml();
+				if (xml.length() > 0)
+				{
+					out.write("\n");
+					xml.writeTo(out);
+				}
+			}
+		}
+
+		if (CollectionUtil.isEmpty(packagesToDelete)) return;
+
+		out.write('\n');
+		writeTag(out, indent, TAG_DROP_PCKG, true);
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		for (ReportPackage def : packagesToDelete)
+		{
+			def.setIndent(myindent);
+			StrBuffer xml = def.getXml(false);
+			xml.writeTo(out);
+		}
+		writeTag(out, indent, TAG_DROP_PCKG, false);
 	}
 
 	private void appendViewDiff(List<ViewDiff> diffs, Writer out)
@@ -1060,6 +1181,7 @@ public class SchemaDiff
 		int count = this.objectsToCompare.size();
 		String[] tattr = new String[] { "type", "reference", "compareTo"};
 		String[] pattr = new String[] { "referenceProcedure", "compareTo" };
+		String[] pkgattr = new String[] { "referencePackage", "compareTo" };
 		String[] sattr = new String[] { "referenceSequence", "compareTo" };
 		String[] tbls = new String[3];
 		DbSettings dbs = this.referenceDb.getMetadata().getDbSettings();
@@ -1090,6 +1212,14 @@ public class SchemaDiff
 				tbls[1] = (pe.target == null ? "" : pe.target.getProcedureName());
 
 				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
+			}
+			else if (o instanceof PackageDiffEntry)
+			{
+				PackageDiffEntry pe = (PackageDiffEntry)o;
+				tbls[0] = pe.reference.getPackageName();
+				tbls[1] = (pe.target == null ? "" : pe.target.getPackageName());
+
+				tw.appendOpenTag(info, indent2, TAG_PKG_PAIR, pkgattr, tbls, false);
 			}
 			else if (o instanceof SequenceDiffEntry)
 			{
@@ -1161,6 +1291,18 @@ class SequenceDiffEntry
 	}
 }
 
+class PackageDiffEntry
+{
+	ReportPackage reference;
+	ReportPackage target;
+
+	PackageDiffEntry(ReportPackage reference, ReportPackage target)
+	{
+		this.reference = reference;
+		this.target = target;
+	}
+}
+
 class ProcDiffEntry
 {
 	ProcedureDefinition reference;
@@ -1188,8 +1330,12 @@ class DiffEntry
 	public String toString()
 	{
 		if (target == null)
+		{
 			return reference.getType() + ": " + reference.getTableExpression();
+		}
 		else
+		{
 			return reference.getType() + ": " + reference.getTableExpression() + " to " + target.getType() + ": " + target.getTableExpression();
+		}
 	}
 }

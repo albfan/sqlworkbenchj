@@ -64,6 +64,49 @@ public class OracleProcedureReader
 		return PROC_HEADER;
 	}
 
+	public boolean packageExists(String owner, String packageName)
+	{
+		final String sql =
+			"SELECT count(*) \n" +
+			"FROM all_objects \n" +
+			"WHERE object_name = ? \n" +
+			"  AND owner = ? \n" +
+			"  AND object_type = 'PACKAGE'";
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleProcedureReader.packageExists()", "Using SQL to check package existence:\n" + SqlUtil.replaceParameters(sql, packageName, owner));
+		}
+
+		int count = 0;
+		try
+		{
+			synchronized (connection)
+			{
+				stmt = this.connection.getSqlConnection().prepareStatement(sql);
+				stmt.setString(1, packageName);
+				stmt.setString(2, owner);
+				rs = stmt.executeQuery();
+				if (rs.next())
+				{
+					count = rs.getInt(1);
+				}
+			}
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("OracleProcedureReader.packageExists()", "Could not check package", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return count > 0;
+	}
+
 	public CharSequence getPackageSource(String owner, String packageName)
 	{
 		final String sql =
