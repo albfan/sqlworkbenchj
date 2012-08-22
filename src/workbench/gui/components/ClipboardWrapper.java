@@ -21,38 +21,43 @@ public class ClipboardWrapper
 	implements ClipboardSupport
 {
 	private JTextComponent client;
-	
+
 	public ClipboardWrapper(JTextComponent aClient)
 	{
 		this.client = aClient;
-	} 
-	
-	public void copy() 
-	{ 
-		this.client.copy(); 
 	}
-	
-	public void clear() 
-	{ 
+
+	@Override
+	public void copy()
+	{
+		this.client.copy();
+	}
+
+	@Override
+	public void clear()
+	{
 		if (this.client.isEditable())
 		{
 			this.client.replaceSelection("");
 		}
 	}
-	
-	public void cut() 
+
+	@Override
+	public void cut()
 	{
-		this.client.cut(); 
+		this.client.cut();
 	}
-	
-	public void paste() 
-	{ 
-		this.client.paste(); 
+
+	@Override
+	public void paste()
+	{
+		this.client.paste();
 	}
-	
-	public void selectAll() 
+
+	@Override
+	public void selectAll()
 	{
 		this.client.select(0, this.client.getText().length());
 	}
-	
+
 }

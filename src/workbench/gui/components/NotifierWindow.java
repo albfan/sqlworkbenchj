@@ -62,9 +62,9 @@ public class NotifierWindow
 		text.setBorder(new EmptyBorder(10,10,10,10));
 		text.addMouseListener(this);
 		text.setCursor(Cursor.getDefaultCursor());
-		
+
 		add(text, BorderLayout.CENTER);
-		
+
 		getRootPane().setBorder(new LineBorder(Color.GRAY, 1));
 		pack();
 	}
@@ -73,7 +73,7 @@ public class NotifierWindow
 	{
 		if (where == null) return;
 		if (!where.isShowing()) return;
-		
+
 		Point p = where.getLocationOnScreen();
 
 		setLocation((int) p.getX() - 10, (int) p.getY() - this.getHeight() - 10);
@@ -81,6 +81,7 @@ public class NotifierWindow
 
 		TimerTask task = new TimerTask()
 		{
+			@Override
 			public void run()
 			{
 				closeWindow();
@@ -97,23 +98,28 @@ public class NotifierWindow
 		dispose();
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		closeWindow();
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}

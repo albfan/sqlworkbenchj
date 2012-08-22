@@ -45,6 +45,7 @@ public class TabbedPaneTraversalPolicy
 	 *         null
 	 *
 	 */
+	@Override
 	public Component getComponentAfter(Container focusCycleRoot, Component aComponent)
 	{
 		if (focusCycleRoot != tabPane) return null;
@@ -67,6 +68,7 @@ public class TabbedPaneTraversalPolicy
 	 *         null
 	 *
 	 */
+	@Override
 	public Component getComponentBefore(Container focusCycleRoot, Component aComponent)
 	{
 		if (focusCycleRoot != tabPane) return null;
@@ -87,6 +89,7 @@ public class TabbedPaneTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getDefaultComponent(Container focusCycleRoot)
 	{
 		return tabPane.getComponentAt(0);
@@ -105,6 +108,7 @@ public class TabbedPaneTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getFirstComponent(Container focusCycleRoot)
 	{
 		return tabPane.getComponentAt(0);
@@ -122,6 +126,7 @@ public class TabbedPaneTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getLastComponent(Container focusCycleRoot)
 	{
 		return tabPane.getComponentAt(tabPane.getTabCount() - 1);

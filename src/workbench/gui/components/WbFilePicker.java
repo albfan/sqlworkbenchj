@@ -73,6 +73,7 @@ public class WbFilePicker
 		this.lastDir = Settings.getInstance().getProperty(prop, null);
 	}
 
+	@Override
 	public void setEnabled(boolean flag)
 	{
 		super.setEnabled(flag);

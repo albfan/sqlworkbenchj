@@ -16,26 +16,27 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
+ *
+ * @author Thomas Kellerer
+ */
 public class WbSplitPaneDivider
 	extends BasicSplitPaneDivider
 {
 	private String oneTouchTooltip;
-	
+
 	public WbSplitPaneDivider(BasicSplitPaneUI ui)
 	{
 		super(ui);
 	}
-	
+
 	public void setOneTouchTooltip(String tip)
 	{
 		this.oneTouchTooltip = tip;
 		this.updateTooltip();
 	}
-	
-	protected JButton createLeftOneTouchButton()	
+
+	@Override
+	protected JButton createLeftOneTouchButton()
 	{
 		JButton b = super.createLeftOneTouchButton();
 		if (this.oneTouchTooltip != null)
@@ -44,7 +45,8 @@ public class WbSplitPaneDivider
 		}
 		return b;
 	}
-	
+
+	@Override
 	protected JButton createRightOneTouchButton()
 	{
 		JButton b = super.createRightOneTouchButton();
@@ -54,7 +56,7 @@ public class WbSplitPaneDivider
 		}
 		return b;
 	}
-	
+
 	private void updateTooltip()
 	{
 		if (this.leftButton != null)

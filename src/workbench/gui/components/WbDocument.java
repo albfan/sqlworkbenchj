@@ -41,22 +41,25 @@ public class WbDocument
 	{
 		modified = false;
 	}
-	
+
 	public boolean isModified()
 	{
 		return modified;
 	}
-	
+
+	@Override
 	public void insertUpdate(DocumentEvent e)
 	{
 		modified = true;
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e)
 	{
 		modified = true;
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e)
 	{
 		modified = true;

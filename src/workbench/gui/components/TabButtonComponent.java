@@ -29,9 +29,9 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * Component to be used as tabComponent;
- * Contains a JLabel to show the text and
- * a JButton to close the tab it belongs to
+ * Component to be used as tabComponent.
+ *
+ * Contains a JLabel to show the text and a JButton to close the tab it belongs to
  *
  * @author Thomas Kellerer
  */

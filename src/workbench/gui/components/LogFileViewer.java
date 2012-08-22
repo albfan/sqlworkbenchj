@@ -72,6 +72,7 @@ public class LogFileViewer
 
 		addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowClosing(WindowEvent evt)
 			{
 				if (watcher != null) watcher.cancel();
@@ -142,6 +143,7 @@ public class LogFileViewer
 
 	protected Runnable _scroller = new Runnable()
 		{
+		@Override
 			public void run()
 			{
 				JScrollBar b = scroll.getVerticalScrollBar();

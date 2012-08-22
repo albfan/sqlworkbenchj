@@ -36,44 +36,53 @@ public class OneLineTableModel
 		this.message = aMessage;
 	}
 
+	@Override
 	public Object getValueAt(int row, int col)
 	{
 		return message;
 	}
 
+	@Override
 	public void setValueAt(Object aValue, int row, int column)
 	{
 	}
 
+	@Override
 	public int getColumnCount()
 	{
 		return 1;
 	}
 
+	@Override
 	public int getRowCount()
 	{
 		return 1;
 	}
 
+	@Override
 	public boolean isCellEditable(int row, int column)
 	{
 		return false;
 	}
 
+	@Override
 	public void addTableModelListener(TableModelListener l)
 	{
 	}
 
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		return String.class;
 	}
 
+	@Override
 	public String getColumnName(int columnIndex)
 	{
 		return this.columnTitle;
 	}
 
+	@Override
 	public void removeTableModelListener(TableModelListener l)
 	{
 	}

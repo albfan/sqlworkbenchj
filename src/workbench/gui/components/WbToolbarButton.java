@@ -51,6 +51,7 @@ public class WbToolbarButton
 		init();
 	}
 
+	@Override
 	public void setAction(Action a)
 	{
 		super.setAction(a);

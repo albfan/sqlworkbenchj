@@ -52,6 +52,7 @@ public class WbLineBorder
 		this.color = aColor;
 	}
 
+	@Override
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color oldColor = g.getColor();
@@ -75,11 +76,13 @@ public class WbLineBorder
 		g.setColor(oldColor);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c)
 	{
 		return this.insets;
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c, Insets i)
 	{
 		i.left = i.top = i.right = i.bottom = 2;

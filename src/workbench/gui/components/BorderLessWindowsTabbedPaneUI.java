@@ -21,14 +21,15 @@ import javax.swing.UIManager;
 import com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
-public class BorderLessWindowsTabbedPaneUI 
+ *
+ * @author Thomas Kellerer
+ */
+public class BorderLessWindowsTabbedPaneUI
 	extends WindowsTabbedPaneUI
 {
 	private Color selColor;
-	
+
+	@Override
 	protected Insets getContentBorderInsets(int tabPlacement)
 	{
 		switch (tabPlacement)
@@ -45,24 +46,26 @@ public class BorderLessWindowsTabbedPaneUI
 				return new Insets(0,0,0,0);
 		}
 	}
-	
+
+	@Override
 	protected void installDefaults()
 	{
 		super.installDefaults();
 		selColor = UIManager.getColor("TabbedPane.selected");
 	}
-	
+
+	@Override
 	protected void paintContentBorder(Graphics g, int tabPlacement, int selectedIndex)
 	{
 		int width = tabPane.getWidth();
 		int height = tabPane.getHeight();
 		Insets insets = tabPane.getInsets();
-		
+
 		int x = insets.left;
 		int y = insets.top;
 		int w = width - insets.right - insets.left;
 		int h = height - insets.top - insets.bottom;
-		
+
 		switch(tabPlacement)
 		{
 			case LEFT:
@@ -90,7 +93,7 @@ public class BorderLessWindowsTabbedPaneUI
 			g.setColor(selColor);
 		}
 		g.fillRect(x,y,w,h);
-		
+
 		switch (tabPlacement)
 		{
 			case JTabbedPane.TOP:

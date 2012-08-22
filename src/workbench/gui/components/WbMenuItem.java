@@ -59,6 +59,7 @@ public class WbMenuItem
 		this.setToolTipText(ResourceMgr.getDescription(key));
 	}
 
+	@Override
 	public void setText(String aText)
 	{
 		if (aText == null)

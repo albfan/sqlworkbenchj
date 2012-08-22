@@ -69,6 +69,7 @@ public class FocusIndicator
 		}
 	}
 
+	@Override
 	public void focusGained(FocusEvent e)
 	{
 		if (this.borderClient != null)
@@ -78,6 +79,7 @@ public class FocusIndicator
 		}
 	}
 
+	@Override
 	public void focusLost(FocusEvent e)
 	{
 		if (this.borderClient != null)

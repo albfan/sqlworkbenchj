@@ -187,6 +187,7 @@ public class EditWindow
 		this.cancelButton.setVisible(false);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
@@ -215,32 +216,39 @@ public class EditWindow
 		return this.textContainer.getText();
 	}
 
+	@Override
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 		Settings.getInstance().storeWindowSize(this, this.settingsId);
 		if (componentSettings != null) componentSettings.saveSettings();
 	}
 
+	@Override
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 		validate();

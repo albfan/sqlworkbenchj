@@ -100,10 +100,12 @@ public class EncodingPanel
 		return this.label.isVisible();
 	}
 
+	@Override
 	public void setEncoding(final String enc)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				encodings.setSelectedItem(enc);
@@ -111,6 +113,7 @@ public class EncodingPanel
 		});
 	}
 
+	@Override
 	public String getEncoding()
 	{
 		String enc = (String)this.encodings.getSelectedItem();

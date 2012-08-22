@@ -61,6 +61,7 @@ public class WbSplitPane
 		this.initDefaults();
 	}
 
+	@Override
 	public void updateUI()
 	{
 		int divider = this.getDividerSize();
@@ -73,6 +74,7 @@ public class WbSplitPane
 		revalidate();
 	}
 
+	@Override
 	public void setUI(ComponentUI newUI)
 	{
 		int divider = this.getDividerSize();

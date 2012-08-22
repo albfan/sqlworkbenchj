@@ -19,14 +19,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
-public class LineNumberTable 
+ *
+ * @author Thomas Kellerer
+ */
+public class LineNumberTable
 	extends JTable
 {
 	protected JTable mainTable;
-	
+
 	public LineNumberTable(JTable table)
 	{
 		super();
@@ -41,55 +41,65 @@ public class LineNumberTable
 		setRowSelectionAllowed(false);
 		setColumnSelectionAllowed(false);
 	}
-	
+
+	@Override
 	public int getRowHeight(int row)
 	{
 		return mainTable.getRowHeight(row);
 	}
-	
-	class RowNumberTableModel 
+
+	class RowNumberTableModel
 		implements TableModel
 	{
+		@Override
 		public int getRowCount()
 		{
 			TableModel m = mainTable.getModel();
 			if (m == null) return 0;
 			return m.getRowCount();
 		}
-		
+
+		@Override
 		public int getColumnCount()
 		{
 			return 1;
 		}
-		
+
+		@Override
 		public Object getValueAt(int row, int column)
 		{
 			return Integer.valueOf(row + 1);
 		}
 
+		@Override
 		public String getColumnName(int columnIndex)
 		{
 			return "";
 		}
 
+		@Override
 		public Class getColumnClass(int columnIndex)
 		{
 			return String.class;
 		}
 
+		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex)
 		{
 			return false;
 		}
 
+		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 		{
 		}
 
+		@Override
 		public void addTableModelListener(TableModelListener l)
 		{
 		}
 
+		@Override
 		public void removeTableModelListener(TableModelListener l)
 		{
 		}

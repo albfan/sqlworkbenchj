@@ -64,6 +64,7 @@ public class DropDownButton
 		popup.addPopupMenuListener(this);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (this.popup == null) return;
@@ -80,16 +81,19 @@ public class DropDownButton
 		}
 	}
 
+	@Override
 	public void popupMenuWillBecomeVisible(PopupMenuEvent e)
 	{
 		popupVisible = true;
 	}
 
+	@Override
 	public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
 	{
 		popupVisible = false;
 	}
 
+	@Override
 	public void popupMenuCanceled(PopupMenuEvent e)
 	{
 		popupVisible = false;

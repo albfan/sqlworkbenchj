@@ -24,6 +24,7 @@ public class WbSplitPaneUI
 	extends BasicSplitPaneUI
 {
 
+	@Override
 	public BasicSplitPaneDivider createDefaultDivider()
 	{
 		return new WbSplitPaneDivider(this);

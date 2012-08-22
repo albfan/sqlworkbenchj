@@ -115,31 +115,37 @@ class ByteBufferTableModel
 		labels[columns] = "0123456789abcdef";
 	}
 
+	@Override
 	public int getRowCount()
 	{
 		return rowCount;
 	}
 
+	@Override
 	public int getColumnCount()
 	{
 		return columns + 1;
 	}
 
+	@Override
 	public String getColumnName(int columnIndex)
 	{
 		return labels[columnIndex];
 	}
 
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		return String.class;
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		return false;
 	}
 
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		if (columnIndex == columns)
@@ -168,14 +174,17 @@ class ByteBufferTableModel
 		return NumberStringCache.getHexString(c);
 	}
 
+	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 	}
 
+	@Override
 	public void addTableModelListener(TableModelListener l)
 	{
 	}
 
+	@Override
 	public void removeTableModelListener(TableModelListener l)
 	{
 	}

@@ -43,6 +43,7 @@ public class SelectionDisplay
 	{
 		rowListener = new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				rowSelectionChanged(e);
@@ -50,6 +51,7 @@ public class SelectionDisplay
 		};
 		columnListener = new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				columnSelectionChanged(e);
@@ -132,7 +134,7 @@ public class SelectionDisplay
 			setText("");
 			return;
 		}
-		
+
 		int cols[] = table.getSelectedColumns();
 
 		StringBuilder display = new StringBuilder(30);

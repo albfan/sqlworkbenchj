@@ -67,6 +67,7 @@ public class WbTraversalPolicy
 	 *         null
 	 *
 	 */
+	@Override
 	public Component getComponentAfter(Container focusCycleRoot, Component aComponent)
 	{
 		// Make sure we have at least one enabled component
@@ -100,6 +101,7 @@ public class WbTraversalPolicy
 	 *         null
 	 *
 	 */
+	@Override
 	public Component getComponentBefore(Container focusCycleRoot, Component aComponent)
 	{
 		// Make sure we have at least one enabled component
@@ -133,6 +135,7 @@ public class WbTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getDefaultComponent(Container focusCycleRoot)
 	{
 		if (this.defaultComponent != null) return this.defaultComponent;
@@ -154,6 +157,7 @@ public class WbTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getFirstComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)
@@ -174,6 +178,7 @@ public class WbTraversalPolicy
 	 * @throws IllegalArgumentException if focusCycleRoot is null
 	 *
 	 */
+	@Override
 	public Component getLastComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)

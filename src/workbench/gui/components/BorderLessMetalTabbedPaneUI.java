@@ -20,36 +20,39 @@ import javax.swing.UIManager;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
-public class BorderLessMetalTabbedPaneUI 
+ *
+ * @author Thomas Kellerer
+ */
+public class BorderLessMetalTabbedPaneUI
 	extends MetalTabbedPaneUI
 {
 	private Color selColor;
-	
+
+	@Override
 	protected Insets getContentBorderInsets(int tabPlacement)
 	{
 		return TabbedPaneUIFactory.getBorderLessInsets(tabPlacement);
 	}
-	
+
+	@Override
 	protected void installDefaults()
 	{
 		super.installDefaults();
 		selColor = UIManager.getColor("TabbedPane.selected");
 	}
-	
+
+	@Override
 	protected void paintContentBorder(Graphics g, int tabPlacement, int selectedIndex)
 	{
 		int width = tabPane.getWidth();
 		int height = tabPane.getHeight();
 		Insets insets = tabPane.getInsets();
-		
+
 		int x = insets.left;
 		int y = insets.top;
 		int w = width - insets.right - insets.left;
 		int h = height - insets.top - insets.bottom;
-		
+
 		switch(tabPlacement)
 		{
 			case LEFT:
@@ -77,7 +80,7 @@ public class BorderLessMetalTabbedPaneUI
 			g.setColor(selColor);
 		}
 		g.fillRect(x,y,w,h);
-		
+
 		switch (tabPlacement)
 		{
 			case JTabbedPane.TOP:
@@ -94,5 +97,5 @@ public class BorderLessMetalTabbedPaneUI
 				break;
 		}
 	}
-   
+
 }

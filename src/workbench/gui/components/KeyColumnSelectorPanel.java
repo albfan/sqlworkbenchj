@@ -55,6 +55,7 @@ public class KeyColumnSelectorPanel
 		}
 	}
 
+	@Override
 	protected void configureInfoPanel()
 	{
 		if (this.tableName == null)

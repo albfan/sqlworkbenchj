@@ -139,6 +139,7 @@ public class DelimiterDefinitionPanel
 		add(singleLineCheckBox, gridBagConstraints);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (updating) return;

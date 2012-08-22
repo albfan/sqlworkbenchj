@@ -44,6 +44,7 @@ public class SingleLineBorder
 		lineColor = color;
 	}
 
+	@Override
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color oldColor = g.getColor();
@@ -72,11 +73,13 @@ public class SingleLineBorder
 		g.setColor(oldColor);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c)
 	{
 		return new Insets(1, 1, 1, 1);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c, Insets insets)
 	{
 		insets.left = insets.top = insets.right = insets.bottom = 1;

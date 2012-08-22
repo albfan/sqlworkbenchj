@@ -18,20 +18,21 @@ import java.awt.Insets;
 import javax.swing.border.AbstractBorder;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
-public class EtchedBorderTop 
+ *
+ * @author Thomas Kellerer
+ */
+public class EtchedBorderTop
 	extends AbstractBorder
 {
 	protected Color color;
-	
+
+	@Override
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color bg = c.getBackground();
 		Color light = bg.brighter();
 		Color shade = bg.darker();
-		
+
 		int w = width;
 
 		g.translate(x, y);
@@ -45,17 +46,19 @@ public class EtchedBorderTop
 		g.translate(-x, -y);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c)
 	{
 		return new Insets(2, 0, 0, 0);
 	}
-	
+
+	@Override
 	public Insets getBorderInsets(Component c, Insets insets)
 	{
 		insets.left = insets.right = insets.bottom = 0;
-		insets.top = 2; 
+		insets.top = 2;
 		return insets;
 	}
-	
+
 }
 

@@ -18,9 +18,9 @@ import java.awt.Graphics;
 import javax.swing.Icon;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
+ *
+ * @author Thomas Kellerer
+ */
 public class SortArrowIcon
 	implements Icon
 {
@@ -46,16 +46,19 @@ public class SortArrowIcon
 		this.direction = dir;
 	}
 
+	@Override
 	public int getIconWidth()
 	{
 		return width;
 	}
 
+	@Override
 	public int getIconHeight()
 	{
 		return height;
 	}
 
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y)
 	{
 		Color bg = c.getBackground();

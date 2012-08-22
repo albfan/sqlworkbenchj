@@ -54,6 +54,7 @@ public class RowHeightResizer
 		this.table.removeMouseMotionListener(this);
 	}
 
+	@Override
 	public void mouseMoved(MouseEvent e)
 	{
 		Point p = e.getPoint();
@@ -72,6 +73,7 @@ public class RowHeightResizer
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 		Point p = e.getPoint();
@@ -86,6 +88,7 @@ public class RowHeightResizer
 		}
 	}
 
+	@Override
 	public void mouseDragged(MouseEvent e)
 	{
 		if (!active) return;
@@ -107,6 +110,7 @@ public class RowHeightResizer
 		});
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 		if (!active) return;

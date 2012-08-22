@@ -75,6 +75,7 @@ public class WbMenu
 		return this.createSeparator;
 	}
 
+	@Override
 	public void setText(String aText)
 	{
 		int pos = aText.indexOf('&');
