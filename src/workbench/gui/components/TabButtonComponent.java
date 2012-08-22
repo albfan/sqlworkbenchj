@@ -92,6 +92,13 @@ public class TabButtonComponent
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
 
+	@Override
+	public void removeNotify()
+	{
+		super.removeNotify();
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
 	public void setRolloverEnabled(boolean flag)
 	{
 		if (flag)

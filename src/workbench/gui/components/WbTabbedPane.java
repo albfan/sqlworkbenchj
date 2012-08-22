@@ -43,7 +43,7 @@ import workbench.util.MacOSHelper;
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
  * <br/>
- * Additionally it installs it's own UI to remove the unnecessary borders
+ * Additionally it installs its own UI to remove the unnecessary borders
  * that the standard Java Look & Feels create.
  * <br/>
  * A close button can be displayed inside each tab that will trigger
@@ -139,6 +139,7 @@ public class WbTabbedPane
 			comp.setIcon(icon);
 		}
 	}
+
 
 	/**
 	 * Enable/Disable the close button.
@@ -276,6 +277,13 @@ public class WbTabbedPane
 		}
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
+	}
+
+	@Override
+	public void removeNotify()
+	{
+		super.removeNotify();
+		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	@Override
