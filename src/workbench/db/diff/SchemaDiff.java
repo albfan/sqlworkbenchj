@@ -471,7 +471,7 @@ public class SchemaDiff
 			}
 			if (tarReader != null)
 			{
-				tarSeqs = tarReader.getSequences(null, this.referenceSchema, null);
+				tarSeqs = tarReader.getSequences(null, this.targetSchema, null);
 			}
 			processSequenceList(refSeqs, tarSeqs);
 		}
