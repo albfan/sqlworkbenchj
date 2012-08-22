@@ -85,7 +85,7 @@ public class TabButtonComponent
 		c.fill = GridBagConstraints.NONE;
 		c.insets = (buttonOnRight ? WbSwingUtilities.EMPTY_INSETS : new Insets(0,0,0,4));
 		add(closeButton, c);
-		
+
 		if (!showButton) closeButton.setVisible(showButton);
 		setOpaque(opaque);
 
@@ -103,9 +103,9 @@ public class TabButtonComponent
 			closeButton.disableBasicRollover();
 		}
 	}
-	
+
 	@Override
-	public void setOpaque(boolean isOpaque)
+	public final void setOpaque(boolean isOpaque)
 	{
 		super.setOpaque(isOpaque);
 		if (label != null) label.setOpaque(isOpaque);
@@ -132,7 +132,8 @@ public class TabButtonComponent
 	{
 		closeButton.setVisible(flag);
 	}
-	
+
+	@Override
 	public void setEnabled(boolean flag)
 	{
 		closeButton.setEnabled(flag);
@@ -179,7 +180,7 @@ public class TabButtonComponent
 		add(closeButton, c);
 		validate();
 	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
