@@ -131,8 +131,10 @@ public class LnFHelper
 	private void scaleDefaultFonts()
 	{
 		if (!Settings.getInstance().getScaleFonts()) return;
+
 		UIDefaults def = UIManager.getDefaults();
 		FontScaler scaler = new FontScaler();
+		
 		for (String property : fontProperties)
 		{
 			if (!noScale.contains(property))
