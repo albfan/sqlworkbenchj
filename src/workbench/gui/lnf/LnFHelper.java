@@ -35,6 +35,14 @@ public class LnFHelper
 {
 	private boolean isWindowsClassic;
 
+	// Font properties that are automatically scaled by Java
+	private final Set<String> noScale = CollectionUtil.treeSet(
+		"Menu.font",
+		"MenuBar.font",
+		"MenuItem.font",
+		"PopupMenu.font",
+		"CheckBoxMenuItem.font");
+
 	private final Set<String> fontProperties = CollectionUtil.treeSet(
 		"Button.font",
 		"CheckBox.font",
@@ -127,11 +135,14 @@ public class LnFHelper
 		FontScaler scaler = new FontScaler();
 		for (String property : fontProperties)
 		{
-			Font base = def.getFont(property);
-			if (base != null)
+			if (!noScale.contains(property))
 			{
-				Font scaled = scaler.scaleFont(base);
-				def.put(property, scaled);
+				Font base = def.getFont(property);
+				if (base != null)
+				{
+					Font scaled = scaler.scaleFont(base);
+					def.put(property, scaled);
+				}
 			}
 		}
 	}
