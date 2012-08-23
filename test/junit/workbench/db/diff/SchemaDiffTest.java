@@ -59,7 +59,8 @@ public class SchemaDiffTest
 		diff.setIncludeSequences(true);
 		diff.setIncludeViews(true);
 		diff.setIncludeTriggers(true);
-		diff.compareAll();
+		diff.setSchemas("REF", "OLD");
+
 		String xml = diff.getMigrateTargetXml();
 //		TestUtil util = new TestUtil("testBaseDiff");
 //		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
@@ -336,28 +337,30 @@ public class SchemaDiffTest
 		this.target = util.getConnection("target");
 
 		TestUtil.executeScript(source,
-			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n"+
-			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n"+
-			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n"+
-			"create table new_table (id integer primary key, some_data varchar(100));\n"+
-			"alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id);\n"+
-			"alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id);\n"+
-			"CREATE VIEW v_person AS SELECT * FROM person;\n"+
-			"CREATE sequence seq_one;\n"+
-			"CREATE sequence seq_two  increment by 5;\n"+
-			"CREATE sequence seq_three;\n" +
-			"CREATE TRIGGER TRIG_INS BEFORE INSERT ON person FOR EACH ROW CALL \"workbench.db.diff.H2TestTrigger\";\n" +
+			"create schema ref;\n" +
+			"create table ref.person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n"+
+			"create table ref.address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n"+
+			"create table ref.person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n"+
+			"create table ref.new_table (id integer primary key, some_data varchar(100));\n"+
+			"alter table ref.person_address add constraint ref.fk_pa_person foreign key (person_id) references ref.person(person_id);\n"+
+			"alter table ref.person_address add constraint ref.fk_pa_address foreign key (address_id) references ref.address(address_id);\n"+
+			"CREATE VIEW ref.v_person AS SELECT * FROM ref.person;\n"+
+			"CREATE sequence ref.seq_one;\n"+
+			"CREATE sequence ref.seq_two  increment by 5;\n"+
+			"CREATE sequence ref.seq_three;\n" +
+			"CREATE TRIGGER ref.TRIG_INS BEFORE INSERT ON ref.person FOR EACH ROW CALL \"workbench.db.diff.H2TestTrigger\";\n" +
 			"commit;");
 
 		TestUtil.executeScript(target,
-			"create table person (person_id integer primary key, firstname varchar(50), lastname varchar(100));\n"+
-			"create table address (address_id integer primary key, street varchar(10), city varchar(100), pone varchar(50), remark varchar(500));\n"+
-			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n"+
-			"alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id);\n"+
-			"CREATE VIEW something AS SELECT * FROM address;\n"+
-			"CREATE sequence seq_one;\n"+
-			"CREATE sequence seq_two;\n"+
-			"CREATE sequence seq_to_be_deleted;\n" +
+			"create schema old;\n" +
+			"create table old.person (person_id integer primary key, firstname varchar(50), lastname varchar(100));\n"+
+			"create table old.address (address_id integer primary key, street varchar(10), city varchar(100), pone varchar(50), remark varchar(500));\n"+
+			"create table old.person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n"+
+			"alter table old.person_address add constraint old.fk_pa_person foreign key (person_id) references old.person(person_id);\n"+
+			"CREATE VIEW old.something AS SELECT * FROM old.address;\n"+
+			"CREATE sequence old.seq_one;\n"+
+			"CREATE sequence old.seq_two;\n"+
+			"CREATE sequence old.seq_to_be_deleted;\n" +
 			"commit;");
 
 	}
