@@ -1299,7 +1299,7 @@ public class Settings
 	 */
 	public boolean getScaleFonts()
 	{
-		return PlatformHelper.isWindows() && getBoolProperty("workbench.gui.desktop.scalefonts", true);
+		return PlatformHelper.isWindows() && getBoolProperty("workbench.gui.desktop.scalefonts", false);
 	}
 
 	public void setScaleFonts(boolean flag)
