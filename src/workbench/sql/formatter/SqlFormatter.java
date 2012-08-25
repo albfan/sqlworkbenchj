@@ -1118,10 +1118,6 @@ public class SqlFormatter
 			final String text = t.getContents();
 			if (text.equals(")"))
 			{
-				if (!collectNames && elementIndex < elementNames.size())
-				{
-						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
-				}
 				if (elementsPerLine == 1) this.appendNewline();
 				this.appendText(")");
 				SQLToken next = skipComments();
@@ -1164,20 +1160,11 @@ public class SqlFormatter
 			{
 				if (commaAfterLineBreak && (elementCount == 0 || elementCount >= elementsPerLine))
 				{
-					if (!collectNames && elementIndex < elementNames.size())
-					{
-						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
-					}
 					this.appendNewline();
 					this.indent(myIndent);
 					elementCount = 0;
-
 				}
 				this.appendText(",");
-				if (!collectNames && elementIndex < elementNames.size())
-				{
-						this.appendText(" /* " + elementNames.get(elementIndex) + " */");
-				}
 				elementCount ++;
 				if (!commaAfterLineBreak && elementCount >= elementsPerLine)
 				{
@@ -1201,6 +1188,15 @@ public class SqlFormatter
 				if (this.needsWhitespace(last, t))
 				{
 					appendText(' ');
+				}
+				if (!collectNames && elementIndex < elementNames.size())
+				{
+					if (commaAfterLineBreak && elementIndex == 0)
+					{
+						this.appendText(' ');
+						if (addSpaceAfterLineBreakComma) this.appendText(' ');
+					}
+					this.appendText("/* " + elementNames.get(elementIndex) + " */ ");
 				}
 				this.appendTokenText(t);
 				if (collectNames)

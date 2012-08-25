@@ -556,9 +556,9 @@ public class SqlFormatterTest
 			")\n" +
 			"VALUES\n" +
 			"(\n" +
-			"  42, /* id */\n" +
-			"  'arthur', /* foo */\n" +
-			"  'dent' /* bar */\n" +
+			"  /* id */ 42,\n" +
+			"  /* foo */ 'arthur',\n" +
+			"  /* bar */ 'dent'\n" +
 			");";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
@@ -571,7 +571,51 @@ public class SqlFormatterTest
 			"INSERT INTO foobar\n" +
 			"  (id, foo, bar)\n" +
 			"VALUES\n" +
-			"  (42, /* id */ 'arthur', /* foo */ 'dent' /* bar */);";
+			"  (/* id */ 42, /* foo */ 'arthur', /* bar */ 'dent');";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter(sql);
+		f.setAddColumnNameComment(true);
+		f.setColumnsPerInsert(1);
+		f.setCommaAfterLineBreak(true);
+		f.setAddSpaceAfterLineBreakComma(false);
+		formatted = f.getFormattedSql();
+		expected =
+			"INSERT INTO foobar\n" +
+			"(\n" +
+			"  id\n" +
+			"  ,foo\n" +
+			"  ,bar\n" +
+			")\n" +
+			"VALUES\n" +
+			"(\n" +
+			"   /* id */ 42\n" +
+			"  ,/* foo */ 'arthur'\n" +
+			"  ,/* bar */ 'dent'\n" +
+			");";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter(sql);
+		f.setAddColumnNameComment(true);
+		f.setColumnsPerInsert(1);
+		f.setCommaAfterLineBreak(true);
+		f.setAddSpaceAfterLineBreakComma(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"INSERT INTO foobar\n" +
+			"(\n" +
+			"  id\n" +
+			"  , foo\n" +
+			"  , bar\n" +
+			")\n" +
+			"VALUES\n" +
+			"(\n" +
+			"    /* id */ 42\n" +
+			"  , /* foo */ 'arthur'\n" +
+			"  , /* bar */ 'dent'\n" +
+			");";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}

@@ -52,6 +52,7 @@ public class FormatterOptionsPanel
 		commaAfterLineBreak.setSelected(Settings.getInstance().getFormatterCommaAfterLineBreak());
 		addSpaceAfterLineBreakComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma());
 		addSpaceAfterLineBreakComma.setEnabled(commaAfterLineBreak.isSelected());
+		insertWithColumnNames.setSelected(Settings.getInstance().getFormatterAddColumnNameComment());
 		JoinWrapStyle style = Settings.getInstance().getFormatterJoinWrapStyle();
 		switch (style)
 		{
@@ -82,6 +83,8 @@ public class FormatterOptionsPanel
 		set.setFormatterAddSpaceAfterComma(spaceAfterComma.isSelected());
 		set.setFormatterCommaAfterLineBreak(commaAfterLineBreak.isSelected());
 		set.setFormatterAddSpaceAfterLineBreakComma(addSpaceAfterLineBreakComma.isSelected());
+		set.setFormatterAddColumnNameComment(insertWithColumnNames.isSelected());
+
 		int index = joinWrappingStyle.getSelectedIndex();
 		switch (index)
 		{
@@ -126,6 +129,7 @@ public class FormatterOptionsPanel
     commaAfterLineBreak = new javax.swing.JCheckBox();
     jLabel1 = new javax.swing.JLabel();
     joinWrappingStyle = new javax.swing.JComboBox();
+    insertWithColumnNames = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -287,8 +291,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 25, 0, 0);
     add(addSpaceAfterLineBreakComma, gridBagConstraints);
 
     commaAfterLineBreak.setText(ResourceMgr.getString("LblCommaAfterLineBreak")); // NOI18N
@@ -319,6 +322,18 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(joinWrappingStyle, gridBagConstraints);
+
+    insertWithColumnNames.setText(ResourceMgr.getString("LblColNameComment")); // NOI18N
+    insertWithColumnNames.setToolTipText(ResourceMgr.getString("d_LblColNameComment")); // NOI18N
+    insertWithColumnNames.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+    add(insertWithColumnNames, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -343,6 +358,7 @@ public class FormatterOptionsPanel
   private javax.swing.JCheckBox funcsLower;
   private javax.swing.JTextField insertColumns;
   private javax.swing.JLabel insertColumnsLabel;
+  private javax.swing.JCheckBox insertWithColumnNames;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JComboBox joinWrappingStyle;
   private javax.swing.JCheckBox keywordsUpper;
