@@ -1552,7 +1552,7 @@ public class SqlPanel
 					connectionInfo.setConnection(aConnection);
 
 					// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
-					if (dbConnection.getDbSettings().endTransactionAfterConnect())
+					if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy())
 					{
 						LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
 						dbConnection.rollbackSilently();
