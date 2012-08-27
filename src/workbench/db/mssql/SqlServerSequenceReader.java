@@ -74,22 +74,22 @@ public class SqlServerSequenceReader
   {
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(
-			"SELECT db_name() as sequence_catalog, \n " +
-			"       sc.name as sequence_schema, \n" +
-			"       sq.name as sequence_name, \n       " +
-			"       sq.minimum_value, \n       " +
-			"       sq.maximum_value, \n       " +
-			"       sq.start_value , \n       " +
-			"       increment, \n       " +
-			"       case when is_cycling = 1 then 'CYCLE' else 'NO CYCLE' end as cycle_flag, \n" +
-			"       is_cached, \n" +
-			"       cache_size, \n" +
-			"       type_name(system_type_id) as data_type, \n" +
-      "       type_name(user_type_id) as user_type, \n" +
-      "       precision, \n" +
-			"       current_value \n" +
-			"FROM sys.sequences sq with (nolock) \n" +
-			"   join sys.schemas sc with (nolock) on sq.schema_id = sc.schema_id \n"  +
+			"SELECT db_name() as sequence_catalog,   \n" +
+			"       sc.name as sequence_schema,  \n" +
+			"       sq.name as sequence_name,         \n" +
+			"       cast(sq.minimum_value as bigint) as minimum_value,         \n" +
+			"       cast(sq.maximum_value as bigint) as maximum_value,         \n" +
+			"       cast(sq.start_value as bigint) as start_value,         \n" +
+			"       cast(sq.increment as bigint) as increment,         \n" +
+			"       case when is_cycling = 1 then 'CYCLE' else 'NO CYCLE' end as cycle_flag,  \n" +
+			"       sq.is_cached,  \n" +
+			"       sq.cache_size,  \n" +
+			"       type_name(sq.system_type_id) as data_type,  \n" +
+			"       type_name(sq.user_type_id) as user_type,  \n" +
+			"       sq.precision,  \n" +
+			"       cast(sq.current_value  as bigint) as current_value \n" +
+			"FROM sys.sequences sq with (nolock)  \n" +
+			"   join sys.schemas sc with (nolock) on sq.schema_id = sc.schema_id " +
 			"WHERE sc.name = '");
 		sql.append(StringUtil.trimQuotes(schema));
 		sql.append("' ");
@@ -143,7 +143,9 @@ public class SqlServerSequenceReader
 		if (ds == null || row >= ds.getRowCount()) return null;
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
+		String db = ds.getValueAsString(row, "SEQUENCE_CATALOG");
 		SequenceDefinition result = new SequenceDefinition(schema, name);
+		result.setCatalog(db);
 		result.setSequenceProperty("minimum_value", ds.getValue(row, "minimum_value"));
 		result.setSequenceProperty("maximum_value", ds.getValue(row, "maximum_value"));
 		result.setSequenceProperty("start_value", ds.getValue(row, "start_value"));
