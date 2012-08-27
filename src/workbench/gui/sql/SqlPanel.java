@@ -1531,36 +1531,36 @@ public class SqlPanel
 			this.stmtRunner.setResultLogger(this);
 		}
 
-		if (this.connectionInfo != null)
+		this.setExecuteActionStates(aConnection != null);
+
+		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
+
+		this.checkResultSetActions();
+		this.checkCommitAction();
+
+		if (this.dbConnection != null)
 		{
+			this.dbConnection.addChangeListener(this);
+
 			WbThread info = new WbThread("Update connection info " + this.getId() )
 			{
 				@Override
 				public void run()
 				{
-					// eonncection info might access the database. In order to not block the GUI
-					// this is done in a separate thread.
+					// ConnectionInfo info might access the database (to retrieve the current schema and user)
+					// In order to not block the GUI this is done in a separate thread.
 					connectionInfo.setConnection(aConnection);
+
+					// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
+					if (dbConnection.getDbSettings().endTransactionAfterConnect())
+					{
+						LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
+						dbConnection.rollbackSilently();
+					}
 				}
 			};
 			info.start();
 		}
-		this.setExecuteActionStates(aConnection != null);
-
-		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
-
-		if (this.dbConnection != null)
-		{
-			this.dbConnection.addChangeListener(this);
-			// avoid the IDLE in transaction for Postgres
-			if (!dbConnection.hasPostConnectScript() && dbConnection.getDbSettings().endTransactionAfterConnect())
-			{
-				dbConnection.rollbackSilently();
-			}
-		}
-
-		this.checkResultSetActions();
-		this.checkCommitAction();
 	}
 
 	/**
