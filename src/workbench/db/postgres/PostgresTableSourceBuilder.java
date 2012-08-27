@@ -424,19 +424,55 @@ public class PostgresTableSourceBuilder
 		StringBuilder result = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "select bt.relname as table_name, bns.nspname as table_schema \n" +
-             "from pg_class ct \n" +
-             "    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
-             "    join pg_inherits i on i.inhparent = ct.oid and ct.relname = ? \n" +
-             "    join pg_class bt on i.inhrelid = bt.oid \n" +
-             "    join pg_namespace bns on bt.relnamespace = bns.oid";
+
+		final String sql83 =
+			"select bt.relname as table_name, bns.nspname as table_schema, 0 as level \n" +
+			"from pg_class ct \n" +
+			"    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
+			"    join pg_inherits i on i.inhparent = ct.oid and ct.relname = ? \n" +
+			"    join pg_class bt on i.inhrelid = bt.oid \n" +
+			"    join pg_namespace bns on bt.relnamespace = bns.oid";
+
+		// Recursive version for 8.4+ based Craig Rigner's statement from here: http://stackoverflow.com/a/12139506/330315
+		final String sql84 =
+			"with recursive inh as ( \n" +
+			" \n" +
+			"				select i.inhrelid, 1 as level, array[inhrelid] as path \n" +
+			"				from pg_catalog.pg_inherits i  \n" +
+			"				  join pg_catalog.pg_class cl on i.inhparent = cl.oid \n" +
+			"				  join pg_catalog.pg_namespace nsp on cl.relnamespace = nsp.oid \n" +
+			"				where nsp.nspname = ? \n" +
+			"				and cl.relname = ? \n" +
+			"				 \n" +
+			"				union all \n" +
+			"				 \n" +
+			"				select i.inhrelid, inh.level + 1, inh.path||i.inhrelid \n" +
+			"				from inh  \n" +
+			"				  inner join pg_catalog.pg_inherits i on (inh.inhrelid = i.inhparent) \n" +
+			") \n" +
+			"select pg_class.relname as table_name, pg_namespace.nspname as table_schema, inh.level \n" +
+			"		from inh \n" +
+			"			inner join pg_catalog.pg_class on (inh.inhrelid = pg_class.oid) \n" +
+			"			inner join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
+			"order by path";
+
+		final boolean isRecursive;
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4"))
+		{
+			isRecursive = true;
+		}
+		else
+		{
+			isRecursive = false;
+		}
 
 		Savepoint sp = null;
 		try
 		{
-			// Retrieve child table(s) for this table
+			// Retrieve direct child table(s) for this table
+			// this does not handle multiple inheritance
 			sp = dbConnection.setSavepoint();
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(isRecursive ? sql84 : sql83);
 			pstmt.setString(1, table.getSchema());
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
@@ -450,15 +486,38 @@ public class PostgresTableSourceBuilder
 				if (count == 0)
 				{
 					result = new StringBuilder(50);
-					result.append("\n-- Child tables:");
+					if (isRecursive)
+					{
+						result.append("\n/* Inheritance tree:\n\n");
+						result.append(table.getSchema());
+						result.append('.');
+						result.append(table.getTableName());
+					}
+					else
+					{
+						result.append("\n-- Child tables:");
+					}
 				}
 				String tableName = rs.getString(1);
 				String schemaName = rs.getString(2);
-				result.append("\n--    ");
+				int level = rs.getInt(3);
+				if (isRecursive)
+				{
+					result.append('\n');
+					result.append(StringUtil.padRight(" ", level * 2));
+				}
+				else
+				{
+					result.append("\n--  ");
+				}
 				result.append(schemaName);
 				result.append('.');
 				result.append(tableName);
 				count ++;
+			}
+			if (isRecursive)
+			{
+				result.append("\n*/");
 			}
 			dbConnection.releaseSavepoint(sp);
 		}

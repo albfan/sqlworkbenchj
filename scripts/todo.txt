@@ -1,5 +1,9 @@
 Features:
 ---------
+- DbExplorer table list: allow changing of schema if possible
+  PostgreSQL --> ALTER TABLE .. SET SCHEMA;
+  SQL Server --> ALTER SCHEMA old TRANSFER newschema.tablename;
+
 - save table sort of DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"
