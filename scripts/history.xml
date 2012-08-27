@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
+  <release build="-1" date="2012-08-26">
+    <entry dev-build="1" type="fix">The DbExplorer's table list did not work for SQL Server 2012 using the Microsoft JDBC Driver 4.0 (and possibly previous versions as well)</entry>
+  </release>
   <release build="113" date="2012-08-26">
     <entry dev-build="20" type="enh">A new option for the SQL Formatter is available to insert column names in the VALUES part of an INSERT statement</entry>
     <entry dev-build="20" type="enh">WbSchemaDiff now deals properly with Oracle packages</entry>
