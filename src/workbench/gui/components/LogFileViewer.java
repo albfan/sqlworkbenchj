@@ -83,7 +83,11 @@ public class LogFileViewer
 		});
 	}
 
-
+	public void setText(String text)
+	{
+		this.display.setText(text);
+	}
+	
 	private void initWatcher()
 	{
 		watcher = new Timer(true);
@@ -115,6 +119,7 @@ public class LogFileViewer
 		Reader in = null;
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			lastFileTime = sourceFile.lastModified();
 			lastSize = sourceFile.length();
 			in = EncodingUtil.createReader(sourceFile, Settings.getInstance().getDefaultEncoding());
@@ -128,6 +133,7 @@ public class LogFileViewer
 		finally
 		{
 			FileUtil.closeQuietely(in);
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
@@ -142,15 +148,15 @@ public class LogFileViewer
 	}
 
 	protected Runnable _scroller = new Runnable()
-		{
+	{
 		@Override
-			public void run()
-			{
-				JScrollBar b = scroll.getVerticalScrollBar();
-				int max = b.getMaximum();
-				b.setValue(max);
-			}
-		};
+		public void run()
+		{
+			JScrollBar b = scroll.getVerticalScrollBar();
+			int max = b.getMaximum();
+			b.setValue(max);
+		}
+	};
 
 	protected void scrollToEnd()
 	{
@@ -162,7 +168,6 @@ public class LogFileViewer
 		sourceFile = new WbFile(f);
 		setTitle(sourceFile.getFullPath());
 		initWatcher();
-		// load() is not necessary because setVisible() will do that
 	}
 
 	protected void saveSettings()

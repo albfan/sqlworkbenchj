@@ -60,9 +60,10 @@ public class ViewLogfileAction
 					try
 					{
 						LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
-						lview.showFile(logFile);
 						viewer = lview;
 						viewer.setVisible(true);
+						lview.setText("Loading...");
+						lview.showFile(logFile);
 					}
 					catch (Exception e)
 					{
