@@ -157,10 +157,12 @@ public class ConnectionInfo
 		infoText.setCaretPosition(0);
 		showMode();
 
+		invalidate();
 		validate();
 
 		if (getParent() != null)
 		{
+			getParent().invalidate();
 			// this seems to be the only way to resize the component
 			// approriately after setting a new text when using the dreaded GTK+ look and feel
 			getParent().validate();

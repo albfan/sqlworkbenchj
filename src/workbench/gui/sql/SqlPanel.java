@@ -1531,35 +1531,47 @@ public class SqlPanel
 			this.stmtRunner.setResultLogger(this);
 		}
 
-		this.setExecuteActionStates(aConnection != null);
-
 		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
 
-		this.checkResultSetActions();
-		this.checkCommitAction();
+		checkResultSetActions();
+		checkCommitAction();
 
 		if (this.dbConnection != null)
 		{
-			this.dbConnection.addChangeListener(this);
+			dbConnection.addChangeListener(this);
+			setExecuteActionStates(false);
 
+			// ConnectionInfo.setConnection() might access the database (to retrieve the current schema, database and user)
+			// In order to not block the GUI this is done in a separate thread.
 			WbThread info = new WbThread("Update connection info " + this.getId() )
 			{
 				@Override
 				public void run()
 				{
-					// ConnectionInfo info might access the database (to retrieve the current schema and user)
-					// In order to not block the GUI this is done in a separate thread.
-					connectionInfo.setConnection(aConnection);
-
-					// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
-					if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy())
+					try
 					{
-						LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
-						dbConnection.rollbackSilently();
+						connectionInfo.setConnection(dbConnection);
+
+						// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
+						// the second check for isBusy() is to prevent the situation where the user manages
+						// to manually run a statement between the above setBusy(false) and this point)
+						if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy())
+						{
+							LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
+							dbConnection.rollbackSilently();
+						}
+					}
+					finally
+					{
+						setExecuteActionStates(true);
 					}
 				}
 			};
 			info.start();
+		}
+		else
+		{
+			setExecuteActionStates(false);
 		}
 	}
 

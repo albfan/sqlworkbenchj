@@ -975,6 +975,7 @@ public class WbConnection
 			{
 				schema = isBusy ? null : meta.getCurrentSchema();
 			}
+
 			if (schema != null)
 			{
 				currentSchema = schema;

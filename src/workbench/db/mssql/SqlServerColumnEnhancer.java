@@ -71,7 +71,10 @@ public class SqlServerColumnEnhancer
 
 		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 
-		String sql = "SELECT objname, cast(value as varchar) as value \n FROM ";
+		// I have to cast to a length specified varchar value otherwise
+		// the remarks will be truncated at 31 characters for some strange reason
+		// varchar(8000) character should work on any sensible SQL Server version  (varchar(max) doesn't work on SQL Server 2000)
+		String sql = "SELECT objname, cast(value as varchar(8000)) as value \n FROM ";
 
 		if (SqlServerUtil.isSqlServer2005(conn))
 		{
