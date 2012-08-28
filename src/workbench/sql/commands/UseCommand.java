@@ -17,8 +17,6 @@ import workbench.db.CatalogChanger;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -43,19 +41,14 @@ public class UseCommand
 	public static final String VERB = "USE";
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 		try
 		{
-			SQLLexer lexer = new SQLLexer(aSql);
-
-			// The first token should be the USE verb;
-			SQLToken t = lexer.getNextToken(false, false);
-
 			// everything after the USE command is the catalog name
-			String catName = aSql.substring(t.getCharEnd()).trim();
+			String catName = getCommandLine(sql);
 
 			// CatalogChanger.setCurrentCatalog() will fire the
 			// catalogChanged() event on the connection!

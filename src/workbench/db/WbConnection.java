@@ -960,7 +960,7 @@ public class WbConnection
 			buff.append('=');
 			buff.append(user);
 
-			String catalog = isBusy ? null : meta.getCurrentCatalog();
+			String catalog = isBusy ? currentCatalog : meta.getCurrentCatalog();
 			if (catalog != null && catalog.length() > 0)
 			{
 				String catName = meta.getCatalogTerm();

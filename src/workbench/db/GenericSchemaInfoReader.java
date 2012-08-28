@@ -76,7 +76,15 @@ public class GenericSchemaInfoReader
 	{
 		if (evt.getSource() == this.connection && evt.getPropertyName().equals(WbConnection.PROP_SCHEMA))
 		{
-			this.cachedSchema = null;
+			Object value = evt.getNewValue();
+			if (value instanceof String)
+			{
+				this.cachedSchema = (String)value;
+			}
+			else
+			{
+				this.cachedSchema = null;
+			}
 			return;
 		}
 
