@@ -515,7 +515,7 @@ public class PostgresTableSourceBuilder
 				result.append(tableName);
 				count ++;
 			}
-			if (isRecursive)
+			if (isRecursive && result != null)
 			{
 				result.append("\n*/");
 			}
