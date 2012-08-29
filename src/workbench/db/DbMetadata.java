@@ -390,8 +390,16 @@ public class DbMetadata
 		String sep = getDbSettings().getCatalogSeparator();
 		if (sep == null)
 		{
-			sep = metaData.getCatalogSeparator();
+			try
+			{
+				sep = metaData.getCatalogSeparator();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.<init>", "Could not retrieve catalog separator", e);
+			}
 		}
+		
 		if (StringUtil.isEmptyString(sep))
 		{
 			catalogSeparator = '.';
