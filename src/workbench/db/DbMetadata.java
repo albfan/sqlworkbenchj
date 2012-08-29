@@ -399,7 +399,7 @@ public class DbMetadata
 				LogMgr.logError("DbMetadata.<init>", "Could not retrieve catalog separator", e);
 			}
 		}
-		
+
 		if (StringUtil.isEmptyString(sep))
 		{
 			catalogSeparator = '.';
