@@ -249,7 +249,6 @@ public class Db2SequenceReader
 		catch (Exception e)
 		{
 			LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
-			e.printStackTrace();
 		}
 		finally
 		{
