@@ -1,6 +1,5 @@
 Features:
 ---------
-- WbImport: Spezialwert für NULL Werte angeben
 - DbExplorer table list: allow changing of schema if possible
   PostgreSQL --> ALTER TABLE .. SET SCHEMA;
   SQL Server --> ALTER SCHEMA old TRANSFER newschema.tablename;

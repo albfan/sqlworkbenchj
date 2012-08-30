@@ -29,13 +29,41 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class TextRowDataConverterTest 
+public class TextRowDataConverterTest
 	extends WbTestCase
 {
-	
+
 	public TextRowDataConverterTest()
 	{
 		super("TextRowDataConverterTest");
+	}
+
+	@Test
+	public void testNullString()
+		throws Exception
+	{
+		String[] cols = new String[] { "char_col", "int_col"};
+		int[] types = new int[] { Types.VARCHAR, Types.INTEGER};
+		int[] sizes = new int[] { 10, 10 };
+
+		ResultInfo info = new ResultInfo(cols, types, sizes);
+		TextRowDataConverter converter = new TextRowDataConverter();
+		converter.setResultInfo(info);
+		converter.setDelimiter(";");
+		converter.setNullString("<NULL>");
+		RowData data = new RowData(info);
+		data.setValue(0, null);
+		data.setValue(1, new Integer(42));
+
+		StrBuffer line = converter.convertRowData(data, 0);
+		assertEquals("Wrong data", "<NULL>;42", line.toString().trim());
+
+		converter.setNullString("[null]");
+		data.setValue(0, "foobar");
+		data.setValue(1, null);
+
+		line = converter.convertRowData(data, 0);
+		assertEquals("Wrong data", "foobar;[null]", line.toString().trim());
 	}
 
 	@Test

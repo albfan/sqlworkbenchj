@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-08-26">
+    <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="1" type="fix">The "USE" command did not work any longer for SQL Server</entry>
     <entry dev-build="1" type="fix">The DbExplorer's table list did not work for SQL Server 2012 using the Microsoft JDBC Driver 4.0 (and possibly previous versions as well)</entry>
   </release>

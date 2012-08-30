@@ -73,6 +73,7 @@ public class TextFileParser
 	private QuoteEscapeType quoteEscape;
 
 	private StreamImporter streamImporter;
+	private String nullString;
 
 	public TextFileParser()
 	{
@@ -88,6 +89,10 @@ public class TextFileParser
 	}
 
 
+	public void setNullString(String value)
+	{
+		nullString = value;
+	}
 	public void setEnableMultilineRecords(boolean flag)
 	{
 		this.enableMultiLineMode = flag;
@@ -795,7 +800,6 @@ public class TextFileParser
 			FileUtil.closeQuietely(in);
 			fileHandler.done();
 		}
-
 	}
 
 	protected List<String> getLineValues(LineParser parser, String line)
@@ -804,7 +808,12 @@ public class TextFileParser
 		parser.setLine(line);
 		while (parser.hasNext())
 		{
-			result.add(parser.getNext());
+			String value = parser.getNext();
+			if (this.nullString != null && value.equals(nullString))
+			{
+				value = null;
+			}
+			result.add(value);
 		}
 		return result;
 	}

@@ -105,6 +105,8 @@ public class WbExport
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_INFINITY_LITERALS = "infinityLiterals";
 	public static final String ARG_MERGE_TYPE = "mergeType";
+	public static final String ARG_NULL_STRING = "nullString";
+
 	// </editor-fold>
 
 	private DataExporter exporter;
@@ -186,6 +188,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_INFINITY_LITERALS, ArgumentType.ListArgument);
 		cmdLine.addArgument(ARG_MERGE_TYPE, MergeGenerator.Factory.getSupportedTypes());
+		cmdLine.addArgument(ARG_NULL_STRING);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -475,6 +478,8 @@ public class WbExport
 				result.setFailure();
 				return result;
 			}
+
+			exporter.setNullString(cmdLine.getValue(ARG_NULL_STRING, null));
 
 			String delimiter = cmdLine.getValue(CommonArgs.ARG_DELIM);
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);

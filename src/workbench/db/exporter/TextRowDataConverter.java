@@ -49,6 +49,7 @@ public class TextRowDataConverter
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName;
 	private char escapeHexType = 'u';
+	private String nullString = "";
 
 	public void setWriteClobToFile(boolean flag)
 	{
@@ -58,6 +59,22 @@ public class TextRowDataConverter
 	public void setWriteBlobToFile(boolean flag)
 	{
 		writeBlobFiles = flag;
+	}
+
+	/**
+	 * Set the value to be exported for NULL values.
+	 * @param value the String to be used for NULL values (if passed as null it is ignored)
+	 */
+	public void setNullString(String value)
+	{
+		if (value == null)
+		{
+			this.nullString = "";
+		}
+		else
+		{
+			this.nullString = value;
+		}
 	}
 
 	/**
@@ -174,7 +191,7 @@ public class TextRowDataConverter
 			boolean isNull = (value == null);
 			if (value == null)
 			{
-				value = "";
+				value = nullString;
 				// Never quote null values
 				addQuote = false;
 			}

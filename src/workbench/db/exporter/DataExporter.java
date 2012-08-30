@@ -141,6 +141,7 @@ public class DataExporter
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 	private ExportDataModifier modifier;
 	private boolean includeColumnComments;
+	private String nullString;
 
 	private int maxBlobFilesPerDir = -1;
 
@@ -182,7 +183,7 @@ public class DataExporter
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 	}
-	
+
 	public String getMergeType()
 	{
 		return mergeType;
@@ -196,6 +197,15 @@ public class DataExporter
 	public boolean getEnableFixedHeader()
 	{
 		return enableFixedHeader;
+	}
+	public String getNullString()
+	{
+		return nullString;
+	}
+
+	public void setNullString(String nullValue)
+	{
+		this.nullString = nullValue;
 	}
 
 	public void setEnableFixedHeader(boolean flag)

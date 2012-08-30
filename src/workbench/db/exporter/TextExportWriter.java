@@ -44,6 +44,7 @@ public class TextExportWriter
 		conv.setQuoteCharacter(exporter.getTextQuoteChar());
 		conv.setQuoteAlways(exporter.getQuoteAlways());
 		conv.setEscapeRange(exporter.getEscapeRange());
+		conv.setNullString(exporter.getNullString());
 		conv.setLineEnding(exporter.getLineEnding());
 		conv.setWriteClobToFile(exporter.getWriteClobAsFile());
 		conv.setQuoteEscaping(exporter.getQuoteEscaping());

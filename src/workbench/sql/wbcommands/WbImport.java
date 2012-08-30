@@ -144,6 +144,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_QUOTE_ALWAYS);
+		cmdLine.addArgument(WbExport.ARG_NULL_STRING);
 		cmdLine.addArgument(ARG_INSERT_START);
 		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolArgument);
 		ModifierArguments.addArguments(cmdLine);
@@ -393,6 +394,7 @@ public class WbImport
 			textParser.setConnection(currentConnection);
 			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
+			textParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
 			textParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
