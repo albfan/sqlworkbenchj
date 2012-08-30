@@ -54,11 +54,11 @@ public class WbLoadPkMapping
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sqlCommand)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = SqlUtil.stripVerb(aSql);
+		String sql = getCommandLine(sqlCommand);
 		cmdLine.parse(sql);
 		String file = cmdLine.getValue("file");
 		if (file == null)

@@ -40,11 +40,11 @@ public class WbRemoveVar extends SqlCommand
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sqlCommand)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String var = SqlUtil.stripVerb(aSql);
+		String var = getCommandLine(sqlCommand);
 
 		String msg = null;
 

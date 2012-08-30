@@ -62,8 +62,6 @@ public class WbMode
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		boolean changed = true;
-
 		ConnectionProfile profile = (currentConnection != null ? currentConnection.getProfile() : null);
 		if (profile == null)
 		{
@@ -103,7 +101,6 @@ public class WbMode
 		{
 			// only trigger display of current state
 			result.setSuccess();
-			changed = false;
 		}
 		else if (command.equalsIgnoreCase("normal"))
 		{

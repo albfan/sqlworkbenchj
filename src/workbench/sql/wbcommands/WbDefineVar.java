@@ -69,7 +69,7 @@ public class WbDefineVar
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String sql = SqlUtil.stripVerb(aSql);
+		String sql = getCommandLine(aSql);
 
 		cmdLine.parse(sql);
 		WbFile file = this.evaluateFileArgument(cmdLine.getValue("file"));
@@ -254,7 +254,7 @@ public class WbDefineVar
 				stmtResult.setWarning(true);
 				stmtResult.addMessageByKey("ErrVarDefCols");
 			}
-			
+
 			if (stmtResult.hasWarning())
 			{
 				stmtResult.addMessageNewLine();

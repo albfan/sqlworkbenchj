@@ -45,12 +45,12 @@ public class WbDefinePk
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sqlCommand)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String sql = SqlUtil.stripVerb(aSql);
+		String sql = getCommandLine(sqlCommand);
 
 		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 		tok.setSourceString(sql);
