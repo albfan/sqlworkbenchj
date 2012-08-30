@@ -869,7 +869,7 @@
   </target>
 
   <target name="test" depends="compile-tests, clean-junit">
-    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
+    <junit fork="true" maxmemory="256m" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${build.test}"/>
