@@ -33,7 +33,7 @@ public class FileUtil
 	/**
 	 * The size of the buffer used by copy()
 	 */
-	private static final int BUFF_SIZE = 32*1024;
+	private static final int BUFF_SIZE = 64*1024;
 
 	/*
 	 * Closes all streams in the list.

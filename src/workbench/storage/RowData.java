@@ -11,6 +11,7 @@
  */
 package workbench.storage;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.List;
@@ -77,11 +79,13 @@ public class RowData
 	private Object[] colData;
 	private Object[] originalData;
 	private List<String> dependencyDeletes;
+	private List<Closeable> streams;
 
 	private Object userObject;
 
 	private DataConverter converter;
 	boolean ignoreReadErrors;
+	boolean useStreamsForBlobs;
 
 	public RowData(ResultInfo info)
 	{
@@ -116,6 +120,11 @@ public class RowData
 	public void setConverter(DataConverter conv)
 	{
 		this.converter = conv;
+	}
+
+	public void setUseStreams(boolean flag)
+	{
+		useStreamsForBlobs = flag;
 	}
 
 	/**
@@ -224,14 +233,29 @@ public class RowData
 				}
 				else if (SqlUtil.isBlobType(type))
 				{
-					if (useGetBytesForBlobs)
+					if (useStreamsForBlobs)
+					{
+						// this is used by the RowDataConverter in order to avoid
+						// reading large blobs into memory
+						InputStream in = rs.getBinaryStream(i+1);
+						addStream(in);
+						if (rs.wasNull())
+						{
+							value = null;
+						}
+						else
+						{
+							value = in;
+						}
+					}
+					else if (useGetBytesForBlobs)
 					{
 						value = rs.getBytes(i+1);
 						if (rs.wasNull()) value = null;
 					}
 					else
 					{
-						// BLOB columns are always converted to byte[] internally
+						// Convert the BLOB data to a byte array
 						InputStream in;
 						try
 						{
@@ -303,6 +327,15 @@ public class RowData
 			this.colData[i] = value;
 		}
 		this.resetStatus();
+	}
+
+	private void addStream(InputStream in)
+	{
+		if (this.streams == null)
+		{
+			streams = new ArrayList<Closeable>();
+		}
+		streams.add(in);
 	}
 
 	private Object readXML(ResultSet rs, int column, boolean useGetXML)
@@ -542,6 +575,14 @@ public class RowData
 	{
 		Arrays.fill(colData, null);
 		this.resetStatus();
+		if (streams != null)
+		{
+			for (Closeable stream : streams)
+			{
+				FileUtil.closeQuietely(stream);
+			}
+		}
+		streams = null;
 	}
 
 	/**

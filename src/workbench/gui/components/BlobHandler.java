@@ -254,6 +254,10 @@ public class BlobHandler
 		{
 			in = new FileInputStream((File)data);
 		}
+		else if (data instanceof InputStream)
+		{
+			in = (InputStream)data;
+		}
 
 		if (in == null)
 		{

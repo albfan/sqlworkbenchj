@@ -51,8 +51,8 @@ public abstract class ExportWriter
 	protected RowDataConverter converter;
 	protected Writer outputWriter;
 	protected WbFile outputFile;
-	protected boolean canAppendStart = false;
-  protected boolean trimCharData = false;
+	protected boolean canAppendStart;
+  protected boolean trimCharData;
 
 	private int progressInterval = 10;
 
@@ -204,6 +204,8 @@ public abstract class ExportWriter
 		boolean first = true;
 		if (this.exporter.writeEmptyResults()) writeStart();
 
+		RowData row = RowDataFactory.createRowData(colCount, exporter.getConnection());
+		row.setUseStreams(true);
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -215,8 +217,7 @@ public abstract class ExportWriter
 			}
 			updateProgress(rows);
 
-			//RowData row = new RowData(colCount);
-			RowData row = RowDataFactory.createRowData(colCount, exporter.getConnection());
+			row.reset();
 			row.read(rs, info, trimCharData);
 			writeRow(row, rows);
 			rows ++;
