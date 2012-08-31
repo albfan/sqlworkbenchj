@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
->
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <!--
   Convert the output of SQL Workbench's WbSchemaDiff command to Microsoft SQL Server
@@ -236,19 +235,21 @@
 <!-- re-create a view -->
   <xsl:template match="view-def">
     <xsl:param name="mode"/>
+    <!--
     <xsl:if test="$mode = 'update'">
       <xsl:text>ALTER VIEW </xsl:text>
       <xsl:value-of select="view-name"/>
       <xsl:value-of select="$newline"/>
     </xsl:if>
     <xsl:if test="$mode = 'create'">
-      <xsl:text>ALTER VIEW </xsl:text>
+      <xsl:text>CREATE VIEW </xsl:text>
       <xsl:value-of select="view-name"/>
       <xsl:value-of select="$newline"/>
     </xsl:if>
     <xsl:text>AS</xsl:text>
+    -->
     <xsl:value-of select="$newline"/>
-    <xsl:copy-of select="normalize-space(view-source)"/>
+    <xsl:copy-of select="view-source"/>
     <xsl:value-of select="$newline"/>
   </xsl:template>
 
