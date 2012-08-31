@@ -33,6 +33,7 @@ import java.util.Map;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
+import workbench.db.PkDefinition;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
 import workbench.db.TriggerDefinition;
@@ -226,17 +227,8 @@ public class ReportTable
 	public List<String> getPrimaryKeyColumns()
 	{
 		if (!includePrimaryKey) return Collections.emptyList();
-		List<String> result = new ArrayList<String>();
-		int count = this.columns.length;
-		for (int i=0; i < count; i++)
-		{
-			if (this.columns[i].getColumn().isPkColumn())
-			{
-				result.add(this.columns[i].getColumn().getColumnName().toUpperCase());
-			}
-		}
-		Collections.sort(result);
-		return result;
+		if (table.getPrimaryKey() == null) return Collections.emptyList();
+		return table.getPrimaryKey().getColumns();
 	}
 
 	/**
@@ -245,18 +237,8 @@ public class ReportTable
 	public String getPrimaryKeyName()
 	{
 		if (!includePrimaryKey) return null;
-		if (this.reporter == null) return null;
-		List pk = this.getPrimaryKeyColumns();
-		if (pk.isEmpty()) return null;
-		Collection<IndexDefinition> idxList = this.reporter.getIndexList();
-		for (IndexDefinition idx : idxList)
-		{
-			if (idx.isPrimaryKeyIndex())
-			{
-				return idx.getName();
-			}
-		}
-		return null;
+		if (table.getPrimaryKey() == null) return null;
+		return table.getPrimaryKeyName();
 	}
 
 	/**

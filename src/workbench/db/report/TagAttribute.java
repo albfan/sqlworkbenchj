@@ -23,10 +23,12 @@ public class TagAttribute
 
 	public TagAttribute(String name, String value)
 	{
-		StringBuilder b = new StringBuilder(name.length() + value.length() + 1);
+		int len = name == null ? 0 : name.length();
+		len += value == null ? 0 : value.length();
+		StringBuilder b = new StringBuilder(len);
 		b.append(name);
 		b.append("=\"");
-		b.append(HtmlUtil.escapeHTML(value));
+		b.append(value == null ? "" : HtmlUtil.escapeHTML(value));
 		b.append('"');
 		tagText = b;
 	}
