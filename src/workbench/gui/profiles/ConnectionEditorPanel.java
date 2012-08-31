@@ -529,6 +529,7 @@ public class ConnectionEditorPanel
     wbOptionsPanel.add(checkOpenTrans, gridBagConstraints);
 
     preventNoWhere.setText(ResourceMgr.getString("LblConnPreventNoWhere")); // NOI18N
+    preventNoWhere.setToolTipText(ResourceMgr.getString("d_LblConnPreventNoWhere")); // NOI18N
     preventNoWhere.setBorder(null);
     preventNoWhere.setName("preventDMLWithoutWhere"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
