@@ -784,7 +784,17 @@
 								values. The delimiter could also be escaped inside a quoted value if the
 								delimiter falls into the selected escape range (e.g. a tab character).
 							</para>
+						</entry>
+					</row>
 
+					<row>
+						<entry>-nullString</entry>
+						<entry>
+							<para>
+                Defines the string value that should be written into the output file for a <literal>NULL</literal> value.
+                This value will be enclosed with the specified quote character only if <literal>-quoteAlways=true</literal>
+                is specified as well.
+							</para>
 						</entry>
 					</row>
 

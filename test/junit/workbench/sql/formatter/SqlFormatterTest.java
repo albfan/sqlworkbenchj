@@ -1588,7 +1588,7 @@ public class SqlFormatterTest
 			"    ON foo.id = bar.fid";
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and x = 1", 100);
+		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2=bar.fid2", 100);
 		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
 		formatted = f.getFormattedSql();
 		expected =
@@ -1596,7 +1596,7 @@ public class SqlFormatterTest
 			"FROM foo\n" +
 			"  JOIN bar\n" +
 			"    ON foo.id = bar.fid\n"  +
-			"   AND x = 1";
+			"   AND foo.id2 = bar.fid2";
 		assertEquals(expected, formatted);
 
 		f.setJoinWrapping(JoinWrapStyle.always);
@@ -1608,8 +1608,21 @@ public class SqlFormatterTest
 		expected =
 			"SELECT *\n" +
 			"FROM foo\n" +
-			"  JOIN bar ON foo.id = bar.fid AND x = 1";
+			"  JOIN bar ON foo.id = bar.fid AND foo.id2 = bar.fid2";
 //		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2 = bar.id2 and foo.id3 = bar.id3", 100);
+		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar\n" +
+			"    ON foo.id = bar.fid\n"  +
+			"   AND foo.id2 = bar.id2\n" +
+			"   AND foo.id3 = bar.id3";
+		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 	}
 

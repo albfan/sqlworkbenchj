@@ -940,6 +940,17 @@
 					</row>
 
 					<row>
+						<entry>-nullString</entry>
+						<entry>
+							<para>
+                Defines the string value that in the input file to denote a <literal>NULL</literal> value.
+                The value of this is case-sensitive, so <literal>-nullString=NULL</literal> is
+                different to <literal>-nullString=null</literal>
+							</para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-trimValues</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>

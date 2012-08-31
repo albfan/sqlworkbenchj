@@ -1239,7 +1239,17 @@ public class Settings
 
 	public Font getMsgLogFont()
 	{
-		return this.getFont(PROPERTY_MSGLOG_FONT);
+		Font f = this.getFont(PROPERTY_MSGLOG_FONT);
+		if (f == null)
+		{
+			f = new Font("Monospaced", Font.PLAIN, 12);
+			if (getScaleFonts())
+			{
+				FontScaler scaler = new FontScaler();
+				f = scaler.scaleFont(f);
+			}
+		}
+		return f;
 	}
 
 	public void setDataFont(Font f)

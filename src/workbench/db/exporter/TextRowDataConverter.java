@@ -193,7 +193,7 @@ public class TextRowDataConverter
 			{
 				value = nullString;
 				// Never quote null values
-				addQuote = false;
+				addQuote = nullString == null ? false : quoteAlways;
 			}
 
 			if (SqlUtil.isCharacterType(colType) && !isNull)

@@ -620,6 +620,7 @@ public class SqlFormatter
 						String lb = "\n" + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
 						this.result.insert(onPos, lb);
 						realLength += lb.length();
+						onPos = -1; // we only need this treatment for the first condition after the ON
 					}
 					appendNewline();
 					indent(indentPos - text.length());
