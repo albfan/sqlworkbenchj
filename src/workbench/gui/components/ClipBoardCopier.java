@@ -56,6 +56,11 @@ public class ClipBoardCopier
 		this.data = client.getDataStore();
 	}
 
+	ClipBoardCopier(DataStore ds)
+	{
+		this.data = ds;
+	}
+
 	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
 	 *
@@ -75,12 +80,12 @@ public class ClipBoardCopier
 		if (this.data.getRowCount() <= 0) return;
 
 		List<ColumnIdentifier> columnsToCopy = null;
-		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
+		if (selectedOnly  && !showSelectColumns && client != null && this.client.getColumnSelectionAllowed())
 		{
 			columnsToCopy = getColumnsFromSelection();
 		}
 
-		if (showSelectColumns)
+		if (showSelectColumns && client != null)
 		{
 			// Display column selection dialog
 			ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, client.getSelectedRowCount() > 0);
@@ -97,8 +102,8 @@ public class ClipBoardCopier
 			int[] rows = null;
 			if (selectedOnly)
 			{
-				rows = this.client.getSelectedRows();
-				count = rows.length;
+				rows = client == null ? null : this.client.getSelectedRows();
+				count = rows == null ? 0 : rows.length;
 			}
 
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
@@ -134,6 +139,7 @@ public class ClipBoardCopier
 
 	private int[] getColumnOrder()
 	{
+		if (client == null) return null;
 		if (!client.isColumnOrderChanged()) return null;
 
 		TableColumnModel model = client.getColumnModel();
@@ -194,7 +200,7 @@ public class ClipBoardCopier
 			@Override
 			public void run()
 			{
-				_copyAsSql(type, selectedOnly, showSelectColumns);
+				doCopyAsSql(type, selectedOnly, showSelectColumns);
 			}
 		};
 		t.start();
@@ -205,7 +211,7 @@ public class ClipBoardCopier
 		return type == ExportType.SQL_UPDATE || type == ExportType.SQL_MERGE || type == ExportType.SQL_DELETE_INSERT;
 	}
 
-	protected void _copyAsSql(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
+	public void doCopyAsSql(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.data.getRowCount() <= 0) return;
 
@@ -224,13 +230,13 @@ public class ClipBoardCopier
 			if (!pkOK)
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
-				WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNotAvailable");
+				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNotAvailable");
 				return;
 			}
 		}
 
 		TableIdentifier updateTable = data.getUpdateTable();
-		if (updateTable == null)
+		if (updateTable == null && client != null)
 		{
 			updateTable = client.selectUpdateTable();
 			if (updateTable != null)
@@ -245,7 +251,7 @@ public class ClipBoardCopier
 			columnsToInclude = getColumnsFromSelection();
 		}
 
-		if (showSelectColumns)
+		if (showSelectColumns && !WbManager.isTest())
 		{
       ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0);
 			if (result == null) return;
@@ -269,14 +275,15 @@ public class ClipBoardCopier
 			if (columnsToInclude != null && columnsToInclude.size() == keyColumns.size() && columnsToInclude.containsAll(keyColumns))
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE statement with only key columns!", null);
-				WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
+				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
 				return;
 			}
 		}
 
 		try
 		{
-			WbSwingUtilities.showWaitCursorOnWindow(this.client);
+			if (!WbManager.isTest()) WbSwingUtilities.showWaitCursorOnWindow(this.client);
+
 			int[] rows = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
 
@@ -344,11 +351,15 @@ public class ClipBoardCopier
 			{
 				String msg = ResourceMgr.getString("ErrClipCopy");
 				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(e));
-				WbSwingUtilities.showErrorMessage(client, msg);
+				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessage(client, msg);
 			}
-			LogMgr.logError(this, "Error when copying as SQL", e);
+			LogMgr.logError("ClipboardCopier.doCopyAsSql()", "Error when copying as SQL", e);
 		}
-		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
+		finally
+		{
+			if (!WbManager.isTest()) WbSwingUtilities.showDefaultCursorOnWindow(this.client);
+		}
+
 	}
 
 
