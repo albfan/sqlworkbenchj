@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
+import workbench.storage.RowDataReader;
 
 /**
  * @author Thomas Kellerer
@@ -86,11 +87,12 @@ public class UpdatingCommandTest
 
 			stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, blob_data from blob_test");
+			ResultInfo info = new ResultInfo(rs.getMetaData(), this.connection);
+			RowDataReader reader = new RowDataReader(info, connection);
 			if (rs.next())
 			{
-				ResultInfo info = new ResultInfo(rs.getMetaData(), this.connection);
-				RowData data = new RowData(2);
-				data.read(rs, info, false);
+
+				RowData data = reader.read(rs, false);
 
 				Object value = data.getValue(0);
 				int nr = ((Integer)value).intValue();

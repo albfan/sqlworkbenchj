@@ -35,7 +35,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
-import workbench.storage.RowDataFactory;
+import workbench.storage.RowDataReader;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -296,17 +296,17 @@ public class TableDeleteSync
 			}
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
+			RowDataReader reader = new RowDataReader(info, toDelete);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
 
 				rowNumber ++;
-				RowData row = RowDataFactory.createRowData(info, toDelete);
 				if (this.monitor != null && (rowNumber % progressInterval == 0))
 				{
 					monitor.setCurrentRow(rowNumber, -1);
 				}
-				row.read(rs, info, false);
+				RowData row = reader.read(rs, false);
 				packetRows.add(row);
 
 				if (packetRows.size() == chunkSize)
@@ -361,11 +361,11 @@ public class TableDeleteSync
 			rs = checkStatement.executeQuery(sql);
 			List<RowData> checkRows = new ArrayList<RowData>(referenceRows.size());
 			ResultInfo ri = new ResultInfo(rs.getMetaData(), reference);
+			RowDataReader reader = new RowDataReader(ri, reference);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
-				RowData r = RowDataFactory.createRowData(ri, reference);
-				r.read(rs, ri, false);
+				RowData r = reader.read(rs, false);
 				checkRows.add(r);
 			}
 

@@ -387,7 +387,7 @@ public class DataStore
 
 	public String getColumnClassName(int column)
 	{
-		DataConverter conv = RowDataFactory.getConverterInstance(originalConnection);
+		DataConverter conv = RowDataReader.getConverterInstance(originalConnection);
 		if (conv != null)
 		{
 			int type = resultInfo.getColumnType(column);
@@ -403,7 +403,7 @@ public class DataStore
 
 	public Class getColumnClass(int column)
 	{
-		DataConverter conv = RowDataFactory.getConverterInstance(originalConnection);
+		DataConverter conv = RowDataReader.getConverterInstance(originalConnection);
 		if (conv != null)
 		{
 			int type = resultInfo.getColumnType(column);
@@ -1260,8 +1260,9 @@ public class DataStore
 		try
 		{
 			int rowCount = 0;
-			int cols = this.resultInfo.getColumnCount();
 			if (this.data == null) this.data = createData();
+			RowDataReader reader = new RowDataReader(resultInfo, originalConnection);
+
 			while (!this.cancelRetrieve && aResultSet.next())
 			{
 				rowCount ++;
@@ -1271,8 +1272,7 @@ public class DataStore
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
 
-				RowData row = RowDataFactory.createRowData(cols, this.originalConnection);
-				row.read(aResultSet, this.resultInfo, trimCharData);
+				RowData row = reader.read(aResultSet, trimCharData);
 				this.data.add(row);
 
 				if (maxRows > 0 && rowCount > maxRows) break;

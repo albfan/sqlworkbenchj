@@ -125,7 +125,7 @@ import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataFactory;
+import workbench.storage.RowDataReader;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
@@ -1625,7 +1625,7 @@ public class WbTable
 			String dbmsType = dwModel.getDbmsType(column);
 			try
 			{
-				DataConverter conv = RowDataFactory.getConverterInstance(this.getDataStore().getOriginalConnection());
+				DataConverter conv = RowDataReader.getConverterInstance(this.getDataStore().getOriginalConnection());
 				if (conv != null)
 				{
 					if (conv.convertsType(type, dbmsType)) return false;

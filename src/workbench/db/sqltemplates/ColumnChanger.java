@@ -310,7 +310,8 @@ public class ColumnChanger
 		if (StringUtil.equalStringOrEmpty(oldRemarks, newRemarks)) return null;
 		if (StringUtil.isBlank(newRemarks)) newRemarks = "";
 
-		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
 		sql = sql.replace(PARAM_TABLE_NAME, table.getTableName());
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
@@ -332,7 +333,8 @@ public class ColumnChanger
 		if (StringUtil.isBlank(remarks)) remarks = "";
 		String sql = commentMgr.getCommentSqlTemplate("column");
 
-		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectName());
 		sql = sql.replace(PARAM_TABLE_NAME, table.getObjectName());
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(column));

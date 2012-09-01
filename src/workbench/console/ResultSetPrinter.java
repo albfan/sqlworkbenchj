@@ -11,20 +11,24 @@
  */
 package workbench.console;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Types;
-import workbench.sql.StatementRunnerResult;
-import workbench.storage.*;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.StatementRunnerResult;
+import workbench.storage.*;
 
 /**
  * A class to print the contents of a ResultSet to a PrintStream.
@@ -118,11 +122,11 @@ public class ResultSetPrinter
 			printHeader(pw);
 
 			//RowData row = new RowData(info);
-			RowData row = RowDataFactory.createRowData(info, null);
+			RowDataReader reader = new RowDataReader(info, null);
 			int count = 0;
 			while (data.next())
 			{
-				row.read(data, info, false);
+				RowData row = reader.read(data, false);
 				printRow(pw, row, count);
 				count ++;
 			}

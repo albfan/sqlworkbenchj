@@ -27,7 +27,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
-import workbench.storage.RowDataFactory;
+import workbench.storage.RowDataReader;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -198,14 +198,13 @@ public abstract class ExportWriter
 			}
 		}
 
-		int colCount = info.getColumnCount();
 		startProgress();
 
 		boolean first = true;
 		if (this.exporter.writeEmptyResults()) writeStart();
 
-		RowData row = RowDataFactory.createRowData(colCount, exporter.getConnection());
-		row.setUseStreams(true);
+		RowDataReader reader = new RowDataReader(info, exporter.getConnection());
+		reader.setUseStreamsForBlobs(true);
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -217,8 +216,7 @@ public abstract class ExportWriter
 			}
 			updateProgress(rows);
 
-			row.reset();
-			row.read(rs, info, trimCharData);
+			RowData row = reader.read(rs, trimCharData);
 			writeRow(row, rows);
 			rows ++;
 		}

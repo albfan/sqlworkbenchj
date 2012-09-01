@@ -24,8 +24,7 @@ package workbench.storage;
  * is recommended to avoid too many instances of the implementing class.
  *
  * @author Thomas Kellerer
- * @see RowData#setConverter(workbench.storage.DataConverter)
- * @see RowDataFactory#createRowData(workbench.storage.ResultInfo, workbench.db.WbConnection) 
+ * @see RowDataReader#setConverter(workbench.storage.DataConverter)
  */
 public interface DataConverter
 {

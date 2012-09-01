@@ -10,9 +10,9 @@
  */
 package workbench.sql;
 
-import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerStatementHook;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleStatementHook;
 
 /**
@@ -33,7 +33,7 @@ public class StatementHookFactory
 		{
 			return new OracleStatementHook();
 		}
-		if (conn.getMetadata().isSqlServer() && JdbcUtils.hasMinimumServerVersion(conn, "10.0"))
+		if (conn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(conn))
 		{
 			// The hack for the MERGE statement is only necessary for SQL Server 2008 and above
 			return new SqlServerStatementHook();

@@ -59,16 +59,16 @@ public class RowDataTest
 			stmt = con.createStatement();
 			rs = stmt.executeQuery("select char_data, vchar from char_test");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
-			RowData row = new RowData(info);
+			RowDataReader reader =  new RowDataReader(info, con);
 			rs.next();
-			row.read(rs, info, true);
+			RowData row = reader.read(rs, true);
 			String v = (String)row.getValue(0);
 			assertEquals("1", v);
 			v = (String)row.getValue(1);
 			assertEquals("1    ", v);
 
 			rs.next();
-			row.read(rs, info, false);
+			row = reader.read(rs, false);
 			v = (String)row.getValue(0);
 			assertEquals("12   ", v);
 		}
@@ -130,10 +130,11 @@ public class RowDataTest
 			stmt = con.createStatement();
 			rs = stmt.executeQuery("select char_data, vchar from char_test");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
-			RowData row = new RowData(info);
-			row.setConverter(trim);
+
+			RowDataReader reader = new RowDataReader(info, con);
+			reader.setConverter(trim);
 			rs.next();
-			row.read(rs, info, false);
+			RowData row = reader.read(rs, false);
 			String v = (String)row.getValue(0);
 			assertEquals("1", v);
 			v = (String)row.getValue(1);

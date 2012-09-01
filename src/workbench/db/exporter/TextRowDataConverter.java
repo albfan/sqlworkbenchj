@@ -12,8 +12,11 @@
 package workbench.db.exporter;
 
 import java.io.File;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.storage.DataConverter;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
@@ -45,11 +48,12 @@ public class TextRowDataConverter
 	private String delimiterAndQuote;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
-	private boolean writeClobFiles = false;
+	private boolean writeClobFiles;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName;
 	private char escapeHexType = 'u';
 	private String nullString = "";
+	private DataConverter converter;
 
 	public void setWriteClobToFile(boolean flag)
 	{
@@ -76,6 +80,14 @@ public class TextRowDataConverter
 			this.nullString = value;
 		}
 	}
+	
+	@Override
+	public void setOriginalConnection(WbConnection conn)
+	{
+		super.setOriginalConnection(conn);
+		converter = RowDataReader.getConverterInstance(conn);
+	}
+
 
 	/**
 	 * Define a column name to include the rowindex in the output
@@ -117,6 +129,12 @@ public class TextRowDataConverter
 		return convertRowData(row, rowIndex, null);
 	}
 
+	private boolean isConverted(int jdbcType, String dbmsType)
+	{
+		if (converter == null) return false;
+		return converter.convertsType(jdbcType, dbmsType);
+	}
+
 	public StrBuffer convertRowData(RowData row, long rowIndex, int[] colMap)
 	{
 		int count = this.metaData.getColumnCount();
@@ -145,7 +163,7 @@ public class TextRowDataConverter
 			String value = null;
 
 			boolean addQuote = quoteAlways;
-			boolean isConverted = row.typeIsConverted(colType, dbmsType);
+			boolean isConverted = isConverted(colType, dbmsType);
 
 			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
 			{

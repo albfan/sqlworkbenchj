@@ -11,26 +11,11 @@
  */
 package workbench.storage;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Struct;
-import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.List;
 import workbench.db.importer.ValueDisplay;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.FileUtil;
 import workbench.util.NumberUtil;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * A class to hold the data for a single row retrieved from the database.
@@ -79,13 +64,13 @@ public class RowData
 	private Object[] colData;
 	private Object[] originalData;
 	private List<String> dependencyDeletes;
-	private List<Closeable> streams;
 
 	private Object userObject;
 
-	private DataConverter converter;
-	boolean ignoreReadErrors;
-	boolean useStreamsForBlobs;
+	RowData(Object[] data)
+	{
+		this.colData = data;
+	}
 
 	public RowData(ResultInfo info)
 	{
@@ -96,7 +81,6 @@ public class RowData
 	{
 		this.colData = new Object[colCount];
 		this.setNew();
-		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 	}
 
 	public Object[] getData()
@@ -104,289 +88,6 @@ public class RowData
 		return this.colData;
 	}
 
-	/**
-	 * Define a converter that may convert the data read from the database
-	 * to e.g. a more readable format.
-	 * <br/>
-	 * As potentially a large number of rows can be created the registered converter
-	 * should be a singleton so that the memory used for retrieving the data is not increased
-	 * too much.
-	 * <br/>
-	 * @param conv the converter to be used.
-	 *
-	 * @see workbench.db.mssql.SqlServerDataConverter
-	 * @see workbench.db.oracle.OracleDataConverter
-	 */
-	public void setConverter(DataConverter conv)
-	{
-		this.converter = conv;
-	}
-
-	public void setUseStreams(boolean flag)
-	{
-		useStreamsForBlobs = flag;
-	}
-
-	/**
-	 * Checks if the given datatype will be converted.
-	 *
-	 * @param jdbcType
-	 * @param dbmsType
-	 *
-	 * @return true if the type is converted
-	 */
-	public boolean typeIsConverted(int jdbcType, String dbmsType)
-	{
-		if (converter == null) return false;
-		return converter.convertsType(jdbcType, dbmsType);
-	}
-
-	/**
-	 * Read the current row from the ResultSet into this RowData.
-	 * <br/>
-	 * It is assumed that ResultSet.next() has already been called on the ResultSet.
-	 * <br/>
-	 * BLOBs (and similar datatypes) will be read into a byte array. CLOBs (and similar datatypes)
-	 * will be converted into a String object.
-	 * <br/>
-	 * All other types will be retrieved using getObject() from the result set, except for
-	 * timestamp and date to work around issues with the Oracle driver.
-	 * <br/>
-	 * If the driver returns a java.sql.Struct, this will be converted into a String
-	 * using {@linkplain StructConverter#getStructDisplay(java.sql.Struct)}
-	 * <br/>
-	 * After retrieving the value from the ResultSet it is passed to a registered DataConverter.
-	 * If a converter is registered, no further processing will be done with the column's value
-	 * <br/>
-	 * The status of this RowData will be reset (NOT_MODIFIED) after the data has been retrieved.
-	 *
-	 * @param rs the ResultSet that is positioned to the correct row
-	 * @param info the resultInfo for the data currently retrieved
-	 * @param trimCharData if true, values for Types.CHAR columns will be trimmed.
-	 *
-	 * @see #setConverter(workbench.storage.DataConverter)
-	 */
-	public void read(ResultSet rs, ResultInfo info, boolean trimCharData)
-		throws SQLException
-	{
-		int colCount = this.colData.length;
-		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
-		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
-		boolean useGetStringForClobs = info.useGetStringForClobs();
-		boolean useGetStringForBit = info.useGetStringForBit();
-		boolean useGetXML = info.useGetXML();
-		boolean adjustArrayDisplay = info.convertArrays();
-
-		Object value;
-
-		for (int i=0; i < colCount; i++)
-		{
-			int type = info.getColumnType(i);
-
-			if (converter != null)
-			{
-				String dbms = info.getDbmsTypeName(i);
-				if (converter.convertsType(type, dbms))
-				{
-					value = rs.getObject(i + 1);
-					this.colData[i] = converter.convertValue(type, dbms, value);
-					continue;
-				}
-			}
-
-			try
-			{
-				if (type == Types.VARCHAR || type == Types.NVARCHAR)
-				{
-					value = rs.getString(i+1);
-				}
-				else if (type == Types.TIMESTAMP)
-				{
-					value = rs.getTimestamp(i+1);
-				}
-				else if (type == Types.DATE)
-				{
-					value = rs.getDate(i+1);
-				}
-				else if (useGetStringForBit && type == Types.BIT)
-				{
-					value = rs.getString(i + 1);
-				}
-				else if (adjustArrayDisplay && type == java.sql.Types.ARRAY)
-				{
-					// this is mainly here for Oracle nested tables and VARRAYS, but should basically work
-					// for other arrays as well.
-					Object o = rs.getObject(i+1);
-					value = ArrayConverter.getArrayDisplay(o, info.getDbmsTypeName(i));
-				}
-				else if (type == java.sql.Types.STRUCT)
-				{
-					Object o = rs.getObject(i+1);
-					if (o instanceof Struct)
-					{
-						value = StructConverter.getInstance().getStructDisplay((Struct)o);
-					}
-					else
-					{
-						value = o;
-					}
-				}
-				else if (SqlUtil.isBlobType(type))
-				{
-					if (useStreamsForBlobs)
-					{
-						// this is used by the RowDataConverter in order to avoid
-						// reading large blobs into memory
-						InputStream in = rs.getBinaryStream(i+1);
-						addStream(in);
-						if (rs.wasNull())
-						{
-							value = null;
-						}
-						else
-						{
-							value = in;
-						}
-					}
-					else if (useGetBytesForBlobs)
-					{
-						value = rs.getBytes(i+1);
-						if (rs.wasNull()) value = null;
-					}
-					else
-					{
-						// Convert the BLOB data to a byte array
-						InputStream in;
-						try
-						{
-							in = rs.getBinaryStream(i+1);
-							if (in != null && !rs.wasNull())
-							{
-								// readBytes will close the InputStream
-								value = FileUtil.readBytes(in);
-							}
-							else
-							{
-								value = null;
-							}
-						}
-						catch (IOException e)
-						{
-							LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
-							value = rs.getObject(i+1);
-						}
-					}
-				}
-				else if (type == Types.SQLXML)
-				{
-					value = readXML(rs, i+1, useGetXML);
-				}
-				else if (SqlUtil.isClobType(type, longVarcharAsClob))
-				{
-					if (useGetStringForClobs)
-					{
-						value = rs.getString(i + 1);
-					}
-					else
-					{
-						value = readCharacterStream(rs, i + 1);
-					}
-				}
-				else if (type == Types.CHAR || type == Types.NCHAR)
-				{
-					value = rs.getString(i+1);
-					if (trimCharData && value != null)
-					{
-						try
-						{
-							value = StringUtil.rtrim((String)value);
-						}
-						catch (Throwable th)
-						{
-							LogMgr.logError("RowData.read()", "Error trimming CHAR data", th);
-						}
-					}
-				}
-				else
-				{
-					value = rs.getObject(i + 1);
-				}
-			}
-			catch (SQLException e)
-			{
-				if (ignoreReadErrors)
-				{
-					value = null;
-					LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'. Using NULL!!", e);
-				}
-				else
-				{
-					throw e;
-				}
-			}
-			this.colData[i] = value;
-		}
-		this.resetStatus();
-	}
-
-	private void addStream(InputStream in)
-	{
-		if (this.streams == null)
-		{
-			streams = new ArrayList<Closeable>();
-		}
-		streams.add(in);
-	}
-
-	private Object readXML(ResultSet rs, int column, boolean useGetXML)
-		throws SQLException
-	{
-		Object value = null;
-		if (useGetXML)
-		{
-			SQLXML xml = null;
-			try
-			{
-				xml = rs.getSQLXML(column);
-				value = xml.getString();
-			}
-			finally
-			{
-				if (xml != null) xml.free();
-			}
-		}
-		else
-		{
-			value = readCharacterStream(rs, column);
-		}
-		return value;
-	}
-
-	private Object readCharacterStream(ResultSet rs, int column)
-		throws SQLException
-	{
-		Object value;
-		Reader in;
-		try
-		{
-			in = rs.getCharacterStream(column);
-			if (in != null && !rs.wasNull())
-			{
-				// readCharacters will close the Reader
-				value = FileUtil.readCharacters(in);
-			}
-			else
-			{
-				value = null;
-			}
-		}
-		catch (IOException e)
-		{
-			LogMgr.logWarning("RowData.read()", "Error retrieving clob data for column '" + rs.getMetaData().getColumnName(column) + "'", e);
-			value = rs.getObject(column);
-		}
-		return value;
-	}
 	/**
 	 * Create a deep copy of this object.
 	 * <br/>
@@ -397,9 +98,7 @@ public class RowData
 	{
 		RowData result = new RowData(this.colData.length);
 		System.arraycopy(colData, 0, result.colData, 0, colData.length);
-		result.converter = this.converter;
 		result.userObject = this.userObject;
-		result.ignoreReadErrors = this.ignoreReadErrors;
 		return result;
 	}
 
@@ -575,14 +274,6 @@ public class RowData
 	{
 		Arrays.fill(colData, null);
 		this.resetStatus();
-		if (streams != null)
-		{
-			for (Closeable stream : streams)
-			{
-				FileUtil.closeQuietely(stream);
-			}
-		}
-		streams = null;
 	}
 
 	/**

@@ -31,7 +31,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
-import workbench.storage.RowDataFactory;
+import workbench.storage.RowDataReader;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.*;
 
@@ -373,12 +373,12 @@ public class TableDataDiff
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
+			RowDataReader reader = new RowDataReader(info, this.reference);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
 
-				RowData row = new RowData(cols);
-				row.read(rs, info, false);
+				RowData row = reader.read(rs, false);
 				packetRows.add(row);
 
 				if (packetRows.size() == chunkSize)
@@ -419,10 +419,10 @@ public class TableDataDiff
 
 			if (currentRowNumber == 0) comparer.setResultInfo(ri);
 
+			RowDataReader reader = new RowDataReader(ri, toSync);
 			while (rs.next())
 			{
-				RowData r = RowDataFactory.createRowData(ri, toSync);
-				r.read(rs, ri, false);
+				RowData r = reader.read(rs, false);
 				checkRows.add(r);
 				if (cancelExecution) break;
 			}

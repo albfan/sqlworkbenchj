@@ -11,8 +11,12 @@
  */
 package workbench.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -62,52 +66,70 @@ public class PostgresBlobFormatter
 	private CharSequence getDecodeString(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof byte[])
+		byte[] buffer = getBytes(value);
+		if (buffer == null) return value.toString();
+
+		StringBuilder result = new StringBuilder(buffer.length * 2 + 20);
+		result.append("decode('");
+		for (int i = 0; i < buffer.length; i++)
 		{
-			byte[] buffer = (byte[])value;
-			StringBuilder result = new StringBuilder(buffer.length * 2 + 20);
-			result.append("decode('");
-			for (int i = 0; i < buffer.length; i++)
-			{
-				int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-				result.append(StringUtil.hexString(c, 2));
-			}
-			result.append("', 'hex')");
-			return result;
+			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
+			result.append(StringUtil.hexString(c, 2));
 		}
-		return value.toString();
+		result.append("', 'hex')");
+		return result;
 	}
 
 	private CharSequence getEscapeString(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof byte[])
+		byte[] buffer = getBytes(value);
+		if (buffer == null) return value.toString();
+
+		StringBuilder result = new StringBuilder(buffer.length * 5 + 10);
+		result.append("E'");
+		for (int i = 0; i < buffer.length; i++)
 		{
-			byte[] buffer = (byte[])value;
-			StringBuilder result = new StringBuilder(buffer.length * 5 + 10);
-			result.append("E'");
-			for (int i = 0; i < buffer.length; i++)
+			result.append("\\\\");
+			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
+			String s = Integer.toOctalString(c);
+			int l = s.length();
+			if (l == 1)
 			{
-				result.append("\\\\");
-				int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-				String s = Integer.toOctalString(c);
-				int l = s.length();
-				if (l == 1)
-				{
-					result.append("00");
-				}
-				else if (l == 2)
-				{
-					result.append('0');
-				}
-				result.append(s);
+				result.append("00");
 			}
-			result.append("'::bytea");
-			return result;
+			else if (l == 2)
+			{
+				result.append('0');
+			}
+			result.append(s);
 		}
-		return value.toString();
+		result.append("'::bytea");
+		return result;
 	}
 
+	private byte[] getBytes(Object value)
+	{
+		if (value instanceof byte[])
+		{
+			return (byte[])value;
+		}
+		
+		if (value instanceof InputStream)
+		{
+			// When doing an export the Blobs might be returned as InputStreams
+			InputStream in = (InputStream)value;
+			try
+			{
+				return FileUtil.readBytes(in);
+			}
+			catch (IOException io)
+			{
+				LogMgr.logError("PostgresBlobFormatter.getBytes()", "Could not read input stream", io);
+			}
+		}
+		return null;
+	}
 	@Override
 	public BlobLiteralType getType()
 	{

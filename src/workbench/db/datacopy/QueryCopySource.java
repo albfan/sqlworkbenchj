@@ -24,6 +24,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
@@ -101,11 +102,10 @@ public class QueryCopySource
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
-			int colCount = info.getColumnCount();
-			currentRow = new RowData(colCount);
+			RowDataReader reader = new RowDataReader(info, sourceConnection);
 			while (this.keepRunning && rs.next())
 			{
-				// RowData will make some transformation
+				// RowDataReader will make some transformation
 				// on the data read from the database
 				// which works around some bugs in the Oracle
 				// JDBC driver. Especially it will supply
@@ -113,7 +113,7 @@ public class QueryCopySource
 				// more flexible when copying from Oracle
 				// to other systems
 				// That's why I'm reading the result set into a RowData object
-				currentRow.read(rs, info, false);
+			  currentRow = reader.read(rs, false);
 				if (!keepRunning) break;
 
 				try

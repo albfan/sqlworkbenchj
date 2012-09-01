@@ -11,9 +11,12 @@
  */
 package workbench.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 import workbench.util.Base64;
+import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
@@ -62,9 +65,7 @@ public class DefaultBlobFormatter
 		if (value instanceof byte[])
 		{
 			byte[] buffer = (byte[])value;
-			result = new StringBuilder(buffer.length * 2 + addSpace);
-			if (prefix != null) result.append(prefix);
-			appendArray(result, buffer);
+			result = convertBytes(buffer);
 		}
 		else if (value instanceof Blob)
 		{
@@ -78,6 +79,19 @@ public class DefaultBlobFormatter
 				appendArray(result, byteBuffer);
 			}
 		}
+		else if (value instanceof InputStream)
+		{
+			InputStream in = (InputStream)value;
+			try
+			{
+				byte[] data = FileUtil.readBytes(in);
+				result = convertBytes(data);
+			}
+			catch (IOException io)
+			{
+				throw new SQLException("Could not read BLOB data", io);
+			}
+		}
 		else
 		{
 			String s = value.toString();
@@ -87,6 +101,14 @@ public class DefaultBlobFormatter
 		}
 		if (suffix != null) result.append(suffix);
 		return result.toString();
+	}
+
+	private StringBuilder convertBytes(byte[] data)
+	{
+		StringBuilder result = new StringBuilder(data.length * 2);
+		if (prefix != null) result.append(prefix);
+		appendArray(result, data);
+		return result;
 	}
 
 	private void appendArray(StringBuilder result, byte[] buffer)

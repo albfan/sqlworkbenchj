@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
@@ -25,6 +24,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.util.CollectionUtil;
@@ -178,11 +178,11 @@ public class ClientSideTableSearcher
 
 			boolean trimCharData = this.connection.trimCharData();
 
+			RowDataReader reader = new RowDataReader(info, connection);
 			while (rs.next())
 			{
 				if (cancelSearch) break;
-				RowData row = new RowData(info.getColumnCount());
-				row.read(rs, info, trimCharData);
+				RowData row = reader.read(rs, trimCharData);
 				if (searcher.isSearchStringContained(row, info))
 				{
 					result.addRow(row);

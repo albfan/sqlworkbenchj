@@ -13,6 +13,7 @@ package workbench.db.exporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.Blob;
@@ -803,7 +804,7 @@ public abstract class RowDataConverter
 					return "";
 				}
 			}
-			else if (blobFormatter != null && (value instanceof Blob || value instanceof byte[]))
+			else if (blobFormatter != null && (value instanceof Blob || value instanceof byte[] || value instanceof InputStream))
 			{
 				try
 				{
