@@ -37,7 +37,6 @@ public class SelectColumn
 			baseTable = s.toString();
 			objectName = elements.get(elements.size() - 1);
 		}
-
 	}
 
 	/**

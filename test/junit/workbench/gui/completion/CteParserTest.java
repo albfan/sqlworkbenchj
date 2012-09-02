@@ -1,0 +1,137 @@
+/*
+ * CteParserTest.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2012, Thomas Kellerer
+ * No part of this code may be reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.gui.completion;
+
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class CteParserTest
+{
+	public CteParserTest()
+	{
+	}
+
+	@Before
+	public void setUp()
+	{
+	}
+
+	@Test
+	public void testParseSql()
+	{
+
+	}
+
+	@Test
+	public void testColDefs()
+	{
+		String cte = "with cte (one, two) as (" +
+			"  select x,y from bar " +
+			"), " +
+			"other as ( " +
+			"   select c.x as x2, c.y as y2, f.a " +
+			"   from cte c " +
+			"     join foo f on c.x = f.id " +
+			") " +
+			"select * from other";
+
+		CteParser analyzer = new CteParser();
+		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		CteDefinition t1 = result.get(0);
+		assertEquals("cte", t1.getName());
+		assertEquals(2, t1.getColumns().size());
+		assertEquals("one", t1.getColumns().get(0).getColumnName());
+		assertEquals("two", t1.getColumns().get(1).getColumnName());
+	}
+
+	@Test
+	public void testSplitCtes()
+	{
+		String cte = "with cte as (" +
+			"  select x,y from bar " +
+			"), " +
+			"other as ( " +
+			"   select c.x as x2, c.y as y2, f.a " +
+			"   from cte c " +
+			"     join foo f on c.x = f.id " +
+			") " +
+			"select * from other";
+
+		CteParser analyzer = new CteParser();
+		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		CteDefinition t1 = result.get(0);
+		assertEquals("cte", t1.getName());
+		assertEquals(2, t1.getColumns().size());
+		assertEquals("x", t1.getColumns().get(0).getColumnName());
+		assertEquals("y", t1.getColumns().get(1).getColumnName());
+
+		System.out.println(result.get(1));
+		System.out.println(cte.substring(result.get(1).getStartInStatement(), result.get(1).getEndInStatement()));
+
+		CteDefinition t2 = result.get(1);
+		assertEquals("other", t2.getName());
+		assertEquals(3, t2.getColumns().size());
+		assertEquals("x2", t2.getColumns().get(0).getColumnName());
+		assertEquals("y2", t2.getColumns().get(1).getColumnName());
+		assertEquals("a", t2.getColumns().get(2).getColumnName());
+	}
+
+	@Test
+	public void testRecursive()
+	{
+		String cte =
+			"with recursive cte as (" +
+			"  select x, y from bar " +
+			") " +
+			"select * from cte";
+
+		CteParser analyzer = new CteParser();
+		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		CteDefinition t1 = result.get(0);
+		assertEquals("cte", t1.getName());
+		assertEquals(2, t1.getColumns().size());
+		assertEquals("x", t1.getColumns().get(0).getColumnName());
+		assertEquals("y", t1.getColumns().get(1).getColumnName());
+	}
+
+	@Test
+	public void testWriteable()
+	{
+		String cte =
+			"with new_rows (id, nr) as (" +
+			"  insert into foo values (1,2) returning * " +
+			") " +
+			"select * from new_rows";
+
+		CteParser analyzer = new CteParser();
+		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		CteDefinition t1 = result.get(0);
+		assertEquals("new_rows", t1.getName());
+		assertEquals(2, t1.getColumns().size());
+		assertEquals("id", t1.getColumns().get(0).getColumnName());
+		assertEquals("nr", t1.getColumns().get(1).getColumnName());
+	}
+
+}

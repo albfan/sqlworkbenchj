@@ -39,8 +39,9 @@ public class RowDataReader
 {
 	private List<Closeable> streams;
 	private DataConverter converter;
-	boolean ignoreReadErrors;
-	boolean useStreamsForBlobs;
+	private boolean ignoreReadErrors;
+	private boolean useStreamsForBlobs;
+	private	boolean useStreamsForClobs;
 	private boolean longVarcharAsClob;
 	private boolean useGetBytesForBlobs;
 	private boolean useGetStringForClobs;
@@ -79,7 +80,7 @@ public class RowDataReader
 	 * then they will be returned as InputStreams (as returned by ResultSet.getBinaryStream()).
 	 *
 	 * <b>If this is set to true, the consumer of the RowData instance is responsible for closing
-	 * all InputStreams returned by this reader.</b>
+	 * all InputStreams returned by this class.</b>
 	 *
 	 * @param flag if true, return InputStreams instead of byte[]
 	 *
@@ -88,6 +89,27 @@ public class RowDataReader
 	public void setUseStreamsForBlobs(boolean flag)
 	{
 		useStreamsForBlobs = flag;
+	}
+
+	/**
+	 * Controls how CLOB columns are returned.
+	 * By default CLOB data is converted to a String.<br/>
+	 * Setting useStreamsForClobs to true will return a <tt>Reader</tt> instance for the CLOB columns
+	 * (as returned by ResultSet.getCharacterStream()).
+	 *
+	 * <b>If this is set to true, the consumer of the RowData instance is responsible for closing
+	 * all Readers returned by this class.</b>
+	 *
+	 * Setting this to true will be ignored if <tt>getString()</tt> is used for the CLOB columns
+	 *
+	 * @param flag if true, return <tt>Reader</tt>s instead of <tt>String</tt>s
+	 *
+	 * @see #read(java.sql.ResultSet, boolean)
+	 * @see ResultInfo#useGetStringForClobs() 
+	 */
+	public void setUseStreamsForClobs(boolean flag)
+	{
+		useStreamsForClobs = flag;
 	}
 
 	/**
@@ -229,6 +251,10 @@ public class RowDataReader
 					if (useGetStringForClobs)
 					{
 						value = rs.getString(i + 1);
+					}
+					else if (useStreamsForClobs)
+					{
+						value = rs.getCharacterStream(i + 1);
 					}
 					else
 					{
