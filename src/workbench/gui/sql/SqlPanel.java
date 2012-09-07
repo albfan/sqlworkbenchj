@@ -1555,7 +1555,8 @@ public class SqlPanel
 						// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
 						// the second check for isBusy() is to prevent the situation where the user manages
 						// to manually run a statement between the above setBusy(false) and this point)
-						if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy())
+						if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy()
+							&& !dbConnection.getAutoCommit())
 						{
 							LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
 							dbConnection.rollbackSilently();
