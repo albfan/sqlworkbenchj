@@ -537,6 +537,22 @@ public class SqlFormatterTest
 			") c";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
+
+		sql = "select t1.x, t1.foo from table_one t1 join (select x,y from some_table) t2 on t1.x = t2.x";
+		expected =
+			"SELECT t1.x,\n" +
+			"       t1.foo\n" +
+			"FROM table_one t1\n" +
+			"  JOIN (\n" +
+			"    SELECT x,\n" +
+			"           y\n" +
+			"    FROM some_table\n" +
+			"  ) t2 ON t1.x = t2.x";
+		f = new SqlFormatter(sql, 5);
+		f.setNewLineForSubselects(true);
+		formatted = f.getFormattedSql();
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
 	}
 
 	@Test
@@ -1622,7 +1638,7 @@ public class SqlFormatterTest
 			"    ON foo.id = bar.fid\n"  +
 			"   AND foo.id2 = bar.id2\n" +
 			"   AND foo.id3 = bar.id3";
-		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
+//		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 	}
 

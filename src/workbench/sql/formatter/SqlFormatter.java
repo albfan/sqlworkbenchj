@@ -584,6 +584,7 @@ public class SqlFormatter
 		int indentPos = last.getText().length() + 2;
 		int onPos = 0;
 		int bracketCount = 0;
+
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -605,6 +606,16 @@ public class SqlFormatter
 					t = this.lexer.getNextToken(true, false);
 					t = processInList(t);
 				}
+			}
+			else if (last.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
+			{
+				StringBuilder old = indent;
+				indent = new StringBuilder(2);
+				if (old != null) indent.append(old);
+				indent.append("  ");
+				t = this.processSubSelect(true, bracketCount, true);
+				indent = old;
+				continue;
 			}
 			else if (")".equals(text))
 			{
