@@ -26,15 +26,38 @@ import workbench.util.StringUtil;
 public class CteParser
 {
 
+	private String baseSql;
+	private int baseSqlStart;
+	private List<CteDefinition> cteList = new ArrayList<CteDefinition>();
+
+	public CteParser(String sql)
+	{
+		parseCte(sql);
+	}
+
+	public String getBaseSql()
+	{
+		return baseSql;
+	}
+
+	public int getBaseSqlStart()
+	{
+		return baseSqlStart;
+	}
+
 	/**
 	 * Split the passed SQL into individual CTE definitions.
 	 *
 	 * @param sql  the sql to parse
 	 * @return a list that contains one string for each CTE
 	 */
-	public List<CteDefinition> getCteDefinitions(String sql)
+	public List<CteDefinition> getCteDefinitions()
 	{
-		List<CteDefinition> result = new ArrayList<CteDefinition>();
+		return cteList;
+	}
+
+	private void parseCte(String sql)
+	{
 		SQLLexer lexer = new SQLLexer(sql);
 
 		int lastDefStart = 0;
@@ -107,16 +130,23 @@ public class CteParser
 						cols = getColumnsFromSelect(cte);
 					}
 					CteDefinition def = new CteDefinition(currentName, cols);
-					def.setStartInStatement(lastDefStart);
-					def.setEndInStatement(token.getCharEnd());
-					result.add(def);
+					def.setStartInStatement(lastStart);
+					def.setEndInStatement(end);
+					def.setInnerSql(cte);
+					cteList.add(def);
 					afterAs = false;
 					colDefs = null;
 				}
 			}
+			else if (bracketCount == 0 && "select".equalsIgnoreCase(s))
+			{
+				// this is the actual SELECT statement for the CTE
+				// (I don't think anything else than a SELECT can "terminate" the list of CTE definitions)
+				baseSql = sql.substring(token.getCharBegin());
+				baseSqlStart = token.getCharBegin();
+			}
 			token = lexer.getNextToken(false, false);
 		}
-		return result;
 	}
 
 	private List<ColumnIdentifier> getColumnsFromDefinition(String columnList)
@@ -135,10 +165,14 @@ public class CteParser
 	{
 		List<String> cl = SqlUtil.getSelectColumns(select, true);
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(cl.size());
+
 		for (String col : cl)
 		{
-			SelectColumn sc = new SelectColumn(col);
-			cols.add(new ColumnIdentifier(sc.getNameToUse()));
+			if (StringUtil.isNonBlank(col))
+			{
+				SelectColumn sc = new SelectColumn(col);
+				cols.add(new ColumnIdentifier(sc.getNameToUse()));
+			}
 		}
 		return cols;
 	}

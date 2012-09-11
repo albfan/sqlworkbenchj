@@ -40,9 +40,35 @@ public class StatementContext
 
 	public StatementContext(WbConnection conn, String sql, int pos, boolean retrieve)
 	{
+		BaseAnalyzer subSelectAnalyzer = checkCTE(conn, sql, pos);
+		if (subSelectAnalyzer == null)
+		{
+			subSelectAnalyzer = checkSubselect(conn, sql, pos);
+		}
+
+		BaseAnalyzer verbAnalyzer = createAnalyzer(conn, sql, pos);
+
+		if (subSelectAnalyzer != null)
+		{
+			this.analyzer = subSelectAnalyzer;
+			this.analyzer.setParent(verbAnalyzer);
+		}
+		else if (verbAnalyzer != null)
+		{
+			this.analyzer = verbAnalyzer;
+			this.analyzer.setParent(null);
+		}
+
+		if (analyzer != null && retrieve)
+		{
+			analyzer.retrieveObjects();
+		}
+	}
+
+	private BaseAnalyzer createAnalyzer(WbConnection conn, String sql, int pos)
+	{
 		String verb = SqlUtil.getSqlVerb(sql);
 
-		BaseAnalyzer subSelectAnalyzer = checkSubselect(conn, sql, pos);
 		BaseAnalyzer verbAnalyzer = null;
 
 		CommandTester wbTester = new CommandTester();
@@ -88,22 +114,11 @@ public class StatementContext
 			ExplainAnalyzerFactory factory = new ExplainAnalyzerFactory();
 			verbAnalyzer = factory.getAnalyzer(conn, sql, pos);
 		}
-
-		if (subSelectAnalyzer != null)
+		else if ("WITH".equalsIgnoreCase(verb))
 		{
-			this.analyzer = subSelectAnalyzer;
-			this.analyzer.setParent(verbAnalyzer);
+			verbAnalyzer = new CteAnalyzer(conn, sql, pos);
 		}
-		else if (verbAnalyzer != null)
-		{
-			this.analyzer = verbAnalyzer;
-			this.analyzer.setParent(null);
-		}
-
-		if (analyzer != null && retrieve)
-		{
-			analyzer.retrieveObjects();
-		}
+		return verbAnalyzer;
 	}
 
 	public BaseAnalyzer getAnalyzer()
@@ -111,9 +126,36 @@ public class StatementContext
 		return this.analyzer;
 	}
 
+	/**
+	 * Checks if the cursor is positioned inside a CTE definition.
+	 *
+	 * @param conn  the connection to use
+	 * @param sql   the sql to check
+	 * @param pos   the cursor position
+	 * @return a BaseAnalyzer for the current inner SQL if any.
+	 */
+	private BaseAnalyzer checkCTE(WbConnection conn, String sql, int pos)
+	{
+		String verb = SqlUtil.getSqlVerb(sql);
+		if (!"WITH".equalsIgnoreCase(verb)) return null;
+
+		CteParser cteParser = new CteParser(sql);
+		List<CteDefinition> definitions = cteParser.getCteDefinitions();
+		if (definitions.isEmpty()) return null;
+		for (CteDefinition cte : definitions)
+		{
+			if (pos >= cte.getStartInStatement() && pos <= cte.getEndInStatement())
+			{
+				int newPos = pos - cte.getStartInStatement();
+				return createAnalyzer(conn, cte.getInnerSql(), newPos);
+			}
+		}
+		return null;
+	}
+
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
-		Set<String> unionKeywords = CollectionUtil.treeSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
+		Set<String> unionKeywords = CollectionUtil.caseInsensitiveSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
 
 		try
 		{

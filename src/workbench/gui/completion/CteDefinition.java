@@ -20,13 +20,25 @@ import workbench.db.ColumnIdentifier;
 public class CteDefinition
 {
 	private String cteName;
+	private String innerSql;
 	private List<ColumnIdentifier> columns;
 	private int startAt;
 	private int endAt;
+
 	public CteDefinition(String name, List<ColumnIdentifier> columnList)
 	{
 		this.cteName = name;
 		this.columns = columnList;
+	}
+
+	public String getInnerSql()
+	{
+		return innerSql;
+	}
+
+	public void setInnerSql(String sql)
+	{
+		this.innerSql = sql == null ? null : sql.trim();
 	}
 
 	public String getName()

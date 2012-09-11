@@ -383,7 +383,7 @@ public abstract class BaseAnalyzer
 	}
 
 	@SuppressWarnings("unchecked")
-	private void retrieveTables()
+	protected void retrieveTables()
 	{
 		DbObjectCache cache = this.dbConnection.getObjectCache();
 		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, typeFilter);
@@ -413,7 +413,7 @@ public abstract class BaseAnalyzer
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean retrieveColumns()
+	protected boolean retrieveColumns()
 	{
 		if (tableForColumnList == null) return false;
 

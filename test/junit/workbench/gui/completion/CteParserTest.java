@@ -39,18 +39,19 @@ public class CteParserTest
 	@Test
 	public void testColDefs()
 	{
-		String cte = "with cte (one, two) as (" +
+		String cte =
+			"with cte (one, two) as (" +
 			"  select x,y from bar " +
 			"), " +
 			"other as ( " +
-			"   select c.x as x2, c.y as y2, f.a " +
-			"   from cte c " +
-			"     join foo f on c.x = f.id " +
+			"   select c.x as x2, c.y as y2, f.a \n" +
+			"   from cte c \n" +
+			"     join foo f on c.x = f.id \n" +
 			") " +
 			"select * from other";
 
-		CteParser analyzer = new CteParser();
-		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		CteParser analyzer = new CteParser(cte);
+		List<CteDefinition> result = analyzer.getCteDefinitions();
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		CteDefinition t1 = result.get(0);
@@ -58,6 +59,10 @@ public class CteParserTest
 		assertEquals(2, t1.getColumns().size());
 		assertEquals("one", t1.getColumns().get(0).getColumnName());
 		assertEquals("two", t1.getColumns().get(1).getColumnName());
+		assertEquals("select x,y from bar", t1.getInnerSql());
+		assertEquals("select * from other", analyzer.getBaseSql());
+		assertEquals(t1.getStartInStatement(), cte.indexOf("as (") + 4);
+		assertEquals("select x,y from bar", cte.substring(t1.getStartInStatement(), t1.getEndInStatement()).trim());
 	}
 
 	@Test
@@ -73,8 +78,8 @@ public class CteParserTest
 			") " +
 			"select * from other";
 
-		CteParser analyzer = new CteParser();
-		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		CteParser analyzer = new CteParser(cte);
+		List<CteDefinition> result = analyzer.getCteDefinitions();
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		CteDefinition t1 = result.get(0);
@@ -83,8 +88,8 @@ public class CteParserTest
 		assertEquals("x", t1.getColumns().get(0).getColumnName());
 		assertEquals("y", t1.getColumns().get(1).getColumnName());
 
-		System.out.println(result.get(1));
-		System.out.println(cte.substring(result.get(1).getStartInStatement(), result.get(1).getEndInStatement()));
+//		System.out.println(result.get(1));
+//		System.out.println(cte.substring(result.get(1).getStartInStatement(), result.get(1).getEndInStatement()));
 
 		CteDefinition t2 = result.get(1);
 		assertEquals("other", t2.getName());
@@ -103,8 +108,8 @@ public class CteParserTest
 			") " +
 			"select * from cte";
 
-		CteParser analyzer = new CteParser();
-		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		CteParser analyzer = new CteParser(cte);
+		List<CteDefinition> result = analyzer.getCteDefinitions();
 		assertNotNull(result);
 		assertEquals(1, result.size());
 		CteDefinition t1 = result.get(0);
@@ -123,8 +128,8 @@ public class CteParserTest
 			") " +
 			"select * from new_rows";
 
-		CteParser analyzer = new CteParser();
-		List<CteDefinition> result = analyzer.getCteDefinitions(cte);
+		CteParser analyzer = new CteParser(cte);
+		List<CteDefinition> result = analyzer.getCteDefinitions();
 		assertNotNull(result);
 		assertEquals(1, result.size());
 		CteDefinition t1 = result.get(0);
@@ -132,6 +137,7 @@ public class CteParserTest
 		assertEquals(2, t1.getColumns().size());
 		assertEquals("id", t1.getColumns().get(0).getColumnName());
 		assertEquals("nr", t1.getColumns().get(1).getColumnName());
+		assertEquals("insert into foo values (1,2) returning *", t1.getInnerSql());
 	}
 
 }

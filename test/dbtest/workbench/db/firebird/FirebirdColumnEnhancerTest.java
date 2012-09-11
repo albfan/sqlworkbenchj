@@ -1,16 +1,17 @@
 /*
  * FirebirdColumnEnhancerTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 
 package workbench.db.firebird;
 
+import org.junit.Assume;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -27,7 +28,7 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class FirebirdColumnEnhancerTest 
+public class FirebirdColumnEnhancerTest
 	extends WbTestCase
 {
 
@@ -60,7 +61,8 @@ public class FirebirdColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
+
 		List<TableIdentifier> tables = con.getMetadata().getTableList();
 		assertNotNull(tables);
 		assertEquals(1, tables.size());

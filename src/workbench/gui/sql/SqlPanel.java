@@ -1555,8 +1555,7 @@ public class SqlPanel
 						// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
 						// the second check for isBusy() is to prevent the situation where the user manages
 						// to manually run a statement between the above setBusy(false) and this point)
-						if (dbConnection.getDbSettings().endTransactionAfterConnect() && !dbConnection.isBusy()
-							&& !dbConnection.getAutoCommit())
+						if (doRollbackOnSetConnection())
 						{
 							LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
 							dbConnection.rollbackSilently();
@@ -1574,6 +1573,21 @@ public class SqlPanel
 		{
 			setExecuteActionStates(false);
 		}
+	}
+
+	private boolean doRollbackOnSetConnection()
+	{
+		if (dbConnection == null) return false;
+		if (!dbConnection.getDbSettings().endTransactionAfterConnect()) return false;
+		if (dbConnection.getAutoCommit()) return false;
+		if (dbConnection.isBusy()) return false;
+		if (dbConnection.getProfile() == null) return false;
+
+		// if we are using a separate connection, we always need to do the rollback
+		if (dbConnection.getProfile().getUseSeparateConnectionPerTab()) return true;
+
+		// a single connection is used for all tabs. Only terminate the transaction for the current tab.
+		return this.isCurrentTab();
 	}
 
 	/**

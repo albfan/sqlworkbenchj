@@ -58,6 +58,68 @@ public class StatementContextTest
 	}
 
 	@Test
+	public void testCte()
+		throws Exception
+	{
+		String sql =
+			"with cte (col1, col2, col3, col4) as (\n" +
+			"  select * from one\n" +
+			")" +
+			"select \n" +
+			"from cte;";
+
+		int pos = sql.indexOf("from") + "from".length() + 1;
+		StatementContext context = new StatementContext(con, sql, pos);
+		assertTrue(context.isStatementSupported());
+		List data = context.getData();
+		assertEquals(3, data.size()); // three tables available.
+		for (Object o : data)
+		{
+			assertTrue(o instanceof TableIdentifier);
+		}
+		pos = sql.indexOf("select \n") + "select".length();
+		context = new StatementContext(con, sql, pos);
+
+		data = context.getData();
+		assertEquals(5, data.size()); // 4 columns defined for the CTE plus the (All) marker
+		for (int i=1; i < data.size(); i++)
+		{
+			assertEquals("col" + Integer.toString(i), data.get(i).toString());
+		}
+
+		sql =
+			"with cte_one (col1, col2, col3, col4) as (\n" +
+			"  select * from one\n" +
+			"), cte_two as (\n" +
+			"  select * from cte_one" +
+			")" +
+			"select *\n" +
+			"from ;";
+
+		pos = sql.indexOf("from ;") + "from".length();
+		context = new StatementContext(con, sql, pos);
+		data = context.getData();
+
+		assertEquals(5, data.size()); // two cte names plus three tables
+		for (int i=0; i < data.size(); i++)
+		{
+			Object o = data.get(i);
+			assertTrue(o instanceof TableIdentifier);
+
+			String name = ((TableIdentifier)o).getTableName().toLowerCase();
+			if (i==0)
+			{
+				assertEquals("cte_one", name);
+			}
+			if (i==1)
+			{
+				assertEquals("cte_two", name);
+			}
+		}
+
+	}
+
+	@Test
 	public void testSubSelect()
 	{
 		StatementContext context = new StatementContext(con, "select * from one where x in (select  from two)", 36);
