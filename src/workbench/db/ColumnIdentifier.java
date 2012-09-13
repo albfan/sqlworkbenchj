@@ -481,11 +481,23 @@ public class ColumnIdentifier
 		this.defaultValue = value;
 	}
 
+	/**
+	 * The position of the column in the table or ResultSet.
+	 *
+	 * @return the position of the column. The first column has the position 1 (one)<br/>
+	 *         0 if the position is unknown
+	 */
 	public int getPosition()
 	{
 		return position;
 	}
 
+	/**
+	 * Sets the position of the column in the table or the ResultSet.
+	 * The first column must have 1 as the position.
+	 * 0 indicates that the position is unknown
+	 * @param pos
+	 */
 	public void setPosition(int pos)
 	{
 		this.position = pos;

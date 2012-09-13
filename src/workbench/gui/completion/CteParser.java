@@ -60,7 +60,6 @@ public class CteParser
 	{
 		SQLLexer lexer = new SQLLexer(sql);
 
-		int lastDefStart = 0;
 		int lastStart = 0;
 		int bracketCount = 0;
 		String currentName = null;
@@ -93,7 +92,6 @@ public class CteParser
 			else if (",".equals(s) && bracketCount == 0)
 			{
 				nextIsName = true;
-				lastDefStart = token.getCharEnd();
 			}
 			else if ("(".equals(s))
 			{
@@ -153,10 +151,14 @@ public class CteParser
 	{
 		List<String> cl = StringUtil.stringToList(columnList, ",", true, true, false, true);
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(cl.size());
+		int colIndex = 1;
 		for (String col : cl)
 		{
 			SelectColumn sc = new SelectColumn(col);
-			cols.add(new ColumnIdentifier(sc.getNameToUse()));
+			ColumnIdentifier ci = new ColumnIdentifier(sc.getNameToUse());
+			ci.setPosition(colIndex);
+			cols.add(ci);
+			colIndex ++;
 		}
 		return cols;
 	}
@@ -166,12 +168,16 @@ public class CteParser
 		List<String> cl = SqlUtil.getSelectColumns(select, true);
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(cl.size());
 
+		int colIndex = 1;
 		for (String col : cl)
 		{
 			if (StringUtil.isNonBlank(col))
 			{
 				SelectColumn sc = new SelectColumn(col);
-				cols.add(new ColumnIdentifier(sc.getNameToUse()));
+				ColumnIdentifier ci = new ColumnIdentifier(sc.getNameToUse());
+				ci.setPosition(colIndex);
+				cols.add(ci);
+				colIndex ++;
 			}
 		}
 		return cols;

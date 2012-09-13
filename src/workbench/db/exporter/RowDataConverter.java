@@ -50,6 +50,7 @@ public abstract class RowDataConverter
 	protected String generatingSql;
 	protected ResultInfo metaData;
 	protected boolean writeHeader = true;
+	protected boolean checkPosition;
 	private File outputFile;
 	private File baseDirectory;
 	private String baseFilename;
@@ -712,12 +713,34 @@ public abstract class RowDataConverter
 		{
 			this.columnsToExport = new boolean[colCount];
 		}
+
 		for (int i=0; i < colCount; i++)
 		{
-			this.columnsToExport[i] = columns.contains(this.metaData.getColumn(i));
+			this.columnsToExport[i] = containsColumn(columns, this.metaData.getColumn(i));
 		}
 	}
 
+	private boolean containsColumn(List<ColumnIdentifier> columns, ColumnIdentifier toFind)
+	{
+		if (columns == null) return false;
+		if (toFind == null) return false;
+		if (columns.isEmpty()) return false;
+
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.getPosition() > 0 && toFind.getPosition() > 0)
+			{
+				// make sure to use equals() to compare the column names in order
+				// to take care of quotes and case-sensitivity
+				if (col.getPosition() == toFind.getPosition() && col.equals(toFind)) return true;
+			}
+			else
+			{
+				if (col.equals(toFind)) return true;
+			}
+		}
+		return false;
+	}
 	/**
 	 * Return the number of columns that have to be exported
 	 * @return the real column count

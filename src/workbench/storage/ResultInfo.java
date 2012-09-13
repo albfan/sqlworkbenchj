@@ -142,6 +142,7 @@ public class ResultInfo
 			}
 
 			ColumnIdentifier col = new ColumnIdentifier(name);
+			col.setPosition(i+1);
 
 			if (!name.equals(alias))
 			{
