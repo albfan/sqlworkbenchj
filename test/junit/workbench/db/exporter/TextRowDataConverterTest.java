@@ -24,6 +24,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import static org.junit.Assert.*;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -36,6 +37,34 @@ public class TextRowDataConverterTest
 	public TextRowDataConverterTest()
 	{
 		super("TextRowDataConverterTest");
+	}
+
+	@Test
+	public void testDuplicateColumns()
+		throws Exception
+	{
+		ColumnIdentifier id = new ColumnIdentifier("id", Types.INTEGER, true);
+		id.setPosition(1);
+
+		ColumnIdentifier name1 = new ColumnIdentifier("name", Types.VARCHAR);
+		name1.setPosition(2);
+
+		ColumnIdentifier name2 = new ColumnIdentifier("name", Types.VARCHAR);
+		name2.setPosition(3);
+
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, name1, name2 });
+		TextRowDataConverter converter = new TextRowDataConverter();
+		converter.setResultInfo(info);
+		converter.setDelimiter(";");
+		converter.setNullString("<NULL>");
+		converter.setColumnsToExport(CollectionUtil.arrayList(id, name2));
+		RowData data = new RowData(info);
+		data.setValue(0, new Integer(42));
+		data.setValue(1, "name_1");
+		data.setValue(2, "name_2");
+
+		StrBuffer line = converter.convertRowData(data, 0);
+		assertEquals("Wrong data", "42;name_2", line.toString().trim());
 	}
 
 	@Test
