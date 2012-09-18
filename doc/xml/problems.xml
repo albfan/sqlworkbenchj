@@ -351,6 +351,20 @@ SELECT 42 FROM dual;</programlisting>
 		  </para>
 		</section>
 
+		<section id="mssql-nt-authentication">
+		  <title>Using Windows authentication to connect to a SQL Server</title>
+		  <para>
+        In order to use the integrated Windows authentication (as opposed SQL Server Authentication) the Microsoft
+        JDBC driver is <emphasis role="bold">required</emphasis>. It does not work with the jTDS driver.
+		  </para>
+		  <para>
+        When using Windows authentication the JDBC driver will try to load a Windows DLL named <literal>sqljdbc_auth.dll</literal>.
+        This DLL either needs to be on the Windows <literal>PATH</literal> definition or in the directory where <literal>SQLWorkbench.exe</literal>
+        is located. You need to make sure that you use the correct "bit" version of the DLL. If you are running a 32bit Java Runtime you have to use
+        the 32bit DLL. For a 64bit Java Runtime you need to use the 64bit DLL (the architecture of the server is not relevant).
+		  </para>
+		</section>
+
 		<section id="mssql-cloned-connection">
 		  <title>Can't start a cloned connection while in manual transaction mode</title>
 		  <para>
@@ -425,7 +439,6 @@ SELECT 42 FROM dual;</programlisting>
         The URL parameters for the Microsoft driver are listed here:
         <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
       </para>
-
     </section>
 
 	</section>
