@@ -29,6 +29,9 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import static org.junit.Assert.*;
+import workbench.db.ColumnIdentifier;
+import workbench.storage.RowDataReader;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -41,6 +44,63 @@ public class SqlRowDataConverterTest
 	public SqlRowDataConverterTest()
 	{
 		super("SqlRowDataConverterTest");
+	}
+
+	@Test
+	public void testDuplicateColumns()
+		throws Exception
+	{
+		WbConnection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			TestUtil util = new TestUtil("testDateLiterals");
+			util.prepareEnvironment();
+
+			con = util.getConnection("sqlConverterTest");
+			String script =
+				"CREATE TABLE person (id integer primary key, name varchar(20));\n" +
+				"insert into person (id, name) values (42, 'Arthur Dent');\n" +
+				"commit;";
+			TestUtil.executeScript(con, script);
+
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("SELECT id, name, name||'*' as name FROM person");
+			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
+			TableIdentifier tbl = con.getMetadata().findObject(new TableIdentifier("person"));
+			info.setUpdateTable(tbl);
+			RowDataReader reader = new RowDataReader(info, con);
+			rs.next();
+			RowData row = reader.read(rs, false);
+
+			SqlRowDataConverter converter = new SqlRowDataConverter(con);
+			converter.setOriginalConnection(con);
+			converter.setResultInfo(info);
+			List<ColumnIdentifier> cols = CollectionUtil.arrayList(info.getColumn(0), info.getColumn(2));
+			converter.setColumnsToExport(cols);
+			StrBuffer result = converter.convertRowData(row, 1);
+			assertNotNull(result);
+			String sql = result.toString().trim();
+			String expected =
+				"INSERT INTO PERSON\n" +
+				"(\n" +
+				"  ID,\n" +
+				"  NAME\n" +
+				")\n" +
+				"VALUES\n" +
+				"(\n" +
+				"  42,\n" +
+				"  'Arthur Dent*'\n" +
+				");";
+//			System.out.println("*****\n" + expected + "\n-------" + sql + "\n**********");
+			assertEquals(expected, sql);
+		}
+		finally
+		{
+			con.disconnect();
+			SqlUtil.closeAll(rs, stmt);
+		}
 	}
 
 	@Test
@@ -65,8 +125,7 @@ public class SqlRowDataConverterTest
 			rs = stmt.executeQuery("SELECT * FROM v_person");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
 
-			SqlRowDataConverter converter = new SqlRowDataConverter(null);
-			converter.setOriginalConnection(con);
+			SqlRowDataConverter converter = new SqlRowDataConverter(con);
 			converter.setResultInfo(info);
 			converter.setCreateTable(true);
 			converter.setAlternateUpdateTable(new TableIdentifier("MYTABLE"));

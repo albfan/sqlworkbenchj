@@ -623,6 +623,38 @@ public class ColumnIdentifier
 		return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(other.name));
 	}
 
+	/**
+	 * Check if the passed column is contained in the list of columns.
+	 *
+	 * If the columns contain a position > 0 then the position is taken into account
+	 * when checking if the column is in the list. Otherwise only the name will be checked.
+	 *
+	 * @param columns  the list of columns to search
+	 * @param toFind   the column to find
+	 * @return true if the column is contained in the list.
+	 */
+	public static boolean containsColumn(List<ColumnIdentifier> columns, ColumnIdentifier toFind)
+	{
+		if (columns == null) return false;
+		if (toFind == null) return false;
+		if (columns.isEmpty()) return false;
+
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.getPosition() > 0 && toFind.getPosition() > 0)
+			{
+				// make sure to use equals() to compare the column names in order
+				// to take care of quotes and case-sensitivity
+				if (col.getPosition() == toFind.getPosition() && col.equals(toFind)) return true;
+			}
+			else
+			{
+				if (col.equals(toFind)) return true;
+			}
+		}
+		return false;
+	}
+
 	public static void sortByPosition(List<ColumnIdentifier> columnList)
 	{
 		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()

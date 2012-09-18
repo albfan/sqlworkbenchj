@@ -224,7 +224,7 @@ public class StatementFactory
 	 *	@param lineEnd the character sequence to be used as the line ending
 	 *	@param columns  a list of columns to be included. If this is null all columns are included
 	 */
-	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List columns)
+	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List<ColumnIdentifier> columns)
 	{
 		if (!ignoreStatus && !aRow.isModified()) return null;
 
@@ -243,7 +243,6 @@ public class StatementFactory
 		StringBuilder valuePart = new StringBuilder(250);
 
 		boolean first = true;
-    String colName = null;
 		int colsInThisLine = 0;
 
 		for (int col=0; col < cols; col ++)
@@ -251,7 +250,7 @@ public class StatementFactory
 			ColumnIdentifier colId = this.resultInfo.getColumn(col);
 			if (columns != null)
 			{
-				if (!columns.contains(colId)) continue;
+				if (!ColumnIdentifier.containsColumn(columns, colId)) continue;
 			}
 
 			if (skipIdentityCols && (colId.isIdentityColumn() || colId.isAutoincrement())) continue;
