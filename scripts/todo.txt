@@ -12,7 +12,6 @@ Features:
 - Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
 - DbExplorer panel showing all indexes (will also enable auto completion for DROP INDEX)
 - Treat Oracle's BFILE, Postgres' LargeObjects as BLOBs
-- support auto-completion for CTEs. Probably only possible if the WITH defines the columns: WITH foo (id, foo, bar) as ( ...
 - Support external SQL formatter
 - Convert DDL from one DBMS to another using "intelligent" search & replace (MySQL -> PG, PG -> Oracle)
 - Support N'   ' strings for SQL generation

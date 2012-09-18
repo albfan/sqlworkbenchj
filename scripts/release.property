@@ -1,4 +1,7 @@
-#Sun, 26 Aug 2012 13:36:07 +0200
+#Tue, 18 Sep 2012 18:35:49 +0200
 
 release.build.number=113
 release.build.date=2012-08-26
+
+dev.build.date=2012-09-18
+dev.build.number=113.1
