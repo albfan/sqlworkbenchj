@@ -1470,4 +1470,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + keyname + ".select", null);
 	}
+
+	public boolean getSwitchCatalogInExplorer()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.switchcatalog", Settings.getInstance().getSwitchCatalogInExplorer());
+	}
+
 }

@@ -320,7 +320,16 @@ public class DbExplorerPanel
 
 	public void setSwitchCatalog(boolean flag)
 	{
-		this.switchCatalog = flag && Settings.getInstance().getSwitchCatalogInExplorer();
+		this.switchCatalog = flag && canSwitchCatalog();
+	}
+
+	private boolean canSwitchCatalog()
+	{
+		if (this.dbConnection == null)
+		{
+			return Settings.getInstance().getSwitchCatalogInExplorer();
+		}
+		return dbConnection.getDbSettings().getSwitchCatalogInExplorer();
 	}
 
 	public void showConnectButton(ConnectionSelector selector)
