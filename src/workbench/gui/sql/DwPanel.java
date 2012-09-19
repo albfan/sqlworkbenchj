@@ -1269,18 +1269,32 @@ public class DwPanel
 	 */
 	public void clearContent()
 	{
-		dataTable.reset();
+		clearContent(true);
+	}
+
+	public void clearContent(boolean removeModel)
+	{
+		if (removeModel)
+		{
+			dataTable.reset();
+			hasResultSet = false;
+			sql = null;
+			selectKeys.setEnabled(false);
+		}
+		else
+		{
+			dataTable.removeData();
+		}
+
 		clearWarningIcon();
 		statusBar.removeSelectionIndicator(dataTable);
-		hasResultSet = false;
 		lastMessage = null;
-		sql = null;
+
 		if (!sharedStatusBar)
 		{
 			statusBar.clearRowcount();
 			statusBar.clearExecutionTime();
 		}
-		selectKeys.setEnabled(false);
 		checkResultSetActions();
 	}
 

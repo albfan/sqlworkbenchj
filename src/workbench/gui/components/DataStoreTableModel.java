@@ -409,6 +409,18 @@ public class DataStoreTableModel
 	}
 
 	/**
+	 * Removes all rows from this table model.
+	 */
+	public void removeAll()
+	{
+		if (this.dataCache != null)
+		{
+			this.dataCache.reset();
+			this.fireTableDataChanged();
+		}
+	}
+
+	/**
 	 *	Clears the EventListenerList and empties the DataStore
 	 */
 	public void dispose()

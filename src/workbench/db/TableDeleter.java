@@ -259,7 +259,10 @@ public class TableDeleter
 			{
 				this.connection.commit();
 			}
-			connection.releaseSavepoint(sp);
+			else
+			{
+				connection.releaseSavepoint(sp);
+			}
 		}
 		catch (SQLException e)
 		{

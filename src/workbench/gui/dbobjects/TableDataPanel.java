@@ -37,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 import workbench.WbManager;
 import workbench.db.TableDefinition;
@@ -50,6 +51,7 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.components.ColumnOrderMgr;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
@@ -1045,6 +1047,24 @@ public class TableDataPanel
 		}
 	}
 
+	public void clearData()
+	{
+		if (!initialized) return;
+		if (this.isRetrieving()) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				dataDisplay.clearContent(false);
+				rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
+				clearLoadingImage();
+				reloadAction.setEnabled(true);
+			}
+		});
+	}
+
 	@Override
 	public void tableDataDeleted(List<TableIdentifier> tables)
 	{
@@ -1052,7 +1072,7 @@ public class TableDataPanel
 		if (this.table == null) return;
 		if (tables.contains(this.table))
 		{
-			this.reset();
+			this.clearData();
 		}
 	}
 
