@@ -12,6 +12,7 @@
 package workbench.interfaces;
 
 import java.util.List;
+import workbench.db.TableIdentifier;
 
 /**
  *
@@ -19,5 +20,5 @@ import java.util.List;
  */
 public interface TableDeleteListener
 {
-	void tableDataDeleted(List tables);
+	void tableDataDeleted(List<TableIdentifier> tables);
 }

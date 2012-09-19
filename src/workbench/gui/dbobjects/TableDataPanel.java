@@ -349,7 +349,7 @@ public class TableDataPanel
 				dataDisplay.clearContent();
 				rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 				clearLoadingImage();
-				reloadAction.setEnabled(false);
+				reloadAction.setEnabled(true);
 			}
 		});
 	}
@@ -1046,7 +1046,7 @@ public class TableDataPanel
 	}
 
 	@Override
-	public void tableDataDeleted(List tables)
+	public void tableDataDeleted(List<TableIdentifier> tables)
 	{
 		if (tables == null) return;
 		if (this.table == null) return;

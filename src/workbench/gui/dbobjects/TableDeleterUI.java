@@ -584,7 +584,7 @@ public class TableDeleterUI
 		this.deleteListener.remove(listener);
 	}
 
-	protected void fireTableDeleted(List tables)
+	protected void fireTableDeleted(List<TableIdentifier> tables)
 	{
 		if (this.deleteListener == null || tables == null)
 		{
