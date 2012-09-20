@@ -59,7 +59,7 @@ public class RowDataTest
 			stmt = con.createStatement();
 			rs = stmt.executeQuery("select char_data, vchar from char_test");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
-			RowDataReader reader =  new RowDataReader(info, con);
+			RowDataReader reader = new RowDataReader(info, con);
 			rs.next();
 			RowData row = reader.read(rs, true);
 			String v = (String)row.getValue(0);

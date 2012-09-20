@@ -11,7 +11,6 @@
  */
 package workbench.storage;
 
-import workbench.TestUtil;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -26,10 +25,6 @@ public class RowDataListSorterTest
 	public void testSort()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("RowDataListSorterTest");
-		util.prepareEnvironment();
-
-		int cols = 2;
 		RowDataList data = new RowDataList(20);
 		RowData row = null;
 
@@ -86,13 +81,7 @@ public class RowDataListSorterTest
 		i1 = (Integer) data.get(3).getValue(0);
 		assertEquals(i1.intValue(), 1);
 
-		sorter = new RowDataListSorter(new int[]
-			{
-				0, 1
-			}, new boolean[]
-			{
-				true, true
-			});
+		sorter = new RowDataListSorter(new int[]{0, 1}, new boolean[]{true, true});
 		sorter.sort(data);
 
 		i1 = (Integer) data.get(0).getValue(0);
@@ -107,13 +96,7 @@ public class RowDataListSorterTest
 		i1 = (Integer) data.get(1).getValue(1);
 		assertEquals(i1.intValue(), 2);
 
-		sorter = new RowDataListSorter(new int[]
-			{
-				0, 1
-			}, new boolean[]
-			{
-				true, false
-			});
+		sorter = new RowDataListSorter(new int[]{0, 1}, new boolean[]{true, false});
 		sorter.sort(data);
 
 		i1 = (Integer) data.get(0).getValue(0);

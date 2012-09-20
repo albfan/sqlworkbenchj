@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * A class to store a dynamic array of {@link RowData} objects
+ * A class to store a dynamic array of {@link RowData} objects.
  *
  * @author Thomas Kellerer
  */
@@ -28,7 +28,7 @@ public class RowDataList
 	private float grow = 1.10f;
 	private int size;
 	private RowData[] data;
-	private final Object dataLock = new Object();
+	// private final Object dataLock = new Object();
 
 	public RowDataList()
 	{
@@ -45,19 +45,19 @@ public class RowDataList
 	{
 		if (this.data == null)
 		{
-			data = new RowData[(int)(minStorage * grow)];
+			data = new RowData[(int) (minStorage * grow)];
 		}
 		else
 		{
-			int newStorage = (int)(this.data.length * grow) + 1;
-			if (newStorage < minStorage) newStorage = minStorage;
-
-			synchronized (this.dataLock)
+			int newStorage = (int) (this.data.length * grow) + 1;
+			if (newStorage < minStorage)
 			{
-				RowData[] newBuf = new RowData[newStorage];
-				System.arraycopy(this.data, 0, newBuf, 0, this.size);
-				this.data = newBuf;
+				newStorage = minStorage;
 			}
+
+			RowData[] newBuf = new RowData[newStorage];
+			System.arraycopy(this.data, 0, newBuf, 0, this.size);
+			this.data = newBuf;
 		}
 	}
 
@@ -78,12 +78,9 @@ public class RowDataList
 	public void reset()
 	{
 		if (data == null) return;
-		synchronized (this.dataLock)
+		for (RowData row : data)
 		{
-			for (RowData row : data)
-			{
-				if (row != null) row.reset();
-			}
+			if (row != null) row.reset();
 		}
 		clear();
 	}
@@ -114,10 +111,7 @@ public class RowDataList
 	public RowData get(int index)
 	{
 		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
-		synchronized (this.dataLock)
-		{
-			return this.data[index];
-		}
+		return this.data[index];
 	}
 
 	/**
@@ -127,16 +121,13 @@ public class RowDataList
 	{
 		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
 
-		synchronized (this.dataLock)
+		int count = size - index - 1;
+		if (count > 0)
 		{
-			int count = size - index - 1;
-			if (count > 0)
-			{
-				System.arraycopy(data, index+1, data, index, count);
-			}
-			this.size --;
-			this.data[size] = null;
+			System.arraycopy(data, index+1, data, index, count);
 		}
+		this.size --;
+		this.data[size] = null;
 	}
 
 	/**
@@ -150,14 +141,11 @@ public class RowDataList
 			grow(DEFAULT_SIZE);
 		}
 
-		synchronized (this.dataLock)
-		{
-			int newlen = this.size + 1;
-			if (newlen > this.data.length) grow(newlen);
-			this.data[newlen - 1] = row;
-			this.size = newlen;
-			return this.size;
-		}
+		int newlen = this.size + 1;
+		if (newlen > this.data.length) grow(newlen);
+		this.data[newlen - 1] = row;
+		this.size = newlen;
+		return this.size;
 	}
 
 	/**
@@ -166,38 +154,34 @@ public class RowDataList
 	public int add(int index, RowData row)
 	{
 		int newlen = this.size + 1;
-		synchronized (this.dataLock)
+
+		if (data == null)
 		{
-			if (data == null)
-			{
-				grow(DEFAULT_SIZE);
-			}
-			else if (newlen > this.data.length)
-			{
-				// we are not using ensureCapacity here to optimize
-				// the calls to System.arraycopy
-				RowData[] newBuf = new RowData[(int)(newlen * grow)];
-				System.arraycopy(this.data, 0, newBuf, 0, index);
-				System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
-				this.data = newBuf;
-			}
-			else
-			{
-				System.arraycopy(this.data, index, this.data, index + 1, (size - index));
-			}
-			this.data[index] = row;
-			this.size = newlen;
-			return index;
+			grow(DEFAULT_SIZE);
 		}
+		else if (newlen > this.data.length)
+		{
+			// we are not using ensureCapacity here to optimize the calls to System.arraycopy
+			// copying the data before the index and after the index should be more efficient
+			// than first growing everything (which copies the entire list) and then copying the part after the index again.
+			RowData[] newBuf = new RowData[(int)(newlen * grow)];
+			System.arraycopy(this.data, 0, newBuf, 0, index);
+			System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
+			this.data = newBuf;
+		}
+		else
+		{
+			System.arraycopy(this.data, index, this.data, index + 1, (size - index));
+		}
+		this.data[index] = row;
+		this.size = newlen;
+		return index;
 	}
 
 	public void sort(Comparator<RowData> comp)
 	{
 		if (size == 0 || data == null) return;
-		synchronized (this.dataLock)
-		{
-			Arrays.sort(this.data, 0, this.size, comp);
-		}
+		Arrays.sort(this.data, 0, this.size, comp);
 	}
 
 }

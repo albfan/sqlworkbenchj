@@ -43,4 +43,82 @@ public class RowDataListTest
 		assertEquals(r.getValue(0), "Test");
 		assertEquals(r.getValue(1), new Integer(42));
 	}
+
+	@Test
+	public void testList()
+	{
+		RowDataList list = new RowDataList();
+		assertEquals(0, list.size());
+
+		for (int i=0; i < 500; i++)
+		{
+			RowData row = new RowData(2);
+			row.setValue(0, "Foobar");
+			row.setValue(1, new Integer(i));
+			list.add(row);
+		}
+		assertEquals(500, list.size());
+		for (int i=0; i < 500; i++)
+		{
+			Integer value = (Integer)list.get(i).getValue(1);
+			assertNotNull(value);
+			assertEquals(i, value.intValue());
+		}
+
+		for (int i=0; i < 200; i++)
+		{
+			list.remove(0);
+		}
+		assertEquals(300, list.size());
+		list.reset();
+		assertEquals(0, list.size());
+
+		list = new RowDataList();
+		RowData one = new RowData(2);
+		one.setValue(0, "foobar");
+		one.setValue(1, new Integer(1));
+
+		RowData two = new RowData(2);
+		two.setValue(0, "foobar");
+		two.setValue(1, new Integer(2));
+
+		RowData three = new RowData(2);
+		three.setValue(0, "foobar");
+		three.setValue(1, new Integer(3));
+
+		list.add(one);
+		list.add(three);
+		list.add(1, two);
+
+		assertEquals(3, list.size());
+
+		Object value = list.get(0).getValue(1);
+		assertEquals(Integer.valueOf(1), value);
+
+		value = list.get(1).getValue(1);
+		assertEquals(Integer.valueOf(2), value);
+
+		value = list.get(2).getValue(1);
+		assertEquals(Integer.valueOf(3), value);
+
+		assertSame(one, list.get(0));
+		assertSame(two, list.get(1));
+		assertSame(three, list.get(2));
+
+		list = new RowDataList(0);
+		list.add(one);
+		list.add(two);
+		list.add(three);
+		assertEquals(3, list.size());
+
+		list = new RowDataList(0);
+		list.add(0, one);
+		list.add(0, two);
+		list.add(0, three);
+		assertEquals(3, list.size());
+		assertSame(three, list.get(0));
+		assertSame(two, list.get(1));
+		assertSame(one, list.get(2));
+	}
+
 }
