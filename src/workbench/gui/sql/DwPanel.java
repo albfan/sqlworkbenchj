@@ -1269,22 +1269,10 @@ public class DwPanel
 	 */
 	public void clearContent()
 	{
-		clearContent(true);
-	}
-
-	public void clearContent(boolean removeModel)
-	{
-		if (removeModel)
-		{
-			dataTable.reset();
-			hasResultSet = false;
-			sql = null;
-			selectKeys.setEnabled(false);
-		}
-		else
-		{
-			dataTable.removeData();
-		}
+		dataTable.reset();
+		hasResultSet = false;
+		sql = null;
+		selectKeys.setEnabled(false);
 
 		clearWarningIcon();
 		statusBar.removeSelectionIndicator(dataTable);

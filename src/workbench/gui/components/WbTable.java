@@ -727,24 +727,6 @@ public class WbTable
 		});
 	}
 
-	public void removeData()
-	{
-		this.cancelEditing();
-		this.rowHeightWasOptimized = false;
-		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
-		DataStoreTableModel model = getDataStoreTableModel();
-		if (model != null)
-		{
-			model.removeAll();
-			TableRowHeader rowNumbers = TableRowHeader.getRowHeader(this);
-			if (rowNumbers != null)
-			{
-				TableRowHeader.removeRowHeader(this);
-				TableRowHeader.showRowHeader(this);
-			}
-		}
-	}
-
 	@Override
 	public void reset()
 	{

@@ -1047,24 +1047,6 @@ public class TableDataPanel
 		}
 	}
 
-	public void clearData()
-	{
-		if (!initialized) return;
-		if (this.isRetrieving()) return;
-
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				dataDisplay.clearContent(false);
-				rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
-				clearLoadingImage();
-				reloadAction.setEnabled(true);
-			}
-		});
-	}
-
 	@Override
 	public void tableDataDeleted(List<TableIdentifier> tables)
 	{
@@ -1072,7 +1054,7 @@ public class TableDataPanel
 		if (this.table == null) return;
 		if (tables.contains(this.table))
 		{
-			this.clearData();
+			this.reset();
 		}
 	}
 
