@@ -1256,7 +1256,7 @@ public class DataStore
 		boolean lowMemory = false;
 
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
-
+		final int checkInterval = Settings.getInstance().getIntProperty("workbench.gui.data.memcheckinterval", 10);
 		try
 		{
 			int rowCount = 0;
@@ -1276,7 +1276,7 @@ public class DataStore
 				this.data.add(row);
 
 				if (maxRows > 0 && rowCount > maxRows) break;
-				if (MemoryWatcher.isMemoryLow())
+				if (rowCount % checkInterval == 0 && MemoryWatcher.isMemoryLow(false))
 				{
 					LogMgr.logError("DataStore.initData()", "Memory is running low. Aborting reading...", null);
 					lowMemory = true;

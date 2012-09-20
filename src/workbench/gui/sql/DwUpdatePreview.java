@@ -73,7 +73,7 @@ public class DwUpdatePreview
 				buffer.append(dml.getExecutableStatement(f, dbConn));
 				buffer.append(";");
 				buffer.appendNewLine();
-				if (MemoryWatcher.isMemoryLow())
+				if (MemoryWatcher.isMemoryLow(true))
 				{
 					lowMemory = true;
 					buffer.clear();

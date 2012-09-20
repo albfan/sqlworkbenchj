@@ -3256,7 +3256,7 @@ public class SqlPanel
 		if (!result.hasMessages()) return;
 		try
 		{
-			if (!MemoryWatcher.isMemoryLow())
+			if (!MemoryWatcher.isMemoryLow(true))
 			{
 				result.appendMessages(this);
 				this.appendToLog("\n");

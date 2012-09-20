@@ -558,11 +558,11 @@ public class EditorPanel
 		return this.readFile(aFile, null);
 	}
 
-	public boolean readFile(File aFile, String encoding)
+	public boolean readFile(File toLoad, String encoding)
 	{
-		if (aFile == null) return false;
-		if (!aFile.exists()) return false;
-		if (aFile.length() >= Integer.MAX_VALUE / 3)
+		if (toLoad == null) return false;
+		if (!toLoad.exists()) return false;
+		if (toLoad.length() >= Integer.MAX_VALUE / 3)
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "MsgFileTooBig");
 			return false;
@@ -584,25 +584,19 @@ public class EditorPanel
 			// be in memory at the same time.
 			clearCurrentDocument();
 
-			String filename = aFile.getAbsolutePath();
-			File f = new File(filename);
 			try
 			{
-				if (StringUtil.isEmptyString(encoding)) encoding = Settings.getInstance().getDefaultFileEncoding();
-				reader = EncodingUtil.createBufferedReader(f, encoding);
+				if (StringUtil.isEmptyString(encoding))
+				{
+					encoding = Settings.getInstance().getDefaultFileEncoding();
+				}
+				reader = EncodingUtil.createBufferedReader(toLoad, encoding);
 			}
 			catch (UnsupportedEncodingException e)
 			{
 				LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested. Using UTF-8", e);
-				try
-				{
-					encoding = "UTF-8";
-					FileInputStream in = new FileInputStream(filename);
-					reader = new BufferedReader(new InputStreamReader(in, "UTF-8"), 8192);
-				}
-				catch (Throwable ignore)
-				{
-				}
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getFormattedString("ErrWrongEncoding", encoding));
+				return false;
 			}
 
 			// Creating a SyntaxDocument with a filled GapContent
@@ -610,7 +604,7 @@ public class EditorPanel
 			// go through the SyntaxDocument
 			// but we initialize the GapContent in advance to avoid
 			// too many re-allocations of the internal buffer
-			GapContent  content = new GapContent((int)aFile.length() + 1500);
+			GapContent  content = new GapContent((int)toLoad.length() + 1500);
 			doc = new SyntaxDocument(content);
 			doc.suspendUndo();
 
@@ -632,7 +626,7 @@ public class EditorPanel
 				pos += lineBuffer.length();
 				lineBuffer.setLength(0);
 				lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
-				if (MemoryWatcher.isMemoryLow())
+				if (MemoryWatcher.isMemoryLow(true))
 				{
 					lowMemory = true;
 					break;
@@ -649,19 +643,19 @@ public class EditorPanel
 			{
 				doc.resumeUndo();
 				setDocument(doc);
-				currentFile = aFile;
+				currentFile = toLoad;
 				fileEncoding = encoding;
 				result = true;
-				fireFilenameChanged(filename);
+				fireFilenameChanged(toLoad.getAbsolutePath());
 			}
 		}
 		catch (BadLocationException bl)
 		{
-			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + aFile.getAbsolutePath(), bl);
+			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + toLoad.getAbsolutePath(), bl);
 		}
 		catch (IOException e)
 		{
-			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + aFile.getAbsolutePath(), e);
+			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + toLoad.getAbsolutePath(), e);
 		}
 		catch (OutOfMemoryError mem)
 		{

@@ -1073,7 +1073,7 @@ public class DataImporter
 			if (!this.continueOnError) throw e;
 		}
 
-		if (MemoryWatcher.isMemoryLow())
+		if (MemoryWatcher.isMemoryLow(false))
 		{
 			this.hasErrors = true;
 			closeStatements();

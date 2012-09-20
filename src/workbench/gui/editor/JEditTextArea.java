@@ -1381,7 +1381,7 @@ public class JEditTextArea
 
 	public void appendLine(String aLine)
 	{
-		if (MemoryWatcher.isMemoryLow())
+		if (MemoryWatcher.isMemoryLow(true))
 		{
 			WbManager.getInstance().showLowMemoryError();
 			return;
@@ -2161,7 +2161,7 @@ public class JEditTextArea
 
 	public void insertText(int position, String text)
 	{
-		if (MemoryWatcher.isMemoryLow())
+		if (MemoryWatcher.isMemoryLow(true))
 		{
 			WbManager.getInstance().showLowMemoryError();
 			return;
@@ -2429,7 +2429,7 @@ public class JEditTextArea
 	{
 		if (editable)
 		{
-			if (MemoryWatcher.isMemoryLow())
+			if (MemoryWatcher.isMemoryLow(true))
 			{
 				WbManager.getInstance().showLowMemoryError();
 				return;

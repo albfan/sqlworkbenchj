@@ -104,9 +104,10 @@ public class WbAboutDialog
     jdkVersion = new JLabel();
     homepageLabel = new JLabel();
     mailToLabel = new JLabel();
+    infoPanel = new JPanel();
+    memoryLabel = new JLabel();
     settingsLabel = new WbLabelField();
     logfileLabel = new WbLabelField();
-    memoryLabel = new JLabel();
 
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
@@ -202,7 +203,7 @@ public class WbAboutDialog
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(4, 5, 0, 5);
+    gridBagConstraints.insets = new Insets(4, 5, 3, 5);
     contentPanel.add(builtWithNbLabel, gridBagConstraints);
 
     jeditLabel.setText("<html>The editor is based on jEdit's 2.2.2 <u>syntax highlighting package</u></html>");
@@ -220,6 +221,7 @@ public class WbAboutDialog
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(0, 5, 5, 5);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
@@ -264,35 +266,44 @@ public class WbAboutDialog
     gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(mailToLabel, gridBagConstraints);
 
+    infoPanel.setLayout(new GridBagLayout());
+
+    memoryLabel.setText("Memory:");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 1, 0);
+    infoPanel.add(memoryLabel, gridBagConstraints);
+
     settingsLabel.setText("Settings");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(3, 5, 0, 5);
-    contentPanel.add(settingsLabel, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
+    infoPanel.add(settingsLabel, gridBagConstraints);
 
     logfileLabel.setText("Logfile");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(1, 5, 0, 5);
-    contentPanel.add(logfileLabel, gridBagConstraints);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(1, 0, 0, 0);
+    infoPanel.add(logfileLabel, gridBagConstraints);
 
-    memoryLabel.setText("Memory:");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(20, 5, 0, 0);
-    contentPanel.add(memoryLabel, gridBagConstraints);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LAST_LINE_START;
+    gridBagConstraints.insets = new Insets(0, 7, 0, 7);
+    contentPanel.add(infoPanel, gridBagConstraints);
 
     getContentPane().add(contentPanel, BorderLayout.CENTER);
 
@@ -368,6 +379,7 @@ public class WbAboutDialog
   private JButton closeButton;
   private JPanel contentPanel;
   private JLabel homepageLabel;
+  private JPanel infoPanel;
   private JLabel jdkVersion;
   private JLabel jeditLabel;
   private JLabel labelCopyright;

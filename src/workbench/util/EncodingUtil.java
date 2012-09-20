@@ -195,8 +195,7 @@ public class EncodingUtil
 			{
 				// Fall back to default encoding
 				pw = new BufferedWriter(new OutputStreamWriter(stream), buffSize);
-				String msg = ResourceMgr.getString("ErrWrongEncoding").replace("%encoding%", encoding);
-				LogMgr.logError("EncodingUtil.createWriter()", msg, e);
+				LogMgr.logError("EncodingUtil.createWriter()", "Invalid encodign: " + encoding, e);
 			}
 		}
 		return pw;
@@ -206,7 +205,7 @@ public class EncodingUtil
 	{
 		return System.getProperty("file.encoding");
 	}
-	
+
 	public static JComponent createEncodingPanel()
 	{
 		try

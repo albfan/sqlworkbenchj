@@ -28,7 +28,8 @@ public class AboutAction
 		initMenuDefinition("MnuTxtAbout");
 		removeIcon();
 	}
-	
+
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");
