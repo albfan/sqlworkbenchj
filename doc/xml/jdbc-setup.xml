@@ -210,7 +210,7 @@
 						<entry>
 							<simplelist columns="1">
 								<member>db2jcc4.jar</member>
-								<member><ulink url="http://www-01.ibm.com/support/docview.wss?rs=4020&amp;uid=swg21385217"/></member>
+								<member><ulink url="http://www-01.ibm.com/software/data/db2/linux-unix-windows/download.html"/></member>
 							</simplelist>
 						</entry>
 					</row>
@@ -265,7 +265,7 @@
 						<entry>
 							<simplelist columns="1">
 								<member>mysql-connector-java-5.1.5-bin.jar (exact name depends on version)</member>
-								<member><ulink url="http://www.mysql.com/products/connector/j"/></member>
+								<member><ulink url="http://www.mysql.com/downloads/connector/j/"/></member>
 							</simplelist>
 						</entry>
 					</row>
@@ -276,7 +276,7 @@
 						<entry>
 							<simplelist columns="1">
 							  <member>sqljdbc4.jar</member>
-								<member><ulink url="http://www.microsoft.com/sqlserver/2005/en/us/java-database-connectivity.aspx"/></member>
+								<member><ulink url="http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx"/></member>
 							</simplelist>
 						</entry>
 					</row>
