@@ -79,6 +79,7 @@ public class SettingsPanel
 		pages.add(new OptionPanelPage("WorkspaceOptions", "LblSettingsWorkspace"));
 		pages.add(new OptionPanelPage("DataDisplayOptions", "LblSettingsDataDisplay"));
 		pages.add(new OptionPanelPage("DataFormattingOptionsPanel", "LblSettingsDataFormat"));
+		pages.add(new OptionPanelPage("DataColorOptions", "LblDataColors"));
 		pages.add(new OptionPanelPage("DataEditOptionsPanel", "LblDataEdit"));
 		pages.add(new OptionPanelPage("DbExplorerOptionsPanel", "LblSettingsDbExplorer"));
 		pages.add(new OptionPanelPage("WindowTitleOptionsPanel", "LblSettingsWinTitle"));

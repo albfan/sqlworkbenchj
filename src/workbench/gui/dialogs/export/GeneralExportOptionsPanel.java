@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import workbench.gui.components.EncodingPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -44,6 +45,7 @@ public class GeneralExportOptionsPanel
 		s.setProperty("workbench.export.general.dateformat", this.getDateFormat());
 		s.setProperty("workbench.export.general.timestampformat", this.getTimestampFormat());
 		s.setProperty("workbench.export.general.encoding", this.getEncoding());
+		s.setExportNullString(this.getNullString());
 	}
 
 	public void restoreSettings()
@@ -52,6 +54,24 @@ public class GeneralExportOptionsPanel
 		this.setDateFormat(s.getProperty("workbench.export.general.dateformat", ""));
 		this.setTimestampFormat(s.getProperty("workbench.export.general.timestampformat", ""));
 		this.setEncoding(s.getProperty("workbench.export.general.encoding", s.getDefaultDataEncoding()));
+		this.setNullString(s.getExportNullString());
+
+	}
+
+	@Override
+	public void setNullString(String value)
+	{
+		nullString.setText(value);
+	}
+
+	@Override
+	public String getNullString()
+	{
+		if (StringUtil.isBlank(nullString.getText()))
+		{
+			return null;
+		}
+		return nullString.getText().trim();
 	}
 
 	@Override
@@ -125,8 +145,10 @@ public class GeneralExportOptionsPanel
     dateFormat = new JTextField();
     timestampFormatLabel = new JLabel();
     timestampFormat = new JTextField();
-    jPanel1 = new JPanel();
     selectColumnsButton = new JButton();
+    nullStringLabel = new JLabel();
+    nullString = new JTextField();
+    jPanel1 = new JPanel();
 
     setLayout(new GridBagLayout());
     gridBagConstraints = new GridBagConstraints();
@@ -168,21 +190,40 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(timestampFormat, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
 
     selectColumnsButton.setText(ResourceMgr.getString("LblSelectColumns")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 4, 0, 4);
     add(selectColumnsButton, gridBagConstraints);
+
+    nullStringLabel.setText(ResourceMgr.getString("LblNullString")); // NOI18N
+    nullStringLabel.setToolTipText(ResourceMgr.getString("d_LblNullString")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 6, 0, 0);
+    add(nullStringLabel, gridBagConstraints);
+
+    nullString.setToolTipText(ResourceMgr.getString("d_LblNullString")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    add(nullString, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -191,6 +232,8 @@ public class GeneralExportOptionsPanel
   private JLabel dateFormatLabel;
   private EncodingPanel encodingPanel;
   private JPanel jPanel1;
+  private JTextField nullString;
+  private JLabel nullStringLabel;
   private JButton selectColumnsButton;
   private JTextField timestampFormat;
   private JLabel timestampFormatLabel;

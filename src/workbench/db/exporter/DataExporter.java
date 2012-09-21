@@ -198,6 +198,7 @@ public class DataExporter
 	{
 		return enableFixedHeader;
 	}
+
 	public String getNullString()
 	{
 		return nullString;
@@ -1309,6 +1310,7 @@ public class DataExporter
 		this.setDateFormat(options.getDateFormat());
 		this.setTimestampFormat(options.getTimestampFormat());
 		this.setEncoding(options.getEncoding());
+		this.setNullString(options.getNullString());
 		if (this.exportWriter != null)
 		{
 			this.exportWriter.configureConverter();

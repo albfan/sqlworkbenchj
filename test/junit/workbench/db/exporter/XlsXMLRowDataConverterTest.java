@@ -113,4 +113,46 @@ public class XlsXMLRowDataConverterTest
 		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[2]/mso:Cell[4]/mso:Data/text()", nsMap);
 		assertEquals("2008-07-23T13:42:01", colValue);
 	}
+
+	@Test
+	public void testNullString()
+		throws Exception
+	{
+		String[] cols = new String[] { "char_col", "int_col"};
+		int[] types = new int[] { Types.VARCHAR, Types.INTEGER};
+		int[] sizes = new int[] { 10, 10 };
+
+		ResultInfo info = new ResultInfo(cols, types, sizes);
+		XlsXMLRowDataConverter converter = new XlsXMLRowDataConverter();
+		converter.setResultInfo(info);
+		converter.setNullString("[NULL]");
+		RowData data = new RowData(info);
+		data.setValue(0, null);
+		data.setValue(1, new Integer(42));
+
+		converter.setEncoding("UTF-8");
+		StrBuffer header = converter.getStart();
+		assertNotNull(header);
+		StrBuffer footer = converter.getEnd(1);
+		assertNotNull(footer);
+
+		StrBuffer converted = converter.convertRowData(data, 0);
+		assertNotNull(converted);
+		String row = converted.toString();
+		String xml = header.toString() + row + footer.toString();
+
+//		System.out.println(xml);
+//		System.out.println("-----------------------------------------");
+
+		Map<String, String> nsMap = new HashMap<String, String>();
+		nsMap.put("mso", "urn:schemas-microsoft-com:office:spreadsheet");
+
+		// Check data values
+		String colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[2]/mso:Cell[1]/mso:Data/text()", nsMap);
+		assertEquals("[NULL]", colValue);
+
+		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[2]/mso:Cell[2]/mso:Data/text()", nsMap);
+		assertEquals("42", colValue);
+
+	}
 }

@@ -19,6 +19,7 @@ package workbench.db.exporter;
 public class XlsXMLExportWriter
 	extends ExportWriter
 {
+
 	public XlsXMLExportWriter(DataExporter exp)
 	{
 		super(exp);
@@ -28,6 +29,13 @@ public class XlsXMLExportWriter
 	public RowDataConverter createConverter()
 	{
 		return new XlsXMLRowDataConverter();
+	}
+
+	@Override
+	public void configureConverter()
+	{
+		super.configureConverter();
+		converter.setNullString(exporter.getNullString());
 	}
 
 }

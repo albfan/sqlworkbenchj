@@ -951,9 +951,19 @@
 			<para>
 				When this option is selected, the focus inside the DbExplorer will
 				be set to the data panel, after an object in the list has been selected
-				(and the data panel is visible).
+				and the data panel is visible.
 			</para>
 		</section>
+
+		<section id="dbexp-options-focus-data">
+			<title>Focus to source panel</title>
+			<para>
+				When this option is selected, the focus inside the DbExplorer will
+				be set to the object's source panel, after an object in the list has been selected
+				and the source panel is visible.
+			</para>
+		</section>
+
 
 		<section id="dbexp-options-show-focus">
 			<title>Show focus</title>
@@ -1005,6 +1015,20 @@
 			<para>
         If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
         is used as a regular expression (rather than a "SQL" Expression) to filter the list.
+			</para>
+		</section>
+
+		<section id="dbexp-options-partial-match">
+			<title>Partial match</title>
+			<para>
+        If this option is enabled, then any text that is typed into the quick filter will matched anywhere
+        in the object name. It is equivalent to typing <literal>*foo*</literal> into the quick filter.
+        If this option is enabled and a wildcard is part of the value, then only that wildcard is used.
+        Using <literal>foo*</literal> for the filter while this option is enabled, shows all objects
+        that <emphasis>start</emphasis> with <literal>foo</literal>.
+			</para>
+      <para>
+        This option is only available when the use of regular expressions in the quick filter is disabled.
 			</para>
 		</section>
 

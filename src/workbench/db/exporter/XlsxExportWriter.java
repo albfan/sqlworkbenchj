@@ -26,6 +26,13 @@ public class XlsxExportWriter
 	}
 
 	@Override
+	public void configureConverter()
+	{
+		super.configureConverter();
+		converter.setNullString(exporter.getNullString());
+	}
+
+	@Override
 	public RowDataConverter createConverter()
 	{
 		XlsRowDataConverter xls = new XlsRowDataConverter();

@@ -20,6 +20,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
 import workbench.storage.DataStore;
@@ -59,9 +60,10 @@ public class ShowObjectInfoAction
 		}
 		WbThread t = new WbThread(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				showInfo(includeDependencies);
+				showInfo(includeDependencies || Settings.getInstance().getObjectInfoWithDependencies());
 			}
 		}, "ObjectInfoThread");
 		t.start();

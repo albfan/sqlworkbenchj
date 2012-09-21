@@ -225,7 +225,7 @@ public class XlsRowDataConverter
 		}
 		else
 		{
-			RichTextString s = workbook.getCreationHelper().createRichTextString(value != null ? value.toString() : "");
+			RichTextString s = workbook.getCreationHelper().createRichTextString(value != null ? value.toString() : getNullDisplay());
 			cell.setCellValue(s);
 			if (multiline)
 			{

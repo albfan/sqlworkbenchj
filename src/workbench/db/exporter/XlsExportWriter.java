@@ -32,6 +32,13 @@ public class XlsExportWriter
 	}
 
 	@Override
+	public void configureConverter()
+	{
+		super.configureConverter();
+		converter.setNullString(exporter.getNullString());
+	}
+
+	@Override
 	public boolean managesOutput()
 	{
 		return true;

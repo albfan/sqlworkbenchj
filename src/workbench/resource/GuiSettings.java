@@ -12,7 +12,6 @@
 package workbench.resource;
 
 import java.awt.Color;
-import java.beans.PropertyChangeListener;
 import java.util.Set;
 import javax.swing.KeyStroke;
 import workbench.util.CollectionUtil;
@@ -612,6 +611,28 @@ public class GuiSettings
 	public static boolean getAlwaysEnableSaveButton()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.savebutton.always.enabled", false);
+	}
+
+	public static String getDisplayNullString()
+	{
+		String value = Settings.getInstance().getProperty("workbench.gui.renderer.nullstring", null);
+		if (StringUtil.isEmptyString(value))
+		{
+			return null;
+		}
+		return value;
+	}
+
+	public static void setDisplayNullString(String value)
+	{
+		if (StringUtil.isBlank(value))
+		{
+			Settings.getInstance().setProperty("workbench.gui.renderer.nullstring", null);
+		}
+		else
+		{
+			Settings.getInstance().setProperty("workbench.gui.renderer.nullstring", value.trim());
+		}
 	}
 
 	public static void setNullColor(Color c)

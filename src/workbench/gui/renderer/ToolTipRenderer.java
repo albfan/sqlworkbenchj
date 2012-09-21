@@ -103,6 +103,8 @@ public class ToolTipRenderer
 	protected boolean showTooltip = true;
 	protected Map renderingHints;
 
+	protected String nullString;
+
 	private Font printFont;
 
 	public ToolTipRenderer()
@@ -114,6 +116,7 @@ public class ToolTipRenderer
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 		showTooltip = Settings.getInstance().getBoolProperty("workbench.gui.renderer.showtooltip", true);
+		nullString = GuiSettings.getDisplayNullString();
 		selectionBlendFactor = retrieveBlendFactor("selection");
 		alternateBlendFactor = retrieveBlendFactor("alternate");
 	}
@@ -255,7 +258,7 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			this.displayValue = null;
+			this.displayValue = nullString;
 			setTooltip(null);
 		}
 

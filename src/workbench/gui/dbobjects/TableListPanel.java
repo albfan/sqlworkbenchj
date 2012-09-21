@@ -290,7 +290,7 @@ public class TableListPanel
 
 		QuickFilterPanel filterPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
 		filterPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		filterPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpFilterAssumeWildcards());
+		filterPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 
 		this.findPanel = filterPanel;
 
@@ -2086,7 +2086,7 @@ public class TableListPanel
 		}
 		else if (Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS.equals(evt.getPropertyName()))
 		{
-			((QuickFilterPanel)findPanel).setAlwaysUseContainsFilter(Settings.getInstance().getDbExpFilterAssumeWildcards());
+			((QuickFilterPanel)findPanel).setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 		}
 		else if (PlacementChooser.PLACEMENT_PROPERTY.equals(evt.getPropertyName()))
 		{

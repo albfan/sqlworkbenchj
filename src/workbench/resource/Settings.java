@@ -968,12 +968,12 @@ public class Settings
 
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
 
-	public boolean getDbExpFilterAssumeWildcards()
+	public boolean getDbExpUsePartialMatch()
 	{
 		return getBoolProperty(PROPERTY_DBEXP_ASSUME_WILDCARDS, true);
 	}
 
-	public void setDbExpFilterAssumeWildcards(boolean flag)
+	public void setDbExpUsePartialMatch(boolean flag)
 	{
 		setProperty(PROPERTY_DBEXP_ASSUME_WILDCARDS, flag);
 	}
@@ -1690,6 +1690,16 @@ public class Settings
 		setProperty(PROPERTY_SHOW_LINE_NUMBERS, show);
 	}
 
+	public boolean getObjectInfoWithDependencies()
+	{
+		return getBoolProperty("workbench.db.objectinfo.includedeps", false);
+	}
+
+	public void setObjectInfoWithDependencies(boolean flag)
+	{
+		setProperty("workbench.db.objectinfo.includedeps", flag);
+	}
+
 	public boolean getAutoJumpNextStatement()
 	{
 		return getBoolProperty(PROPERTY_AUTO_JUMP_STATEMENT , false);
@@ -2103,6 +2113,16 @@ public class Settings
 	public void setDefaultBlobTextEncoding(String enc)
 	{
 		setProperty("workbench.blob.text.encoding", enc);
+	}
+
+	public String getExportNullString()
+	{
+		return getProperty("workbench.export.general.nullstring", null);
+	}
+
+	public void setExportNullString(String value)
+	{
+		setProperty("workbench.export.general.nullstring", value);
 	}
 
 	private String getSystemFileEncoding()

@@ -26,6 +26,13 @@ public class OdsExportWriter
 	}
 
 	@Override
+	public void configureConverter()
+	{
+		super.configureConverter();
+		converter.setNullString(exporter.getNullString());
+	}
+
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new OdsRowDataConverter();

@@ -41,5 +41,6 @@ public class HtmlExportWriter
 		conv.setEscapeHtml(exporter.getEscapeHtml());
 		conv.setHeading(exporter.getHtmlHeading());
 		conv.setTrailer(exporter.getHtmlTrailer());
+		conv.setNullString(exporter.getNullString());
 	}
 }

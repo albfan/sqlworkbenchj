@@ -58,6 +58,7 @@ public abstract class RowDataConverter
 	private boolean[] columnsToExport;
 	protected List exportColumns;
 	protected ErrorReporter errorReporter;
+	protected String nullString;
 
 	protected SimpleDateFormat defaultTimeFormatter;
 	protected WbDateFormatter defaultDateFormatter;
@@ -105,6 +106,20 @@ public abstract class RowDataConverter
 		defaultTimestampFormatter = new WbDateFormatter(Settings.getInstance().getDefaultTimestampFormat());
 		defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
+	}
+
+	public String getNullDisplay()
+	{
+		return nullString == null ? "" : nullString;
+	}
+
+	/**
+	 * Set the value to be exported for NULL values.
+	 * @param value the String to be used for NULL values (if passed as null it is ignored)
+	 */
+	public void setNullString(String value)
+	{
+		this.nullString = value;
 	}
 
 	public void setDataModifier(ExportDataModifier modifier)
@@ -756,7 +771,7 @@ public abstract class RowDataConverter
 		Object value = row.getValue(col);
 		if (value == null)
 		{
-			return null;
+			return getNullDisplay();
 		}
 		else
 		{

@@ -23,4 +23,6 @@ public interface ExportOptions
 	String getTimestampFormat();
 	void setEncoding(String enc);
 	String getEncoding();
+	String getNullString();
+	void setNullString(String value);
 }

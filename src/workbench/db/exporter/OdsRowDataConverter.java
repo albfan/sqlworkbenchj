@@ -400,7 +400,8 @@ public class OdsRowDataConverter
 		{
 			if (!this.includeColumnInExport(i)) continue;
 			Object o = row.getValue(i);
-			if (o == null)
+			String value = getValueAsFormattedString(row, i);
+			if (o == null && value == null)
 			{
 				xml.append("<table:table-cell />");
 				continue;
@@ -409,7 +410,6 @@ public class OdsRowDataConverter
 			xml.append(getCellAttribs(o, i));
 			xml.append(">\n");
 
-			String value = getValueAsFormattedString(row, i);
 			if (SqlUtil.isCharacterType(metaData.getColumnType(i)))
 			{
 				String[] lines = value.split(StringUtil.REGEX_CRLF);
