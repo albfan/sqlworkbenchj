@@ -288,10 +288,17 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		this.findPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
-		((QuickFilterPanel)findPanel).setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		QuickFilterPanel filterPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
+		filterPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		filterPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpFilterAssumeWildcards());
 
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_INSTANT_FILTER, PlacementChooser.PLACEMENT_PROPERTY);
+		this.findPanel = filterPanel;
+
+		Settings.getInstance().addPropertyChangeListener(this,
+			Settings.PROPERTY_DBEXP_INSTANT_FILTER,
+			Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS,
+			PlacementChooser.PLACEMENT_PROPERTY
+		);
 
 		reloadAction = new ReloadAction(this);
 		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
@@ -776,7 +783,7 @@ public class TableListPanel
 				// no DBMS specific configuration use a global one
 				add = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", tableView);
 			}
-			
+
 			List<String> userFilter = StringUtil.stringToList(add, ";", true, true);
 
 			for (String t : userFilter)
@@ -2076,6 +2083,10 @@ public class TableListPanel
 		else if (Settings.PROPERTY_DBEXP_INSTANT_FILTER.equals(evt.getPropertyName()))
 		{
 			((QuickFilterPanel)findPanel).setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		}
+		else if (Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS.equals(evt.getPropertyName()))
+		{
+			((QuickFilterPanel)findPanel).setAlwaysUseContainsFilter(Settings.getInstance().getDbExpFilterAssumeWildcards());
 		}
 		else if (PlacementChooser.PLACEMENT_PROPERTY.equals(evt.getPropertyName()))
 		{

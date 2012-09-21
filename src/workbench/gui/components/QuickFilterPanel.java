@@ -84,6 +84,7 @@ public class QuickFilterPanel
 	private boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
+	private boolean assumeWildcards;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -113,6 +114,11 @@ public class QuickFilterPanel
 		{
 			disableAutoFilter();
 		}
+	}
+
+	public void setAlwaysUseContainsFilter(boolean flag)
+	{
+		this.assumeWildcards = flag;
 	}
 
 	private void enableAutoFilter()
@@ -332,6 +338,10 @@ public class QuickFilterPanel
 			// no exception, so everything is OK
 			return input;
 		}
+		if (assumeWildcards && !containsWildcards(input))
+		{
+			input = "*" + input + "*";
+		}
 		String regex = wildcardToRegex(input);
 
 		// Test the "translated" pattern, if that throws an exception
@@ -344,7 +354,11 @@ public class QuickFilterPanel
 
 	/**
 	 * Convert a string that is expected to have standard "filename wildcards" to
-	 * a matching regular expression
+	 * a matching regular expression.
+	 *
+	 * <tt>*</tt> and <tt>%</tt> are treated the same.
+	 * For single character wildcards only a question mark is used.
+	 * The SQL single character wildcard (<tt>_</tt>) is not supported.
 	 *
 	 * @param wildcard
 	 * @return a pattern that can be used as a regular expression
@@ -358,7 +372,7 @@ public class QuickFilterPanel
 		for (int i = 0, is = wildcard.length(); i < is; i++)
 		{
 			char c = wildcard.charAt(i);
-			if (c == '*' || c == '%')
+			if (c == '*' || c == '%') // support filesystem wildcards and SQL wildcards
 			{
 				s.append(".*");
 			}
@@ -402,14 +416,22 @@ public class QuickFilterPanel
 					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, pattern);
 					col.setIgnoreCase(true);
 					searchTable.applyFilter(col);
-					this.filterValue.addToHistory(filterExpression);
+					if (storeInHistory)
+					{
+						this.filterValue.addToHistory(filterExpression);
+					}
 				}
-				catch (Exception e)
+				catch (PatternSyntaxException e)
 				{
 					searchTable.resetFilter();
 					LogMgr.logError("QuickFilterPanel.applyQuickFilter()", "Cannot apply filter expression", e);
 					String msg = ResourceMgr.getFormattedString("ErrBadRegex", filterExpression);
 					WbSwingUtilities.showErrorMessage(this, msg);
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError("QuickFilterPanel.applyQuickFilter()", "Cannot apply filter expression", ex);
+					WbSwingUtilities.showErrorMessage(this, ex.getLocalizedMessage());
 				}
 			}
 		}
@@ -417,6 +439,12 @@ public class QuickFilterPanel
 		{
 			this.filterValue.addActionListener(this);
 		}
+	}
+
+	private boolean containsWildcards(String filter)
+	{
+		if (filter == null) return false;
+		return filter.indexOf('%') > -1 || filter.indexOf('*') > -1;
 	}
 
 	@Override
@@ -548,11 +576,12 @@ public class QuickFilterPanel
 			String value = editor.getText();
 			if (StringUtil.isNonBlank(value))
 			{
+				int currentPos = editor.getCaretPosition();
 				filterValue.setText(value);
 				applyFilter(value, false);
 				// this is necessary to remove the text selection that is automatically done
-				// because of setting the text in applayFilter
-				editor.setCaretPosition(value.length());
+				// because of setting the text in applyFilter
+				editor.setCaretPosition(currentPos);
 			}
 		}
 	}

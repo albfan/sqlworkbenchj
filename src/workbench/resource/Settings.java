@@ -107,6 +107,7 @@ public class Settings
 
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	public static final String PROPERTY_DBEXP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
+	public static final String PROPERTY_DBEXP_ASSUME_WILDCARDS = "workbench.dbexplorer.assumewildcards";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -966,6 +967,16 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
+
+	public boolean getDbExpFilterAssumeWildcards()
+	{
+		return getBoolProperty(PROPERTY_DBEXP_ASSUME_WILDCARDS, true);
+	}
+
+	public void setDbExpFilterAssumeWildcards(boolean flag)
+	{
+		setProperty(PROPERTY_DBEXP_ASSUME_WILDCARDS, flag);
+	}
 
 	public boolean getDbExpFilterDuringTyping()
 	{
