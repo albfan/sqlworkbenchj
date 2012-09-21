@@ -98,7 +98,7 @@ public class TextAreaRenderer
 	{
 		if (value == null)
 		{
-			this.displayValue = nullString;
+			this.displayValue = rendererSetup == null ? null : rendererSetup.nullString;
 			this.textDisplay.setText(displayValue);
 			this.textDisplay.setToolTipText(null);
 		}

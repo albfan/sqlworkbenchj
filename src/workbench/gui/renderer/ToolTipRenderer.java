@@ -67,7 +67,7 @@ public class ToolTipRenderer
 	protected Color highlightBackground;
 	protected Color filterHighlightColor = GuiSettings.getExpressionHighlightColor();
 
-	private RendererSetup rendererSetup;
+	protected RendererSetup rendererSetup;
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 
@@ -103,7 +103,6 @@ public class ToolTipRenderer
 	protected boolean showTooltip = true;
 	protected Map renderingHints;
 
-	protected String nullString;
 
 	private Font printFont;
 
@@ -116,7 +115,6 @@ public class ToolTipRenderer
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 		showTooltip = Settings.getInstance().getBoolProperty("workbench.gui.renderer.showtooltip", true);
-		nullString = GuiSettings.getDisplayNullString();
 		selectionBlendFactor = retrieveBlendFactor("selection");
 		alternateBlendFactor = retrieveBlendFactor("alternate");
 	}
@@ -258,7 +256,7 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			this.displayValue = nullString;
+			this.displayValue = rendererSetup.nullString;
 			setTooltip(null);
 		}
 

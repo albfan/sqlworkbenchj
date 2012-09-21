@@ -603,7 +603,6 @@
       </para>
     </section>
 
-
 		<section id="option-selection-summary">
       <title>Show selection summary in statusbar</title>
       <para>
@@ -642,6 +641,45 @@
 			</para>
 			<para>
 				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line fields.
+			</para>
+		</section>
+
+		<section id="options-null-value-literal">
+			<title>Retrieve column remarks for queries</title>
+			<para>
+				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tooltip.
+        As this requires additional overhead after processing a query, it can be disabled for performance reasons.
+			</para>
+		</section>
+
+		<section id="options-def-max-rows">
+			<title>Default max. Rows</title>
+			<para>
+        When adding a SQL panel, this number will be used as a default for the <link linkend="max-rows-display">max. rows</link>
+        value for the new panel.
+			</para>
+		</section>
+
+		<section id="options-null-value-literal">
+			<title>Show max. rows warning</title>
+			<para>
+        If this option is enabled the result tab will show a warning sign if the limit defined
+        by the <link linkend="max-rows-display">max. rows</link> setting is reached, indicating that the result
+        might be incomplete.
+			</para>
+		</section>
+
+		<section id="options-null-value-literal">
+			<title>Show row numbers</title>
+			<para>
+        If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
+			</para>
+		</section>
+
+		<section id="options-null-value-literal">
+			<title><literal>NULL</literal> string</title>
+			<para>
+				The specified value will be displayed instead of <literal>NULL</literal> values in the result of a SQL statement.
 			</para>
 		</section>
 
@@ -688,7 +726,6 @@
 					width.
 				</para>
 			</simplesect>
-
 		</section>
 
 		<section id="row-height-settings">
@@ -726,23 +763,6 @@
 				</para>
 			</simplesect>
 
-		</section>
-
-		<section id="options-alternating-row-colors">
-			<title>Alternate row colors</title>
-			<para>
-				If this option is selected, the rows in the data table will be displayed
-				with alternating background color. You can choose the alternate color (the
-				other color is defined by the used <link linkend="options-look-and-feel">Look &amp; Feel</link>)
-				with the font chooser next to the checkbox.
-			</para>
-		</section>
-
-		<section id="options-null-value-color">
-			<title>Color for <literal>NULL</literal> values</title>
-			<para>
-				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
-			</para>
 		</section>
 
 	</section>
@@ -831,12 +851,33 @@
 
 	</section>
 
+  <section id="options-data-colors">
+    <title>Data display colors</title>
+
+		<section id="options-alternating-row-colors">
+			<title>Alternate row colors</title>
+			<para>
+				If this color is defined, the rows in the data table will be displayed
+				with alternating background color.
+			</para>
+		</section>
+
+		<section id="options-null-value-color">
+			<title>Color for <literal>NULL</literal> values</title>
+			<para>
+				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
+			</para>
+		</section>
+
+  </section>
+
 	<section id="options-data-edit">
 		<title>Options for data editing</title>
 
 		<section id="options-confirm-update">
 			<title>Confirm result set updates</title>
-			<para>When this option is enabled, the statements which are sent to the
+			<para>
+        When this option is enabled, the statements which are sent to the
 				database when saving changes to result set table, are displayed before
 				execution. The update can be cancelled at that point if the statements
 				are not correct. The generated statements can also be saved to a file

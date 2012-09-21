@@ -4,8 +4,7 @@
 	<section id="displaying-help">
 		<title>Displaying help</title>
 		<para>
-			You have two possibilities to display help for &wb-productname;. Either a HTML based
-			help or a PDF version of the manual.
+			You have two possibilities to display help for &wb-productname;: a HTML a PDF version of the manual.
 		</para>
 		<para>
 			The HTML help is available through the menu item
@@ -16,11 +15,11 @@
 		</para>
 		<para>
 			You can choose to display a single-page version of the HTML help (easier to search) or a multi-page
-			version of the help that is easier to navigatie. This can be switched in the options dialog, that is
+			version of the help that is easier to navigate. This can be changed in the options dialog, that is
 			accessible from <menuchoice><guimenu>Tools</guimenu><guimenuitem>Option</guimenuitem></menuchoice>.
 		</para>
 		<para>
-			The the PDF manual can be displayed by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
+			The PDF manual can be displayed by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
 			In order to be able to display the PDF manual, you need to define the path to the executable for the PDF
 			reader in the <link linkend="options-general">General options</link> section of the options dialog.
 		</para>
@@ -32,8 +31,8 @@
     <para>
       When connected to a database, the menu item
       <menuchoice><guimenu>Help</guimenu><guimenuitem>DBMS Manual</guimenuitem></menuchoice> will display the
-      online manual for the current DBMS (if there is one). The default configuration includes the URLs
-      for PostgreSQL, Oracle 10g, H2, HSQLDB, MySQL 5.1 and Microsoft SQL Server 2005.
+      online manual for the current DBMS (if there is one). Where possible the link will display the manual that
+      corresponds to the version of the current connection.
     </para>
     <para>
       The URL that is used to display the manual can be <link linkend="db-settings-online-manual">changed</link> in the
@@ -53,7 +52,7 @@
     </para>
     <para>
       Every window in &wb-productname; can be resized and will remember its
-      size. So in case no everything is readable on a dialog, just resize the
+      size. So in case not everything is readable on a dialog, just resize the
       window so that the missing parts become visible, and that size will
       be kept for the future.
     </para>
@@ -246,21 +245,23 @@ COMMIT;
 		<para>
 			You can also run stored procedures that return result sets. These result will be
 			displayed in the same way. For DBMS's that support mulitple result sets from
-			a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed
+			a single stored procedure (e.g. Microsoft SQL Server), one result tab will be displayed
 			for each result returned.
 		</para>
 
-    <!--
-		<note>
-			<para>
-				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
-				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
-				package is enabled.
-				In order to be able to display these columns, the support for
-				<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
-			</para>
-		</note>
-    -->
+    <section id="max-rows-display">
+      <title>Limiting result sizes</title>
+      <para>
+        To prevent retrieving an large amount of rows (and possibly running out of memory), the maximum number of rows
+        that are retrieved can be defined for each SQL panel in the "Max. Rows" input field of the status bar. This
+        value will be stored in the <link linkend="using-workspaces">workspace</link> that is associated with the
+        connection profile.
+      </para>
+      <para>
+        A default value that will be used for newly opened SQL tabs can be defined in the
+        <link linkend="options-def-max-rows">options dialog</link>.
+      </para>
+    </section>
 
 		<section id="display-multiline">
 			<title>Displaying values with embedded newlines</title>

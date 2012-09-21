@@ -22,10 +22,11 @@ public class RendererSetup
 
 	// These are package visible for performance reasons
 	// those values are accessed from within the renderers where every nanosecond counts
-	Color alternateBackground;
-	boolean useAlternatingColors;
+	final Color alternateBackground;
+	final boolean useAlternatingColors;
 	Color nullColor;
 	Color modifiedColor;
+	String nullString;
 
 	public RendererSetup()
 	{
@@ -40,6 +41,7 @@ public class RendererSetup
 			useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 			nullColor = GuiSettings.getNullColor();
 			modifiedColor = null;
+			nullString = GuiSettings.getDisplayNullString();
 		}
 		else
 		{
@@ -47,6 +49,7 @@ public class RendererSetup
 			useAlternatingColors = false;
 			nullColor = null;
 			modifiedColor = null;
+			nullString = null;
 		}
 	}
 
@@ -54,12 +57,8 @@ public class RendererSetup
 	{
 		RendererSetup setup = new RendererSetup();
 		setup.nullColor = null;
+		setup.nullString = null;
 		return setup;
-	}
-
-	public void setAlternateBackground(Color backgroundColor)
-	{
-		this.alternateBackground = backgroundColor;
 	}
 
 	public void setModifiedColor(Color color)
@@ -67,14 +66,5 @@ public class RendererSetup
 		this.modifiedColor = color;
 	}
 
-	public void setNullColor(Color color)
-	{
-		this.nullColor = color;
-	}
-
-	public void setUseAlternatingColors(boolean flag)
-	{
-		this.useAlternatingColors = flag;
-	}
 
 }
