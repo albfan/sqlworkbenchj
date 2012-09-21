@@ -33,11 +33,15 @@ class ObjectCache
 	private Set<String> schemasInCache;
 	private Map<TableIdentifier, List<ColumnIdentifier>> objects;
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
+	private ObjectNameFilter schemaFilter;
+	private ObjectNameFilter catalogFilter;
 
 	ObjectCache(WbConnection conn)
 	{
 		this.createCache();
 		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
+		schemaFilter = conn.getProfile().getSchemaFilter();
+		catalogFilter = conn.getProfile().getCatalogFilter();
 	}
 
 	private void createCache()
@@ -46,16 +50,40 @@ class ObjectCache
 		objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
 	}
 
+	private boolean isFiltered(TableIdentifier table)
+	{
+		boolean filtered = false;
+		if (schemaFilter != null)
+		{
+			filtered = schemaFilter.isExcluded(table.getSchema());
+		}
+
+		if (!filtered && catalogFilter != null)
+		{
+			filtered = catalogFilter.isExcluded(table.getCatalog());
+		}
+		return filtered;
+	}
 	/**
 	 * Add this list of tables to the current cache.
 	 */
 	private void setTables(List<TableIdentifier> tables)
 	{
+
 		for (TableIdentifier tbl : tables)
 		{
-			if (!this.objects.containsKey(tbl))
+			if (!isFiltered(tbl) && !this.objects.containsKey(tbl))
 			{
 				this.objects.put(tbl, null);
+
+				if (tbl.getSchema() != null)
+				{
+					this.schemasInCache.add(tbl.getSchema());
+				}
+				else
+				{
+					this.schemasInCache.add(NULL_SCHEMA);
+				}
 			}
 		}
 	}
@@ -100,7 +128,6 @@ class ObjectCache
 						tbl.checkQuotesNeeded(dbConnection);
 					}
 					this.setTables(tables);
-					this.schemasInCache.add(checkSchema == null ? NULL_SCHEMA : checkSchema);
 				}
 				catch (Exception e)
 				{
@@ -178,11 +205,17 @@ class ObjectCache
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter(true));
 		DbMetadata meta = dbConnection.getMetadata();
 
-		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion() || schemas.size() > 1;
+		List<String> schemasToCheck = new ArrayList<String>(schemas.size());
+		for (String s : schemas)
+		{
+			if (s != null) schemasToCheck.add(s);
+		}
+
+		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion() || schemasToCheck.size() > 1;
 		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
 
 		String currentSchema = null;
-		if (schemas.size() == 1)
+		if (schemasToCheck.size() == 1)
 		{
 			currentSchema = meta.getCurrentSchema();
 		}
@@ -191,7 +224,7 @@ class ObjectCache
 		{
 			String tSchema = tbl.getSchema();
 
-			if (schemas.contains(tSchema))
+			if (schemasToCheck.contains(tSchema) || schemasToCheck.isEmpty())
 			{
 				boolean ignoreSchema = !alwaysUseSchema && currentSchema != null && meta.ignoreSchema(tSchema, currentSchema);
 
