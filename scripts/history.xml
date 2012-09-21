@@ -2,9 +2,12 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-09-18">
+    <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when displaying data in a result set</entry>
+    <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
-    <entry dev-build="1" type="fix">Exporting of the result data (e.g. copy to clipboard) did not deal properly with duplicate column names</entry>
+    <entry dev-build="2" type="fix">Code completion for SQL Server did not work without a schema.</entry>
+    <entry dev-build="2" type="fix">Exporting of the result data (e.g. copy to clipboard) did not deal properly with duplicate column names</entry>
     <entry dev-build="1" type="fix">Derived tables in JOIN expressions where not formatted correctly (according to the sub-select rules).</entry>
     <entry dev-build="1" type="fix">The "USE" command did not work any longer for SQL Server</entry>
     <entry dev-build="1" type="fix">The DbExplorer's table list did not work for SQL Server 2012 using the Microsoft JDBC Driver 4.0 (and possibly previous versions as well)</entry>
