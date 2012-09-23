@@ -644,7 +644,7 @@
 			</para>
 		</section>
 
-		<section id="options-null-value-literal">
+		<section id="options-retrieve-column-remarks">
 			<title>Retrieve column remarks for queries</title>
 			<para>
 				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tooltip.
@@ -660,7 +660,7 @@
 			</para>
 		</section>
 
-		<section id="options-null-value-literal">
+		<section id="options-max-rows-warning">
 			<title>Show max. rows warning</title>
 			<para>
         If this option is enabled the result tab will show a warning sign if the limit defined
@@ -669,7 +669,7 @@
 			</para>
 		</section>
 
-		<section id="options-null-value-literal">
+		<section id="options-row-numbers">
 			<title>Show row numbers</title>
 			<para>
         If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
@@ -996,7 +996,7 @@
 			</para>
 		</section>
 
-		<section id="dbexp-options-focus-data">
+		<section id="dbexp-options-focus-source">
 			<title>Focus to source panel</title>
 			<para>
 				When this option is selected, the focus inside the DbExplorer will

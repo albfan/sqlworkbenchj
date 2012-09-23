@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-09-18">
+  <release build="-1" date="2012-09-23">
     <entry dev-build="2" type="enh">In the DbExplorer's table list, the schema and catalog can now be changed if the DBMS supports it</entry>
     <entry dev-build="2" type="enh">The string literal for NULL values can now be defined when displaying data in a result set</entry>
     <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
