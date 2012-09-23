@@ -2,7 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-09-18">
-    <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when displaying data in a result set</entry>
+    <entry dev-build="2" type="enh">In the DbExplorer's table list, the schema and catalog can now be changed if the DBMS supports it</entry>
+    <entry dev-build="2" type="enh">The string literal for NULL values can now be defined when displaying data in a result set</entry>
     <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
