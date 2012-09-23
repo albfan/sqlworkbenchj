@@ -42,6 +42,11 @@ public abstract class ConsolePrinter
 	protected abstract String getColumnName(int col);
 	protected abstract int getColumnType(int col);
 
+	public ConsolePrinter()
+	{
+		converter.setNullString(ConsoleSettings.getNullString());
+	}
+
 	/**
 	 * If set to true (the default) one row is printed per console line.
 	 * If set to false, one row is displayed as a "form", i.e. one row per column,
@@ -177,25 +182,31 @@ public abstract class ConsolePrinter
 	protected String getDisplayValue(RowData row, int col)
 	{
 		int type = getColumnType(col);
-		String value = "";
+		String value = null;
+
 		if (SqlUtil.isBlobType(type))
 		{
-			// In case the BLOB data was converter to a string
-			// by a DataConverter
-			if (row.getValue(col) instanceof String)
+			Object data = row.getValue(col);
+
+			// In case the BLOB data was converted to a string by a DataConverter
+			if (data instanceof String)
 			{
 				value = (String)row.getValue(col);
 			}
-			else
+			else if (data != null)
 			{
 				value = "(BLOB)";
 			}
 		}
-		else if (value != null)
+		else
 		{
 			value = converter.getValueAsFormattedString(row, col);
 		}
-		if (value == null) value = "";
+
+		if (value == null)
+		{
+			value = ConsoleSettings.getNullString();
+		}
 
 		return value;
 	}

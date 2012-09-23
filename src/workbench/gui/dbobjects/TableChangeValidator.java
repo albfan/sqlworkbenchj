@@ -44,6 +44,14 @@ public class TableChangeValidator
 		{
 			return changer.getCommentSql(type) != null;
 		}
+		else if (col == DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA)
+		{
+			return changer.getChangeSchemaSql(type) != null;
+		}
+		else if (col == DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG)
+		{
+			return changer.getChangeCatalogSql(type) != null;
+		}
 		return false;
 	}
 

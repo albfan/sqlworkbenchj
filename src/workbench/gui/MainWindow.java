@@ -2698,9 +2698,14 @@ public class MainWindow
 
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
-		if (index == -1) index = sqlTab.getTabCount();
-
 		final SqlPanel sql = new SqlPanel(index+1);
+		addTabAtIndex(sql, selectNew, checkConnection, renumber, index);
+		return sql;
+	}
+
+	private void addTabAtIndex(SqlPanel sql, boolean selectNew, boolean checkConnection, boolean renumber, int index)
+	{
+		if (index == -1) index = sqlTab.getTabCount();
 
 		try
 		{
@@ -2742,8 +2747,6 @@ public class MainWindow
 		{
 			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
-
-		return sql;
 	}
 
 	/**

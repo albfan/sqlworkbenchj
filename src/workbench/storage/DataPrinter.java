@@ -61,6 +61,11 @@ public class DataPrinter
 		converter.setEscapeRange(CharacterRange.RANGE_CONTROL);
 	}
 
+	public void setNullString(String value)
+	{
+		converter.setNullString(value);
+	}
+
 	/**
 	 * Define a mapping from the stored order of columns to the order
 	 * that is visible to the user.
@@ -75,7 +80,7 @@ public class DataPrinter
 	/**
 	 * Write the contents of the DataStore into the writer but only the rows
 	 * that have been passed in the rows[] parameter
-	 * 
+	 *
 	 * @param out the writer to use
 	 * @param rows the rows to print, if this is null all rows are printed
 	 */

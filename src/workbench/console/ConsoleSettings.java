@@ -15,6 +15,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * A singleton to control and manage the current display style in the console.
@@ -97,4 +100,16 @@ public class ConsoleSettings
 		}
 		return rowDisplay;
 	}
+
+	/**
+	 * Convenience method to retrieve the NULL string to be used in the console
+	 *
+	 * This gets the value for the property <tt>workbench.console.nullstring</tt>
+	 */
+	public static String getNullString()
+	{
+		return Settings.getInstance().getProperty("workbench.console.nullstring", GuiSettings.getDisplayNullString());
+	}
+
+
 }

@@ -1023,7 +1023,7 @@ public final class WbManager
 	{
 		return "true".equals(System.getProperty(Settings.TEST_MODE_PROPERTY, "false"));
 	}
-	
+
 	public static void prepareForTest(String[] args)
 	{
 

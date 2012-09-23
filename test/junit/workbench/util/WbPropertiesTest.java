@@ -44,6 +44,7 @@ public class WbPropertiesTest
 		);
 		WbProperties props = new WbProperties();
 		props.loadTextFile(file.getAbsolutePath());
+		assertFalse(props.isModified());
 
 		assertEquals("value1 \nvalue2", props.getProperty("key1"));
 
@@ -113,9 +114,15 @@ public class WbPropertiesTest
 
 	@Test
 	public void testChangeNotification()
+		throws Exception
 	{
+		TestUtil util = getTestUtil();
     WbProperties props = new WbProperties();
+		assertFalse(props.isModified());
+
     props.setProperty("test.property", "bla");
+		assertTrue(props.isModified());
+
     props.setProperty("test2.property", "two");
 		props.addPropertyChangeListener(this, "test.property", "test2.property");
     changedProperty = null;
@@ -125,8 +132,14 @@ public class WbPropertiesTest
     changedProperty = null;
     props.setProperty("test2.property", "nothing");
     assertEquals("test2.property", changedProperty);
+
+		File newfile = new File(util.getBaseDir(), "changed.properties");
+		props.saveToFile(newfile);
+		assertFalse(props.isModified());
+
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		changedProperty = evt.getPropertyName();

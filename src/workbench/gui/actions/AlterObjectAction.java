@@ -32,6 +32,7 @@ import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -69,10 +70,10 @@ public class AlterObjectAction
 	{
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		boolean modified = (ds != null ? ds.isModified() : false);
-		setEnabled(dbConnection != null && modified && canRenameChangedTypes());
+		setEnabled(dbConnection != null && modified && canAlterChangedTypes());
 	}
 
-	private boolean canRenameChangedTypes()
+	private boolean canAlterChangedTypes()
 	{
 		if (dbConnection == null) return false;
 		DbSettings db = dbConnection.getDbSettings();
@@ -81,33 +82,19 @@ public class AlterObjectAction
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		if (ds == null) return false;
 
-		List<String> renameTypes = CollectionUtil.arrayList();
-		List<String> commentTypes = CollectionUtil.arrayList();
-
+		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
-			String type = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			if (ds.isColumnModified(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME))
+			if (ds.isRowModified(row))
 			{
-				renameTypes.add(type);
-			}
-			if (ds.isColumnModified(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS))
-			{
-				commentTypes.add(type);
+				TableIdentifier newTable = getCurrentDefinition(row);
+				TableIdentifier oldTable = getOldDefintion(row);
+				changed.put(oldTable, newTable);
 			}
 		}
-
-		for (String type : renameTypes)
-		{
-			if (db.getRenameObjectSql(type) != null) return true;
-		}
-
-		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getDbId());
-		for (String type : commentTypes)
-		{
-			if (mgr.getCommentSqlTemplate(type) != null) return true;
-		}
-		return false;
+		DbObjectChanger changer = new DbObjectChanger(dbConnection);
+		String sql = changer.getAlterScript(changed);
+		return StringUtil.isNonEmpty(sql);
 	}
 
 	@Override
@@ -154,10 +141,7 @@ public class AlterObjectAction
 
 	private TableIdentifier getCurrentDefinition(int row)
 	{
-		if (tableList == null)
-		{
-			return null;
-		}
+		if (tableList == null) return null;
 		DataStore ds = tableList.getDataStore();
 
 		String name = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
@@ -174,10 +158,7 @@ public class AlterObjectAction
 
 	private TableIdentifier getOldDefintion(int row)
 	{
-		if (tableList == null)
-		{
-			return null;
-		}
+		if (tableList == null) return null;
 		DataStore ds = tableList.getDataStore();
 
 		String name = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);

@@ -29,6 +29,7 @@ import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
@@ -50,12 +51,22 @@ public class ClipBoardCopier
 	private DataStore data;
 	private WbTable client;
 
-	public ClipBoardCopier(WbTable t)
+	/**
+	 * Create a new ClipBoardCopier to copy the contents of the given table.
+	 *
+	 * @param table  the table for which the data should be copied.
+	 */
+	public ClipBoardCopier(WbTable table)
 	{
-		this.client = t;
+		this.client = table;
 		this.data = client.getDataStore();
 	}
 
+	/**
+	 * For testing purposes only.
+	 *
+	 * @param ds the datastore containing the data to copy
+	 */
 	ClipBoardCopier(DataStore ds)
 	{
 		this.data = ds;
@@ -110,6 +121,7 @@ public class ClipBoardCopier
 			// because for some reason this creates additional empty lines
 			// under Windows
 			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
+			printer.setNullString(GuiSettings.getDisplayNullString());
 			printer.setColumnMapping(getColumnOrder());
 
 			out = new StringWriter(count * 250);

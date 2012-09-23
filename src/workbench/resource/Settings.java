@@ -153,6 +153,11 @@ public class Settings
 		removeObsolete();
 	}
 
+	public boolean isModified()
+	{
+		return props.isModified();
+	}
+
 	@Override
 	public Set<String> getKeys()
 	{
@@ -332,21 +337,25 @@ public class Settings
 			if (!logfile.isAbsolute())
 			{
 				logfile = new WbFile(getConfigDir(), logfilename);
+				if (!logfile.getParentFile().exists())
+				{
+					logfile.getParentFile().mkdirs();
+				}
 			}
 
-			String old = null;
+			String configuredFile = null;
 			if (!logfile.isWriteable())
 			{
-				old = logfile.getFullPath();
+				configuredFile = logfile.getFullPath();
 				logfile = new WbFile(getConfigDir(), "workbench.log");
 				setProperty("workbench.log.filename", "workbench.log");
 			}
 
 			int maxSize = this.getMaxLogfileSize();
 			LogMgr.setOutputFile(logfile, maxSize);
-			if (old != null)
+			if (configuredFile != null)
 			{
-				LogMgr.logWarning("Settings.initLogging()", "Could not write requested logfile '" + old + "'");
+				LogMgr.logWarning("Settings.initLogging()", "Could not write requested logfile '" + configuredFile + "'");
 			}
 		}
 		catch (Throwable e)
@@ -3037,6 +3046,7 @@ public class Settings
 			this.props.put(newKey, value);
 		}
 	}
+
 	private void removeObsolete()
 	{
 		try
@@ -3255,6 +3265,14 @@ public class Settings
 			{
 				LogMgr.logWarning("Settings.saveSettings()", "Error when creating backup file!", e);
 			}
+		}
+
+		File cfd = configfile.getParentFile();
+		if (!cfd.exists())
+		{
+			// this can happen in console mode
+			LogMgr.logInfo("Settings.saveSettings()", "Creating config directory to store settings");
+			cfd.mkdirs();
 		}
 
 		try

@@ -101,6 +101,47 @@ public class DbObjectChangerTest
 		assertEquals("COMMENT ON TABLE person_address IS 'new comment'", p.getCommand(0));
 		assertEquals("ALTER TABLE person_address RENAME TO pers_addr", p.getCommand(1));
 		assertEquals("COMMIT", p.getCommand(2));
+
+		table = new TableIdentifier("public", "bar");
+		newTable = new TableIdentifier("foo", "bar");
+		sql = changer.getSchemaChange(table, newTable);
+		assertNotNull(sql);
+		assertEquals("ALTER TABLE public.bar SET SCHEMA foo", sql);
+
+		changed.clear();
+		changed.put(table, newTable);
+		sql = changer.getAlterScript(changed);
+		p = new ScriptParser(sql);
+		assertEquals(2, p.getSize());
+		assertEquals("ALTER TABLE public.bar SET SCHEMA foo", p.getCommand(0));
+	}
+
+	@Test
+	public void testSQLServer()
+		throws Exception
+	{
+		DbSettings settings = new DbSettings("microsoft_sql_server", "Microsoft SQL Server");
+		DbObjectChanger changer = new DbObjectChanger(settings);
+
+		TableIdentifier oldTable = new TableIdentifier("dbo", "bar");
+		TableIdentifier newTable = new TableIdentifier("foo", "bar");
+		String sql = changer.getSchemaChange(oldTable, newTable);
+		assertNotNull(sql);
+		assertEquals("ALTER SCHEMA foo TRANSFER dbo.bar", sql);
+	}
+
+	@Test
+	public void testMySQL()
+		throws Exception
+	{
+		DbSettings settings = new DbSettings("mysql", "Wannabee");
+		DbObjectChanger changer = new DbObjectChanger(settings);
+
+		TableIdentifier oldTable = new TableIdentifier("first_db", null, "bar");
+		TableIdentifier newTable = new TableIdentifier("second_db", null, "bar");
+		String sql = changer.getCatalogChange(oldTable, newTable);
+		System.out.println(sql);
+		assertEquals("RENAME TABLE first_db.bar TO second_db.bar", sql);
 	}
 
 }

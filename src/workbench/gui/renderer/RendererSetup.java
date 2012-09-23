@@ -55,7 +55,7 @@ public class RendererSetup
 
 	public static RendererSetup getBaseSetup()
 	{
-		RendererSetup setup = new RendererSetup();
+		RendererSetup setup = new RendererSetup(true);
 		setup.nullColor = null;
 		setup.nullString = null;
 		return setup;

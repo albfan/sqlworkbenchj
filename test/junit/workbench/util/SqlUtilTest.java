@@ -39,6 +39,22 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testFullyQualifiedName()
+	{
+		TableIdentifier tbl = new TableIdentifier("foobar");
+		assertEquals("foobar", SqlUtil.fullyQualifiedName(null, tbl));
+
+		tbl = new TableIdentifier("public", "foobar");
+		assertEquals("public.foobar", SqlUtil.fullyQualifiedName(null, tbl));
+
+		tbl = new TableIdentifier("dbo", "public", "foobar");
+		assertEquals("dbo.public.foobar", SqlUtil.fullyQualifiedName(null, tbl));
+
+		tbl = new TableIdentifier("my schema", "foobar");
+		assertEquals("\"my schema\".foobar", SqlUtil.fullyQualifiedName(null, tbl));
+	}
+
+	@Test
 	public void testDb2Parsing()
 	{
 		String select = "select * from mylib/sometable where belegid=20100234";

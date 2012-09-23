@@ -615,12 +615,7 @@ public class GuiSettings
 
 	public static String getDisplayNullString()
 	{
-		String value = Settings.getInstance().getProperty("workbench.gui.renderer.nullstring", null);
-		if (StringUtil.isEmptyString(value))
-		{
-			return null;
-		}
-		return value;
+		return Settings.getInstance().getProperty("workbench.gui.renderer.nullstring", null);
 	}
 
 	public static void setDisplayNullString(String value)

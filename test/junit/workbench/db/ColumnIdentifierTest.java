@@ -25,39 +25,7 @@ public class ColumnIdentifierTest
 	@Test
 	public void testAdjustQuotes()
 	{
-		QuoteHandler ansi = new QuoteHandler()
-		{
-			@Override
-			public boolean isQuoted(String name)
-			{
-				return name.startsWith("\"");
-			}
-
-			@Override
-			public String removeQuotes(String name)
-			{
-				if (isQuoted(name))
-				{
-					return StringUtil.trimQuotes(name);
-				}
-				return name;
-			}
-
-			@Override
-			public String quoteObjectname(String name)
-			{
-				if (isQuoted(name)) return name;
-				return "\"" + name + "\"";
-			}
-
-			@Override
-			public boolean needsQuotes(String name)
-			{
-				return name.indexOf(' ') > -1 || !name.toUpperCase().equals(name);
-			}
-		};
-
-		QuoteHandler wrongQuoting = new QuoteHandler()
+		QuoteHandler wrongQuoting1 = new QuoteHandler()
 		{
 			@Override
 			public boolean isQuoted(String name)
@@ -124,21 +92,20 @@ public class ColumnIdentifierTest
 		};
 
 		ColumnIdentifier col1 = new ColumnIdentifier("`Special Name`");
-		col1.adjustQuotes(wrongQuoting, ansi);
+		col1.adjustQuotes(wrongQuoting1, QuoteHandler.STANDARD_HANDLER);
 		assertEquals("\"Special Name\"", col1.getColumnName());
 
 		col1 = new ColumnIdentifier("noquotes");
-		col1.adjustQuotes(wrongQuoting, ansi);
+		col1.adjustQuotes(wrongQuoting1, QuoteHandler.STANDARD_HANDLER);
 		assertEquals("noquotes", col1.getColumnName());
 
 		col1 = new ColumnIdentifier("\"Need quote\"");
-		col1.adjustQuotes(ansi, wrongQuoting);
+		col1.adjustQuotes(QuoteHandler.STANDARD_HANDLER, wrongQuoting1);
 		assertEquals("`Need quote`", col1.getColumnName());
 
 		col1 = new ColumnIdentifier("[Very Wrong Quote]");
-		col1.adjustQuotes(wrongQuoting2, ansi);
+		col1.adjustQuotes(wrongQuoting2, QuoteHandler.STANDARD_HANDLER);
 		assertEquals("\"Very Wrong Quote\"", col1.getColumnName());
-
 	}
 
 	@Test
@@ -173,10 +140,14 @@ public class ColumnIdentifierTest
 
 		copy = col.createCopy();
 		assertEquals(col.isNullable(), copy.isNullable());
-		
+
 		col.setIsNullable(true);
 		copy = col.createCopy();
 		assertEquals(col.isNullable(), copy.isNullable());
+
+		col.setPosition(35);
+		copy = col.createCopy();
+		assertEquals(col.getPosition(), copy.getPosition());
 	}
 
 	@Test

@@ -10,24 +10,30 @@
  */
 package workbench.gui.components;
 
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+
 import java.sql.Types;
+
 import java.util.List;
-import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.db.IndexColumn;
-import workbench.storage.DataStore;
-import static org.junit.Assert.*;
+
 import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
+import workbench.db.IndexColumn;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.ExportType;
+import workbench.resource.GuiSettings;
 import workbench.sql.ScriptParser;
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -104,22 +110,41 @@ public class ClipBoardCopierTest
 	public void testCopyAsSqlInsert()
 		throws Exception
 	{
-		DataStore ds = createDataStore();
-		assertTrue(ds.hasPkColumns());
-		ClipBoardCopier copier = new ClipBoardCopier(ds);
-		copier.doCopyAsSql(ExportType.SQL_INSERT, false, false);
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		Transferable contents = clp.getContents(copier);
-		Object data = contents.getTransferData(DataFlavor.stringFlavor);
-		assertNotNull(data);
-		assertTrue(data instanceof String);
-		ScriptParser p = new ScriptParser((String)data);
-		assertEquals(2, p.getSize());
+		try
+		{
+			GuiSettings.setDisplayNullString("<[NULL]>");
+			DataStore ds = createDataStore();
+			int row = ds.addRow();
+			ds.setValue(row, 0, new Integer(1));
+			ds.setValue(row, 1, "Marvin");
+			ds.setValue(row, 2, null);
 
-		String verb = SqlUtil.getSqlVerb(p.getCommand(0));
-		assertEquals("INSERT", verb);
-		assertTrue(p.getCommand(0).contains("'Arthur'"));
-		assertTrue(p.getCommand(1).contains("'Ford'"));
+			assertTrue(ds.hasPkColumns());
+
+			ClipBoardCopier copier = new ClipBoardCopier(ds);
+			copier.doCopyAsSql(ExportType.SQL_INSERT, false, false);
+
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+			Transferable contents = clp.getContents(copier);
+			Object data = contents.getTransferData(DataFlavor.stringFlavor);
+
+			assertNotNull(data);
+			assertTrue(data instanceof String);
+			String sql = (String)data;
+
+			ScriptParser p = new ScriptParser(sql);
+			assertEquals(3, p.getSize());
+
+			String verb = SqlUtil.getSqlVerb(p.getCommand(0));
+			assertEquals("INSERT", verb);
+			assertTrue(p.getCommand(0).contains("'Arthur'"));
+			assertTrue(p.getCommand(1).contains("'Ford'"));
+			assertFalse(sql.contains("<[NULL]>"));
+		}
+		finally
+		{
+			GuiSettings.setDisplayNullString(null);
+		}
 	}
 
 	@Test
@@ -154,7 +179,7 @@ public class ClipBoardCopierTest
 		Object data = contents.getTransferData(DataFlavor.stringFlavor);
 		assertNotNull(data);
 		assertTrue(data instanceof String);
-		System.out.println(data);
+//		System.out.println(data);
 		ScriptParser p = new ScriptParser((String)data);
 		assertEquals(2, p.getSize());
 		assertEquals("UPDATE", SqlUtil.getSqlVerb(p.getCommand(0)));

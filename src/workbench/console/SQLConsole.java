@@ -30,6 +30,7 @@ import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.console.WbConsoleSet;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
@@ -140,6 +141,7 @@ public class SQLConsole
 			// Enable console-specific commands for the batch runner
 			runner.addCommand(new WbDisconnect());
 			runner.addCommand(new WbDisplay());
+			runner.addCommand(new WbConsoleSet());
 			runner.addCommand(new WbToggleDisplay());
 			runner.addCommand(new WbListProfiles());
 			runner.addCommand(new WbRun());
@@ -263,6 +265,10 @@ public class SQLConsole
 		{
 			ConsoleReaderFactory.getConsoleReader().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
+			if (Settings.getInstance().isModified())
+			{
+				Settings.getInstance().saveSettings(false);
+			}
 			WbManager.getInstance().doShutdown(0);
 		}
 	}
@@ -323,5 +329,6 @@ public class SQLConsole
 			console.run();
 		}
 	}
+
 
 }

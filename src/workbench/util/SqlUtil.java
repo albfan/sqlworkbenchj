@@ -35,6 +35,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
+import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -235,7 +236,7 @@ public class SqlUtil
 	 * <br/>
 	 * For performance reasons the input is not trimmed and is not tested (unlike StringUtil.trimQuotes)
 	 *
-	 * It does take the idiotic MySQL backticks into account but not SQL Server's weird [..] quoting.
+	 * It does take the idiotic MySQL backticks into account but not SQL Server's imbecile [..] quoting.
 	 *
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
@@ -1804,6 +1805,43 @@ public class SqlUtil
 	{
 		if (object == null) return null;
 		return buildExpression(conn, object.getCatalog(), object.getSchema(), object.getObjectName());
+	}
+
+	/**
+	 * Return a fully qualified name string for the database object.
+	 *
+	 * Unlike {@link #buildExpression(workbench.db.WbConnection, workbench.db.DbObject)} it will
+	 * not leave out some parts if they are not needed (e.g. because the catalog or schema is the
+	 * "current" and is currently not needed.
+	 *
+	 * @param conn    the connection to use, may be null
+	 * @param object  the object
+	 * @return a fully qualified name for the object.
+	 *
+	 * @see #buildExpression(workbench.db.WbConnection, workbench.db.DbObject)
+	 * @see DbMetadata#ignoreCatalog(java.lang.String)
+	 * @see DbMetadata#ignoreSchema(java.lang.String)
+	 */
+	public static String fullyQualifiedName(WbConnection conn, DbObject object)
+	{
+		if (object == null) return null;
+		StringBuilder result = new StringBuilder(30);
+		QuoteHandler quoter = (conn != null ? conn.getMetadata() : QuoteHandler.STANDARD_HANDLER);
+
+		char catalogSeparator = SqlUtil.getCatalogSeparator(conn);
+		char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
+		if (StringUtil.isNonEmpty(object.getCatalog()))
+		{
+			result.append(quoter.quoteObjectname(object.getCatalog()));
+			result.append(catalogSeparator);
+		}
+		if (StringUtil.isNonEmpty(object.getSchema()))
+		{
+			result.append(quoter.quoteObjectname(object.getSchema()));
+			result.append(schemaSeparator);
+		}
+		result.append(quoter.quoteObjectname(object.getObjectName()));
+		return result.toString();
 	}
 
 	/**

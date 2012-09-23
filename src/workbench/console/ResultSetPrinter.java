@@ -50,6 +50,7 @@ public class ResultSetPrinter
 	public ResultSetPrinter(PrintStream out)
 		throws SQLException
 	{
+		super();
 		pw = new PrintWriter(out);
 	}
 

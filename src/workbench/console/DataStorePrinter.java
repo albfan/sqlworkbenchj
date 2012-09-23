@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
  * The column widths are optimized against the content of the DataStore
  * if column formatting {@link ConsolePrinter#setFormatColumns(boolean) }
  * is enabled
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DataStorePrinter
@@ -33,9 +33,10 @@ public class DataStorePrinter
 {
 	private DataStore data;
 	private static final int MAX_WIDTH = 80;
-	
+
 	public DataStorePrinter(DataStore source)
 	{
+		super();
 		this.data = source;
 	}
 
@@ -97,7 +98,7 @@ public class DataStorePrinter
 		}
 		return width;
 	}
-	
+
 	public void printTo(PrintStream out)
 	{
 		PrintWriter pw = new PrintWriter(out);

@@ -19,6 +19,7 @@ import java.util.Map;
 
 import workbench.db.sqltemplates.ColumnChanger;
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -29,6 +30,12 @@ public class DbObjectChanger
 {
 	public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
 	public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
+
+	public static final String PARAM_OLD_SCHEMA_NAME = "%schema_name%";
+	public static final String PARAM_NEW_SCHEMA_NAME = "%new_schema_name%";
+
+	public static final String PARAM_OLD_CATALOG_NAME = "%catalog_name%";
+	public static final String PARAM_NEW_CATALOG_NAME = "%new_catalog_name%";
 
 	private WbConnection dbConnection;
 	private DbSettings settings;
@@ -73,6 +80,18 @@ public class DbObjectChanger
 				result.append(commentSql);
 				result.append(";\n");
 			}
+			String schema = getSchemaChange(entry.getKey(), entry.getValue());
+			if (schema != null)
+			{
+				result.append(schema);
+				result.append(";\n");
+			}
+			String cat = getCatalogChange(entry.getKey(), entry.getValue());
+			if (cat != null)
+			{
+				result.append(cat);
+				result.append(";\n");
+			}
 			String sql = getRename(entry.getKey(), entry.getValue());
 			if (sql != null)
 			{
@@ -80,11 +99,53 @@ public class DbObjectChanger
 				result.append(";\n");
 			}
 		}
-		if (settings.ddlNeedsCommit())
+		if (settings.ddlNeedsCommit() && result.length() > 0)
 		{
 			result.append("\nCOMMIT;\n");
 		}
 		return result.toString();
+	}
+
+	public String getSchemaChange(DbObject oldTable, DbObject newTable)
+	{
+		if (newTable == null || oldTable == null) return null;
+		String type = oldTable.getObjectType();
+		String sql = getChangeSchemaSql(type);
+		if (sql == null) return null;
+
+		String oldSchema = oldTable.getSchema();
+		String newSchema = newTable.getSchema();
+		if (oldSchema == null || newSchema == null) return null;
+
+		if (StringUtil.equalStringOrEmpty(oldSchema.trim(), newSchema.trim(), true)) return null; // no change
+
+		sql = sql.replace(PARAM_OLD_SCHEMA_NAME, oldSchema.trim());
+		sql = sql.replace(PARAM_NEW_SCHEMA_NAME, newSchema.trim());
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName());
+
+		return sql;
+	}
+
+	public String getCatalogChange(DbObject oldTable, DbObject newTable)
+	{
+		if (newTable == null || oldTable == null) return null;
+		String type = oldTable.getObjectType();
+		String sql = getChangeCatalogSql(type);
+		if (sql == null) return null;
+
+		String oldCat = oldTable.getCatalog();
+		String newCat = newTable.getCatalog();
+		if (oldCat == null || newCat == null) return null;
+
+		if (StringUtil.equalStringOrEmpty(oldCat.trim(), newCat.trim(), true)) return null; // no change
+
+		sql = sql.replace(PARAM_OLD_CATALOG_NAME, oldCat.trim());
+		sql = sql.replace(PARAM_NEW_CATALOG_NAME, newCat.trim());
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName());
+
+		return sql;
 	}
 
 	public String getRename(DbObject oldTable, DbObject newTable)
@@ -101,7 +162,7 @@ public class DbObjectChanger
 		if (StringUtil.equalStringOrEmpty(oldName.trim(), newName.trim(), true)) return null; // no change
 		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldName.trim());
 		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newName.trim());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, oldTable.getFullyQualifiedName(dbConnection));
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
 		return sql;
 	}
 
@@ -140,6 +201,18 @@ public class DbObjectChanger
 	{
 		if (settings == null || type == null) return null;
 		return settings.getRenameObjectSql(type);
+	}
+
+	public String getChangeSchemaSql(String type)
+	{
+		if (settings == null || type == null) return null;
+		return settings.getChangeSchemaSql(type);
+	}
+
+	public String getChangeCatalogSql(String type)
+	{
+		if (settings == null || type == null) return null;
+		return settings.getChangeCatalogSql(type);
 	}
 
 	public String getCommentSql(String type)

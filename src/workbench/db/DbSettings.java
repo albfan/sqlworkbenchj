@@ -1212,6 +1212,30 @@ public class DbSettings
 	}
 
 	/**
+	 * Returns the ALTER ... template to change the schema for a given object type
+	 *
+	 * @param type
+	 * @return null if no template was configured for this dbms
+	 */
+	public String getChangeSchemaSql(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".change.schema", null);
+	}
+
+	/**
+	 * Returns the ALTER ... template to change the schema for a given object type
+	 *
+	 * @param type
+	 * @return null if no template was configured for this dbms
+	 */
+	public String getChangeCatalogSql(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".change.catalog", null);
+	}
+
+	/**
 	 * Returns the SQL to drop a primary key of a database object
 	 * @param type the type of the object. e.g. table, materialized view
 	 */

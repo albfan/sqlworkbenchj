@@ -47,7 +47,7 @@ public class WbProperties
 	private final Map<String, String> comments = new HashMap<String, String>();
 
 	private Object changeNotificationSource = null;
-
+	private boolean changed = false;
 
 	protected WbProperties()
 	{
@@ -66,6 +66,11 @@ public class WbProperties
 		this.distinctSections = num;
 	}
 
+	public boolean isModified()
+	{
+		return changed;
+	}
+	
 	public synchronized void saveToFile(File filename)
 		throws IOException
 	{
@@ -174,6 +179,7 @@ public class WbProperties
 			lastKey = key;
 		}
 		bw.flush();
+		changed = false;
 	}
 
 	@Override
@@ -261,6 +267,7 @@ public class WbProperties
 
 	private void firePropertyChanged(String name, String oldValue, String newValue)
 	{
+		changed = true;
 		List<PropertyChangeListener> listeners = this.changeListeners.get(name);
 		if (listeners == null || listeners.isEmpty()) return;
 
@@ -470,6 +477,7 @@ public class WbProperties
 			}
 			line = in.readLine();
 		}
+		changed = false;
 	}
 
 }
