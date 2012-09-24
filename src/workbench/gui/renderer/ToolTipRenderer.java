@@ -91,6 +91,7 @@ public class ToolTipRenderer
 
 	protected boolean isSelected;
 	protected boolean hasFocus;
+	protected boolean isNull;
 
 	protected ColumnExpression filter;
 
@@ -204,6 +205,7 @@ public class ToolTipRenderer
 
 	protected void initDisplay(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
+		this.isNull = (value == null);
 		this.hasFocus = focus;
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
@@ -331,7 +333,7 @@ public class ToolTipRenderer
 		{
 			return rendererSetup.modifiedColor; // might be null which is OK
 		}
-		else if (displayValue == null)
+		else if (displayValue == null || isNull)
 		{
 			return rendererSetup.nullColor; // might be null which is OK
 		}

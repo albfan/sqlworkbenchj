@@ -273,9 +273,9 @@ public class SqlCommand
 			{
 				try
 				{
-					LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution (" + StringUtil.getMaxSubstring(currentStatement.toString(), 80) + ")");
+					LogMgr.logTrace("SqlCommand.cancel()", "Cancelling statement execution (" + StringUtil.getMaxSubstring(currentStatement.toString(), 80) + ")");
 					currentStatement.cancel();
-					LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
+					LogMgr.logTrace("SqlCommand.cancel()", "Cancelled.");
 				}
 				catch (Throwable th)
 				{
@@ -302,7 +302,7 @@ public class SqlCommand
 		{
 			if (currentStatement != null)
 			{
-				LogMgr.logDebug("SqlCommand.done()", "Cleaning up SqlCommand");
+				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + getVerb());
 
 				try { currentStatement.clearBatch(); } catch (Exception th) {}
 				try { currentStatement.clearWarnings(); } catch (Exception th) {}
@@ -314,7 +314,7 @@ public class SqlCommand
 				}
 				catch (Exception th)
 				{
-					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement", th);
+					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for (" + getVerb() + ")", th);
 				}
 			}
 			currentStatement = null;

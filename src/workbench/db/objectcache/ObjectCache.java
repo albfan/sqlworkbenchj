@@ -255,7 +255,7 @@ class ObjectCache
 	 */
 	public synchronized List<ColumnIdentifier> getColumns(WbConnection dbConnection, TableIdentifier tbl)
 	{
-		LogMgr.logDebug("ObjectCache.getColumns()", "Checking columns for: " + tbl.getTableExpression());
+		LogMgr.logDebug("ObjectCache.getColumns()", "Checking columns for: " + tbl.getTableExpression(dbConnection));
 
 		TableIdentifier toSearch = findEntry(dbConnection, tbl);
 		List<ColumnIdentifier> cols = null;

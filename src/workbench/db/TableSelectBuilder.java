@@ -29,10 +29,16 @@ public class TableSelectBuilder
 	private boolean includLobColumns = true;
 	private boolean useColumnAlias;
 	private String sqlTemplate;
+	private boolean alwaysFullyQualified;
 
 	public TableSelectBuilder(WbConnection source)
 	{
 		this(source, null);
+	}
+
+	public void setUseFullyQualifiedName(boolean flag)
+	{
+		alwaysFullyQualified = flag;
 	}
 
 	public TableSelectBuilder(WbConnection source, String templateKey)
@@ -57,7 +63,7 @@ public class TableSelectBuilder
 	{
 		this.sqlTemplate = template;
 	}
-	
+
 	public void setExcludeLobColumns(boolean flag)
 	{
 		this.includLobColumns = !flag;
@@ -133,8 +139,19 @@ public class TableSelectBuilder
 			}
 		}
 
+
+		String tableName;
+		if (alwaysFullyQualified)
+		{
+			tableName = SqlUtil.fullyQualifiedName(dbConnection, table);
+		}
+		else
+		{
+			tableName = table.getTableExpression(this.dbConnection);
+		}
+		
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-		select = select.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
+		select = select.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		return select;
 	}
 

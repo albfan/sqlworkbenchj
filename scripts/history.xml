@@ -7,6 +7,7 @@
     <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
+    <entry dev-build="3" type="fix">The new NULL display string and a background color for NULL values could not be combined</entry>
     <entry dev-build="2" type="fix">Code completion for SQL Server did not work without a schema.</entry>
     <entry dev-build="2" type="fix">Exporting of the result data (e.g. copy to clipboard) did not deal properly with duplicate column names</entry>
     <entry dev-build="1" type="fix">Derived tables in JOIN expressions where not formatted correctly (according to the sub-select rules).</entry>

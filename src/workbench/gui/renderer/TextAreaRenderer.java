@@ -96,7 +96,8 @@ public class TextAreaRenderer
 	@Override
 	public void prepareDisplay(Object value)
 	{
-		if (value == null)
+		this.isNull = (value == null);
+		if (this.isNull)
 		{
 			this.displayValue = rendererSetup == null ? null : rendererSetup.nullString;
 			this.textDisplay.setText(displayValue);
