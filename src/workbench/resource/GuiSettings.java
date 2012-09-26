@@ -733,7 +733,7 @@ public class GuiSettings
 
 	public static int maxMenuItems()
 	{
-		return Settings.getInstance().getIntProperty("workbench.gui.menu.items.max", 99999);
+		return Settings.getInstance().getIntProperty("workbench.gui.menu.items.max", 9999);
 	}
 
 }
