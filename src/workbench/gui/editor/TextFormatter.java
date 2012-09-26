@@ -36,8 +36,6 @@ public class TextFormatter
 
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
 	{
-		if (!editor.isEditable()) return;
-
 		String sql = editor.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(alternateDelimiter);
@@ -107,10 +105,27 @@ public class TextFormatter
 			{
 				if (editor.isTextSelected())
 				{
-					editor.setSelectedText(text);
+					boolean editable = editor.isEditable();
+					try
+					{
+						if (!editable)
+						{
+							// the editor will refuse to execute setSelectedText() if it's not editable
+							editor.setEditable(true);
+						}
+						editor.setSelectedText(text);
+					}
+					finally
+					{
+						if (!editable)
+						{
+							editor.setEditable(false);
+						}
+					}
 				}
 				else
 				{
+					// setText() is always allowed, even if the editor is not editable
 					editor.setText(text);
 				}
 			}

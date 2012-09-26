@@ -1876,13 +1876,13 @@ public class SqlPanel
 	@Override
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false, this.appendResults);
+		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults);
 	}
 
 	@Override
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false, this.appendResults);
+		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults);
 	}
 
 	public void runAll()

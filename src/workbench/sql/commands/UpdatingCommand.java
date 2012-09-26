@@ -29,10 +29,25 @@ import workbench.util.LobFileStatement;
 public class UpdatingCommand
 	extends SqlCommand
 {
-	public static final SqlCommand UPDATE = new UpdatingCommand("UPDATE");
-	public static final SqlCommand DELETE = new UpdatingCommand("DELETE");
-	public static final SqlCommand INSERT = new UpdatingCommand("INSERT");
-	public static final SqlCommand TRUNCATE = new UpdatingCommand("TRUNCATE");
+	public static SqlCommand getUpdateCommand()
+	{
+		return new UpdatingCommand("UPDATE");
+	}
+
+	public static SqlCommand getDeleteCommand()
+	{
+		return new UpdatingCommand("DELETE");
+	}
+	
+	public static SqlCommand getInsertCommand()
+	{
+		return new UpdatingCommand("INSERT");
+	}
+
+	public static SqlCommand getTruncateCommand()
+	{
+		return new UpdatingCommand("TRUNCATE");
+	}
 
 	private String verb;
 	private boolean checkLobParameter = false;

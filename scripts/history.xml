@@ -2,11 +2,13 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-09-23">
+    <entry dev-build="2" type="enh">The source code displayed in the table list of the DbExplorer can now be reformatted.</entry>
     <entry dev-build="2" type="enh">In the DbExplorer's table list, the schema and catalog can now be changed if the DBMS supports it</entry>
     <entry dev-build="2" type="enh">The string literal for NULL values can now be defined when displaying data in a result set</entry>
     <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
+    <entry dev-build="3" type="fix">Sometimes concurrently running statements (in two different tabs) could influence each other</entry>
     <entry dev-build="3" type="fix">The new NULL display string and a background color for NULL values could not be combined</entry>
     <entry dev-build="2" type="fix">Code completion for SQL Server did not work without a schema.</entry>
     <entry dev-build="2" type="fix">Exporting of the result data (e.g. copy to clipboard) did not deal properly with duplicate column names</entry>

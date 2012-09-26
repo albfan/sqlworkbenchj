@@ -47,6 +47,7 @@ public class DbObjectSourcePanel
 	private EditorTabSelectMenu selectTabMenu;
 	private MainWindow parentWindow;
 	private boolean initialized;
+	private boolean allowReformat;
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
@@ -57,6 +58,11 @@ public class DbObjectSourcePanel
 			reloadSource = new ReloadAction(reloader);
 			reloadSource.setEnabled(false);
 		}
+	}
+
+	public void allowReformat()
+	{
+		this.allowReformat = true;
 	}
 
 	private void initGui()
@@ -80,6 +86,12 @@ public class DbObjectSourcePanel
 		this.sourceEditor = EditorPanel.createSqlEditor();
 		this.sourceEditor.showFindOnPopupMenu();
 		this.sourceEditor.setEditable(false);
+		this.sourceEditor.setAllowReformatOnReadonly(true);
+		if (allowReformat)
+		{
+			this.sourceEditor.showFormatSql();
+		}
+
 		this.setLayout(new BorderLayout());
 		WbToolbar toolbar = new WbToolbar();
 

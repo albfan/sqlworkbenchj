@@ -109,22 +109,22 @@ public class CommandMapper
 		addCommand(new WbGenerateScript());
 
 		// Wrappers for standard SQL statements
-		addCommand(SingleVerbCommand.COMMIT);
-		addCommand(SingleVerbCommand.ROLLBACK);
+		addCommand(SingleVerbCommand.getCommit());
+		addCommand(SingleVerbCommand.getRollback());
 
-		addCommand(UpdatingCommand.DELETE);
-		addCommand(UpdatingCommand.INSERT);
-		addCommand(UpdatingCommand.UPDATE);
-		addCommand(UpdatingCommand.TRUNCATE);
+		addCommand(UpdatingCommand.getDeleteCommand());
+		addCommand(UpdatingCommand.getInsertCommand());
+		addCommand(UpdatingCommand.getUpdateCommand());
+		addCommand(UpdatingCommand.getTruncateCommand());
 
 		addCommand(new SetCommand());
 		addCommand(new SelectCommand());
 
-		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
+		for (DdlCommand cmd : DdlCommand.getDdlCommands())
 		{
 			addCommand(cmd);
 		}
-		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
+		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.getCreateCommand());
 
 		this.dbSpecificCommands = new LinkedList<String>();
 		this.allowAbbreviated = Settings.getInstance().getBoolProperty("workbench.sql.allow.abbreviation", false);
@@ -209,8 +209,9 @@ public class CommandMapper
 		}
 		else if (metaData.isFirebird())
 		{
-			this.cmdDispatch.put(DdlCommand.RECREATE.getVerb(), DdlCommand.RECREATE);
-			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
+			DdlCommand recreate = DdlCommand.getRecreateCommand();
+			this.cmdDispatch.put(recreate.getVerb(), recreate);
+			this.dbSpecificCommands.add(recreate.getVerb());
 		}
 
 		if (metaData.getDbSettings().useWbProcedureCall())

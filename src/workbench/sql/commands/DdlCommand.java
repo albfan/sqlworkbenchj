@@ -39,15 +39,26 @@ import workbench.util.StringUtil;
 public class DdlCommand
 	extends SqlCommand
 {
-	public static final DdlCommand CREATE = new DdlCommand("CREATE");
-	public static final DdlCommand DROP = new DdlCommand("DROP");
-	public static final DdlCommand ALTER = new DdlCommand("ALTER");
-	public static final DdlCommand GRANT = new DdlCommand("GRANT");
-	public static final DdlCommand REVOKE = new DdlCommand("REVOKE");
-
 	// Firebird RECREATE VIEW command
-	public static final DdlCommand RECREATE = new DdlCommand("RECREATE");
-	public static final List<DdlCommand> DDL_COMMANDS = CollectionUtil.readOnlyList(DROP, CREATE, ALTER, GRANT, REVOKE);
+	public static DdlCommand getRecreateCommand()
+	{
+		return new DdlCommand("RECREATE");
+	}
+
+	public static DdlCommand getCreateCommand()
+	{
+		return new DdlCommand("CREATE");
+	}
+	
+	public static List<DdlCommand> getDdlCommands()
+	{
+		return CollectionUtil.readOnlyList(
+			new DdlCommand("DROP"),
+			getCreateCommand(),
+			new DdlCommand("ALTER"),
+			new DdlCommand("GRANT"),
+			new DdlCommand("REVOKE"));
+	}
 
 	private String verb;
 	private Savepoint ddlSavepoint;

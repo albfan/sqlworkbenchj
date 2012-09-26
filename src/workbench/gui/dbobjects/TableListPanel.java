@@ -261,6 +261,7 @@ public class TableListPanel
 		};
 
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
+		this.tableSource.allowReformat();
 
 		this.tableData = new TableDataPanel();
 

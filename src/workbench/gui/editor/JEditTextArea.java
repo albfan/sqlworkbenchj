@@ -2209,17 +2209,20 @@ public class JEditTextArea
 
 	/**
 	 * Sets if this component is editable.
-	 * @param editable True if this text area should be editable,
+	 * @param flag True if this text area should be editable,
 	 * false otherwise
 	 */
-	public void setEditable(boolean editable)
+	public void setEditable(boolean flag)
 	{
-		this.editable = editable;
+		if (editable == flag) return; // no change, do nothing
+
+		this.editable = flag;
+		
 		if (this.popup != null)
 		{
-			this.popup.getCutAction().setEnabled(editable);
-			this.popup.getClearAction().setEnabled(editable);
-			this.popup.getPasteAction().setEnabled(editable);
+			this.popup.getCutAction().setEnabled(flag);
+			this.popup.getClearAction().setEnabled(flag);
+			this.popup.getPasteAction().setEnabled(flag);
 		}
 	}
 

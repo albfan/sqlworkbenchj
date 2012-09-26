@@ -100,16 +100,21 @@ public class StatementRunnerTest
 			ExecutionController controller = new ExecutionController()
 			{
 
+				@Override
 				public boolean confirmStatementExecution(String command)
 				{
 					controllerCalled = true;
 					return confirmExecution;
 				}
+
+				@Override
 				public boolean confirmExecution(String command)
 				{
 					controllerCalled = true;
 					return confirmExecution;
 				}
+
+				@Override
 				public String getPassword(String prompt)
 				{
 					return null;
@@ -192,43 +197,52 @@ public class StatementRunnerTest
 		String sql = "\n\ninsert into bla (col) values (1)";
 		StatementRunner runner = new StatementRunner();
 		SqlCommand command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, UpdatingCommand.INSERT);
+		assertEquals(command.getVerb(), "INSERT");
+		assertEquals(true, command.isUpdatingCommand());
+		assertTrue(command instanceof UpdatingCommand);
 
 		sql = "--do something\nupdate bla set col = value";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, UpdatingCommand.UPDATE);
+		assertEquals(command.getVerb(), "UPDATE");
+		assertTrue(command instanceof UpdatingCommand);
 		assertEquals(true, command.isUpdatingCommand());
 
 		sql = "  delete from bla";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, UpdatingCommand.DELETE);
+		assertEquals(command.getVerb(), "DELETE");
 		assertEquals(true, command.isUpdatingCommand());
+		assertTrue(command instanceof UpdatingCommand);
 
 		sql = "  create table bla (col integer);";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.CREATE);
+		assertEquals(command.getVerb(), "CREATE");
 		assertEquals(true, command.isUpdatingCommand());
+		assertTrue(command instanceof DdlCommand);
 
 		sql = "-- comment\n\n\ncreate view bla as select * from blub;";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.CREATE);
+		assertEquals(command.getVerb(), "CREATE");
+		assertTrue(command instanceof DdlCommand);
 
 		sql = "-- comment\n\n\ncreate \nor \nreplace \nview bla as select * from blub;";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.CREATE);
+		assertEquals(command.getVerb(), "CREATE");
+		assertTrue(command instanceof DdlCommand);
 
 		sql = "-- comment\n\n\ncreate trigger bla;";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.CREATE);
+		assertEquals(command.getVerb(), "CREATE");
 
 		sql = "  drop table bla (col integer);";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.DROP);
+		assertEquals(command.getVerb(), "DROP");
+		assertTrue(command instanceof DdlCommand);
 		assertEquals(true, command.isUpdatingCommand());
 
 		sql = "/* this is \n a comment \n*/\n-- comment\nalter table bla drop constraint xyz;";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, DdlCommand.ALTER);
+		assertEquals(command.getVerb(), "ALTER");
+		assertTrue(command instanceof DdlCommand);
 		assertEquals(true, command.isUpdatingCommand());
 
 		boolean isDrop = ((DdlCommand)command).isDropCommand(sql);

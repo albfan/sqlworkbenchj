@@ -23,8 +23,18 @@ import workbench.sql.StatementRunnerResult;
  */
 public class SingleVerbCommand extends SqlCommand
 {
-	public static final SqlCommand COMMIT = new SingleVerbCommand("COMMIT");
-	public static final SqlCommand ROLLBACK = new SingleVerbCommand("ROLLBACK");
+	public static final String COMMIT_VERB = "COMMIT";
+	public static final String ROLLBACK_VERB = "COMMIT";
+
+	public static SqlCommand getCommit()
+	{
+		return new SingleVerbCommand(COMMIT_VERB);
+	}
+
+	public static SqlCommand getRollback()
+	{
+		return new SingleVerbCommand(ROLLBACK_VERB);
+	}
 
 	private String verb;
 
@@ -32,7 +42,7 @@ public class SingleVerbCommand extends SqlCommand
 	{
 		super();
 		this.verb = aVerb;
-		this.isUpdatingCommand = "COMMIT".equalsIgnoreCase(this.verb);
+		this.isUpdatingCommand = COMMIT_VERB.equalsIgnoreCase(this.verb);
 	}
 
 	@Override
@@ -44,11 +54,11 @@ public class SingleVerbCommand extends SqlCommand
 		{
 			if (currentConnection.useJdbcCommit())
 			{
-				if ("COMMIT".equals(this.verb))
+				if (COMMIT_VERB.equals(this.verb))
 				{
 					currentConnection.getSqlConnection().commit();
 				}
-				else if ("ROLLBACK".equals(this.verb))
+				else if (ROLLBACK_VERB.equals(this.verb))
 				{
 					currentConnection.getSqlConnection().rollback();
 				}

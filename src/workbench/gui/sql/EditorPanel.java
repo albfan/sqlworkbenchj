@@ -11,13 +11,8 @@
  */
 package workbench.gui.sql;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -30,6 +25,16 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -41,13 +46,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import workbench.WbManager;
 import workbench.db.WbConnection;
@@ -97,6 +95,8 @@ public class EditorPanel
 	protected RedoAction redo;
 	protected FileOpenAction fileOpen;
 	protected FileSaveAsAction fileSaveAs;
+
+	private boolean allowReformatOnReadonly;
 
 	protected FileSaveAction fileSave;
 	protected FileReloadAction fileReloadAction;
@@ -327,9 +327,19 @@ public class EditorPanel
 		}
 	}
 
+	/**
+	 * Controls if reformatting of the SQL is allowed even if the editor is not editable.
+	 */
+	public void setAllowReformatOnReadonly(boolean flag)
+	{
+		allowReformatOnReadonly = flag;
+	}
+
 	@Override
 	public void reformatSql()
 	{
+		if (!allowReformatOnReadonly && !this.isEditable()) return;
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
