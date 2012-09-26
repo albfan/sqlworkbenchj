@@ -29,6 +29,7 @@ import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -36,6 +37,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -1068,5 +1071,54 @@ public class WbSwingUtilities
 			default:
 				return Integer.toString(choice);
 		}
+	}
+
+	public static int calculateMaxMenuItems(JFrame window)
+	{
+		UIDefaults def = UIManager.getDefaults();
+		Font menuFont = def.getFont("Menu.font");
+		Font itemFont = def.getFont("MenuItem.font");
+		Font barFont = def.getFont("MenuBar.font");
+
+		int itemHeight = 16;
+		int barHeight = 24;
+
+		FontMetrics fm = window.getFontMetrics(itemFont);
+		if (fm != null)
+		{
+			itemHeight = fm.getHeight();
+		}
+		else
+		{
+			itemHeight = convertPointSizeToPixel(itemFont.getSize());
+		}
+		FontMetrics barMetrics = window.getFontMetrics(barFont);
+		if (barMetrics != null)
+		{
+			barHeight = fm.getHeight();
+		}
+		else
+		{
+			barHeight = convertPointSizeToPixel(barFont.getSize());
+		}
+
+		Insets itemInsets = def.getInsets("MenuItem.margin");
+		if (itemInsets != null)
+		{
+			itemHeight += itemInsets.top + itemInsets.bottom;
+		}
+
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		int screenHeight = (int)screen.getHeight();
+		int usableHeight = screenHeight - barHeight * 3;
+		int numItems = usableHeight / itemHeight;
+		return numItems;
+	}
+
+	public static int convertPointSizeToPixel(int points)
+	{
+		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+		int pixel = points * dpi / 72;
+		return pixel;
 	}
 }

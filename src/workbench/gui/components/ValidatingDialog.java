@@ -70,6 +70,12 @@ public class ValidatingDialog
 		init(editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
 	}
 
+	public ValidatingDialog(Dialog owner, String title, JComponent editor, boolean addCancelButton)
+	{
+		super(owner, title, true);
+		init(editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
+	}
+
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options)
 	{
 		this(owner, title, editor, options, true);
@@ -154,6 +160,7 @@ public class ValidatingDialog
 	{
 		return this.selectedOption;
 	}
+
 	public boolean isCancelled()
 	{
 		return this.isCancelled;
@@ -162,6 +169,15 @@ public class ValidatingDialog
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
 		return showConfirmDialog(parent, editor, title, null, 0, false);
+	}
+
+	public static boolean showOKCancelDialog(Dialog parent, JComponent editor, String title)
+	{
+		ValidatingDialog dialog = new ValidatingDialog(parent, title, editor, true);
+		WbSwingUtilities.center(dialog, parent);
+		dialog.setDefaultButton(0);
+		dialog.setVisible(true);
+		return !dialog.isCancelled();
 	}
 
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, int defaultButton)

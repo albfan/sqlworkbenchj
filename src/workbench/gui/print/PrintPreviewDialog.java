@@ -158,7 +158,7 @@ public class PrintPreviewDialog
 
 	private void selectPrintFont()
 	{
-		final Font f = WbFontChooser.chooseFont(this.getRootPane(), this.printTarget.getFont(), false, false);
+		final Font f = WbFontChooser.chooseFont(this.getRootPane(), this.printTarget.getFont(), false);
 		if (f != null)
 		{
 			Settings.getInstance().setPrintFont(f);

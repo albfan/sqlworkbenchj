@@ -100,6 +100,7 @@ import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.components.ConnectionSelector;
+import workbench.gui.components.MenuScroller;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
@@ -424,6 +425,22 @@ public class MainWindow
 		}
 	}
 
+	private void adjustMenuHeight(JMenuBar bar)
+	{
+		if (!GuiSettings.limitMenuLength()) return;
+		int maxItems = Math.min(WbSwingUtilities.calculateMaxMenuItems(this) - 4, GuiSettings.maxMenuItems());
+		int count = bar.getMenuCount();
+		for (int i=0; i < count; i++)
+		{
+			JMenu menu = bar.getMenu(i);
+			int items = menu.getItemCount();
+			if (items > maxItems)
+			{
+				MenuScroller.setScrollerFor(menu, maxItems - 4);
+			}
+		}
+	}
+
 	private JMenuBar createMenuForPanel(MainPanel panel)
 	{
 		HashMap<String, JMenu> menus = new HashMap<String, JMenu>(10);
@@ -625,6 +642,7 @@ public class MainWindow
 		menuBar.add(this.buildHelpMenu());
 
 		panel.addToToolbar(this.dbExplorerAction, true);
+		adjustMenuHeight(menuBar);
 		return menuBar;
 	}
 

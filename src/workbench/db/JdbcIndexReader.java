@@ -293,12 +293,6 @@ public class JdbcIndexReader
 		if (indexDefinition == null) return null;
 		StringBuilder idx = new StringBuilder(100);
 
-		String tableName = tableNameToUse;
-		if (tableName == null)
-		{
-			tableName = table.getTableExpression(this.metaData.getWbConnection());
-		}
-
 		String uniqueConstraint = null;
 		if (indexDefinition.isUniqueConstraint())
 		{
@@ -313,11 +307,18 @@ public class JdbcIndexReader
 		String type = indexDefinition.getIndexType();
 		type = getSQLKeywordForType(type);
 
-		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+		WbConnection conn = metaData.getWbConnection();
+		String sql = template;
 
-		if (tableNameToUse != null)
+		if (tableNameToUse == null)
 		{
-			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, tableName);
+			sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
+			sql = StringUtil.replace(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableName());
+		}
+		else
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, tableNameToUse);
+			sql = StringUtil.replace(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableNameToUse);
 		}
 
 		if (indexDefinition.isUnique())
@@ -359,7 +360,8 @@ public class JdbcIndexReader
 			sql = StringUtil.replace(sql, MetaDataSqlManager.IDX_DIRECTION_PLACEHOLDER + " ", "");
 		}
 
-		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
+		sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
+		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectName());
 		idx.append(sql);
 		String options = getIndexOptions(indexDefinition);
 		if (options != null)

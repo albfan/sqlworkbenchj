@@ -13,13 +13,12 @@ package workbench.gui.components;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Window;
 import java.io.Serializable;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -122,41 +121,28 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
 	private void selectFontButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_selectFontButtonMouseClicked
 	{//GEN-HEADEREND:event_selectFontButtonMouseClicked
-		WbFontChooser chooser = new WbFontChooser(monospacedOnly, allowFontReset);
+		WbFontChooser chooser = new WbFontChooser(monospacedOnly);
 		chooser.setSelectedFont(getSelectedFont());
+
 		Dimension d = new Dimension(320, 240);
 		chooser.setSize(d);
 		chooser.setPreferredSize(d);
 
-		JOptionPane option = new JOptionPane(chooser, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		JDialog dialog = option.createDialog(this, ResourceMgr.getString("TxtWindowTitleChooseFont"));
-		dialog.pack();
-		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(this));
-		dialog.setVisible(true);
-		dialog.dispose();
-
-		if (chooser.isFontReset())
-		{
-			this.setSelectedFont(null);
-			return;
-		}
-
-		Object value= option.getValue();
-		if (value == null) return;
 		Font result = null;
-		if (value instanceof Integer)
+		JDialog parent = null;
+		Window win = SwingUtilities.getWindowAncestor(this);
+		if (win instanceof JDialog)
 		{
-			int answer = ((Integer)value).intValue();
-			if (answer == JOptionPane.OK_OPTION)
-			{
-				result = chooser.getSelectedFont();
-			}
+			parent = (JDialog)win;
 		}
-		if (result != null)
+
+		boolean ok = ValidatingDialog.showOKCancelDialog(parent, chooser, ResourceMgr.getString("TxtWindowTitleChooseFont"));
+
+		if (ok)
 		{
+			result = chooser.getSelectedFont();
 			this.setSelectedFont(result);
 		}
-
 	}//GEN-LAST:event_selectFontButtonMouseClicked
 
 	public Font getSelectedFont()

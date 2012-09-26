@@ -725,4 +725,15 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.sequence.transpose", true);
 	}
+
+	public static boolean limitMenuLength()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.limit.menu", true);
+	}
+
+	public static int maxMenuItems()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.menu.items.max", 99999);
+	}
+
 }
