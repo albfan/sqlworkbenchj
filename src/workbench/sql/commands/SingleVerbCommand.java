@@ -24,7 +24,7 @@ import workbench.sql.StatementRunnerResult;
 public class SingleVerbCommand extends SqlCommand
 {
 	public static final String COMMIT_VERB = "COMMIT";
-	public static final String ROLLBACK_VERB = "COMMIT";
+	public static final String ROLLBACK_VERB = "ROLLBACK";
 
 	public static SqlCommand getCommit()
 	{
