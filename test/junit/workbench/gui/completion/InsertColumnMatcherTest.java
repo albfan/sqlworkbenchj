@@ -110,7 +110,8 @@ public class InsertColumnMatcherTest
 			"       'Dent', \n" +
 			"       CURRENT_DATE, \n" +
 			"       foobar_value \n" +
-			"FROM my_table";
+			"FROM my_table \n" +
+			" where not exists (select 1 from foobar)" ;
 
 		matcher = new InsertColumnMatcher(sql);
 		columns = matcher.getColumns();

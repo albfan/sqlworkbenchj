@@ -38,10 +38,10 @@ public class SingleVerbCommand extends SqlCommand
 
 	private String verb;
 
-	public SingleVerbCommand(String aVerb)
+	private SingleVerbCommand(String sqlVerb)
 	{
 		super();
-		this.verb = aVerb;
+		this.verb = sqlVerb;
 		this.isUpdatingCommand = COMMIT_VERB.equalsIgnoreCase(this.verb);
 	}
 

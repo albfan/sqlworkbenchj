@@ -89,6 +89,15 @@ public class InsertAnalyzerTest
 		assertTrue(c1 instanceof ColumnIdentifier);
 		ColumnIdentifier col = (ColumnIdentifier)c1;
 		assertEquals("firstname", col.getColumnName().toLowerCase());
+
+		sql = "insert into two  (  ) \n select id1, \n firstname \n from one where id not in (1,2,3);";
+		pos = sql.indexOf('(') + 1;
+		context = new StatementContext(con, sql , pos);
+		assertTrue(context.isStatementSupported());
+		analyzer = context.getAnalyzer();
+		assertTrue(analyzer instanceof InsertAnalyzer);
+		columns = analyzer.getData();
+		assertEquals(2, columns.size());
   }
 
 	@Test

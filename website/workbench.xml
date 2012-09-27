@@ -146,7 +146,7 @@ WHERE id=42;</p>
       <li><image-link title="Using WbGrepData" name="wbgrepdata.png">Search data in all tables using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-data">WbGrepData</a></b></li>
       <li><image-link title="Data Pumper" name="DataPumper.png">Copy data between databases</image-link></li>
       <li><image-link title="Auto-completion" name="completion.png">Auto-completion for SQL statements</image-link></li>
-      <!--<li><image-link title="INSERT Hint" name="insert_hint.png">Hints for columns and values in INSERT statements</image-link></li>-->
+      <li><image-link title="INSERT Hint" name="insert_hint.png">Hints for columns and values in INSERT statements</image-link></li>
       <li><image-link title="Console mode" name="console.png">Console mode</image-link></li>
       <li><image-link name="TableSource.png" title="SQL source for table definition">DbExplorer displaying table source</image-link></li>
       <li><image-link title="SQL Source Display" name="ViewSource.png">DbExplorer displaying the source of a VIEW</image-link></li>

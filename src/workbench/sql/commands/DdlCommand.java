@@ -49,7 +49,7 @@ public class DdlCommand
 	{
 		return new DdlCommand("CREATE");
 	}
-	
+
 	public static List<DdlCommand> getDdlCommands()
 	{
 		return CollectionUtil.readOnlyList(
@@ -63,10 +63,10 @@ public class DdlCommand
 	private String verb;
 	private Savepoint ddlSavepoint;
 
-	private DdlCommand(String aVerb)
+	private DdlCommand(String sqlVerb)
 	{
 		super();
-		this.verb = aVerb;
+		this.verb = sqlVerb;
 		this.isUpdatingCommand = true;
 	}
 

@@ -60,7 +60,7 @@ public class InsertAnalyzer
 					// if the INTO keyword was already read but not the VALUES
 					// keyword, the opening bracket marks the end of the table
 					// definition between INTO and the column list
-					if (intoStart != Integer.MAX_VALUE && valuesPos == Integer.MAX_VALUE)
+					if (intoStart != Integer.MAX_VALUE && valuesPos == Integer.MAX_VALUE && columnBracketStart == Integer.MAX_VALUE)
 					{
 						intoEnd = t.getCharBegin();
 						columnBracketStart = t.getCharEnd();

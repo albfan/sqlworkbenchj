@@ -38,7 +38,7 @@ public class UpdatingCommand
 	{
 		return new UpdatingCommand("DELETE");
 	}
-	
+
 	public static SqlCommand getInsertCommand()
 	{
 		return new UpdatingCommand("INSERT");
@@ -52,12 +52,12 @@ public class UpdatingCommand
 	private String verb;
 	private boolean checkLobParameter = false;
 
-	public UpdatingCommand(String aVerb)
+	private UpdatingCommand(String sqlVerb)
 	{
 		super();
-		this.verb = aVerb;
+		this.verb = sqlVerb;
 		this.isUpdatingCommand = true;
-		checkLobParameter = aVerb.equals("UPDATE") || aVerb.equals("INSERT");
+		checkLobParameter = sqlVerb.equals("UPDATE") || sqlVerb.equals("INSERT");
 	}
 
 	@Override

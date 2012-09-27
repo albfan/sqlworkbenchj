@@ -103,6 +103,7 @@ public class InsertColumnMatcher
 						element.setOffset(token.getCharBegin());
 					}
 					isSubSelect = true;
+					break; // no need to go any further, it's an INSERT ... SELECT statement
 				}
 				token = lexer.getNextToken(false, false);
 			}
