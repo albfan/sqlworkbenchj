@@ -42,7 +42,7 @@ public class OracleConstraintReader
 
 	public OracleConstraintReader(String dbId)
 	{
-		super("oracle");
+		super(dbId);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class OracleConstraintReader
 					if (isDefaultNNConstraint(constraint)) continue;
 
 					TableConstraint c = new TableConstraint(name, "(" + constraint + ")");
-					c.setIsSystemName(name.startsWith("SYS_"));
+					c.setIsSystemName(isSystemConstraintName(name));
 					result.add(c);
 				}
 			}
