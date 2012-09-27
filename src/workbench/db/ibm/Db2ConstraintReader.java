@@ -51,11 +51,13 @@ public class Db2ConstraintReader
 
 	public Db2ConstraintReader(WbConnection conn)
 	{
+		super(conn.getDbId());
 		String dbid = conn.getDbId();
 		isHostDB2 = dbid.equals("db2h");
 		isAS400 = dbid.equals("db2i");
 		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 	}
+
 
 	@Override
 	public boolean isSystemConstraintName(String name)

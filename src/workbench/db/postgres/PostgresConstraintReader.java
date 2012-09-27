@@ -34,6 +34,12 @@ public class PostgresConstraintReader
 				"where rel.contype in ('c', 'x') \n" +
 				" and t.relname = ? ";
 
+	public PostgresConstraintReader(String dbId)
+	{
+		super(dbId);
+	}
+
+
 	@Override
 	public String getColumnConstraintSql()
 	{

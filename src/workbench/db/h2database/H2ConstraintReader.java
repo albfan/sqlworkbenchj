@@ -44,6 +44,11 @@ public class H2ConstraintReader
 
 	private Pattern systemNamePattern = Pattern.compile("^(CONSTRAINT_[0-9A-F][0-9A-F])");
 
+	public H2ConstraintReader()
+	{
+		super("h2");
+	}
+
 	@Override
 	public int getIndexForSchemaParameter()
 	{

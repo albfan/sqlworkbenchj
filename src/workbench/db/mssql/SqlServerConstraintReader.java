@@ -27,6 +27,7 @@ public class SqlServerConstraintReader
 
 	public SqlServerConstraintReader(WbConnection con)
 	{
+		super(con.getDbId());
 		if (!SqlServerUtil.isSqlServer2005(con))
 		{
 			is2000 = true;

@@ -43,6 +43,11 @@ public class FirstSqlConstraintReader
 		"  and cons.table_schema = ? \n" +
 		"  and cons.table_name = ? ";
 
+	public FirstSqlConstraintReader()
+	{
+		super("firstsqlj");
+	}
+
 
 	@Override
 	public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier aTable)

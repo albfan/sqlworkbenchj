@@ -160,15 +160,15 @@ public class ReaderFactory
 		String dbid = meta.getDbId();
 		if (meta.isPostgres())
 		{
-			return new PostgresConstraintReader();
+			return new PostgresConstraintReader(meta.getDbId());
 		}
 		if (meta.isOracle())
 		{
-			return new OracleConstraintReader();
+			return new OracleConstraintReader(meta.getDbId());
 		}
 		if (meta.isHsql())
 		{
-			return new HsqlConstraintReader(meta.getSqlConnection());
+			return new HsqlConstraintReader(meta.getWbConnection());
 		}
 		if (meta.isSqlServer())
 		{
@@ -188,7 +188,7 @@ public class ReaderFactory
 		}
 		if (dbid.startsWith("adaptive_server"))
 		{
-			return new SybaseConstraintReader();
+			return new SybaseConstraintReader(meta.getWbConnection());
 		}
 		if (meta.isApacheDerby())
 		{

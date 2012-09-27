@@ -29,6 +29,11 @@ public class DerbyConstraintReader
 		"  and t.tablename = ? \n" +
 		"  and s.schemaname = ?";
 
+	public DerbyConstraintReader()
+	{
+		super("apache_derby");
+	}
+
 
 	@Override
 	public String getColumnConstraintSql()

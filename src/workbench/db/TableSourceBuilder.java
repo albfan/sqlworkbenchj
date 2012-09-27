@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
+import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
@@ -39,6 +40,7 @@ import workbench.util.StringUtil;
 public class TableSourceBuilder
 {
 	protected WbConnection dbConnection;
+	private ConstraintNameTester nameTester;
 
 	/**
 	 * This class should not be instantiated directly. Use
@@ -50,6 +52,7 @@ public class TableSourceBuilder
 	protected TableSourceBuilder(WbConnection con)
 	{
 		dbConnection = con;
+		nameTester = new ConstraintNameTester(con.getDbId());
 	}
 
 	protected ViewReader getViewReader()
@@ -210,7 +213,7 @@ public class TableSourceBuilder
 
 		readTableConfigOptions(table);
 
-		result.append(meta.generateCreateObject(includeDrop, table, table.getTableTypeOption()));
+		result.append(generateCreateObject(includeDrop, table, table.getTableTypeOption()));
 		result.append("\n(\n");
 
 		appendColumnDefinitions(result, columns, meta, columnConstraints);
@@ -280,6 +283,97 @@ public class TableSourceBuilder
 			result.append(pkSource);
 		}
 
+		return result;
+	}
+
+	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
+	{
+		String type = toDrop.getObjectType();
+		String objectName = toDrop.getObjectNameForDrop(dbConnection);
+		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
+
+		String drop = dbConnection.getDbSettings().getDropDDL(type, cascadeConstraints);
+		if (drop == null)
+		{
+			// Fallback, just in case no DROP statement was configured
+			result.append("DROP ");
+			result.append(type.toUpperCase());
+			result.append(' ');
+			result.append(objectName);
+			String cascade = dbConnection.getDbSettings().getCascadeConstraintsVerb(type);
+			if (cascade != null)
+			{
+				result.append(' ');
+				result.append(cascade);
+			}
+			result.append(";\n");
+		}
+		else
+		{
+			drop = StringUtil.replace(drop, "%name%", objectName);
+			result.append(SqlUtil.addSemicolon(drop));
+		}
+		return result;
+	}
+
+	/**
+	 * Generate a CREATE statement for the given object type
+	 * @param includeDrop if true, a DROP ... will be included in the SQL
+	 * @param objectType the object type (TABLE, VIEW, ...)
+	 * @param name the name of the object to create
+	 * @param typeOption an option for the CREATE statement. This is only
+	 * @return
+	 */
+	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption)
+	{
+		StringBuilder result = new StringBuilder();
+		boolean replaceAvailable = false;
+
+		String objectType = toCreate.getObjectType();
+
+		String prefix = "workbench.db.";
+		String suffix = "." + objectType.toLowerCase() + ".sql." + dbConnection.getDbId();
+
+		String name = toCreate.getObjectExpression(dbConnection);
+
+		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
+		if (replace != null)
+		{
+			result.append(StringUtil.replace(replace, "%name%", name));
+			replaceAvailable = true;
+		}
+
+		if (includeDrop && !replaceAvailable)
+		{
+			result.append(generateDrop(toCreate, true));
+			result.append('\n');
+		}
+
+		if (!replaceAvailable)
+		{
+			String create = Settings.getInstance().getProperty(prefix + "create" + suffix, null);
+			if (create == null)
+			{
+				result.append("CREATE ");
+				result.append(objectType.toUpperCase());
+				result.append(' ');
+				result.append(name);
+			}
+			else
+			{
+				create = StringUtil.replace(create, "%name%", name);
+				create = StringUtil.replace(create, "%fq_name%", SqlUtil.fullyQualifiedName(dbConnection, toCreate));
+				if (StringUtil.isNonBlank(typeOption))
+				{
+					create = StringUtil.replace(create, "%typeoption%", typeOption);
+				}
+				else
+				{
+					create = StringUtil.replace(create, "%typeoption% ", "");
+				}
+				result.append(create);
+			}
+		}
 		return result;
 	}
 
@@ -426,7 +520,7 @@ public class TableSourceBuilder
 
 		if (includeDrop)
 		{
-			CharSequence drop = dbConnection.getMetadata().generateDrop(table, true);
+			CharSequence drop = generateDrop(table, true);
 			result.append(drop);
 			result.append("\n\n");
 		}
@@ -519,7 +613,7 @@ public class TableSourceBuilder
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ", ", false));
 
-		if (meta.isSystemConstraintName(pkName))
+		if (nameTester.isSystemConstraintName(pkName))
 		{
 			pkName = null;
 		}
@@ -653,7 +747,7 @@ public class TableSourceBuilder
 			}
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableExpression(dbConnection) : tableNameToUse));
 
-			if (meta.isSystemConstraintName(fkname))
+			if (nameTester.isSystemConstraintName(fkname))
 			{
 				stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, "");
 				stmt = StringUtil.replace(stmt, " CONSTRAINT ", "");
@@ -673,25 +767,25 @@ public class TableSourceBuilder
 
 			String entry = StringUtil.listToString(colList, ", ", false);
 			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
+
 			String rule = updateRules.get(fkname);
-			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
-			rule = deleteRules.get(fkname);
-			if (meta.isOracle())
+			if (dbConnection.getDbSettings().supportsFkOption("update", rule))
 			{
-				// Oracle does not allow ON DELETE RESTRICT, so we'll have to
-				// remove the placeholder completely
-				if ("restrict".equalsIgnoreCase(rule))
-				{
-					stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
-				}
-				else
-				{
-					stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
-				}
+				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
 			}
 			else
 			{
+				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, true);
+			}
+
+			rule = deleteRules.get(fkname);
+			if (dbConnection.getDbSettings().supportsFkOption("delete", rule))
+			{
 				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
+			}
+			else
+			{
+				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
 			}
 
 			rule = getDeferrableVerb(deferrable.get(fkname));

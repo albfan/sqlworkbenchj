@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
+import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
@@ -159,7 +160,8 @@ public class GenericObjectDropper
 
 		if (objectTable != null)
 		{
-			ddl = ddl.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, objectTable.getTableExpression(this.connection));
+			ddl = TemplateHandler.replacePlaceHolder(ddl, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, objectTable.getObjectExpression(this.connection));
+			ddl = TemplateHandler.replacePlaceHolder(ddl, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(connection, objectTable));
 		}
 		ddl = ddl.replace("%name%", name);
 		sql.append(ddl);

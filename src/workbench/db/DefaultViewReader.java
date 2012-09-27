@@ -124,7 +124,8 @@ public class DefaultViewReader
 			return result.toString();
 		}
 
-		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable, null));
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
+		result.append(builder.generateCreateObject(includeDrop, viewTable, null));
 
 		result.append(lineEnding);
 		result.append('(');

@@ -921,96 +921,6 @@ public class DbMetadata
 		return type;
 	}
 
-	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
-	{
-		String type = toDrop.getObjectType();
-		String objectName = toDrop.getObjectNameForDrop(dbConnection);
-		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
-
-		String drop = dbConnection.getDbSettings().getDropDDL(type, cascadeConstraints);
-		if (drop == null)
-		{
-			// Fallback, just in case no DROP statement was configured
-			result.append("DROP ");
-			result.append(type.toUpperCase());
-			result.append(' ');
-			result.append(objectName);
-			String cascade = this.dbSettings.getCascadeConstraintsVerb(type);
-			if (cascade != null)
-			{
-				result.append(' ');
-				result.append(cascade);
-			}
-			result.append(";\n");
-		}
-		else
-		{
-			drop = StringUtil.replace(drop, "%name%", objectName);
-			result.append(SqlUtil.addSemicolon(drop));
-		}
-		return result;
-	}
-
-	/**
-	 * Generate a CREATE statement for the given object type
-	 * @param includeDrop if true, a DROP ... will be included in the SQL
-	 * @param objectType the object type (TABLE, VIEW, ...)
-	 * @param name the name of the object to create
-	 * @param typeOption an option for the CREATE statement. This is only
-	 * @return
-	 */
-	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toDrop, String typeOption)
-	{
-		StringBuilder result = new StringBuilder();
-		boolean replaceAvailable = false;
-
-		String objectType = toDrop.getObjectType();
-
-		String prefix = "workbench.db.";
-		String suffix = "." + objectType.toLowerCase() + ".sql." + this.getDbId();
-
-		String name = toDrop.getObjectExpression(dbConnection);
-
-		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
-		if (replace != null)
-		{
-			result.append(StringUtil.replace(replace, "%name%", name));
-			replaceAvailable = true;
-		}
-
-		if (includeDrop && !replaceAvailable)
-		{
-			result.append(generateDrop(toDrop, true));
-			result.append('\n');
-		}
-
-		if (!replaceAvailable)
-		{
-			String create = Settings.getInstance().getProperty(prefix + "create" + suffix, null);
-			if (create == null)
-			{
-				result.append("CREATE ");
-				result.append(objectType.toUpperCase());
-				result.append(' ');
-				result.append(name);
-			}
-			else
-			{
-				create = StringUtil.replace(create, "%name%", name);
-				if (StringUtil.isNonBlank(typeOption))
-				{
-					create = StringUtil.replace(create, "%typeoption%", typeOption);
-				}
-				else
-				{
-					create = StringUtil.replace(create, "%typeoption% ", "");
-				}
-				result.append(create);
-			}
-		}
-		return result;
-	}
-
 	public boolean isReservedWord(String name)
 	{
 		synchronized (reservedWords)
@@ -2675,25 +2585,6 @@ public class DbMetadata
 			result.append('\n');
 		}
 		return result.toString();
-	}
-
-	protected boolean isSystemConstraintName(String name)
-	{
-		if (name == null) return false;
-		String regex = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".constraints.systemname", null);
-		if (StringUtil.isEmptyString(regex)) return false;
-
-		try
-		{
-			Pattern p = Pattern.compile(regex);
-			Matcher m = p.matcher(name);
-			return m.matches();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.isSystemConstraintName()", "Error in regex", e);
-		}
-		return false;
 	}
 
 	public ConstraintReader getConstraintReader()

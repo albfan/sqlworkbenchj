@@ -1470,6 +1470,12 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "fk.inline", false);
 	}
 
+	public boolean supportsFkOption(String action, String type)
+	{
+		String toUse = type.toLowerCase().replace(' ', '_');
+		return Settings.getInstance().getBoolProperty(prefix + "fk." + action.toLowerCase() + "." + toUse +".supported", true);
+	}
+
 	public boolean supportsMetaDataWildcards()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards", true);

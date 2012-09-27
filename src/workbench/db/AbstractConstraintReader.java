@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.sqltemplates.ColumnDefinitionTemplate;
+import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
@@ -37,17 +39,27 @@ import workbench.util.StringUtil;
 public abstract class AbstractConstraintReader
 	implements ConstraintReader
 {
+	private ConstraintNameTester nameTester;
+
+	public AbstractConstraintReader(String dbId)
+	{
+		nameTester = new ConstraintNameTester(dbId);
+	}
+
 	public abstract String getColumnConstraintSql();
 	public abstract String getTableConstraintSql();
+
 
 	public int getIndexForSchemaParameter()
 	{
 		return -1;
 	}
+
 	public int getIndexForCatalogParameter()
 	{
 		return -1;
 	}
+
 	public int getIndexForTableNameParameter()
 	{
 		return 1;
@@ -55,7 +67,8 @@ public abstract class AbstractConstraintReader
 
 	public boolean isSystemConstraintName(String name)
 	{
-		return false;
+		if (nameTester == null) return false;
+		return nameTester.isSystemConstraintName(name);
 	}
 
 	/**

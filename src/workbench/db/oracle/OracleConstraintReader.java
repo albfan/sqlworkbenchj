@@ -40,6 +40,11 @@ public class OracleConstraintReader
 		 " and owner = ? \n" +
 		 " and table_name = ?  \n";
 
+	public OracleConstraintReader(String dbId)
+	{
+		super("oracle");
+	}
+
 	@Override
 	public int getIndexForSchemaParameter()
 	{

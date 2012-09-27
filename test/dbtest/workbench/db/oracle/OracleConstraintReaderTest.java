@@ -61,9 +61,9 @@ public class OracleConstraintReaderTest
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		
+
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
-		OracleConstraintReader reader = new OracleConstraintReader();
+		OracleConstraintReader reader = new OracleConstraintReader(con.getDbId());
 		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);
 		assertEquals(1, cons.size());
@@ -77,7 +77,7 @@ public class OracleConstraintReaderTest
 	@Test
 	public void testIsDefaultNNConstraint()
 	{
-		OracleConstraintReader instance = new OracleConstraintReader();
+		OracleConstraintReader instance = new OracleConstraintReader("oracle");
 		String definition = "\"MY_COL\" IS NOT NULL";
 		boolean result = instance.isDefaultNNConstraint(definition);
 		assertEquals("Default NN not recognized", true, result);

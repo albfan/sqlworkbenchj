@@ -19,6 +19,7 @@ import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.ReaderFactory;
 
 /**
  *
@@ -76,6 +77,13 @@ public class SqlServerConstraintReaderTest
 		assertNotNull(source);
 		assertTrue(source.indexOf("CHECK ([pieces]>(0))") > -1);
 		assertTrue(source.indexOf("CONSTRAINT positive_amount") > -1);
+
+		SqlServerConstraintReader reader = (SqlServerConstraintReader)ReaderFactory.getConstraintReader(conn.getMetadata());
+		assertTrue(reader.isSystemConstraintName("FK__child__base_id__70099B30"));
+		assertTrue(reader.isSystemConstraintName("CK__check_test__id__2E3BD7D3"));
+		assertTrue(reader.isSystemConstraintName("PK__child__3213D0856E2152BE"));
+		assertFalse(reader.isSystemConstraintName("PK_child__100"));
+		assertFalse(reader.isSystemConstraintName("fk_child_base"));
 	}
 
 	@Test

@@ -27,6 +27,11 @@ public class SybaseConstraintReader
 			"and   cons.table_id = tbl.table_id \n" +
 			"and   tbl.table_name = ? \n";
 
+	public SybaseConstraintReader(WbConnection conn)
+	{
+		super(conn.getDbId());
+	}
+
 	@Override
 	public String getColumnConstraintSql()
 	{

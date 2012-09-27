@@ -33,6 +33,11 @@ public class FirebirdConstraintReader
 		 "and   cc.rdb$trigger_name = trg.rdb$trigger_name \n" +
 		 "and   trg.rdb$trigger_type = 1 \n";
 
+	public FirebirdConstraintReader()
+	{
+		super("firebird");
+	}
+
 	@Override
 	public String getColumnConstraintSql()
 	{

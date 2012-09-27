@@ -11,9 +11,9 @@
  */
 package workbench.db.hsqldb;
 
-import java.sql.Connection;
 import workbench.db.AbstractConstraintReader;
 import workbench.db.JdbcUtils;
+import workbench.db.WbConnection;
 import workbench.util.StringUtil;
 
 /**
@@ -23,12 +23,11 @@ import workbench.util.StringUtil;
 public class HsqlConstraintReader
 	extends AbstractConstraintReader
 {
-
 	private String sql;
 
-	public HsqlConstraintReader(Connection dbConnection)
+	public HsqlConstraintReader(WbConnection dbConnection)
 	{
-		super();
+		super(dbConnection.getDbId());
 		this.sql = "select chk.constraint_name, chk.check_clause \n" +
 			"from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
 			"where chk.constraint_name = cons.constraint_name  \n" +
