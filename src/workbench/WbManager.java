@@ -330,11 +330,13 @@ public final class WbManager
 		for (MainWindow win : mainWindows)
 		{
 			if (win == null) continue;
+			
 			if (!settingsSaved && win.hasFocus())
 			{
 				win.saveSettings();
 				settingsSaved = true;
 			}
+
 			if (win.isBusy())
 			{
 				if (!this.checkAbort(win)) return false;
@@ -343,16 +345,10 @@ public final class WbManager
 			if (!result) return false;
 		}
 
+		// No window with focus found, save the size and position of the last opened window
 		if (!settingsSaved)
 		{
-			LogMgr.logDebug("WbManager.saveSettings()", "No MainWindow with focus found. Calling saveSettings() for all windows");
-			for (MainWindow win : mainWindows)
-			{
-				if (win != null)
-				{
-					win.saveSettings();
-				}
-			}
+			mainWindows.get(mainWindows.size() - 1).saveSettings();
 		}
 
 		return true;
@@ -513,7 +509,7 @@ public final class WbManager
 		closeToolWindows();
 	}
 
-	private void saveSettings()
+	public void saveConfigSettings()
 	{
 		if (this.writeSettings && !this.isBatchMode())
 		{
@@ -555,7 +551,7 @@ public final class WbManager
 	{
 		removeShutdownHook();
 		closeAllWindows();
-		saveSettings();
+		saveConfigSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		// The property workbench.system.doexit can be used to embedd the sqlworkbench.jar
@@ -1082,7 +1078,7 @@ public final class WbManager
 	public void run()
 	{
 		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted. Aborting process...");
-		saveSettings();
+		saveConfigSettings();
 		boolean exitImmediately = Settings.getInstance().getBoolProperty("workbench.exitonbreak", true);
 		if (exitImmediately)
 		{

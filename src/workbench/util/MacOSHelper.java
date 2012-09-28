@@ -92,6 +92,7 @@ public class MacOSHelper
 		{
 			LogMgr.logWarning("MacOSHelper.invoke()", "Different Proxy object passed to invoke!");
 		}
+		
 		try
 		{
 			String methodName = method.getName();
@@ -103,13 +104,19 @@ public class MacOSHelper
 				boolean handled = Settings.getInstance().getBoolProperty("workbench.osx.quit.sethandled", true);
 				if (handled)
 				{
-					// Apparently MacOS will call System.exit() once this event is triggered (and the "handled" flat was set to true)
-					// The following line will prevent WbManager from calling system.exit() as well.
+					// Apparently MacOS will call System.exit() once this event is triggered (and the "handled" flag was set to true)
+					// The following line will prevent WbManager from calling system.exit() again
 					System.setProperty("workbench.system.doexit", "false");
 				}
 
 				setHandled(args[0], handled);
 
+				// Apparently MacOS sometimes terminates the application before
+				// WbManager could cleanly shutdown the application. In order to make sure
+				// the settings are properly saved, this is done here "just in case".
+				WbManager.getInstance().saveConfigSettings();
+
+				// This is a hack to somehow cleanly shutdown the application although
 				boolean immediate = Settings.getInstance().getBoolProperty("workbench.osx.quit.immediate", true);
 				if (immediate)
 				{
@@ -189,6 +196,7 @@ public class MacOSHelper
 		try
 		{
 			Method setHandled = event.getClass().getMethod("setHandled", boolean.class);
+			LogMgr.logDebug("MacOSHelper.setHandled()", "Setting handled=" + flag + " for event: " + event.toString());
 			setHandled.invoke(event, Boolean.valueOf(flag));
 		}
 		catch (Exception e)

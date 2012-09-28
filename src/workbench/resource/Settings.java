@@ -3283,6 +3283,7 @@ public class Settings
 			WbProperties defaults = getDefaultProperties();
 			this.props.saveToFile(this.configfile, defaults);
 			LogMgr.logDebug("Settings.saveSettings()", "Global settings saved to: " + configfile.getFullPath());
+			fileTime = configfile.lastModified();
 		}
 		catch (IOException e)
 		{
