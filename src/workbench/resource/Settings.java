@@ -3245,21 +3245,24 @@ public class Settings
 
 		if (renameExistingFile || (createBackup && !makeBackups()))
 		{
-			this.configfile.makeBackup();
+			String bck = this.configfile.makeBackup();
+			LogMgr.logInfo("Settings.saveSettings()", "Created backup of global settings file: " + bck);
 		}
 
 		if (makeBackups())
 		{
 			// versioned backups are something different than renaming the existing file
-			// renameExistingFile will be true if an out of memory error occurred at some point
-			// in that case FileVersioning might not work properly so both things are done.
+			// renameExistingFile will be true if an out of memory error occurred at some point.
+			// If that happened FileVersioning might not work properly (because the JVM acts strange once an OOME occurred)
+			// So both things are done.
 			int maxVersions = getMaxWorkspaceBackup();
 			String dir = getWorkspaceBackupDir();
 			String sep = getFileVersionDelimiter();
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
 			try
 			{
-				version.createBackup(configfile);
+				String bck = version.createBackup(configfile);
+				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck);
 			}
 			catch (IOException e)
 			{
@@ -3279,11 +3282,13 @@ public class Settings
 		{
 			WbProperties defaults = getDefaultProperties();
 			this.props.saveToFile(this.configfile, defaults);
+			LogMgr.logDebug("Settings.saveSettings()", "Global settings saved to: " + configfile.getFullPath());
 		}
 		catch (IOException e)
 		{
 			LogMgr.logError(this, "Error saving Settings file '" + configfile.getFullPath() + "'", e);
 		}
+
 		if (this.getPKMappingFilename() != null && PkMapping.isInitialized())
 		{
 			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());

@@ -103,7 +103,7 @@ public class MacOSHelper
 				boolean handled = Settings.getInstance().getBoolProperty("workbench.osx.quit.sethandled", true);
 				if (handled)
 				{
-					// Apparently MacOS will call System.exit() once this event is trigger (and the "handled" flat was set to true)
+					// Apparently MacOS will call System.exit() once this event is triggered (and the "handled" flat was set to true)
 					// The following line will prevent WbManager from calling system.exit() as well.
 					System.setProperty("workbench.system.doexit", "false");
 				}

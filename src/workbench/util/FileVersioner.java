@@ -30,7 +30,7 @@ public class FileVersioner
 	/**
 	 * Create a FileVersioner that saves the backup in the same
 	 * directory as the target file.
-	 * 
+	 *
 	 * @param maxCount max. number of backups to maintain
 	 */
 	public FileVersioner(int maxCount)
@@ -84,13 +84,14 @@ public class FileVersioner
 	 * specified)
 	 *
 	 * @param target the file to backup
+	 * @return the complete filename of the backup
 	 * @throws java.io.IOException
 	 */
-	public void createBackup(File target)
+	public String createBackup(File target)
 		throws IOException
 	{
-		if (target == null) return;
-		if (!target.exists()) return;
+		if (target == null) return null;
+		if (!target.exists()) return null;
 
 		int nextVersion = findNextIndex(target);
 		File dir = getTargetDir(target);
@@ -99,7 +100,7 @@ public class FileVersioner
 			LogMgr.logWarning("FileVersioner.createBackup()", "Could not determine target directory. Using current directory");
 			dir = new File(".");
 		}
-		
+
 		if (!dir.exists())
 		{
 			if (!dir.mkdirs())
@@ -110,6 +111,7 @@ public class FileVersioner
 		}
 		File backup = new File(dir, target.getName() + versionSeparator + nextVersion);
 		FileUtil.copy(target, backup);
+		return backup.getAbsolutePath();
 	}
 
 	private File getTargetDir(File target)

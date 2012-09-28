@@ -517,7 +517,15 @@ public final class WbManager
 	{
 		if (this.writeSettings && !this.isBatchMode())
 		{
-			Settings s = Settings.getInstance();
+			if (overWriteGlobalSettingsFile)
+			{
+				Settings.getInstance().saveSettings(outOfMemoryOcurred);
+			}
+			else
+			{
+				LogMgr.logInfo("WbManager.saveSettings()", "Not overwritting global settings!");
+			}
+
 			FilterDefinitionManager.getInstance().saveMRUList();
 			try
 			{
@@ -527,7 +535,6 @@ public final class WbManager
 			{
 				LogMgr.logError("WbManager.saveSettings()", "Could not write column order storage", e);
 			}
-			if (s != null && overWriteGlobalSettingsFile) s.saveSettings(outOfMemoryOcurred);
 		}
 	}
 
@@ -823,6 +830,10 @@ public final class WbManager
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name"));
 			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
+			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
+			{
+				LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved!");
+			}
 		}
 		catch (Exception e)
 		{

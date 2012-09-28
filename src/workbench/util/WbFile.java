@@ -82,12 +82,13 @@ public class WbFile
 	/**
 	 * Renames this file by adding the current timestamp to the filename.
 	 */
-	public void makeBackup()
+	public String makeBackup()
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		String newname = this.getName() + "." + sdf.format(new java.util.Date());
 		WbFile newfile = new WbFile(this.getParent(), newname);
 		this.renameTo(newfile);
+		return newfile.getFullPath();
 	}
 
 	/**
