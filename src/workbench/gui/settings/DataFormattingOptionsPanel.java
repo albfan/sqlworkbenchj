@@ -16,7 +16,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;

@@ -62,7 +62,7 @@ public abstract class RowDataConverter
 
 	protected SimpleDateFormat defaultTimeFormatter;
 	protected WbDateFormatter defaultDateFormatter;
-	protected DecimalFormat defaultNumberFormatter;
+	protected WbNumberFormatter defaultNumberFormatter;
 	protected WbDateFormatter defaultTimestampFormatter;
 	protected boolean needsUpdateTable;
 	protected OutputFactory factory;
@@ -658,7 +658,7 @@ public abstract class RowDataConverter
 		syncInfinityLiterals();
 	}
 
-	public void setDefaultNumberFormatter(DecimalFormat formatter)
+	public void setDefaultNumberFormatter(WbNumberFormatter formatter)
 	{
 		this.defaultNumberFormatter = formatter;
 	}
@@ -682,20 +682,6 @@ public abstract class RowDataConverter
 		if (StringUtil.isEmptyString(format)) return;
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		setDefaultTimeFormatter(formatter);
-	}
-
-	public void setDefaultNumberFormat(String aFormat)
-	{
-		if (aFormat == null) return;
-		try
-		{
-			this.defaultNumberFormatter = new DecimalFormat(aFormat);
-		}
-		catch (Exception e)
-		{
-			this.defaultNumberFormatter = null;
-			LogMgr.logWarning("RowDataConverter.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
-		}
 	}
 
 	/**
@@ -807,7 +793,7 @@ public abstract class RowDataConverter
 			}
 			else if (value instanceof Number && this.defaultNumberFormatter != null)
 			{
-				result = this.defaultNumberFormatter.format(value);
+				result = this.defaultNumberFormatter.format((Number)value);
 			}
 			else if (value instanceof Clob)
 			{

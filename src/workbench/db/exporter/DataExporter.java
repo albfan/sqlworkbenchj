@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,7 +113,7 @@ public class DataExporter
 	private WbDateFormatter dateFormatter;
 	private WbDateFormatter dateTimeFormatter;
 
-	private DecimalFormat numberFormatter;
+	private WbNumberFormatter numberFormatter;
 	private boolean append;
 	private boolean escapeHtml = true;
 	private String htmlHeading;
@@ -872,9 +871,7 @@ public class DataExporter
 		{
 			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 			symbols.setDecimalSeparator(aSymbol.charAt(0));
-			numberFormatter = new DecimalFormat("0.#", symbols);
-			numberFormatter.setGroupingUsed(false);
-			numberFormatter.setMaximumFractionDigits(999);
+			numberFormatter = new WbNumberFormatter(aSymbol.charAt(0));
 		}
 		else
 		{
@@ -882,7 +879,7 @@ public class DataExporter
 		}
 	}
 
-	public DecimalFormat getDecimalFormatter()
+	public WbNumberFormatter getDecimalFormatter()
 	{
 		return this.numberFormatter;
 	}
@@ -893,12 +890,7 @@ public class DataExporter
 		{
 			return '.';
 		}
-		DecimalFormatSymbols symb = numberFormatter.getDecimalFormatSymbols();
-		if (symb == null)
-		{
-			return '.';
-		}
-		return symb.getDecimalSeparator();
+		return numberFormatter.getDecimalSymbol();
 	}
 
 	public void addQueryJob(String query, WbFile outputFile, String where)

@@ -65,7 +65,7 @@ public class XlsRowDataConverter
 	{
 		String dateFormat = this.defaultDateFormatter != null ? this.defaultDateFormatter.toPattern() : StringUtil.ISO_DATE_FORMAT;
 		String tsFormat = this.defaultTimestampFormatter != null ? this.defaultTimestampFormatter.toPattern() : StringUtil.ISO_TIMESTAMP_FORMAT;
-		String numFormat = this.defaultNumberFormatter != null ? this.defaultNumberFormatter.toPattern() : "0.00";
+		String numFormat = this.defaultNumberFormatter != null ? this.defaultNumberFormatter.toFormatterPattern() : "0.00";
 		excelFormat = new ExcelDataFormat(numFormat, dateFormat, "0", tsFormat);
 	}
 

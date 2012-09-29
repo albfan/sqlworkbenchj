@@ -26,8 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2458,16 +2456,17 @@ public class Settings
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
 	}
 
-	public DecimalFormat createDefaultDecimalFormatter()
+	public WbNumberFormatter createDefaultDecimalFormatter(int maxDigits)
 	{
-		DecimalFormat formatter = new DecimalFormat("0.#");
+		String sep = this.getDecimalSymbol();
+		return new WbNumberFormatter(maxDigits, sep.charAt(0));
+	}
+
+	public WbNumberFormatter createDefaultDecimalFormatter()
+	{
 		String sep = this.getDecimalSymbol();
 		int maxDigits = this.getMaxFractionDigits();
-		DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
-		decSymbols.setDecimalSeparator(sep.charAt(0));
-		formatter.setDecimalFormatSymbols(decSymbols);
-		formatter.setMaximumFractionDigits(maxDigits);
-		return formatter;
+		return new WbNumberFormatter(maxDigits, sep.charAt(0));
 	}
 
 	public String getDecimalSymbol()

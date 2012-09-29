@@ -46,10 +46,10 @@ public class DataDisplayOptions
 	{
 		super();
 		initComponents();
-		WbSwingUtilities.setMinimumSize(defMaxRows, 3);
-		WbSwingUtilities.setMinimumSize(multiLineThreshold, 3);
-		WbSwingUtilities.setMinimumSize(minColSizeField, 3);
-		WbSwingUtilities.setMinimumSize(maxColSizeField, 3);
+		WbSwingUtilities.setMinimumSize(defMaxRows, 6);
+		WbSwingUtilities.setMinimumSize(multiLineThreshold, 6);
+		WbSwingUtilities.setMinimumSize(minColSizeField, 6);
+		WbSwingUtilities.setMinimumSize(maxColSizeField, 6);
 	}
 
 	@Override
@@ -106,37 +106,6 @@ public class DataDisplayOptions
 	@Override
 	public boolean validateInput()
 	{
-		return true;
-	}
-
-	private boolean validateTextField(final JTextField field)
-	{
-		if (StringUtil.isEmptyString(field.getText().trim())) return true;
-		String errMsg = ResourceMgr.getString("ErrInvalidBlend");
-
-		int blend = -1;
-		try
-		{
-			blend = Integer.parseInt(field.getText().trim());
-		}
-		catch (Exception ex)
-		{
-			blend = -1;
-		}
-
-		if (blend < 0 || blend > 256)
-		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), errMsg);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					field.requestFocusInWindow();
-				}
-			});
-			return false;
-		}
 		return true;
 	}
 

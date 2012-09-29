@@ -11,11 +11,8 @@
  */
 package workbench.gui.components;
 
-
-import java.awt.Toolkit;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;
@@ -23,15 +20,19 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+import java.util.Locale;
+
+import workbench.log.LogMgr;
+
 /**
- *
+ * A JTextField that only allows numbers to be entered.
+ * 
  * @author Thomas Kellerer
  */
 public class NumberField
 	extends JTextField
 {
 	private NumberFormat integerFormatter;
-	protected boolean allowDecimals;
 	protected char decimalSep = '.';
 
 	public NumberField()
@@ -60,14 +61,10 @@ public class NumberField
 		this.decimalSep = aDecChar;
 	}
 
-	public char getDecimalChar() { return this.decimalSep; }
-
-	public void setAllowDecimals(boolean allowDec)
+	public char getDecimalChar()
 	{
-		this.allowDecimals = allowDec;
+		return this.decimalSep;
 	}
-
-	public boolean getAllowDecimals() { return this.allowDecimals; }
 
 	public int getValue()
 	{
@@ -80,7 +77,7 @@ public class NumberField
 		{
 			// This should never happen because insertString allows
 			// only properly formatted data to get in the field.
-			Toolkit.getDefaultToolkit().beep();
+			LogMgr.logError("NumberField.getValue()", "Invalid value entered", e);
 		}
 		return retVal;
 	}
@@ -99,7 +96,7 @@ public class NumberField
 	protected class WholeNumberDocument extends PlainDocument
 	{
 		@Override
-		public void insertString(int offs,String str,AttributeSet a)
+		public void insertString(int offs, String str, AttributeSet a)
 			throws BadLocationException
 		{
 			char[] source = str.toCharArray();
@@ -108,14 +105,9 @@ public class NumberField
 
 			for (int i = 0; i < result.length; i++)
 			{
-				if (Character.isDigit(source[i]) || (allowDecimals && source[i] == decimalSep))
+				if (Character.isDigit(source[i]))
 				{
 					result[j++] = source[i];
-				}
-				else
-				{
-					Toolkit.getDefaultToolkit().beep();
-					//System.err.println("insertString: " + source[i]);
 				}
 			}
 			super.insertString(offs, new String(result, 0, j), a);

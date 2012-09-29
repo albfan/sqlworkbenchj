@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.text.DecimalFormat;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -25,6 +24,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
+import workbench.util.WbNumberFormatter;
 
 /**
  *
@@ -37,7 +37,7 @@ public class SelectionDisplay
 	private Border activeBorder = new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3));
 	private ListSelectionListener rowListener;
 	private ListSelectionListener columnListener;
-	private DecimalFormat formatter;
+	private WbNumberFormatter formatter;
 
 	public SelectionDisplay()
 	{
@@ -58,8 +58,7 @@ public class SelectionDisplay
 			}
 		};
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
-		formatter = Settings.getInstance().createDefaultDecimalFormatter();
-		formatter.setMaximumFractionDigits(2);
+		formatter = Settings.getInstance().createDefaultDecimalFormatter(2);
 	}
 
 	public void removeClient(JTable client)
