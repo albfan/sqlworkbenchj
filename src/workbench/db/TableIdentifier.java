@@ -894,6 +894,10 @@ public class TableIdentifier
 	{
 		String name = table.getTableName();
 		String schema = table.getSchema();
+		if (schema == null && table.getCatalog() != null)
+		{
+			schema = table.getCatalog();
+		}
 		if (StringUtil.isEmptyString(schema)) return name;
 		return schema + "." + name;
 	}

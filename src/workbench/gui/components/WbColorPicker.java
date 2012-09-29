@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -55,6 +56,7 @@ public class WbColorPicker
 		if (showReset)
 		{
 			this.resetButton.setIcon(ResourceMgr.getImage("Delete"));
+			WbSwingUtilities.adjustButtonWidth(resetButton,22,22);
 		}
 		this.defaultLabel.setVisible(false);
 		Dimension d = null;
@@ -70,12 +72,13 @@ public class WbColorPicker
 		d.width--;
 		this.sampleColor.setPreferredSize(d);
 		this.sampleBorder = new BevelBorder(BevelBorder.LOWERED);
+		WbSwingUtilities.adjustButtonWidth(selectColor,22,22);
 	}
 
 	/**
 	 * Define the displayed label when no color is selected by supplying
 	 * the resource key.
-	 * 
+	 *
 	 * @param key
 	 */
 	public void setDefaultLabelKey(String key)

@@ -153,7 +153,7 @@ public class PostgresRuleReader
 		catch (SQLException e)
 		{
 			connection.rollback(sp);
-			LogMgr.logError("PostgresRuleReader.getDomainList()", "Could not read domains", e);
+			LogMgr.logError("PostgresRuleReader.getRuleList()", "Could not read domains", e);
 		}
 		finally
 		{
@@ -184,7 +184,7 @@ public class PostgresRuleReader
 				}
 				catch (SQLException e)
 				{
-					LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableSql()", "Error retrieving rule source!", e);
+					LogMgr.logError("PostgresTableSourceBuilder.getTableRuleSource()", "Error retrieving rule source!", e);
 				}
 			}
 			return result.toString();

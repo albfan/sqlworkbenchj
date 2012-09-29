@@ -412,6 +412,7 @@ public class SchemaDiff
 	 *	Setup this SchemaDiff object to compare all tables that the user
 	 *  can access in the reference connection with all matching (=same name)
 	 *  tables in the target connection.
+	 *
 	 *  This will retrieve all user tables from the reference (=source)
 	 *  connection and will match them to the tables in the target connection.
 	 *
@@ -419,6 +420,9 @@ public class SchemaDiff
 	 *  present in the target connection but not existing in the reference
 	 *  connection.
 	 *
+	 * @param rSchema the reference schema. If null the "current schema" of the reference connection will be used
+	 * @param tSchema the target schema. If null the "current schema" of the target connection will be used
+	 * 
 	 * @see #setTables(List, List)
 	 * @see #setTables(List)
 	 */
@@ -431,8 +435,37 @@ public class SchemaDiff
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
 
-		this.referenceSchema = (rSchema == null ? this.referenceDb.getMetadata().getSchemaToUse() : this.referenceDb.getMetadata().adjustSchemaNameCase(rSchema));
-		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.referenceDb.getMetadata().adjustSchemaNameCase(tSchema));
+		if (rSchema == null)
+		{
+			if (referenceDb.getDbSettings().supportsSchemas())
+			{
+				referenceSchema = this.referenceDb.getMetadata().getSchemaToUse();
+			}
+			else
+			{
+				referenceSchema = this.referenceDb.getMetadata().getCurrentCatalog();
+			}
+		}
+		else
+		{
+			this.referenceSchema = this.referenceDb.getMetadata().adjustSchemaNameCase(rSchema);
+		}
+
+		if (tSchema == null)
+		{
+			if (targetDb.getDbSettings().supportsSchemas())
+			{
+				targetSchema = this.targetDb.getMetadata().getSchemaToUse();
+			}
+			else
+			{
+				targetSchema = this.targetDb.getMetadata().getCurrentCatalog();
+			}
+		}
+		else
+		{
+			this.targetSchema = this.referenceDb.getMetadata().adjustSchemaNameCase(tSchema);
+		}
 
 		String[] types;
 		if (diffViews || treatViewAsTable)
@@ -444,8 +477,8 @@ public class SchemaDiff
 			types = this.referenceDb.getMetadata().getTableTypesArray();
 		}
 
-		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(null, this.referenceSchema, types);
-		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(null, this.targetSchema, types);
+		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(null, getReferenceCatalog(referenceSchema), getReferenceSchema(referenceSchema), types);
+		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(null, getTargetCatalog(this.targetSchema), getTargetSchema(this.targetSchema), types);
 
 		if (treatViewAsTable)
 		{
@@ -461,6 +494,42 @@ public class SchemaDiff
 		}
 
 		processTableList(refTables, target);
+	}
+
+	/**
+	 * Return the catalog name to be used for the passed "schema input".
+	 *
+	 * If the target DBMS does not support schemas, the schemaName will
+	 * be returned to it can be used as a catalog.
+	 */
+	private String getTargetCatalog(String schemaName)
+	{
+		if (targetDb.getDbSettings().supportsSchemas()) return null;
+		return schemaName;
+	}
+
+	/**
+	 * Return the schema name to be used for the passed "schema input".
+	 *
+	 * If the target DBMS supports schemas, the schemaName will
+	 * be returned, otherwise null.
+	 */
+	private String getTargetSchema(String schemaName)
+	{
+		if (targetDb.getDbSettings().supportsSchemas()) return schemaName;
+		return null;
+	}
+
+	private String getReferenceCatalog(String schemaName)
+	{
+		if (referenceDb.getDbSettings().supportsSchemas()) return null;
+		return schemaName;
+	}
+
+	private String getReferenceSchema(String schemaName)
+	{
+		if (referenceDb.getDbSettings().supportsSchemas()) return schemaName;
+		return null;
 	}
 
 	private void buildSequenceList()
@@ -491,8 +560,9 @@ public class SchemaDiff
 	{
 		try
 		{
-			List<ProcedureDefinition> refProcs = referenceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
-			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(null, this.targetSchema, null);
+			List<ProcedureDefinition> refProcs = referenceDb.getMetadata().getProcedureReader().getProcedureList(getReferenceCatalog(referenceSchema), getReferenceSchema(referenceSchema), null);
+			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(getTargetCatalog(targetSchema), getTargetSchema(targetSchema), null);
+
 			processProcedureList(refProcs, targetProcs);
 		}
 		catch (SQLException sql)
@@ -702,7 +772,10 @@ public class SchemaDiff
 			else
 			{
 				ProcDiffEntry entry = null;
-				ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, refProc.getProcedureName(), refProc.getResultType());
+				ProcedureDefinition tp = new ProcedureDefinition(
+					getTargetCatalog(targetSchema),
+					getTargetSchema(targetSchema), refProc.getProcedureName(),refProc.getResultType());
+
 				if (targetMeta.getProcedureReader().procedureExists(tp))
 				{
 					entry = new ProcDiffEntry(refProc,tp);
@@ -884,7 +957,8 @@ public class SchemaDiff
 			{
 				String refType = entry.reference.getType();
 
-				if (referenceDb.getMetadata().isTableType(refType) && !refType.equals(referenceDb.getMetadata().getMViewTypeName()))
+				if (referenceDb.getMetadata().isTableType(refType)
+					  && !refType.equals(referenceDb.getMetadata().getMViewTypeName()))
 				{
 					ReportTable source = createReportTableInstance(entry.reference, this.referenceDb);
 					if (entry.target == null)

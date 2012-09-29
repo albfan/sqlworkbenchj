@@ -196,16 +196,24 @@ public class CommonDiffParameters
 			missingRefTables.addAll(refTableArgs.getMissingTables());
 			matchNames = refTableArgs.wasWildCardArgument();
 
+			boolean refUseCatalog = !referenceConn.getDbSettings().supportsSchemas();
 			tableNames = cmdLine.getValue(PARAM_TARGETTABLES);
 			if (StringUtil.isBlank(tableNames))
 			{
 				targetTables = new ArrayList<TableIdentifier>(refTables.size());
-				Set<String> schemas = getSchemas(refTables);
+				Set<String> schemas = refUseCatalog ? getCatalogs(refTables) : getSchemas(refTables);
 				if (schemas.size() > 0)
 				{
 					for (String schema : schemas)
 					{
-						targetTables.addAll(targetCon.getMetadata().getTableList(null, schema));
+						if (refUseCatalog)
+						{
+							targetTables.addAll(targetCon.getMetadata().getTableList(null, schema, null));
+						}
+						else
+						{
+							targetTables.addAll(targetCon.getMetadata().getTableList(null, schema));
+						}
 					}
 				}
 				else
@@ -258,6 +266,19 @@ public class CommonDiffParameters
 		}
 
 		return mapping;
+	}
+
+	private Set<String> getCatalogs(List<TableIdentifier> tables)
+	{
+		Set<String> schemas = CollectionUtil.caseInsensitiveSet();
+		for (TableIdentifier tbl : tables)
+		{
+			if (tbl.getCatalog() != null)
+			{
+				schemas.add(tbl.getCatalog());
+			}
+		}
+		return schemas;
 	}
 
 	private Set<String> getSchemas(List<TableIdentifier> tables)

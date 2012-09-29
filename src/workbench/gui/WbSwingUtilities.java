@@ -25,8 +25,10 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -35,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -1120,5 +1123,41 @@ public class WbSwingUtilities
 		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
 		int pixel = points * dpi / 72;
 		return pixel;
+	}
+
+	public static void adjustButtonWidth(JButton button, int minWidth, int minHeight)
+	{
+		Font f = button.getFont();
+		if (f != null)
+		{
+			FontMetrics fm = button.getFontMetrics(f);
+			if (fm != null)
+			{
+				Rectangle2D bounds = f.getStringBounds(button.getText(), fm.getFontRenderContext());
+				int width = (int)bounds.getWidth() + 2;
+				int height = Math.max((int)bounds.getHeight(), minHeight);
+				Dimension pref = button.getPreferredSize();
+				Dimension dim = new Dimension(Math.max(width,minWidth), Math.max(height, pref.height));
+				button.setPreferredSize(dim);
+				button.setMinimumSize(dim);
+			}
+		}
+	}
+
+	public static void adjustTreeRowHeight(JTree tree)
+	{
+		Font std = Settings.getInstance().getStandardFont();
+		if (std == null) return; // nothing to do
+
+		Font font = tree.getFont();
+		if (font != null)
+		{
+			FontMetrics fm = tree.getFontMetrics(font);
+			if (fm != null)
+			{
+				int height = fm.getHeight();
+				tree.setRowHeight(height);
+			}
+		}
 	}
 }

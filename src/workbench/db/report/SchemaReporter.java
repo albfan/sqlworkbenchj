@@ -397,6 +397,8 @@ public class SchemaReporter
 
 	private void retrieveSequences()
 	{
+		// No need to check the schema/catalog stuff because MySQL
+		// which doesn't support schemas also doesn't support sequences.
 		if (this.monitor != null)
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingSequences"), -1, -1);
@@ -473,7 +475,15 @@ public class SchemaReporter
 		try
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
+			List<ProcedureDefinition> procs = null;
+			if (this.dbConn.getDbSettings().supportsSchemas())
+			{
+				procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
+			}
+			else
+			{
+				procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(schema, null, null);
+			}
 			Set<String> oraPackages = new HashSet<String>();
 
 			for (ProcedureDefinition def : procs)
@@ -510,7 +520,15 @@ public class SchemaReporter
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
 			String[] typesToUse = new String[types.size()];
 			types.toArray(typesToUse);
-			this.setTableList(dbConn.getMetadata().getObjectList(schema, typesToUse));
+			if (this.dbConn.getDbSettings().supportsSchemas())
+			{
+				this.setTableList(dbConn.getMetadata().getObjectList(schema, typesToUse));
+			}
+			else
+			{
+				// Assume the schema names are really catalogs
+				this.setTableList(dbConn.getMetadata().getObjectList(null, schema, null, typesToUse));
+			}
 		}
 		catch (SQLException e)
 		{

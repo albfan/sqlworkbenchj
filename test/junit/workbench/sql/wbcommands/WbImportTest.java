@@ -411,6 +411,52 @@ public class WbImportTest
 		}
 	}
 
+	public void testMultipleConstants()
+		throws Exception
+	{
+		File importFile  = new File(this.basedir, "mult_constant_import.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("id");
+		out.println("1");
+		out.println("2");
+		out.println("3");
+		out.close();
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "'" +
+			" -constantValues=\"flag1=xx,flag2=yy\" " +
+			" -type=text " +
+			" -header=true " +
+			" -continueonerror=false " +
+			" -table=const_test"
+		);
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			int count = 0;
+			stmt = this.connection.createStatementForQuery();
+			rs = stmt.executeQuery("select nr, flag1, flag2 from const_test order by nr");
+			while (rs.next())
+			{
+				count ++;
+				int id = rs.getInt(1);
+				assertEquals(count, id);
+				String f1 = rs.getString(2);
+				String f2 = rs.getString(3);
+				assertEquals("xx", f1);
+				assertEquals("yy", f2);
+			}
+			assertEquals("Not enough values imported", 3, count);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
 	@Test
 	public void testPartialColumnXmlImport()
 		throws Exception
@@ -4114,6 +4160,7 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
+		stmt.executeUpdate("CREATE TABLE const_test (nr integer, flag1 varchar(2), flag2 varchar(2))");
 
 		stmt.executeUpdate("CREATE TABLE zzbase (id integer primary key, info varchar(50))");
 		stmt.executeUpdate("CREATE TABLE child1 (id integer primary key, base_id integer not null, info varchar(50))");

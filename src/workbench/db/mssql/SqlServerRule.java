@@ -9,11 +9,10 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.postgres;
+package workbench.db.mssql;
 
 import java.sql.SQLException;
 import workbench.db.DbObject;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
@@ -21,7 +20,7 @@ import workbench.util.SqlUtil;
  *
  * @author Thomas Kellerer
  */
-public class PostgresRule
+public class SqlServerRule
 	implements DbObject
 {
 	private String catalog;
@@ -30,38 +29,12 @@ public class PostgresRule
 	private final String objectType = "RULE";
 	private String remarks;
 	private String source;
-	private TableIdentifier ruleTable;
-	private String event;
 
-	public PostgresRule(String ruleCatalog, String ruleSchema, String name)
+	public SqlServerRule(String ruleCatalog, String ruleSchema, String name)
 	{
 		catalog = ruleCatalog;
 		schema = ruleSchema;
 		ruleName = name;
-	}
-
-	public void setEvent(String evt)
-	{
-		event = evt;
-	}
-
-	public String getEvent()
-	{
-		return event;
-	}
-
-	/**
-	 * Set the table for which this rule is defined
-	 * @param tbl
-	 */
-	public void setTable(TableIdentifier tbl)
-	{
-		ruleTable = tbl;
-	}
-
-	public TableIdentifier getTable()
-	{
-		return ruleTable;
 	}
 
 	@Override
@@ -139,12 +112,6 @@ public class PostgresRule
 		StringBuilder sql = new StringBuilder(50);
 		sql.append("DROP RULE ");
 		sql.append(con.getMetadata().quoteObjectname(ruleName));
-		sql.append(" ON ");
-		sql.append(ruleTable.getObjectName(con));
-		if (cascade)
-		{
-			sql.append(" CASCADE");
-		}
 		return sql.toString();
 	}
 

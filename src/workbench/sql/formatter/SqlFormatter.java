@@ -1416,6 +1416,14 @@ public class SqlFormatter
 					continue;
 				}
 
+				if (word.equals("GRANT") || word.equals("REVOKE"))
+				{
+					lastToken = t;
+					t = this.processGrantRevoke(t);
+					if (t == null) return;
+					continue;
+				}
+
 				if (word.equals("FROM"))
 				{
 					lastToken = t;
@@ -1769,6 +1777,44 @@ public class SqlFormatter
 			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
+	}
+
+	private SQLToken processGrantRevoke(SQLToken previous)
+	{
+		SQLToken last = previous;
+		SQLToken t = this.lexer.getNextToken(true, false);
+		boolean nextIsIdentifier = false;
+		while (t != null)
+		{
+			String verb = t.getContents();
+			if (verb.equalsIgnoreCase("ON") || verb.equalsIgnoreCase("TO") || verb.equalsIgnoreCase("FROM"))
+			{
+				this.appendNewline();
+				this.indent(2);
+				this.appendTokenText(t);
+				nextIsIdentifier = true;
+			}
+			else
+			{
+				if (needsWhitespace(last, t))
+				{
+					this.appendText(' ');
+				}
+
+				if (nextIsIdentifier)
+				{
+					// don't change the case of the identifiers, leave them as they were entered by the user
+					this.appendText(t.getText());
+				}
+				else
+				{
+					this.appendText(verb);
+				}
+				nextIsIdentifier = false;
+			}
+			t = this.lexer.getNextToken(true, false);
+		}
+		return t;
 	}
 
 	private SQLToken processCreate(SQLToken previous)

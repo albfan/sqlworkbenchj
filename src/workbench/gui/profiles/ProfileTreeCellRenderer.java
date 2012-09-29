@@ -11,16 +11,20 @@
  */
 package workbench.gui.profiles;
 
+
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
+
 import workbench.resource.ResourceMgr;
 
 /**
- * A tree cell renderer that can indicate a drop target
+ * A tree cell renderer that can indicate a drop target.
+ *
  * @author Thomas Kellerer
  */
 public class ProfileTreeCellRenderer
@@ -44,6 +48,7 @@ public class ProfileTreeCellRenderer
 		this.dropTargetItem = target;
 	}
 
+	@Override
 	public Component getTreeCellRendererComponent(JTree tree,
 	                                              Object value,
 	                                              boolean sel,

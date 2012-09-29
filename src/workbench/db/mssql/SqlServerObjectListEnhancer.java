@@ -93,7 +93,7 @@ public class SqlServerObjectListEnhancer
 
 		if (requestedTypes == null)
 		{
-			requestedTypes = new String[] { "TABLE", "VIEW", "SYNONYM", "TYPE" };
+			requestedTypes = new String[] { "TABLE", "VIEW", "SYNONYM", "TYPE", "RULE" };
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())

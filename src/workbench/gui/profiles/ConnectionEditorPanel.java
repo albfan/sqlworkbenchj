@@ -122,6 +122,8 @@ public class ConnectionEditorPanel
 		this.infoColor.setActionListener(this);
 		this.confirmUpdates.addActionListener(this);
 		this.readOnly.addActionListener(this);
+		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
+		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
 	}
 
 	public JComponent getInitialFocusComponent()
@@ -553,9 +555,7 @@ public class ConnectionEditorPanel
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
     tfFetchSize.setToolTipText(ResourceMgr.getString("d_LblFetchSize")); // NOI18N
-    tfFetchSize.setMinimumSize(new java.awt.Dimension(20, 20));
     tfFetchSize.setName("defaultFetchSize"); // NOI18N
-    tfFetchSize.setPreferredSize(new java.awt.Dimension(24, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
@@ -593,9 +593,7 @@ public class ConnectionEditorPanel
     jPanel2.add(timeoutLabel, gridBagConstraints);
 
     tfTimeout.setToolTipText(ResourceMgr.getString("d_LblConnTimeout")); // NOI18N
-    tfTimeout.setMinimumSize(new java.awt.Dimension(20, 20));
     tfTimeout.setName("connectionTimeout"); // NOI18N
-    tfTimeout.setPreferredSize(new java.awt.Dimension(24, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;

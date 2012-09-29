@@ -340,24 +340,22 @@ public class DataColorOptions
     jPanel7.add(jLabel8, gridBagConstraints);
 
     selectionBlend.setToolTipText(ResourceMgr.getString("d_LblSelectionBlend")); // NOI18N
-    selectionBlend.setMinimumSize(new java.awt.Dimension(40, 20));
-    selectionBlend.setPreferredSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
     jPanel7.add(selectionBlend, gridBagConstraints);
 
     alternateBlend.setToolTipText(ResourceMgr.getString("d_LblAlternateBlend")); // NOI18N
-    alternateBlend.setMinimumSize(new java.awt.Dimension(40, 20));
-    alternateBlend.setPreferredSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(3, 10, 0, 0);
     jPanel7.add(alternateBlend, gridBagConstraints);
 
     jLabel9.setText(ResourceMgr.getString("LblAlternateBlend")); // NOI18N
@@ -366,17 +364,17 @@ public class DataColorOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
     jPanel7.add(jLabel9, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 20);
     add(jPanel7, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

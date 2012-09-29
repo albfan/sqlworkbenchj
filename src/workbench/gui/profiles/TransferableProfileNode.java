@@ -18,30 +18,34 @@ import java.io.IOException;
 import javax.swing.tree.TreePath;
 
 /**
- * Handle drag and drop in the profile Tree
+ * Handle drag and drop in the profile Tree.
+ * 
  * @author Thomas Kellerer
  */
-class TransferableProfileNode 
+class TransferableProfileNode
 	implements Transferable
 {
 	public static final DataFlavor PROFILE_FLAVOR = new DataFlavor(TreePath.class, "ProfileTreeElement");
 	private TreePath[] path;
-	
-	public TransferableProfileNode(TreePath[] tp)
+
+	TransferableProfileNode(TreePath[] tp)
 	{
 		path = tp;
 	}
-	
+
+	@Override
 	public DataFlavor[] getTransferDataFlavors()
 	{
 		return new DataFlavor[] { PROFILE_FLAVOR };
 	}
-	
+
+	@Override
 	public boolean isDataFlavorSupported(DataFlavor flavor)
 	{
 		return (flavor.getRepresentationClass() == PROFILE_FLAVOR.getRepresentationClass());
 	}
-	
+
+	@Override
 	public synchronized Object getTransferData(DataFlavor flavor)
 		throws UnsupportedFlavorException, IOException
 	{

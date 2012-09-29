@@ -46,7 +46,10 @@ public class DataDisplayOptions
 	{
 		super();
 		initComponents();
-		WbSwingUtilities.setMinimumSize(nullString, 15);
+		WbSwingUtilities.setMinimumSize(defMaxRows, 3);
+		WbSwingUtilities.setMinimumSize(multiLineThreshold, 3);
+		WbSwingUtilities.setMinimumSize(minColSizeField, 3);
+		WbSwingUtilities.setMinimumSize(maxColSizeField, 3);
 	}
 
 	@Override
@@ -245,8 +248,8 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 10);
     add(localeDropDown, gridBagConstraints);
 
@@ -276,8 +279,8 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     generalPanel.add(multiLineThreshold, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -310,8 +313,8 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     generalPanel.add(defMaxRows, gridBagConstraints);
 
@@ -333,13 +336,14 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 25, 0, 0);
     generalPanel.add(showMaxRowsWarn, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 12, 2, 0);
@@ -355,9 +359,9 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 5);
     add(nullString, gridBagConstraints);
 
     colWidthPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtColWidthSettings"))); // NOI18N
@@ -396,8 +400,6 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 6);
     jPanel4.add(minColSizeLabel, gridBagConstraints);
-
-    minColSizeField.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -420,8 +422,6 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
     jPanel4.add(maxColSizeLabel, gridBagConstraints);
-
-    maxColSizeField.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
@@ -450,7 +450,7 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 7);
@@ -512,7 +512,7 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;

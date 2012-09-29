@@ -33,11 +33,13 @@ public class SourceTableArgument
 	private List<String> missingTables = new ArrayList<String>();
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent;
+	private boolean schemaAsCatalog;
 
 	public SourceTableArgument(String includeTables, WbConnection dbConn)
 		throws SQLException
 	{
 		if (dbConn == null) return;
+		schemaAsCatalog = !dbConn.getDbSettings().supportsSchemas();
 		initTableList(includeTables, null, null, dbConn.getMetadata().getTableTypesArray(), dbConn);
 	}
 
@@ -56,6 +58,7 @@ public class SourceTableArgument
 		if (dbConn == null) return;
 
 		String[] types = dbConn.getMetadata().getTableTypesArray();
+		schemaAsCatalog = !dbConn.getDbSettings().supportsSchemas();
 		initTableList(includeTables, excludeTables, schema, types, dbConn);
 	}
 
@@ -75,6 +78,7 @@ public class SourceTableArgument
 	{
 		if (StringUtil.isEmptyString(includeTables)) return;
 		if (dbConn == null) return;
+		schemaAsCatalog = !dbConn.getDbSettings().supportsSchemas();
 
 		initTableList(includeTables, excludeTables, schema, types, dbConn);
 	}
@@ -135,7 +139,16 @@ public class SourceTableArgument
 
 		if (args.isEmpty() && schemaToUse != null)
 		{
-			List<TableIdentifier> l = dbConn.getMetadata().getObjectList(null, schemaToUse, types);
+			List<TableIdentifier> l = null;
+
+			if (schemaAsCatalog)
+			{
+				l = dbConn.getMetadata().getObjectList(null, schemaToUse, null, types);
+			}
+			else
+			{
+				l = dbConn.getMetadata().getObjectList(null, null, schemaToUse, types);
+			}
 			result.addAll(l);
 		}
 		else
@@ -151,7 +164,15 @@ public class SourceTableArgument
 						tbl.setSchema(schemaToUse);
 					}
 					tbl.adjustCase(dbConn);
-					List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
+					List<TableIdentifier> l = null;
+					if (schemaAsCatalog)
+					{
+						l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), null, types);
+					}
+					else
+					{
+						l = dbConn.getMetadata().getObjectList(tbl.getTableName(), null, tbl.getSchema(), types);
+					}
 					result.addAll(l);
 				}
 				else
@@ -172,12 +193,6 @@ public class SourceTableArgument
 		return result;
 	}
 
-	private boolean allSchemas(String schema)
-	{
-		if (StringUtil.isBlank(schema)) return true;
-		return schema.equals("%") || schema.equals("*");
-	}
-
 	public List<String> getMissingTables()
 	{
 		return missingTables;
@@ -185,11 +200,12 @@ public class SourceTableArgument
 
 	/**
 	 * Returns all DB Object names from the comma separated list.
-	 * This is different to stringToList() as it keeps any quotes that
+	 * This is different to {@link StringUtil#stringToList(String)} as it keeps any quotes that
 	 * are present in the list.
 	 *
 	 * @param list a comma separated list of elements (optionally with quotes)
 	 * @return a List of Strings as defined by the input string
+	 * @see StringUtil#stringToList(java.lang.String)
 	 */
 	List<String> getObjectNames(String list)
 	{

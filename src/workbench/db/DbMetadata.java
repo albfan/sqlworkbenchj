@@ -46,6 +46,7 @@ import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
+import workbench.db.mssql.SqlServerRuleReader;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mssql.SqlServerUtil;
@@ -252,6 +253,11 @@ public class DbMetadata
 			if (SqlServerUtil.isSqlServer2005(dbConnection))
 			{
 				columnEnhancer = new SqlServerColumnEnhancer();
+			}
+
+			if (SqlServerUtil.isSqlServer2000(dbConnection))
+			{
+				extenders.add(new SqlServerRuleReader());
 			}
 
 			objectListEnhancer = new SqlServerObjectListEnhancer();
@@ -1113,19 +1119,14 @@ public class DbMetadata
 		if (respectQuotes && isQuoted(schema)) return schema;
 
 		schema = StringUtil.trimQuotes(schema).trim();
-		try
+
+		if (this.storesUpperCaseSchemas())
 		{
-			if (this.storesUpperCaseSchemas())
-			{
-				return schema.toUpperCase();
-			}
-			else if (this.storesLowerCaseSchemas())
-			{
-				return schema.toLowerCase();
-			}
+			return schema.toUpperCase();
 		}
-		catch (Exception e)
+		else if (this.storesLowerCaseSchemas())
 		{
+			return schema.toLowerCase();
 		}
 		return schema;
 	}
@@ -2160,6 +2161,12 @@ public class DbMetadata
 		return getObjectList(table, schema, tableTypesArray);
 	}
 
+	public List<TableIdentifier> getTableList(String table, String catalog, String schema)
+		throws SQLException
+	{
+		return getObjectList(table, catalog, schema, tableTypesArray);
+	}
+
 	/**
 	 * Returns a list of objects from which a SELECT can be run.
 	 * <br/>
@@ -2184,7 +2191,22 @@ public class DbMetadata
 	public List<TableIdentifier> getObjectList(String table, String schema, String[] types)
 		throws SQLException
 	{
-		DataStore ds = getObjects(null, schema, table, types);
+		return getObjectList(table, null, schema, types);
+	}
+
+	/**
+	 * Return a list of tables for the given schema
+	 * if the table name is null, all tables will be returned
+	 *
+	 * @param table    the (wildcard) name of a table
+	 * @param catalog  the catalog for which to retrieve the objects (may be null)
+	 * @param schema   the schema for which to retrieve the objects (may be null)
+	 * @see #getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+	 */
+	public List<TableIdentifier> getObjectList(String table, String catalog, String schema, String[] types)
+		throws SQLException
+	{
+		DataStore ds = getObjects(catalog, schema, table, types);
 		int count = ds.getRowCount();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
 		for (int i=0; i < count; i++)

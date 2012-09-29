@@ -112,6 +112,11 @@ public class SQLServerTestUtil
 				"from sys.types \n" +
 				"where is_user_defined = 1 \n" +
 				" \n" +
+				"select @stmt = isnull( @stmt + @n, '' ) + \n" +
+				"    'drop rule [' + name + ']' \n" +
+				"from sys.objects \n" +
+				"where type in ( 'R' ) \n" +
+			  " \n" +
 				"exec sp_executesql @stmt";
 		try
 		{

@@ -111,6 +111,7 @@ public class MacroTree
 		setCellRenderer(renderer);
 		setAutoscrolls(true);
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
+		WbSwingUtilities.adjustTreeRowHeight(this);
 	}
 
 	public final void loadMacros()

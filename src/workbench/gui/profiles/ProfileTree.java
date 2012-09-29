@@ -19,8 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.LinkedList;
-import java.util.List;
+
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JTree;
@@ -34,6 +33,10 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -108,6 +111,8 @@ public class ProfileTree
 		setCellRenderer(new ProfileTreeCellRenderer());
     new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
+
+		WbSwingUtilities.adjustTreeRowHeight(this);
 	}
 
 	public void setDeleteAction(DeleteListEntryAction delete)

@@ -105,7 +105,6 @@ public class WbSchemaReport
 			return result;
 		}
 
-
 		this.reporter = new SchemaReporter(currentConnection);
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);

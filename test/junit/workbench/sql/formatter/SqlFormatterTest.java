@@ -32,6 +32,30 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testGrant()
+	{
+		String sql = "grant insert,select,update on foobar to arthur;";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"GRANT INSERT, SELECT, UPDATE\n" +
+			"  ON foobar\n" +
+			"  TO arthur;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+		sql = "revoke insert,update on foobar from public;";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql();
+		expected =
+			"REVOKE INSERT, UPDATE\n" +
+			"  ON foobar\n" +
+			"  FROM public;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testNumericLiterals()
 	{
 		String sql = "select * from foo where bar = -1";
