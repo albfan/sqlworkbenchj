@@ -29,7 +29,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to read information about rules from Postgres.
+ * A class to read information about rules from SQL Server.
  *
  * @author Thomas Kellerer
  */
