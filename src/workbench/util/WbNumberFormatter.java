@@ -36,15 +36,7 @@ public class WbNumberFormatter
 	public WbNumberFormatter(int maxDigits, char sep)
 	{
 		this.decimalSeparator = sep;
-		String pattern = null;
-		if (maxDigits > 0)
-		{
-			pattern = StringUtil.padRight("0.", maxDigits + 2, '#');
-		}
-		else
-		{
-			pattern = "0.########################################";
-		}
+		String pattern = StringUtil.padRight("0.", maxDigits > 0 ? maxDigits + 2 : 22, '#');
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator(sep);
 		this.decimalFormatter = new DecimalFormat(pattern, symb);

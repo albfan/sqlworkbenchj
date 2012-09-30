@@ -20,7 +20,6 @@ Features:
 - Support ${...} syntax for calling function during data editing (similar to -constantValues for WbImport)
 - Support ${guid} calls
   (or more generic: calling any "registered" Java functions to evaluate values before sending them to the DBMS)
-
 - Filterdefinition: show unique values per column as a dropdown in the dialog
 - Paging for console mode
 - DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
@@ -41,7 +40,6 @@ Features:
   (pre-copy and post-copy scripts)
 - History of selected tables in DbExplorer
 - Log statement execution times in separate file (e.g. for performance testing SQL statements)
-- make catalog handling better for DBMS that do not support schemas (namely MySQL)
 - hierarchyid, http://technet.microsoft.com/en-us/library/bb677213.aspx
 
 Bugs:
@@ -55,5 +53,6 @@ Bugs:
 
 ToDo/Cleanup
 --------------------
+- Rework SQLFormatter, needs to be modularized (one "formatter" for each command, chained together)
 - Change print header and font for header in print preview
 - Rework printing

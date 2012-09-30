@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-09-23">
+  <release build="-1" date="2012-09-30">
     <entry dev-build="3" type="enh">If a (main) menu contains more items than can fit on the screen, the menu can now be scrolled</entry>
     <entry dev-build="3" type="enh">When choosing a font, the size can now be entered manually to allow any size</entry>
     <entry dev-build="3" type="enh">The source code displayed in the table list of the DbExplorer can now be reformatted.</entry>
@@ -11,6 +11,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="3" type="fix">The detection of columns for auto-completion in INSERT statements did not always work properly if the insert was based on a SELECT.</entry>
+    <entry dev-build="3" type="fix">The trees for the connection profiles and macros now display correctly with larger fonts</entry>
     <entry dev-build="3" type="fix">For SQL Server the data types varchar(max), nvarchar(max) and varbinary(max) where not handled correctly.</entry>
     <entry dev-build="3" type="fix">Sometimes concurrently running statements (in two different tabs) could influence each other</entry>
     <entry dev-build="3" type="fix">The new NULL display string and a background color for NULL values could not be combined</entry>
