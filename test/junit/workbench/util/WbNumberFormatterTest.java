@@ -35,11 +35,18 @@ public class WbNumberFormatterTest
 		assertEquals("1.5", f.format(new Double(1.5)));
 		assertEquals("1.5", f.format(new BigDecimal("1.5")));
 		assertEquals("42", f.format(new BigDecimal("42")));
+		assertEquals("1", f.format(new Double(1)));
+		assertEquals("1.123", f.format(new Double(1.123)));
+		assertEquals("1.123", f.format(new Double(1.1234)));
+		assertEquals("1.124", f.format(new Double(1.1236)));
+		assertEquals("", f.format(null));
 
 		f = new WbNumberFormatter('.');
 		assertEquals("1.1", f.format(new BigDecimal("1.1")));
 		assertEquals("1.1234", f.format(new BigDecimal("1.1234")));
 		assertEquals("1.1234567890", f.format(new BigDecimal("1.1234567890")));
+		assertEquals("1", f.format(new Double(1)));
+		assertEquals("1.123456", f.format(new Double(1.123456)));
 	}
 
 }

@@ -52,28 +52,30 @@ public class NumberColumnRenderer
 		try
 		{
 			Number n = (Number) aValue;
+
 			displayValue = formatter.format(n);
-			
+
 			if (showTooltip)
 			{
+				// Tooltip should be unformatted to show the "real" value
 				if (n instanceof BigDecimal)
 				{
-					this.tooltip = ((BigDecimal)n).toPlainString();
+					tooltip = ((BigDecimal)n).toPlainString();
 				}
 				else
 				{
-					displayValue = n.toString();
+					tooltip = n.toString();
 				}
 			}
 			else
 			{
-				this.tooltip = null;
+				tooltip = null;
 			}
 		}
 		catch (Throwable th)
 		{
 			displayValue = aValue.toString();
-			this.tooltip = null;
+			tooltip = null;
 		}
 	}
 

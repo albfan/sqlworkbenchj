@@ -36,7 +36,15 @@ public class WbNumberFormatter
 	public WbNumberFormatter(int maxDigits, char sep)
 	{
 		this.decimalSeparator = sep;
-		String pattern =  StringUtil.padRight("0.", maxDigits + 2, '#');
+		String pattern = null;
+		if (maxDigits > 0)
+		{
+			pattern = StringUtil.padRight("0.", maxDigits + 2, '#');
+		}
+		else
+		{
+			pattern = "0.########################################";
+		}
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator(sep);
 		this.decimalFormatter = new DecimalFormat(pattern, symb);
@@ -52,7 +60,7 @@ public class WbNumberFormatter
 	{
 		return decimalFormatter.toPattern();
 	}
-	
+
 	private boolean isInteger(Number n)
 	{
 		return (n instanceof Integer
@@ -67,24 +75,24 @@ public class WbNumberFormatter
 	{
 		if (value == null) return "";
 
-		String display = null;
+		String formatted = null;
 
 		if (value instanceof BigDecimal)
 		{
-			display = format((BigDecimal)value);
+			formatted = format((BigDecimal)value);
 		}
 		else if (isInteger(value))
 		{
-			display = value.toString();
+			formatted = value.toString();
 		}
 		else
 		{
 			synchronized (this.decimalFormatter)
 			{
-				display = decimalFormatter.format(value.doubleValue());
+				formatted = decimalFormatter.format(value);
 			}
 		}
-		return display;
+		return formatted;
 	}
 
 	/**
@@ -114,7 +122,9 @@ public class WbNumberFormatter
 
 		if (decimalSeparator != '.' )
 		{
-			// this is a little bit faster than using
+			// this is a little bit faster than using a StringBuilder and setCharAt()
+			// and as numbers will not contain any two byte characters theres nothing
+			// to worry about encoding.
 			int pos = display.lastIndexOf('.');
 			char[] ca = display.toCharArray();
 			ca[pos] = decimalSeparator;
