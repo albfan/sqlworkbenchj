@@ -1498,7 +1498,8 @@ public class DbSettings
 
 	public String getTableSelectTemplate(String keyname)
 	{
-		return Settings.getInstance().getProperty(prefix + keyname + ".select", null);
+		String general = Settings.getInstance().getProperty("workbench.db.sql." + keyname + ".select", null);
+		return Settings.getInstance().getProperty(prefix + keyname + ".select", general);
 	}
 
 	public boolean getSwitchCatalogInExplorer()

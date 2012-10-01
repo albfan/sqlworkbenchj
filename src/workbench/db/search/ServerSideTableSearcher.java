@@ -231,8 +231,7 @@ public class ServerSideTableSearcher
 		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
 		StringBuilder sql = new StringBuilder(colCount * 120);
-		TableSelectBuilder builder = new TableSelectBuilder(this.connection);
-		builder.setUseFullyQualifiedName(true);
+		TableSelectBuilder builder = new TableSelectBuilder(this.connection, "tablesearch");
 		builder.setExcludeLobColumns(this.excludeLobColumns);
 		sql.append(builder.getSelectForColumns(def.getTable(), def.getColumns()));
 		sql.append("\n WHERE ");

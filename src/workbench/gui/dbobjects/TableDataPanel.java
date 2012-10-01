@@ -37,7 +37,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableModel;
 
 import workbench.WbManager;
 import workbench.db.TableDefinition;
@@ -51,7 +50,6 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.components.ColumnOrderMgr;
-import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
@@ -581,7 +579,6 @@ public class TableDataPanel
 		if (tableDef == null) return null;
 
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, "tabledata");
-		builder.setUseFullyQualifiedName(true);
 		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
 		return sql;
 	}

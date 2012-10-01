@@ -152,7 +152,7 @@ public class ClientSideTableSearcher
 				sp = connection.setSavepoint();
 			}
 
-			TableSelectBuilder builder = new TableSelectBuilder(connection);
+			TableSelectBuilder builder = new TableSelectBuilder(connection, "tablesearch");
 			builder.setExcludeLobColumns(excludeLobs);
 			String sql = builder.getSelectForTable(table);
 			if (StringUtil.isEmptyString(sql))
