@@ -294,6 +294,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>com.nuodb.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>nuodbjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>NuoDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:com.nuodb://localhost/test</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
     </void>
     <void property="library">
