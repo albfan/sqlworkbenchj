@@ -1306,6 +1306,39 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testCreateStupidTable()
+		throws Exception
+	{
+		String sql = null;
+		SqlFormatter f = null;
+
+		String expected =
+			"CREATE TABLE ##foo_tmp \n" +
+			"(\n" +
+			"  foo   INTEGER,\n" +
+			"  bar   INTEGER\n" +
+			")";
+
+		sql = "create table ##foo_tmp (foo integer, bar integer)";
+		f = new SqlFormatter(sql, 100);
+		String formatted = f.getFormattedSql();
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
+
+		sql = "create table #foo_tmp (foo integer, bar integer)";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql();
+		expected =
+			"CREATE TABLE #foo_tmp \n" +
+			"(\n" +
+			"  foo   INTEGER,\n" +
+			"  bar   INTEGER\n" +
+			")";
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
+	}
+
+	@Test
 	public void testCreateTable()
 		throws Exception
 	{
