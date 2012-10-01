@@ -412,6 +412,11 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("IDX", info.objectName);
 		assertEquals("INDEX", info.objectType);
+
+		sql = "create table ##mytemp (id integer);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("##mytemp", info.objectName);
+		assertEquals("TABLE", info.objectType);
 	}
 
 	@Test

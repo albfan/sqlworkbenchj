@@ -329,7 +329,16 @@ public class SqlUtil
 				{
 					name = lexer.getNextToken(false, false);
 					if (name == null) return null;
+
+					if (name.getContents().equals("#"))
+					{
+						// SQL Server temporary tables using ##
+						content = "##";
+						name = lexer.getNextToken(false, false);
+						if (name == null) return null;
+					}
 				}
+
 				SQLToken next = lexer.getNextToken(false, false);
 				if (next != null && next.getContents().equals("."))
 				{
@@ -339,11 +348,11 @@ public class SqlUtil
 
 				info.objectName = name.getContents();
 
-				if (content.equals("#"))
+				if (content.startsWith("#"))
 				{
-					info.objectName = "#" + info.objectName;
+					info.objectName = content + info.objectName;
 				}
-
+				
 				if (info.objectName != null)
 				{
 					info.objectName = removeQuoting(info.objectName);
