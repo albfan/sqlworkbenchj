@@ -220,6 +220,7 @@ public class SqlPanel
 	protected ExecuteCurrentAction executeCurrent;
 	protected ExecuteSelAction executeSelected;
 
+	private static int instanceCount = 0;
 	private int internalId;
 
 	// Actions from DwPanel
@@ -297,10 +298,11 @@ public class SqlPanel
 
 //</editor-fold>
 
-	public SqlPanel(int anId)
+	public SqlPanel()
 	{
 		super(new BorderLayout());
-		this.setId(anId);
+		this.internalId = ++instanceCount;
+		this.setName("sqlpanel-" + internalId);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		editor = EditorPanel.createSqlEditor();
@@ -314,11 +316,11 @@ public class SqlPanel
 		editor.setBorder(new EtchedBorderTop());
 
 		// The name of the component is used for the Jemmy GUI Tests
-		editor.setName("sqleditor" + anId);
+		editor.setName("sqleditor" + internalId);
 
 		log = new LogArea();
 		// The name of the component is used for the Jemmy GUI Tests
-		log.setName("msg" + anId);
+		log.setName("msg" + internalId);
 
 		resultTab = new WbTabbedPane();
 		resultTab.setTabPlacement(JTabbedPane.TOP);
@@ -411,12 +413,6 @@ public class SqlPanel
 	public String getId()
 	{
 		return NumberStringCache.getNumberString(this.internalId);
-	}
-
-	public final void setId(int anId)
-	{
-		this.setName("sqlpanel" + anId);
-		this.internalId = anId;
 	}
 
 	@Override
@@ -1331,7 +1327,18 @@ public class SqlPanel
 		throws IOException
 	{
 		this.storeStatementInHistory();
-		w.addHistoryEntry(this.internalId, this.sqlHistory);
+		w.addHistoryEntry(getTabIndex(), this.sqlHistory);
+	}
+
+	private int getTabIndex()
+	{
+		if (getParent() instanceof JTabbedPane)
+		{
+			JTabbedPane p = (JTabbedPane)getParent();
+			int index = p.indexOfComponent(this);
+			return index;
+		}
+		return this.internalId;
 	}
 
 	public String getRealTabTitle()
@@ -1401,7 +1408,6 @@ public class SqlPanel
 	{
 		String fname = null;
 		String tooltip = null;
-		this.setId(index + 1);
 
 		fname = this.getCurrentFileName();
 		if (fname != null)

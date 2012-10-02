@@ -587,14 +587,24 @@ public class QuickFilterPanel
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e)
+	public void keyTyped(final KeyEvent e)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				filterByEditorValue();
+				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+				{
+					// reset filter, do not change the input text
+					// resetting the filter does not change the cursor location in the edit field
+					// so there is no need to take care of that (as done in filterByEditorValue()
+					applyFilter(null, false);
+				}
+				else
+				{
+					filterByEditorValue();
+				}
 			}
 		});
 	}
@@ -602,13 +612,11 @@ public class QuickFilterPanel
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-
 	}
 
 }

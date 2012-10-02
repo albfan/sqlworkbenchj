@@ -2716,7 +2716,7 @@ public class MainWindow
 
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
-		final SqlPanel sql = new SqlPanel(index+1);
+		final SqlPanel sql = new SqlPanel();
 		addTabAtIndex(sql, selectNew, checkConnection, renumber, index);
 		return sql;
 	}
