@@ -365,27 +365,20 @@ SELECT 42 FROM dual;</programlisting>
 		  </para>
 		</section>
 
-		<section id="mssql-cloned-connection">
-		  <title>Can't start a cloned connection while in manual transaction mode</title>
-		  <para>
-		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
-		    and the connection does not use autocommit mode. There are three ways to fix this problem:
-		    <itemizedlist>
-		      <listitem><simpara>Upgrade to a newer Microsoft driver (e.g. the one for <ulink url="http://www.microsoft.com/sql/technologies/jdbc/default.mspx">SQL Server 2005</ulink>)</simpara></listitem>
-		      <listitem><simpara>Enable autocommit in the connection profile</simpara></listitem>
-		      <listitem><simpara>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</simpara></listitem>
-		    </itemizedlist>
-		    This <ulink url="http://support.microsoft.com/?scid=kb;en-us;313181&amp;x=9&amp;y=11">article</ulink>
-		    in Microsoft's Knowledgebase gives more information regarding this problem.
-		  </para>
-		  <para>
-		    The possible parameters for the SQL Server 2005 driver are listed here:
-        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
-		  </para>
-		</section>
+    <section id="mssql-showplan-exception">
+      <title>The Microsoft Driver throws an Exception when using SET SHOWPLAN_ALL</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>Problem when running SHOWPLAN_ALL</secondary></indexterm>
+      <para>
+        When displaying an execution plan using <literal>SET SHOWPLAN_ALL ON</literal> and the following error is thrown:
+        <literal>The TDS protocol stream is not valid. Unexpected token TDS_COLMETADATA (0x81).</literal> please
+        set "Max. Rows" to 0 for that SQL panel. Apparently the driver cannot handle showing the execution plan and
+        having the result limited.
+      </para>
+    </section>
 
 		<section id="mssql-locking-problems">
 		  <title>Dealing with locking problems</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>Locking problems</secondary></indexterm>
 		  <para>
 				Microsoft SQL Server (at least up to 2000) does not support concurrent reads and writes
 				to the database very well. Especially when using DDL statements, this can lead to
@@ -411,8 +404,28 @@ SELECT 42 FROM dual;</programlisting>
 			</para>
 		</section>
 
+		<section id="mssql-cloned-connection">
+		  <title>Can't start a cloned connection while in manual transaction mode</title>
+		  <para>
+		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
+		    and the connection does not use autocommit mode. There are three ways to fix this problem:
+		    <itemizedlist>
+		      <listitem><simpara>Upgrade to a newer Microsoft driver (e.g. the one for <ulink url="http://www.microsoft.com/sql/technologies/jdbc/default.mspx">SQL Server 2005</ulink>)</simpara></listitem>
+		      <listitem><simpara>Enable autocommit in the connection profile</simpara></listitem>
+		      <listitem><simpara>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</simpara></listitem>
+		    </itemizedlist>
+		    This <ulink url="http://support.microsoft.com/?scid=kb;en-us;313181&amp;x=9&amp;y=11">article</ulink>
+		    in Microsoft's Knowledgebase gives more information regarding this problem.
+		  </para>
+		  <para>
+		    The possible parameters for the SQL Server 2005 driver are listed here:
+        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
+		  </para>
+		</section>
+
 		<section id="mssql-result-buffer">
 			<title>WbExport using a lot of memory</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>WbExport memory problem</secondary></indexterm>
       <para>
         The jTDS driver and the Microsoft JDBC driver read the complete result set into memory
         before returning it to the calling application. This means that when retrieving
@@ -529,6 +542,7 @@ SELECT 42 FROM dual;</programlisting>
 
 		<section id="pg-result-buffer">
 			<title>WbExport using a lot of memory</title>
+      <indexterm><primary>PostgreSQL</primary><secondary>WbExport memory problem</secondary></indexterm>
       <para>
         The PostgreSQL JDBC driver defaults to buffer the results obtained from the database
         in memory before returning them to the application. This means that when retrieving
@@ -553,8 +567,8 @@ SELECT 42 FROM dual;</programlisting>
 		<section id="pg-statement-savepoint">
 			<title>Getting the error: Current transaction is aborted</title>
 			<para>
-				PostgreSQL - unlike other DBMS - marks a complete transaction as failed if
-				a single statement fails. In such a case the transaction cannot be committed, e.g.
+				PostgreSQL marks a complete transaction as failed if a only single statement fails.
+        In such a case the transaction cannot be committed, e.g.
 				consider the following script:
 			</para>
 			<programlisting>INSERT INTO person (id, firstname, lastname) VALUES (1, 'Arthur', 'Dent');
