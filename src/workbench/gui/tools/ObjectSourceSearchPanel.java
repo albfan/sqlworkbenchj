@@ -65,6 +65,7 @@ import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -84,9 +85,12 @@ public class ObjectSourceSearchPanel
 	private WbTable results;
 	private DbObjectSourcePanel objectSource;
 	private WbThread searchThread;
+	private int instanceId;
+	private static int instanceCount;
 
 	public ObjectSourceSearchPanel()
 	{
+		this.instanceId = ++instanceCount;
 		initComponents();
 		checkButtons();
 		results = new WbTable(true, false, false);
@@ -284,7 +288,7 @@ public class ObjectSourceSearchPanel
 			{
 				try
 				{
-					connection = ConnectionMgr.getInstance().getConnection(profile, "ObjectSearcher");
+					connection = ConnectionMgr.getInstance().getConnection(profile, "ObjectSearcher-" + instanceId);
 				}
 				catch (Exception e)
 				{

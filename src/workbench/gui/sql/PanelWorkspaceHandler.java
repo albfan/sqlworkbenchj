@@ -106,7 +106,7 @@ public class PanelWorkspaceHandler
 		if (!client.hasFileLoaded() ||
 			  client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() != ExternalFileHandling.none)
 		{
-			client.saveHistory(w);
+			w.addHistoryEntry(index, client.getHistory());
 		}
 		Properties props = w.getSettings();
 

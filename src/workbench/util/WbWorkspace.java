@@ -132,7 +132,7 @@ public class WbWorkspace
 	{
 		if (this.isReadOnly) throw new IllegalStateException("Workspace is opened for reading. addHistoryEntry() may not be called");
 
-		ZipEntry entry = new ZipEntry("WbStatements" + index + ".txt");
+		ZipEntry entry = new ZipEntry("WbStatements" + (index + 1) + ".txt");
 		this.zout.putNextEntry(entry);
 		if (history != null)
 		{

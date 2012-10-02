@@ -19,6 +19,7 @@ import workbench.util.StringUtil;
  * A class to generate a summary display of a WbConnection.
  *
  * The information can be presented as HTML or plain text.
+ * 
  * @author Thomas Kellerer
  */
 public class ConnectionInfoBuilder
@@ -57,13 +58,18 @@ public class ConnectionInfoBuilder
 			String boldEnd = useHtml ? "</b> " : " ";
 			String newLine = useHtml ? "<br>\n" : "\n";
 
-			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
+			boolean busy = conn.isBusy();
+			DatabaseMetaData meta = null;
+			if (!busy)
+			{
+				meta = conn.getSqlConnection().getMetaData();
+			}
 			DbMetadata wbmeta = conn.getMetadata();
 
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductName") + ":" + boldEnd + wbmeta.getProductName() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductVersion") + ":" + boldEnd + conn.getDatabaseVersion().toString() + lineEnd);
-			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductInfo") + ":" + boldEnd + conn.getDatabaseProductVersion() + lineEnd);
-			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoName") + ":" + boldEnd + meta.getDriverName() + lineEnd);
+			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductInfo") + ":" + boldEnd + (busy ? "n/a" : conn.getDatabaseProductVersion()) + lineEnd);
+			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoName") + ":" + boldEnd + (meta != null ? meta.getDriverName() : "n/a") + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoClass") + ":" + boldEnd + conn.getProfile().getDriverclass() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoVersion") + ":" + boldEnd + conn.getDriverVersion() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbURL") + ":" + boldEnd + conn.getUrl() + lineEnd);
@@ -75,7 +81,7 @@ public class ConnectionInfoBuilder
 			{
 				s += " (" + ResourceMgr.getString("LblSchema") + ")";
 			}
-			content.append(space + boldStart + s + ":" + boldEnd + nvl(conn.getCurrentSchema()) + newLine);
+			content.append(space + boldStart + s + ":" + boldEnd + nvl(busy ? "n/a" : conn.getCurrentSchema()) + newLine);
 
 			term = wbmeta.getCatalogTerm();
 			s = StringUtil.capitalize(term);
@@ -83,7 +89,7 @@ public class ConnectionInfoBuilder
 			{
 				s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
 			}
-			content.append(space + boldStart + s + ":" + boldEnd + nvl(conn.getCurrentCatalog()) + newLine);
+			content.append(space + boldStart + s + ":" + boldEnd + nvl(busy ? "n/a" : conn.getCurrentCatalog()) + newLine);
 			content.append(space + boldStart + "Workbench DBID:" + boldEnd + wbmeta.getDbId() + newLine);
 			content.append(space + boldStart + "Connection ID:" + boldEnd + conn.getId());
 			if (useHtml) content.append("</html>");

@@ -1323,22 +1323,9 @@ public class SqlPanel
 		handler.saveToWorkspace(w, index);
 	}
 
-	public void saveHistory(WbWorkspace w)
-		throws IOException
+	SqlHistory getHistory()
 	{
-		this.storeStatementInHistory();
-		w.addHistoryEntry(getTabIndex(), this.sqlHistory);
-	}
-
-	private int getTabIndex()
-	{
-		if (getParent() instanceof JTabbedPane)
-		{
-			JTabbedPane p = (JTabbedPane)getParent();
-			int index = p.indexOfComponent(this);
-			return index;
-		}
-		return this.internalId;
+		return sqlHistory;
 	}
 
 	public String getRealTabTitle()

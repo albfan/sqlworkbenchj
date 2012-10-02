@@ -99,6 +99,13 @@ public class ConnectionMgr
 		return this.getConnection(prof, anId);
 	}
 
+	/**
+	 * Finds a connection based on the ID.
+	 *
+	 * For testing purposes only.
+	 * @param id the id to find
+	 * @return the connection, null if not found
+	 */
 	public WbConnection findConnection(String id)
 	{
 		return this.activeConnections.get(id);
@@ -109,13 +116,17 @@ public class ConnectionMgr
 		return this.activeConnections.size();
 	}
 
-	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
+	public WbConnection getConnection(ConnectionProfile aProfile, String connId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
-
-		this.disconnect(anId);
+		if (this.activeConnections.containsKey(connId))
+		{
+			int count = getPrefixCount(connId) + 1;
+			connId = connId + "-" + Integer.toString(count);
+			LogMgr.logWarning("ConnectionMgr.getConnection()", "A new connection for ID " + connId + " was requested, but there is already an active one with that ID!");
+		}
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
-		WbConnection conn = this.connect(aProfile, anId);
+		WbConnection conn = this.connect(aProfile, connId);
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
 		String jdbcVersion = conn.getJDBCVersion();
@@ -123,14 +134,27 @@ public class ConnectionMgr
 
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" +
 			conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" +
-			driverVersion + "], JDBC Version: [" + jdbcVersion + "], ID: ["  + anId + "]"
+			driverVersion + "], JDBC Version: [" + jdbcVersion + "], ID: ["  + connId + "]"
 		);
 
-		this.activeConnections.put(anId, conn);
+		this.activeConnections.put(connId, conn);
 
 		return conn;
 	}
 
+	private int getPrefixCount(String idPrefix)
+	{
+		int count = 0;
+		for (String key : activeConnections.keySet())
+		{
+			if (key.startsWith(idPrefix))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+	
 	public Class loadClassFromDriverLib(ConnectionProfile profile, String className)
 		throws ClassNotFoundException, UnsupportedClassVersionError
 	{
@@ -548,15 +572,6 @@ public class ConnectionMgr
 		this.activeConnections.remove(con.getId());
 		LogMgr.logDebug("ConnectionMgr.disconnect()", "Trying to physically close the connection with id=" + con.getId());
 		this.closeConnection(con);
-	}
-
-	/**
-	 *	Disconnect the connection with the given id
-	 */
-	public void disconnect(String anId)
-	{
-		WbConnection con = this.activeConnections.get(anId);
-		disconnect(con);
 	}
 
 	/**

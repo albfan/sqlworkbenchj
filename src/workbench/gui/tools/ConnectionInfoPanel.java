@@ -20,6 +20,7 @@ import java.awt.datatransfer.StringSelection;
 import java.io.StringWriter;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.text.Document;
 import workbench.WbManager;
 import workbench.db.ConnectionInfoBuilder;
@@ -37,7 +38,7 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class ConnectionInfoPanel
-	extends javax.swing.JPanel
+	extends JPanel
 {
 
 	public ConnectionInfoPanel(WbConnection conn)
@@ -61,17 +62,24 @@ public class ConnectionInfoPanel
 			jScrollPane1.setSize(d);
 			jScrollPane1.setPreferredSize(d);
 			jScrollPane1.setMaximumSize(d);
-
-			DriverInfo drvInfo = new DriverInfo(conn.getSqlConnection());
-			WbTable data = new WbTable(true, false, false);
-			WbScrollPane scroll = new WbScrollPane(data);
-			scroll.setPreferredSize(d);
-			scroll.setMaximumSize(d);
-			DataStoreTableModel ds = new DataStoreTableModel(drvInfo.getInfo());
-			data.setModel(ds, true);
-			extendedPanel.add(scroll, BorderLayout.CENTER);
 			infoTabs.setTitleAt(0, ResourceMgr.getString("TxtInfoBasic"));
-			infoTabs.setTitleAt(1, ResourceMgr.getString("TxtInfoExt"));
+
+			if (conn.isBusy())
+			{
+				infoTabs.remove(1);
+			}
+			else
+			{
+				DriverInfo drvInfo = new DriverInfo(conn.getSqlConnection());
+				WbTable data = new WbTable(true, false, false);
+				WbScrollPane scroll = new WbScrollPane(data);
+				scroll.setPreferredSize(d);
+				scroll.setMaximumSize(d);
+				DataStoreTableModel ds = new DataStoreTableModel(drvInfo.getInfo());
+				data.setModel(ds, true);
+				extendedPanel.add(scroll, BorderLayout.CENTER);
+				infoTabs.setTitleAt(1, ResourceMgr.getString("TxtInfoExt"));
+			}
 		}
 		catch (Exception e)
 		{

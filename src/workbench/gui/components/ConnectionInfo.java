@@ -182,7 +182,7 @@ public class ConnectionInfo
 	public void actionPerformed(ActionEvent e)
 	{
 		if (this.sourceConnection == null) return;
-		if (!WbSwingUtilities.checkConnection(this, sourceConnection)) return;
+		// if (!WbSwingUtilities.checkConnection(this, sourceConnection)) return;
 
 		ConnectionInfoPanel.showConnectionInfo(sourceConnection);
 	}

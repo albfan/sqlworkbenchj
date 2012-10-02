@@ -227,6 +227,8 @@ public class WbConnection
 	public String getIsolationLevel()
 	{
 		if (this.sqlConnection == null) return "";
+		if(this.isBusy()) return "n/a";
+
 		try
 		{
 			return SqlUtil.getIsolationLevelName(sqlConnection.getTransactionIsolation());
@@ -281,6 +283,11 @@ public class WbConnection
 	 */
 	public String getCurrentUser()
 	{
+		if (this.isBusy())
+		{
+			return "(" + this.getProfile().getUsername() + ")";
+		}
+		
 		try
 		{
 			return this.sqlConnection.getMetaData().getUserName();
@@ -1026,7 +1033,7 @@ public class WbConnection
 	 */
 	public String getDatabaseProductVersion()
 	{
-		if (dbProductVersion == null)
+		if (dbProductVersion == null && !isBusy())
 		{
 			try
 			{
@@ -1049,7 +1056,7 @@ public class WbConnection
 	 */
 	public VersionNumber getDatabaseVersion()
 	{
-		if (dbVersion == null)
+		if (dbVersion == null && !isBusy())
 		{
 			try
 			{
@@ -1103,7 +1110,7 @@ public class WbConnection
 
 	public String getDriverVersion()
 	{
-		if (driverVersion == null)
+		if (driverVersion == null && !isBusy())
 		{
 			DatabaseMetaData db ;
 			try
