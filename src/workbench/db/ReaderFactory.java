@@ -32,6 +32,7 @@ import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mssql.SqlServerSequenceReader;
 import workbench.db.mssql.SqlServerUtil;
+import workbench.db.mysql.MySQLIndexReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
@@ -151,6 +152,10 @@ public class ReaderFactory
 		if (meta.isFirebird() && JdbcUtils.hasMinimumServerVersion(meta.getWbConnection(), "2.5"))
 		{
 			return new FirebirdIndexReader(meta);
+		}
+		if (meta.isMySql())
+		{
+			return new MySQLIndexReader(meta);
 		}
 		return new JdbcIndexReader(meta);
 	}

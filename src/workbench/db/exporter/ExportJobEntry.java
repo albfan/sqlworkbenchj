@@ -13,9 +13,10 @@ package workbench.db.exporter;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
@@ -50,19 +51,8 @@ public class ExportJobEntry
 	{
 		resultInfo = new ResultInfo(table, con);
 		outputFile = new WbFile(file);
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("SELECT ");
-		ColumnIdentifier[] cols = resultInfo.getColumns();
-		if (cols.length == 0) throw new SQLException("Table '" + table.getTableExpression() + "' not found!");
-		for (int i = 0; i < cols.length; i++)
-		{
-			if (i > 0) sql.append(',');
-			sql.append(cols[i].getColumnName());
-		}
-		sql.append(" FROM ");
-		baseTable = table;
-		sql.append(table.getTableExpression(con));
-		query = sql.toString();
+		TableSelectBuilder builder = new TableSelectBuilder(con, "export");
+		query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()));
 		resultInfo.setUpdateTable(baseTable);
 		appendWhere(where);
 	}

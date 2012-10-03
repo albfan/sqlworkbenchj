@@ -90,10 +90,13 @@ public abstract class TemplateHandler
 	 *
 	 * If the template does not have whitespace before or after the placeholder a whitespace will be inserted.
 	 *
+	 * If replacement is null or an empty string, the placeholder will be removed.
+	 *
 	 * @param sql           the SQL template
 	 * @param placeholder   the placeholder
 	 * @param replacement   the replacement
 	 * @return the template with the placeholder replaced
+	 * @see #removePlaceholder(String, String, boolean)
 	 */
 	public static String replacePlaceHolder(String sql, String placeholder, String replacement)
 	{

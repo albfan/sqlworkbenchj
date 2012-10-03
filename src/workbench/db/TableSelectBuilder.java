@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.db.sqltemplates.TemplateHandler;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -135,11 +136,17 @@ public class TableSelectBuilder
 
 
 		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
-		String tableName = table.getTableExpression(this.dbConnection);
 
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-		select = select.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName);
-		select = select.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+		select = TemplateHandler.replacePlaceHolder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName);
+
+		if (sqlTemplate.contains(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER))
+		{
+			// do not call getTableExpression() if not necessary.
+			// this might trigger a SELECT to the database to get the current schema
+			// to avoid unnecessary calls, this is only done if really needed
+			select = TemplateHandler.replacePlaceHolder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
+		}
 		return select;
 	}
 

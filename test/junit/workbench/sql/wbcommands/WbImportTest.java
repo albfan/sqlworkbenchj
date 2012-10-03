@@ -411,6 +411,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMultipleConstants()
 		throws Exception
 	{
@@ -424,7 +425,7 @@ public class WbImportTest
 
 		StatementRunnerResult result = importCmd.execute(
 			"wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "'" +
-			" -constantValues=\"flag1=xx,flag2=yy\" " +
+			" -constantValues=flag1=xx,flag2=yy " +
 			" -type=text " +
 			" -header=true " +
 			" -continueonerror=false " +
@@ -438,7 +439,7 @@ public class WbImportTest
 		{
 			int count = 0;
 			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery("select nr, flag1, flag2 from const_test order by nr");
+			rs = stmt.executeQuery("select id, flag1, flag2 from const_test order by id");
 			while (rs.next())
 			{
 				count ++;
@@ -4160,7 +4161,7 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
-		stmt.executeUpdate("CREATE TABLE const_test (nr integer, flag1 varchar(2), flag2 varchar(2))");
+		stmt.executeUpdate("CREATE TABLE const_test (id integer, flag1 varchar(2), flag2 varchar(2))");
 
 		stmt.executeUpdate("CREATE TABLE zzbase (id integer primary key, info varchar(50))");
 		stmt.executeUpdate("CREATE TABLE child1 (id integer primary key, base_id integer not null, info varchar(50))");

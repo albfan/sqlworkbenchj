@@ -82,6 +82,11 @@ public class ArgumentParserTest
 		assertNotNull(constants);
 		assertEquals(2, constants.size());
 
+		cmdLine = "-constant=LM_ID=111,LMT_SOC_COD=S1,LMT_STATO=2 -constant=LMT_F_FATTA=1,LMT_F_FATTP=0";
+		parser.parse(cmdLine);
+		constants = parser.getList("constant");
+		assertEquals(5, constants.size());
+
 		cmdLine = "-constant='somelist=1,2' -constant='otherlist=3,4'";
 		parser.parse(cmdLine);
 		constants = parser.getList("constant");
