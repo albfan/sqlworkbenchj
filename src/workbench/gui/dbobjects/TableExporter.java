@@ -27,6 +27,7 @@ import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -53,9 +54,8 @@ public class TableExporter
 
 	public void exportTables(List<DbObject> tables, Frame caller)
 	{
-		if (tables == null) return;
-		if (tables.size() == 0) return;
-		
+		if (CollectionUtil.isEmpty(tables)) return;
+
 		ExportFileDialog dialog = new ExportFileDialog(caller);
 		dialog.setIncludeSqlUpdate(false);
 		dialog.setSelectDirectoryOnly(true);
@@ -106,10 +106,12 @@ public class TableExporter
 		exporter.startBackgroundExport();
 	}
 
+	@Override
 	public void executionStart(WbConnection conn, Object source)
 	{
 	}
 
+	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		if (progress != null)

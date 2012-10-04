@@ -81,7 +81,7 @@ public class DataExporterTest
 			exporter.setTextOptions(getTextOptions());
 
 			WbFile exportFile = new WbFile(util.getBaseDir(), "schema_table_export.txt");
-			exporter.addTableExportJob(exportFile, new TableIdentifier("person"));
+			exporter.addTableExportJob(exportFile, new TableIdentifier("PERSON"));
 
 			long rowCount = exporter.startExport();
 			assertEquals(4, rowCount);

@@ -83,12 +83,14 @@ public class VariablePool
 	private VariablePool()
 	{
 		initPromptPattern();
-		this.initFromProperties(System.getProperties());
+		initFromProperties(System.getProperties());
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_VAR_PREFIX, Settings.PROPERTY_VAR_SUFFIX);
 	}
 
 	private void initPromptPattern()
 	{
+		// The promptPattern is cached as this is evaluated each time a SQL is executed
+		// rebuild the pattern each time would slow down execution of large SQL scripts too much.
 		synchronized (lock)
 		{
 			String expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
@@ -130,6 +132,7 @@ public class VariablePool
 			this.suffix = null;
 			initPromptPattern();
 		}
+		LogMgr.logDebug("VariablePool.propertyChange()", "Update prompter patter because " + evt.getPropertyName() + " changed.");
 	}
 
 	/**
