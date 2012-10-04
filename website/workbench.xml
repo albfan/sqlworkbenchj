@@ -51,7 +51,8 @@
       <li>Tooltips for INSERT statements to show the corresponding value or column (<image-link title="INSERT Hint" name="insert_hint.png">Screenshot</image-link>) </li>
       <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
       <li>An interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
-      <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
+      <li>Display database objects and their definitions (<image-link name="table_definition.png" title="Table definition">Screenshot</image-link>)</li>
+      <li>Display table source (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
       <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
       <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
       <li>SQLWorkbench/J is <b>free</b> (<a href="manual/information.html#license">License agreement</a>)</li>
@@ -148,7 +149,8 @@ WHERE id=42;</p>
       <li><image-link title="Auto-completion" name="completion.png">Auto-completion for SQL statements</image-link></li>
       <li><image-link title="INSERT Hint" name="insert_hint.png">Hints for columns and values in INSERT statements</image-link></li>
       <li><image-link title="Console mode" name="console.png">Console mode</image-link></li>
-      <li><image-link name="TableSource.png" title="SQL source for table definition">DbExplorer displaying table source</image-link></li>
+      <li><image-link title="Table definition" name="table_definition.png">DbExplorer displaying table definition</image-link></li>
+      <li><image-link title="SQL source for table definition" name="TableSource.png">DbExplorer displaying table source</image-link></li>
       <li><image-link title="SQL Source Display" name="ViewSource.png">DbExplorer displaying the source of a VIEW</image-link></li>
       <li><image-link title="Foreign key display" name="FkDisplay.png">DbExplorer displaying foreign key relationships</image-link></li>
      </ul>
