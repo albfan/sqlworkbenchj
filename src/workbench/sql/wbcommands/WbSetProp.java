@@ -12,6 +12,8 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.TreeMap;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -19,6 +21,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -35,6 +38,7 @@ public class WbSetProp
 	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_PROP = "property";
 	public static final String PARAM_VALUE = "value";
+	private final Map<String, String> configMap = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbSetProp()
 	{
@@ -43,6 +47,9 @@ public class WbSetProp
 		cmdLine.addArgument(PARAM_TYPE, CollectionUtil.arrayList("temp","default"));
 		cmdLine.addArgument(PARAM_PROP);
 		cmdLine.addArgument(PARAM_VALUE);
+		configMap.put("nulldisplay", "workbench.console.nullstring");
+		configMap.put("varsuffix", Settings.PROPERTY_VAR_SUFFIX);
+		configMap.put("varprefix", Settings.PROPERTY_VAR_PREFIX);
 	}
 
 	@Override
@@ -101,7 +108,7 @@ public class WbSetProp
 			String[] pair = args.split("=");
 			if (pair.length == 2)
 			{
-				String prop	= pair[0];
+				String prop	= getPropertyName(pair[0]);
 				String value = pair[1];
 				if (isConfig && prop.startsWith("workbench"))
 				{
@@ -118,7 +125,7 @@ public class WbSetProp
 			}
 			else if (pair.length == 1)
 			{
-				String prop	= pair[0];
+				String prop	= getPropertyName(pair[0]);
 				// no value specified, remove property
 				Settings.getInstance().removeProperty(prop);
 				result.addMessage(prop  + " removed");
@@ -131,6 +138,13 @@ public class WbSetProp
 		}
 		result.setSuccess();
 		return result;
+	}
+
+	private String getPropertyName(String shortName)
+	{
+		String longName = configMap.get(shortName);
+		if (longName == null) return shortName;
+		return longName;
 	}
 
 	@Override

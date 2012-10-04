@@ -589,28 +589,24 @@ public class DataCopier
 			throw new SQLException("No columns defined");
 		}
 		int count = this.columnMap.size();
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(count);
 
-		int col = 0;
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(count);
+		List<ColumnIdentifier> sourceCols = new ArrayList<ColumnIdentifier>(count);
+		TableSelectBuilder builder = new TableSelectBuilder(sourceConnection, "export");
 
 		StringBuilder sql = new StringBuilder(count * 25 + 30);
-		sql.append("SELECT ");
+
 
 		for (Map.Entry<ColumnIdentifier, ColumnIdentifier> entry : this.columnMap.entrySet())
 		{
 			ColumnIdentifier sid = entry.getKey();
 			ColumnIdentifier tid = entry.getValue();
-			if (col > 0)
-			{
-				sql.append(", ");
-			}
-			sql.append(sourceConnection.getMetadata().quoteObjectname(sid.getColumnName()));
+			sourceCols.add(sid);
 			cols.add(tid);
-			col ++;
 		}
 
-		sql.append(" FROM ");
-		sql.append(this.sourceTable.getTableExpression(this.sourceConnection));
+		String select = builder.getSelectForColumns(sourceTable, sourceCols);
+		sql.append(select);
 
 		if (StringUtil.isNonBlank(addWhere))
 		{

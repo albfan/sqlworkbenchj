@@ -106,6 +106,9 @@ public class Settings
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	public static final String PROPERTY_DBEXP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
 	public static final String PROPERTY_DBEXP_ASSUME_WILDCARDS = "workbench.dbexplorer.assumewildcards";
+
+	public static final String PROPERTY_VAR_PREFIX = "workbench.sql.parameter.prefix";
+	public static final String PROPERTY_VAR_SUFFIX = "workbench.sql.parameter.suffix";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -2498,7 +2501,7 @@ public class Settings
 
 	public String getSqlParameterPrefix()
 	{
-		String value = getProperty("workbench.sql.parameter.prefix", "$[");
+		String value = getProperty(PROPERTY_VAR_PREFIX, "$[");
 		if (StringUtil.isEmptyString(value)) value = "$[";
 		return value;
 	}
@@ -2507,7 +2510,7 @@ public class Settings
 	{
 		// The built-in default suffix is stored in default.properties thus is can be "deleted"
 		// by adding an empty property in workbench.settings
-		return getProperty("workbench.sql.parameter.suffix", "");
+		return getProperty(PROPERTY_VAR_SUFFIX, "");
 	}
 
 	/**

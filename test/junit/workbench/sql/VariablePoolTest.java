@@ -24,6 +24,7 @@ import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.resource.Settings;
 
 /**
  *
@@ -55,7 +56,7 @@ public class VariablePoolTest
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-		
+
 		ArgumentParser p = new ArgumentParser();
 		p.addArgument(AppArguments.ARG_VARDEF);
 		p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
@@ -151,5 +152,23 @@ public class VariablePoolTest
 		ds.updateDb(null, null);
 		assertEquals(1, pool.getParameterCount());
 		assertEquals("value", pool.getParameterValue("varname"));
+	}
+
+	@Test
+	public void testAlternatePrefix()
+	{
+		VariablePool pool = VariablePool.getInstance();
+		try
+		{
+			pool.setPrefixSuffix("${", "}");
+			pool.setParameterValue("foo.bar.value", "1");
+			String sql = "select * from foo where bar = ${foo.bar.value}";
+			String replaced = pool.replaceAllParameters(sql);
+			assertEquals("select * from foo where bar = 1", replaced);
+		}
+		finally
+		{
+			pool.reset();
+		}
 	}
 }

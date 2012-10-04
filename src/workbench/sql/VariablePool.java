@@ -11,21 +11,26 @@
  */
 package workbench.sql;
 
-import java.io.File;
-import java.io.IOException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.sql.Types;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.io.File;
+import java.io.IOException;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
@@ -37,6 +42,7 @@ import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
+
 
 
 /**
@@ -52,14 +58,16 @@ import workbench.util.WbProperties;
  * @author  Thomas Kellerer
  */
 public class VariablePool
+	implements PropertyChangeListener
 {
 	public static final String PROP_PREFIX = "wbp.";
 	private final Map<String, String> data = new HashMap<String, String>();
+
+	private final Object lock = new Object();
 	private String prefix;
 	private String suffix;
-	private int prefixLen;
-	private int suffixLen;
-	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
+
+	private Pattern validNamePattern = Pattern.compile("[\\w\\.]*");;
 	private Pattern promptPattern;
 
 	public static VariablePool getInstance()
@@ -74,14 +82,77 @@ public class VariablePool
 
 	private VariablePool()
 	{
-		this.prefix = Settings.getInstance().getSqlParameterPrefix();
-		this.suffix = Settings.getInstance().getSqlParameterSuffix();
-
-		if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
-
-		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?&][\\w]+" + StringUtil.quoteRegexMeta(suffix);
-		this.promptPattern = Pattern.compile(expr);
+		initPromptPattern();
 		this.initFromProperties(System.getProperties());
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_VAR_PREFIX, Settings.PROPERTY_VAR_SUFFIX);
+	}
+
+	private void initPromptPattern()
+	{
+		synchronized (lock)
+		{
+			String expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
+			this.promptPattern = Pattern.compile(expr);
+		}
+	}
+
+	private String getPrefix()
+	{
+		synchronized (lock)
+		{
+			if (prefix == null)
+			{
+				this.prefix = Settings.getInstance().getSqlParameterPrefix();
+			}
+			return prefix;
+		}
+	}
+
+	private String getSuffix()
+	{
+		synchronized (lock)
+		{
+			if (suffix == null)
+			{
+				this.suffix = Settings.getInstance().getSqlParameterSuffix();
+				if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
+			}
+			return suffix;
+		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		synchronized (lock)
+		{
+			this.prefix = null;
+			this.suffix = null;
+			initPromptPattern();
+		}
+	}
+
+	/**
+	 * For testing purposes only.
+	 */
+	void reset()
+	{
+		clear();
+		synchronized (lock)
+		{
+			this.prefix = null;
+			this.suffix = null;
+		}
+	}
+
+	public void setPrefixSuffix(String newPrefix, String newSuffix)
+	{
+		synchronized (lock)
+		{
+			this.prefix = newPrefix;
+			this.suffix = newSuffix;
+			initPromptPattern();
+		}
 	}
 
 	final void initFromProperties(Properties props)
@@ -160,8 +231,8 @@ public class VariablePool
 		{
 			while (m.find())
 			{
-				int start = m.start() + this.prefix.length();
-				int end = m.end() - this.suffix.length();
+				int start = m.start() + this.getPrefix().length();
+				int end = m.end() - this.getSuffix().length();
 				char type = sql.charAt(start);
 				String var = sql.substring(start + 1, end);
 				if (!includeConditional)
@@ -243,7 +314,7 @@ public class VariablePool
 	{
 		if (sql == null) return null;
 		if (StringUtil.isBlank(sql)) return StringUtil.EMPTY_STRING;
-		if (sql.indexOf(this.prefix) == -1) return sql;
+		if (sql.indexOf(this.getPrefix()) == -1) return sql;
 		StringBuilder newSql = new StringBuilder(sql);
 		for (String name : varNames)
 		{
@@ -275,19 +346,18 @@ public class VariablePool
 
 	public String buildVarName(String varName, boolean forPrompt)
 	{
-		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
-		result.append(this.prefix);
+		StringBuilder result = new StringBuilder(varName.length() + 5);
+		result.append(this.getPrefix());
 		if (forPrompt) result.append('?');
 		result.append(varName);
-		result.append(this.suffix);
+		result.append(this.getSuffix());
 		return result.toString();
 	}
 
 	public String buildVarNamePattern(String varName, boolean forPrompt)
 	{
-		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
-
-		result.append(StringUtil.quoteRegexMeta(prefix));
+		StringBuilder result = new StringBuilder(varName.length() + 5);
+		result.append(StringUtil.quoteRegexMeta(getPrefix()));
 		if (forPrompt)
 		{
 			result.append("[\\?\\&]{1}");
@@ -297,7 +367,7 @@ public class VariablePool
 			result.append("[\\?\\&]?");
 		}
 		result.append(varName);
-		result.append(StringUtil.quoteRegexMeta(suffix));
+		result.append(StringUtil.quoteRegexMeta(getSuffix()));
 		return result.toString();
 	}
 
@@ -407,7 +477,6 @@ public class VariablePool
 	}
 
 }
-
 class VariableDataStore
 	extends DataStore
 {
