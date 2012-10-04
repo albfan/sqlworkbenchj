@@ -14,17 +14,19 @@ package workbench.sql;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+
 import java.util.Set;
+
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import workbench.resource.Settings;
 
 /**
  *
