@@ -76,5 +76,8 @@ public class SqlServerProcedureReaderTest
 		assertNotNull(source);
 		String sourceSql = source.toString();
 		assertEquals(SqlUtil.trimSemicolon(sql), sourceSql);
+
+		procedureList = reader.getProcedureList(SQLServerTestUtil.DB_NAME, "dbo", "answer");
+		assertEquals(1, procedureList.size());
 	}
 }

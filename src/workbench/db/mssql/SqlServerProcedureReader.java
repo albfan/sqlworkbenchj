@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
 public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
-	private final String GET_PROC_SQL = "{call sp_stored_procedures ('%', ?) }";
+	private final String GET_PROC_SQL = "{call sp_stored_procedures (@sp_owner = ?,  @sp_name = ?)}";
 	private boolean useOwnSQL = true;
 
 	public SqlServerProcedureReader(WbConnection db)
@@ -84,13 +84,22 @@ public class SqlServerProcedureReader
 		{
 			ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 
-			if (owner == null || "*".equals(owner))
+			if (StringUtil.isEmptyString(owner) || "*".equals(owner))
 			{
 				cstmt.setString(1, "%");
 			}
 			else
 			{
 				cstmt.setString(1, owner);
+			}
+
+			if (StringUtil.isEmptyString(namePattern))
+			{
+				cstmt.setString(2, "%");
+			}
+			else
+			{
+				cstmt.setString(2, namePattern);
 			}
 
 			boolean hasResult = cstmt.execute();
