@@ -11,6 +11,7 @@
  */
 package workbench.gui.editor.actions;
 
+import java.awt.FontMetrics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -21,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.LineMetrics;
 import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
 import javax.swing.Popup;
@@ -203,8 +205,9 @@ public class ShowTipAction
 	{
 		Point p = area.getCursorLocation();
 		Point s = area.getLocationOnScreen();
-		int height = area.getFontMetrics(area.getFont()).getHeight();
-		Point pos = new Point(s.x + p.x,  (s.y + p.y) - 2* height);
+		int line = area.getCaretLine();
+		int lineY = s.y + area.lineToY(line > 1 ? line - 1 : line + 1);
+		Point pos = new Point(s.x + p.x,  lineY);
 		return pos;
 	}
 

@@ -163,10 +163,10 @@ public class ObjectScripter
 					if (useSeparator)
 					{
 						this.script.append("-- BEGIN FOREIGN KEYS --");
-						this.script.append(nl);
 					}
 					first = false;
 				}
+				script.append(nl);
 				script.append(source);
 			}
 		}

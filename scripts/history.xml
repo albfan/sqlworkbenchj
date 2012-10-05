@@ -10,6 +10,7 @@
     <entry dev-build="2" type="enh">The string literal for NULL values can now also be defined when using "Save Data As"</entry>
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
+    <entry dev-build="4" type="fix">Table comments were not shown completely for SQL Server.</entry>
     <entry dev-build="4" type="fix">For MySQL if an index only indexes part of a column, the index definition is now shown correctly.</entry>
     <entry dev-build="3" type="fix">The detection of columns for auto-completion in INSERT statements did not always work properly if the insert was based on a SELECT.</entry>
     <entry dev-build="3" type="fix">The trees for the connection profiles and macros now display correctly with larger fonts</entry>

@@ -1290,7 +1290,7 @@ public class DwPanel
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
 		String msg = ResourceMgr.getFormattedString("ErrUpdateSqlError", NumberStringCache.getNumberString(errorRow),
-			StringUtil.getMaxSubstring(data, 50),errorMessage);
+			StringUtil.getMaxSubstring(data, 50), errorMessage);
 
 		Window w = SwingUtilities.getWindowAncestor(this);
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(w, msg);

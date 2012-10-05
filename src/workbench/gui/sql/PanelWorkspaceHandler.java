@@ -106,6 +106,7 @@ public class PanelWorkspaceHandler
 		if (!client.hasFileLoaded() ||
 			  client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() != ExternalFileHandling.none)
 		{
+			client.storeStatementInHistory(); // make sure the current content is stored in the SqlHistory object
 			w.addHistoryEntry(index, client.getHistory());
 		}
 		Properties props = w.getSettings();

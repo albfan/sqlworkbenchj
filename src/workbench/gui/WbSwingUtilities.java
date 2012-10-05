@@ -360,7 +360,8 @@ public class WbSwingUtilities
 	 */
 	public static void showFriendlyErrorMessage(Component caller, final String title, final String error)
 	{
-		if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > 100)
+		int maxLen = Settings.getInstance().getIntProperty("workbench.gui.message.maxlength", 100);
+		if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > maxLen)
 		{
 			showMultiLineError(caller, title, error);
 		}
