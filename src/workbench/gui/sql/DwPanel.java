@@ -1602,7 +1602,7 @@ public class DwPanel
 	@Override
 	public void fatalError(String msg)
 	{
-		WbSwingUtilities.showErrorMessage(this, msg);
+		WbSwingUtilities.showFriendlyErrorMessage(this, msg);
 	}
 
 }

@@ -98,19 +98,19 @@ public class TableSourceBuilder
 			FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 			fkDef = fk.getForeignKeys(def.getTable(), false);
 		}
-		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, null, includeFk);
+		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk);
 		return source;
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table);
-		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
+		return getTableSource(table, columns, indexInfo, null, false, true);
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore aFkDef, boolean includeDrop, boolean includeFk)
 	{
-		CharSequence createSql = getCreateTable(table, columns, indexList, aFkDef, includeDrop, tableNameToUse, includeFk);
+		CharSequence createSql = getCreateTable(table, columns, indexList, aFkDef, includeDrop, includeFk);
 
 		StringBuilder result = new StringBuilder(createSql.length() + 50);
 		result.append(createSql);
@@ -121,7 +121,7 @@ public class TableSourceBuilder
 
 		if (!inlineFK && includeFk && dbConnection.getDbSettings().getGenerateTableFKSource())
 		{
-			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, false);
+			CharSequence fk = getFkSource(table, aFkDef, false);
 			if (StringUtil.isNonBlank(fk))
 			{
 				result.append(lineEnding);
@@ -131,7 +131,7 @@ public class TableSourceBuilder
 
 		if (dbConnection.getDbSettings().getGenerateTableIndexSource())
 		{
-			StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList, tableNameToUse);
+			StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList);
 			if (StringUtil.isNonBlank(indexSource))
 			{
 				result.append(lineEnding);
@@ -197,7 +197,12 @@ public class TableSourceBuilder
 	 *
 	 * @return the CREATE TABLE statement for the table
 	 */
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, boolean includeFk)
+	{
+		return getCreateTable(table, columns, indexList, fkDefinitions, includeDrop, includeFk, true);
+	}
+
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -238,7 +243,7 @@ public class TableSourceBuilder
 		}
 
 		boolean inlinePK = getCreateInlinePKConstraints();
-		if (inlinePK && pkCols.size() > 0)
+		if (includePK && inlinePK && pkCols.size() > 0)
 		{
 			result.append("\n   ,");
 			CharSequence pk = getPkSource(table, pkCols, pkname, true);
@@ -247,7 +252,7 @@ public class TableSourceBuilder
 
 		if (includeFk && getCreateInlineFKConstraints())
 		{
-			StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, true);
+			StringBuilder fk = getFkSource(table, fkDefinitions, true);
 			if (fk.length() > 0)
 			{
 				result.append('\n');
@@ -276,9 +281,9 @@ public class TableSourceBuilder
 			result.append("\n\n");
 		}
 
-		if (!inlinePK && pkCols.size() > 0)
+		if (includePK && !inlinePK && pkCols.size() > 0)
 		{
-			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, pkname);
+			CharSequence pkSource = getPkSource(table, pkCols, pkname);
 			result.append('\n');
 			result.append(pkSource);
 		}
@@ -657,7 +662,7 @@ public class TableSourceBuilder
 	{
 		FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
 		DataStore fkDef = fk.getForeignKeys(table, false);
-		return getFkSource(table, fkDef, null, getCreateInlineFKConstraints());
+		return getFkSource(table, fkDef, getCreateInlineFKConstraints());
 	}
 
 	/**
@@ -668,7 +673,7 @@ public class TableSourceBuilder
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table, never null
 	 */
-	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse, boolean forInlineUse)
+	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, boolean forInlineUse)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
 
@@ -745,7 +750,7 @@ public class TableSourceBuilder
 				// first time we hit this FK definition in this loop
 				stmt = template;
 			}
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableExpression(dbConnection) : tableNameToUse));
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
 
 			if (nameTester.isSystemConstraintName(fkname))
 			{

@@ -111,7 +111,7 @@ public class OracleMViewReader
 				}
 			}
 		}
-		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexList, table.getTableName());
+		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexList);
 
 		if (indexSource != null) result.append(indexSource);
 		return result.toString();

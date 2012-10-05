@@ -47,24 +47,32 @@ public class DB2UniqueConstraintReader
 		{
 			// DB2 LUW
 			sql.append(
-				"select indname, indschema, constname from ( \n" +
-				"select ind.indname, ind.indschema, tc.constname \n" +
-				"from syscat.indexes ind \n" +
-				"  join syscat.tabconst tc on ind.tabschema = tc.tabschema and ind.tabname = tc.tabname and tc.constname = ind.indname \n" +
+				"select indname, indschema, constname \n " +
+				"from ( \n" +
+				"  select ind.indname, ind.indschema, tc.constname \n" +
+				"  from syscat.indexes ind \n" +
+				"    join syscat.tabconst tc \n " +
+				"      on ind.tabschema = tc.tabschema \n " +
+				"     and ind.tabname = tc.tabname \n " +
+				"     and tc.constname = ind.indname \n" +
 				"  where type = 'U' \n" +
-			  ") \n " +
+			  ") t \n " +
 				"where (");
 		}
 		else if (dbid.equals("db2h"))
 		{
 			// DB2 host
 			sql.append(
-				"select indname, indschema, constname from ( \n" +
+				"select indname, indschema, constname \n" +
+				"from ( \n" +
 				"  select ind.name as indname, ind.creator as indschema, tc.constname  \n" +
 				"  from sysibm.sysindexes ind \n" +
-				"    join sysibm.systabconst tc on ind.tbcreator = tc.tbcreator and ind.tbname = tc.tbname and tc.constname = ind.name \n" +
-				"    where type = 'U' \n " +
-				") \n " +
+				"    join sysibm.systabconst tc \n " +
+				"      on ind.tbcreator = tc.tbcreator \n " +
+				"     and ind.tbname = tc.tbname \n " +
+				"     and tc.constname = ind.name \n" +
+				"  where type = 'U' \n " +
+				") t\n " +
 				"where (");
 		}
 

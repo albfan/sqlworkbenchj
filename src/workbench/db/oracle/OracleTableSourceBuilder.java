@@ -258,7 +258,7 @@ public class OracleTableSourceBuilder
 		}
 		else
 		{
-			String indexSql = reader.getExtendedIndexSource(table, idx, null, "    ").toString();
+			String indexSql = reader.getExtendedIndexSource(table, idx, "    ").toString();
 			if ("NORMAL/REV".equals(idx.getIndexType()))
 			{
 				indexSql = indexSql.replace("\n    REVERSE", " REVERSE"); // cosmetic cleanup

@@ -61,7 +61,7 @@ public interface IndexReader
 	 * If tableNameToUse is non-null then that name will be used instead
 	 * of the name of the TableIdentifier
 	 */
-	StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList, String tableNameToUse);
+	StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList);
 
 	/**
 	 * Return the CREATE INDEX for a single index
@@ -69,7 +69,7 @@ public interface IndexReader
 	 * @param indexDefinition
 	 * @param tableNameToUse
 	 */
-	CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse);
+	CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition);
 
 	/**
 	 * 	Build a SQL statement (from scratch) to create a new index on the given table.
@@ -83,7 +83,7 @@ public interface IndexReader
 
 	/**
 	 * Post-Process the index definitions contained in the List.
-	 * 
+	 *
 	 * This can be used to e.g. retrieve additional index information
 	 * that can't be read with getIndexInfo()
 	 */

@@ -174,7 +174,7 @@ public class DefaultViewReader
 		List<IndexDefinition> indexInfo = connection.getMetadata().getIndexReader().getTableIndexList(viewTable);
 		if (indexInfo.size() > 0)
 		{
-			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(viewTable, indexInfo, null);
+			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(viewTable, indexInfo);
 			if (idx != null && idx.length() > 0)
 			{
 				result.append(lineEnding);

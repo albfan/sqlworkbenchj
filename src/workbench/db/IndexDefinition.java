@@ -301,7 +301,7 @@ public class IndexDefinition
 	{
 		if (con == null) return null;
 		IndexReader reader = con.getMetadata().getIndexReader();
-		return reader.getIndexSource(baseTable, this, null);
+		return reader.getIndexSource(baseTable, this);
 	}
 
 	public static IndexDefinition findIndex(List<IndexDefinition> indexList, String indexName, String indexSchema)

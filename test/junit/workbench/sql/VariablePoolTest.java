@@ -162,6 +162,7 @@ public class VariablePoolTest
 		VariablePool pool = VariablePool.getInstance();
 		try
 		{
+			pool.reset();
 			pool.setPrefixSuffix("${", "}");
 			pool.setParameterValue("foo.bar.value", "1");
 			String sql = "select * from foo where bar = ${foo.bar.value}";

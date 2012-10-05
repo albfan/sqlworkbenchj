@@ -2597,7 +2597,7 @@ public class DbMetadata
 		}
 		result.append("\n\n");
 
-		StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList, table.getTableName());
+		StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList);
 
 		if (indexSource != null) result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())

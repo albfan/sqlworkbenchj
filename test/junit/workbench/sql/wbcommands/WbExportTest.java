@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
+import workbench.util.SqlUtil.DdlObjectInfo;
 
 /**
  *
@@ -1053,7 +1054,7 @@ public class WbExportTest
 		throws Exception
 	{
 		File exportFile = new File(this.basedir, "insert_export.sql");
-		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -createTable=true -table=OTHER_TABLE");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -encoding=UTF8 -type=sqlinsert -sourcetable=junit_test -createTable=true -table=OTHER_TABLE");
 		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 		assertEquals("Export file not created", true, exportFile.exists());
@@ -1061,12 +1062,17 @@ public class WbExportTest
 		ScriptParser p = new ScriptParser(1024*1024);
 		p.setFile(exportFile);
 
+//		String script = FileUtil.readFile(exportFile, "UTF-8");
+//		System.out.println(script);
+
 		assertEquals("Wrong number of statements", rowcount + 3, p.getSize());
 		String sql = p.getCommand(0);
 		String verb = SqlUtil.getSqlVerb(sql);
 
 		// first verb must be the CREATE TABLE statement
 		assertEquals("Not a CREATE TABLE statement", "CREATE", verb);
+		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		assertTrue(info.objectName.equalsIgnoreCase("OTHER_TABLE"));
 
 		sql = p.getCommand(1);
 		verb = SqlUtil.getSqlVerb(sql);
@@ -1238,6 +1244,8 @@ public class WbExportTest
 
 		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE MEMORY TABLE junit_test (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		stmt.executeUpdate("create index idx_fname on junit_test (firstname)");
+
 		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (nr, firstname, lastname) values (?,?,?)");
 		for (int i=0; i < rowcount; i ++)
 		{

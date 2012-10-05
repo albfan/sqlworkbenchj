@@ -52,6 +52,7 @@ import workbench.db.WbConnection;
 import workbench.gui.components.PlainEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbOptionPane;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -510,7 +511,7 @@ public class WbSwingUtilities
 		};
 
 		String msg = ResourceMgr.getFormattedString(resourceKey, params);
-		final JOptionPane ignorePane = new JOptionPane(msg, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		final JOptionPane ignorePane = new WbOptionPane(msg, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		final JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -543,13 +544,14 @@ public class WbSwingUtilities
 			ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")
 		};
 
-		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+
 		JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		int rvalue = -1;
 		try
 		{
-			dialog.setResizable(false);
+			dialog.setResizable(true);
 			dialog.pack();
 			dialog.setVisible(true);
 			Object result = ignorePane.getValue();
@@ -590,7 +592,7 @@ public class WbSwingUtilities
 			ResourceMgr.getPlainString("LblNo"),
 			ResourceMgr.getPlainString("LblCancel")
 		};
-		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
 		{
@@ -636,7 +638,7 @@ public class WbSwingUtilities
 
 	public static int getYesNo(Component aCaller, String aMessage, String[] options, int type)
 	{
-		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options[1]);
+		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options[1]);
 		ignorePane.setMessageType(type);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
@@ -675,7 +677,7 @@ public class WbSwingUtilities
 
 	public static boolean getOKCancel(String title, Component aCaller, Component message, final Runnable doLater)
 	{
-		JOptionPane pane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JOptionPane pane = new WbOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		JDialog dialog = pane.createDialog(aCaller, title);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		if (doLater != null)
@@ -691,7 +693,7 @@ public class WbSwingUtilities
 			dialog.addWindowListener(w);
 		}
 
-		dialog.setResizable(false);
+		dialog.setResizable(true);
 		dialog.pack();
 		dialog.setVisible(true);
 		dialog.dispose();
@@ -720,7 +722,7 @@ public class WbSwingUtilities
 		{
 			ResourceMgr.getString("LblCommit"), ResourceMgr.getString("LblRollback")
 		};
-		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
 		int w = 0;
 		try
 		{

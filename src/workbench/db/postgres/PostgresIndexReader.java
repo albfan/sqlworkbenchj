@@ -55,7 +55,7 @@ public class PostgresIndexReader
 	 * @return
 	 */
 	@Override
-	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList, String tableNameToUse)
+	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList)
 	{
 		if (CollectionUtil.isEmpty(indexList)) return null;
 
@@ -141,13 +141,13 @@ public class PostgresIndexReader
 	}
 
 	@Override
-	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse)
+	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition)
 	{
 		if (indexDefinition == null) return null;
 		if (table == null) return null;
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.default.indexsource", false))
 		{
-			return super.getIndexSource(table, indexDefinition, tableNameToUse);
+			return super.getIndexSource(table, indexDefinition);
 		}
 
 		if (indexDefinition.isUniqueConstraint())

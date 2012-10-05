@@ -278,7 +278,12 @@ public class SqlRowDataConverter
 
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
-		String source = builder.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
+		String source = null;
+
+		TableIdentifier toUse = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
+		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
+		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK);
+		source = create.toString();
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;
