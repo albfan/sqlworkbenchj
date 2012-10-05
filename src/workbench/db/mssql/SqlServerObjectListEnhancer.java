@@ -73,12 +73,12 @@ public class SqlServerObjectListEnhancer
 
 		if (SqlServerUtil.isSqlServer2005(con))
 		{
-			sql = "SELECT objtype, objname, cast(value as varchar) as value \n" +
+			sql = "SELECT objtype, objname, cast(value as varchar(8000)) as value \n" +
       "FROM fn_listextendedproperty ('" + propName + "','schema', ?, ?, ";
 		}
 		else
 		{
-			sql = "SELECT objname, cast(value as varchar) as value \n" +
+			sql = "SELECT objname, cast(value as varchar(8000)) as value \n" +
       "FROM ::fn_listextendedproperty ('" + propName + "','user', ?, ?, ";
 		}
 
