@@ -160,8 +160,8 @@ public class GenericObjectDropper
 
 		if (objectTable != null)
 		{
-			ddl = TemplateHandler.replacePlaceHolder(ddl, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, objectTable.getObjectExpression(this.connection));
-			ddl = TemplateHandler.replacePlaceHolder(ddl, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(connection, objectTable));
+			ddl = TemplateHandler.replacePlaceholder(ddl, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, objectTable.getObjectExpression(this.connection));
+			ddl = TemplateHandler.replacePlaceholder(ddl, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(connection, objectTable));
 		}
 		ddl = ddl.replace("%name%", name);
 		sql.append(ddl);

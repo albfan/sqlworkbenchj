@@ -28,33 +28,33 @@ public class TemplateHandlerTest
 	}
 
 	/**
-	 * Test of replacePlaceHolder method, of class TemplateHandler.
+	 * Test of replacePlaceholder method, of class TemplateHandler.
 	 */
 	@Test
 	public void testReplacePlaceHolder()
 	{
 		String sql = "some text %foo%%bar% more text";
-		String result = TemplateHandler.replacePlaceHolder(sql, "%foo%", "newfoo");
+		String result = TemplateHandler.replacePlaceholder(sql, "%foo%", "newfoo");
 		assertEquals("some text newfoo %bar% more text", result);
-		result = TemplateHandler.replacePlaceHolder(result, "%bar%", "newbar");
+		result = TemplateHandler.replacePlaceholder(result, "%bar%", "newbar");
 		assertEquals("some text newfoo newbar more text", result);
 
-		result = TemplateHandler.replacePlaceHolder("%bar%", "%bar%", "newbar");
+		result = TemplateHandler.replacePlaceholder("%bar%", "%bar%", "newbar");
 		assertEquals("newbar", result);
 
-		result = TemplateHandler.replacePlaceHolder("bla %bar%", "%bar%", "newbar");
+		result = TemplateHandler.replacePlaceholder("bla %bar%", "%bar%", "newbar");
 		assertEquals("bla newbar", result);
 
-		result = TemplateHandler.replacePlaceHolder("%bar% foo", "%bar%", "newbar");
+		result = TemplateHandler.replacePlaceholder("%bar% foo", "%bar%", "newbar");
 		assertEquals("newbar foo", result);
 
-		result = TemplateHandler.replacePlaceHolder("some_table(%column_list%)", "%column_list%", "a,b");
+		result = TemplateHandler.replacePlaceholder("some_table(%column_list%)", "%column_list%", "a,b");
 		assertEquals("some_table(a,b)", result);
 
-		result = TemplateHandler.replacePlaceHolder("[%some_table%]", "%some_table%", "foobar");
+		result = TemplateHandler.replacePlaceholder("[%some_table%]", "%some_table%", "foobar");
 		assertEquals("[foobar]", result);
 
-		result = TemplateHandler.replacePlaceHolder("\"%some_table%\"", "%some_table%", "foobar");
+		result = TemplateHandler.replacePlaceholder("\"%some_table%\"", "%some_table%", "foobar");
 		assertEquals("\"foobar\"", result);
 	}
 

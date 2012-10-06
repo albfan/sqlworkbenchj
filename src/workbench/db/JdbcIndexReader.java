@@ -417,7 +417,7 @@ public class JdbcIndexReader
 		sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, true);
 		if (unique)
 		{
-			sql = TemplateHandler.replacePlaceHolder(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE");
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE");
 		}
 		else
 		{

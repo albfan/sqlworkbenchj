@@ -58,6 +58,24 @@ public abstract class TemplateHandler
 	}
 
 	/**
+	 * Remove the a schema or catalog placeholder completely from the template SQL.
+	 *
+	 * @param sql          the sql template
+	 * @param placeholder  the placeholder
+	 * @param delimiter    if this character follows the placeholder, it is removed as well
+	 *
+	 * @return the template with the placeholder removed
+	 */
+	public static String removeSchemaOrCatalog(String sql, String placeholder, char delimiter)
+	{
+		StringBuilder b = new StringBuilder(placeholder.length() + 10);
+		b.append(StringUtil.quoteRegexMeta(placeholder));
+		b.append(StringUtil.quoteRegexMeta(new String(new char[] { delimiter })));
+		String regex = b.toString();
+		return sql.replaceAll(regex, StringUtil.EMPTY_STRING);
+	}
+
+	/**
 	 * Remove the placeholder completely from the template SQL.
 	 *
 	 * @param sql          the sql template
@@ -98,7 +116,7 @@ public abstract class TemplateHandler
 	 * @return the template with the placeholder replaced
 	 * @see #removePlaceholder(String, String, boolean)
 	 */
-	public static String replacePlaceHolder(String sql, String placeholder, String replacement)
+	public static String replacePlaceholder(String sql, String placeholder, String replacement)
 	{
 		if (StringUtil.isEmptyString(replacement)) return removePlaceholder(sql, placeholder, false);
 		int pos = sql.indexOf(placeholder);

@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-
 import java.util.ArrayList;
 
 import org.junit.Test;
@@ -34,35 +33,80 @@ public class TableSelectBuilderTest
 	}
 
 	@Test
+	public void testTemplateWithSchema()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		TestUtil.executeScript(con,
+			"create schema foo; \n" +
+			"create table foo.person (nr integer, firstname varchar(20), lastname varchar(20))");
+
+		TableSelectBuilder builder = new TableSelectBuilder(con);
+		builder.setTemplate("select %columnlist%\nfrom %catalog_name%.%schema_name%.%simple_table_name%");
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
+
+		TableDefinition def = con.getMetadata().getTableDefinition(tbl);
+
+		TableIdentifier t1 = tbl.createCopy();
+		t1.setSchema(null);
+		t1.setCatalog(null);
+
+		String sql = builder.getSelectForColumns(t1, def.getColumns());
+		String expected = "select NR,\n" +
+			"       FIRSTNAME,\n" +
+			"       LASTNAME\nfrom PERSON";
+//			System.out.println("----\n" + expected + "\n------\n" + sql);
+		assertEquals(expected, sql);
+
+		t1 = tbl.createCopy();
+		t1.setCatalog(null);
+
+		sql = builder.getSelectForColumns(t1, def.getColumns());
+		expected = "select NR,\n" +
+			"       FIRSTNAME,\n" +
+			"       LASTNAME\nfrom FOO.PERSON";
+//			System.out.println("----\n" + expected + "\n------\n" + sql);
+		assertEquals(expected, sql);
+
+		t1 = tbl.createCopy();
+		t1.setSchema(null);
+
+		sql = builder.getSelectForColumns(t1, def.getColumns());
+		expected = "select NR,\n" +
+			"       FIRSTNAME,\n" +
+			"       LASTNAME\nfrom TABLESELECTBUILDERTEST.PERSON";
+//			System.out.println("----\n" + expected + "\n------\n" + sql);
+		assertEquals(expected, sql);
+
+		sql = builder.getSelectForTable(tbl);
+		expected = "select NR,\n" +
+			"       FIRSTNAME,\n" +
+			"       LASTNAME\nfrom TABLESELECTBUILDERTEST.FOO.PERSON";
+		assertEquals(expected, sql);
+	}
+
+	@Test
 	public void testTemplate()
 		throws Exception
 	{
-		String propname = "workbench.db.h2.junittabledata.select";
-		try
-		{
-			TestUtil util = getTestUtil();
-			WbConnection con = util.getConnection();
-			TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20))");
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20))");
 
-			System.setProperty(propname, "select %columnlist%\nfrom %table_name% with (nolock)");
+		TableSelectBuilder builder = new TableSelectBuilder(con, "junittabledata");
+		builder.setTemplate("select %columnlist%\nfrom %table_name% with (nolock)");
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
 
-			TableSelectBuilder builder = new TableSelectBuilder(con, "junittabledata");
-			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
+		String sql = builder.getSelectForTable(tbl);
+		String expected = "select NR,\n" +
+			"       FIRSTNAME,\n" +
+			"       LASTNAME\nfrom PERSON with (nolock)";
+		assertEquals(expected, sql);
 
-			String sql = builder.getSelectForTable(tbl);
-			String expected = "select NR,\n" +
-				"       FIRSTNAME,\n" +
-				"       LASTNAME\nfrom PERSON with (nolock)";
-			assertEquals(expected, sql);
-
-			sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
-			expected = "select *\nfrom PERSON with (nolock)";
-			assertEquals(expected, sql);
-		}
-		finally
-		{
-			System.clearProperty(propname);
-		}
+		sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
+		expected = "select *\nfrom PERSON with (nolock)";
+		assertEquals(expected, sql);
 	}
 
 	@Test

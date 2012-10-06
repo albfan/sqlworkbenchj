@@ -138,14 +138,34 @@ public class TableSelectBuilder
 		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
 
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-		select = TemplateHandler.replacePlaceHolder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName);
+		select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName);
+
+		select = select.replace(MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName());
+
+		if (table.getSchema() == null)
+		{
+			select = TemplateHandler.removeSchemaOrCatalog(select, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, SqlUtil.getSchemaSeparator(dbConnection));
+		}
+		else
+		{
+			select = select.replace(MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, table.getSchema());
+		}
+
+		if (table.getCatalog() == null)
+		{
+			select = TemplateHandler.removeSchemaOrCatalog(select, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, SqlUtil.getCatalogSeparator(dbConnection));
+		}
+		else
+		{
+			select = select.replace(MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, table.getCatalog());
+		}
 
 		if (sqlTemplate.contains(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER))
 		{
 			// do not call getTableExpression() if not necessary.
-			// this might trigger a SELECT to the database to get the current schema
+			// this might trigger a SELECT to the database to get the current schema and/or catalog
 			// to avoid unnecessary calls, this is only done if really needed
-			select = TemplateHandler.replacePlaceHolder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
+			select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
 		}
 		return select;
 	}
@@ -185,4 +205,10 @@ public class TableSelectBuilder
 		if (pos == -1) return dbmsType;
 		return dbmsType.substring(0, pos);
 	}
+
+	void setTemplate(String template)
+	{
+		this.sqlTemplate = template;
+	}
+
 }

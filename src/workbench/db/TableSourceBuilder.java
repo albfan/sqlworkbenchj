@@ -771,12 +771,12 @@ public class TableSourceBuilder
 			}
 
 			String entry = StringUtil.listToString(colList, ", ", false);
-			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
 
 			String rule = updateRules.get(fkname);
 			if (dbConnection.getDbSettings().supportsFkOption("update", rule))
 			{
-				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
 			}
 			else
 			{
@@ -786,7 +786,7 @@ public class TableSourceBuilder
 			rule = deleteRules.get(fkname);
 			if (dbConnection.getDbSettings().supportsFkOption("delete", rule))
 			{
-				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
 			}
 			else
 			{
@@ -800,7 +800,7 @@ public class TableSourceBuilder
 			}
 			else
 			{
-				stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
 			}
 
 			colList = fkTarget.get(fkname);
@@ -835,8 +835,8 @@ public class TableSourceBuilder
 				}
 				colListBuffer.append(col.substring(pos + 1));
 			}
-			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = TemplateHandler.replacePlaceHolder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(fkname, stmt.trim());
 		}
 		StringBuilder fk = new StringBuilder();
