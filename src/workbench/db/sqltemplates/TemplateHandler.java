@@ -68,11 +68,7 @@ public abstract class TemplateHandler
 	 */
 	public static String removeSchemaOrCatalog(String sql, String placeholder, char delimiter)
 	{
-		StringBuilder b = new StringBuilder(placeholder.length() + 10);
-		b.append(StringUtil.quoteRegexMeta(placeholder));
-		b.append(StringUtil.quoteRegexMeta(new String(new char[] { delimiter })));
-		String regex = b.toString();
-		return sql.replaceAll(regex, StringUtil.EMPTY_STRING);
+		return sql.replace(placeholder + delimiter, StringUtil.EMPTY_STRING);
 	}
 
 	/**
