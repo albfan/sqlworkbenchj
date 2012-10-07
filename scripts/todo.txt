@@ -4,6 +4,7 @@ Features:
 - undo tab close
 - open file after "Save Data As"
 - WbClipCopy: Copy result set data to the clipboard
+- Auto-Completion not working for UPDATE ... FROM .. JOIN
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
 - Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
 - DbExplorer panel showing all indexes (will also enable auto completion for DROP INDEX)
