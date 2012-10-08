@@ -32,6 +32,25 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testHaving()
+	{
+		String sql = "select b.id from bar b group by b.groupid having count(*) = (select count(*) from foo f where f.id = b.groupid);";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT b.id\n" +
+			"FROM bar b\n" +
+			"GROUP BY b.groupid \n" +
+			"HAVING count(*) = (\n" +
+			"  select count(*)\n" +
+			"  from foo f \n" +
+			"  where f.id = b.groupid \n" +
+			");";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testGrant()
 	{
 		String sql = "grant insert,select,update on foobar to arthur;";

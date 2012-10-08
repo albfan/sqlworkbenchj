@@ -194,10 +194,11 @@ public class HelpManager
 		File dir = getHtmlManualDir();
 		if (dir == null)
 		{
-			File jardir = WbManager.getInstance().getJarFile().getParentFile();
-			WbFile htmldir = new WbFile(jardir, "manual");
-			String msg = ResourceMgr.getFormattedString("ErrHelpDirNotFound", htmldir.getFullPath());
-			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
+			showOnlineHelp(basefile);
+//			File jardir = WbManager.getInstance().getJarFile().getParentFile();
+//			WbFile htmldir = new WbFile(jardir, "manual");
+//			String msg = ResourceMgr.getFormattedString("ErrHelpDirNotFound", htmldir.getFullPath());
+//			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
 
@@ -209,8 +210,9 @@ public class HelpManager
 
 		if (manual == null || !manual.exists())
 		{
-			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", basefile, dir);
-			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
+			showOnlineHelp(basefile);
+//			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", basefile, dir);
+//			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
 
@@ -226,6 +228,19 @@ public class HelpManager
 		catch (Exception ex)
 		{
 			LogMgr.logError("ShowHelpAction.executeAction", "Error displaying manual", ex);
+		}
+	}
+
+	private static void showOnlineHelp(String basefile)
+	{
+		try
+		{
+			LogMgr.logInfo("HelpManager.showHelpFile", "HTML help not found, opening online help");
+			BrowserLauncher.openURL("http://www.sql-workbench.net/manual/" + (basefile == null ? "" : basefile));
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("HelpManager.showHelpFile", "Could not open online help", ex);
 		}
 	}
 
