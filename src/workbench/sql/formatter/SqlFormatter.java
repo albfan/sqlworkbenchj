@@ -41,10 +41,15 @@ public class SqlFormatter
 	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.caseInsensitiveSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
+	public static final Set<String> HAVING_TERMINAL = CollectionUtil.caseInsensitiveSet(
+		"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
+		"MINUS", "WINDOW", ";");
+
 	// keywords terminating a WHERE clause
 	public static final Set<String> WHERE_TERMINAL = CollectionUtil.caseInsensitiveSet(
-	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
-		"MINUS", "WINDOW", ";");
+		HAVING_TERMINAL, "HAVING");
+
+	// keywords terminating a HAVING clause
 
 	// keywords terminating the FROM part
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
@@ -473,6 +478,60 @@ public class SqlFormatter
 		return true;
 	}
 
+	private SQLToken processHaving(SQLToken last)
+	{
+		SQLToken t = this.lexer.getNextToken(true, false);
+		SQLToken lastToken = last;
+		Set<String> newLines = CollectionUtil.caseInsensitiveSet("AND", "OR");
+		int bracketCount = 0;
+		while (t != null)
+		{
+			String word = t.getContents();
+			if (word.equals("("))
+			{
+				bracketCount ++;
+			}
+
+			if (word.equals(")"))
+			{
+				bracketCount--;
+			}
+
+			if (word.equals("(") && isDbFunction(lastToken))
+			{
+				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
+				this.appendText('(');
+				t = this.processFunctionCall(t);
+				bracketCount = 0;
+			}
+			else if (word.equalsIgnoreCase("SELECT") && "(".equalsIgnoreCase(lastToken.getText()))
+			{
+				t = this.processSubSelect(true, 1, false);
+				if (t == null) return t;
+				continue;
+			}
+			else if (newLines.contains(word) && bracketCount == 0)
+			{
+				this.appendNewline();
+				this.indent(3);
+				this.appendTokenText(t);
+			}
+			else if (HAVING_TERMINAL.contains(t.getText()))
+			{
+				return t;
+			}
+			else
+			{
+				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
+				this.appendTokenText(t);
+			}
+
+			lastToken = t;
+			t = lexer.getNextToken(true, false);
+		}
+		return t;
+	}
+
 	private SQLToken processFrom(SQLToken last)
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
@@ -493,7 +552,8 @@ public class SqlFormatter
 			{
 				return t;
 			}
-			else if (lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
+
+			if (lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
 			{
 				t = this.processSubSelect(true, bracketCount, true);
 				continue;
@@ -1440,6 +1500,14 @@ public class SqlFormatter
 					continue;
 				}
 
+				if (word.equals("HAVING"))
+				{
+					lastToken = t;
+					t = this.processHaving(lastToken);
+					if (t == null) return;
+					continue;
+				}
+
 				if (word.equals("ORDER BY"))
 				{
 					lastToken = t;
@@ -2059,7 +2127,7 @@ public class SqlFormatter
 				name = "#" + t.getContents();
 			}
 		}
-		
+
 		this.appendText(name);
 
 		// the SQLLexer does not handle quoted multi-part identifiers correctly...

@@ -35,19 +35,47 @@ public class SqlFormatterTest
 	public void testHaving()
 	{
 		String sql = "select b.id from bar b group by b.groupid having count(*) = (select count(*) from foo f where f.id = b.groupid);";
-		SqlFormatter f = new SqlFormatter(sql);
+		SqlFormatter f = new SqlFormatter(sql, 10);
+		f.setUseLowerCaseFunctions(true);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT b.id\n" +
 			"FROM bar b\n" +
-			"GROUP BY b.groupid \n" +
-			"HAVING count(*) = (\n" +
-			"  select count(*)\n" +
-			"  from foo f \n" +
-			"  where f.id = b.groupid \n" +
-			");";
+			"GROUP BY b.groupid\n" +
+			"HAVING count(*) = (SELECT count(*)\n" +
+			"                   FROM foo f\n" +
+			"                   WHERE f.id = b.groupid);";
+
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
+
+		sql = "select b.id from bar b group by b.groupid having count(*) = 2";
+		f = new SqlFormatter(sql, 10);
+		f.setUseLowerCaseFunctions(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT b.id\n" +
+			"FROM bar b\n" +
+			"GROUP BY b.groupid\n" +
+			"HAVING count(*) = 2";
+
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+		sql = "select b.id from bar b group by b.groupid having count(distinct id) = 2 and count(foo) = 42";
+		f = new SqlFormatter(sql, 10);
+		f.setUseLowerCaseFunctions(true);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT b.id\n" +
+			"FROM bar b\n" +
+			"GROUP BY b.groupid\n" +
+			"HAVING count(DISTINCT id) = 2\n" +
+			"   AND count(foo) = 42";
+
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
 	}
 
 	@Test
