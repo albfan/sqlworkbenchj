@@ -61,7 +61,7 @@ public class GreaterOrEqualComparator
 		{
 			return false;
 		}
-		
+
 		try
 		{
 			int result = ((Comparable) reference).compareTo(value);
@@ -82,7 +82,7 @@ public class GreaterOrEqualComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof GreaterOrEqualComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

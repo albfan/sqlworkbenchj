@@ -95,6 +95,6 @@ public class NotStartsWithComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof NotStartsWithComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 }

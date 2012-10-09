@@ -93,6 +93,6 @@ public class StringNotEqualsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof StringNotEqualsComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 }

@@ -91,7 +91,7 @@ public class RegExComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof RegExComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public class GreaterThanComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof GreaterThanComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

@@ -80,7 +80,7 @@ public class LessOrEqualComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof LessOrEqualComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

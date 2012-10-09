@@ -100,7 +100,7 @@ public class BooleanEqualsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return other instanceof BooleanEqualsComparator;
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

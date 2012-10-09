@@ -90,7 +90,7 @@ public class DateEqualsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof DateEqualsComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

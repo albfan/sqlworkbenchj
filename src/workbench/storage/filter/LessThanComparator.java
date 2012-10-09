@@ -81,7 +81,7 @@ public class LessThanComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof LessThanComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override

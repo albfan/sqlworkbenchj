@@ -75,6 +75,6 @@ public class IsNotNullComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof IsNotNullComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 }

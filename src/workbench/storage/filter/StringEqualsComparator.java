@@ -95,6 +95,6 @@ public class StringEqualsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return other instanceof StringEqualsComparator;
+		return (other.getClass().equals(this.getClass()));
 	}
 }

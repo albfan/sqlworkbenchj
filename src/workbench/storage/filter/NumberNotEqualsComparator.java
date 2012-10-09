@@ -82,7 +82,7 @@ public class NumberNotEqualsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return other instanceof NumberNotEqualsComparator;
+		return (other.getClass().equals(this.getClass()));
 	}
 
 	@Override
