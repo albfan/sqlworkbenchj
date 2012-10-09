@@ -42,7 +42,8 @@ public class ComparatorListItem
 	{
 		if (other instanceof ComparatorListItem)
 		{
-			return comparator.equals(((ComparatorListItem)other).comparator);
+			ColumnComparator otherComp = ((ComparatorListItem)other).comparator;
+			return this.comparator.equals(otherComp);
 		}
 		return false;
 	}

@@ -17,12 +17,14 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import workbench.storage.ResultInfo;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * An object containing the definition for a table column.
+ * An object containing the definition for a table or resultset column.
+ *
  * @author  Thomas Kellerer
  */
 public class ColumnIdentifier
@@ -52,6 +54,8 @@ public class ColumnIdentifier
 	private String expression;
 
 	private int displaySize = -1;
+
+	/** The position of the column in the table or result set */
 	private int position;
 
 	private int size; // for VARCHAR etc
@@ -142,6 +146,15 @@ public class ColumnIdentifier
 		return sourceTable;
 	}
 
+	/**
+	 * Return the column alias used in the SQL.
+	 *
+	 * This requires the JDBC driver to return different identifiers for the
+	 * column name and the alias if one is used.
+	 *
+	 * @return the column alias if used
+	 * @see ResultInfo#ResultInfo(java.sql.ResultSetMetaData, workbench.db.WbConnection)
+	 */
 	public String getColumnAlias()
 	{
 		return alias;
@@ -173,18 +186,31 @@ public class ColumnIdentifier
 		return alias;
 	}
 
+	/**
+	 * The schema of the column.
+	 *
+	 * @return always null
+	 */
 	@Override
 	public String getSchema()
 	{
 		return null;
 	}
 
+	/**
+	 * The catalog of the column.
+	 *
+	 * @return always null
+	 */
 	@Override
 	public String getCatalog()
 	{
 		return null;
 	}
 
+	/**
+	 * @return always null
+	 */
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
@@ -236,10 +262,12 @@ public class ColumnIdentifier
 
 	/**
 	 *	Define the size for this column (e.g. for VARCHAR columns)
+	 *
+	 * @param colSize  the size of the column
 	 */
-	public void setColumnSize(int aSize)
+	public void setColumnSize(int colSize)
 	{
-		this.size = aSize;
+		this.size = colSize;
 	}
 
 	/**
@@ -269,7 +297,7 @@ public class ColumnIdentifier
 		if (SqlUtil.isIntegerType(type)) return 10;
 		if (SqlUtil.isDecimalType(type, size, digits)) return 15;
 		if (SqlUtil.isCharacterType(type)) return size;
-		if (SqlUtil.isBlobType(type)) return 5;
+		if (SqlUtil.isBlobType(type)) return 5;  // the console will display "(BLOB)"
 
 		if (displaySize < 0) return size;
 		return this.displaySize;
@@ -314,11 +342,21 @@ public class ColumnIdentifier
 		return this.isNullable;
 	}
 
+	/**
+	 * Define the DBMS data type as reported by the JDBC driver.
+	 *
+	 * @param dbType the column's data type
+	 */
 	public void setDbmsType(String dbType)
 	{
 		this.dbmsType = dbType;
 	}
 
+	/**
+	 * Return the DBMS data type as reported by the JDBC driver.
+	 *
+	 * @return the column's data type
+	 */
 	public String getDbmsType()
 	{
 		return this.dbmsType;
@@ -372,10 +410,17 @@ public class ColumnIdentifier
 		return result;
 	}
 
+	/**
+	 * Return the column's name including any quoting if necessary.
+	 *
+	 * @param con the connection to be used, may be null
+	 * @return the column's name, quote approriately
+	 * @see DbMetadata#quoteObjectname(java.lang.String)
+	 */
 	public String getColumnName(WbConnection con)
 	{
-		if (con == null) return getColumnName();
-		return con.getMetadata().quoteObjectname(name);
+		QuoteHandler handler = (con == null ? QuoteHandler.STANDARD_HANDLER : con.getMetadata());
+		return handler.quoteObjectname(name);
 	}
 
 	public String getColumnName()
@@ -494,9 +539,11 @@ public class ColumnIdentifier
 
 	/**
 	 * Sets the position of the column in the table or the ResultSet.
+	 *
 	 * The first column must have 1 as the position.
 	 * 0 indicates that the position is unknown
-	 * @param pos
+	 *
+	 * @param pos the position to use.
 	 */
 	public void setPosition(int pos)
 	{

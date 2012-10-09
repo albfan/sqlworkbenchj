@@ -72,7 +72,6 @@ public class ColumnExpressionPanel
 
 		// pre-fill dropdown to calculate space
 		buildColumnComparatorDropDown(String.class);
-		comparatorDropDown.setModel(activeItems);
 
 		Dimension d = comparatorDropDown.getPreferredSize();
 		comparatorDropDown.setPreferredSize(d);
@@ -366,7 +365,6 @@ public class ColumnExpressionPanel
 			}
 
 			activeItems.setData(l);
-			comparatorDropDown.setSelectedItem(null);
 			comparatorDropDown.setModel(activeItems);
 			if (added > 0)
 			{

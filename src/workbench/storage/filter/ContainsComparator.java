@@ -90,7 +90,7 @@ public class ContainsComparator
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof ContainsComparator);
+		return (other.getClass().equals(this.getClass()));
 	}
 
 }

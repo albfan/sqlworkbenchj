@@ -48,7 +48,7 @@ public class WbOptionPane
 		if (message instanceof String)
 		{
 			// if the message is a HTML formatted string, we cannot count the characters
-			// as the HTML tags will not be displayed.
+			// as the HTML tags will not be displayed and we don't have a way to figure out the real (display) length
 			allowAnyLength = ((String)message).startsWith("<html>");
 		}
 		else
@@ -68,7 +68,7 @@ public class WbOptionPane
 
 		try
 		{
-			// Limit the display of the option pane to 70% of the screen width
+			// Limit the display of the option pane to 75% of the screen width
 			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 			int maxWidth = (int) (screen.width * 0.75);
 

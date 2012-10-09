@@ -768,7 +768,16 @@ public class DataStore
 	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)
 	{
 		DbMetadata meta = conn.getMetadata();
-		return meta.searchTableOnPath(table);
+		TableIdentifier tbl = meta.searchTableOnPath(table);
+		if (tbl == null && table.getSchema() == null)
+		{
+			tbl = meta.getSynonymTable(table);
+			if (tbl != null)
+			{
+				LogMgr.logDebug("DataStore.findTable()", "Using synonym table: " + tbl.getObjectExpression(null));
+			}
+		}
+		return tbl;
 	}
 
 	/**

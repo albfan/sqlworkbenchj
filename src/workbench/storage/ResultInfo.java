@@ -127,6 +127,7 @@ public class ResultInfo
 
 		for (int i=0; i < this.colCount; i++)
 		{
+			// Not all drivers will really return the column label if an alias is used
 			String name = metaData.getColumnName(i + 1);
 			String alias = metaData.getColumnLabel(i + 1);
 
@@ -146,6 +147,7 @@ public class ResultInfo
 
 			if (!name.equals(alias))
 			{
+				// only set the alias if it's different than the name
 				col.setColumnAlias(alias);
 			}
 

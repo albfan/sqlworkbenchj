@@ -42,20 +42,24 @@ public class ListComboBoxModel
 	public void setData(List<? extends Object> l)
 	{
 		this.data = l;
+		this.selectedItem = null;
 		fireContentsChanged(this, -1, -1);
 	}
 
+	@Override
 	public Object getElementAt(int index)
 	{
 		if (data == null) return null;
 		return data.get(index);
 	}
 
+	@Override
 	public Object getSelectedItem()
 	{
 		return selectedItem;
 	}
 
+	@Override
 	public int getSize()
 	{
 		if (data == null) return 0;
@@ -75,14 +79,11 @@ public class ListComboBoxModel
 		return -1;
 	}
 
+	@Override
 	public void setSelectedItem(Object anItem)
 	{
-		this.selectedItem = anItem;
-		if (selectedItem != null && !selectedItem.equals(anItem))
-		{
-			selectedItem = anItem;
-			fireContentsChanged(this, -1, -1);
-		}
+		selectedItem = anItem;
+		fireContentsChanged(this, -1, -1);
 	}
 
 }
