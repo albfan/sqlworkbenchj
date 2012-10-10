@@ -90,7 +90,8 @@ public class WbSysExec
 				String dir = cmdLine.getValue(ARG_WORKING_DIR);
 				if (StringUtil.isNonBlank(dir))
 				{
-					pb.directory(new File(dir));
+					File f = evaluateFileArgument(dir);
+					pb.directory(f);
 				}
 				this.task = pb.start();
 			}
