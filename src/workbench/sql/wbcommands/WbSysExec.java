@@ -83,6 +83,11 @@ public class WbSysExec
 			if (StringUtil.isNonBlank(prg))
 			{
 				List<String> args = new ArrayList<String>();
+				if (prg.startsWith("."))
+				{
+					WbFile f = evaluateFileArgument(prg);
+					prg = f.getFullPath();
+				}
 				args.add(prg);
 				List<String> params = cmdLine.getList(ARG_PRG_ARG);
 				args.addAll(params);
