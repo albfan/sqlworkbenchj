@@ -352,7 +352,7 @@ public class SqlUtil
 				{
 					info.objectName = content + info.objectName;
 				}
-				
+
 				if (info.objectName != null)
 				{
 					info.objectName = removeQuoting(info.objectName);
@@ -1837,14 +1837,17 @@ public class SqlUtil
 		StringBuilder result = new StringBuilder(30);
 		QuoteHandler quoter = (conn != null ? conn.getMetadata() : QuoteHandler.STANDARD_HANDLER);
 
+		boolean supportsCatalogs = (conn != null ? conn.getDbSettings().supportsCatalogs() : true);
+		boolean supportsSchemas = (conn != null ? conn.getDbSettings().supportsSchemas() : true);
+
 		char catalogSeparator = SqlUtil.getCatalogSeparator(conn);
 		char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
-		if (StringUtil.isNonEmpty(object.getCatalog()))
+		if (supportsCatalogs && StringUtil.isNonEmpty(object.getCatalog()))
 		{
 			result.append(quoter.quoteObjectname(object.getCatalog()));
 			result.append(catalogSeparator);
 		}
-		if (StringUtil.isNonEmpty(object.getSchema()))
+		if (supportsSchemas && StringUtil.isNonEmpty(object.getSchema()))
 		{
 			result.append(quoter.quoteObjectname(object.getSchema()));
 			result.append(schemaSeparator);

@@ -2,7 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-10-10">
-    <entry dev-build="4" type="enh">Improved the handling of relative filenames for WbSysExec</entry>
+    <entry dev-build="5" type="enh">The context menu of a SQL Tab now has options to copy the filename to the clipboard</entry>
+    <entry dev-build="5" type="enh">Improved the handling of relative filenames for WbSysExec</entry>
     <entry dev-build="3" type="enh">If a (main) menu contains more items than can fit on the screen, the menu can now be scrolled</entry>
     <entry dev-build="3" type="enh">When choosing a font, the size can now be entered manually to allow any size</entry>
     <entry dev-build="3" type="enh">The source code displayed in the table list of the DbExplorer can now be reformatted.</entry>

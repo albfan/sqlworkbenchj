@@ -37,6 +37,7 @@ public class FileSaveAction extends WbAction
 		this.setEnabled(this.client.hasFileLoaded());
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.saveCurrentFile();

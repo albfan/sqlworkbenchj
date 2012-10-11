@@ -908,7 +908,7 @@ public class SqlPanel
 		}
 	}
 
-	protected boolean isPanelModified(int index)
+	protected boolean isResultModified(int index)
 	{
 		DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 		return panel.isModified();
@@ -1265,7 +1265,7 @@ public class SqlPanel
 	{
 		if (index >= resultTab.getTabCount() - 1) return false;
 
-		boolean isModified = (index == -1 ? isModified() : isPanelModified(index));
+		boolean isModified = (index == -1 ? isDataModified() : isResultModified(index));
 		if (!isModified) return true;
 		String title = getRealTabTitle();
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;

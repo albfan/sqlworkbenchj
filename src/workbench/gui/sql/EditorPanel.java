@@ -820,7 +820,11 @@ public class EditorPanel
 		}
 	}
 
-	public File getCurrentFile() { return this.currentFile; }
+	@Override
+	public File getCurrentFile()
+	{
+		return this.currentFile;
+	}
 
 	public String getCurrentFileEncoding()
 	{
@@ -834,8 +838,15 @@ public class EditorPanel
 		return this.currentFile.getAbsolutePath();
 	}
 
-	public CommentAction getCommentAction() { return this.commentAction; }
-	public UnCommentAction getUnCommentAction() { return this.unCommentAction; }
+	public CommentAction getCommentAction()
+	{
+		return this.commentAction;
+	}
+
+	public UnCommentAction getUnCommentAction()
+	{
+		return this.unCommentAction;
+	}
 
 	/**
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)

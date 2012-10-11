@@ -15,6 +15,7 @@ import javax.swing.JPopupMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.CloseOtherTabsAction;
+import workbench.gui.actions.CopyFileNameAction;
 import workbench.gui.actions.FileDiscardAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
@@ -27,6 +28,7 @@ import workbench.gui.actions.LockPanelAction;
 import workbench.gui.actions.MoveSqlTabLeft;
 import workbench.gui.actions.MoveSqlTabRight;
 import workbench.gui.actions.OpenFileAction;
+import workbench.gui.actions.OpenFileDirAction;
 import workbench.gui.actions.ToggleExtraConnection;
 
 /**
@@ -42,13 +44,13 @@ public class SqlTabPopup
 		this.add(add);
 		InsertTabAction insert = new InsertTabAction(aClient);
 		this.add(insert);
-		
+
 		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
 		newDbExp.removeIcon();
 		add(newDbExp);
 
 		addSeparator();
-		
+
 		RemoveTabAction remove = new RemoveTabAction(aClient);
 		remove.setEnabled(aClient.canCloseTab());
 		this.add(remove);
@@ -57,7 +59,7 @@ public class SqlTabPopup
 
 		CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
 		this.add(closeOthers);
-		
+
 		if (aClient.canRenameTab())
 		{
 			RenameTabAction rename = new RenameTabAction(aClient);
@@ -89,7 +91,7 @@ public class SqlTabPopup
 
 		this.addSeparator();
 		this.add(new OpenFileAction(aClient));
-		
+
 		if (panel instanceof SqlPanel)
 		{
 			SqlPanel spanel = (SqlPanel)panel;
@@ -98,11 +100,18 @@ public class SqlTabPopup
 
 			this.add(editor.getFileSaveAction());
 			this.add(editor.getFileSaveAsAction());
-			this.add(editor.getReloadAction());
-			FileDiscardAction discard = new FileDiscardAction(spanel);
-			discard.removeIcon();
-			this.add(discard);
-			remove.setEnabled(aClient.canCloseTab());
+
+			if (editor.hasFileLoaded())
+			{
+				this.add(editor.getReloadAction());
+				FileDiscardAction discard = new FileDiscardAction(spanel);
+				discard.removeIcon();
+				this.add(discard);
+				this.addSeparator();
+				this.add(new CopyFileNameAction(editor, true));
+				this.add(new CopyFileNameAction(editor, false));
+				this.add(new OpenFileDirAction(editor));
+			}
 		}
 	}
 
