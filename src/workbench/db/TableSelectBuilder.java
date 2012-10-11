@@ -69,6 +69,28 @@ public class TableSelectBuilder
 		this.useColumnAlias = flag;
 	}
 
+	public String getSelectForCount(TableIdentifier table)
+	{
+		if (table == null)
+		{
+			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not table supplied!");
+			return null;
+		}
+		String select = replacePlaceholders(table, "count(*)");
+		return select;
+	}
+
+	/**
+	 * Returns a SELECT statement that selects all columns from the table.
+	 *
+	 * The table columns will be retrieved to build the SELECT statement.
+	 *
+	 * @param table   the table for which the SELECT should be created
+	 * @return a SQL to retrieve all columns and rows from the table
+	 *
+	 * @throws SQLException
+	 * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
+	 */
 	public String getSelectForTable(TableIdentifier table)
 		throws SQLException
 	{
@@ -85,6 +107,17 @@ public class TableSelectBuilder
 		return getSelectForColumns(def.getTable(), def.getColumns());
 	}
 
+	/**
+	 * Create a SELECT statement that contains all columns of the table.
+	 *
+	 * If replacements for certain datatypes are configured, an expression to convert the column
+	 * will be used instead of the column directly. The expression will be given the column name as an alias.
+	 *
+	 * @param table    the table to retrieve
+	 * @param columns  the columns to use
+	 * @return a SELECT for all rows in the table
+	 * @see #getColumnExpression(workbench.db.ColumnIdentifier) 
+	 */
 	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		if (table == null)
@@ -97,7 +130,7 @@ public class TableSelectBuilder
 
 		if (columns.isEmpty())
 		{
-			String tbl = table.getTableExpression(this.dbConnection);
+			String tbl = SqlUtil.fullyQualifiedName(dbConnection, table);
 			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "No columns available for table " + tbl  + ". Using \"SELECT *\" instead");
 			selectCols.append("*");
 		}
@@ -134,7 +167,13 @@ public class TableSelectBuilder
 			}
 		}
 
+		String select = replacePlaceholders(table, selectCols);
 
+		return select;
+	}
+
+	private String replacePlaceholders(TableIdentifier table, CharSequence selectCols)
+	{
 		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
 
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);

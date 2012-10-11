@@ -163,6 +163,12 @@ public class TableSelectBuilderTest
 			"       LASTNAME\n" +
 			"FROM PERSON";
 		assertEquals(expected, sql);
+
+		sql = builder.getSelectForCount(tbl);
+		expected = "SELECT count(*)\n" +
+			"FROM PERSON";
+		assertEquals(expected, sql);
+
 	}
 
 	@Test

@@ -568,10 +568,9 @@ public class TableDataPanel
 	private String buildSqlForRowCount()
 	{
 		if (this.table == null) return null;
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("SELECT COUNT(*) FROM ");
-		sql.append(this.table.getTableExpression(this.dbConnection));
-		return sql.toString();
+		TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
+		String sql = builder.getSelectForCount(table);
+		return sql;
 	}
 
 	private String buildSqlForTable(TableDefinition tableDef)
