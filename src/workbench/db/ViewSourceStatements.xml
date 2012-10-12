@@ -3,6 +3,25 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>NuoDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select 'create view '||case when coalesce(schema,'') = '' then '' else schema||'.'end||tablename||viewdefinition as view_source
+from system.tables
+where type = 'VIEW'
+    </string>
+    </void>
+    <void property="objectNameField">
+     <string>tablename</string>
+    </void>
+    <void property="schemaField">
+     <string>schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>H2</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

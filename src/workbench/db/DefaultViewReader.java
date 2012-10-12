@@ -109,7 +109,7 @@ public class DefaultViewReader
 				result.append("DROP ");
 				result.append(type);
 				result.append(' ');
-				result.append(viewTable.getTableName());
+				result.append(viewTable.getTableExpression(connection));
 				result.append(';');
 				result.append(lineEnding);
 				result.append(lineEnding);

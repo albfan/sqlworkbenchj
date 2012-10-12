@@ -74,6 +74,21 @@
 	</void>
 
   <void method="put">
+   <string>NuoDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT PROCEDURETEXT FROM system.procedures</string>
+    </void>
+    <void property="objectNameField">
+     <string>procedurename</string>
+    </void>
+    <void property="schemaField">
+     <string>schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>Oracle</string>
    <object id="ora_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

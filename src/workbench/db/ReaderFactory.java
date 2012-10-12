@@ -34,6 +34,7 @@ import workbench.db.mssql.SqlServerSequenceReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLIndexReader;
 import workbench.db.mysql.MySqlProcedureReader;
+import workbench.db.nuodb.NuoDBSequenceReader;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleProcedureReader;
@@ -131,6 +132,10 @@ public class ReaderFactory
 		if (con.getDbId().equals("ingres"))
 		{
 			return new IngresSequenceReader(con);
+		}
+		if (con.getDbId().equals("nuodb"))
+		{
+			return new NuoDBSequenceReader(con);
 		}
 		return null;
 	}

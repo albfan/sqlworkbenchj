@@ -52,6 +52,8 @@ import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
+import workbench.db.nuodb.NuoDBDomainReader;
+import workbench.db.nuodb.NuoDbColumnEnhancer;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleTypeReader;
@@ -298,6 +300,11 @@ public class DbMetadata
 				extenders.add(new DerbyTypeReader());
 			}
 			columnEnhancer = new DerbyColumnEnhancer();
+		}
+		else if (productLower.equals("nuodb"))
+		{
+			extenders.add(new NuoDBDomainReader());
+			columnEnhancer = new NuoDbColumnEnhancer();
 		}
 		else if (productLower.indexOf("sqlite") > -1)
 		{
