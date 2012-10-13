@@ -87,6 +87,7 @@ public abstract class AbstractConstraintReader
 	{
 		String sql = this.getColumnConstraintSql();
 		if (sql == null) return Collections.emptyMap();
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo(getClass().getName() + ".getColumnConstraints()", "Using SQL: " + sql);
@@ -96,8 +97,14 @@ public abstract class AbstractConstraintReader
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
+		Savepoint sp = null;
+
 		try
 		{
+			if (dbConnection.getDbSettings().useSavePointForDML())
+			{
+				sp = dbConnection.setSavepoint();
+			}
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			int index = this.getIndexForSchemaParameter();
 			if (index > 0) stmt.setString(index, aTable.getSchema());
@@ -118,10 +125,12 @@ public abstract class AbstractConstraintReader
 					result.put(column.trim(), constraint.trim());
 				}
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints", e);
+			dbConnection.rollback(sp);
+			LogMgr.logError(getClass().getName() + ".getColumnConstraints()", "Error when reading column constraints", e);
 		}
 		finally
 		{
@@ -133,13 +142,12 @@ public abstract class AbstractConstraintReader
 	@Override
 	public String getConstraintSource(List<TableConstraint> constraints, String indent)
 	{
-		if (constraints == null) return null;
-		StringBuilder result = new StringBuilder();
+		if (CollectionUtil.isEmpty(constraints)) return StringUtil.EMPTY_STRING;
+		StringBuilder result = new StringBuilder(constraints.size() * 10);
 
 		int count = 0;
-		for (int i=0; i < constraints.size(); i++)
+		for (TableConstraint cons : constraints)
 		{
-			TableConstraint cons = constraints.get(i);
 			if (cons == null) continue;
 			if (StringUtil.isBlank(cons.getExpression())) continue;
 			if (count > 0)
@@ -155,8 +163,12 @@ public abstract class AbstractConstraintReader
 	}
 
 	/**
-	 * Returns the SQL Statement that should be appended to a CREATE table
-	 * in order to create the constraints defined on the table
+	 * Returns the table level constraints for the table
+	 *
+	 * @param dbConnection  the connection to use
+	 * @param aTable        the table to check
+	 *
+	 * @return a list of table constraints or an empty list if nothing was found
 	 */
 	@Override
 	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
@@ -235,7 +247,7 @@ public abstract class AbstractConstraintReader
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("AbstractConstraintReader", "Error when reading table constraints " + ExceptionUtil.getDisplay(e), null);
+			LogMgr.logError(getClass().getName() + ".getTableConstraints()", "Error when reading table constraints " + ExceptionUtil.getDisplay(e), null);
 		}
 		finally
 		{

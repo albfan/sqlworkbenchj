@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import workbench.db.oracle.OracleErrorInformationReader;
+
 /**
  * An interface for reading extended error information from the database.
  *
@@ -21,6 +23,7 @@ package workbench.db;
  * after a CREATE PROCEDURE or similar statement.
  *
  * @author Thomas Kellerer
+ * @see OracleErrorInformationReader
  */
 public interface ErrorInformationReader
 {

@@ -21,6 +21,7 @@ import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
 import static org.junit.Assert.*;
+import workbench.db.TableIdentifier;
 
 /**
  *
@@ -29,7 +30,7 @@ import static org.junit.Assert.*;
 public class OracleObjectCompilerTest
 	extends WbTestCase
 {
-	private static final String TEST_ID = "orametadata";
+	private static final String TEST_ID = "oracompiler";
 
 	public OracleObjectCompilerTest()
 	{
@@ -62,7 +63,7 @@ public class OracleObjectCompilerTest
 			"END emp_mgmt; \n" +
 			"/";
 		TestUtil.executeScript(con, declaration, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
-		
+
 		String body =
 			"CREATE OR REPLACE PACKAGE BODY emp_mgmt AS  \n" +
 			" \n" +
@@ -88,6 +89,12 @@ public class OracleObjectCompilerTest
 			"END emp_mgmt; \n" +
 			"/";
 		TestUtil.executeScript(con, body, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		sql =
+			"create table person (id integer primary key, first_name varchar(100), last_name varchar(100), check (id > 0));\n" +
+			"create view v_person (id, full_name) as select id, first_name || ' ' || last_name from person;\n" +
+			"create materialized view mv_person as select * from person;";
+		TestUtil.executeScript(con, sql);
 	}
 
 	@AfterClass
@@ -122,5 +129,23 @@ public class OracleObjectCompilerTest
 		sql = compiler.createCompileStatement(pkgFunc);
 		msg = compiler.compileObject(pkgFunc);
 		assertNull(msg);
+	}
+
+	@Test
+	public void testCompileView()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		OracleObjectCompiler compiler = new OracleObjectCompiler(con);
+		TableIdentifier tbl = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
+		assertTrue(OracleObjectCompiler.canCompile(tbl));
+		String error = compiler.compileObject(tbl);
+		assertNull(error);
+
+		TableIdentifier mv = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
+		assertTrue(OracleObjectCompiler.canCompile(mv));
+		error = compiler.compileObject(mv);
+		assertNull(error);
 	}
 }

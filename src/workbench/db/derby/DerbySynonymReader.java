@@ -37,7 +37,7 @@ public class DerbySynonymReader
 	}
 
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
 		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
@@ -88,7 +88,7 @@ public class DerbySynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		String sql = "select a.aliasinfo \n" +
@@ -134,14 +134,14 @@ public class DerbySynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
-		result.append(aSynonym);
+		result.append(synonym);
 		result.append(nl);
 		result.append("   FOR ");
 		result.append(id.getTableExpression());

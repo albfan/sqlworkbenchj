@@ -16,7 +16,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to re-create the SQL for a Synonym
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SynonymDDLHandler
@@ -40,7 +40,7 @@ public class SynonymDDLHandler
 		tbl.adjustCase(dbConnection);
 		try
 		{
-			String source = reader.getSynonymSource(dbConnection, tbl.getSchema(), tbl.getTableName());
+			String source = reader.getSynonymSource(dbConnection, tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 			result.append(source);
 		}
 		catch (Exception e)
@@ -66,7 +66,7 @@ public class SynonymDDLHandler
 		{
 			try
 			{
-				TableIdentifier syn = dbConnection.getMetadata().getSynonymTable(tbl.getSchema(), tbl.getTableName());
+				TableIdentifier syn = dbConnection.getMetadata().getSynonymTable(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 				if (syn != null)
 				{
 					TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);

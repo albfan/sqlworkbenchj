@@ -146,24 +146,6 @@ public class OracleMetadataTest
 	}
 
 	@Test
-	public void testObjectCompiler()
-		throws Exception
-	{
-		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
-		OracleObjectCompiler compiler = new OracleObjectCompiler(con);
-		TableIdentifier tbl = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
-		assertTrue(OracleObjectCompiler.canCompile(tbl));
-		String error = compiler.compileObject(tbl);
-		assertNull(error);
-
-		TableIdentifier mv = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
-		assertTrue(OracleObjectCompiler.canCompile(mv));
-		error = compiler.compileObject(mv);
-		assertNull(error);
-	}
-
-	@Test
 	public void testRowIDConverter()
 		throws Exception
 	{

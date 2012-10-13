@@ -39,14 +39,14 @@ public class InformixSynonymReader
 	 * @return an empty list
 	 */
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
 		return Collections.emptyList();
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String schema, String synonymName)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
 		String sql =
@@ -92,14 +92,15 @@ public class InformixSynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String synonymSchema, String synonymName)
+	public String getSynonymSource(WbConnection con, String catalog, String synonymSchema, String synonymName)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, synonymSchema, synonymName);
+		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
-		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
+		TableIdentifier syn = new TableIdentifier(catalog, synonymSchema, synonymName);
+		result.append(syn.getTableExpression(con));
 		result.append(nl).append("   FOR ");
 		result.append(id.getTableExpression(con));
 		result.append(';');

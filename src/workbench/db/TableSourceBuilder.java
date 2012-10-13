@@ -30,12 +30,13 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * Re-Create the source SQL for a given TableIdentifier.
+ * Re-create the source SQL for a given TableIdentifier.
  *
  * This class should not be instantiated directly. Use
  * TableSourceBuilderFactory.getBuilder() instead
  *
  * @author Thomas Kellerer
+ * @see TableSourceBuilderFactory#getBuilder(workbench.db.WbConnection)
  */
 public class TableSourceBuilder
 {
@@ -43,8 +44,9 @@ public class TableSourceBuilder
 	private ConstraintNameTester nameTester;
 
 	/**
-	 * This class should not be instantiated directly. Use
-   * TableSourceBuilderFactory.getBuilder() instead.
+	 * This class should not be instantiated directly.
+	 *
+	 * Use TableSourceBuilderFactory.getBuilder() instead.
 	 *
 	 * @param con the connection to be used
 	 * @see TableSourceBuilderFactory#getBuilder(workbench.db.WbConnection)
@@ -214,7 +216,8 @@ public class TableSourceBuilder
 		StringBuilder result = new StringBuilder(250);
 		DbMetadata meta = dbConnection.getMetadata();
 
-		Map<String, String> columnConstraints = meta.getColumnConstraints(table);
+		ConstraintReader consReader = ReaderFactory.getConstraintReader(meta);
+		Map<String, String> columnConstraints = consReader.getColumnConstraints(dbConnection, table);
 
 		readTableConfigOptions(table);
 
@@ -223,8 +226,9 @@ public class TableSourceBuilder
 
 		appendColumnDefinitions(result, columns, meta, columnConstraints);
 
-		String cons = meta.getTableConstraintSource(table, "   ");
-		if (StringUtil.isNonBlank(cons))
+		List<TableConstraint> constraints = consReader.getTableConstraints(dbConnection, table);
+		String cons = consReader.getConstraintSource(constraints, "   ");
+		if (StringUtil.isNonEmpty(cons))
 		{
 			result.append("\n   ,");
 			result.append(cons);

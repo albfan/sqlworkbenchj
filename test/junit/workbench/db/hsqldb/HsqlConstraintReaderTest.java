@@ -22,6 +22,7 @@ import workbench.db.ConstraintReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.ReaderFactory;
 
 /**
  *
@@ -56,7 +57,7 @@ public class HsqlConstraintReaderTest
 		TestUtil util = getTestUtil();
 		WbConnection conn = util.getHSQLConnection("constraintreader");
 		TestUtil.executeScript(conn, "create table cons_test (id integer, nr integer, constraint min_value check (id > 42), check (nr < 100));");
-		ConstraintReader reader = conn.getMetadata().getConstraintReader();
+		ConstraintReader reader = ReaderFactory.getConstraintReader(conn.getMetadata());
 		assertTrue(reader instanceof HsqlConstraintReader);
 		HsqlConstraintReader hsqlReader = (HsqlConstraintReader)reader;
 		TableIdentifier tbl = new TableIdentifier("CONS_TEST");

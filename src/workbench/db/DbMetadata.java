@@ -16,7 +16,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -56,6 +54,7 @@ import workbench.db.nuodb.NuoDBDomainReader;
 import workbench.db.nuodb.NuoDbColumnEnhancer;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresColumnEnhancer;
@@ -103,16 +102,12 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
-	private OracleMetadata oracleMetaData;
-
 	private ColumnDefinitionEnhancer columnEnhancer;
 	private ObjectListEnhancer objectListEnhancer;
 	private TableDefinitionReader definitionReader;
-	private ConstraintReader constraintReader;
 	private DataTypeResolver dataTypeResolver;
 	private SequenceReader sequenceReader;
 	private ProcedureReader procedureReader;
-	private ErrorInformationReader errorInfoReader;
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
 	private List<ObjectListExtender> extenders = new ArrayList<ObjectListExtender>();
@@ -208,12 +203,12 @@ public class DbMetadata
 		else if (productLower.indexOf("oracle") > -1)
 		{
 			isOracle = true;
-			oracleMetaData = new OracleMetadata(this.dbConnection);
-			errorInfoReader = oracleMetaData;
-			dataTypeResolver = oracleMetaData;
-			definitionReader = oracleMetaData;
+			OracleMetadata oraMeta = new OracleMetadata(this.dbConnection);
+			dataTypeResolver = oraMeta;
+			definitionReader = oraMeta;
 			extenders.add(new OracleTypeReader());
 			viewReader = new OracleViewReader(this.dbConnection);
+			objectListEnhancer = new OracleObjectListEnhancer(); // to cleanup MVIEW type information
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -378,18 +373,17 @@ public class DbMetadata
 			while (itr.hasNext())
 			{
 				String type = itr.next().toLowerCase();
-				// we don't want views or system tables in this list because it should
-				// only contain real uset table
-				if (type.contains("view") || type.contains("system"))
+				// we don't want views in this list
+				if (type.contains("view"))
 				{
 					itr.remove();
 				}
 			}
-			LogMgr.logDebug("DbMetadata.<init>", "Using tabletypes returned by the JDBC driver: " + ttypes);
+			LogMgr.logDebug("DbMetadata.<init>", "Using table types returned by the JDBC driver: " + ttypes);
 		}
 		else
 		{
-			LogMgr.logInfo("DbMetadata.<init>", "Using configured tabletypes: " + ttypes);
+			LogMgr.logInfo("DbMetadata.<init>", "Using configured table types: " + ttypes);
 		}
 
 		tableTypesList = CollectionUtil.caseInsensitiveSet();
@@ -410,7 +404,7 @@ public class DbMetadata
 			while (itr.hasNext())
 			{
 				String s = itr.next();
-				if (s.toUpperCase().indexOf("SYSTEM") > -1)
+				if (s.toUpperCase().contains("SYSTEM"))
 				{
 					itr.remove();
 				}
@@ -612,24 +606,28 @@ public class DbMetadata
 	public final Set<String> getObjectsWithData()
 	{
 		Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
-		objectsWithData.addAll(getTableTypes());
+		objectsWithData.addAll(retrieveTableTypes());
+
 		String keyPrefix = "workbench.db.objecttype.selectable.";
 		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
 		String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);
 
-		if (types == null)
+		if (types != null)
 		{
+			List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
+			objectsWithData.addAll(l);
+		}
+
+		if (objectsWithData.isEmpty())
+		{
+			// make sure we have at some basic information in here
 			objectsWithData.add("table");
 			objectsWithData.add("view");
 			objectsWithData.add("synonym");
 			objectsWithData.add("system view");
 			objectsWithData.add("system table");
 		}
-		else
-		{
-			List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
-			objectsWithData.addAll(l);
-		}
+
 		return objectsWithData;
 	}
 
@@ -913,10 +911,13 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns the type of the passed TableIdentifier. This could
-	 * be VIEW, TABLE, SYNONYM, ...
+	 * Returns the type of the passed TableIdentifier.
+	 * <br/>
+	 * This could be VIEW, TABLE, SYNONYM, ...
+	 * <br/>
 	 * If the JDBC driver does not return the object through the getObjects()
 	 * method, null is returned, otherwise the value reported in TABLE_TYPE
+	 * <br/>
 	 * If there is more than object with the same name but different types
 	 * (is there a DB that supports that???) than the type of the first object found
    * will be returned.
@@ -1295,17 +1296,10 @@ public class DbMetadata
 		DataStore result = new DataStore(cols, coltypes, sizes);
 
 		boolean sequencesReturned = false;
-		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
 		boolean synRetrieved = false;
-		boolean synonymsRequested = typeIncluded("SYNONYM", types);
+		boolean synonymsRequested = typeIncluded(SynonymReader.SYN_TYPE_NAME, types);
 
 		ObjectListFilter filter = new ObjectListFilter(getDbId());
-
-		Set<String> snapshotList = Collections.emptySet();
-		if (checkOracleSnapshots)
-		{
-			snapshotList = oracleMetaData.getSnapshots(schemaPattern);
-		}
 
 		// When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
 		// materialized views twice, so we need to get rid of them.
@@ -1370,25 +1364,11 @@ public class DbMetadata
 
 				if (isIndexType(ttype)) continue;
 
-				String fqName = null;
-				if (detectDuplicates || checkOracleSnapshots)
-				{
-					// As this name is only used to workaround Oracle problems, schema and table name are enough
-					// for a fully qualified name.
-					StringBuilder t = new StringBuilder(schema.length() + name.length() + 1);
-					t.append(schema);
-					t.append('.');
-					t.append(name);
-					fqName = t.toString();
-				}
-
-				if (checkOracleSnapshots && !ttype.equals(MVIEW_NAME) && snapshotList.contains(fqName))
-				{
-					ttype = MVIEW_NAME;
-				}
-
 				if (detectDuplicates)
 				{
+					// As this name is only used to workaround an Oracle problem,
+					// schema and table name are enough for a fully qualified name
+					String fqName = schema + "." + name;
 					if (processed.contains(fqName)) continue;
 					processed.add(fqName);
 				}
@@ -1409,6 +1389,8 @@ public class DbMetadata
 
 		boolean sortNeeded = false;
 
+		// Synonym and Sequence retrieval is handled differently to "regular" ObjectListExtenders
+		// because some JDBC driver versions do retrieve this information automatically some don't
 		SequenceReader seqReader = this.getSequenceReader();
 		if (seqReader != null && typeIncluded(seqReader.getSequenceTypeName(), types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
@@ -1426,14 +1408,14 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, sequence.getComment());
 				result.getRow(row).setUserObject(sequence);
 			}
-			sortNeeded = true;
+			sortNeeded = sequences.size() > 0;
 		}
 
 		SynonymReader synReader = this.getSynonymReader();
 		boolean retrieveSyns = (synReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
-			List<TableIdentifier> syns = synReader.getSynonymList(dbConnection, schemaPattern, namePattern);
+			List<TableIdentifier> syns = synReader.getSynonymList(dbConnection, catalogPattern, schemaPattern, namePattern);
 			for (TableIdentifier synonym : syns)
 			{
 				int row = result.addRow();
@@ -1444,7 +1426,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, synonym.getSchema());
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, synonym.getComment());
 			}
-			sortNeeded = true;
+			sortNeeded = syns.size() > 0;
 		}
 
 		for (ObjectListExtender extender : extenders)
@@ -1939,7 +1921,6 @@ public class DbMetadata
 	 */
 	public void close()
 	{
-		if (this.oracleMetaData != null) this.oracleMetaData.done();
 		if  (this.dbConnection != null && !this.dbConnection.isBusy())
 		{
 			if (this.oraOutput != null) 	this.oraOutput.close();
@@ -2106,7 +2087,7 @@ public class DbMetadata
 
 		if (dbConnection.getDbSettings().isSynonymType(table.getType()))
 		{
-			TableIdentifier id = getSynonymTable(schema, tablename);
+			TableIdentifier id = getSynonymTable(catalog, schema, tablename);
 			if (id != null)
 			{
 				schema = id.getSchema();
@@ -2320,7 +2301,7 @@ public class DbMetadata
 	 * <br/>
 	 * The list of catalogs will not be filtered.
 	 */
-	public List<String> getCatalogInformation()
+	public List<String> getCatalogs()
 	{
 		return getCatalogInformation(null);
 	}
@@ -2480,7 +2461,8 @@ public class DbMetadata
 	}
 
 	/**
-	 * Return a list of types that identify tables in the target database.
+	 * Return a list of types available in the database.
+	 *
 	 * e.g. TABLE, SYSTEM TABLE, ...
 	 */
 	public Collection<String> getObjectTypes()
@@ -2560,7 +2542,7 @@ public class DbMetadata
 	{
 		TableIdentifier tbl = synonym.createCopy();
 		tbl.adjustCase(this.dbConnection);
-		return getSynonymTable(tbl.getSchema(), tbl.getTableName());
+		return getSynonymTable(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 	}
 
 	/**
@@ -2573,14 +2555,14 @@ public class DbMetadata
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
 	 * @see #getSynonymTable(String, String)
 	 */
-	public TableIdentifier getSynonymTable(String schema, String synonym)
+	public TableIdentifier getSynonymTable(String catalog, String schema, String synonym)
 	{
 		SynonymReader reader = getSynonymReader();
 		if (reader == null) return null;
 		TableIdentifier id = null;
 		try
 		{
-			id = reader.getSynonymTable(this.dbConnection, schema, synonym);
+			id = reader.getSynonymTable(this.dbConnection, catalog, schema, synonym);
 			if (id != null && id.getType() == null)
 			{
 				String type = getObjectType(id);
@@ -2598,131 +2580,4 @@ public class DbMetadata
 	{
 		return SynonymReader.Factory.getSynonymReader(dbConnection);
 	}
-
-	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, boolean includeDrop)
-	{
-		StringBuilder result = new StringBuilder(250);
-
-		try
-		{
-			TableDefinition def = new TableDefinition(table, columns);
-			result.append(getViewReader().getExtendedViewSource(def, includeDrop, false));
-		}
-		catch (SQLException e)
-		{
-			result.append(ExceptionUtil.getDisplay(e));
-		}
-		result.append("\n\n");
-
-		StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList);
-
-		if (indexSource != null) result.append(indexSource);
-		if (this.dbSettings.ddlNeedsCommit())
-		{
-			result.append('\n');
-			result.append("COMMIT;");
-			result.append('\n');
-		}
-		return result.toString();
-	}
-
-	public ConstraintReader getConstraintReader()
-	{
-		synchronized (readerLock)
-		{
-			if (constraintReader == null)
-			{
-				constraintReader = ReaderFactory.getConstraintReader(this);
-			}
-			return constraintReader;
-		}
-	}
-
-	/**
-	 * Return constraints defined for each column in the given table.
-	 * @param table The table to check
-	 * @return A Map with columns and their constraints. The keys to the Map are column names
-	 * The value is the SQL source for the column. The actual retrieval is delegated to a {@link ConstraintReader}
-	 * @see ConstraintReader#getColumnConstraints(java.sql.Connection, TableIdentifier)
-	 */
-	public Map<String, String> getColumnConstraints(TableIdentifier table)
-	{
-		Map<String, String> columnConstraints = Collections.emptyMap();
-		ConstraintReader reader = this.getConstraintReader();
-		if (reader == null) return columnConstraints;
-
-		Savepoint sp = null;
-		try
-		{
-			if (dbSettings.useSavePointForDML())
-			{
-				sp = this.dbConnection.setSavepoint();
-			}
-			columnConstraints = reader.getColumnConstraints(this.dbConnection, table);
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
-			dbConnection.rollback(sp);
-			columnConstraints = Collections.emptyMap();
-		}
-
-		return columnConstraints;
-	}
-
-	/**
-	 * Return the SQL source for check constraints defined for the table. This is
-	 * delegated to a {@link ConstraintReader}
-	 * @return A String with the table constraints. If no constrains exist, a null String is returned
-	 * @param tbl The table to check
-	 * @param indent A String defining the indention for the source code
-	 */
-	public String getTableConstraintSource(TableIdentifier tbl, String indent)
-	{
-		List<TableConstraint> cons = getTableConstraints(tbl);
-		return getTableConstraintSource(cons, indent);
-	}
-
-	public String getTableConstraintSource(List<TableConstraint> cons, String indent)
-	{
-		ConstraintReader reader = this.getConstraintReader();
-		if (reader == null) return null;
-
-		return reader.getConstraintSource(cons, indent);
-	}
-
-
-	/**
-	 * Return the SQL source for check constraints defined for the table. This is
-	 * delegated to a {@link ConstraintReader}
-	 * @return A String with the table constraints. If no constrains exist, a null String is returned
-	 * @param tbl The table to check
-	 */
-	public List<TableConstraint> getTableConstraints(TableIdentifier tbl)
-	{
-		ConstraintReader reader = this.getConstraintReader();
-		if (reader == null) return null;
-
-		List<TableConstraint> result = reader.getTableConstraints(dbConnection, tbl);
-		return result;
-	}
-
-	public ErrorInformationReader getErrorInformationReader()
-	{
-		return this.errorInfoReader;
-	}
-
-	/**
-	 * Returns the errors available for the given object and type. This call
-	 * is delegated to the available {@link ErrorInformationReader}
-	 * @return extended error information if the current DBMS is Oracle. An empty string otherwise.
-	 * @see ErrorInformationReader
-	 */
-	public String getExtendedErrorInfo(String schema, String objectName, String objectType, boolean formatMessage)
-	{
-		if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
-		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType, formatMessage);
-	}
-
 }

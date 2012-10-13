@@ -39,14 +39,14 @@ public class Db2SynonymReader
 	 * @return an empty list
 	 */
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
 		return Collections.emptyList();
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(200);
@@ -78,8 +78,8 @@ public class Db2SynonymReader
 		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
-		stmt.setString(1, aSynonym);
-		stmt.setString(2, anOwner);
+		stmt.setString(1, namePattern);
+		stmt.setString(2, schemaPattern);
 
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
@@ -106,10 +106,10 @@ public class Db2SynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String synonymSchema, String synonymName)
+	public String getSynonymSource(WbConnection con, String catalog, String synonymSchema, String synonymName)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, synonymSchema, synonymName);
+		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE ALIAS ");

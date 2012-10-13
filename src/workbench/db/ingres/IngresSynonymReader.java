@@ -38,7 +38,7 @@ public class IngresSynonymReader
 	 * 	Get a list of synonyms for the given owner
 	 */
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection conn, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection conn, String catalog, String owner, String namePattern)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -80,7 +80,7 @@ public class IngresSynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(200);
@@ -116,15 +116,16 @@ public class IngresSynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
 		StringBuilder result = new StringBuilder(200);
 		result.append("CREATE SYNONYM ");
-		result.append(aSynonym);
+		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
+		result.append(syn.getTableExpression(con));
 		result.append("\n   FOR ");
-		result.append(id.getTableExpression());
+		result.append(id.getTableExpression(con));
 		result.append(";\n");
 		return result.toString();
 	}

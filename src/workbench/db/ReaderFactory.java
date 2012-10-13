@@ -36,6 +36,7 @@ import workbench.db.mysql.MySQLIndexReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.nuodb.NuoDBSequenceReader;
 import workbench.db.oracle.OracleConstraintReader;
+import workbench.db.oracle.OracleErrorInformationReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleSequenceReader;
@@ -207,6 +208,16 @@ public class ReaderFactory
 		if (dbid.startsWith("firstsql"))
 		{
 			return new FirstSqlConstraintReader();
+		}
+		return ConstraintReader.NULL_READER;
+	}
+
+	public static ErrorInformationReader getErrorInformationReader(WbConnection conn)
+	{
+		if (conn == null) return null;
+		if (conn.getMetadata().isOracle())
+		{
+			return new OracleErrorInformationReader(conn);
 		}
 		return null;
 	}

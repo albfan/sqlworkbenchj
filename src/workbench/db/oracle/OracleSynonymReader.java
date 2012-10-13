@@ -32,7 +32,7 @@ public class OracleSynonymReader
 {
 
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
 		// Nothing to do. The Oracle driver already returns the SYNONYMs in the getTables() call
@@ -40,7 +40,7 @@ public class OracleSynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(400);
@@ -85,14 +85,14 @@ public class OracleSynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		TableIdentifier id = getSynonymTable(con, catalog, owner, synonym);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
-		result.append(aSynonym);
+		result.append(synonym);
 		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');

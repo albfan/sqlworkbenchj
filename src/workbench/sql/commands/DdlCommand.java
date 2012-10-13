@@ -11,22 +11,25 @@
  */
 package workbench.sql.commands;
 
+
 import java.sql.SQLException;
 import java.sql.Savepoint;
+
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
+
+import workbench.db.ErrorInformationReader;
+import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
@@ -76,8 +79,7 @@ public class DdlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
-		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();
+		boolean useSavepoint = currentConnection.getDbSettings().useSavePointForDDL() && !this.currentConnection.getAutoCommit();
 
 		if (useSavepoint && !this.currentConnection.supportsSavepoints())
 		{
@@ -224,30 +226,25 @@ public class DdlCommand
 	/**
 	 * Retrieve extended error information if the DBMS supports this.
 	 *
-	 * Currently this is only implemented for Oracle to read errors
-	 * after creating a stored procedure from the ALL_ERRORS view.
+	 * @return true if an error was added, false otherwise
 	 *
-	 * @see DbMetadata#getExtendedErrorInfo(String, String, String)
+	 * @see ErrorInformationReader#getErrorInfo(String, String, String)
+	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
 	 */
 	private boolean addExtendErrorInfo(WbConnection aConnection, SqlUtil.DdlObjectInfo info , StatementRunnerResult result)
 	{
 		if (info == null) return false;
 		if (aConnection == null) return false;
 
-		DbMetadata meta = aConnection.getMetadata();
-		if (meta == null) return false;
+		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(aConnection);
+		if (reader == null) return false;
 
-		String msg = meta.getExtendedErrorInfo(null, info.objectName, info.objectType, true);
-		if (msg != null && msg.length() > 0)
-		{
-			result.addMessageNewLine();
-			result.addMessage(msg);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		String error = reader.getErrorInfo(null, info.objectName, info.objectType, true);
+		if (StringUtil.isEmptyString(error)) return false;
+
+		result.addMessageNewLine();
+		result.addMessage(error);
+		return true;
 	}
 
 	@Override

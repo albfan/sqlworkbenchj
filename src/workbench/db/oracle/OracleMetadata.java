@@ -11,34 +11,31 @@
  */
 package workbench.db.oracle;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import workbench.db.JdbcTableDefinitionReader;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
-import workbench.db.ErrorInformationReader;
+import workbench.db.JdbcTableDefinitionReader;
 import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
 import workbench.db.TableDefinitionReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -63,17 +60,16 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class OracleMetadata
-	implements ErrorInformationReader, DataTypeResolver, PropertyChangeListener, TableDefinitionReader
+	implements DataTypeResolver, TableDefinitionReader
 {
-	private final WbConnection connection;
-	private int version;
-	private boolean retrieveSnapshots = true;
 	static final int BYTE_SEMANTICS = 1;
 	static final int CHAR_SEMANTICS = 2;
+
+	private final WbConnection connection;
+	private int version;
 	private int defaultLengthSemantics = -1;
 	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
-	private boolean globalMapDateToTimestamp = false;
 
 	/**
 	 * Only for testing purposes
@@ -138,8 +134,6 @@ public class OracleMetadata
 		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
-		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
-		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
 
 		// The incorrectly reported search string escape bug was fixed with 11.2
 		// The 11.1 and earlier drivers do not report the correct escape character and thus
@@ -159,20 +153,6 @@ public class OracleMetadata
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (evt.getPropertyName().equals("workbench.db.oracle.fixdatetype"))
-		{
-			globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
-		}
-	}
-
-	public void done()
-	{
-		Settings.getInstance().removePropertyChangeListener(this);
-	}
-
 	static boolean getRemarksReporting(WbConnection conn)
 	{
 		// The old "remarksReporting" property should not be taken from the
@@ -189,7 +169,7 @@ public class OracleMetadata
 
 	public boolean getMapDateToTimestamp()
 	{
-		if (globalMapDateToTimestamp) return true;
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false)) return true;
 		// if the mapping hasn't been enabled globally, then check the driver property
 
 		// Newer Oracle drivers support a connection property to automatically
@@ -201,6 +181,7 @@ public class OracleMetadata
 
 	static String getDriverProperty(WbConnection con, String property, boolean includeSystemProperty)
 	{
+		if (con == null) return "false";
 		String value = null;
 		ConnectionProfile profile = con.getProfile();
 		if (profile != null)
@@ -509,179 +490,6 @@ public class OracleMetadata
 		}
 
 		return linkOwner;
-	}
-
-	/**
-	 *	Return the errors reported in the all_errors table for Oracle.
-	 *	This method can be used to obtain error information after a CREATE PROCEDURE
-	 *	or CREATE TRIGGER statement has been executed.
-	 *
-	 *	@return extended error information if available
-	 */
-	@Override
-	public String getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
-	{
-		String query =
-			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
-			" FROM all_errors \n" +
-			"WHERE owner = ? \n";
-
-		int typeIndex = -1;
-		int nameIndex = -1;
-
-		if (objectType != null)
-		{
-			query += " and type = ? \n";
-			typeIndex = 2;
-		}
-
-		if (objectName != null)
-		{
-			query += "  and name = ? \n";
-			nameIndex = typeIndex == -1 ? 2 : 3;
-		}
-
-		query += " ORDER BY type, name, line, position";
-
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		StringBuilder result = new StringBuilder(250);
-		try
-		{
-			if (objectName != null && objectName.indexOf('.') > -1)
-			{
-				schema = objectName.substring(0, objectName.indexOf('.'));
-			}
-			else if (schema == null)
-			{
-				schema = this.connection.getCurrentUser();
-			}
-			DbMetadata meta = this.connection.getMetadata();
-
-			stmt = this.connection.getSqlConnection().prepareStatement(query);
-			stmt.setString(1, meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema)));
-			if (typeIndex > -1)
-			{
-				stmt.setString(typeIndex, objectType.toUpperCase().trim());
-			}
-			if (nameIndex > -1)
-			{
-				stmt.setString(nameIndex, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
-			}
-
-			rs = stmt.executeQuery();
-			int count = 0;
-			String currentName = null;
-
-			boolean firstHeading = true;
-			int indentLength = 14;
-
-			String indent = StringUtil.padRight("", indentLength);
-			while (rs.next())
-			{
-				if (count > 0)
-				{
-					result.append("\n");
-				}
-				int line = rs.getInt(1);
-				int pos = rs.getInt(2);
-				String msg = rs.getString(3);
-				String name = rs.getString(4);
-				String type = rs.getString(5);
-
-				if (formatMessages && (currentName == null || !currentName.equals(name)))
-				{
-					if (firstHeading)
-					{
-						firstHeading = false;
-					}
-					else
-					{
-						result.append('\n');
-					}
-					String heading = ResourceMgr.getFormattedString("ErrForObject", type, name);
-					String divide = StringUtil.padRight("", heading.length(), '-');
-					result.append(heading);
-					result.append('\n');
-					result.append(divide);
-					result.append("\n");
-					currentName = name;
-				}
-
-				if (formatMessages)
-				{
-					String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
-					lineInfo = StringUtil.padRight(lineInfo, indentLength + 2);
-					result.append(lineInfo);
-					// indent all lines of the message
-					msg = msg.trim().replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
-				}
-				result.append(msg);
-				count++;
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleMetadata.getExtendedErrorInfo()", "Error retrieving error information", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result.toString();
-	}
-
-	/**
-	 * Returns a Set with Strings identifying available Snapshots (materialized views)
-	 * The names will be returned as owner.tablename
-	 * In case the retrieve throws an error, this method will return
-	 * an empty set in subsequent calls.
-	 */
-	public Set<String> getSnapshots(String schema)
-	{
-		if (!retrieveSnapshots)
-		{
-			return Collections.emptySet();
-		}
-		Set<String> result = new HashSet<String>();
-		String sql = "SELECT /* SQLWorkbench */ owner||'.'||mview_name FROM all_mviews";
-		if (schema != null)
-		{
-			sql += " WHERE owner = ?";
-		}
-
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		try
-		{
-			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			if (schema != null)
-			{
-				stmt.setString(1, schema);
-			}
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String name = rs.getString(1);
-				result.add(name);
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logWarning("OracleMetadata.getSnapshots()", "Error accessing all_mviews", e);
-			// When we get an exception, most probably we cannot access the ALL_MVIEWS view.
-			// To avoid further (unnecessary) calls, we are disabling the support
-			// for snapshots
-			this.retrieveSnapshots = false;
-			result = Collections.emptySet();
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
 	}
 
 	/**

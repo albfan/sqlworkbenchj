@@ -38,6 +38,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.ErrorInformationReader;
+import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
@@ -457,7 +459,12 @@ public class TestUtil
 				SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 				if (printError && info != null)
 				{
-					String msg = con.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType, true);
+					ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(con);
+					String msg = null;
+					if (reader != null)
+					{
+						reader.getErrorInfo(null, info.objectName, info.objectType, true);
+					}
 					if (StringUtil.isNonBlank(msg))
 					{
 						System.out.println("**** Error executing statement:\n" + msg + "\n------------------");

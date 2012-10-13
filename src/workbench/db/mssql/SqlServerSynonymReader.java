@@ -51,7 +51,7 @@ public class SqlServerSynonymReader
 	}
 
 	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
 		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
@@ -62,7 +62,7 @@ public class SqlServerSynonymReader
 
 		boolean whereAdded = false;
 
-		if (StringUtil.isNonBlank(owner))
+		if (StringUtil.isNonBlank(schemaPattern))
 		{
 			sql.append(" where sc.name = ?");
 			whereAdded = true;
@@ -96,7 +96,7 @@ public class SqlServerSynonymReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, owner, namePattern));
+			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, schemaPattern, namePattern));
 		}
 
 		PreparedStatement stmt = null;
@@ -104,7 +104,7 @@ public class SqlServerSynonymReader
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql.toString());
-			if (schemaIndex != -1) stmt.setString(schemaIndex, owner);
+			if (schemaIndex != -1) stmt.setString(schemaIndex, schemaPattern);
 			if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
 
 			rs = stmt.executeQuery();
@@ -130,7 +130,7 @@ public class SqlServerSynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String schema, String synonymName)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
 		String sql = baseSql + " where syn.name = ? and sc.name = ?";
@@ -169,18 +169,19 @@ public class SqlServerSynonymReader
 	}
 
 	@Override
-	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
 		if (id == null) return "";
 
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
-		result.append(aSynonym);
+		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
+		result.append(syn.getTableExpression(con));
 		result.append(nl).append("   FOR ");
-		result.append(id.getTableExpression());
+		result.append(id.getTableExpression(con));
 		result.append(';');
 		result.append(nl);
 

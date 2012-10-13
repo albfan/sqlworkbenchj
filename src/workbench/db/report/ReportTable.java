@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConstraintReader;
 import workbench.db.DbMetadata;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
+import workbench.db.ReaderFactory;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
@@ -143,7 +145,8 @@ public class ReportTable
 
 		if (includeConstraints)
 		{
-			this.tableConstraints = conn.getMetadata().getTableConstraints(tbl);
+			ConstraintReader consReader = ReaderFactory.getConstraintReader(conn.getMetadata());
+			this.tableConstraints = consReader.getTableConstraints(conn, tbl);
 		}
 
 		if (includeGrants)

@@ -16,7 +16,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import workbench.db.ErrorInformationReader;
+import workbench.db.oracle.OracleErrorInformationReader;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -36,6 +36,10 @@ import workbench.util.SqlUtil;
  * <ul>
  *    <li>parameters</li>
  *    <li>user</li>
+ *    <li>errors</li>
+ *    <li>sga</li>
+ *    <li>recyclebin</li>
+ *    <li>autocommit</li>
  * </ul>
  * @author Thomas Kellerer
  */
@@ -52,6 +56,7 @@ public class WbOraShow
 		"JAVA SOURCE", "JAVA CLASS");
 
 	private Map<String, String> propertyUnits = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+
 	public WbOraShow()
 	{
 		propertyUnits.put("result_cache_max_size", "kb");
@@ -204,18 +209,15 @@ public class WbOraShow
 			}
 		}
 
-		ErrorInformationReader reader = currentConnection.getMetadata().getErrorInformationReader();
-		if (reader != null)
+		OracleErrorInformationReader reader = new OracleErrorInformationReader(currentConnection);
+		String errors = reader.getErrorInfo(schema, object, type, true);
+		if (errors.length() > 0)
 		{
-			String errors = reader.getErrorInfo(schema, object, type, true);
-			if (errors.length() > 0)
-			{
-				result.addMessage(errors);
-			}
-			else
-			{
-				result.addMessage(ResourceMgr.getString("TxtOraNoErr"));
-			}
+			result.addMessage(errors);
+		}
+		else
+		{
+			result.addMessage(ResourceMgr.getString("TxtOraNoErr"));
 		}
 		return result;
 	}

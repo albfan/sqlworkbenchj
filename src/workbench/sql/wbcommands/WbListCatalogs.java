@@ -58,7 +58,7 @@ public class WbListCatalogs
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
-		List<String> cats = currentConnection.getMetadata().getCatalogInformation();
+		List<String> cats = currentConnection.getMetadata().getCatalogs();
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
 		String[] cols = {catName};
 		int[] types = {Types.VARCHAR};

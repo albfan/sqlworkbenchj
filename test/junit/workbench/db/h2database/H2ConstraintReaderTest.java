@@ -1,11 +1,11 @@
 /*
  * H2ConstraintReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.h2database;
@@ -20,6 +20,8 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 
 /**
  *
@@ -52,7 +54,10 @@ public class H2ConstraintReaderTest
 		TestUtil.executeScript(con, sql);
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("CHECK_TEST"));
-		List<TableConstraint> cons = con.getMetadata().getTableConstraints(tbl);
+		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
+		assertTrue(reader instanceof H2ConstraintReader);
+		
+		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);
 		assertEquals(1, cons.size());
 		TableConstraint constraint = cons.get(0);

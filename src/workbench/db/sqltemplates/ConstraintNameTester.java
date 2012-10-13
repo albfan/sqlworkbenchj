@@ -22,30 +22,32 @@ import workbench.util.StringUtil;
  */
 public class ConstraintNameTester
 {
-	private String dbId;
+	private Pattern sysNamePattern;
 
 	public ConstraintNameTester(String id)
 	{
-		this.dbId = id;
+		String regex = Settings.getInstance().getProperty("workbench.db." + id + ".constraints.systemname", null);
+		if (StringUtil.isNonEmpty(regex))
+		{
+			try
+			{
+				sysNamePattern = Pattern.compile(regex);
+			}
+			catch (Exception ex)
+			{
+				sysNamePattern = null;
+				LogMgr.logError("ConstraintNameTester.isSystemConstraintName()", "Error in regex", ex);
+			}
+		}
 	}
 
 	public boolean isSystemConstraintName(String name)
 	{
 		if (name == null) return false;
-		String regex = Settings.getInstance().getProperty("workbench.db." + dbId + ".constraints.systemname", null);
-		if (StringUtil.isEmptyString(regex)) return false;
+		if (sysNamePattern == null) return false;
 
-		try
-		{
-			Pattern p = Pattern.compile(regex);
-			Matcher m = p.matcher(name);
-			return m.matches();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConstraintNameTester.isSystemConstraintName()", "Error in regex", e);
-		}
-		return false;
+		Matcher m = sysNamePattern.matcher(name);
+		return m.matches();
 	}
 
 }

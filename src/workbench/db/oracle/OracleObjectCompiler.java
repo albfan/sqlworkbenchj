@@ -31,6 +31,8 @@ import workbench.util.StringUtil;
 public class OracleObjectCompiler
 {
 	private WbConnection dbConnection;
+	private OracleErrorInformationReader errorReader;
+
 	private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
 		"VIEW", "PROCEDURE", "MATERIALIZED VIEW", "FUNCTION", "PACKAGE", "TRIGGER"
 	);
@@ -38,7 +40,8 @@ public class OracleObjectCompiler
 	public OracleObjectCompiler(WbConnection conn)
 		throws SQLException
 	{
-		this.dbConnection = conn;
+		dbConnection = conn;
+		errorReader = new OracleErrorInformationReader(dbConnection);
 	}
 
 	/**
@@ -63,7 +66,7 @@ public class OracleObjectCompiler
 			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
 			stmt.executeUpdate(sql);
-			String error = dbConnection.getMetadata().getExtendedErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
+			String error = errorReader.getErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
 			if (StringUtil.isBlank(error))
 			{
 				return null;
