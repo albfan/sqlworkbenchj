@@ -64,6 +64,7 @@ import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.storage.DataStore;
 import workbench.storage.DatastoreTransposer;
+import workbench.storage.RowDataListSorter;
 import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
@@ -1276,7 +1277,18 @@ public class DbMetadata
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30, 12, 10, 10, 20};
 
-		DataStore result = new DataStore(cols, coltypes, sizes);
+		final boolean sortMViewAsTable = isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.sortmviewsastable", true);
+
+		DataStore result = new DataStore(cols, coltypes, sizes)
+		{
+			@Override
+			protected RowDataListSorter createSorter(SortDefinition sort)
+			{
+				TableListSorter sorter = new TableListSorter(sort);
+				sorter.setSortMViewAsTable(sortMViewAsTable);
+				return sorter;
+			}
+		};
 
 		boolean sequencesReturned = false;
 		boolean synRetrieved = false;
@@ -1370,8 +1382,6 @@ public class DbMetadata
 			SqlUtil.closeResult(tableRs);
 		}
 
-		boolean sortNeeded = false;
-
 		// Synonym and Sequence retrieval is handled differently to "regular" ObjectListExtenders
 		// because some JDBC driver versions do retrieve this information automatically some don't
 		SequenceReader seqReader = this.getSequenceReader();
@@ -1391,7 +1401,6 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, sequence.getComment());
 				result.getRow(row).setUserObject(sequence);
 			}
-			sortNeeded = sequences.size() > 0;
 		}
 
 		SynonymReader synReader = this.getSynonymReader();
@@ -1409,17 +1418,13 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, synonym.getSchema());
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, synonym.getComment());
 			}
-			sortNeeded = syns.size() > 0;
 		}
 
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(types))
 			{
-				if (extender.extendObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types))
-				{
-					sortNeeded = true;
-				}
+				extender.extendObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
 			}
 		}
 
@@ -1428,14 +1433,13 @@ public class DbMetadata
 			objectListEnhancer.updateObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
 		}
 
-		if (sortNeeded)
-		{
-			SortDefinition def = new SortDefinition();
-			def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
-			def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
-			def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
-			result.sort(def);
-		}
+		// the extenders or objectListEnhancer could have changed the list so that the
+		// original sort is no longer "correct".
+		SortDefinition def = new SortDefinition();
+		def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
+		def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
+		def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
+		result.sort(def);
 
 		result.resetStatus();
 		return result;

@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.Set;
 import workbench.db.DataTypeResolver;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 /**
  * @author Thomas Kellerer
@@ -48,7 +49,7 @@ public class SQLiteDataTypeResolver
 	@Override
 	public int fixColumnType(int type, String dbmsType)
 	{
-		String plainType = getPlainTypeName(dbmsType);
+		String plainType = SqlUtil.getPlainTypeName(dbmsType);
 
 		if (INTEGER_TYPES.contains(plainType))
 		{
@@ -98,12 +99,5 @@ public class SQLiteDataTypeResolver
 			default:
 				return "java.lang.String";
 		}
-	}
-
-	private String getPlainTypeName(String input)
-	{
-		int pos = input.indexOf('(');
-		if (pos < 0) return input;
-		return input.substring(0, pos);
 	}
 }

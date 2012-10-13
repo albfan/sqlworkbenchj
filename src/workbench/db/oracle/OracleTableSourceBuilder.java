@@ -125,9 +125,80 @@ public class OracleTableSourceBuilder
 				result.append(ext);
 			}
 		}
+
+		// retrieving the nested table options requires another query to the Oracle
+		// catalogs which is always horribly slow. In order to prevent this,
+		// we first check if the table only contains "standard" data types.
+		// as the number of tables containing nested tables is probably quite small
+		// we prevent firing additional queries by checking if at least one column
+		// might be a nested table
+		boolean hasUserType = false;
+		for (ColumnIdentifier col : columns)
+		{
+			String type = SqlUtil.getPlainTypeName(col.getDbmsType());
+			if (!OracleUtils.STANDARD_TYPES.contains(type))
+			{
+				hasUserType = true;
+				break;
+			}
+		}
+
+		if (hasUserType)
+		{
+			String options = readNestedTableOptions(table);
+			if (options.trim().length() > 0)
+			{
+				result.append('\n');
+				result.append(options);
+			}
+		}
 		return result.toString();
 	}
 
+	private String readNestedTableOptions(TableIdentifier tbl)
+	{
+		String sql =
+			"SELECT /* SQLWorkbench */ 'NESTED TABLE '||parent_table_column||' STORE AS '||table_name \n" +
+			"FROM all_nested_tables \n" +
+			"WHERE parent_table_name = ? \n" +
+			"  AND owner = ?";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder options = new StringBuilder();
+
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getTableName());
+			pstmt.setString(2, tbl.getSchema());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.readNestedTableOptions()", "Using sql:\n" +
+					SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
+			}
+
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String option = rs.getString(1);
+				if (options.length() > 0)
+				{
+					options.append('\n');
+				}
+				options.append(option);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.readNestedTableOptions()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return options.toString();
+	}
 
 	/**
 	 * Read additional options for the CREATE TABLE part.

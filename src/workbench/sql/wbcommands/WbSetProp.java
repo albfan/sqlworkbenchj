@@ -50,6 +50,7 @@ public class WbSetProp
 		configMap.put("nulldisplay", "workbench.console.nullstring");
 		configMap.put("varsuffix", Settings.PROPERTY_VAR_SUFFIX);
 		configMap.put("varprefix", Settings.PROPERTY_VAR_PREFIX);
+		configMap.put("debugmeta", "workbench.dbmetadata.debugmetasql");
 	}
 
 	@Override

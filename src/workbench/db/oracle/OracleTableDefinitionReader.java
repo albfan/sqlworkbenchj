@@ -173,7 +173,7 @@ public class OracleTableDefinitionReader
 				col.setIsPkColumn(pkColumns.contains(colName));
 				col.setIsNullable("YES".equalsIgnoreCase(nullable));
 
-				if (isVirtual)
+				if (isVirtual && sqlType != Types.OTHER)
 				{
 					String exp = "GENERATED ALWAYS AS (" + defaultValue + ")";
 					col.setComputedColumnExpression(exp);
@@ -199,27 +199,28 @@ public class OracleTableDefinitionReader
 	public static String getDecodeForDataType(String colname, boolean fixNVARCHAR, boolean mapDateToTimestamp)
 	{
 			return
-			"     DECODE(" + colname + ", 'CHAR', " + Types.CHAR + ", " +
-			"                    'VARCHAR2', " + Types.VARCHAR + ", " +
-			"                    'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", " +
-			"                    'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", " +
-			"                    'NUMBER', " + Types.DECIMAL + ", " +
-			"                    'LONG', " + Types.LONGVARCHAR + ", " +
-			"                    'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", " +
-			"                    'RAW', " + Types.VARBINARY + ", " +
-			"                    'LONG RAW', " + Types.LONGVARBINARY + ", " +
-			"                    'BLOB', " + Types.BLOB + ", " +
-			"                    'CLOB', " + Types.CLOB + ", " +
-			"                    'NCLOB', " + (fixNVARCHAR ? Types.NCLOB : Types.OTHER) + ", " +
-			"                    'BFILE', -13, " +
-			"                    'FLOAT', " + Types.FLOAT + ", " +
-			"                    'TIMESTAMP(6)', " + Types.TIMESTAMP + ", " +
-			"                    'TIMESTAMP(6) WITH TIME ZONE', -101, " +
-			"                    'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, " +
-			"                    'INTERVAL YEAR(2) TO MONTH', -103, " +
-			"                    'INTERVAL DAY(2) TO SECOND(6)', -104, " +
-			"                    'BINARY_FLOAT', 100, " +
-			"                    'BINARY_DOUBLE', 101, " + Types.OTHER + ")";
+			"     DECODE(" + colname + ", " +
+			"            'CHAR', " + Types.CHAR + ", " +
+			"            'VARCHAR2', " + Types.VARCHAR + ", " +
+			"            'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", " +
+			"            'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", " +
+			"            'NUMBER', " + Types.DECIMAL + ", " +
+			"            'LONG', " + Types.LONGVARCHAR + ", " +
+			"            'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", " +
+			"            'RAW', " + Types.VARBINARY + ", " +
+			"            'LONG RAW', " + Types.LONGVARBINARY + ", " +
+			"            'BLOB', " + Types.BLOB + ", " +
+			"            'CLOB', " + Types.CLOB + ", " +
+			"            'NCLOB', " + (fixNVARCHAR ? Types.NCLOB : Types.OTHER) + ", " +
+			"            'BFILE', -13, " +
+			"            'FLOAT', " + Types.FLOAT + ", " +
+			"            'TIMESTAMP(6)', " + Types.TIMESTAMP + ", " +
+			"            'TIMESTAMP(6) WITH TIME ZONE', -101, " +
+			"            'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, " +
+			"            'INTERVAL YEAR(2) TO MONTH', -103, " +
+			"            'INTERVAL DAY(2) TO SECOND(6)', -104, " +
+			"            'BINARY_FLOAT', 100, " +
+			"            'BINARY_DOUBLE', 101, " + Types.OTHER + ")";
 	}
 
 	private PreparedStatement prepareColumnsStatement(String schema, String table)
@@ -255,8 +256,9 @@ public class OracleTableDefinitionReader
 		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
 		if (includeVirtualColumns)
 		{
-			// for some reason XMLTYPE columns are returned with virtual_column = 'YES' which seems like a bug in all_tab_cols....
-			sql2 += ", case when data_type <> 'XMLTYPE' THEN t.virtual_column else 'NO' end as virtual_column \n FROM all_tab_cols t \n";
+			// for some reason XMLTYPE columns and "table type" columns are returned with virtual_column = 'YES'
+			// which seems like a bug in all_tab_cols....
+			sql2 += ", case when data_type <> 'XMLTYPE' and DATA_TYPE_OWNER is null THEN t.virtual_column else 'NO' end as virtual_column \n FROM all_tab_cols t \n";
 		}
 		else
 		{

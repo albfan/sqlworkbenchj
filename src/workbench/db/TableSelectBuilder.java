@@ -215,7 +215,7 @@ public class TableSelectBuilder
 		DbSettings db = dbConnection.getDbSettings();
 		if (db == null) return colname;
 
-		String type = cleanDataType(col.getDbmsType());
+		String type = SqlUtil.getPlainTypeName(col.getDbmsType());
 		String expr = db.getDataTypeExpression(type);
 		if (expr == null)
 		{
@@ -235,14 +235,6 @@ public class TableSelectBuilder
 			expr = expr + " AS " + colname;
 		}
 		return expr;
-	}
-
-	protected String cleanDataType(String dbmsType)
-	{
-		if (dbmsType == null) return null;
-		int pos = dbmsType.indexOf('(');
-		if (pos == -1) return dbmsType;
-		return dbmsType.substring(0, pos);
 	}
 
 	void setTemplate(String template)

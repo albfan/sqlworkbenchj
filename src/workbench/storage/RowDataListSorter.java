@@ -70,7 +70,7 @@ public class RowDataListSorter
 	 * Compares the defined sort column
 	 */
 	@SuppressWarnings("unchecked")
-	private int compareColumn(int column, RowData row1, RowData row2)
+	protected int compareColumn(int column, RowData row1, RowData row2)
 	{
 		Object o1 = row1.getValue(column);
 		Object o2 = row2.getValue(column);

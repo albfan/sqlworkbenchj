@@ -1858,11 +1858,16 @@ public class DataStore
 		this.resetUpdateRowCounters();
 	}
 
+	protected RowDataListSorter createSorter(SortDefinition sort)
+	{
+		return new RowDataListSorter(sort);
+	}
+	
 	public void sort(SortDefinition sortDef)
 	{
 		synchronized (this)
 		{
-			RowDataListSorter sorter = new RowDataListSorter(sortDef);
+			RowDataListSorter sorter = createSorter(sortDef);
 			sorter.sort(this.data);
 		}
 	}
@@ -1872,7 +1877,7 @@ public class DataStore
 		synchronized (this)
 		{
 			SortDefinition sort = new SortDefinition(col, ascending);
-			RowDataListSorter sorter = new RowDataListSorter(sort);
+			RowDataListSorter sorter = createSorter(sort);
 			sorter.sort(this.data);
 		}
 	}

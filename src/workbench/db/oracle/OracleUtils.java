@@ -12,9 +12,11 @@
 package workbench.db.oracle;
 
 import java.util.Properties;
+import java.util.Set;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 
 /**
  * Utility methods for Oracle
@@ -25,6 +27,12 @@ public class OracleUtils
 {
 	public static final int BYTE_SEMANTICS = 1;
 	public static final int CHAR_SEMANTICS = 2;
+
+	public static final Set<String> STANDARD_TYPES = CollectionUtil.caseInsensitiveSet
+		("INTERVALDS", "INTERVALYM", "TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP WITH TIME ZONE",
+		 "NUMBER", "NUMBER", "NUMBER", "LONG RAW", "RAW", "LONG", "CHAR", "NUMBER", "NUMBER", "NUMBER",
+		 "FLOAT", "REAL", "VARCHAR2", "DATE", "DATE", "TIMESTAMP", "STRUCT", "ARRAY", "BLOB", "CLOB", "ROWID",
+		 "XMLType", "SDO_GEOMETRY", "SDO_TOPO_GEOMETRY", "SDO_GEORASTER", "ANYTYPE", "ANYDATA");
 
 	private OracleUtils()
 	{

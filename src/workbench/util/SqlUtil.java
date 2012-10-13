@@ -109,6 +109,13 @@ public class SqlUtil
 		LEXER_INSTANCE.reset(new StringReader(sql),0,0);
 	}
 
+	public static String 	getPlainTypeName(String input)
+	{
+		int pos = input.indexOf('(');
+		if (pos < 0) return input;
+		return input.substring(0, pos);
+	}
+
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
