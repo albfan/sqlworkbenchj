@@ -12,6 +12,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.db.oracle.OracleTableDefinitionReader;
 
 /**
  *
@@ -35,6 +36,10 @@ public interface TableDefinitionReader
 	 * @see TableColumnsDatastore
 	 * @see TableIdentifier#getPrimaryKey()
 	 */
-	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, WbConnection dbConnection, DataTypeResolver typeResolver)
+	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, DataTypeResolver typeResolver)
 		throws SQLException;
+
+	TableDefinition getTableDefinition(TableIdentifier toRead)
+		throws SQLException;
+
 }

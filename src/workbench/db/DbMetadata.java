@@ -29,35 +29,28 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.derby.DerbyTypeReader;
-import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
-import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
-import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
-import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.Db2ProcedureReader;
-import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerRuleReader;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mssql.SqlServerUtil;
-import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.nuodb.NuoDBDomainReader;
-import workbench.db.nuodb.NuoDbColumnEnhancer;
 import workbench.db.oracle.DbmsOutput;
-import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleDataTypeResolver;
+import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleObjectListEnhancer;
+import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.oracle.OracleViewReader;
-import workbench.db.postgres.PostgresColumnEnhancer;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -75,7 +68,6 @@ import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.CollectionUtil;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -102,7 +94,7 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
-	private ColumnDefinitionEnhancer columnEnhancer;
+	private SynonymReader synonymReader;
 	private ObjectListEnhancer objectListEnhancer;
 	private TableDefinitionReader definitionReader;
 	private DataTypeResolver dataTypeResolver;
@@ -198,14 +190,12 @@ public class DbMetadata
 			}
 			extenders.add(new PostgresRuleReader());
 			extenders.add(new PostgresTypeReader());
-			columnEnhancer = new PostgresColumnEnhancer();
 		}
 		else if (productLower.indexOf("oracle") > -1)
 		{
 			isOracle = true;
-			OracleMetadata oraMeta = new OracleMetadata(this.dbConnection);
-			dataTypeResolver = oraMeta;
-			definitionReader = oraMeta;
+			dataTypeResolver = new OracleDataTypeResolver(aConnection);
+			definitionReader = new OracleTableDefinitionReader(aConnection);
 			extenders.add(new OracleTypeReader());
 			viewReader = new OracleViewReader(this.dbConnection);
 			objectListEnhancer = new OracleObjectListEnhancer(); // to cleanup MVIEW type information
@@ -219,7 +209,6 @@ public class DbMetadata
 				// so the dynamically configured queries in the XML files need
 				// to be different. Therefor the product name is "patched" to include the version number
 				productName += " 2.0";
-				columnEnhancer = new HsqlColumnEnhancer();
 			}
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.2"))
 			{
@@ -236,7 +225,6 @@ public class DbMetadata
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			productName = "Firebird";
 			extenders.add(new FirebirdDomainReader());
-			columnEnhancer = new FirebirdColumnEnhancer();
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
@@ -245,11 +233,6 @@ public class DbMetadata
 			if (SqlServerTypeReader.versionSupportsTypes(dbConnection))
 			{
 				extenders.add(new SqlServerTypeReader());
-			}
-
-			if (SqlServerUtil.isSqlServer2005(dbConnection))
-			{
-				columnEnhancer = new SqlServerColumnEnhancer();
 			}
 
 			if (SqlServerUtil.isSqlServer2000(dbConnection))
@@ -273,14 +256,12 @@ public class DbMetadata
 			// Generated columns are not available on the host version...
 			if (getDbId().equals("db2"))
 			{
-				columnEnhancer = new Db2ColumnEnhancer();
 				extenders.add(new DB2TypeReader());
 			}
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
-			columnEnhancer = new MySQLColumnEnhancer();
 			objectListEnhancer = new MySQLTableCommentReader();
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
@@ -294,12 +275,10 @@ public class DbMetadata
 			{
 				extenders.add(new DerbyTypeReader());
 			}
-			columnEnhancer = new DerbyColumnEnhancer();
 		}
 		else if (productLower.equals("nuodb"))
 		{
 			extenders.add(new NuoDBDomainReader());
-			columnEnhancer = new NuoDbColumnEnhancer();
 		}
 		else if (productLower.indexOf("sqlite") > -1)
 		{
@@ -318,7 +297,6 @@ public class DbMetadata
 			isH2 = true;
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
-			columnEnhancer = new H2ColumnEnhancer();
 		}
 
 		if (schemaInfoReader == null)
@@ -333,7 +311,7 @@ public class DbMetadata
 
 		if (definitionReader == null)
 		{
-			definitionReader = new JdbcTableDefinitionReader();
+			definitionReader = new JdbcTableDefinitionReader(dbConnection);
 		}
 
 		try
@@ -577,6 +555,11 @@ public class DbMetadata
 			}
 			return this.indexReader;
 		}
+	}
+
+	public TableDefinitionReader getTableDefinitionReader()
+	{
+		return definitionReader;
 	}
 
 	/**
@@ -1916,7 +1899,7 @@ public class DbMetadata
 	 *
 	 * After a call to close(), this instance should not be used any longer.
 	 * @see DbmsOutput#close()
-	 * @see OracleMetadata#done()
+	 * @see OracleUtils#done()
 	 * @see SchemaInformationReader#dispose()
 	 */
 	public void close()
@@ -1966,7 +1949,7 @@ public class DbMetadata
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
 	{
-		TableDefinition def = this.getTableDefinition(table);
+		TableDefinition def = definitionReader.getTableDefinition(table);
 		if (def == null) return Collections.emptyList();
 		return def.getColumns();
 	}
@@ -2040,7 +2023,7 @@ public class DbMetadata
 		}
 		else if (def == null)
 		{
-			TableDefinition tdef = getTableDefinition(table);
+			TableDefinition tdef = definitionReader.getTableDefinition(table);
 			def = new TableColumnsDatastore(tdef);
 		}
 		if (def != null) def.resetStatus();
@@ -2058,61 +2041,13 @@ public class DbMetadata
 	 * @throws SQLException
 	 * @return the definition of the table.
 	 * @see TableColumnsDatastore
+	 * @see TableDefinitionReader#getTableDefinition(workbench.db.TableIdentifier)
 	 */
 	public TableDefinition getTableDefinition(TableIdentifier toRead)
 		throws SQLException
 	{
 		if (toRead == null) return null;
-
-		TableIdentifier table = toRead.createCopy();
-		table.adjustCase(dbConnection);
-
-		String catalog = StringUtil.trimQuotes(table.getCatalog());
-		String schema = StringUtil.trimQuotes(table.getSchema());
-		String tablename = StringUtil.trimQuotes(table.getTableName());
-
-		if (schema == null)
-		{
-			schema = getCurrentSchema();
-			table.setSchema(schema);
-		}
-
-		if (catalog == null)
-		{
-			catalog = getCurrentCatalog();
-			table.setCatalog(catalog);
-		}
-
-		TableIdentifier retrieve = table;
-
-		if (dbConnection.getDbSettings().isSynonymType(table.getType()))
-		{
-			TableIdentifier id = getSynonymTable(catalog, schema, tablename);
-			if (id != null)
-			{
-				schema = id.getSchema();
-				tablename = id.getTableName();
-				catalog = null;
-				retrieve = table.createCopy();
-				retrieve.setSchema(schema);
-				retrieve.parseTableIdentifier(tablename);
-				retrieve.setCatalog(null);
-			}
-		}
-
-		PkDefinition pk = getIndexReader().getPrimaryKey(retrieve);
-		retrieve.setPrimaryKey(pk);
-
-		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, dbConnection, dataTypeResolver);
-
-		retrieve.setNewTable(false);
-		TableDefinition result = new TableDefinition(retrieve, columns);
-		if (columnEnhancer != null)
-		{
-			columnEnhancer.updateColumnDefinition(result, dbConnection);
-		}
-
-		return result;
+		return definitionReader.getTableDefinition(toRead);
 	}
 
 	/**
@@ -2578,6 +2513,13 @@ public class DbMetadata
 
 	public SynonymReader getSynonymReader()
 	{
-		return SynonymReader.Factory.getSynonymReader(dbConnection);
+		synchronized (readerLock)
+		{
+			if (synonymReader == null)
+			{
+				synonymReader = SynonymReader.Factory.getSynonymReader(dbConnection);
+			}
+		}
+		return synonymReader;
 	}
 }

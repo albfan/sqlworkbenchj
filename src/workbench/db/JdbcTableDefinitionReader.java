@@ -16,6 +16,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import workbench.db.derby.DerbyColumnEnhancer;
+import workbench.db.firebird.FirebirdColumnEnhancer;
+import workbench.db.h2database.H2ColumnEnhancer;
+import workbench.db.hsqldb.HsqlColumnEnhancer;
+import workbench.db.ibm.Db2ColumnEnhancer;
+import workbench.db.mssql.SqlServerColumnEnhancer;
+import workbench.db.mssql.SqlServerUtil;
+import workbench.db.mysql.MySQLColumnEnhancer;
+import workbench.db.nuodb.NuoDbColumnEnhancer;
+import workbench.db.postgres.PostgresColumnEnhancer;
 import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -28,6 +38,13 @@ import workbench.util.StringUtil;
 public class JdbcTableDefinitionReader
 	implements TableDefinitionReader
 {
+	protected final WbConnection dbConnection;
+
+	public JdbcTableDefinitionReader(WbConnection conn)
+	{
+		dbConnection = conn;
+	}
+
 	/**
 	 * Return the definition of the given table.
 	 * <br/>
@@ -44,7 +61,7 @@ public class JdbcTableDefinitionReader
 	 * @see TableColumnsDatastore
 	 */
 	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
 		throws SQLException
 	{
 		DbSettings dbSettings = dbConnection.getDbSettings();
@@ -148,5 +165,122 @@ public class JdbcTableDefinitionReader
 		}
 
 		return columns;
+	}
+
+	/**
+	 * Return the definition of the given table.
+	 * <br/>
+	 * To display the columns for a table in a DataStore create an
+	 * instance of {@link TableColumnsDatastore}.
+	 *
+	 * @param toRead The table for which the definition should be retrieved
+	 *
+	 * @throws SQLException
+	 * @return the definition of the table.
+	 * @see TableColumnsDatastore
+	 */
+	@Override
+	public TableDefinition getTableDefinition(TableIdentifier toRead)
+		throws SQLException
+	{
+		if (toRead == null) return null;
+
+		TableIdentifier table = toRead.createCopy();
+		table.adjustCase(dbConnection);
+
+		String catalog = StringUtil.trimQuotes(table.getCatalog());
+		String schema = StringUtil.trimQuotes(table.getSchema());
+		String tablename = StringUtil.trimQuotes(table.getTableName());
+
+		DbMetadata meta = dbConnection.getMetadata();
+		if (schema == null)
+		{
+			schema = meta.getCurrentSchema();
+			table.setSchema(schema);
+		}
+
+		if (catalog == null)
+		{
+			catalog = meta.getCurrentCatalog();
+			table.setCatalog(catalog);
+		}
+
+		TableIdentifier retrieve = table;
+
+		if (dbConnection.getDbSettings().isSynonymType(table.getType()))
+		{
+			TableIdentifier id = meta.getSynonymTable(catalog, schema, tablename);
+			if (id != null)
+			{
+				schema = id.getSchema();
+				tablename = id.getTableName();
+				catalog = null;
+				retrieve = table.createCopy();
+				retrieve.setSchema(schema);
+				retrieve.parseTableIdentifier(tablename);
+				retrieve.setCatalog(null);
+			}
+		}
+
+		PkDefinition pk = meta.getIndexReader().getPrimaryKey(retrieve);
+		retrieve.setPrimaryKey(pk);
+
+		List<ColumnIdentifier> columns = getTableColumns(retrieve, meta.getDataTypeResolver());
+
+		retrieve.setNewTable(false);
+		TableDefinition result = new TableDefinition(retrieve, columns);
+
+		ColumnDefinitionEnhancer columnEnhancer = getColumnEnhancer(dbConnection);
+		if (columnEnhancer != null)
+		{
+			columnEnhancer.updateColumnDefinition(result, dbConnection);
+		}
+
+		return result;
+	}
+
+	private ColumnDefinitionEnhancer getColumnEnhancer(WbConnection con)
+	{
+		if (con == null) return null;
+		DbMetadata meta = con.getMetadata();
+		if (meta == null) return null;
+
+		if (meta.isPostgres())
+		{
+			 return new PostgresColumnEnhancer();
+		}
+		if (meta.isH2())
+		{
+			return new H2ColumnEnhancer();
+		}
+		if (meta.isApacheDerby())
+		{
+			return new DerbyColumnEnhancer();
+		}
+		if (meta.isMySql())
+		{
+			return new MySQLColumnEnhancer();
+		}
+		if (con.getDbId().equals("db2"))
+		{
+			return new Db2ColumnEnhancer();
+		}
+		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2005(con))
+		{
+			return new SqlServerColumnEnhancer();
+		}
+		if (meta.isFirebird())
+		{
+			return new FirebirdColumnEnhancer();
+		}
+		if (con.getDbId().equals("nuodb"))
+		{
+			return new NuoDbColumnEnhancer();
+		}
+		if (meta.isHsql() && JdbcUtils.hasMinimumServerVersion(con, "2.0"))
+		{
+			return new HsqlColumnEnhancer();
+		}
+		return null;
 	}
 }

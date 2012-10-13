@@ -1,11 +1,11 @@
 /*
  * Db2ConstraintReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.ibm;
@@ -19,6 +19,8 @@ import org.junit.Test;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 
 /**
  *
@@ -64,7 +66,9 @@ public class Db2ConstraintReaderTest
 		TableIdentifier person = con.getMetadata().findTable(new TableIdentifier(schema, "PERSON"));
 		assertNotNull(person);
 
-		List<TableConstraint> constraints = con.getMetadata().getTableConstraints(person);
+		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
+		List<TableConstraint> constraints = reader.getTableConstraints(con, person);
+		
 		assertNotNull(constraints);
 		assertEquals(1, constraints.size());
 		TableConstraint check = constraints.get(0);

@@ -1,5 +1,5 @@
 /*
- * OracleMetadataTest.java
+ * OracleTableDefinitionReaderTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -38,12 +38,12 @@ import workbench.db.*;
  *
  * @author Thomas Kellerer
  */
-public class OracleMetadataTest
+public class OracleTableDefinitionReaderTest
 	extends WbTestCase
 {
 	private static final String TEST_ID = "orametadata";
 
-	public OracleMetadataTest()
+	public OracleTableDefinitionReaderTest()
 	{
 		super(TEST_ID);
 	}
@@ -101,7 +101,7 @@ public class OracleMetadataTest
 		assertEquals("TYPE", type.getType());
 
 		List<TableIdentifier> tables = con.getMetadata().getObjectList("WBJUNIT", new String[] { "TABLE" });
-		assertEquals(3, tables.size());
+		assertEquals("Got wrong tables: " + tables.toString(), 3, tables.size());
 		TableIdentifier tbl = tables.get(0);
 		assertEquals("MV_PERSON", tbl.getTableName());
 		assertEquals("MATERIALIZED VIEW", tbl.getType());
@@ -111,7 +111,7 @@ public class OracleMetadataTest
 		assertEquals("person comment", person.getComment());
 
 		List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(person);
-		assertEquals(3, columns.size());
+		assertEquals("Got wrong columns: " + columns, 3, columns.size());
 		ColumnIdentifier id = columns.get(0);
 		assertEquals("ID", id.getColumnName());
 		assertEquals("person id", id.getComment());
@@ -124,7 +124,7 @@ public class OracleMetadataTest
 		OracleIndexReader reader = (OracleIndexReader)r;
 
 		List<IndexDefinition> indexes = reader.getTableIndexList(person);
-		assertEquals(3, indexes.size());
+		assertEquals("Got wrong indexes: " + indexes, 3, indexes.size());
 
 		Collections.sort(indexes, new DbObjectComparator());
 
@@ -173,41 +173,6 @@ public class OracleMetadataTest
 	}
 
 	@Test
-	public void testGetSqlTypeDisplay()
-	{
-		// Test with BYTE as default semantics
-		OracleMetadata meta = new OracleMetadata(OracleMetadata.BYTE_SEMANTICS, false);
-
-		// Test non-Varchar types
-		assertEquals("CLOB", meta.getSqlTypeDisplay("CLOB", Types.CLOB, -1, -1, 0));
-		assertEquals("NVARCHAR(300)", meta.getSqlTypeDisplay("NVARCHAR", Types.VARCHAR, 300, -1, 0));
-		assertEquals("CHAR(5)", meta.getSqlTypeDisplay("CHAR", Types.CHAR, 5, -1, 0));
-		assertEquals("NUMBER(10,2)", meta.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, 2, 0));
-
-		String display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.BYTE_SEMANTICS);
-		assertEquals("VARCHAR(200)", display);
-
-		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.CHAR_SEMANTICS);
-		assertEquals("VARCHAR(200 Char)", display);
-
-		meta = new OracleMetadata(OracleMetadata.CHAR_SEMANTICS, false);
-
-		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.BYTE_SEMANTICS);
-		assertEquals("VARCHAR(200 Byte)", display);
-
-		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.CHAR_SEMANTICS);
-		assertEquals("VARCHAR(200)", display);
-
-		meta = new OracleMetadata(OracleMetadata.CHAR_SEMANTICS, true);
-
-		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.BYTE_SEMANTICS);
-		assertEquals("VARCHAR(200 Byte)", display);
-
-		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.CHAR_SEMANTICS);
-		assertEquals("VARCHAR(200 Char)", display);
-	}
-
-	@Test
 	public void testStupidTimestamp()
 		throws Exception
 	{
@@ -232,16 +197,23 @@ public class OracleMetadataTest
 			return;
 		}
 
-		String script =
-			"create table virtual_col_test (some_name varchar(100), lower_name generated always as (lower(some_name)));";
-		TestUtil.executeScript(con, script);
-		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("VIRTUAL_COL_TEST"));
-		assertNotNull(def);
-		List<ColumnIdentifier> columns = def.getColumns();
-		assertNotNull(columns);
-		assertEquals(2, columns.size());
-		ColumnIdentifier lower = columns.get(1);
-		assertEquals("LOWER_NAME", lower.getColumnName());
-		assertEquals("GENERATED ALWAYS AS (LOWER(\"SOME_NAME\"))", lower.getComputedColumnExpression());
+		try
+		{
+			String script =
+				"create table virtual_col_test (some_name varchar(100), lower_name generated always as (lower(some_name)));";
+			TestUtil.executeScript(con, script);
+			TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("VIRTUAL_COL_TEST"));
+			assertNotNull(def);
+			List<ColumnIdentifier> columns = def.getColumns();
+			assertNotNull(columns);
+			assertEquals(2, columns.size());
+			ColumnIdentifier lower = columns.get(1);
+			assertEquals("LOWER_NAME", lower.getColumnName());
+			assertEquals("GENERATED ALWAYS AS (LOWER(\"SOME_NAME\"))", lower.getComputedColumnExpression());
+		}
+		finally
+		{
+			TestUtil.executeScript(con, "drop table virtual_col_test");
+		}
 	}
 }

@@ -21,6 +21,8 @@ import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 
 /**
  *
@@ -69,7 +71,8 @@ public class PostgresConstraintReaderTest
 		if (con == null) return;
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("check_test"));
-		List<TableConstraint> cons = con.getMetadata().getTableConstraints(tbl);
+		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
+		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);
 		assertEquals(2, cons.size());
 		TableConstraint check = cons.get(0);

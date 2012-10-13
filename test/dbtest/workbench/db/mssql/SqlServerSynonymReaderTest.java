@@ -68,7 +68,7 @@ public class SqlServerSynonymReaderTest
 		if (conn == null) return;
 		SynonymReader reader = conn.getMetadata().getSynonymReader();
 		assertNotNull(reader);
-		List<TableIdentifier> syns = reader.getSynonymList(conn, "dbo", null);
+		List<TableIdentifier> syns = reader.getSynonymList(conn, null, "dbo", null);
 		assertNotNull(syns);
 		assertEquals(1, syns.size());
 		assertEquals("s_person", syns.get(0).getObjectName());
@@ -82,7 +82,7 @@ public class SqlServerSynonymReaderTest
 		assertNotNull(table);
 		assertEquals("person", table.getTableName());
 
-		syns = reader.getSynonymList(conn, "dbo", "s_person");
+		syns = reader.getSynonymList(conn, null, "dbo", "s_person");
 		assertEquals(1, syns.size());
 	}
 }

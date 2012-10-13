@@ -125,7 +125,7 @@ public class DummySelect
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
-		
+
 		sql.append("SELECT ");
 		for (int i = 0; i < colCount; i++)
 		{

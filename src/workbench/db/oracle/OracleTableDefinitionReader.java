@@ -1,5 +1,5 @@
 /*
- * OracleMetadata.java
+ * OracleUtils.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,7 +15,6 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import workbench.db.DbSettings;
 import workbench.db.JdbcTableDefinitionReader;
 import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
-import workbench.db.TableDefinitionReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -59,86 +57,24 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class OracleMetadata
-	implements DataTypeResolver, TableDefinitionReader
+public class OracleTableDefinitionReader
+	extends JdbcTableDefinitionReader
 {
-	static final int BYTE_SEMANTICS = 1;
-	static final int CHAR_SEMANTICS = 2;
-
-	private final WbConnection connection;
-	private int version;
-	private int defaultLengthSemantics = -1;
-	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
+	private final OracleDataTypeResolver oraTypes;
 
-	/**
-	 * Only for testing purposes
-	 */
-	OracleMetadata(int defaultSemantics, boolean alwaysShowSemantics)
+	public OracleTableDefinitionReader(WbConnection conn)
 	{
-		connection = null;
-		defaultLengthSemantics = defaultSemantics;
-		alwaysShowCharSemantics = alwaysShowSemantics;
-	}
-
-	public OracleMetadata(WbConnection conn)
-	{
-		this.connection = conn;
-		try
-		{
-			this.version = this.connection.getSqlConnection().getMetaData().getDatabaseMajorVersion();
-		}
-		catch (Throwable th)
-		{
-			// The old Oracle 8 driver (classes12.jar) does not implement getDatabaseMajorVersion()
-      // and throws an AbstractMethodError
-			this.version = 8;
-		}
-
-		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
-
-		if (!alwaysShowCharSemantics)
-		{
-			Statement stmt = null;
-			ResultSet rs = null;
-			try
-			{
-				stmt = this.connection.createStatement();
-				String sql = "SELECT /* SQLWorkbench */ value FROM v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
-				rs = stmt.executeQuery(sql);
-				if (rs.next())
-				{
-					String v = rs.getString(1);
-					if ("BYTE".equalsIgnoreCase(v))
-					{
-						defaultLengthSemantics = BYTE_SEMANTICS;
-					}
-					else if ("CHAR".equalsIgnoreCase(v))
-					{
-						defaultLengthSemantics = CHAR_SEMANTICS;
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				defaultLengthSemantics = BYTE_SEMANTICS;
-				LogMgr.logWarning("OracleMetadata.<init>", "Could not retrieve NLS_LENGTH_SEMANTICS from v$nls_parameters. Assuming byte semantics", e);
-			}
-			finally
-			{
-				SqlUtil.closeAll(rs, stmt);
-			}
-		}
-
+		super(conn);
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
 		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 
-		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
+		useOwnSql = (JdbcUtils.hasMinimumServerVersion(conn, "8.0") && (checkCharSemantics || fixNVARCHAR));
 
 		// The incorrectly reported search string escape bug was fixed with 11.2
 		// The 11.1 and earlier drivers do not report the correct escape character and thus
 		// escaping in DbMetadata doesn't return anything if the username (schema) contains an underscore
-		if (!JdbcUtils.hasMiniumDriverVersion(connection.getSqlConnection(), "11.1")
+		if (!JdbcUtils.hasMiniumDriverVersion(conn.getSqlConnection(), "11.1")
 			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true)
 			&& Settings.getInstance().getProperty("workbench.db.oracle.searchstringescape", null) == null)
 		{
@@ -146,6 +82,7 @@ public class OracleMetadata
 			System.setProperty("workbench.db.oracle.metadata.retrieval.wildcards", "false");
 			System.setProperty("workbench.db.oracle.escape.searchstrings", "false");
 		}
+		oraTypes = new OracleDataTypeResolver(conn);
 	}
 
 	protected final boolean fixNVARCHARSemantics()
@@ -153,82 +90,13 @@ public class OracleMetadata
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
 	}
 
-	static boolean getRemarksReporting(WbConnection conn)
-	{
-		// The old "remarksReporting" property should not be taken from the
-		// System properties as a fall-back
-		String value = getDriverProperty(conn, "remarksReporting", false);
-		if (value == null)
-		{
-			// Only the new oracle.jdbc.remarksReporting should also be
-			// checked in the system properties
-			value = getDriverProperty(conn, "oracle.jdbc.remarksReporting", true);
-		}
-		return "true".equalsIgnoreCase(value == null ? "false" : value.trim());
-	}
-
-	public boolean getMapDateToTimestamp()
-	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false)) return true;
-		// if the mapping hasn't been enabled globally, then check the driver property
-
-		// Newer Oracle drivers support a connection property to automatically
-		// return DATE columns as Types.TIMESTAMP. We have to mimic that
-		// when using our own statement to retrieve column definitions
-		String value = getDriverProperty(connection, "oracle.jdbc.mapDateToTimestamp", true);
-		return "true".equalsIgnoreCase(value);
-	}
-
-	static String getDriverProperty(WbConnection con, String property, boolean includeSystemProperty)
-	{
-		if (con == null) return "false";
-		String value = null;
-		ConnectionProfile profile = con.getProfile();
-		if (profile != null)
-		{
-			Properties props = profile.getConnectionProperties();
-			value = (props != null ? props.getProperty(property, null) : null);
-			if (value == null && includeSystemProperty)
-			{
-				value = System.getProperty(property, null);
-			}
-		}
-		return value;
-	}
-
 	@Override
-	public String getColumnClassName(int type, String dbmsType)
-	{
-		return null;
-	}
-
-	@Override
-	public int fixColumnType(int type, String dbmsType)
-	{
-		if (type == Types.DATE && getMapDateToTimestamp()) return Types.TIMESTAMP;
-
-		// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric
-		// value -101 (which is not an official java.sql.Types value
-		// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
-		if (type == -101 || type == -102) return Types.TIMESTAMP;
-
-		// The Oracle driver stupidly reports TIMESTAMP(n) columns as Types.OTHER
-		if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP("))
-		{
-			return Types.TIMESTAMP;
-		}
-
-		return type;
-	}
-
-	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, WbConnection dbConnection, DataTypeResolver typeResolver)
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
 		throws SQLException
 	{
 		if (!useOwnSql)
 		{
-			JdbcTableDefinitionReader reader = new JdbcTableDefinitionReader();
-			return reader.getTableColumns(table, dbConnection, typeResolver);
+			return super.getTableColumns(table, typeResolver);
 		}
 
 		PkDefinition primaryKey = table.getPrimaryKey();
@@ -246,7 +114,7 @@ public class OracleMetadata
 
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
 
-		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
+		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
 
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -261,7 +129,7 @@ public class OracleMetadata
 				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
-				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), fixColumnType(sqlType, typeName));
+				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), oraTypes.fixColumnType(sqlType, typeName));
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = rs.getInt("DECIMAL_DIGITS");
@@ -278,19 +146,19 @@ public class OracleMetadata
 
 				String nullable = rs.getString("IS_NULLABLE");
 				String byteOrChar = rs.getString("CHAR_USED");
-				int charSemantics = defaultLengthSemantics;
+				int charSemantics = oraTypes.getDefaultCharSemantics();
 
 				if (StringUtil.isEmptyString(byteOrChar))
 				{
-					charSemantics = defaultLengthSemantics;
+					charSemantics = oraTypes.getDefaultCharSemantics();
 				}
 				else if ("B".equals(byteOrChar.trim()))
 				{
-					charSemantics = BYTE_SEMANTICS;
+					charSemantics = OracleDataTypeResolver.BYTE_SEMANTICS;
 				}
 				else if ("C".equals(byteOrChar.trim()))
 				{
-					charSemantics = CHAR_SEMANTICS;
+					charSemantics = OracleDataTypeResolver.CHAR_SEMANTICS;
 				}
 
 				boolean isVirtual = false;
@@ -299,7 +167,7 @@ public class OracleMetadata
 					String virtual = rs.getString("VIRTUAL_COLUMN");
 					isVirtual = StringUtil.stringToBool(virtual);
 				}
-				String display = getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
+				String display = oraTypes.getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
 
 				col.setDbmsType(display);
 				col.setIsPkColumn(pkColumns.contains(colName));
@@ -365,7 +233,7 @@ public class OracleMetadata
     // to speed up the retrieval.
 		final String sql1 =
 			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n   " +
-			      getDecodeForDataType("t.data_type", fixNVARCHAR, getMapDateToTimestamp()) + " AS data_type, \n" +
+			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     DECODE(t.data_precision, null, " +
 			"        decode(t.data_type, 'VARCHAR', t.char_length, " +
@@ -384,7 +252,7 @@ public class OracleMetadata
 			"     t.column_id AS ordinal_position,   \n" +
 			"     DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
 
-		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
+		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
 		if (includeVirtualColumns)
 		{
 			// for some reason XMLTYPE columns are returned with virtual_column = 'YES' which seems like a bug in all_tab_cols....
@@ -408,7 +276,7 @@ public class OracleMetadata
 
 		String sql = null;
 
-		if (getRemarksReporting(connection))
+		if (OracleUtils.getRemarksReporting(dbConnection))
 		{
 			sql = sql_comment;
 		}
@@ -432,7 +300,7 @@ public class OracleMetadata
 			}
 		}
 
-		PreparedStatement stmt = this.connection.getSqlConnection().prepareStatement(sql);
+		PreparedStatement stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 		stmt.setString(1, schema);
 		stmt.setString(2, table);
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -468,9 +336,9 @@ public class OracleMetadata
 
 		try
 		{
-			synchronized (connection)
+			synchronized (dbConnection)
 			{
-				stmt = this.connection.getSqlConnection().prepareStatement(sql);
+				stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 				stmt.setString(1, dblink);
 				stmt.setString(2, owner);
 				rs = stmt.executeQuery();
@@ -509,79 +377,6 @@ public class OracleMetadata
 			value = props.getProperty("remarksReporting", "false");
 		}
 		return "true".equals(value);
-	}
-
-	private String getVarcharType(String type, int size, int semantics)
-	{
-		StringBuilder result = new StringBuilder(25);
-		result.append(type);
-		result.append('(');
-		result.append(size);
-
-		// Only apply this logic on VARCHAR columns
-		// NVARCHAR (which might have been reported as type == VARCHAR) does not allow Byte/Char semantics
-		if (type.startsWith("VARCHAR"))
-		{
-			if (alwaysShowCharSemantics || semantics != defaultLengthSemantics)
-			{
-				if (semantics < 0) semantics = defaultLengthSemantics;
-				if (semantics == BYTE_SEMANTICS)
-				{
-					result.append(" Byte");
-				}
-				else if (semantics == CHAR_SEMANTICS)
-				{
-					result.append(" Char");
-				}
-			}
-		}
-		result.append(')');
-		return result.toString();
-	}
-
-	@Override
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
-	{
-		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, -1);
-	}
-
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
-	{
-		String display = null;
-
-		if (sqlType == Types.VARCHAR)
-		{
-			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
-			// My own statement to retrieve column information in OracleMetaData
-			// will return the byte/char semantics in the field WB_SQL_DATA_TYPE
-			// Oracle's JDBC driver does not supply this information (because
-			// the JDBC standard does not define a column for this)
-			display = getVarcharType(dbmsName, size, byteOrChar);
-		}
-		else if ("NUMBER".equalsIgnoreCase(dbmsName))
-		{
-			if (digits < 0)
-			{
-				return "NUMBER";
-			}
-			else if (digits == 0)
-			{
-				return "NUMBER(" + size + ")";
-			}
-			else
-			{
-				return "NUMBER(" + size + "," + digits + ")";
-			}
-		}
-		else if (sqlType == Types.VARBINARY && "RAW".equals(dbmsName))
-		{
-			return "RAW(" + size  + ")";
-		}
-		else
-		{
-			display = SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
-		}
-		return display;
 	}
 
 }

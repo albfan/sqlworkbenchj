@@ -10,20 +10,22 @@
  */
 package workbench.db.ibm;
 
+
 import java.sql.SQLException;
-import workbench.db.oracle.*;
-import workbench.WbTestCase;
-import java.util.List;
-import workbench.db.TableIdentifier;
+
 import java.util.Collection;
-import workbench.db.SynonymReader;
+import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.db.SynonymDDLHandler;
-import workbench.db.WbConnection;
 import static org.junit.Assert.*;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.db.SynonymReader;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -89,7 +91,7 @@ public class DB2SynonymReaderTest
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();
 		assertTrue(types.contains("SYNONYM"));
-		
+
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "ALIAS"});
 		assertNotNull(objects);
 		assertEquals(1, objects.size());
@@ -100,7 +102,7 @@ public class DB2SynonymReaderTest
 		assertNotNull(table);
 		assertEquals("PERSON", table.getTableName());
 
-		String sql = reader.getSynonymSource(con, syn.getSchema(), syn.getTableName());
+		String sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
 
 		String schema = Db2TestUtil.getSchemaName();
 		String expected = "CREATE ALIAS " + schema + ".S_PERSON\n   FOR " + schema + ".PERSON;";

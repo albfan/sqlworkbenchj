@@ -1,0 +1,72 @@
+/*
+ * OracleDataTypeResolverTest.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2012, Thomas Kellerer
+ * No part of this code may be reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.db.oracle;
+
+import java.sql.Types;
+import org.junit.Before;
+import org.junit.Test;
+import workbench.WbTestCase;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class OracleDataTypeResolverTest
+	extends WbTestCase
+{
+	public OracleDataTypeResolverTest()
+	{
+		super("OracleDataTypeResolverTest");
+	}
+
+	@Before
+	public void setUp()
+	{
+	}
+
+	@Test
+	public void testGetSqlTypeDisplay()
+	{
+		// Test with BYTE as default semantics
+		OracleDataTypeResolver resolver = new OracleDataTypeResolver(OracleUtils.BYTE_SEMANTICS, false);
+
+		// Test non-Varchar types
+		assertEquals("CLOB", resolver.getSqlTypeDisplay("CLOB", Types.CLOB, -1, -1, 0));
+		assertEquals("NVARCHAR(300)", resolver.getSqlTypeDisplay("NVARCHAR", Types.VARCHAR, 300, -1, 0));
+		assertEquals("CHAR(5)", resolver.getSqlTypeDisplay("CHAR", Types.CHAR, 5, -1, 0));
+		assertEquals("NUMBER(10,2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, 2, 0));
+
+		String display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		assertEquals("VARCHAR(200)", display);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		assertEquals("VARCHAR(200 Char)", display);
+
+		resolver = new OracleDataTypeResolver(OracleUtils.CHAR_SEMANTICS, false);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		assertEquals("VARCHAR(200 Byte)", display);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		assertEquals("VARCHAR(200)", display);
+
+		resolver = new OracleDataTypeResolver(OracleUtils.CHAR_SEMANTICS, true);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		assertEquals("VARCHAR(200 Byte)", display);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		assertEquals("VARCHAR(200 Char)", display);
+	}
+
+
+}

@@ -19,7 +19,7 @@ import workbench.db.DbSettings;
 import workbench.db.MetaDataSqlManager;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleUtils;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
@@ -92,7 +92,7 @@ public class ColumnChanger
 		{
 			String oldComment = oldDefinition.getComment();
 			String newComment = newDefinition.getComment();
-			if (!StringUtil.equalStringOrEmpty(oldComment, newComment) && !OracleMetadata.remarksEnabled(dbConn))
+			if (!StringUtil.equalStringOrEmpty(oldComment, newComment) && !OracleUtils.remarksEnabled(dbConn))
 			{
 				result.append("-- ");
 				result.append(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));

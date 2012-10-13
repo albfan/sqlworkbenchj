@@ -116,7 +116,7 @@ public class TableSelectBuilder
 	 * @param table    the table to retrieve
 	 * @param columns  the columns to use
 	 * @return a SELECT for all rows in the table
-	 * @see #getColumnExpression(workbench.db.ColumnIdentifier) 
+	 * @see #getColumnExpression(workbench.db.ColumnIdentifier)
 	 */
 	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns)
 	{

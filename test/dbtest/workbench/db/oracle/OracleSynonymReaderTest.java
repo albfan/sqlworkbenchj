@@ -76,7 +76,7 @@ public class OracleSynonymReaderTest
 		TableIdentifier table = con.getMetadata().getSynonymTable(syn);
 		assertNotNull(table);
 		assertEquals("PERSON", table.getTableName());
-		String sql = reader.getSynonymSource(con, syn.getSchema(), syn.getTableName());
+		String sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
 //		System.out.println(sql);
 		String expected = "CREATE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
 		assertEquals(expected, sql.trim());

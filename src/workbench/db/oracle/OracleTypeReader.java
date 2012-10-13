@@ -212,7 +212,7 @@ public class OracleTypeReader
 			"       length,  \n" +
 			"       precision,  \n" +
 			"       scale,  \n" +
-			OracleMetadata.getDecodeForDataType("attr_type_name", true, true) + " as jdbc_type \n" +
+			OracleTableDefinitionReader.getDecodeForDataType("attr_type_name", true, true) + " as jdbc_type \n" +
 			"FROM all_type_attrs  \n";
 
 		sql += " WHERE type_name = '" + type.getObjectName() + "' \n";

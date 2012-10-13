@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.TableIdentifier;
-import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleUtils;
 import workbench.db.report.SchemaReporter;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
@@ -171,7 +171,7 @@ public class WbSchemaReport
 
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
-			if (!OracleMetadata.remarksEnabled(currentConnection))
+			if (!OracleUtils.remarksEnabled(currentConnection))
 			{
 				result.addMessage(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
 				result.addMessage("");
