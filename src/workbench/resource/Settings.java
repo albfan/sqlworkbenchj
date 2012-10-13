@@ -2068,16 +2068,6 @@ public class Settings
 		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
 	}
 
-	/**
-	 * Returns a list of DBIDs of servers that do not accept the NULL keyword
-	 * in a column definition.
-	 */
-	public List<String> getServersWithNoNullKeywords()
-	{
-		String list = getProperty("workbench.db.nonullkeyword", "");
-		return StringUtil.stringToList(list, ",");
-	}
-
 	public boolean getCheckPreparedStatements()
 	{
 		return getBoolProperty("workbench.sql.checkprepared", false);
@@ -3141,6 +3131,18 @@ public class Settings
 			props.remove("workbench.db.hsql_database_engine.drop.column.single");
 			props.remove("workbench.db.oracle.drop.column.single");
 			props.remove("workbench.db.postgresql.drop.column.single");
+			props.remove("workbench.db.nonullkeyword");
+			
+			String v = props.getProperty("workbench.db.objecttype.selectable.apache_derby", "");
+			if ("table,view,system table,system view,sequence,synonym".equalsIgnoreCase(v))
+			{
+				props.remove("workbench.db.objecttype.selectable.apache_derby");
+			}
+			v = props.getProperty("workbench.db.objecttype.selectable.postgresql", null);
+			if ("table,view,system table,system view,sequence".equalsIgnoreCase(v))
+			{
+				props.remove("workbench.db.objecttype.selectable.postgresql");
+			}
 		}
 		catch (Throwable e)
 		{

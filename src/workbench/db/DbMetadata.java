@@ -370,8 +370,28 @@ public class DbMetadata
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 
-		List<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, "TABLE");
-		LogMgr.logDebug("DbMetadata.<init>", "Using configured tabletypes: " + ttypes);
+		Collection<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, null);
+		if (ttypes.isEmpty())
+		{
+			ttypes = retrieveTableTypes();
+			Iterator<String> itr = ttypes.iterator();
+			while (itr.hasNext())
+			{
+				String type = itr.next().toLowerCase();
+				// we don't want views or system tables in this list because it should
+				// only contain real uset table
+				if (type.contains("view") || type.contains("system"))
+				{
+					itr.remove();
+				}
+			}
+			LogMgr.logDebug("DbMetadata.<init>", "Using tabletypes returned by the JDBC driver: " + ttypes);
+		}
+		else
+		{
+			LogMgr.logInfo("DbMetadata.<init>", "Using configured tabletypes: " + ttypes);
+		}
+
 		tableTypesList = CollectionUtil.caseInsensitiveSet();
 		tableTypesList.addAll(ttypes);
 
@@ -610,17 +630,6 @@ public class DbMetadata
 			List<String> l = StringUtil.stringToList(types.toLowerCase(), ",", true, true);
 			objectsWithData.addAll(l);
 		}
-
-		if (this.isPostgres)
-		{
-			objectsWithData.add("sequence");
-		}
-
-		if (this.isOracle)
-		{
-			objectsWithData.add(MVIEW_NAME);
-		}
-
 		return objectsWithData;
 	}
 
@@ -2465,7 +2474,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); }	 catch (Throwable e) {}
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
@@ -2488,9 +2497,10 @@ public class DbMetadata
 			result.add("SYNONYM");
 		}
 
-		if (getSequenceReader() != null)
+		SequenceReader reader = getSequenceReader();
+		if (reader != null)
 		{
-			result.add(getSequenceReader().getSequenceTypeName());
+			result.add(reader.getSequenceTypeName());
 		}
 
 		for (ObjectListExtender extender : extenders)

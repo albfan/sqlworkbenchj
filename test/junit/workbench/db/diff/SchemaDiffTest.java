@@ -62,7 +62,7 @@ public class SchemaDiffTest
 		diff.setSchemas("REF", "OLD");
 
 		String xml = diff.getMigrateTargetXml();
-//		TestUtil util = new TestUtil("testBaseDiff");
+//		TestUtil util = getTestUtil();
 //		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
 //		System.out.println("---------------\n" + xml + "\n---------------");
 
@@ -148,7 +148,7 @@ public class SchemaDiffTest
 		diff.setIncludeViews(false);
 		diff.compareAll();
 		String xml = diff.getMigrateTargetXml();
-//			TestUtil util = new TestUtil("testGrantDiff");
+//			TestUtil util = getTestUtil();
 //			TestUtil.writeFile(new File(util.getBaseDir(), "grantdiff.xml"), xml);
 
 		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
@@ -179,8 +179,8 @@ public class SchemaDiffTest
 		diff.setIncludeViews(false);
 		diff.compareAll();
 		String xml = diff.getMigrateTargetXml();
-//			TestUtil util = new TestUtil("testIndexChangeOnly");
-//			TestUtil.writeFile(new File(util.getBaseDir(), "indexdiff.xml"), xml);
+//		TestUtil util = getTestUtil();
+//		TestUtil.writeFile(new File(util.getBaseDir(), "indexdiff.xml"), xml);
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 		assertEquals("Incorrect number of tables listed", "3", count);
 
@@ -241,7 +241,8 @@ public class SchemaDiffTest
 	private void setupCheckTest()
 		throws SQLException, ClassNotFoundException
 	{
-		TestUtil util = new TestUtil("schemaDiffTest");
+		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
@@ -269,7 +270,8 @@ public class SchemaDiffTest
 	private void setupGrantTestDb()
 		throws SQLException, ClassNotFoundException
 	{
-		TestUtil util = new TestUtil("schemaDiffTest");
+		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
@@ -296,7 +298,8 @@ public class SchemaDiffTest
 	private void setupIndexDiffTestDb()
 		throws SQLException, ClassNotFoundException
 	{
-		TestUtil util = new TestUtil("schemaDiffTest");
+		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
@@ -331,7 +334,8 @@ public class SchemaDiffTest
 	private void setupBaseDatabase()
 		throws SQLException, ClassNotFoundException
 	{
-		TestUtil util = new TestUtil("schemaDiffTest");
+		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 
 		this.source = util.getConnection("source");
 		this.target = util.getConnection("target");
