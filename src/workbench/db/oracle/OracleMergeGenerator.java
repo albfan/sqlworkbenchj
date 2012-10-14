@@ -10,8 +10,6 @@
  */
 package workbench.db.oracle;
 
-
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.storage.ColumnData;
