@@ -866,6 +866,8 @@ public class SqlUtil
 			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.emptyList();
 			t = lex.getNextToken(false, false);
 
+			if (t == null) return Collections.emptyList();
+
 			boolean ignoreFirstBracket = false;
 
 			// Skip a potential DISTINCT at the beginning
@@ -874,6 +876,7 @@ public class SqlUtil
 				// Postgres DISTINCT ON extension...
 				ignoreFirstBracket = t.getContents().equals("DISTINCT ON");
 				t = lex.getNextToken(false, false);
+				if (t == null) return Collections.emptyList();
 			}
 
 			int lastColStart = t.getCharBegin();
