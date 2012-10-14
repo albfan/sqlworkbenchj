@@ -928,6 +928,15 @@ public class SqlUtilTest
 		sql = "select * from t where x = 1 and y = 42";
 		newSql = SqlUtil.replaceParameters(sql, "foo", "bar");
 		assertEquals("select * from t where x = 1 and y = 42", newSql);
-
 	}
+
+	@Test
+	public void testCleanDataType()
+	{
+		String type = SqlUtil.getPlainTypeName("varchar");
+		assertEquals("varchar", type);
+		type = SqlUtil.getPlainTypeName("varchar(10)");
+		assertEquals("varchar", type);
+	}
+
 }

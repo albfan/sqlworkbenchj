@@ -170,14 +170,4 @@ public class TableSelectBuilderTest
 		assertEquals(expected, sql);
 
 	}
-
-	@Test
-	public void testCleanDataType()
-	{
-		TableSelectBuilder builder = new TableSelectBuilder(null);
-		String type = builder.cleanDataType("varchar");
-		assertEquals("varchar", type);
-		type = builder.cleanDataType("varchar(10)");
-		assertEquals("varchar", type);
-	}
 }
