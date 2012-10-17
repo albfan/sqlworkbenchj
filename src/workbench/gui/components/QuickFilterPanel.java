@@ -486,7 +486,8 @@ public class QuickFilterPanel
 	{
 		if (e.getSource() == filterValue)
 		{
-			if (e.getActionCommand().equals("comboBoxEdited"))
+			String cmd = e.getActionCommand();
+			if (cmd.equals("comboBoxChanged") || cmd.equals("comboBoxEdited"))
 			{
 				applyQuickFilter();
 			}
