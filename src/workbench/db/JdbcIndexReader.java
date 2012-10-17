@@ -249,10 +249,11 @@ public class JdbcIndexReader
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, this.metaData.quoteObjectname(indexDefinition.getUniqueConstraintName()));
+
 		ConstraintDefinition constraint = indexDefinition.getUniqueConstraint();
 
-		Boolean deferred = constraint == null ? false : constraint.isInitiallyDeferred();
-		Boolean deferrable = constraint == null ? false : constraint.isDeferrable();
+		Boolean deferred = constraint == null ? Boolean.FALSE : constraint.isInitiallyDeferred();
+		Boolean deferrable = constraint == null ? Boolean.FALSE : constraint.isDeferrable();
 
 		if (deferrable == null)
 		{
