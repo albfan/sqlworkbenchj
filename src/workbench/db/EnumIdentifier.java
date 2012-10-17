@@ -20,7 +20,7 @@ import workbench.util.SqlUtil;
  * Representation of an enum type definition.
  *
  * Currently only used for PostgreSQL
- * 
+ *
  * @author Thomas Kellerer
  */
 public class EnumIdentifier
@@ -83,7 +83,7 @@ public class EnumIdentifier
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(null, catalog, schema, enumName);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

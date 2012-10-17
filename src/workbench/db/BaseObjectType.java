@@ -77,7 +77,7 @@ public class BaseObjectType
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, catalog, schema, typeName);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

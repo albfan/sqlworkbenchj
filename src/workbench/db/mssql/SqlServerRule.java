@@ -70,7 +70,7 @@ public class SqlServerRule
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(null, catalog, schema, ruleName);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

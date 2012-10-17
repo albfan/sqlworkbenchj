@@ -207,13 +207,7 @@ public class TableIdentifier
 	@Override
 	public String getFullyQualifiedName(WbConnection con)
 	{
-		if (con == null)
-		{
-			return SqlUtil.buildExpression(null, catalog, schema, tablename);
-		}
-		String cat = con.getDbSettings().supportsCatalogs() ? catalog : null;
-		String schem = con.getDbSettings().supportsSchemas() ? schema : null;
-		return SqlUtil.buildExpression(con, cat, schem, tablename);
+		return SqlUtil.fullyQualifiedName(con, this);
 	}
 
 	@Override

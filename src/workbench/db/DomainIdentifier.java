@@ -129,7 +129,7 @@ public class DomainIdentifier
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(null, catalog, schema, domain);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

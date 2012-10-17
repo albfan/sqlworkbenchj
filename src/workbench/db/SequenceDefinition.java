@@ -128,7 +128,7 @@ public class SequenceDefinition
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(null, catalog, schema, sequenceName);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

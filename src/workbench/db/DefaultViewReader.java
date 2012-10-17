@@ -12,6 +12,7 @@
 package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 import workbench.log.LogMgr;
@@ -215,14 +216,18 @@ public class DefaultViewReader
 		StringBuilder source = new StringBuilder(500);
 		Statement stmt = null;
 		ResultSet rs = null;
-
+		Savepoint sp = null;
 		try
 		{
+			if (connection.getDbSettings().useSavePointForDML())
+			{
+				sp = connection.setSavepoint();
+			}
 			TableIdentifier tbl = viewId.createCopy();
 			tbl.adjustCase(connection);
-			sql.setSchema(tbl.getSchema());
-			sql.setObjectName(tbl.getTableName());
-			sql.setCatalog(tbl.getCatalog());
+			sql.setSchema(connection.getMetadata().quoteObjectname(tbl.getSchema()));
+			sql.setObjectName(connection.getMetadata().quoteObjectname(tbl.getTableName()));
+			sql.setCatalog(connection.getMetadata().quoteObjectname(tbl.getCatalog()));
 			stmt = connection.createStatementForQuery();
 			String query = sql.getSql();
 			if (Settings.getInstance().getDebugMetadataSql())
@@ -265,12 +270,13 @@ public class DefaultViewReader
 					}
 				}
 			}
+			connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression(), e);
+			LogMgr.logError("DefaultViewReader.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression(), e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
-			if (this.connection.getMetadata().isPostgres()) try { this.connection.rollback(); } catch (Throwable th) {}
+			connection.rollback(sp);
 		}
 		finally
 		{

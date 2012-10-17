@@ -149,7 +149,7 @@ public class IndexDefinition
 	@Override
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(null, getCatalog(), getSchema(), indexName);
+		return SqlUtil.fullyQualifiedName(conn, this);
 	}
 
 	@Override

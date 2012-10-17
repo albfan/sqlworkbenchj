@@ -177,7 +177,7 @@ public class SimpleLogger
 		{
 			if (th != null)
 			{
-				String error = ExceptionUtil.getDisplay(th, showStackTrace || this.level == LogLevel.debug);
+				String error = ExceptionUtil.getDisplay(th, showStackTrace || this.level == LogLevel.debug || this.level == LogLevel.trace);
 				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, error);
 			}
 			else
