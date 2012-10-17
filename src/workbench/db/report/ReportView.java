@@ -24,7 +24,10 @@ import workbench.util.StrBuffer;
 import java.util.Collections;
 import workbench.db.IndexDefinition;
 import workbench.db.NoConfigException;
+import workbench.db.ReaderFactory;
 import workbench.db.TableCommentReader;
+import workbench.db.TableGrant;
+import workbench.db.ViewGrantReader;
 import workbench.util.StringUtil;
 
 /**
@@ -51,6 +54,9 @@ public class ReportView
 	private TagWriter tagWriter = new TagWriter();
 	private IndexReporter index;
 
+	private boolean includeGrants;
+	private ReportTableGrants grants;
+
 	/** The schema name to be used in the generated XML */
 	private String schemaNameToUse = null;
 
@@ -70,10 +76,11 @@ public class ReportView
 	 *  <li>the source for the view using {@link workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex)
+	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeViewGrants)
 		throws SQLException
 	{
 		this.view = tbl;
+		this.includeGrants = includeViewGrants;
 
 		if (tbl.getSchema() == null)
 		{
@@ -95,11 +102,18 @@ public class ReportView
 		}
 		try
 		{
-			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
+			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl, false);
 		}
 		catch (NoConfigException no)
 		{
 			viewSource = StringUtil.EMPTY_STRING;
+		}
+
+		if (includeGrants)
+		{
+			ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(conn);
+			Collection<TableGrant> viewGrants = grantReader.getViewGrants(conn, tbl);
+			grants = new ReportTableGrants(viewGrants);
 		}
 		this.setColumns(cols);
 		if (includeIndex)
@@ -187,6 +201,10 @@ public class ReportView
 		for (int i=0; i < cols; i++)
 		{
 			this.columns[i].appendXml(line, colindent);
+		}
+		if (this.grants != null)
+		{
+			this.grants.appendXml(line, colindent);
 		}
 		writeSourceTag(tagWriter, line, colindent, viewSource);
 		if (includeIndex && this.index != null) this.index.appendXml(line, colindent);

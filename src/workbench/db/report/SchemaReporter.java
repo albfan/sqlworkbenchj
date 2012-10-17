@@ -285,7 +285,7 @@ public class SchemaReporter
 				}
 				else if (dbs.isViewType(type))
 				{
-					ReportView rview = new ReportView(table, this.dbConn, true);
+					ReportView rview = new ReportView(table, this.dbConn, true, includeGrants);
 					rview.setSchemaNameToUse(this.schemaNameToUse);
 					rview.writeXml(out);
 				}

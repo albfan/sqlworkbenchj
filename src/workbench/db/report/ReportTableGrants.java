@@ -46,7 +46,7 @@ public class ReportTableGrants
 
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
-		if (grants.size() == 0) return;
+		if (grants.isEmpty()) return;
 
 		TagWriter tagWriter = new TagWriter();
 

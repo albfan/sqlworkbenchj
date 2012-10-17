@@ -316,7 +316,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportView view = new ReportView(tbl, con, diffIndex);
+		ReportView view = new ReportView(tbl, con, diffIndex, diffGrants);
 		return view;
 	}
 
@@ -422,7 +422,7 @@ public class SchemaDiff
 	 *
 	 * @param rSchema the reference schema. If null the "current schema" of the reference connection will be used
 	 * @param tSchema the target schema. If null the "current schema" of the target connection will be used
-	 * 
+	 *
 	 * @see #setTables(List, List)
 	 * @see #setTables(List)
 	 */

@@ -76,7 +76,7 @@ public class DefaultViewReader
 		CharSequence source = null;
 		try
 		{
-			source = this.getViewSource(viewTable);
+			source = this.getViewSource(viewTable, true);
 		}
 		catch (NoConfigException no)
 		{
@@ -205,7 +205,7 @@ public class DefaultViewReader
 	 *  @throws NoConfigException if no SQL was configured in ViewSourceStatements.xml
 	 */
 	@Override
-	public CharSequence getViewSource(TableIdentifier viewId)
+	public CharSequence getViewSource(TableIdentifier viewId, boolean includeGrants)
 		throws NoConfigException
 	{
 		if (viewId == null) return null;
@@ -258,15 +258,18 @@ public class DefaultViewReader
 					source.append(';');
 					source.append(Settings.getInstance().getInternalEditorLineEnding());
 				}
-				ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
-				if (grantReader != null)
+				if (includeGrants)
 				{
-					CharSequence grants = grantReader.getViewGrantSource(connection, viewId);
-					if (grants != null && grants.length() > 0)
+					ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
+					if (grantReader != null)
 					{
-						source.append(Settings.getInstance().getInternalEditorLineEnding());
-						source.append(grants);
-						source.append(Settings.getInstance().getInternalEditorLineEnding());
+						CharSequence grants = grantReader.getViewGrantSource(connection, viewId);
+						if (grants != null && grants.length() > 0)
+						{
+							source.append(Settings.getInstance().getInternalEditorLineEnding());
+							source.append(grants);
+							source.append(Settings.getInstance().getInternalEditorLineEnding());
+						}
 					}
 				}
 			}
