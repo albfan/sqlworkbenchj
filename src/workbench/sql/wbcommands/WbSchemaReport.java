@@ -211,6 +211,12 @@ public class WbSchemaReport
 			{
 				transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 				transformer.transform(output.getFullPath(), xsltOutput, xslt);
+				String msg = transformer.getAllOutputs();
+				if (msg.length() != 0)
+				{
+					result.addMessage(msg);
+					result.addMessage(""); // create newline
+				}
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 				result.setSuccess();
 			}

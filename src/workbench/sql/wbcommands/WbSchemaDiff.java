@@ -285,6 +285,12 @@ public class WbSchemaDiff
 					{
 						transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 						transformer.transform(output.getFullPath(), xsltOutput, xslt);
+						String xsltMsg = transformer.getAllOutputs();
+						if (xsltMsg.length() != 0)
+						{
+							result.addMessage(xsltMsg);
+							result.addMessage(""); // create newline
+						}
 						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 						result.setSuccess();
 					}
