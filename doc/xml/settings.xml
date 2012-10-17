@@ -328,7 +328,7 @@
         this retrieval can be disabled using this configuration setting.
       </para>
       <para>
-        The of the extended property can be configured using
+        The name of the extended property can be configured using
         <link linkend="dbexplorer-ms-remarks-prop"><literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></link>
       </para>
       <para>Default value: <literal>false</literal> for both properties</para>
