@@ -177,6 +177,11 @@ public class ReportTable
 		retrieveOptions(conn);
 	}
 
+	public boolean grantsIncluded()
+	{
+		return grants != null;
+	}
+
 	private ReportTable(TableIdentifier tbl, char catSep)
 	{
 		this.table = tbl;
