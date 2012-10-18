@@ -6,11 +6,19 @@
   <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
   <xsl:variable name="table-name" select="table-name"/>
-  <xsl:variable name="table-space">${tablespace.table}</xsl:variable>
-  <xsl:variable name="index-space">${tablespace.index}</xsl:variable>
 
-  <createTable tableName="{$table-name}" schemaName="{$schema-owner}" tablespace="{$table-space}">
-  
+  <createTable tableName="{$table-name}">
+    <xsl:if test="string-length($schema.owner) &gt; 0">
+      <xsl:attribute name="schemaName">
+         <xsl:value-of select="$schema.owner"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length($tablespace.table) &gt; 0">
+      <xsl:attribute name="tablespace">
+         <xsl:value-of select="$tablespace.table"/>
+      </xsl:attribute>
+    </xsl:if>
+
     <xsl:if test="string-length(comment) &gt; 0">
       <xsl:attribute name="remarks">
         <xsl:call-template name="_replace_text">
@@ -29,12 +37,12 @@
     <xsl:variable name="pk-col-count">
       <xsl:value-of select="count(column-def[primary-key='true'])"/>
     </xsl:variable>
-    
+
     <xsl:for-each select="column-def">
       <xsl:sort select="dbms-position"/>
-      
+
       <xsl:variable name="column-name" select="@name"/>
-      
+
       <xsl:variable name="data-type">
         <xsl:if test="$useJdbcTypes = 'true'">
           <xsl:call-template name="write-data-type">
@@ -43,35 +51,35 @@
             <xsl:with-param name="scale" select="dbms-data-digits"/>
           </xsl:call-template>
         </xsl:if>
-        
+
         <xsl:if test="$useJdbcTypes = 'false'">
           <xsl:value-of select="dbms-data-type"/>
         </xsl:if>
       </xsl:variable>
-      
+
       <column name="{$column-name}" type="{$data-type}">
-      
+
         <xsl:variable name="pk-flag" select="primary-key"/>
         <xsl:variable name="nullable" select="nullable"/>
         <xsl:variable name="type-id" select="java-sql-type"/>
 
         <xsl:if test="string-length(default-value) &gt; 0">
-        
+
           <!-- defaults for character columns go into a different attribute than other values -->
           <xsl:variable name="character-types">
             <xsl:value-of select="'12;-9;-15;1;'"/>
           </xsl:variable>
           <xsl:if test="contains($character-types, concat($type-id,';'))">
-            <xsl:attribute name="defaultValue"> 
+            <xsl:attribute name="defaultValue">
               <xsl:value-of select="default-value"/>
             </xsl:attribute>
           </xsl:if>
-          
+
           <xsl:variable name="numeric-types">
             <xsl:value-of select="'-5;3;4;5;6;7;8;'"/>
           </xsl:variable>
           <xsl:if test="contains($numeric-types, concat($type-id,';'))">
-            <xsl:attribute name="defaultValueNumeric"> 
+            <xsl:attribute name="defaultValueNumeric">
               <xsl:value-of select="translate(default-value, ' *?[]()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', '')"/>
             </xsl:attribute>
           </xsl:if>
@@ -80,12 +88,12 @@
             <xsl:value-of select="'16;-7;'"/>
           </xsl:variable>
           <xsl:if test="contains($boolean-types, concat($type-id,';'))">
-            <xsl:attribute name="defaultValueBoolean"> 
+            <xsl:attribute name="defaultValueBoolean">
               <xsl:value-of select="translate(default-value, ' *?[]()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', '')"/>
             </xsl:attribute>
           </xsl:if>
         </xsl:if>
-        
+
         <!-- only write remarks if they are defined -->
         <xsl:if test="string-length(comment) &gt; 0">
           <xsl:attribute name="remarks">
@@ -99,13 +107,13 @@
 
         <xsl:if test="($pk-flag = 'true' and $pk-col-count = 1) or $nullable = 'false'">
           <constraints>
-          
+
             <xsl:if test="$nullable = 'false'">
               <xsl:attribute name="nullable">
                 <xsl:value-of select="$nullable"/>
               </xsl:attribute>
             </xsl:if>
-            
+
             <xsl:if test="$pk-flag = 'true' and $pk-col-count = 1">
               <xsl:attribute name="primaryKey">
                 <xsl:value-of select="'true'"/>
@@ -114,39 +122,37 @@
                 <xsl:value-of select="$pk-name"/>
               </xsl:attribute>
             </xsl:if>
-          
+
           </constraints>
         </xsl:if>
-        
+
       </column>
-      
+
     </xsl:for-each> <!-- columns -->
-      
+
   </createTable>
 
-  <!-- 
-    now process all index definitions for this table 
+  <!--
+    now process all index definitions for this table
   -->
   <xsl:for-each select="index-def">
     <xsl:call-template name="create-index">
        <xsl:with-param name="table-name" select="$table-name"/>
-       <xsl:with-param name="tbl-space" select="$index-space"/>
     </xsl:call-template>
-  </xsl:for-each> <!-- table index -->
-  
+  </xsl:for-each> <!-- index-def -->
+
   <xsl:for-each select="table-constraints/constraint-definition[@type='check']">
     <xsl:variable name="condition">
         <xsl:value-of select="normalize-space(.)"/>
     </xsl:variable>
     <sql>ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></sql><xsl:text>&#10;</xsl:text>
   </xsl:for-each>
-  
+
 </xsl:template>
-  
+
 <xsl:template name="create-index">
   <xsl:param name="table-name"/>
-  <xsl:param name="tbl-space"/>
-  
+
   <xsl:variable name="index-name">
     <xsl:value-of select="name"/>
   </xsl:variable>
@@ -171,7 +177,17 @@
   </xsl:if>
 
   <xsl:if test="primary-key='false'">
-    <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}" schemaName="{$schema-owner}" tablespace="{$tbl-space}">
+    <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}">
+    <xsl:if test="string-length($schema.owner) &gt; 0">
+      <xsl:attribute name="schemaName">
+         <xsl:value-of select="$schema.owner"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length($tablespace.index) &gt; 0">
+      <xsl:attribute name="tablespace">
+         <xsl:value-of select="$tablespace.index"/>
+      </xsl:attribute>
+    </xsl:if>
 
     <xsl:for-each select="column-list/column">
       <column>
@@ -186,10 +202,10 @@
 
 <xsl:template name="add-fk">
   <xsl:param name="tablename"/>
-  
+
   <xsl:variable name="fk-name" select="constraint-name"/>
   <xsl:variable name="referenced-table" select="references/table-name"/>
-  
+
   <xsl:variable name="base-columns">
     <xsl:for-each select="source-columns/column">
       <xsl:copy-of select="."/>
@@ -211,7 +227,7 @@
                            referencedColumnNames="{$referenced-columns}"/>
 </xsl:template>
 
-<!-- 
+<!--
   Map jdbc data types (from java.sql.Types) to a proper data type
   using scale and precision where approriate.
 -->
@@ -294,10 +310,10 @@
     </xsl:when>
     <xsl:otherwise>
         <xsl:text>[</xsl:text><xsl:value-of select="$type-id"/><xsl:text>]</xsl:text>
-    </xsl:otherwise>  
+    </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
-  
+
 <xsl:template name="_replace_text">
     <xsl:param name="text"/>
     <xsl:param name="replace"/>
@@ -317,5 +333,5 @@
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
-  
+
 </xsl:transform>
