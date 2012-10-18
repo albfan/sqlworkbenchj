@@ -116,17 +116,8 @@ public class WbSysExec
 			}
 			else
 			{
-				String dir = null;
-				if (runner != null)
-				{
-					dir = runner.getBaseDir();
-				}
-				if (dir == null)
-				{
-					dir = ".";
-				}
-				File cd = new File(dir);
-				this.task = Runtime.getRuntime().exec(command, null, cd);
+				File cwd = new File(getBaseDir());
+				this.task = Runtime.getRuntime().exec(command, null, cwd);
 			}
 
 			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream()));

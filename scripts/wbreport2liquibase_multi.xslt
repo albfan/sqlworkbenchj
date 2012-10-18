@@ -79,6 +79,19 @@
     </xsl:for-each>  <!-- foreign keys -->
     </changeSet>
 
+
+
+    <xsl:for-each select="proc-def">
+      <xsl:variable name="id" select="position()"/>
+      <changeSet author="{$authorName}" id="initial-proc-{$id}">
+        <createProcedure>
+           <xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>
+           <xsl:value-of disable-output-escaping="yes" select="proc-source"/>
+           <xsl:text disable-output-escaping="yes">]]&gt;</xsl:text>
+        </createProcedure>
+      </changeSet>
+    </xsl:for-each>
+
     <xsl:for-each select="view-def">
       <xsl:variable name="view-name" select="@name"/>
       <xsl:variable name="id" select="position()"/>

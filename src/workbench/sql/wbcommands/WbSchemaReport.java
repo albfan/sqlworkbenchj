@@ -209,7 +209,7 @@ public class WbSchemaReport
 			XsltTransformer transformer = new XsltTransformer();
 			try
 			{
-				transformer.setXsltBaseDir(new File(runner.getBaseDir()));
+				transformer.setXsltBaseDir(new File(getBaseDir()));
 				transformer.transform(output.getFullPath(), xsltOutput, xslt);
 				String msg = transformer.getAllOutputs();
 				if (msg.length() != 0)

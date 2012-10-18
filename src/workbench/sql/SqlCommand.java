@@ -92,6 +92,16 @@ public class SqlCommand
 		this.errorMessagesOnly = flag;
 	}
 
+	protected String getBaseDir()
+	{
+		String dir = runner == null ? null : runner.getBaseDir();
+		if (dir == null)
+		{
+			dir = ".";
+		}
+		return dir;
+	}
+	
 	protected String getDefaultSuccessMessage(StatementRunnerResult result)
 	{
 		String msg = result == null ? null : getSuccessMessage(result.getSourceCommand());

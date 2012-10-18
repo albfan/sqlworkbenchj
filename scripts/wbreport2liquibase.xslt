@@ -71,6 +71,16 @@
 
     </xsl:for-each>  <!-- foreign keys -->
 
+    <xsl:for-each select="proc-def">
+      <changeSet>
+        <createProcedure>
+           <xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>
+           <xsl:value-of disable-output-escaping="yes" select="proc-source"/>
+           <xsl:text disable-output-escaping="yes">]]&gt;</xsl:text>
+        </createProcedure>
+      </changeSet>
+    </xsl:for-each>
+
     <xsl:for-each select="view-def">
       <xsl:variable name="view-name" select="@name"/>
       <createView viewName="{$view-name}">
