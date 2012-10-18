@@ -73,7 +73,9 @@ Author: Thomas Kellerer, Henri Tremblay
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-      <xsl:value-of select="$newline"/>
+      <xsl:if test="count(table-constraints/drop-constraint/constraint-definition) &gt; 0">
+         <xsl:value-of select="$newline"/>
+      </xsl:if>
 
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
@@ -95,7 +97,7 @@ Author: Thomas Kellerer, Henri Tremblay
           </xsl:call-template>
         </xsl:if>
         <xsl:text> CHECK </xsl:text>
-        <xsl:value-of select="normalize-space(.)"/>
+        <xsl:value-of select="."/>
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
@@ -111,7 +113,7 @@ Author: Thomas Kellerer, Henri Tremblay
           </xsl:call-template>
         </xsl:if>
         <xsl:text> CHECK </xsl:text>
-        <xsl:value-of select="normalize-space(.)"/>
+        <xsl:value-of select="."/>
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
@@ -129,8 +131,11 @@ Author: Thomas Kellerer, Henri Tremblay
         </xsl:call-template>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-
     </xsl:for-each>
+
+    <xsl:if test="count(/schema-diff/modify-table) &gt; 0">
+       <xsl:value-of select="$newline"/>
+    </xsl:if>
 
     <xsl:for-each select="/schema-diff/drop-view">
       <xsl:text>DROP VIEW </xsl:text>
@@ -331,13 +336,15 @@ Author: Thomas Kellerer, Henri Tremblay
 
     <xsl:for-each select="column-def">
       <xsl:sort select="dbms-position"/>
+
       <xsl:variable name="colname">
-        <xsl:call-template name="write-object-name">
-          <xsl:with-param name="objectname" select="view-name"/>
-        </xsl:call-template>
+          <xsl:call-template name="write-object-name">
+            <xsl:with-param name="objectname" select="column-name"/>
+          </xsl:call-template>
       </xsl:variable>
+
       <xsl:text>  </xsl:text>
-      <xsl:copy-of select="$colname"/>
+      <xsl:value-of select="$colname"/>
       <xsl:if test="position() &lt; last()">
         <xsl:text>,</xsl:text>
         <xsl:value-of select="$newline"/>
@@ -348,8 +355,7 @@ Author: Thomas Kellerer, Henri Tremblay
     <xsl:value-of select="$newline"/>
     <xsl:text>AS</xsl:text>
     <xsl:value-of select="$newline"/>
-    <xsl:value-of select="normalize-space(view-source)"/>
-    <xsl:text>;</xsl:text>
+    <xsl:value-of select="view-source"/>
     <xsl:value-of select="$newline"/>
   </xsl:template>
 
@@ -425,6 +431,7 @@ Author: Thomas Kellerer, Henri Tremblay
       <xsl:call-template name="add-fk">
         <xsl:with-param name="tablename" select="$tablename"/>
       </xsl:call-template>
+      <xsl:value-of select="$newline"/>
     </xsl:for-each>
 
     <xsl:for-each select="index-def">
@@ -432,6 +439,10 @@ Author: Thomas Kellerer, Henri Tremblay
         <xsl:with-param name="tablename" select="$tablename"/>
       </xsl:call-template>
     </xsl:for-each>
+    <xsl:if test="count(index-def) &gt; 0">
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
+
 
   </xsl:template>
 
