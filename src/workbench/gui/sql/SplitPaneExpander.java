@@ -89,6 +89,7 @@ public class SplitPaneExpander
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				WbSwingUtilities.callRepaint(contentPanel);

@@ -11,7 +11,6 @@
  */
 package workbench.gui.editor.actions;
 
-import java.awt.FontMetrics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -22,14 +21,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.font.LineMetrics;
+
 import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
+
 import workbench.gui.actions.WbAction;
 import workbench.gui.completion.ParameterTipProvider;
 import workbench.gui.editor.JEditTextArea;
+
 import workbench.log.LogMgr;
 
 /**

@@ -43,6 +43,7 @@ public class ResultTabHandler
 		client = sqlPanel;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getSource() != this.resultTab) return;
@@ -64,18 +65,22 @@ public class ResultTabHandler
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
@@ -93,11 +98,13 @@ public class ResultTabHandler
 		return menu;
 	}
 
+	@Override
 	public Component getComponent()
 	{
 		return resultTab;
 	}
 
+	@Override
 	public void setCurrentTabTitle(String newName)
 	{
 		int index = this.resultTab.getSelectedIndex();
@@ -108,17 +115,20 @@ public class ResultTabHandler
 		resultTab.setTitleAt(index, newName);
 	}
 
+	@Override
 	public String getCurrentTabTitle()
 	{
 		int index = this.resultTab.getSelectedIndex();
 		return resultTab.getTitleAt(index);
 	}
 
+	@Override
 	public boolean canRenameTab()
 	{
 		return true;
 	}
 
+	@Override
 	public void addTabChangeListener(ChangeListener l)
 	{
 		this.resultTab.addChangeListener(l);

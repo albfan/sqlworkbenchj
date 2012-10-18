@@ -68,8 +68,6 @@ public class CompletionPopup
 	protected CompletionSearchField searchField;
 	private boolean dbStoresMixedCase;
 	private boolean ignoreSearchChange;
-	private boolean partialSearch;
-	private boolean filterSearch;
 
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -95,8 +93,6 @@ public class CompletionPopup
 		elementList.setVisibleRowCount(10);
 		content.add(scroll);
 		elementList.addKeyListener(this);
-		partialSearch = GuiSettings.getPartialCompletionSearch();
-		filterSearch = GuiSettings.getFilterCompletionSearch();
 	}
 
 	public void setContext(StatementContext c)
@@ -489,6 +485,9 @@ public class CompletionPopup
 		if (s == null) return -1;
 		int count = this.data.getSize();
 		if (count == 0) return -1;
+
+		boolean partialSearch = GuiSettings.getPartialCompletionSearch();
+		boolean filterSearch = GuiSettings.getFilterCompletionSearch();
 
 		if (filterSearch && data instanceof CompletionHandler)
 		{

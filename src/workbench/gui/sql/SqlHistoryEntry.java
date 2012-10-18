@@ -85,6 +85,7 @@ public class SqlHistoryEntry
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return "{" + StringUtil.getMaxSubstring(this.text, 40) + ", Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
@@ -101,6 +102,7 @@ public class SqlHistoryEntry
 		return hash;
 	}
 
+	@Override
 	public boolean equals(Object o)
 	{
 		if (!(o instanceof SqlHistoryEntry)) return false;

@@ -14,10 +14,14 @@ package workbench.gui.sql;
 import java.awt.Component;
 import java.awt.Window;
 import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.gui.components.ValidatingDialog;
+
 import workbench.resource.ResourceMgr;
 
 /**
@@ -30,10 +34,10 @@ public class MissingPkDialog
 	{
 		this.columns = cols;
 	}
-	
+
 	public boolean checkContinue(Component caller)
 	{
-		if (this.columns == null || this.columns.size() == 0) return true;
+		if (this.columns == null || this.columns.isEmpty()) return true;
 		StringBuilder msg = new StringBuilder(100);
 
 		msg.append("<html>");
@@ -55,6 +59,6 @@ public class MissingPkDialog
 		Window parent = SwingUtilities.getWindowAncestor(caller);
 		boolean ok = ValidatingDialog.showConfirmDialog(parent, new JLabel(msg.toString()), ResourceMgr.getString("TxtMissingPkTitle"), 1);
 		return ok;
-		
+
 	}
 }

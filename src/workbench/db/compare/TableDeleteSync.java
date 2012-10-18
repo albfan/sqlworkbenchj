@@ -226,7 +226,7 @@ public class TableDeleteSync
 		if (outputWriter == null)
 		{
 			// Directly delete the rows, without an intermediate script file...
-			String deleteSql = "DELETE FROM " + this.deleteTable.getTableExpression(this.toDelete) + where;
+			String deleteSql = "DELETE FROM " + this.deleteTable.getFullyQualifiedName(this.toDelete) + where;
 			PreparedStatement deleteStmt = toDelete.getSqlConnection().prepareStatement(deleteSql);
 			this.deleteStatement = new BatchedStatement(deleteStmt, toDelete, batchSize);
 			LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
@@ -416,7 +416,7 @@ public class TableDeleteSync
 				}
 				if (xmlConverter == null)
 				{
-					this.outputWriter.write("DELETE FROM " + deleteTable.getTableName() + " WHERE ") ;
+					this.outputWriter.write("DELETE FROM " + deleteTable.getTableExpression(toDelete) + " WHERE ") ;
 					for (int i=0; i < row.getColumnCount(); i++)
 					{
 						Object value = row.getValue(i);

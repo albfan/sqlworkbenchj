@@ -13,11 +13,12 @@ package workbench.gui.sql;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.JTextArea;
-import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TextComponentMouseListener;
+
 import workbench.resource.Settings;
 
 /**
@@ -39,12 +40,18 @@ public class LogArea
 		initColors();
 
 		addMouseListener(new TextComponentMouseListener());
-		
+
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_FG_COLOR,
 			Settings.PROPERTY_EDITOR_BG_COLOR);
 	}
 
+	public void dispose()
+	{
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		initColors();
