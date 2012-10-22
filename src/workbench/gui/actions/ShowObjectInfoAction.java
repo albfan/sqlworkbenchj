@@ -20,7 +20,6 @@ import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
 import workbench.storage.DataStore;
@@ -63,7 +62,7 @@ public class ShowObjectInfoAction
 			@Override
 			public void run()
 			{
-				showInfo(includeDependencies || Settings.getInstance().getObjectInfoWithDependencies());
+				showInfo(includeDependencies);
 			}
 		}, "ObjectInfoThread");
 		t.start();
@@ -80,6 +79,7 @@ public class ShowObjectInfoAction
 
 			ObjectInfo info = new ObjectInfo();
 			WbConnection conn = display.getConnection();
+			boolean deps = conn.getDbSettings().objectInfoWithDependencies();
 			String text = display.getSelectedText();
 			if (StringUtil.isEmptyString(text))
 			{
@@ -88,7 +88,7 @@ public class ShowObjectInfoAction
 			if (conn != null && StringUtil.isNonBlank(text))
 			{
 				display.showStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
-				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies);
+				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps);
 				if (result != null)
 				{
 					int count = display.getResultTabCount();

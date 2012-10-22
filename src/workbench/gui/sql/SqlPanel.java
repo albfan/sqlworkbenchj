@@ -188,6 +188,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.HtmlUtil;
 
 
 /**
@@ -1274,12 +1275,7 @@ public class SqlPanel
 		if (!isModified) return true;
 		String title = getRealTabTitle();
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
-		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", cleanHTML(title));
-	}
-
-	private String cleanHTML(String input)
-	{
-		return input.replaceAll("\\<.*?\\>", "");
+		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", HtmlUtil.cleanHTML(title));
 	}
 
 	private boolean confirmDiscardTransaction()
@@ -1298,7 +1294,7 @@ public class SqlPanel
 			{
 				tabTitle = con.getProfile().getName();
 			}
-			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", cleanHTML(tabTitle));
+			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardOpenTrans", HtmlUtil.cleanHTML(tabTitle));
 		}
 		return true;
 	}

@@ -201,4 +201,11 @@ public class HtmlUtil
 		return s;
 	}
 
+	public static String cleanHTML(String input)
+	{
+		if (input == null) return input;
+		return input.replaceAll("\\<.*?\\>", "");
+	}
+
+
 }

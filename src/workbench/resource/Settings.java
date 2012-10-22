@@ -1700,16 +1700,6 @@ public class Settings
 		setProperty(PROPERTY_SHOW_LINE_NUMBERS, show);
 	}
 
-	public boolean getObjectInfoWithDependencies()
-	{
-		return getBoolProperty("workbench.db.objectinfo.includedeps", false);
-	}
-
-	public void setObjectInfoWithDependencies(boolean flag)
-	{
-		setProperty("workbench.db.objectinfo.includedeps", flag);
-	}
-
 	public boolean getAutoJumpNextStatement()
 	{
 		return getBoolProperty(PROPERTY_AUTO_JUMP_STATEMENT , false);
@@ -3132,7 +3122,7 @@ public class Settings
 			props.remove("workbench.db.oracle.drop.column.single");
 			props.remove("workbench.db.postgresql.drop.column.single");
 			props.remove("workbench.db.nonullkeyword");
-			
+
 			String v = props.getProperty("workbench.db.objecttype.selectable.apache_derby", "");
 			if ("table,view,system table,system view,sequence,synonym".equalsIgnoreCase(v))
 			{

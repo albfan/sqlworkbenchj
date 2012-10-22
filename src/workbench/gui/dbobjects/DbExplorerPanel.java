@@ -68,6 +68,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.HtmlUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
@@ -1082,7 +1083,7 @@ public class DbExplorerPanel
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (!isModified()) return true;
 
-		boolean canClose = WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
+		boolean canClose = WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", HtmlUtil.cleanHTML(getRealTabTitle()));
 		return canClose;
 	}
 

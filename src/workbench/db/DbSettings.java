@@ -1440,6 +1440,12 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "objectinfo.includefk", global);
 	}
 
+	public boolean objectInfoWithDependencies()
+	{
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.includedeps", false);
+		return Settings.getInstance().getBoolProperty(prefix + "objectinfo.includedeps", global);
+	}
+
 	public String checkOpenTransactionsQuery()
 	{
 		return Settings.getInstance().getProperty(prefix + "opentransaction.query", null);

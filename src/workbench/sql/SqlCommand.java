@@ -101,7 +101,7 @@ public class SqlCommand
 		}
 		return dir;
 	}
-	
+
 	protected String getDefaultSuccessMessage(StatementRunnerResult result)
 	{
 		String msg = result == null ? null : getSuccessMessage(result.getSourceCommand());
@@ -217,7 +217,7 @@ public class SqlCommand
 	 *
 	 * @see workbench.util.SqlUtil#getWarnings(WbConnection, Statement)
 	 */
-	protected boolean appendWarnings(StatementRunnerResult result)
+	protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel)
 	{
 		if (this.runner.getHideWarnings()) return false;
 
@@ -226,14 +226,17 @@ public class SqlCommand
 		if (warn != null && warn.length() > 0)
 		{
 			hasWarning = true;
-			if (result.hasMessages()) result.addMessageNewLine();
+			if (addLabel && result.hasMessages()) result.addMessageNewLine();
 
 			// Only add the "Warnings:" text if the message returned from the
 			// server does not already start with "Warning"
 			if (warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
 			{
-				result.addMessage(ResourceMgr.getString("TxtWarnings"));
-				result.addMessageNewLine();
+				if (addLabel)
+				{
+					result.addMessage(ResourceMgr.getString("TxtWarnings"));
+					result.addMessageNewLine();
+				}
 			}
 			result.addMessage(warn);
 			result.setWarning(true);
@@ -417,7 +420,7 @@ public class SqlCommand
 		}
 		else
 		{
-			appendWarnings(result);
+			appendWarnings(result, true);
 		}
 	}
 
@@ -450,7 +453,7 @@ public class SqlCommand
 		// Postgres obviously clears the warnings if the getMoreResults() is called,
 		// so we add the warnings before calling getMoreResults(). This doesn't seem
 		// to do any harm for other DBMS as well.
-		appendWarnings(result);
+		appendWarnings(result, true);
 
 		if (!runner.getStatementHook().fetchResults())
 		{
@@ -528,6 +531,9 @@ public class SqlCommand
 				}
 				else
 				{
+					// this is for SQL Server messages sent with "PRINT"
+					// they need to be retrieved for each result set
+					appendWarnings(result, false);
 					ResultSet newRs = this.currentStatement.getResultSet();
 					// workaround for a MySQL Driver bug that returns the same ResultSet over and over again
 					if (newRs == firstResult || newRs == rs)

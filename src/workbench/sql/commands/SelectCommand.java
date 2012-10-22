@@ -152,7 +152,7 @@ public class SelectCommand
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(StringUtil.getMaxSubstring(sql, 120));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			appendWarnings(result);
+			appendWarnings(result, true);
 			LogMgr.logError("SelectCommand.execute()", sql, e);
 			result.setFailure();
 			this.runner.rollbackSavepoint();
