@@ -230,13 +230,10 @@ public class SqlCommand
 
 			// Only add the "Warnings:" text if the message returned from the
 			// server does not already start with "Warning"
-			if (warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
+			if (addLabel && warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
 			{
-				if (addLabel)
-				{
-					result.addMessage(ResourceMgr.getString("TxtWarnings"));
-					result.addMessageNewLine();
-				}
+				result.addMessage(ResourceMgr.getString("TxtWarnings"));
+				result.addMessageNewLine();
 			}
 			result.addMessage(warn);
 			result.setWarning(true);
@@ -531,9 +528,6 @@ public class SqlCommand
 				}
 				else
 				{
-					// this is for SQL Server messages sent with "PRINT"
-					// they need to be retrieved for each result set
-					appendWarnings(result, false);
 					ResultSet newRs = this.currentStatement.getResultSet();
 					// workaround for a MySQL Driver bug that returns the same ResultSet over and over again
 					if (newRs == firstResult || newRs == rs)
@@ -545,6 +539,10 @@ public class SqlCommand
 				}
 
 				if (rs == null) break;
+
+				// this is for SQL Server messages sent with "PRINT"
+				// they need to be retrieved for each result set.
+				appendWarnings(result, false);
 
 				ResultSetConsumer consumer = runner.getConsumer();
 				if (consumer != null)
