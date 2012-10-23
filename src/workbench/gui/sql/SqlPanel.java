@@ -1906,7 +1906,7 @@ public class SqlPanel
 			return;
 		}
 
-		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
+		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
 		{
 			@Override
 			public void run()
@@ -1915,6 +1915,16 @@ public class SqlPanel
 			}
 		};
 		this.executionThread.start();
+	}
+
+	private String getThreadId()
+	{
+		String id = getId();
+		if (this.dbConnection != null)
+		{
+			id += "(" + dbConnection.getId() + ")";
+		}
+		return id;
 	}
 
 	/**
@@ -1976,7 +1986,7 @@ public class SqlPanel
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
 
-		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
+		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
 		{
 			@Override
 			public void run()
