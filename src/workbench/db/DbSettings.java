@@ -191,6 +191,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "dml.supports.results", true);
 	}
 
+	public boolean truncateReturnsRowCount()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "dml.truncate.returns.rows", true);
+	}
+
 	public boolean supportsBatchedStatements()
 	{
 		return this.supportsBatchedStatements;

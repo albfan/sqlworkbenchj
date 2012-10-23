@@ -50,7 +50,7 @@ public class UpdatingCommand
 	}
 
 	private String verb;
-	private boolean checkLobParameter = false;
+	private boolean checkLobParameter;
 
 	private UpdatingCommand(String sqlVerb)
 	{
@@ -104,24 +104,36 @@ public class UpdatingCommand
 			}
 
 			boolean hasResult = false;
+			boolean supportsResultSets = currentConnection.getDbSettings().supportsResultSetsWithDML();
+			int updateCount = -1;
+
 			if (isPrepared)
 			{
 				hasResult = ((PreparedStatement)this.currentStatement).execute();
 			}
-			else
+			else if (supportsResultSets)
 			{
 				hasResult = this.currentStatement.execute(sql);
 			}
+			else
+			{
+				updateCount = currentStatement.executeUpdate(sql);
+			}
+
 			appendSuccessMessage(result);
 			result.setSuccess();
-			if (currentConnection.getDbSettings().supportsResultSetsWithDML())
+
+			// adding the result/update count should be done after adding the success message
+			// to the StatementRunnerResult object
+			if (supportsResultSets || isPrepared)
 			{
 				processResults(result, hasResult);
 			}
-			else
+			else if (updateCount > -1)
 			{
-				result.addUpdateCountMsg(currentStatement.getUpdateCount());
+				result.addUpdateCountMsg(updateCount);
 			}
+
 			runner.releaseSavepoint();
 		}
 		catch (Exception e)
