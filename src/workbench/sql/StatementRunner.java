@@ -128,7 +128,9 @@ public class StatementRunner
 		}
 		else if (Settings.PROPERTY_LOG_ALL_SQL.equals(evt.getPropertyName()))
 		{
+			boolean old = logAllStatements;
 			logAllStatements = Settings.getInstance().getLogAllStatements();
+			LogMgr.logDebug("StatementRunner.propertyChange()", "logAllStatements changed from " + old + " to " + logAllStatements);
 		}
 	}
 
@@ -398,11 +400,6 @@ public class StatementRunner
 
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
 
-		if (logAllStatements)
-		{
-			LogMgr.logInfo("StatementRunner.execute()", "Executing: " + realSql);
-		}
-
 		realSql = statementHook.preExec(this, realSql);
 
 		long sqlExecStart = System.currentTimeMillis();
@@ -427,6 +424,20 @@ public class StatementRunner
 		long time = (System.currentTimeMillis() - sqlExecStart);
 		statementHook.postExec(this, realSql, result);
 		result.setExecutionTime(time);
+
+		if (logAllStatements)
+		{
+			String msg = "Executed: ";
+			if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
+			{
+				msg += SqlUtil.makeCleanSql(realSql, false) + " (" + time + "ms)";
+			}
+			else
+			{
+				msg += realSql + "\n(" + time + "ms)";
+			}
+			LogMgr.logInfo("StatementRunner.execute()", msg);
+		}
 	}
 
 	public StatementHook getStatementHook()
