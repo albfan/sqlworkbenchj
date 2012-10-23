@@ -512,7 +512,10 @@ public class TableListPanel
 	 */
 	protected void showTablePanels()
 	{
-		if (displayTab.getTabCount() > 3) return; // nothing to do
+		int minCount = 3;
+		if (viewTriggersSupported()) minCount ++;
+		
+		if (displayTab.getTabCount() > minCount) return; // nothing to do
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -596,12 +599,17 @@ public class TableListPanel
 		});
 	}
 
-	private void showTriggerIfSupported()
+	private boolean viewTriggersSupported()
 	{
 		TriggerReader reader = TriggerReaderFactory.createReader(dbConnection);
 
-		if (reader == null) return;
-		if (!reader.supportsTriggersOnViews()) return;
+		if (reader == null) return false;
+		return reader.supportsTriggersOnViews();
+	}
+
+	private void showTriggerIfSupported()
+	{
+		if (!viewTriggersSupported()) return;
 
 		TableIdentifier tbl = getObjectTable();
 		if (tbl == null) return;
