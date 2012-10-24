@@ -30,7 +30,7 @@ public class DurationFormatterTest
 		assertEquals("1.5s", s);
 
 		millis = DurationFormatter.ONE_SECOND * 102 + (DurationFormatter.ONE_SECOND / 2);
-		s = s = f.getDurationAsSeconds(millis);
+		s = f.getDurationAsSeconds(millis);
 		assertEquals("102.5s", s);
 
 		millis = DurationFormatter.ONE_HOUR * 3 + DurationFormatter.ONE_MINUTE * 12 + DurationFormatter.ONE_SECOND * 12 + 300;
