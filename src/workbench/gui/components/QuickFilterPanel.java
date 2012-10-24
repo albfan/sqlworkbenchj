@@ -347,7 +347,6 @@ public class QuickFilterPanel
 		// Test the "translated" pattern, if that throws an exception
 		// let the caller handle the exception
 		Pattern.compile(regex);
-		LogMgr.logInfo("QuickFilterPanel.getPattern()", "Using regex pattern [" + regex + "] instead of [" + input + "]");
 
 		return regex;
 	}

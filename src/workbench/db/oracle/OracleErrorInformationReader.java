@@ -90,11 +90,11 @@ public class OracleErrorInformationReader
 			stmt = this.connection.getSqlConnection().prepareStatement(query);
 
 			schema = meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema));
-			String otype = objectType.toUpperCase().trim();
+			String otype = objectType == null ? null : objectType.toUpperCase().trim();
 			String oname = meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName));
 
 			stmt.setString(1, schema);
-			
+
 			if (typeIndex > -1)
 			{
 				stmt.setString(typeIndex, otype);

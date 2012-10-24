@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -99,6 +100,10 @@ public class WbOraShow
 		{
 			return getSGAInfo();
 		}
+		else if (verb.equals("logsource"))
+		{
+			return getLogSource();
+		}
 		else if (verb.equals("recyclebin"))
 		{
 			return showRecycleBin();
@@ -150,10 +155,11 @@ public class WbOraShow
 
 		ResultSet rs = null;
 
+		Statement stmt = null;
 		try
 		{
-			currentStatement = this.currentConnection.createStatementForQuery();
-			rs = currentStatement.executeQuery(sql);
+			stmt = this.currentConnection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
 			processResults(result, true, rs);
 			if (result.hasDataStores() && result.getDataStores().get(0).getRowCount() == 0)
 			{
@@ -168,7 +174,7 @@ public class WbOraShow
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}
@@ -177,25 +183,21 @@ public class WbOraShow
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		SQLToken name = lexer.getNextToken(false, false);
+		SQLToken token = lexer.getNextToken(false, false);
 
 		String schema = null;
 		String object = null;
 		String type = null;
 
-		if (name != null)
+		if (token != null && types.contains(token.getText()))
 		{
-			if (types.contains(name.getText()))
-			{
-				type = name.getContents();
-			}
-			name = lexer.getNextToken(false, false);
+			type = token.getContents();
+			token = lexer.getNextToken(false, false);
 		}
 
-
-		if (name != null)
+		if (token != null)
 		{
-			String v = name.getText();
+			String v = token.getText();
 			int pos = v.indexOf('.');
 
 			if (pos > 0)
@@ -284,10 +286,16 @@ public class WbOraShow
 		query += "order by name";
 		StatementRunnerResult result = new StatementRunnerResult(query);
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("WbOraShow.getParameterValues()", "Using SQL: " + query);
+		}
+
+		Statement stmt = null;
 		try
 		{
-			currentStatement = this.currentConnection.createStatementForQuery();
-			rs = currentStatement.executeQuery(query);
+			stmt = this.currentConnection.createStatementForQuery();
+			rs = stmt.executeQuery(query);
 			processResults(result, true, rs);
 			if (result.hasDataStores())
 			{
@@ -312,7 +320,7 @@ public class WbOraShow
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}
@@ -347,6 +355,58 @@ public class WbOraShow
 		return null;
 	}
 
+	protected StatementRunnerResult getLogSource()
+	{
+		StatementRunnerResult result = new StatementRunnerResult();
+
+		String sql =
+			"select destination \n" +
+			"from V$ARCHIVE_DEST \n "+
+			"where status = 'VALID'";
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("WbOraShow.getLogSource()", "Using SQL: " + sql);
+		}
+
+		try
+		{
+			stmt = this.currentConnection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			DataStore ds = new DataStore(new String[] {"LOGSOURCE", "VALUE"}, new int[] {Types.VARCHAR, Types.VARCHAR});
+			while (rs.next())
+			{
+				String dest = rs.getString(1);
+				if ("USE_DB_RECOVERY_FILE_DEST".equals(dest))
+				{
+					dest = "";
+				}
+				int row = ds.addRow();
+				ds.setValue(row, 0, "LOGSOURCE");
+				ds.setValue(row, 1, dest);
+			}
+			ds.setGeneratingSql("show logsource");
+			ds.setResultName("LOGSOURCE");
+			ds.resetStatus();
+			result.addDataStore(ds);
+			result.setSuccess();
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info", ex);
+			result.setFailure();
+			result.addMessage(ex.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+
+	}
 	protected StatementRunnerResult getSGAInfo()
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -367,6 +427,11 @@ public class WbOraShow
 		Statement stmt = null;
 		ResultSet rs = null;
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Using SQL: " + (sqlPlusMode ? sqlPlusStatement : infoStatement));
+		}
+
 		try
 		{
 			stmt = this.currentConnection.createStatementForQuery();
@@ -386,8 +451,7 @@ public class WbOraShow
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}
