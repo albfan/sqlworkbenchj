@@ -18,6 +18,7 @@ import workbench.db.ErrorInformationReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -82,19 +83,30 @@ public class OracleErrorInformationReader
 			}
 			else if (schema == null)
 			{
-				schema = this.connection.getCurrentUser();
+				schema = connection.getMetadata().getCurrentSchema();
 			}
 			DbMetadata meta = this.connection.getMetadata();
 
 			stmt = this.connection.getSqlConnection().prepareStatement(query);
-			stmt.setString(1, meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema)));
+
+			schema = meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema));
+			String otype = objectType.toUpperCase().trim();
+			String oname = meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName));
+
+			stmt.setString(1, schema);
+			
 			if (typeIndex > -1)
 			{
-				stmt.setString(typeIndex, objectType.toUpperCase().trim());
+				stmt.setString(typeIndex, otype);
 			}
 			if (nameIndex > -1)
 			{
-				stmt.setString(nameIndex, meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName)));
+				stmt.setString(nameIndex, oname);
+			}
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleErrorInformationReader.getErrorInfo()", "Using SQL: " + SqlUtil.replaceParameters(query, schema, otype, oname));
 			}
 
 			rs = stmt.executeQuery();
