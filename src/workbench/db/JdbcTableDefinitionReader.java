@@ -147,7 +147,7 @@ public class JdbcTableDefinitionReader
 
 				String display = typeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits);
 
-				if (dbConnection.getMetadata().isSqlServer())
+				if (dbConnection.getMetadata().isSqlServer() && dbSettings.fixSqlServerAutoincrement())
 				{
 					// The Microsoft JDBC Driver does not return the autoincrement attribute correctly for identity columns.
 					// (And they refuse to fix this: http://social.msdn.microsoft.com/Forums/en/sqldataaccess/thread/20df12f3-d1bf-4526-9daa-239a83a8e435)
