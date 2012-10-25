@@ -287,7 +287,7 @@ public class WbConnection
 		{
 			return "(" + this.getProfile().getUsername() + ")";
 		}
-		
+
 		try
 		{
 			return this.sqlConnection.getMetaData().getUserName();
@@ -517,6 +517,12 @@ public class WbConnection
 	public void commit()
 		throws SQLException
 	{
+		if (getAutoCommit())
+		{
+			LogMgr.logDebug("WbConnection.commit()", "Commit() called on a connection with autocommit enabled", new Exception("Traceback"));
+			return;
+		}
+		
 		if (getDbSettings().supportsTransactions())
 		{
 			this.sqlConnection.commit();
