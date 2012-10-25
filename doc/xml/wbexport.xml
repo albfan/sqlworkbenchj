@@ -317,7 +317,7 @@
                 (as it is normally done).
               </para>
               <para>
-                When this paarameter is specified the generated statement for exporting the table is
+                When this parameter is specified the generated statement for exporting the table is
                 changed to a <literal>SELECT * FROM [prefix]tableName</literal> instead of listing all columns individually.
               </para>
               <para>
@@ -400,6 +400,7 @@
 
 					<row>
 						<entry>-compress</entry>
+            <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 						<entry>
 							<para>
 								Selects whether the output file should be compressed
@@ -595,7 +596,7 @@
                 and generates much bigger statements (due to the increase escaping overhead).
               </para>
               <para>
-                When using <literal>file</literal>, <literal>base64</literal> or <literal>ansi</literal> the file can imported using
+                When using <literal>file</literal>, <literal>base64</literal> or <literal>ansi</literal> the file can be imported using
                 <link linkend="command-import"><literal>WbImport</literal></link>
               </para>
 							<para>
@@ -1354,7 +1355,7 @@ SELECT * FROM data_table;</programlisting>
 
 <programlisting>WbImport -type=text
          -sourceDir=c:/data/export
-         -extensioin=zip
+         -extension=zip
          -checkDependencies=true;</programlisting>
 		</section>
 
