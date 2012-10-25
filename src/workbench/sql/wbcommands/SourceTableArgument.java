@@ -177,7 +177,18 @@ public class SourceTableArgument
 				}
 				else
 				{
-					TableIdentifier tbl = dbConn.getMetadata().findTable(new TableIdentifier(t, dbConn));
+					TableIdentifier toSearch = new TableIdentifier(t, dbConn);
+					TableIdentifier tbl = null;
+					
+					if (types == null)
+					{
+						tbl = dbConn.getMetadata().findTable(toSearch);
+					}
+					else
+					{
+						tbl = dbConn.getMetadata().searchObjectOnPath(toSearch, types);
+					}
+
 					if (tbl != null)
 					{
 						result.add(tbl);

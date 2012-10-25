@@ -1588,7 +1588,7 @@ public class DbMetadata
 		return searchObjectOnPath(table, tableTypesArray);
 	}
 
-	private TableIdentifier searchObjectOnPath(TableIdentifier table, String[] types)
+	public TableIdentifier searchObjectOnPath(TableIdentifier table, String[] types)
 	{
 		if (table.getSchema() != null)
 		{
