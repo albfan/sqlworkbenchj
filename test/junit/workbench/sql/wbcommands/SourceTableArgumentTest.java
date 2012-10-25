@@ -39,6 +39,54 @@ public class SourceTableArgumentTest
   }
 
 	@Test
+  public void testViews()
+		throws Exception
+  {
+    WbConnection con = null;
+    Statement stmt = null;
+    try
+    {
+      TestUtil util = new TestUtil("includeview");
+      con = util.getConnection();
+
+			Settings.getInstance().setProperty("workbench.sql.ignorecatalog.h2", "includeview");
+			con.getMetadata().clearIgnoredCatalogs();
+
+			String script = "CREATE TABLE t1 (id integer);\n" +
+				"create view v1 as select * from t1;\n" +
+				"create view v2 as select * from t1;\n" +
+				"commit;\n";
+			TestUtil.executeScript(con, script);
+
+      SourceTableArgument parser = new SourceTableArgument("v1", null, null, new String[] { "VIEW" }, con);
+      List<TableIdentifier> tables = parser.getTables();
+      assertEquals(1, tables.size());
+			TableIdentifier tbl = tables.get(0);
+			assertNotNull(tbl);
+			assertEquals("V1", tbl.getTableName());
+			assertEquals("VIEW", tbl.getObjectType());
+
+      parser = new SourceTableArgument("v%", null, null, new String[] { "VIEW" }, con);
+      tables = parser.getTables();
+      assertEquals(2, tables.size());
+			tbl = tables.get(0);
+			assertNotNull(tbl);
+			assertEquals("V1", tbl.getTableName());
+			assertEquals("VIEW", tbl.getObjectType());
+
+			tbl = tables.get(1);
+			assertNotNull(tbl);
+			assertEquals("V2", tbl.getTableName());
+			assertEquals("VIEW", tbl.getObjectType());
+    }
+    finally
+    {
+      SqlUtil.closeStatement(stmt);
+      ConnectionMgr.getInstance().disconnectAll();
+    }
+	}
+
+	@Test
   public void testExcludeWithWildcard()
 		throws Exception
   {

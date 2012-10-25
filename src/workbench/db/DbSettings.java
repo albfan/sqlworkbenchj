@@ -1518,4 +1518,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.switchcatalog", Settings.getInstance().getSwitchCatalogInExplorer());
 	}
 
+	public boolean fixSqlServerAutoincrement()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.autoincrement.fix", true);
+	}
 }
