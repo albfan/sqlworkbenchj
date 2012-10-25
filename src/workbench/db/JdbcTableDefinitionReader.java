@@ -147,6 +147,14 @@ public class JdbcTableDefinitionReader
 
 				String display = typeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits);
 
+				if (dbConnection.getMetadata().isSqlServer())
+				{
+					// The Microsoft JDBC Driver does not return the autoincrement attribute correctly for identity columns.
+					// (And they refuse to fix this: http://social.msdn.microsoft.com/Forums/en/sqldataaccess/thread/20df12f3-d1bf-4526-9daa-239a83a8e435)
+					// This hack works around Microsoft's ignorance regarding Java and JDBC
+					autoincrement = display.contains("identity");
+				}
+
 				col.setDbmsType(display);
 				col.setIsAutoincrement(autoincrement);
 				col.setIsPkColumn(primaryKeyColumns.contains(colName));
