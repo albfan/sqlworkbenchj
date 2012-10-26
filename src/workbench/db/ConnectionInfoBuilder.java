@@ -10,7 +10,6 @@
  */
 package workbench.db;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -19,7 +18,7 @@ import workbench.util.StringUtil;
  * A class to generate a summary display of a WbConnection.
  *
  * The information can be presented as HTML or plain text.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ConnectionInfoBuilder
@@ -59,22 +58,38 @@ public class ConnectionInfoBuilder
 			String newLine = useHtml ? "<br>\n" : "\n";
 
 			boolean busy = conn.isBusy();
-			DatabaseMetaData meta = null;
-			if (!busy)
-			{
-				meta = conn.getSqlConnection().getMetaData();
-			}
 			DbMetadata wbmeta = conn.getMetadata();
 
+			String username = null;
+			String isolationlevel = null;
+			String productVersion = null;
+			String driverName = null;
+			if (busy)
+			{
+				username = conn.getDisplayUser();
+				isolationlevel = "n/a";
+				productVersion = "n/a";
+				driverName = "n/a";
+			}
+			else
+			{
+				username = conn.getCurrentUser();
+				isolationlevel = conn.getIsolationLevel();
+				productVersion = conn.getDatabaseProductVersion();
+				driverName = conn.getSqlConnection().getMetaData().getDriverName();
+			}
+			String dbVersion = conn.getDatabaseVersion().toString();
+
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductName") + ":" + boldEnd + wbmeta.getProductName() + lineEnd);
-			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductVersion") + ":" + boldEnd + conn.getDatabaseVersion().toString() + lineEnd);
-			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductInfo") + ":" + boldEnd + (busy ? "n/a" : conn.getDatabaseProductVersion()) + lineEnd);
-			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoName") + ":" + boldEnd + (meta != null ? meta.getDriverName() : "n/a") + lineEnd);
+			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductVersion") + ":" + boldEnd + dbVersion + lineEnd);
+			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductInfo") + ":" + boldEnd + productVersion + lineEnd);
+			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoName") + ":" + boldEnd + driverName + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoClass") + ":" + boldEnd + conn.getProfile().getDriverclass() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoVersion") + ":" + boldEnd + conn.getDriverVersion() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbURL") + ":" + boldEnd + conn.getUrl() + lineEnd);
-			content.append(space + boldStart + "Isolation Level:" + boldEnd + " " + conn.getIsolationLevel() + newLine);
-			content.append(space + boldStart + ResourceMgr.getString("LblUsername") + ":" + boldEnd + conn.getCurrentUser() + newLine);
+			content.append(space + boldStart + "Isolation Level:" + boldEnd + " " + isolationlevel + newLine);
+			content.append(space + boldStart + ResourceMgr.getString("LblUsername") + ":" + boldEnd + username + newLine);
+
 			String term = wbmeta.getSchemaTerm();
 			String s = StringUtil.capitalize(term);
 			if (!"schema".equalsIgnoreCase(term))

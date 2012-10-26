@@ -227,7 +227,6 @@ public class WbConnection
 	public String getIsolationLevel()
 	{
 		if (this.sqlConnection == null) return "";
-		if(this.isBusy()) return "n/a";
 
 		try
 		{
@@ -279,15 +278,13 @@ public class WbConnection
 
 	/**
 	 * Return the name of the current user.
-	 * Wrapper for DatabaseMetaData.getUserName() that throws no Exception
+	 * <br/>
+	 * @return the current user as returned by the database.
+	 *
+	 * @see #isBusy()
 	 */
 	public String getCurrentUser()
 	{
-		if (this.isBusy())
-		{
-			return "(" + this.getProfile().getUsername() + ")";
-		}
-
 		try
 		{
 			return this.sqlConnection.getMetaData().getUserName();
@@ -522,7 +519,7 @@ public class WbConnection
 			LogMgr.logDebug("WbConnection.commit()", "Commit() called on a connection with autocommit enabled", new Exception("Traceback"));
 			return;
 		}
-		
+
 		if (getDbSettings().supportsTransactions())
 		{
 			this.sqlConnection.commit();
@@ -936,7 +933,12 @@ public class WbConnection
 		return getId() + ", " + getDisplayUser() + "@" + getUrl();
 	}
 
-	private String getDisplayUser()
+	/**
+	 * Returns the username stored in the connection profile.
+	 *
+	 * @return the profile's username
+	 */
+	public String getDisplayUser()
 	{
 		if (profile == null)
 		{

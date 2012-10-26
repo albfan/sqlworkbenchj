@@ -11,10 +11,8 @@
  */
 package workbench.sql.wbcommands.console;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Savepoint;
-import workbench.db.DbMetadata;
+import workbench.db.ConnectionInfoBuilder;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -86,66 +84,22 @@ public class WbAbout
 	private String getConnectionInfo()
 	{
 		if (this.currentConnection == null) return null;
-		StringBuilder content = new StringBuilder(100);
 
-		Savepoint sp = null;
+		ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
+		boolean busy = currentConnection.isBusy();
+		String result = null;
 		try
 		{
-			if (currentConnection.getDbSettings().useSavePointForDML())
-			{
-				sp = currentConnection.setSavepoint();
-			}
-			DatabaseMetaData meta = currentConnection.getSqlConnection().getMetaData();
-			DbMetadata wbmeta = currentConnection.getMetadata();
-
-			content.append(ResourceMgr.getString("LblDbProductName") + ": " + wbmeta.getProductName() + "\n");
-			content.append(ResourceMgr.getString("LblDbProductVersion") + ": " + currentConnection.getDatabaseVersion().toString() + "\n");
-			content.append(ResourceMgr.getString("LblDbProductInfo") + ": " + meta.getDatabaseProductVersion() + "\n");
-			content.append(ResourceMgr.getString("LblDriverInfoName") + ": " + meta.getDriverName() + "\n");
-			content.append(ResourceMgr.getString("LblDriverInfoClass") + ": " + currentConnection.getProfile().getDriverclass() + "\n");
-			content.append(ResourceMgr.getString("LblDriverInfoVersion") + ": " + currentConnection.getDriverVersion() + "\n");
-			content.append(ResourceMgr.getString("LblDbURL") + ": " + currentConnection.getUrl() + "\n");
-			content.append(ResourceMgr.getString("LblUsername") + ": " + currentConnection.getCurrentUser() + "\n");
-			String term = wbmeta.getSchemaTerm();
-			String s = StringUtil.capitalize(term);
-			String schema = currentConnection.getCurrentSchema();
-			if (schema != null)
-			{
-				if (!"schema".equalsIgnoreCase(term))
-				{
-					s += " (" + ResourceMgr.getString("LblSchema") + ")";
-				}
-				content.append(s);
-				content.append(": ");
-				content.append(schema);
-				content.append('\n');
-			}
-
-			term = wbmeta.getCatalogTerm();
-			s = StringUtil.capitalize(term);
-			String catalog = currentConnection.getCurrentCatalog();
-			if (catalog != null)
-			{
-				if (!"catalog".equalsIgnoreCase(term))
-				{
-					s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
-				}
-				content.append(s);
-				content.append(": ");
-				content.append(catalog);
-				content.append("\n");
-			}
-			content.append("Workbench DBID: ");
-			content.append(wbmeta.getDbId());
-			content.append(" \n");
-			currentConnection.releaseSavepoint(sp);
+			// ConnectionBuilder will not call certain functions if the connection is busy to avoid deadlocks.
+			// But we know that the connection isn't "really" busy while this is running
+			// So we can safely reset the flag so that the ConnectionInfoBuilder can return everything
+			currentConnection.setBusy(false);
+			result = builder.getPlainTextDisplay(currentConnection, 0);
 		}
-		catch (Exception e)
+		finally
 		{
-			currentConnection.rollback(sp);
-			LogMgr.logError("WbAbout.getConnectionInfo()", "Error retrieving connection info", e);
-			return null;
+			currentConnection.setBusy(busy);
 		}
-		return content.toString();
+		return result;
 	}
 }
