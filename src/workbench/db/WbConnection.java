@@ -55,6 +55,7 @@ public class WbConnection
 	public static final String PROP_CONNECTION_STATE = "state";
 	public static final String CONNECTION_CLOSED = "closed";
 	public static final String CONNECTION_OPEN = "open";
+	public static final String PROP_READONLY = "readonly";
 
 	// version information is cached to avoid
 	// blocks on the connection if getDatabaseVersion() is called in the background.
@@ -168,7 +169,7 @@ public class WbConnection
 		if (sessionReadOnly != null)
 		{
 			sessionReadOnly = null;
-			fireConnectionStateChanged("readonly", null, null);
+			fireConnectionStateChanged(PROP_READONLY, null, null);
 		}
 	}
 
@@ -179,7 +180,7 @@ public class WbConnection
 		sessionConfirmUpdates = null;
 		if (wasSet)
 		{
-			fireConnectionStateChanged("readonly", null, null);
+			fireConnectionStateChanged(PROP_READONLY, null, null);
 		}
 	}
 
@@ -195,7 +196,7 @@ public class WbConnection
 		}
 		if (!wasSet || oldValue != flag)
 		{
-			fireConnectionStateChanged("readonly", Boolean.toString(oldValue), Boolean.toString(flag));
+			fireConnectionStateChanged(PROP_READONLY, Boolean.toString(oldValue), Boolean.toString(flag));
 		}
 	}
 

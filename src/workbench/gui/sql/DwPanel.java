@@ -16,6 +16,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Window;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -90,7 +92,7 @@ import workbench.util.WbThread;
 public class DwPanel
 	extends JPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
-						 DbData, DbUpdater, Interruptable, JobErrorHandler
+				     DbData, DbUpdater, Interruptable, JobErrorHandler, PropertyChangeListener
 {
 	public static final String PROP_UPDATE_TABLE = "updateTable";
 
@@ -227,6 +229,11 @@ public class DwPanel
 	 */
 	public void setConnection(WbConnection aConn)
 	{
+		if (this.dbConnection != null)
+		{
+			this.dbConnection.removeChangeListener(this);
+		}
+
 		clearContent();
 		dbConnection = aConn;
 		if (stmtRunner != null)
@@ -239,6 +246,7 @@ public class DwPanel
 		if (dbConnection != null)
 		{
 			setReadOnly(dbConnection.isSessionReadOnly());
+			this.dbConnection.addChangeListener(this);
 		}
 	}
 
@@ -509,21 +517,12 @@ public class DwPanel
 
 	public void setReadOnly(boolean aFlag)
 	{
-		if (this.dbConnection != null)
-		{
-			aFlag = this.dbConnection.isSessionReadOnly();
-		}
-
 		this.readOnly = aFlag;
-		if (this.readOnly)
+		if (this.readOnly && isEditingStarted())
 		{
-			if (isEditingStarted()) this.dataTable.cancelEditing();
-			disableUpdateActions();
+			this.dataTable.cancelEditing();
 		}
-		else
-		{
-			this.insertRow.setEnabled(true);
-		}
+		checkResultSetActions();
 	}
 
 	public boolean isReadOnly()
@@ -1566,6 +1565,15 @@ public class DwPanel
 					checkResultSetActions();
 				}
 			});
+		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(WbConnection.PROP_READONLY) && evt.getSource() == this.dbConnection)
+		{
+			setReadOnly(this.dbConnection.isSessionReadOnly());
 		}
 	}
 

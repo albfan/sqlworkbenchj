@@ -1036,14 +1036,6 @@ public class TableDataPanel
 		}
 	}
 
-	public void setReadOnly(boolean aFlag)
-	{
-		if (dataDisplay != null)
-		{
-			this.dataDisplay.setReadOnly(aFlag);
-		}
-	}
-
 	@Override
 	public void tableDataDeleted(List<TableIdentifier> tables)
 	{

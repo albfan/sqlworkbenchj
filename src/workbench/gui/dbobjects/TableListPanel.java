@@ -514,7 +514,7 @@ public class TableListPanel
 	{
 		int minCount = 3;
 		if (viewTriggersSupported()) minCount ++;
-		
+
 		if (displayTab.getTabCount() > minCount) return; // nothing to do
 
 		WbSwingUtilities.invoke(new Runnable()
@@ -1262,7 +1262,6 @@ public class TableListPanel
 		}
 
 		this.tableData.reset();
-		this.tableData.setReadOnly(dbConnection.getMetadata().isTableType(this.selectedTable.getType()));
 		this.tableData.setTable(this.selectedTable);
 
 		this.setShowDataMenuStatus(hasData);
