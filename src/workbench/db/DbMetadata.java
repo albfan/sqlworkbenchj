@@ -46,7 +46,6 @@ import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.nuodb.NuoDBDomainReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleDataTypeResolver;
-import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
@@ -1626,6 +1625,11 @@ public class DbMetadata
 	public TableIdentifier findTable(TableIdentifier tbl)
 	{
 		return findTable(tbl, tableTypesArray, false);
+	}
+
+	public TableIdentifier findTable(TableIdentifier tbl, String[] types)
+	{
+		return findTable(tbl, types == null ? tableTypesArray : types, false);
 	}
 
 	private TableIdentifier findTable(TableIdentifier tbl, String[] types, boolean searchAllSchemas)

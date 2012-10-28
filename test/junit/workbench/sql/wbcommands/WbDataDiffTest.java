@@ -529,11 +529,10 @@ public class WbDataDiffTest
 
 			StatementRunner runner = new StatementRunner();
 			runner.setBaseDir(util.getBaseDir());
-			String sql = "WbDataDiff -referenceSchema=difftest -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -targetSchema=difftest -referenceTables=person -file=sync.sql -encoding=UTF8";
-//			String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -referenceTables=difftest.person -targetTables=difftest.person -file=sync.sql -encoding=UTF8";
+			String sql = "WbDataDiff -includeDelete=true -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -referenceSchema=difftest -targetSchema=difftest -referenceTables=person -file=sync.sql -encoding=UTF8";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertTrue(result.isSuccess());
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 
 			String[] expectedFiles = new String[]
 			{

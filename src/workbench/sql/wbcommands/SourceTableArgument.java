@@ -178,16 +178,19 @@ public class SourceTableArgument
 				else
 				{
 					TableIdentifier toSearch = new TableIdentifier(t, dbConn);
-					TableIdentifier tbl = null;
-					
-					if (types == null)
+					if (schemaToUse != null && toSearch.getSchema() == null)
 					{
-						tbl = dbConn.getMetadata().findTable(toSearch);
+						if (schemaAsCatalog)
+						{
+							toSearch.setCatalog(schemaToUse);
+						}
+						else
+						{
+							toSearch.setSchema(schemaToUse);
+						}
 					}
-					else
-					{
-						tbl = dbConn.getMetadata().searchObjectOnPath(toSearch, types);
-					}
+					toSearch.adjustCase(dbConn);
+					TableIdentifier tbl = dbConn.getMetadata().findTable(toSearch, types);
 
 					if (tbl != null)
 					{

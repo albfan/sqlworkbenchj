@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-10-10">
+  <release build="-1" date="2012-10-28">
     <entry dev-build="5" type="enh">Added support for NuoDB (http://www.nuodb.com/)</entry>
     <entry dev-build="5" type="enh">The context menu of a SQL Tab now has options to copy the filename to the clipboard</entry>
     <entry dev-build="5" type="enh">Improved the handling of relative filenames for WbSysExec</entry>
