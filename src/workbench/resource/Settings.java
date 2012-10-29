@@ -3061,16 +3061,6 @@ public class Settings
 			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.history");
 			this.props.remove("workbench.gui.dbobjects.TableListPanel.quickfilter.lastvalue");
 
-			boolean mySQLRemoved = getBoolProperty("workbench.migrate.settings.mysql.cascade", false);
-			if (!mySQLRemoved)
-			{
-				// Only remove them once!
-				this.props.remove("workbench.db.drop.table.cascade.mysql");
-				this.props.remove("workbench.db.drop.view.cascade.mysql");
-				this.props.remove("workbench.db.drop.function.cascade.mysql");
-				setProperty("workbench.migrate.settings.mysql.cascade", true);
-			}
-
 			// Starting with build 95 no default standard font should be used
 			// (to make sure the default font of the Look & Feel is used)
 			// Only if the user sets one through the Options dialog
@@ -3111,6 +3101,8 @@ public class Settings
 
 			this.props.remove("workbench.db.mysql.dropindex.needstable");
 			this.props.remove("workbench.db.hxtt_dbf.dropindex.needstable");
+			this.props.remove("workbench.db.microsoft_sql_server.dropindex.needstable");
+
 			this.props.remove("workbench.ignoretypes.postgresql");
 			this.props.remove("workbench.ignoretypes.mysql");
 			props.remove("workbench.db.syntax.functions");
