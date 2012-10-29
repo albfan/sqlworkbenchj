@@ -76,7 +76,10 @@ public class SqlServerDataTypeResolver
 			}
 			return "varbinary(" + Integer.toString(size) + ")";
 		}
-
+		if (sqlType == Types.BINARY)
+		{
+			return "binary(" + Integer.toString(size) + ")";
+		}
 		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
