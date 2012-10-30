@@ -1,5 +1,6 @@
 Features:
 ---------
+- "Always append results" option for macros
 - DropDown to select values for FK columns (inside the ResultSet)
 - runAll option for WbInclude to run all scripts from a directory (e.g in alphabetical order)
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
