@@ -1,9 +1,12 @@
 Features:
 ---------
-- extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, ...)
+- DropDown to select values for FK columns (inside the ResultSet)
+- runAll option for WbInclude to run all scripts from a directory (e.g in alphabetical order)
+- extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
 - save table sort of DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"
+- WbSchemaDiff (and DataDiff) with multiple -referenceSchema values
 - WbClipCopy: Copy result set data to the clipboard
 - Auto-Completion not working for UPDATE ... FROM .. JOIN
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
@@ -43,7 +46,6 @@ Features:
 - Allow full script in DataPumper as SQL Query source
   (pre-copy and post-copy scripts)
 - History of selected tables in DbExplorer
-- Log statement execution times in separate file (e.g. for performance testing SQL statements)
 - hierarchyid, http://technet.microsoft.com/en-us/library/bb677213.aspx
 
 Bugs:

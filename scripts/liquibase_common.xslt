@@ -105,6 +105,14 @@
           </xsl:attribute>
         </xsl:if>
 
+        <xsl:if test="$useJdbcTypes = 'true'">
+            <xsl:if test="auto-increment = 'true'">
+              <xsl:attribute name="autoIncrement">
+                <xsl:value-of select="'true'"/>
+              </xsl:attribute>
+            </xsl:if>
+        </xsl:if>
+
         <xsl:if test="($pk-flag = 'true' and $pk-col-count = 1) or $nullable = 'false'">
           <constraints>
 
