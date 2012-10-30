@@ -23,47 +23,43 @@ import javax.swing.JOptionPane;
 public class WbOptionPane
 	extends JOptionPane
 {
-	private boolean allowAnyLength;
-
 	public WbOptionPane(Object message, int messageType, int optionType)
 	{
 		super(message, messageType, optionType);
-		checkMessage(message);
 	}
 
 	public WbOptionPane(Object message, int messageType, int optionType, Icon icon, Object[] options)
 	{
 		super(message, messageType, optionType, icon, options);
-		checkMessage(message);
 	}
 
 	public WbOptionPane(Object message, int messageType, int optionType, Icon icon, Object[] options, Object initialValue)
 	{
 		super(message, messageType, optionType, icon, options, initialValue);
-		checkMessage(message);
 	}
 
-	private void checkMessage(Object message)
+	private boolean allowAnyLength(Object message)
 	{
 		if (message instanceof String)
 		{
 			// if the message is a HTML formatted string, we cannot count the characters
 			// as the HTML tags will not be displayed and we don't have a way to figure out the real (display) length
-			allowAnyLength = ((String)message).startsWith("<html>");
+			return Boolean.valueOf(((String)message).startsWith("<html>"));
 		}
 		else
 		{
 			// if component is used as the message, do not interfere with the formatting either
-			allowAnyLength = true;
+			return Boolean.TRUE;
 		}
 	}
 
 	@Override
 	public int getMaxCharactersPerLineCount()
 	{
-		if (allowAnyLength)
+
+		if (allowAnyLength(getMessage()))
 		{
-			return super.getMaxCharactersPerLineCount();
+			return Integer.MAX_VALUE;
 		}
 
 		try
@@ -81,6 +77,7 @@ public class WbOptionPane
 		}
 		catch (Throwable th)
 		{
+			// fallback, do not display more than 100 characters
 			return 100;
 		}
 	}
