@@ -1,17 +1,19 @@
 /*
  * WbIsolationLevel
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2012, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.sql.wbcommands;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import workbench.log.LogMgr;
@@ -23,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  * A SQL Command to set or display the current isolation level in a DBMS independent manner.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class WbIsolationLevel
@@ -31,13 +33,13 @@ public class WbIsolationLevel
 {
 	public static final String VERB = "WBISOLATIONLEVEL";
 	private final Map<String, Integer> levelMap = new TreeMap<String, Integer>(CaseInsensitiveComparator.INSTANCE);
-	
+
 	public WbIsolationLevel()
 	{
-		levelMap.put("read committed", Integer.valueOf(Connection.TRANSACTION_READ_COMMITTED));
-		levelMap.put("read uncommitted", Integer.valueOf(Connection.TRANSACTION_READ_UNCOMMITTED));
+		levelMap.put("read_committed", Integer.valueOf(Connection.TRANSACTION_READ_COMMITTED));
+		levelMap.put("read_uncommitted", Integer.valueOf(Connection.TRANSACTION_READ_UNCOMMITTED));
 		levelMap.put("serializable", Integer.valueOf(Connection.TRANSACTION_SERIALIZABLE));
-		levelMap.put("repeatable read", Integer.valueOf(Connection.TRANSACTION_REPEATABLE_READ));
+		levelMap.put("repeatable_read", Integer.valueOf(Connection.TRANSACTION_REPEATABLE_READ));
 		levelMap.put("none", Integer.valueOf(Connection.TRANSACTION_NONE));
 	}
 
@@ -46,7 +48,15 @@ public class WbIsolationLevel
 	{
 		return VERB;
 	}
-	
+
+	@Override
+	public List<String> getCommandArguments()
+	{
+		List<String> result = new ArrayList<String>(levelMap.keySet());
+		return result;
+	}
+
+
 	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
@@ -61,7 +71,7 @@ public class WbIsolationLevel
 			result.setSuccess();
 			return result;
 		}
-		
+
 		int level = stringToLevel(parameter);
 		if (level == -1)
 		{
@@ -88,8 +98,8 @@ public class WbIsolationLevel
 
 	protected int stringToLevel(String arg)
 	{
-		arg = arg.replaceAll("_", " ");
 		arg = arg.replaceAll("\\s+", " ");
+		arg = arg.replaceAll(" ", "_");
 		arg = arg.trim();
 		Integer level = levelMap.get(arg);
 		if (level == null) return -1;
