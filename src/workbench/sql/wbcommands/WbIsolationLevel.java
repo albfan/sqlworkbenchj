@@ -12,14 +12,14 @@ package workbench.sql.wbcommands;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
+import workbench.util.ArgumentParser;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
@@ -41,6 +41,13 @@ public class WbIsolationLevel
 		levelMap.put("serializable", Integer.valueOf(Connection.TRANSACTION_SERIALIZABLE));
 		levelMap.put("repeatable_read", Integer.valueOf(Connection.TRANSACTION_REPEATABLE_READ));
 		levelMap.put("none", Integer.valueOf(Connection.TRANSACTION_NONE));
+
+		// add support for auto-completion
+		cmdLine = new ArgumentParser(false);
+		for (String key : levelMap.keySet())
+		{
+			cmdLine.addArgument(key);
+		}
 	}
 
 	@Override
@@ -48,14 +55,6 @@ public class WbIsolationLevel
 	{
 		return VERB;
 	}
-
-	@Override
-	public List<String> getCommandArguments()
-	{
-		List<String> result = new ArrayList<String>(levelMap.keySet());
-		return result;
-	}
-
 
 	@Override
 	public StatementRunnerResult execute(final String sql)

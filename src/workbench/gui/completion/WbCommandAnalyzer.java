@@ -21,7 +21,6 @@ import workbench.sql.SqlCommand;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
-import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -55,7 +54,7 @@ public class WbCommandAnalyzer
 	{
 		if (this.isParameter) return 0;
 		if (context == CONTEXT_STATEMENT_PARAMETER) return 0;
-		
+
 		if (value.indexOf('-') > -1 || value.indexOf(' ') > -1)
 		{
 			if (value.indexOf('\'') > -1) return '"';
@@ -94,11 +93,7 @@ public class WbCommandAnalyzer
 		if (p == null)
 		{
 			this.context = NO_CONTEXT;
-			this.elements = cmd.getCommandArguments();
-			if (elements != null)
-			{
-				context = CONTEXT_STATEMENT_PARAMETER;
-			}
+			this.elements = null;
 			return;
 		}
 
@@ -150,12 +145,7 @@ public class WbCommandAnalyzer
 		}
 		else
 		{
-
 			List<String> arguments = p.getRegisteredArguments();
-			if (CollectionUtil.isEmpty(arguments))
-			{
-				arguments = cmd.getCommandArguments();
-			}
 			this.elements = arguments;
 			String params = SqlUtil.stripVerb(this.sql);
 			p.parse(params);

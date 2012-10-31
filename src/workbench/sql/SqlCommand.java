@@ -15,7 +15,6 @@ package workbench.sql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
@@ -296,10 +295,6 @@ public class SqlCommand
 		}
 	}
 
-	public List<String> getCommandArguments()
-	{
-		return null;
-	}
 	/**
 	 * Cleanup all resource after running the statement.
 	 *

@@ -38,8 +38,11 @@ import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.ReaderFactory;
+import workbench.db.SourceStatementsHelp;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.SourceCache;
@@ -613,10 +616,18 @@ public class ProcedureListPanel
 			{
 				if (sql == null)
 				{
-					sql = def.getSource(this.dbConnection);
+					ProcedureReader reader = ReaderFactory.getProcedureReader(dbConnection.getMetadata());
+					reader.readProcedureSource(def);
+					sql = def.getSource();
 					putSourceToCache(def, sql);
 				}
 				source.setText(sql == null ? "" : sql.toString());
+			}
+			catch (NoConfigException nce)
+			{
+				SourceStatementsHelp help = new SourceStatementsHelp();
+				String msg = help.explainMissingProcSourceSql(this.dbConnection.getMetadata().getProductName());
+				source.setText(msg);
 			}
 			catch (Throwable ex)
 			{
