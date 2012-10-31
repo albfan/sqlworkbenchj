@@ -42,16 +42,16 @@ public class SourceStatementsHelp
 			"   <string>" + product + "</string>  \n" +
 			"   <object class=\"workbench.db.GetMetaDataSql\">  \n" +
 			"    <void property=\"baseSql\">  \n" +
-			"     <string>THE SELECT TO RETRIEVE THE SOURCE FOR A VIEW</string>  \n" +
+			"     <string>The SELECT statement to retrieve the source for a view</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"objectNameField\">  \n" +
-			"     <string>THE COLUMN FROM THE SELECT THAT IDENTIFIES THE VIEW NAME</string>  \n" +
+			"     <string>The column name from the above SELECT that identifies the view name</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"schemaField\">  \n" +
-			"     <string>THE COLUMN FROM THE SELECT THAT IDENTIFIES THE VIEW SCHEMA (if necessary)</string>  \n" +
+			"     <string>The column from the above SELECT that identifies the view schema (if necessary)</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"orderBy\">  \n" +
-			"     <string>DEFINE AN ORDER BY CLAUSE FOR THE SELECT STATEMENT</string>  \n" +
+			"     <string>Define an order by clause for the select statement in case the source is returned in more than one row.</string>  \n" +
 			"    </void>  \n" +
 			"   </object>  \n" +
 			"  </void>  \n" +
@@ -64,7 +64,7 @@ public class SourceStatementsHelp
 	public String explainMissingProcSourceSql(String product)
 	{
 		String jarDir = WbManager.getInstance().getJarPath();
-		WbFile xmlfile = new WbFile(jarDir, "ViewSourceStatements.xml");
+		WbFile xmlfile = new WbFile(jarDir, "ProcSourceStatements.xml");
 
 		String explain = PROC_ERROR_START + " " + product +
 			"\n\nTo enable this, create the file\n" + xmlfile.getFullPath() + "\n" +
@@ -78,16 +78,16 @@ public class SourceStatementsHelp
 			"   <string>" + product + "</string>  \n" +
 			"   <object class=\"workbench.db.GetMetaDataSql\">  \n" +
 			"    <void property=\"baseSql\">  \n" +
-			"     <string>THE SELECT TO RETRIEVE THE SOURCE FOR A PROCEDURE/FUNCTION</string>  \n" +
+			"     <string>The SELECT statement to retrieve the source for a Procedure/Function</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"objectNameField\">  \n" +
-			"     <string>THE COLUMN FROM THE SELECT THAT IDENTIFIES THE PROCEDURE NAME</string>  \n" +
+			"     <string>The column name from the select that identifies the procedure name</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"schemaField\">  \n" +
-			"     <string>THE COLUMN FROM THE SELECT THAT IDENTIFIES THE PROCEDURE SCHEMA (if necessary)</string>  \n" +
+			"     <string>The column name from the select that identifies the procedure schema (if necessary)</string>  \n" +
 			"    </void>  \n" +
 			"    <void property=\"orderBy\">  \n" +
-			"     <string>DEFINE AN ORDER BY CLAUSE FOR THE SELECT STATEMENT (if necessary)</string>  \n" +
+			"     <string>Define an order by clause for the above SELECT statement in case the source is returned in more than one row.</string>  \n" +
 			"    </void>  \n" +
 			"   </object>  \n" +
 			"  </void>  \n" +

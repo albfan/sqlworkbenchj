@@ -31,6 +31,9 @@ public interface ViewReader
 	 *
 	 * This method will extend the stored source to a valid CREATE VIEW.
 	 *
+	 * If no SQL Statement was configured to retrieve the source, an explanation
+	 * on how to configure will be returned.
+	 *
 	 * @param view The view for which thee source should be created
 	 * @param includeCommit if true, terminate the whole statement with a COMMIT
 	 * @param includeDrop if true, add a DROP statement before the CREATE statement
