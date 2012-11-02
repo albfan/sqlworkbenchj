@@ -45,6 +45,9 @@ import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+import workbench.gui.sql.LookupValuePicker;
 import workbench.util.ArgumentValue;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -352,7 +355,7 @@ public class CompletionPopup
 		return result;
 	}
 
-	private void closePopup(boolean pasteEntry)
+	private void closePopup(boolean entrySelected)
 	{
 		editor.removeKeyEventInterceptor();
 		scroll.setColumnHeaderView(this.headerComponent);
@@ -364,9 +367,14 @@ public class CompletionPopup
 
 		try
 		{
-			if (pasteEntry)
+
+			if (entrySelected)
 			{
-				doPaste();
+				boolean handled = handleFKSelection();
+				if (!handled)
+				{
+					doPaste();
+				}
 			}
 		}
 		finally
@@ -378,6 +386,32 @@ public class CompletionPopup
 			this.searchField = null;
 			selectEditor();
 		}
+	}
+
+	private boolean handleFKSelection()
+	{
+		Object[] selected = this.elementList.getSelectedValues();
+		if (selected == null) return false;
+		if (selected.length != 1) return false;
+		if (selected[0] instanceof SelectFKValueMarker)
+		{
+			final SelectFKValueMarker marker = (SelectFKValueMarker)selected[0];
+			final WbConnection connection = this.context.getAnalyzer().getConnection();
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Object value = LookupValuePicker.pickValue(editor, connection, marker.getColumnName(), marker.getTable());
+					if (value != null)
+					{
+						editor.setSelectedText(value.toString());
+					}
+				}
+			});
+			return true;
+		}
+		return false;
 	}
 
 	protected void doPaste()

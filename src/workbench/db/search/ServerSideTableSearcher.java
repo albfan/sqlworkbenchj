@@ -225,13 +225,18 @@ public class ServerSideTableSearcher
 		throws SQLException
 	{
 		DbMetadata meta = this.connection.getMetadata();
-
 		TableDefinition def = meta.getTableDefinition(tbl);
+		return buildSqlForTable(def, "tablesearch");
+	}
+
+	public String buildSqlForTable(TableDefinition def, String sqlTemplateKey)
+		throws SQLException
+	{
 		int colCount = def.getColumnCount();
 		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
 		StringBuilder sql = new StringBuilder(colCount * 120);
-		TableSelectBuilder builder = new TableSelectBuilder(this.connection, "tablesearch");
+		TableSelectBuilder builder = new TableSelectBuilder(this.connection, sqlTemplateKey);
 		builder.setExcludeLobColumns(this.excludeLobColumns);
 		sql.append(builder.getSelectForColumns(def.getTable(), def.getColumns()));
 		sql.append("\n WHERE ");
@@ -291,7 +296,7 @@ public class ServerSideTableSearcher
 		}
 		if (colcount == 0)
 		{
-			LogMgr.logWarning("TableSearcher.buildSqlForTable()", "Table " + tbl.getTableExpression() + " not beeing searched because no character columns were found");
+			LogMgr.logWarning("TableSearcher.buildSqlForTable()", "Table " + def.getTable().getTableExpression() + " not beeing searched because no character columns were found");
 			return null;
 		}
 		else
@@ -377,7 +382,6 @@ public class ServerSideTableSearcher
 	{
 		if (aText == null) return;
 		this.criteria = StringUtil.trimQuotes(aText);
-		return;
 	}
 
 	@Override

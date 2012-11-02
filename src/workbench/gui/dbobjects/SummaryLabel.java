@@ -12,12 +12,13 @@
 package workbench.gui.dbobjects;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.sql.DwStatusBar;
 
 /**
  *
@@ -30,7 +31,12 @@ public class SummaryLabel
 	public SummaryLabel(String text)
 	{
 		super(text);
-		Dimension d = new Dimension(80, DwStatusBar.BAR_HEIGHT);
+		Font f = getFont();
+		FontMetrics fm = null;
+		if (f != null) fm = getFontMetrics(f);
+		int height = fm == null ? 0 : fm.getHeight() + 8;
+		height = Math.min(22, height);
+		Dimension d = new Dimension(80, height);
 		setMinimumSize(d);
 		setPreferredSize(d);
 		setBorder(DEFAULT_BORDER);

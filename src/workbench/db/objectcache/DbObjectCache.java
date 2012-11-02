@@ -12,6 +12,7 @@ package workbench.db.objectcache;
 import java.util.List;
 import java.util.Set;
 import workbench.db.ColumnIdentifier;
+import workbench.db.DependencyNode;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -32,6 +33,16 @@ public class DbObjectCache
 	{
 		dbConnection = connection;
 		objectCache = cache;
+	}
+
+	public List<DependencyNode> getReferencedTables(TableIdentifier table)
+	{
+		return objectCache.getReferencedTables(dbConnection, table);
+	}
+
+	public List<DependencyNode> getReferencingTables(TableIdentifier table)
+	{
+		return objectCache.getReferencingTables(dbConnection, table);
 	}
 
 	public void addTable(TableDefinition table)

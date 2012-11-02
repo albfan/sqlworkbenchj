@@ -32,6 +32,9 @@ import workbench.gui.completion.ParameterTipProvider;
 import workbench.gui.editor.JEditTextArea;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
+import workbench.gui.editor.InsertTipProvider;
 
 /**
  * Display a tooltip for the current statement.
@@ -57,6 +60,7 @@ public class ShowTipAction
 		area = edit;
 		tipProvider = provider;
 		setMenuTextByKey("MnuTxtShowInsertParms");
+		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, KeyEvent.CTRL_MASK));
 		initializeShortcut();
 	}

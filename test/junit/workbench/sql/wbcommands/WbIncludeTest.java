@@ -53,6 +53,55 @@ public class WbIncludeTest
 	}
 
 	@Test
+	public void testMultipleFiles()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = runner.getConnection();
+
+			Statement stmt = con.createStatement();
+			stmt.execute("create table include_test (some_name varchar(100))");
+			con.commit();
+
+			String encoding = "ISO-8859-1";
+			File scriptFile = new File(util.getBaseDir(), "test_1.sql");
+
+			Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
+			w.write("insert into include_test (some_name) values ('one');\n");
+			w.close();
+
+			scriptFile = new File(util.getBaseDir(), "test_2.sql");
+
+			w = EncodingUtil.createWriter(scriptFile, encoding, false);
+			w.write("insert into include_test (some_name) values ('two');\n");
+			w.write("commit;\n");
+			w.close();
+
+			String sql = "WbInclude -file='" + util.getBaseDir() + "/test*.sql'";
+
+			runner.runStatement(sql);
+			StatementRunnerResult result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Object o = TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
+			if (o instanceof Number)
+			{
+				int count = ((Number)o).intValue();
+				assertEquals(2, count);
+			}
+			else
+			{
+				fail("No count returned");
+			}
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
 	public void testAlternateInclude()
 		throws Exception
 	{

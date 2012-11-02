@@ -14,13 +14,15 @@ package workbench.sql.fksupport;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
+
+import workbench.resource.Settings;
+
+import workbench.db.DependencyNode;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
-import workbench.storage.DataStore;
+
 import workbench.util.TableAlias;
 
 /**
@@ -101,25 +103,19 @@ public class JoinColumnsDetector
 		throws SQLException
 	{
 		Map<String, String> columns = new HashMap<String, String>(2);
-		FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
-		DataStore ds = fkHandler.getImportedKeys(table2);
-		int count = ds.getRowCount();
-		for (int row = 0; row < count; row ++)
+		List<DependencyNode> refTables = connection.getObjectCache().getReferencedTables(table2);
+
+		for (DependencyNode node : refTables)
 		{
-			// see DatabaseMetaData.getExportedKeys() for column index description
-			String pkTableCat = ds.getValueAsString(row, 0);
-			String pkTableSchema = ds.getValueAsString(row, 1);
-			String pkTableName = ds.getValueAsString(row, 2);
-			TableIdentifier pkTable = new TableIdentifier(pkTableCat, pkTableSchema, pkTableName);
-
-			if (pkTable.equals(table1))
+			if (node.getTable().equals(table1))
 			{
-				String pkColName = ds.getValueAsString(row, 3);
-				String pkColumnExpr = alias1.getNameToUse() + "." + getColumnName(pkColName);
-
-				String fkColName = ds.getValueAsString(row, 7);
-				String fkColExpr = alias2.getNameToUse() + "." + getColumnName(fkColName);
-				columns.put(pkColumnExpr, fkColExpr);
+				Map<String, String> colMap = node.getColumns();
+				for (Map.Entry<String, String> entry : colMap.entrySet())
+				{
+					String pkColumnExpr = alias1.getNameToUse() + "." +  getColumnName(entry.getKey());
+					String fkColExpr = alias2.getNameToUse() + "." + getColumnName(entry.getValue());
+					columns.put(pkColumnExpr, fkColExpr);
+				}
 			}
 		}
 		return columns;

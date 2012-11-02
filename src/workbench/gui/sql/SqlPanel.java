@@ -188,6 +188,8 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.util.EventNotifier;
 import workbench.util.HtmlUtil;
 
 
@@ -203,7 +205,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -313,6 +315,8 @@ public class SqlPanel
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
+		EventNotifier.getInstance().addEventDisplay(statusBar);
+
 		int defRows = GuiSettings.getDefaultMaxRows();
 		if (defRows > 0)
 		{
@@ -862,6 +866,9 @@ public class SqlPanel
 		this.joinCompletion = new JoinCompletionAction(this);
 		this.actions.add(joinCompletion);
 
+		ShowTipAction showTip = new ShowTipAction(editor, new InsertTipProvider(this));
+		this.actions.add(showTip);
+
 		this.clearCompletionCache = new ClearCompletionCacheAction();
 		this.actions.add(this.clearCompletionCache);
 		this.actions.add(showObjectInfoAction);
@@ -901,7 +908,7 @@ public class SqlPanel
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
-		editor.addKeyBinding(new ShowTipAction(editor, new InsertTipProvider(this)));
+		editor.addKeyBinding(showTip);
 	}
 
 	@Override
@@ -1234,14 +1241,22 @@ public class SqlPanel
 		return statusBar;
 	}
 
-	/**
-	 *	Display a message in the status bar of the DwPanel.
-	 */
 	@Override
-	public void showStatusMessage(String aMsg)
+	public void setStatusMessage(String message)
 	{
-		statusBar.setStatusMessage(aMsg);
-		statusBar.forcePaint();
+		statusBar.setStatusMessage(message);
+	}
+
+	@Override
+	public void setStatusMessage(String message, int duration)
+	{
+		statusBar.setStatusMessage(message, duration);
+	}
+
+	@Override
+	public void doRepaint()
+	{
+		statusBar.doRepaint();
 	}
 
 	/**
@@ -1747,7 +1762,7 @@ public class SqlPanel
 	{
 		if (!this.isBusy()) return;
 
-		showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
+		setStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
 		iconHandler.showCancelIcon();
 		try
 		{
@@ -1938,7 +1953,7 @@ public class SqlPanel
 	 */
 	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
 	{
-		this.showStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
+		this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
 		this.storeStatementInHistory();
 		cancelExecution = false;

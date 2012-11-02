@@ -118,6 +118,16 @@ public class BatchRunner
 		}
 	}
 
+	public BatchRunner(List<File> files)
+	{
+		this();
+		filenames = new ArrayList<String>(files.size());
+		for (File f : files)
+		{
+			filenames.add(f.getAbsolutePath());
+		}
+	}
+
 	public void setStoreErrors(boolean flag)
 	{
 		this.storeErrorMessages = flag;

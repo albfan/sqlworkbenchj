@@ -342,54 +342,12 @@ public class QuickFilterPanel
 		{
 			input = "*" + input + "*";
 		}
-		String regex = wildcardToRegex(input);
+		String regex = StringUtil.wildcardToRegex(input, true);
 
-		// Test the "translated" pattern, if that throws an exception
-		// let the caller handle the exception
+		// Test the "translated" pattern, if that throws an exception let the caller handle it
 		Pattern.compile(regex);
 
 		return regex;
-	}
-
-	/**
-	 * Convert a string that is expected to have standard "filename wildcards" to
-	 * a matching regular expression.
-	 *
-	 * <tt>*</tt> and <tt>%</tt> are treated the same.
-	 * For single character wildcards only a question mark is used.
-	 * The SQL single character wildcard (<tt>_</tt>) is not supported.
-	 *
-	 * @param wildcard
-	 * @return a pattern that can be used as a regular expression
-	 */
-	public String wildcardToRegex(String wildcard)
-	{
-		StringBuilder s = new StringBuilder(wildcard.length() + 5);
-
-		s.append('^');
-
-		for (int i = 0, is = wildcard.length(); i < is; i++)
-		{
-			char c = wildcard.charAt(i);
-			if (c == '*' || c == '%') // support filesystem wildcards and SQL wildcards
-			{
-				s.append(".*");
-			}
-			else if (c == '?' )
-			{
-				s.append(".");
-			}
-			else
-			{
-				if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) != -1)
-				{
-					s.append('\\');
-				}
-				s.append(c);
-			}
-		}
-		s.append('$');
-		return s.toString();
 	}
 
 	@Override

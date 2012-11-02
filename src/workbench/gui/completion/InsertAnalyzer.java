@@ -11,6 +11,7 @@
  */
 package workbench.gui.completion;
 
+import java.util.ArrayList;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -139,6 +140,19 @@ public class InsertAnalyzer
 		{
 			tableForColumnList = table;
 			context = CONTEXT_COLUMN_LIST;
+		}
+		else if (cursorPos >= valuesPos)
+		{
+			context = CONTEXT_STATEMENT_PARAMETER;
+			tableForColumnList = table;
+			InsertColumnMatcher matcher = new InsertColumnMatcher(sql);
+			String column = matcher.getInsertColumnName(cursorPos);
+			if (column != null)
+			{
+				columnForFKSelect = column;
+				elements = new ArrayList();
+				elements .add(new SelectFKValueMarker(column, table));
+			}
 		}
 	}
 

@@ -24,6 +24,22 @@ public class StringUtilTest
 {
 
 	@Test
+	public void testWildcardRegex()
+	{
+		String pattern = StringUtil.wildcardToRegex("*.sql", false);
+		assertEquals("^.*\\.sql$", pattern);
+
+		pattern = StringUtil.wildcardToRegex("*.sql*", false);
+		assertEquals("^.*\\.sql.*$", pattern);
+
+		pattern = StringUtil.wildcardToRegex("foo%20*.txt", false);
+		assertEquals("^foo%20.*\\.txt$", pattern);
+
+		pattern = StringUtil.wildcardToRegex("foo%", true);
+		assertEquals("^foo.*$", pattern);
+	}
+
+	@Test
 	public void testFormatString()
 	{
 		assertEquals("0001", StringUtil.formatInt(1, 4).toString());

@@ -99,6 +99,8 @@ public abstract class BaseAnalyzer
 	protected BaseAnalyzer parentAnalyzer;
 	protected char catalogSeparator;
 
+	protected String columnForFKSelect;
+
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		this.dbConnection = conn;
@@ -107,6 +109,11 @@ public abstract class BaseAnalyzer
 		this.catalogSeparator = SqlUtil.getCatalogSeparator(this.dbConnection);
 	}
 
+	public WbConnection getConnection()
+	{
+		return dbConnection;
+	}
+	
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator
@@ -229,12 +236,13 @@ public abstract class BaseAnalyzer
 		this.context = NO_CONTEXT;
 		this.typeFilter = null;
 		this.keywordFile = null;
+		this.columnForFKSelect = null;
 
 		checkOverwrite();
 		this.addAllMarker = false;
 
 		// this should not be done in the constructor as the
-		// sub-classes might need to do important initializations durin initialization
+		// sub-classes might need to do important initializations during initialization
 		// and before checkContext is called
 		this.checkContext();
 		this.buildResult();
@@ -416,7 +424,6 @@ public abstract class BaseAnalyzer
 	protected boolean retrieveColumns()
 	{
 		if (tableForColumnList == null) return false;
-
 		DbObjectCache cache = this.dbConnection.getObjectCache();
 		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
 		List<ColumnIdentifier> cols = cache.getColumns(toCheck);
@@ -436,6 +443,11 @@ public abstract class BaseAnalyzer
 			if (GuiSettings.getSortCompletionColumns())
 			{
 				Collections.sort(elements);
+			}
+			if (columnForFKSelect != null)
+			{
+				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tableForColumnList);
+				elements.add(fk);
 			}
 		}
 		return (elements == null ? false : (elements.size() > 0));

@@ -196,7 +196,8 @@ public class WbCellEditor
 	{
 		if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && this.parentTable != null)
 		{
-			parentTable.openEditWindow();
+			CellWindowEdit edit = new CellWindowEdit(parentTable);
+			edit.openEditWindow();
 		}
 	}
 
@@ -251,7 +252,7 @@ public class WbCellEditor
 	static class TextAreaEditor
 		extends JTextArea
 	{
-		public TextAreaEditor()
+		TextAreaEditor()
 		{
 			super();
 			this.setFocusCycleRoot(false);

@@ -25,8 +25,8 @@ import java.util.Locale;
 import workbench.log.LogMgr;
 
 /**
- * A JTextField that only allows numbers to be entered.
- * 
+ * A JTextField that only allows numbers (integers) to be entered.
+ *
  * @author Thomas Kellerer
  */
 public class NumberField
@@ -41,13 +41,10 @@ public class NumberField
 		this.init();
 	}
 
-	public NumberField(int value, int columns)
+	public NumberField(int columns)
 	{
 		super(columns);
 		this.init();
-		integerFormatter = NumberFormat.getNumberInstance(Locale.US);
-		integerFormatter.setParseIntegerOnly(true);
-		setValue(value);
 	}
 
 	private void init()

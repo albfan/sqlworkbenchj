@@ -74,6 +74,7 @@ public class WbSwingUtilities
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(1, 6, 1, 6));
 	public static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
 	public static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
+	public static final KeyStroke SHIFT_TAB = KeyStroke.getKeyStroke("shift TAB");
 	public static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
 	public static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	public static final KeyStroke ALT_ENTER = KeyStroke.getKeyStroke("alt ENTER");
@@ -265,6 +266,11 @@ public class WbSwingUtilities
 		return new Point(x, y);
 	}
 
+	/**
+	 * Display an hourglass (wait) mouse cursor on the passed component and the window containing the component.
+	 *
+	 * @param caller  the component on which to display the wait cursor
+	 */
 	public static void showWaitCursorOnWindow(Component caller)
 	{
 		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, true, false);
@@ -275,6 +281,11 @@ public class WbSwingUtilities
 		showDefaultCursor(caller, true);
 	}
 
+	/**
+	 * Display an hourglass (wait) mouse cursor on the passed component.
+	 *
+	 * @param caller  the component on which to display the wait cursor
+	 */
 	public static void showWaitCursor(final Component caller)
 	{
 		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, false, true);

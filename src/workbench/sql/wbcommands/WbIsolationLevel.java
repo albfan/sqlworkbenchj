@@ -21,6 +21,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -81,9 +82,15 @@ public class WbIsolationLevel
 		{
 			try
 			{
+				boolean supported = currentConnection.getSqlConnection().getMetaData().supportsTransactionIsolationLevel(level);
 				currentConnection.getSqlConnection().setTransactionIsolation(level);
 				result.setSuccess();
 				result.addMessage(ResourceMgr.getFormattedString("MsgLevelChanged", currentConnection.getIsolationLevel()));
+				if (!supported)
+				{
+					result.addMessage(ResourceMgr.getFormattedString("MsgLevelNotSupported", SqlUtil.getIsolationLevelName(level)));
+					result.setWarning(true);
+				}
 			}
 			catch (SQLException e)
 			{
@@ -97,9 +104,9 @@ public class WbIsolationLevel
 
 	protected int stringToLevel(String arg)
 	{
+		arg = arg.trim();
 		arg = arg.replaceAll("\\s+", " ");
 		arg = arg.replaceAll(" ", "_");
-		arg = arg.trim();
 		Integer level = levelMap.get(arg);
 		if (level == null) return -1;
 		return level.intValue();

@@ -46,6 +46,8 @@ import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
 import workbench.resource.*;
+
+import workbench.gui.actions.WbAction;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
 import workbench.storage.DataStore;
@@ -326,22 +328,28 @@ public class ShortcutEditor
 		if (key != null)
 		{
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
-
+			String currentClass = d.getShortcut().getActionClass();
+			WbAction currentAction = ShortcutManager.getInstance().getActionForClass(currentClass);
 			int oldrow = this.findKey(key);
-			if (oldrow > -1)
+			if (!currentAction.allowDuplicate() && oldrow > -1)
 			{
-				String name = this.definitions.getValueAsString(oldrow, 0);
-				String msg = ResourceMgr.getFormattedString("MsgShortcutAlreadyAssigned", name);
-				boolean choice = WbSwingUtilities.getYesNo(this, msg);
-				if (!choice) return;
-
 				ShortcutDisplay old = (ShortcutDisplay)this.definitions.getValue(oldrow, 1);
-				old.clearKey();
-				this.model.fireTableRowsUpdated(oldrow, oldrow);
+				String actionClass = old.getShortcut().getActionClass();
+				WbAction action = ShortcutManager.getInstance().getActionForClass(actionClass);
+				if (!action.allowDuplicate())
+				{
+					String name = this.definitions.getValueAsString(oldrow, 0);
+					String msg = ResourceMgr.getFormattedString("MsgShortcutAlreadyAssigned", name);
+					boolean choice = WbSwingUtilities.getYesNo(this, msg);
+					if (!choice) return;
+
+					old.clearKey();
+					this.model.fireTableRowsUpdated(oldrow, oldrow);
+				}
 			}
 
 			MacroDefinition def = MacroManager.getInstance().getMacroForKeyStroke(key);
-			if (def != null)
+			if (!currentAction.allowDuplicate() && def != null)
 			{
 				String msg = ResourceMgr.getFormattedString("MsgShortcutMacroAlreadyAssigned", def.getName());
 				boolean choice = WbSwingUtilities.getYesNo(this, msg);

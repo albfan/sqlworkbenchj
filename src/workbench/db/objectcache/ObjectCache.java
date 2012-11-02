@@ -31,6 +31,8 @@ class ObjectCache
 	private boolean retrieveOraclePublicSynonyms;
 
 	private Set<String> schemasInCache;
+	private Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<TableIdentifier, List<DependencyNode>>();
+	private Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<TableIdentifier, List<DependencyNode>>();
 	private Map<TableIdentifier, List<ColumnIdentifier>> objects;
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 	private ObjectNameFilter schemaFilter;
@@ -144,6 +146,42 @@ class ObjectCache
 		{
 			return filterTablesBySchema(dbConnection, searchPath);
 		}
+	}
+
+	public List<DependencyNode> getReferencingTables(WbConnection dbConn, TableIdentifier table)
+	{
+		if (table == null) return Collections.emptyList();
+
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(dbConn);
+		List<DependencyNode> referencing = referencingTables.get(tbl);
+		if (referencing == null)
+		{
+			TableDependency deps = new TableDependency(dbConn, tbl);
+			deps.setRetrieveDirectChildrenOnly(true);
+			deps.readTreeForChildren();
+			referencing = deps.getLeafs();
+			referencingTables.put(table, referencing);
+		}
+		return referencing;
+	}
+
+	public List<DependencyNode> getReferencedTables(WbConnection dbConn, TableIdentifier table)
+	{
+		if (table == null) return Collections.emptyList();
+		
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(dbConn);
+		List<DependencyNode> referenced = referencedTables.get(tbl);
+		if (referenced == null)
+		{
+			TableDependency deps = new TableDependency(dbConn, tbl);
+			deps.setRetrieveDirectChildrenOnly(true);
+			deps.readTreeForParents();
+			referenced = deps.getLeafs();
+			referencedTables.put(table, referenced);
+		}
+		return referenced;
 	}
 
 	/**

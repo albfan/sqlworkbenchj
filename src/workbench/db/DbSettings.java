@@ -1522,4 +1522,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.autoincrement.fix", true);
 	}
+
+	public String getLowerFunctionTemplate()
+	{
+		return Settings.getInstance().getProperty(prefix + "sql.function.lower", null);
+	}
 }

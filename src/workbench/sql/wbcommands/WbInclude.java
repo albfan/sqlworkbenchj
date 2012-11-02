@@ -11,7 +11,9 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 import workbench.AppArguments;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.ArgumentType;
@@ -21,6 +23,8 @@ import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.resource.Settings;
@@ -45,7 +49,7 @@ public class WbInclude
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
-		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/','GO:nl'"));
+		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/:nl','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
@@ -115,7 +119,31 @@ public class WbInclude
 			return result;
 		}
 
-		if (!file.exists())
+		List<File> allFiles = null;
+		if (FileUtil.hasWildcard(cmdLine.getValue("file")))
+		{
+			String search = StringUtil.trimQuotes(cmdLine.getValue("file"));
+			File f = new File(search);
+			if (f.getParentFile() == null && this.runner != null)
+			{
+				String dir = this.runner.getBaseDir();
+				if (StringUtil.isNonEmpty(dir))
+				{
+					f = new File(dir, search);
+					search = f.getPath();
+				}
+			}
+			allFiles = FileUtil.listFiles(search);
+			if (allFiles.isEmpty())
+			{
+				result.setFailure();
+				String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
+				msg = StringUtil.replace(msg, "%filename%", search);
+				result.addMessage(msg);
+				return result;
+			}
+		}
+		else if (!file.exists())
 		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
@@ -151,9 +179,17 @@ public class WbInclude
 
 		try
 		{
-			batchRunner = new BatchRunner(file.getCanonicalPath());
-			String dir = file.getCanonicalFile().getParent();
-			batchRunner.setBaseDir(dir);
+			if (CollectionUtil.isEmpty(allFiles))
+			{
+				batchRunner = new BatchRunner(file.getCanonicalPath());
+				String dir = file.getCanonicalFile().getParent();
+				batchRunner.setBaseDir(dir);
+			}
+			else
+			{
+				batchRunner = new BatchRunner(allFiles);
+			}
+			
 			batchRunner.setConnection(currentConnection);
 			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);

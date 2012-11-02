@@ -42,7 +42,7 @@ public class TableDependency
 	{
 		this.connection = con;
 		this.wbMetadata = this.connection.getMetadata();
-		fkHandler = FKHandlerFactory.createInstance(connection);
+		this.fkHandler = FKHandlerFactory.createInstance(connection);
 		this.theTable = this.wbMetadata.findTable(tbl, false);
 	}
 

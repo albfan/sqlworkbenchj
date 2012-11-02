@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -19,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
@@ -45,6 +47,7 @@ public class WbTextLabel
 	private FontMetrics fm;
 	private boolean hasBorder;
 	private Map renderingHints;
+	private int minCharacters;
 
 	public WbTextLabel()
 	{
@@ -66,6 +69,33 @@ public class WbTextLabel
 		addMouseListener(this);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map)tk.getDesktopProperty("awt.font.desktophints");
+	}
+
+	public void setMininumCharacters(int min)
+	{
+		this.minCharacters = min;
+	}
+
+	@Override
+	public Dimension getPreferredSize()
+	{
+		if (this.fm != null)
+		{
+			Rectangle2D bounds = fm.getStringBounds(text == null ? "M" : text, getGraphics());
+			int w = (int)bounds.getWidth();
+			if (text == null)
+			{
+				w *= minCharacters;
+			}
+			return new Dimension(w, (int)bounds.getHeight() + 2);
+		}
+		return super.getPreferredSize();
+	}
+
+	@Override
+	public Dimension getMinimumSize()
+	{
+		return getPreferredSize();
 	}
 
 	@Override

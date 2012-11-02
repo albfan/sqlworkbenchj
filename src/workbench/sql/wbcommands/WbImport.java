@@ -628,7 +628,7 @@ public class WbImport
 			return result;
 		}
 
-		if (!StringUtil.isEmptyString(table) && !StringUtil.isEmptyString(dir))
+		if (StringUtil.isNonEmpty(table) && StringUtil.isNonEmpty(dir))
 		{
 			parser.setMultiFileImport(true);
 		}

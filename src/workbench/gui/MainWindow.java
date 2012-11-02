@@ -1232,8 +1232,10 @@ public class MainWindow
 	 */
 	public void showStatusMessage(final String aMsg)
 	{
-		final MainPanel current = this.getCurrentPanel();
-		if (current == null) return;
+		MainPanel current = this.getCurrentPanel();
+		if (!(current instanceof StatusBar)) return;
+
+		final StatusBar status = (StatusBar)current;
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1242,11 +1244,11 @@ public class MainWindow
 			{
 				if (StringUtil.isEmptyString(aMsg))
 				{
-					current.clearStatusMessage();
+					status.clearStatusMessage();
 				}
 				else
 				{
-					current.showStatusMessage(aMsg);
+					status.setStatusMessage(aMsg);
 				}
 			}
 		});
@@ -1417,7 +1419,10 @@ public class MainWindow
 		for (int i=0; i < sqlTab.getTabCount(); i++)
 		{
 			MainPanel sql = getSqlPanel(i);
-			sql.clearStatusMessage();
+			if (sql instanceof StatusBar)
+			{
+				((StatusBar)sql).clearStatusMessage();
+			}
 		}
 		this.clearConnectIsInProgress();
 	}
@@ -2098,7 +2103,13 @@ public class MainWindow
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 
-		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
+		StatusBar status = null;
+		if (aPanel instanceof StatusBar)
+		{
+			status = (StatusBar)aPanel;
+			status.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
+		}
+
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;
 		try
@@ -2107,7 +2118,7 @@ public class MainWindow
 		}
 		finally
 		{
-			aPanel.clearStatusMessage();
+			if (status != null) status.clearStatusMessage();
 		}
 		showConnectionWarnings(conn, aPanel);
 		return conn;

@@ -47,9 +47,13 @@ public class ContainsComparator
 			String v = value.toString();
 			String ref = reference.toString();
 			if (ignoreCase)
+			{
 				return (v.toLowerCase().indexOf(ref.toLowerCase()) > -1);
+			}
 			else
+			{
 				return (v.indexOf(ref) > -1);
+			}
 		}
 		catch (Exception e)
 		{

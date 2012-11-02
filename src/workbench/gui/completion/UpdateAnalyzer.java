@@ -102,9 +102,78 @@ public class UpdateAnalyzer
 			if (table != null)
 			{
 				context = CONTEXT_COLUMN_LIST;
+				columnForFKSelect = getCurrentColumn();
 				tableForColumnList = new TableIdentifier(table, dbConnection);
 			}
 		}
+	}
+
+	private String getCurrentColumn()
+	{
+		List<ColumnInfo> columns = getColumns();
+		for (ColumnInfo col : columns)
+		{
+			if (cursorPos >= col.valueStartPos && cursorPos <= col.valueEndPos)
+			{
+				return col.name;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Package visible for testing purposes.
+	 */
+	List<ColumnInfo> getColumns()
+	{
+		List<ColumnInfo> result = new ArrayList<ColumnInfo>();
+
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken t = lexer.getNextToken(false, false);
+		boolean inSet = false;
+		boolean nextIsColumn = false;
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (inSet)
+			{
+				if (nextIsColumn)
+				{
+					ColumnInfo col = new ColumnInfo();
+					col.name = text;
+					col.valueStartPos = 0;
+					col.valueEndPos = 0;
+					result.add(col);
+					nextIsColumn = false;
+				}
+				else if (text.equals(","))
+				{
+					nextIsColumn = true;
+					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
+					if (last != null)
+					{
+						last.valueEndPos = t.getCharBegin();
+					}
+				}
+				else if (text.equals("="))
+				{
+					nextIsColumn = false;
+					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
+					if (last != null)
+					{
+						last.valueStartPos = t.getCharEnd();
+					}
+				}
+			}
+			else if (text.equalsIgnoreCase("SET"))
+			{
+				inSet = true;
+				nextIsColumn = true;
+			}
+
+			t = lexer.getNextToken(false, false);
+		}
+		return result;
 	}
 
 	@Override
@@ -118,4 +187,17 @@ public class UpdateAnalyzer
 		return result;
 	}
 
+	class ColumnInfo
+	{
+		String name;
+		int valueStartPos;
+		int valueEndPos;
+
+		@Override
+		public String toString()
+		{
+			return name + " from: " + valueStartPos + " to: " + valueEndPos;
+		}
+	}
+	
 }

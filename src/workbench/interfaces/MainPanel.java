@@ -30,8 +30,6 @@ public interface MainPanel
 {
 	List getActions();
 	WbToolbar getToolbar();
-	void showStatusMessage(String aMsg);
-	void clearStatusMessage();
 	void showLogPanel();
 	void showResultPanel();
 	void setConnectionClient(Connectable client);

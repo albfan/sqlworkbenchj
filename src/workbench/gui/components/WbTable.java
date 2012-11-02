@@ -20,7 +20,6 @@ import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -335,18 +334,7 @@ public class WbTable
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
 
-		Action a = new AbstractAction()
-		{
-			@Override
-			public void actionPerformed(ActionEvent evt)
-			{
-				stopEditing();
-			}
-		};
-
-		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
-		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
-		this.getActionMap().put("wbtable-stop-editing", a);
+		configureEnterKey();
 		this.zoomer = new FontZoomer(this);
 		IncreaseFontSize inc = new IncreaseFontSize(zoomer);
 		inc.addToInputMap(im, am);
@@ -357,6 +345,26 @@ public class WbTable
 		ResetFontSize reset = new ResetFontSize(zoomer);
 		reset.addToInputMap(im, am);
 		fixCopyShortcut();
+	}
+
+	private void configureEnterKey()
+	{
+		Action a = new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(ActionEvent evt)
+			{
+				stopEditing();
+			}
+		};
+		configureEnterKeyAction(a);
+	}
+	
+	public void configureEnterKeyAction(Action enterAction)
+	{
+		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
+		this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
+		this.getActionMap().put("wbtable-stop-editing", enterAction);
 	}
 
 	private void fixCopyShortcut()
@@ -1843,62 +1851,6 @@ public class WbTable
 		return result;
 	}
 
-	public void openEditWindow()
-	{
-		if (!this.isEditing()) return;
-
-		int col = this.getEditingColumn();
-		int row = this.getEditingRow();
-		String data = null;
-		TableCellEditor editor = this.getCellEditor();
-
-		if (editor instanceof WbTextCellEditor)
-		{
-			WbTextCellEditor wbeditor = (WbTextCellEditor)editor;
-			if (this.isEditing() && wbeditor.isModified())
-			{
-				data = wbeditor.getText();
-			}
-			else
-			{
-				data = this.getValueAsString(row, col);
-			}
-		}
-		else
-		{
-			data = (String)editor.getCellEditorValue();
-		}
-
-		Window owner = SwingUtilities.getWindowAncestor(this);
-		Frame ownerFrame = null;
-		if (owner instanceof Frame)
-		{
-			ownerFrame = (Frame)owner;
-		}
-
-		String title = ResourceMgr.getString("TxtEditWindowTitle");
-		EditWindow w = new EditWindow(ownerFrame, title, data);
-		try
-		{
-			w.setVisible(true);
-			if (editor != null)
-			{
-				// we need to "cancel" the editor so that the data
-				// in the editor component will not be written into the
-				// table model!
-				editor.cancelCellEditing();
-			}
-			if (!w.isCancelled())
-			{
-				this.setValueAt(w.getText(), row, col);
-			}
-		}
-		finally
-		{
-			w.dispose();
-		}
-	}
-
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		if (this.changeListener.add(aListener))
@@ -2150,7 +2102,8 @@ public class WbTable
 
 		if (table == null)
 		{
-			table = selectUpdateTable();
+			UpdateTableSelector selector = new UpdateTableSelector(this);
+			table = selector.selectUpdateTable();
 			if (table != null)
 			{
 				ds.setUpdateTable(table);
@@ -2266,42 +2219,6 @@ public class WbTable
 		{
 			this.copyDeleteInsertAction.setEnabled(hasRows);
 		}
-	}
-
-	public TableIdentifier selectUpdateTable()
-	{
-		if (this.getDataStore() == null) return null;
-
-		String csql = this.getDataStore().getGeneratingSql();
-		WbConnection conn = this.getDataStore().getOriginalConnection();
-		List<String> tables = SqlUtil.getTables(csql, false, conn);
-
-		TableIdentifier table = null;
-
-		if (tables.size() > 1)
-		{
-			SelectTablePanel p = new SelectTablePanel(tables);
-
-			boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(this), p, ResourceMgr.getString("MsgSelectTableTitle"));
-			String selectedTable = null;
-			if (ok)
-			{
-				selectedTable = p.getSelectedTable();
-			}
-			if (selectedTable != null)
-			{
-				table = new TableIdentifier(selectedTable, conn);
-			}
-		}
-		else if (tables.size() == 1)
-		{
-			table = getDataStore().getUpdateTable();
-			if (table == null)
-			{
-				table = new TableIdentifier(tables.get(0), conn);
-			}
-		}
-		return table;
 	}
 
 	/**

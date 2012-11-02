@@ -1546,4 +1546,48 @@ public class StringUtil
 		}
 		return len;
 	}
+
+	/**
+	 * Convert a string that is expected to have standard "filename wildcards" to
+	 * a matching regular expression.
+	 *
+	 * <tt>*</tt> and <tt>%</tt> are treated the same.
+	 * For single character wildcards only a question mark is used.
+	 * The SQL single character wildcard (<tt>_</tt>) is not supported (even when supportSQLWildcard is true)
+	 *
+	 * @param toSearch            the search expression
+	 * @param supportSQLWildcard  if true, % is also recognized as a wildcard character
+	 * 
+	 * @return a pattern that can be used as a regular expression
+	 */
+	public static String wildcardToRegex(String toSearch, boolean supportSQLWildcard)
+	{
+		StringBuilder s = new StringBuilder(toSearch.length() + 5);
+
+		s.append('^');
+
+		for (int i = 0, is = toSearch.length(); i < is; i++)
+		{
+			char c = toSearch.charAt(i);
+			if (c == '*' || (c == '%' && supportSQLWildcard)) // support filesystem wildcards and SQL wildcards
+			{
+				s.append(".*");
+			}
+			else if (c == '?' )
+			{
+				s.append(".");
+			}
+			else
+			{
+				if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
+				{
+					s.append('\\');
+				}
+				s.append(c);
+			}
+		}
+		s.append('$');
+		return s.toString();
+	}
+
 }

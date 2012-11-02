@@ -957,16 +957,6 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public void clearStatusMessage()
-	{
-	}
-
-	@Override
-	public void showStatusMessage(String aMsg)
-	{
-	}
-
-	@Override
 	public void clearLog()
 	{
 	}

@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
@@ -45,32 +46,55 @@ public class FileUtilTest
 	}
 
 	@Test
-	public void testGetLines()
+	public void testListFiles()
+		throws Exception
 	{
-		try
+		testUtil.emptyBaseDirectory();
+		File dir = new File(testUtil.getBaseDir());
+		for (int i=0; i<5; i++)
 		{
-			File f = new File(testUtil.getBaseDir(), "somedata.txt");
-			String encoding = "ISO-8859-1";
-			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
-			for (int i=0; i < 100; i++)
-			{
-				w.write("line_" + i + "\n");
-			}
-			w.close();
-
-			BufferedReader in = new BufferedReader(new FileReader(f));
-
-			Collection<String> lines = FileUtil.getLines(in);
-			assertEquals(100, lines.size());
-			for (int i=0; i < 100; i++)
-			{
-				assertTrue(lines.contains("line_" + i));
-			}
+			File f = new File(dir, "file_" + (i+1) + ".sql");
+			f.createNewFile();
 		}
-		catch (Throwable th)
+
+		File f = new File(dir, "foobar.sqlscript");
+		f.createNewFile();
+		
+		String wildcard = testUtil.getBaseDir() + "/" + "*.sql";
+		List<File> files = FileUtil.listFiles(wildcard);
+		assertNotNull(files);
+		assertEquals(5, files.size());
+		for (File found : files)
 		{
-			th.printStackTrace();
-			fail(th.getMessage());
+			String fname = found.getName();
+			assertTrue(fname.startsWith("file_"));
+		}
+
+		wildcard = testUtil.getBaseDir() + "/" + "*.sql*";
+		files = FileUtil.listFiles(wildcard);
+		assertEquals(6, files.size());
+	}
+
+	@Test
+	public void testGetLines()
+		throws Exception
+	{
+		File f = new File(testUtil.getBaseDir(), "somedata.txt");
+		String encoding = "ISO-8859-1";
+		Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
+		for (int i=0; i < 100; i++)
+		{
+			w.write("line_" + i + "\n");
+		}
+		w.close();
+
+		BufferedReader in = new BufferedReader(new FileReader(f));
+
+		Collection<String> lines = FileUtil.getLines(in);
+		assertEquals(100, lines.size());
+		for (int i=0; i < 100; i++)
+		{
+			assertTrue(lines.contains("line_" + i));
 		}
 	}
 

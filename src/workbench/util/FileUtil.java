@@ -17,12 +17,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import workbench.log.LogMgr;
 
 /**
@@ -396,6 +403,70 @@ public class FileUtil
 		{
 			// ignore
 		}
+	}
+
+	public static boolean hasWildcard(String fname)
+	{
+		return fname != null && (fname.indexOf('?') > -1 || fname.indexOf('*') > -1);
+	}
+	/**
+	 * List all files denoted by the file pattern.
+	 * The pattern is expected to contain a directory.
+	 *
+	 * Only the directory specfied in the argument is searched, no recursive search is done.
+	 *
+	 * @param toSearch  the files to search, e.g. /temp/*.sql
+	 * @return a list of files found in the directory denoted by the search pattern
+	 *
+	 * @throws IllegalArgumentException  if the pattern is invalid
+	 */
+	public static List<File> listFiles(String toSearch)
+		throws IllegalArgumentException
+	{
+		File f = new File(toSearch);
+		final File parentDir = f.getParentFile();
+
+		String matchPattern = StringUtil.wildcardToRegex(f.getName(), false);
+		final Pattern pattern;
+		try
+		{
+			pattern = Pattern.compile(matchPattern);
+		}
+		catch (PatternSyntaxException e)
+		{
+			throw new IllegalArgumentException(toSearch +  " is not a valid wildcard pattern");
+		}
+
+		FilenameFilter filter = new FilenameFilter()
+		{
+			@Override
+			public boolean accept(File dir, String name)
+			{
+				if (dir == null) return false;
+
+				Matcher matcher = pattern.matcher(name);
+				return matcher.matches();
+			}
+		};
+		File[] list = parentDir.listFiles(filter);
+		if (list == null)
+		{
+			return Collections.emptyList();
+		}
+		List<File> result = Arrays.asList(list);
+		Comparator<File> fnameSorter = new Comparator<File>()
+		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return 1;
+				if (o2 == null) return -1;
+				return o1.getName().compareToIgnoreCase(o2.getName());
+			}
+		};
+		Collections.sort(result, fnameSorter);
+		return result;
 	}
 
 }

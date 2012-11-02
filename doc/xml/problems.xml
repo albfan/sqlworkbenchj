@@ -147,6 +147,7 @@
 		<section id="oracle-db-exp-tables">
 			<title>No Views or tables visible in the DbExplorer</title>
       <indexterm><primary>Oracle</primary><secondary>No views displayed in DbExplorer</secondary></indexterm>
+      <indexterm><primary>Oracle</primary><secondary>Tables with underscores not treated correctly</secondary></indexterm>
 			<para>
         Since Build 112 it is possible that the DbExplorer does no longer display views or tables if the
         selected schema (username) contains an underscore. This is caused by a bug in older Oracle JDBC drivers.
@@ -169,10 +170,13 @@
         actually <emphasis>used</emphasis> by the driver.
       </para>
       <para>
-        To fix this problem, the escape character reported by the driver can be overridden with a property in <literal>workbench.settings</literal>:
-        <literal>workbench.db.oracle.searchstringescape=/</literal>. You can also change this property by running
-        <literal>WbSetConfig workbench.db.oracle.searchstringescape=/</literal>
+        To fix this problem, the escape character reported by the driver can be overridden by setting a property in <literal>workbench.settings</literal>:
       </para>
+      <para>
+        <literal>workbench.db.oracle.searchstringescape=/</literal>
+      </para>
+      <para>You can also change this property by running</para>
+      <programlisting>WbSetConfig workbench.db.oracle.searchstringescape=/</programlisting>
       <para>
         This bug was fixed in the 11.2 drivers.
       </para>

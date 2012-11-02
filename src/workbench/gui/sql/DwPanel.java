@@ -66,10 +66,13 @@ import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.components.UpdateTableSelector;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -92,7 +95,7 @@ import workbench.util.WbThread;
 public class DwPanel
 	extends JPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
-				     DbData, DbUpdater, Interruptable, JobErrorHandler, PropertyChangeListener
+				     DbData, DbUpdater, Interruptable, JobErrorHandler, PropertyChangeListener, StatusBar
 {
 	public static final String PROP_UPDATE_TABLE = "updateTable";
 
@@ -553,7 +556,8 @@ public class DwPanel
 
 			if (!result)
 			{
-				TableIdentifier tbl = dataTable.selectUpdateTable();
+				UpdateTableSelector selector = new UpdateTableSelector(dataTable);
+				TableIdentifier tbl = selector.selectUpdateTable();
 				if (tbl == null) return TableCheck.cancel;
 				if (tbl != null)
 				{
@@ -1213,14 +1217,33 @@ public class DwPanel
 		}
 	}
 
+	@Override
+	public void doRepaint()
+	{
+		statusBar.doRepaint();
+	}
+
+	@Override
+	public String getText()
+	{
+		return statusBar.getText();
+	}
+
 	/**
 	 *	Show a message in the status panel.
 	 *
 	 *  @see DwStatusBar#setStatusMessage(String)
 	 */
+	@Override
 	public void setStatusMessage(final String aMsg)
 	{
 		this.statusBar.setStatusMessage(aMsg);
+	}
+
+	@Override
+	public void setStatusMessage(final String msg, final int duration)
+	{
+		statusBar.setStatusMessage(msg, duration);
 	}
 
 	/**
@@ -1228,6 +1251,7 @@ public class DwPanel
 	 *
 	 *  @see DwStatusBar#clearStatusMessage()
 	 */
+	@Override
 	public void clearStatusMessage()
 	{
 		statusBar.clearStatusMessage();

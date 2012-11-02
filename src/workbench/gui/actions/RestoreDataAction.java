@@ -11,7 +11,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.WbCellEditor;
 import workbench.interfaces.NullableEditor;
 
 /**

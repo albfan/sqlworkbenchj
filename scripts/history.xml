@@ -2,6 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-10-28">
+    <entry dev-build="6" type="enh">Values for FK columns can now be selected from the referenced table through a search dialog. This is available when editing a result set or for the column values of UPDATE and INSERT statements.</entry>
+    <entry dev-build="6" type="enh">The FK information used for the "join completion feature" is now held in the completion cache to make subsequent uses faster.</entry>
+    <entry dev-build="6" type="enh">WbInclude now supports wildcards for the -file argument (e.g. -file=/foo/bar/*.sql will run all scripts from the specified directory)</entry>
     <entry dev-build="5" type="enh">Added support for NuoDB (http://www.nuodb.com/)</entry>
     <entry dev-build="5" type="enh">The context menu of a SQL Tab now has options to copy the filename to the clipboard</entry>
     <entry dev-build="5" type="enh">Improved the handling of relative filenames for WbSysExec</entry>
@@ -14,6 +17,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="5" type="fix">Showing the INSERT "hint" for values and columns was not working for INSERT statements with more than one row.</entry>
     <entry dev-build="5" type="fix">For Oracle, errors resulting from e.g. a wrong CREATE PROCEDURE were no longer displayed automatically</entry>
     <entry dev-build="5" type="fix">For Oracle the display in the DbExplorer of the index and other table specific panels was not always correct when switching between VIEWs and TABLEs</entry>
     <entry dev-build="5" type="fix">WbDataDiff generated DELETE statement without a schema qualification for the tables even when necessary.</entry>

@@ -875,7 +875,7 @@ public class SqlCommand
 		if (this.runner != null)
 		{
 			String dir = this.runner.getBaseDir();
-			if (!StringUtil.isEmptyString(dir))
+			if (StringUtil.isNonEmpty(dir))
 			{
 				f = new WbFile(dir, fname);
 			}

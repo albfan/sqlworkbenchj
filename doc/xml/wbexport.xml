@@ -1443,7 +1443,7 @@ FROM blob_table;</programlisting>
 			<para>
         When writing the export data, values in character columns can be replaced using regular expressions.
 			</para>
-<programlisting>WbExport -file='/path/to/export.tx'
+<programlisting>WbExport -file='/path/to/export.txt'
          -type=text
          -replaceExpression='(\n|\r\n)' -replaceWith='*'
          -sourceTable=export_table;</programlisting>
@@ -1452,8 +1452,8 @@ FROM blob_table;</programlisting>
        </para>
        <para>
          The value for <literal>-replaceExpression</literal> defines a regular expression. In the example
-         above multiple new lines will be replace with multiple  * characters. To replace consecutive
-         new lines with a single * character, use the regular expression <literal>-replaceExpression='(\n|\r\n)+'</literal>.
+         above multiple new lines will be replace with multiple <literal>*</literal> characters. To replace consecutive
+         new lines with a single <literal>*</literal> character, use the regular expression <literal>-replaceExpression='(\n|\r\n)+'</literal>.
          (Note the + sign after the brackets)
        </para>
 

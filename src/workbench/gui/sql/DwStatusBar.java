@@ -51,7 +51,6 @@ import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.DurationFormatter;
-import workbench.util.EventNotifier;
 import workbench.util.NotifierEvent;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -78,8 +77,7 @@ public class DwStatusBar
 	private JPanel alertPanel;
 	private JPanel infoPanel;
 
-	public static final int BAR_HEIGHT = 22;
-	private static final int FIELD_HEIGHT = 18;
+	private static final int DEFAULT_FIELD_HEIGHT = 18;
 	private static final Border MAX_ROWS_BORDER = new EmptyBorder(0, 0, 0, 1);
 	private static final Insets MAX_ROWS_INSETS = new Insets(0, 2, 0, 2);
 
@@ -101,9 +99,19 @@ public class DwStatusBar
 	public DwStatusBar(boolean showTimeout, boolean showEditorStatus)
 	{
 		super();
-		Dimension d = new Dimension(40, FIELD_HEIGHT);
+
 		this.tfRowCount = new JTextField();
 		this.tfMaxRows = new JTextField(6);
+
+		Font f = tfMaxRows.getFont();
+		FontMetrics fm = null;
+		if (f != null) fm = tfMaxRows.getFontMetrics(f);
+
+		int fieldHeight = (fm == null ? 0 : fm.getHeight() + 2);
+		fieldHeight = Math.min(DEFAULT_FIELD_HEIGHT, fieldHeight);
+		int barHeight = fieldHeight + 4;
+		Dimension d = new Dimension(40, fieldHeight);
+
 		this.tfMaxRows.setEditable(true);
 		this.tfMaxRows.setMaximumSize(d);
 		this.tfMaxRows.setMargin(MAX_ROWS_INSETS);
@@ -118,8 +126,8 @@ public class DwStatusBar
 
 		this.setLayout(new BorderLayout());
 
-		this.setMaximumSize(new Dimension(32768, BAR_HEIGHT));
-		this.setMinimumSize(new Dimension(80, BAR_HEIGHT));
+		this.setMaximumSize(new Dimension(32768, barHeight));
+		this.setMinimumSize(new Dimension(80, barHeight));
 		this.setPreferredSize(null);
 		tfRowCount.setEditable(false);
 		tfRowCount.setHorizontalAlignment(JTextField.RIGHT);
@@ -132,25 +140,19 @@ public class DwStatusBar
 		tfRowCount.setEnabled(false);
 
 		this.tfStatus = new WbTextLabel();
-		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
-		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
-		tfStatus.setPreferredSize(null);
 
 		this.add(tfStatus, BorderLayout.CENTER);
 
 		infoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
 		infoPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		infoPanel.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
+		infoPanel.setMaximumSize(new Dimension(300, fieldHeight));
 
 		setBorder(DEFAULT_BORDER);
 
 		execTime = new WbTextLabel();
+		execTime.setMininumCharacters(12);
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
 		execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
-
-		Font f = execTime.getFont();
-		FontMetrics fm = null;
-		if (f != null) fm = execTime.getFontMetrics(f);
 
 		if (showTimer)
 		{
@@ -162,7 +164,7 @@ public class DwStatusBar
 			this.editorStatus = new JLabel();
 			this.editorStatus.setHorizontalAlignment(SwingConstants.CENTER);
 			int ew = (fm == null ? 85 : fm.stringWidth("L:999 C:999"));
-			d = new Dimension(ew + 4, FIELD_HEIGHT);
+			d = new Dimension(ew + 4, fieldHeight);
 			editorStatus.setMinimumSize(d);
 			this.editorStatus.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3)));
 			this.editorStatus.setToolTipText(ResourceMgr.getDescription("LblEditorStatus"));
@@ -172,17 +174,12 @@ public class DwStatusBar
 		}
 
 		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
-		int width = (fm == null ? 100 : fm.stringWidth("000000000000s"));
-		d = new Dimension(width + 4, FIELD_HEIGHT);
-		execTime.setPreferredSize(d);
-		execTime.setMaximumSize(d);
 		execTime.setBorder(b);
 		infoPanel.add(execTime);
 
 		if (showTimeout)
 		{
 			JLabel l = new JLabel(" " + ResourceMgr.getString("LblQueryTimeout") + " ");
-			//l.setBorder(new DividerBorder(DividerBorder.LEFT));
 			infoPanel.add(l);
 			this.tfTimeout = new JTextField(3);
 			this.tfTimeout.setBorder(b);
@@ -202,8 +199,6 @@ public class DwStatusBar
 
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
-
-		EventNotifier.getInstance().addEventDisplay(this);
 	}
 
 	public void removeSelectionIndicator(JTable client)

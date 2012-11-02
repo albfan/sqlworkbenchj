@@ -29,5 +29,6 @@ public class ActionRegistration
 		new CopySelectedAsSqlInsertAction(null);
 		new CopySelectedAsSqlUpdateAction(null);
 		new SetNullAction(null);
+		new SelectFkValueAction(null);
 	}
 }

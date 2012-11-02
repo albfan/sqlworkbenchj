@@ -29,6 +29,63 @@ public class InsertColumnMatcherTest
 	}
 
 	@Test
+	public void testMultipleValues()
+	{
+		// multi-value inserts currently not supported
+		String sql =
+			"insert into person " +
+			"  (id, firstname, lastname, birthday) \n" +
+			"values \n" +
+			"  (1, 'arthur', 'dent', DATE '1960-04-02'), \n" +
+			"  (2, 'ford', 'prefect', DATE '1960-04-02'), \n" +
+			"  (3, 'tricia', 'mcmillan', DATE '1960-04-02')";
+		InsertColumnMatcher matcher = new InsertColumnMatcher(sql);
+		int pos = sql.indexOf("'prefect',");
+		String column = matcher.getTooltipForPosition(pos);
+		assertEquals("lastname", column);
+
+		sql =
+		"insert into address (id, person_id, address_info)  \n" +
+		"values \n" +
+		"  (1, 1, 'foo'), \n" +
+		"  (2, 1, 'bar'), \n" +
+		"  (3, 2, 'foobar'), \n" +
+		"  (4, 3, 'fubar')";
+
+		matcher = new InsertColumnMatcher(sql);
+		pos = sql.indexOf("1, 'bar");
+		column = matcher.getTooltipForPosition(pos);
+		assertEquals("person_id", column);
+
+		pos = sql.indexOf("person_id,");
+		String value = matcher.getTooltipForPosition(pos);
+		assertEquals("[1, 1, 2, 3]", value);
+
+		pos = sql.indexOf("id,");
+		value = matcher.getTooltipForPosition(pos);
+		assertEquals("[1, 2, 3, 4]", value);
+
+		value = matcher.getValueForColumn("id");
+		assertEquals("[1, 2, 3, 4]", value);
+
+		sql =
+		"insert into address (id, person_id, address_info)  \n" +
+		"values \n" +
+		"  (1, 1, 'foo'), \n" +
+		"  (2, 1, ), \n" +
+		"  (3, 2, 'foobar'), \n" +
+		"  (4, 3, 'fubar')";
+
+		matcher = new InsertColumnMatcher(sql);
+		pos = sql.indexOf("address_info") + 2;
+		value = matcher.getTooltipForPosition(pos);
+		assertEquals("['foo', <No value>, 'foobar', 'fubar']", value);
+
+		value = matcher.getValueForColumn("address_info");
+		assertEquals("['foo', <No value>, 'foobar', 'fubar']", value);
+	}
+
+	@Test
 	public void testGetColumns()
 	{
 		String sql =

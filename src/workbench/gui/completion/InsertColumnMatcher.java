@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.ElementInfo;
@@ -28,6 +29,7 @@ public class InsertColumnMatcher
 {
 	private List<InsertColumnInfo> columns;
 	private boolean isInsert;
+	private String noValue = "<" + ResourceMgr.getString("TxtNoValue") + ">";
 
 	public InsertColumnMatcher(String sql)
 	{
@@ -55,7 +57,7 @@ public class InsertColumnMatcher
 			boolean afterValues = false;
 
 			List<ElementInfo> columnEntries = null;
-			List<ElementInfo> valueEntries = null;
+			List<List<ElementInfo>> rowValues = new ArrayList<List<ElementInfo>>(1);
 
 			int bracketCount = 0;
 			boolean isSubSelect = false;
@@ -65,10 +67,6 @@ public class InsertColumnMatcher
 				if (token.getContents().equals(")"))
 				{
 					bracketCount --;
-					if (bracketCount == 0 && afterValues)
-					{
-						break;
-					}
 				}
 				else if (token.getContents().equals("(") && !afterValues)
 				{
@@ -76,7 +74,7 @@ public class InsertColumnMatcher
 					if (bracketCount == 1)
 					{
 						columnEntries = getListValues(lexer, token.getCharEnd(), sql);
-						// getListValues() terminated a the closing bracket
+						// getListValues() terminated at the closing bracket
 						// so the bracket count must be decreased here again.
 						bracketCount --;
 					}
@@ -86,7 +84,7 @@ public class InsertColumnMatcher
 					bracketCount ++;
 					if (bracketCount == 1)
 					{
-						valueEntries = getListValues(lexer, token.getCharEnd(), sql);
+						rowValues.add(getListValues(lexer, token.getCharEnd(), sql));
 						bracketCount --;
 					}
 				}
@@ -97,18 +95,28 @@ public class InsertColumnMatcher
 				else if (token.getContents().equals("SELECT"))
 				{
 					String subSelect = sql.substring(token.getCharBegin());
-					valueEntries = SqlUtil.getColumnEntries(subSelect, true);
-					for (ElementInfo element : valueEntries)
+					List<ElementInfo> entries = SqlUtil.getColumnEntries(subSelect, true);
+					for (ElementInfo element : entries)
 					{
 						element.setOffset(token.getCharBegin());
 					}
+					rowValues.add(entries);
 					isSubSelect = true;
 					break; // no need to go any further, it's an INSERT ... SELECT statement
 				}
 				token = lexer.getNextToken(false, false);
 			}
 
-			int maxElements = columnEntries.size() > valueEntries.size() ? columnEntries.size() : valueEntries.size();
+			int maxValues = -1;
+			for (List<ElementInfo> values : rowValues)
+			{
+				if (values.size() > maxValues)
+				{
+					maxValues = values.size();
+				}
+			}
+
+			int maxElements = columnEntries.size() > maxValues ? columnEntries.size() : maxValues;
 			columns = new ArrayList<InsertColumnInfo>(maxElements);
 			for (int i=0; i < maxElements; i++)
 			{
@@ -119,11 +127,23 @@ public class InsertColumnMatcher
 					info.columnEnd = columnEntries.get(i).getEndPosition();
 					info.columnName = columnEntries.get(i).getElementValue();
 				}
-				if (i < valueEntries.size())
+				else
 				{
-					info.valueStart = valueEntries.get(i).getStartPosition();
-					info.valueEnd = valueEntries.get(i).getEndPosition();
-					info.value = valueEntries.get(i).getElementValue();
+					info.columnStart = -1;
+					info.columnEnd = -1;
+					info.columnName = null;
+				}
+				for (int row=0; row < rowValues.size(); row++)
+				{
+					List<ElementInfo> entries = rowValues.get(row);
+					if (i < entries.size())
+					{
+						info.addValue(entries.get(i).getElementValue(), entries.get(i).getStartPosition(), entries.get(i).getEndPosition());
+					}
+					else
+					{
+						info.addValue(null, -1, -1);
+					}
 				}
 				columns.add(info);
 			}
@@ -154,10 +174,17 @@ public class InsertColumnMatcher
 		{
 			InsertColumnInfo current = columns.get(i);
 			InsertColumnInfo next = columns.get(i + 1);
-			if (next.value != null && next.valueStart > 0 && next.valueEnd > 0)
+			for (int v=0; v < next.values.size(); v++)
 			{
-				next.valueStart = current.valueEnd + 1; // plus 1 because of the comma
+				if (next.values.get(v).valueStart > 0 && next.values.get(v).valueEnd > 0)
+				{
+					next.values.get(v).valueStart = current.values.get(v).valueEnd -1;
+				}
 			}
+//			if (!next.values.isEmpty() && next.values.get(0).valueStart > 0 && next.values.get(0).valueEnd > 0)
+//			{
+//				next.values.get(0).valueStart = current.values.get(0).valueEnd + 1; // plus 1 because of the comma
+//			}
 		}
 	}
 
@@ -200,9 +227,12 @@ public class InsertColumnMatcher
 	{
 		for (InsertColumnInfo info : columns)
 		{
-			if (info.valueStart <= position && info.valueEnd >= position)
+			for (ColumnValueInfo valInfo : info.values)
 			{
-				return true;
+				if (valInfo.valueStart <= position && valInfo.valueEnd >= position)
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -246,7 +276,30 @@ public class InsertColumnMatcher
 		{
 			if (StringUtil.equalStringIgnoreCase(columnName, info.columnName))
 			{
-				return info.value;
+				return info.getValue();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return the name of the column at the given position.
+	 *
+	 * If the cursor is not in the VALUES list, null will be returned.
+	 *
+	 * @param position the cursor position.
+	 * @return the column name or null
+	 */
+	public String getInsertColumnName(int position)
+	{
+		for (InsertColumnInfo info : columns)
+		{
+			for (ColumnValueInfo valInfo : info.values)
+			{
+				if (valInfo.valueStart <= position && valInfo.valueEnd >= position)
+				{
+					return info.columnName;
+				}
 			}
 		}
 		return null;
@@ -267,11 +320,14 @@ public class InsertColumnMatcher
 		{
 			if (info.columnStart <= position && info.columnEnd >= position)
 			{
-				return info.value;
+				return info.getValue();
 			}
-			if (info.valueStart <= position && info.valueEnd >= position)
+			for (ColumnValueInfo valInfo : info.values)
 			{
-				return info.columnName;
+				if (valInfo.valueStart <= position && valInfo.valueEnd >= position)
+				{
+					return info.columnName;
+				}
 			}
 		}
 		return null;
@@ -281,11 +337,62 @@ public class InsertColumnMatcher
 	{
 		int columnStart;
 		int columnEnd;
+		String columnName;
+		List<ColumnValueInfo> values = new ArrayList<ColumnValueInfo>(1);
+
+		void addValue(String value, int valueStart, int valueEnd)
+		{
+			values.add(new ColumnValueInfo(value, valueStart, valueEnd));
+		}
+
+		String getValue()
+		{
+			if (values.isEmpty())
+			{
+				return null;
+			}
+			if (values.size() == 1)
+			{
+				return values.get(0).value;
+			}
+			StringBuilder result = new StringBuilder(values.size() * 5);
+			result.append('[');
+			for (int i=0; i < values.size(); i++)
+			{
+				if (i > 0) result.append(", ");
+				String value = values.get(i).value;
+				if (StringUtil.isBlank(value))
+				{
+					result.append(noValue);
+				}
+				else
+				{
+					result.append(values.get(i).value);
+				}
+			}
+			result.append(']');
+			return result.toString();
+		}
+	}
+
+	private class ColumnValueInfo
+	{
 		int valueStart;
 		int valueEnd;
-		String columnName;
 		String value;
-		boolean valueIsColumn;
+
+		ColumnValueInfo(String value, int valueStart, int valueEnd)
+		{
+			this.valueStart = valueStart;
+			this.valueEnd = valueEnd;
+			this.value = value;
+		}
+
+		@Override
+		public String toString()
+		{
+			return value;
+		}
 	}
 }
 

@@ -250,7 +250,8 @@ public class ClipBoardCopier
 		TableIdentifier updateTable = data.getUpdateTable();
 		if (updateTable == null && client != null)
 		{
-			updateTable = client.selectUpdateTable();
+			UpdateTableSelector selector = new UpdateTableSelector(client);
+			updateTable = selector.selectUpdateTable();
 			if (updateTable != null)
 			{
 				client.getDataStore().setUpdateTable(updateTable);

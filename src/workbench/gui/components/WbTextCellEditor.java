@@ -32,11 +32,19 @@ import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.actions.SelectFkValueAction;
 import workbench.util.WbDateFormatter;
 
 /**
+ * A cell editor using a JTextField to edit the value.
+ *
+ * This editor is usable for nearly all kinds of data, except multiline text.
+ *
+ * For Multiline text use {@link WbCellEditor}
  *
  * @author Thomas Kellerer
+ * @see WbCellEditor
  */
 public class WbTextCellEditor
 	extends DefaultCellEditor
@@ -71,8 +79,18 @@ public class WbTextCellEditor
 		textField.addMouseListener(this);
 		restoreValue = new RestoreDataAction(this);
 		TextComponentMouseListener menu = new TextComponentMouseListener();
-		menu.addAction(new SetNullAction(this));
+
+		SetNullAction setNull = new SetNullAction(this);
+		menu.addAction(setNull);
+		setNull.addToInputMap(textField);
+
 		menu.addAction(restoreValue);
+		restoreValue.addToInputMap(textField);
+
+		SelectFkValueAction selectFk = new SelectFkValueAction(parent);
+		menu.addAction(selectFk);
+		selectFk.addToInputMap(textField);
+
 		textField.addMouseListener(menu);
 		textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
@@ -245,7 +263,8 @@ public class WbTextCellEditor
 		}
 		else
 		{
-			this.parentTable.openEditWindow();
+			CellWindowEdit edit = new CellWindowEdit(parentTable);
+			edit.openEditWindow();
 		}
 	}
 
