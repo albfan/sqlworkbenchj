@@ -335,20 +335,23 @@ public class DwStatusBar
 	}
 
 	@Override
-	public void setStatusMessage(final String message, int duration)
+	public void setStatusMessage(final String message, final int duration)
 	{
 		setStatusMessage(message);
-		WbThread t = new WbThread("Notification")
+		if (duration > 0)
 		{
-			@Override
-			public void run()
+			WbThread t = new WbThread("ClearStatusMessage")
 			{
-				WbThread.sleepSilently(2500);
-				String m = getText();
-				if (message.equals(m)) clearStatusMessage();
-			}
-		};
-		t.start();
+				@Override
+				public void run()
+				{
+					WbThread.sleepSilently(duration);
+					String m = getText();
+					if (message.equals(m)) clearStatusMessage();
+				}
+			};
+			t.start();
+		}
 	}
 
 	/**

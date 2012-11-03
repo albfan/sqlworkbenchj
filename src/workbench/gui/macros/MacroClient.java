@@ -19,7 +19,7 @@ import javax.swing.JComponent;
  */
 public interface MacroClient
 {
-	void executeMacroSql(String sql, boolean replaceText);
+	void executeMacroSql(String sql, boolean replaceText, boolean appendResults);
 	String getStatementAtCursor();
 	String getSelectedText();
 	String getText();

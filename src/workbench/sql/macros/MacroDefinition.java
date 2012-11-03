@@ -36,6 +36,7 @@ public class MacroDefinition
 	private StoreableKeyStroke shortcut;
 	private boolean showInMenu = true;
 	private boolean expandWhileTyping;
+	private boolean appendResult;
 
 	public MacroDefinition()
 	{
@@ -49,7 +50,7 @@ public class MacroDefinition
 
 	public void setExpandWhileTyping(boolean flag)
 	{
-		if (expandWhileTyping != flag) modified = true;
+		modified = (expandWhileTyping != flag);
 		this.expandWhileTyping = flag;
 	}
 
@@ -65,7 +66,19 @@ public class MacroDefinition
 
 	public void setVisibleInMenu(boolean flag)
 	{
+		modified = (showInMenu != flag);
 		this.showInMenu = flag;
+	}
+
+	public boolean isAppendResult()
+	{
+		return appendResult;
+	}
+
+	public void setAppendResult(boolean flag)
+	{
+		modified = (appendResult != flag);
+		this.appendResult = flag;
 	}
 
 	@Override
@@ -110,6 +123,7 @@ public class MacroDefinition
 		def.showInMenu = this.showInMenu;
 		def.shortcut = this.shortcut;
 		def.expandWhileTyping = this.expandWhileTyping;
+		def.appendResult = this.appendResult;
 		return def;
 	}
 

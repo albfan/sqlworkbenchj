@@ -2,6 +2,7 @@
 <section id="export">
 	<title>Export result data</title>
   <indexterm><primary>Export</primary><secondary>result set</secondary></indexterm>
+  <indexterm><primary>Clipboard</primary><secondary>export result to</secondary></indexterm>
 	<para>
     You can export the data of the result set into local files of the following formats:
 	</para>
@@ -120,6 +121,7 @@
 
 <section id="import-resultset">
 	<title>Import data into the result set</title>
+  <indexterm><primary>Import</primary><secondary>result set</secondary></indexterm>
 	<section id="import-resultset-file">
 		<title>Import a file into the current result set</title>
 		<para>
@@ -184,6 +186,8 @@
 		</para>
 	</section>
 	<section id="import-clipboard">
+    <indexterm><primary>Import</primary><secondary>clipboard</secondary></indexterm>
+    <indexterm><primary>Clipboard</primary><secondary>import data from</secondary></indexterm>
 		<title>Import the clipboard into the current result</title>
 		<para>
       You can import the contents of the <indexterm><primary>Import</primary><secondary>clipboard</secondary></indexterm> clipboard into the current result,

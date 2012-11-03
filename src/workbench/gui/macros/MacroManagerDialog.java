@@ -102,7 +102,7 @@ public class MacroManagerDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(700,500);
+			this.setSize(700,600);
 		}
 		WbSwingUtilities.center(this, parent);
 		boolean replace = Settings.getInstance().getBoolProperty("workbench.gui.macros.replaceOnRun", false);

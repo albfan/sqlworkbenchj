@@ -31,9 +31,9 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
- * A class to retrieve the data from the table a specific column references.
+ * A class to retrieve the data from the table that is referenced through a FK constraint from another table.
  * <br/>
- * This server a different purpose than {@link ReferenceTableNavigation} which is
+ * This serves a different purpose than {@link ReferenceTableNavigation} which is
  * used to retrieve the data that is referenced by (or referencing) specific <b>values</b>
  * in a table.
  * <br/>

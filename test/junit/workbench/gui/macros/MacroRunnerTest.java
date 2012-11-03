@@ -16,8 +16,6 @@ import workbench.WbTestCase;
 import workbench.sql.macros.MacroDefinition;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -38,26 +36,31 @@ public class MacroRunnerTest
 		final MacroDefinition macro = new MacroDefinition("test", "select 42 from dual;");
 		MacroClient p = new MacroClient()
 		{
-			public void executeMacroSql(String sql, boolean replaceText)
+			@Override
+			public void executeMacroSql(String sql, boolean replaceText, boolean append)
 			{
 				assertEquals(macro.getText(), sql);
 			}
 
+			@Override
 			public String getStatementAtCursor()
 			{
 				return "";
 			}
 
+			@Override
 			public String getSelectedText()
 			{
 				return "";
 			}
 
+			@Override
 			public String getText()
 			{
 				return "";
 			}
 
+			@Override
 			public JComponent getPanel()
 			{
 				return null;
@@ -73,26 +76,31 @@ public class MacroRunnerTest
 		final MacroDefinition macro = new MacroDefinition("test", "select ${selection}$ from dual;");
 		MacroClient p = new MacroClient()
 		{
-			public void executeMacroSql(String sql, boolean replaceText)
+			@Override
+			public void executeMacroSql(String sql, boolean replaceText, boolean append)
 			{
 				assertEquals("select 42 from dual;", sql);
 			}
 
+			@Override
 			public String getStatementAtCursor()
 			{
 				return "";
 			}
 
+			@Override
 			public String getSelectedText()
 			{
 				return "42";
 			}
 
+			@Override
 			public String getText()
 			{
 				return "";
 			}
 
+			@Override
 			public JComponent getPanel()
 			{
 				return null;
@@ -108,26 +116,31 @@ public class MacroRunnerTest
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${current_statement}$;");
 		MacroClient p = new MacroClient()
 		{
-			public void executeMacroSql(String sql, boolean replaceText)
+			@Override
+			public void executeMacroSql(String sql, boolean replaceText, boolean append)
 			{
 				assertEquals("explain select * from person;", sql);
 			}
 
+			@Override
 			public String getStatementAtCursor()
 			{
 				return "select * from person";
 			}
 
+			@Override
 			public String getSelectedText()
 			{
 				return "";
 			}
 
+			@Override
 			public String getText()
 			{
 				return "";
 			}
 
+			@Override
 			public JComponent getPanel()
 			{
 				return null;
@@ -143,26 +156,31 @@ public class MacroRunnerTest
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${selected_statement}$");
 		MacroClient p = new MacroClient()
 		{
-			public void executeMacroSql(String sql, boolean replaceText)
+			@Override
+			public void executeMacroSql(String sql, boolean replaceText, boolean append)
 			{
 				assertEquals("explain select * from person", sql);
 			}
 
+			@Override
 			public String getStatementAtCursor()
 			{
 				return "";
 			}
 
+			@Override
 			public String getSelectedText()
 			{
 				return "select * from person;";
 			}
 
+			@Override
 			public String getText()
 			{
 				return "";
 			}
 
+			@Override
 			public JComponent getPanel()
 			{
 				return null;
@@ -178,26 +196,31 @@ public class MacroRunnerTest
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${text}$");
 		MacroClient p = new MacroClient()
 		{
-			public void executeMacroSql(String sql, boolean replaceText)
+			@Override
+			public void executeMacroSql(String sql, boolean replaceText, boolean append)
 			{
 				assertEquals("explain select * from person where x = 5;", sql);
 			}
 
+			@Override
 			public String getStatementAtCursor()
 			{
 				return "";
 			}
 
+			@Override
 			public String getSelectedText()
 			{
 				return "";
 			}
 
+			@Override
 			public String getText()
 			{
 				return "select * from person where x = 5;";
 			}
 
+			@Override
 			public JComponent getPanel()
 			{
 				return null;

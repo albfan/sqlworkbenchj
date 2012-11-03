@@ -33,6 +33,7 @@ public class MacroDefinitionTest
 		macro.setVisibleInMenu(false);
 		macro.setExpandWhileTyping(true);
 		macro.setSortOrder(5);
+		macro.setAppendResult(true);
 		StoreableKeyStroke key = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
 		macro.setShortcut(key);
 
@@ -40,10 +41,28 @@ public class MacroDefinitionTest
 		assertTrue(copy.getExpandWhileTyping());
 		StoreableKeyStroke key2 = copy.getShortcut();
 		assertEquals(key, key2);
+		assertTrue(copy.isAppendResult());
 		assertFalse(copy.isVisibleInMenu());
 		assertFalse(copy.isModified());
 		assertEquals(5, copy.getSortOrder());
 		assertEquals(macro.getName(), copy.getName());
 		assertEquals(macro.getText(), copy.getText());
+	}
+
+	@Test
+	public void testModified()
+	{
+		MacroDefinition macro = new MacroDefinition("test", "select 42 from dual");
+		assertFalse(macro.isModified());
+		macro.setExpandWhileTyping(true);
+		assertTrue(macro.isModified());
+
+		macro.resetModified();
+		macro.setAppendResult(true);
+		assertTrue(macro.isModified());
+
+		macro.resetModified();
+		macro.setVisibleInMenu(false);
+		assertTrue(macro.isModified());
 	}
 }

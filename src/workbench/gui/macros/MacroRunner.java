@@ -62,7 +62,7 @@ public class MacroRunner
 		{
 			sql = replaceEditorText(sql, client.getText());
 		}
-		client.executeMacroSql(sql, replaceText);
+		client.executeMacroSql(sql, replaceText, macro.isAppendResult());
 	}
 
 	protected boolean hasTextKey(String sql)

@@ -453,17 +453,23 @@ public class LookupValuePicker
 		LookupDataLoader loader = new LookupDataLoader(baseTable, column);
 		try
 		{
+			WbSwingUtilities.showWaitCursor(parent);
+			showStatusMessage(parent, "MsgFkDeps", 0);
 			loader.retrieveReferencedTable(conn);
 			TableIdentifier lookupTable = loader.getReferencedTable();
 			if (lookupTable != null)
 			{
 				LookupValuePicker picker = new LookupValuePicker(conn, loader);
+				showStatusMessage(parent, null, 0);
+				WbSwingUtilities.showDefaultCursor(parent);
 				JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
 				String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
 				ValidatingDialog dialog = new ValidatingDialog(window, title, picker);
 				picker.dialog = dialog;
-				dialog.setSize(450,350);
-				Settings.getInstance().restoreWindowSize(picker);
+				if (!Settings.getInstance().restoreWindowSize(picker))
+				{
+					dialog.setSize(450,350);
+				}
 				WbSwingUtilities.center(dialog, window);
 				dialog.setVisible(true);
 				Settings.getInstance().storeWindowSize(picker);
@@ -491,6 +497,10 @@ public class LookupValuePicker
 		{
 			LogMgr.logError("LookupValuePicker.openPicker()", "Could not retrieve lookup information", sql);
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(parent);
+		}
 		return null;
 	}
 
@@ -512,7 +522,12 @@ public class LookupValuePicker
 		}
 	}
 
-	private static void showNotFound(JComponent component)
+	private static void showNotFound(JComponent current)
+	{
+		showStatusMessage(current, "MsgComplNoFK", 2500);
+	}
+
+	private static void showStatusMessage(JComponent component, String msgKey, int timeout)
 	{
 		StatusBar status = null;
 		Container parent = component.getParent();
@@ -525,9 +540,26 @@ public class LookupValuePicker
 			}
 			parent = parent.getParent();
 		}
-		if (status != null)
+
+		if (status == null) return;
+
+		if (msgKey == null)
 		{
-			status.setStatusMessage(ResourceMgr.getString("MsgComplNoFK"), 2500);
+			status.clearStatusMessage();
+			status.doRepaint();
+		}
+		else
+		{
+			String message = ResourceMgr.getString(msgKey);
+			if (timeout > 0)
+			{
+				status.setStatusMessage(message, timeout);
+			}
+			else
+			{
+				status.setStatusMessage(message);
+				status.doRepaint();
+			}
 		}
 	}
 }

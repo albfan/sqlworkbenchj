@@ -18,9 +18,12 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
+
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -37,6 +40,7 @@ import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.ShortcutManager;
 import workbench.resource.StoreableKeyStroke;
+
 import workbench.sql.macros.MacroDefinition;
 
 /**
@@ -71,7 +75,7 @@ public class MacroDefinitionPanel
 		macroEditor.showFormatSql();
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.BOTH;
@@ -120,11 +124,16 @@ public class MacroDefinitionPanel
 		expand.setSourceObject(macro, "expandWhileTyping");
 		expand.setImmediateUpdate(true);
 
+		BooleanPropertyEditor append = (BooleanPropertyEditor)appendResults;
+		append.setSourceObject(macro, "appendResult");
+		append.setImmediateUpdate(true);
+
 		StringPropertyEditor name = (StringPropertyEditor) tfName;
 		name.setSourceObject(macro, "name");
 		name.setImmediateUpdate(true);
 
 		updateShortcutDisplay();
+		appendResults.setEnabled(!doExpansion.isSelected());
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -204,7 +213,7 @@ public class MacroDefinitionPanel
 		StoreableKeyStroke key = (currentMacro == null ? null : currentMacro.getShortcut());
 		if (key != null)
 		{
-			shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol") + ": " + key.toString());
+			shortcutLabel.setText("<html>" + ResourceMgr.getString("LblKeyDefKeyCol") + ": <span style=\"background-color:white;font-weight:bold\"><tt>&nbsp;" + key.toString() + "&nbsp;</tt></span></html>");
 		}
 		else
 		{
@@ -236,87 +245,131 @@ public class MacroDefinitionPanel
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     jLabel1 = new JLabel();
     tfName = new StringPropertyEditor();
+    optionsPanel = new JPanel();
     visibleInMenu = new BooleanPropertyEditor();
+    jSeparator1 = new JSeparator();
+    doExpansion = new BooleanPropertyEditor();
+    appendResults = new BooleanPropertyEditor();
+    jSeparator3 = new JSeparator();
+    shortcutPanel = new JPanel();
     shortcutLabel = new JLabel();
     assignShortcutButton = new JButton();
     clearShortcutButton = new JButton();
-    jSeparator1 = new JSeparator();
-    doExpansion = new BooleanPropertyEditor();
-    jSeparator2 = new JSeparator();
 
     setLayout(new GridBagLayout());
 
-    jLabel1.setText(ResourceMgr.getString("LblMacroName"));     gridBagConstraints = new GridBagConstraints();
+    jLabel1.setText(ResourceMgr.getString("LblMacroName")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(jLabel1, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridwidth = 7;
+    gridBagConstraints.gridwidth = 9;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 4, 0, 5);
     add(tfName, gridBagConstraints);
 
-    visibleInMenu.setText(ResourceMgr.getString("LblMacroGrpMenu"));     visibleInMenu.setBorder(null);
+    optionsPanel.setBorder(BorderFactory.createEtchedBorder());
+    optionsPanel.setLayout(new GridBagLayout());
+
+    visibleInMenu.setText(ResourceMgr.getString("LblMacroGrpMenu")); // NOI18N
+    visibleInMenu.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 5, 0, 5);
-    add(visibleInMenu, gridBagConstraints);
-
-    shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol"));     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 9, 0, 5);
-    add(shortcutLabel, gridBagConstraints);
-
-    assignShortcutButton.setText(ResourceMgr.getString("LblAssignShortcut"));     assignShortcutButton.addActionListener(this);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
-    add(assignShortcutButton, gridBagConstraints);
-
-    clearShortcutButton.setText(ResourceMgr.getString("LblClearShortcut"));     clearShortcutButton.addActionListener(this);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 10, 0, 0);
-    add(clearShortcutButton, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(0, 9, 0, 0);
+    optionsPanel.add(visibleInMenu, gridBagConstraints);
 
     jSeparator1.setOrientation(SwingConstants.VERTICAL);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.VERTICAL;
-    gridBagConstraints.insets = new Insets(6, 4, 0, 0);
-    add(jSeparator1, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(0, 4, 0, 5);
+    optionsPanel.add(jSeparator1, gridBagConstraints);
 
-    doExpansion.setText(ResourceMgr.getString("LblExpandMacro"));     doExpansion.setToolTipText(ResourceMgr.getString("d_LblExpandMacro"));     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 0, 0, 0);
-    add(doExpansion, gridBagConstraints);
-
-    jSeparator2.setOrientation(SwingConstants.VERTICAL);
+    doExpansion.setText(ResourceMgr.getString("LblExpandMacro")); // NOI18N
+    doExpansion.setToolTipText(ResourceMgr.getString("d_LblExpandMacro")); // NOI18N
+    doExpansion.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 6;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    optionsPanel.add(doExpansion, gridBagConstraints);
+
+    appendResults.setText(ResourceMgr.getString("LblAppendMacroData")); // NOI18N
+    appendResults.setToolTipText(ResourceMgr.getString("d_LblAppendMacroData")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    optionsPanel.add(appendResults, gridBagConstraints);
+
+    jSeparator3.setOrientation(SwingConstants.VERTICAL);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.VERTICAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(6, 17, 0, 3);
-    add(jSeparator2, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(0, 6, 0, 5);
+    optionsPanel.add(jSeparator3, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(8, 4, 0, 5);
+    add(optionsPanel, gridBagConstraints);
+
+    shortcutPanel.setLayout(new GridBagLayout());
+
+    shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 0, 0, 5);
+    shortcutPanel.add(shortcutLabel, gridBagConstraints);
+
+    assignShortcutButton.setText(ResourceMgr.getString("LblAssignShortcut")); // NOI18N
+    assignShortcutButton.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
+    shortcutPanel.add(assignShortcutButton, gridBagConstraints);
+
+    clearShortcutButton.setText(ResourceMgr.getString("LblClearShortcut")); // NOI18N
+    clearShortcutButton.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(6, 10, 0, 0);
+    shortcutPanel.add(clearShortcutButton, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(1, 4, 0, 5);
+    add(shortcutPanel, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -330,6 +383,10 @@ public class MacroDefinitionPanel
     else if (evt.getSource() == clearShortcutButton)
     {
       MacroDefinitionPanel.this.clearShortcutButtonActionPerformed(evt);
+    }
+    else if (evt.getSource() == doExpansion)
+    {
+      MacroDefinitionPanel.this.doExpansionActionPerformed(evt);
     }
   }// </editor-fold>//GEN-END:initComponents
 
@@ -369,14 +426,22 @@ public class MacroDefinitionPanel
 		}
 	}//GEN-LAST:event_clearShortcutButtonActionPerformed
 
+  private void doExpansionActionPerformed(ActionEvent evt)//GEN-FIRST:event_doExpansionActionPerformed
+  {//GEN-HEADEREND:event_doExpansionActionPerformed
+    appendResults.setEnabled(!doExpansion.isSelected());
+  }//GEN-LAST:event_doExpansionActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JCheckBox appendResults;
   private JButton assignShortcutButton;
   private JButton clearShortcutButton;
   private JCheckBox doExpansion;
   private JLabel jLabel1;
   private JSeparator jSeparator1;
-  private JSeparator jSeparator2;
+  private JSeparator jSeparator3;
+  private JPanel optionsPanel;
   private JLabel shortcutLabel;
+  private JPanel shortcutPanel;
   private JTextField tfName;
   private JCheckBox visibleInMenu;
   // End of variables declaration//GEN-END:variables

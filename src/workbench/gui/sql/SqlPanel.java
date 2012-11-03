@@ -2052,7 +2052,7 @@ public class SqlPanel
 	private boolean macroExecution = false;
 
 	@Override
-	public void executeMacroSql(final String sql, final boolean replaceText)
+	public void executeMacroSql(final String sql, final boolean replaceText, boolean appendData)
 	{
 		if (isBusy()) return;
 		if (StringUtil.isBlank(sql)) return;
@@ -2067,7 +2067,7 @@ public class SqlPanel
 		{
 			this.macroExecution = true;
 		}
-		this.startExecution(sql, 0, -1, false, this.appendResults);
+		this.startExecution(sql, 0, -1, false, this.appendResults || appendData);
 	}
 
 	@Override
