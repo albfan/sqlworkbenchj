@@ -168,12 +168,21 @@ public class LookupValuePicker
 		doFilter = new JRadioButton(ResourceMgr.getString("LblFkPickerFilter"));
 		doFilter.setToolTipText(ResourceMgr.getDescription("LblFkPickerFilter"));
 		doFilter.setBorder(new EmptyBorder(0, 0, 0, 10));
-		doFilter.setSelected(true);
 		doSearch = new JRadioButton(ResourceMgr.getString("LblFkPickerSelect"));
 		doSearch.setToolTipText(ResourceMgr.getDescription("LblFkPickerSelect"));
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(doFilter);
 		buttonGroup.add(doSearch);
+
+		boolean useFilter = Settings.getInstance().getBoolProperty("workbench.gui.lookupvaluepicker.usefilter", true);
+		if (useFilter)
+		{
+			doFilter.setSelected(true);
+		}
+		else
+		{
+			doSearch.setSelected(true);
+		}
 
 		radios.add(doFilter);
 		radios.add(doSearch);
@@ -331,10 +340,11 @@ public class LookupValuePicker
 	{
 		try
 		{
-			setStatusText("Retrieving lookup data...");
+			setStatusText(ResourceMgr.getString("MsgRetrieving"));
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 
-			final DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression());
+			boolean useOrderBy = Settings.getInstance().getBoolProperty("workbench.gui.lookupvaluepicker.useorderby", true);
+			final DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression(), useOrderBy);
 
 			EventQueue.invokeLater(new Runnable()
 			{

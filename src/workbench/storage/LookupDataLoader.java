@@ -62,13 +62,7 @@ public class LookupDataLoader
 		baseTable = table;
 	}
 
-	public DataStore getLookupData(WbConnection conn, int maxRows)
-		throws SQLException
-	{
-		return getLookupData(conn, maxRows, null);
-	}
-
-	public DataStore getLookupData(WbConnection conn, int maxRows, String searchValue)
+	public DataStore getLookupData(WbConnection conn, int maxRows, String searchValue, boolean useOrderBy)
 		throws SQLException
 	{
 		if (lookupTable == null && !retrieved)
@@ -95,7 +89,10 @@ public class LookupDataLoader
 			sql = searcher.buildSqlForTable(lookupTable, "lookupretrieval");
 		}
 
-		sql += getOrderBy(conn, lookupTable.getTable().getPrimaryKey());
+		if (useOrderBy)
+		{
+			sql += getOrderBy(conn, lookupTable.getTable().getPrimaryKey());
+		}
 
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -167,17 +164,27 @@ public class LookupDataLoader
 		}
 	}
 
+	/**
+	 * Return the column that is referenced.
+	 *
+	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
+	 * calling this method, otherwise null will be returned.
+	 *
+	 * @return the referenced column or null if no FK was found or retrieveReferencedTable() was not yet called
+	 * @see #getReferencedTable()
+	 */
 	public String getReferencedColumn()
 	{
 		return referencedColumn;
 	}
+
 	/**
 	 * Return the cached lookup table.
 	 *
 	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
 	 * calling this method.
 	 *
-	 * @return  the lookup table.
+	 * @return the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
 	 */
 	public TableIdentifier getReferencedTable()
 	{
@@ -185,6 +192,16 @@ public class LookupDataLoader
 		return lookupTable.getTable();
 	}
 
+	/**
+	 * Return the PK of the referenced table.
+	 *
+	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
+	 * calling this method, otherwise null will be returned.
+	 *
+	 * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
+	 * @see #getReferencedTable()
+	 * @see #getReferencedColumn() 
+	 */
 	public PkDefinition getPK()
 	{
 		if (lookupTable == null) return null;

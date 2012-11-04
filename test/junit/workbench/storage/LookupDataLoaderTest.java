@@ -74,7 +74,7 @@ extends WbTestCase
 		TableIdentifier result = retriever.getReferencedTable();
 		assertNotNull(result);
 		assertEquals("ADDRESS_TYPE", result.getTableName());
-		DataStore data = retriever.getLookupData(conn, 0);
+		DataStore data = retriever.getLookupData(conn, 0, null, true);
 		assertNotNull(data);
 		assertEquals(3, data.getRowCount());
 		assertEquals(1, data.getValueAsInt(0, 0, -1));
