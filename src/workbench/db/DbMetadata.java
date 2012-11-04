@@ -2404,7 +2404,7 @@ public class DbMetadata
 	}
 
 	/**
-	 * Return a list of types available in the database.
+	 * Return a list of object types available in the database.
 	 *
 	 * e.g. TABLE, SYSTEM TABLE, ...
 	 */
@@ -2413,8 +2413,7 @@ public class DbMetadata
 		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		result.addAll(retrieveTableTypes());
 
-		String additional = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",null);
-		List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
+		List<String> addTypes = Settings.getInstance().getListProperty("workbench.db." + this.getDbId() + ".additional.objecttypes",false);
 		result.addAll(addTypes);
 
 		if (supportsSynonyms())
@@ -2456,6 +2455,13 @@ public class DbMetadata
 			}
 			return this.sequenceReader;
 		}
+	}
+
+	public boolean isExtendedTableType(String type)
+	{
+		if (isTableType(type)) return true;
+		List<String> types = Settings.getInstance().getListProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",false);
+		return types.contains(type);
 	}
 
 	public boolean isTableType(String type)

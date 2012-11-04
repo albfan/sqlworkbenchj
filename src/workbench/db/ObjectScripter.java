@@ -53,7 +53,7 @@ public class ObjectScripter
 	private boolean appendCommit;
 	private boolean useSeparator = true;
 	private Collection<String> typesWithoutSeparator;
-	private String sequenceType = "sequence";
+	private String sequenceType;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
@@ -65,8 +65,7 @@ public class ObjectScripter
 		{
 			sequenceType = reader.getSequenceTypeName();
 		}
-		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM,
-			TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM);
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM);
 		if (sequenceType != null)
 		{
 			commitTypes.add(sequenceType.toLowerCase());

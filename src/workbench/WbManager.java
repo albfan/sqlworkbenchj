@@ -330,7 +330,7 @@ public final class WbManager
 		for (MainWindow win : mainWindows)
 		{
 			if (win == null) continue;
-			
+
 			if (!settingsSaved && win.hasFocus())
 			{
 				win.saveSettings();
@@ -556,10 +556,10 @@ public final class WbManager
 		LogMgr.shutdown();
 		// The property workbench.system.doexit can be used to embedd the sqlworkbench.jar
 		// in other applications and still be able to call doShutdown()
-		if (doExit()) System.exit(errorCode);
+		if (shouldDoSystemExit()) System.exit(errorCode);
 	}
 
-	public static boolean doExit()
+	public static boolean shouldDoSystemExit()
 	{
 		return "true".equals(System.getProperty("workbench.system.doexit", "true"));
 	}

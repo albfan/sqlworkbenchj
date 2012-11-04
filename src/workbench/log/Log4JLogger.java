@@ -315,7 +315,7 @@ public class Log4JLogger
 	public void shutdownWbLog()
 	{
 		getLogger(getClass()).info("=================== Log stopped ===================");
-		if (WbManager.doExit())
+		if (WbManager.shouldDoSystemExit())
 		{
 			LogManager.shutdown();
 		}

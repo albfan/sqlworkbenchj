@@ -1366,7 +1366,7 @@ public class TableListPanel
 					sql = seqSql.toString();
 				}
 			}
-			else if (meta.isTableType(type))
+			else if (meta.isExtendedTableType(type))
 			{
 				sql = builder.getTableSource(selectedTable, true, true);
 			}

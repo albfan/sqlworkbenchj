@@ -13,7 +13,6 @@ package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,7 +37,7 @@ class ProfileListModel
 	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private List<ConnectionProfile> profiles;
 
-	public ProfileListModel()
+	ProfileListModel()
 	{
 		super(null, true);
 		this.profiles = new ArrayList<ConnectionProfile>();
@@ -323,11 +322,9 @@ class ProfileListModel
 			rootNode.add(groupNode);
 			List<ConnectionProfile> groupProfiles = groupMap.get(group);
 
-			this.sortList(groupProfiles);
-			Iterator p = groupProfiles.iterator();
-			while (p.hasNext())
+			sortList(groupProfiles);
+			for (ConnectionProfile prof : groupProfiles)
 			{
-				ConnectionProfile prof = (ConnectionProfile)p.next();
 				DefaultMutableTreeNode profNode = new DefaultMutableTreeNode(prof, false);
 				groupNode.add(profNode);
 			}

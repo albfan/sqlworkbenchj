@@ -44,5 +44,27 @@ public class HtmlUtilTest
 		assertEquals("a &amp;lt; b", escaped);
 	}
 
+	@Test
+  public void testEscapeXML()
+	{
+		String input = "<sometag> sometext";
+		String escaped = HtmlUtil.escapeXML(input);
+		assertEquals("&lt;sometag&gt; sometext", escaped);
 
+		input = "a &lt; b";
+		escaped = HtmlUtil.escapeXML(input);
+		assertEquals("a &amp;lt; b", escaped);
+
+		input = "a > b";
+		escaped = HtmlUtil.escapeXML(input);
+		assertEquals("a &gt; b", escaped);
+
+		input = "a '>' b";
+		escaped = HtmlUtil.escapeXML(input, false);
+		assertEquals("a '&gt;' b", escaped);
+
+		input = "& > < \"";
+		escaped = HtmlUtil.escapeXML(input, false);
+		assertEquals("&amp; &gt; &lt; &quot;", escaped);
+	}
 }

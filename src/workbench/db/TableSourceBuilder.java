@@ -298,6 +298,7 @@ public class TableSourceBuilder
 	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
 	{
 		String type = toDrop.getObjectType();
+		type = type.replace("SYSTEM ", "");
 		String objectName = toDrop.getObjectNameForDrop(dbConnection);
 		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
 
@@ -339,6 +340,7 @@ public class TableSourceBuilder
 		boolean replaceAvailable = false;
 
 		String objectType = toCreate.getObjectType();
+		objectType = objectType.replace("SYSTEM ", "");
 
 		String prefix = "workbench.db.";
 		String suffix = "." + objectType.toLowerCase() + ".sql." + dbConnection.getDbId();

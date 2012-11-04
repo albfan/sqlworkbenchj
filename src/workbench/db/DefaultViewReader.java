@@ -267,6 +267,7 @@ public class DefaultViewReader
 						if (grants != null && grants.length() > 0)
 						{
 							source.append(Settings.getInstance().getInternalEditorLineEnding());
+							source.append(Settings.getInstance().getInternalEditorLineEnding());
 							source.append(grants);
 							source.append(Settings.getInstance().getInternalEditorLineEnding());
 						}

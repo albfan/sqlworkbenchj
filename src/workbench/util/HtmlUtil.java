@@ -33,6 +33,7 @@ public class HtmlUtil
 		return escapeXML(s, true);
 	}
 
+	@SuppressWarnings("fallthrough")
 	public static String escapeXML(CharSequence s, boolean replaceSingleQuotes)
 	{
 		if (s == null) return null;
@@ -61,6 +62,8 @@ public class HtmlUtil
 						sb.append("&apos;");
 						break;
 					}
+					// single quotes should not be replaced
+					// in that case the fall through to the default is intended
 				default:
 					sb.append(c);
 					break;

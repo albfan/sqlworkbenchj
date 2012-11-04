@@ -115,7 +115,7 @@ public class DummyDML
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
-    boolean makePrepared = Settings.getInstance().getBoolProperty("workbench.sql.generate.defaultupdate.prepared", false);
+    boolean makePrepared = Settings.getInstance().getBoolProperty("workbench.sql.generate.dummydml.prepared", false);
 		ResultInfo info = null;
 		if (this.columns == null)
 		{
