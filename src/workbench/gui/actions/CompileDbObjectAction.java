@@ -86,7 +86,7 @@ public class CompileDbObjectAction
 
 	private void compileObjects()
 	{
-		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection()))
+		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection()))
 		{
 			return;
 		}

@@ -258,7 +258,7 @@ public class TriggerListPanel
 		if (this.reader == null) return;
 		if (this.isRetrieving) return;
 
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		try
 		{
@@ -405,7 +405,7 @@ public class TriggerListPanel
 	protected void retrieveTriggerSource(String triggerName, String tableName, String comment)
 	{
 		if (this.dbConnection == null || this.reader == null) return;
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -515,7 +515,7 @@ public class TriggerListPanel
 	@Override
 	public void reload()
 	{
-		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
 		this.reset();
 		this.retrieve();
 	}

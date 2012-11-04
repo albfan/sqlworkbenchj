@@ -37,6 +37,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+
+import workbench.interfaces.ResultSetter;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTraversalPolicy;
@@ -397,18 +399,25 @@ public class CompletionPopup
 		{
 			final SelectFKValueMarker marker = (SelectFKValueMarker)selected[0];
 			final WbConnection connection = this.context.getAnalyzer().getConnection();
-			EventQueue.invokeLater(new Runnable()
+			if (!WbSwingUtilities.isConnectionIdle(editor, connection))
+			{
+				return false;
+			}
+
+			ResultSetter result = new ResultSetter()
 			{
 				@Override
-				public void run()
+				public void setResult(Object value)
 				{
-					Object value = LookupValuePicker.pickValue(editor, connection, marker.getColumnName(), marker.getTable());
 					if (value != null)
 					{
 						editor.setSelectedText(value.toString());
 					}
 				}
-			});
+			};
+			// this is done in a background thread!
+			LookupValuePicker.pickValue(editor, result, connection, marker.getColumnName(), marker.getTable());
+
 			return true;
 		}
 		return false;

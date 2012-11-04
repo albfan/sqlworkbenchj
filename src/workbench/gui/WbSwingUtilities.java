@@ -1017,7 +1017,15 @@ public class WbSwingUtilities
 		}
 	}
 
-	public static boolean checkConnection(Component parent, WbConnection dbConnection)
+	/**
+	 * Checks if the connection is busy, and displays an error message if it is.
+	 *
+	 * @param parent       the reference component
+	 * @param dbConnection the connection to check
+	 * @return true if the connection can be used (not busy)
+	 *         false if the connection can not be used (because it's busy)
+	 */
+	public static boolean isConnectionIdle(Component parent, WbConnection dbConnection)
 	{
 		if (dbConnection.isBusy())
 		{

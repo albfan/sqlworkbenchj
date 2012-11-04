@@ -406,7 +406,7 @@ public class TableSearchPanel
 	{
 		if (searcher != null && searcher.isRunning()) return;
 
-		if (!WbSwingUtilities.checkConnection(this, connection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, connection)) return;
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
 

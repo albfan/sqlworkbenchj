@@ -56,7 +56,7 @@ public class SchemaReportAction
 		final WbConnection dbConnection = client.getConnection();
 		final Component caller = client.getComponent();
 
-		if (!WbSwingUtilities.checkConnection(caller, dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(caller, dbConnection)) return;
 		List<? extends DbObject> objects = client.getSelectedObjects();
 		if (objects == null) return;
 

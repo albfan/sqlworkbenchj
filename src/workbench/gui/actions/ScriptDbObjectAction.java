@@ -47,7 +47,7 @@ public class ScriptDbObjectAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
+		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.isEmpty()) return;

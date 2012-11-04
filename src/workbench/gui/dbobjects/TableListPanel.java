@@ -1793,7 +1793,7 @@ public class TableListPanel
 	@Override
 	public void reload()
 	{
-		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
 		this.reset();
 		this.startRetrieve(false);
 	}
@@ -2035,7 +2035,7 @@ public class TableListPanel
 	@Override
 	public void exportData()
 	{
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
 

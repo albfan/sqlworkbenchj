@@ -2681,7 +2681,7 @@ public class MainWindow
 
 	/**
 	 *  @param selectNew if true the new tab is automatically selected
-	 *  @param checkConnection if true, the panel will automatically be connected
+	 *  @param isConnectionIdle if true, the panel will automatically be connected
 	 *  this is important if a Profile is used where each panel gets its own
 	 *  connection
 	 */
@@ -2692,7 +2692,7 @@ public class MainWindow
 
 	/**
 	 * @param selectNew if true the new tab is automatically selected
-	 * @param checkConnection if true, the panel will automatically be connected
+	 * @param isConnectionIdle if true, the panel will automatically be connected
 	 * this is important if a Profile is used where each panel gets its own
 	 * connection
 	 * @param append if true, the tab will be appended at the end (after all other tabs), if false will be

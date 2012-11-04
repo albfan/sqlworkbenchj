@@ -190,7 +190,7 @@ public class DbExplorerPanel
 				@Override
 				public void reload()
 				{
-					if (!WbSwingUtilities.checkConnection(DbExplorerPanel.this, dbConnection)) return;
+					if (!WbSwingUtilities.isConnectionIdle(DbExplorerPanel.this, dbConnection)) return;
 
 					if (schemaSelector.isVisible())
 					{

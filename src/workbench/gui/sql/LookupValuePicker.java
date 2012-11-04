@@ -52,6 +52,7 @@ import javax.swing.border.EtchedBorder;
 
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Restoreable;
+import workbench.interfaces.ResultSetter;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
@@ -79,6 +80,8 @@ import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
+
+import workbench.util.WbThread;
 
 /**
  *
@@ -313,20 +316,34 @@ public class LookupValuePicker
 
 	public void loadData()
 	{
+		WbThread load = new WbThread("LookupPickerRetrieval")
+		{
+			@Override
+			public void run()
+			{
+				_loadData();
+			}
+		};
+		load.start();
+	}
+
+	private void _loadData()
+	{
 		try
 		{
 			setStatusText("Retrieving lookup data...");
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 
-			DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression());
-			DataStoreTableModel model = new DataStoreTableModel(data);
-			model.setAllowEditing(false);
-			lookupData.setModel(model, true);
+			final DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression());
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
 				{
+					DataStoreTableModel model = new DataStoreTableModel(data);
+					model.setAllowEditing(false);
+					lookupData.setModel(model, true);
 					lookupData.getSelectionModel().setSelectionInterval(0, 0);
 					lookupData.requestFocusInWindow();
 				}
@@ -448,78 +465,121 @@ public class LookupValuePicker
 	{
 	}
 
-	public static Object pickValue(final JComponent parent, WbConnection conn, String column, TableIdentifier baseTable)
+	public static void pickValue(final JComponent parent, final ResultSetter result, final WbConnection conn, final String column, final TableIdentifier baseTable)
 	{
-		LookupDataLoader loader = new LookupDataLoader(baseTable, column);
+		// The retrieval of the FK references must be done in a background thread to avoid blocking the UI
+		// especially with Oracle retrieving FK information is deadly slow and can take minutes!
+		WbThread retrieve = new WbThread("RetrieveLookupFk")
+		{
+			@Override
+			public void run()
+			{
+				WbSwingUtilities.showWaitCursor(parent);
+
+				showStatusMessage(parent, "MsgFkDeps", 0);
+				TableIdentifier lookupTable = null;
+
+				final LookupDataLoader loader = new LookupDataLoader(baseTable, column);
+				try
+				{
+					// this is the slow part!
+					loader.retrieveReferencedTable(conn);
+					lookupTable = loader.getReferencedTable();
+				}
+				catch (SQLException sql)
+				{
+					LogMgr.logError("LookupValuePicker.openPicker()", "Could not retrieve lookup information", sql);
+				}
+				finally
+				{
+					showStatusMessage(parent, null, 0);
+					WbSwingUtilities.showDefaultCursor(parent);
+				}
+
+				if (lookupTable != null)
+				{
+					// a referenced table was found --> Open the picker dialog butm make sure that is opened on the EDT
+					EventQueue.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							showDialog(parent, result, conn, column, baseTable, loader);
+						}
+					});
+				}
+				else
+				{
+					showNotFound(parent);
+				}
+			}
+		};
+		retrieve.start();
+	}
+
+	private static void showDialog(final JComponent parent, final ResultSetter result, WbConnection conn, String column, TableIdentifier baseTable, final LookupDataLoader loader)
+	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(parent);
-			showStatusMessage(parent, "MsgFkDeps", 0);
-			loader.retrieveReferencedTable(conn);
-			TableIdentifier lookupTable = loader.getReferencedTable();
-			if (lookupTable != null)
-			{
-				LookupValuePicker picker = new LookupValuePicker(conn, loader);
-				showStatusMessage(parent, null, 0);
-				WbSwingUtilities.showDefaultCursor(parent);
-				JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
-				String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
-				ValidatingDialog dialog = new ValidatingDialog(window, title, picker);
-				picker.dialog = dialog;
-				if (!Settings.getInstance().restoreWindowSize(picker))
-				{
-					dialog.setSize(450,350);
-				}
-				WbSwingUtilities.center(dialog, window);
-				dialog.setVisible(true);
-				Settings.getInstance().storeWindowSize(picker);
 
-				if (!dialog.isCancelled())
-				{
-					Map<String, Object> values = picker.getSelectedPKValue();
-					Object value = values.get(loader.getReferencedColumn());
-					return value;
-				}
-			}
-			else
+			// the found table is cached in the loader, so this call does not access the database
+			TableIdentifier lookupTable = loader.getReferencedTable();
+
+			LookupValuePicker picker = new LookupValuePicker(conn, loader);
+			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
+
+			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
+
+			ValidatingDialog dialog = new ValidatingDialog(window, title, picker);
+			picker.dialog = dialog;
+			if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.lookupvaluepicker"))
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						showNotFound(parent);
-					}
-				});
+				dialog.setSize(450,350);
 			}
-		}
-		catch (SQLException sql)
-		{
-			LogMgr.logError("LookupValuePicker.openPicker()", "Could not retrieve lookup information", sql);
+			WbSwingUtilities.center(dialog, window);
+			dialog.setVisible(true);
+
+			Settings.getInstance().storeWindowSize(dialog, "workbench.gui.lookupvaluepicker");
+
+			if (!dialog.isCancelled())
+			{
+				Map<String, Object> values = picker.getSelectedPKValue();
+				Object value = values.get(loader.getReferencedColumn());
+				result.setResult(value);
+			}
 		}
 		finally
 		{
 			WbSwingUtilities.showDefaultCursor(parent);
 		}
-		return null;
 	}
 
-	public static void openPicker(WbTable table)
+	public static void openPicker(final WbTable table)
 	{
-		int col = table.getEditingColumn();
+		final int col = table.getEditingColumn();
 		if (col == -1) return;
 
-		int row = table.getEditingRow();
+		final int row = table.getEditingRow();
 
 		DataStore ds = table.getDataStore();
+
+		WbConnection conn = ds.getOriginalConnection();
+		if (!WbSwingUtilities.isConnectionIdle(table, conn)) return;
+
 		String column = table.getColumnName(col);
 		ds.checkUpdateTable();
 		TableIdentifier baseTable = ds.getUpdateTable();
-		Object value = pickValue(table, ds.getOriginalConnection(), column, baseTable);
-		if (value != null)
+
+		ResultSetter result = new ResultSetter()
 		{
-			table.setValueAt(value, row, col);
-		}
+			@Override
+			public void setResult(Object value)
+			{
+				table.setValueAt(value, row, col);
+			}
+		};
+		pickValue(table, result, conn, column, baseTable);
 	}
 
 	private static void showNotFound(JComponent current)
@@ -527,7 +587,19 @@ public class LookupValuePicker
 		showStatusMessage(current, "MsgComplNoFK", 2500);
 	}
 
-	private static void showStatusMessage(JComponent component, String msgKey, int timeout)
+	private static void showStatusMessage(final JComponent component, final String msgKey, final int timeout)
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_showStatusMessage(component, msgKey, timeout);
+			}
+		});
+	}
+
+	private static void _showStatusMessage(JComponent component, String msgKey, int timeout)
 	{
 		StatusBar status = null;
 		Container parent = component.getParent();

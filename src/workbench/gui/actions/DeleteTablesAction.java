@@ -52,7 +52,7 @@ public class DeleteTablesAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
+		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
 		List<TableIdentifier> tables = getSelectedTables();
 

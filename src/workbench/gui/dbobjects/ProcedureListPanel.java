@@ -320,7 +320,7 @@ public class ProcedureListPanel
 		initGui();
 
 		if (this.isRetrieving) return;
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		final Container parent = this.getParent();
 		try
@@ -573,7 +573,7 @@ public class ProcedureListPanel
 	private void retrieveProcDefinition(ProcedureDefinition def, boolean useCache)
 	{
 		if (this.dbConnection == null) return;
-		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
@@ -735,7 +735,7 @@ public class ProcedureListPanel
 	@Override
 	public void reload()
 	{
-		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
 		this.reset();
 		this.retrieve();
 	}

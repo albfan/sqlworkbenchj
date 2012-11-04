@@ -141,6 +141,7 @@ public class LookupDataLoader
 	{
 		try
 		{
+			conn.setBusy(true);
 			lookupTable = null;
 			TableIdentifier table = null;
 			List<DependencyNode> nodes = conn.getObjectCache().getReferencedTables(baseTable);
@@ -161,6 +162,7 @@ public class LookupDataLoader
 		}
 		finally
 		{
+			conn.setBusy(false);
 			retrieved = true;
 		}
 	}
