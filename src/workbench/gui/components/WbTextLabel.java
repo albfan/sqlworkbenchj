@@ -81,13 +81,21 @@ public class WbTextLabel
 	{
 		if (this.fm != null)
 		{
-			Rectangle2D bounds = fm.getStringBounds(text == null ? "M" : text, getGraphics());
-			int w = (int)bounds.getWidth();
-			if (text == null)
+			Rectangle2D charBounds = fm.getStringBounds("M", getGraphics());
+			int charWidth = (int)charBounds.getWidth();
+			int charHeight = (int)charBounds.getHeight();
+
+			int minWidth = charWidth * minCharacters;
+
+			int textWidth = minWidth;
+			if (text != null)
 			{
-				w *= minCharacters;
+				Rectangle2D bounds = fm.getStringBounds(text, getGraphics());
+				textWidth = (int)bounds.getWidth();
+				charHeight = (int)bounds.getHeight();
 			}
-			return new Dimension(w, (int)bounds.getHeight() + 2);
+			textWidth = Math.max(minWidth, textWidth);
+			return new Dimension(textWidth, charHeight + 2);
 		}
 		return super.getPreferredSize();
 	}

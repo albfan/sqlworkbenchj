@@ -99,7 +99,9 @@ public class LookupValuePicker
 	private WbTable lookupData;
 	private LookupDataLoader lookupLoader;
 	private WbScrollPane scroll;
+	private JPanel statusPanel;
 	private JLabel statusBar;
+	private JLabel rowCount;
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
 
@@ -196,27 +198,7 @@ public class LookupValuePicker
 		reload.setMargin(WbToolbarButton.MARGIN);
 		edit.add(reload, BorderLayout.LINE_END);
 
-		JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
-		statusBar = new JLabel();
-		Font f = statusBar.getFont();
-		FontMetrics fm = null;
-		if (f != null) fm = statusBar.getFontMetrics(f);
-		int height = fm == null ? 0 : fm.getHeight() + 6;
-		height = Math.min(24, height);
-		Dimension d = new Dimension(80, height);
-		statusBar.setMinimumSize(d);
-		statusBar.setPreferredSize(d);
-		statusPanel.add(statusBar);
-
-		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
-		statusPanel.add(l);
-		statusBar.setBorder(new DividerBorder(DividerBorder.RIGHT));
-		maxRows = new NumberField(6);
-		WbSwingUtilities.setMinimumSize(maxRows, 6);
-		statusPanel.add(maxRows);
-
-		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1,5,1,1));
-		statusPanel.setBorder(b);
+		statusPanel = createStatusPanel();
 
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.gridx = 0;
@@ -248,6 +230,49 @@ public class LookupValuePicker
 		setFocusTraversalPolicy(pol);
 	}
 
+	private JPanel createStatusPanel()
+	{
+		JPanel result = new JPanel(new GridBagLayout());
+
+		Insets empty = new Insets(0,0,0,0);
+		Insets small = new Insets(0,2,0,2);
+		GridBagConstraints gc = new GridBagConstraints();
+
+		statusBar = new JLabel();
+		gc.gridx = 0;
+		gc.gridy = 0;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.weightx = 1.0;
+		gc.weighty = 0.0;
+		result.add(statusBar, gc);
+
+		rowCount = new JLabel("   ");
+		rowCount.setIconTextGap(2);
+		rowCount.setBorder(new DividerBorder(DividerBorder.LEFT));
+		gc.insets = small;
+		gc.weightx = 0.0;
+		gc.gridx ++;
+		result.add(rowCount, gc);
+
+		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
+		l.setBorder(new DividerBorder(DividerBorder.LEFT));
+		gc.insets = small;
+		gc.gridx ++;
+		result.add(l, gc);
+
+		maxRows = new NumberField(6);
+		WbSwingUtilities.setMinimumSize(maxRows, 6);
+		gc.insets = empty;
+		gc.gridx ++;
+		result.add(maxRows, gc);
+
+		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1,5,1,1));
+		result.setBorder(b);
+
+		return result;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -267,7 +292,6 @@ public class LookupValuePicker
 	@Override
 	public void reload()
 	{
-		filterValue.setText("");
 		loadData();
 	}
 
@@ -356,6 +380,19 @@ public class LookupValuePicker
 					lookupData.setModel(model, true);
 					lookupData.getSelectionModel().setSelectionInterval(0, 0);
 					lookupData.requestFocusInWindow();
+					int rows = data.getRowCount();
+					int maxRowNum = maxRows.getValue();
+					rowCount.setText(rows + " rows");
+
+					if (rows == maxRowNum || rows == maxRowNum + 1)
+					{
+						rowCount.setIcon(ResourceMgr.getPng("alert"));
+					}
+					else
+					{
+						rowCount.setIcon(null);
+					}
+					statusPanel.doLayout();
 				}
 			});
 		}

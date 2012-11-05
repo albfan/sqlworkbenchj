@@ -98,7 +98,7 @@ public class DwStatusBar
 
 	public DwStatusBar(boolean showTimeout, boolean showEditorStatus)
 	{
-		super();
+		super(new BorderLayout());
 
 		this.tfRowCount = new JTextField();
 		this.tfMaxRows = new JTextField(6);
@@ -124,8 +124,6 @@ public class DwStatusBar
 		Border b = BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1), new EmptyBorder(1,1,1,1));
 		this.tfMaxRows.setBorder(b);
 
-		this.setLayout(new BorderLayout());
-
 		this.setMaximumSize(new Dimension(32768, barHeight));
 		this.setMinimumSize(new Dimension(80, barHeight));
 		this.setPreferredSize(null);
@@ -143,14 +141,14 @@ public class DwStatusBar
 
 		this.add(tfStatus, BorderLayout.CENTER);
 
-		infoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
+		infoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT,0,0));
 		infoPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		infoPanel.setMaximumSize(new Dimension(300, fieldHeight));
 
 		setBorder(DEFAULT_BORDER);
 
 		execTime = new WbTextLabel();
-		execTime.setMininumCharacters(12);
+		execTime.setMininumCharacters(8);
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
 		execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
 
@@ -190,6 +188,7 @@ public class DwStatusBar
 			l.setToolTipText(this.tfTimeout.getToolTipText());
 			infoPanel.add(this.tfTimeout);
 		}
+		
 		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		infoPanel.add(l);
@@ -283,7 +282,7 @@ public class DwStatusBar
 	private void setExecTimeText(final String text)
 	{
 		EventQueue.invokeLater(new Runnable()
-			{
+		{
 				@Override
 				public void run()
 				{
@@ -292,6 +291,7 @@ public class DwStatusBar
 			}
 		);
 	}
+
 	public void setRowcount(int start, int end, int count)
 	{
 		final StringBuilder s = new StringBuilder(20);
