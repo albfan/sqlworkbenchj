@@ -1,7 +1,7 @@
 Features:
 ---------
 - "Always append results" option for macros
-- DropDown to select values for FK columns (inside the ResultSet)
+- LookupValuePicker --> select current value when opened from a result set.
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
 - save table sort of DbExplorer in Workspace
 - undo tab close
