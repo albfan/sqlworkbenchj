@@ -407,6 +407,12 @@ public class CompletionPopup
 			ResultSetter result = new ResultSetter()
 			{
 				@Override
+				public Object getCurrentValue()
+				{
+					return null;
+				}
+
+				@Override
 				public void setResult(Object value)
 				{
 					if (value != null)

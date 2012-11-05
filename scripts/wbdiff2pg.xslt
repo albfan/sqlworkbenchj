@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <xsl:stylesheet
-     version="1.0"
+     version="1.2"
      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 >
 <!--
-
-Convert the output of SQL Workbench's WbSchemaDiff command to SQL for PostgreSQL
-Author: Thomas Kellerer, Henri Tremblay
-
+Convert the output of SQL Workbench's WbSchemaDiff command to a PostgreSQL script
+Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 -->
 
 <xsl:output  encoding="iso-8859-15" method="text" indent="no" standalone="yes" omit-xml-declaration="yes"/>
@@ -21,8 +19,14 @@ Author: Thomas Kellerer, Henri Tremblay
 
   <xsl:template match="/">
 
+    <xsl:text>-- Added Tables without Foreign Keys</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <!-- Added Tables without Foreign Keys-->
     <xsl:apply-templates select="/schema-diff/add-table"/>
 
+    <xsl:text>-- Drop Foreign Keys of Modified Tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <!-- Drop Foreign Keys of Modified Tables. This assures that droped tables doesn't generate an error -->
     <xsl:for-each select="/schema-diff/modify-table">
 
       <xsl:variable name="table">
@@ -31,41 +35,61 @@ Author: Thomas Kellerer, Henri Tremblay
         </xsl:call-template>
       </xsl:variable>
 
+      <xsl:for-each select="drop-foreign-keys/foreign-key">
+        <xsl:call-template name="drop-fk">
+          <xsl:with-param name="tablename" select="$table"/>
+        </xsl:call-template>
+        <xsl:value-of select="$newline"/>
+      </xsl:for-each>
+
+    </xsl:for-each>
+
+    <xsl:text>-- Modified Tables Definition</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <!--Modified Tables Definition -->
+    <xsl:for-each select="/schema-diff/modify-table">
+
+      <xsl:variable name="table2">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="@name"/>
+        </xsl:call-template>
+      </xsl:variable>
+
       <xsl:apply-templates select="remove-column">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="add-column">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="modify-column">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="remove-primary-key">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="add-primary-key">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="drop-index">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="add-index">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:apply-templates select="update-trigger">
-        <xsl:with-param name="table" select="$table"/>
+        <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
 
       <xsl:for-each select="table-constraints/drop-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="$table"/>
+        <xsl:value-of select="$table2"/>
         <xsl:text> DROP CONSTRAINT </xsl:text>
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
@@ -73,13 +97,11 @@ Author: Thomas Kellerer, Henri Tremblay
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-      <xsl:if test="count(table-constraints/drop-constraint/constraint-definition) &gt; 0">
-         <xsl:value-of select="$newline"/>
-      </xsl:if>
+      <xsl:value-of select="$newline"/>
 
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="$table"/>
+        <xsl:value-of select="$table2"/>
         <xsl:text> DROP CONSTRAINT </xsl:text>
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
@@ -88,7 +110,7 @@ Author: Thomas Kellerer, Henri Tremblay
         <xsl:value-of select="$newline"/>
 
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="$table"/>
+        <xsl:value-of select="$table2"/>
         <xsl:text> ADD</xsl:text>
         <xsl:if test="@generated-name != 'true'">
           <xsl:text> CONSTRAINT </xsl:text>
@@ -104,7 +126,7 @@ Author: Thomas Kellerer, Henri Tremblay
 
       <xsl:for-each select="table-constraints/add-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="$table"/>
+        <xsl:value-of select="$table2"/>
         <xsl:text> ADD</xsl:text>
         <xsl:if test="@generated-name != 'true'">
           <xsl:text> CONSTRAINT </xsl:text>
@@ -118,25 +140,61 @@ Author: Thomas Kellerer, Henri Tremblay
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
 
-      <xsl:for-each select="drop-foreign-keys/foreign-key">
-        <xsl:call-template name="drop-fk">
-          <xsl:with-param name="tablename" select="$table"/>
+    </xsl:for-each>
+
+
+    <xsl:text>-- Foreign Keys of Added Tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <!-- Foreign Keys of Added Tables -->
+    <xsl:for-each select="/schema-diff/add-table">
+      <xsl:variable name="tableFk">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="@name"/>
+        </xsl:call-template>
+      </xsl:variable>
+
+      <xsl:for-each select="table-def/foreign-keys">
+        <xsl:for-each select="foreign-key">
+          <xsl:call-template name="add-fk">
+            <xsl:with-param name="tablename" select="$tableFk"/>
+          </xsl:call-template>
+          <xsl:value-of select="$newline"/>
+        </xsl:for-each>
+        <xsl:for-each select="index-def">
+          <xsl:call-template name="create-index">
+            <xsl:with-param name="tablename" select="$tableFk"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:for-each>
+
+    </xsl:for-each>
+
+
+    <xsl:text>-- Foreign Keys of Modified Tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <!-- Foreign Keys of Modified Tables. This assures al tables needed for foreign keys are created -->
+    <xsl:for-each select="/schema-diff/modify-table">
+
+      <xsl:variable name="table3">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="@name"/>
+        </xsl:call-template>
+      </xsl:variable>
+
+      <xsl:for-each select="add-foreign-keys/foreign-key">
+        <xsl:call-template name="add-fk">
+          <xsl:with-param name="tablename" select="$table3"/>
         </xsl:call-template>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
 
-      <xsl:for-each select="add-foreign-keys/foreign-key">
-        <xsl:call-template name="add-fk">
-          <xsl:with-param name="tablename" select="$table"/>
-        </xsl:call-template>
-        <xsl:value-of select="$newline"/>
-      </xsl:for-each>
     </xsl:for-each>
 
     <xsl:if test="count(/schema-diff/modify-table) &gt; 0">
        <xsl:value-of select="$newline"/>
     </xsl:if>
 
+    <!-- Processes out of table modifications cycles -->
     <xsl:for-each select="/schema-diff/drop-view">
       <xsl:text>DROP VIEW </xsl:text>
       <xsl:call-template name="write-object-name">
@@ -331,34 +389,25 @@ Author: Thomas Kellerer, Henri Tremblay
       <xsl:with-param name="objectname" select="view-name"/>
     </xsl:call-template>
     <xsl:value-of select="$newline"/>
-    <xsl:text>(</xsl:text>
-    <xsl:value-of select="$newline"/>
-
-    <xsl:for-each select="column-def">
-      <xsl:sort select="dbms-position"/>
-
-      <xsl:variable name="colname">
-          <xsl:call-template name="write-object-name">
-            <xsl:with-param name="objectname" select="column-name"/>
-          </xsl:call-template>
-      </xsl:variable>
-
-      <xsl:text>  </xsl:text>
-      <xsl:value-of select="$colname"/>
-      <xsl:if test="position() &lt; last()">
-        <xsl:text>,</xsl:text>
-        <xsl:value-of select="$newline"/>
-      </xsl:if>
-    </xsl:for-each>
-    <xsl:value-of select="$newline"/>
-    <xsl:text>)</xsl:text>
-    <xsl:value-of select="$newline"/>
     <xsl:text>AS</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:value-of select="view-source"/>
+    <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:if test="string-length(comment) &gt; 0">
+      <xsl:text>COMMENT ON VIEW </xsl:text>
+      <xsl:call-template name="write-object-name">
+        <xsl:with-param name="objectname" select="view-name"/>
+      </xsl:call-template>
+      <xsl:text> IS '</xsl:text>
+      <xsl:value-of select="comment"/>
+      <xsl:text>';</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
     <xsl:value-of select="$newline"/>
   </xsl:template>
 
+  <!-- Create Table Definition without foreign keys-->
   <xsl:template match="table-def">
     <xsl:variable name="tablename">
       <xsl:call-template name="write-object-name">
@@ -427,23 +476,6 @@ Author: Thomas Kellerer, Henri Tremblay
       <xsl:value-of select="$newline"/>
     </xsl:if>
 
-    <xsl:for-each select="foreign-keys/foreign-key">
-      <xsl:call-template name="add-fk">
-        <xsl:with-param name="tablename" select="$tablename"/>
-      </xsl:call-template>
-      <xsl:value-of select="$newline"/>
-    </xsl:for-each>
-
-    <xsl:for-each select="index-def">
-      <xsl:call-template name="create-index">
-        <xsl:with-param name="tablename" select="$tablename"/>
-      </xsl:call-template>
-    </xsl:for-each>
-    <xsl:if test="count(index-def) &gt; 0">
-      <xsl:value-of select="$newline"/>
-    </xsl:if>
-
-
   </xsl:template>
 
   <xsl:template name="drop-fk">
@@ -465,9 +497,18 @@ Author: Thomas Kellerer, Henri Tremblay
     <xsl:value-of select="$tablename"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>  ADD CONSTRAINT </xsl:text>
-    <xsl:call-template name="write-object-name">
-      <xsl:with-param name="objectname" select="constraint-name"/>
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="contains(constraint-name,'.')">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="concat($quote,constraint-name,$quote)"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="constraint-name"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:value-of select="$newline"/>
     <xsl:text>  FOREIGN KEY (</xsl:text>
     <xsl:for-each select="source-columns/column">
@@ -539,7 +580,11 @@ Author: Thomas Kellerer, Henri Tremblay
       <xsl:when test="substring($objectname,1,1) = $quote and substring($objectname,string-length($objectname),1) = $quote">
         <xsl:value-of select="$objectname"/>
       </xsl:when>
-      <xsl:when test="contains($objectname,' ')">
+      <!-- Support for common Postgres and SQL keywords. If you need another special one, just added it -->
+      <xsl:when test="$objectname = 'order' or $objectname = 'name' or $objectname = 'type' or $objectname = 'limit' or $objectname = 'where' or $objectname = 'select' or $objectname = 'update' or $objectname = 'delete' or $objectname = 'alter' or $objectname = 'and' or $objectname = 'as' or $objectname = 'or' or $objectname = 'group' or $objectname = 'by' or $objectname = 'primary' or $objectname = 'foreign' or $objectname = 'rollback' or $objectname = 'commit' or $objectname = 'begin' or $objectname = 'return'">
+        <xsl:value-of select="concat($quote, $objectname, $quote)"/>
+      </xsl:when>
+      <xsl:when test="contains($objectname,' ') or contains($objectname,'-')">
         <xsl:value-of select="concat($quote, $objectname, $quote)"/>
       </xsl:when>
       <xsl:when test="$objectname != $lower-name">

@@ -136,8 +136,19 @@ public class TableReplacer
 		}
 		else
 		{
-			comp = new ContainsComparator();
+			comp = new ContainsComparator()
+			{
+				@Override
+				public boolean supportsType(Class valueClass)
+				{
+					// allow any datatype to be found
+					// this works, because the ContainsComparator converts
+					// the values to Strings anyway
+					return true;
+				}
+			};
 		}
+
 		ColumnExpression filter = new ColumnExpression(comp, criteria);
 		filter.setIgnoreCase(ignoreCase);
 		client.applyHighlightExpression(filter);

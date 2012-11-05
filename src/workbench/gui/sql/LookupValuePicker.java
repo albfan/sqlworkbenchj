@@ -17,8 +17,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.FocusTraversalPolicy;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -78,6 +76,8 @@ import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
+import workbench.storage.filter.ColumnComparator;
+import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
@@ -104,13 +104,15 @@ public class LookupValuePicker
 	private JLabel rowCount;
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
+	private Object currentValue;
 
-	public LookupValuePicker(WbConnection conn, LookupDataLoader loader)
+	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Object current)
 	{
 		super(new GridBagLayout());
 
 		lookupLoader = loader;
 		dbConnection = conn;
+		currentValue = current;
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -284,15 +286,107 @@ public class LookupValuePicker
 			}
 			else if (doSearch.isSelected())
 			{
-				loadData();
+				loadData(false);
 			}
 		}
+	}
+
+	private void findCurrentValue(boolean selectRow)
+	{
+		if (currentValue == null) return;
+
+		String colName = this.lookupLoader.getReferencedColumn();
+		int colIndex = lookupData.getDataStore().getColumnIndex(colName);
+		if (colIndex < 0)
+		{
+			LogMgr.logError("LookupValuePicker.findCurrentValue()", "Referenced column " + colName + " not found!", null);
+			return;
+		}
+
+		if (selectRow)
+		{
+			int rows = lookupData.getRowCount();
+			for (int row = 0; row < rows; row++)
+			{
+				Object pk = lookupData.getValueAt(row, colIndex);
+				if (currentValue.equals(pk))
+				{
+					lookupData.getSelectionModel().setSelectionInterval(row, row);
+					break;
+				}
+			}
+		}
+		ColumnComparator comp = getComparator();
+		ColumnExpression search = new ColumnExpression(colName, comp, currentValue);
+		lookupData.applyHighlightExpression(search);
+	}
+
+	private ColumnComparator getComparator()
+	{
+		return new ColumnComparator()
+		{
+			@Override
+			public String getOperator()
+			{
+				return "=";
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "equals";
+			}
+
+			@Override
+			public boolean evaluate(Object reference, Object value, boolean ignoreCase)
+			{
+				if (reference == null && value == null) return true;
+				if (reference == null || value == null) return false;
+				return value.equals(reference);
+			}
+
+			@Override
+			public boolean supportsType(Class valueClass)
+			{
+				return true;
+			}
+
+			@Override
+			public boolean supportsIgnoreCase()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean needsValue()
+			{
+				return true;
+			}
+
+			@Override
+			public String getValueExpression(Object value)
+			{
+				return value == null ? "" : value.toString();
+			}
+
+			@Override
+			public boolean validateInput(Object input)
+			{
+				return true;
+			}
+
+			@Override
+			public boolean comparesEquality()
+			{
+				return true;
+			}
+		};
 	}
 
 	@Override
 	public void reload()
 	{
-		loadData();
+		loadData(false);
 	}
 
 	@Override
@@ -347,20 +441,20 @@ public class LookupValuePicker
 		return "%" + filter + "%";
 	}
 
-	public void loadData()
+	public void loadData(final boolean selectCurrent)
 	{
 		WbThread load = new WbThread("LookupPickerRetrieval")
 		{
 			@Override
 			public void run()
 			{
-				_loadData();
+				_loadData(selectCurrent);
 			}
 		};
 		load.start();
 	}
 
-	private void _loadData()
+	private void _loadData(final boolean selectCurrent)
 	{
 		try
 		{
@@ -378,7 +472,14 @@ public class LookupValuePicker
 					DataStoreTableModel model = new DataStoreTableModel(data);
 					model.setAllowEditing(false);
 					lookupData.setModel(model, true);
-					lookupData.getSelectionModel().setSelectionInterval(0, 0);
+					if (currentValue != null)
+					{
+						findCurrentValue(selectCurrent);
+					}
+					else
+					{
+						lookupData.getSelectionModel().setSelectionInterval(0, 0);
+					}
 					lookupData.requestFocusInWindow();
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
@@ -475,7 +576,7 @@ public class LookupValuePicker
 	{
 		restoreSettings();
 		fixStatusBarHeight();
-		loadData();
+		loadData(true);
 	}
 
 	public void selectValue()
@@ -573,7 +674,7 @@ public class LookupValuePicker
 			// the found table is cached in the loader, so this call does not access the database
 			TableIdentifier lookupTable = loader.getReferencedTable();
 
-			LookupValuePicker picker = new LookupValuePicker(conn, loader);
+			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getCurrentValue());
 			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
 
 			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
@@ -610,6 +711,7 @@ public class LookupValuePicker
 		final int row = table.getEditingRow();
 
 		DataStore ds = table.getDataStore();
+		final Object currentValue = table.getValueAt(row, col);
 
 		WbConnection conn = ds.getOriginalConnection();
 		if (!WbSwingUtilities.isConnectionIdle(table, conn)) return;
@@ -620,6 +722,13 @@ public class LookupValuePicker
 
 		ResultSetter result = new ResultSetter()
 		{
+
+			@Override
+			public Object getCurrentValue()
+			{
+				return currentValue;
+			}
+
 			@Override
 			public void setResult(Object value)
 			{

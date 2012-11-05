@@ -65,6 +65,7 @@ public class DataColorOptions
 		modifiedColor.setSelectedColor(GuiSettings.getColumnModifiedColor());
 		selectionBlend.setText(Settings.getInstance().getProperty("workbench.gui.renderer.blend.selection", ""));
 		alternateBlend.setText(Settings.getInstance().getProperty("workbench.gui.renderer.blend.alternate", ""));
+		searchHilite.setSelectedColor(GuiSettings.getExpressionHighlightColor());
 	}
 
 	@Override
@@ -75,7 +76,8 @@ public class DataColorOptions
 		GuiSettings.setAlternateRowColor(alternateColor.getSelectedColor());
 		GuiSettings.setNullColor(nullColor.getSelectedColor());
 		GuiSettings.setColumnModifiedColor(modifiedColor.getSelectedColor());
-
+		GuiSettings.setExpressionHighlightColor(searchHilite.getSelectedColor());
+		
 		Settings.getInstance().setColor("workbench.gui.table.background", stdBackground.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.foreground", textColor.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.selection.background", selectionColor.getSelectedColor());
@@ -186,6 +188,8 @@ public class DataColorOptions
     selectionBlend = new javax.swing.JTextField();
     alternateBlend = new javax.swing.JTextField();
     jLabel9 = new javax.swing.JLabel();
+    jLabel10 = new javax.swing.JLabel();
+    searchHilite = new WbColorPicker(true);
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -369,13 +373,33 @@ public class DataColorOptions
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 20);
     add(jPanel7, gridBagConstraints);
+
+    jLabel10.setText(ResourceMgr.getString("LblDataHiliteColor")); // NOI18N
+    jLabel10.setToolTipText(ResourceMgr.getString("d_LblDataHiliteColor")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    add(jLabel10, gridBagConstraints);
+
+    searchHilite.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+    add(searchHilite, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -383,6 +407,7 @@ public class DataColorOptions
   private javax.swing.JTextField alternateBlend;
   private workbench.gui.components.WbColorPicker alternateColor;
   private javax.swing.JLabel alternateColorLabel;
+  private javax.swing.JLabel jLabel10;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel7;
   private javax.swing.JLabel jLabel8;
@@ -390,6 +415,7 @@ public class DataColorOptions
   private javax.swing.JPanel jPanel7;
   private workbench.gui.components.WbColorPicker modifiedColor;
   private workbench.gui.components.WbColorPicker nullColor;
+  private workbench.gui.components.WbColorPicker searchHilite;
   private workbench.gui.components.WbColorPicker selectedTextColor;
   private javax.swing.JLabel selectedTextColorLabel;
   private javax.swing.JTextField selectionBlend;

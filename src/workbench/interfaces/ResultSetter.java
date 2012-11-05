@@ -16,5 +16,6 @@ package workbench.interfaces;
  */
 public interface ResultSetter
 {
+	Object getCurrentValue();
 	void setResult(Object value);
 }

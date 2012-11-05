@@ -1,7 +1,5 @@
 Features:
 ---------
-- "Always append results" option for macros
-- LookupValuePicker --> select current value when opened from a result set.
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
 - save table sort of DbExplorer in Workspace
 - undo tab close

@@ -57,6 +57,7 @@ public class ToolTipRenderer
 	implements TableCellRenderer, WbRenderer, RequiredFieldHighlighter
 {
 	protected String displayValue = StringUtil.EMPTY_STRING;
+	protected Object currentValue;
 	protected String tooltip;
 
 	protected int rightMargin;
@@ -252,6 +253,7 @@ public class ToolTipRenderer
 			this.setFont(table.getFont());
 		}
 
+		currentValue = value;
 		if (value != null)
 		{
 			prepareDisplay(value);
@@ -325,7 +327,7 @@ public class ToolTipRenderer
 			}
 		}
 
-		if (checkHighlightExpression())
+		if (checkHighlightExpression(currentValue))
 		{
 			return filterHighlightColor;
 		}
@@ -442,13 +444,13 @@ public class ToolTipRenderer
 		setTooltip(displayValue);
 	}
 
-	protected boolean checkHighlightExpression()
+	protected boolean checkHighlightExpression(Object value)
 	{
 		if (this.filter == null)
 		{
 			return false;
 		}
-		return filter.evaluate(displayValue);
+		return filter.evaluate(value);
 	}
 
 	@Override
