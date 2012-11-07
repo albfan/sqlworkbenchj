@@ -30,7 +30,7 @@ public class PostgresDataTypeResolver
 		if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
 		if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
 		if (sqlType == Types.BIT && "bool".equals(dbmsName)) return "boolean";
-		
+
 		if (sqlType == Types.CHAR && "bpchar".equals(dbmsName))
 		{
 			return "char(" + size + ")";
@@ -46,7 +46,7 @@ public class PostgresDataTypeResolver
 			if (size == 65535 || size == 131089) size = 0;
 			if (digits == 65531) digits = 0;
 		}
-		
+
 		if (sqlType == Types.OTHER && "varbit".equals(dbmsName))
 		{
 			return "bit varying(" + size + ")";
@@ -55,6 +55,12 @@ public class PostgresDataTypeResolver
 		if (sqlType == Types.BIT && "bit".equals(dbmsName))
 		{
 			return "bit(" + size + ")";
+		}
+		if (sqlType == Types.ARRAY && dbmsName.charAt(0) == '_')
+		{
+			if ("_int2".equals(dbmsName)) return "smallint[]";
+			if ("_int4".equals(dbmsName)) return "integer[]";
+			if ("_int8".equals(dbmsName)) return "bigint[]";
 		}
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
