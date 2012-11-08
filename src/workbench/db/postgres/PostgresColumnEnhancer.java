@@ -13,6 +13,7 @@ package workbench.db.postgres;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
@@ -25,7 +26,13 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A column enhancer to read the column collation available since PostgreSQL 9.1
+ * A column enhancer to update column definitions for PostgreSQL.
+ *
+ * The following additional information is updated:
+ * <ul>
+ * <li>the column collation available for versions >= PostgreSQL 9.1</li>
+ * <li>The array dimensions so that arrays are displayed correctly.</li>
+ * </ul>
  *
  * @author Thomas Kellerer
  */
@@ -39,6 +46,78 @@ public class PostgresColumnEnhancer
 		if (JdbcUtils.hasMinimumServerVersion(conn, "9.1"))
 		{
 			readCollations(table, conn);
+		}
+
+		if (JdbcUtils.hasMinimumServerVersion(conn, "8.0"))
+		{
+			updateArrayTypes(table, conn);
+		}
+	}
+
+	private void updateArrayTypes(TableDefinition table, WbConnection conn)
+	{
+		int arrayCols = 0;
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			if (col.getDataType() == Types.ARRAY)
+			{
+				arrayCols ++;
+			}
+		}
+		if (arrayCols == 0) return;
+
+
+		String sql =
+			"select att.attname, att.attndims, pg_catalog.format_type(atttypid, NULL) as display_type \n" +
+			"from pg_attribute att \n" +
+			"  join pg_class tbl on tbl.oid = att.attrelid  \n" +
+			"  join pg_namespace ns on tbl.relnamespace = ns.oid  \n" +
+			"where tbl.relname = ?   \n" +
+			"  and ns.nspname = ? \n" +
+			"  and att.attndims > 0";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "PostgresColumnEnhancer using SQL=\n" + SqlUtil.replaceParameters(sql, table.getTable().getTableName(), table.getTable().getSchema()));
+		}
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		HashMap<String, ArrayDef> dims = new HashMap<String, ArrayDef>(table.getColumnCount());
+
+		try
+		{
+			stmt = conn.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, table.getTable().getTableName());
+			stmt.setString(2, table.getTable().getSchema());
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				ArrayDef def = new ArrayDef();
+				String colname = rs.getString(1);
+				def.numDims = rs.getInt(2);
+				def.formattedType = rs.getString(3);
+				dims.put(colname, def);
+			}
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read column collations", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			ArrayDef def = dims.get(col.getColumnName());
+			String type = def.formattedType;
+			for (int i=0; i < def.numDims - 1; i++)
+			{
+				type += "[]";
+			}
+			col.setDbmsType(type);
 		}
 	}
 
@@ -95,4 +174,10 @@ public class PostgresColumnEnhancer
 			}
 		}
 	}
+	class ArrayDef
+	{
+		int numDims;
+		String formattedType;
+	}
+
 }
