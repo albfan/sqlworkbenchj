@@ -71,7 +71,7 @@ extends WbTestCase
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("ADDRESS"));
 		LookupDataLoader retriever = new LookupDataLoader(tbl, "ADR_TYPE_ID");
 		retriever.retrieveReferencedTable(conn);
-		TableIdentifier result = retriever.getReferencedTable();
+		TableIdentifier result = retriever.getLookupTable();
 		assertNotNull(result);
 		assertEquals("ADDRESS_TYPE", result.getTableName());
 		DataStore data = retriever.getLookupData(conn, 0, null, true);

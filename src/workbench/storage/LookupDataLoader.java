@@ -133,6 +133,21 @@ public class LookupDataLoader
 		return order.toString();
 	}
 
+	public void setLookupTable(TableIdentifier tbl, WbConnection conn)
+		throws SQLException
+	{
+		try
+		{
+			conn.setBusy(true);
+			lookupTable = conn.getMetadata().getTableDefinition(tbl);
+		}
+		finally
+		{
+			conn.setBusy(false);
+			retrieved = true;
+		}
+	}
+
 	public void retrieveReferencedTable(WbConnection conn)
 		throws SQLException
 	{
@@ -171,7 +186,7 @@ public class LookupDataLoader
 	 * calling this method, otherwise null will be returned.
 	 *
 	 * @return the referenced column or null if no FK was found or retrieveReferencedTable() was not yet called
-	 * @see #getReferencedTable()
+	 * @see #getLookupTable()
 	 */
 	public String getReferencedColumn()
 	{
@@ -186,21 +201,21 @@ public class LookupDataLoader
 	 *
 	 * @return the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
 	 */
-	public TableIdentifier getReferencedTable()
+	public TableIdentifier getLookupTable()
 	{
 		if (lookupTable == null) return null;
 		return lookupTable.getTable();
 	}
 
 	/**
-	 * Return the PK of the referenced table.
+	 * Return the PK of the lookup table.
 	 *
 	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
 	 * calling this method, otherwise null will be returned.
 	 *
 	 * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
-	 * @see #getReferencedTable()
-	 * @see #getReferencedColumn() 
+	 * @see #getLookupTable()
+	 * @see #getReferencedColumn()
 	 */
 	public PkDefinition getPK()
 	{

@@ -632,7 +632,7 @@ public class LookupValuePicker
 				{
 					// this is the slow part!
 					loader.retrieveReferencedTable(conn);
-					lookupTable = loader.getReferencedTable();
+					lookupTable = loader.getLookupTable();
 				}
 				catch (SQLException sql)
 				{
@@ -672,7 +672,7 @@ public class LookupValuePicker
 			WbSwingUtilities.showWaitCursor(parent);
 
 			// the found table is cached in the loader, so this call does not access the database
-			TableIdentifier lookupTable = loader.getReferencedTable();
+			TableIdentifier lookupTable = loader.getLookupTable();
 
 			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getCurrentValue());
 			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);

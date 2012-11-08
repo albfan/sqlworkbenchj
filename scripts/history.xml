@@ -18,6 +18,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="6" type="fix">For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</entry>
     <entry dev-build="6" type="fix">When searching in the result set, "Highlight All" did no longer work.</entry>
     <entry dev-build="5" type="fix">Showing the INSERT "hint" for values and columns was not working for INSERT statements with more than one row.</entry>
     <entry dev-build="5" type="fix">For Oracle, errors resulting from e.g. a wrong CREATE PROCEDURE were no longer displayed automatically</entry>
