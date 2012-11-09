@@ -192,6 +192,12 @@ public class LookupValuePicker
 		radios.add(doSearch);
 
 		JPanel edit = new JPanel(new BorderLayout(0, 0));
+		String text = "Filter value";
+		JLabel lbl = new JLabel(text);
+		lbl.setLabelFor(filterValue);
+		lbl.setDisplayedMnemonic(text.charAt(0));
+		lbl.setBorder(new EmptyBorder(0, 0, 0, 10));
+		edit.add(lbl, BorderLayout.WEST);
 		edit.add(filterValue, BorderLayout.CENTER);
 		edit.add(radios, BorderLayout.PAGE_START);
 

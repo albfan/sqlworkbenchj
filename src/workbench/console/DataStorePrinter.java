@@ -102,6 +102,11 @@ public class DataStorePrinter
 	public void printTo(PrintStream out)
 	{
 		PrintWriter pw = new PrintWriter(out);
+		printTo(pw);
+	}
+
+	public void printTo(PrintWriter pw)
+	{
 		try
 		{
 			printHeader(pw);

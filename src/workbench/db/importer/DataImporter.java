@@ -910,10 +910,18 @@ public class DataImporter
 	{
 		if (stream != null)
 		{
-			this.insertedRows += stream.processStreamData();
+			try
+			{
+				this.insertedRows += stream.processStreamData();
+			}
+			catch (SQLException sql)
+			{
+				this.hasErrors = true;
+				LogMgr.logError("DataImporter.processFile()", "Error importing file: " + ExceptionUtil.getDisplay(sql), null);
+				this.addError(sql.getLocalizedMessage()+ "\n");
+			}
 		}
 	}
-
 
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array

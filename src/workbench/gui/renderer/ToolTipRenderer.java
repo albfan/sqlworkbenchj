@@ -80,6 +80,7 @@ public class ToolTipRenderer
 	private boolean isEditing;
 	private boolean[] highlightCols;
 	private int currentColumn = -1;
+	private String currentColumnName;
 
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
@@ -210,6 +211,7 @@ public class ToolTipRenderer
 		this.hasFocus = focus;
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
+		this.currentColumnName = table.getColumnName(col);
 		this.isSelected = selected;
 
 		try
@@ -450,7 +452,11 @@ public class ToolTipRenderer
 		{
 			return false;
 		}
-		return filter.evaluate(value);
+		if (!filter.isColumnSpecific() || StringUtil.compareStrings(filter.getColumnName(), currentColumnName, true) == 0)
+		{
+			return filter.evaluate(value);
+		}
+		return false;
 	}
 
 	@Override

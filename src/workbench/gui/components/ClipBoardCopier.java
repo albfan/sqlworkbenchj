@@ -14,6 +14,8 @@ package workbench.gui.components;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
+import workbench.console.DataStorePrinter;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
@@ -96,19 +99,21 @@ public class ClipBoardCopier
 			columnsToCopy = getColumnsFromSelection();
 		}
 
+		boolean doTextFormat = false;
 		if (showSelectColumns && client != null)
 		{
 			// Display column selection dialog
-			ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, client.getSelectedRowCount() > 0);
+			ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, client.getSelectedRowCount() > 0, true);
 			if (result == null) return;
+
 			columnsToCopy = result.columns;
 			includeHeaders = result.includeHeaders;
 			selectedOnly = result.selectedOnly;
+			doTextFormat = result.formatText;
 		}
 
 		try
 		{
-			StringWriter out = null;
 			int count = this.data.getRowCount();
 			int[] rows = null;
 			if (selectedOnly)
@@ -117,15 +122,26 @@ public class ClipBoardCopier
 				count = rows == null ? 0 : rows.length;
 			}
 
-			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
-			// because for some reason this creates additional empty lines
-			// under Windows
-			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
-			printer.setNullString(GuiSettings.getDisplayNullString());
-			printer.setColumnMapping(getColumnOrder());
+			StringWriter out = new StringWriter(count * 250);
+			if (doTextFormat)
+			{
+				DataStorePrinter printer = new DataStorePrinter(this.data);
+				printer.setFormatColumns(true);
+				printer.setPrintRowCount(false);
+				PrintWriter pw = new PrintWriter(out);
+				printer.printTo(pw);
+			}
+			else
+			{
+				// Do not use StringUtil.LINE_TERMINATOR for the line terminator
+				// because for some reason this creates additional empty lines
+				// under Windows
+				DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
+				printer.setNullString(GuiSettings.getDisplayNullString());
+				printer.setColumnMapping(getColumnOrder());
 
-			out = new StringWriter(count * 250);
-			printer.writeDataString(out, rows);
+				printer.writeDataString(out, rows);
+			}
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
@@ -266,7 +282,7 @@ public class ClipBoardCopier
 
 		if (showSelectColumns && !WbManager.isTest())
 		{
-      ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0);
+      ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0, false);
 			if (result == null) return;
 			columnsToInclude = result.columns;
       selectedOnly = result.selectedOnly;
@@ -381,7 +397,7 @@ public class ClipBoardCopier
 	 *  this is e.g. used for copying data to the clipboard
 	 *
 	 */
-	public ColumnSelectionResult selectColumns(boolean includeHeader, boolean selectedOnly, boolean showHeaderSelection, boolean showSelectedRowsSelection)
+	public ColumnSelectionResult selectColumns(boolean includeHeader, boolean selectedOnly, boolean showHeaderSelection, boolean showSelectedRowsSelection, boolean showTextFormat)
 	{
 		if (this.data == null) return null;
 
@@ -390,7 +406,7 @@ public class ClipBoardCopier
 		result.selectedOnly = selectedOnly;
 
 		ColumnIdentifier[] originalCols = this.data.getColumns();
-		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection);
+		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection, showTextFormat);
 		panel.selectAll();
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this.client), panel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -399,6 +415,7 @@ public class ClipBoardCopier
 			result.columns = panel.getSelectedColumns();
 			result.includeHeaders = panel.includeHeader();
 			result.selectedOnly = panel.selectedOnly();
+			result.formatText = panel.formatTextOutput();
 		}
 		else
 		{

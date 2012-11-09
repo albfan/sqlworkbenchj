@@ -11,13 +11,17 @@
  */
 package workbench.console;
 
-import workbench.storage.*;
-import java.io.PrintWriter;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import java.io.PrintWriter;
+import java.util.List;
+
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.storage.*;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -35,6 +39,7 @@ public abstract class ConsolePrinter
 	protected boolean doFormat = true;
 	protected boolean showRowCount = true;
 	protected boolean printRowAsLine = true;
+	protected List<String> includedColumns;
 
 	protected abstract String getResultName();
 	protected abstract Map<Integer, Integer> getColumnSizes();

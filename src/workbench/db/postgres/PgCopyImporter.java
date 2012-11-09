@@ -13,6 +13,7 @@ package workbench.db.postgres;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
@@ -149,15 +150,20 @@ public class PgCopyImporter
 		}
 		catch (Exception e)
 		{
-			if (e instanceof SQLException)
+			Throwable realException = e;
+			if (e instanceof InvocationTargetException)
 			{
-				throw (SQLException)e;
+				realException = e.getCause();
 			}
-			if (e instanceof IOException)
+			if (realException instanceof SQLException)
 			{
-				throw (IOException)e;
+				throw (SQLException)realException;
 			}
-			throw new SQLException("Could not copy data", e);
+			if (realException instanceof IOException)
+			{
+				throw (IOException)realException;
+			}
+			throw new SQLException("Could not copy data", e.getCause() == null ? e : e.getCause());
 		}
 		finally
 		{

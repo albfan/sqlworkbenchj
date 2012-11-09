@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -49,17 +50,19 @@ public class ColumnSelectorPanel
 	private JButton selectNone;
 	private JCheckBox selectedOnlyCheckBox;
 	private JCheckBox includeHeaderCheckBox;
+	private JCheckBox formatText;
 
 	public ColumnSelectorPanel(ColumnIdentifier[] columns)
 	{
-		this(columns,false,false,false,false);
+		this(columns,false,false,false,false,false);
 	}
 
 	public ColumnSelectorPanel(ColumnIdentifier[] columns,
           boolean includeHeader,
           boolean selectedOnly,
           boolean showHeaderSelection,
-          boolean showSelectedCheckBox)
+          boolean showSelectedCheckBox,
+					boolean showFormatCheckBox)
 	{
 		super();
 		this.setLayout(new BorderLayout());
@@ -89,57 +92,53 @@ public class ColumnSelectorPanel
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
 
-		if (showSelectedCheckBox)
-		{
-			this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LblSelectedRowsOnly"));
-			this.selectedOnlyCheckBox.setSelected(selectedOnly);
-			this.selectedOnlyCheckBox.setEnabled(true);
-		}
-
-		if (showHeaderSelection)
-		{
-			this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LblExportIncludeHeaders"));
-			this.includeHeaderCheckBox.setSelected(includeHeader);
-		}
-
 		JPanel optionPanel = new JPanel();
 		optionPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 0.5;
-		c.anchor = java.awt.GridBagConstraints.EAST;
+		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, 0, 5);
 		optionPanel.add(selectAll, c);
 
 		c.gridx = 1;
 		c.gridy = 0;
-		c.anchor = java.awt.GridBagConstraints.WEST;
+		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 0.5;
 		c.insets = new Insets(0, 5, 0, 0);
 		optionPanel.add(selectNone, c);
 
+		JPanel cbxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+
 		if (showSelectedCheckBox)
 		{
-			c.gridx = 0;
-			c.gridy = 1;
-			c.insets = new Insets(3, 0, 0, 0);
-			c.anchor = (showHeaderSelection ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);
-			c.gridwidth = (showHeaderSelection ? 1 : 2);
-			c.weightx = (showHeaderSelection ? 0.5 : 1.0);
-			optionPanel.add(selectedOnlyCheckBox, c);
+			selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LblSelectedRowsOnly"));
+			selectedOnlyCheckBox.setSelected(selectedOnly);
+			selectedOnlyCheckBox.setEnabled(true);
+			cbxPanel.add(selectedOnlyCheckBox);
 		}
 
 		if (showHeaderSelection)
 		{
-			c.gridx = (showSelectedCheckBox ? 1 : 0);
-			c.gridy = 1;
-			c.gridwidth = (showSelectedCheckBox ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);
-			c.gridwidth = (showSelectedCheckBox ? 1 : 2);
-			c.weightx = (showSelectedCheckBox ? 0.5 : 1.0);
-			c.anchor = java.awt.GridBagConstraints.WEST;
-			optionPanel.add(includeHeaderCheckBox, c);
+			includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LblExportIncludeHeaders"));
+			includeHeaderCheckBox.setSelected(includeHeader);
+			cbxPanel.add(includeHeaderCheckBox);
 		}
+
+		if (showFormatCheckBox)
+		{
+			formatText = new JCheckBox("Format text");
+			cbxPanel.add(formatText);
+		}
+
+		c.gridx = 0;
+		c.gridy = 1;
+		c.insets = new Insets(3, 0, 0, 3);
+		c.anchor = GridBagConstraints.CENTER;
+		c.weightx = 1;
+		c.gridwidth = 2;
+		optionPanel.add(cbxPanel, c);
 
 		optionPanel.setBorder(new EmptyBorder(5, 0, 10, 0));
 		this.add(optionPanel, BorderLayout.SOUTH);
@@ -162,17 +161,23 @@ public class ColumnSelectorPanel
 		col.setHeaderValue(label);
 	}
 
-  public boolean selectedOnly()
-  {
-      if (this.selectedOnlyCheckBox == null) return false;
-      return selectedOnlyCheckBox.isSelected();
-  }
+	public boolean formatTextOutput()
+	{
+		if (formatText == null) return false;
+		return formatText.isSelected();
+	}
 
-  public boolean includeHeader()
-  {
-      if (this.includeHeaderCheckBox == null) return false;
-      return includeHeaderCheckBox.isSelected();
-  }
+	public boolean selectedOnly()
+	{
+		if (this.selectedOnlyCheckBox == null) return false;
+		return selectedOnlyCheckBox.isSelected();
+	}
+
+	public boolean includeHeader()
+	{
+		if (this.includeHeaderCheckBox == null)	return false;
+		return includeHeaderCheckBox.isSelected();
+	}
 
 	/**
 	 * Check if the column with the specified index is selected.
@@ -208,7 +213,7 @@ public class ColumnSelectorPanel
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(selected);
 		for (int i=0; i < this.model.selected.length; i++)
 		{
-			if (this.model.selected[i])
+			if (this.model.selected[i] || formatTextOutput())
 			{
 				result.add(this.model.columns[i].createCopy());
 			}

@@ -21,5 +21,6 @@ public class ColumnSelectionResult
 {
 	public boolean includeHeaders;
 	public boolean selectedOnly;
+	public boolean formatText;
 	public List<ColumnIdentifier> columns;
 }
