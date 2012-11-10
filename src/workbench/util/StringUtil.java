@@ -970,14 +970,26 @@ public class StringUtil
 		return -1;
 	}
 
-	public static int findWordBoundary(String data, int pos, String wordBoundaries)
+	/**
+	 * Find the start of the word for the word left of the cursor position.
+	 *
+	 * @param data             the string to use
+	 * @param cursorPosition   the cursor position
+	 * @param wordBoundaries   characters that define wordboundaries.
+	 *                         If null, the first non-whitespace character will be returned.
+	 * @return the position of the word boundary or -1 if not found
+	 * 
+	 * @see #findPreviousWhitespace(String, int)
+	 */
+	public static int findWordBoundary(String data, int cursorPosition, String wordBoundaries)
 	{
-		if (wordBoundaries == null) return findPreviousWhitespace(data, pos);
+		if (wordBoundaries == null) return findPreviousWhitespace(data, cursorPosition);
 		if (data == null) return -1;
 		int count = data.length();
-		if (pos > count) return -1;
-		if (pos <= 1) return 0;
-		for (int i=pos; i > 0; i--)
+		if (cursorPosition > count) return -1;
+		if (cursorPosition == count) cursorPosition --;
+		if (cursorPosition <= 1) return 0;
+		for (int i=cursorPosition; i > 0; i--)
 		{
 			char c = data.charAt(i);
 			if (wordBoundaries.indexOf(c) > -1 || Character.isWhitespace(c)) return i;
@@ -1557,7 +1569,7 @@ public class StringUtil
 	 *
 	 * @param toSearch            the search expression
 	 * @param supportSQLWildcard  if true, % is also recognized as a wildcard character
-	 * 
+	 *
 	 * @return a pattern that can be used as a regular expression
 	 */
 	public static String wildcardToRegex(String toSearch, boolean supportSQLWildcard)

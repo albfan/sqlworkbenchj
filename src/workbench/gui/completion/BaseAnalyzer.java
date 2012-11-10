@@ -100,6 +100,7 @@ public abstract class BaseAnalyzer
 	protected char catalogSeparator;
 
 	protected String columnForFKSelect;
+	protected TableIdentifier tableForFkSelect;
 
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -113,7 +114,7 @@ public abstract class BaseAnalyzer
 	{
 		return dbConnection;
 	}
-	
+
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator
@@ -237,6 +238,7 @@ public abstract class BaseAnalyzer
 		this.typeFilter = null;
 		this.keywordFile = null;
 		this.columnForFKSelect = null;
+		this.tableForFkSelect = null;
 
 		checkOverwrite();
 		this.addAllMarker = false;
@@ -446,7 +448,8 @@ public abstract class BaseAnalyzer
 			}
 			if (columnForFKSelect != null)
 			{
-				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tableForColumnList);
+				TableIdentifier tbl = (tableForFkSelect != null ? tableForFkSelect : tableForColumnList);
+				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tbl);
 				elements.add(fk);
 			}
 		}

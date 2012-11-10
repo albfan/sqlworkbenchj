@@ -68,6 +68,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
@@ -192,10 +193,9 @@ public class LookupValuePicker
 		radios.add(doSearch);
 
 		JPanel edit = new JPanel(new BorderLayout(0, 0));
-		String text = "Filter value";
-		JLabel lbl = new JLabel(text);
+		WbLabel lbl = new WbLabel();
+		lbl.setTextByKey("LblFkFilterValue");
 		lbl.setLabelFor(filterValue);
-		lbl.setDisplayedMnemonic(text.charAt(0));
 		lbl.setBorder(new EmptyBorder(0, 0, 0, 10));
 		edit.add(lbl, BorderLayout.WEST);
 		edit.add(filterValue, BorderLayout.CENTER);

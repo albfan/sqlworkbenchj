@@ -22,6 +22,8 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+
+import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -89,6 +91,8 @@ public class SelectAnalyzer
 		boolean inTableList = ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos));
+
+		boolean inWhere = afterWhere && !afterGroup && !afterHaving && cursorPos > orderPos;
 
 		if (inTableList && afterGroup) inTableList = false;
 		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
@@ -168,7 +172,7 @@ public class SelectAnalyzer
 				{
 					pos = currentWord.indexOf(schemaSep);
 				}
-				
+
 				if (pos > -1)
 				{
 					table = currentWord.substring(0, pos);
@@ -225,6 +229,51 @@ public class SelectAnalyzer
 				setColumnPrefix(currentAlias.getNameToUse());
 			}
 		}
+
+		if (inWhere)
+		{
+			checkFkLookup();
+		}
+	}
+
+	private void checkFkLookup()
+	{
+		String col = getColumnNameForCondition();
+		if (col != null)
+		{
+			SelectColumn scol = new SelectColumn(col);
+			columnForFKSelect = scol.getObjectName();
+			String tbl = scol.getColumnTable();
+			if (tbl != null)
+			{
+				List<TableAlias> tblList = getTables();
+				for (TableAlias alias : tblList)
+				{
+					if (tbl.equalsIgnoreCase(alias.getNameToUse()))
+					{
+						tableForFkSelect = alias.getTable();
+					}
+				}
+			}
+		}
+	}
+
+	private String getColumnNameForCondition()
+	{
+		String currentOperator = null;
+		int pos = StringUtil.findWordBoundary(sql, cursorPos - 1, " ");
+		if (pos > -1)
+		{
+			currentOperator = StringUtil.getWordLeftOfCursor(sql, pos, " ");
+		}
+		if (currentOperator == null || !currentOperator.equals("=")) return null;
+		int pos2 = StringUtil.findWordBoundary(sql, pos - currentOperator.length() - 1, " ");
+		String col = null;
+		if (pos2 > -1)
+		{
+			col = StringUtil.getWordLeftOfCursor(sql, pos2, " ");
+		}
+		return col;
 	}
 
 	private TableAlias findAlias(String toSearch, List<String> possibleTables, char catalogSeparator, char schemaSeparator)

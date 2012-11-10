@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.log.LogMgr;
+
 import workbench.db.DependencyNode;
 import workbench.db.PkDefinition;
 import workbench.db.QuoteHandler;
@@ -133,21 +134,6 @@ public class LookupDataLoader
 		return order.toString();
 	}
 
-	public void setLookupTable(TableIdentifier tbl, WbConnection conn)
-		throws SQLException
-	{
-		try
-		{
-			conn.setBusy(true);
-			lookupTable = conn.getMetadata().getTableDefinition(tbl);
-		}
-		finally
-		{
-			conn.setBusy(false);
-			retrieved = true;
-		}
-	}
-
 	public void retrieveReferencedTable(WbConnection conn)
 		throws SQLException
 	{
@@ -170,6 +156,7 @@ public class LookupDataLoader
 					}
 				}
 			}
+			// can't use the objectCache here because I also need the PK of the table
 			lookupTable = conn.getMetadata().getTableDefinition(table);
 		}
 		finally
