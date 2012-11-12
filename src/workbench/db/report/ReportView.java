@@ -126,7 +126,7 @@ public class ReportView
 	{
 		return grants;
 	}
-	
+
 	/**
 	 * Return the list of IndexDefinitions for this view
 	 * @return defined indexes, maybe null

@@ -43,6 +43,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
+
 /**
  * Compare two Schemas for differences in the definition of the tables
  *
@@ -87,22 +88,23 @@ public class SchemaDiff
 	private List<SequenceDefinition> sequencesToDelete;
 
 	private String encoding = "UTF-8";
-	private boolean compareJdbcTypes = false;
+	private boolean compareJdbcTypes;
 	private boolean diffIndex = true;
 	private boolean diffForeignKeys = true;
 	private boolean diffPrimaryKeys = true;
-	private boolean diffConstraints = false;
-	private boolean diffGrants = false;
+	private boolean diffConstraints;
+	private boolean diffGrants;
 	private boolean diffViews = true;
 	private boolean diffProcs = true;
 	private boolean diffTriggers = true;
 	private boolean diffSequences = true;
-	private boolean treatViewAsTable = false;
+	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
+	private boolean includeExtendedOptions = true;
 
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
-	private boolean cancel = false;
+	private boolean cancel;
 	private String referenceSchema;
 	private String targetSchema;
 	private Set<String> tablesToIgnore = CollectionUtil.caseInsensitiveSet();
@@ -122,6 +124,16 @@ public class SchemaDiff
 	{
 		referenceDb = reference;
 		targetDb = target;
+	}
+
+	public boolean isIncludeExtendedOptions()
+	{
+		return includeExtendedOptions;
+	}
+
+	public void setIncludeExtendedOptions(boolean flag)
+	{
+		this.includeExtendedOptions = flag;
 	}
 
 	public void setCompareConstraintsByName(boolean flag)
@@ -324,7 +336,8 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		return new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers);
+		ReportTable rTable = new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers, includeExtendedOptions);
+		return rTable;
 	}
 
 	/**
@@ -1352,7 +1365,6 @@ public class SchemaDiff
 		out.write(">\n");
 	}
 }
-
 class SequenceDiffEntry
 {
 	SequenceDefinition reference;

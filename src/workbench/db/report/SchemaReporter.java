@@ -291,7 +291,7 @@ public class SchemaReporter
 				}
 				else
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers);
+					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers, true);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();

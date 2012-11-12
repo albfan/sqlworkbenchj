@@ -103,7 +103,8 @@ public class ReportTable
 			boolean includePk,
 			boolean includeConstraints,
 			boolean includeGrants,
-			boolean includeTriggers)
+			boolean includeTriggers,
+			boolean includeOptions)
 		throws SQLException
 	{
 		this.includePrimaryKey = includePk;
@@ -135,7 +136,7 @@ public class ReportTable
 
 		if (includeIndex)
 		{
-			this.reporter = new IndexReporter(tbl, conn);
+			this.reporter = new IndexReporter(tbl, conn, includeOptions);
 		}
 
 		if (includeFk)
@@ -174,7 +175,10 @@ public class ReportTable
 				triggers = null;
 			}
 		}
-		retrieveOptions(conn);
+		if (includeOptions)
+		{
+			retrieveOptions(conn);
+		}
 	}
 
 	public boolean grantsIncluded()

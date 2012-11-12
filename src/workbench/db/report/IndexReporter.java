@@ -53,8 +53,16 @@ public class IndexReporter
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
+		this(tbl, conn, true);
+	}
+	
+	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includeOptions)
+	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
-		retrieveIndexOptions(conn);
+		if (includeOptions)
+		{
+			retrieveIndexOptions(conn);
+		}
 	}
 
 	public IndexReporter(IndexDefinition index)
