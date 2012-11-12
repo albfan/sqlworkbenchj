@@ -41,6 +41,9 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
 import workbench.log.LogMgr;
+
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
@@ -71,6 +74,8 @@ public class ReportTable
 	public static final String TAG_TABLE_CONSTRAINTS = "table-constraints";
 	public static final String TAG_CONSTRAINT_DEF = "constraint-definition";
 	public static final String TAG_CONSTRAINT_COMMENT = "constraint-comment";
+	public static final String TAG_TABLESPACE = "tablespace";
+	public static final String TAG_TABLE_TYPE = "table-type";
 
 	private TableIdentifier table;
 	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
@@ -204,14 +209,28 @@ public class ReportTable
 	private void retrieveOptions(WbConnection conn)
 		throws SQLException
 	{
-		if (!conn.getMetadata().isOracle()) return;
-		OracleTablePartition partition = new OracleTablePartition(conn);
-		partition.retrieve(this.table, conn);
-		if (partition.isPartitioned())
+		if (conn.getMetadata().isOracle())
 		{
-			String source = partition.getSourceForTableDefinition();
-			dbmsOptions = new ArrayList<ObjectOption>();
-			ObjectOption option = new ObjectOption("partition", source);
+			OracleTablePartition partition = new OracleTablePartition(conn);
+			partition.retrieve(this.table, conn);
+			if (partition.isPartitioned())
+			{
+				String source = partition.getSourceForTableDefinition();
+				dbmsOptions = new ArrayList<ObjectOption>();
+				ObjectOption option = new ObjectOption("partition", source);
+				dbmsOptions.add(option);
+			}
+		}
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(conn);
+		builder.readTableConfigOptions(table);
+		String options = table.getTableConfigOptions();
+		if (StringUtil.isNonBlank(options))
+		{
+			ObjectOption option = new ObjectOption("options", options);
+			if (dbmsOptions == null)
+			{
+				dbmsOptions = new ArrayList<ObjectOption>();
+			}
 			dbmsOptions.add(option);
 		}
 	}
@@ -440,6 +459,16 @@ public class ReportTable
 		appendTableNameXml(line, colindent);
 		tagWriter.appendTag(line, colindent, TAG_TABLE_PK_NAME, table.getPrimaryKeyName(), false);
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
+
+		if (StringUtil.isNonBlank(table.getTablespace()))
+		{
+			tagWriter.appendTag(line, colindent, TAG_TABLESPACE, table.getTablespace(), false);
+		}
+		if (StringUtil.isNonBlank(table.getTableTypeOption()))
+		{
+			tagWriter.appendTag(line, colindent, TAG_TABLE_TYPE, table.getTableTypeOption(), false);
+		}
+
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
 		{

@@ -65,6 +65,7 @@ public class SchemaReporter
 	private boolean includeProcedures;
 	private boolean includeGrants;
 	private boolean includeTriggers;
+	private boolean includeExtendedOptions = true;
 	private boolean includeSequences;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
@@ -151,6 +152,11 @@ public class SchemaReporter
 		if (CollectionUtil.isEmpty(newTypeList)) return;
 		types.clear();
 		types.addAll(newTypeList);
+	}
+
+	public void setIncludeExtendedOptions(boolean flag)
+	{
+		this.includeExtendedOptions = flag;
 	}
 
 	public void setIncludeSequences(boolean flag)
@@ -291,7 +297,7 @@ public class SchemaReporter
 				}
 				else
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers, true);
+					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includeExtendedOptions);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();

@@ -48,6 +48,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	public static final String PARAM_TABLE_NAMES = "tables";
+	public static final String PARAM_OBJECT_OPTIONS = "includeExtendedOptions";
 
 	public static final String ALTERNATE_VERB = "WBREPORT";
 	public static final String VERB = "WBSCHEMAREPORT";
@@ -72,6 +73,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_OBJECT_OPTIONS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -168,7 +170,8 @@ public class WbSchemaReport
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
-
+		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, true));
+		
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
 			if (!OracleUtils.remarksEnabled(currentConnection))

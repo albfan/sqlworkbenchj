@@ -126,11 +126,6 @@ public class SchemaDiff
 		targetDb = target;
 	}
 
-	public boolean isIncludeExtendedOptions()
-	{
-		return includeExtendedOptions;
-	}
-
 	public void setIncludeExtendedOptions(boolean flag)
 	{
 		this.includeExtendedOptions = flag;

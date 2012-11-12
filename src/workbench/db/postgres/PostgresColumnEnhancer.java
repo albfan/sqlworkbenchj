@@ -52,8 +52,40 @@ public class PostgresColumnEnhancer
 		{
 			updateArrayTypes(table, conn);
 		}
+
+		updateSerials(table);
 	}
 
+	private void updateSerials(TableDefinition table)
+	{
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			String dbmsType = col.getDbmsType();
+			String defaultValue = col.getDefaultValue();
+			if (dbmsType.endsWith("serial"))
+			{
+				if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.serial.show", true))
+				{
+					if (dbmsType.endsWith("serial") && defaultValue != null && defaultValue.startsWith("nextval"))
+					{
+						col.setDefaultValue(null);
+					}
+				}
+				else
+				{
+					if (dbmsType.equals("serial"))
+					{
+						col.setDbmsType("integer");
+					}
+					if (dbmsType.equals("bigserial"))
+					{
+						col.setDbmsType("bigint");
+					}
+				}
+			}
+		}
+	}
+	
 	private void updateArrayTypes(TableDefinition table, WbConnection conn)
 	{
 		int arrayCols = 0;
