@@ -65,7 +65,7 @@ public class SchemaReporter
 	private boolean includeProcedures;
 	private boolean includeGrants;
 	private boolean includeTriggers;
-	private boolean includeExtendedOptions = true;
+	private boolean includeExtendedOptions;
 	private boolean includeSequences;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;

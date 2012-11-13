@@ -170,8 +170,8 @@ public class WbSchemaReport
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
-		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, true));
-		
+		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, false));
+
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
 			if (!OracleUtils.remarksEnabled(currentConnection))

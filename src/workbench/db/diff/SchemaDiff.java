@@ -100,7 +100,7 @@ public class SchemaDiff
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
-	private boolean includeExtendedOptions = true;
+	private boolean includeExtendedOptions;
 
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
