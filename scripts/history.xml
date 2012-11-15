@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-11-11">
+    <entry dev-build="7" type="enh">WbSchemaDiff and WbSchemaReport have new option -includeExtendedOptions to include extended table attributes (like tablespace or Oracle partitions)</entry>
     <entry dev-build="6" type="enh">A new option "Append result" is available for macros.</entry>
     <entry dev-build="6" type="enh">Values for FK columns can now be selected from the referenced table through a search dialog. This is available when editing a result set or for the column values of UPDATE and INSERT statements.</entry>
     <entry dev-build="6" type="enh">The FK information used for the "join completion feature" is now held in the completion cache to make subsequent uses faster.</entry>
@@ -18,6 +19,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="7" type="fix">When using WbCopy with a single table the -preTableStatement and -postTableStatements weren't executed</entry>
     <entry dev-build="6" type="fix">For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</entry>
     <entry dev-build="6" type="fix">When searching in the result set, "Highlight All" did no longer work.</entry>
     <entry dev-build="5" type="fix">Showing the INSERT "hint" for values and columns was not working for INSERT statements with more than one row.</entry>

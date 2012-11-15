@@ -23,6 +23,8 @@ import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.importer.TableStatements;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
@@ -72,6 +74,8 @@ class TableCopy
 		this.copier = new DataCopier();
 		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
 		copier.setKeyColumns(keys);
+
+		copier.setPerTableStatements(new TableStatements(cmdLine));
 
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(mode))
