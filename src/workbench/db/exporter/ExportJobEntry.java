@@ -51,6 +51,7 @@ public class ExportJobEntry
 	{
 		resultInfo = new ResultInfo(table, con);
 		outputFile = new WbFile(file);
+		baseTable = resultInfo.getUpdateTable();
 		TableSelectBuilder builder = new TableSelectBuilder(con, "export");
 		query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()));
 		resultInfo.setUpdateTable(baseTable);

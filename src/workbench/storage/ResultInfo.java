@@ -96,6 +96,7 @@ public class ResultInfo
 			}
 		}
 
+		this.updateTable = toUse;
 		List<ColumnIdentifier> cols = meta.getTableColumns(toUse);
 		this.columns = new ColumnIdentifier[cols.size()];
 		int i = 0;
