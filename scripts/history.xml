@@ -19,6 +19,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="7" type="fix">When exporting data into XML, the name of the exported table was not written to the XML file</entry>
     <entry dev-build="7" type="fix">When using WbCopy with a single table the -preTableStatement and -postTableStatements weren't executed</entry>
     <entry dev-build="6" type="fix">For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</entry>
     <entry dev-build="6" type="fix">When searching in the result set, "Highlight All" did no longer work.</entry>
