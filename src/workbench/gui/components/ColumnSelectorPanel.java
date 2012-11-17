@@ -213,7 +213,7 @@ public class ColumnSelectorPanel
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(selected);
 		for (int i=0; i < this.model.selected.length; i++)
 		{
-			if (this.model.selected[i] || formatTextOutput())
+			if (this.model.selected[i])
 			{
 				result.add(this.model.columns[i].createCopy());
 			}

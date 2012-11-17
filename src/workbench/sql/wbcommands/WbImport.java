@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.BlobMode;
@@ -35,9 +36,14 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.exporter.PoiHelper;
+import workbench.db.importer.SpreadsheetFileParser;
+import workbench.interfaces.TabularDataParser;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.StringUtil;
@@ -87,6 +93,7 @@ public class WbImport
 	public static final String ARG_ILLEGAL_DATE_NULL = "illegalDateIsNull";
 	public static final String ARG_EMPTY_FILE = "emptyFile";
 	public static final String ARG_PG_COPY = "usePgCopy";
+	public static final String ARG_SHEET_NR = "sheetNumber";
 
 	private DataImporter imp;
 
@@ -108,7 +115,17 @@ public class WbImport
 		CommonArgs.addTransactionControL(cmdLine);
 		CommonArgs.addImportModeParameter(cmdLine);
 
-		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
+		List<String> types = CollectionUtil.arrayList("text", "xml");
+		if (PoiHelper.isPoiAvailable())
+		{
+			types.add("xls");
+		}
+		if (PoiHelper.isXLSXAvailable())
+		{
+			types.add("xlsx");
+		}
+		cmdLine.addArgument(ARG_TYPE, types);
+		cmdLine.addArgument(ARG_SHEET_NR);
 		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
@@ -178,17 +195,17 @@ public class WbImport
 		return result;
 	}
 
-	private boolean getContinueDefault()
+	static boolean getContinueDefault()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
 	}
 
-	private boolean getHeaderDefault()
+	static boolean getHeaderDefault()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 	}
 
-	private boolean getMultiDefault()
+	static boolean getMultiDefault()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.import.default.multilinerecord", false);
 	}
@@ -246,7 +263,15 @@ public class WbImport
 			return result;
 		}
 
-		if (!type.equalsIgnoreCase("text") && !type.equalsIgnoreCase("txt") && !type.equalsIgnoreCase("xml"))
+		type = type.toLowerCase();
+
+		Set<String> validTypes = CollectionUtil.caseInsensitiveSet("txt");
+		for (ArgumentValue val :  cmdLine.getAllowedValues(ARG_TYPE))
+		{
+			validTypes.add(val.getValue());
+		}
+
+		if (!validTypes.contains(type))
 		{
 			result.addMessage(ResourceMgr.getString("ErrImportInvalidType"));
 			result.setFailure();
@@ -392,7 +417,6 @@ public class WbImport
 			textParser.setEnableMultilineRecords(multi);
 			textParser.setTargetSchema(schema);
 			textParser.setConnection(currentConnection);
-			textParser.setAbortOnError(!continueOnError);
 			textParser.setTreatClobAsFilenames(cmdLine.getBoolean(ARG_CLOB_ISFILENAME, false));
 			textParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
@@ -415,58 +439,10 @@ public class WbImport
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
-			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
-			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
-
-			String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
-
-			// The flag for a header lines must be specified before setting the columns
-			textParser.setContainsHeader(header);
-
-			String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-			List<ColumnIdentifier> toImport = null;
-			if (StringUtil.isNonBlank(importcolumns))
+			initParser(table, textParser, result);
+			if (!result.isSuccess())
 			{
-				toImport = stringToCols(importcolumns);
-			}
-
-			if (StringUtil.isNonBlank(table))
-			{
-				try
-				{
-					textParser.checkTargetTable();
-				}
-				catch (Exception e)
-				{
-					result.addMessage(textParser.getMessages());
-					result.setFailure();
-					return result;
-				}
-
-				// read column definition from header line
-				// if no header was specified, the text parser
-				// will assume the columns in the text file
-				// map to the column in the target table
-				try
-				{
-					if (StringUtil.isBlank(filecolumns))
-					{
-						textParser.setupFileColumns(toImport);
-					}
-					else
-					{
-						List<ColumnIdentifier> fileCols = stringToCols(filecolumns);
-						textParser.setColumns(fileCols, toImport);
-					}
-				}
-				catch (Exception e)
-				{
-					result.setFailure();
-					result.addMessage(textParser.getMessages());
-					LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e),null);
-					return result;
-				}
-
+				return result;
 			}
 
 			// The column filter has to bee applied after the
@@ -539,7 +515,6 @@ public class WbImport
 					result.setWarning(true);
 				}
 			}
-			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
@@ -547,7 +522,6 @@ public class WbImport
 
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
-			xmlParser.setAbortOnError(!continueOnError);
 			parser = xmlParser;
 
 			// The encoding must be set as early as possible
@@ -578,9 +552,59 @@ public class WbImport
 				}
 			}
 			imp.setCreateTarget(cmdLine.getBoolean(ARG_CREATE_TABLE, false));
-			imp.setProducer(xmlParser);
+		}
+		else if (type.startsWith("xls"))
+		{
+			if (!PoiHelper.isPoiAvailable())
+			{
+				result.addMessage(ResourceMgr.getString("ErrNoXLS"));
+				result.setFailure();
+				return result;
+			}
+
+			if ( (type.equals("xlsx") || (inputFile != null && inputFile.getExtension().equalsIgnoreCase("xlsx"))) && !PoiHelper.isXLSXAvailable())
+			{
+				result.addMessage(ResourceMgr.getString("ErrNoXLSX"));
+				return result;
+			}
+
+			if (table == null && dir == null)
+			{
+				String msg = ResourceMgr.getString("ErrTextImportRequiresTableName");
+				LogMgr.logError("WbImport.execute()", msg, null);
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
+
+			defaultExtension = type;
+
+			SpreadsheetFileParser xlsParser = new SpreadsheetFileParser();
+			parser = xlsParser;
+			xlsParser.setTableName(table);
+			xlsParser.setTargetSchema(schema);
+			xlsParser.setConnection(currentConnection);
+			xlsParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
+			xlsParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
+			xlsParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
+
+			if (inputFile != null)
+			{
+				int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
+				xlsParser.setInputFile(inputFile);
+				// the index is zero-based, but the user supplies a one-based index
+				xlsParser.setSheetIndex(index - 1);
+			}
+
+			initParser(table, xlsParser, result);
+			if (!result.isSuccess())
+			{
+				return result;
+			}
 		}
 
+		imp.setProducer(parser);
+		parser.setAbortOnError(!continueOnError);
 		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
 
 		ImportFileLister sorter = getFileNameSorter(cmdLine, defaultExtension);
@@ -754,6 +778,63 @@ public class WbImport
 		return result;
 	}
 
+	private void initParser(String tableName, TabularDataParser parser, StatementRunnerResult result)
+	{
+		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+		boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
+
+		String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
+
+		// The flag for a header lines must be specified before setting the columns
+		parser.setContainsHeader(header);
+
+		if (StringUtil.isBlank(tableName))
+		{
+			return;
+		}
+
+		String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+		List<ColumnIdentifier> toImport = null;
+		if (StringUtil.isNonBlank(importcolumns))
+		{
+			toImport = stringToCols(importcolumns);
+		}
+
+		try
+		{
+			parser.checkTargetTable();
+		}
+		catch (Exception e)
+		{
+			result.addMessage(parser.getMessages());
+			result.setFailure();
+			return;
+		}
+
+		// read column definition from header line
+		// if no header was specified, the text parser
+		// will assume the columns in the text file
+		// map to the column in the target table
+		try
+		{
+			if (StringUtil.isBlank(filecolumns))
+			{
+				parser.setupFileColumns(toImport);
+			}
+			else
+			{
+				List<ColumnIdentifier> fileCols = stringToCols(filecolumns);
+				parser.setColumns(fileCols, toImport);
+			}
+		}
+		catch (Exception e)
+		{
+			result.setFailure();
+			result.addMessage(parser.getMessages());
+			LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e), null);
+		}
+	}
+
 	private void appendRestartMessage(ImportFileParser importer, StatementRunnerResult result)
 	{
 		List<File> files = importer.getProcessedFiles();
@@ -838,10 +919,13 @@ public class WbImport
 	protected String findTypeFromFilename(String fname)
 	{
 		if (fname == null) return null;
-		if (fname.toLowerCase().endsWith(".txt")) return "text";
-		if (fname.toLowerCase().endsWith(".xml")) return "xml";
-		if (fname.toLowerCase().endsWith(".text")) return "text";
-		if (fname.toLowerCase().endsWith(".csv")) return "text";
+		String name = fname.toLowerCase();
+		if (name.endsWith(".txt")) return "text";
+		if (name.endsWith(".xml")) return "xml";
+		if (name.endsWith(".text")) return "text";
+		if (name.endsWith(".csv")) return "text";
+		if (name.endsWith(".xls")) return "xls";
+		if (name.endsWith(".xlsx")) return "xlsx";
 		return null;
 	}
 }

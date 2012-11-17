@@ -62,24 +62,29 @@ public class ConnectionSelector
 
 	public void selectConnection()
 	{
+		selectConnection(false);
+	}
+
+	public void selectConnection(final boolean doVersionCheck)
+	{
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				_selectConnection();
+				_selectConnection(doVersionCheck);
 			}
 		});
 	}
 
-	protected void _selectConnection()
+	protected void _selectConnection(final boolean doVersionCheck)
 	{
 		if (this.isConnectInProgress()) return;
 		ProfileSelectionDialog dialog = null;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this.parent);
-			dialog = new ProfileSelectionDialog(this.parent, true, this.propertyKey);
+			dialog = new ProfileSelectionDialog(this.parent, true, this.propertyKey, doVersionCheck);
 			WbSwingUtilities.center(dialog, this.parent);
 			WbSwingUtilities.showDefaultCursor(this.parent);
 			dialog.setVisible(true);

@@ -12,6 +12,7 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -23,11 +24,15 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+
+import workbench.interfaces.EventDisplay;
 import workbench.db.ConnectionMgr;
 
 import workbench.db.ConnectionProfile;
@@ -38,6 +43,9 @@ import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.util.EventNotifier;
+import workbench.util.NotifierEvent;
 import workbench.util.StringUtil;
 
 /**
@@ -46,7 +54,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileSelectionDialog
 	extends JDialog
-	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener
+	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener, EventDisplay
 {
 
 	private JPanel okCancelPanel;
@@ -58,22 +66,28 @@ public class ProfileSelectionDialog
 	private ConnectionProfile selectedProfile;
 	private boolean cancelled;
 	private String escActionCommand;
-
-	public ProfileSelectionDialog(Frame parent, boolean modal)
-	{
-		this(parent, modal, null);
-	}
+	private JLabel versionInfo;
 
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
 	{
+		this(parent, modal, lastProfileKey, false);
+	}
+	
+	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey, boolean enableVersionCheck)
+	{
 		super(parent, modal);
 		initComponents(lastProfileKey);
+		if (enableVersionCheck)
+		{
+			EventNotifier.getInstance().addEventDisplay(this);
+		}
 
 		JRootPane root = this.getRootPane();
 		root.setDefaultButton(okButton);
 		EscAction esc = new EscAction(this, this);
 		escActionCommand = esc.getActionName();
 	}
+
 
 	private void initComponents(String lastProfileKey)
 	{
@@ -98,6 +112,10 @@ public class ProfileSelectionDialog
 		okCancelPanel = new JPanel();
 		buttonPanel.add(okCancelPanel, BorderLayout.EAST);
 		buttonPanel.add(toolsButtonPanel, BorderLayout.WEST);
+		versionInfo = new JLabel("  ");
+		versionInfo.setForeground(Color.RED);
+		versionInfo.setBorder(new EmptyBorder(0, 15, 0, 0));
+		buttonPanel.add(versionInfo, BorderLayout.CENTER);
 
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setEnabled(profiles.getSelectedProfile() != null);
@@ -126,6 +144,38 @@ public class ProfileSelectionDialog
 		// This should be "posted", otherwise the focus will not be set
 		// correctly when running on Linux with the GTk+ look and feel
 		WbSwingUtilities.requestFocus(profiles.getInitialFocusComponent());
+	}
+
+	@Override
+	public void showAlert(final NotifierEvent event)
+	{
+		if (versionInfo == null) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				versionInfo.setText(event.getTooltip());
+				versionInfo.getParent().doLayout();
+			}
+		});
+	}
+
+	@Override
+	public void removeAlert()
+	{
+		if (versionInfo == null) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				versionInfo.setText("");
+				versionInfo.getParent().doLayout();
+			}
+		});
 	}
 
 	private void closeDialog()

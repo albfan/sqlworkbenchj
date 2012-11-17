@@ -701,7 +701,7 @@ public final class WbManager
 				@Override
 				public void run()
 				{
-					main.selectConnection(exitOnCancel);
+					main.selectConnection(exitOnCancel, true);
 				}
 			});
 		}

@@ -14,7 +14,6 @@ package workbench.gui.components;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -128,6 +127,15 @@ public class ClipBoardCopier
 				DataStorePrinter printer = new DataStorePrinter(this.data);
 				printer.setFormatColumns(true);
 				printer.setPrintRowCount(false);
+				if (columnsToCopy != null)
+				{
+					List<String> colNames =new ArrayList<String>(columnsToCopy.size());
+					for (ColumnIdentifier id : columnsToCopy)
+					{
+						colNames.add(id.getColumnName());
+					}
+					printer.setColumnsToPrint(colNames);
+				}
 				PrintWriter pw = new PrintWriter(out);
 				printer.printTo(pw);
 			}

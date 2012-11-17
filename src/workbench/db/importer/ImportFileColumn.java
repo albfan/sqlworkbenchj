@@ -75,7 +75,6 @@ public class ImportFileColumn
 	@Override
 	public boolean equals(Object obj)
 	{
-//		System.out.println(tableColumn.getColumnName() + " equals " + obj.toString());
 		if (obj instanceof ImportFileColumn)
 		{
 			final ImportFileColumn other = (ImportFileColumn) obj;

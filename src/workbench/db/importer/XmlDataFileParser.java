@@ -28,20 +28,16 @@ import java.util.Map;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.XmlRowDataConverter;
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
@@ -49,13 +45,19 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
+
 /**
  *
  * @author  Thomas Kellerer
  */
 public class XmlDataFileParser
 	extends AbstractImportFileParser
-	implements RowDataProducer, ImportFileParser
+	implements ImportFileParser
 {
 	private String tableNameFromFile;
 
@@ -114,6 +116,12 @@ public class XmlDataFileParser
 	public String getColumns()
 	{
 		return StringUtil.listToString(this.columnsToImport, ',', false);
+	}
+
+	@Override
+	public void addColumnFilter(String colname, String regex)
+	{
+		// not yet supported
 	}
 
 	@Override

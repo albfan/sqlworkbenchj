@@ -18,6 +18,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.storage.DataStore;
+
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import static org.junit.Assert.*;
 
@@ -74,6 +76,31 @@ public class DataStorePrinterTest
 	}
 
 	@Test
+	public void testSelectedColumns()
+	{
+		DataStore ds = createTestData();
+
+		DataStorePrinter printer = new DataStorePrinter(ds);
+		printer.setColumnsToPrint(CollectionUtil.arrayList("DESCRIPTION", "QUANTITY"));
+		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
+		PrintStream ps = new PrintStream(ba);
+		printer.printTo(ps);
+		String out = ba.toString();
+		ps.close();
+
+		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
+		int linecount = lines.length;
+		assertEquals(10, linecount);
+
+		assertEquals("DESCRIPTION           | QUANTITY", lines[0]);
+		assertEquals("----------------------+---------", lines[1]);
+		assertEquals("Very long test value  | 1       ", lines[2]);
+		assertEquals("Multi-line            | 2       ", lines[3]);
+		assertEquals("test value"                      , lines[4]);
+		assertEquals("My comment            | 3       ", lines[5]);
+	}
+
+	@Test
 	public void testTabularPrint()
 	{
 		DataStore ds = createTestData();
@@ -84,7 +111,7 @@ public class DataStorePrinterTest
 		printer.printTo(ps);
 		String out = ba.toString();
 		ps.close();
-//		System.out.println(out);
+
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
 		assertEquals(11, linecount);
@@ -141,6 +168,6 @@ public class DataStorePrinterTest
 		assertEquals("QUANTITY    : 2", lines[7]);
 		assertEquals("LASTNAME    : Dent on", lines[8]);
 		assertEquals("              two lines", lines[9]);
-		
+
 	}
 }

@@ -15,14 +15,17 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
 import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ImportFileHandler;
+import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.modifier.ImportValueModifier;
 
 /**
  * @author Thomas Kellerer
  */
 public interface ImportFileParser
+	extends RowDataProducer
 {
 	/**
 	 *  Return the encoding used to read input files
@@ -34,38 +37,40 @@ public interface ImportFileParser
 	 * @param file
 	 */
 	void setInputFile(File file);
-	
+
 	/**
 	 *	Return the name of the input file
 	 */
 	String getSourceFilename();
-	
+
 	/**
-	 *	Parse the file and return a list of column 
+	 *	Parse the file and return a list of column
 	 *  names defined in that file
 	 */
 	List<ColumnIdentifier> getColumnsFromFile();
+
 	void setTableName(String table);
-	
+	void setTargetSchema(String schema);
+
 	/**
 	 * Define the column structure to be used for the import
 	 */
 	void setColumns(List<ColumnIdentifier> columns)
 		throws SQLException;
-	
+
 	/**
 	 *	Returns the column list as a comma separated string
-	 *  that can be used for the WbImport command
+	 *  that can be used for the WbImport command.
 	 */
 	String getColumns();
-	
+
 	ImportFileHandler getFileHandler();
-	
+
 	/**
 	 * Define a modifier to change the values received
-	 * from the text file before they are converted to 
+	 * from the text file before they are converted to
 	 * the correct datatype.
-	 * 
+	 *
 	 * @param modifier the ImportValueModifier to apply to the values in the import file
 	 */
 	void setValueModifier(ImportValueModifier modifier);
@@ -77,4 +82,9 @@ public interface ImportFileParser
   void setTrimValues(boolean trimValues);
 
 	List<File> getProcessedFiles();
+
+	void addColumnFilter(String colname, String regex);
+
+	void setConnection(WbConnection connection);
+
 }

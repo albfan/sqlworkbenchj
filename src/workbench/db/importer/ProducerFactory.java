@@ -32,12 +32,14 @@ public class ProducerFactory
 {
 	public enum ImportType {
 		Text,
-		XML;
+		XML,
+		Spreadsheet;
 
 		public static ImportType valueOf(int type)
 		{
 			if (type == 0) return Text;
 			if (type == 1) return XML;
+			if (type == 2) return Spreadsheet;
 			return null;
 		}
 
@@ -45,6 +47,7 @@ public class ProducerFactory
 		{
 			if (this == Text) return 0;
 			if (this == XML) return 1;
+			if (this == Spreadsheet) return 2;
 			return -1;
 		}
 	};
@@ -122,9 +125,21 @@ public class ProducerFactory
 	{
 		return this.importType == ImportType.Text;
 	}
+
 	public boolean isXmlImport()
 	{
 		return this.importType == ImportType.XML;
+	}
+
+	public boolean isSpreadsheetImport()
+	{
+		return this.importType == ImportType.Spreadsheet;
+	}
+
+	public void setImportTypeSpreadsheet()
+	{
+		this.importType = ImportType.Spreadsheet;
+		this.producer = null;
 	}
 
 	public void setImportTypeText()
@@ -159,10 +174,17 @@ public class ProducerFactory
 	{
 		if (this.producer == null)
 		{
-			if (this.importType == ImportType.Text)
-				createTextFileParser();
-			else if (this.importType == ImportType.XML)
-				createXmlFileParser();
+			switch (this.importType)
+			{
+				case Text:
+					createTextFileParser();
+					break;
+				case XML:
+					createXmlFileParser();
+					break;
+				case Spreadsheet:
+					createSpreadsheetParser();
+			}
 		}
 		return this.producer;
 	}
@@ -233,11 +255,17 @@ public class ProducerFactory
 		return this.inputFile;
 	}
 
+	private void createSpreadsheetParser()
+	{
+		this.inputColumns = null;
+		this.producer = null;
+		this.fileParser = null;
+	}
+
 	private void createXmlFileParser()
 	{
 		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
 		parser.setEncoding(this.generalOptions.getEncoding());
-		//parser.setUseVerboseFormat(this.xmlOptions.getUseVerboseXml());
 		this.inputColumns = null;
 		this.producer = parser;
 		this.fileParser = parser;

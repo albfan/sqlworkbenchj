@@ -143,10 +143,10 @@ public class WbSchemaDiffTest
 		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-table/table-name/text()");
 		assertEquals("Incorrect sequence to delete", "DROP_ME", value);
 
-//		if (!output.delete())
-//		{
-//			fail("could not delete output file");
-//		}
+		if (!output.delete())
+		{
+			fail("could not delete output file");
+		}
 		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
 
@@ -233,7 +233,7 @@ public class WbSchemaDiffTest
 
 			value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='Baked beans']/add-column)");
 			assertEquals("Incorrect table count", "1", value);
-
+			assertTrue(output.delete());
 		}
 		finally
 		{

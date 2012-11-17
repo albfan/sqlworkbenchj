@@ -16,13 +16,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.*;
 import workbench.util.CharacterRange;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -39,7 +41,7 @@ public abstract class ConsolePrinter
 	protected boolean doFormat = true;
 	protected boolean showRowCount = true;
 	protected boolean printRowAsLine = true;
-	protected List<String> includedColumns;
+	protected Set<String> includedColumns;
 
 	protected abstract String getResultName();
 	protected abstract Map<Integer, Integer> getColumnSizes();
@@ -102,33 +104,51 @@ public abstract class ConsolePrinter
 			pw.println("---- " + resultName);
 		}
 		int headerWidth = 0;
+		int currentCol = 0;
 		for (int col = 0; col < getColumnCount(); col ++)
 		{
-			if (col > 0) pw.print(" | ");
+			String colName = getColumnName(col);
+			if (!isColumnIncluded(colName)) continue;
+
+			if (currentCol > 0) pw.print(" | ");
 
 			if (doFormat)
 			{
 				int colWidth = columnWidths.get(Integer.valueOf(col));
-				writePadded(pw, getColumnName(col), colWidth);
+				writePadded(pw, colName, colWidth);
 				headerWidth += colWidth;
 			}
 			else
 			{
-				pw.print(getColumnName(col));
+				pw.print(colName);
 			}
+			currentCol ++;
 		}
 		pw.println();
 
 		if (headerWidth > 0 && doFormat)
 		{
+			currentCol = 0;
 			// Print divider line
 			for (int i=0; i < getColumnCount(); i++)
 			{
+				if (!isColumnIncluded(i)) continue;
 				if (i > 0) pw.print("-+-");
 				pw.print(StringUtil.padRight("-", columnWidths.get(Integer.valueOf(i)), '-'));
+				currentCol ++;
 			}
 			pw.println();
 		}
+	}
+
+	public void setColumnsToPrint(Collection<String> columns)
+	{
+		if (CollectionUtil.isEmpty(columns))
+		{
+			includedColumns = null;
+		}
+		includedColumns = CollectionUtil.caseInsensitiveSet();
+		includedColumns.addAll(columns);
 	}
 
 	protected void printRow(PrintWriter pw, RowData row, int rowNumber)
@@ -141,6 +161,17 @@ public abstract class ConsolePrinter
 		{
 			printAsRecord(pw, row, rowNumber);
 		}
+	}
+
+	protected boolean isColumnIncluded(String colName)
+	{
+		if (includedColumns == null) return true;
+		return includedColumns.contains(colName);
+	}
+
+	protected boolean isColumnIncluded(int index)
+	{
+		return isColumnIncluded(getColumnName(index));
 	}
 
 	public void printAsRecord(PrintWriter pw, RowData row, int rowNum)
@@ -160,6 +191,8 @@ public abstract class ConsolePrinter
 		for (int col=0; col < colcount; col++)
 		{
 			String colname = getColumnName(col);
+			if (!isColumnIncluded(colname)) continue;
+
 			String value = getDisplayValue(row, col);
 			writePadded(pw, colname, colwidth + 1);
 			pw.print(": ");
@@ -223,9 +256,11 @@ public abstract class ConsolePrinter
 		{
 			Map<Integer, String[]> continuationLines = new HashMap<Integer, String[]>(colcount);
 
+			int realColCount = 0;
 			for (int col = 0; col < colcount; col ++)
 			{
-				if (col > 0) pw.print(" | ");
+				if (!isColumnIncluded(col)) continue;
+				if (realColCount > 0) pw.print(" | ");
 
 				String value = getDisplayValue(row, col);
 
@@ -243,6 +278,7 @@ public abstract class ConsolePrinter
 				{
 					pw.print(StringUtil.escapeUnicode(value, CharacterRange.RANGE_CONTROL));
 				}
+				realColCount ++;
 			}
 			pw.println();
 			printContinuationLines(pw, continuationLines);
@@ -272,18 +308,23 @@ public abstract class ConsolePrinter
 		boolean printed = true;
 		int colcount = getColumnCount();
 		int currentLine = 1; // line 0 has already been printed
+		int printedColNr = 0;
 		while (printed)
 		{
 			printed = false;
 			int currentpos = 0;
 			for (int col = 0; col < colcount; col ++)
 			{
+				if (!isColumnIncluded(col)) continue;
 				String[] lines = lineMap.get(col);
+				printedColNr ++;
+
 				if (lines == null) continue;
 				if (lines.length <= currentLine) continue;
+
 				int colstart = getColStartColumn(col) - currentpos;
 				writePadded(pw, "", colstart);
-				if (col > 0)
+				if (printedColNr > 1)
 				{
 					pw.print(" : ");
 				}

@@ -161,6 +161,8 @@ public class MainWindow
 	private static int instanceCount;
 	private int windowId;
 
+	private boolean exitOnCancel = false;
+
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
 	protected ConnectionSelector connectionSelector;
@@ -1928,15 +1930,13 @@ public class MainWindow
 
 	public void selectConnection()
 	{
-		selectConnection(false);
+		selectConnection(false, false);
 	}
 
-	private boolean exitOnCancel = false;
-
-	public void selectConnection(boolean exit)
+	public void selectConnection(boolean exit, boolean doVersionCheck)
 	{
-		this.exitOnCancel = exit;
-		getSelector().selectConnection();
+		exitOnCancel = exit;
+		getSelector().selectConnection(doVersionCheck);
 	}
 
 	public JMenu getRecentWorkspaceMenu(int panelIndex)

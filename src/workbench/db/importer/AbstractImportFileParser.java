@@ -39,7 +39,7 @@ import workbench.util.WbFile;
  * @author  Thomas Kellerer
  */
 public abstract class AbstractImportFileParser
-	implements RowDataProducer, ImportFileParser
+	implements ImportFileParser
 {
 	protected File inputFile;
 	protected ImportFileLister sourceFiles;
@@ -112,6 +112,7 @@ public abstract class AbstractImportFileParser
 		this.valueModifier = mod;
 	}
 
+	@Override
 	public void setTargetSchema(String schema)
 	{
 		this.targetSchema = schema;
@@ -230,7 +231,7 @@ public abstract class AbstractImportFileParser
 		}
 	}
 
-	private TableIdentifier createTargetTableId()
+	protected TableIdentifier createTargetTableId()
 	{
 		TableIdentifier table = new TableIdentifier(this.tableName, this.connection);
 		table.setPreserveQuotes(true);
@@ -261,6 +262,7 @@ public abstract class AbstractImportFileParser
 		return targetTable;
 	}
 
+	@Override
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;

@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -24,6 +25,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -32,7 +34,7 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.BrowserLauncher;
 import workbench.util.UpdateVersion;
 import workbench.util.VersionNumber;
@@ -40,16 +42,16 @@ import workbench.util.WbVersionReader;
 
 /**
  * A Dialog to display available versions from the SQL Workbench/J homepage.
- * 
+ *
  * @author  Thomas Kellerer
  */
-public class VersionCheckDialog 
+public class VersionCheckDialog
 	extends JDialog
 	implements ActionListener, MouseListener
 {
 	private WbVersionReader versionReader;
 
-	public VersionCheckDialog(java.awt.Frame parent)
+	public VersionCheckDialog(Frame parent)
 	{
 		super(parent, true);
 		initComponents();
@@ -69,12 +71,13 @@ public class VersionCheckDialog
 		readVersion();
 	}
 
+	@Override
 	public void setVisible(boolean flag)
 	{
 		if (flag) startRetrieveVersions();
 		super.setVisible(flag);
 	}
-	
+
 	protected void readVersion()
 	{
 		this.versionReader = new WbVersionReader(this);
@@ -84,7 +87,7 @@ public class VersionCheckDialog
 	private void checkDisplay()
 	{
 		UpdateVersion version = this.versionReader.getAvailableUpdate();
-		
+
 		String msg = ResourceMgr.getString("LblVersionUpToDate");
 		if (!this.versionReader.success())
 		{

@@ -177,17 +177,17 @@ public class TableDiff
 
 		String refOptionType = referenceTable.getTable().getTableTypeOption();
 		String tgOptionType = targetTable.getTable().getTableTypeOption();
-		boolean typesAreDifferent = StringUtil.equalStringOrEmpty(refOptionType, tgOptionType, false);
+		boolean typesAreEquals = StringUtil.equalStringOrEmpty(refOptionType, tgOptionType, false);
 
 		String refTblSpace = referenceTable.getTable().getTablespace();
 		String tgTblSpace = targetTable.getTable().getTablespace();
-		boolean spacesDifferent = StringUtil.equalStringOrEmpty(refTblSpace, tgTblSpace, false);
+		boolean tblSpacesAreEquals = StringUtil.equalStringOrEmpty(refTblSpace, tgTblSpace, false);
 
 		boolean optionsAreDifferent = optionsAreDifferent();
 
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.isEmpty()
 			  && colsToBeRemoved.isEmpty() && refPk.equals(tPk) && constraintsAreEqual && fksAreEqual
-				&& !indexDifferent && !grantDifferent && !triggersDifferent && !optionsAreDifferent && !typesAreDifferent && !spacesDifferent)
+				&& !indexDifferent && !grantDifferent && !triggersDifferent && !optionsAreDifferent && typesAreEquals && tblSpacesAreEquals)
 		{
 			return result;
 		}
@@ -266,12 +266,12 @@ public class TableDiff
 			writeFKs(missingFK, result, "add-foreign-keys", myindent);
 		}
 
-		if (typesAreDifferent)
+		if (typesAreEquals)
 		{
 			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_TYPE, referenceTable.getTable().getTableTypeOption());
 		}
 
-		if (spacesDifferent)
+		if (tblSpacesAreEquals)
 		{
 			writer.appendTag(result, myindent, ReportTable.TAG_TABLESPACE, referenceTable.getTable().getTablespace());
 		}

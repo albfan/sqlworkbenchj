@@ -325,7 +325,7 @@ public class WbExport
 
 		if ((type.equals("xls") || type.equals("xlsx")) && !PoiHelper.isPoiAvailable())
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportNoXLS"));
+			result.addMessage(ResourceMgr.getString("ErrNoXLS"));
 			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
 			result.setFailure();
@@ -334,7 +334,7 @@ public class WbExport
 
 		if (type.equals("xlsx") && !PoiHelper.isXLSXAvailable())
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportNoXLSX"));
+			result.addMessage(ResourceMgr.getString("ErrNoXLSX"));
 			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
 			result.setFailure();

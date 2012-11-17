@@ -65,7 +65,6 @@ import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
-import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 

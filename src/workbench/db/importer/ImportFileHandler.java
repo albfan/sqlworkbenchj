@@ -33,7 +33,8 @@ import workbench.util.ZipUtil;
 
 /**
  * This class manages access to an import file and possible attachments that
- * were created by {@link workbench.db.exporter.DataExporter}
+ * were created by {@link workbench.db.exporter.DataExporter}.
+ * 
  * The import file can either be a regular file, or stored in a ZIP archive.
  *
  * @author Thomas Kellerer
@@ -55,7 +56,7 @@ public class ImportFileHandler
 	 * return a Reader for the first file in the archive.
 	 * (DataExporter creates an archive with a single
 	 * file in it).
-	 * 
+	 *
 	 * @param mainFile the basefile
 	 * @param enc the encoding for the basefile
 	 */
@@ -74,7 +75,7 @@ public class ImportFileHandler
 
 	/**
 	 * Used for unit tests
-	 * 
+	 *
 	 * @return true if the import file is a ZIP file
 	 */
 	boolean isZip()
@@ -86,7 +87,7 @@ public class ImportFileHandler
 	 * Return a Reader that is suitable for reading the contents
 	 * of the main file. The reader will be created with the
 	 * encoding that was specified in {@link #setMainFile(File, String)}
-	 * 
+	 *
 	 * @return a BufferedReader for the main file
 	 * @see #setMainFile(File, String)
 	 */
@@ -95,8 +96,9 @@ public class ImportFileHandler
 	{
 		if (this.mainReader != null)
 		{
-			try { mainReader.close(); } catch (Throwable th) {}
+			FileUtil.closeQuietely(mainReader);
 		}
+
 		Reader r = null;
 		if (baseFile instanceof ClipboardFile)
 		{
@@ -130,7 +132,7 @@ public class ImportFileHandler
 	{
 		return Settings.getInstance().getIntProperty("workbench.import.file.buffsize", 64*1024);
 	}
-	
+
 	private void initAttachements()
 		throws IOException
 	{
@@ -161,7 +163,7 @@ public class ImportFileHandler
 	 * When exporting LOB data {@link workbench.db.exporter.DataExporter} will write
 	 * the LOB data for each row/column into separate files. These files might
 	 * reside in a second ZIP archive.
-	 * 
+	 *
 	 * @param attachmentFile the attachment to read
 	 * @return an InputStream to read the attachment
 	 */
@@ -215,7 +217,7 @@ public class ImportFileHandler
 	 * @param f the file to check
 	 * @return the number of characters (not bytes) in that file.
 	 * @throws java.io.IOException
-	 * 
+	 *
 	 * @see FileUtil#getCharacterLength(java.io.File, java.lang.String)
 	 */
 	public long getCharacterLength(File f)
@@ -245,7 +247,7 @@ public class ImportFileHandler
 			ZipEntry entry = findEntry(toTest);
 			return entry.getSize();
 		}
-		
+
 		File realFile = getRealFile(toTest);
 		return realFile.length();
 	}

@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -40,14 +41,23 @@ import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.StatementRunnerResult;
 import workbench.util.Base64;
+import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipOutputFactory;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 /**
  *
  * @author Thomas Kellerer
@@ -84,6 +94,144 @@ public class WbImportTest
 	{
 		this.connection.disconnect();
 	}
+
+	@Test
+	public void testExcel()
+		throws Exception
+	{
+
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			File importFile = createExcelFile("person.xls");
+
+			StatementRunnerResult result = importCmd.execute("wbimport " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-type=xls " +
+				"-header=true " +
+				"-continueonerror=false " +
+				"-table=junit_test");
+
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
+			assertEquals(2, count.intValue());
+
+			TestUtil.executeScript(connection,
+				"delete from junit_test;\n" +
+				"commit;\n"
+			);
+
+			result = importCmd.execute("wbimport " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-type=xls " +
+				"-header=true " +
+				"-sheetNumber=2 " +
+				"-continueonerror=false " +
+				"-table=junit_test");
+
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
+			assertEquals(5, count.intValue());
+
+			TestUtil.executeScript(connection,
+				"delete from junit_test;\n" +
+				"delete from junit_test_pk;\n" +
+				"commit;\n"
+			);
+
+			util.emptyBaseDirectory();
+
+			createExcelFile("junit_test.xls");
+			createExcelFile("junit_test_pk.xls");
+
+			result = importCmd.execute("wbimport " +
+				"-sourceDir='" + util.getBaseDir() + "' " +
+				"-type=xls " +
+				"-extension=xls " +
+				"-header=true " +
+				"-continueonerror=false");
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
+			assertEquals(2, count.intValue());
+			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test_pk");
+			assertEquals(2, count.intValue());
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+	private WbFile createExcelFile(String filename)
+		throws Exception
+	{
+		WbFile data = new WbFile(util.getBaseDir(), filename);
+
+		Workbook workbook = null;
+		if (filename.endsWith("xlsx"))
+		{
+			workbook = new XSSFWorkbook();
+		}
+		else
+		{
+			workbook = new HSSFWorkbook();
+		}
+
+		Sheet sheet = workbook.createSheet("Sheet One");
+		Row header = sheet.createRow(0);
+		List<String> columns = CollectionUtil.arrayList("nr", "firstname", "lastname");
+		for (int i=0; i < columns.size(); i++)
+		{
+			Cell cell = header.createCell(i, Cell.CELL_TYPE_STRING);
+			cell.setCellValue(columns.get(i));
+		}
+
+		for (int i=0; i < 2; i++)
+		{
+			Row dataRow = sheet.createRow(i + 1);
+			Cell cell = dataRow.createCell(0, Cell.CELL_TYPE_NUMERIC);
+			cell.setCellValue(i);
+			cell = dataRow.createCell(1, Cell.CELL_TYPE_STRING);
+			cell.setCellValue("Firstname " + (i+1));
+			cell = dataRow.createCell(2, Cell.CELL_TYPE_STRING);
+			cell.setCellValue("Lastname " + (i+1));
+		}
+
+		Sheet sheet2 = workbook.createSheet("Sheet Two");
+		header = sheet2.createRow(0);
+
+		for (int i=0; i < columns.size(); i++)
+		{
+			Cell cell = header.createCell(i, Cell.CELL_TYPE_STRING);
+			cell.setCellValue(columns.get(i));
+		}
+
+		for (int i=0; i < 5; i++)
+		{
+			Row dataRow = sheet2.createRow(i + 1);
+			Cell cell = dataRow.createCell(0, Cell.CELL_TYPE_NUMERIC);
+			cell.setCellValue(i);
+			cell = dataRow.createCell(1, Cell.CELL_TYPE_STRING);
+			cell.setCellValue("Firstname " + (i+1));
+			cell = dataRow.createCell(2, Cell.CELL_TYPE_STRING);
+			cell.setCellValue("Lastname " + (i+1));
+		}
+
+		OutputStream out = null;
+		try
+		{
+			out = new FileOutputStream(data);
+			workbook.write(out);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(out);
+		}
+		return data;
+	}
+
 
 	@Test
 	public void testFailedInsert()

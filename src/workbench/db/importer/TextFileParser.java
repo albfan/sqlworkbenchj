@@ -11,6 +11,7 @@
  */
 package workbench.db.importer;
 
+import workbench.interfaces.TabularDataParser;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
@@ -51,7 +52,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class TextFileParser
 	extends AbstractImportFileParser
-	implements TextImportOptions
+	implements TextImportOptions, TabularDataParser
 {
 	private File baseDir;
 	private String delimiter = "\t";
@@ -93,6 +94,7 @@ public class TextFileParser
 	{
 		nullString = value;
 	}
+
 	public void setEnableMultilineRecords(boolean flag)
 	{
 		this.enableMultiLineMode = flag;
@@ -197,10 +199,13 @@ public class TextFileParser
 
 	/**
 	 * Define the columns in the input file.
+	 *
 	 * If a column name equals RowDataProducer.SKIP_INDICATOR
 	 * then the column will not be imported.
+	 *
 	 * @param fileColumns the list of columns present in the input file
 	 * @param columnsToImport the list of columns to import, if null all columns are imported
+	 *
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
@@ -656,7 +661,7 @@ public class TextFileParser
 					if (sourceIndex >= currentRowValues.size())
 					{
 						// Log this warning only once
-						if (importRow == 0)
+						if (importRow == 1)
 						{
 							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");
 						}
@@ -922,25 +927,6 @@ public class TextFileParser
 			cols = def.getColumns();
 		}
 		setColumns(cols, importColumns);
-	}
-
-	private TableIdentifier createTargetTableId()
-	{
-		TableIdentifier table = new TableIdentifier(this.tableName, this.connection);
-		table.setPreserveQuotes(true);
-		if (this.targetSchema != null)
-		{
-			table.setSchema(this.targetSchema);
-		}
-		if (this.connection != null)
-		{
-			table.adjustCase(this.connection);
-			if (table.getSchema() == null)
-			{
-				table.setSchema(this.connection.getCurrentSchema());
-			}
-		}
-		return table;
 	}
 
 	public int getColumnCount()
