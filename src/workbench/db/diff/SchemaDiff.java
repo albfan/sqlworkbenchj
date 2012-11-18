@@ -38,6 +38,7 @@ import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
@@ -78,8 +79,7 @@ public class SchemaDiff
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
 	public static final String TAG_VIEWS_AS_TABLE = "views-as-tables";
 
-	private WbConnection referenceDb;
-	private WbConnection targetDb;
+	private GenericDiffLoader objectDiffs;
 	private List<Object> objectsToCompare;
 	private List<TableIdentifier> tablesToDelete;
 	private List<ProcedureDefinition> procsToDelete;
@@ -101,10 +101,13 @@ public class SchemaDiff
 	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
 	private boolean includeExtendedOptions;
+	private String[] additionalTypes;
 
-//	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel;
+
+	private WbConnection referenceDb;
+	private WbConnection targetDb;
 	private String referenceSchema;
 	private String targetSchema;
 	private Set<String> tablesToIgnore = CollectionUtil.caseInsensitiveSet();
@@ -141,7 +144,15 @@ public class SchemaDiff
 		this.diffTriggers = flag;
 	}
 
-	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
+	public void setAdditionalTypes(List<String> types)
+	{
+		this.additionalTypes = types.toArray(new String[]{});
+	}
+
+	public void setIncludeSequences(boolean flag)
+	{
+		this.diffSequences = flag;
+	}
 
 	/**
 	 * Control whether foreign keys should be compared as well.
@@ -717,6 +728,13 @@ public class SchemaDiff
 		}
 	}
 
+	private void buildObjectsList()
+	{
+		this.objectDiffs = new GenericDiffLoader(referenceDb, targetDb, referenceSchema, targetSchema, additionalTypes);
+		this.objectDiffs.setProgressMonitor(monitor);
+		this.objectDiffs.loadObjects();
+	}
+
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
 	{
 		HashSet<String> refProcNames = new HashSet<String>();
@@ -926,7 +944,9 @@ public class SchemaDiff
 			buildSequenceList();
 		}
 
-		if (objectsToCompare == null) return;
+		buildObjectsList();
+
+		if (objectsToCompare == null && (objectDiffs == null || objectDiffs.getObjectCount() == 0)) return;
 
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");
@@ -1044,6 +1064,16 @@ public class SchemaDiff
 			out.write("\n");
 		}
 
+		if (this.cancel) return;
+
+		if (objectDiffs != null)
+		{
+			StrBuffer xml = objectDiffs.getMigrateTargetXml(indent);
+			if (xml != null && xml.length() > 0)
+			{
+				out.write(xml.toString());
+			}
+		}
 		if (this.cancel) return;
 
 		writeTag(out, null, "schema-diff", false);

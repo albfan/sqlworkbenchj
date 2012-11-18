@@ -240,7 +240,7 @@ public class ProcedureDefinition
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
-		if (con == null) return null;
+		if (con == null) return this.source;
 		if (this.source == null)
 		{
 			try

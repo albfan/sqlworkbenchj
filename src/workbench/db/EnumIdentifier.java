@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -24,7 +25,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class EnumIdentifier
-	implements DbObject
+	implements ComparableDbObject
 {
 	private String catalog;
 	private String schema;
@@ -123,4 +124,23 @@ public class EnumIdentifier
 		remarks = cmt;
 	}
 
+	@Override
+	public boolean isComparableWith(DbObject other)
+	{
+		return (other instanceof EnumIdentifier);
+	}
+
+	@Override
+	public boolean isEqualTo(DbObject other)
+	{
+		if (other instanceof EnumIdentifier)
+		{
+			EnumIdentifier id = (EnumIdentifier)other;
+			int mySize = values == null ? 0 : values.size();
+			int otherSize = id.values == null ? 0 : id.values.size();
+			if (mySize != otherSize) return false;
+			return values.equals(id.values);
+		}
+		return false;
+	}
 }

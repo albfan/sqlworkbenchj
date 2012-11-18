@@ -140,6 +140,7 @@ public class TextFileParser
 		}
 	}
 
+	@Override
 	public void addColumnFilter(String colname, String regex)
 	{
 		int index = this.getColumnIndex(colname);
@@ -209,6 +210,7 @@ public class TextFileParser
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
+	@Override
 	public void setColumns(List<ColumnIdentifier> fileColumns, List<ColumnIdentifier> columnsToImport)
 		throws SQLException
 	{
@@ -895,6 +897,7 @@ public class TextFileParser
 		return cols;
 	}
 
+	@Override
 	public void checkTargetTable()
 		throws SQLException
 	{
@@ -912,6 +915,7 @@ public class TextFileParser
 		}
 	}
 
+	@Override
 	public void setupFileColumns(List<ColumnIdentifier> importColumns)
 		throws SQLException, IOException
 	{

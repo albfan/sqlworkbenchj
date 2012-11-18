@@ -20,11 +20,11 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DomainIdentifier
-	implements DbObject
+	implements ComparableDbObject
 {
 	private String catalog;
 	private String schema;
-	private String domain;
+	private String domainName;
 	private String objectType = "DOMAIN";
 	private String remarks;
 	private String dataType;
@@ -38,7 +38,7 @@ public class DomainIdentifier
 	{
 		catalog = dcatalog;
 		schema = dschema;
-		domain = name;
+		domainName = name;
 	}
 
 	public void setDefaultValue(String def)
@@ -117,13 +117,13 @@ public class DomainIdentifier
 	@Override
 	public String getObjectName()
 	{
-		return domain;
+		return domainName;
 	}
 
 	@Override
 	public String getObjectName(WbConnection conn)
 	{
-		return domain;
+		return domainName;
 	}
 
 	@Override
@@ -202,6 +202,29 @@ public class DomainIdentifier
 	public void setComment(String cmt)
 	{
 		remarks = cmt;
+	}
+
+	@Override
+	public boolean isComparableWith(DbObject other)
+	{
+		return (other instanceof DomainIdentifier);
+	}
+
+	@Override
+	public boolean isEqualTo(DbObject other)
+	{
+		if (other instanceof DomainIdentifier)
+		{
+			DomainIdentifier dom = (DomainIdentifier)other;
+			if (!StringUtil.equalStringOrEmpty(dataType, dom.dataType)) return false;
+			if (nullable != dom.nullable) return false;
+			if (!StringUtil.equalStringOrEmpty(defaultValue, dom.defaultValue)) return false;
+			if (!StringUtil.equalStringOrEmpty(constraintDefinition, dom.constraintDefinition)) return false;
+			if (!StringUtil.equalStringOrEmpty(constraintName, dom.constraintName)) return false;
+			if (!StringUtil.equalStringOrEmpty(remarks, dom.remarks)) return false;
+			return true;
+		}
+		return false;
 	}
 
 }

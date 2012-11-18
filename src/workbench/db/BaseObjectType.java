@@ -7,12 +7,12 @@
  *  No part of this code may be reused without the permission of the author
  *
  *  To contact the author please send an email to: support@sql-workbench.net
- */
-package workbench.db;
+ */package workbench.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -23,7 +23,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class BaseObjectType
-	implements DbObject
+	implements ComparableDbObject
 {
 	private String catalog;
 	private String schema;
@@ -106,7 +106,7 @@ public class BaseObjectType
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
-		if (this.source == null)
+		if (this.source == null && con != null)
 		{
 			return con.getMetadata().getObjectSource(this);
 		}
@@ -152,4 +152,31 @@ public class BaseObjectType
 		if (CollectionUtil.isEmpty(columns)) return 0;
 		return columns.size();
 	}
+
+	@Override
+	public boolean isComparableWith(DbObject other)
+	{
+		return this.getClass().equals(other.getClass());
+	}
+
+	@Override
+	public boolean isEqualTo(DbObject other)
+	{
+		if (other instanceof BaseObjectType)
+		{
+			BaseObjectType otherType = (BaseObjectType)other;
+			if (this.getNumberOfAttributes() != otherType.getNumberOfAttributes()) return false;
+
+			List<ColumnIdentifier> otherCols = otherType.getAttributes();
+			for (ColumnIdentifier col : getAttributes())
+			{
+				ColumnIdentifier otherCol = ColumnIdentifier.findColumnInList(otherCols, col.getColumnName());
+				if (otherCol == null) return false;
+				if (!col.isEqualTo(otherCol)) return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
 }

@@ -13,11 +13,17 @@ package workbench.db.report;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
+
+import workbench.db.BaseObjectType;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
 import workbench.db.EnumIdentifier;
 import workbench.db.TableConstraint;
 import workbench.db.WbConnection;
+
+import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -44,6 +50,8 @@ public class GenericReportObject
 	public static final String TAG_ENUM_VALUES = "enum-values";
 	public static final String TAG_ENUM_VALUE = "enum-value";
 
+	public static final String TAG_TYPE_ATTRS = "attributes";
+
 	private DbObject object;
 	private String source;
 	private String schemaNameToUse;
@@ -51,7 +59,7 @@ public class GenericReportObject
 	public GenericReportObject(WbConnection con, DbObject dbo)
 	{
 		object = dbo;
-		this.source = con.getMetadata().getObjectSource(dbo);
+		this.source = con == null ? null : con.getMetadata().getObjectSource(dbo);
 	}
 
 	public void setSchemaNameToUse(String name)
@@ -98,6 +106,8 @@ public class GenericReportObject
 
 		StrBuffer details = new StrBuffer(defIndent);
 		details.append("  ");
+		StrBuffer in2 = new StrBuffer(details);
+		in2.append("  ");
 		if (object instanceof DomainIdentifier)
 		{
 			tagWriter.appendOpenTag(line, defIndent, TAG_OBJECT_DETAILS);
@@ -108,8 +118,6 @@ public class GenericReportObject
 				tagWriter.appendOpenTag(line, details, TAG_DOMAIN_CONSTRAINT);
 				line.append('\n');
 				TableConstraint con = new TableConstraint(domain.getConstraintName(), domain.getCheckConstraint());
-				StrBuffer in2 = new StrBuffer(details);
-				in2.append("  ");
 				ReportTable.writeConstraint(con, tagWriter, line, in2);
 				tagWriter.appendCloseTag(line, details, TAG_DOMAIN_CONSTRAINT);
 			}
@@ -125,8 +133,6 @@ public class GenericReportObject
 			EnumIdentifier enumDef = (EnumIdentifier)object;
 			tagWriter.appendOpenTag(line, details, TAG_ENUM_VALUES);
 			line.append('\n');
-			StrBuffer in2 = new StrBuffer(details);
-			in2.append("  ");
 			for (String value : enumDef.getValues())
 			{
 				tagWriter.appendTag(line, in2, TAG_ENUM_VALUE, value);
@@ -134,7 +140,29 @@ public class GenericReportObject
 			tagWriter.appendCloseTag(line, details, TAG_ENUM_VALUES);
 			tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
 		}
-		tagWriter.appendTag(line, defIndent, TAG_OBJECT_SOURCE, source, true);
+		else if (object instanceof BaseObjectType)
+		{
+			BaseObjectType obj = (BaseObjectType)object;
+			List<ColumnIdentifier> cols = obj.getAttributes();
+			if (CollectionUtil.isNonEmpty(cols))
+			{
+				tagWriter.appendOpenTag(line, defIndent, TAG_OBJECT_DETAILS);
+				line.append('\n');
+				tagWriter.appendOpenTag(line, details, TAG_TYPE_ATTRS);
+				line.append('\n');
+				for (ColumnIdentifier col : cols)
+				{
+					ReportColumn rcol = new ReportColumn(col);
+					rcol.appendXml(line, in2, true);
+				}
+				tagWriter.appendCloseTag(line, details, TAG_TYPE_ATTRS);
+				tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
+			}
+		}
+		if (StringUtil.isNonEmpty(source))
+		{
+			tagWriter.appendTag(line, defIndent, TAG_OBJECT_SOURCE, source, true);
+		}
 		tagWriter.appendCloseTag(line, indent, TAG_OBJECT_DEF);
 		return line;
 	}

@@ -15,7 +15,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.Writer;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -24,6 +23,9 @@ import workbench.db.diff.SchemaDiff;
 import workbench.util.FileUtil;
 import static org.junit.Assert.*;
 import workbench.sql.DelimiterDefinition;
+
+import workbench.util.CollectionUtil;
+import org.junit.BeforeClass;
 
 
 /**
@@ -47,6 +49,31 @@ public class OracleSchemaDiffTest
 		OracleTestUtil.initTestCase(OracleTestUtil.SCHEMA2_NAME);
 	}
 
+	private void createTypes(WbConnection con1, WbConnection con2)
+		throws Exception
+	{
+		String sql1 =
+			"create type person_type is object (\n" +
+			"   id integer, " +
+			"   firstname varchar(100), " +
+			"   lastname varchar(100)\n" +
+			");\n" +
+			"create type foo_type is object (\n" +
+			"   id integer \n " +
+			");";
+
+		TestUtil.executeScript(con1, sql1);
+
+		if (con2 == null) return;
+		String sql2 =
+			"create type person_type is object (\n" +
+			"   id integer, " +
+			"   firstname varchar(50), " +
+			"   lastname varchar(50)\n" +
+			");";
+		TestUtil.executeScript(con2, sql2);
+	}
+
 	private void createTables(WbConnection con1, WbConnection con2)
 		throws Exception
 	{
@@ -61,7 +88,6 @@ public class OracleSchemaDiffTest
 
 		TestUtil.executeScript(con1, sql1);
 
-		OracleTestUtil.initTestCase(OracleTestUtil.SCHEMA2_NAME);
 		if (con2 == null) return;
 		String sql2 =
 			"create table person (\n" +
@@ -204,6 +230,58 @@ public class OracleSchemaDiffTest
 		TestUtil.executeScript(con2, pck4, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 	}
 
+	@Test
+	public void testTypeDiff()
+		throws Exception
+	{
+		WbConnection reference = OracleTestUtil.getOracleConnection();
+		WbConnection target = OracleTestUtil.getOracleConnection2();
+		if (reference == null || target == null)
+		{
+			return;
+		}
+
+		try
+		{
+			createTypes(reference, target);
+
+			SchemaDiff diff = new SchemaDiff(reference, target);
+			diff.setIncludeViews(false);
+			diff.setIncludeExtendedOptions(false);
+			diff.setIncludeIndex(false);
+			diff.setIncludeSequences(false);
+			diff.setIncludeProcedures(false);
+			diff.setIncludeTriggers(false);
+			diff.setAdditionalTypes(CollectionUtil.arrayList("TYPE"));
+			diff.setSchemas(OracleTestUtil.SCHEMA_NAME, OracleTestUtil.SCHEMA2_NAME);
+
+			TestUtil util = getTestUtil();
+
+			File outfile = new File(util.getBaseDir(), "ora_types_diff.xml");
+			Writer out = new FileWriter(outfile);
+			diff.writeXml(out);
+			FileUtil.closeQuietely(out);
+
+			assertTrue(outfile.exists());
+			assertTrue(outfile.length() > 0);
+			Reader in = new FileReader(outfile);
+			String xml = FileUtil.readCharacters(in);
+			assertNotNull(xml);
+
+			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object)");
+			assertEquals("1", value);
+
+			value = TestUtil.getXPathValue(xml, "count(/schema-diff/add-object)");
+			assertEquals("1", value);
+
+			assertTrue("Could not delete output", outfile.delete());
+		}
+		finally
+		{
+			OracleTestUtil.dropAllObjects(reference);
+			OracleTestUtil.dropAllObjects(target);
+		}
+	}
 
 	@Test
 	public void testPackageDiff()
@@ -236,7 +314,7 @@ public class OracleSchemaDiffTest
 			Reader in = new FileReader(outfile);
 			String xml = FileUtil.readCharacters(in);
 			assertNotNull(xml);
-			System.out.println("**************\n" + xml + "\n*********************");
+			// System.out.println("**************\n" + xml + "\n*********************");
 
 			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/create-package/package-def[@packageName='PCKG_TO_CREATE'])");
 			assertEquals("1", value);
@@ -258,7 +336,6 @@ public class OracleSchemaDiffTest
 			OracleTestUtil.dropAllObjects(target);
 		}
 	}
-
 
 	@Test
 	public void testDiff()

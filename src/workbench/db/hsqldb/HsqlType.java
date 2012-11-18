@@ -10,9 +10,9 @@
  */
 package workbench.db.hsqldb;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import workbench.db.BaseObjectType;
 import workbench.db.ColumnIdentifier;
 

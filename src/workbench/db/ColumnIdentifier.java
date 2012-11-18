@@ -17,6 +17,7 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import workbench.storage.ResultInfo;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -28,7 +29,7 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class ColumnIdentifier
-	implements DbObject, Comparable<ColumnIdentifier>
+	implements ComparableDbObject, Comparable<ColumnIdentifier>
 {
 	private String name;
 	private String alias;
@@ -728,6 +729,42 @@ public class ColumnIdentifier
 			}
 		}
 		return maxLength;
+	}
+
+	@Override
+	public boolean isComparableWith(DbObject other)
+	{
+		return (other instanceof ColumnIdentifier);
+	}
+
+	@Override
+	public boolean isEqualTo(DbObject other)
+	{
+		if (other instanceof ColumnIdentifier)
+		{
+			ColumnIdentifier otherCol = (ColumnIdentifier)other;
+			if (!StringUtil.equalStringOrEmpty(this.dbmsType, otherCol.dbmsType, true)) return false;
+			if (this.isNullable != otherCol.isNullable) return false;
+			if (this.isExpression != otherCol.isExpression) return false;
+			if (this.isPk != otherCol.isPk) return false;
+			if (!StringUtil.equalStringOrEmpty(this.defaultValue, otherCol.defaultValue)) return false;
+			return true;
+		}
+		return false;
+	}
+
+	public static ColumnIdentifier findColumnInList(List<ColumnIdentifier> columns, String colname)
+	{
+		if (columns == null) return null;
+		if (colname == null) return null;
+
+		String toTest = StringUtil.trimQuotes(colname);
+		for (ColumnIdentifier col : columns)
+		{
+			String name = StringUtil.trimQuotes(col.getColumnName());
+			if (name.equalsIgnoreCase(toTest)) return col;
+		}
+		return null;
 	}
 
 }

@@ -658,16 +658,7 @@ public class DataCopier
 
 	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String colname)
 	{
-		if (columns == null) return null;
-		if (colname == null) return null;
-
-		String toTest = StringUtil.trimQuotes(colname);
-		for (ColumnIdentifier col : columns)
-		{
-			String name = StringUtil.trimQuotes(col.getColumnName());
-			if (name.equalsIgnoreCase(toTest)) return col;
-		}
-		return null;
+		return ColumnIdentifier.findColumnInList(columns, colname);
 	}
 
 	private void addTargetColumn(ColumnIdentifier sourceCol, String targetName, List<ColumnIdentifier> targetCols)

@@ -87,6 +87,8 @@ public class SpreadsheetFileParser
 	{
 		this.sheetIndex = index;
 	}
+
+	@Override
 	public void setContainsHeader(boolean aFlag)
 	{
 		this.withHeader = aFlag;
@@ -123,6 +125,7 @@ public class SpreadsheetFileParser
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
+	@Override
 	public void setColumns(List<ColumnIdentifier> fileColumns, List<ColumnIdentifier> columnsToImport)
 		throws SQLException
 	{
@@ -502,6 +505,7 @@ public class SpreadsheetFileParser
 		return cols;
 	}
 
+	@Override
 	public void checkTargetTable()
 		throws SQLException
 	{
@@ -519,6 +523,7 @@ public class SpreadsheetFileParser
 		}
 	}
 
+	@Override
 	public void setupFileColumns(List<ColumnIdentifier> importColumns)
 		throws SQLException, IOException
 	{
