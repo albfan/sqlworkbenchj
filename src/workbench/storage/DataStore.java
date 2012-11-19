@@ -768,7 +768,7 @@ public class DataStore
 	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)
 	{
 		DbMetadata meta = conn.getMetadata();
-		TableIdentifier tbl = meta.searchTableOnPath(table);
+		TableIdentifier tbl = meta.searchSelectableObjectOnPath(table);
 		if (tbl == null && table.getSchema() == null)
 		{
 			tbl = meta.getSynonymTable(table);
@@ -1862,7 +1862,7 @@ public class DataStore
 	{
 		return new RowDataListSorter(sort);
 	}
-	
+
 	public void sort(SortDefinition sortDef)
 	{
 		synchronized (this)
