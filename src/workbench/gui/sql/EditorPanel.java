@@ -540,14 +540,16 @@ public class EditorPanel
 			{
 				this.saveCurrentFile();
 			}
+			if (result == JOptionPane.CLOSED_OPTION)
+			{
+				result = JOptionPane.CANCEL_OPTION;
+			}
 		}
 		return result;
 	}
 
 	public YesNoCancelResult canCloseFile()
 	{
-		if (!this.hasFileLoaded()) return YesNoCancelResult.yes;
-		if (!this.isModified()) return YesNoCancelResult.yes;
 		int choice = this.checkAndSaveFile();
 		if (choice == JOptionPane.YES_OPTION)
 		{
