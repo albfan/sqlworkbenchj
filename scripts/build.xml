@@ -765,6 +765,12 @@
     <fileset dir="${junitdir}">
       <include name="*.jar"/>
     </fileset>
+    <fileset dir="../etc/poi">
+      <include name="poi*.jar"/>
+    </fileset>
+    <fileset dir="../etc/poi/ooxml-lib">
+      <include name="*.jar"/>
+    </fileset>
   </path>
 
   <target name="compile-tests" depends="prepare-test, compile">
