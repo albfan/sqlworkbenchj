@@ -85,7 +85,7 @@ public class PostgresColumnEnhancer
 			}
 		}
 	}
-	
+
 	private void updateArrayTypes(TableDefinition table, WbConnection conn)
 	{
 		int arrayCols = 0;
@@ -144,6 +144,7 @@ public class PostgresColumnEnhancer
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			ArrayDef def = dims.get(col.getColumnName());
+			if (def == null) continue;
 			String type = def.formattedType;
 			for (int i=0; i < def.numDims - 1; i++)
 			{
