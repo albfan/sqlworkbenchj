@@ -587,7 +587,10 @@ public class ObjectSourceSearchPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
+		if (row < 0) return;
+		
 		TableModel model = results.getModel();
+		if (model.getRowCount() == 0) return;
 
 		// As the source column has been removed from the view, the source
 		// has to be retrieved directly from the underlying table model
