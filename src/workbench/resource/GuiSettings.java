@@ -736,4 +736,13 @@ public class GuiSettings
 		return Settings.getInstance().getIntProperty("workbench.gui.menu.items.max", 9999);
 	}
 
+	public static int getWheelScrollLines()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.editor.wheelscroll.units", -1);
+	}
+
+	public static void setWheelScrollLines(int lines)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.wheelscroll.units", lines);
+	}
 }

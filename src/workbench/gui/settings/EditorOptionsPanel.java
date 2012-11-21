@@ -90,6 +90,15 @@ public class EditorOptionsPanel
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 		StoreableKeyStroke key = new StoreableKeyStroke(GuiSettings.getExpansionKey());
 		cbExpansionKey.setSelectedItem(key);
+		int lines = GuiSettings.getWheelScrollLines();
+		if (lines <= 0)
+		{
+			wheelScrollLines.setText("");
+		}
+		else
+		{
+			wheelScrollLines.setText(Integer.toString(lines));
+		}
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -141,6 +150,13 @@ public class EditorOptionsPanel
 
 		StoreableKeyStroke key = (StoreableKeyStroke) cbExpansionKey.getSelectedItem();
 		GuiSettings.setExpansionKey(key.getKeyStroke());
+
+
+		if (StringUtil.isNumber(wheelScrollLines.getText()))
+		{
+			int lines = StringUtil.getIntValue(wheelScrollLines.getText(), -1);
+			GuiSettings.setWheelScrollLines(lines);
+		}
 	}
 
 	@Override
@@ -175,7 +191,7 @@ public class EditorOptionsPanel
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     editorTabSizeLabel = new JLabel();
     tabSize = new JTextField();
@@ -210,6 +226,8 @@ public class EditorOptionsPanel
     autoCloseBrackets = new JTextField();
     jLabel3 = new JLabel();
     cbExpansionKey = new JComboBox();
+    wheelScrollLabel = new JLabel();
+    wheelScrollLines = new JTextField();
 
     setLayout(new GridBagLayout());
 
@@ -218,7 +236,7 @@ public class EditorOptionsPanel
     editorTabSizeLabel.setToolTipText(ResourceMgr.getString("d_LblTabWidth")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(editorTabSizeLabel, gridBagConstraints);
@@ -227,7 +245,7 @@ public class EditorOptionsPanel
     tabSize.setHorizontalAlignment(JTextField.LEFT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
@@ -264,7 +282,7 @@ public class EditorOptionsPanel
     electricScrollLabel.setToolTipText(ResourceMgr.getString("d_LblSettingElectricScroll")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(electricScrollLabel, gridBagConstraints);
@@ -272,7 +290,7 @@ public class EditorOptionsPanel
     electricScroll.setColumns(4);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
@@ -344,7 +362,7 @@ public class EditorOptionsPanel
     noWordSepLabel.setToolTipText(ResourceMgr.getString("d_LblNoWordSep")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(noWordSepLabel, gridBagConstraints);
@@ -354,7 +372,7 @@ public class EditorOptionsPanel
     useTabs.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 0, 0, 10);
     add(useTabs, gridBagConstraints);
@@ -364,7 +382,7 @@ public class EditorOptionsPanel
     noWordSep.setName("nowordsep"); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
@@ -465,7 +483,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -519,7 +537,7 @@ public class EditorOptionsPanel
     jLabel2.setToolTipText(ResourceMgr.getString("d_LblAutoCloseBrkt")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(jLabel2, gridBagConstraints);
@@ -528,7 +546,7 @@ public class EditorOptionsPanel
     autoCloseBrackets.setToolTipText(ResourceMgr.getString("d_LblAutoCloseBrkt")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
@@ -539,7 +557,7 @@ public class EditorOptionsPanel
     jLabel3.setToolTipText(ResourceMgr.getString("d_LblExpandKey")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(jLabel3, gridBagConstraints);
@@ -548,11 +566,30 @@ public class EditorOptionsPanel
     cbExpansionKey.setToolTipText(ResourceMgr.getString("d_LblExpandKey")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(4, 11, 0, 15);
     add(cbExpansionKey, gridBagConstraints);
+
+    wheelScrollLabel.setText(ResourceMgr.getString("LblWheelScrLines")); // NOI18N
+    wheelScrollLabel.setToolTipText(ResourceMgr.getString("d_LblWheelScrLines")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
+    add(wheelScrollLabel, gridBagConstraints);
+
+    wheelScrollLines.setColumns(4);
+    wheelScrollLines.setToolTipText(ResourceMgr.getString("d_LblWheelScrLines")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    add(wheelScrollLines, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -605,6 +642,8 @@ public class EditorOptionsPanel
   private JCheckBox rightClickMovesCursor;
   private JTextField tabSize;
   private JCheckBox useTabs;
+  private JLabel wheelScrollLabel;
+  private JTextField wheelScrollLines;
   // End of variables declaration//GEN-END:variables
 
 }

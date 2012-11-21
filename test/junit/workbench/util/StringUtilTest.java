@@ -705,6 +705,10 @@ public class StringUtilTest
 
 		isNumber = StringUtil.isNumber("bla");
 		assertEquals(false, isNumber);
+
+		assertFalse(StringUtil.isNumber(""));
+
+		assertTrue(StringUtil.isNumber("  1 "));
 	}
 
 	@Test

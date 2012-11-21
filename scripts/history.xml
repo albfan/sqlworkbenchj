@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-11-19">
+    <entry dev-build="8" type="enh">The number of lines to scroll in the editor with the mouse wheel can now be configured.</entry>
     <entry dev-build="7" type="enh">WbImport can now import Excel (XLS and XLSX) files (XLSM is not supported)</entry>
     <entry dev-build="7" type="enh">WbSchemaDiff and WbSchemaReport have new option -includeExtendedOptions to include extended table attributes (like tablespace or Oracle partitions)</entry>
     <entry dev-build="6" type="enh">A new option "Append result" is available for macros.</entry>

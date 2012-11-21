@@ -713,7 +713,7 @@ public class JEditTextArea
 		if (vertical != null && visibleLines != 0)
 		{
 			vertical.setValues(firstLine, visibleLines, 0, lineCount);
-			vertical.setUnitIncrement(2);
+			vertical.setUnitIncrement(1);
 			vertical.setBlockIncrement(visibleLines);
 			if (visibleLines > lineCount)
 			{
@@ -2217,7 +2217,7 @@ public class JEditTextArea
 		if (editable == flag) return; // no change, do nothing
 
 		this.editable = flag;
-		
+
 		if (this.popup != null)
 		{
 			this.popup.getCutAction().setEnabled(flag);
@@ -2741,7 +2741,12 @@ public class JEditTextArea
 		{
 			if (!WbAction.isCtrlPressed(e.getModifiers()))
 			{
-				int totalScrollAmount = e.getUnitsToScroll() * vertical.getUnitIncrement();
+				int units = GuiSettings.getWheelScrollLines();
+				if (units < 0)
+				{
+					units = e.getUnitsToScroll();
+				}
+				int totalScrollAmount = units * vertical.getUnitIncrement();
 				vertical.setValue(vertical.getValue() + totalScrollAmount);
 			}
 		}
