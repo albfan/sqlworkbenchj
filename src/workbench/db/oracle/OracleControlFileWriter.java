@@ -18,7 +18,6 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
@@ -26,6 +25,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.util.CharacterRange;
+import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -127,6 +127,15 @@ public class OracleControlFileWriter
 						out.print("\"");
 					}
 				}
+				else if (SqlUtil.isNumberType(type) && i == count -1)
+				{
+					for (int k = col.length(); k < max; k++)
+					{
+						out.print(" ");
+					}
+					out.print("TERMINATED BY WHITESPACE");
+				}
+
 				if (i < count - 1 || blobColumns.size() > 0)
 				{
 					out.print(",");
@@ -165,6 +174,8 @@ public class OracleControlFileWriter
 	private String convertJavaCharsetToOracle(String encoding)
 	{
 		if (encoding == null) return Settings.getInstance().getDefaultFileEncoding();
+		encoding = EncodingUtil.cleanupEncoding(encoding);
+
 		if (encoding.equalsIgnoreCase("UTF8")) return "AL32UTF8";
 		if (encoding.equalsIgnoreCase("UTF-8")) return "AL32UTF8";
 		if (encoding.equalsIgnoreCase("ISO-8859-1")) return "WE8ISO8859P1";

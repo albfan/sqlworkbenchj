@@ -92,9 +92,12 @@ public class OracleControlFileWriterTest
 		ColumnIdentifier firstname = new ColumnIdentifier("firstname", Types.VARCHAR);
 		ColumnIdentifier lastname = new ColumnIdentifier("lastname", Types.VARCHAR);
 		ColumnIdentifier birthday = new ColumnIdentifier("birthday", Types.DATE);
+		ColumnIdentifier salary = new ColumnIdentifier("salary", Types.NUMERIC);
+		salary.setDbmsType("number(12,2)");
+
 		final TableIdentifier table = new TableIdentifier("person");
 
-		final ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, firstname, lastname, birthday } );
+		final ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, firstname, lastname, birthday, salary } );
 		info.setUpdateTable(table);
 
 		RowDataConverter converter = new RowDataConverter()
@@ -131,7 +134,7 @@ public class OracleControlFileWriterTest
 			assertTrue(formatFile.exists());
 			List<String> lines = StringUtil.readLines(formatFile);
 			assertNotNull(lines);
-			assertEquals(15, lines.size());
+			assertEquals(16, lines.size());
 
 			// First line is a comment so the actual contents starts with the second line
 			assertEquals("OPTIONS (skip=1)", lines.get(1));
@@ -144,8 +147,9 @@ public class OracleControlFileWriterTest
 			assertEquals("  id,", lines.get(10));
 			assertEquals("  firstname,", lines.get(11));
 			assertEquals("  lastname,", lines.get(12));
-			assertEquals("  birthday  DATE \"YYYY_MM_DD\"", lines.get(13));
-			assertEquals(")", lines.get(14).trim());
+			assertEquals("  birthday  DATE \"YYYY_MM_DD\",", lines.get(13));
+			assertEquals("  salary    TERMINATED BY WHITESPACE", lines.get(14));
+			assertEquals(")", lines.get(15).trim());
 		}
 		finally
 		{
