@@ -11,10 +11,7 @@
  */
 package workbench.gui.tools;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
@@ -64,6 +61,7 @@ import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -514,7 +512,8 @@ public class ObjectSourceSearchPanel
 	{
 		if (this.connection == null) return;
 		Collection<String> schemas = connection.getMetadata().getSchemas();
-		String result = selectFromList(schemas);
+		List<String> selected = StringUtil.stringToList(schemaNames.getText(), ",");
+		String result = selectFromList(schemas, selected);
 		if (result != null)
 		{
 			schemaNames.setText(result.toString());
@@ -534,41 +533,49 @@ public class ObjectSourceSearchPanel
 		types.add("PROCEDURE");
 		types.add("TRIGGER");
 
-		String result = selectFromList(types);
+		List<String> selected = StringUtil.stringToList(objectTypes.getText(), ",", true, true, false, false);
+
+		String result = selectFromList(types, selected);
 		if (result != null)
 		{
 			objectTypes.setText(result.toString());
 		}
 	}
 
-	private String selectFromList(Collection<String> elements)
+	private String selectFromList(Collection<String> elements, List<String> selected)
 	{
 		DefaultListModel model = new DefaultListModel();
 		for (String type : elements)
 		{
 			model.addElement(type);
 		}
-		JList l = new JList(model);
-		JScrollPane pane = new JScrollPane(l);
-		int height = 24;
-		try
-		{
-			Font f = l.getFont();
-			FontMetrics fm = l.getFontMetrics(f);
-			height = fm.getHeight() + 2;
-		}
-		catch (Exception e)
-		{
-			height = 24;
-		}
-		Dimension d = l.getPreferredSize();
-		d.height = height * 8;
+		JList elementList = new JList(model);
 
-		pane.setPreferredSize(d);
-		pane.setMinimumSize(d);
+		if (CollectionUtil.isNonEmpty(selected))
+		{
+			int firstSelected = -1;
+			int[] indexes = new int[selected.size()];
+			for (int i=0; i < selected.size(); i++)
+			{
+				int index = model.indexOf(selected.get(i));
+				if (index > -1)
+				{
+					indexes[i] = index;
+					if (firstSelected == -1)
+					{
+						firstSelected = index;
+					}
+				}
+			}
+			elementList.setSelectedIndices(indexes);
+			elementList.ensureIndexIsVisible(firstSelected);
+		}
+		elementList.setVisibleRowCount(14);
+
+		JScrollPane pane = new JScrollPane(elementList);
 		if (WbSwingUtilities.getOKCancel("Select type", this, pane))
 		{
-			Object[] sel = l.getSelectedValues();
+			Object[] sel = elementList.getSelectedValues();
 			if (sel != null)
 			{
 				StringBuilder result = new StringBuilder(sel.length * 5);
@@ -588,7 +595,7 @@ public class ObjectSourceSearchPanel
 	{
 		int row = results.getSelectedRow();
 		if (row < 0) return;
-		
+
 		TableModel model = results.getModel();
 		if (model.getRowCount() == 0) return;
 
