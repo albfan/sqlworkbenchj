@@ -2746,6 +2746,10 @@ public class JEditTextArea
 				{
 					units = e.getUnitsToScroll();
 				}
+				if (e.getUnitsToScroll() < 0)
+				{
+					units = -1 * units;
+				}
 				int totalScrollAmount = units * vertical.getUnitIncrement();
 				vertical.setValue(vertical.getValue() + totalScrollAmount);
 			}
