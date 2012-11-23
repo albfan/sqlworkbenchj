@@ -1277,8 +1277,14 @@ public class TableListPanel
 	private boolean isSynonym(TableIdentifier table)
 	{
 		if (table == null) return false;
+
+		// this can happen during closing the application.
+		if (this.dbConnection == null) return false;
 		DbMetadata meta = this.dbConnection.getMetadata();
+		if (meta == null) return false;
 		DbSettings dbs = this.dbConnection.getDbSettings();
+		if (dbs == null) return false;
+
 		return (meta.supportsSynonyms() && dbs.isSynonymType(table.getType()));
 	}
 
