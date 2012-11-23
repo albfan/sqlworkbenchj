@@ -2742,13 +2742,16 @@ public class JEditTextArea
 			if (!WbAction.isCtrlPressed(e.getModifiers()))
 			{
 				int units = GuiSettings.getWheelScrollLines();
-				if (units < 0)
+				if (units > 0)
+				{
+					if (e.getUnitsToScroll() < 0)
+					{
+						units = -units; // need to scroll up
+					}
+				}
+				else
 				{
 					units = e.getUnitsToScroll();
-				}
-				if (e.getUnitsToScroll() < 0)
-				{
-					units = -1 * units;
 				}
 				int totalScrollAmount = units * vertical.getUnitIncrement();
 				vertical.setValue(vertical.getValue() + totalScrollAmount);
