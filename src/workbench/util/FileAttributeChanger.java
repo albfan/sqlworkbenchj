@@ -44,12 +44,12 @@ public class FileAttributeChanger
 	{
 		try
 		{
-			LogMgr.logDebug("FileAttributeChanger.removeHiddenJava6()", "Using Runtime to remove hidden attribute");
+			LogMgr.logDebug("FileAttributeChanger.runAttribCommand()", "Using Runtime to remove hidden attribute");
 			Runtime.getRuntime().exec("attrib -H \""  + dir.getAbsolutePath() + "\"");
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("FileAttributeChanger.removeHiddenJava6()", "Could not run attrib command", th);
+			LogMgr.logWarning("FileAttributeChanger.runAttribCommand()", "Could not run attrib command", th);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class FileAttributeChanger
 		// In order to be able to run & compile on Java6 as well, I'm using reflection.
 		try
 		{
-			LogMgr.logDebug("FileAttributeChanger.removeHiddenJava7()", "Using Files.setAttribute() to remove hidden attribute");
+			LogMgr.logDebug("FileAttributeChanger.removeAttribute()", "Using Files.setAttribute() to remove hidden attribute");
 			Method m = dir.getClass().getMethod("toPath", (Class<?>[])null);
 			Object path = m.invoke(dir, (Object[]) null);
 			Class pathClass = Class.forName("java.nio.file.Path");
@@ -79,7 +79,7 @@ public class FileAttributeChanger
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("FileAttributeChanger.removeHiddenJava7()", "Could not remove hidden attribute", th);
+			LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute", th);
 			return false;
 		}
 	}
