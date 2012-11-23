@@ -1,0 +1,98 @@
+/*
+ * FileAttributeChanger.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2012, Thomas Kellerer
+ * No part of this code may be reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.util;
+
+import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+
+import workbench.log.LogMgr;
+
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class FileAttributeChanger
+{
+
+	public void removeHidden(File dir)
+	{
+		if (isWindows())
+		{
+			boolean done = false;
+			if (isJava7())
+			{
+				done = removeAttribute(dir);
+			}
+			if (!done)
+			{
+				runAttribCommand(dir);
+			}
+		}
+	}
+
+	private void runAttribCommand(File dir)
+	{
+		try
+		{
+			LogMgr.logDebug("FileAttributeChanger.removeHiddenJava6()", "Using Runtime to remove hidden attribute");
+			Runtime.getRuntime().exec("attrib -H \""  + dir.getAbsolutePath() + "\"");
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("FileAttributeChanger.removeHiddenJava6()", "Could not run attrib command", th);
+		}
+	}
+
+	private boolean removeAttribute(File dir)
+	{
+		// this code does essentially the following:
+		// Path file = dir.toPath();
+		// Files.setAttribute(file, "dos:hidden", false);
+
+		// In order to be able to run & compile on Java6 as well, I'm using reflection.
+		try
+		{
+			LogMgr.logDebug("FileAttributeChanger.removeHiddenJava7()", "Using Files.setAttribute() to remove hidden attribute");
+			Method m = dir.getClass().getMethod("toPath", (Class<?>[])null);
+			Object path = m.invoke(dir, (Object[]) null);
+			Class pathClass = Class.forName("java.nio.file.Path");
+			Class filesClass = Class.forName("java.nio.file.Files");
+			Class option = Class.forName("java.nio.file.LinkOption");
+			Class optionArray = Class.forName("[Ljava.nio.file.LinkOption;");
+			Method setAttr = filesClass.getMethod("setAttribute", pathClass, String.class, Object.class, optionArray);
+
+			Enum noFollow = Enum.valueOf(option, "NOFOLLOW_LINKS");
+			Object options = Array.newInstance(option, 1);
+			Array.set(options, 0, noFollow);
+			setAttr.invoke(null, path, "dos:hidden", Boolean.FALSE, options);
+			return true;
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("FileAttributeChanger.removeHiddenJava7()", "Could not remove hidden attribute", th);
+			return false;
+		}
+	}
+
+	private boolean isWindows()
+	{
+		return System.getProperty("os.name").contains("Windows");
+	}
+
+	private boolean isJava7()
+	{
+		VersionNumber java = VersionNumber.getJavaVersion();
+		VersionNumber java7 = new VersionNumber(1, 7);
+		return java.isNewerOrEqual(java7);
+	}
+}

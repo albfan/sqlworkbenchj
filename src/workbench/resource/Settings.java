@@ -252,6 +252,13 @@ public class Settings
 				resetDefaults();
 			}
 		}
+
+		if (cfd.isHidden())
+		{
+			LogMgr.logWarning("Settings.initialize()", "Removing hidden attribute of the configuration directory!");
+			FileAttributeChanger changer = new FileAttributeChanger();
+			changer.removeHidden(cfd);
+		}
 	}
 
 	private boolean initLog4j()
