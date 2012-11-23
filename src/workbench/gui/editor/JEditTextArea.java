@@ -2739,6 +2739,8 @@ public class JEditTextArea
 	{
 		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
 		{
+			// Do not scroll if the Ctrl-Key is pressed
+			// that will trigger the font zoomer
 			if (!WbAction.isCtrlPressed(e.getModifiers()))
 			{
 				int units = GuiSettings.getWheelScrollLines();
