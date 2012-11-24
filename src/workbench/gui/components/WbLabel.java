@@ -24,10 +24,15 @@ public class WbLabel
 
 	public void setTextByKey(String resourceKey)
 	{
+		setTextByKey(resourceKey, true);
+	}
+
+	public void setTextByKey(String resourceKey, boolean includeTooltip)
+	{
 		setText(ResourceMgr.getString(resourceKey));
 		setToolTipText(ResourceMgr.getDescription(resourceKey, false));
 	}
-	
+
 	@Override
 	public void setText(String aText)
 	{

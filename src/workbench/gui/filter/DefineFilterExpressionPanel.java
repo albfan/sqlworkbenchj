@@ -40,9 +40,11 @@ import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.ValidatingComponent;
+import workbench.interfaces.ValueProvider;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.DataStoreValueProvider;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ColumnComparator;
@@ -62,7 +64,7 @@ public class DefineFilterExpressionPanel
 	extends JPanel
 	implements ActionListener, ValidatingComponent
 {
-	private ResultInfo columnInfo;
+	private ValueProvider data;
 	private List<PanelEntry> panels = new ArrayList<PanelEntry>();
 	private JButton addLineButton;
 	private JRadioButton andButton;
@@ -72,15 +74,15 @@ public class DefineFilterExpressionPanel
 	private	JButton saveButton = new JButton();
 	private	JButton loadButton = new JButton();
 
-	public DefineFilterExpressionPanel(ResultInfo source)
+	public DefineFilterExpressionPanel(ValueProvider source)
 	{
 		this(source,true);
 	}
 
-	public DefineFilterExpressionPanel(ResultInfo source, boolean allowSave)
+	public DefineFilterExpressionPanel(ValueProvider source, boolean allowSave)
 	{
 		super();
-		columnInfo = source;
+		data = source;
 		expressions = new JPanel();
 		this.expressions.setLayout(new GridBagLayout());
 
@@ -342,7 +344,7 @@ public class DefineFilterExpressionPanel
 
 	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
-		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
+		final ColumnExpressionPanel exp = new ColumnExpressionPanel(data, filter);
 		JButton b = new FlatButton(ResourceMgr.getImage("Remove"));
 		b.setPreferredSize(new Dimension(21,21));
 		b.addActionListener(this);
@@ -437,7 +439,8 @@ public class DefineFilterExpressionPanel
 		ResultInfo info = ds.getResultInfo();
 		if (info == null) return;
 
-		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(info);
+		ValueProvider data = new DataStoreValueProvider(ds);
+		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(data);
 		int col = source.getSelectedColumn();
 
 		FilterExpression lastFilter = source.getLastFilter();
@@ -486,14 +489,13 @@ public class DefineFilterExpressionPanel
 		if (entry == null || entry.expressionPanel == null) return;
 		entry.expressionPanel.setFocusToColumn();
 	}
-
 }
 
 class PanelEntry
 {
 	JPanel container;
 	ColumnExpressionPanel expressionPanel;
-	public PanelEntry(JPanel p, ColumnExpressionPanel ep)
+	PanelEntry(JPanel p, ColumnExpressionPanel ep)
 	{
 		container = p;
 		expressionPanel = ep;

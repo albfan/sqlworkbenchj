@@ -128,7 +128,6 @@ public class LookupValuePicker
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
 
-
 		Action nextComponent = new AbstractAction()
 		{
 			@Override

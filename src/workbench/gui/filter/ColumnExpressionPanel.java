@@ -11,6 +11,7 @@
  */
 package workbench.gui.filter;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -20,16 +21,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+
+import workbench.interfaces.ValueProvider;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.FlatButton;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
@@ -51,15 +58,18 @@ public class ColumnExpressionPanel
 	protected JComboBox columnSelector;
 	private List<ComparatorListItem> comparatorItems;
 	private ListComboBoxModel activeItems;
-	private ResultInfo columnInfo;
+	private ValueProvider filterData;
 	protected JTextField valueField;
+	protected JButton selectValueButton;
+
 	private ValueConverter converter = new ValueConverter();
 	private boolean ignoreComparatorChange;
 
-	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
+	public ColumnExpressionPanel(ValueProvider data, ExpressionValue filter)
 	{
 		super();
-		columnInfo = info;
+		filterData = data;
+		ResultInfo info = filterData.getResultInfo();
 		comparatorDropDown = new JComboBox();
 		activeItems = new ListComboBoxModel();
 
@@ -93,11 +103,18 @@ public class ColumnExpressionPanel
 		ignoreCase = new JCheckBox(ResourceMgr.getString("LblFilterIgnoreCase"));
 		ignoreCase.setSelected(false);
 		ignoreCase.setEnabled(false);
+
+		JPanel valuePanel = new JPanel(new BorderLayout(0,0));
+
 		valueField = new JTextField(10);
 		TextComponentMouseListener ml = new TextComponentMouseListener();
 		valueField.addMouseListener(ml);
+		valuePanel.add(valueField, BorderLayout.CENTER);
 
-		valueField.setMinimumSize(new Dimension(15,24));
+		selectValueButton = new FlatButton("...");
+		selectValueButton.addActionListener(this);
+
+		valuePanel.add(selectValueButton, BorderLayout.EAST);
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -118,7 +135,7 @@ public class ColumnExpressionPanel
 		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		this.add(valueField,c);
+		this.add(valuePanel, c);
 
 		columnSelector.addActionListener(this);
 		comparatorDropDown.addActionListener(this);
@@ -137,7 +154,6 @@ public class ColumnExpressionPanel
 		pol.addComponent(comparatorDropDown);
 		pol.addComponent(ignoreCase);
 		pol.addComponent(valueField);
-		pol.setDefaultComponent(valueField);
 		this.setFocusTraversalPolicy(pol);
 	}
 
@@ -172,7 +188,7 @@ public class ColumnExpressionPanel
 				}
 				else
 				{
-					ColumnIdentifier col = this.columnInfo.getColumn(index-1);
+					ColumnIdentifier col = this.filterData.getResultInfo().getColumn(index-1);
 					buildColumnComparatorDropDown(col);
 				}
 			}
@@ -182,12 +198,27 @@ public class ColumnExpressionPanel
 			}
 			checkComparator();
 		}
+		else if (evt.getSource() == selectValueButton)
+		{
+			selectColumnValue();
+		}
 		else if (!ignoreComparatorChange && evt.getSource() == this.comparatorDropDown)
 		{
 			checkComparator();
 		}
 	}
 
+	private void selectColumnValue()
+	{
+		String column = getColumnName();
+		if ("*".equals(column)) return;
+		String value = ListValuePicker.pickValue(this, column, filterData, (String) getFilterValue());
+		if (value != null)
+		{
+			valueField.setText(value);
+		}
+	}
+	
 	private void checkComparator()
 	{
 		try
@@ -207,6 +238,15 @@ public class ColumnExpressionPanel
 				else
 				{
 					valueField.setBackground(this.getBackground());
+				}
+				String col = getColumnName();
+				if ("*".equals(col))
+				{
+					selectValueButton.setEnabled(false);
+				}
+				else
+				{
+					selectValueButton.setEnabled(true);
 				}
 			}
 			else
@@ -233,7 +273,7 @@ public class ColumnExpressionPanel
 		int index = 0;
 		if (!"*".equals(col))
 		{
-			index = this.columnInfo.findColumn(col);
+			index = this.filterData.getResultInfo().findColumn(col);
 		}
 		if (index > -1)
 		{
@@ -311,15 +351,15 @@ public class ColumnExpressionPanel
 
 	public Object getFilterValue()
 	{
-		String value = valueField.getText();
+		String value = getInputValue();
 		String col = getColumnName();
-		int colIndex = this.columnInfo.findColumn(col);
+		int colIndex = this.filterData.getResultInfo().findColumn(col);
 		// If the any column ("*") entry is selected
 		// colIndex will be -1, and we simply return the value entered
 		// because we tried everything as a String
 		if (colIndex > -1)
 		{
-			int type = this.columnInfo.getColumnType(colIndex);
+			int type = this.filterData.getResultInfo().getColumnType(colIndex);
 			try
 			{
 				Object dataValue = this.converter.convertValue(value, type);
