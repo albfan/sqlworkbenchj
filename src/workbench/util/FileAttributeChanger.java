@@ -59,7 +59,7 @@ public class FileAttributeChanger
 		// Path file = dir.toPath();
 		// Files.setAttribute(file, "dos:hidden", false);
 
-		// In order to be able to run & compile on Java6 as well, I'm using reflection.
+		// In order to be able to compile on Java6, I'm using reflection.
 		try
 		{
 			LogMgr.logDebug("FileAttributeChanger.removeAttribute()", "Using Files.setAttribute() to remove hidden attribute");

@@ -2737,28 +2737,27 @@ public class JEditTextArea
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+		if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL) return;
+
+		// Do not scroll if the Ctrl-Key is pressed
+		// because that combination is handled by the font zoomer
+		if (WbAction.isCtrlPressed(e.getModifiers())) return;
+
+		int units = GuiSettings.getWheelScrollLines();
+
+		// The user configured a value that is different from the OS settings
+		if (units > 0)
 		{
-			// Do not scroll if the Ctrl-Key is pressed
-			// that will trigger the font zoomer
-			if (!WbAction.isCtrlPressed(e.getModifiers()))
+			if (e.getUnitsToScroll() < 0)
 			{
-				int units = GuiSettings.getWheelScrollLines();
-				if (units > 0)
-				{
-					if (e.getUnitsToScroll() < 0)
-					{
-						units = -units; // need to scroll up
-					}
-				}
-				else
-				{
-					units = e.getUnitsToScroll();
-				}
-				int totalScrollAmount = units * vertical.getUnitIncrement();
-				vertical.setValue(vertical.getValue() + totalScrollAmount);
+				units = -units; // need to scroll up
 			}
 		}
+		else
+		{
+			units = e.getUnitsToScroll();
+		}
+		vertical.setValue(vertical.getValue() + units);
 	}
 
 	class ScrollLayout implements LayoutManager
