@@ -20,11 +20,10 @@ Features:
 - Access to result data through expressions: where id = ${results[1].columns("foo")}
 - "Copy as Select"
 - Macros in console mode
-- Spreadsheet import (XLS, XLSX, ODS)
+- Spreadsheet import for ODS
 - Compare ResultSets
-- Support ${...} syntax for calling function during data editing (similar to -constantValues for WbImport)
 - Support ${guid} calls
-  (or more generic: calling any "registered" Java functions to evaluate values before sending them to the DBMS)
+  (or more generic: Support ${...} syntax for calling function during data editing )
 - Filterdefinition: show unique values per column as a dropdown in the dialog
 - Paging for console mode
 - DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
