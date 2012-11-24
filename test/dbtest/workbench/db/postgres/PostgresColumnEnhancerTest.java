@@ -57,7 +57,7 @@ public class PostgresColumnEnhancerTest
 			return;
 		}
 		String sql =
-			"create table foo (pk_value integer not null, id1 integer[], id2 integer[][], id3 integer[][][], foo text[]);\n" +
+			"create table foo (pk_value integer not null, id1 integer[], id2 integer[][], id3 integer[][][], foo text[], bar varchar);\n" +
 			"commit;\n";
 		TestUtil.executeScript(conn, sql);
 		TableDefinition tbl = conn.getMetadata().getTableDefinition(new TableIdentifier("foo"));
@@ -84,6 +84,11 @@ public class PostgresColumnEnhancerTest
 			{
 				assertEquals("integer", col.getDbmsType());
 			}
+			if (col.getColumnName().equals("bar"))
+			{
+				assertEquals("varchar", col.getDbmsType());
+			}
+
 		}
 	}
 
