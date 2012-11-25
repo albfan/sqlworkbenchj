@@ -147,7 +147,7 @@ public class WbSchemaDiff
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, true));
 		diff.setIncludeExtendedOptions(cmdLine.getBoolean(WbSchemaReport.PARAM_OBJECT_OPTIONS, false));
-		List<String> types = cmdLine.getList(ARG_ADD_TYPES);
+		List<String> types = cmdLine.getListValue(ARG_ADD_TYPES);
 		diff.setAdditionalTypes(types);
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);

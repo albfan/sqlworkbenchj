@@ -146,8 +146,12 @@ public class SchemaDiff
 
 	public void setAdditionalTypes(List<String> types)
 	{
-		if (types == null) return;
-		this.additionalTypes = new String[types.size()];
+		if (CollectionUtil.isEmpty(types))
+		{
+			additionalTypes = null;
+			return;
+		}
+		additionalTypes = new String[types.size()];
 		for (int i=0; i < types.size(); i++)
 		{
 			additionalTypes[i] = types.get(i).toUpperCase();
@@ -735,9 +739,12 @@ public class SchemaDiff
 
 	private void buildObjectsList()
 	{
-		this.objectDiffs = new GenericDiffLoader(referenceDb, targetDb, referenceSchema, targetSchema, additionalTypes);
-		this.objectDiffs.setProgressMonitor(monitor);
-		this.objectDiffs.loadObjects();
+		if (this.additionalTypes != null)
+		{
+			this.objectDiffs = new GenericDiffLoader(referenceDb, targetDb, referenceSchema, targetSchema, additionalTypes);
+			this.objectDiffs.setProgressMonitor(monitor);
+			this.objectDiffs.loadObjects();
+		}
 	}
 
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
@@ -951,7 +958,11 @@ public class SchemaDiff
 
 		buildObjectsList();
 
-		if (objectsToCompare == null && (objectDiffs == null || objectDiffs.getObjectCount() == 0)) return;
+		if (objectsToCompare == null && (objectDiffs == null || objectDiffs.getObjectCount() == 0))
+		{
+			// nothing to do
+			return;
+		}
 
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");

@@ -474,6 +474,7 @@ public class ArgumentParser
 		if (getArgumentType(key) != ArgumentType.Repeatable)
 		{
 			String value = getValue(key);
+			if (value == null) return Collections.emptyList();
 			return CollectionUtil.arrayList(value);
 		}
 		Object value = this.arguments.get(key);

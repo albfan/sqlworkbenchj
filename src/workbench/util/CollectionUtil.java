@@ -102,4 +102,21 @@ public class CollectionUtil
 		return Collections.unmodifiableList(arrayList(a));
 	}
 
+	/**
+	 * Removes all NULL values from the given collection.
+	 *
+	 * @param elements the collection to cleanup
+	 */
+	public static void removeNullValues(Collection elements)
+	{
+		Iterator itr = elements.iterator();
+		while (itr.hasNext())
+		{
+			if (itr.next() == null)
+			{
+				itr.remove();
+			}
+		}
+	}
+
 }
