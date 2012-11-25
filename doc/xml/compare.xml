@@ -200,7 +200,7 @@
 						<para>
 							When including check constraints this parameter controls whether constraints
 							should be matched by name, or only by their expression. If comparing by names
-							is enabled, the diff output will contain elements for constraint modification
+							the diff output will contain elements for constraint modification
 							otherwise only drop and add entries will be available.
 						</para>
 						<para>
@@ -280,10 +280,31 @@
 						</para>
 					</entry>
 				</row>
-
+				<row>
+					<entry>-additionalTypes</entry>
+          <entry>
+              <para>
+                Select additional object types that are not compared by default (using the <literal>-includeXXX</literal> parameters)
+                such as Oracle <literal>TYPE</literal> definitions. Those objects are compared on source code level (like procedures)
+                rather than on attribute level.
+              </para>
+              <para>
+                Valid values are object type names as shown in the "Type" dropdown in the DbExplorer.
+              </para>
+          </entry>
+				</row>
+				<row>
+					<entry>-includeExtendedOptions</entry>
+          <entry>
+            <para>Include additional information for tables like tablespace definition or partition defintion for Oracle.</para>
+						<para>
+							Valid values are <literal>true</literal> or <literal>false</literal>. The default is <literal>false</literal>
+						</para>
+          </entry>
+				</row>
 				<row>
 					<entry>-stylesheet</entry>
-					<entry>Apply a XSLT transformation to the generated XML file.</entry>
+					<entry>Define the filename of a XSLT transformation that is to be applied to the generated XML file.</entry>
 				</row>
 				<row>
 					<entry>-xsltOutput</entry>

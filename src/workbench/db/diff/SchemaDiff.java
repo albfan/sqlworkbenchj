@@ -146,7 +146,12 @@ public class SchemaDiff
 
 	public void setAdditionalTypes(List<String> types)
 	{
-		this.additionalTypes = types.toArray(new String[]{});
+		if (types == null) return;
+		this.additionalTypes = new String[types.size()];
+		for (int i=0; i < types.size(); i++)
+		{
+			additionalTypes[i] = types.get(i).toUpperCase();
+		}
 	}
 
 	public void setIncludeSequences(boolean flag)

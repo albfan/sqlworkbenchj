@@ -79,6 +79,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_OBJECT_OPTIONS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_ADD_TYPES, ArgumentType.ListArgument);
 	}
 
 	@Override
@@ -148,7 +149,7 @@ public class WbSchemaDiff
 		diff.setIncludeExtendedOptions(cmdLine.getBoolean(WbSchemaReport.PARAM_OBJECT_OPTIONS, false));
 		List<String> types = cmdLine.getList(ARG_ADD_TYPES);
 		diff.setAdditionalTypes(types);
-		
+
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
 		String tarTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
 

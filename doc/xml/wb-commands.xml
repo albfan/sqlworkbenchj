@@ -86,15 +86,15 @@
 					</entry>
 				</row>
 
-				<row>
-					<entry>-types</entry>
-					<entry>A (comma separated) list of object types to include. By default <literal>TABLE</literal>s and
-          <literal>VIEW</literal>s are included. To include e.g. <literal>SYSTEM VIEW</literal>s and
-          <literal>TEMPORARY TABLE</literal>s, use the following option:
-          <literal>-types='TABLE,VIEW,SYSTEM VIEW,TEMPORARY TABLE'</literal>. If you include type names that contain
-          a space (or e.g. a dash) you have to quote the whole list, not just the single value.
-					</entry>
-				</row>
+        <row>
+          <entry>-types</entry>
+          <entry>A (comma separated) list of object types to include. By default <literal>TABLE</literal>s and
+            <literal>VIEW</literal>s are included. To include e.g. <literal>SYSTEM VIEW</literal>s and
+            <literal>TEMPORARY TABLE</literal>s, use the following option:
+            <literal>-types='TABLE,VIEW,SYSTEM VIEW,TEMPORARY TABLE'</literal>. If you include type names that contain
+            a space (or e.g. a dash) you have to quote the whole list, not just the single value.
+          </entry>
+        </row>
 
 				<row>
 					<entry>-includeTables</entry>
@@ -142,6 +142,15 @@
 				<row>
 					<entry>-xsltOutput</entry>
 					<entry>The name of the generated output file when applying the XSLT transformation.</entry>
+				</row>
+				<row>
+					<entry>-includeExtendedOptions</entry>
+          <entry>
+            <para>Include additional information for tables like tablespace definition or partition defintion for Oracle.</para>
+						<para>
+							Valid values are <literal>true</literal> or <literal>false</literal>. The default is <literal>false</literal>
+						</para>
+          </entry>
 				</row>
 			</tbody>
       </tgroup>

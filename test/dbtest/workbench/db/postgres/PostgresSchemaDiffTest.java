@@ -22,6 +22,8 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
+
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import static org.junit.Assert.*;
 
@@ -112,6 +114,62 @@ public class PostgresSchemaDiffTest
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='foo']/table-constraints)");
 		assertEquals("0", value);
+	}
+
+	@Test
+	public void testExtendedDiff()
+		throws Exception
+	{
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+		if (conn == null)
+		{
+			return;
+		}
+
+		String sql =
+			"CREATE SCHEMA " + TARGET_SCHEMA + ";\n" +
+			"COMMIT;\n" +
+			"create type " + REFERENCE_SCHEMA + ".mood as enum ('sad','ok','happy');\n" +
+			"create type " + REFERENCE_SCHEMA + ".address_type AS (city varchar(100), street varchar(50), zipcode varchar(10));\n" +
+			"create type " + TARGET_SCHEMA + ".mood as enum ('notok','ok','happy');\n" +
+			"create type " + TARGET_SCHEMA + ".address_type AS (city varchar(50), street varchar(50), zipcode varchar(10));\n" +
+			"commit\n";
+
+		TestUtil.executeScript(conn, sql);
+
+		SchemaDiff diff = new SchemaDiff(conn, conn);
+		diff.setIncludeViews(false);
+		diff.setIncludeExtendedOptions(false);
+		diff.setIncludeIndex(false);
+		diff.setIncludeSequences(false);
+		diff.setIncludeProcedures(false);
+		diff.setIncludeTriggers(false);
+		diff.setAdditionalTypes(CollectionUtil.arrayList("enum","type"));
+		diff.setSchemas(REFERENCE_SCHEMA, TARGET_SCHEMA);
+
+		TestUtil util = getTestUtil();
+
+		File outfile = new File(util.getBaseDir(), "pg_addtypes_diff.xml");
+		Writer out = new FileWriter(outfile);
+		diff.writeXml(out);
+		FileUtil.closeQuietely(out);
+
+		assertTrue(outfile.exists());
+		assertTrue(outfile.length() > 0);
+		Reader in = new FileReader(outfile);
+		String xml = FileUtil.readCharacters(in);
+		assertNotNull(xml);
+//		System.out.println(xml);
+		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object)");
+		assertEquals("2", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object/reference-object/object-def[@name='mood'])");
+		assertEquals("1", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object/reference-object/object-def[@name='address_type'])");
+		assertEquals("1", value);
+
+		assertTrue("Could not delete output", outfile.delete());
 	}
 
 }
