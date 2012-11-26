@@ -145,6 +145,7 @@ public class VariablePool
 		{
 			this.prefix = null;
 			this.suffix = null;
+			initPromptPattern();
 		}
 	}
 

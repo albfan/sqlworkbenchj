@@ -45,8 +45,8 @@ public class SqlServerMergeGenerator
 	public String addRow(ResultInfo info, RowData row, long rowIndex)
 	{
 		StringBuilder sql = new StringBuilder(100);
-		if (rowIndex > 0) sql.append("\n  UNION ALL\n");
-		appendValues(sql, info, row, rowIndex == 0);
+		if (rowIndex > 0) sql.append(",\n");
+		appendValues(sql, info, row);
 		return sql.toString();
 	}
 
@@ -77,14 +77,15 @@ public class SqlServerMergeGenerator
 		TableIdentifier tbl = data.getUpdateTable();
 		sql.append("MERGE INTO ");
 		sql.append(tbl.getTableExpression(data.getOriginalConnection()));
-		sql.append(" ut\nUSING\n(\n");
+		sql.append(" ut\nUSING (\n");
+		sql.append("  VALUES\n");
 		if (withData)
 		{
 			ResultInfo info = data.getResultInfo();
 			for (int row=0; row < data.getRowCount(); row++)
 			{
-				if (row > 0) sql.append("\n  UNION ALL\n");
-				appendValues(sql, info, data.getRow(row), row == 0);
+				if (row > 0) sql.append(",\n");
+				appendValues(sql, info, data.getRow(row));
 			}
 		}
 	}
@@ -92,7 +93,13 @@ public class SqlServerMergeGenerator
 	private void appendJoin(StringBuilder sql, RowDataContainer data)
 	{
 		ResultInfo info = data.getResultInfo();
-		sql.append("\n) AS md ON (");
+		sql.append("\n) AS md (");
+		for (int col=0; col < info.getColumnCount(); col ++)
+		{
+			if (col > 0) sql.append(", ");
+			sql.append(info.getColumnName(col));
+		}
+		sql.append(") ON (");
 		int pkCount = 0;
 		for (int col=0; col < info.getColumnCount(); col ++)
 		{
@@ -108,21 +115,17 @@ public class SqlServerMergeGenerator
 		sql.append(")");
 	}
 
-	private void appendValues(StringBuilder sql, ResultInfo info, RowData rd, boolean useAlias)
+	private void appendValues(StringBuilder sql, ResultInfo info, RowData rd)
 	{
-		sql.append("  SELECT ");
+		sql.append("    (");
 
 		for (int col=0; col < info.getColumnCount(); col++)
 		{
 			if (col > 0) sql.append(", ");
 			ColumnData cd = new ColumnData(rd.getValue(col), info.getColumn(col));
 			sql.append(formatter.getDefaultLiteral(cd));
-			if (useAlias)
-			{
-				sql.append(" AS ");
-				sql.append(info.getColumnName(col));
-			}
 		}
+		sql.append(')');
 	}
 
 	private void appendUpdate(StringBuilder sql, RowDataContainer data)

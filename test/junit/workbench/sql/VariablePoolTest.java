@@ -44,13 +44,13 @@ public class VariablePoolTest
 	@AfterClass
 	public static void tearDown()
 	{
-		VariablePool.getInstance().clear();
+		VariablePool.getInstance().reset();
 	}
 
 	@Before
 	public void beforeTest()
 	{
-		VariablePool.getInstance().clear();
+		VariablePool.getInstance().reset();
 	}
 
 	@Test

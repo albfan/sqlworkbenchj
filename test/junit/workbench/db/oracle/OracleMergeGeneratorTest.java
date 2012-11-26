@@ -60,8 +60,7 @@ public class OracleMergeGeneratorTest
 		assertNotNull(sql);
 		String expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
+			"USING (\n" +
 			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
 			"  UNION ALL\n" +
 			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +
@@ -81,8 +80,7 @@ public class OracleMergeGeneratorTest
 
 		expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
+			"USING (\n" +
 			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
 			") md ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
@@ -132,8 +130,7 @@ public class OracleMergeGeneratorTest
 
 		String expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
+			"USING (\n" +
 			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname FROM dual\n" +
 			"  UNION ALL\n" +
 			"  SELECT 24, 'Ford', 'Prefect' FROM dual\n" +

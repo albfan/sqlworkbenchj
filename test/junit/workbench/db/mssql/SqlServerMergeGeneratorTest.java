@@ -60,12 +60,11 @@ public class SqlServerMergeGeneratorTest
 		assertNotNull(sql);
 		String expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
-			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect'\n" +
-			") AS md ON (ut.id = md.id)\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent'),\n" +
+			"    (24, 'Ford', 'Prefect')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
@@ -81,10 +80,10 @@ public class SqlServerMergeGeneratorTest
 
 		expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
-			") AS md ON (ut.id = md.id)\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
@@ -132,19 +131,18 @@ public class SqlServerMergeGeneratorTest
 
 		String expected =
 			"MERGE INTO person ut\n" +
-			"USING\n" +
-			"(\n" +
-			"  SELECT 42 AS id, 'Arthur' AS fname, 'Dent' AS lname\n" +
-			"  UNION ALL\n" +
-			"  SELECT 24, 'Ford', 'Prefect'\n" +
-			") AS md ON (ut.id = md.id)\n" +
+			"USING (\n" +
+			"  VALUES\n" +
+			"    (42, 'Arthur', 'Dent'),\n" +
+			"    (24, 'Ford', 'Prefect')\n" +
+			") AS md (id, fname, lname) ON (ut.id = md.id)\n" +
 			"WHEN MATCHED THEN UPDATE\n" +
 			"     SET ut.fname = md.fname,\n" +
 			"         ut.lname = md.lname\n" +
 			"WHEN NOT MATCHED THEN\n" +
 			"  INSERT (id, fname, lname)\n" +
 			"  VALUES (md.id, md.fname, md.lname);";
-		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
+//		System.out.println("----- expected: \n" + expected + "\n****** result: \n" + result.toString() + "\n-------");
 		assertEquals(expected, result.toString());
 	}
 }
