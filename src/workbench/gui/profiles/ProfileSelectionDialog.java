@@ -13,10 +13,12 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -72,7 +74,7 @@ public class ProfileSelectionDialog
 	{
 		this(parent, modal, lastProfileKey, false);
 	}
-	
+
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey, boolean enableVersionCheck)
 	{
 		super(parent, modal);
@@ -141,7 +143,7 @@ public class ProfileSelectionDialog
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		this.restoreSize();
-		// This should be "posted", otherwise the focus will not be set
+		// This should be done "later", otherwise the focus will not be set
 		// correctly when running on Linux with the GTk+ look and feel
 		WbSwingUtilities.requestFocus(profiles.getInitialFocusComponent());
 	}
@@ -151,11 +153,28 @@ public class ProfileSelectionDialog
 	{
 		if (versionInfo == null) return;
 
-		WbSwingUtilities.invoke(new Runnable()
+		versionInfo.addMouseListener(
+			new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked(MouseEvent e)
+				{
+					if (e.getButton() == MouseEvent.BUTTON1)
+					{
+						ActionEvent evt = new ActionEvent(ProfileSelectionDialog.this, -1, "notifierClicked");
+						event.getHandler().actionPerformed(evt);
+						versionInfo.removeMouseListener(this);
+					}
+				}
+			});
+
+		WbSwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				versionInfo.setIcon(ResourceMgr.getImageByName(event.getIconKey()));
 				versionInfo.setText(event.getTooltip());
 				versionInfo.getParent().doLayout();
 			}
@@ -172,6 +191,7 @@ public class ProfileSelectionDialog
 			@Override
 			public void run()
 			{
+				versionInfo.setIcon(null);
 				versionInfo.setText("");
 				versionInfo.getParent().doLayout();
 			}

@@ -40,6 +40,17 @@ public class NotifierWindow
 	public NotifierWindow(Frame owner, String msg)
 	{
 		super(owner, false);
+		init(msg);
+	}
+
+	public NotifierWindow(JDialog owner, String msg)
+	{
+		super(owner, false);
+		init(msg);
+	}
+
+	private void init(String msg)
+	{
 		setUndecorated(true);
 		setFocusable(false);
 		setLayout(new BorderLayout());

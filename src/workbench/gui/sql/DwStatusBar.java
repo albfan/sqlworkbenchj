@@ -41,7 +41,6 @@ import javax.swing.border.LineBorder;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.NotifierWindow;
 import workbench.gui.components.SelectionDisplay;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
@@ -188,7 +187,7 @@ public class DwStatusBar
 			l.setToolTipText(this.tfTimeout.getToolTipText());
 			infoPanel.add(this.tfTimeout);
 		}
-		
+
 		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		infoPanel.add(l);
@@ -450,8 +449,8 @@ public class DwStatusBar
 			public void run()
 			{
 				alertPanel.add(notificationLabel);
-				NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
-				w.show(notificationLabel);
+//				NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
+//				w.show(notificationLabel);
 				validate();
 			}
 		});
