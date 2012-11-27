@@ -460,6 +460,9 @@ public class TableListPanel
 
 	private void extendPopupMenu()
 	{
+		countAction = new CountTableRowsAction(this, tableList.getSelectionModel());
+		tableList.addPopupAction(countAction, false);
+
 		if (this.parentWindow != null)
 		{
 			this.showDataMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", parentWindow, true);
@@ -479,9 +482,6 @@ public class TableListPanel
 
 		compileAction = new CompileDbObjectAction(this, tableList.getSelectionModel());
 		tableList.addPopupAction(compileAction, false);
-
-		countAction = new CountTableRowsAction(this, tableList.getSelectionModel());
-		tableList.addPopupAction(countAction, false);
 
 		DropDbObjectAction dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
 		tableList.addPopupAction(dropAction, true);

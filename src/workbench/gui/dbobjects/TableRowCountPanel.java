@@ -38,6 +38,7 @@ import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.WbTable;
 
 import workbench.storage.DataStore;
@@ -131,6 +132,10 @@ public class TableRowCountPanel
 			conn.setBusy(true);
 			TableSelectBuilder builder = new TableSelectBuilder(conn, "tabledata");
 			currentStatement = conn.createStatementForQuery();
+
+			WbSwingUtilities.showWaitCursorOnWindow(data);
+
+			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
 			for (TableIdentifier table : tables)
 			{
 				if (cancel) break;
@@ -157,6 +162,9 @@ public class TableRowCountPanel
 			SqlUtil.closeAll(rs, currentStatement);
 			conn.setBusy(false);
 			showStatusMessage("   ");
+			WbSwingUtilities.showDefaultCursorOnWindow(data);
+			this.window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
+			data.checkCopyActions();
 		}
 	}
 
