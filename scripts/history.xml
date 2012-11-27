@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-11-24">
+    <entry dev-build="9" type="enh">From within the DbExplore's table list, the rows for the selected tables can now be counted.</entry>
     <entry dev-build="9" type="enh">WbSchemaDiff can now handle additional DBMS specific objects such as TYPEs. The parameter -additionalTypes selects the types to be compared.</entry>
     <entry dev-build="9" type="enh">When filtering for a single column in the filter dialog, a value from the underlying data can now be selected.</entry>
     <entry dev-build="8" type="enh">The number of lines to scroll in the editor with the mouse wheel can now be configured.</entry>
