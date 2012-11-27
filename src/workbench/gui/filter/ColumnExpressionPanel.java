@@ -113,7 +113,6 @@ public class ColumnExpressionPanel
 
 		selectValueButton = new FlatButton("...");
 		selectValueButton.addActionListener(this);
-		selectValueButton.setMargin(new Insets(2, 3, 2, 3));
 
 		valuePanel.add(selectValueButton, BorderLayout.EAST);
 

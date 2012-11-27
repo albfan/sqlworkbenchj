@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
 import workbench.WbManager;
@@ -23,6 +24,9 @@ import workbench.gui.WbSwingUtilities;
 public class FlatButton
 	extends WbButton
 {
+
+	private static final Insets SMALL_MARGIN = new Insets(3,5,3,5);
+	private boolean useDefaultMargin;
 
 	public FlatButton()
 	{
@@ -62,5 +66,31 @@ public class FlatButton
 	public void setFlatLook()
 	{
 		this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
+	}
+
+	public void setUseDefaultMargin(boolean useDefaultMargin)
+	{
+		this.useDefaultMargin = useDefaultMargin;
+	}
+
+	@Override
+	public Insets getInsets()
+	{
+		return getCustomInsets();
+	}
+
+	@Override
+	public Insets getMargin()
+	{
+		return getCustomInsets();
+	}
+
+	private Insets getCustomInsets()
+	{
+		if (useDefaultMargin)
+		{
+			return super.getInsets();
+		}
+		return SMALL_MARGIN;
 	}
 }

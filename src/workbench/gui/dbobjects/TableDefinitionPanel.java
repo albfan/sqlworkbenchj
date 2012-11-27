@@ -225,6 +225,7 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 15, 0, 0);
 		alterButton = new FlatButton(alterColumnsAction);
 		alterButton.setIcon(null);
+		alterButton.setUseDefaultMargin(true);
 		toolbar.add(alterButton, cc);
 
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);

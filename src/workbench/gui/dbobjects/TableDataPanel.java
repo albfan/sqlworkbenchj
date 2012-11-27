@@ -30,7 +30,6 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -90,7 +89,7 @@ public class TableDataPanel
 
 	private ReloadAction reloadAction;
 
-	private JButton config;
+	private FlatButton config;
 	private JLabel tableNameLabel;
 	private JLabel rowCountLabel;
 	private WbButton rowCountButton;
@@ -219,6 +218,7 @@ public class TableDataPanel
 		this.config = new FlatButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
 		this.config.setToolTipText(ResourceMgr.getDescription("LblConfigureWarningThreshold"));
 		this.config.addActionListener(this);
+		config.setUseDefaultMargin(true);
 		topPanel.add(this.config);
 
 		this.add(topPanel, BorderLayout.NORTH);

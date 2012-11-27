@@ -711,9 +711,9 @@ public class ConnectionEditorPanel
     jPanel1.add(tfWorkspaceFile, gridBagConstraints);
 
     selectWkspButton.setText("...");
-    selectWkspButton.setMaximumSize(new java.awt.Dimension(26, 22));
-    selectWkspButton.setMinimumSize(new java.awt.Dimension(26, 22));
-    selectWkspButton.setPreferredSize(new java.awt.Dimension(26, 22));
+    selectWkspButton.setMaximumSize(null);
+    selectWkspButton.setMinimumSize(null);
+    selectWkspButton.setPreferredSize(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
