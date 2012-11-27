@@ -148,7 +148,7 @@ public class TableDefinitionPanel
 		DbData db = new DbData()
 		{
 			@Override
-			public long addRow()
+			public int addRow()
 			{
 				return tableDefinition.addRow();
 			}

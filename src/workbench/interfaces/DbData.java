@@ -17,7 +17,7 @@ package workbench.interfaces;
  */
 public interface DbData
 {
-	long addRow();
+	int addRow();
 	void deleteRow();
 	void deleteRowWithDependencies();
 	boolean startEdit();

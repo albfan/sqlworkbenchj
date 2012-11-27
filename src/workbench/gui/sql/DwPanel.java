@@ -1135,12 +1135,12 @@ public class DwPanel
 	}
 
 	@Override
-	public long addRow()
+	public int addRow()
 	{
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
 
-		long newRow = this.dataTable.addRow();
+		int newRow = this.dataTable.addRow();
 		if (newRow > -1) this.rowCountChanged();
 		return newRow;
 	}

@@ -359,7 +359,7 @@ public class WbTable
 		};
 		configureEnterKeyAction(a);
 	}
-	
+
 	public void configureEnterKeyAction(Action enterAction)
 	{
 		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
@@ -2284,7 +2284,7 @@ public class WbTable
 		}
 	}
 
-	public long addRow()
+	public int addRow()
 	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return -1;

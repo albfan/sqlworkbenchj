@@ -100,6 +100,8 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.actions.CountTableRowsAction;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
@@ -147,6 +149,7 @@ public class TableListPanel
 	private SpoolDataAction spoolData;
 
 	private CompileDbObjectAction compileAction;
+	private CountTableRowsAction countAction;
 	private AlterObjectAction renameAction;
 
 	private MainWindow parentWindow;
@@ -476,6 +479,9 @@ public class TableListPanel
 
 		compileAction = new CompileDbObjectAction(this, tableList.getSelectionModel());
 		tableList.addPopupAction(compileAction, false);
+
+		countAction = new CountTableRowsAction(this, tableList.getSelectionModel());
+		tableList.addPopupAction(countAction, false);
 
 		DropDbObjectAction dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
 		tableList.addPopupAction(dropAction, true);
@@ -820,6 +826,7 @@ public class TableListPanel
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);
 		this.compileAction.setConnection(connection);
+		this.countAction.setConnection(connection);
 	}
 
 	public boolean isReallyVisible()
