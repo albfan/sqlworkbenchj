@@ -11,6 +11,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -37,9 +38,14 @@ import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.StopAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.Reloadable;
 
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
@@ -52,7 +58,7 @@ import workbench.util.WbThread;
  */
 public class TableRowCountPanel
 	extends JPanel
-	implements WindowListener
+	implements WindowListener, Reloadable, Interruptable
 {
 	private WbTable data;
 	private JLabel statusBar;
@@ -60,24 +66,54 @@ public class TableRowCountPanel
 	private Statement currentStatement;
 	private boolean cancel;
 	private JFrame window;
+	private WbConnection dbConnection;
 
-	public TableRowCountPanel(List<TableIdentifier> toCount)
+	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
 		tables = toCount;
+		dbConnection = connection;
 		statusBar = new JLabel();
 		data = new WbTable(false, false, false);
 		JScrollPane scroll = new JScrollPane(data);
 		JPanel statusPanel = new JPanel(new BorderLayout(0,0));
-		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1,5,1,1));
+
+		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
+		Border frame = new CompoundBorder(new EmptyBorder(3,3,0,3), etched);
+		scroll.setBorder(frame);
+
+		Border b = new CompoundBorder(new EmptyBorder(3, 2, 2, 3), etched);
 		statusPanel.setBorder(b);
 		statusPanel.add(statusBar);
 
+		WbToolbar toolbar = new WbToolbar();
+		toolbar.setBorder(new CompoundBorder(new EmptyBorder(3,3,3,3), etched));
+		ReloadAction reload = new ReloadAction(this);
+		toolbar.add(reload);
+		toolbar.addSeparator();
+		StopAction cancelAction = new StopAction(this);
+		toolbar.add(cancelAction);
+
+		add(toolbar, BorderLayout.PAGE_START);
 		add(scroll, BorderLayout.CENTER);
 		add(statusPanel, BorderLayout.PAGE_END);
 	}
 
-	public void cancel()
+	@Override
+	public void reload()
+	{
+		retrieveRowCounts();
+	}
+
+
+	@Override
+	public boolean confirmCancel()
+	{
+		return true;
+	}
+
+	@Override
+	public void cancelExecution()
 	{
 		showStatusMessage(ResourceMgr.getString("MsgCancelling"));
 		cancel = true;
@@ -95,24 +131,33 @@ public class TableRowCountPanel
 		}
 	}
 
-	public void retrieveRowCounts(final WbConnection conn)
+	public void retrieveRowCounts()
 	{
+		if (dbConnection == null) return;
 		if (CollectionUtil.isEmpty(tables)) return;
-		if (conn.isBusy()) return;
+		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection))
+		{
+			return;
+		}
+
 		WbThread retrieveThread = new WbThread("RowCounter")
 		{
 			@Override
 			public void run()
 			{
-				doRetrieveRowCounts(conn);
+				doRetrieveRowCounts();
 			}
 		};
 		retrieveThread.start();
 	}
 
-	private void doRetrieveRowCounts(WbConnection conn)
+	private void doRetrieveRowCounts()
 	{
-		String[] tableListColumns = conn.getMetadata().getTableListColumns();
+		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection))
+		{
+			return;
+		}
+		String[] tableListColumns = dbConnection.getMetadata().getTableListColumns();
 		String[] columns = new String[tableListColumns.length];
 
 		columns[0] = "ROWS";
@@ -129,9 +174,9 @@ public class TableRowCountPanel
 
 		try
 		{
-			conn.setBusy(true);
-			TableSelectBuilder builder = new TableSelectBuilder(conn, "tabledata");
-			currentStatement = conn.createStatementForQuery();
+			dbConnection.setBusy(true);
+			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
+			currentStatement = dbConnection.createStatementForQuery();
 
 			WbSwingUtilities.showWaitCursorOnWindow(data);
 
@@ -139,8 +184,10 @@ public class TableRowCountPanel
 			for (TableIdentifier table : tables)
 			{
 				if (cancel) break;
+
 				showTable(table);
 				String sql = builder.getSelectForCount(table);
+
 				rs = currentStatement.executeQuery(sql);
 				if (cancel) break;
 
@@ -160,17 +207,28 @@ public class TableRowCountPanel
 		finally
 		{
 			SqlUtil.closeAll(rs, currentStatement);
-			conn.setBusy(false);
+			currentStatement = null;
+			dbConnection.setBusy(false);
 			showStatusMessage("   ");
 			WbSwingUtilities.showDefaultCursorOnWindow(data);
 			this.window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
 			data.checkCopyActions();
 		}
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				data.requestFocusInWindow();
+			}
+		});
 	}
 
 	private void showTable(final TableIdentifier table)
 	{
-		showStatusMessage(table.getTableExpression());
+		String msg = ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableExpression());
+		showStatusMessage(msg);
 	}
 
 	private void showStatusMessage(final String message)
@@ -180,7 +238,7 @@ public class TableRowCountPanel
 			@Override
 			public void run()
 			{
-				statusBar.setText(message);
+				statusBar.setText(" " + message);
 			}
 		});
 	}
@@ -215,7 +273,7 @@ public class TableRowCountPanel
 		});
 	}
 
-	public void showWindow(Window aParent, WbConnection conn)
+	public void showWindow(Window aParent)
 	{
 		if (this.window == null)
 		{
@@ -237,19 +295,18 @@ public class TableRowCountPanel
 			this.window.addWindowListener(this);
 		}
 		this.window.setVisible(true);
-		this.retrieveRowCounts(conn);
+		this.retrieveRowCounts();
 	}
 
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
-
 	}
 
 	@Override
 	public void windowClosing(WindowEvent e)
 	{
-		cancel();
+		cancelExecution();
 		Settings.getInstance().storeWindowPosition(this.window, TableRowCountPanel.class.getName());
 		Settings.getInstance().storeWindowSize(this.window, TableRowCountPanel.class.getName());
 		this.window.setVisible(false);

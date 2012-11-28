@@ -76,20 +76,19 @@ public class FlatButton
 	@Override
 	public Insets getInsets()
 	{
-		return getCustomInsets();
+		if (useDefaultMargin)
+		{
+			return super.getInsets();
+		}
+		return SMALL_MARGIN;
 	}
 
 	@Override
 	public Insets getMargin()
 	{
-		return getCustomInsets();
-	}
-
-	private Insets getCustomInsets()
-	{
 		if (useDefaultMargin)
 		{
-			return super.getInsets();
+			return super.getMargin();
 		}
 		return SMALL_MARGIN;
 	}

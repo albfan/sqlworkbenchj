@@ -96,8 +96,8 @@ public class CountTableRowsAction
 		{
 			return;
 		}
-		TableRowCountPanel panel = new TableRowCountPanel(objects);
-		panel.showWindow(SwingUtilities.getWindowAncestor(source.getComponent()), source.getConnection());
+		TableRowCountPanel panel = new TableRowCountPanel(objects, source.getConnection());
+		panel.showWindow(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
 
 	private List<TableIdentifier> getSelectedObjects()
