@@ -85,6 +85,8 @@ public class TableRowCountPanel
 
 		statusBar = new JLabel();
 		data = new WbTable(false, false, false);
+		data.setReadOnly(true);
+		
 		JScrollPane scroll = new JScrollPane(data);
 		JPanel statusPanel = new JPanel(new BorderLayout(0,0));
 
@@ -226,8 +228,8 @@ public class TableRowCountPanel
 
 		DataStore ds = new DataStore(columns, new int[] { Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR} );
 		DataStoreTableModel model = new DataStoreTableModel(ds);
+		model.setAllowEditing(false);
 		setModel(model);
-
 		ResultSet rs = null;
 
 		try
