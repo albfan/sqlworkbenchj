@@ -29,6 +29,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import workbench.db.ConnectionMgr;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -60,6 +61,7 @@ public class TableRowCountPanel
 	extends JPanel
 	implements WindowListener, Reloadable, Interruptable
 {
+	private static int instanceCount;
 	private WbTable data;
 	private JLabel statusBar;
 	private List<TableIdentifier> tables;
@@ -67,12 +69,16 @@ public class TableRowCountPanel
 	private boolean cancel;
 	private JFrame window;
 	private WbConnection dbConnection;
+	private WbConnection baseConnection;
+	private boolean doCloseConnection;
 
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
 		tables = toCount;
-		dbConnection = connection;
+		instanceCount ++;
+		baseConnection = connection;
+
 		statusBar = new JLabel();
 		data = new WbTable(false, false, false);
 		JScrollPane scroll = new JScrollPane(data);
@@ -97,6 +103,34 @@ public class TableRowCountPanel
 		add(toolbar, BorderLayout.PAGE_START);
 		add(scroll, BorderLayout.CENTER);
 		add(statusPanel, BorderLayout.PAGE_END);
+	}
+
+	private void checkConnection()
+	{
+		if (dbConnection != null) return;
+
+		if (baseConnection.getProfile().getUseSeparateConnectionPerTab())
+		{
+			try
+			{
+				showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+				dbConnection = ConnectionMgr.getInstance().getConnection(baseConnection.getProfile(), "TableRowCount-" + Integer.toString(instanceCount));
+			}
+			catch (Exception cne)
+			{
+				LogMgr.logError("TableRowCountPanel.checkConnection()", "Could not get connection", cne);
+			}
+			finally
+			{
+				showStatusMessage("");
+			}
+			doCloseConnection = true;
+		}
+		else
+		{
+			dbConnection = baseConnection;
+			doCloseConnection = false;
+		}
 	}
 
 	@Override
@@ -133,6 +167,8 @@ public class TableRowCountPanel
 
 	public void retrieveRowCounts()
 	{
+		checkConnection();
+
 		if (dbConnection == null) return;
 		if (CollectionUtil.isEmpty(tables)) return;
 		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection))
@@ -301,6 +337,10 @@ public class TableRowCountPanel
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
+		if (doCloseConnection && dbConnection != null)
+		{
+			dbConnection.disconnect();
+		}
 	}
 
 	@Override
