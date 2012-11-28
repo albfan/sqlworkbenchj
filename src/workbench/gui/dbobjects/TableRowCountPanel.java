@@ -30,11 +30,14 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import workbench.db.ConnectionMgr;
 
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
@@ -46,12 +49,12 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.Reloadable;
 
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -72,7 +75,7 @@ public class TableRowCountPanel
 	private WbConnection dbConnection;
 	private WbConnection sourceConnection;
 	private boolean useSeparateConnection;
-
+	private StopAction cancelAction;
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
@@ -99,7 +102,8 @@ public class TableRowCountPanel
 		ReloadAction reload = new ReloadAction(this);
 		toolbar.add(reload);
 		toolbar.addSeparator();
-		StopAction cancelAction = new StopAction(this);
+		cancelAction = new StopAction(this);
+		cancelAction.setEnabled(false);
 		toolbar.add(cancelAction);
 
 		add(toolbar, BorderLayout.PAGE_START);
@@ -110,7 +114,7 @@ public class TableRowCountPanel
 	private void checkConnection()
 	{
 		if (dbConnection != null) return;
-		
+
 		if (sourceConnection.getProfile().getUseSeparateConnectionPerTab())
 		{
 			try
@@ -166,14 +170,27 @@ public class TableRowCountPanel
 		}
 	}
 
+	private void connectAndRetrieve()
+	{
+		WbThread conn = new WbThread("RowCountConnect")
+		{
+			@Override
+			public void run()
+			{
+				checkConnection();
+				doRetrieveRowCounts();
+			}
+		};
+		conn.start();
+
+	}
 	public void retrieveRowCounts()
 	{
-		checkConnection();
-
-		if (dbConnection == null) return;
 		if (CollectionUtil.isEmpty(tables)) return;
-		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection))
+
+		if (dbConnection == null)
 		{
+			connectAndRetrieve();
 			return;
 		}
 
@@ -194,6 +211,10 @@ public class TableRowCountPanel
 		{
 			return;
 		}
+
+		cancelAction.setEnabled(true);
+		cancel = false;
+
 		String[] tableListColumns = dbConnection.getMetadata().getTableListColumns();
 		String[] columns = new String[tableListColumns.length];
 
@@ -215,7 +236,7 @@ public class TableRowCountPanel
 			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
 			currentStatement = dbConnection.createStatementForQuery();
 
-			WbSwingUtilities.showWaitCursorOnWindow(data);
+			WbSwingUtilities.showWaitCursor(data);
 
 			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
 			boolean useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
@@ -257,7 +278,6 @@ public class TableRowCountPanel
 			{
 				dbConnection.rollback(sp);
 			}
-
 		}
 		catch (SQLException sql)
 		{
@@ -268,10 +288,11 @@ public class TableRowCountPanel
 			SqlUtil.closeAll(rs, currentStatement);
 			currentStatement = null;
 			dbConnection.setBusy(false);
-			showStatusMessage("   ");
+			showStatusMessage("");
 			WbSwingUtilities.showDefaultCursorOnWindow(data);
-			this.window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
+			window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
 			data.checkCopyActions();
+			cancelAction.setEnabled(false);
 		}
 
 		EventQueue.invokeLater(new Runnable()
@@ -297,7 +318,14 @@ public class TableRowCountPanel
 			@Override
 			public void run()
 			{
-				statusBar.setText(" " + message);
+				if (StringUtil.isBlank(message))
+				{
+					statusBar.setText(" " + Integer.toString(data.getRowCount()) + " " + ResourceMgr.getString("TxtTableListObjects"));
+				}
+				else
+				{
+					statusBar.setText(" " + message);
+				}
 			}
 		});
 	}
