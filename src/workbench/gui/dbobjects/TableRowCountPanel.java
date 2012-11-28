@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
@@ -69,15 +70,15 @@ public class TableRowCountPanel
 	private boolean cancel;
 	private JFrame window;
 	private WbConnection dbConnection;
-	private WbConnection baseConnection;
-	private boolean doCloseConnection;
+	private WbConnection sourceConnection;
+	private boolean useSeparateConnection;
 
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
 		tables = toCount;
 		instanceCount ++;
-		baseConnection = connection;
+		sourceConnection = connection;
 
 		statusBar = new JLabel();
 		data = new WbTable(false, false, false);
@@ -85,7 +86,8 @@ public class TableRowCountPanel
 		JPanel statusPanel = new JPanel(new BorderLayout(0,0));
 
 		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
-		Border frame = new CompoundBorder(new EmptyBorder(3,3,0,3), etched);
+		Border current = scroll.getBorder();
+		Border frame = new CompoundBorder(new EmptyBorder(3,3,0,3), current);
 		scroll.setBorder(frame);
 
 		Border b = new CompoundBorder(new EmptyBorder(3, 2, 2, 3), etched);
@@ -108,13 +110,13 @@ public class TableRowCountPanel
 	private void checkConnection()
 	{
 		if (dbConnection != null) return;
-
-		if (baseConnection.getProfile().getUseSeparateConnectionPerTab())
+		
+		if (sourceConnection.getProfile().getUseSeparateConnectionPerTab())
 		{
 			try
 			{
 				showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-				dbConnection = ConnectionMgr.getInstance().getConnection(baseConnection.getProfile(), "TableRowCount-" + Integer.toString(instanceCount));
+				dbConnection = ConnectionMgr.getInstance().getConnection(sourceConnection.getProfile(), "TableRowCount-" + Integer.toString(instanceCount));
 			}
 			catch (Exception cne)
 			{
@@ -124,12 +126,12 @@ public class TableRowCountPanel
 			{
 				showStatusMessage("");
 			}
-			doCloseConnection = true;
+			useSeparateConnection = true;
 		}
 		else
 		{
-			dbConnection = baseConnection;
-			doCloseConnection = false;
+			dbConnection = sourceConnection;
+			useSeparateConnection = false;
 		}
 	}
 
@@ -138,7 +140,6 @@ public class TableRowCountPanel
 	{
 		retrieveRowCounts();
 	}
-
 
 	@Override
 	public boolean confirmCancel()
@@ -217,6 +218,15 @@ public class TableRowCountPanel
 			WbSwingUtilities.showWaitCursorOnWindow(data);
 
 			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
+			boolean useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
+
+			Savepoint sp = null;
+
+			if (useSavepoint)
+			{
+				sp = dbConnection.setSavepoint();
+			}
+
 			for (TableIdentifier table : tables)
 			{
 				if (cancel) break;
@@ -235,6 +245,19 @@ public class TableRowCountPanel
 				SqlUtil.closeResult(rs);
 				addRowCount(table, count);
 			}
+
+			if (useSeparateConnection)
+			{
+				if (this.dbConnection.selectStartsTransaction())
+				{
+					dbConnection.rollback();
+				}
+			}
+			else
+			{
+				dbConnection.rollback(sp);
+			}
+
 		}
 		catch (SQLException sql)
 		{
@@ -337,10 +360,6 @@ public class TableRowCountPanel
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
-		if (doCloseConnection && dbConnection != null)
-		{
-			dbConnection.disconnect();
-		}
 	}
 
 	@Override
@@ -356,6 +375,10 @@ public class TableRowCountPanel
 	@Override
 	public void windowClosed(WindowEvent e)
 	{
+		if (useSeparateConnection && dbConnection != null)
+		{
+			dbConnection.disconnect();
+		}
 	}
 
 	@Override
