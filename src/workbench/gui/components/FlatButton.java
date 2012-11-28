@@ -25,8 +25,10 @@ public class FlatButton
 	extends WbButton
 {
 
-	private static final Insets SMALL_MARGIN = new Insets(3,5,3,5);
+	public static final Insets SMALL_MARGIN = new Insets(3,5,3,5);
+	public static final Insets LARGER_MARGIN = new Insets(5,7,5,7);
 	private boolean useDefaultMargin;
+	private Insets customInsets;
 
 	public FlatButton()
 	{
@@ -73,6 +75,11 @@ public class FlatButton
 		this.useDefaultMargin = useDefaultMargin;
 	}
 
+	public void setCustomInsets(Insets insets)
+	{
+		this.customInsets = insets;
+	}
+
 	@Override
 	public Insets getInsets()
 	{
@@ -80,7 +87,7 @@ public class FlatButton
 		{
 			return super.getInsets();
 		}
-		return SMALL_MARGIN;
+		return customInsets == null ? SMALL_MARGIN : customInsets;
 	}
 
 	@Override
@@ -90,6 +97,6 @@ public class FlatButton
 		{
 			return super.getMargin();
 		}
-		return SMALL_MARGIN;
+		return customInsets == null ? SMALL_MARGIN : customInsets;
 	}
 }

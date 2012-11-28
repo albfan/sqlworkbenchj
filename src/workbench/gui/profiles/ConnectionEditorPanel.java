@@ -122,6 +122,8 @@ public class ConnectionEditorPanel
 		this.infoColor.setActionListener(this);
 		this.confirmUpdates.addActionListener(this);
 		this.readOnly.addActionListener(this);
+		((FlatButton)editConnectionScriptsButton).setCustomInsets(FlatButton.LARGER_MARGIN);
+		((FlatButton)editFilterButton).setCustomInsets(FlatButton.LARGER_MARGIN);
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
 		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
 	}

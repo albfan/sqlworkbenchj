@@ -85,7 +85,7 @@ public class ObjectNameFilterTest
 		filter.setIsInclusionFilter(true);
 		filter.resetModified();
 		copy = filter.createCopy();
-		assertTrue(filter.getIsInclusionFilter());
+		assertTrue(filter.isInclusionFilter());
 	}
 
 }

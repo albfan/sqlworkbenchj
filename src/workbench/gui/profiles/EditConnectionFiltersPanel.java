@@ -63,6 +63,7 @@ public class EditConnectionFiltersPanel
 		schemaFilterEditor.setPreferredSize(d);
 		schemaInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
 		schemaInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
+		schemaInclusionFlag.setSelected(schemaFilter != null ? schemaFilter.isInclusionFilter() : false);
 		p1.add(schemaInclusionFlag, BorderLayout.SOUTH);
 		p1.add(l1, BorderLayout.NORTH);
 		p1.add(schemaFilterEditor, BorderLayout.CENTER);
@@ -75,6 +76,7 @@ public class EditConnectionFiltersPanel
 		catalogFilterEditor.setCaretVisible(false);
 		catalogInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
 		catalogInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
+		catalogInclusionFlag.setSelected(catalogFilter != null ? catalogFilter.isInclusionFilter() : false);
 		p2.add(catalogInclusionFlag, BorderLayout.SOUTH);
 		p2.add(catalogFilterEditor, BorderLayout.CENTER);
 		p2.add(l2, BorderLayout.NORTH);
@@ -196,15 +198,18 @@ public class EditConnectionFiltersPanel
 	{
 		final EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);
 		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblSchemaFilterBtn"), p);
-		boolean hasSize = Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectionfilter.window");
+		boolean hasSize = Settings.getInstance().restoreWindowSize(d, "workbench.gui.connectionfilter.window");
 		if (!hasSize)
 		{
-				d.setSize(400,450);
+			d.setSize(400, 450);
 		}
 		WbSwingUtilities.center(d, owner);
 		d.setVisible(true);
 		Settings.getInstance().storeWindowSize(d, "workbench.gui.connectionfilter.window");
-		if (d.isCancelled()) return false;
+		if (d.isCancelled())
+		{
+			return false;
+		}
 
 		profile.setCatalogFilter(p.getCatalogFilter());
 		profile.setSchemaFilter(p.getSchemaFilter());

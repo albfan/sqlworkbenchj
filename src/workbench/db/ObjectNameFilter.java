@@ -52,7 +52,7 @@ public class ObjectNameFilter
 	 * If true, the filter defines the objects to include instead of names to exclude.
 	 * @see #setIsInclusionFilter(boolean)
 	 */
-	public boolean getIsInclusionFilter()
+	public boolean isInclusionFilter()
 	{
 		return inclusionFilter;
 	}
