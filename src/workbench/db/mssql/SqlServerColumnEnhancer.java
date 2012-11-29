@@ -54,7 +54,7 @@ public class SqlServerColumnEnhancer
 		{
 			updateComputedColumns(table, conn);
 		}
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", false))
+		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", true))
 		{
 			updateColumnRemarks(table, conn);
 		}

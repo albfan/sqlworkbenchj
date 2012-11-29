@@ -35,7 +35,7 @@ public class SqlServerObjectListEnhancer
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", false))
+		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", true))
 		{
 			updateObjectRemarks(con, result, aCatalog, aSchema, objects, requestedTypes);
 		}
