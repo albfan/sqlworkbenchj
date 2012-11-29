@@ -76,6 +76,7 @@ public class TableRowCountPanel
 	private WbConnection sourceConnection;
 	private boolean useSeparateConnection;
 	private StopAction cancelAction;
+	
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
