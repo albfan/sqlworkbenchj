@@ -302,6 +302,8 @@ WHERE id=42;</p>
       <ul>
         <li><a href="wbexport2lbinsert.xslt">Transform an XML export into a Liquibase INSERT changeset</a>&nbsp;&nbsp;&nbsp;(See <a target="_blank" href="http://www.liquibase.org/manual/insert_data">Liquibase Insert Data</a>)</li>
         <li><a href="wbexport2text.xslt">Transform an XML export into a CSV file</a></li>
+        <li><a href="wbexport2dbunit.xslt">Transform an XML export int a DbUnit XML file</a></li>
+        <li><a href="wbexport2dbunitflat.xslt">Transform an XML export into a DbUnit flat XML file</a></li>
       </ul>
 
     </content>
