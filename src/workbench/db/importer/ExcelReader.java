@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -158,6 +160,7 @@ public class ExcelReader
 			Cell cell = cells.next();
 			int type = cell.getCellType();
 			String value = null;
+
 			switch (type)
 			{
 				case Cell.CELL_TYPE_BLANK:
@@ -165,8 +168,17 @@ public class ExcelReader
 					value = null;
 					break;
 				case Cell.CELL_TYPE_NUMERIC:
+					boolean isDate = HSSFDateUtil.isCellDateFormatted(cell);
 					double dv = cell.getNumericCellValue();
-					value = Double.toString(dv);
+					if (isDate)
+					{
+						Date dt = HSSFDateUtil.getJavaDate(dv);
+						value = StringUtil.getIsoTimestampFormatter().format(dt);
+					}
+					else
+					{
+						value = Double.toString(dv);
+					}
 					break;
 				default:
 					value = cell.getStringCellValue();

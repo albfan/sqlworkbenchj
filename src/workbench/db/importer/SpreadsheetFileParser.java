@@ -29,7 +29,6 @@ import workbench.db.TableIdentifier;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -57,9 +56,9 @@ public class SpreadsheetFileParser
 
 	public SpreadsheetFileParser()
 	{
-		// raise an error during import if the date or timestamps cannot be parsed
-		boolean checkBuiltInFormats = Settings.getInstance().getBoolProperty("workbench.import.text.dateformat.checkbuiltin", false);
-		converter.setCheckBuiltInFormats(checkBuiltInFormats);
+		converter.setCheckBuiltInFormats(false);
+		converter.setDefaultTimestampFormat(StringUtil.ISO_TIMESTAMP_FORMAT);
+		converter.setDefaultDateFormat(StringUtil.ISO_DATE_FORMAT);
 	}
 
 	public SpreadsheetFileParser(File aFile)
@@ -368,11 +367,10 @@ public class SpreadsheetFileParser
 					}
 					String value = currentRowValues.get(sourceIndex);
 
+					ColumnIdentifier col = fileCol.getColumn();
+					int colType = col.getDataType();
 					try
 					{
-						ColumnIdentifier col = fileCol.getColumn();
-						int colType = col.getDataType();
-
 						if (fileCol.getColumnFilter() != null)
 						{
 							if (value == null)
@@ -409,11 +407,13 @@ public class SpreadsheetFileParser
 					catch (Exception e)
 					{
 						if (targetIndex != -1) rowData[targetIndex] = null;
-						String msg = ResourceMgr.getString("ErrXlsFileImport");
+						String msg = ResourceMgr.getString("ErrConvertError");
 						msg = msg.replace("%row%", Integer.toString(importRow));
 						msg = msg.replace("%col%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
 						msg = msg.replace("%value%", (value == null ? "(NULL)" : value));
 						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+						msg = msg.replace("%type%", SqlUtil.getTypeName(colType));
+						msg = msg.replace("%error%", e.getMessage());
 						this.messages.append(msg);
 						this.messages.appendNewLine();
 						if (this.abortOnError)
