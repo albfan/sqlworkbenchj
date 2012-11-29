@@ -86,7 +86,7 @@ public class TableRowCountPanel
 		statusBar = new JLabel();
 		data = new WbTable(false, false, false);
 		data.setReadOnly(true);
-		
+
 		JScrollPane scroll = new JScrollPane(data);
 		JPanel statusPanel = new JPanel(new BorderLayout(0,0));
 
@@ -220,7 +220,7 @@ public class TableRowCountPanel
 		String[] tableListColumns = dbConnection.getMetadata().getTableListColumns();
 		String[] columns = new String[tableListColumns.length];
 
-		columns[0] = "ROWS";
+		columns[0] = ResourceMgr.getString("TxtRowCnt").toUpperCase();
 		columns[1] = tableListColumns[0];
 		columns[2] = tableListColumns[1];
 		columns[3] = tableListColumns[2];
