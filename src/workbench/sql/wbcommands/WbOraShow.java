@@ -98,7 +98,11 @@ public class WbOraShow
 		}
 		else if (verb.equals("sga"))
 		{
-			return getSGAInfo();
+			return getSGAInfo(true);
+		}
+		else if (verb.equals("sgainfo"))
+		{
+			return getSGAInfo(false);
 		}
 		else if (verb.equals("logsource"))
 		{
@@ -405,14 +409,16 @@ public class WbOraShow
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
-
 	}
-	protected StatementRunnerResult getSGAInfo()
+
+	protected StatementRunnerResult getSGAInfo(boolean sqlPlusMode)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		boolean sqlPlusMode = Settings.getInstance().getBoolProperty("workbench.db.oracle.sgainfo.sqlplusmode", true);
-		String sqlPlusStatement =
+		String sql = null;
+		if (sqlPlusMode)
+		{
+			sql =
 				"select 'Total System Global Area' as \"Memory\", \n" +
 				"       sum(VALUE) as \"Value\", \n" +
 				"       'bytes' as unit \n" +
@@ -422,22 +428,26 @@ public class WbOraShow
 				"       VALUE, \n" +
 				"       'bytes' \n" +
 				"from V$SGA";
-		String infoStatement = "select * from v$sgainfo";
+		}
+		else
+		{
+			sql = "select * from v$sgainfo";
+		}
 
 		Statement stmt = null;
 		ResultSet rs = null;
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Using SQL: " + (sqlPlusMode ? sqlPlusStatement : infoStatement));
+			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Using SQL: " + sql);
 		}
 
 		try
 		{
 			stmt = this.currentConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sqlPlusMode ? sqlPlusStatement : infoStatement);
+			rs = stmt.executeQuery(sql);
 			DataStore ds = new DataStore(rs, true);
-			ds.setGeneratingSql("show sga");
+			ds.setGeneratingSql(sqlPlusMode ? "show sga" : "show sgainfo");
 			ds.setResultName("SGA Size");
 			ds.resetStatus();
 			result.addDataStore(ds);
