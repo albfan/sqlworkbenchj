@@ -17,9 +17,13 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
-import workbench.db.report.TagWriter;
+
 import workbench.log.LogMgr;
+
+import workbench.db.report.TagWriter;
+
 import workbench.storage.RowData;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -58,9 +62,17 @@ public class OdsRowDataConverter
 			this.factory = new ZipOutputFactory(getOutputFile());
 			out = factory.createWriter("META-INF/manifest.xml", "UTF-8");
 
+			boolean template = isTemplate();
 			out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			out.write("<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\">\n");
-			out.write(" <manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.spreadsheet\" manifest:full-path=\"/\"/>\n");
+			if (template)
+			{
+				out.write(" <manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.spreadsheet-template\" manifest:full-path=\"/\"/>\n");
+			}
+			else
+			{
+				out.write(" <manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.spreadsheet\" manifest:full-path=\"/\"/>\n");
+			}
 			out.write(" <manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"content.xml\"/>\n");
 			out.write(" <manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>\n");
 			out.write("</manifest:manifest>\n");
@@ -73,7 +85,14 @@ public class OdsRowDataConverter
 			}
 
 			out = factory.createWriter("mimetype", "UTF-8");
-			out.write("application/vnd.oasis.opendocument.spreadsheet");
+			if (template)
+			{
+				out.write("application/vnd.oasis.opendocument.spreadsheet-template");
+			}
+			else
+			{
+				out.write("application/vnd.oasis.opendocument.spreadsheet");
+			}
 			out.close();
 			this.content = factory.createWriter("content.xml", "UTF-8");
 
@@ -488,6 +507,11 @@ public class OdsRowDataConverter
 		}
 
 		return attr;
+	}
+
+	public boolean isTemplate()
+	{
+		return hasOutputFileExtension("ots");
 	}
 
 }

@@ -871,4 +871,14 @@ public abstract class RowDataConverter
 		return out;
 	}
 
+	protected boolean hasOutputFileExtension(String ext)
+	{
+		File of = getOutputFile();
+		if (of == null) return false;
+		WbFile f = new WbFile(of);
+
+		String extension = f.getExtension();
+		return extension.equalsIgnoreCase(ext);
+	}
+	
 }

@@ -77,6 +77,10 @@ public class XlsRowDataConverter
 		if (useXLSX)
 		{
 			workbook = new XSSFWorkbook();
+			if (isTemplate())
+			{
+				makeTemplate();
+			}
 		}
 		else
 		{
@@ -243,5 +247,18 @@ public class XlsRowDataConverter
 		}
 
 		cell.setCellStyle(cellStyle);
+	}
+
+	public boolean isTemplate()
+	{
+		return hasOutputFileExtension("xltx");
+	}
+
+	private void makeTemplate()
+	{
+		if (!useXLSX) return;
+		org.apache.poi.POIXMLProperties props = ((XSSFWorkbook)workbook).getProperties();
+		org.apache.poi.POIXMLProperties.ExtendedProperties ext =  props.getExtendedProperties();
+    ext.getUnderlyingProperties().setTemplate("XSSF");
 	}
 }
