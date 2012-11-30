@@ -875,7 +875,7 @@
   </target>
 
   <target name="test" depends="compile-tests, clean-junit">
-    <junit fork="true" maxmemory="256m" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
+    <junit fork="true" forkmode="perBatch"  maxmemory="512m" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${build.test}"/>
@@ -885,9 +885,32 @@
       <batchtest todir="../junit">
         <formatter type="plain"/>
           <fileset dir="${unittest}">
+          <exclude name="**/XsltTransformerTest.java"/>
+          <exclude name="**/ClassFinderTest.java"/>
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
+
+      <!--
+        for some reasons running the XsltTransformerTest on a 64bit JVM
+        bombs out with an OutOfMemory error in the PermGen space
+        moving this (and the ClassFinderTest) to a separate VM each
+        solves the problem
+      -->
+      <batchtest todir="../junit">
+        <formatter type="plain"/>
+          <fileset dir="${unittest}">
+          <include name="**/XsltTransformerTest.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="../junit">
+        <formatter type="plain"/>
+          <fileset dir="${unittest}">
+          <include name="**/ClassFinderTest.java.java"/>
+        </fileset>
+      </batchtest>
+
     </junit>
   </target>
 
