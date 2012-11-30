@@ -194,6 +194,7 @@
       <exclude name="workbench/WbStarter.java"/>
       <classpath>
           <fileset dir="../etc/poi" includes="poi*.jar"/>
+          <fileset dir="../etc/poi/ooxml-lib" includes="*.jar"/>
           <fileset dir="../etc/log4j" includes="log4j*.jar"/>
       </classpath>
     </javac>
