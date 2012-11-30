@@ -411,7 +411,7 @@ public class WbOraShow
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		boolean sqlPlusMode = Settings.getInstance().getBoolProperty("workbench.db.oracle.sgainfo.sqlplusmode", false);
+		boolean sqlPlusMode = Settings.getInstance().getBoolProperty("workbench.db.oracle.sgainfo.sqlplusmode", true);
 		String sqlPlusStatement =
 				"select 'Total System Global Area' as \"Memory\", \n" +
 				"       sum(VALUE) as \"Value\", \n" +
