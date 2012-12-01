@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -126,7 +125,19 @@ public class ExcelReader
 	{
 		if (headerColumns == null)
 		{
-			headerColumns = getRowValues(0);
+			List<Object> values = getRowValues(0);
+			headerColumns = new ArrayList<String>(values.size());
+			for (int i=0; i < values.size(); i++)
+			{
+				if (values.get(i) != null)
+				{
+					headerColumns.add(values.get(i).toString());
+				}
+				else
+				{
+					headerColumns.add("Col" + Integer.toString(i));
+				}
+			}
 		}
 		return headerColumns;
 	}
@@ -150,16 +161,16 @@ public class ExcelReader
 	}
 
 	@Override
-	public List<String> getRowValues(int rowIndex)
+	public List<Object> getRowValues(int rowIndex)
 	{
 		Row row = dataSheet.getRow(rowIndex);
-		ArrayList<String> values = new ArrayList<String>();
+		ArrayList<Object> values = new ArrayList<Object>();
 		Iterator<Cell> cells = row.cellIterator();
 		while (cells.hasNext())
 		{
 			Cell cell = cells.next();
 			int type = cell.getCellType();
-			String value = null;
+			Object value = null;
 
 			switch (type)
 			{
@@ -172,20 +183,23 @@ public class ExcelReader
 					double dv = cell.getNumericCellValue();
 					if (isDate)
 					{
-						Date dt = HSSFDateUtil.getJavaDate(dv);
-						value = StringUtil.getIsoTimestampFormatter().format(dt);
+						value = HSSFDateUtil.getJavaDate(dv);
 					}
 					else
 					{
-						value = Double.toString(dv);
+						value = Double.valueOf(dv);
 					}
 					break;
 				default:
-					value = cell.getStringCellValue();
-			}
-			if (value != null && StringUtil.equalString(value, nullString))
-			{
-				value = null;
+					String svalue = cell.getStringCellValue();
+					if (svalue != null && StringUtil.equalString(svalue, nullString))
+					{
+						value = null;
+					}
+					else
+					{
+						value = svalue;
+					}
 			}
 			values.add(value);
 		}
@@ -195,7 +209,7 @@ public class ExcelReader
 	@Override
 	public void setNullString(String nullString)
 	{
-
+		this.nullString = nullString;
 	}
 
 	@Override

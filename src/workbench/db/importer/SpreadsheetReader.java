@@ -21,7 +21,7 @@ public interface SpreadsheetReader
 {
 	List<String> getHeaderColumns();
 	void setActiveWorksheet(int index);
-	List<String> getRowValues(int row);
+	List<Object> getRowValues(int row);
 	void setNullString(String nullString);
 
 	/**

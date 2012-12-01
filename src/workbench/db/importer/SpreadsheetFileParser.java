@@ -33,6 +33,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
@@ -53,6 +54,7 @@ public class SpreadsheetFileParser
 	private int currentRow;
 	private int sheetIndex;
 	private SpreadsheetReader content;
+	protected List<Object> dataRowValues;
 
 	public SpreadsheetFileParser()
 	{
@@ -226,15 +228,15 @@ public class SpreadsheetFileParser
 	@Override
 	public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
 	{
-		if (currentRowValues == null) return null;
+		if (dataRowValues == null) return null;
 		if (inputFileIndexes == null) return null;
 
 		Map<Integer, Object> result = new HashMap<Integer, Object>(inputFileIndexes.size());
 		for (Integer index : inputFileIndexes)
 		{
-			if (index > 0 && index <= currentRowValues.size())
+			if (index > 0 && index <= dataRowValues.size())
 			{
-				result.put(index, currentRowValues.get(index - 1));
+				result.put(index, dataRowValues.get(index - 1));
 			}
 		}
 		return result;
@@ -245,9 +247,9 @@ public class SpreadsheetFileParser
 	{
 		if (currentRow < 0) return null;
 		StringBuilder result = new StringBuilder(100);
-		List<String> values = content.getRowValues(currentRow);
+		List<Object> values = content.getRowValues(currentRow);
 		boolean first = true;
-		for (String value : values)
+		for (Object value : values)
 		{
 			if (first)
 			{
@@ -257,7 +259,7 @@ public class SpreadsheetFileParser
 			{
 				result.append(", ");
 			}
-			result.append(value);
+			result.append(value == null ? "" : value.toString());
 		}
 		return result.toString();
 	}
@@ -267,7 +269,17 @@ public class SpreadsheetFileParser
 	{
 		if (content == null)
 		{
-			content = new ExcelReader(inputFile, sheetIndex);
+			WbFile f = new WbFile(inputFile);
+			String ext = f.getExtension();
+
+			if (ext.startsWith("xls"))
+			{
+				content = new ExcelReader(inputFile, sheetIndex);
+			}
+			else if (ext.equals("ods"))
+			{
+				content = new OdsReader(inputFile, sheetIndex);
+			}
 			content.load();
 		}
 	}
@@ -344,7 +356,7 @@ public class SpreadsheetFileParser
 				}
 
 				importRow ++;
-				currentRowValues = content.getRowValues(currentRow);
+				dataRowValues = content.getRowValues(currentRow);
 
 				int targetIndex = -1;
 
@@ -356,7 +368,7 @@ public class SpreadsheetFileParser
 					targetIndex = fileCol.getTargetIndex();
 					if (targetIndex == -1) continue;
 
-					if (sourceIndex >= currentRowValues.size())
+					if (sourceIndex >= dataRowValues.size())
 					{
 						// Log this warning only once
 						if (importRow == 1)
@@ -365,7 +377,8 @@ public class SpreadsheetFileParser
 						}
 						continue;
 					}
-					String value = currentRowValues.get(sourceIndex);
+					Object value = dataRowValues.get(sourceIndex);
+					String svalue = (value != null ? value.toString() : null);
 
 					ColumnIdentifier col = fileCol.getColumn();
 					int colType = col.getDataType();
@@ -378,7 +391,7 @@ public class SpreadsheetFileParser
 								includeRow = false;
 								break;
 							}
-							Matcher m = fileCol.getColumnFilter().matcher(value);
+							Matcher m = fileCol.getColumnFilter().matcher(svalue);
 							if (!m.matches())
 							{
 								includeRow = false;
@@ -388,12 +401,12 @@ public class SpreadsheetFileParser
 
 						if (valueModifier != null)
 						{
-							value = valueModifier.modifyValue(col, value);
+							value = valueModifier.modifyValue(col, svalue);
 						}
 
 						if (SqlUtil.isCharacterType(colType))
 						{
-								if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
+								if (this.emptyStringIsNull && StringUtil.isEmptyString(svalue))
 								{
 									value = null;
 								}
@@ -401,7 +414,7 @@ public class SpreadsheetFileParser
 						}
 						else
 						{
-							rowData[targetIndex] = converter.convertValue(value, colType);
+							rowData[targetIndex] = value; // converter.convertValue(value, colType);
 						}
 					}
 					catch (Exception e)
@@ -410,7 +423,7 @@ public class SpreadsheetFileParser
 						String msg = ResourceMgr.getString("ErrConvertError");
 						msg = msg.replace("%row%", Integer.toString(importRow));
 						msg = msg.replace("%col%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
-						msg = msg.replace("%value%", (value == null ? "(NULL)" : value));
+						msg = msg.replace("%value%", (svalue == null ? "(NULL)" : svalue));
 						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						msg = msg.replace("%type%", SqlUtil.getTypeName(colType));
 						msg = msg.replace("%error%", e.getMessage());
@@ -426,7 +439,7 @@ public class SpreadsheetFileParser
 						LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", msg, e);
 						if (this.errorHandler != null)
 						{
-							int choice = errorHandler.getActionOnError(importRow, fileCol.getColumn().getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
+							int choice = errorHandler.getActionOnError(importRow, fileCol.getColumn().getColumnName(), (svalue == null ? "(NULL)" : svalue), ExceptionUtil.getDisplay(e, false));
 							if (choice == JobErrorHandler.JOB_ABORT) throw e;
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL)
 							{
