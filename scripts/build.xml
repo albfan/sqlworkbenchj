@@ -193,9 +193,9 @@
            encoding="ISO-8859-1">
       <exclude name="workbench/WbStarter.java"/>
       <classpath>
-          <fileset dir="../etc/poi" includes="poi*.jar"/>
-          <fileset dir="../etc/poi/ooxml-lib" includes="*.jar"/>
-          <fileset dir="../etc/log4j" includes="log4j*.jar"/>
+          <fileset dir="../libs/odf" includes="*.jar"/>
+          <fileset dir="../libs/poi" includes="*.jar"/>
+          <fileset dir="../libs/log4j" includes="*.jar"/>
       </classpath>
     </javac>
 
@@ -479,7 +479,7 @@
     <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
-        <attribute name="Class-Path" value=". log4j.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar geronimo-stax-api_1.0_spec-1.0.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar"/>
+        <attribute name="Class-Path" value=". log4j.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar stax-api-1.0.1.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar odfdom-java.jar resolver.jar serializer.jar simple-odf.jar xercesImpl.jar"/>
         <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
         <attribute name="Implementation-Title" value="SQL Workbench/J"/>
         <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
@@ -619,7 +619,7 @@
   </target>
 
   <target name="mac-package" depends="init">
-    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-2.1.0.jar"/>
+    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../libs/jarbundler/jarbundler-2.1.0.jar"/>
 
     <property name="bundledir" value="${distdir}/mac"/>
     <delete dir="${bundledir}" failonerror="false"/>
@@ -636,7 +636,7 @@
       signature="sqwb"
       icon="Workbench.icns"
       vmoptions="-Xmx256m"
-      stubfile="../etc/jarbundler/SQLWorkbench">
+      stubfile="../libs/jarbundler/SQLWorkbench">
 
       <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
       <javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
@@ -670,6 +670,37 @@
         <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </tar>
+
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac-with-office-libs.tgz">
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </tarfileset>
+      <tarfileset dir="${bundledir}">
+        <include name="**/*"/>
+        <exclude name="**/SQLWorkbench"/>
+      </tarfileset>
+      <tarfileset dir="../libs/poi">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset dir="../libs/odf">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset mode="555" dir="${bundledir}">
+        <include name="**/SQLWorkbench"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+        <include name="history.html"/>
+      </tarfileset>
+      <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
+        <exclude name="get_builds_from_history.xslt"/>
+        <exclude name="history2html.xslt"/>
+        <exclude name="history2docbook.xslt"/>
+      </zipfileset>
+    </tar>
   </target>
 
   <target name="release-package" depends="fixshellscripts,html-history">
@@ -678,6 +709,46 @@
       <zipfileset dir="${distdir}">
         <include name="${jarfile}"/>
         <include name="SQLWorkbench-Manual.pdf"/>
+      </zipfileset>
+      <zipfileset dir="../launcher">
+        <include name="SQLWorkbench.exe"/>
+        <include name="sqlwbconsole.exe"/>
+        <include name="SQLWorkbench64.exe"/>
+        <include name="sqlwbconsole64.exe"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}">
+        <include name="log4j.xml"/>
+        <include name="SQLWorkbench.vbs"/>
+        <include name="sqlwbconsole.cmd"/>
+        <include name="sqlworkbench.sh"/>
+        <include name="sqlwbconsole.sh"/>
+        <include name="history.html"/>
+        <include name="SQLWorkbench.desktop"/>
+      </zipfileset>
+      <zipfileset dir="${src}/workbench/resource/images">
+        <include name="workbench32.png"/>
+      </zipfileset>
+      <zipfileset dir="${distdir}/manual" prefix="manual">
+        <include name="**/*.*"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
+        <exclude name="get_builds_from_history.xslt"/>
+        <exclude name="history2html.xslt"/>
+        <exclude name="history2docbook.xslt"/>
+      </zipfileset>
+    </zip>
+
+    <zip zipfile="${distdir}/Workbench-Build${build.number}-with-office-libs.zip">
+      <zipfileset dir="${distdir}">
+        <include name="${jarfile}"/>
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </zipfileset>
+      <zipfileset dir="../libs/poi">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="../libs/odf">
+        <include name="*.jar"/>
       </zipfileset>
       <zipfileset dir="../launcher">
         <include name="SQLWorkbench.exe"/>
@@ -755,7 +826,7 @@
   </target>
 
   <target name="generate-lexer">
-    <java classname="JFlex.Main" classpath="../etc/JFlex.jar" fork="true">
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
       <arg value="../src/workbench/sql/formatter/SQLLexer.flex"/>
@@ -766,11 +837,8 @@
     <fileset dir="${junitdir}">
       <include name="*.jar"/>
     </fileset>
-    <fileset dir="../etc/poi">
-      <include name="poi*.jar"/>
-    </fileset>
-    <fileset dir="../etc/poi/ooxml-lib">
-      <include name="*.jar"/>
+    <fileset dir="../libs">
+      <include name="**/*.jar"/>
     </fileset>
   </path>
 

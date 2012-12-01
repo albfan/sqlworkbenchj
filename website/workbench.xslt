@@ -354,8 +354,16 @@
     <a href="Workbench-Build{$buildNumber}.zip">Download generic package for all systems</a>
   </xsl:template>
 
+  <xsl:template match="zip-office-link">
+    <a href="Workbench-Build{$buildNumber}-with-office-libs.zip">Generic package including libraries to read and write office (ods,xls,xlsx) documents</a>
+  </xsl:template>
+
   <xsl:template match="mac-link">
     <a href="Workbench-Build{$buildNumber}-Mac.tgz">Download package for MacOS</a>
+  </xsl:template>
+
+  <xsl:template match="mac-office-link">
+    <a href="Workbench-Build{$buildNumber}-Mac-with-office-libs.tgz">MacOS including libraries to read and write office (ods,xls,xlsx) documents</a>
   </xsl:template>
 
   <xsl:template match="build-number">

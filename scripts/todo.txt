@@ -20,7 +20,6 @@ Features:
 - Access to result data through expressions: where id = ${results[1].columns("foo")}
 - "Copy as Select"
 - Macros in console mode
-- Spreadsheet import for ODS
 - Compare ResultSets
 - Support ${guid} calls
   (or more generic: Support ${...} syntax for calling function during data editing )
@@ -30,7 +29,6 @@ Features:
 - WbCopy with multiple tables and -deleteTarget (do a delete with dependencies first, then run Copy)
 - Show table data from the result of "Search table data" (or make the result editable)
 - search BLOB columns as Text in "Search table data"
-- DbExplorer rowcount for all tables
 - Multi-Threaded WbImport
 - "Generate Default ..." in DbExplorer for jOOQ
 - SQL Export type as jOOQ Queries
