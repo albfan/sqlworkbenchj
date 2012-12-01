@@ -31,6 +31,8 @@ import workbench.util.StringUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
+import org.apache.poi.POIXMLProperties;
+
 /**
  * Export data into an Excel spreadsheet using Apache's POI
  *
@@ -257,8 +259,8 @@ public class XlsRowDataConverter
 	private void makeTemplate()
 	{
 		if (!useXLSX) return;
-		org.apache.poi.POIXMLProperties props = ((XSSFWorkbook)workbook).getProperties();
-		org.apache.poi.POIXMLProperties.ExtendedProperties ext =  props.getExtendedProperties();
+		POIXMLProperties props = ((XSSFWorkbook)workbook).getProperties();
+		POIXMLProperties.ExtendedProperties ext =  props.getExtendedProperties();
     ext.getUnderlyingProperties().setTemplate("XSSF");
 	}
 }
