@@ -159,6 +159,7 @@
         <include name="**/*.sql"/>
         <include name="**/*.xml"/>
         <include name="**/*.xslt"/>
+        <include name="**/*.ods"/>
         <include name="**/*.txt"/>
         <include name="**/*.properties"/>
       </fileset>
@@ -833,12 +834,18 @@
     </java>
   </target>
 
-  <path id="junit.path">
+<path id="junit.path">
     <fileset dir="${junitdir}">
       <include name="*.jar"/>
     </fileset>
-    <fileset dir="../libs">
-      <include name="**/*.jar"/>
+    <fileset dir="../libs/poi">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/log4j">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/odf">
+      <include name="*.jar"/>
     </fileset>
   </path>
 
@@ -944,7 +951,16 @@
   </target>
 
   <target name="test" depends="compile-tests, clean-junit">
-    <junit fork="true" forkmode="perBatch"  maxmemory="512m" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
+
+    <junit fork="true"
+           forkmode="perBatch"
+           maxmemory="512m"
+           showoutput="false"
+           haltonerror="true"
+           haltonfailure="true"
+           printsummary="true"
+           includeantruntime="true">
+
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${build.test}"/>
@@ -953,7 +969,7 @@
 
       <batchtest todir="../junit">
         <formatter type="plain"/>
-          <fileset dir="${unittest}">
+        <fileset dir="${unittest}">
           <exclude name="**/XsltTransformerTest.java"/>
           <exclude name="**/ClassFinderTest.java"/>
           <include name="**/*Test.java"/>
@@ -963,19 +979,18 @@
       <!--
         for some reasons running the XsltTransformerTest on a 64bit JVM
         bombs out with an OutOfMemory error in the PermGen space
-        moving this (and the ClassFinderTest) to a separate VM each
-        solves the problem
+        Moving this - and the ClassFinderTest - to a separate VM solves the problem
       -->
       <batchtest todir="../junit">
         <formatter type="plain"/>
-          <fileset dir="${unittest}">
+        <fileset dir="${unittest}">
           <include name="**/XsltTransformerTest.java"/>
         </fileset>
       </batchtest>
 
       <batchtest todir="../junit">
         <formatter type="plain"/>
-          <fileset dir="${unittest}">
+        <fileset dir="${unittest}">
           <include name="**/ClassFinderTest.java.java"/>
         </fileset>
       </batchtest>
