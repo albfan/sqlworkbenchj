@@ -2,11 +2,11 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-12-01">
+    <entry dev-build="10" type="enh">WbImport can now import Excel (XLS and XLSX) and Open Office Calc (ODS) files</entry>
     <entry dev-build="9" type="enh">From within the DbExplorer's table list, the rows for the selected tables can now be counted.</entry>
     <entry dev-build="9" type="enh">WbSchemaDiff can now handle additional DBMS specific objects such as TYPEs. The parameter -additionalTypes selects the types to be compared.</entry>
     <entry dev-build="9" type="enh">When filtering for a single column in the filter dialog, a value from the underlying data can now be selected.</entry>
     <entry dev-build="8" type="enh">The number of lines to scroll in the editor with the mouse wheel can now be configured.</entry>
-    <entry dev-build="7" type="enh">WbImport can now import Excel (XLS and XLSX) files (XLSM is not supported)</entry>
     <entry dev-build="7" type="enh">WbSchemaDiff and WbSchemaReport have new option -includeExtendedOptions to include extended table attributes (like tablespace or Oracle partitions)</entry>
     <entry dev-build="6" type="enh">A new option "Append result" is available for macros.</entry>
     <entry dev-build="6" type="enh">Values for FK columns can now be selected from the referenced table through a search dialog. This is available when editing a result set or for the column values of UPDATE and INSERT statements.</entry>
@@ -24,6 +24,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="10" type="fix">When exporting to Excel or OpenOffice, using an extension that identifies a template would result in invalid files.</entry>
     <entry dev-build="9" type="fix">In the connection profile's schema and catalog filter, the "only show these objects" options where not restored correctly when editing the filter.</entry>
     <entry dev-build="8" type="fix">For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</entry>
     <entry dev-build="7" type="fix">When cancelling the confirmation to discard changes in an editor file while closing a tab by using the ESC key, the tab would still be closed.</entry>
