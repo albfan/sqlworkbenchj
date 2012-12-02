@@ -11,10 +11,10 @@
  */
 package workbench.db.importer;
 
-import workbench.interfaces.TabularDataParser;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,12 +23,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.TabularDataParser;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -245,6 +248,8 @@ public class SpreadsheetFileParser
 		StringBuilder result = new StringBuilder(100);
 		List<Object> values = content.getRowValues(currentRow);
 		boolean first = true;
+		SimpleDateFormat dtFormatter = new SimpleDateFormat(StringUtil.ISO_DATE_FORMAT);
+		SimpleDateFormat tsFormatter = new SimpleDateFormat(StringUtil.ISO_TIMESTAMP_FORMAT);
 		for (Object value : values)
 		{
 			if (first)
@@ -255,7 +260,24 @@ public class SpreadsheetFileParser
 			{
 				result.append(", ");
 			}
-			result.append(value == null ? "" : value.toString());
+			String svalue = null;
+			if (value instanceof java.sql.Date)
+			{
+				svalue = dtFormatter.format((java.sql.Date)value);
+			}
+			else if (value instanceof java.sql.Timestamp)
+			{
+				svalue = tsFormatter.format((java.sql.Timestamp)value);
+			}
+			else if (value != null)
+			{
+				svalue = value.toString();
+			}
+			else
+			{
+				svalue = "";
+			}
+			result.append(svalue);
 		}
 		return result.toString();
 	}

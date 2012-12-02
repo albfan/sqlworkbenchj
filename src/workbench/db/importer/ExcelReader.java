@@ -15,10 +15,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import workbench.util.CollectionUtil;
+import workbench.util.DurationFormatter;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -38,13 +44,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ExcelReader
 	implements SpreadsheetReader
 {
-	private int sheetIndex = -1;
+	/**
+	 * Amount of milliseconds in a day.
+	 */
+	private static final long ONE_DAY = (24L * DurationFormatter.ONE_HOUR);
 
+	private int sheetIndex = -1;
 	private WbFile inputFile;
 	private Workbook dataFile;
 	private Sheet dataSheet;
 	private List<String> headerColumns;
 	private String nullString;
+
+	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 
 	private boolean useXLSX;
 
@@ -160,6 +172,51 @@ public class ExcelReader
 		}
 	}
 
+	private boolean isTimestampFormat(String format)
+	{
+		for (String key : tsFormats)
+		{
+			if (format.contains(key)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This is a copy of the POI function DateUtil.getJavaDate().
+	 *
+	 * The POI function does not consider hours, minutes and seconds, which means
+	 * that columns with date <b>and</b> time are not retrieved correctly from an Excel file.
+	 *
+	 * @param date the "Excel" date
+	 * @return a properly initialized Java Date
+	 */
+	private Date getJavaDate(double date)
+	{
+		int wholeDays = (int) Math.floor(date);
+    int millisecondsInDay = (int)((date - wholeDays) * ONE_DAY + 0.5);
+		Calendar calendar = new GregorianCalendar(); // using default time-zone
+
+		int startYear = 1900;
+		int dayAdjust = -1; // Excel thinks 2/29/1900 is a valid date, which it isn't
+		if (wholeDays < 61)
+		{
+			// Date is prior to 3/1/1900, so adjust because Excel thinks 2/29/1900 exists
+			// If Excel date == 2/29/1900, will become 3/1/1900 in Java representation
+			dayAdjust = 0;
+		}
+
+		int hours = (int)(millisecondsInDay / DurationFormatter.ONE_HOUR);
+		millisecondsInDay -= (hours * DurationFormatter.ONE_HOUR);
+		int minutes = (int)(millisecondsInDay / DurationFormatter.ONE_MINUTE);
+		millisecondsInDay -= (minutes * DurationFormatter.ONE_MINUTE);
+		int seconds = (int)Math.floor(millisecondsInDay / DurationFormatter.ONE_SECOND);
+		millisecondsInDay -= (seconds * DurationFormatter.ONE_SECOND);
+		calendar.set(startYear, 0, wholeDays + dayAdjust, hours, minutes, seconds);
+		calendar.set(GregorianCalendar.MILLISECOND, millisecondsInDay);
+		return calendar.getTime();
+	}
+
+
 	@Override
 	public List<Object> getRowValues(int rowIndex)
 	{
@@ -180,10 +237,22 @@ public class ExcelReader
 					break;
 				case Cell.CELL_TYPE_NUMERIC:
 					boolean isDate = HSSFDateUtil.isCellDateFormatted(cell);
+					String fmt = cell.getCellStyle().getDataFormatString();
 					double dv = cell.getNumericCellValue();
 					if (isDate)
 					{
-						value = HSSFDateUtil.getJavaDate(dv);
+						java.util.Date dval = getJavaDate(dv);
+						if (dval != null)
+						{
+							if (isTimestampFormat(fmt))
+							{
+								value = new java.sql.Timestamp(dval.getTime());
+							}
+							else
+							{
+								value = new java.sql.Date(dval.getTime());
+							}
+						}
 					}
 					else
 					{

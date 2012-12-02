@@ -14,9 +14,12 @@ package workbench.sql.formatter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -142,6 +145,13 @@ public class SQLLexerTest
 		t = tokens.get(12);
 		assertEquals("OUTER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
+
+		sql = "SELECT * FROM bla LEFT OUTER JOIN blub ON (x = y)";
+
+		tokens = getTokenList(sql);
+		t = tokens.get(4);
+		assertEquals("LEFT OUTER JOIN", t.getContents());
+		assertTrue(t.isReservedWord());
 	}
 
 	@Test

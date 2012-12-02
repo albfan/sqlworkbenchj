@@ -16,8 +16,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
+
+import workbench.util.CollectionUtil;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.table.Cell;
@@ -37,7 +40,8 @@ public class OdsReader
 	private Table worksheet;
 	private int worksheetIndex = 0;
 	private List<String> headerColumns;
-
+	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
+	
 	public OdsReader(File f, int sheetIndex)
 	{
 		inputFile = f;
@@ -80,6 +84,15 @@ public class OdsReader
 		}
 	}
 
+	private boolean isTimestampFormat(String format)
+	{
+		for (String key : tsFormats)
+		{
+			if (format.contains(key)) return true;
+		}
+		return false;
+	}
+
 	@Override
 	public List<Object> getRowValues(int row)
 	{
@@ -102,7 +115,15 @@ public class OdsReader
 				try
 				{
 					SimpleDateFormat formatter = new SimpleDateFormat(fmt);
-					value = formatter.parse(text);
+					java.util.Date udt = formatter.parse(text);
+					if (isTimestampFormat(fmt))
+					{
+						value = new java.sql.Timestamp(udt.getTime());
+					}
+					else
+					{
+						value = new java.sql.Date(udt.getTime());
+					}
 				}
 				catch (Exception ex)
 				{
