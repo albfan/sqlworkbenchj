@@ -33,4 +33,5 @@ public interface TabularDataParser
 	void setColumns(List<ColumnIdentifier> fileColumns, List<ColumnIdentifier> columnsToImport)
 		throws SQLException;
 
+	void done();
 }

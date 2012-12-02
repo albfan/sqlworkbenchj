@@ -17,9 +17,9 @@ import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import org.junit.After;
-import org.junit.Before;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -34,14 +34,23 @@ public class OdsReaderTest
 		super("OdsReaderTest");
 	}
 
-	@Before
-	public void setUp()
+	@Test
+	public void testReadSecondSheet()
+		throws Exception
 	{
-	}
-
-	@After
-	public void tearDown()
-	{
+		TestUtil util = getTestUtil();
+		File input = util.copyResourceFile(this, "data.ods");
+		OdsReader reader = new OdsReader(input, 1);
+		try
+		{
+			reader.load();
+			assertEquals(5, reader.getRowCount());
+		}
+		finally
+		{
+			reader.done();
+		}
+		assertTrue(input.delete());
 	}
 
 	@Test
@@ -49,25 +58,26 @@ public class OdsReaderTest
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-		util.copyResourceFile(this, "data.ods");
-		File input = new File(util.getBaseDir(), "data.ods");
+		File input = util.copyResourceFile(this, "data.ods");
 		OdsReader reader = new OdsReader(input, 0);
+
 		try
 		{
 			reader.load();
 			List<String> header = reader.getHeaderColumns();
 			assertNotNull(header);
-			assertEquals(5, header.size());
+			assertEquals(6, header.size());
 			assertEquals("id", header.get(0));
 			assertEquals("firstname", header.get(1));
 			assertEquals("lastname", header.get(2));
 			assertEquals("hiredate", header.get(3));
 			assertEquals("salary", header.get(4));
+			assertEquals("last_login", header.get(5));
 			assertEquals(3, reader.getRowCount());
 
 			// check first data row
 			List<Object> values = reader.getRowValues(1);
-			assertEquals(5, values.size());
+			assertEquals(6, values.size());
 			Number n = (Number)values.get(0);
 			assertEquals(1, n.intValue());
 			String s = (String)values.get(1);
@@ -83,8 +93,13 @@ public class OdsReaderTest
 			assertNotNull(sal);
 			assertEquals(4200.24, sal.doubleValue(), 0.01);
 
+			Date ts = (Date)values.get(5);
+			SimpleDateFormat tsFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String tsv = tsFmt.format(ts);
+			assertEquals("2012-04-05 16:17:18", tsv);
+
 			values = reader.getRowValues(2);
-			assertEquals(5, values.size());
+			assertEquals(6, values.size());
 			n = (Number)values.get(0);
 			assertEquals(2, n.intValue());
 			s = (String)values.get(1);
@@ -99,10 +114,15 @@ public class OdsReaderTest
 			sal = (Double)values.get(4);
 			assertNotNull(sal);
 			assertEquals(1234.56, sal.doubleValue(), 0.01);
+
+			ts = (Date)values.get(5);
+			tsv = tsFmt.format(ts);
+			assertEquals("2012-07-08 15:16:17", tsv);
 		}
 		finally
 		{
 			reader.done();
 		}
+		assertTrue(input.delete());
 	}
 }

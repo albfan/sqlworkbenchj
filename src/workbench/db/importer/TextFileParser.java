@@ -809,6 +809,15 @@ public class TextFileParser
 		}
 	}
 
+	@Override
+	public void done()
+	{
+		if (fileHandler != null)
+		{
+			fileHandler.done();
+		}
+	}
+
 	protected List<String> getLineValues(LineParser parser, String line)
 	{
 		List<String> result = new ArrayList<String>(getColumnCount());

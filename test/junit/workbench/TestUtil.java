@@ -29,31 +29,37 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  *
@@ -342,13 +348,20 @@ public class TestUtil
 		return this.basedir;
 	}
 
-	public void copyResourceFile(Object test, String filename)
+	public File copyResourceFile(Object test, String filename)
 		throws IOException
 	{
-		InputStream in = test.getClass().getResourceAsStream(filename);
+		return copyResourceFile(test.getClass(), filename);
+	}
+
+	public File copyResourceFile(Class clz, String filename)
+		throws IOException
+	{
+		InputStream in = clz.getResourceAsStream(filename);
 		File target = new File(basedir, filename);
 		OutputStream out = new FileOutputStream(target);
 		FileUtil.copy(in, out);
+		return target;
 	}
 
 	public static int countLines(File f)
@@ -382,6 +395,8 @@ public class TestUtil
 	{
 		try
 		{
+			// The build.xml will include the Xerces runtime because of the Simple ODF library
+			// for some reason using the Xerces DocumentBuilderFactory does not work here
 			DocumentBuilderFactory xmlFact = DocumentBuilderFactory.newInstance();
 			xmlFact.setNamespaceAware(true);
 			DocumentBuilder builder = xmlFact.newDocumentBuilder();

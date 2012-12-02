@@ -105,15 +105,11 @@ public class SpreadsheetFileParser
 	@Override
 	public void setInputFile(File file)
 	{
-		File old = inputFile;
 		super.setInputFile(file);
-		if (old != null && file == null || old == null && inputFile != null || !inputFile.equals(old))
+		if (content != null)
 		{
-			if (content != null)
-			{
-				content.done();
-				content = null;
-			}
+			content.done();
+			content = null;
 		}
 	}
 
@@ -406,11 +402,11 @@ public class SpreadsheetFileParser
 
 						if (SqlUtil.isCharacterType(colType))
 						{
-								if (this.emptyStringIsNull && StringUtil.isEmptyString(svalue))
-								{
-									value = null;
-								}
-								rowData[targetIndex] = value;
+							if (this.emptyStringIsNull && StringUtil.isEmptyString(svalue))
+							{
+								value = null;
+							}
+							rowData[targetIndex] = value;
 						}
 						else
 						{
@@ -484,6 +480,15 @@ public class SpreadsheetFileParser
 			}
 		}
 		finally
+		{
+			done();
+		}
+	}
+
+	@Override
+	public void done()
+	{
+		if (content != null)
 		{
 			content.done();
 		}

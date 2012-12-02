@@ -12,11 +12,12 @@ package workbench.db.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import workbench.util.WbFile;
+import workbench.log.LogMgr;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.table.Cell;
@@ -31,7 +32,7 @@ public class OdsReader
 	implements SpreadsheetReader
 {
 	private String nullIndicator;
-	private WbFile inputFile;
+	private File inputFile;
 	private SpreadsheetDocument dataFile;
 	private Table worksheet;
 	private int worksheetIndex = 0;
@@ -39,10 +40,7 @@ public class OdsReader
 
 	public OdsReader(File f, int sheetIndex)
 	{
-		if (f != null)
-		{
-			inputFile = new WbFile(f);
-		}
+		inputFile = f;
 		worksheetIndex = sheetIndex;
 	}
 
@@ -51,13 +49,17 @@ public class OdsReader
 	{
 		if (headerColumns == null)
 		{
-			List<Object> values = getRowValues(0);
-			headerColumns = new ArrayList<String>(values.size());
-			for (int i=0; i < values.size(); i++)
+			Row rowData = worksheet.getRowByIndex(0);
+			int colCount = rowData.getCellCount();
+			headerColumns = new ArrayList<String>(colCount);
+			for (int i=0; i < colCount; i++)
 			{
-				if (values.get(i) != null)
+				Cell cell = rowData.getCellByIndex(i);
+				String title = cell.getDisplayText();
+
+				if (title != null)
 				{
-					headerColumns.add(values.get(i).toString());
+					headerColumns.add(title.toString());
 				}
 				else
 				{
@@ -93,20 +95,31 @@ public class OdsReader
 			{
 				value = cell.getBooleanValue();
 			}
-			else if ("date".equals(type))
+			else if ("date".equals(type) || "time".equals(type))
 			{
-				Calendar cal = cell.getDateValue();
-				if (cal != null)
+				String fmt = cell.getFormatString();
+				String text = cell.getDisplayText();
+				try
 				{
-					value = cal.getTime();
+					SimpleDateFormat formatter = new SimpleDateFormat(fmt);
+					value = formatter.parse(text);
 				}
-			}
-			else if ("time".equals(type))
-			{
-				Calendar cal = cell.getTimeValue();
-				if (cal != null)
+				catch (Exception ex)
 				{
-					value = cal.getTime();
+					LogMgr.logError("OdsReader.getRowValues()", "Could not parse date format: " + fmt, ex);
+					Calendar cal = null;
+					if ("time".equals(type))
+					{
+						cal = cell.getTimeValue();
+					}
+					else
+					{
+						cal = cell.getDateValue();
+					}
+					if (cal != null)
+					{
+						value = cal.getTime();
+					}
 				}
 			}
 			else if ("float".equals(type))
@@ -165,7 +178,7 @@ public class OdsReader
 		}
 		catch (Exception ex)
 		{
-			throw new IOException("Could not load file " + inputFile.getFullPath(), ex);
+			throw new IOException("Could not load file " + inputFile.getAbsolutePath(), ex);
 		}
 	}
 

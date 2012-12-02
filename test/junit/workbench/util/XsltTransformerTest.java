@@ -37,10 +37,8 @@ public class XsltTransformerTest
 		TestUtil util = getTestUtil();
 		try
 		{
-			util.copyResourceFile(this, "person.xml");
-			File input = new File(util.getBaseDir(), "person.xml");
-			util.copyResourceFile(this, "wbexport2text.xslt");
-			File xslt = new File(util.getBaseDir(), "wbexport2text.xslt");
+			File input = util.copyResourceFile(this, "person.xml");
+			File xslt = util.copyResourceFile(this, "wbexport2text.xslt");
 
 			File output = new File(util.getBaseDir(), "data.txt");
 			String inputFileName = input.getAbsolutePath();

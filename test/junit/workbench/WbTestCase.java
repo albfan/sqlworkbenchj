@@ -24,7 +24,7 @@ public class WbTestCase
 	public WbTestCase()
 	{
 		name = "WbTestCase";
-		prepared = false;
+		prepare();
 	}
 
 	public WbTestCase(String testName)

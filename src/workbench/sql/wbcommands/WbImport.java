@@ -40,6 +40,8 @@ import workbench.resource.Settings;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.importer.SpreadsheetFileParser;
 import workbench.interfaces.TabularDataParser;
+
+import workbench.db.exporter.OdfHelper;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
@@ -124,6 +126,12 @@ public class WbImport
 		{
 			types.add("xlsx");
 		}
+
+		if (OdfHelper.isSimpleODFAvailable())
+		{
+			types.add("ods");
+		}
+
 		cmdLine.addArgument(ARG_TYPE, types);
 		cmdLine.addArgument(ARG_SHEET_NR);
 		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
@@ -442,6 +450,7 @@ public class WbImport
 			initParser(table, textParser, result);
 			if (!result.isSuccess())
 			{
+				textParser.done();
 				return result;
 			}
 
@@ -490,6 +499,7 @@ public class WbImport
 				}
 				catch (MissingWidthDefinition e)
 				{
+					textParser.done();
 					result.addMessage(ResourceMgr.getFormattedString("ErrImpWrongWidth", e.getColumnName()));
 					result.setFailure();
 					return result;
@@ -553,9 +563,9 @@ public class WbImport
 			}
 			imp.setCreateTarget(cmdLine.getBoolean(ARG_CREATE_TABLE, false));
 		}
-		else if (type.startsWith("xls"))
+		else if (type.startsWith("xls") || type.equals("ods"))
 		{
-			if (!PoiHelper.isPoiAvailable())
+			if (type.startsWith("xls") && !PoiHelper.isPoiAvailable())
 			{
 				result.addMessage(ResourceMgr.getString("ErrNoXLS"));
 				result.setFailure();
@@ -565,6 +575,13 @@ public class WbImport
 			if ( (type.equals("xlsx") || (inputFile != null && inputFile.getExtension().equalsIgnoreCase("xlsx"))) && !PoiHelper.isXLSXAvailable())
 			{
 				result.addMessage(ResourceMgr.getString("ErrNoXLSX"));
+				return result;
+			}
+
+			if (type.equals("ods") && !OdfHelper.isSimpleODFAvailable())
+			{
+				result.addMessage(ResourceMgr.getString("ErrNoODS"));
+				result.setFailure();
 				return result;
 			}
 
@@ -579,26 +596,27 @@ public class WbImport
 
 			defaultExtension = type;
 
-			SpreadsheetFileParser xlsParser = new SpreadsheetFileParser();
-			parser = xlsParser;
-			xlsParser.setTableName(table);
-			xlsParser.setTargetSchema(schema);
-			xlsParser.setConnection(currentConnection);
-			xlsParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
-			xlsParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
-			xlsParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
+			SpreadsheetFileParser spreadSheetParser = new SpreadsheetFileParser();
+			parser = spreadSheetParser;
+			spreadSheetParser.setTableName(table);
+			spreadSheetParser.setTargetSchema(schema);
+			spreadSheetParser.setConnection(currentConnection);
+			spreadSheetParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
+			spreadSheetParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
+			spreadSheetParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
 			if (inputFile != null)
 			{
 				int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
-				xlsParser.setInputFile(inputFile);
+				spreadSheetParser.setInputFile(inputFile);
 				// the index is zero-based, but the user supplies a one-based index
-				xlsParser.setSheetIndex(index - 1);
+				spreadSheetParser.setSheetIndex(index - 1);
 			}
 
-			initParser(table, xlsParser, result);
+			initParser(table, spreadSheetParser, result);
 			if (!result.isSuccess())
 			{
+				spreadSheetParser.done();
 				return result;
 			}
 		}
@@ -769,6 +787,7 @@ public class WbImport
 			result.setFailure();
 			addErrorInfo(result, sqlCommand, e);
 		}
+
 		result.addMessage(imp.getMessages());
 
 		if (!result.isSuccess() && sorter != null)

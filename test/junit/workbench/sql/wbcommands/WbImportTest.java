@@ -30,19 +30,16 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
-import workbench.resource.ResourceMgr;
 
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.Base64;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
@@ -58,6 +55,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 /**
  *
  * @author Thomas Kellerer
@@ -96,15 +98,87 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testOdsImport()
+		throws Exception
+	{
+		File input = util.copyResourceFile(this, "data.ods");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=ods " +
+			"-header=true " +
+			"-continueonerror=false " +
+			"-table=junit_test");
+
+		assertTrue(input.delete());
+
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
+		assertEquals(2, count.intValue());
+
+		input = util.copyResourceFile(this, "data.ods");
+
+		result = importCmd.execute(
+			"WbImport -file='" + input.getAbsolutePath() + "' " +
+			" -type=ods " +
+			" -sheetNumber=2 " +
+			" -header=true " +
+			" -continueonerror=false " +
+			" -table=datatype_test");
+
+//		assertTrue(input.delete());
+
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
+		assertEquals(2, count.intValue());
+
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery("select int_col,double_col,char_col,date_col,time_col,ts_col,nchar_col from datatype_test");
+			rs.next();
+			int i = rs.getInt("int_col");
+			assertEquals(42, i);
+
+			double d = rs.getDouble("double_col");
+			assertEquals(1234.56, d, 0.01);
+			String s = rs.getString("char_col");
+			assertEquals("char_value", s.trim());
+			java.sql.Date dt = rs.getDate("date_col");
+			SimpleDateFormat dtfm = new SimpleDateFormat(StringUtil.ISO_DATE_FORMAT);
+			java.util.Date dtv = dtfm.parse("1980-11-01");
+			assertEquals(dtv, dt);
+
+			java.sql.Time t = rs.getTime("time_col");
+			SimpleDateFormat tfm = new SimpleDateFormat("HH:mm:ss");
+			assertEquals("23:54:14", tfm.format(t));
+
+			java.sql.Timestamp ts = rs.getTimestamp("ts_col");
+			SimpleDateFormat tsFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			assertEquals("1990-10-01 17:04:06", tsFmt.format(ts));
+
+			s = rs.getString("nchar_col");
+			assertEquals("nchar_val", s);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+	@Test
 	public void testExcel()
 		throws Exception
 	{
 
 		ResultSet rs = null;
 		Statement stmt = null;
+		File importFile = createExcelFile("person.xls");
+
 		try
 		{
-			File importFile = createExcelFile("person.xls");
 
 			StatementRunnerResult result = importCmd.execute("wbimport " +
 				"-file='" + importFile.getAbsolutePath() + "' " +
@@ -112,6 +186,8 @@ public class WbImportTest
 				"-header=true " +
 				"-continueonerror=false " +
 				"-table=junit_test");
+
+			assertTrue(importFile.delete());
 
 			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 			Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
@@ -122,6 +198,7 @@ public class WbImportTest
 				"commit;\n"
 			);
 
+			importFile = createExcelFile("person.xls");
 			result = importCmd.execute("wbimport " +
 				"-file='" + importFile.getAbsolutePath() + "' " +
 				"-type=xls " +
@@ -129,6 +206,8 @@ public class WbImportTest
 				"-sheetNumber=2 " +
 				"-continueonerror=false " +
 				"-table=junit_test");
+
+			assertTrue(importFile.delete());
 
 			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
@@ -2995,9 +3074,7 @@ public class WbImportTest
 	{
 		try
 		{
-			util.copyResourceFile(this, "encoded_blob_input.xml");
-
-			File xmlFile = new File(this.basedir, "encoded_blob_input.xml");
+			File xmlFile = util.copyResourceFile(this, "encoded_blob_input.xml");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='ISO-8859-1' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
