@@ -13,17 +13,22 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.ReplaceDataAction;
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
@@ -31,6 +36,7 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.RegExComparator;
+
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
@@ -91,6 +97,8 @@ public class TableReplacer
 
 		Component parent = SwingUtilities.getWindowAncestor(this.client);
 		Position pos = Position.NO_POSITION;
+
+		boolean scrollOnly = false;
 		while (showDialog)
 		{
 			boolean doFind = p.showFindDialog(parent, ResourceMgr.getString("TxtWindowTitleSearchDataText"));
@@ -99,12 +107,15 @@ public class TableReplacer
 			boolean ignoreCase = p.getIgnoreCase();
 			boolean wholeWord = p.getWholeWordOnly();
 			boolean useRegex = p.getUseRegex();
+
 			try
 			{
 				this.findAgainAction.setEnabled(false);
 				if (p.getHighlightAll())
 				{
 					initTableHighlighter(criteria, ignoreCase, useRegex);
+					pos = this.replacer.find(criteria, ignoreCase, wholeWord, useRegex);
+					scrollOnly = true;
 				}
 				else
 				{
@@ -122,7 +133,14 @@ public class TableReplacer
 			}
 		}
 
-		highlightPosition(pos);
+		if (scrollOnly && pos.isValid())
+		{
+			client.scrollToRow(pos.getRow());
+		}
+		else
+		{
+			highlightPosition(pos);
+		}
 
 		return pos.getRow();
 	}
@@ -149,11 +167,30 @@ public class TableReplacer
 			};
 		}
 
-		ColumnExpression filter = new ColumnExpression(comp, criteria);
+		ColumnExpression filter = new ColumnExpression(comp, criteria)
+		{
+			@Override
+			public boolean isColumnSpecific()
+			{
+				return false;
+			}
+		};
 		filter.setIgnoreCase(ignoreCase);
 		client.applyHighlightExpression(filter);
 	}
 
+	protected void scrollTo(final Position pos)
+	{
+		final int row = pos.getRow();
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				client.scrollToRow(row);
+			}
+		});
+	}
 	protected void highlightPosition(final Position pos)
 	{
 		final int row = pos.getRow();

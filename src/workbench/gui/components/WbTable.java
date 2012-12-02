@@ -11,9 +11,6 @@
  */
 package workbench.gui.components;
 
-import workbench.db.WbConnection;
-import workbench.gui.actions.CopyAction;
-import workbench.gui.fontzoom.FontZoomer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -40,6 +37,7 @@ import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -48,16 +46,16 @@ import javax.swing.InputMap;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.JPopupMenu.Separator;
-import javax.swing.KeyStroke;
 import javax.swing.UIDefaults;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -69,30 +67,43 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.PlatformShortcuts;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CopyAllColumnNamesAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
-import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
-import workbench.gui.actions.CopySelectedAsSqlInsertAction;
-import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
-import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.CopyColumnNameAction;
+import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
+import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlMergeAction;
+import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
+import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.FilterDataAction;
-import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.OptimizeColumnWidthAction;
 import workbench.gui.actions.OptimizeRowHeightAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
 import workbench.gui.actions.ResetColOrderAction;
+import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.ResetHighlightAction;
 import workbench.gui.actions.SaveColOrderAction;
 import workbench.gui.actions.SaveDataAsAction;
@@ -104,6 +115,7 @@ import workbench.gui.actions.TransposeRowAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.FontZoomProvider;
+import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.renderer.RendererFactory;
@@ -111,14 +123,7 @@ import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.sql.DwStatusBar;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.ListSelectionControl;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.PlatformShortcuts;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataConverter;
 import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
@@ -127,6 +132,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowDataReader;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
+
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 
@@ -1716,13 +1722,10 @@ public class WbTable
 
 	public void applyHighlightExpression(ColumnExpression filter)
 	{
-		boolean changed = (filter != null && this.highlightExpression == null) ||
-			(filter == null && this.highlightExpression != null);
-
 		this.highlightExpression = filter;
 		this.resetHighlightAction.setEnabled(filter != null);
 
-		if (changed) WbSwingUtilities.repaintLater(this);
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	private void initMultiLineRenderer()

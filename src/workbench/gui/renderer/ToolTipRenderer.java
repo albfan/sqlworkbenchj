@@ -20,23 +20,27 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
-
 import java.awt.Toolkit;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.WbTable;
+
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.WbTable;
+
 import workbench.storage.filter.ColumnExpression;
+
 import workbench.util.StringUtil;
 
 /**
@@ -213,6 +217,7 @@ public class ToolTipRenderer
 		this.currentColumn = col;
 		this.currentColumnName = table.getColumnName(col);
 		this.isSelected = selected;
+		this.currentValue = value;
 
 		try
 		{
@@ -255,7 +260,6 @@ public class ToolTipRenderer
 			this.setFont(table.getFont());
 		}
 
-		currentValue = value;
 		if (value != null)
 		{
 			prepareDisplay(value);
