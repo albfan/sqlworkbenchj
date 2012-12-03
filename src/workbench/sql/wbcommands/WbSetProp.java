@@ -14,12 +14,15 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
@@ -135,7 +138,10 @@ public class WbSetProp
 		else
 		{
 			DataStore ds = WbSysProps.getWbProperties(args);
-			result.addDataStore(ds);
+			if (ds.getRowCount() > 0)
+			{
+				result.addDataStore(ds);
+			}
 		}
 		result.setSuccess();
 		return result;
