@@ -26,8 +26,6 @@ public interface WbLogger
 
 	void logMessage(LogLevel level, Object caller, String msg, Throwable th);
 
-	void logSqlError(Object caller, String sql, Throwable th);
-
 	void setMessageFormat(String newFormat);
 
 	void logToSystemError(boolean flag);

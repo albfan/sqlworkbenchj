@@ -13,6 +13,11 @@ package workbench.log;
 
 import java.io.File;
 import java.util.Enumeration;
+
+import workbench.WbManager;
+
+import workbench.util.StringUtil;
+
 import org.apache.log4j.Appender;
 import org.apache.log4j.Category;
 import org.apache.log4j.FileAppender;
@@ -22,8 +27,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
-import workbench.WbManager;
-import workbench.util.StringUtil;
 
 /**
  * An implementation of WbLogger that uses Log4J for logging.
@@ -247,12 +250,6 @@ public class Log4JLogger
 			default:
 				error(msg, th);
 		}
-	}
-
-	@Override
-	public void logSqlError(Object caller, String sql, Throwable th)
-	{
-		logMessage(LogLevel.error, caller, sql, th);
 	}
 
 	@Override

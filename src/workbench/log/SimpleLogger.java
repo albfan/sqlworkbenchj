@@ -14,8 +14,8 @@ package workbench.log;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.sql.SQLException;
 import java.util.MissingFormatArgumentException;
+
 import workbench.util.*;
 
 /**
@@ -29,7 +29,6 @@ public class SimpleLogger
 	private LogLevel level = LogLevel.warning;
 	private PrintStream logOut = null;
 	private boolean logSystemErr = false;
-	private boolean showStackTrace = false;
 	private String messageFormat;
 	private File currentFile;
 
@@ -47,8 +46,6 @@ public class SimpleLogger
 		messageFormat = messageFormat.replace("{source}", "%3$s");
 		messageFormat = messageFormat.replace("{message}", "%4$s");
 		messageFormat = messageFormat.replace("{error}", "%5$s");
-		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1;
-		messageFormat = messageFormat.replace("{stacktrace}", "");
 	}
 
 	@Override
@@ -131,19 +128,6 @@ public class SimpleLogger
 	}
 
 	@Override
-	public void logSqlError(Object caller, String sql, Throwable th)
-	{
-		if (th instanceof SQLException)
-		{
-			logMessage(LogLevel.debug, caller, "Error executing statement: " + sql, th);
-		}
-		else
-		{
-			logMessage(LogLevel.error, caller, "Error executing statement: " + sql, th);
-		}
-	}
-
-	@Override
 	public boolean levelEnabled(LogLevel tolog)
 	{
 		return level.compareTo(tolog) >= 0;
@@ -177,7 +161,9 @@ public class SimpleLogger
 		{
 			if (th != null)
 			{
-				String error = ExceptionUtil.getDisplay(th, showStackTrace || this.level == LogLevel.debug || this.level == LogLevel.trace);
+				// if the requested level is error or finer, include the stacktrace
+				boolean includeStacktrace = logLevel.compareTo(LogLevel.error) >= 0;
+				String error = ExceptionUtil.getDisplay(th, includeStacktrace);
 				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, error);
 			}
 			else

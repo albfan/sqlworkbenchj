@@ -25,7 +25,9 @@ import workbench.db.exporter.BlobMode;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.TextFileParser;
 import workbench.db.postgres.PgCopyImporter;
+
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -140,7 +142,7 @@ public class FileParserFactory
 			{
 				result.setFailure();
 				result.addMessage(textParser.getMessages());
-				LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e), null);
+				LogMgr.logError("FileParserFactory.createTextFileParser()", ExceptionUtil.getDisplay(e), null);
 				return null;
 			}
 

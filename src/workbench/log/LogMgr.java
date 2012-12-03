@@ -13,6 +13,7 @@ package workbench.log;
 
 import java.io.File;
 import java.sql.SQLException;
+
 import workbench.util.*;
 
 /**
@@ -110,6 +111,7 @@ public class LogMgr
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
 		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, th);
+		logChainedException(LogLevel.debug, th);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg)
@@ -130,24 +132,20 @@ public class LogMgr
 	public static void logWarning(Object aCaller, String aMsg, Throwable th)
 	{
 		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, th);
+		logChainedException(LogLevel.warning, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, Throwable th)
 	{
 		getLogger().logMessage(LogLevel.error, aCaller, aMsg, th);
+		logChainedException(LogLevel.error, th);
 	}
 
-	public static void logError(Object aCaller, String aMsg, SQLException se)
+	public static void logChainedException(LogLevel level, Throwable se)
 	{
-		if (!getLogger().levelEnabled(LogLevel.error))
+		if (getLogger().levelEnabled(level) && se instanceof SQLException)
 		{
-			return;
-		}
-
-		getLogger().logMessage(LogLevel.error, aCaller, aMsg, se);
-		if (se != null)
-		{
-			SQLException next = se.getNextException();
+			SQLException next = ((SQLException)se).getNextException();
 			while (next != null)
 			{
 				getLogger().logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
