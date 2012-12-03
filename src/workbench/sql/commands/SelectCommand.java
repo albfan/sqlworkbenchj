@@ -15,12 +15,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
+import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
 
@@ -153,7 +155,7 @@ public class SelectCommand
 			result.addMessage(StringUtil.getMaxSubstring(sql, 120));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			appendWarnings(result, true);
-			LogMgr.logError("SelectCommand.execute()", sql, e);
+			LogMgr.logUserSqlError("SelectCommand.execute()", sql, e);
 			result.setFailure();
 			this.runner.rollbackSavepoint();
 		}

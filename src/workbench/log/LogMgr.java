@@ -141,6 +141,20 @@ public class LogMgr
 		logChainedException(LogLevel.error, th);
 	}
 
+	public static void logUserSqlError(Object caller, String sql, Throwable th)
+	{
+		String logMsg = "Error executing:\n" + sql + "\n  ";
+		if (th instanceof SQLException && !getLogger().levelEnabled(LogLevel.debug))
+		{
+			logMsg += ExceptionUtil.getDisplay(th);
+			logError("SelectCommand.execute()", logMsg, null);
+		}
+		else
+		{
+			logError("SelectCommand.execute()", logMsg, th);
+		}
+	}
+
 	public static void logChainedException(LogLevel level, Throwable se)
 	{
 		if (getLogger().levelEnabled(level) && se instanceof SQLException)

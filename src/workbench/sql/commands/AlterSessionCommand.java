@@ -14,13 +14,17 @@ package workbench.sql.commands;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
-import workbench.db.DbMetadata;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DbMetadata;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -119,7 +123,7 @@ public class AlterSessionCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, sql, e);
-			LogMgr.logError("AlterSessionCommand.execute()", sql, e);
+			LogMgr.logUserSqlError("AlterSessionCommand.execute()", sql, e);
 		}
 
 		return result;

@@ -17,8 +17,10 @@ import java.sql.SQLException;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.LobFileStatement;
 
 /**
@@ -140,7 +142,7 @@ public class UpdatingCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
-			LogMgr.logError("UpdatingCommnad.execute()", sql, e);
+			LogMgr.logUserSqlError("UpdatingCommnad.execute()", sql, e);
 		}
 		finally
 		{

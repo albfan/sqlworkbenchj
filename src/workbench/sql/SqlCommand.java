@@ -17,16 +17,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.WbManager;
-import workbench.db.ConnectionProfile;
-import workbench.db.DbSettings;
-import workbench.db.WbConnection;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.DbSettings;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -386,7 +389,7 @@ public class SqlCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
-			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement: " + sql + "\nError:" + ExceptionUtil.getDisplay(e), null);
+			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}
 		finally
 		{

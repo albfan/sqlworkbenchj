@@ -14,20 +14,22 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
-
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -176,7 +178,7 @@ public class DdlCommand
 
 			addExtendErrorInfo(currentConnection, info, result);
 			result.setFailure();
-			LogMgr.logError("DdlCommand.execute()", sql, e);
+			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
 		}
 		finally
 		{

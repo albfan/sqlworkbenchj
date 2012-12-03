@@ -12,7 +12,9 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+
 import workbench.log.LogMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -76,7 +78,7 @@ public class SingleVerbCommand extends SqlCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, aSql, e);
-			LogMgr.logError("SingleVerbCommand.execute()", aSql, e);
+			LogMgr.logUserSqlError("SingleVerbCommand.execute()", aSql, e);
 		}
 		finally
 		{
