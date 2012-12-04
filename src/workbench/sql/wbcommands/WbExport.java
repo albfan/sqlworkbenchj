@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.WbManager;
+import workbench.interfaces.ProgressReporter;
+import workbench.interfaces.ResultSetConsumer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
@@ -28,15 +34,13 @@ import workbench.db.exporter.ExportType;
 import workbench.db.exporter.InfinityLiterals;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.exporter.WrongFormatFileException;
-import workbench.interfaces.ProgressReporter;
-import workbench.interfaces.ResultSetConsumer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.MergeGenerator;
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
@@ -164,8 +168,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_QUOTE_ALWAYS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_LINEENDING, StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument(ARG_SHOW_ENCODINGS);
-		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
-		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2"));
+		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2,mysql"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
@@ -461,12 +464,6 @@ public class WbExport
 
 		if ("text".equals(type))
 		{
-			// Support old parameter Syntax
-			if (cmdLine.getBoolean("writeoracleloader", false))
-			{
-				exporter.addControlFileFormat(ControlFileFormat.oracle);
-			}
-
 			try
 			{
 				Set<ControlFileFormat> formats = ControlFileFormat.parseCommandLine(cmdLine.getValue(ARG_FORMATFILE));

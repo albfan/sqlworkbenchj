@@ -13,11 +13,15 @@ package workbench.db.postgres;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+
+import workbench.log.LogMgr;
+
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
-import workbench.log.LogMgr;
+
 import workbench.storage.ResultInfo;
+
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
@@ -76,7 +80,7 @@ public class PostgresCopyStatementWriter
 				out.print(", quote '" + quote + "'");
 			}
 			String encoding = exporter.getEncoding();
-			if (quote != null)
+			if (encoding != null)
 			{
 				out.print(", encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
 			}

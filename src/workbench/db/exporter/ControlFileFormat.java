@@ -15,21 +15,26 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import workbench.db.mssql.SqlServerFormatFileWriter;
-import workbench.db.postgres.PostgresCopyStatementWriter;
-import workbench.db.oracle.OracleControlFileWriter;
+
 import workbench.db.ibm.Db2FormatFileWriter;
+import workbench.db.mssql.SqlServerFormatFileWriter;
+import workbench.db.mysql.MySQLLoadDataWriter;
+import workbench.db.oracle.OracleControlFileWriter;
+import workbench.db.postgres.PostgresCopyStatementWriter;
+
 import workbench.util.StringUtil;
 
 /**
  * Type definitions for various control file formats.
- * Currently Oracle, SQL Server, PostgreSQL (COPY command) and DB2 are covered
+ *
+ * Currently Oracle, SQL Server, PostgreSQL (COPY command), DB2 and MySQL (LOAD DATA INFILE ...) are covered
  *
  * @author Thomas Kellerer
  * @see OracleControlFileWriter
  * @see SqlServerFormatFileWriter
  * @see PostgresCopyStatementWriter
  * @see Db2FormatFileWriter
+ * @see MySQLLoadDataWriter
  */
 public enum ControlFileFormat
 {
@@ -37,7 +42,8 @@ public enum ControlFileFormat
 	oracle,
 	sqlserver,
 	postgres,
-	db2;
+	db2,
+	mysql;
 
 	public static Set<ControlFileFormat> parseCommandLine(String args)
 		throws WrongFormatFileException
@@ -72,6 +78,8 @@ public enum ControlFileFormat
 				return new SqlServerFormatFileWriter();
 			case db2:
 				return new Db2FormatFileWriter();
+			case mysql:
+				return new MySQLLoadDataWriter();
 			default:
 				return null;
 		}
