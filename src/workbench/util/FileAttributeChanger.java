@@ -89,7 +89,7 @@ public class FileAttributeChanger
 		return System.getProperty("os.name").contains("Windows");
 	}
 
-	private boolean isJava7()
+	public static boolean isJava7()
 	{
 		VersionNumber java = VersionNumber.getJavaVersion();
 		VersionNumber java7 = new VersionNumber(1, 7);
