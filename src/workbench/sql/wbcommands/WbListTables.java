@@ -90,9 +90,15 @@ public class WbListTables extends SqlCommand
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
 
-		if (StringUtil.isBlank(schema)) schema = currentConnection.getMetadata().getSchemaToUse();
+		if (StringUtil.isBlank(schema))
+		{
+			schema = currentConnection.getMetadata().getCurrentSchema();
+		}
 
-		if (StringUtil.isBlank(catalog)) catalog = currentConnection.getMetadata().getCurrentCatalog();
+		if (StringUtil.isBlank(catalog))
+		{
+			catalog = currentConnection.getMetadata().getCurrentCatalog();
+		}
 
 		DataStore resultList = null;
 
