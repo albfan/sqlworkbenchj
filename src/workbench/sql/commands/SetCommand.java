@@ -12,18 +12,20 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -53,7 +55,6 @@ public class SetCommand
 	{
 		StatementRunnerResult result = null;
 
-		Savepoint sp = null;
 		try
 		{
 			String command = null;
@@ -172,7 +173,6 @@ public class SetCommand
 				}
 			}
 
-
 			if (execSql)
 			{
 				String oldSchema = null;
@@ -182,10 +182,6 @@ public class SetCommand
 				}
 				result = new StatementRunnerResult();
 				aSql = getSqlToExecute(aSql);
-				if (currentConnection.getDbSettings().useSavePointForDML())
-				{
-					sp = currentConnection.setSavepoint();
-				}
 				this.currentStatement = currentConnection.createStatement();
 
 				// Using a generic execute ensures that servers that
@@ -201,8 +197,6 @@ public class SetCommand
 					appendSuccessMessage(result);
 				}
 
-				currentConnection.releaseSavepoint(sp);
-
 				if (pgSchemaChange)
 				{
 					String newSchema = handlePgSchemaChange(oldSchema);
@@ -212,7 +206,6 @@ public class SetCommand
 		}
 		catch (Exception e)
 		{
-			currentConnection.rollback(sp);
 			result = new StatementRunnerResult();
 			result.clear();
 			if (currentConnection.getMetadata().isOracle())
