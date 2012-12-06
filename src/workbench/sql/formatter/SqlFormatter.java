@@ -36,7 +36,7 @@ public class SqlFormatter
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
-		"RIGHT JOIN", "START WITH", "CONNECT BY");
+		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY");
 
 	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.caseInsensitiveSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");

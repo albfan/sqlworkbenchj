@@ -144,7 +144,9 @@ keyword=(
 (MATERIALIZED{wsp}VIEW{wsp}LOG)|
 (START{wsp}WITH)|
 (OUTER{wsp}JOIN)|
+(OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|
+(CROSS{wsp}APPLY)|
 (FULL{wsp}JOIN)|
 (FULL{wsp}OUTER{wsp}JOIN)|
 (INNER{wsp}JOIN)|
