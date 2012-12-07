@@ -149,7 +149,7 @@
       For a comparison of the different Microsoft Office XML formats please refer to: <ulink url="http://en.wikipedia.org/wiki/Microsoft_Office_XML_formats"/>
     </para>
 
-    <para>
+    <para id="download-poi-addon">
       You can download all required POI libraries as a single archive from the &wb-productname; homepage:
       <ulink url="http://www.sql-workbench.net/poi-add-on2.zip"/>. After downloading the archive, unzip it
       into the directory where <literal>sqlworkbench.jar</literal> is located.

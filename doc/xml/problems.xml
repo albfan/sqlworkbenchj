@@ -324,12 +324,17 @@ SELECT 42 FROM dual;</programlisting>
 		</section>
 
 		<section id="mysql-no-view-source">
-			<title>Source SQL for views is not displayed</title>
+			<title>The SQL source for views is not displayed</title>
 			<para>
 				&wb-productname; retrieves the view definitioin from <literal>INFORMATION_SCHEMA.VIEWS</literal>.
-        In some cases the column <literal>VIEW_DEFINITION</literal> does not contain the view definition
-        and thus the source cannot be displayed.
+        For some unknown reason, the column <literal>VIEW_DEFINITION</literal> sometimes does not contain the view definition
+        and the source is not displayed in the DbExplorer.
 			</para>
+      <para>
+        To make &wb-productname; use MySQL's <tt>SHOW CREATE VIEW</tt> statement instead of the <tt>INFORMATION_SCHEMA</tt>,
+        you can set the property <tt>workbench.db.mysql.use.showcreate.view</tt> to true, e.g. by running
+        <tt>WbSetConfig workbench.db.mysql.use.showcreate.view=true</tt>
+      </para>
 		</section>
 
 	</section>

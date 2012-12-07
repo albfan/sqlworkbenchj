@@ -49,7 +49,6 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
-import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -197,7 +196,6 @@ public class DbMetadata
 			dataTypeResolver = new OracleDataTypeResolver(aConnection);
 			definitionReader = new OracleTableDefinitionReader(aConnection);
 			extenders.add(new OracleTypeReader());
-			viewReader = new OracleViewReader(this.dbConnection);
 			objectListEnhancer = new OracleObjectListEnhancer(); // to cleanup MVIEW type information
 		}
 		else if (productLower.indexOf("hsql") > -1)

@@ -19,13 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.db.exporter.RowDataConverter;
-import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.sql.commands.SingleVerbCommand;
+
+import workbench.gui.dbobjects.TableSearchPanel;
+
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
+
+import workbench.sql.commands.SingleVerbCommand;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -503,6 +506,12 @@ public class DbSettings
 	public boolean selectStartsTransaction()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "select.startstransaction", false);
+	}
+
+	public boolean getUseMySQLShowCreate(String type)
+	{
+		if (type == null) return false;
+		return Settings.getInstance().getBoolProperty("workbench.db.mysql.use.showcreate." + type.trim().toLowerCase(), false);
 	}
 
 	/**

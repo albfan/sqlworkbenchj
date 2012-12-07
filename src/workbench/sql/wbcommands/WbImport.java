@@ -16,9 +16,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import workbench.WbManager;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.TabularDataParser;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.OdfHelper;
+import workbench.db.exporter.PoiHelper;
 import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
@@ -26,28 +35,21 @@ import workbench.db.importer.DeleteType;
 import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
+import workbench.db.importer.SpreadsheetFileParser;
 import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.db.postgres.PgCopyImporter;
-import workbench.interfaces.ImportFileParser;
-import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
-import workbench.db.exporter.PoiHelper;
-import workbench.db.importer.SpreadsheetFileParser;
-import workbench.interfaces.TabularDataParser;
-
-import workbench.db.exporter.OdfHelper;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
@@ -601,6 +603,7 @@ public class WbImport
 			spreadSheetParser.setTableName(table);
 			spreadSheetParser.setTargetSchema(schema);
 			spreadSheetParser.setConnection(currentConnection);
+			spreadSheetParser.setContainsHeader(cmdLine.getBoolean(WbExport.ARG_HEADER, true));
 			spreadSheetParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
 			spreadSheetParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			spreadSheetParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));

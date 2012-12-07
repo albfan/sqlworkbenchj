@@ -5,6 +5,9 @@
   <indexterm><primary>Import</primary><secondary>csv</secondary></indexterm>
   <indexterm><primary>Import</primary><secondary>tab separated</secondary></indexterm>
   <indexterm><primary>Import</primary><secondary>XML</secondary></indexterm>
+  <indexterm><primary>Import</primary><secondary>Excel</secondary></indexterm>
+  <indexterm><primary>Import</primary><secondary>XSLT</secondary></indexterm>
+  <indexterm><primary>Import</primary><secondary>OpenOffice</secondary></indexterm>
 
 	<para>
     The <literal>WbImport</literal> command can be used to import data from text or
@@ -55,6 +58,27 @@
 		</para>
 	</note>
 
+  <section id="spreadsheet-import">
+    <title>Importing spreadsheet files</title>
+    <para>
+      In order to import Microsoft Excel (XSL, XSLT) or OpenOffice Calc (ODS) files, additional libraries are needed.
+      For Excel <link linkend="download-poi-addon">the same libraries</link> are needed as for exporting those formats. For OpenOffice
+      additional libraries are needed. All needed libraries are included in the download bundle named <literal>with-office-libs.zip</literal>
+      If you did not download that bundle, you can download the libraries needed for OpenOffice from here: <ulink url="http://www.sql-workbench.net/odf-add-on.zip"/>.
+    </para>
+
+    <note>
+      <para>
+        The Excel import supports XLS and XLSX, it does <emphasis role="bold">not</emphasis> support the "SpreadsheetML" format.
+      </para>
+    </note>
+
+    <para>
+      You can tell if the needed libraries are installed if you invoke the <link linkend="command-completion">auto-completion</link>
+      after typing the <literal>-type=</literal> parameter. If the types XLS or ODS are presented in the dropdown, the libraries installed.
+    </para>
+
+  </section>
 
 	<section id="import-general-parameters">
 		<title>General parameters</title>
@@ -75,7 +99,7 @@
 					<row>
 						<entry>-type</entry>
 						<entry>
-							<para>Possible values: <literal>xml</literal>, <literal>text</literal></para>
+							<para>Possible values: <literal>xml</literal>, <literal>text</literal>, <literal>ods</literal>, <literal>xls</literal></para>
 							<para>Defines the type of the input file</para>
 						</entry>
 					</row>
@@ -323,6 +347,9 @@
 								This parameter will only be used if <literal>-mode=insert</literal>
 								is specified.
 							</para>
+              <para>
+                This parameter is ignored for spreadsheet imports.
+              </para>
 						</entry>
 					</row>
 
@@ -486,8 +513,10 @@
                 To store different values than 0/1 in the target column, use the parameters
                 <literal>-numericFalse</literal> and <literal>-numericTrue</literal>
               </para>
+              <para>This parameter is ignored for spreadsheet imports</para>
 						</entry>
 					</row>
+
 					<row>
 						<entry>-numericFalse -numericTrue</entry>
 						<entry>
@@ -520,6 +549,7 @@
 										</listitem>
 								</itemizedlist>
 							</para>
+              <para>This parameter is ignored for spreadsheet imports</para>
             </entry>
           </row>
 					<row>
@@ -551,6 +581,7 @@
 										</listitem>
 								</itemizedlist>
 							</para>
+              <para>This parameter is ignored for spreadsheet imports</para>
 						</entry>
 					</row>
 
@@ -1372,6 +1403,59 @@
 				</tgroup>
 			</informaltable>
 	</section>
+
+	<section id="import-spreadsheet-parameters">
+		<title>Parameters for spreadsheet import</title>
+    <para>
+      Both spreadsheet imports support a subset of the parameters that are used for flat file imports.
+    </para>
+    <para>
+      These parameters are:
+				<itemizedlist>
+          <listitem><simpara>-header</simpara></listitem>
+          <listitem><simpara>-fileColumns</simpara></listitem>
+          <listitem><simpara>-importColumns</simpara></listitem>
+          <listitem><simpara>-nullString</simpara></listitem>
+          <listitem><simpara>-emptyStringIsNull</simpara></listitem>
+          <listitem><simpara>-illegalDateIsNull</simpara></listitem>
+        </itemizedlist>
+    </para>
+    <para>
+      The spreadsheet import does not support specifying a date or timestamp format. It is expected that those
+      columns are formatted in such a way that they can be identified as date or timestamps.
+    </para>
+    <para>
+      The spreadsheet import also does not support importing BLOB files that are referenced from within the
+      spreadsheet. If you want to import this kind of data, you need to convert the spreadsheet into a text file.
+    </para>
+    <para>
+      The spreadsheet import supports one additional parameter that is not available for the text imports:
+    </para>
+			<informaltable frame="all">
+				<tgroup cols="2"  align="left">
+					<colspec colname="c1" colwidth="4cm" />
+					<colspec colname="c2" />
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+          <tbody valign="top">
+            <row>
+              <entry>-sheetNumber</entry>
+              <entry>
+                <para>
+                  Selects the spreedsheet inside the file to be imported. If this is not specified the first
+                  sheet is used. The first sheet has the number 1.</para>
+              </entry>
+            </row>
+          </tbody>
+				</tgroup>
+			</informaltable>
+
+  </section>
+
 
 	<section id="import-update-mode">
 		<title>Update mode</title>
