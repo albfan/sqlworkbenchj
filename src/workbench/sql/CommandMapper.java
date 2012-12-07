@@ -18,10 +18,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbMetadata;
+import workbench.db.WbConnection;
+
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.IgnoredCommand;
@@ -34,6 +37,7 @@ import workbench.sql.wbcommands.*;
 import workbench.sql.wbcommands.console.WbAbout;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbStoreProfile;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -212,6 +216,13 @@ public class CommandMapper
 			DdlCommand recreate = DdlCommand.getRecreateCommand();
 			this.cmdDispatch.put(recreate.getVerb(), recreate);
 			this.dbSpecificCommands.add(recreate.getVerb());
+		}
+
+		if (metaData.isMySql())
+		{
+			MySQLShow show = new MySQLShow();
+			this.cmdDispatch.put(show.getVerb(), show);
+			this.dbSpecificCommands.add(show.getVerb());
 		}
 
 		if (metaData.getDbSettings().useWbProcedureCall())

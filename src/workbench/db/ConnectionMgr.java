@@ -29,17 +29,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import workbench.WbManager;
-import workbench.db.objectcache.DbObjectCacheFactory;
-import workbench.db.shutdown.DbShutdownFactory;
-import workbench.db.shutdown.DbShutdownHook;
-import workbench.gui.profiles.ProfileKey;
 
-import workbench.util.ExceptionUtil;
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
+import workbench.db.shutdown.DbShutdownFactory;
+import workbench.db.shutdown.DbShutdownHook;
+
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.PropertiesCopier;
 import workbench.util.WbFile;
@@ -66,6 +69,8 @@ public class ConnectionMgr
 
 	private final Object driverLock = new Object();
 	private final Object profileLock = new Object();
+
+	private String currentFilename;
 
 	private ConnectionMgr()
 	{
@@ -154,7 +159,7 @@ public class ConnectionMgr
 		}
 		return count;
 	}
-	
+
 	public Class loadClassFromDriverLib(ConnectionProfile profile, String className)
 		throws ClassNotFoundException, UnsupportedClassVersionError
 	{
@@ -627,15 +632,13 @@ public class ConnectionMgr
 		String url = aConn.getUrl();
 		String id = aConn.getId();
 
-		Iterator itr = this.activeConnections.values().iterator();
-		while (itr.hasNext())
+		for (WbConnection conn : this.activeConnections.values())
 		{
-			WbConnection c = (WbConnection)itr.next();
-			if (c == null) continue;
+			if (conn == null) continue;
 
-			if (c.getId().equals(id)) continue;
+			if (conn.getId().equals(id)) continue;
 
-			String u = c.getUrl();
+			String u = conn.getUrl();
 			if (u == null) continue;
 			// we found one connection with the same URL
 			if (u.equals(url)) return true;
@@ -802,20 +805,25 @@ public class ConnectionMgr
 		long start = System.currentTimeMillis();
 		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
 
+		String filename = getFileName();
 		Object result = null;
 		try
 		{
-			WbPersistence reader = new WbPersistence(Settings.getInstance().getProfileStorage());
+			if (this.currentFilename != null)
+			{
+				LogMgr.logInfo("ConnectionMgr.readProfiles()", "Loading connection profiles from " + filename);
+			}
+			WbPersistence reader = new WbPersistence(filename);
 			result = reader.readObject();
 		}
 		catch (FileNotFoundException fne)
 		{
-			LogMgr.logDebug("ConnectionMgr.readProfiles()", "WbProfiles.xml not found. Creating new one.");
+			LogMgr.logDebug("ConnectionMgr.readProfiles()", filename + " not found. Creating new one.");
 			result = null;
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles", e);
+			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles from " + filename, e);
 			result = null;
 		}
 
@@ -860,6 +868,15 @@ public class ConnectionMgr
 		}
 	}
 
+	private String getFileName()
+	{
+		if (currentFilename == null)
+		{
+			return Settings.getInstance().getProfileStorage();
+		}
+		return currentFilename;
+	}
+
 	/**
 	 * Save the connectioin profiles to an external file.
 	 *
@@ -880,7 +897,7 @@ public class ConnectionMgr
 				WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
 				WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
 
-				WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
+				WbPersistence writer = new WbPersistence(getFileName());
 				try
 				{
 					writer.writeObject(this.profiles);
