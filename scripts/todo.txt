@@ -1,5 +1,7 @@
 Features:
 ---------
+- Load different WbProfiles.xml from within the connection dialog
+  Dropdown with the last used files
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
   (Auto-Completion not working for UPDATE ... FROM .. JOIN)
 - save table sort of DbExplorer in Workspace
