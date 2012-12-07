@@ -296,6 +296,24 @@ public class WbConnection
 		}
 	}
 
+	private String getWindowsUser()
+	{
+		String url = this.getUrl();
+		if (StringUtil.isEmptyString(url)) return StringUtil.EMPTY_STRING;
+
+		if (url.startsWith("jdbc:sqlserver:") && url.contains("integratedSecurity=true"))
+		{
+			String userName = System.getProperty("user.name");
+			String domain = System.getenv("userdomain");
+			if (domain != null)
+			{
+				return domain + "\\" + userName;
+			}
+			return userName;
+		}
+		return StringUtil.EMPTY_STRING;
+	}
+
 	public boolean supportsQueryTimeout()
 	{
 		if (this.metaData == null) return false;
@@ -945,7 +963,12 @@ public class WbConnection
 		{
 			return getCurrentUser();
 		}
-		return profile.getUsername();
+		String username = profile.getUsername();
+		if (StringUtil.isEmptyString(username))
+		{
+			username = getWindowsUser();
+		}
+		return username;
 	}
 
 	/**
