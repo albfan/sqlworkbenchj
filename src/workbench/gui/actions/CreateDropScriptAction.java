@@ -14,16 +14,23 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.WbManager;
+
 import workbench.db.DbObject;
 import workbench.db.DropScriptGenerator;
 import workbench.db.TableIdentifier;
+
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
+
 import workbench.util.CollectionUtil;
+
+import static workbench.gui.actions.WbAction.isCtrlPressed;
 
 /**
  * @author Thomas Kellerer
@@ -56,6 +63,16 @@ public class CreateDropScriptAction
 			}
 		}
 		DropScriptGenerator generator = new DropScriptGenerator(source.getConnection());
+		if (isCtrlPressed(e))
+		{
+			generator.setIncludeRecreateStatements(false);
+		}
+
+		if (isAltPressed(e))
+		{
+			generator.setIncludeDropTable(false);
+		}
+
 		generator.setTables(tables);
 		ObjectScripterUI ui = new ObjectScripterUI(generator);
 		ui.show(WbManager.getInstance().getCurrentWindow());

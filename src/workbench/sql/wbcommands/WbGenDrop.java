@@ -16,17 +16,23 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DropScriptGenerator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
+
+import static workbench.sql.wbcommands.WbGenDrop.PARAM_INCLUDE_CREATE;
 
 /**
  * A SqlCommand to create a DROP script for one or more tables that will drop referencing foreign keys
@@ -44,6 +50,10 @@ public class WbGenDrop
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_FILE = "outputFile";
 	public static final String PARAM_DIR = "outputDir";
+	public static final String PARAM_INCLUDE_CREATE = "includeCreate";
+	public static final String PARAM_DROP_FK_ONLY = "onlyForeignkeys";
+	public static final String PARAM_SORT_BY_TYPE = "sortByType";
+	public static final String PARAM_INCLUDE_COMMENTS = "includeMarkers";
 
 	public WbGenDrop()
 	{
@@ -53,6 +63,10 @@ public class WbGenDrop
 		cmdLine.addArgument(PARAM_DIR, ArgumentType.StringArgument);
 		cmdLine.addArgument(PARAM_FILE, ArgumentType.StringArgument);
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_CREATE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_DROP_FK_ONLY, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_SORT_BY_TYPE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_COMMENTS, ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -85,8 +99,24 @@ public class WbGenDrop
 			result.setFailure();
 			return result;
 		}
+
+		boolean includeCreate = cmdLine.getBoolean(PARAM_INCLUDE_CREATE, true);
+		boolean onlyFk = cmdLine.getBoolean(PARAM_DROP_FK_ONLY, false);
+		boolean sortByType = cmdLine.getBoolean(PARAM_SORT_BY_TYPE, false);
+		boolean includeComments = cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, true);
+		
 		DropScriptGenerator gen = new DropScriptGenerator(currentConnection);
+		gen.setIncludeRecreateStatements(includeCreate);
+		gen.setIncludeComments(includeComments);
+
+		if (onlyFk)
+		{
+			gen.setIncludeRecreateStatements(false);
+			gen.setIncludeDropTable(false);
+		}
+
 		gen.setTables(tables);
+		gen.setSortByType(sortByType);
 		gen.setRowMonitor(this.rowMonitor);
 		String dir = cmdLine.getValue(PARAM_DIR, null);
 		String file = cmdLine.getValue(PARAM_FILE, null);

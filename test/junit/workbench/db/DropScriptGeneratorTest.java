@@ -11,13 +11,17 @@
 package workbench.db;
 
 import java.util.List;
-import org.junit.*;
-import workbench.sql.ScriptParser;
-import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -32,13 +36,9 @@ public class DropScriptGeneratorTest
 		super("DropScriptGeneratorTest");
 	}
 
-	@Test
-	public void testGetScript()
+	public void createTables(WbConnection conn)
 		throws Exception
 	{
-		TestUtil util = getTestUtil();
-		WbConnection conn = util.getConnection();
-
 		String sql =
 			"create table customer (cust_id integer not null primary key);\n" +
 			"create table orders (order_id integer not null primary key, cust_id integer not null);\n" +
@@ -53,6 +53,50 @@ public class DropScriptGeneratorTest
 			"alter table invoice add constraint fk_inv_order foreign key (order_id) references orders (order_id);\n" +
 			"commit;\n";
 		TestUtil.executeScript(conn, sql);
+	}
+
+	@Test
+	public void testSort()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getConnection();
+		createTables(conn);
+
+		DropScriptGenerator gen = new DropScriptGenerator(conn);
+
+		TableIdentifier oi = conn.getMetadata().findTable(new TableIdentifier("ORDER_ITEM"));
+		TableIdentifier cust = conn.getMetadata().findTable(new TableIdentifier("CUSTOMER"));
+		TableIdentifier orders = conn.getMetadata().findTable(new TableIdentifier("ORDERS"));
+		TableIdentifier del = conn.getMetadata().findTable(new TableIdentifier("DELIVERY"));
+		gen.setTables(CollectionUtil.arrayList(oi,cust,orders,del));
+
+		gen.setSortByType(true);
+		gen.setIncludeRecreateStatements(false);
+		gen.generateScript();
+		String script = gen.getScript();
+		ScriptParser parser = new ScriptParser(script);
+		int size = parser.getSize();
+		assertEquals(8, size);
+		assertEquals("ALTER TABLE INVOICE DROP CONSTRAINT FK_INV_ORDER", parser.getCommand(0));
+		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS", parser.getCommand(1));
+		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", parser.getCommand(2));
+		assertEquals("ALTER TABLE DELIVERY DROP CONSTRAINT FK_DEL_OI", parser.getCommand(3));
+
+		assertEquals("DROP TABLE ORDERS", parser.getCommand(4));
+		assertEquals("DROP TABLE DELIVERY", parser.getCommand(5));
+		assertEquals("DROP TABLE CUSTOMER", parser.getCommand(6));
+		assertEquals("DROP TABLE ORDER_ITEM", parser.getCommand(7));
+
+	}
+
+	@Test
+	public void testGetScript()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getConnection();
+		createTables(conn);
 
 		DropScriptGenerator generator = new DropScriptGenerator(conn);
 

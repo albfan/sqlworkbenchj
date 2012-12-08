@@ -12,10 +12,14 @@
 package workbench.db;
 
 import java.util.*;
+
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
-import workbench.sql.ScriptParser;
+
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -37,11 +41,35 @@ public class DropScriptGenerator
 	private Map<TableIdentifier, List<String>> restoreConstraints = new HashMap<TableIdentifier, List<String>>();
 	private Map<TableIdentifier, String> dropTableStatements = new HashMap<TableIdentifier, String>();
 	private String dropTemplate;
+	private boolean includeCreate = true;
+	private boolean includeDropTable = true;
+	private boolean sortByType;
+	private boolean includeTableMarkers = true;
 
 	public DropScriptGenerator(WbConnection aConnection)
 	{
 		this.connection = aConnection;
 		dropTemplate = connection.getDbSettings().getDropConstraint("table");
+	}
+
+	public void setIncludeComments(boolean flag)
+	{
+		this.includeTableMarkers = flag;
+	}
+
+	public void setSortByType(boolean flag)
+	{
+		this.sortByType = flag;
+	}
+
+	public void setIncludeRecreateStatements(boolean flag)
+	{
+		this.includeCreate = flag;
+	}
+
+	public void setIncludeDropTable(boolean flag)
+	{
+		this.includeDropTable = flag;
 	}
 
 	public void setTable(TableIdentifier table)
@@ -177,42 +205,109 @@ public class DropScriptGenerator
 		}
 		StringBuilder script = new StringBuilder(dropConstraints.size() * 30);
 
-		boolean includeMarkers = tables.size() > 1;
-		for (TableIdentifier table : tables)
+		if (sortByType)
 		{
-			appendTable(script, table, includeMarkers);
+			appendDropFKs(script);
+
+			if (includeDropTable)
+			{
+				appendDropTables(script);
+			}
+
+			if (includeCreate)
+			{
+				appendCreateFks(script);
+			}
+		}
+		else
+		{
+			boolean includeMarkers = includeTableMarkers && tables.size() > 1;
+			for (TableIdentifier table : tables)
+			{
+				appendTable(script, table, includeMarkers);
+			}
 		}
 		return script.toString();
 	}
 
+	private void appendCreateFks(StringBuilder script)
+	{
+		for (List<String> restore : restoreConstraints.values())
+		{
+			for (String dml : restore)
+			{
+				script.append(dml);
+				script.append('\n');
+			}
+		}
+		script.append('\n');
+	}
+
+	private void appendDropTables(StringBuilder script)
+	{
+		for (String drop : dropTableStatements.values())
+		{
+			script.append(drop);
+			script.append('\n');
+		}
+		script.append('\n');
+	}
+
+	private void appendDropFKs(StringBuilder script)
+	{
+		int count = 0;
+		for (List<String> tableCons : dropConstraints.values())
+		{
+			for (String drop : tableCons)
+			{
+				script.append(drop);
+				script.append('\n');
+				count ++;
+			}
+		}
+		if (count > 0)
+		{
+			script.append('\n');
+		}
+	}
 	private void appendTable(StringBuilder script, TableIdentifier table, boolean includeMarkers)
 	{
-		List<String> drop = dropConstraints.get(table);
-		if (drop == null) return;
+		List<String> constraintsDrop = dropConstraints.get(table);
+		if (constraintsDrop == null) return;
 
-		if (includeMarkers)
+		boolean markerAdded = false;
+		if (includeMarkers && (constraintsDrop.size() > 0 || includeDropTable))
 		{
 			script.append("--- BEGIN ");
 			script.append(table.getTableName());
 			script.append(" ---\n");
+			markerAdded = true;
 		}
 
-		for (String dml : drop)
+		for (String drop : constraintsDrop)
 		{
-			script.append(dml);
+			script.append(drop);
 			script.append('\n');
 		}
-		if (drop.size() > 0) script.append('\n');
-		script.append(dropTableStatements.get(table));
-		script.append("\n\n");
+		if (constraintsDrop.size() > 0) script.append('\n');
 
-		List<String> restore = restoreConstraints.get(table);
-		for (String dml : restore)
+		if (this.includeDropTable)
 		{
-			script.append(dml);
-			script.append('\n');
+			script.append(dropTableStatements.get(table));
+			script.append("\n\n");
 		}
-		if (includeMarkers)
+
+		if (includeCreate)
+		{
+			List<String> restore = restoreConstraints.get(table);
+			for (String dml : restore)
+			{
+				script.append(dml);
+				script.append('\n');
+			}
+		}
+
+		if (markerAdded)
 		{
 			script.append("--- END ");
 			script.append(table.getTableName());

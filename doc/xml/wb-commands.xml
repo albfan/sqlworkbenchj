@@ -1235,6 +1235,41 @@ WHERE id=42;</programlisting>
 							</entry>
 						</row>
 						<row>
+							<entry>-includeCreate</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the table
+                  after a drop. By specifying <literal>-includeCreate=false</literal> only the statements to
+                  drop the foreign key and to drop the table(s) will be created.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-onlyForeignkeys</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
+                  statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
+                  and no statements to re-created the foreign keys will be generated. Setting this paramter to <literal>true</literal>
+                  implies <literal>-includeCreate=false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sortByType</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  Usually the generated SQL script will be "sorted" by tables. When specifying
+                  <literal>-sortByType=true</literal>, then the script will first list all statements
+                  to drop the foreign keys, then the tables. Then the re-create statements will be listed.
+								</para>
+							</entry>
+						</row>
+
+						<row>
 							<entry>-outputFile</entry>
 							<entry>
 								<para>
