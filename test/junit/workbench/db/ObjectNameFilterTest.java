@@ -13,9 +13,12 @@ package workbench.db;
 
 import java.util.Collection;
 import java.util.Set;
+
 import workbench.util.CollectionUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -23,6 +26,15 @@ import org.junit.Test;
  */
 public class ObjectNameFilterTest
 {
+
+	@Test
+	public void testEmpty()
+	{
+		ObjectNameFilter filter = new ObjectNameFilter();
+		assertFalse(filter.isExcluded(null));
+		assertFalse(filter.isExcluded(""));
+		assertFalse(filter.isExcluded("foo"));
+	}
 
 	@Test
 	public void testInclusion()
@@ -36,6 +48,7 @@ public class ObjectNameFilterTest
 		assertFalse(filter.isExcluded("one"));
 		assertFalse(filter.isExcluded("dev1"));
 		assertTrue(filter.isExcluded("public"));
+		assertTrue(filter.isExcluded(null));
 	}
 
 	@Test

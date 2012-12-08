@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -31,7 +33,7 @@ public class ObjectNameFilter
 	private boolean modified;
 
 	/**
-	 * If true, the filter defines the objects to include instead of names to exclude.
+	 * If true, the filter defines the names to include instead of names to exclude.
 	 */
 	private boolean inclusionFilter;
 
@@ -157,7 +159,7 @@ public class ObjectNameFilter
 
 	public boolean isExcluded(String name)
 	{
-		if (name == null) return !inclusionFilter;
+		if (name == null) return inclusionFilter;
 
 		if (CollectionUtil.isEmpty(filterExpressions)) return inclusionFilter;
 

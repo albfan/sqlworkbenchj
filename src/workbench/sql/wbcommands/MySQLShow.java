@@ -26,7 +26,7 @@ import workbench.sql.formatter.SQLToken;
  * rather than a result set.
  *
  * Every other option to the show command is handled as is.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class MySQLShow
@@ -65,7 +65,10 @@ public class MySQLShow
 		return result;
 	}
 
-	private boolean isInnoDBStatus(String sql)
+	/**
+	 * Package visible for testing purposes.
+	 */
+	boolean isInnoDBStatus(String sql)
 	{
 		String[] words = new String[] { "show", "engine", "innodb", "status"};
 		SQLLexer lexer = new SQLLexer(sql);
@@ -77,7 +80,7 @@ public class MySQLShow
 			index ++;
 			token = lexer.getNextToken(false, false);
 		}
-		return true;
+		return index == 4;
 	}
 
 	@Override

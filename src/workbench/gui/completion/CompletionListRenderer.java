@@ -11,10 +11,13 @@
 package workbench.gui.completion;
 
 import java.awt.Component;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -50,15 +53,18 @@ public class CompletionListRenderer
 		if (value instanceof DbObject)
 		{
 			DbObject dbo = (DbObject)value;
+			String type = (dbo instanceof ColumnIdentifier ? null : dbo.getObjectType());
+			String tooltip = null;
 			String comment = dbo.getComment();
-			if (comment == null || comment.isEmpty())
+			if (comment == null || comment.isEmpty() && type != null)
 			{
-				setToolTipText(null);
+				tooltip = "<html><tt>" + type + "</tt></html>";
 			}
-			else
+			else if (type != null)
 			{
-				setToolTipText(comment);
+				tooltip = "<html><tt>" + type + "</tt><br><i>"+ comment + "</i></html>";
 			}
+			setToolTipText(tooltip);
 		}
 		return c;
 	}
