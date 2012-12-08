@@ -22,7 +22,11 @@ import workbench.sql.formatter.SQLToken;
 
 
 /**
+ * A class to display the output of MySQL's "show engine innodb status" as a message
+ * rather than a result set.
  *
+ * Every other option to the show command is handled as is.
+ * 
  * @author Thomas Kellerer
  */
 public class MySQLShow
