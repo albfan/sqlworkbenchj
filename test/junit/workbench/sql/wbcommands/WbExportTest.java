@@ -12,36 +12,42 @@
 package workbench.sql.wbcommands;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.LobFileParameter;
 import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
+import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
+
 import org.junit.After;
-import workbench.util.SqlUtil.DdlObjectInfo;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -817,7 +823,7 @@ public class WbExportTest
 		connection.commit();
 		stmt.close();
 
-		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -formatFile=oracle");
 		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 		assertEquals("Export file not created", true, exportFile.exists());
