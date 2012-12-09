@@ -29,6 +29,11 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.derby.DerbyTypeReader;
 import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.h2database.H2ConstantReader;
@@ -55,17 +60,16 @@ import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.storage.DataStore;
 import workbench.storage.DatastoreTransposer;
 import workbench.storage.RowDataListSorter;
 import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
+
+import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -1138,7 +1142,7 @@ public class DbMetadata
 	{
 		if (name == null) return true;
 
-		if (supportsMixedCaseIdentifiers()) return true;
+		if (storesMixedCaseIdentifiers()) return true;
 
 		boolean isUpper = StringUtil.isUpperCase(name);
 		boolean isLower = StringUtil.isLowerCase(name);
@@ -1683,20 +1687,9 @@ public class DbMetadata
 		return result;
 	}
 
-	protected boolean supportsMixedCaseIdentifiers()
-	{
-		try
-		{
-			return this.metaData.supportsMixedCaseIdentifiers();
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
-
 	/**
 	 * Returns true if the server stores identifiers in mixed case.
+	 *
 	 * Usually this is delegated to the JDBC driver, but as some drivers
 	 * (e.g. Frontbase) implement this incorrectly, this can be overriden
 	 * in workbench.settings with the property:
@@ -1741,22 +1734,6 @@ public class DbMetadata
 			return storesLowerCaseIdentifiers();
 		}
 		return ocase == IdentifierCase.lower;
-	}
-
-	public boolean isCaseSensitive()
-	{
-		try
-		{
-			// According to the JDBC docs, supportsMixedCaseIdentifiers()
-			// should only return true if the server is case sensitive...
-			return this.metaData.supportsMixedCaseIdentifiers();
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logWarning("DbMetadata.isCaseSensitive()", "Error when calling supportsMixedCaseIdentifiers()", ex);
-			// Standard SQL identifiers are not case sensitive.
-			return false;
-		}
 	}
 
 	/**

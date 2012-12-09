@@ -20,12 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -407,19 +409,6 @@ public abstract class BaseAnalyzer
 		}
 		this.elements = new ArrayList(tables.size());
 		this.elements.addAll(tables);
-	}
-
-	public String cleanupPasteValue(String toPaste)
-	{
-		if (schemaForTableList != null && this.context == CONTEXT_TABLE_LIST)
-		{
-			TableIdentifier tbl = new TableIdentifier(toPaste);
-			if (schemaForTableList.equalsIgnoreCase(tbl.getSchema()))
-			{
-				return tbl.getTableName();
-			}
-		}
-		return toPaste;
 	}
 
 	@SuppressWarnings("unchecked")

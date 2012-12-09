@@ -13,10 +13,14 @@ package workbench.db.objectcache;
 
 import java.sql.SQLException;
 import java.util.*;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.*;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -169,7 +173,7 @@ class ObjectCache
 	public List<DependencyNode> getReferencedTables(WbConnection dbConn, TableIdentifier table)
 	{
 		if (table == null) return Collections.emptyList();
-		
+
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(dbConn);
 		List<DependencyNode> referenced = referencedTables.get(tbl);

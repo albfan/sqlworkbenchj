@@ -25,6 +25,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -39,17 +40,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import workbench.interfaces.ResultSetter;
-import workbench.db.ColumnIdentifier;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.editor.JEditTextArea;
 import workbench.gui.sql.LookupValuePicker;
+
 import workbench.util.ArgumentValue;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -295,7 +299,6 @@ public class CompletionPopup
 			}
 		}
 
-		result = this.context.getAnalyzer().cleanupPasteValue(result);
 		if (this.context.getAnalyzer().appendDotToSelection()) result += ".";
 		if (this.context.getAnalyzer().isKeywordList()) result += " ";
 		if (this.context.getAnalyzer().isWbParam())
@@ -487,6 +490,16 @@ public class CompletionPopup
 					value += ", ";
 				}
 				value += v.getValue();
+			}
+			else if (o instanceof TableIdentifier)
+			{
+				TableIdentifier tbl = (TableIdentifier)o;
+				if (value.length() > 0)
+				{
+					value += ", ";
+				}
+				WbConnection connection = this.context.getAnalyzer().getConnection();
+				value += tbl.getTableExpression(connection);
 			}
 			else
 			{
