@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2012-12-01">
+    <entry dev-build="10" type="enh">The output of WbGenerateDrop can now be controlled in more detail</entry>
     <entry dev-build="10" type="enh">WbImport can now import Excel (XLS and XLSX) and Open Office Calc (ODS) files</entry>
     <entry dev-build="9" type="enh">From within the DbExplorer's table list, the rows for the selected tables can now be counted.</entry>
     <entry dev-build="9" type="enh">WbSchemaDiff can now handle additional DBMS specific objects such as TYPEs. The parameter -additionalTypes selects the types to be compared.</entry>
