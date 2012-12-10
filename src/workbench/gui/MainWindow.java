@@ -53,9 +53,23 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import workbench.WbManager;
+import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.MacroChangeListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Moveable;
+import workbench.interfaces.StatusBar;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -120,19 +134,9 @@ import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.MacroChangeListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Moveable;
-import workbench.interfaces.StatusBar;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
@@ -1681,7 +1685,7 @@ public class MainWindow
 				for (ToolWindow w : explorerWindows)
 				{
 					WbConnection conn = w.getConnection();
-					if (conn != this.currentConnection)
+					if (conn != this.currentConnection && conn != null)
 					{
 						toAbort.add(conn);
 					}

@@ -31,8 +31,10 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import workbench.WbManager;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -63,7 +65,7 @@ import workbench.util.WbThread;
  */
 public class TableRowCountPanel
 	extends JPanel
-	implements WindowListener, Reloadable, Interruptable
+	implements WindowListener, Reloadable, Interruptable, ToolWindow
 {
 	private static int instanceCount;
 	private WbTable data;
@@ -76,7 +78,7 @@ public class TableRowCountPanel
 	private WbConnection sourceConnection;
 	private boolean useSeparateConnection;
 	private StopAction cancelAction;
-	
+
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
 		super(new BorderLayout(0,0));
@@ -383,9 +385,20 @@ public class TableRowCountPanel
 				WbSwingUtilities.center(this.window, aParent);
 			}
 			this.window.addWindowListener(this);
+			WbManager.getInstance().registerToolWindow(this);
 		}
 		this.window.setVisible(true);
 		this.retrieveRowCounts();
+	}
+
+	private void doClose()
+	{
+		cancelExecution();
+		Settings.getInstance().storeWindowPosition(this.window, TableRowCountPanel.class.getName());
+		Settings.getInstance().storeWindowSize(this.window, TableRowCountPanel.class.getName());
+		this.window.setVisible(false);
+		this.window.dispose();
+		this.window = null;
 	}
 
 	@Override
@@ -396,20 +409,15 @@ public class TableRowCountPanel
 	@Override
 	public void windowClosing(WindowEvent e)
 	{
-		cancelExecution();
-		Settings.getInstance().storeWindowPosition(this.window, TableRowCountPanel.class.getName());
-		Settings.getInstance().storeWindowSize(this.window, TableRowCountPanel.class.getName());
-		this.window.setVisible(false);
-		this.window.dispose();
+		WbManager.getInstance().unregisterToolWindow(this);
+		doClose();
 	}
+
 
 	@Override
 	public void windowClosed(WindowEvent e)
 	{
-		if (useSeparateConnection && dbConnection != null)
-		{
-			dbConnection.disconnect();
-		}
+		disconnect();
 	}
 
 	@Override
@@ -435,5 +443,41 @@ public class TableRowCountPanel
 	{
 	}
 
+	@Override
+	public void closeWindow()
+	{
+		doClose();
+	}
+
+	@Override
+	public void disconnect()
+	{
+		if (useSeparateConnection && dbConnection != null)
+		{
+			dbConnection.disconnect();
+			dbConnection = null;
+		}
+	}
+
+	@Override
+	public void activate()
+	{
+		if (window != null)
+		{
+			window.requestFocus();
+		}
+	}
+
+	@Override
+	public WbConnection getConnection()
+	{
+		return dbConnection;
+	}
+
+	@Override
+	public JFrame getWindow()
+	{
+		return window;
+	}
 
 }
