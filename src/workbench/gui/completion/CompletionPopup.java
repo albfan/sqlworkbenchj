@@ -499,7 +499,13 @@ public class CompletionPopup
 					value += ", ";
 				}
 				WbConnection connection = this.context.getAnalyzer().getConnection();
-				value += tbl.getTableExpression(connection);
+				String name = tbl.getTableExpression(connection);
+				if (!name.contains("\"") && !name.contains("[") && !name.contains("`"))
+				{
+					// only change the case if the name is not quoted
+					name = getPasteValue(name);
+				}
+				value += name;
 			}
 			else
 			{

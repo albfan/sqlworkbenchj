@@ -802,7 +802,7 @@
 					<row>
 						<entry>-formatFile</entry>
 						<entry>
-							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal>, <literal>db2</literal></para>
+							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal>, <literal>db2</literal>, <literal>mysql</literal></para>
 							<para>
 								This parameter controls the creation of a control file for
 								the bulk load utilities of some DBMS.
@@ -811,16 +811,15 @@
 									<listitem><simpara><literal>oracle</literal> will create a control file (.ctl) for Oracle's <ulink url="http://download.oracle.com/docs/cd/B28359_01/server.111/b28319/part_ldr.htm">SQL*Loader</ulink> utility</simpara></listitem>
                   <listitem><simpara><literal>sqlserver</literal> will create a format file (.fmt) for Microsoft's <ulink url="http://msdn.microsoft.com/en-us/library/ms162802%28v=SQL.90%29.aspx"><literal>bcp</literal></ulink> utility</simpara></listitem>
                   <listitem><simpara><literal>db2</literal>will create a SQL script with a DB2 <ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/index.jsp?topic=/com.ibm.db2.luw.admin.cmd.doc/doc/r0008304.html"><literal>IMPORT</literal></ulink> command</simpara></listitem>
+                  <listitem><simpara><literal>mysql</literal>will create a SQL script with a MySQL <ulink url="http://dev.mysql.com/doc/refman/5.5/en/load-data.html"><literal>LOAD DATA INFILE</literal></ulink> command</simpara></listitem>
 								</itemizedlist>
 							</para>
 							<para>
-								You can specify several formats at the same time. In that case one control file for each
-								format will be created.
+								You can specify more than one format (separated by a comma). In that case one control file for each format will be created.
 							</para>
-							<para>
-                The generated format file(s) are intended as a starting point for your own adjustments. Don't expect
-                them to be complete.
-							</para>
+							<note>
+                <para>The generated format file(s) are intended as a starting point for your own adjustments. Don't expect them to be complete.</para>
+              </note>
 						</entry>
 					</row>
 
