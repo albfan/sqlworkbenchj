@@ -25,7 +25,7 @@
      <string>com.vertica.Driver</string>
     </void>
     <void property="library">
-     <string>vertica-jdk6-6.0.0-0.jar</string>
+     <string>vertica_5.1.1_jdk_5.jar</string>
     </void>
     <void property="name">
      <string>Vertica</string>
