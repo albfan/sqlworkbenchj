@@ -207,14 +207,16 @@ public class SearchAndReplace
 			msg = StringUtil.replace(msg, "%value%", this.lastSearchExpression);
 			WbSwingUtilities.showMessage(this.parent, msg);
 		}
+		findNextAction.setEnabled(this.lastSearchPos > -1);
 		return this.lastSearchPos;
 	}
 
 	@Override
 	public int findFirst(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
-		int pos = this.findText(aValue, ignoreCase, wholeWord, useRegex);
-		return pos;
+		this.lastSearchPos = this.findText(aValue, ignoreCase, wholeWord, useRegex);
+		findNextAction.setEnabled(this.lastSearchPos > -1);
+		return lastSearchPos;
 	}
 
 	@Override

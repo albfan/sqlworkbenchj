@@ -614,7 +614,11 @@ public class ObjectSourceSearchPanel
 				if (values.size() == 1)
 				{
 					String text = values.get(0);
-					objectSource.getEditor().findFirst(text, ignoreCase.isSelected(), true, regex.isSelected());
+					int pos = objectSource.getEditor().findFirst(text, ignoreCase.isSelected(), true, regex.isSelected());
+					if (pos > -1)
+					{
+						objectSource.requestFocus();
+					}
 				}
 			}
 		});
