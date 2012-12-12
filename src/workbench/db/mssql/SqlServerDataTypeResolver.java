@@ -11,8 +11,11 @@
 package workbench.db.mssql;
 
 import java.sql.Types;
-import workbench.db.DefaultDataTypeResolver;
+
 import workbench.resource.Settings;
+
+import workbench.db.DefaultDataTypeResolver;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -23,7 +26,8 @@ public class SqlServerDataTypeResolver
 	extends DefaultDataTypeResolver
 {
 
-	private static final int MAX_INDICATOR = 2147483647;
+	private static final int MAX_DEFAULT_LENGTH = 8000;
+	private static final int MAX_NVARCHAR_LENGTH = 4000;
 
 	@Override
 	public String getColumnClassName(int type, String dbmsType)
@@ -46,7 +50,7 @@ public class SqlServerDataTypeResolver
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		// this works around the jTDS driver reporting nvarchar as CLOB and not as NCLOB
-		if (sqlType == Types.CLOB && "nvarchar".equals(dbmsName) && size > 8000)
+		if (sqlType == Types.CLOB && "nvarchar".equals(dbmsName) && size > MAX_NVARCHAR_LENGTH)
 		{
 			return "nvarchar(max)";
 		}
@@ -56,11 +60,11 @@ public class SqlServerDataTypeResolver
 			return "varbinary(max)";
 		}
 
-		if ( (sqlType == Types.NVARCHAR && size >= MAX_INDICATOR) || sqlType == Types.NCLOB)
+		if ( (sqlType == Types.NVARCHAR && size > MAX_NVARCHAR_LENGTH) || sqlType == Types.NCLOB)
 		{
 			return "nvarchar(max)";
 		}
-		if ( (sqlType == Types.VARCHAR && size >= MAX_INDICATOR) || sqlType == Types.CLOB)
+		if ( (sqlType == Types.VARCHAR && size > MAX_DEFAULT_LENGTH) || sqlType == Types.CLOB)
 		{
 			return "varchar(max)";
 		}
@@ -70,7 +74,7 @@ public class SqlServerDataTypeResolver
 		}
 		if (sqlType == Types.VARBINARY)
 		{
-			if (size >= MAX_INDICATOR)
+			if (size > MAX_DEFAULT_LENGTH)
 			{
 				return "varbinary(max)";
 			}
@@ -78,6 +82,10 @@ public class SqlServerDataTypeResolver
 		}
 		if (sqlType == Types.BINARY)
 		{
+			if (size > MAX_DEFAULT_LENGTH)
+			{
+				return "binary(max)";
+			}
 			return "binary(" + Integer.toString(size) + ")";
 		}
 		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
