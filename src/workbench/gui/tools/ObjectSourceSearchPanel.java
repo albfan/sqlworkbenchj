@@ -108,10 +108,7 @@ public class ObjectSourceSearchPanel
 		topPanel.setBorder(b);
 		clearSearch();
 
-		TextComponentMouseListener.addListener(this.objectNames);
-		TextComponentMouseListener.addListener(this.searchValues);
-		TextComponentMouseListener.addListener(this.objectTypes);
-		TextComponentMouseListener.addListener(this.schemaNames);
+		TextComponentMouseListener.addListener(this.objectNames, this.searchValues, this.objectTypes, this.schemaNames);
 	}
 
 	protected void clearSearch()

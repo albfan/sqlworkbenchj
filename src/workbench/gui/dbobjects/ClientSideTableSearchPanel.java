@@ -64,7 +64,7 @@ public class ClientSideTableSearchPanel
     lbl.setToolTipText(tip);
 
 		searchText = new JTextField();
-		new TextComponentMouseListener(searchText);
+		TextComponentMouseListener.addListener(searchText);
     searchText.setToolTipText(tip);
 
 		GridBagConstraints constraints = new GridBagConstraints();

@@ -103,7 +103,7 @@ public class RecordFormPanel
 		if (this.data == null) return null;
 		return data.getDataStore();
 	}
-	
+
 	protected void buildEntryForm()
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -196,7 +196,7 @@ public class RecordFormPanel
 			{
 				JTextArea area = new JTextArea(new WbDocument());
 				area.setEditable(editable);
-				new TextComponentMouseListener(area);
+				TextComponentMouseListener.addListener(area);
 				area.setLineWrap(false);
 
 				inputControls[i] = area;
@@ -222,7 +222,7 @@ public class RecordFormPanel
 			{
 				JTextField f = new JTextField(new WbDocument(), null, numChars);
 				f.setEditable(editable);
-				new TextComponentMouseListener(f);
+				TextComponentMouseListener.addListener(f);
 				inputControls[i] = f;
 				inputControls[i].setFont(displayFont);
 				c.fill = GridBagConstraints.HORIZONTAL;

@@ -55,7 +55,7 @@ public class ConnectionInfoPanel
 			infotext.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 			infotext.setText(info.getHtmlDisplay(conn));
 			infotext.setCaretPosition(0);
-			new TextComponentMouseListener(infotext);
+			TextComponentMouseListener.addListener(infotext);
 			FontMetrics fm = infotext.getFontMetrics(infotext.getFont());
 			int height = fm.getHeight() * 12 + 40;
 			Dimension d = new Dimension(470, height);
