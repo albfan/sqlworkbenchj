@@ -140,8 +140,7 @@ public class ObjectSourceSearchPanel
 			{
 				try
 				{
-					List<DbObject> result = searcher.searchObjects(values,matchAll.isSelected(), ignoreCase.isSelected(),
-						regex.isSelected());
+					List<DbObject> result = searcher.searchObjects(values, matchAll.isSelected(), ignoreCase.isSelected(), regex.isSelected());
 					showResult(result);
 				}
 				catch (Exception e)
@@ -430,7 +429,6 @@ public class ObjectSourceSearchPanel
 	@Override
 	public void activate()
 	{
-		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override
@@ -612,6 +610,12 @@ public class ObjectSourceSearchPanel
 			{
 				objectSource.setText(source == null ? "" : source.toString());
 				objectSource.setCaretPosition(0, false);
+				List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
+				if (values.size() == 1)
+				{
+					String text = values.get(0);
+					objectSource.getEditor().findFirst(text, ignoreCase.isSelected(), true, regex.isSelected());
+				}
 			}
 		});
 	}

@@ -28,6 +28,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.Replaceable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -58,6 +59,11 @@ public class DbObjectSourcePanel
 			reloadSource = new ReloadAction(reloader);
 			reloadSource.setEnabled(false);
 		}
+	}
+
+	public Replaceable getEditor()
+	{
+		return sourceEditor.getReplacer();
 	}
 
 	public void allowReformat()

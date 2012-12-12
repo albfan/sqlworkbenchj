@@ -127,13 +127,15 @@ public class ObjectSourceSearcher
 	}
 
 	/**
-	 * Searches all objects for the given search string(s)
+	 * Searches all objects for the given search string(s).
+	 *
 	 * If multiple search strings are given, the parameter matchAll
 	 * defines if they all of them have to match or at least one
 	 *
 	 * @param searchValues the patterns to be searched in all object sources. This can be a regular expression
-	 * @param matchAll if true all patterns must be found in a single source
-	 * @param ignoreCase  if false, the patterns must match exactly
+	 * @param matchAll     if true all patterns must be found in a single source
+	 * @param ignoreCase   if false, the patterns must match exactly
+	 *
 	 * @return a list of objects where the searchvalue has been found
 	 */
 	public synchronized List<DbObject> searchObjects(List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)
@@ -201,8 +203,7 @@ public class ObjectSourceSearcher
 		return searchResult;
 	}
 
-	private void searchList(List<DbObject> toSearch, List<String> searchValues,
-		boolean matchAll, boolean ignoreCase, boolean useRegex)
+	private void searchList(List<DbObject> toSearch, List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		if (monitor != null)
 		{
