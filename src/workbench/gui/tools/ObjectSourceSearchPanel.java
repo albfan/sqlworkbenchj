@@ -47,6 +47,7 @@ import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.SimpleStatusBar;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
@@ -106,6 +107,11 @@ public class ObjectSourceSearchPanel
 		Border b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(5,5,5,5));
 		topPanel.setBorder(b);
 		clearSearch();
+
+		TextComponentMouseListener.addListener(this.objectNames);
+		TextComponentMouseListener.addListener(this.searchValues);
+		TextComponentMouseListener.addListener(this.objectTypes);
+		TextComponentMouseListener.addListener(this.schemaNames);
 	}
 
 	protected void clearSearch()

@@ -49,6 +49,11 @@ public class TextComponentMouseListener
 	{
 	}
 
+	public static void addListener(JTextComponent component)
+	{
+		new TextComponentMouseListener(component);
+	}
+	
 	/**
 	 * Create a listener to display a context menu with Cut, Copy and Paste
 	 * entries. The shortcuts of the menu actions will be added to the input
