@@ -345,11 +345,15 @@ public class DbExplorerPanel
 	}
 
 	private final Object busyLock = new Object();
+
 	private void setBusy(boolean flag)
 	{
 		synchronized (busyLock)
 		{
 			busy = flag;
+			schemaSelector.setEnabled(!flag);
+			catalogSelector.setEnabled(!flag);
+			reloadButton.setEnabled(!flag);
 		}
 	}
 

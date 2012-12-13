@@ -78,12 +78,14 @@
       to the export file without buffering them in memory.
    </para>
 
-   <para>
-      Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft Driver) read the full result obtained
-      from the database into memory. In that case, exporting large results might still require a lot
-      of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
-      for details on how to configure the individual drivers if this happens to you.
-    </para>
+   <note>
+    <para>
+       Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft Driver) read the full result obtained
+       from the database into memory. In that case, exporting large results might still require a lot
+       of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
+       for details on how to configure the individual drivers if this happens to you.
+     </para>
+    </note>
   </section>
 
   <section id="poi-installation">
