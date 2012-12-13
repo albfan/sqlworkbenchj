@@ -271,12 +271,12 @@
 					</row>
 
 					<row>
-						<entry>SQL Server 2000/2005 (Microsoft driver)</entry>
+						<entry>SQL Server (Microsoft driver)</entry>
 						<entry>com.microsoft.sqlserver.jdbc.SQLServerDriver</entry>
 						<entry>
 							<simplelist columns="1">
 							  <member>sqljdbc4.jar</member>
-								<member><ulink url="http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx"/></member>
+								<member><ulink url="http://msdn.microsoft.com/en-gb/data/aa937724%28en-us%29.aspx"/></member>
 							</simplelist>
 						</entry>
 					</row>
