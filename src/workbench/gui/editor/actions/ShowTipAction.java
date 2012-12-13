@@ -29,6 +29,7 @@ import javax.swing.PopupFactory;
 
 import workbench.gui.actions.WbAction;
 import workbench.gui.completion.ParameterTipProvider;
+import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.editor.JEditTextArea;
 
 import workbench.log.LogMgr;
@@ -78,7 +79,8 @@ public class ShowTipAction
 			closeTooltip();
 			return;
 		}
-		currentTooltip = area.createToolTip();
+		currentTooltip = new MultiLineToolTip();
+		currentTooltip.setComponent(area);
 		currentTooltip.setTipText(tip);
 
 		showPopupAt(calculatePopupPosition());
