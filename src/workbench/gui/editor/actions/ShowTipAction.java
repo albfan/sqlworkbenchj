@@ -11,6 +11,7 @@
  */
 package workbench.gui.editor.actions;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -213,8 +214,23 @@ public class ShowTipAction
 		Point p = area.getCursorLocation();
 		Point s = area.getLocationOnScreen();
 		int line = area.getCaretLine();
-		int lineY = s.y + area.lineToY(line > 1 ? line - 1 : line + 1);
-		Point pos = new Point(s.x + p.x,  lineY);
+		Dimension dim = currentTooltip.getPreferredSize();
+		int height = (int)dim.getHeight();
+
+		int lineY = area.lineToY(line);
+		int popupY = s.y + lineY;  // y-position of the top of the line
+
+		if (popupY - height > 0)
+		{
+			// only show the popup above the current line if it fits on the screen
+			popupY -= height;
+		}
+		else
+		{
+			// otherwise show the popup below the current line
+			popupY = s.y + area.lineToY(line + 1) + 5;
+		}
+		Point pos = new Point(s.x + p.x,  popupY);
 		return pos;
 	}
 
