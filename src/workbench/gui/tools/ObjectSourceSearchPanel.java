@@ -113,6 +113,7 @@ public class ObjectSourceSearchPanel
 
 	protected void clearSearch()
 	{
+		objectSource.setText("");
 		setModel(new ObjectResultListDataStore());
 	}
 
