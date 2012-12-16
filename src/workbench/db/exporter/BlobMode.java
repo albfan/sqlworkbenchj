@@ -12,6 +12,7 @@
 package workbench.db.exporter;
 
 import java.util.List;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -37,7 +38,7 @@ public enum BlobMode
 
 	/**
 	 * Generate WB Specific {$blobfile=...} statements
-	 * @see workbench.db.exporter.DataExporter#setBlobMode(BlobMode) 
+	 * @see workbench.db.exporter.DataExporter#setBlobMode(BlobMode)
 	 */
 	SaveToFile,
 
@@ -57,7 +58,7 @@ public enum BlobMode
 	 * @see workbench.storage.PostgresBlobFormatter
 	 */
 	pgEscape,
-	
+
 	None;
 
 	/**
@@ -83,9 +84,39 @@ public enum BlobMode
 		if ("base64".equalsIgnoreCase(type.trim())) return BlobMode.Base64;
 		if ("pgescape".equalsIgnoreCase(type.trim())) return BlobMode.pgEscape;
 		if ("pgdecode".equalsIgnoreCase(type.trim())) return BlobMode.pgDecode;
-		return null;
+		try
+		{
+			return BlobMode.valueOf(type);
+		}
+		catch (Throwable e)
+		{
+			return null;
+		}
 	}
 
+	public String getTypeString()
+	{
+		switch (this)
+		{
+			case None:
+				return "";
+			case AnsiLiteral:
+				return "ansi";
+			case DbmsLiteral:
+				return "dbms";
+			case SaveToFile:
+				return "file";
+			case Base64:
+				return "base64";
+			case pgDecode:
+				return "pgdecode";
+			case pgEscape:
+				return "pgescape";
+			default:
+				return "";
+		}
+		
+	}
 	public static List<String> getTypes()
 	{
 		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64", "pgescape", "pgdecode");

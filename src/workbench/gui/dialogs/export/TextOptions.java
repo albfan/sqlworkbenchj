@@ -12,7 +12,10 @@
 package workbench.gui.dialogs.export;
 
 import java.util.Set;
+
+import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
+
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
 
@@ -38,4 +41,5 @@ public interface TextOptions
 	String getDecimalSymbol();
 	QuoteEscapeType getQuoteEscaping();
 	Set<ControlFileFormat> getControlFiles();
+	BlobMode getBlobMode();
 }

@@ -454,6 +454,12 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
+		
+		if (btype == null)
+		{
+			btype = BlobMode.SaveToFile;
+		}
+
 		exporter.setBlobMode(btype);
 		if (updateTable != null) exporter.setTableName(updateTable);
 

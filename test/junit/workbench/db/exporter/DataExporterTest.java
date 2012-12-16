@@ -11,30 +11,38 @@
  */
 package workbench.db.exporter;
 
-import org.junit.Test;
-import workbench.WbTestCase;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.dialogs.export.SqlOptions;
 import workbench.gui.dialogs.export.TextOptions;
-import workbench.sql.ScriptParser;
+
 import workbench.storage.DataStore;
+
+import workbench.sql.ScriptParser;
+
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
-import workbench.util.WbFile;
-import static org.junit.Assert.*;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -193,6 +201,11 @@ public class DataExporterTest
 				return Collections.emptySet();
 			}
 
+			@Override
+			public BlobMode getBlobMode()
+			{
+				return BlobMode.SaveToFile;
+			}
 		};
 	}
 
@@ -233,6 +246,12 @@ public class DataExporterTest
 			public String getDateLiteralType()
 			{
 				return "jdbc";
+			}
+
+			@Override
+			public BlobMode getBlobMode()
+			{
+				return BlobMode.AnsiLiteral;
 			}
 		};
 	}

@@ -30,28 +30,32 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import workbench.interfaces.Committer;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.ErrorReporter;
+import workbench.interfaces.InterruptableJob;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.Committer;
-import workbench.interfaces.ErrorReporter;
-import workbench.interfaces.ProgressReporter;
-import workbench.util.ExceptionUtil;
+
 import workbench.gui.dialogs.export.ExportOptions;
 import workbench.gui.dialogs.export.HtmlOptions;
 import workbench.gui.dialogs.export.SpreadSheetOptions;
 import workbench.gui.dialogs.export.SqlOptions;
 import workbench.gui.dialogs.export.TextOptions;
 import workbench.gui.dialogs.export.XmlOptions;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.InterruptableJob;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
+
 import workbench.util.*;
 
 /**
@@ -1328,6 +1332,7 @@ public class DataExporter
 		this.setTableName(sqlOptions.getAlternateUpdateTable());
 		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
 		this.setDateLiteralType(sqlOptions.getDateLiteralType());
+		this.setBlobMode(sqlOptions.getBlobMode());
 		this.exportWriter.configureConverter();
 	}
 

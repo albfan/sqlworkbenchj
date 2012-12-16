@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -31,16 +32,22 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ColumnSelectorPanel;
-import workbench.gui.components.KeyColumnSelectorPanel;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.exporter.BlobMode;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ColumnSelectorPanel;
+import workbench.gui.components.KeyColumnSelectorPanel;
+
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;
+
 import workbench.util.StringUtil;
 
 /**
@@ -48,7 +55,7 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class SqlOptionsPanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements SqlOptions, ActionListener
 {
 	private List<String> keyColumns;
@@ -67,6 +74,12 @@ public class SqlOptionsPanel
 		List<String> mTypes = MergeGenerator.Factory.getSupportedTypes();
 		ComboBoxModel mergeModel = new DefaultComboBoxModel(mTypes.toArray());
 		mergeTypes.setModel(mergeModel);
+
+		List<String> bTypes = BlobMode.getTypes();
+		bTypes.remove(BlobMode.Base64.getTypeString());
+		ComboBoxModel blobModel = new DefaultComboBoxModel(bTypes.toArray());
+		blobTypes.setModel(blobModel);
+		blobTypes.setSelectedItem(BlobMode.SaveToFile.toString());
 
 		WbSwingUtilities.setMinimumSize(commitCount, 4);
 	}
@@ -102,6 +115,7 @@ public class SqlOptionsPanel
 		s.setProperty("workbench.export.sql.commitevery", this.getCommitEvery());
 		s.setProperty("workbench.export.sql.createtable", this.getCreateTable());
 		s.setProperty("workbench.export.sql.saveas.dateliterals", this.getDateLiteralType());
+		s.setProperty("workbench.export.sql.saveas.blobliterals", this.getBlobMode().getTypeString());
 	}
 
 	public void restoreSettings()
@@ -112,6 +126,17 @@ public class SqlOptionsPanel
 		String def = s.getProperty("workbench.export.sql.default.dateliterals", "dbms");
 		String type = s.getProperty("workbench.export.sql.saveas.dateliterals", def);
 		this.literalTypes.setSelectedItem(type);
+
+		type = s.getProperty("workbench.export.sql.saveas.blobliterals", BlobMode.SaveToFile.getTypeString());
+		this.blobTypes.setSelectedItem(type);
+	}
+
+	@Override
+	public BlobMode getBlobMode()
+	{
+		String type = (String)blobTypes.getSelectedItem();
+		BlobMode mode = BlobMode.getMode(type);
+		return mode;
 	}
 
 	@Override
@@ -357,7 +382,7 @@ public class SqlOptionsPanel
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     typeGroup = new ButtonGroup();
     createTable = new JCheckBox();
@@ -374,6 +399,8 @@ public class SqlOptionsPanel
     mergeTypes = new JComboBox();
     jLabel2 = new JLabel();
     syntaxType = new JComboBox();
+    blobTypes = new JComboBox();
+    blobTypesLabel = new JLabel();
 
     setLayout(new GridBagLayout());
 
@@ -482,6 +509,22 @@ public class SqlOptionsPanel
     jPanel4.add(syntaxType, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    jPanel4.add(blobTypes, gridBagConstraints);
+
+    blobTypesLabel.setText(ResourceMgr.getString("LblBlobType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    jPanel4.add(blobTypesLabel, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -505,6 +548,8 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public JTextField alternateTable;
+  public JComboBox blobTypes;
+  public JLabel blobTypesLabel;
   public JTextField commitCount;
   public JLabel commitLabel;
   public JCheckBox createTable;

@@ -13,6 +13,8 @@ package workbench.gui.dialogs.export;
 
 import java.util.List;
 
+import workbench.db.exporter.BlobMode;
+
 /**
  *
  * @author Thomas Kellerer
@@ -33,4 +35,5 @@ public interface SqlOptions
 	void setAlternateUpdateTable(String table);
 	List<String> getKeyColumns();
 	String getDateLiteralType();
+	BlobMode getBlobMode();
 }
