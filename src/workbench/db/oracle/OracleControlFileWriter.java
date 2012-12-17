@@ -56,12 +56,15 @@ public class OracleControlFileWriter
 		try
 		{
 			out = new PrintWriter(new FileWriter(ctl));
+			out.println("-- Please review these options to fit your needs");
 			if (exporter.getExportHeaders())
 			{
-				out.println("-- Skip the header row of the input file");
-				out.println("OPTIONS (skip=1)");
+				out.println("OPTIONS (skip=1, direct=true, rows=10000, silent=(feedback) )");
 			}
-
+			else
+			{
+				out.println("OPTIONS (direct=true, rows=10000, silent=(feedback) )");
+			}
 			out.println("-- The specified characterset might not be correct, please check the Oracle documentation");
 			out.print("LOAD DATA CHARACTERSET '");
 			out.println(convertJavaCharsetToOracle(exporter.getEncoding()) + "'");
