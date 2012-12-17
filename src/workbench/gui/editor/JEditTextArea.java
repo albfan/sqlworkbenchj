@@ -1547,7 +1547,7 @@ public class JEditTextArea
 		int start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
 		if (start > -1)
 		{
-			this.select(lineStart + start + 1, caret);
+			this.select(lineStart + start, caret);
 		}
 	}
 	/**

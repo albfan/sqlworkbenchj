@@ -139,7 +139,7 @@ public class CompletionPopup
 					@Override
 					public void run()
 					{
-						editor.selectWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
+						editor.selectWordAtCursor(context.getAnalyzer().getWordDelimiters());
 					}
 				});
 			}

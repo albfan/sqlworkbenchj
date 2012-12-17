@@ -117,6 +117,11 @@ public abstract class BaseAnalyzer
 		return dbConnection;
 	}
 
+	public String getWordDelimiters()
+	{
+		return SELECT_WORD_DELIM;
+	}
+	
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator

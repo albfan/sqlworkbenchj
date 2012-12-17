@@ -36,6 +36,7 @@ public class WbCommandAnalyzer
 	private boolean isParameter;
 
 	private boolean changeCase;
+	private final String wordDelimiters = " \t";
 
 	public WbCommandAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -47,6 +48,12 @@ public class WbCommandAnalyzer
 	public boolean isWbParam()
 	{
 		return this.isParameter;
+	}
+
+	@Override
+	public String getWordDelimiters()
+	{
+		return wordDelimiters;
 	}
 
 	@Override
@@ -68,7 +75,7 @@ public class WbCommandAnalyzer
 	public void checkContext()
 	{
 		CommandMapper mapper = new CommandMapper();
-		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
+		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, wordDelimiters);
 
 		changeCase = true;
 
