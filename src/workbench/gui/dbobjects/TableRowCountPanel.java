@@ -241,7 +241,7 @@ public class TableRowCountPanel
 			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
 			currentStatement = dbConnection.createStatementForQuery();
 
-			WbSwingUtilities.showWaitCursor(data);
+			WbSwingUtilities.showWaitCursor(this);
 
 			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
 			boolean useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
@@ -294,7 +294,7 @@ public class TableRowCountPanel
 			currentStatement = null;
 			dbConnection.setBusy(false);
 			showStatusMessage("");
-			WbSwingUtilities.showDefaultCursorOnWindow(data);
+			WbSwingUtilities.showDefaultCursor(this);
 			window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
 			data.checkCopyActions();
 			cancelAction.setEnabled(false);
