@@ -78,6 +78,7 @@ public class TableRowCountPanel
 	private WbConnection sourceConnection;
 	private boolean useSeparateConnection;
 	private StopAction cancelAction;
+	private JScrollPane scrollPane;
 
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
@@ -90,13 +91,13 @@ public class TableRowCountPanel
 		data = new WbTable(false, false, false);
 		data.setReadOnly(true);
 
-		JScrollPane scroll = new JScrollPane(data);
+		scrollPane = new JScrollPane(data);
 		JPanel statusPanel = new JPanel(new BorderLayout(0,0));
 
 		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
-		Border current = scroll.getBorder();
+		Border current = scrollPane.getBorder();
 		Border frame = new CompoundBorder(new EmptyBorder(3,3,0,3), current);
-		scroll.setBorder(frame);
+		scrollPane.setBorder(frame);
 
 		Border b = new CompoundBorder(new EmptyBorder(3, 2, 2, 3), etched);
 		statusPanel.setBorder(b);
@@ -112,7 +113,7 @@ public class TableRowCountPanel
 		toolbar.add(cancelAction);
 
 		add(toolbar, BorderLayout.PAGE_START);
-		add(scroll, BorderLayout.CENTER);
+		add(scrollPane, BorderLayout.CENTER);
 		add(statusPanel, BorderLayout.PAGE_END);
 	}
 
@@ -241,7 +242,7 @@ public class TableRowCountPanel
 			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
 			currentStatement = dbConnection.createStatementForQuery();
 
-			WbSwingUtilities.showWaitCursor(this);
+			WbSwingUtilities.showWaitCursor(scrollPane);
 
 			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
 			boolean useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
@@ -294,7 +295,7 @@ public class TableRowCountPanel
 			currentStatement = null;
 			dbConnection.setBusy(false);
 			showStatusMessage("");
-			WbSwingUtilities.showDefaultCursor(this);
+			WbSwingUtilities.showDefaultCursor(scrollPane);
 			window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
 			data.checkCopyActions();
 			cancelAction.setEnabled(false);
