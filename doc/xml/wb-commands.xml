@@ -1095,6 +1095,24 @@ WHERE id=42;</programlisting>
                   </para>
                 </entry>
               </row>
+              <row>
+                <entry>REALPLAN</entry>
+                <entry>
+                  <para>
+                    This is an extension to the SQL*Plus <literal>EXPLAIN</literal> mode. Using <literal>EXPLAIN</literal>, &wb-productname; will
+                    simply run an <literal>EXPLAIN PLAN</literal> for the statement (and the statement will not be executed) - this is the same
+                    behaviour as SQL*Plus' <literal>EXPLAIN</literal> mode.
+                  </para>
+                  <para>
+                    Using <literal>REALPLAN</literal>, &wb-productname; will run the statement and then retrieve the execution plan
+                    that was generated while running the statement. This might yield a different result than regular <literal>EXPLAIN</literal>
+                    mode. The actual plan also contains more details about estimated and actual row counts. This plan is retrieved
+                    using <literal>dbms_xplan.display_cursor()</literal>. If <literal>REALPLAN</literal> is used, the actual SQL statement
+                    sent to the server will be changed to include the <literal>GATHER_PLAN_STATISTICS</literal> hint.
+                  </para>
+                </entry>
+              </row>
+
             </tbody>
           </tgroup>
         </informaltable>
