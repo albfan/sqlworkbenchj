@@ -34,7 +34,7 @@ public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
 	private final String TABLE_SQL =
-		 "SELECT constraint_name, search_condition \n" +
+		 "SELECT constraint_name, search_condition, status, validated \n" +
 		 "FROM all_constraints cons   \n" +
 		 "WHERE constraint_type = 'C' \n" +
 		 " and owner = ? \n" +
@@ -96,12 +96,23 @@ public class OracleConstraintReader
 			{
 				String name = rs.getString(1);
 				String constraint = rs.getString(2);
+				String status = rs.getString(3);
+				String valid = rs.getString(4);
 				if (constraint != null)
 				{
 					// NOT NULL constraints do not need to be taken into account
 					if (isDefaultNNConstraint(constraint)) continue;
 
-					TableConstraint c = new TableConstraint(name, "(" + constraint + ")");
+					String expression = "(" + constraint + ")";
+					if ("DISABLED".equalsIgnoreCase(status))
+					{
+						expression += " DISABLE";
+					}
+					if ("NOT VALIDATED".equalsIgnoreCase(valid))
+					{
+						expression += " NOVALIDATE";
+					}
+					TableConstraint c = new TableConstraint(name, expression);
 					c.setIsSystemName(isSystemConstraintName(name));
 					result.add(c);
 				}
