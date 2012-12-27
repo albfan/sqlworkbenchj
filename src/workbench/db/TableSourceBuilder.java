@@ -3,8 +3,19 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2012, Thomas Kellerer
- * No part of this code may be reused without the permission of the author
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -14,17 +25,19 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.*;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -246,12 +259,26 @@ public class TableSourceBuilder
 			pkCols = getPKColsFromIndex(indexList, pkname);
 		}
 
+		PkDefinition pk = table.getPrimaryKey();
+		if (includePK && pk == null)
+		{
+			pk = getIndexReader().getPrimaryKey(table);
+			if (pk == null && pkCols.size() > 0)
+			{
+				pk = new PkDefinition(pkCols);
+			}
+			else
+			{
+				table.setPrimaryKey(pk);
+			}
+		}
+
 		boolean inlinePK = getCreateInlinePKConstraints();
-		if (includePK && inlinePK && pkCols.size() > 0)
+		if (includePK && inlinePK && pk != null)
 		{
 			result.append("\n   ,");
-			CharSequence pk = getPkSource(table, pkCols, pkname, true);
-			result.append(pk);
+			CharSequence pkSql = getPkSource(table, pk, true);
+			result.append(pkSql);
 		}
 
 		if (includeFk && getCreateInlineFKConstraints())
@@ -285,9 +312,9 @@ public class TableSourceBuilder
 			result.append("\n\n");
 		}
 
-		if (includePK && !inlinePK && pkCols.size() > 0)
+		if (includePK && !inlinePK && pk != null)
 		{
-			CharSequence pkSource = getPkSource(table, pkCols, pkname);
+			CharSequence pkSource = getPkSource(table, pk, false);
 			result.append('\n');
 			result.append(pkSource);
 		}
@@ -596,30 +623,31 @@ public class TableSourceBuilder
 
 		return result.toString();
 	}
+
 	/**
 	 * Builds an ALTER TABLE to add a primary key definition for the given tablename.
 	 *
-	 * @param table
-	 * @param pkCols
-	 * @param pkName
+	 * @param table         the table for which the PK statement should be created.
+	 * @param pk            the PK definition, if null the PK from the table is used
+	 * @param forInlineUse  if true, the SQL is useable "inline" for a CREATE TABLE statement.
 	 * @return an SQL statement to add a PK constraint on the given table.
 	 */
-	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
+	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse)
 	{
-		return getPkSource(table, pkCols, pkName, false);
-	}
+		if (pk == null) return StringUtil.EMPTY_STRING;
 
-	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName, boolean forInlineUse)
-	{
 		DbMetadata meta = dbConnection.getMetadata();
 
 		PkTemplate pkTmpl = new PkTemplate(dbConnection.getDbId(), forInlineUse);
 		String template = pkTmpl.getSQLTemplate();
 
-		if (StringUtil.isEmptyString(template)) return "";
+		if (StringUtil.isEmptyString(template)) return StringUtil.EMPTY_STRING;
 
 		StringBuilder result = new StringBuilder(100);
 		String tablename = table.getTableExpression(this.dbConnection);
+
+		List<String> pkCols = pk.getColumns();
+		String pkName = pk.getPkName();
 
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ", ", false));
@@ -681,8 +709,6 @@ public class TableSourceBuilder
 	 */
 	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, boolean forInlineUse)
 	{
-		DbMetadata meta = dbConnection.getMetadata();
-
 		if (aFkDef == null) return StringUtil.emptyBuffer();
 		int count = aFkDef.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();

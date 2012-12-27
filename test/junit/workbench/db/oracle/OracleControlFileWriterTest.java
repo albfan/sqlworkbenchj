@@ -1,30 +1,48 @@
 /*
- * OracleControlFileWriterTest
+ * OracleControlFileWriterTest.java
  *
- *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2012, Thomas Kellerer
- *  No part of this code may be reused without the permission of the author
+ * Copyright 2002-2013, Thomas Kellerer
  *
- *  To contact the author please send an email to: support@sql-workbench.net
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.db.oracle;
 
 import java.sql.Types;
 import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.RowDataConverter;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+
 import workbench.util.StrBuffer;
-import workbench.util.WbFile;
-import org.junit.Test;
-import workbench.WbTestCase;
-import static org.junit.Assert.*;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -137,7 +155,7 @@ public class OracleControlFileWriterTest
 			assertEquals(16, lines.size());
 
 			// First line is a comment so the actual contents starts with the second line
-			assertEquals("OPTIONS (skip=1)", lines.get(1));
+			assertEquals("OPTIONS (skip=1, direct=true, rows=10000, silent=(feedback) )", lines.get(1));
 			assertEquals("LOAD DATA CHARACTERSET 'AL32UTF8'", lines.get(3));
 			assertEquals("INFILE 'export.txt'", lines.get(4));
 			assertEquals("INTO TABLE person", lines.get(7));

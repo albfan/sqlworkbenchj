@@ -3,8 +3,19 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2012, Thomas Kellerer
- * No part of this code may be reused without the permission of the author
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -15,12 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -41,23 +55,15 @@ public class OracleUniqueConstraintReader
 
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
-			"select index_name, constraint_name, deferrable, deferred \n" +
+			"select /* SQL Workbench */ index_name, constraint_name, deferrable, deferred, status, validated \n" +
 			"from all_constraints \n" +
 			"where constraint_type = 'U' \n" +
 			" AND (");
 
 		boolean first = true;
-		int idxCount = 0;
 
 		for (IndexDefinition idx : indexList)
 		{
-			if (idx.isPrimaryKeyIndex())
-			{
-				// Only skip Primary key indexes.
-				// Non-Unique indexes can still back a unique constraint...
-				continue;
-			}
-
 			if (first)
 			{
 				first = false;
@@ -66,7 +72,6 @@ public class OracleUniqueConstraintReader
 			{
 				sql.append(" OR ");
 			}
-			idxCount ++;
 			String schema = con.getMetadata().removeQuotes(idx.getSchema());
 			String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
 			sql.append(" (nvl(index_owner, '");
@@ -78,10 +83,6 @@ public class OracleUniqueConstraintReader
 			sql.append("') ");
 		}
 		sql.append(')');
-		if (idxCount == 0)
-		{
-			return;
-		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -100,14 +101,27 @@ public class OracleUniqueConstraintReader
 				String consName = rs.getString(2);
 				String deferrable = rs.getString("deferrable");
 				String deferred = rs.getString("deferred");
+				String status = rs.getString("status");
+				String validated = rs.getString("validated");
+
 				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, null);
-				if (def != null)
+				if (def == null) continue;
+
+				if (def.isPrimaryKeyIndex())
+				{
+					def.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
+					def.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
+				}
+				else
 				{
 					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
 					cons.setDeferrable(StringUtil.equalStringIgnoreCase("DEFERRABLE", deferrable));
 					cons.setInitiallyDeferred(StringUtil.equalStringIgnoreCase("DEFERRED", deferred));
+					cons.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
+					cons.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
 					def.setUniqueConstraint(cons);
 				}
+
 			}
 		}
 		catch (SQLException se)

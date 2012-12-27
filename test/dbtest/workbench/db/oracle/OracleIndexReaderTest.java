@@ -1,30 +1,48 @@
 /*
- * OracleIndexReaderTest
+ * OracleIndexReaderTest.java
  *
- *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2012, Thomas Kellerer
- *  No part of this code may be reused without the permission of the author
+ * Copyright 2002-2013, Thomas Kellerer
  *
- *  To contact the author please send an email to: support@sql-workbench.net
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.db.oracle;
 
-import workbench.WbTestCase;
-import workbench.util.CollectionUtil;
 import java.util.Collections;
 import java.util.List;
-import workbench.db.IndexDefinition;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.DbObjectComparator;
+import workbench.db.IndexDefinition;
+import workbench.db.PkDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
+
+import workbench.util.CollectionUtil;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -131,7 +149,10 @@ public class OracleIndexReaderTest
 		assertEquals("PK_T", tbl.getTable().getPrimaryKeyName());
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		String pkSource = builder.getPkSource(tbl.getTable(), CollectionUtil.arrayList("ID"), "PK_T").toString();
+		PkDefinition pk = new PkDefinition(CollectionUtil.arrayList("ID"));
+		pk.setPkName("PK_T");
+		pk.setPkIndexName("UNIQUE_ID");
+		String pkSource = builder.getPkSource(tbl.getTable(), pk, false).toString();
 		assertTrue(pkSource.indexOf("USING INDEX") > -1);
 		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX UNIQUE_ID") > -1);
 	}

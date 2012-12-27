@@ -5,6 +5,7 @@
 	<!ENTITY wb-productname	"SQL Workbench/J">
 
 	<!ENTITY information SYSTEM "general-information.xml">
+	<!ENTITY license SYSTEM "license.xml">
 	<!ENTITY install SYSTEM "installation.xml">
 	<!ENTITY jdbc-setup SYSTEM "jdbc-setup.xml">
 	<!ENTITY profiles SYSTEM "profiles.xml">
@@ -36,6 +37,7 @@
 <article lang="en">
   <title>&wb-productname; User's Manual</title>
 &information;
+&license;
 &release-history;
 &install;
 &jdbc-setup;

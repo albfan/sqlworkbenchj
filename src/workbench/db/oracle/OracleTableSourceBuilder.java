@@ -3,8 +3,19 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2012, Thomas Kellerer
- * No part of this code may be reused without the permission of the author
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -16,9 +27,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.IndexDefinition;
+import workbench.db.PkDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -211,7 +230,7 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select /* SQLWorkbench*/ tablespace_name, degree, row_movement, temporary, duration \n" +
+			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration \n" +
 			"from all_tables  \n" +
 			"where owner = ? \n" +
 			"and table_name = ? ";
@@ -296,19 +315,16 @@ public class OracleTableSourceBuilder
 	 * @return the SQL to re-create the primary key
 	 */
 	@Override
-	public CharSequence getPkSource(TableIdentifier table, List<String> pkCols, String pkName)
+	public CharSequence getPkSource(TableIdentifier table, PkDefinition def, boolean forInlineUse)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		PkDefinition pk = table.getPrimaryKey();
-		if (pk == null)
-		{
-			pk = reader.getPrimaryKey(table);
-		}
+		String sql = super.getPkSource(table, def, false).toString();
+		if (StringUtil.isEmptyString(sql)) return sql;
 
-		String sql = super.getPkSource(table, pkCols, pkName).toString();
+		PkDefinition pk = def == null ? table.getPrimaryKey() : def;
 
 		// The name used by the index is not necessarily the same as the one used by the constraint.
-		String pkIndexName = pk == null ? null : pk.getPkIndexName();
+		String pkIndexName = pk.getPkIndexName();
 		IndexDefinition idx = getIndexDefinition(table, pkIndexName);
 		boolean isPartitioned = false;
 
@@ -323,7 +339,7 @@ public class OracleTableSourceBuilder
 			isPartitioned = false;
 		}
 
-		if (pkIndexName.equals(pkName) && !isPartitioned)
+		if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, "");
 		}
@@ -346,16 +362,17 @@ public class OracleTableSourceBuilder
 	private IndexDefinition getIndexDefinition(TableIdentifier table, String indexName)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
+		IndexDefinition index = null;
 		try
 		{
-			IndexDefinition index = reader.getIndexDefinition(table, indexName, null);
-			return index;
+			index = reader.getIndexDefinition(table, indexName, null);
 		}
 		catch (SQLException sql)
 		{
 			LogMgr.logError("OracleTableSourceBuilder.getIndexDefinition()", "Could not retrieve index", sql);
+			index = null;
 		}
-		return null;
+		return index;
 	}
 
 }
