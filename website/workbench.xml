@@ -55,7 +55,7 @@
       <li>Display table source (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
       <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
       <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
-      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/information.html#license">License agreement</a>)</li>
+      <li>SQLWorkbench/J is <b>free</b> ( <a href="manual/license.html">published under the Apache 2.0 license</a>)</li>
     </ul>
     </content>
   </page>
