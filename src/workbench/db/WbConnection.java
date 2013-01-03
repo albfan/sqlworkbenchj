@@ -22,7 +22,6 @@
  */
 package workbench.db;
 
-import workbench.db.objectcache.DbObjectCache;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
@@ -35,19 +34,23 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.interfaces.DbExecutionListener;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
+import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleWarningsClearer;
-
 import workbench.db.report.TagWriter;
-import workbench.interfaces.DbExecutionListener;
-import workbench.resource.ResourceMgr;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.PreparedStatementPool;
+
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -375,7 +378,7 @@ public class WbConnection
 	private void runConnectScript(String sql, String type)
 	{
 		if (StringUtil.isBlank(sql)) return;
-		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script...");
+		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script for connection " + getDisplayString(true) + " ..." );
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
