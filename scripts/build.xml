@@ -663,6 +663,7 @@
       </tarfileset>
       <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="history.html"/>
+        <include name="LICENSE"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
@@ -694,6 +695,7 @@
       </tarfileset>
       <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="history.html"/>
+        <include name="LICENSE"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
@@ -725,6 +727,7 @@
         <include name="sqlwbconsole.sh"/>
         <include name="history.html"/>
         <include name="SQLWorkbench.desktop"/>
+        <include name="LICENSE"/>
       </zipfileset>
       <zipfileset dir="${src}/workbench/resource/images">
         <include name="workbench32.png"/>
@@ -765,6 +768,7 @@
         <include name="sqlwbconsole.sh"/>
         <include name="history.html"/>
         <include name="SQLWorkbench.desktop"/>
+        <include name="LICENSE"/>
       </zipfileset>
       <zipfileset dir="${src}/workbench/resource/images">
         <include name="workbench32.png"/>
@@ -812,6 +816,7 @@
         <include name="sqlworkbench.sh"/>
         <include name="sqlwb.sh"/>
         <include name="*.xslt"/>
+        <include name="LICENSE"/>
         <exclude name="**/*test*"/>
       </zipfileset>
 

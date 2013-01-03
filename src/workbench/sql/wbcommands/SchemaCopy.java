@@ -24,25 +24,31 @@ package workbench.sql.wbcommands;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import workbench.AppArguments;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.importer.DeleteType;
 import workbench.db.importer.DataReceiver;
+import workbench.db.importer.DeleteType;
 import workbench.db.importer.TableDependencySorter;
 import workbench.db.importer.TableStatements;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -112,6 +118,14 @@ class SchemaCopy
 		DataReceiver receiver = this.copier.getReceiver();
 		receiver.setTableCount(count);
 
+		Savepoint sp = null;
+		// if transaction control is disabled, QueryCopySource will not rollback each implicit transaction started
+		// by the select statements. In that case we should do it here in order to free resources
+		if (!copier.getReceiver().isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
+		{
+			sp = sourceConnection.setSavepoint();
+		}
+
 		try
 		{
 			copier.beginMultiTableCopy(targetConnection);
@@ -152,6 +166,7 @@ class SchemaCopy
 		finally
 		{
 			copier.endMultiTableCopy();
+			sourceConnection.rollback(sp);
 		}
 
 		if (doSyncDelete)

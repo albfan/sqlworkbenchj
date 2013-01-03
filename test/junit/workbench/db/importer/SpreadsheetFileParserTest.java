@@ -162,6 +162,12 @@ public class SpreadsheetFileParserTest
 			}
 
 			@Override
+			public boolean isTransactionControlEnabled()
+			{
+				return true;
+			}
+
+			@Override
 			public void processRow(Object[] row)
 				throws SQLException
 			{

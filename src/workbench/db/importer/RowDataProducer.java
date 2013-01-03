@@ -24,7 +24,9 @@ package workbench.db.importer;
 
 import java.util.Collection;
 import java.util.Map;
+
 import workbench.interfaces.JobErrorHandler;
+
 import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
 
@@ -42,6 +44,7 @@ public interface RowDataProducer
 
 	/**
 	 * Abort the current import.
+	 * 
 	 * This is usually called when the user cancels the running SQL statement.
 	 */
 	void cancel();

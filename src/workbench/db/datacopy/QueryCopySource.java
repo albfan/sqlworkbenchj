@@ -28,14 +28,18 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Map;
-import workbench.db.WbConnection;
-import workbench.db.importer.RowDataProducer;
-import workbench.db.importer.DataReceiver;
+
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+import workbench.db.importer.DataReceiver;
+import workbench.db.importer.RowDataProducer;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
@@ -51,7 +55,7 @@ import workbench.util.ValueConverter;
  * @author  Thomas Kellerer
  */
 public class QueryCopySource
-		implements RowDataProducer
+	implements RowDataProducer
 {
 	private DataReceiver receiver;
 	private boolean keepRunning = true;
@@ -97,7 +101,7 @@ public class QueryCopySource
 	public void start()
 		throws Exception
 	{
-		LogMgr.logDebug("QueryCopySource.start()", "Using SQL: "+ this.retrieveSql);
+		LogMgr.logDebug("QueryCopySource.start()", "Using SQL: " + this.retrieveSql);
 
 		ResultSet rs = null;
 		this.keepRunning = true;
@@ -106,7 +110,7 @@ public class QueryCopySource
 
 		try
 		{
-			if (this.sourceConnection.supportsSavepoints() && this.sourceConnection.getDbSettings().selectStartsTransaction())
+			if (receiver.isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
 			{
 				sp = sourceConnection.setSavepoint();
 			}

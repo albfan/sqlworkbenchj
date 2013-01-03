@@ -28,42 +28,46 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.Committer;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.Committer;
-import workbench.interfaces.ProgressReporter;
-import workbench.util.ExceptionUtil;
-import workbench.interfaces.Interruptable;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.storage.RowActionMonitor;
-import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import java.io.Reader;
-import java.sql.Clob;
-import java.sql.Savepoint;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Map;
-import workbench.db.DbSettings;
 import workbench.db.compare.BatchedStatement;
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.ImportFileParser;
-import workbench.resource.Settings;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -237,6 +241,12 @@ public class DataImporter
 	{
 		if (this.dbConn == null) return true;
 		return dbConn.getMetadata().supportsBatchUpdates();
+	}
+
+	@Override
+	public boolean isTransactionControlEnabled()
+	{
+		return this.transactionControl;
 	}
 
 	public void setTransactionControl(boolean flag)

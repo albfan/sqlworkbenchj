@@ -27,16 +27,20 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
+
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
+
 import workbench.util.ClipboardFile;
 import workbench.util.MessageBuffer;
 
@@ -82,6 +86,12 @@ public class DataStoreImporter
 		{
 			LogMgr.logError("DataStoreImporter.startImport()", "Error ocurred during import", e);
 		}
+	}
+
+	@Override
+	public boolean isTransactionControlEnabled()
+	{
+		return true;
 	}
 
 	@Override

@@ -25,6 +25,7 @@ package workbench.db.importer;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 
@@ -92,4 +93,6 @@ public interface DataReceiver
 	 * during parsing of the source data.
 	 */
 	void recordRejected(String record, long importRow, Throwable e);
+
+	boolean isTransactionControlEnabled();
 }
