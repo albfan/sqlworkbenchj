@@ -22,19 +22,25 @@
  */
 package workbench.db.postgres;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import workbench.sql.wbcommands.*;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.WbConnection;
-import workbench.sql.StatementRunnerResult;
-import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.wbcommands.*;
+
+import workbench.util.SqlUtil;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -140,12 +146,15 @@ public class WbCopyPostgresTest
 
 		TestUtil.executeScript(pgCon,
 			"create table public.person (id integer, first_name varchar(50), last_name varchar(50));\n " +
+			"create table public.data (id integer, some_info varchar(50));\n " +
 			"commit;\n");
 
 		TestUtil.executeScript(source,
 			"create schema foobar; \n" +
 			"create table foobar.person (id integer, first_name varchar(50), last_name varchar(50));\n " +
 			"insert into foobar.person (id, first_name, last_name) values (42, 'Arthur', 'Dent');\n" +
+			"create table foobar.data (id integer, some_info varchar(50));\n " +
+			"insert into foobar.data (id, some_info) values (24, 'foo');\n " +
 			"commit;\n");
 
 		String sql =
@@ -158,8 +167,12 @@ public class WbCopyPostgresTest
 		String msg = result.getMessageBuffer().toString();
 		assertEquals(msg, true, result.isSuccess());
 
-		Integer count = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from person where last_name = 'Dent'");
-		assertEquals(42, count.intValue());
+		Integer id = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from public.person where last_name = 'Dent'");
+		assertEquals(42, id.intValue());
+
+		id = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from public.data where some_info = 'foo'");
+		assertEquals(24, id.intValue());
+
 	}
 
 	@Test

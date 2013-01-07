@@ -26,6 +26,7 @@
     <entry dev-build="1" type="enh">Code completion is now also supported for common table expressions</entry>
     <entry dev-build="1" type="enh">WbExport and WbImport now support a parameter to define the string literal to be used for NULL values (e.g. -nullString='[NULL]')</entry>
     <entry dev-build="5" type="fix">Using -types=VIEW did not work for WbExport</entry>
+    <entry dev-build="12" type="fix">WbCopy did not find the target tables if the two DBMS were using different default casing for table names (foo vs. FOO)</entry>
     <entry dev-build="11" type="fix">When creating tables on the fly using WbCopy, character columns with more than 8000 characters (e.g. varchar in PostgreSQL) are now automatically mapped to varchar(max).</entry>
     <entry dev-build="11" type="fix">For SQL Server Auto-completion removed the schema from the table names even if the schema was required.</entry>
     <entry dev-build="10" type="fix">When exporting to Excel or OpenOffice, using an extension that identifies a template would result in invalid files.</entry>

@@ -197,6 +197,7 @@ class SchemaCopy
 		for (TableIdentifier sourceTable : sourceTables)
 		{
 			TableIdentifier targetTable = sourceTable.createCopy();
+			targetTable.setNeverAdjustCase(false);
 
 			if (this.targetSchema != null || targetCatalog != null)
 			{
@@ -204,10 +205,11 @@ class SchemaCopy
 				targetTable.setCatalog(catalog);
 			}
 
+			targetTable.adjustCase(targetConnection);
+
 			if (createTargetTable())
 			{
 				targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
-				targetTable.adjustCase(targetConnection);
 			}
 			else
 			{

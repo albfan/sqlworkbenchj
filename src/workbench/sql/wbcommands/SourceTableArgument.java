@@ -27,9 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -170,7 +173,7 @@ public class SourceTableArgument
 				{
 					if (checkWildcard) this.wildcardsPresent = true;
 					TableIdentifier tbl = new TableIdentifier(t);
-					if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%")))
+					if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%"))) // if all tables should be selected, no schema is necessary.
 					{
 						tbl.setSchema(schemaToUse);
 					}
