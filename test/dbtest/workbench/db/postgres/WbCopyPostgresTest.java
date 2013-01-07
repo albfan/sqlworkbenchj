@@ -158,7 +158,7 @@ public class WbCopyPostgresTest
 			"commit;\n");
 
 		String sql =
-			"wbcopy -sourceSchema=foobar \n" +
+			"wbcopy -sourceSchema=FOOBAR \n" +
 			"       -sourceTable=* \n" +
 			"       -targetSchema=public \n"+
 			"       -sourceProfile=" + source.getProfile().getName() + " \n ";

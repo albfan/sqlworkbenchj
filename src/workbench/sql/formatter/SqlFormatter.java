@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.resource.Settings;
+
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -380,9 +382,14 @@ public class SqlFormatter
 
 	private void appendComment(String text)
 	{
+		appendComment(text, true);
+	}
+
+	private void appendComment(String text, boolean checkStartOfLine)
+	{
 		if (text.startsWith("--"))
 		{
-			if (!this.isStartOfLine()) this.appendNewline();
+			if (checkStartOfLine && !this.isStartOfLine()) this.appendNewline();
 		}
 		else
 		{
@@ -453,6 +460,7 @@ public class SqlFormatter
 		boolean isLastOpenBracket = "(".equals(lastText);
 		boolean isLastCloseBracket = ")".equals(lastText);
 
+		if (last.isComment() && lastText.startsWith("--")) return false;
 		if (DATE_LITERALS.contains(lastText) && current.isLiteral()) return true;
 		if (lastText.endsWith("'") && currentText.equals("''")) return false;
 		if (lastText.endsWith("'") && currentText.equals("}")) return false;
@@ -1265,6 +1273,15 @@ public class SqlFormatter
 			{
 				this.appendText(text);
 				t = processLobParameter();
+			}
+			else if (t.isComment())
+			{
+				int len = getCurrentLineLength();
+				appendComment(text, false);
+				if (text.startsWith("--") && len > 0)
+				{
+					indent(StringUtil.padRight("", len));
+				}
 			}
 			else if (!t.isWhiteSpace())
 			{

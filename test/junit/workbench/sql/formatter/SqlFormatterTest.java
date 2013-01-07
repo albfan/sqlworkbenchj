@@ -60,7 +60,22 @@ public class SqlFormatterTest
 		f.setColumnsPerInsert(1);
 		f.setUseLowerCaseFunctions(true);
 		String formatted = f.getFormattedSql();
-		System.out.println(formatted);
+		String expected =
+			"INSERT INTO foobar\n" +
+			"(\n" +
+			"  -- foobar, \n" +
+			"  col1,\n" +
+			"  col2,\n" +
+			"  col3,\n" +
+			"  col4\n" +
+			")\n" +
+			"SELECT 1,\n" +
+			"       2,\n" +
+			"       3,\n" +
+			"       4\n" +
+			"FROM someTable";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
 	}
 
 	@Test
