@@ -126,6 +126,43 @@ public class WbCopyPostgresTest
 	}
 
 	@Test
+	public void testDifferentSchemaCopy()
+		throws Exception
+	{
+		WbConnection pgCon = PostgresTestUtil.getPostgresConnection();
+		if (pgCon == null) return;
+
+		TestUtil util = getTestUtil();
+		WbConnection source = util.getConnection("copySourceSchema"); // H2
+
+		WbCopy copyCmd = new WbCopy();
+		copyCmd.setConnection(pgCon);
+
+		TestUtil.executeScript(pgCon,
+			"create table public.person (id integer, first_name varchar(50), last_name varchar(50));\n " +
+			"commit;\n");
+
+		TestUtil.executeScript(source,
+			"create schema foobar; \n" +
+			"create table foobar.person (id integer, first_name varchar(50), last_name varchar(50));\n " +
+			"insert into foobar.person (id, first_name, last_name) values (42, 'Arthur', 'Dent');\n" +
+			"commit;\n");
+
+		String sql =
+			"wbcopy -sourceSchema=foobar \n" +
+			"       -sourceTable=* \n" +
+			"       -targetSchema=public \n"+
+			"       -sourceProfile=" + source.getProfile().getName() + " \n ";
+
+		StatementRunnerResult result = copyCmd.execute(sql);
+		String msg = result.getMessageBuffer().toString();
+		assertEquals(msg, true, result.isSuccess());
+
+		Integer count = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from person where last_name = 'Dent'");
+		assertEquals(42, count.intValue());
+	}
+
+	@Test
 	public void testCopyFromH2()
 		throws Exception
 	{
