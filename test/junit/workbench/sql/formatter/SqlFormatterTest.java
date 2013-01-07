@@ -50,11 +50,14 @@ public class SqlFormatterTest
 	public void testInsertWithComment()
 	{
 		String sql =
-			"insert into (-- foobar \n " +
-			"   col1, col2, col3) \n" +
-			"select 1,2,3 \n"  +
+			"insert into foobar(\n" +
+			"-- foobar, \n " +
+			"col1, col2, col3, col4 \n" +
+			")\n" +
+			"select 1,2,3,4 \n"  +
 			"from someTable";
 		SqlFormatter f = new SqlFormatter(sql, 10);
+		f.setColumnsPerInsert(1);
 		f.setUseLowerCaseFunctions(true);
 		String formatted = f.getFormattedSql();
 		System.out.println(formatted);
