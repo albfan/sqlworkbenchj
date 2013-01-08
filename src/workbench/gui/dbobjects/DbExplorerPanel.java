@@ -177,19 +177,17 @@ public class DbExplorerPanel
 			}
 			tabPane.setTabPlacement(location);
 
-			int index = 1;
-
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
-			tabPane.setToolTipTextAt(index, ResourceMgr.getDescription("TxtDbExplorerProcs"));
+			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
 
 			if (Settings.getInstance().getShowTriggerPanel())
 			{
 				triggers = new TriggerListPanel(aParent);
 				tabPane.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
-				tabPane.setToolTipTextAt(++index, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
+				tabPane.setToolTipTextAt(tabPane.getTabCount() - 1, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
 			}
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
-			tabPane.setToolTipTextAt(++index, ResourceMgr.getDescription("TxtSearchTables"));
+			tabPane.setToolTipTextAt(tabPane.getTabCount() - 1, ResourceMgr.getDescription("TxtSearchTables"));
 			tabPane.setFocusable(false);
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
