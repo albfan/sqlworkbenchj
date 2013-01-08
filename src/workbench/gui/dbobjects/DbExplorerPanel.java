@@ -186,10 +186,10 @@ public class DbExplorerPanel
 			{
 				triggers = new TriggerListPanel(aParent);
 				tabPane.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
-				tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
+				tabPane.setToolTipTextAt(++index, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
 			}
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
-			tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtSearchTables"));
+			tabPane.setToolTipTextAt(++index, ResourceMgr.getDescription("TxtSearchTables"));
 			tabPane.setFocusable(false);
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
