@@ -24,10 +24,8 @@ package workbench.db.mssql;
 
 import java.sql.Types;
 
-import workbench.resource.Settings;
-
 import workbench.db.DefaultDataTypeResolver;
-
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -61,6 +59,13 @@ public class SqlServerDataTypeResolver
 	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
+		// the new hierarchyid type is reported as VARBINARY, so this needs
+		// to be checked before checking the binary stuff
+		if (sqlType == Types.VARBINARY && "hierarchyid".equals(dbmsName))
+		{
+			return dbmsName;
+		}
+
 		// this works around the jTDS driver reporting nvarchar as CLOB and not as NCLOB
 		if (sqlType == Types.CLOB && "nvarchar".equals(dbmsName) && size > MAX_NVARCHAR_LENGTH)
 		{
@@ -76,14 +81,17 @@ public class SqlServerDataTypeResolver
 		{
 			return "nvarchar(max)";
 		}
+
 		if ( (sqlType == Types.VARCHAR && size > MAX_DEFAULT_LENGTH) || sqlType == Types.CLOB)
 		{
 			return "varchar(max)";
 		}
+
 		if (sqlType == Types.BLOB)
 		{
 			return "varbinary(max)";
 		}
+
 		if (sqlType == Types.VARBINARY)
 		{
 			if (size > MAX_DEFAULT_LENGTH)
@@ -92,6 +100,7 @@ public class SqlServerDataTypeResolver
 			}
 			return "varbinary(" + Integer.toString(size) + ")";
 		}
+
 		if (sqlType == Types.BINARY)
 		{
 			if (size > MAX_DEFAULT_LENGTH)
