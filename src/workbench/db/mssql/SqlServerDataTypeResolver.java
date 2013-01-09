@@ -59,9 +59,9 @@ public class SqlServerDataTypeResolver
 	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
-		// the new hierarchyid type is reported as VARBINARY, so this needs
-		// to be checked before checking the binary stuff
-		if (sqlType == Types.VARBINARY && "hierarchyid".equals(dbmsName))
+		// the new hierarchyid type is reported as VARBINARY (or BLOB by jTDS),
+		// so this needs to be checked before checking the "real" BLOB and VARBINARY columns
+		if ("hierarchyid".equals(dbmsName))
 		{
 			return dbmsName;
 		}
