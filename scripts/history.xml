@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2012-12-13">
+  <release build="-1" date="2013-01-08">
     <entry dev-build="12" type="enh">The licenses for SQL Workbench/J has been changed to an Apache 2.0 license</entry>
     <entry dev-build="10" type="enh">The output of WbGenerateDrop can now be controlled in more detail</entry>
     <entry dev-build="10" type="enh">WbImport can now import Excel (XLS and XLSX) and Open Office Calc (ODS) files</entry>

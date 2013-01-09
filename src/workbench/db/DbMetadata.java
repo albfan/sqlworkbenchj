@@ -432,6 +432,9 @@ public class DbMetadata
 	/**
 	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
 	 *
+	 * It also allows overwriting the driver's escape character through DbSettings in case
+	 * the driver returns the wrong information (like Oracle's driver did for some time).
+	 *
 	 * @return the escape characters to mask wildcards in a string literal
 	 */
 	public final String getSearchStringEscape()
