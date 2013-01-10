@@ -24,7 +24,9 @@ package workbench.resource;
 
 import java.awt.Color;
 import java.util.Set;
+
 import javax.swing.KeyStroke;
+
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -50,6 +52,7 @@ public class GuiSettings
 
 	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
 	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
+	public static final String PROP_TITLE_SHOW_URL_USER = "workbench.gui.display.showurl.includeuser";
 	public static final String PROP_TITLE_SHOW_PROF_GROUP = "workbench.gui.display.showprofilegroup";
 	public static final String PROP_TITLE_APP_AT_END = "workbench.gui.display.name_at_end";
 	public static final String PROP_TITLE_SHOW_EDITOR_FILE = "workbench.gui.display.showfilename";
@@ -567,6 +570,16 @@ public class GuiSettings
 	public static boolean getShowURLinWindowTitle()
 	{
 		return Settings.getInstance().getBoolProperty(PROP_TITLE_SHOW_URL, false);
+	}
+
+	public static void setIncludeUserInTitleURL(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_TITLE_SHOW_URL_USER, flag);
+	}
+
+	public static boolean getIncludeUserInTitleURL()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_TITLE_SHOW_URL_USER, false);
 	}
 
 	public static void setShowProfileGroupInWindowTitle(boolean flag)

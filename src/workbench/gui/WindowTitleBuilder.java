@@ -23,6 +23,7 @@
 package workbench.gui;
 
 import java.io.File;
+
 import workbench.db.ConnectionProfile;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -43,6 +44,7 @@ public class WindowTitleBuilder
 		boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
 		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
 		boolean showURL = GuiSettings.getShowURLinWindowTitle();
+		boolean includeUser = GuiSettings.getIncludeUserInTitleURL();
 
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
@@ -61,6 +63,11 @@ public class WindowTitleBuilder
 		{
 			if (showURL)
 			{
+				if (includeUser)
+				{
+					title.append(profile.getUsername());
+					title.append('@');
+				}
 				title.append(profile.getUrl());
 			}
 			else
