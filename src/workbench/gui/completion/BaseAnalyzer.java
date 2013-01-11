@@ -31,14 +31,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
-
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -132,7 +130,7 @@ public abstract class BaseAnalyzer
 	{
 		return SELECT_WORD_DELIM;
 	}
-	
+
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator
@@ -514,7 +512,8 @@ public abstract class BaseAnalyzer
 		else
 		{
 			boolean keyWord = this.dbConnection != null && this.dbConnection.getMetadata().isKeyword(currentWord);
-			setOverwriteCurrentWord(!keyWord);
+			char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
+			setOverwriteCurrentWord(!keyWord && currentWord.charAt(currentWord.length() - 1) != separator);
 		}
 	}
 
