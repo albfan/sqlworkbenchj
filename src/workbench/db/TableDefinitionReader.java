@@ -24,7 +24,6 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.oracle.OracleTableDefinitionReader;
 
 /**
  *

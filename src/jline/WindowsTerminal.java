@@ -8,7 +8,6 @@ package jline;
 
 import java.io.*;
 
-import jline.UnixTerminal.ReplayPrefixOneCharInputStream;
 
 /**
  * <p>
@@ -188,11 +187,11 @@ public class WindowsTerminal extends Terminal {
     private Boolean directConsole;
 
     private boolean echoEnabled;
-    
+
     String encoding = System.getProperty("jline.WindowsTerminal.input.encoding", System.getProperty("file.encoding"));
     ReplayPrefixOneCharInputStream replayStream = new ReplayPrefixOneCharInputStream(encoding);
     InputStreamReader replayReader;
-    
+
     public WindowsTerminal() {
         String dir = System.getProperty("jline.WindowsTerminal.directConsole");
 
@@ -201,13 +200,13 @@ public class WindowsTerminal extends Terminal {
         } else if ("false".equals(dir)) {
             directConsole = Boolean.FALSE;
         }
-        
+
         try {
             replayReader = new InputStreamReader(replayStream, encoding);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
+
     }
 
     private native int getConsoleMode();
@@ -357,11 +356,11 @@ public class WindowsTerminal extends Terminal {
                 replayStream.setInput(indicator, in);
                 // replayReader = new InputStreamReader(replayStream, encoding);
                 indicator = replayReader.read();
-                
+
         }
-        
+
         return indicator;
-        
+
 	}
 
     public boolean isSupported() {
@@ -439,7 +438,7 @@ public class WindowsTerminal extends Terminal {
     public InputStream getDefaultBindings() {
         return getClass().getResourceAsStream("windowsbindings.properties");
     }
-    
+
     /**
      * This is awkward and inefficient, but probably the minimal way to add
      * UTF-8 support to JLine
@@ -453,11 +452,11 @@ public class WindowsTerminal extends Terminal {
         int byteRead;
 
         final String encoding;
-        
+
         public ReplayPrefixOneCharInputStream(String encoding) {
             this.encoding = encoding;
         }
-        
+
         public void setInput(int recorded, InputStream wrapped) throws IOException {
             this.byteRead = 0;
             this.firstByte = (byte) recorded;
@@ -471,8 +470,8 @@ public class WindowsTerminal extends Terminal {
             else if (encoding.equalsIgnoreCase("UTF-32"))
                 byteLength = 4;
         }
-            
-            
+
+
         public void setInputUTF8(int recorded, InputStream wrapped) throws IOException {
             // 110yyyyy 10zzzzzz
             if ((firstByte & (byte) 0xE0) == (byte) 0xC0)
@@ -509,5 +508,5 @@ public class WindowsTerminal extends Terminal {
             return byteLength - byteRead;
         }
     }
-    
+
 }

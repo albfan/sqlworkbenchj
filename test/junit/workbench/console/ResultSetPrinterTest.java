@@ -26,13 +26,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
+
 import workbench.db.WbConnection;
+
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
+
+import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  *
@@ -77,18 +81,18 @@ public class ResultSetPrinterTest
 			printer.consumeResult(result);
 			ps.close();
 			rs.close();
-			
+
 			String out = ba.toString();
 //			System.out.println(out);
 			String[] lines = out.split(StringUtil.LINE_TERMINATOR);
-			
+
 			// expected is one line per row in the database (rowCount)
 			// plus two lines heading
 			// plus one additional line for the multi-line values
 			// plus one line with the number of rows retrieved
 			// so we wind up with rowCount + 4
 			assertEquals(rowCount + 5, lines.length);
-			
+
 			assertEquals("NR         | FIRSTNAME            | LASTNAME            ", lines[0]);
 			assertEquals("-----------+----------------------+---------------------", lines[1]);
 			assertEquals("0          | firstname            | lastname            ", lines[2]);

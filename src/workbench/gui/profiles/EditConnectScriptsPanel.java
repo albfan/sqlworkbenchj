@@ -30,18 +30,22 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import workbench.interfaces.ValidatingComponent;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionProfile;
 import workbench.db.KeepAliveDaemon;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.sql.EditorPanel;
-import workbench.interfaces.ValidatingComponent;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  * @author Thomas Kellerer
@@ -165,15 +169,18 @@ public class EditConnectScriptsPanel
 		return true;
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				postConnectEditor.requestFocusInWindow();

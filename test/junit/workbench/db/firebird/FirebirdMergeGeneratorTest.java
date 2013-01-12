@@ -23,20 +23,19 @@
 package workbench.db.firebird;
 
 import java.sql.Types;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+
 import workbench.storage.DataStore;
-import static org.junit.Assert.*;
-import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowData;
-import workbench.storage.RowDataContainer;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

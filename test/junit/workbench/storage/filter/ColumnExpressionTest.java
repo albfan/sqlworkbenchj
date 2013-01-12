@@ -25,11 +25,10 @@ package workbench.storage.filter;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+
+import static org.junit.Assert.*;
 
 /**
  *

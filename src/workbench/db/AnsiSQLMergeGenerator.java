@@ -22,9 +22,6 @@
  */
 package workbench.db;
 
-import workbench.db.ibm.*;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
 import workbench.storage.ColumnData;
 import workbench.storage.MergeGenerator;
 import workbench.storage.ResultInfo;

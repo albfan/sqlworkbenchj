@@ -22,9 +22,9 @@
  */
 package workbench.sql;
 
-import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.StringUtil;
 
 /**

@@ -23,8 +23,9 @@
 package workbench.util;
 
 import java.math.BigDecimal;
-import org.junit.Before;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**

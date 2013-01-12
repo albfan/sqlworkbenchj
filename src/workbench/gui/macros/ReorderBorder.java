@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
+
 import javax.swing.border.AbstractBorder;
 
 /**
@@ -43,6 +44,7 @@ public class ReorderBorder
 		super();
 	}
 
+	@Override
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
 		Color oldColor = g.getColor();
@@ -56,11 +58,13 @@ public class ReorderBorder
 		g.setColor(oldColor);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c)
 	{
 		return new Insets(2, 2, 2, 2);
 	}
 
+	@Override
 	public Insets getBorderInsets(Component c, Insets insets)
 	{
 		insets.left = insets.top = insets.right = insets.bottom = 2;

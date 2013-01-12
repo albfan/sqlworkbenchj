@@ -27,14 +27,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
+
+import workbench.log.LogMgr;
+
 import workbench.db.DbSettings;
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
-import workbench.log.LogMgr;
+
 import workbench.storage.ResultInfo;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;

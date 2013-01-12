@@ -23,10 +23,10 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.KeyStroke;
-import workbench.gui.sql.SqlPanel;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * Select the messages panel of the SqlPanel

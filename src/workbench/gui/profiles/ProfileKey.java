@@ -82,6 +82,7 @@ public class ProfileKey
 	public String getName() { return name; }
 	public String getGroup() { return group; }
 
+	@Override
 	public String toString()
 	{
 		if (group == null) return name;

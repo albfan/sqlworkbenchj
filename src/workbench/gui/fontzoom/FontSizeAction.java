@@ -23,12 +23,15 @@
 package workbench.gui.fontzoom;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.KeyStroke;
-import workbench.gui.actions.WbAction;
+
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.actions.WbAction;
+
 /**
- * An action to be used for font zooming. 
+ * An action to be used for font zooming.
  *
  * @author Thomas Kellerer
  */
@@ -53,6 +56,7 @@ public abstract class FontSizeAction
 		zoomer = fontZoomer;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		FontZoomer toUse = zoomer;

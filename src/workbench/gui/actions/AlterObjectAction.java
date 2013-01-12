@@ -25,24 +25,27 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.db.CommentSqlManager;
+
+import workbench.interfaces.Reloadable;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectChanger;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.RunScriptPanel;
-import workbench.interfaces.Reloadable;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.DataStore;
-import workbench.util.CollectionUtil;
+
 import workbench.util.StringUtil;
 
 /**

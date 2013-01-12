@@ -23,23 +23,22 @@
 package workbench.gui.settings;
 
 
-import java.awt.*;
-
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.NumberField;
+import javax.swing.JPanel;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.NumberField;
+
 import workbench.util.DisplayLocale;
 import workbench.util.StringUtil;
 import workbench.util.WbLocale;

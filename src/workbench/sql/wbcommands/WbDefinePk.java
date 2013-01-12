@@ -23,11 +23,14 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.PkMapping;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.PkMapping;
-import workbench.util.SqlUtil;
+
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 

@@ -23,9 +23,11 @@
 package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.actions.WbAction;
+
 import workbench.interfaces.GroupTree;
 import workbench.log.LogMgr;
+
+import workbench.gui.actions.WbAction;
 
 /**
  * @author Thomas Kellerer
@@ -34,7 +36,7 @@ public class NewGroupAction
 	extends WbAction
 {
 	private GroupTree client;
-	
+
 	public NewGroupAction(GroupTree panel, String resourceKey)
 	{
 		super();
@@ -43,6 +45,7 @@ public class NewGroupAction
 		this.initMenuDefinition(resourceKey);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		try

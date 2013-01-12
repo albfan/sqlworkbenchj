@@ -41,7 +41,7 @@ class DriverListModel
 {
 	private List<DbDriver> drivers;
 
-	public DriverListModel(List<DbDriver> aDriverList)
+	DriverListModel(List<DbDriver> aDriverList)
 	{
 		this.drivers = new ArrayList<DbDriver>(aDriverList);
 		Comparator<DbDriver> comp = new Comparator<DbDriver>()

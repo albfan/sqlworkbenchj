@@ -23,12 +23,12 @@
 package workbench.util;
 
 import java.io.InputStream;
-import junit.framework.TestCase;
+
 import workbench.gui.sql.PanelType;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -49,6 +49,6 @@ public class WbWorkspaceTest
 		assertEquals(8, wksp.getEntryCount());
 		assertEquals(PanelType.sqlPanel, wksp.getPanelType(0));
 		assertEquals(PanelType.dbExplorer, wksp.getPanelType(7));
-		
+
 	}
 }

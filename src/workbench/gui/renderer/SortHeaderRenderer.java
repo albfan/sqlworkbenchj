@@ -23,18 +23,22 @@
 package workbench.gui.renderer;
 
 import java.awt.Component;
-
 import java.sql.Types;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
+
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -42,7 +46,7 @@ import workbench.util.StringUtil;
  * A renderer for table headers to be able to display a sort indicator and customized
  * tooltips that show the data type of the column.
  *
- * If adjusts the display of the default renderer to display the sort indicator if
+ * It adjusts the display of the default renderer to display the sort indicator if
  * the default renderer returns a JLabel.
  *
  * Otherwise a separate JLabel is used to display the header that is made to look

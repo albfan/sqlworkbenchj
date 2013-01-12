@@ -26,33 +26,37 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+
 import javax.swing.tree.TreePath;
 
 /**
  * Handle drag and drop in the profile Tree
  * @author Thomas Kellerer
  */
-class TransferableMacroNode 
+class TransferableMacroNode
 	implements Transferable
 {
 	public static final DataFlavor PROFILE_FLAVOR = new DataFlavor(TreePath.class, "MacroTreeElement");
 	private TreePath[] path;
-	
-	public TransferableMacroNode(TreePath[] tp)
+
+	TransferableMacroNode(TreePath[] tp)
 	{
 		path = tp;
 	}
-	
+
+	@Override
 	public DataFlavor[] getTransferDataFlavors()
 	{
 		return new DataFlavor[] { PROFILE_FLAVOR };
 	}
-	
+
+	@Override
 	public boolean isDataFlavorSupported(DataFlavor flavor)
 	{
 		return (flavor.getRepresentationClass() == PROFILE_FLAVOR.getRepresentationClass());
 	}
-	
+
+	@Override
 	public synchronized Object getTransferData(DataFlavor flavor)
 		throws UnsupportedFlavorException, IOException
 	{

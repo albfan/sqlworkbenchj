@@ -26,9 +26,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  * A singleton to control and manage the current display style in the console.

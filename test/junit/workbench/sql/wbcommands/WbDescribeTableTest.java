@@ -23,19 +23,23 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.console.DataStorePrinter;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.IndexDefinition;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.wbcommands.WbDescribeTableTest;
-import workbench.storage.DataStore;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
+
 import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

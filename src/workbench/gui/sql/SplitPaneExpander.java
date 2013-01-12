@@ -23,6 +23,7 @@
 package workbench.gui.sql;
 
 import javax.swing.JSplitPane;
+
 import workbench.gui.WbSwingUtilities;
 
 /**
@@ -49,7 +50,7 @@ public class SplitPaneExpander
 		}
 		else
 		{
-			int newLoc = (int)(this.contentPanel.getHeight() / 2);
+			int newLoc = this.contentPanel.getHeight() / 2;
 			this.contentPanel.setDividerLocation(newLoc);
 		}
 		this.lastDivider = -1;

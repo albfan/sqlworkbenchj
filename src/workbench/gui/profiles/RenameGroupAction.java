@@ -23,8 +23,10 @@
 package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+
 import workbench.gui.actions.WbAction;
 
 /**
@@ -44,11 +46,13 @@ public class RenameGroupAction
 		this.initMenuDefinition("LblRenameProfileGroup");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		client.renameGroup();
 	}
 
+	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		this.setEnabled(client.onlyGroupSelected());

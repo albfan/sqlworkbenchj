@@ -24,13 +24,13 @@ package workbench.util;
 
 import java.io.File;
 import java.io.PrintWriter;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+
+import static org.junit.Assert.*;
 
 /**
  *

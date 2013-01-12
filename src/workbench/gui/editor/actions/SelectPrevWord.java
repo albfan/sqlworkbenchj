@@ -22,7 +22,6 @@
  */
 package workbench.gui.editor.actions;
 
-import java.awt.event.KeyEvent;
 import workbench.resource.PlatformShortcuts;
 
 /**

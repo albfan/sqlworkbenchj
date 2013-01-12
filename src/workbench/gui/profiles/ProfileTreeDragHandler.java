@@ -36,9 +36,11 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
 import workbench.log.LogMgr;
 
 /**
@@ -52,7 +54,7 @@ class ProfileTreeDragHandler
 	private ProfileTree profileTree;
 	private TreePath[] draggedProfiles;
 
-	public ProfileTreeDragHandler(ProfileTree tree, int actions)
+	ProfileTreeDragHandler(ProfileTree tree, int actions)
 	{
 		profileTree = tree;
 		dragSource = new DragSource();
@@ -60,6 +62,7 @@ class ProfileTreeDragHandler
 		dragSource.createDefaultDragGestureRecognizer(profileTree, actions, this);
 	}
 
+	@Override
 	public void dragGestureRecognized(DragGestureEvent dge)
 	{
 		if (!profileTree.onlyProfilesSelected()) return;
@@ -97,26 +100,31 @@ class ProfileTreeDragHandler
 		}
 	}
 
+	@Override
 	public void dragEnter(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dragExit(DragSourceEvent dse)
 	{
 		dse.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
 	}
 
+	@Override
 	public void dragOver(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dropActionChanged(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
 		setCurrentDropTargetItem(null);
@@ -157,25 +165,30 @@ class ProfileTreeDragHandler
 		profileTree.repaint();
 	}
 
+	@Override
 	public void dragEnter(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
 
+	@Override
 	public void dragOver(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
 
+	@Override
 	public void dragExit(DropTargetEvent dte)
 	{
 		setCurrentDropTargetItem(null);
 	}
 
+	@Override
 	public void dropActionChanged(DropTargetDragEvent dtde)
 	{
 	}
 
+	@Override
 	public void drop(DropTargetDropEvent dtde)
 	{
 		Point pt = dtde.getLocation();

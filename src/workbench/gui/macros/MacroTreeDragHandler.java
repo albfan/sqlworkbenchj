@@ -36,7 +36,9 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+
 import javax.swing.tree.TreePath;
+
 import workbench.log.LogMgr;
 
 /**
@@ -50,7 +52,7 @@ class MacroTreeDragHandler
 	private MacroTree macroTree;
 	private TreePath[] draggedEntries;
 
-	public MacroTreeDragHandler(MacroTree tree, int actions)
+	MacroTreeDragHandler(MacroTree tree, int actions)
 	{
 		macroTree = tree;
 		dragSource = new DragSource();
@@ -58,6 +60,7 @@ class MacroTreeDragHandler
 		dragSource.createDefaultDragGestureRecognizer(macroTree, actions, this);
 	}
 
+	@Override
 	public void dragGestureRecognized(DragGestureEvent dge)
 	{
 
@@ -94,26 +97,31 @@ class MacroTreeDragHandler
 		}
 	}
 
+	@Override
 	public void dragEnter(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dragExit(DragSourceEvent dse)
 	{
 		dse.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
 	}
 
+	@Override
 	public void dragOver(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dropActionChanged(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
 
+	@Override
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
 		setCurrentDropTargetItem(null, DragType.none);
@@ -132,9 +140,9 @@ class MacroTreeDragHandler
 			setCurrentDropTargetItem(null, DragType.none);
 			return;
 		}
-		
+
 		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
-		
+
 		boolean allowDrop = false;
 		if (draggedEntries.length == 1)
 		{
@@ -166,25 +174,30 @@ class MacroTreeDragHandler
 		macroTree.repaint();
 	}
 
+	@Override
 	public void dragEnter(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
 
+	@Override
 	public void dragOver(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
 
+	@Override
 	public void dragExit(DropTargetEvent dte)
 	{
 		setCurrentDropTargetItem(null, DragType.none);
 	}
 
+	@Override
 	public void dropActionChanged(DropTargetDragEvent dtde)
 	{
 	}
 
+	@Override
 	public void drop(DropTargetDropEvent dtde)
 	{
 		Point pt = dtde.getLocation();

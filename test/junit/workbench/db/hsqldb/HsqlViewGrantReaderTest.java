@@ -22,16 +22,18 @@
  */
 package workbench.db.hsqldb;
 
-import workbench.resource.Settings;
 import java.util.Collection;
-import java.util.List;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
 import workbench.db.WbConnection;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**

@@ -23,13 +23,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-import workbench.gui.sql.SqlHistory;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlHistory;
 
 /**
  *	Display the next statement from the SQL History.

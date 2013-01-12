@@ -23,14 +23,15 @@
 package workbench.gui.lnf;
 
 import java.util.List;
-import workbench.TestUtil;
+
 import workbench.WbTestCase;
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+
+import static org.junit.Assert.*;
 
 /**
  *

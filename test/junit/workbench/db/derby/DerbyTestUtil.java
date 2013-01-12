@@ -23,12 +23,15 @@
 package workbench.db.derby;
 
 import java.util.Properties;
+
 import workbench.AppArguments;
-import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ArgumentParser;
 import workbench.util.WbFile;
 

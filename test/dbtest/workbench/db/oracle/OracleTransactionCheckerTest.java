@@ -22,19 +22,19 @@
  */
 package workbench.db.oracle;
 
-import static junit.framework.Assert.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.DefaultTransactionChecker;
+import workbench.db.TransactionChecker;
+import workbench.db.WbConnection;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ConnectionMgr;
-import workbench.db.DefaultTransactionChecker;
-import workbench.db.TransactionChecker;
-import workbench.db.WbConnection;
-import workbench.resource.Settings;
+import static junit.framework.Assert.*;
 
 /**
  *

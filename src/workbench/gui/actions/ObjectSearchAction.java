@@ -24,12 +24,11 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.db.ConnectionProfile;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 
 /**

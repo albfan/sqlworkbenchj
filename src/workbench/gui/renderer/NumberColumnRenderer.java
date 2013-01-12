@@ -23,14 +23,9 @@
 package workbench.gui.renderer;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+
 import javax.swing.SwingConstants;
-import workbench.util.StringUtil;
+
 import workbench.util.WbNumberFormatter;
 
 /**

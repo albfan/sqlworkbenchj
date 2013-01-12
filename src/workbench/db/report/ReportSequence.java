@@ -25,9 +25,10 @@ package workbench.db.report;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
+
 import workbench.db.SequenceDefinition;
+
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
 
 /**
  *

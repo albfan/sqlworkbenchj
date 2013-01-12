@@ -26,19 +26,19 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.util.StrBuffer;
-import java.util.Collections;
 import workbench.db.IndexDefinition;
 import workbench.db.NoConfigException;
-import workbench.db.ReaderFactory;
 import workbench.db.TableCommentReader;
 import workbench.db.TableGrant;
+import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
+import workbench.db.WbConnection;
+
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**

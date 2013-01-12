@@ -23,10 +23,11 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+
+import workbench.resource.PlatformShortcuts;
+
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
-import workbench.resource.PlatformShortcuts;
 
 /**
  *

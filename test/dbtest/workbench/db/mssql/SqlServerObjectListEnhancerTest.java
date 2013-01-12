@@ -25,19 +25,21 @@ package workbench.db.mssql;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+
+import workbench.db.TableCommentReader;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.util.SqlUtil;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.sqltemplates.ColumnChanger;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableCommentReader;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
+
 import static org.junit.Assert.*;
 
 /**

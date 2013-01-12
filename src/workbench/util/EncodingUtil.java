@@ -39,9 +39,10 @@ import java.nio.charset.Charset;
 import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.JComponent;
+
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  * Utility class to handle encoding related stuff

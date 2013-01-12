@@ -23,10 +23,13 @@
 package workbench.gui.macros;
 
 import java.util.Collection;
+
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroStorage;
@@ -66,7 +69,7 @@ public class MacroListModel
 		{
 			macros.removeGroup((MacroGroup)data);
 		}
-		
+
 		MacroTreeNode parent = (MacroTreeNode)node.getParent();
 		if (parent == null) return null;
 
@@ -77,7 +80,7 @@ public class MacroListModel
 		}
 
 		removeNodeFromParent(node);
-		
+
 		if (parent != null && newSelection != null)
 		{
 			return new TreePath(new Object[] { rootNode, parent, newSelection});
@@ -93,7 +96,7 @@ public class MacroListModel
 	{
 		return findNode(rootNode, userObject);
 	}
-	
+
 	private MacroTreeNode findNode(MacroTreeNode startWith, Object userObject)
 	{
 		if (userObject == null) return null;
@@ -114,14 +117,14 @@ public class MacroListModel
 		}
 		return null;
 	}
-	
+
 	public TreePath addMacro(MacroGroup group, MacroDefinition macro)
 	{
 		if (macro == null) return null;
 		if (group == null) return null;
 
 		MacroTreeNode groupNode = findNode(group);
-		
+
 		if (groupNode != null)
 		{
 			MacroTreeNode macroNode = new MacroTreeNode(macro, false);
@@ -140,7 +143,7 @@ public class MacroListModel
 		insertNodeInto(node, this.rootNode, this.rootNode.getChildCount() );
 		return new TreePath(new Object[] { rootNode, node });
 	}
-	
+
 	public TreePath[] getGroupNodes()
 	{
 		if (this.rootNode == null) return null;
@@ -148,13 +151,13 @@ public class MacroListModel
 		TreePath[] nodes = new TreePath[children];
 		for (int i = 0; i < children; i++)
 		{
-			TreeNode n = (TreeNode)rootNode.getChildAt(i);
+			TreeNode n = rootNode.getChildAt(i);
 			if (n == null) continue;
 			nodes[i] = new TreePath(new Object[] { this.rootNode, n } );
 		}
 		return nodes;
 	}
-	
+
 	private void buildTree()
 	{
 		rootNode = new MacroTreeNode("Macros", true);
@@ -184,7 +187,7 @@ public class MacroListModel
 		if (targetGroupNode == null) return;
 
 		MacroTreeNode sourceGroupNode = (MacroTreeNode)source.getParent();
-		
+
 		if (!sourceGroupNode.equals(targetGroupNode))
 		{
 			MacroDefinition sourceMacro = (MacroDefinition)source.getDataObject();
@@ -193,7 +196,7 @@ public class MacroListModel
 			sourceGroup.removeMacro(sourceMacro);
 			targetGroup.addMacro(sourceMacro);
 		}
-		
+
 		int targetIndex = targetGroupNode.getIndex(target);
 		removeNodeFromParent(source);
 		insertNodeInto(source, (MacroTreeNode)target.getParent(), targetIndex);
@@ -232,7 +235,7 @@ public class MacroListModel
 		if (!target.getAllowsChildren()) return;
 
 		MacroGroup targetGroup = (MacroGroup)target.getDataObject();
-		
+
 		for (MacroTreeNode node : source)
 		{
 			if (node.getAllowsChildren()) continue;
@@ -241,7 +244,7 @@ public class MacroListModel
 			removeNodeFromParent(node);
 			insertNodeInto(node, target, target.getChildCount());
 		}
-		
+
 		for (int i=0; i < target.getChildCount(); i++)
 		{
 			MacroTreeNode node = (MacroTreeNode)target.getChildAt(i);
@@ -250,7 +253,7 @@ public class MacroListModel
 		}
 		macros.applySort();
 	}
-	
+
 	public void moveNodes(MacroTreeNode[] source, MacroTreeNode target)
 	{
 		boolean sourceIsGroup = true;
@@ -268,5 +271,5 @@ public class MacroListModel
 			moveMacrosToGroup(source, target);
 		}
 	}
-	
+
 }

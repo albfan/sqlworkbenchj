@@ -22,21 +22,24 @@
  */
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
