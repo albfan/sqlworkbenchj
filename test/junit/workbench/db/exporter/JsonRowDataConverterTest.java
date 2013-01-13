@@ -21,6 +21,7 @@
  */
 package workbench.db.exporter;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.Date;
 
@@ -66,7 +67,10 @@ public class JsonRowDataConverterTest
 		ColumnIdentifier lastLogin = new ColumnIdentifier("last_login", Types.TIMESTAMP);
 		lname.setPosition(4);
 
-		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, fname, lname, lastLogin });
+		ColumnIdentifier salaray = new ColumnIdentifier("salary", Types.DECIMAL);
+		salaray.setPosition(5);
+
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { id, fname, lname, lastLogin, salaray });
 		info.setUpdateTable(new TableIdentifier("PERSON"));
 		JsonRowDataConverter converter = new JsonRowDataConverter();
 		converter.setResultInfo(info);
@@ -78,6 +82,7 @@ public class JsonRowDataConverterTest
 		data.setValue(1, "Arthur");
 		data.setValue(2, "Dent");
 		data.setValue(3, new java.sql.Timestamp(login.getTime()));
+		data.setValue(4, new BigDecimal("42.24"));
 
 		String result = converter.getStart().toString();
 		result += converter.convertRowData(data, 0).toString();
@@ -86,6 +91,7 @@ public class JsonRowDataConverterTest
 		data.setValue(1, "Ford");
 		data.setValue(2, "Prefect");
 		data.setValue(3, null);
+		data.setValue(4, new BigDecimal("24.42"));
 
 		result += converter.convertRowData(data, 1).toString();
 		result += converter.getEnd(2).toString();
@@ -94,8 +100,8 @@ public class JsonRowDataConverterTest
 			"{\n" +
 			"  \"person\":\n" +
 			"  [\n" +
-			"    {\"id\": \"1\", \"firstname\": \"Arthur\", \"lastname\": \"Dent\", \"last_login\": \"2013-01-12 14:56:12.000\"},\n" +
-			"    {\"id\": \"2\", \"firstname\": \"Ford\", \"lastname\": \"Prefect\", \"last_login\": \"\"}\n" +
+			"    {\"id\": \"1\", \"firstname\": \"Arthur\", \"lastname\": \"Dent\", \"last_login\": \"2013-01-12 14:56:12.000\", \"salary\": \"42.24\"},\n" +
+			"    {\"id\": \"2\", \"firstname\": \"Ford\", \"lastname\": \"Prefect\", \"last_login\": \"\", \"salary\": \"24.42\"}\n" +
 			"  ]\n" +
 			"}";
 		assertEquals(expected, result);
