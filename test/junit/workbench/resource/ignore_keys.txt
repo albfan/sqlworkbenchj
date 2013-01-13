@@ -70,3 +70,4 @@ TxtWindowTitleGeneratedScript
 TxtXlsName
 LblSettingsWorkspace
 TxtPSParameterName
+TxtFileFilterJson

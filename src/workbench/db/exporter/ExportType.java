@@ -38,7 +38,8 @@ public enum ExportType
 	ODS("OpenDocument Spreadsheet"),
 	XLS("XLS"),
 	XLSM("XLSM"),
-	XLSX("XLSX");
+	XLSX("XLSX"),
+	JSON("JSON");
 
 	private String display;
 
@@ -84,6 +85,7 @@ public enum ExportType
 		if (code.equals("6")) return XLS;
 		if (code.equals("7")) return XLSM;
 		if (code.equals("8")) return XLSX;
+		if (code.equals("9")) return JSON;
 		return null;
 	}
 
@@ -121,6 +123,9 @@ public enum ExportType
 
 			case XLS:
 				return ".xls";
+
+			case JSON:
+				return ".json";
 		}
 		return null;
 	}
@@ -154,6 +159,10 @@ public enum ExportType
 
 			case XLSX:
 				return "8";
+
+			case JSON:
+				return "9";
+
 		}
 		return null;
 	}

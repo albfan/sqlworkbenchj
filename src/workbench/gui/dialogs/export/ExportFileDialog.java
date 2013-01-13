@@ -22,7 +22,6 @@
  */
 package workbench.gui.dialogs.export;
 
-import workbench.gui.components.WbFileChooser;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Window;
@@ -30,24 +29,33 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
+
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FeedbackWindow;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+import workbench.gui.components.WbFileChooser;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
+
+import static workbench.db.exporter.ExportType.XLS;
 
 
 /**
@@ -214,8 +222,10 @@ public class ExportFileDialog
 		}
 
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
+		fc.addChoosableFileFilter(ExtensionFileFilter.getJsonFilterFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getOdsFileFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXlsMFileFilter());
+
 		if (PoiHelper.isPoiAvailable())
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getXlsFileFilter());
@@ -358,6 +368,9 @@ public class ExportFileDialog
 			case XLS:
 				exporter.setXlsOptions(getXlsOptions());
 				break;
+			case JSON:
+				exporter.setOutputType(ExportType.JSON);
+				break;
 			default:
 				exporter.setTextOptions(this.getTextOptions());
 				LogMgr.logWarning("ExportFileDialog.setExporterOptions()", "Unknown file type selected", null);
@@ -371,7 +384,7 @@ public class ExportFileDialog
 		{
 			return ff.getExportType();
 		}
-		
+
 		if (ff.hasFilter(ExtensionFileFilter.SQL_EXT))
 		{
 			return ExportType.SQL_INSERT;
@@ -403,6 +416,10 @@ public class ExportFileDialog
 		else if (ff.hasFilter(ExtensionFileFilter.ODS_EXT))
 		{
 			return ExportType.ODS;
+		}
+		else if (ff.hasFilter(ExtensionFileFilter.JSON_EXT))
+		{
+			return ExportType.JSON;
 		}
 		return null;
 	}
@@ -528,6 +545,9 @@ public class ExportFileDialog
 						break;
 					case XML:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
+						break;
+					case JSON:
+						this.chooser.setFileFilter(ExtensionFileFilter.getJsonFilterFilter());
 						break;
 					case TEXT:
 						this.chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());

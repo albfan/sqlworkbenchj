@@ -29,12 +29,16 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JFrame;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.WbAction;
+
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
+
 import workbench.util.StringUtil;
 
 /**
@@ -106,13 +110,28 @@ public class RunningJobIndicator
 	public void jobEnded()
 	{
 		long duration = 0;
+		boolean showAlert = false;
+
 		synchronized (counterMonitor)
 		{
-			if (runningJobs > 0) runningJobs --;
+			boolean wasDecreased = (runningJobs > 0);
+			if (runningJobs > 0)
+			{
+				runningJobs--;
+			}
 			updateTitle();
 			duration = System.currentTimeMillis() - startTime;
-			if (runningJobs > 0 || !GuiSettings.showScriptFinishedAlert()) return;
+			if (runningJobs > 0)
+			{
+				showAlert = false;
+			}
+			else if (runningJobs == 0 && wasDecreased)
+			{
+				showAlert = GuiSettings.showScriptFinishedAlert();
+			}
 		}
+
+		if (!showAlert) return;
 
 		long minDuration = GuiSettings.getScriptFinishedAlertDuration();
 		if (minDuration == 0 || duration > minDuration)

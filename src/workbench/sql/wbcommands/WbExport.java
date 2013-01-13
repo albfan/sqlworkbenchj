@@ -134,7 +134,7 @@ public class WbExport
 	private boolean showProgress = true;
 	private int progressInterval = 1;
 
-	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,sqlmerge,ods,xlsm,html,xlsx,xls";
+	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,sqlmerge,ods,xlsm,html,xlsx,xls,json";
 
 	public WbExport()
 	{
@@ -465,7 +465,7 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (btype == null)
 		{
 			btype = BlobMode.SaveToFile;
@@ -615,7 +615,11 @@ public class WbExport
 
 			this.defaultExtension = ".html";
 		}
-
+		else if ("json".equals(type))
+		{
+			exporter.setNullString(cmdLine.getValue(ARG_NULL_STRING, null));
+		}
+		
 		exporter.setAppendToFile(appendToFile);
 
 		String ending = cmdLine.getValue(ARG_LINEENDING);

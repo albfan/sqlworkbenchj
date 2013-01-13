@@ -26,12 +26,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
+
 import javax.swing.filechooser.FileFilter;
-import workbench.db.exporter.ExportType;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.db.exporter.ExportType;
+
 import workbench.util.WbFile;
 
 /**
@@ -58,6 +60,7 @@ public class ExtensionFileFilter
 	public static final String XLSX_EXT = "xlsx";
 	public static final String XLSM_EXT = "xml";
 	public static final String ODS_EXT = "ods";
+	public static final String JSON_EXT = "json";
 
 	private boolean ignoreCase = true;
 	private ExportType exportType;
@@ -227,6 +230,11 @@ public class ExtensionFileFilter
 	public static FileFilter getOdsFileFilter()
 	{
 		return getFileFilter(ODS_EXT, "TxtFileFilterOds", ExportType.ODS);
+	}
+
+	public static FileFilter getJsonFilterFilter()
+	{
+		return getFileFilter(JSON_EXT, "TxtFileFilterJson", ExportType.JSON);
 	}
 
 	private static ExtensionFileFilter getFileFilter(String ext, String key, ExportType type)

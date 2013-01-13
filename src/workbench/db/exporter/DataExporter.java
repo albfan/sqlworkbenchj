@@ -818,6 +818,10 @@ public class DataExporter
 				break;
 			case ODS:
 				this.exportWriter = new OdsExportWriter(this);
+				break;
+			case JSON:
+				this.exportWriter = new JsonExportWriter(this);
+				break;
 		}
 	}
 

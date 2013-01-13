@@ -27,6 +27,7 @@ import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,20 +36,27 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import workbench.db.ColumnIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.exporter.ExportType;
-import workbench.db.exporter.PoiHelper;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ColumnSelectorPanel;
-import workbench.gui.components.DividerBorder;
+
 import workbench.interfaces.EncodingSelector;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
+import workbench.db.exporter.ExportType;
+import workbench.db.exporter.PoiHelper;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ColumnSelectorPanel;
+import workbench.gui.components.DividerBorder;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+
 import workbench.util.SqlUtil;
+
+import static workbench.db.exporter.ExportType.ODS;
 
 /**
  *
@@ -121,6 +129,7 @@ public class ExportOptionsPanel
 		typeSelector.addItem("Text");
 		typeSelector.addItem("SQL");
 		typeSelector.addItem("XML");
+		typeSelector.addItem("JSON");
 		typeSelector.addItem(ODS_ITEM);
 		typeSelector.addItem("HTML");
 		if (poiAvailable)
@@ -160,6 +169,8 @@ public class ExportOptionsPanel
 
 		xlsmOptions = new SpreadSheetOptionsPanel("xlsm");
 		this.typePanel.add(xlsmOptions, "xlsm");
+
+		this.typePanel.add(new JPanel(), "empty");
 
 		if (poiAvailable)
 		{
@@ -298,6 +309,9 @@ public class ExportOptionsPanel
 			case ODS:
 				setTypeOds();
 				break;
+			case JSON:
+				setTypeJson();
+				break;
 			case XLSM:
 				setTypeXlsM();
 				break;
@@ -351,6 +365,11 @@ public class ExportOptionsPanel
 		typeSelector.setSelectedItem("XML");
 	}
 
+	private void showEmptyOptions()
+	{
+		this.card.show(this.typePanel, "empty");
+	}
+
 	private void showHtmlOptions()
 	{
 		this.card.show(this.typePanel, "html");
@@ -402,6 +421,13 @@ public class ExportOptionsPanel
 		showXlsXOptions();
 		this.currentType = ExportType.XLSX;
 		typeSelector.setSelectedItem(XLSX_ITEM);
+	}
+
+	public void setTypeJson()
+	{
+		this.card.show(this.typePanel, "empty");
+		this.currentType = ExportType.JSON;
+		typeSelector.setSelectedItem("JSON");
 	}
 
 	public void setTypeXlsM()
@@ -518,6 +544,11 @@ public class ExportOptionsPanel
 			{
 				type = ExportType.HTML;
 				showHtmlOptions();
+			}
+			else if ("json".equalsIgnoreCase(itemValue))
+			{
+				type = ExportType.JSON;
+				showEmptyOptions();
 			}
 
 			this.currentType = type;
