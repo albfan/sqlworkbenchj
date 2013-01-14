@@ -39,6 +39,7 @@ public class SetColumnWidthAction extends WbAction
 		this.setMenuTextByKey("MnuTxtSetColWidth");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		e.setSource(this);
