@@ -27,17 +27,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -638,7 +635,7 @@ public class TableSourceBuilder
 
 		DbMetadata meta = dbConnection.getMetadata();
 
-		PkTemplate pkTmpl = new PkTemplate(dbConnection.getDbId(), forInlineUse);
+		PkTemplate pkTmpl = new PkTemplate(dbConnection, forInlineUse);
 		String template = pkTmpl.getSQLTemplate();
 
 		if (StringUtil.isEmptyString(template)) return StringUtil.EMPTY_STRING;
@@ -669,7 +666,8 @@ public class TableSourceBuilder
 		}
 
 		pkName = SqlUtil.quoteObjectname(pkName, false, true, meta.getQuoteCharacter().charAt(0));
-		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
+		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
+		template = StringUtil.replace(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
 		result.append(template);
 		if (!forInlineUse)
 		{

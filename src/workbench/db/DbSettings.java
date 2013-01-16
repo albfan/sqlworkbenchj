@@ -30,16 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-
-import workbench.gui.dbobjects.TableSearchPanel;
-
+import workbench.sql.commands.SingleVerbCommand;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
-
-import workbench.sql.commands.SingleVerbCommand;
-
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -1287,8 +1283,18 @@ public class DbSettings
 	 */
 	public String getAddPK(String type)
 	{
+		return getAddPK(type, false);
+	}
+
+	public String getAddPK(String type, boolean checkDefault)
+	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
+		String sql = Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
+		if (sql == null && checkDefault)
+		{
+			Settings.getInstance().getProperty("workbench.db.sql.alter." + type.trim().toLowerCase() + ".add.pk", null);
+		}
+		return sql;
 	}
 
 	/**

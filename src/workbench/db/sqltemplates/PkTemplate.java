@@ -22,6 +22,8 @@
  */
 package workbench.db.sqltemplates;
 
+import workbench.db.WbConnection;
+
 /**
  *
  * @author Thomas Kellerer
@@ -29,24 +31,19 @@ package workbench.db.sqltemplates;
 public class PkTemplate
 	extends TemplateHandler
 {
-	private final String defaultSQL =
-		"ALTER TABLE %table_name%\n" +
-		"   ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)";
-
-	private final String defaultInlineSQL =
-		"CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)";
+	private final String defaultInlineSQL =	"CONSTRAINT %constraint_name% PRIMARY KEY (%columnlist%)";
 
 	private String sql;
 
-	public PkTemplate(String dbid, boolean forInlineUse)
+	public PkTemplate(WbConnection conn, boolean forInlineUse)
 	{
 		if (forInlineUse)
 		{
-			this.sql = getStringProperty("workbench.db." + dbid + ".pk.inline.sql", defaultInlineSQL);
+			this.sql = getStringProperty("workbench.db." + conn.getDbId() + ".pk.inline.sql", defaultInlineSQL);
 		}
 		else
 		{
-			this.sql = getStringProperty("workbench.db." + dbid + ".pk.sql", defaultSQL);
+			sql = conn.getDbSettings().getAddPK("table", true);
 		}
 	}
 
