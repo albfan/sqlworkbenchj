@@ -26,8 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.ConstraintDefinition;
 
+import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
@@ -58,7 +58,7 @@ public class SqlServerUniqueConstraintReader
 			"from sys.indexes ind with (nolock) \n" +
 			"  join sys.objects obj with (nolock) on ind.object_id = obj.object_id \n" +
 			"  join sys.schemas sch with (nolock) on sch.schema_id = obj.schema_id \n" +
-			"  join sys.key_constraints cons with (nolock) on cons.unique_index_id  = ind.index_id \n" +
+			"  join sys.key_constraints cons with (nolock) on ind.object_id = cons.parent_object_id and ind.index_id = cons.unique_index_id \n" +
 			"where is_unique = 1  \n" +
 			"and is_unique_constraint = 1 \n" +
 			"and (");
