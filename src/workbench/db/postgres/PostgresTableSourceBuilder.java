@@ -30,6 +30,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
+
 import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -352,8 +353,9 @@ public class PostgresTableSourceBuilder
 			stmt = dbConnection.createStatementForQuery();
 			for (ColumnIdentifier col : columns)
 			{
-				// for serial types the sequence is already shown in the default clause
-				if (col.getDbmsType().equals("serial")) continue;
+				String defaultValue = col.getDefaultValue();
+				// if the default value is shown as nextval, the sequence name is already visible
+				if (defaultValue != null && defaultValue.toLowerCase().startsWith("nextval")) continue;
 				String colname = StringUtil.trimQuotes(col.getColumnName());
 				rs = stmt.executeQuery("select pg_get_serial_sequence('" + tblname + "', '" + colname + "')");
 				if (rs.next())
