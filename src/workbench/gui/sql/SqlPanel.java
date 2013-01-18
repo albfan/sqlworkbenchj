@@ -54,6 +54,29 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import workbench.WbManager;
+import workbench.interfaces.Commitable;
+import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.DbExecutionNotifier;
+import workbench.interfaces.DbUpdater;
+import workbench.interfaces.ExecutionController;
+import workbench.interfaces.Exporter;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Moveable;
+import workbench.interfaces.ParameterPrompter;
+import workbench.interfaces.ResultLogger;
+import workbench.interfaces.ResultReceiver;
+import workbench.interfaces.StatusBar;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbSettings;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
@@ -155,6 +178,7 @@ import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 
 import workbench.storage.DataStore;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
@@ -166,7 +190,9 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
 import workbench.util.DurationFormatter;
+import workbench.util.EventNotifier;
 import workbench.util.ExceptionUtil;
+import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
@@ -176,32 +202,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
-
-import workbench.WbManager;
-import workbench.interfaces.Commitable;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.DbExecutionNotifier;
-import workbench.interfaces.DbUpdater;
-import workbench.interfaces.ExecutionController;
-import workbench.interfaces.Exporter;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Moveable;
-import workbench.interfaces.ParameterPrompter;
-import workbench.interfaces.ResultLogger;
-import workbench.interfaces.ResultReceiver;
-import workbench.interfaces.StatusBar;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
-import workbench.util.EventNotifier;
-import workbench.util.HtmlUtil;
 
 
 /**
@@ -2570,7 +2570,7 @@ public class SqlPanel
 						{
 							DwPanel panel = (DwPanel)c;
 							panel.removePropertyChangeListener(SqlPanel.this);
-							panel.clearContent();
+							panel.dispose();
 							resultTab.removeTabAt(index);
 						}
 						else
@@ -2601,7 +2601,7 @@ public class SqlPanel
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 			panel.removePropertyChangeListener(SqlPanel.this);
-			panel.clearContent();
+			panel.dispose();
 
 			resultTab.removeTabAt(index);
 			currentData = null;
@@ -2663,7 +2663,7 @@ public class SqlPanel
 						{
 							DwPanel panel = (DwPanel)c;
 							panel.removePropertyChangeListener(SqlPanel.this);
-							panel.clearContent();
+							panel.dispose();
 						}
 						resultTab.removeTabAt(0);
 					}
@@ -3337,6 +3337,7 @@ public class SqlPanel
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		data.setConnection(dbConnection);
 		data.setUpdateHandler(this);
+		data.setSqlInfoEnabled(true);
 
 		if (enableNavigation)
 		{
@@ -3408,8 +3409,8 @@ public class SqlPanel
 		final int newIndex = addResultTab(p);
 		if (newIndex > 0)
 		{
-			WbSwingUtilities.invokeLater(new Runnable() {
-
+			WbSwingUtilities.invokeLater(new Runnable()
+			{
 				@Override
 				public void run()
 				{
@@ -3741,7 +3742,7 @@ public class SqlPanel
 		setLocked(false);
 		clearLog();
 		clearResultTabs();
-		if (this.currentData != null) this.currentData.clearContent();
+		if (this.currentData != null) this.currentData.dispose();
 		currentData = null;
 		iconHandler.flush();
 		if (sqlHistory != null) sqlHistory.clear();

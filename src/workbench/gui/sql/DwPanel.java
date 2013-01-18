@@ -35,11 +35,16 @@ import java.util.List;
 
 import javax.swing.CellEditor;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -51,10 +56,21 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.WbManager;
+import workbench.interfaces.DbData;
+import workbench.interfaces.DbUpdater;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.StatusBar;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
@@ -69,31 +85,25 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TableRowHeader;
+import workbench.gui.components.UpdateTableSelector;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.DbData;
-import workbench.interfaces.DbUpdater;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.StatusBar;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
-import workbench.gui.components.UpdateTableSelector;
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -141,6 +151,8 @@ public class DwPanel
 	private ReferenceTableNavigator referenceNavigator;
 	private ImageIcon warningIcon;
 	private boolean showSQLAsTooltip;
+	private JLabel sqlInfo;
+	private boolean enableSqlInfo;
 
 	public DwPanel()
 	{
@@ -174,7 +186,23 @@ public class DwPanel
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setStatusBar(this.statusBar);
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SHOW_RESULT_SQL);
 		initColors();
+	}
+
+	public void dispose()
+	{
+		clearContent();
+		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
+	public void setSqlInfoEnabled(boolean flag)
+	{
+		this.enableSqlInfo = flag;
+		if (!enableSqlInfo)
+		{
+			hideSQLInfo();
+		}
 	}
 
 	private void initColors()
@@ -833,6 +861,10 @@ public class DwPanel
 					{
 						TableRowHeader.showRowHeader(dataTable);
 					}
+					if (enableSqlInfo && GuiSettings.getShowResultSQL())
+					{
+						showSQLInfo();
+					}
 				}
 			});
 		}
@@ -920,6 +952,10 @@ public class DwPanel
 		tip += "(" + msg + ")<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
+		if (sqlInfo != null)
+		{
+			sqlInfo.setToolTipText(tip);
+		}
 	}
 
 	public void checkLimitReachedDisplay()
@@ -1214,6 +1250,41 @@ public class DwPanel
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.dataTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.dataTable.setAdjustToColumnLabel(true);
+	}
+
+	public void hideSQLInfo()
+	{
+		if (sqlInfo != null)
+		{
+			this.remove(sqlInfo);
+			sqlInfo = null;
+		}
+	}
+
+	public void showSQLInfo()
+	{
+		if (sqlInfo == null)
+		{
+			this.sqlInfo = new JLabel("");
+			Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1,1,1,1));
+			b = new CompoundBorder(new EmptyBorder(2,1,5,1), b);
+			this.sqlInfo.setBorder(b);
+			this.add(sqlInfo, BorderLayout.NORTH);
+		}
+		sqlInfo.setText(SqlUtil.makeCleanSql(sql == null ? "" : sql, false, false));
+	}
+
+	private void updateSqlInfoTooltip()
+	{
+		JTabbedPane tab = getTabParent();
+		int index = getTabIndex(tab);
+		if (index == -1) return;
+
+		String tip = tab.getToolTipTextAt(index);
+		if (sqlInfo != null)
+		{
+			sqlInfo.setToolTipText(tip);
+		}
 	}
 
 	public void updateStatusBar()
@@ -1609,6 +1680,18 @@ public class DwPanel
 		if (evt.getPropertyName().equals(WbConnection.PROP_READONLY) && evt.getSource() == this.dbConnection)
 		{
 			setReadOnly(this.dbConnection.isSessionReadOnly());
+		}
+		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_SHOW_RESULT_SQL))
+		{
+			if (GuiSettings.getShowResultSQL())
+			{
+				showSQLInfo();
+				updateSqlInfoTooltip();
+			}
+			else
+			{
+				hideSQLInfo();
+			}
 		}
 	}
 

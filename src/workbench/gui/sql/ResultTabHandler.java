@@ -25,16 +25,20 @@ package workbench.gui.sql;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseOtherResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
-import workbench.gui.actions.SqlPanelReloadAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowSourceQueryAction;
-import workbench.resource.ResourceMgr;
+import workbench.gui.actions.SqlPanelReloadAction;
+
 import workbench.util.StringUtil;
 
 /**

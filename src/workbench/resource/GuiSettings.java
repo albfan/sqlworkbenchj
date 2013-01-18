@@ -49,6 +49,7 @@ public class GuiSettings
 	public static final String PROPERTY_SMART_COMPLETE = "workbench.editor.smartcomplete";
 	public static final String PROPERTY_EXPAND_KEYSTROKE = "workbench.editor.expand.macro.key";
 	public static final String PROPERTY_EXPAND_MAXDURATION = "workbench.editor.expand.maxduration";
+	public static final String PROPERTY_SHOW_RESULT_SQL = "workbench.gui.display.result.sql";
 
 	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
 	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
@@ -58,6 +59,7 @@ public class GuiSettings
 	public static final String PROP_TITLE_SHOW_EDITOR_FILE = "workbench.gui.display.showfilename";
 	public static final String PROP_TITLE_GROUP_SEP = "workbench.gui.display.titlegroupsep";
 	public static final String PROP_TITLE_GROUP_BRACKET = "workbench.gui.display.titlegroupbracket";
+
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
@@ -83,6 +85,16 @@ public class GuiSettings
 		int code = key.getKeyCode();
 		int modifier = key.getModifiers();
 		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
+	}
+
+	public static boolean getShowResultSQL()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_SHOW_RESULT_SQL, true);
+	}
+
+	public static void setShowResultSQL(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_SHOW_RESULT_SQL, flag);
 	}
 
 	public static boolean getHighlightErrorStatement()

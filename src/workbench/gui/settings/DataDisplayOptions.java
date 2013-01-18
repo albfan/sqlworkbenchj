@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 import javax.swing.JPanel;
+
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
@@ -81,6 +82,7 @@ public class DataDisplayOptions
 		showRowNumbers.setSelected(GuiSettings.getShowTableRowNumbers());
 		showMaxRowsWarn.setSelected(GuiSettings.getShowMaxRowsReached());
 		nullString.setText(GuiSettings.getDisplayNullString());
+		showGeneratingSQL.setSelected(GuiSettings.getShowResultSQL());
 		fillLanguageDropDown();
 	}
 
@@ -103,7 +105,7 @@ public class DataDisplayOptions
 		GuiSettings.setShowTableRowNumbers(showRowNumbers.isSelected());
 		GuiSettings.setShowMaxRowsReached(showMaxRowsWarn.isSelected());
 		GuiSettings.setDisplayNullString(nullString.getText());
-
+		GuiSettings.setShowResultSQL(showGeneratingSQL.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
 	}
@@ -192,6 +194,7 @@ public class DataDisplayOptions
     defMaxRows = new javax.swing.JTextField();
     showRowNumbers = new javax.swing.JCheckBox();
     showMaxRowsWarn = new javax.swing.JCheckBox();
+    showGeneratingSQL = new javax.swing.JCheckBox();
     nullStringLabel = new javax.swing.JLabel();
     nullString = new javax.swing.JTextField();
     colWidthPanel = new javax.swing.JPanel();
@@ -318,6 +321,16 @@ public class DataDisplayOptions
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 25, 0, 0);
     generalPanel.add(showMaxRowsWarn, gridBagConstraints);
+
+    showGeneratingSQL.setText(ResourceMgr.getString("LblShowGenSQL")); // NOI18N
+    showGeneratingSQL.setToolTipText(ResourceMgr.getString("d_LblShowGenSQL")); // NOI18N
+    showGeneratingSQL.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
+    generalPanel.add(showGeneratingSQL, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -531,6 +544,7 @@ public class DataDisplayOptions
   private javax.swing.JPanel rowHeightPanel;
   private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JCheckBox selectSummary;
+  private javax.swing.JCheckBox showGeneratingSQL;
   private javax.swing.JCheckBox showMaxRowsWarn;
   private javax.swing.JCheckBox showRowNumbers;
   // End of variables declaration//GEN-END:variables

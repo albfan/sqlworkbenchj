@@ -25,20 +25,22 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import workbench.db.WbConnection;
+
 import workbench.resource.ResourceMgr;
 
+import workbench.db.WbConnection;
+
 /**
- * An action to toggle the auto commit attribute of the 
+ * An action to toggle the auto commit attribute of the
  * given {@link workbench.db.WbConnection}
  * @author  Thomas Kellerer
  */
-public class ToggleAutoCommitAction 
+public class ToggleAutoCommitAction
 	extends CheckBoxAction
 	implements PropertyChangeListener
 {
 	private WbConnection connection;
-	
+
 	public ToggleAutoCommitAction()
 	{
 		super("MnuTxtToggleAutoCommit", null);
@@ -58,10 +60,11 @@ public class ToggleAutoCommitAction
 		}
 		this.checkState();
 	}
-	
+
+	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (this.connection != null && this.isEnabled()) 
+		if (this.connection != null && this.isEnabled())
 		{
 			this.connection.toggleAutoCommit();
 			checkState();
@@ -81,11 +84,12 @@ public class ToggleAutoCommitAction
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.connection && WbConnection.PROP_AUTOCOMMIT.equals(evt.getPropertyName()))
 		{
 			this.checkState();
-		}		
+		}
 	}
 }
