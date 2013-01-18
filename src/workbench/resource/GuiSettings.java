@@ -89,7 +89,7 @@ public class GuiSettings
 
 	public static boolean getShowResultSQL()
 	{
-		return Settings.getInstance().getBoolProperty(PROPERTY_SHOW_RESULT_SQL, true);
+		return Settings.getInstance().getBoolProperty(PROPERTY_SHOW_RESULT_SQL, false);
 	}
 
 	public static void setShowResultSQL(boolean flag)
