@@ -1783,7 +1783,7 @@ WbSysOpen c:/temp/person.txt;</programlisting>
 		<para>
 			After running <literal>ENABLEOUT</literal> the <literal>DBMS_OUTPUT</literal> package is enabled,
 			and any message written with <literal>dbms_output.put_line()</literal> is displayed in the message
-			pane after executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
+			panel after executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
     </para>
 
     <para>
