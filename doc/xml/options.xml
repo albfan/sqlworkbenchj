@@ -676,6 +676,14 @@
 			</para>
 		</section>
 
+		<section id="options-show-generating-sql">
+			<title>Show row numbers</title>
+			<para>
+        If this option is enabled, the SQL that produced a result set is shown directly above the data inside
+        each result tab.
+			</para>
+		</section>
+
 		<section id="options-null-value-literal">
 			<title><literal>NULL</literal> string</title>
 			<para>

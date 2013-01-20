@@ -25,15 +25,18 @@ package workbench.db.mysql;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
+
 import workbench.util.StringUtil;
+
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -117,9 +120,9 @@ public class MySQLTableSourceBuilderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
 
 		String create = tbl.getSource(con).toString();
-		System.out.println(create);
+//		System.out.println(create);
 		String[] lines = create.trim().split("\n");
-		assertEquals(9, lines.length);
+		assertEquals(10, lines.length);
 		assertEquals("CREATE TABLE foo", lines[0]);
 		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar'", lines[3]);
 	}
