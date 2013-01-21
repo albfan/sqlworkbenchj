@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-01-08">
+  <release build="114" date="2013-01-21">
     <entry dev-build="13" type="enh">It's now possible to (permanently) display the SQL that generated a result right above the result's data</entry>
     <entry dev-build="13" type="enh">WbExport can now export JSON as well.</entry>
     <entry dev-build="12" type="enh">The licenses for SQL Workbench/J has been changed to an Apache 2.0 license</entry>

@@ -342,7 +342,6 @@ WHERE id=42;</p>
             <li><source-link/></li>
         </ul>
 
-        <!--
         <p>
           If you want to import or export Microsoft Excel files (XLS, XLSX) or import OpenOffice Calc documents, download the packages
           that include the office libraries (approx. 18MB).
@@ -357,7 +356,6 @@ WHERE id=42;</p>
            If you have copied the jar files for the Excel support before, please delete all existing ones before extracting the
            archive as some of the library names have changed.
         </p>
-        -->
 
         <p style="margin-top:25px">
           Older versions can be downloaded from the <a href="download-archive.html">download archive</a>
@@ -411,6 +409,13 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 113<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build113.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build113-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build113.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 112<br/>
           <ul>
             <li><a href="archive/Workbench-Build112.zip">All Platforms</a></li>
