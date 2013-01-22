@@ -661,13 +661,17 @@ public class TableSourceBuilder
 
 		if (StringUtil.isEmptyString(pkName))
 		{
-			pkName = ""; // remove placeholder if no name is available
+			template = TemplateHandler.removePlaceholder(template, "CONSTRAINT " + MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, true);
+			template = TemplateHandler.removePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, true);
 			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if no name is available
 		}
+		else
+		{
+			pkName = SqlUtil.quoteObjectname(pkName, false, true, meta.getQuoteCharacter().charAt(0));
+			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
+			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
+		}
 
-		pkName = SqlUtil.quoteObjectname(pkName, false, true, meta.getQuoteCharacter().charAt(0));
-		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
-		template = StringUtil.replace(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
 		result.append(template);
 		if (!forInlineUse)
 		{
