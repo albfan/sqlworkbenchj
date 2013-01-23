@@ -24,7 +24,9 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -377,7 +379,7 @@ public class TableIdentifier
 		DbMetadata meta = conn.getMetadata();
 		if (meta.needSchemaInDML(this))
 		{
-			if (this.schema != null) return this.schema;
+			if (this.schema != null) return this.schema.trim();
 			return meta.getSchemaToUse();
 		}
 		return null;
@@ -396,7 +398,7 @@ public class TableIdentifier
 
 			if (meta.ignoreCatalog(catalogToUse)) return null;
 
-			return catalogToUse;
+			return catalogToUse.trim();
 		}
 		return null;
 	}

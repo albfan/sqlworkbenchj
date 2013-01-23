@@ -28,7 +28,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import workbench.log.LogMgr;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -218,12 +220,14 @@ public class DefaultFKHandler
 			int deleteActionCol = 10;
 			int updateActionCol = 9;
 			int schemaCol;
+			int catalogCol;
 
 			if (getOwnFk)
 			{
 				rawList = getRawKeyList(tbl, false);
 				tableCol = 2;
 				schemaCol = 1;
+				catalogCol = 0;
 				fkNameCol = 11;
 				colCol = 7;
 				fkColCol = 3;
@@ -233,23 +237,25 @@ public class DefaultFKHandler
 				rawList = getRawKeyList(tbl, true);
 				tableCol = 6;
 				schemaCol = 5;
+				catalogCol = 4;
 				fkNameCol = 11;
 				colCol = 3;
 				fkColCol = 7;
 			}
 
-			String currentSchema = dbConnection.getMetadata().getCurrentSchema();
 			for (int rawRow = 0; rawRow < rawList.getRowCount(); rawRow ++)
 			{
-				String table = rawList.getValueAsString(rawRow, tableCol);
+				String tname = rawList.getValueAsString(rawRow, tableCol);
+				String schema = rawList.getValueAsString(rawRow, schemaCol);
+				String catalog = rawList.getValueAsString(rawRow, catalogCol);
+				TableIdentifier tid = new TableIdentifier(catalog, schema, tname, false);
+				tid.setNeverAdjustCase(true);
+				String tableName = tid.getTableExpression(dbConnection);
+
 				String fk_col = rawList.getValueAsString(rawRow, fkColCol);
 				String col = rawList.getValueAsString(rawRow, colCol);
 				String fk_name = rawList.getValueAsString(rawRow, fkNameCol);
-				String schema = rawList.getValueAsString(rawRow, schemaCol);
-				if (!this.dbConnection.getMetadata().ignoreSchema(schema, currentSchema))
-				{
-					table = schema.trim() + "." + table.trim();
-				}
+
 				int updateAction = rawList.getValueAsInt(rawRow, updateActionCol, DatabaseMetaData.importedKeyNoAction);
 				String updActionDesc = dbSettings.getRuleDisplay(updateAction);
 				int deleteAction = rawList.getValueAsInt(rawRow, deleteActionCol, DatabaseMetaData.importedKeyNoAction);
@@ -261,7 +267,7 @@ public class DefaultFKHandler
 				int row = ds.addRow();
 				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name.trim());
 				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col.trim());
-				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, table + "." + fk_col);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, tableName + "." + fk_col);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE, updActionDesc);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE, delActionDesc);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE, deferrable);
