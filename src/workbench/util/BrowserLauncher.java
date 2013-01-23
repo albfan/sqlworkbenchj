@@ -23,9 +23,13 @@
 package workbench.util;
 
 import java.awt.Desktop;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 /**
  * A Wrapper around Desktop.browse()
@@ -45,7 +49,7 @@ public class BrowserLauncher
 				{
 					try
 					{
-						URI uri = new URI("mailto:" + email);
+						URI uri = new URI("mailto:" + email + "?subject=" + urlEncode("SQL Workbench/J " + ResourceMgr.getBuildInfo()+ " - feedback"));
 						Desktop.getDesktop().mail(uri);
 					}
 					catch (Exception e)
@@ -61,6 +65,18 @@ public class BrowserLauncher
 		{
 			LogMgr.logError("BrowserLauncher.openEmail()", "Desktop not supported!", null);
 			WbSwingUtilities.showErrorMessage("Desktop not supported by your Java version");
+		}
+	}
+
+	private static String urlEncode(String str)
+	{
+		try
+		{
+			return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException(e);
 		}
 	}
 
