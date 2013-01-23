@@ -49,7 +49,7 @@ public class BrowserLauncher
 				{
 					try
 					{
-						URI uri = new URI("mailto:" + email + "?subject=" + urlEncode("SQL Workbench/J " + ResourceMgr.getBuildInfo()+ " - feedback"));
+						URI uri = new URI("mailto:" + email + "?subject=" + urlEncode("SQL Workbench/J (Build " + ResourceMgr.getBuildNumber()+ ") - feedback"));
 						Desktop.getDesktop().mail(uri);
 					}
 					catch (Exception e)
