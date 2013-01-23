@@ -26,6 +26,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
@@ -220,7 +221,6 @@ public class DefaultFKHandler
 
 			if (getOwnFk)
 			{
-				//rs = meta.getImportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 				rawList = getRawKeyList(tbl, false);
 				tableCol = 2;
 				schemaCol = 1;
@@ -230,7 +230,6 @@ public class DefaultFKHandler
 			}
 			else
 			{
-				//rs = meta.getExportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 				rawList = getRawKeyList(tbl, true);
 				tableCol = 6;
 				schemaCol = 5;
@@ -249,7 +248,7 @@ public class DefaultFKHandler
 				String schema = rawList.getValueAsString(rawRow, schemaCol);
 				if (!this.dbConnection.getMetadata().ignoreSchema(schema, currentSchema))
 				{
-					table = schema + "." + table;
+					table = schema.trim() + "." + table.trim();
 				}
 				int updateAction = rawList.getValueAsInt(rawRow, updateActionCol, DatabaseMetaData.importedKeyNoAction);
 				String updActionDesc = dbSettings.getRuleDisplay(updateAction);
@@ -260,8 +259,8 @@ public class DefaultFKHandler
 				String deferrable = dbSettings.getRuleDisplay(deferrableCode);
 
 				int row = ds.addRow();
-				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name.trim());
+				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col.trim());
 				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, table + "." + fk_col);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE, updActionDesc);
 				ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE, delActionDesc);
