@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.h2database.H2ColumnEnhancer;
@@ -121,7 +122,9 @@ public class JdbcTableDefinitionReader
 				String colName = StringUtil.trim(rs.getString("COLUMN_NAME"));
 				int sqlType = rs.getInt("DATA_TYPE");
 				String typeName = rs.getString("TYPE_NAME");
-				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), typeResolver.fixColumnType(sqlType, typeName));
+
+				sqlType = typeResolver.fixColumnType(sqlType, typeName);
+				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), sqlType);
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = -1;

@@ -109,7 +109,38 @@ public class SqlServerDataTypeResolver
 			}
 			return "binary(" + Integer.toString(size) + ")";
 		}
+
+		if (sqlType == Types.TIME && digits > 0)
+		{
+			return "time(" + digits + ")";
+		}
 		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
+	/**
+	 * Fix a bug in jTDS that reports a date or time column as Types.VARCHAR.
+	 *
+	 * @param type the java.sql.Types as returned from the driver
+	 * @param dbmsType the DBMS data type as returned from the driver
+	 *
+	 * @return the correct Types.XXX value for the dbmsType
+	 */
+	@Override
+	public int fixColumnType(int type, String dbmsType)
+	{
+		if (type == Types.VARCHAR)
+		{
+			// Fix the jTDS bug that reports a date or time column as VARCHAR
+			// no check for the driver is done as these combinations will not show up with the Microsoft Driver
+			if ("date".equalsIgnoreCase(dbmsType))
+			{
+				return Types.DATE;
+			}
+			if ("time".equalsIgnoreCase(dbmsType))
+			{
+				return Types.TIME;
+			}
+		}
+		return type;
+	}
 }
