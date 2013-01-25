@@ -22,9 +22,10 @@
  */
 package workbench.db.oracle;
 
-import org.junit.Test;
-import workbench.WbTestCase;
 import static org.junit.Assert.*;
+import org.junit.Test;
+
+import workbench.WbTestCase;
 
 /**
  *
@@ -63,6 +64,12 @@ public class OracleStatementHookTest
 		expResult = "select /*+ gather_plan_statistics */ /* do stuff */ * from foo";
 		result = hook.injectHint(sql);
 		assertEquals(expResult, result);
+
+		sql = "select /*+ gather_plan_statistics */ * from foo";
+		expResult = "select /*+ gather_plan_statistics */ * from foo";
+		result = hook.injectHint(sql);
+		assertEquals(expResult, result);
+
 	}
 
 }

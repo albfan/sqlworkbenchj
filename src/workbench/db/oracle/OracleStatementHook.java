@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -253,7 +254,7 @@ public class OracleStatementHook
 		{
 			// if statistics should be displayed we have to get the execution plan
 			// after retrieving the statistics. In that case we must make the SQL "identifiable" using the prefix
-			return getIDPrefix() + " " + sql;
+			return getIDPrefix() + "\n" + sql;
 		}
 
 		// if no statistics are required we can use dbms_xplan() without parameters to get the plan
@@ -297,7 +298,7 @@ public class OracleStatementHook
 			// no comment with a hint found
 			sql = sql.substring(0, pos) + " /*+ gather_plan_statistics */ " + sql.substring(pos + 1);
 		}
-		else
+		else if (sql.indexOf("gather_plan_statistics", pos) < 0)
 		{
 			sql = sql.substring(0, pos + 3) + " gather_plan_statistics " + sql.substring(pos + 3);
 		}
@@ -314,7 +315,7 @@ public class OracleStatementHook
 		{
 			return "";
 		}
-		return "/* wb$" + lastExplainID + " */";
+		return "-- wb$" + lastExplainID;
 	}
 
 	private void storeSessionStats(StatementRunner runner)
