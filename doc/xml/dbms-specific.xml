@@ -113,6 +113,14 @@
        </section>
      </section>
 
+     <section id="oracle-show">
+       <indexterm><primary>Oracle</primary><secondary>show system information</secondary></indexterm>
+       <title>Using SQL*Plus' SHOW command</title>
+       <para>
+         ...
+       </para>
+     </section>
+
   </section>
 
 </section>

@@ -32,23 +32,20 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
+import workbench.db.datacopy.DropType;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.TableDependencySorter;
 import workbench.db.importer.TableStatements;
-
-import workbench.storage.RowActionMonitor;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
-
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -67,7 +64,7 @@ class SchemaCopy
 	private DataCopier copier;
 	private boolean success;
 	private String createTableType;
-	private boolean dropTable;
+	private DropType dropTable;
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
 	private boolean useSavepoint;
@@ -352,7 +349,7 @@ class SchemaCopy
 			createTableType = null;
 		}
 
-		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
+		dropTable = CommonArgs.getDropType(cmdLine);
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 		skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 

@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import workbench.AppArguments;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
@@ -33,9 +34,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.resource.ResourceMgr;
-
+import workbench.db.datacopy.DropType;
 import workbench.db.importer.TableStatements;
+import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
@@ -76,7 +77,7 @@ class TableCopy
 		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
-		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
+		DropType dropType = CommonArgs.getDropType(cmdLine);
 		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
@@ -137,7 +138,7 @@ class TableCopy
 			{
 				throw new TableNotFoundException(targettable);
 			}
-			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError, skipTargetCheck);
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropType, ignoreDropError, skipTargetCheck);
 		}
 		else
 		{
@@ -160,7 +161,7 @@ class TableCopy
 					queryCols.get(i).setColumnAlias(null);
 				}
 			}
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError, skipTargetCheck);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropType, ignoreDropError, skipTargetCheck);
 		}
 
 		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());

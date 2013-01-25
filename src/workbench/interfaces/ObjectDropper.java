@@ -24,6 +24,7 @@ package workbench.interfaces;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -41,17 +42,17 @@ public interface ObjectDropper
 	void setConnection(WbConnection con);
 	WbConnection getConnection();
 	void setObjectTable(TableIdentifier tbl);
-	
+
 	void setObjects(List<? extends DbObject> objects);
 	List<? extends DbObject> getObjects();
-	
+
 	void dropObjects()
 		throws SQLException;
-	
+
 	void cancel()
 		throws SQLException;
-	
+
 	void setRowActionMonitor(RowActionMonitor monitor);
-	
+
 	CharSequence getScript();
 }

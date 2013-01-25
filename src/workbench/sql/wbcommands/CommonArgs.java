@@ -23,6 +23,8 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
+
+import workbench.db.datacopy.DropType;
 import workbench.db.importer.DeleteType;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
@@ -332,4 +334,21 @@ public class CommonArgs
 		return converter;
 	}
 
+	public static DropType getDropType(ArgumentParser cmdLine)
+	{
+		String drop = cmdLine.getValue(WbCopy.PARAM_DROPTARGET, null);
+		DropType dropType = DropType.none;
+		if (drop != null)
+		{
+			if (drop.startsWith("cascade"))
+			{
+				dropType = DropType.cascaded;
+			}
+			else if (StringUtil.stringToBool(drop))
+			{
+				dropType = DropType.regular;
+			}
+		}
+		return dropType;
+	}
 }

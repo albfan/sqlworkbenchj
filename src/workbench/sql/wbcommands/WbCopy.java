@@ -24,6 +24,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -33,13 +34,14 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
-import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -118,7 +120,7 @@ public class WbCopy
 		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_KEYS);
-		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_DROPTARGET, CollectionUtil.arrayList("false", "true", "cascade"));
 		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolArgument);
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);

@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -57,29 +58,27 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
-import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.datacopy.DataCopier;
+import workbench.db.datacopy.DropType;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.ProducerFactory;
-import workbench.gui.actions.AutoCompletionAction;
-import workbench.gui.components.RunningJobIndicator;
-import workbench.interfaces.StatusBar;
-import workbench.sql.wbcommands.CommandTester;
-import workbench.sql.wbcommands.CommonArgs;
-import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
@@ -87,12 +86,16 @@ import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.help.HelpManager;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.wbcommands.CommandTester;
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.storage.RowActionMonitor;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -1946,7 +1949,11 @@ public class DataPumper
 
 		if (!this.createCopier()) return;
 
-		boolean dropTarget = dropTargetCbx.isSelected();
+		DropType dropTarget = DropType.none;
+		if (dropTargetCbx.isSelected())
+		{
+			dropTarget = DropType.regular;
+		}
 		boolean ignoreDrop = ignoreDropError.isSelected();
 
 		try

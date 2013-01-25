@@ -194,7 +194,7 @@ public class DataCopier
 														Map<String, String> columnMapping,
 														String additionalWhere,
 														String createTableType,
-														boolean dropTable,
+														DropType dropTable,
 														boolean ignoreDropError,
 														boolean skipTargetCheck)
 		throws SQLException
@@ -242,10 +242,10 @@ public class DataCopier
 		return realTable;
 	}
 
-	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType, boolean skipTargetCheck)
+	private void createTable(Collection<ColumnIdentifier> columns, DropType dropIfExists, boolean ignoreError, String createType, boolean skipTargetCheck)
 		throws SQLException
 	{
-		if (dropIfExists)
+		if (dropIfExists == DropType.cascaded || dropIfExists == DropType.regular)
 		{
 			TableIdentifier toDrop = null;
 			if (skipTargetCheck)
@@ -265,6 +265,7 @@ public class DataCopier
 				{
 					ObjectDropper dropper = new GenericObjectDropper();
 					dropper.setObjects(Collections.singletonList(toDrop));
+					dropper.setCascade(dropIfExists == DropType.cascaded);
 					dropper.setConnection(targetConnection);
 					dropper.dropObjects();
 					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
@@ -396,7 +397,7 @@ public class DataCopier
 														TableIdentifier aTargetTable,
 														List<ColumnIdentifier> queryColumns,
 														String createTableType,
-														boolean dropTarget,
+														DropType dropTarget,
 														boolean ignoreDropError,
 														boolean skipTargetCheck)
 		throws SQLException
