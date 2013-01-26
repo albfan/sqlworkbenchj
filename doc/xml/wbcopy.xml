@@ -371,8 +371,16 @@
 					<row>
 						<entry>-dropTarget</entry>
 						<entry>
-							If this parameter is set to <literal>true</literal> the target table
-							will be dropped before it is created.
+              <para>Possible values: <literal>false</literal>, <literal>true</literal>, <literal>cascade</literal></para>
+              <para>
+                If this parameter is set to <literal>true</literal> the target table
+                will be dropped before it is created.
+              </para>
+              <para>
+                For database systems that support it (Oracle, PostgreSQL), a <literal>DROP ... CASCADE</literal>
+                is used when the value <literal>cascade</literal> is specified. If the DBMS does not support
+                cascading drops, this is the same as specifying <literal>true</literal>.
+              </para>
 						</entry>
 					</row>
 
