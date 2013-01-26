@@ -317,6 +317,7 @@
                   This feature is not intended (nor suitable) to synchonize the schema of two databases and should not be considered
                   as a replacement of a proper schema (script) management. If you have the requirement to
                   keep the schema definition of different DBMS in sync please consider a tool like <ulink url="http://liquibase.org/">Liquibase</ulink>
+                  or <ulink url="http://flywaydb.org/">Flyway</ulink>
                 </para>
               </important>
 							<para>

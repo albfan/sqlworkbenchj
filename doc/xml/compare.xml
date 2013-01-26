@@ -27,6 +27,15 @@
 			<ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
     </para>
 
+    <note>
+    <para>
+      This feature should only be considered as a one-off solution to quickly compare to database schemas. Is not intended
+      to replace a proper schema (script) management. You should consider tools like <ulink url="http://liquibase.org/">Liquibase</ulink>
+      or <ulink url="http://flywaydb.org/">Flyway</ulink> to manage a database schema.
+      Those scripts should also be stored in a version control system (Subversion, GIT, ...)
+    </para>
+    </note>
+
     <para>The command supports the following parameters:</para>
 
     <informaltable frame="all">
