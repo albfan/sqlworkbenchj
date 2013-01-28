@@ -986,10 +986,10 @@ public class StringUtil
 	 *
 	 * @param data             the string to use
 	 * @param cursorPosition   the cursor position
-	 * @param wordBoundaries   characters that define wordboundaries.
+	 * @param wordBoundaries   characters that define wordboundaries (in addition to whitespace).
 	 *                         If null, the first non-whitespace character will be returned.
 	 * @return the position of the word boundary or -1 if not found
-	 * 
+	 *
 	 * @see #findPreviousWhitespace(String, int)
 	 */
 	public static int findWordBoundary(String data, int cursorPosition, String wordBoundaries)

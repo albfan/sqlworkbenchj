@@ -23,7 +23,9 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.KeyStroke;
+
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.TextUtilities;
@@ -62,6 +64,7 @@ public class NextWord
 		int caret = textArea.getCaretPosition();
 		int line = textArea.getCaretLine();
 		int lineStart = textArea.getLineStartOffset(line);
+		int lineEnd = textArea.getLineEndOffset(line);
 		caret -= lineStart;
 
 		String lineText = textArea.getLineText(textArea.getCaretLine());
@@ -80,13 +83,23 @@ public class NextWord
 			caret = TextUtilities.findWordEnd(lineText, caret);
 		}
 
-		if (select)
+		int newPos = 0;
+		if (caret == -1)
 		{
-			textArea.select(textArea.getMarkPosition(), lineStart + caret);
+			newPos = lineEnd - 1;
 		}
 		else
 		{
-			textArea.setCaretPosition(lineStart + caret);
+			newPos = lineStart + caret;
+		}
+
+		if (select)
+		{
+			textArea.select(textArea.getMarkPosition(), newPos);
+		}
+		else
+		{
+			textArea.setCaretPosition(newPos);
 		}
 	}
 }

@@ -41,9 +41,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -63,8 +63,8 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
-import workbench.WbManager;
 
+import workbench.WbManager;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
@@ -1545,9 +1545,13 @@ public class JEditTextArea
 		if (pos <= 0) return;
 		if (Character.isWhitespace(line.charAt(pos - 1))) return;
 		int start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
-		if (start > -1)
+		if (start == 0)
 		{
 			this.select(lineStart + start, caret);
+		}
+		else if (start > 0)
+		{
+			this.select(lineStart + start + 1, caret);
 		}
 	}
 	/**
