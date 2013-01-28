@@ -628,43 +628,6 @@ public class DbSettings
 				return "CLUSTERED";
 		}
 		return IDX_TYPE_NORMAL;
-
-//		if (indexTypeMapping == null)
-//		{
-//			this.indexTypeMapping = new HashMap<Integer, String>();
-//			String map = Settings.getInstance().getProperty(prefix + "indextypes", null);
-//			if (map != null)
-//			{
-//				List<String> entries = StringUtil.stringToList(map, ";", true, true);
-//				for (String entry : entries)
-//				{
-//					String[] mapping = entry.split(",");
-//					if (mapping.length != 2) continue;
-//					int value = StringUtil.getIntValue(mapping[0], Integer.MIN_VALUE);
-//					if (value != Integer.MIN_VALUE)
-//					{
-//						indexTypeMapping.put(Integer.valueOf(value), mapping[1]);
-//					}
-//				}
-//			}
-//		}
-//		String dbmsType = this.indexTypeMapping.get(Integer.valueOf(type));
-//		if (dbmsType == null)
-//		{
-//			if (Settings.getInstance().getDebugMetadataSql())
-//			{
-//				LogMgr.logDebug("DbSettings.mapIndexType()", "No mapping for type = " + type);
-//			}
-//			switch (type)
-//			{
-//				case DatabaseMetaData.tableIndexHashed:
-//					return "HASH";
-//				case DatabaseMetaData.tableIndexClustered:
-//					return "CLUSTERED";
-//			}
-//			return IDX_TYPE_NORMAL;
-//		}
-//		return dbmsType;
 	}
 
 	public boolean proceduresNeedTerminator()
