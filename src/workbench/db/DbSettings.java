@@ -30,12 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.sql.commands.SingleVerbCommand;
-import workbench.storage.BlobLiteralType;
-import workbench.storage.DmlStatement;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -65,7 +61,6 @@ public class DbSettings
 	private boolean supportsBatchedStatements;
 	private boolean supportsCommentInSql = true;
 
-	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
 
@@ -75,7 +70,7 @@ public class DbSettings
 	public DbSettings(String id, String productName)
 	{
 		this.dbId = id;
-		prefix = "workbench.db." + id + ".";
+		this.prefix = "workbench.db." + id + ".";
 		Settings settings = Settings.getInstance();
 
 		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false);
@@ -625,35 +620,51 @@ public class DbSettings
 
 	String mapIndexType(int type)
 	{
-		if (indexTypeMapping == null)
+		switch (type)
 		{
-			this.indexTypeMapping = new HashMap<Integer, String>();
-			String map = Settings.getInstance().getProperty(prefix + "indextypes", null);
-			if (map != null)
-			{
-				List<String> entries = StringUtil.stringToList(map, ";", true, true);
-				for (String entry : entries)
-				{
-					String[] mapping = entry.split(",");
-					if (mapping.length != 2) continue;
-					int value = StringUtil.getIntValue(mapping[0], Integer.MIN_VALUE);
-					if (value != Integer.MIN_VALUE)
-					{
-						indexTypeMapping.put(Integer.valueOf(value), mapping[1]);
-					}
-				}
-			}
+			case DatabaseMetaData.tableIndexHashed:
+				return "HASH";
+			case DatabaseMetaData.tableIndexClustered:
+				return "CLUSTERED";
 		}
-		String dbmsType = this.indexTypeMapping.get(Integer.valueOf(type));
-		if (dbmsType == null)
-		{
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("DbSettings.mapIndexType()", "No mapping for type = " + type);
-			}
-			return IDX_TYPE_NORMAL;
-		}
-		return dbmsType;
+		return IDX_TYPE_NORMAL;
+
+//		if (indexTypeMapping == null)
+//		{
+//			this.indexTypeMapping = new HashMap<Integer, String>();
+//			String map = Settings.getInstance().getProperty(prefix + "indextypes", null);
+//			if (map != null)
+//			{
+//				List<String> entries = StringUtil.stringToList(map, ";", true, true);
+//				for (String entry : entries)
+//				{
+//					String[] mapping = entry.split(",");
+//					if (mapping.length != 2) continue;
+//					int value = StringUtil.getIntValue(mapping[0], Integer.MIN_VALUE);
+//					if (value != Integer.MIN_VALUE)
+//					{
+//						indexTypeMapping.put(Integer.valueOf(value), mapping[1]);
+//					}
+//				}
+//			}
+//		}
+//		String dbmsType = this.indexTypeMapping.get(Integer.valueOf(type));
+//		if (dbmsType == null)
+//		{
+//			if (Settings.getInstance().getDebugMetadataSql())
+//			{
+//				LogMgr.logDebug("DbSettings.mapIndexType()", "No mapping for type = " + type);
+//			}
+//			switch (type)
+//			{
+//				case DatabaseMetaData.tableIndexHashed:
+//					return "HASH";
+//				case DatabaseMetaData.tableIndexClustered:
+//					return "CLUSTERED";
+//			}
+//			return IDX_TYPE_NORMAL;
+//		}
+//		return dbmsType;
 	}
 
 	public boolean proceduresNeedTerminator()
