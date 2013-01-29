@@ -44,8 +44,37 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+
 	@Test
-	public void testSelectWithEmptyLines()
+	public void testInsertSelectWithComment()
+	{
+		String sql =
+			"insert into foo (col1, col2)\n" +
+			"select \n" +
+			" -- useless comment \n" +
+			"      case \n" +
+			"         when x = 1 then 2 \n"+
+			"         else case when (y = 3) then 4 else 5 end\n" +
+			"       end col1, " +
+			"       col2\n" +
+			"from foobar";
+		SqlFormatter f = new SqlFormatter(sql, 10);
+		f.setColumnsPerInsert(1);
+		f.setUseLowerCaseFunctions(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT\n" +
+			"-- blabla\n" +
+			"       col1,\n" +
+			"       col2,\n" +
+			"       col3\n" +
+			"FROM foo";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testSelectWithLineComment()
 	{
 		String sql =
 //			"insert into foobar (col1, col2, col3) \n" +
@@ -63,7 +92,7 @@ public class SqlFormatterTest
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT\n" +
-			"-- blabla\n" + 
+			"-- blabla\n" +
 			"       col1,\n" +
 			"       col2,\n" +
 			"       col3\n" +
