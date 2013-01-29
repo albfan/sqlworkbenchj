@@ -24,15 +24,13 @@ package workbench.sql.formatter;
 
 import java.util.List;
 
-import workbench.WbTestCase;
-import workbench.resource.Settings;
-
-import workbench.util.CollectionUtil;
-import workbench.util.StringUtil;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -44,6 +42,34 @@ public class SqlFormatterTest
 	public SqlFormatterTest()
 	{
 		super("SqlFormatterTest");
+	}
+
+	@Test
+	public void testSelectWithEmptyLines()
+	{
+		String sql =
+//			"insert into foobar (col1, col2, col3) \n" +
+//			" -- get the data \n" +
+			"select \n" +
+			"-- blabla \n" +
+			" col1, \n" +
+			"\n" +
+			"       col2, \n" +
+			"\n" +
+			"       col3 from foo";
+		SqlFormatter f = new SqlFormatter(sql, 10);
+		f.setColumnsPerInsert(1);
+		f.setUseLowerCaseFunctions(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT\n" +
+			"-- blabla\n" + 
+			"       col1,\n" +
+			"       col2,\n" +
+			"       col3\n" +
+			"FROM foo";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		assertEquals(expected, formatted);
 	}
 
 	@Test
