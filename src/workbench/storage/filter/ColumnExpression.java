@@ -164,6 +164,10 @@ public class ColumnExpression
 	@Override
 	public boolean isColumnSpecific()
 	{
+		if ("*".equals(columnName))
+		{
+			return false;
+		}
 		return true;
 	}
 }

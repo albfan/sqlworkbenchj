@@ -75,7 +75,8 @@ public class ContainsComparator
 	@Override
 	public boolean supportsType(Class valueClass)
 	{
-		return (CharSequence.class.isAssignableFrom(valueClass));
+		// as we are calling toString() in evaluate() we support all types
+		return true;
 	}
 
 	@Override

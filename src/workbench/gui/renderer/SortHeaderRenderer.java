@@ -31,14 +31,13 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
-
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
-
+import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -119,11 +118,17 @@ public class SortHeaderRenderer
 				int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
 				if (realCol >= 0)
 				{
-					ColumnIdentifier colId = model.getDataStore().getResultInfo().getColumn(realCol);
-					type = colId.getDbmsType();
-					javaType = colId.getDataType();
-					javaTypeName = SqlUtil.getTypeName(javaType);
-					remarks = colId.getComment();
+					DataStore ds = model.getDataStore();
+					ResultInfo info = (ds == null ? null : ds.getResultInfo());
+
+					ColumnIdentifier colId = (info == null ? null : info.getColumn(realCol));
+					if (colId != null)
+					{
+						type = colId.getDbmsType();
+						javaType = colId.getDataType();
+						javaTypeName = SqlUtil.getTypeName(javaType);
+						remarks = colId.getComment();
+					}
 				}
 			}
 		}
