@@ -29,17 +29,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.WbConnection;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.ReplaceDataAction;
-
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
@@ -47,7 +44,6 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.RegExComparator;
-
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
@@ -165,27 +161,10 @@ public class TableReplacer
 		}
 		else
 		{
-			comp = new ContainsComparator()
-			{
-				@Override
-				public boolean supportsType(Class valueClass)
-				{
-					// allow any datatype to be found
-					// this works, because the ContainsComparator converts
-					// the values to Strings anyway
-					return true;
-				}
-			};
+			comp = new ContainsComparator();
 		}
 
-		ColumnExpression filter = new ColumnExpression(comp, criteria)
-		{
-			@Override
-			public boolean isColumnSpecific()
-			{
-				return false;
-			}
-		};
+		ColumnExpression filter = new ColumnExpression(comp, criteria);
 		filter.setIgnoreCase(ignoreCase);
 		client.applyHighlightExpression(filter);
 	}
