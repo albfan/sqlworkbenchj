@@ -27,12 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.resource.Settings;
-
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
-
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -707,7 +705,7 @@ public class SqlFormatter
 				{
 					if (onPos > 0)
 					{
-						String lb = "\n" + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
+						String lb = NL + StringUtil.padRight(" ", indentPos - 3, ' ') + (indent == null ? "" : indent);
 						this.result.insert(onPos, lb);
 						realLength += lb.length();
 						onPos = -1; // we only need this treatment for the first condition after the ON
