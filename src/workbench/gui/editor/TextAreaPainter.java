@@ -18,14 +18,15 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.JComponent;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -452,8 +453,15 @@ public class TextAreaPainter
 		if (firstInvalid > 1) firstInvalid --;
 
 		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
-		if (lastInvalid > lastLine) lastInvalid = lastLine;
-		else lastInvalid++;
+		
+		if (lastInvalid > lastLine)
+		{
+			lastInvalid = lastLine;
+		}
+		else
+		{
+			lastInvalid++;
+		}
 
 		try
 		{
