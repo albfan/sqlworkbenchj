@@ -16,6 +16,7 @@ import java.awt.Graphics;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+
 import workbench.resource.Settings;
 
 /**
@@ -58,7 +59,7 @@ public class SyntaxUtilities
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Checks if a subregion of a <code>Segment</code> is equal to a
 	 * character array.
@@ -119,7 +120,7 @@ public class SyntaxUtilities
 		SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
 		Settings sett = Settings.getInstance();
-		
+
 		styles[Token.COMMENT1] = new SyntaxStyle(sett.getColor("workbench.editor.color.comment1", Color.GRAY),true,false);
 		styles[Token.COMMENT2] = new SyntaxStyle(sett.getColor("workbench.editor.color.comment2", Color.GRAY),true,false);
 		styles[Token.KEYWORD1] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword1", Color.BLUE),false,false);
@@ -130,11 +131,11 @@ public class SyntaxUtilities
 		styles[Token.DATATYPE] = new SyntaxStyle(sett.getEditorDatatypeColor(),false,false);
 		styles[Token.OPERATOR] = new SyntaxStyle(sett.getColor("workbench.editor.color.operator", Color.BLACK),false,false);
 		styles[Token.INVALID] = new SyntaxStyle(sett.getColor("workbench.editor.color.invalid", Color.RED),false,true);
-		
+
 		return styles;
 	}
 
-	
+
 	/**
 	 * Paints the specified line onto the graphics context. Note that this
 	 * method munges the offset and count values of the segment.
@@ -149,18 +150,16 @@ public class SyntaxUtilities
 	 * @param addwidth Additional spacing to be added to the line width
 	 * @return The x co-ordinate, plus the width of the painted string
 	 */
-	public static int paintSyntaxLine(Segment line, Token tokens,
-		SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
-		int x, int y, int addwidth)
+	public static int paintSyntaxLine(Segment line, Token tokens, SyntaxStyle[] styles, TabExpander expander, Graphics gfx, int x, int y, int addwidth)
 	{
 		if (tokens == null) return x;
-		
+
 		Font defaultFont = gfx.getFont();
 		Color defaultColor = gfx.getColor();
 
 		while (true)
 		{
-			if (tokens == null) 
+			if (tokens == null)
 			{
 				gfx.setColor(defaultColor);
 				gfx.setFont(defaultFont);
