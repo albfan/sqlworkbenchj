@@ -130,8 +130,11 @@ public class TextAreaPainter
 			"workbench.editor.color.invalid",
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
+		if (Settings.getInstance().getBoolProperty("workbench.editor.desktophints.enabled", true))
+		{
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
+		}
 	}
 
 	@Override
@@ -453,7 +456,7 @@ public class TextAreaPainter
 		if (firstInvalid > 1) firstInvalid --;
 
 		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
-		
+
 		if (lastInvalid > lastLine)
 		{
 			lastInvalid = lastLine;
