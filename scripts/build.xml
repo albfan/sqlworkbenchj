@@ -619,6 +619,51 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
+  <target name="mac-package7" depends="init">
+
+    <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
+
+    <property name="bundledir" value="${distdir}/mac7"/>
+    <delete dir="${bundledir}" failonerror="false"/>
+    <mkdir dir="${bundledir}"/>
+
+    <bundleapp outputdirectory="${bundledir}"
+               name="SQLWorkbenchJ"
+               displayname="SQL Workbench/J"
+               identifier="sqlworkbench.app"
+               icon="Workbench.icns"
+               shortversion="${build.number}"
+               mainclassname="workbench.WbStarter">
+
+      <classpath dir="${distdir}">
+        <include name="${jarfile}"/>
+      </classpath>
+
+      <option value="-Dapple.laf.useScreenMenuBar=true"/>
+      <option value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
+      <option value="-Dapple.awt.showGrowBoxtrue=true"/>
+      <option value="-Xmx256m"/>
+    </bundleapp>
+
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava7.tgz">
+      <tarfileset dir="${bundledir}">
+        <include name="**/*"/>
+        <exclude name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset mode="555" dir="${bundledir}">
+        <include name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+        <include name="history.html"/>
+        <include name="LICENSE"/>
+      </tarfileset>
+    </tar>
+
+  </target>
+
   <target name="mac-package" depends="init">
     <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../libs/jarbundler/jarbundler-2.1.0.jar"/>
 
