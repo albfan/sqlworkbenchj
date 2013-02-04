@@ -619,7 +619,7 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
-  <target name="mac-package7" depends="init">
+  <target name="mac-package7" depends="init,publish">
 
     <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
 
@@ -659,6 +659,9 @@
       <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="history.html"/>
         <include name="LICENSE"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+        <include name="SQLWorkbench-Manual.pdf"/>
       </tarfileset>
     </tar>
 
