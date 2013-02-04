@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.resource.Settings;
+
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -791,14 +793,14 @@ public class SqlFormatter
 			{
 				return t;
 			}
-			else if (t.isSeparator() && text.equals("("))
+			else if (text.equals("("))
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText("(");
 				// an equal sign immediately followed by an opening
 				// bracket cannot be a function call (the function name
 				// is missing) so it has to be a sub-select
-				if ("=".equals(lastToken.getContents()))
+				if ("=".equals(lastToken.getContents()) || ",".equals(lastToken.getContents()))
 				{
 					t = this.processSubSelect(false);
 					this.appendTokenText(t);
@@ -822,7 +824,7 @@ public class SqlFormatter
 					}
 				}
 			}
-			else if (t.isSeparator() && text.equals(","))
+			else if (text.equals(","))
 			{
 				currentColumnCount++;
 				if (!commaAfterLineBreak || !needLineBreak(columnsPerLine, currentColumnCount))

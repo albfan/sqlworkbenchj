@@ -24,13 +24,15 @@ package workbench.sql.formatter;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
 import workbench.WbTestCase;
 import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -44,6 +46,24 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+
+	@Test
+	public void testNestedSelect()
+	{
+		String sql = "select 1, (select foo from bar where bar.id = foobar.id) as foo, col2, col3 from foobar";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setColumnsPerInsert(1);
+		f.setUseLowerCaseFunctions(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT 1,\n" +
+			"       (SELECT foo FROM bar WHERE bar.id = foobar.id) AS foo,\n" +
+			"       col2,\n" +
+			"       col3\n" +
+			"FROM foobar";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
 
 	@Test
 	public void testInsertSelectWithComment()
@@ -69,7 +89,7 @@ public class SqlFormatterTest
 			"       col2,\n" +
 			"       col3\n" +
 			"FROM foo";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 //		assertEquals(expected, formatted);
 	}
 
@@ -97,7 +117,7 @@ public class SqlFormatterTest
 			"       col2,\n" +
 			"       col3\n" +
 			"FROM foo";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 //		assertEquals(expected, formatted);
 	}
 
