@@ -26,11 +26,14 @@ import java.awt.Desktop;
 import java.awt.Desktop.Action;
 import java.io.File;
 import java.net.URI;
+
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
@@ -120,6 +123,10 @@ public class HelpManager
 		{
 			return htmldir;
 		}
+		else
+		{
+			LogMgr.logWarning("HelpManager.getHtmlManualDir()", "Help directory '" + htmldir.getAbsolutePath() + "' not found!");
+		}
 
 		return null;
 	}
@@ -206,10 +213,6 @@ public class HelpManager
 		if (dir == null)
 		{
 			showOnlineHelp(basefile);
-//			File jardir = WbManager.getInstance().getJarFile().getParentFile();
-//			WbFile htmldir = new WbFile(jardir, "manual");
-//			String msg = ResourceMgr.getFormattedString("ErrHelpDirNotFound", htmldir.getFullPath());
-//			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
 
@@ -221,9 +224,8 @@ public class HelpManager
 
 		if (manual == null || !manual.exists())
 		{
+			LogMgr.logInfo("HelpManager.showHelpFile()", "Help file: '" + manual + "' not found. Showing online help");
 			showOnlineHelp(basefile);
-//			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", basefile, dir);
-//			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
 
@@ -246,7 +248,6 @@ public class HelpManager
 	{
 		try
 		{
-			LogMgr.logInfo("HelpManager.showHelpFile", "HTML help not found, opening online help");
 			BrowserLauncher.openURL("http://www.sql-workbench.net/manual/" + (basefile == null ? "" : basefile));
 		}
 		catch (Exception ex)

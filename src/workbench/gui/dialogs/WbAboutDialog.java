@@ -32,26 +32,28 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.actions.EscAction;
-import workbench.gui.components.WbLabelField;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbLabelField;
+
 import workbench.util.BrowserLauncher;
 import workbench.util.MemoryWatcher;
 import workbench.util.WbFile;
@@ -75,6 +77,7 @@ public class WbAboutDialog
 		mailToLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		builtWithNbLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		jeditLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 		getRootPane().setDefaultButton(closeButton);
 		escAction = new EscAction(this, this);
@@ -90,6 +93,7 @@ public class WbAboutDialog
 		long freeMem = MemoryWatcher.getFreeMemory() / (1024*1024);
 		long maxMem = MemoryWatcher.MAX_MEMORY / (1024*1024);
 		memoryLabel.setText(ResourceMgr.getString("LblMemory") + " " + freeMem + "MB/" + maxMem + "MB");
+		pack();
 	}
 
 	/** This method is called from within the constructor to
@@ -100,7 +104,7 @@ public class WbAboutDialog
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     buttonPanel = new JPanel();
     closeButton = new JButton();
@@ -114,6 +118,7 @@ public class WbAboutDialog
     jeditLabel = new JLabel();
     jdkVersion = new JLabel();
     homepageLabel = new JLabel();
+    licenseLabel = new JLabel();
     mailToLabel = new JLabel();
     infoPanel = new JPanel();
     memoryLabel = new JLabel();
@@ -232,8 +237,7 @@ public class WbAboutDialog
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 5, 5, 5);
+    gridBagConstraints.insets = new Insets(0, 5, 4, 5);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
     jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version"));
@@ -260,6 +264,24 @@ public class WbAboutDialog
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(homepageLabel, gridBagConstraints);
+
+    licenseLabel.setText(ResourceMgr.getString("TxtLicense")); // NOI18N
+    licenseLabel.addMouseListener(new MouseAdapter()
+    {
+      public void mouseClicked(MouseEvent evt)
+      {
+        licenseLabelMouseClicked(evt);
+      }
+    });
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 5, 4, 5);
+    contentPanel.add(licenseLabel, gridBagConstraints);
 
     mailToLabel.setText("support@sql-workbench.net");
     mailToLabel.addMouseListener(new MouseAdapter()
@@ -310,10 +332,12 @@ public class WbAboutDialog
     infoPanel.add(logfileLabel, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LAST_LINE_START;
-    gridBagConstraints.insets = new Insets(0, 7, 0, 7);
+    gridBagConstraints.insets = new Insets(11, 7, 0, 7);
     contentPanel.add(infoPanel, gridBagConstraints);
 
     getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -375,6 +399,17 @@ public class WbAboutDialog
 		}
 }//GEN-LAST:event_jeditLabelMouseClicked
 
+  private void licenseLabelMouseClicked(MouseEvent evt)//GEN-FIRST:event_licenseLabelMouseClicked
+  {//GEN-HEADEREND:event_licenseLabelMouseClicked
+		try
+		{
+			if (evt.getClickCount() == 1) BrowserLauncher.openURL("http://www.sql-workbench.net/manual/license.html");
+		}
+		catch (Exception e)
+		{
+		}
+  }//GEN-LAST:event_licenseLabelMouseClicked
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -397,6 +432,7 @@ public class WbAboutDialog
   private JLabel labelDesc;
   private JLabel labelTitel;
   private JLabel labelVersion;
+  private JLabel licenseLabel;
   private JTextField logfileLabel;
   private JLabel logo;
   private JLabel mailToLabel;
