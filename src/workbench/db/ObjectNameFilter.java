@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import workbench.log.LogMgr;
-
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -54,6 +53,8 @@ public class ObjectNameFilter
 
 	/**
 	 * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
+	 *
+	 * @see #isInclusionFilter()
 	 */
 	public void setInclusionFilter(boolean flag)
 	{
@@ -62,8 +63,9 @@ public class ObjectNameFilter
 	}
 
 	/**
-	 * If true, the filter defines the objects to include instead of names to exclude.
-	 * @see #setIsInclusionFilter(boolean)
+	 * If true, the filter defines the names to include (=display) instead of names to exclude.
+	 *
+	 * @see #setInclusionFilter(boolean)
 	 */
 	public boolean isInclusionFilter()
 	{
@@ -77,9 +79,16 @@ public class ObjectNameFilter
 	 * Empy expressions (null, "") in the collection will be ignored.
 	 * <br/>
 	 * If the list is empty the current filter definitions are not changed
+	 * <br/>
+	 *
+	 * This will set the modified flag to false as this method is called when XMLDecoder reads
+	 * a connection profile.
+	 *
+	 * To modify the filter expressions and update the modified flag, use {@link #addExpression(java.lang.String)}
 	 *
 	 * @param expressions
 	 * @see #setExpressionList(java.lang.String)
+	 * @see #addExpression(java.lang.String) 
 	 */
 	public void setFilterExpressions(Collection<String> expressions)
 	{
