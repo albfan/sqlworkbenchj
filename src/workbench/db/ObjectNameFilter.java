@@ -55,7 +55,7 @@ public class ObjectNameFilter
 	/**
 	 * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
 	 */
-	public void setIsInclusionFilter(boolean flag)
+	public void setInclusionFilter(boolean flag)
 	{
 		modified = flag != inclusionFilter;
 		inclusionFilter = flag;

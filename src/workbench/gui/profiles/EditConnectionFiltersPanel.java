@@ -153,7 +153,7 @@ public class EditConnectionFiltersPanel
 			catalogFilter.removeExpressions();
 		}
 
-		catalogFilter.setIsInclusionFilter(catalogInclusionFlag.isSelected());
+		catalogFilter.setInclusionFilter(catalogInclusionFlag.isSelected());
 
 		for (int i=0; i < lines; i++)
 		{
@@ -182,7 +182,7 @@ public class EditConnectionFiltersPanel
 		{
 			schemaFilter.removeExpressions();
 		}
-		schemaFilter.setIsInclusionFilter(schemaInclusionFlag.isSelected());
+		schemaFilter.setInclusionFilter(schemaInclusionFlag.isSelected());
 
 		for (int i=0; i < lines; i++)
 		{

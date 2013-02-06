@@ -51,7 +51,7 @@ public class ObjectNameFilterTest
 	public void testInclusion()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();
-		filter.setIsInclusionFilter(true);
+		filter.setInclusionFilter(true);
 		filter.resetModified();
 
 		Set<String> names = CollectionUtil.treeSet("ONE ", "^DEV[0-9]+");
@@ -66,7 +66,7 @@ public class ObjectNameFilterTest
 	public void testIsExcluded()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();
-		filter.setIsInclusionFilter(false);
+		filter.setInclusionFilter(false);
 		Set<String> names = CollectionUtil.treeSet("ONE ", "^DEV[0-9]+");
 		filter.setFilterExpressions(names);
 		assertTrue(filter.isExcluded("one"));
@@ -106,7 +106,7 @@ public class ObjectNameFilterTest
 		assertTrue(copy.isExcluded("one"));
 		assertFalse(copy.isExcluded("three"));
 
-		filter.setIsInclusionFilter(true);
+		filter.setInclusionFilter(true);
 		filter.resetModified();
 		copy = filter.createCopy();
 		assertTrue(filter.isInclusionFilter());
