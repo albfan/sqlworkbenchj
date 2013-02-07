@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
-
 import workbench.util.SqlUtil;
 
 /**

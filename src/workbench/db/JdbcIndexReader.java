@@ -30,16 +30,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import workbench.log.LogMgr;
-
 import workbench.db.ibm.DB2UniqueConstraintReader;
 import workbench.db.mssql.SqlServerUniqueConstraintReader;
 import workbench.db.oracle.OracleUniqueConstraintReader;
 import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
 import workbench.storage.DataStore;
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -195,7 +192,9 @@ public class JdbcIndexReader
 			if (idx.isPrimaryKeyIndex())
 			{
 				LogMgr.logInfo("JdbcIndexreader.findPKFromIndexList()", "Using unique index " + idx.getObjectName() + " as a primary key");
-				return new PkDefinition(idx.getObjectName(), idx.getColumns());
+				PkDefinition pk = new PkDefinition(idx.getObjectName(), idx.getColumns());
+				pk.setIndexType(idx.getIndexType());
+				return pk;
 			}
 		}
 
@@ -628,6 +627,10 @@ public class JdbcIndexReader
 			{
 				boolean isPK = isPkIndex(index, pkIndex);
 				index.setPrimaryKeyIndex(isPK);
+				if (isPK && pkIndex != null)
+				{
+					pkIndex.setIndexType(index.getIndexType());
+				}
 			}
 		}
 

@@ -40,6 +40,7 @@ import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.InformixSequenceReader;
 import workbench.db.ingres.IngresSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
+import workbench.db.mssql.SqlServerIndexReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mssql.SqlServerSequenceReader;
 import workbench.db.mssql.SqlServerUtil;
@@ -173,6 +174,10 @@ public class ReaderFactory
 		if (meta.isMySql())
 		{
 			return new MySQLIndexReader(meta);
+		}
+		if (meta.isSqlServer())
+		{
+			return new SqlServerIndexReader(meta);
 		}
 		return new JdbcIndexReader(meta);
 	}

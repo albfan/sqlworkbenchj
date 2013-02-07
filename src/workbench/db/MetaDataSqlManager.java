@@ -29,7 +29,6 @@ import java.util.HashMap;
 import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-
 import workbench.util.WbPersistence;
 
 /**

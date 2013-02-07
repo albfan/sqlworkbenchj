@@ -24,6 +24,7 @@ package workbench.db;
 
 import workbench.db.derby.DerbyTableSourceBuilder;
 import workbench.db.h2database.H2TableSourceBuilder;
+import workbench.db.mssql.SqlServerTableSourceBuilder;
 import workbench.db.mysql.MySQLTableSourceBuilder;
 import workbench.db.oracle.OracleTableSourceBuilder;
 import workbench.db.postgres.PostgresTableSourceBuilder;
@@ -57,6 +58,10 @@ public class TableSourceBuilderFactory
 		else if (con.getMetadata().isMySql())
 		{
 			return new MySQLTableSourceBuilder(con);
+		}
+		else if (con.getMetadata().isSqlServer())
+		{
+			return new SqlServerTableSourceBuilder(con);
 		}
 		return new TableSourceBuilder(con);
 	}

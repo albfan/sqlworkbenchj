@@ -23,6 +23,7 @@
 package workbench.db.postgres;
 
 import java.sql.Types;
+
 import workbench.db.DataTypeResolver;
 import workbench.util.SqlUtil;
 
@@ -40,7 +41,7 @@ public class PostgresDataTypeResolver
 		if (sqlType == Types.SMALLINT && "int2".equals(dbmsName)) return "smallint";
 		if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
 		if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
-		if (sqlType == Types.BIT && "bool".equals(dbmsName)) return "boolean";
+		if ((sqlType == Types.BIT || sqlType == Types.BOOLEAN) && "bool".equals(dbmsName)) return "boolean";
 
 		if (sqlType == Types.CHAR && "bpchar".equals(dbmsName))
 		{

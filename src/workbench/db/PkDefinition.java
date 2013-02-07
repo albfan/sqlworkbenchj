@@ -42,6 +42,8 @@ public class PkDefinition
 	private Boolean enabled;
 	private Boolean validated;
 
+	// This is mainly for SQL Server to hold the CLUSTERED/NON CLUSTERED index type
+	private String indexType;
 
 	public PkDefinition (List<String> pkCols)
 	{
@@ -61,6 +63,26 @@ public class PkDefinition
 		}
 	}
 
+	public Boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	public Boolean isValidated()
+	{
+		return validated;
+	}
+
+	public void setEnabled(Boolean flag)
+	{
+		this.enabled = flag;
+	}
+
+	public void setValidated(Boolean flag)
+	{
+		this.validated = flag;
+	}
+	
 	public String getPkIndexName()
 	{
 		if (pkIndexName == null) return pkName;
@@ -80,6 +102,16 @@ public class PkDefinition
 	public String getPkName()
 	{
 		return pkName;
+	}
+
+	public String getIndexType()
+	{
+		return indexType;
+	}
+
+	public void setIndexType(String type)
+	{
+		indexType = type;
 	}
 
 	public List<String> getColumns()

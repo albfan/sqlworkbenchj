@@ -269,6 +269,7 @@ public class TableSourceBuilder
 				table.setPrimaryKey(pk);
 			}
 		}
+		syncPkIndexType(pk, indexList);
 
 		boolean inlinePK = getCreateInlinePKConstraints();
 		if (includePK && inlinePK && pk != null)
@@ -317,6 +318,22 @@ public class TableSourceBuilder
 		}
 
 		return result;
+	}
+
+	private void syncPkIndexType(PkDefinition pk, List<IndexDefinition> indexList)
+	{
+		if (pk == null) return;
+		if (CollectionUtil.isEmpty(indexList)) return;
+
+		for (IndexDefinition index : indexList)
+		{
+			if (index.isPrimaryKeyIndex())
+			{
+				pk.setIndexType(index.getIndexType());
+				pk.setEnabled(index.isEnabled());
+				pk.setValidated(index.isValidated());
+			}
+		}
 	}
 
 	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
@@ -472,6 +489,7 @@ public class TableSourceBuilder
 		}
 
 	}
+
 	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList, String pkname)
 	{
 		List<String> columns = new ArrayList<String>();
