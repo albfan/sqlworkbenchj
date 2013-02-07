@@ -384,7 +384,7 @@ public class TableSourceBuilder
 		objectType = objectType.replace("SYSTEM ", "");
 
 		String prefix = "workbench.db.";
-		String suffix = "." + objectType.toLowerCase() + ".sql." + dbConnection.getDbId();
+		String suffix = "." + DbSettings.getKeyValue(objectType) + ".sql." + dbConnection.getDbId();
 
 		String name = toCreate.getObjectExpression(dbConnection);
 

@@ -377,6 +377,12 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "function.select", null);
 	}
 
+	public static String getKeyValue(String value)
+	{
+		if (value == null) return null;
+		return value.toLowerCase().trim().replaceAll("\\s+", "_");
+	}
+
 	/**
 	 * Return the complete DDL to drop the given type of DB-Object.
 	 * <br/>
@@ -398,7 +404,7 @@ public class DbSettings
 		if (StringUtil.isBlank(type)) return null;
 		String cascade = getCascadeConstraintsVerb(type);
 
-		String ddl = Settings.getInstance().getProperty(prefix + "drop." + type.toLowerCase(), null);
+		String ddl = Settings.getInstance().getProperty(prefix + "drop." + getKeyValue(type), null);
 		if (ddl == null)
 		{
 			ddl = "DROP " + type.toUpperCase() + " %name%";
@@ -1108,7 +1114,7 @@ public class DbSettings
 
 		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
 
-		return Settings.getInstance().getProperty(prefix + "create.table." + type.toLowerCase(), defaultSql);
+		return Settings.getInstance().getProperty(prefix + "create.table." + getKeyValue(type), defaultSql);
 	}
 
 	public Set<String> getViewTypes()
@@ -1203,7 +1209,7 @@ public class DbSettings
 	public String getRenameObjectSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".rename", null);
+		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".rename", null);
 	}
 
 	/**
@@ -1215,7 +1221,7 @@ public class DbSettings
 	public String getChangeSchemaSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".change.schema", null);
+		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".change.schema", null);
 	}
 
 	/**
@@ -1227,7 +1233,7 @@ public class DbSettings
 	public String getChangeCatalogSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".change.catalog", null);
+		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".change.catalog", null);
 	}
 
 	/**
@@ -1237,7 +1243,7 @@ public class DbSettings
 	public String getDropPrimaryKeySql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".drop.pk", null);
+		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".drop.pk", null);
 	}
 
 	/**
@@ -1247,7 +1253,7 @@ public class DbSettings
 	public String getDropConstraint(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".drop.constraint", null);
+		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".drop.constraint", null);
 	}
 
 	/**
@@ -1263,10 +1269,10 @@ public class DbSettings
 	public String getAddPK(String type, boolean checkDefault)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		String sql = Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
+		String sql = Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".add.pk", null);
 		if (sql == null && checkDefault)
 		{
-			Settings.getInstance().getProperty("workbench.db.sql.alter." + type.trim().toLowerCase() + ".add.pk", null);
+			Settings.getInstance().getProperty("workbench.db.sql.alter." + getKeyValue(type) + ".add.pk", null);
 		}
 		return sql;
 	}
