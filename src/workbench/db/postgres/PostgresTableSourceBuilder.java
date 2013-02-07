@@ -31,10 +31,12 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-import workbench.db.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.*;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -195,7 +197,7 @@ public class PostgresTableSourceBuilder
 			pstmt.setString(2, tbl.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readTablePersistence()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -228,7 +230,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
 		}
 		finally
 		{
