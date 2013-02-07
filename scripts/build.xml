@@ -633,6 +633,9 @@
                identifier="sqlworkbench.app"
                icon="Workbench.icns"
                shortversion="${build.number}"
+               signature="sqwb"
+               applicationCategory="public.app-category.developer-tools"
+               copyright="Thomas Kellerer"
                mainclassname="workbench.WbStarter">
 
       <classpath dir="${distdir}">
@@ -643,6 +646,7 @@
       <option value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
       <option value="-Dapple.awt.showGrowBoxtrue=true"/>
       <option value="-Xmx256m"/>
+      <option value="-Xdock:name=SQLWorkbench/J"/>
     </bundleapp>
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava7.tgz">
