@@ -22,27 +22,24 @@
  */
 package workbench;
 
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLDecoder;
-
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.FocusManager;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -363,6 +360,11 @@ public final class WbManager
 		}
 
 		return true;
+	}
+
+	public boolean isGUIMode()
+	{
+		return !consoleMode && !batchMode;
 	}
 
 	public boolean isConsoleMode()

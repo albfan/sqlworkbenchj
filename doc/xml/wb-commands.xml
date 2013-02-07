@@ -677,11 +677,7 @@ $$ LANGUAGE plpgsql;
             <entry>
               <para>
               By default any result set that is returned e.g. by a <literal>SELECT</literal> statement in the script will not be
-              displayed. By specfying <literal>-displayResult=true</literal> those results will be displayed when running
-              this command in console mode.
-              </para>
-              <para>
-                This option has no effect if WbInclude is run within the GUI, it only controls the output in console mode.
+              displayed. By specfying <literal>-displayResult=true</literal> those results will be displayed.
               </para>
             </entry>
           </row>

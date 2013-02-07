@@ -34,29 +34,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
 import workbench.console.ConsoleSettings;
+import workbench.console.ConsoleStatusBar;
+import workbench.console.DataStorePrinter;
 import workbench.console.RowDisplay;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.console.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
+import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.console.DataStorePrinter;
-import workbench.interfaces.ResultSetConsumer;
 import workbench.sql.wbcommands.WbConnect;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -109,6 +111,7 @@ public class BatchRunner
 	private String command;
 	private boolean storeErrorMessages;
 	private MessageBuffer errors;
+	private List<DataStore> queryResults = new ArrayList<DataStore>();
 
 	public BatchRunner()
 	{
@@ -137,6 +140,12 @@ public class BatchRunner
 		{
 			filenames.add(f.getAbsolutePath());
 		}
+	}
+
+	public void done()
+	{
+		if (errors != null) errors.clear();
+		queryResults.clear();
 	}
 
 	public void setStoreErrors(boolean flag)
@@ -195,10 +204,7 @@ public class BatchRunner
 		this.stmtRunner.setParameterPrompter(p);
 	}
 
-	/**
-	 * For testing purposes to redirect the output to a file
-	 */
-	void setConsole(PrintStream output)
+	public void setConsole(PrintStream output)
 	{
 		this.console = output;
 	}
@@ -362,6 +368,11 @@ public class BatchRunner
 		connect.setPersistentChange(flag);
 	}
 
+	public List<DataStore> getQueryResults()
+	{
+		return queryResults;
+	}
+
 	public boolean isSuccess()
 	{
 		return this.success;
@@ -431,7 +442,8 @@ public class BatchRunner
 
 	public void execute()
 	{
-		if (filenames != null && filenames.size() > 0)
+		queryResults.clear();
+		if (CollectionUtil.isNonEmpty(filenames))
 		{
 			runFiles();
 		}
@@ -600,6 +612,7 @@ public class BatchRunner
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		return parser;
 	}
+
 	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
@@ -807,12 +820,22 @@ public class BatchRunner
 	private void printResults(String sql, StatementRunnerResult result)
 	{
 		if (!this.showResultSets) return;
-		if (console == null) return;
+
 		if (result == null) return;
 		if (!result.isSuccess()) return;
 		if (!result.hasDataStores()) return;
 
 		List<DataStore> data = result.getDataStores();
+
+		if (console == null)
+		{
+			for (DataStore ds : data)
+			{
+				queryResults.add(ds);
+			}
+			return;
+		}
+
 
 		if (showStatementWithResult)
 		{

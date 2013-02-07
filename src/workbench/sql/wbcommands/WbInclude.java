@@ -25,20 +25,23 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.AppArguments;
-import workbench.sql.DelimiterDefinition;
-import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.resource.Settings;
 import workbench.util.WbFile;
 
 /**
@@ -50,6 +53,10 @@ public class WbInclude
 	public static final String VERB = "WBINCLUDE";
 	public static final String ORA_INCLUDE = "@";
 
+	/*
+	 * I need to store the instance in a variable to be able to cancel the execution.
+	 * If cancelling wasn't necessary, a local variable in the execute() method would have been enough.
+	 */
 	private BatchRunner batchRunner;
 
 	public WbInclude()
@@ -200,7 +207,7 @@ public class WbInclude
 			{
 				batchRunner = new BatchRunner(allFiles);
 			}
-			
+
 			batchRunner.setConnection(currentConnection);
 			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);
@@ -220,11 +227,22 @@ public class WbInclude
 			{
 				batchRunner.setUseSavepoint(cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT));
 			}
+
 			if (showResults)
 			{
-				batchRunner.setShowProgress(false);
+				if (WbManager.getInstance().isGUIMode())
+				{
+					// Make sure the batchRunner doesn't print the results to System.out
+					batchRunner.setConsole(null);
+				}
+				else
+				{
+					batchRunner.setShowProgress(false);
+				}
 			}
+
 			batchRunner.execute();
+
 			if (batchRunner.isSuccess())
 			{
 				result.setSuccess();
@@ -232,6 +250,12 @@ public class WbInclude
 			else
 			{
 				result.setFailure();
+			}
+
+			List<DataStore> results = batchRunner.getQueryResults();
+			for (DataStore ds : results)
+			{
+				result.addDataStore(ds);
 			}
 
 			if (this.rowMonitor != null)
@@ -250,7 +274,11 @@ public class WbInclude
 	@Override
 	public void done()
 	{
-		// nothing to do
+		if (batchRunner != null)
+		{
+			batchRunner.done();
+			batchRunner = null;
+		}
 	}
 
 	@Override
