@@ -28,6 +28,7 @@ import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -44,6 +45,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -64,6 +66,8 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.DbObjectSourcePanel;
 import workbench.gui.profiles.ProfileSelectionDialog;
+import workbench.interfaces.Connectable;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -84,7 +88,7 @@ import workbench.util.WbThread;
  */
 public class ObjectSourceSearchPanel
 	extends JPanel
-	implements ListSelectionListener, WindowListener, ToolWindow
+	implements ListSelectionListener, WindowListener, ToolWindow, Connectable
 {
 	private boolean standalone;
 	private WbConnection connection;
@@ -102,6 +106,7 @@ public class ObjectSourceSearchPanel
 		this.instanceId = ++instanceCount;
 		initComponents();
 		checkButtons();
+		selectConnection.setEnabled(false);
 		results = new WbTable(true, false, false);
 		WbScrollPane scroll = new WbScrollPane(results);
 		results.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -281,6 +286,7 @@ public class ObjectSourceSearchPanel
 		}
 		if (prof != null)
 		{
+			disconnect();
 			connect(prof);
 		}
 	}
@@ -290,6 +296,7 @@ public class ObjectSourceSearchPanel
 		clearSearch();
 		statusbar.setText(ResourceMgr.getString("MsgConnecting"));
 		//WbSwingUtilities.repaintNow(statusbar);
+		selectConnection.setEnabled(false);
 		WbSwingUtilities.showWaitCursor(window);
 
 		WbThread t = new WbThread("Connection")
@@ -317,7 +324,39 @@ public class ObjectSourceSearchPanel
 		t.start();
 	}
 
-	protected void connectEnded()
+	@Override
+	public void connectCancelled()
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public String getConnectionId(ConnectionProfile profile)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void connectFailed(String error)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void connected(WbConnection conn)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	
+	@Override
+	public void connectEnded()
 	{
 		WbSwingUtilities.showDefaultCursor(window);
 		objectSource.setDatabaseConnection(connection);
@@ -435,6 +474,7 @@ public class ObjectSourceSearchPanel
 		if (connection != null)
 		{
 			connection.disconnect();
+			connection = null;
 		}
 	}
 
