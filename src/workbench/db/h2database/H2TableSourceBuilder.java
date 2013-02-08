@@ -25,6 +25,7 @@ package workbench.db.h2database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -110,6 +111,45 @@ public class H2TableSourceBuilder
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return createSql.toString();
+	}
+
+	@Override
+	public void readTableConfigOptions(TableIdentifier tbl)
+	{
+		if (tbl.getTableTypeOption() != null) return;
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select storage_type \n" +
+			"from information_schema.tables \n" +
+			"where table_name = ? \n" +
+			"and table_schema = ?";
+
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getTableName());
+			pstmt.setString(2, tbl.getSchema());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("H2TableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String type = rs.getString(1);
+				tbl.setTableTypeOption(type);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("H2TableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
 	}
 
 }
