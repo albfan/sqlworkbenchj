@@ -41,8 +41,15 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+
 import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
 import workbench.gui.WbFocusManager;
@@ -54,14 +61,11 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.DeadlockMonitor;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -354,7 +358,7 @@ public final class WbManager
 		}
 
 		// No window with focus found, save the size and position of the last opened window
-		if (!settingsSaved)
+		if (!settingsSaved && mainWindows.size() > 0)
 		{
 			mainWindows.get(mainWindows.size() - 1).saveSettings();
 		}

@@ -50,6 +50,7 @@ public class ObjectSearchAction
 		this.parent = win;
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (parent != null)

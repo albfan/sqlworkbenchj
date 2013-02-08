@@ -47,11 +47,17 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.WbManager;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.search.ObjectSourceSearcher;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
@@ -66,17 +72,14 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.DbObjectSourcePanel;
 import workbench.gui.profiles.ProfileSelectionDialog;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.StatusBar;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.ObjectResultListDataStore;
 import workbench.sql.wbcommands.WbGrepSource;
-import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -88,7 +91,7 @@ import workbench.util.WbThread;
  */
 public class ObjectSourceSearchPanel
 	extends JPanel
-	implements ListSelectionListener, WindowListener, ToolWindow, Connectable
+	implements ListSelectionListener, WindowListener, ToolWindow
 {
 	private boolean standalone;
 	private WbConnection connection;
@@ -106,7 +109,7 @@ public class ObjectSourceSearchPanel
 		this.instanceId = ++instanceCount;
 		initComponents();
 		checkButtons();
-		selectConnection.setEnabled(false);
+
 		results = new WbTable(true, false, false);
 		WbScrollPane scroll = new WbScrollPane(results);
 		results.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -324,38 +327,6 @@ public class ObjectSourceSearchPanel
 		t.start();
 	}
 
-	@Override
-	public void connectCancelled()
-	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
-	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public String getConnectionId(ConnectionProfile profile)
-	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public void connectFailed(String error)
-	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public void connected(WbConnection conn)
-	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	
-	@Override
 	public void connectEnded()
 	{
 		WbSwingUtilities.showDefaultCursor(window);
@@ -525,7 +496,11 @@ public class ObjectSourceSearchPanel
 			}
 		};
 
-		this.window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		boolean showConnect = standalone || Settings.getInstance().getBoolProperty("workbench.gui.objectsearcher.allowconnect", false);
+		selectConnection.setVisible(showConnect);
+		selectConnection.setEnabled(showConnect);
+
+		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		ResourceMgr.setWindowIcons(window, "searchsource");
 
