@@ -138,9 +138,11 @@ public class ConnectionMgr
 		if (this.activeConnections.containsKey(connId))
 		{
 			int count = getPrefixCount(connId) + 1;
-			connId = connId + "-" + Integer.toString(count);
-			LogMgr.logWarning("ConnectionMgr.getConnection()", "A new connection for ID " + connId + " was requested, but there is already an active one with that ID!");
+			String newId = connId + "/" + Integer.toString(count);
+			LogMgr.logWarning("ConnectionMgr.getConnection()", "A new connection for ID " + connId + " was requested, but there is already an active one with that ID! Using ID=" + newId + " instead.");
+			connId = newId;
 		}
+
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
 		WbConnection conn = this.connect(aProfile, connId);
 		conn.runPostConnectScript();
