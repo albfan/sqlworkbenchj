@@ -657,14 +657,14 @@
       <tarfileset mode="555" dir="${bundledir}">
         <include name="**/JavaAppLauncher"/>
       </tarfileset>
-      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Java/manual">
         <include name="**/*.*"/>
       </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Java">
         <include name="history.html"/>
         <include name="LICENSE"/>
       </tarfileset>
-      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Java">
         <include name="SQLWorkbench-Manual.pdf"/>
       </tarfileset>
     </tar>

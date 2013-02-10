@@ -275,4 +275,10 @@ public class HelpManager
 	{
 		showHelpFile("profiles");
 	}
+
+	public static void showDriverHelp()
+	{
+		showHelpFile("jdbc-setup");
+	}
+
 }

@@ -25,25 +25,30 @@ package workbench.gui.profiles;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.BorderFactory;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import workbench.db.DbDriver;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.EscAction;
-import workbench.gui.components.WbButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbDriver;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbButton;
+import workbench.gui.help.HelpManager;
 
 /**
  * @author Thomas Kellerer
@@ -55,6 +60,8 @@ public class DriverEditorDialog
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
 	private JButton okButton;
+	private WbButton helpButton;
+
 	private DriverlistEditorPanel driverListPanel;
 	private JButton cancelButton;
 	private boolean cancelled = true;
@@ -90,10 +97,15 @@ public class DriverEditorDialog
 	private void initComponents()
 	{
 		driverListPanel = new DriverlistEditorPanel();
-		buttonPanel = new JPanel();
+		buttonPanel = new JPanel(new GridBagLayout());
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 		dummyPanel = new JPanel();
+
+		helpButton = new WbButton();
+		helpButton.setResourceKey("LblHelp");
+		helpButton.addActionListener(this);
+
 
 		setTitle(ResourceMgr.getString("TxtDriverEditorWindowTitle"));
 		setModal(true);
@@ -110,14 +122,24 @@ public class DriverEditorDialog
 		driverListPanel.setBorder(BorderFactory.createEtchedBorder());
 		getContentPane().add(driverListPanel, BorderLayout.CENTER);
 
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
-		okButton.setFont(null);
 		okButton.addActionListener(this);
-		buttonPanel.add(okButton);
-
 		cancelButton.addActionListener(this);
-		buttonPanel.add(cancelButton);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.WEST;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(5,5,5,0);
+		buttonPanel.add(helpButton, c);
+
+		c.anchor = GridBagConstraints.EAST;
+		c.gridx++;
+		c.weightx = 1.0;
+		c.insets = new Insets(5,5,5,5);
+		buttonPanel.add(okButton, c);
+		c.gridx++;
+		c.weightx = 0;
+		buttonPanel.add(cancelButton, c);
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
@@ -138,6 +160,10 @@ public class DriverEditorDialog
 		else if (e.getSource() == cancelButton || e.getActionCommand().equals(escAction.getActionName()))
 		{
 			cancelButtonActionPerformed(e);
+		}
+		else if (e.getSource() == helpButton)
+		{
+			HelpManager.showDriverHelp();
 		}
 	}
 	private void cancelButtonActionPerformed(ActionEvent evt)
