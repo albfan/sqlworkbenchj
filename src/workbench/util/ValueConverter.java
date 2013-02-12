@@ -147,11 +147,11 @@ public class ValueConverter
 	public final void setDefaultDateFormat(String aFormat)
 		throws IllegalArgumentException
 	{
-		if (!StringUtil.isEmptyString(aFormat))
+		if (StringUtil.isNonEmpty(aFormat))
 		{
 			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
-				this.defaultTimestampFormat = FORMAT_MILLIS;
+				this.defaultDateFormat = FORMAT_MILLIS;
 			}
 			else
 			{
@@ -164,12 +164,11 @@ public class ValueConverter
 	public final void setDefaultTimestampFormat(String aFormat)
 		throws IllegalArgumentException
 	{
-		if (!StringUtil.isEmptyString(aFormat))
+		if (StringUtil.isNonEmpty(aFormat))
 		{
 			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
 				this.defaultTimestampFormat = FORMAT_MILLIS;
-				//this.dateFormatter = null;
 			}
 			else
 			{
@@ -195,7 +194,7 @@ public class ValueConverter
 	{
 		return this.decimalCharacter;
 	}
-	
+
 	public void setDecimalCharacter(char aChar)
 	{
 		this.decimalCharacter = aChar;

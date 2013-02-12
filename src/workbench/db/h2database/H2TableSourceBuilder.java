@@ -41,10 +41,51 @@ import workbench.util.StringUtil;
 public class H2TableSourceBuilder
 	extends TableSourceBuilder
 {
-
 	public H2TableSourceBuilder(WbConnection con)
 	{
 		super(con);
+	}
+
+	private String readDefaultTableType()
+	{
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select value\n" +
+			"from information_schema.settings \n" +
+			"where name = 'DEFAULT_TABLE_TYPE'";
+
+		String tableType = "";
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("H2TableSourceBuilder.readDefaultTableType()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String type = rs.getString(1);
+				if ("0".equals(type))
+				{
+					tableType = "CACHED";
+				}
+				else if ("1".equals(type))
+				{
+					tableType = "MEMORY";
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("H2TableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return tableType;
 	}
 
 	@Override
@@ -121,7 +162,8 @@ public class H2TableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select storage_type \n" +
+			"select storage_type, \n" +
+			"       (select value from information_schema.settings where name = 'DEFAULT_TABLE_TYPE') as default_type \n" +
 			"from information_schema.tables \n" +
 			"where table_name = ? \n" +
 			"and table_schema = ?";
@@ -139,7 +181,19 @@ public class H2TableSourceBuilder
 			if (rs.next())
 			{
 				String type = rs.getString(1);
-				tbl.setTableTypeOption(type);
+				String defaultType = rs.getString(2);
+				if ("0".equals(defaultType))
+				{
+					defaultType = "CACHED";
+				}
+				else
+				{
+					defaultType = "MEMORY";
+				}
+				if (!defaultType.equals(type))
+				{
+					tbl.setTableTypeOption(type);
+				}
 			}
 		}
 		catch (SQLException e)

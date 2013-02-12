@@ -58,7 +58,8 @@ public class HsqlTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select hsqldb_type \n" +
+			"select hsqldb_type, \n" +
+			"       (select upper(property_value) from information_schema.system_properties where property_name = 'hsqldb.default_table_type') as default_type \n" +
 			"from information_schema.system_tables \n" +
 			"where table_name = ? \n" +
 			"and table_schem = ?";
@@ -76,7 +77,15 @@ public class HsqlTableSourceBuilder
 			if (rs.next())
 			{
 				String type = rs.getString(1);
-				tbl.setTableTypeOption(type);
+				String defaultType = rs.getString(2);
+				if (defaultType == null)
+				{
+					defaultType = "CACHED";
+				}
+				if (!defaultType.equals(type))
+				{
+					tbl.setTableTypeOption(type);
+				}
 			}
 		}
 		catch (SQLException e)
