@@ -48,7 +48,27 @@ public class ValueConverter
 	 *	Often used date formats which are tried when parsing a Date
 	 *  or a TimeStamp column
 	 */
-	private final String[] dateFormats = new String[] {
+	private final List<String> timestampFormats = CollectionUtil.arrayList(
+														"yyyy-MM-dd HH:mm:ss.SS",
+														"yyyy-MM-dd HH:mm:ss",
+														"yyyy-MM-dd HH:mm",
+														"dd.MM.yyyy HH:mm:ss.SS",
+														"dd.MM.yyyy HH:mm:ss",
+														"dd.MM.yy HH:mm:ss.SS",
+														"dd.MM.yy HH:mm:ss",
+														"dd.MM.yy HH:mm",
+														"MM/dd/yyyy HH:mm:ss.SS",
+														"MM/dd/yyyy HH:mm:ss",
+														"MM/dd/yy HH:mm:ss.SS",
+														"MM/dd/yy HH:mm:ss",
+														"MM/dd/yy HH:mm",
+														"yyyy-MM-dd",
+														"dd.MM.yyyy",
+														"dd.MM.yy",
+														"MM/dd/yy",
+														"MM/dd/yyyy");
+
+	private final List<String> dateFormats = CollectionUtil.arrayList(
 														"yyyy-MM-dd",
 														"dd.MM.yyyy",
 														"dd.MM.yy",
@@ -59,26 +79,7 @@ public class ValueConverter
 														"yyyy-MM-dd HH:mm:ss",
 														"dd.MM.yyyy HH:mm:ss",
 														"MM/dd/yy HH:mm:ss",
-														"MM/dd/yyyy HH:mm:ss"
-													};
-
-	private final String[] timestampFormats = new String[] {
-														"yyyy-MM-dd HH:mm:ss.SS",
-														"yyyy-MM-dd HH:mm:ss",
-														"dd.MM.yyyy HH:mm:ss.SS",
-														"dd.MM.yyyy HH:mm:ss",
-														"dd.MM.yy HH:mm:ss.SS",
-														"dd.MM.yy HH:mm:ss",
-														"MM/dd/yyyy HH:mm:ss.SS",
-														"MM/dd/yyyy HH:mm:ss",
-														"MM/dd/yy HH:mm:ss.SS",
-														"MM/dd/yy HH:mm:ss",
-														"yyyy-MM-dd",
-														"dd.MM.yyyy",
-														"dd.MM.yy",
-														"MM/dd/yy",
-														"MM/dd/yyyy",
-													};
+														"MM/dd/yyyy HH:mm:ss");
 
 	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm" };
 
@@ -164,7 +165,11 @@ public class ValueConverter
 	public final void setDefaultTimestampFormat(String aFormat)
 		throws IllegalArgumentException
 	{
-		if (StringUtil.isNonEmpty(aFormat))
+		if ("none".equalsIgnoreCase(aFormat))
+		{
+			this.defaultTimestampFormat = null;
+		}
+		else if (StringUtil.isNonEmpty(aFormat))
 		{
 			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
@@ -176,6 +181,7 @@ public class ValueConverter
 				this.timestampFormatter.applyPattern(aFormat);
 			}
 		}
+
 	}
 
 	public void setNumericBooleanValues(int falseValue, int trueValue)
@@ -593,30 +599,19 @@ public class ValueConverter
 
 		if (result == null && checkBuiltInFormats)
 		{
-			int usedPattern = -1;
-
-			for (int i = 0; i < dateFormats.length; i++)
+			for (String format : timestampFormats)
 			{
 				try
 				{
-					this.formatter.applyPattern(timestampFormats[i]);
+					this.formatter.applyPattern(format);
 					result = this.formatter.parse(timestampInput);
-					usedPattern = i;
+					LogMgr.logDebug("ValueConverter.parseTimestamp()", "Succeeded parsing '" + timestampInput + "' using the format: " + format);
 					break;
 				}
 				catch (ParseException e)
 				{
 					result = null;
 				}
-			}
-
-			if (usedPattern > -1)
-			{
-				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + timestampInput + "' using the format: " + timestampFormats[usedPattern]);
-
-				// use this pattern from now on to avoid multiple attempts for the next values
-				defaultTimestampFormat = timestampFormats[usedPattern];
-				timestampFormatter.applyPattern(this.defaultTimestampFormat);
 			}
 		}
 
@@ -662,7 +657,6 @@ public class ValueConverter
 			catch (Exception e)
 			{
 				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.dateFormatter.toPattern(), null);
-				// Do not throw the exception yet as we will try the defaultTimestampFormat as well.
 				result = null;
 			}
 		}
@@ -689,22 +683,29 @@ public class ValueConverter
 		// Still no luck, try to detect the format by trying the built-in formats
 		if (result == null && checkBuiltInFormats)
 		{
-			for (int i = 0; i < dateFormats.length; i++)
+			for (String format : dateFormats)
 			{
-				try
+				this.formatter.applyPattern(format);
+				result = this.formatter.parseQuietly(dateInput);
+				if (result != null)
 				{
-					this.formatter.applyPattern(dateFormats[i]);
-					result = this.formatter.parse(dateInput);
-					LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + dateFormats[i]);
-
-					// use this format from now on...
-					defaultDateFormat = dateFormats[i];
-					dateFormatter.applyPattern(defaultDateFormat);
+					LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
 					break;
 				}
-				catch (Exception e)
+			}
+
+			// no luck with dates, try timestamps
+			if (result == null)
+			{
+				for (String format : timestampFormats)
 				{
-					result = null;
+					this.formatter.applyPattern(format);
+					result = this.formatter.parseQuietly(dateInput);
+					if (result != null)
+					{
+						LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
+						break;
+					}
 				}
 			}
 		}

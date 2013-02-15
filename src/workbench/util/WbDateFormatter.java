@@ -103,6 +103,18 @@ public class WbDateFormatter
 		return super.parse(source);
 	}
 
+	public Date parseQuietly(String source)
+	{
+		try
+		{
+			return this.parse(source);
+		}
+		catch (ParseException ex)
+		{
+			return null;
+		}
+	}
+
 	public static String getDisplayValue(Object value)
 	{
 		if (value == null) return "";
