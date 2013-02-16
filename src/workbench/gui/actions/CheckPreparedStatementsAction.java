@@ -57,6 +57,7 @@ public class CheckPreparedStatementsAction
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.sql.checkprepared");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
@@ -79,6 +80,7 @@ public class CheckPreparedStatementsAction
 		}
 	}
 
+	@Override
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)
@@ -99,6 +101,7 @@ public class CheckPreparedStatementsAction
 		aMenu.add(this.toggleMenu);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (!inSetter)

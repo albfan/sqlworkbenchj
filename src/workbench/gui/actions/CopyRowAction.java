@@ -46,6 +46,7 @@ public class CopyRowAction extends WbAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.duplicateRow();

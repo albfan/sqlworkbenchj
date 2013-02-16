@@ -1293,7 +1293,7 @@ public class SqlPanel
 		handler.readFromWorkspace(w, index);
 	}
 
-	private boolean confirmDiscardChanges(int index)
+	public boolean confirmDiscardChanges(int index)
 	{
 		if (index >= resultTab.getTabCount() - 1) return false;
 
@@ -2488,7 +2488,7 @@ public class SqlPanel
 		}
 		else
 		{
-			currentData = (DwPanel)this.resultTab.getSelectedComponent();
+			currentData = getCurrentResult();
 			if (currentData != null)
 			{
 				currentData.updateStatusBar();
@@ -2530,7 +2530,7 @@ public class SqlPanel
 	/**
 	 * Closes the currently selected result tab.
 	 *
-	 * @see #closeResult()
+	 * @see #closeResult(int)
 	 */
 	public void closeCurrentResult()
 	{
@@ -2540,8 +2540,8 @@ public class SqlPanel
 
 	/**
 	 * Closes the result tab with the given index.
-	 * If confirmation for discarding changes is enabled, the user will be asked to proceed
-	 * if the data has been edited
+	 *
+	 * If confirmation for discarding changes is enabled, the user will be asked to proceed in case the data has been edited.
 	 *
 	 * @see #closeCurrentResult()
 	 */
@@ -2551,7 +2551,12 @@ public class SqlPanel
 		discardResult(index);
 	}
 
-	public void closeOtherResults()
+	/**
+	 * Closes the results identified by the filter.
+	 *
+	 * @param filter the filter to use.
+	 */
+	public void closeSelectedResults(final ResultCloseFilter filter)
 	{
 		try
 		{
@@ -2561,14 +2566,13 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					Component keep = resultTab.getSelectedComponent();
 					int index = 0;
 					while (index < resultTab.getTabCount() - 1)
 					{
 						Component c = resultTab.getComponentAt(index);
-						if (c != keep && confirmDiscardChanges(index))
+						DwPanel panel = (DwPanel)c;
+						if (filter.shouldClose(panel, index) && confirmDiscardChanges(index))
 						{
-							DwPanel panel = (DwPanel)c;
 							panel.removePropertyChangeListener(SqlPanel.this);
 							panel.dispose();
 							resultTab.removeTabAt(index);
@@ -2579,6 +2583,8 @@ public class SqlPanel
 						}
 					}
 					resultTab.setSelectedIndex(0);
+					currentData = getCurrentResult();
+					updateProxiedActions();
 					updateResultInfos();
 				}
 			});

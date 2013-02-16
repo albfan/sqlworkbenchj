@@ -51,6 +51,7 @@ public class SelectionFilterAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		SelectionFilter filter = new SelectionFilter(this.client);
@@ -95,6 +96,7 @@ public class SelectionFilterAction
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		checkEnabled();

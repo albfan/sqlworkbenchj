@@ -68,6 +68,7 @@ public class ExecuteSelAction
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXEC_SEL_ONLY);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (isEnabled())

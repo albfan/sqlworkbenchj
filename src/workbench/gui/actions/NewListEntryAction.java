@@ -53,6 +53,7 @@ public class NewListEntryAction
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		try

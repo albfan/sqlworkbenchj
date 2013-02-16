@@ -48,6 +48,7 @@ public class NextTabAction
 		setEnabled(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		int newIndex = client.getSelectedIndex() + 1;

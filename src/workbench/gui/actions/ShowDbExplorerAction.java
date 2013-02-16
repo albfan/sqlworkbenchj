@@ -49,6 +49,7 @@ public class ShowDbExplorerAction
 		setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();

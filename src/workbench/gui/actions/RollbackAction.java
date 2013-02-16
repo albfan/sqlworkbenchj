@@ -50,6 +50,7 @@ public class RollbackAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client != null) this.client.rollback();

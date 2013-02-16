@@ -45,6 +45,7 @@ public class CopyProfileAction
 		this.initMenuDefinition("LblCopyProfile");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		try

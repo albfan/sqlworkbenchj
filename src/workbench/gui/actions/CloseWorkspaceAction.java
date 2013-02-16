@@ -45,6 +45,7 @@ public class CloseWorkspaceAction extends WbAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.closeWorkspace(true);

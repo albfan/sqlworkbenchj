@@ -51,6 +51,7 @@ public class CommitAction extends WbAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client != null) this.client.commit();

@@ -43,6 +43,7 @@ public class ScrollDownAction
 		initMenuDefinition("MnuTxtScrollDown", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.CTRL_MASK));
 	}
 
+	@Override
 	public boolean isEnabled()
 	{
 		return client != null && client.canScrollDown();

@@ -48,11 +48,13 @@ public class ResetHighlightAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.clearHighlightExpression();
 	}
 
+	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.isHighlightEnabled());

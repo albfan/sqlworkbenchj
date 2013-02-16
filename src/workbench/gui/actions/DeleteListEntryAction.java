@@ -52,6 +52,7 @@ public class DeleteListEntryAction extends WbAction
 		setIcon("Delete");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		try

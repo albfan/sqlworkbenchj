@@ -50,6 +50,7 @@ public class CreateDeleteScriptAction
 		setClient(aClient);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbConnection con = client.getDataStore().getOriginalConnection();
@@ -69,6 +70,7 @@ public class CreateDeleteScriptAction
 		}
 	}
 
+	@Override
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;

@@ -42,6 +42,7 @@ public class OptionsDialogAction
 		this.removeIcon();
 	}
 	
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		showOptionsDialog();
@@ -52,6 +53,7 @@ public class OptionsDialogAction
 		final JFrame parent = WbManager.getInstance().getCurrentWindow();
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				SettingsPanel panel = new SettingsPanel();

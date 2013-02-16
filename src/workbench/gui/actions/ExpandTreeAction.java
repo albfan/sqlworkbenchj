@@ -43,6 +43,7 @@ public class ExpandTreeAction
 		this.setIcon("expand");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.expandAll();

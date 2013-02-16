@@ -46,6 +46,7 @@ public class OptimizeColumnWidthAction
 		this.setMenuTextByKey("MnuTxtOptimizeCol");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (client == null) return;
@@ -53,6 +54,7 @@ public class OptimizeColumnWidthAction
 		final int column = client.getPopupColumnIndex();
 		Thread t = new WbThread("OptimizeCol Thread")
 		{
+			@Override
 			public void run()	
 			{ 
 				optimizer.optimizeColWidth(column, respectColName); 

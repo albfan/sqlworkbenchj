@@ -42,6 +42,7 @@ public class MoveSqlTabLeft
 		setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.moveTabLeft();

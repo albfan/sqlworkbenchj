@@ -47,6 +47,7 @@ public class ScrollToColumnAction extends WbAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		String lastValue = Settings.getInstance().getProperty("workbench.gui.findcolumn.lastvalue", null);
@@ -75,6 +76,7 @@ public class ScrollToColumnAction extends WbAction
 				final Rectangle rect = client.getCellRect(row, idx, true);
 				EventQueue.invokeLater(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						client.scrollRectToVisible(rect);

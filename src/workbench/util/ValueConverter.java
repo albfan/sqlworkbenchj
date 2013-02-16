@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -44,22 +45,26 @@ import workbench.resource.Settings;
  */
 public class ValueConverter
 {
+
+	public static final String DETECT_FIRST = "detect_once";
+	public static final String ALWAYS_CHECK_INTERNAL = "detect";
+
 	/**
 	 *	Often used date formats which are tried when parsing a Date
 	 *  or a TimeStamp column
 	 */
 	private final List<String> timestampFormats = CollectionUtil.arrayList(
-														"yyyy-MM-dd HH:mm:ss.SS",
+														"yyyy-MM-dd HH:mm:ss.SSS",
 														"yyyy-MM-dd HH:mm:ss",
 														"yyyy-MM-dd HH:mm",
-														"dd.MM.yyyy HH:mm:ss.SS",
+														"dd.MM.yyyy HH:mm:ss.SSS",
 														"dd.MM.yyyy HH:mm:ss",
-														"dd.MM.yy HH:mm:ss.SS",
+														"dd.MM.yy HH:mm:ss.SSS",
 														"dd.MM.yy HH:mm:ss",
 														"dd.MM.yy HH:mm",
-														"MM/dd/yyyy HH:mm:ss.SS",
+														"MM/dd/yyyy HH:mm:ss.SSS",
 														"MM/dd/yyyy HH:mm:ss",
-														"MM/dd/yy HH:mm:ss.SS",
+														"MM/dd/yy HH:mm:ss.SSS",
 														"MM/dd/yy HH:mm:ss",
 														"MM/dd/yy HH:mm",
 														"yyyy-MM-dd",
@@ -75,7 +80,7 @@ public class ValueConverter
 														"MM/dd/yy",
 														"MM/dd/yyyy",
 														"dd-MMM-yyyy",
-														"yyyy-MM-dd HH:mm:ss.SS",
+														"yyyy-MM-dd HH:mm:ss.SSS",
 														"yyyy-MM-dd HH:mm:ss",
 														"dd.MM.yyyy HH:mm:ss",
 														"MM/dd/yy HH:mm:ss",
@@ -103,6 +108,7 @@ public class ValueConverter
 
 	private static final String FORMAT_MILLIS = "millis";
 	private boolean checkBuiltInFormats = true;
+	private boolean useFirstMatching = true;
 	private boolean illegalDateIsNull;
 	private boolean cleanupNumbers = false;
 
@@ -145,41 +151,57 @@ public class ValueConverter
 		this.checkBuiltInFormats = flag;
 	}
 
-	public final void setDefaultDateFormat(String aFormat)
+	public final void setDefaultDateFormat(String dtFormat)
 		throws IllegalArgumentException
 	{
-		if (StringUtil.isNonEmpty(aFormat))
+		if (DETECT_FIRST.equalsIgnoreCase(dtFormat))
 		{
-			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
-			{
-				this.defaultDateFormat = FORMAT_MILLIS;
-			}
-			else
-			{
-				this.defaultDateFormat = aFormat;
-				this.dateFormatter.applyPattern(aFormat);
-			}
+			this.defaultDateFormat = null;
+			this.checkBuiltInFormats = true;
+			this.useFirstMatching = true;
+		}
+		else if (ALWAYS_CHECK_INTERNAL.equalsIgnoreCase(dtFormat))
+		{
+			this.defaultDateFormat = null;
+			this.checkBuiltInFormats = true;
+			this.useFirstMatching = false;
+		}
+		else if (dtFormat.equalsIgnoreCase(FORMAT_MILLIS))
+		{
+			this.defaultDateFormat = FORMAT_MILLIS;
+			this.checkBuiltInFormats = false;
+		}
+		else if (StringUtil.isNonEmpty(dtFormat))
+		{
+			this.defaultDateFormat = dtFormat;
+			this.dateFormatter.applyPattern(dtFormat);
 		}
 	}
 
-	public final void setDefaultTimestampFormat(String aFormat)
+	public final void setDefaultTimestampFormat(String tsFormat)
 		throws IllegalArgumentException
 	{
-		if ("none".equalsIgnoreCase(aFormat))
+		if (DETECT_FIRST.equalsIgnoreCase(tsFormat))
 		{
 			this.defaultTimestampFormat = null;
+			this.checkBuiltInFormats = true;
+			this.useFirstMatching = true;
 		}
-		else if (StringUtil.isNonEmpty(aFormat))
+		else if (ALWAYS_CHECK_INTERNAL.equalsIgnoreCase(tsFormat))
 		{
-			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
-			{
-				this.defaultTimestampFormat = FORMAT_MILLIS;
-			}
-			else
-			{
-				this.defaultTimestampFormat = aFormat;
-				this.timestampFormatter.applyPattern(aFormat);
-			}
+			this.defaultTimestampFormat = null;
+			this.checkBuiltInFormats = true;
+			this.useFirstMatching = false;
+		}
+		else if (tsFormat.equalsIgnoreCase(FORMAT_MILLIS))
+		{
+			this.defaultTimestampFormat = FORMAT_MILLIS;
+			this.checkBuiltInFormats = false;
+		}
+		else if (StringUtil.isNonEmpty(tsFormat))
+		{
+			this.defaultTimestampFormat = tsFormat;
+			this.timestampFormatter.applyPattern(tsFormat);
 		}
 
 	}
@@ -606,6 +628,10 @@ public class ValueConverter
 					this.formatter.applyPattern(format);
 					result = this.formatter.parse(timestampInput);
 					LogMgr.logDebug("ValueConverter.parseTimestamp()", "Succeeded parsing '" + timestampInput + "' using the format: " + format);
+					if (useFirstMatching)
+					{
+						this.defaultTimestampFormat = format;
+					}
 					break;
 				}
 				catch (ParseException e)
@@ -689,6 +715,10 @@ public class ValueConverter
 				result = this.formatter.parseQuietly(dateInput);
 				if (result != null)
 				{
+					if (useFirstMatching)
+					{
+						this.defaultDateFormat = format;
+					}
 					LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
 					break;
 				}
@@ -703,6 +733,10 @@ public class ValueConverter
 					result = this.formatter.parseQuietly(dateInput);
 					if (result != null)
 					{
+						if (useFirstMatching)
+						{
+							this.defaultDateFormat = format;
+						}
 						LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
 						break;
 					}

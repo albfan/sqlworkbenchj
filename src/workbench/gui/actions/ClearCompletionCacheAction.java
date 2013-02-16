@@ -51,6 +51,7 @@ public class ClearCompletionCacheAction
 		this.setEnabled(this.dbConnection != null);
 	}
 	
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (this.dbConnection != null) this.dbConnection.getObjectCache().clear();

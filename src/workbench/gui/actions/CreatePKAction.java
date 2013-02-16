@@ -51,6 +51,7 @@ public class CreatePKAction
 		this.initMenuDefinition("MnuTxtCreatePK");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		List<? extends DbObject> selected = columns.getSelectedObjects();

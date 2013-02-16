@@ -43,6 +43,7 @@ public class SelectResultAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.selectResult();

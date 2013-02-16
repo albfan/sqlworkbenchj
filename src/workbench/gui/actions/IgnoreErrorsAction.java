@@ -53,6 +53,7 @@ public class IgnoreErrorsAction
 		this.switchedOn = Settings.getInstance().getIgnoreErrors();
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
@@ -68,6 +69,7 @@ public class IgnoreErrorsAction
 		return this.toggleButton;
 	}
 
+	@Override
 	public void addToToolbar(JToolBar aToolbar)
 	{
 		if (this.toggleButton == null) this.createButton();
@@ -87,6 +89,7 @@ public class IgnoreErrorsAction
 		Settings.getInstance().setIgnoreErrors(this.switchedOn);
 	}
 
+	@Override
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)

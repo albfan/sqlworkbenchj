@@ -46,6 +46,7 @@ public class InsertRowAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.addRow();

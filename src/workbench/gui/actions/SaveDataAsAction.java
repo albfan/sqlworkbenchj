@@ -51,6 +51,7 @@ public class SaveDataAsAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbThread encodings = new WbThread("Fetch Encodings")
@@ -68,6 +69,7 @@ public class SaveDataAsAction
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				DataStoreExporter exporter = new DataStoreExporter(client.getDataStore(), client);

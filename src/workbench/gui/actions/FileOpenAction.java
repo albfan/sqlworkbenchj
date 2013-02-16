@@ -47,6 +47,7 @@ public class FileOpenAction
 		setCreateMenuSeparator(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.openFile();

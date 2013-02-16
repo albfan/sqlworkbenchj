@@ -50,6 +50,7 @@ public class ToggleTableSourceAction extends WbAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.toggleExpandSource();

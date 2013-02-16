@@ -33,6 +33,7 @@ import javax.swing.event.ChangeListener;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.actions.CloseAllResultsAction;
+import workbench.gui.actions.CloseEmptyResultsAction;
 import workbench.gui.actions.CloseOtherResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.RenameTabAction;
@@ -109,6 +110,7 @@ public class ResultTabHandler
 		menu.addSeparator();
 		menu.add(new CloseResultTabAction(client));
 		menu.add(new CloseOtherResultsAction(client));
+		menu.add(new CloseEmptyResultsAction(client));
 		menu.add(new CloseAllResultsAction(client));
 		return menu;
 	}

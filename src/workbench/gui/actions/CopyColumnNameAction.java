@@ -47,6 +47,7 @@ public class CopyColumnNameAction
 		removeIcon();
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		int col = client.getPopupViewColumnIndex();

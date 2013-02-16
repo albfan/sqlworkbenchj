@@ -51,6 +51,7 @@ public class PrintPreviewAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		TablePrinter printer = new TablePrinter(this.client);
@@ -65,6 +66,7 @@ public class PrintPreviewAction
 		preview.setVisible(true);
 	}
 	
+	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.getRowCount() > 0);

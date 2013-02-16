@@ -45,6 +45,7 @@ public class ClearMessagesAction
 		this.setEnabled(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (logdisplay != null)

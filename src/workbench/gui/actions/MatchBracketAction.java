@@ -47,6 +47,7 @@ public class MatchBracketAction extends WbAction
 		this.setEnabled(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.matchBracket();

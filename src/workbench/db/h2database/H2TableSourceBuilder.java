@@ -26,11 +26,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -44,48 +46,6 @@ public class H2TableSourceBuilder
 	public H2TableSourceBuilder(WbConnection con)
 	{
 		super(con);
-	}
-
-	private String readDefaultTableType()
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select value\n" +
-			"from information_schema.settings \n" +
-			"where name = 'DEFAULT_TABLE_TYPE'";
-
-		String tableType = "";
-		try
-		{
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("H2TableSourceBuilder.readDefaultTableType()", "Using sql: " + pstmt.toString());
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String type = rs.getString(1);
-				if ("0".equals(type))
-				{
-					tableType = "CACHED";
-				}
-				else if ("1".equals(type))
-				{
-					tableType = "MEMORY";
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("H2TableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return tableType;
 	}
 
 	@Override
@@ -168,6 +128,8 @@ public class H2TableSourceBuilder
 			"where table_name = ? \n" +
 			"and table_schema = ?";
 
+		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.h2.table_type.show_always", false);
+
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
@@ -190,7 +152,7 @@ public class H2TableSourceBuilder
 				{
 					defaultType = "MEMORY";
 				}
-				if (!defaultType.equals(type))
+				if (alwaysShowType || !defaultType.equals(type))
 				{
 					tbl.setTableTypeOption(type);
 				}

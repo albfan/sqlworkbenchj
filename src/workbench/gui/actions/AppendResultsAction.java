@@ -49,6 +49,7 @@ public class AppendResultsAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void setSwitchedOn(boolean aFlag)
 	{
 		super.setSwitchedOn(aFlag);
@@ -72,6 +73,7 @@ public class AppendResultsAction
 		return this.toggleButton;
 	}
 	
+	@Override
 	public void addToToolbar(JToolBar aToolbar)
 	{
 		aToolbar.add(this.getButton());

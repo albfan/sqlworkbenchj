@@ -47,6 +47,7 @@ public class UndoAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.undo();

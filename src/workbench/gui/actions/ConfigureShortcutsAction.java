@@ -42,6 +42,7 @@ public class ConfigureShortcutsAction
 		removeIcon();
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		final JFrame main = WbManager.getInstance().getCurrentWindow();

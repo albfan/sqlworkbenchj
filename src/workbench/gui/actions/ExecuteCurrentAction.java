@@ -50,6 +50,7 @@ public class ExecuteCurrentAction extends WbAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.target.runCurrentStatement();

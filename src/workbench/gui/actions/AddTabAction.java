@@ -53,6 +53,7 @@ public class AddTabAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.addTab();

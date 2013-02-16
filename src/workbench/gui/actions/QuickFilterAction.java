@@ -45,6 +45,7 @@ public class QuickFilterAction
 		this.setCreateToolbarSeparator(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		client.applyQuickFilter();

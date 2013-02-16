@@ -61,6 +61,7 @@ public class CheckBoxAction
 		}
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
@@ -78,6 +79,7 @@ public class CheckBoxAction
 		{
 			WbSwingUtilities.invoke(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					toggleMenu.setSelected(switchedOn);
@@ -90,6 +92,7 @@ public class CheckBoxAction
 		}
 	}
 
+	@Override
 	public JMenuItem getMenuItem()
 	{
 		if (this.toggleMenu == null)
@@ -115,6 +118,7 @@ public class CheckBoxAction
 		this.toggleMenu.setSelected(this.switchedOn);
 	}
 
+	@Override
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)
@@ -124,6 +128,7 @@ public class CheckBoxAction
 		aMenu.add(this.toggleMenu);
 	}
 
+	@Override
 	public void setAccelerator(KeyStroke key)
 	{
 		super.setAccelerator(key);

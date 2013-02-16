@@ -48,12 +48,14 @@ public class PrintAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		TablePrinter printer = new TablePrinter(this.client);
 		printer.startPrint();
 	}
 	
+	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.getRowCount() > 0);

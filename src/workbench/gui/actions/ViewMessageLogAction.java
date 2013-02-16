@@ -48,6 +48,7 @@ public class ViewMessageLogAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		panel.showLogPanel();

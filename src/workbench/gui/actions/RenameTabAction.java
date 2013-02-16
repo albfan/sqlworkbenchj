@@ -50,6 +50,7 @@ public class RenameTabAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		String oldName = client.getCurrentTabTitle();
@@ -61,6 +62,7 @@ public class RenameTabAction
 		}
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		setEnabled(client.canRenameTab());

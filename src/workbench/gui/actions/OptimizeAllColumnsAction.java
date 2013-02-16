@@ -54,12 +54,14 @@ public class OptimizeAllColumnsAction
 		this.setAccelerator(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (optimizer == null) return;
 		final boolean shiftPressed = isShiftPressed(e);
 		Thread t = new WbThread("OptimizeAllCols Thread")
 		{
+			@Override
 			public void run()
 			{
 				optimizer.optimizeAllColWidth(shiftPressed || GuiSettings.getIncludeHeaderInOptimalWidth());
@@ -68,6 +70,7 @@ public class OptimizeAllColumnsAction
 		t.start();
 	}
 
+	@Override
 	public boolean hasShiftModifier() { return true; }
 
 	public void setClient(WbTable client)

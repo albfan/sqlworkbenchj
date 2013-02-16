@@ -48,6 +48,7 @@ public class PrevTabAction
 		this.setEnabled(true);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		int newIndex = client.getSelectedIndex() - 1;

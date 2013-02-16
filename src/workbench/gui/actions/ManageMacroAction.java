@@ -54,6 +54,7 @@ public class ManageMacroAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		SqlPanel sql = this.client.getCurrentSqlPanel();

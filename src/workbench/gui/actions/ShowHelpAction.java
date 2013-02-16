@@ -40,6 +40,7 @@ public class ShowHelpAction
 		setIcon("help");
 	}
 	
+	@Override
 	public synchronized void executeAction(ActionEvent e)
 	{
 		HelpManager.showHelpIndex();

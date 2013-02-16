@@ -55,6 +55,8 @@ public class HsqlTableSourceBuilder
 
 		if (tbl.getTableTypeOption() != null) return;
 
+		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
+		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
@@ -82,7 +84,7 @@ public class HsqlTableSourceBuilder
 				{
 					defaultType = "CACHED";
 				}
-				if (!defaultType.equals(type))
+				if (alwaysShowType || !defaultType.equals(type))
 				{
 					tbl.setTableTypeOption(type);
 				}

@@ -48,6 +48,7 @@ public class SaveListFileAction extends WbAction
 		this.setIcon(ResourceMgr.IMG_SAVE);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		try

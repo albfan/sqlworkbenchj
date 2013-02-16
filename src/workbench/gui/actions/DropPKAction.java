@@ -47,6 +47,7 @@ public class DropPKAction
 		this.initMenuDefinition("MnuTxtDropPK");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		TableIdentifier table = columns.getObjectTable();

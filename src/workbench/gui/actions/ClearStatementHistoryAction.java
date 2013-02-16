@@ -46,6 +46,7 @@ public class ClearStatementHistoryAction extends WbAction
 		this.setCreateToolbarSeparator(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.history.clear();

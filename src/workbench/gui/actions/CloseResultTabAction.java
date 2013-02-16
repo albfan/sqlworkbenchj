@@ -50,6 +50,7 @@ public class CloseResultTabAction
 		this.setEnabled(panel.getCurrentResult() != null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		panel.closeCurrentResult();

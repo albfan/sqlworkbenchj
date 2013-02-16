@@ -48,6 +48,7 @@ public class PrevStatementAction
 		this.setCreateToolbarSeparator(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.history.showPreviousStatement();

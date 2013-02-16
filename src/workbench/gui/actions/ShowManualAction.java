@@ -38,6 +38,7 @@ public class ShowManualAction
 		setIcon("pdf");
 	}
 	
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		HelpManager.showPdfHelp();

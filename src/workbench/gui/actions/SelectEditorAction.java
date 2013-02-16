@@ -46,6 +46,7 @@ public class SelectEditorAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.selectEditor();

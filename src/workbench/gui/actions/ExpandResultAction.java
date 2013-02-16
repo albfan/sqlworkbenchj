@@ -45,6 +45,7 @@ public class ExpandResultAction extends WbAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.toggleLowerComponentExpand();

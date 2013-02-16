@@ -48,6 +48,7 @@ public class SaveWorkspaceAction extends WbAction
 		this.setIcon(null);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.saveWorkspace(this.client.getCurrentWorkspaceFile(), false);

@@ -47,6 +47,7 @@ public class NextStatementAction extends WbAction
 		this.setCreateToolbarSeparator(false);
  	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.history.showNextStatement();

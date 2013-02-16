@@ -47,6 +47,7 @@ public class SelectAllAction extends WbAction
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, PlatformShortcuts.getDefaultModifier()));
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.selectAll();

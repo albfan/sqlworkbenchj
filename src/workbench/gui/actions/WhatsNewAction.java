@@ -44,6 +44,7 @@ public class WhatsNewAction
 		this.removeIcon();
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		HelpManager.showHistory();

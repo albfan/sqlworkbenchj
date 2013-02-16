@@ -45,6 +45,7 @@ public class SelectMaxRowsAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		client.selectMaxRowsField();

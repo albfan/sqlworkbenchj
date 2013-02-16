@@ -48,6 +48,7 @@ public class NewDbExplorerPanelAction
 		this.initMenuDefinition(key);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		mainWin.newDbExplorerPanel(true);

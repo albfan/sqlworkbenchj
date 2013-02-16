@@ -41,6 +41,7 @@ public class VersionCheckAction extends WbAction
 		this.removeIcon();
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().showDialog("workbench.gui.tools.VersionCheckDialog");

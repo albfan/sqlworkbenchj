@@ -51,6 +51,7 @@ public class ExecuteAllAction extends WbAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.runAll();

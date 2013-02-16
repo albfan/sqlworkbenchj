@@ -48,12 +48,14 @@ public class EscAction
 		addToInputMap(d.getRootPane());
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		e.setSource(this);
 		this.client.actionPerformed(e);
 	}
 
+	@Override
 	public void addToInputMap(JComponent c)
 	{
 		super.addToInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW);

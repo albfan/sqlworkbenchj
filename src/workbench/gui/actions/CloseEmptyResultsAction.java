@@ -1,5 +1,5 @@
 /*
- * CollapseTreeAction.java
+ * CloseOtherResultsAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -23,29 +23,39 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.interfaces.ExpandableTree;
+
+import workbench.gui.sql.DwPanel;
+import workbench.gui.sql.ResultCloseFilter;
+import workbench.gui.sql.SqlPanel;
 
 /**
- * Action to collapse all nodes in a tree
-
+ *
  * @author Thomas Kellerer
  */
-public class CollapseTreeAction
+public class CloseEmptyResultsAction
 	extends WbAction
 {
-	private ExpandableTree client;
+	private SqlPanel client;
 
-	public CollapseTreeAction(ExpandableTree tree)
+	public CloseEmptyResultsAction(SqlPanel panel)
 	{
-		super();
-		this.client = tree;
-		this.initMenuDefinition("LblCollapseAll");
-		this.setIcon("collapse");
+		client = panel;
+		initMenuDefinition("MnuTxtCloseEmptyResults");
+		this.setEnabled(client.getResultTabCount() > 0);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.collapseAll();
+		ResultCloseFilter filter = new ResultCloseFilter()
+		{
+			@Override
+			public boolean shouldClose(DwPanel panel, int panelIndex)
+			{
+				return panel.getDataStore().getRowCount() == 0;
+			}
+		};
+		client.closeSelectedResults(filter);
 	}
+
 }

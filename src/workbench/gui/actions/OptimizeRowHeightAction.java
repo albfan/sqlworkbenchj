@@ -65,11 +65,13 @@ public class OptimizeRowHeightAction
 		checkEnabled();
 	}
 	
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		if (client == null) return;
 		Thread t = new WbThread("OptimizeRows Thread")
 		{
+			@Override
 			public void run()	
 			{
 				client.optimizeRowHeight();
@@ -90,6 +92,7 @@ public class OptimizeRowHeightAction
 		}
 	}
 	
+	@Override
 	public void tableChanged(TableModelEvent e)
 	{
 		checkEnabled();

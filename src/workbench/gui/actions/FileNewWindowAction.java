@@ -39,6 +39,7 @@ public class FileNewWindowAction
 		this.initMenuDefinition("MnuTxtFileNewWindow");
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().openNewWindow();

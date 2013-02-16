@@ -43,6 +43,7 @@ public class ScrollUpAction
 		initMenuDefinition("MnuTxtScrollUp", KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.CTRL_MASK));
 	}
 
+	@Override
 	public boolean isEnabled()
 	{
 		return client != null && client.canScrollUp();

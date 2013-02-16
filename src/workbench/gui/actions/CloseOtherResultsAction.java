@@ -23,6 +23,9 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
+import workbench.gui.sql.DwPanel;
+import workbench.gui.sql.ResultCloseFilter;
 import workbench.gui.sql.SqlPanel;
 
 /**
@@ -44,7 +47,16 @@ public class CloseOtherResultsAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		client.closeOtherResults();
+		final DwPanel toKeep = client.getCurrentResult();
+		ResultCloseFilter filter = new ResultCloseFilter()
+		{
+			@Override
+			public boolean shouldClose(DwPanel panel, int panelIndex)
+			{
+				return toKeep != panel;
+			}
+		};
+		client.closeSelectedResults(filter);
 	}
 
 }

@@ -23,8 +23,10 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.sql.SqlPanel;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * An action to close all result tabs of a SqlPanel.
@@ -46,6 +48,7 @@ public class CloseAllResultsAction
 		this.setEnabled(panel.getResultTabCount() > 0);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		panel.closeAllResults();

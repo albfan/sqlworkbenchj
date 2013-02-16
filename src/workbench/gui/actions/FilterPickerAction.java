@@ -67,6 +67,7 @@ public class FilterPickerAction
 		buildPopup();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (this.client == null) return;
@@ -113,6 +114,7 @@ public class FilterPickerAction
 		checkEnabled();
 	}
 
+	@Override
 	public JButton getToolbarButton(boolean createNew)
 	{
     JButton result = null;
@@ -136,6 +138,7 @@ public class FilterPickerAction
 		return result;
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();

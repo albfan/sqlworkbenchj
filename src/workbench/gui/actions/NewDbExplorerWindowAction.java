@@ -42,6 +42,7 @@ public class NewDbExplorerWindowAction
 		setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		mainWin.newDbExplorerWindow();

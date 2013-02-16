@@ -49,11 +49,13 @@ public class ResetFilterAction
 		this.setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		this.client.resetFilter();
 	}
 
+	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.isFiltered());

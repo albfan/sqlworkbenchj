@@ -89,6 +89,7 @@ public class SchemaReportAction
 
 		Thread t = new WbThread("Schema Report")
 		{
+			@Override
 			public void run()
 			{
 				try
@@ -102,6 +103,7 @@ public class SchemaReportAction
 					final String msg = ExceptionUtil.getDisplay(e);
 					EventQueue.invokeLater(new Runnable()
 					{
+						@Override
 						public void run()
 						{
 							WbSwingUtilities.showErrorMessage(caller, msg);

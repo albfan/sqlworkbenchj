@@ -54,11 +54,13 @@ public class RemoveTabAction
 		setEnabled(false);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		client.removeCurrentTab();
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e)
 	{
 		EventQueue.invokeLater(new Runnable()

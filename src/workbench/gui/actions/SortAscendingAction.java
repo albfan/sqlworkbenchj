@@ -44,6 +44,7 @@ public class SortAscendingAction extends WbAction
 		this.putValue(Action.SMALL_ICON, SortArrowIcon.ARROW_DOWN);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		e.setSource(this);

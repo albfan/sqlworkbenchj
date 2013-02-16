@@ -52,6 +52,7 @@ public class CleanJavaCodeAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
+	@Override
 	public void executeAction(ActionEvent e)
 	{
 		boolean selected = true;
@@ -67,6 +68,7 @@ public class CleanJavaCodeAction extends WbAction
 			final boolean sel = selected;
 			EventQueue.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (sel)
