@@ -5,7 +5,7 @@
     <title>Pre-requisites</title>
 
     <para>
-      To run &wb-productname; a <ulink url="http://java.sun.com/javase/downloads/index.jsp">Java 6 runtime environment</ulink>
+      To run &wb-productname; a <ulink url="http://www.java.com/">Java 6 runtime environment</ulink>
       is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
     </para>
 
@@ -134,39 +134,31 @@
 
   <section id="launcher-using">
     <title>Starting the program using the Windows launcher</title>
-    <indexterm><primary>Windows</primary><secondary>32bit</secondary></indexterm>
-    <indexterm><primary>Windows</primary><secondary>64bit</secondary></indexterm>
     <indexterm><primary>Windows</primary><secondary>using the launcher</secondary></indexterm>
+    <indexterm><primary>Windows</primary><secondary>Java not found</secondary></indexterm>
+    <indexterm><primary>Starting</primary><secondary>Java runtime not found on Windows</secondary></indexterm>
+    <indexterm><primary>Java runtime</primary><secondary>Java not found on Windows</secondary></indexterm>
 
     <para>
-      On a 32bit Windows&reg; platform the supplied SQLWorkbench.exe can be used to
-      start the program when using a Sun JDK. The native launcher searches for an installed
-      JDK (querying the registry) and then starts &wb-productname;. The file
-      sqlworkbench.jar has to be located in the same directory as the
-      SQLWorkbench.exe, otherwise it doesn&#39;t work.
+      To start &wb-productname; on the Windows&reg; platform, the supplied <literal>SQLWorkbench.exe</literal> (32bit Windows)
+      or <literal>SQLWorkbench64.exe</literal> (64bit Windows) can be used to start the program when using an installed
+      Oracle Java runtime. The file <literal>sqlworkbench.jar</literal> has to be located in the same directory as the
+      exe files, otherwise it does not work.
     </para>
 
     <important>
       <para>
-        For a Windows 64bit system, you have to use <literal>SQLWorkbench64.exe</literal>. It will automatically search
-        for a 64bit Java installation.
+        The launcher currently only recognizes a Java <emphasis>Runtime</emphasis> installation. A Java development kit (JDK) installation
+        <emphasis>without</emphasis> a "public JRE" is not recognized. You need to specify the JDK path using an INI file as described further down.
       </para>
     </important>
 
     <para>
-      The launcher only works with a Sun JDK, as it directly calls the
-      JDK&apos; dll to start the virtual machine. If you are using a different JDK
-      you cannot use the launcher to start &wb-productname; on Windows (unless it uses the same
-      directory layout and filenames as the Sun JDK).
-    </para>
-
-    <para>
       By default the launcher increases the maximum JVM heap size to 256MB.
-      If you need more heap memory, you need to pass the appropriate JVM parameter to the launcher.
+      If you need more heap memory (e.g. because you have to load large result sets), you need to pass the appropriate JVM parameter to the launcher.
       Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
       on how to increase the memory that is available to &wb-productname;
     </para>
-
 
     <section id="launcher-parameters">
       <title>Parameters for the Windows launcher</title>
