@@ -34,6 +34,8 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
@@ -48,9 +50,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JToolTip;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -1109,10 +1115,44 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static void showToolTip(final JComponent component, String tip)
+	{
+		if (component == null) return;
+		Point pos = component.getLocationOnScreen();
+
+		JToolTip tooltip = component.createToolTip();
+		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+		tooltip.setTipText(tip);
+
+		final Popup tooltipContainer = popupFactory.getPopup(component, tooltip, (int)pos.getX(), (int)pos.getY() - (int)tooltip.getPreferredSize().getHeight());
+
+		final int timeout = ToolTipManager.sharedInstance().getDismissDelay();
+
+		WbThread hideThread = new WbThread("Tooltip Hider")
+		{
+			@Override
+			public void run()
+			{
+				WbThread.sleepSilently(timeout);
+				tooltipContainer.hide();
+			}
+		};
+		hideThread.start();
+
+		tooltipContainer.show();
+		tooltip.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				tooltipContainer.hide();
+			}
+		});
+}
+
 	public static int calculateMaxMenuItems(JFrame window)
 	{
 		UIDefaults def = UIManager.getDefaults();
-		Font menuFont = def.getFont("Menu.font");
 		Font itemFont = def.getFont("MenuItem.font");
 		Font barFont = def.getFont("MenuBar.font");
 

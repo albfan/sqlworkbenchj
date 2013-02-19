@@ -235,6 +235,7 @@ public class TableDefinitionPanel
 		cc.anchor = GridBagConstraints.EAST;
 		cc.insets = new Insets(0, 15, 0, 0);
 		alterButton = new FlatButton(alterColumnsAction);
+		alterColumnsAction.setButton(alterButton);
 		alterButton.setIcon(null);
 		alterButton.setUseDefaultMargin(true);
 		toolbar.add(alterButton, cc);

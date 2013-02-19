@@ -25,6 +25,8 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.List;
+
+import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.db.sqltemplates.ColumnChanger;
@@ -55,6 +57,7 @@ public class ColumnAlterAction
 	private TableIdentifier sourceTable;
 	private WbConnection dbConnection;
 	private Reloadable client;
+	private JButton guiButton;
 
 	public ColumnAlterAction(WbTable defTable)
 	{
@@ -64,6 +67,11 @@ public class ColumnAlterAction
 		this.setIcon("runAlter");
 		this.setEnabled(false);
 		definition.addTableModelListener(this);
+	}
+
+	public void setButton(JButton button)
+	{
+		guiButton = button;
 	}
 
 	public void setReloader(Reloadable reload)
@@ -76,6 +84,8 @@ public class ColumnAlterAction
 	{
 		if (definition.isReadOnly()) return;
 
+		boolean wasEnabled = isEnabled();
+
 		if (!isTable())
 		{
 			setEnabled(false);
@@ -85,6 +95,11 @@ public class ColumnAlterAction
 		if (e.getType() == TableModelEvent.UPDATE || e.getType() == TableModelEvent.DELETE)
 		{
 			setEnabled(sourceTable != null);
+		}
+
+		if (!wasEnabled && isEnabled() && guiButton != null)
+		{
+			WbSwingUtilities.showToolTip(guiButton, "Click her to apply the changes");
 		}
 	}
 
