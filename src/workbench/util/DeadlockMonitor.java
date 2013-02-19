@@ -34,37 +34,38 @@ public class DeadlockMonitor
 {
 	private ThreadDumper monitor;
 	private int sleepTime;
+	private int minLogDuration;
+	private boolean keepRunning = true;
 
 	public DeadlockMonitor()
 	{
 		monitor = new ThreadDumper();
 		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 10000);
+		minLogDuration = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.logduration", 50);
 	}
 
 	@Override
 	public void run()
 	{
-		try
+		while (keepRunning)
 		{
-			while (true)
+			long start = System.currentTimeMillis();
+			String dump = monitor.getDeadlockDump();
+			long duration = System.currentTimeMillis() - start;
+			if (duration > minLogDuration)
 			{
-				long start = System.currentTimeMillis();
-				String dump = monitor.getDeadlockDump();
-				long duration = System.currentTimeMillis() - start;
-				if (duration > 50)
-				{
-					LogMgr.logInfo("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
-				}
-				if (dump != null)
-				{
-					LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);
-				}
-				Thread.sleep(sleepTime);
+				LogMgr.logInfo("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
 			}
-		}
-		catch (InterruptedException e)
-		{
+			if (dump != null)
+			{
+				LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);
+			}
+			WbThread.sleepSilently(sleepTime);
 		}
 	}
 
+	public void cancel()
+	{
+		keepRunning = false;
+	}
 }

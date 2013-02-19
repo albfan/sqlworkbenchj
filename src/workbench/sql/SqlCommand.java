@@ -326,7 +326,8 @@ public class SqlCommand
 		{
 			if (currentStatement != null)
 			{
-				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + getVerb() + " (" + getClass().getSimpleName() + ")");
+				String info = getVerb() + " (" + getClass().getSimpleName();
+				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + info + ")");
 
 				try { currentStatement.clearBatch(); } catch (Exception th) {}
 				try { currentStatement.clearWarnings(); } catch (Exception th) {}
@@ -338,7 +339,7 @@ public class SqlCommand
 				}
 				catch (Exception th)
 				{
-					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for: " + getVerb() + " (" + getClass().getSimpleName() + ")", th);
+					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for: " + info + ")", th);
 				}
 			}
 			currentStatement = null;

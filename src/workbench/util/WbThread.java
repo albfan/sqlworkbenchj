@@ -57,11 +57,17 @@ public class WbThread
 	 * Implementation of sleep() without throwing an exception.
 	 *
 	 * @param time
-	 * @see Thread#sleep(long) 
+	 * @see Thread#sleep(long)
 	 */
 	public static void sleepSilently(long time)
 	{
-		try { Thread.sleep(time); } catch (Throwable th) {}
+		try
+		{
+			Thread.sleep(time);
+		}
+		catch (Throwable th)
+		{
+		}
 	}
 
 	public static void runWithTimeout(Thread toRun, long timeout)

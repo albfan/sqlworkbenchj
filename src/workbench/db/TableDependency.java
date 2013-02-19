@@ -29,6 +29,7 @@ import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  * A class to retrieve the FK dependencies of a given table.
@@ -97,22 +98,16 @@ public class TableDependency
 		this.cancelled = false;
 		this.cancelRetrieve = true;
 		long start = System.currentTimeMillis();
-		long maxWait = 1000 * 60; // one minute
+		long maxWait = 1000 * 15; // 15 seconds
 
 		while (!cancelled)
 		{
-			try
+			WbThread.sleepSilently(100);
+			if (System.currentTimeMillis() - start > maxWait)
 			{
-				Thread.sleep(100);
-				if (System.currentTimeMillis() - start > maxWait)
-				{
-					// Prevent an endless loop in case cancelling does not work for some reason
-					// e.g because the retrieval from the database hangs
-					break;
-				}
-			}
-			catch (InterruptedException ex)
-			{
+				// Prevent an endless loop in case cancelling does not work for some reason
+				// e.g because the retrieval from the database hangs
+				break;
 			}
 		}
 	}
