@@ -89,8 +89,6 @@ public class ColumnAlterAction
 	{
 		if (definition.isReadOnly()) return;
 
-		boolean wasEnabled = isEnabled();
-
 		if (!isTable())
 		{
 			setEnabled(false);
@@ -100,11 +98,6 @@ public class ColumnAlterAction
 		if (e.getType() == TableModelEvent.UPDATE || e.getType() == TableModelEvent.DELETE)
 		{
 			setEnabled(sourceTable != null);
-		}
-
-		if (!wasEnabled && isEnabled() && guiButton != null)
-		{
-			WbSwingUtilities.showToolTip(guiButton, ResourceMgr.getString("TxtApplyDDLHint"));
 		}
 	}
 

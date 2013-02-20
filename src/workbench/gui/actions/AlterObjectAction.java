@@ -90,12 +90,7 @@ public class AlterObjectAction
 	{
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		boolean modified = (ds != null ? ds.isModified() : false);
-		boolean wasEnabled = isEnabled();
 		setEnabled(dbConnection != null && modified && canAlterChangedTypes());
-		if (!wasEnabled && isEnabled() && guiButton != null)
-		{
-			WbSwingUtilities.showToolTip(guiButton, ResourceMgr.getString("TxtApplyDDLHint"));
-		}
 	}
 
 	private boolean canAlterChangedTypes()
