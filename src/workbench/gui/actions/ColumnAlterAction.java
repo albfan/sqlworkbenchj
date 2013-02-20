@@ -29,19 +29,24 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.db.sqltemplates.ColumnChanger;
+
+import workbench.interfaces.Reloadable;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.sqltemplates.ColumnChanger;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.RunScriptPanel;
-import workbench.interfaces.Reloadable;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -99,7 +104,7 @@ public class ColumnAlterAction
 
 		if (!wasEnabled && isEnabled() && guiButton != null)
 		{
-			WbSwingUtilities.showToolTip(guiButton, "Click her to apply the changes");
+			WbSwingUtilities.showToolTip(guiButton, ResourceMgr.getString("TxtApplyDDLHint"));
 		}
 	}
 

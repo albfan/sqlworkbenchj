@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -56,7 +57,7 @@ public class AlterObjectAction
 	extends WbAction
 	implements TableModelListener
 {
-
+	private JButton guiButton;
 	private WbTable tableList;
 	private WbConnection dbConnection;
 	private Reloadable client;
@@ -67,6 +68,11 @@ public class AlterObjectAction
 		initMenuDefinition("MnuTxtAlterObjects");
 		tableList.addTableModelListener(this);
 		checkEnabled();
+	}
+
+	public void setButton(JButton button)
+	{
+		guiButton = button;
 	}
 
 	public void setReloader(Reloadable reload)
@@ -84,7 +90,12 @@ public class AlterObjectAction
 	{
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		boolean modified = (ds != null ? ds.isModified() : false);
+		boolean wasEnabled = isEnabled();
 		setEnabled(dbConnection != null && modified && canAlterChangedTypes());
+		if (!wasEnabled && isEnabled() && guiButton != null)
+		{
+			WbSwingUtilities.showToolTip(guiButton, ResourceMgr.getString("TxtApplyDDLHint"));
+		}
 	}
 
 	private boolean canAlterChangedTypes()

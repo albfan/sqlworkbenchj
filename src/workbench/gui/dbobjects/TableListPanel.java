@@ -39,6 +39,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -49,16 +55,20 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import workbench.WbManager;
+import workbench.interfaces.CriteriaPanel;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.Exporter;
+import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.interfaces.ShareableDisplay;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
@@ -74,10 +84,12 @@ import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.CountTableRowsAction;
 import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.CreateSnippetAction;
@@ -90,30 +102,12 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.*;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.QuickFilterPanel;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
-import workbench.interfaces.CriteriaPanel;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.Exporter;
-import workbench.interfaces.ListSelectionControl;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
-import workbench.interfaces.ShareableDisplay;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
-import workbench.gui.actions.CountTableRowsAction;
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
@@ -348,6 +342,8 @@ public class TableListPanel
 		this.statusPanel = new JPanel(new BorderLayout());
 		this.alterButton = new FlatButton(this.renameAction);
 		this.alterButton.setResourceKey("MnuTxtRunAlter");
+		renameAction.setButton(alterButton);
+		
 		this.summaryStatusBarLabel = new SummaryLabel("");
 		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);
 		this.listPanel.add(statusPanel, BorderLayout.SOUTH);
