@@ -284,7 +284,17 @@
 							</para>
 						</entry>
 					</row>
-
+					<row>
+						<entry>-schema</entry>
+						<entry>
+							<para>
+                Define the schema in which the table(s) specified with <literal>-sourceTable</literal>
+                are located. This parameter only accepts a single schema name. If you want to
+                export tables from more than one schema, you need to fully qualify them as shown
+                in the description of the <literal>-sourceTable</literal> parameter.
+							</para>
+            </entry>
+          </row>
 					<row>
 						<entry>-types</entry>
 						<entry>
@@ -326,6 +336,10 @@
                 This can be used when exporting views on tables, when for each table e.g. a view with a certain prefix
                 exists (e.g. table <literal>PERSON</literal> has the view <literal>V_PERSON</literal> and the view does
                 some filtering of the data.
+              </para>
+              <para>
+                This parameter can <emphasis role="bold">not</emphasis> be used to select tables from a specific schema.
+                The prefix will be prepended to the table's <emphasis role="bold">name</emphasis>.
               </para>
             </entry>
 					</row>
@@ -1264,7 +1278,7 @@
 						</entry>
 					</row>
         </tbody>
-        
+
       </tgroup>
     </informaltable>
   </section>

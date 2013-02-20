@@ -173,6 +173,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_PREDATA_HTML);
 		cmdLine.addArgument(ARG_POSTDATA_HTML);
 		cmdLine.addArgument(ARG_SOURCETABLE, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(ARG_OUTPUTDIR);
 		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none"));
@@ -619,7 +620,7 @@ public class WbExport
 		{
 			exporter.setNullString(cmdLine.getValue(ARG_NULL_STRING, null));
 		}
-		
+
 		exporter.setAppendToFile(appendToFile);
 
 		String ending = cmdLine.getValue(ARG_LINEENDING);
@@ -669,8 +670,9 @@ public class WbExport
 		try
 		{
 			String excluded = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
+			String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			String[] types = SourceTableArgument.parseTypes(cmdLine.getValue(CommonArgs.ARG_TYPES), currentConnection);
-			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, null, types, this.currentConnection);
+			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, schema, types, this.currentConnection);
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && cmdLine.isArgPresent(ARG_SOURCETABLE))
 			{
