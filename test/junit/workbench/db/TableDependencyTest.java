@@ -24,11 +24,14 @@ package workbench.db;
 
 import java.sql.Statement;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
 import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -47,56 +50,47 @@ public class TableDependencyTest
 	{
 		TestUtil util = new TestUtil("dependencyTest");
 		WbConnection dbConn = util.getConnection();
-		Statement stmt = dbConn.createStatement();
-		String baseSql = "CREATE TABLE base  \n" +
-					 "( \n" +
-					 "   id1  INTEGER NOT NULL, \n" +
-					 "   id2  INTEGER NOT NULL, \n" +
-					 "   primary key (id1, id2) \n" +
-					 ")";
-		stmt.execute(baseSql);
-
-		String child1Sql = "CREATE TABLE child1 \n" +
-					 "( \n" +
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
-					 "   base_id1    INTEGER NOT NULL, \n" +
-					 "   base_id2    INTEGER NOT NULL, \n" +
-					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-					 ")";
-		stmt.executeUpdate(child1Sql);
-
-		String child2Sql = "CREATE TABLE child2 \n" +
-					 "( \n" +
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
-					 "   base_id1    INTEGER NOT NULL, \n" +
-					 "   base_id2    INTEGER NOT NULL, \n" +
-					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-					 ")";
-		stmt.executeUpdate(child2Sql);
-
-		String child3Sql = "CREATE TABLE child2_detail \n" +
-					 "( \n" +
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
-					 "   child_id    INTEGER NOT NULL, \n" +
-					 "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
-					 ")";
-		stmt.executeUpdate(child3Sql);
-
-		String sql = "CREATE TABLE child1_detail \n" +
-					 "( \n" +
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
-					 "   child1_id    INTEGER NOT NULL, \n" +
-					 "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" +
-					 ")";
-		stmt.executeUpdate(sql);
-
-		sql = "CREATE TABLE child1_detail2 \n" +
-					 "( \n" +
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
-					 "   detail_id    INTEGER NOT NULL, \n" +
-					 "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" +
-					 ")";
-		stmt.executeUpdate(sql);
+		String script =
+		"CREATE TABLE base  \n" +
+			 "( \n" +
+			 "   id1  INTEGER NOT NULL, \n" +
+			 "   id2  INTEGER NOT NULL, \n" +
+			 "   primary key (id1, id2) \n" +
+			 "); \n"+
+		"CREATE TABLE child1 \n" +
+			 "( \n" +
+			 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+			 "   base_id1    INTEGER NOT NULL, \n" +
+			 "   base_id2    INTEGER NOT NULL, \n" +
+			 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+			 "); \n" +
+		"CREATE TABLE child2 \n" +
+			 "( \n" +
+			 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+			 "   base_id1    INTEGER NOT NULL, \n" +
+			 "   base_id2    INTEGER NOT NULL, \n" +
+			 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+			 "); \n" +
+		"CREATE TABLE child2_detail \n" +
+			 "( \n" +
+			 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+			 "   child_id    INTEGER NOT NULL, \n" +
+			 "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
+			 "); \n"+
+		"CREATE TABLE child1_detail \n" +
+			 "( \n" +
+			 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+			 "   child1_id    INTEGER NOT NULL, \n" +
+			 "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" +
+			 "); \n" +
+		"CREATE TABLE child1_detail2 \n" +
+			 "( \n" +
+			 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+			 "   detail_id    INTEGER NOT NULL, \n" +
+			 "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" +
+			 ");\n" +
+		"commit;\n";
+		TestUtil.executeScript(dbConn, script);
 		return dbConn;
 	}
 
@@ -108,12 +102,57 @@ public class TableDependencyTest
 	}
 
 	@Test
+	public void testMultiSchema()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection dbConn = util.getConnection();
+		String script =
+			"create schema one;\n" +
+			"create schema two;\n" +
+			"create table one.t1 (id integer not null primary key);\n" +
+			"create table one.t2 (id integer not null primary key, t1_id integer not null references one.t1(id));\n" +
+			"create table two.t3 (id integer not null primary key, t2_id integer not null references one.t2(id));\n" +
+			"commit;";
+		TestUtil.executeScript(dbConn, script);
+		try
+		{
+			TableIdentifier base = new TableIdentifier("ONE.T1");
+			TableDependency dep = new TableDependency(dbConn, base);
+			dep.setRetrieveDirectChildrenOnly(false);
+			dep.readTreeForChildren();
+			DependencyNode root = dep.getRootNode();
+			assertNotNull("No root returned", root);
+
+			List<DependencyNode> l1 = root.getChildren();
+			assertNotNull(l1);
+			assertEquals(1, l1.size());
+
+			DependencyNode c1 = l1.get(0);
+			assertNotNull(c1);
+			assertEquals("T2", c1.getTable().getTableName());
+
+			List<DependencyNode> l2 = c1.getChildren();
+			assertNotNull(l2);
+			assertEquals(1, l2.size());
+			DependencyNode c2 = l2.get(0);
+			assertNotNull(c2);
+			assertEquals("T3", c2.getTable().getTableName());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
 	public void testDependency()
 		throws Exception
 	{
 		try
 		{
 			TableIdentifier base = new TableIdentifier("BASE");
+
 			TableDependency dep = new TableDependency(createRegularDB(), base);
 			dep.readTreeForChildren();
 			DependencyNode root = dep.getRootNode();
