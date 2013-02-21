@@ -143,7 +143,6 @@ public class MacroPopup
 
 	private List<String> getExpanedGroups()
 	{
-
 		PropertyStorage config = getConfig();
 		String groups = config.getProperty(propkey, null);
 		return StringUtil.stringToList(groups, ",", true, true);
