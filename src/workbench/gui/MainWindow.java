@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -218,6 +220,12 @@ public class MainWindow
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
+
+	/**
+	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
+	 * e.g. the Macro Popup window
+	 */
+	private final Map<String, Properties> toolProperties = new HashMap<String, Properties>();
 
 	public MainWindow()
 	{
@@ -821,6 +829,26 @@ public class MainWindow
 			if (p.getId().equals(panel.getId())) return i;
 		}
 		return -1;
+	}
+
+	/**
+	 * Return properties for a specific tool.
+	 *
+	 * @param toolKey a (unique) key for the tool. It must not contain spaces or special characters
+	 * @return the properties, never null
+	 */
+	public Properties getToolProperties(String toolKey)
+	{
+		synchronized (toolProperties)
+		{
+			Properties props = toolProperties.get(toolKey);
+			if (props == null)
+			{
+				props = new Properties();
+				toolProperties.put(toolKey, props);
+			}
+			return props;
+		}
 	}
 
 	/**
@@ -2638,6 +2666,7 @@ public class MainWindow
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
 			}
+
 		}
 		catch (Throwable e)
 		{

@@ -81,7 +81,7 @@ public class WbProperties
 	{
 		return changed;
 	}
-	
+
 	public synchronized void saveToFile(File filename)
 		throws IOException
 	{

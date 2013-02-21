@@ -29,6 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -51,6 +54,8 @@ public class WbWorkspace
 	private boolean isReadOnly;
 	private WbProperties tabInfo = new WbProperties(null, 0);
 	private int tabCount = -1;
+	private Map<String, WbProperties> toolProperties = new HashMap<String, WbProperties>();
+	private final String toolEntryPrefix = "toolprop_";
 
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
@@ -78,7 +83,7 @@ public class WbWorkspace
 				entry = archive.getEntry("tabinfo.properties");
 			}
 			this.readTabInfo(entry);
-
+			this.readToolProperties();
 			tabCount = calculateTabCount();
 		}
 	}
@@ -92,6 +97,23 @@ public class WbWorkspace
 		this.tabInfo = props;
 		tabCount = calculateTabCount();
 		this.isReadOnly = true;
+	}
+
+	private void readToolProperties()
+	{
+		Enumeration<? extends ZipEntry> entries = archive.entries();
+		while (entries.hasMoreElements())
+		{
+			ZipEntry entry = entries.nextElement();
+			String name = entry.getName();
+			if (name.startsWith(toolEntryPrefix))
+			{
+				WbFile f = new WbFile(name.substring(toolEntryPrefix.length()));
+				String toolkey = f.getFileName();
+				WbProperties props = readProperties(entry);
+				toolProperties.put(toolkey, props);
+			}
+		}
 	}
 
 	private int calculateTabCount()
@@ -131,6 +153,16 @@ public class WbWorkspace
 			index ++;
 		}
 		return index;
+	}
+
+	public Map<String, WbProperties> getToolProperties()
+	{
+		return toolProperties;
+	}
+
+	public void setToolProperties(Map<String, WbProperties> toolProps)
+	{
+		this.toolProperties = new HashMap<String, WbProperties>(toolProps);
 	}
 
 	public void setEntryCount(int count)
@@ -190,6 +222,19 @@ public class WbWorkspace
 		return this.tabInfo;
 	}
 
+	private void saveToolProperties()
+		throws IOException
+	{
+		if (this.toolProperties == null && this.toolProperties.isEmpty()) return;
+		for (Map.Entry<String, WbProperties> propEntry : toolProperties.entrySet())
+		{
+				ZipEntry entry = new ZipEntry(toolEntryPrefix + propEntry.getKey() + ".properties");
+				this.zout.putNextEntry(entry);
+				propEntry.getValue().save(this.zout);
+				zout.closeEntry();
+		}
+	}
+
 	@Override
 	public void close()
 		throws IOException
@@ -204,6 +249,7 @@ public class WbWorkspace
 					this.zout.putNextEntry(entry);
 					this.tabInfo.save(this.zout);
 					zout.closeEntry();
+					saveToolProperties();
 				}
 				catch (Throwable e)
 				{
@@ -223,17 +269,22 @@ public class WbWorkspace
 
 	private void readTabInfo(ZipEntry entry)
 	{
+		this.tabInfo = readProperties(entry);
+	}
+
+	private WbProperties readProperties(ZipEntry entry)
+	{
+		WbProperties props = new WbProperties(null, 1);
 		try
 		{
 			InputStream in = this.archive.getInputStream(entry);
-			this.tabInfo = new WbProperties(1);
-			this.tabInfo.load(in);
+			props.load(in);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbWorkspace", "Could not read tab info!", e);
-			this.tabInfo = new WbProperties(this);
+			LogMgr.logError("WbWorkspace.readProperties()", "Could not read property file: " + entry.getName(), e);
 		}
+		return props;
 	}
 
 	public void setSelectedTab(int anIndex)
