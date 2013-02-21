@@ -46,6 +46,7 @@ import javax.swing.table.TableColumnModel;
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 /**
  *	Prints the content of a Table.
@@ -120,7 +121,7 @@ public class TablePrinter
 		pj.setPrintable(this, this.format);
 		pj.setPageable(this);
 
-		Thread pt = new Thread()
+		Thread pt = new WbThread("Print Thread")
 		{
 			@Override
 			public void run()
@@ -139,8 +140,6 @@ public class TablePrinter
 				}
 			}
 		};
-		pt.setDaemon(true);
-		pt.setName("Print Thread");
 		pt.start();
 	}
 
