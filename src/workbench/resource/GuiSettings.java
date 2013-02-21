@@ -50,6 +50,7 @@ public class GuiSettings
 	public static final String PROPERTY_EXPAND_KEYSTROKE = "workbench.editor.expand.macro.key";
 	public static final String PROPERTY_EXPAND_MAXDURATION = "workbench.editor.expand.maxduration";
 	public static final String PROPERTY_SHOW_RESULT_SQL = "workbench.gui.display.result.sql";
+	public static final String PROPERTY_MACRO_POPUP_WKSP = "workbench.gui.macropopup.useworkspace";
 
 	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
 	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
@@ -85,6 +86,16 @@ public class GuiSettings
 		int code = key.getKeyCode();
 		int modifier = key.getModifiers();
 		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
+	}
+
+	public static boolean getStoreMacroPopupInWorkspace()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_WKSP, false);
+	}
+
+	public static void setStoreMacroPopupInWorkspace(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_MACRO_POPUP_WKSP, flag);
 	}
 
 	public static boolean getShowResultSQL()

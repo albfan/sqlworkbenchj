@@ -29,12 +29,22 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
+
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+
+import workbench.interfaces.FileActions;
+import workbench.interfaces.MacroChangeListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.PropertyStorage;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -43,14 +53,13 @@ import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.FileActions;
-import workbench.interfaces.MacroChangeListener;
-import workbench.interfaces.MainPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.StringUtil;
+
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
  * Display a floating window with the MacroTree.
@@ -67,12 +76,17 @@ public class MacroPopup
 	private MainWindow mainWindow;
 	private RunMacroAction runAction;
 	private boolean isClosing;
+	private final String propkey = getClass().getName() + ".expandedgroups";
+	private final String toolkey = "macropopup";
 
 	public MacroPopup(MainWindow parent)
 	{
 		super(parent, false);
+		mainWindow = parent;
 		setLayout(new BorderLayout(0, 0));
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
 		tree = new MacroTree();
 		JScrollPane p = new JScrollPane(tree);
 		add(p, BorderLayout.CENTER);
@@ -85,18 +99,15 @@ public class MacroPopup
 		{
 			setLocation(parent.getX() + parent.getWidth() - getWidth()/2, parent.getY() + 25);
 		}
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		String s = Settings.getInstance().getProperty(getClass().getName() + ".expandedgroups", null);
-		List<String> groups = StringUtil.stringToList(s, ",", true, true);
+		List<String> groups = getExpanedGroups();
 		tree.expandGroups(groups);
 		tree.addMouseListener(this);
-		mainWindow = parent;
+
 		runAction = new RunMacroAction(mainWindow, null, -1);
 		tree.addPopupActionAtTop(runAction);
 		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
-
 
 		FileActions actions = new FileActions()
 		{
@@ -128,6 +139,33 @@ public class MacroPopup
 
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 		ToolTipManager.sharedInstance().registerComponent(tree);
+	}
+
+	private List<String> getExpanedGroups()
+	{
+
+		PropertyStorage config = getConfig();
+		String groups = config.getProperty(propkey, null);
+		return StringUtil.stringToList(groups, ",", true, true);
+	}
+
+	private void saveExpandedGroups(List<String> groups)
+	{
+		String grouplist = StringUtil.listToString(groups, ',', true);
+		PropertyStorage config = getConfig();
+		config.setProperty(propkey, grouplist);
+	}
+
+	private PropertyStorage getConfig()
+	{
+		if (GuiSettings.getStoreMacroPopupInWorkspace() && mainWindow != null)
+		{
+			return mainWindow.getToolProperties(toolkey);
+		}
+		else
+		{
+			return Settings.getInstance();
+		}
 	}
 
 	private void closeWindow()
@@ -182,7 +220,7 @@ public class MacroPopup
 		tree.removeTreeSelectionListener(this);
 
 		List<String> groups = tree.getExpandedGroupNames();
-		Settings.getInstance().setProperty(getClass().getName() + ".expandedgroups", StringUtil.listToString(groups, ',', true));
+		saveExpandedGroups(groups);
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
 		EventQueue.invokeLater(new Runnable()

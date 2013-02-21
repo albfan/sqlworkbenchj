@@ -49,7 +49,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -66,9 +65,23 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import workbench.WbManager;
+import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.MacroChangeListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Moveable;
+import workbench.interfaces.StatusBar;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -133,19 +146,9 @@ import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.MacroChangeListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Moveable;
-import workbench.interfaces.StatusBar;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
@@ -153,6 +156,7 @@ import workbench.util.FileVersioner;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -225,7 +229,7 @@ public class MainWindow
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
 	 * e.g. the Macro Popup window
 	 */
-	private final Map<String, Properties> toolProperties = new HashMap<String, Properties>();
+	private final Map<String, WbProperties> toolProperties = new HashMap<String, WbProperties>();
 
 	public MainWindow()
 	{
@@ -837,14 +841,14 @@ public class MainWindow
 	 * @param toolKey a (unique) key for the tool. It must not contain spaces or special characters
 	 * @return the properties, never null
 	 */
-	public Properties getToolProperties(String toolKey)
+	public WbProperties getToolProperties(String toolKey)
 	{
 		synchronized (toolProperties)
 		{
-			Properties props = toolProperties.get(toolKey);
+			WbProperties props = toolProperties.get(toolKey);
 			if (props == null)
 			{
-				props = new Properties();
+				props = new WbProperties(1);
 				toolProperties.put(toolKey, props);
 			}
 			return props;
