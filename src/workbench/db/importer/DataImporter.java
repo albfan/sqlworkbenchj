@@ -53,7 +53,6 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -102,6 +101,8 @@ public class DataImporter
 	private boolean createTarget;
 	private String createType;
 	private boolean continueOnError;
+
+	private boolean ignoreIdentityColumns;
 
 	private long totalRows = 0;
 	private long updatedRows = 0;
@@ -224,6 +225,10 @@ public class DataImporter
 		LogMgr.logInfo("DataImporter.setUseSavepoint()", "Using savepoints for DML: " + useSavepoint);
 	}
 
+	public void setIgnoreIdentityColumns(boolean flag)
+	{
+		this.ignoreIdentityColumns = flag;
+	}
 
 	public void setInsertStart(String sql)
 	{
@@ -680,6 +685,13 @@ public class DataImporter
 	private boolean hasKeyColumns()
 	{
 		return (this.keyColumns != null && keyColumns.size() > 0);
+	}
+
+	private boolean ignoreColumn(ColumnIdentifier col)
+	{
+		if (col == null) return true;
+		if (!ignoreIdentityColumns) return false;
+		return col.isIdentityColumn() || col.isAutoincrement();
 	}
 
 	/**
@@ -1270,9 +1282,12 @@ public class DataImporter
 	private long processRowData(BatchedStatement pstmt, Object[] row, boolean useColMap)
 		throws SQLException
 	{
+		int colIndex = 0;
 		for (int i=0; i < row.length; i++)
 		{
-			int colIndex = i  + 1;
+			if (ignoreColumn(targetColumns.get(i))) continue;
+			colIndex ++;
+
 			if (useColMap)
 			{
 				// The colIndex points to the correct location in the PreparedStatement
@@ -1459,7 +1474,7 @@ public class DataImporter
 		if (columnConstants != null && pstmt == this.insertStatement)
 		{
 			int count = this.columnConstants.getColumnCount();
-			int colIndex = row.length + 1;
+			int constIndex = row.length + 1;
 			for (int i=0; i < count; i++)
 			{
 				if (columnConstants.isSelectStatement(i))
@@ -1468,13 +1483,13 @@ public class DataImporter
 
 					Map<Integer, Object> values = source.getInputColumnValues(stmt.getInputColumnIndexes());
 					Object data = stmt.getDatabaseValue(dbConn, values);
-					pstmt.getStatement().setObject(colIndex, data);
-					colIndex ++;
+					pstmt.getStatement().setObject(constIndex, data);
+					constIndex ++;
 				}
 				else if (!columnConstants.isFunctionCall(i))
 				{
-					columnConstants.setParameter(pstmt.getStatement(), colIndex, i);
-					colIndex ++;
+					columnConstants.setParameter(pstmt.getStatement(), constIndex, i);
+					constIndex ++;
 				}
 			}
 		}
@@ -1759,14 +1774,17 @@ public class DataImporter
 
 		DbMetadata meta = dbConn.getMetadata();
 
+		int colIndex = 0;
 		for (int i=0; i < this.colCount; i++)
 		{
-			if (i > 0)
+			ColumnIdentifier col = this.targetColumns.get(i);
+			if (ignoreColumn(col)) continue;
+			if (colIndex > 0)
 			{
 				text.append(',');
 				parms.append(',');
 			}
-			ColumnIdentifier col = this.targetColumns.get(i);
+
 			String colname = col.getDisplayName();
 			if (!verifyTargetTable)
 			{
@@ -1778,7 +1796,9 @@ public class DataImporter
 			text.append(colname);
 
 			parms.append('?');
+			colIndex ++;
 		}
+
 		if (this.columnConstants != null)
 		{
 			int cols = columnConstants.getColumnCount();
@@ -1855,6 +1875,7 @@ public class DataImporter
 		for (int i=0; i < this.colCount; i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
+			if (ignoreColumn(col)) continue;
 			String colname = col.getDisplayName();
 			if (!verifyTargetTable)
 			{

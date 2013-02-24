@@ -343,7 +343,7 @@ public class TableListPanel
 		this.alterButton = new FlatButton(this.renameAction);
 		this.alterButton.setResourceKey("MnuTxtRunAlter");
 		renameAction.setButton(alterButton);
-		
+
 		this.summaryStatusBarLabel = new SummaryLabel("");
 		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);
 		this.listPanel.add(statusPanel, BorderLayout.SOUTH);
@@ -940,6 +940,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
+			tableTypes.setEnabled(false);
 			summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			reset();
 
@@ -1017,6 +1018,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 			setBusy(false);
+			tableTypes.setEnabled(true);
 			endTransaction();
 		}
 	}
@@ -1876,7 +1878,7 @@ public class TableListPanel
 	{
 		if (ignoreStateChanged) return;
 
-		if (e.getSource() == this.tableTypes)
+		if (e.getSource() == this.tableTypes && !isBusy())
 		{
 			try
 			{

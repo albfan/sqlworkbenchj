@@ -38,13 +38,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.RestoreDataAction;
-import workbench.gui.actions.SetNullAction;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SelectFkValueAction;
+import workbench.gui.actions.SetNullAction;
+
 import workbench.util.WbDateFormatter;
 
 /**

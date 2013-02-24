@@ -24,13 +24,15 @@ package workbench.sql.wbcommands;
 
 import java.util.List;
 
-import workbench.db.datacopy.DropType;
-import workbench.db.importer.DeleteType;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.datacopy.DropType;
+import workbench.db.importer.DeleteType;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.QuoteEscapeType;
@@ -82,6 +84,8 @@ public class CommonArgs
 	public static final String ARG_SCHEMAS = "schemas";
 	public static final String ARG_TYPES = "types";
 	public static final String ARG_OBJECTS = "objects";
+	public static final String ARG_IGNORE_IDENTITY = "ignoreIdentityColumns";
+
 
 	private static List<String> getDelimiterArguments()
 	{

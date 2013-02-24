@@ -1423,6 +1423,8 @@ public class MainWindow
 		this.disconnectAction.setEnabled(true);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
+		this.showMacroPopup.workspaceChanged();
+		
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 		DatabaseMetaData meta = conn.getMetadata().getJdbcMetaData();

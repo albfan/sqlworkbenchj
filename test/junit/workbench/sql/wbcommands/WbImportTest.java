@@ -109,6 +109,37 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testIdentityInsert()
+		throws Exception
+	{
+		File input = new File(util.getBaseDir(), "id_data.txt");
+
+		TestUtil.writeFile(input,
+			"id\tfirstname\tlastname\n" +
+			"100\tArthur\tDent\n" +
+			"101\tFord\tPrefect\n", "ISO-8859-1");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-header=true " +
+			"-ignoreIdentityColumns=true " +
+			"-continueonerror=false " +
+			"-table=id_test");
+
+		assertTrue(input.delete());
+
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		Number id = (Number)TestUtil.getSingleQueryValue(connection, "select id from id_test where lastname = 'Dent'");
+		assertNotNull(id);
+		assertEquals(1, id.intValue());
+
+		id = (Number)TestUtil.getSingleQueryValue(connection, "select id from id_test where lastname = 'Prefect'");
+		assertNotNull(id);
+		assertEquals(2, id.intValue());
+	}
+
+	@Test
 	public void testOdsImport()
 		throws Exception
 	{
@@ -4398,6 +4429,7 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
 		stmt.executeUpdate("CREATE TABLE const_test (id integer, flag1 varchar(2), flag2 varchar(2))");
+		stmt.executeUpdate("create table id_test (id integer generated always as identity primary key, firstname varchar(100), lastname varchar(100))");
 
 		stmt.executeUpdate("CREATE TABLE zzbase (id integer primary key, info varchar(50))");
 		stmt.executeUpdate("CREATE TABLE child1 (id integer primary key, base_id integer not null, info varchar(50))");

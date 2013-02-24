@@ -169,6 +169,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_IGNORE_IDENTITY, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, CollectionUtil.arrayList("file", "ansi", "base64"));
 		cmdLine.addArgument(ARG_CLOB_ISFILENAME, ArgumentType.BoolArgument);
@@ -317,7 +318,8 @@ public class WbImport
 		imp.setContinueOnError(continueOnError);
 
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
-
+		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
+		
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 

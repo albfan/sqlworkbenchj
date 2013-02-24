@@ -324,6 +324,22 @@
 					</row>
 
 					<row>
+						<entry>-ignoreIdentitiyColumns</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls if identity or auto-increment columns will be included in the import.
+							</para>
+              <para>
+                If this is used, the JDBC driver must correctly report the column to be excluded as an <emphasis>AUTOINCREMENT</emphasis>
+                column. This can be verified in the table definition display of the DbExplorer.
+                If the column is reported with <literal>YES</literal> for the <emphasis>AUTOINCREMENT</emphasis> property,
+                then this column will be excluded during the import.
+              </para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-schema</entry>
 						<entry>
 							Defines the schema into which the data should be imported. This

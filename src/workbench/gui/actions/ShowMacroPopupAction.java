@@ -24,14 +24,14 @@ package workbench.gui.actions;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-
-
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroPopup;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  Thomas Kellerer
@@ -62,6 +62,14 @@ public class ShowMacroPopupAction
 	{
 		createPopup();
 		macroWindow.setVisible(true);
+	}
+
+	public void workspaceChanged()
+	{
+		if (this.macroWindow != null)
+		{
+			macroWindow.workspaceChanged();
+		}
 	}
 
 	private void createPopup()

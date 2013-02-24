@@ -30,15 +30,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import workbench.db.*;
-import workbench.db.compare.TableDeleteSync;
-import workbench.db.importer.*;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ObjectDropper;
 import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.*;
+import workbench.db.compare.TableDeleteSync;
+import workbench.db.importer.*;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.*;
 
 /**
@@ -94,6 +97,11 @@ public class DataCopier
 		errors = new MessageBuffer();
 	}
 
+	public void setIgnoreIdentityColumns(boolean flag)
+	{
+		this.importer.setIgnoreIdentityColumns(flag);
+	}
+	
 	public void setTransactionControl(boolean flag)
 	{
 		this.importer.setTransactionControl(flag);

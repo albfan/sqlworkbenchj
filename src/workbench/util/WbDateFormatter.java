@@ -28,6 +28,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import workbench.resource.Settings;
+
 import workbench.db.exporter.InfinityLiterals;
 
 /**
@@ -118,6 +121,7 @@ public class WbDateFormatter
 	public static String getDisplayValue(Object value)
 	{
 		if (value == null) return "";
+
 		if (value instanceof java.util.Date)
 		{
 			long time = ((java.util.Date)value).getTime();
@@ -130,6 +134,21 @@ public class WbDateFormatter
 				return InfinityLiterals.PG_NEGATIVE_LITERAL;
 			}
 		}
+
+		if (value instanceof java.sql.Date)
+		{
+			String format = Settings.getInstance().getDefaultDateFormat();
+			WbDateFormatter formatter = new WbDateFormatter(format);
+			return formatter.format((java.sql.Date)value);
+		}
+
+		if (value instanceof java.sql.Timestamp)
+		{
+			String format = Settings.getInstance().getDefaultTimestampFormat();
+			WbDateFormatter formatter = new WbDateFormatter(format);
+			return formatter.format((java.sql.Timestamp)value);
+		}
+
 		return value.toString();
 	}
 }

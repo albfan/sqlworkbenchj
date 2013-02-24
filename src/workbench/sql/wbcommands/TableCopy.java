@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
@@ -36,9 +38,11 @@ import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.datacopy.DropType;
 import workbench.db.importer.TableStatements;
-import workbench.resource.ResourceMgr;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -88,6 +92,7 @@ class TableCopy
 		copier.setKeyColumns(keys);
 
 		copier.setPerTableStatements(new TableStatements(cmdLine));
+		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
 
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(mode))

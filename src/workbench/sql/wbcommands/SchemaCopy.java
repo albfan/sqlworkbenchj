@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -42,10 +45,11 @@ import workbench.db.importer.DataReceiver;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.TableDependencySorter;
 import workbench.db.importer.TableStatements;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -367,7 +371,8 @@ class SchemaCopy
 
 		copier.setPerTableStatements(new TableStatements(cmdLine));
 		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
-
+		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
+		
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
 
 		CommonArgs.setProgressInterval(copier, arguments);

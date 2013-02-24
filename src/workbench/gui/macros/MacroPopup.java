@@ -100,8 +100,7 @@ public class MacroPopup
 			setLocation(parent.getX() + parent.getWidth() - getWidth()/2, parent.getY() + 25);
 		}
 
-		List<String> groups = getExpanedGroups();
-		tree.expandGroups(groups);
+		restoreExpandedGroups();
 		tree.addMouseListener(this);
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
@@ -139,6 +138,17 @@ public class MacroPopup
 
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 		ToolTipManager.sharedInstance().registerComponent(tree);
+	}
+
+	public void workspaceChanged()
+	{
+		restoreExpandedGroups();
+	}
+
+	private void restoreExpandedGroups()
+	{
+		List<String> groups = getExpanedGroups();
+		tree.expandGroups(groups);
 	}
 
 	private List<String> getExpanedGroups()
