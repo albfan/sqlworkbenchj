@@ -28,10 +28,6 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.*;
 
-import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
-import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -39,9 +35,17 @@ import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
+import workbench.db.WbConnection;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -525,11 +529,9 @@ public class StatementRunner
 	{
 		synchronized (this)
 		{
-			LogMgr.logDebug("StatementRunner.done()", "SQL execution finished");
 			if (this.result != null) this.result.clear();
 			this.result = null;
 			this.releaseSavepoint();
-//			this.statementDone();
 			this.currentConsumer = null;
 			this.restoreMainConnection();
 			if (currentConnection != null)
