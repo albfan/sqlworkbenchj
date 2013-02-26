@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-02-09">
+  <release build="-1" date="2013-02-26">
     <entry dev-build="1" type="enh">When editing a date or timestamp column, the value is now displayed in the same format that is defined in the options dialog for "Data formatting"</entry>
     <entry dev-build="1" type="enh">A new parameter (-ignoreIdentityColumns) to ignore identity (and autoincrement columns) was added to WbImport</entry>
     <entry dev-build="1" type="enh">A new menu item to close all empty result tabs has been added to the context menu of the result tabs</entry>
