@@ -392,47 +392,8 @@ public class JdbcProcedureReader
 		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
 		source.append(header);
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		Savepoint sp = null;
-
-		try
-		{
-			if (useSavepoint)
-			{
-				sp = this.connection.setSavepoint();
-			}
-			sql.setSchema(def.getSchema());
-			sql.setObjectName(procName);
-			sql.setCatalog(def.getCatalog());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
-			}
-
-			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery(sql.getSql());
-			while (rs.next())
-			{
-				String line = rs.getString(1);
-				if (line != null)
-				{
-					source.append(line);
-				}
-			}
-			this.connection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			if (sp != null) this.connection.rollback(sp);
-			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
-			source = new StringBuilder(ExceptionUtil.getDisplay(e));
-			this.connection.rollback(sp);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+		CharSequence body = retrieveProcedureSource(def);
+		source.append(body);
 
 		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();
 		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
@@ -476,6 +437,63 @@ public class JdbcProcedureReader
 		}
 
 		def.setSource(result);
+	}
+
+	protected CharSequence retrieveProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+	{
+		GetMetaDataSql sql = this.connection.getMetadata().getMetaDataSQLMgr().getProcedureSourceSql();
+		if (sql == null)
+		{
+			throw new NoConfigException("No sql configured to retrieve procedure source");
+		}
+
+		String procName = stripVersionInfo(def.getProcedureName());
+
+		StringBuilder source = new StringBuilder(500);
+
+		Statement stmt = null;
+		ResultSet rs = null;
+		Savepoint sp = null;
+
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
+			sql.setSchema(def.getSchema());
+			sql.setObjectName(procName);
+			sql.setCatalog(def.getCatalog());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("JdbcProcedureReader.getProcedureSource()", "Using query=\n" + sql.getSql());
+			}
+
+			stmt = this.connection.createStatementForQuery();
+			rs = stmt.executeQuery(sql.getSql());
+			while (rs.next())
+			{
+				String line = rs.getString(1);
+				if (line != null)
+				{
+					source.append(line);
+				}
+			}
+			this.connection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			if (sp != null) this.connection.rollback(sp);
+			LogMgr.logError("JdbcProcedureReader.getProcedureSource()", "Error retrieving procedure source", e);
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
+			this.connection.rollback(sp);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return source;
 	}
 
 	/**

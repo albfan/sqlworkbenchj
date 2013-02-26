@@ -28,6 +28,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import workbench.db.JdbcProcedureReader;
+import workbench.db.NoConfigException;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -211,4 +213,13 @@ public class SqlServerProcedureReader
 		}
 	}
 
+	@Override
+	public CharSequence retrieveProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+	{
+		SpHelpTextRunner runner = new SpHelpTextRunner();
+		String procName = stripVersionInfo(def.getProcedureName());
+		CharSequence sql = runner.getSource(connection, def.getCatalog(), def.getSchema(), procName);
+		return sql;
+	}
 }

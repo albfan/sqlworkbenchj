@@ -37,21 +37,6 @@ where type = 'VIEW'
   </void>
 
   <void method="put">
-   <string>Microsoft SQL Server</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>exec sp_helptext</string>
-    </void>
-    <void property="isProcedureCall">
-     <boolean>true</boolean>
-    </void>
-    <void property="objectNameArgumentPos">
-     <int>1</int>
-    </void>
-   </object>
-  </void>
-
-  <void method="put">
    <string>FirstSQL/J</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
