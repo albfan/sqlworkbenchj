@@ -65,7 +65,7 @@ public interface ViewReader
 	 *
 	 * @return the view source as stored in the database.
 	 */
-	CharSequence getViewSource(TableIdentifier viewId, boolean includeGrants)
+	CharSequence getViewSource(TableIdentifier viewId)
 		throws NoConfigException;
 
 }

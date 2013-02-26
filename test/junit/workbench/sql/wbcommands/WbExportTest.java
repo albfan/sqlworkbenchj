@@ -396,7 +396,7 @@ public class WbExportTest
 		verb = SqlUtil.getSqlVerb(script);
 		assertEquals("Not an insert statement", "INSERT", verb);
 		assertEquals("ANSI Date literal not found", true, sql.indexOf("DATE '2006-01-01'") > -1);
-		assertEquals("ANSI Timestamp literal not found", true, sql.indexOf("TIMESTAMP '2007-02-02 14:15:16'") > -1);
+		assertEquals("ANSI Timestamp literal not found", true, sql.indexOf("TIMESTAMP '2007-02-02 14:15:16") > -1);
 
 		// Test Standard literals
 		exportFile.delete();
@@ -411,7 +411,7 @@ public class WbExportTest
 		verb = SqlUtil.getSqlVerb(script);
 		assertEquals("Not an insert statement", "INSERT", verb);
 		assertEquals("STANDARD Date literal not found", true, sql.indexOf("'2006-01-01'") > -1);
-		assertEquals("STANDARD Timestamp literal not found", true, sql.indexOf("'2007-02-02 14:15:16'") > -1);
+		assertEquals("STANDARD Timestamp literal not found", true, sql.indexOf("'2007-02-02 14:15:16") > -1);
 
 		// Test Oracle literals
 		exportFile.delete();
@@ -427,7 +427,7 @@ public class WbExportTest
 //			System.out.println("Statement=" + sql);
 		assertEquals("Not an insert statement", "INSERT", verb);
 		assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01'") > -1);
-		assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16'") > -1);
+		assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16") > -1);
 	}
 
 	@Test

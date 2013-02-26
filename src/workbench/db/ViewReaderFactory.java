@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import workbench.db.mssql.SqlServerViewReader;
 import workbench.db.mysql.MySQLViewReader;
 import workbench.db.oracle.OracleViewReader;
 import workbench.db.postgres.PostgresViewReader;
@@ -45,6 +46,10 @@ public class ViewReaderFactory
 		if (con.getMetadata().isOracle())
 		{
 			return new OracleViewReader(con);
+		}
+		if (con.getMetadata().isSqlServer())
+		{
+			return new SqlServerViewReader(con);
 		}
 		return new DefaultViewReader(con);
 	}

@@ -113,7 +113,7 @@ public class ReportView
 		}
 		try
 		{
-			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl, false);
+			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
 		}
 		catch (NoConfigException no)
 		{

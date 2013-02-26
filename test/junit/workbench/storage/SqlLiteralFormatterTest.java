@@ -58,7 +58,7 @@ public class SqlLiteralFormatterTest
 		assertNotNull(literal);
 		assertEquals("N'hello'", literal.toString());
 	}
-	
+
 	@Test
 	public void testGetJdbcLiteral()
 	{
@@ -74,6 +74,7 @@ public class SqlLiteralFormatterTest
 		c.set(Calendar.HOUR_OF_DAY, 14);
 		c.set(Calendar.MINUTE, 15);
 		c.set(Calendar.SECOND, 16);
+		c.set(Calendar.MILLISECOND, 0);
 
 		java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
 		ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
@@ -109,6 +110,7 @@ public class SqlLiteralFormatterTest
 		c.set(Calendar.HOUR_OF_DAY, 14);
 		c.set(Calendar.MINUTE, 15);
 		c.set(Calendar.SECOND, 16);
+		c.set(Calendar.MILLISECOND, 0);
 
 		java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
 		ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
@@ -126,7 +128,7 @@ public class SqlLiteralFormatterTest
 		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
 		data = new ColumnData(ts, tscol);
 		literal = f.getDefaultLiteral(data);
-		assertEquals("ANSI timestamp incorrect", "TIMESTAMP '2002-04-02 14:15:16'", literal);
+		assertEquals("ANSI timestamp incorrect", "TIMESTAMP '2002-04-02 14:15:16.000'", literal);
 	}
 
 	@Test
@@ -144,6 +146,7 @@ public class SqlLiteralFormatterTest
 		c.set(Calendar.HOUR_OF_DAY, 14);
 		c.set(Calendar.MINUTE, 15);
 		c.set(Calendar.SECOND, 16);
+		c.set(Calendar.MILLISECOND, 0);
 
 		java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
 		ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
@@ -155,6 +158,6 @@ public class SqlLiteralFormatterTest
 		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
 		data = new ColumnData(ts, tscol);
 		literal = f.getDefaultLiteral(data);
-		assertEquals("Oracle timestamp incorrect", "to_date('2002-04-02 14:15:16', 'YYYY-MM-DD HH24:MI:SS')", literal);
+		assertEquals("Oracle timestamp incorrect", "to_date('2002-04-02 14:15:16.000', 'YYYY-MM-DD HH24:MI:SS.FFF')", literal);
 	}
 }

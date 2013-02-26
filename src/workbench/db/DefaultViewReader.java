@@ -87,7 +87,7 @@ public class DefaultViewReader
 		CharSequence source = null;
 		try
 		{
-			source = this.getViewSource(viewTable, true);
+			source = this.getViewSource(viewTable);
 		}
 		catch (NoConfigException no)
 		{
@@ -165,6 +165,19 @@ public class DefaultViewReader
 		result.append(source);
 		result.append(lineEnding);
 
+		ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
+		if (grantReader != null)
+		{
+			CharSequence grants = grantReader.getViewGrantSource(connection, view.getTable());
+			if (grants != null && grants.length() > 0)
+			{
+				result.append(Settings.getInstance().getInternalEditorLineEnding());
+				result.append(Settings.getInstance().getInternalEditorLineEnding());
+				result.append(grants);
+				result.append(Settings.getInstance().getInternalEditorLineEnding());
+			}
+		}
+
 		TableCommentReader commentReader = new TableCommentReader();
 		String tableComment = commentReader.getTableCommentSql(this.connection, view.getTable());
 		if (StringUtil.isNonBlank(tableComment))
@@ -216,7 +229,7 @@ public class DefaultViewReader
 	 *  @throws NoConfigException if no SQL was configured in ViewSourceStatements.xml
 	 */
 	@Override
-	public CharSequence getViewSource(TableIdentifier viewId, boolean includeGrants)
+	public CharSequence getViewSource(TableIdentifier viewId)
 		throws NoConfigException
 	{
 		if (viewId == null) return null;
@@ -268,21 +281,6 @@ public class DefaultViewReader
 				{
 					source.append(';');
 					source.append(Settings.getInstance().getInternalEditorLineEnding());
-				}
-				if (includeGrants)
-				{
-					ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
-					if (grantReader != null)
-					{
-						CharSequence grants = grantReader.getViewGrantSource(connection, viewId);
-						if (grants != null && grants.length() > 0)
-						{
-							source.append(Settings.getInstance().getInternalEditorLineEnding());
-							source.append(Settings.getInstance().getInternalEditorLineEnding());
-							source.append(grants);
-							source.append(Settings.getInstance().getInternalEditorLineEnding());
-						}
-					}
 				}
 			}
 			connection.releaseSavepoint(sp);

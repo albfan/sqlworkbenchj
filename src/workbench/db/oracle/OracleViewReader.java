@@ -58,7 +58,7 @@ public class OracleViewReader
 	}
 
 	@Override
-	public CharSequence getViewSource(TableIdentifier viewId, boolean includeGrants)
+	public CharSequence getViewSource(TableIdentifier viewId)
 		throws NoConfigException
 	{
 		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
@@ -67,7 +67,7 @@ public class OracleViewReader
 			CharSequence sql = reader.getMViewSource(this.connection, viewId, null, false);
 			return sql;
 		}
-		return super.getViewSource(viewId, includeGrants);
+		return super.getViewSource(viewId);
 	}
 
 }
