@@ -112,15 +112,21 @@ public class CommonDiffParameters
 		WbConnection connection = null;
 
 		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profileKey);
+
 		if (prof == null)
 		{
 			String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
 			result.addMessage(msg);
 			result.setFailure();
+			return null;
 		}
+
 		try
 		{
-			if (this.monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnecting" + connType),-1,-1);
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnecting" + connType),-1,-1);
+			}
 			connection = ConnectionMgr.getInstance().getConnection(profileKey, "Wb-Diff-" + connType);
 		}
 		catch (Exception e)
@@ -223,7 +229,7 @@ public class CommonDiffParameters
 						}
 						else
 						{
-							targetTables.addAll(targetCon.getMetadata().getTableList(null, schema));
+							targetTables.addAll(targetCon.getMetadata().getTableList(null, null, schema));
 						}
 					}
 				}
@@ -319,5 +325,13 @@ public class CommonDiffParameters
 	{
 		public List<TableIdentifier> referenceTables = new ArrayList<TableIdentifier>();
 		public List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>();
+
+		@Override
+		public String toString()
+		{
+			return
+				"reference: " + referenceTables.toString() + "\n" +
+				"target: " + targetTables.toString();
+		}
 	}
 }

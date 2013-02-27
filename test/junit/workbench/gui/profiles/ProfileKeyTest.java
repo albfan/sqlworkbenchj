@@ -71,6 +71,11 @@ public class ProfileKeyTest
 		key1 = new ProfileKey("Profile1", "Default Group");
 		key2 = new ProfileKey("{ Default Group} / Profile1");
 		assertEquals(key1, key2);
+
+
+		key1 = new ProfileKey("TAD310DAT@c63d64b", null);
+		key2 = new ProfileKey("TAD310DAT@c63d64b", "BG");
+		assertEquals(key1, key2);
 	}
 
 }
