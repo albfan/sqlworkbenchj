@@ -103,8 +103,16 @@ public class ReportView
 		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
-		TableCommentReader reader = new TableCommentReader();
-		this.viewComment = reader.getTableComment(conn, this.view);
+		if (view.commentIsDefined())
+		{
+			this.viewComment = view.getComment();
+		}
+		else
+		{
+			TableCommentReader reader = new TableCommentReader();
+			this.viewComment = reader.getTableComment(conn, this.view);
+		}
+
 		String schema = this.view.getSchema();
 		if (schema == null || schema.length() == 0)
 		{

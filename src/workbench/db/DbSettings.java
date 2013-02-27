@@ -32,6 +32,7 @@ import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -1544,4 +1545,8 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "sql.constraint.notvalid", null);
 	}
 
+	public boolean getUseStreamsForBlobExport()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "export.blob.use.streams", true);
+	}
 }

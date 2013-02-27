@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConstraintReader;
 import workbench.db.DbMetadata;
@@ -46,16 +48,16 @@ import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
-import workbench.log.LogMgr;
 
-import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -136,8 +138,16 @@ public class ReportTable
 		List<ColumnIdentifier> cols = def.getColumns();
 		Collections.sort(cols);
 
-		TableCommentReader reader = new TableCommentReader();
-		this.tableComment = reader.getTableComment(conn, this.table);
+		if (table.commentIsDefined())
+		{
+			this.tableComment = table.getComment();
+		}
+		else
+		{
+			TableCommentReader reader = new TableCommentReader();
+			this.tableComment = reader.getTableComment(conn, this.table);
+		}
+
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
 		{

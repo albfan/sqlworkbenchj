@@ -27,12 +27,16 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 
@@ -62,6 +66,8 @@ public class SqlServerObjectListEnhancer
 		if (result.getRowCount() == 1)
 		{
 			object = result.getValueAsString(0, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			// no need to loop through all requested types if only a single object is requested
+			requestedTypes = new String[] { result.getValueAsString(0, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)};
 		}
 
 		Map<String, String> remarks = readRemarks(con, schema, object, requestedTypes);
@@ -69,7 +75,9 @@ public class SqlServerObjectListEnhancer
 		for (int row=0; row < result.getRowCount(); row++)
 		{
 			String name = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String remark = remarks.get(name);
+			String objectSchema = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+
+			String remark = remarks.get(objectSchema + "." + name);
 			if (remark != null)
 			{
 				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, remark);
@@ -143,7 +151,7 @@ public class SqlServerObjectListEnhancer
 					String remark = rs.getString(3);
 					if (objectname != null && remark != null)
 					{
-						remarks.put(objectname.trim(), remark);
+						remarks.put(schema + "." + objectname.trim(), remark);
 					}
 				}
 				SqlUtil.closeResult(rs);

@@ -28,17 +28,23 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.TableIdentifier;
-import workbench.db.oracle.OracleUtils;
-import workbench.db.report.SchemaReporter;
+
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.TableIdentifier;
+import workbench.db.oracle.OracleUtils;
+import workbench.db.report.SchemaReporter;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
@@ -125,17 +131,30 @@ public class WbSchemaReport
 		List<String> types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 		reporter.setObjectTypes(types);
 
-		reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
+		boolean includeViews = cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true);
+		reporter.setIncludeViews(includeViews);
 		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
 
 		String tableNames = this.cmdLine.getValue(PARAM_TABLE_NAMES);
 		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
 
+		if (CollectionUtil.isEmpty(types))
+		{
+			types = currentConnection.getMetadata().getTableTypes();
+		}
+		if (includeViews)
+		{
+			types.add(currentConnection.getMetadata().getViewTypeName());
+		}
+
+		String[] typesArray = new String[types.size()];
+		types.toArray(typesArray);
+
 		if (StringUtil.isNonEmpty(tableNames))
 		{
 			String schema = StringUtil.isEmptyString(tableNames) ? "%" : null;
-			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, this.currentConnection);
+			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, typesArray, this.currentConnection);
 			List<TableIdentifier> tables = tableArg.getTables();
 			if (tables != null && tables.size() > 0)
 			{

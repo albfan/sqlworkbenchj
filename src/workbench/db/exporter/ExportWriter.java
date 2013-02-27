@@ -28,17 +28,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.storage.DataStore;
 
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -64,6 +67,7 @@ public abstract class ExportWriter
 	protected WbFile outputFile;
 	protected boolean canAppendStart;
   protected boolean trimCharData;
+	protected boolean useStreamsForBlobs;
 
 	private int progressInterval = 10;
 
@@ -77,6 +81,8 @@ public abstract class ExportWriter
 		// here and now
 		converter.setOriginalConnection(this.exporter.getConnection());
 		configureConverter();
+
+		useStreamsForBlobs = this.exporter.getConnection().getDbSettings().getUseStreamsForBlobExport();
 	}
 
 	public void configureConverter()
@@ -215,7 +221,7 @@ public abstract class ExportWriter
 		if (this.exporter.writeEmptyResults()) writeStart();
 
 		RowDataReader reader = new RowDataReader(info, exporter.getConnection());
-		reader.setUseStreamsForBlobs(true);
+		reader.setUseStreamsForBlobs(useStreamsForBlobs);
 		while (rs.next())
 		{
 			if (this.cancel) break;

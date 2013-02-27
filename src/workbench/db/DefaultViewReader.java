@@ -26,9 +26,12 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;

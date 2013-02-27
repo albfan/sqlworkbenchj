@@ -22,8 +22,6 @@
  */
 package workbench.db;
 
-import java.sql.ResultSet;
-import java.sql.Savepoint;
 import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -92,36 +90,8 @@ public class TableCommentReader
 
 	public String getTableComment(WbConnection dbConnection, TableIdentifier tbl)
 	{
-		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(dbConnection);
-		ResultSet rs = null;
-		String result = null;
-		Savepoint sp = null;
-		try
-		{
-			if (dbConnection.getDbSettings().useSavePointForDML())
-			{
-				sp = dbConnection.setSavepoint();
-			}
-			rs = dbConnection.getSqlConnection().getMetaData().getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), null);
-			if (rs.next())
-			{
-				result = rs.getString("REMARKS");
-			}
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (Exception e)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("TableCommentReader.getTableComment()", "Error retrieving comment for table " + table.getTableExpression(), e);
-			result = null;
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-
-		return result;
+		TableIdentifier id = dbConnection.getMetadata().findObject(tbl);
+		return id.getComment();
 	}
 
 	/**
