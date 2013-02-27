@@ -46,6 +46,8 @@ import workbench.util.*;
  */
 public class LogMgr
 {
+	public static final String DEFAULT_ENCODING = "UTF-8";
+
 	private static WbLogger logger = null;
 	private static boolean useLog4J;
 

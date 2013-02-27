@@ -28,8 +28,12 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 
 import java.io.Reader;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JFrame;
@@ -37,10 +41,12 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.FixedSizeList;
 import workbench.util.WbFile;
 
 /**
@@ -98,7 +104,7 @@ public class LogFileViewer
 	{
 		this.display.setText(text);
 	}
-	
+
 	private void initWatcher()
 	{
 		watcher = new Timer(true);
@@ -133,8 +139,9 @@ public class LogFileViewer
 			WbSwingUtilities.showWaitCursor(this);
 			lastFileTime = sourceFile.lastModified();
 			lastSize = sourceFile.length();
-			in = EncodingUtil.createReader(sourceFile, Settings.getInstance().getDefaultEncoding());
-			display.read(in, null);
+			int maxLines = Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000);
+			String lines = readLastLines(sourceFile, maxLines);
+			display.setText(lines);
 			scrollToEnd();
 		}
 		catch (Exception e)
@@ -187,4 +194,31 @@ public class LogFileViewer
 		Settings.getInstance().storeWindowSize(this);
 	}
 
+	public String readLastLines(File src, int maxLines)
+		throws IOException
+	{
+		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING);
+		try
+		{
+			FixedSizeList<String> lines = new FixedSizeList<String>(maxLines);
+			for (String line = reader.readLine(); line != null; line = reader.readLine())
+			{
+				lines.add(line);
+			}
+			StringBuilder result = new StringBuilder(maxLines * 100);
+			Iterator<String> itr = lines.iterator();
+			while (itr.hasNext())
+			{
+				String line = itr.next();
+				result.append(line);
+				result.append('\n');
+				itr.remove();
+			}
+			return result.toString();
+		}
+		finally
+		{
+			FileUtil.closeQuietely(reader);
+		}
+	}
 }

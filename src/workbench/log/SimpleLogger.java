@@ -36,7 +36,6 @@ import workbench.util.*;
 public class SimpleLogger
 	implements WbLogger
 {
-
 	private LogLevel level = LogLevel.warning;
 	private PrintStream logOut = null;
 	private boolean logSystemErr = false;
@@ -113,7 +112,7 @@ public class SimpleLogger
 				}
 				logfile.renameTo(last);
 			}
-			logOut = new PrintStream(new FileOutputStream(logfile, true));
+			logOut = new PrintStream(new FileOutputStream(logfile, true), true, LogMgr.DEFAULT_ENCODING);
 			currentFile = logfile;
 			logMessage(LogLevel.info, null, "=================== Log started ===================", null);
 		}
