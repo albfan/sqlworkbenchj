@@ -173,6 +173,7 @@ public class ValueConverter
 		}
 		else if (StringUtil.isNonEmpty(dtFormat))
 		{
+			this.checkBuiltInFormats = false;
 			this.defaultDateFormat = dtFormat;
 			this.dateFormatter.applyPattern(dtFormat);
 		}
@@ -200,6 +201,7 @@ public class ValueConverter
 		}
 		else if (StringUtil.isNonEmpty(tsFormat))
 		{
+			this.checkBuiltInFormats = false;
 			this.defaultTimestampFormat = tsFormat;
 			this.timestampFormatter.applyPattern(tsFormat);
 		}
