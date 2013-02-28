@@ -54,7 +54,7 @@ public class WbListTables extends SqlCommand
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
-		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 	}
 
 	@Override
