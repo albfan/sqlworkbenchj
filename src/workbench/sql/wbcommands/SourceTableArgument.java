@@ -90,7 +90,7 @@ public class SourceTableArgument
 	public SourceTableArgument(String includeTables, String excludeTables, String schema, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
-		if (StringUtil.isEmptyString(includeTables)) return;
+		if (StringUtil.isEmptyString(includeTables) && StringUtil.isEmptyString(schema)) return;
 		if (dbConn == null) return;
 		schemaAsCatalog = !dbConn.getDbSettings().supportsSchemas();
 
@@ -173,7 +173,7 @@ public class SourceTableArgument
 				{
 					if (checkWildcard) this.wildcardsPresent = true;
 					TableIdentifier tbl = new TableIdentifier(t);
-					if (tbl.getSchema() == null && !(t.equals("*") || t.equals("%"))) // if all tables should be selected, no schema is necessary.
+					if (tbl.getSchema() == null && StringUtil.isNonEmpty(schema))
 					{
 						tbl.setSchema(schemaToUse);
 					}

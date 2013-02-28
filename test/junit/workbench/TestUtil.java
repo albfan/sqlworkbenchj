@@ -354,6 +354,12 @@ public class TestUtil
 		Settings.getInstance().setDoFormatUpdates(false);
 
 	}
+
+	public WbFile getFile(String filename)
+	{
+		return new WbFile(basedir, filename);
+	}
+
 	public String getBaseDir()
 	{
 		return this.basedir;

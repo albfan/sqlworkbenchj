@@ -23,19 +23,23 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -62,15 +66,13 @@ public class WbSchemaReportTest
 			WbSchemaReport report = new WbSchemaReport();
 			report.setConnection(source);
 
-			File output = new File(util.getBaseDir(), "report.xml");
+			File output = util.getFile("report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=false -includeTableGrants=false -includeViews=false");
-			assertTrue(result.isSuccess());
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 			assertTrue("File not created", output.exists());
 
-			InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
-			String xml = FileUtil.readCharacters(r);
-			r.close();
+			String xml = FileUtil.readFile(output, "UTF-8");
 
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
 			assertEquals("Incorrect table count", "4", count);
@@ -105,12 +107,10 @@ public class WbSchemaReportTest
 			File output = new File(util.getBaseDir(), "report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbSchemaReport -file='" + output.getAbsolutePath() + "' -includeSequences=true -includeTableGrants=true");
-			assertTrue(result.isSuccess());
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 			assertTrue("File not created", output.exists());
 
-			InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
-			String xml = FileUtil.readCharacters(r);
-			r.close();
+			String xml = FileUtil.readFile(output, "UTF-8");
 
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
 			assertEquals("Incorrect table count", "4", count);

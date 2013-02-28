@@ -26,13 +26,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.report.SchemaReporter;
@@ -65,6 +66,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	public static final String PARAM_TABLE_NAMES = "tables";
+	public static final String PARAM_OBJECT_NAMES = "objects";
 	public static final String PARAM_OBJECT_OPTIONS = "includeExtendedOptions";
 
 	public static final String ALTERNATE_VERB = "WBREPORT";
@@ -79,7 +81,8 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument("file");
-		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.Deprecated);
+		cmdLine.addArgument(PARAM_OBJECT_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
@@ -125,66 +128,87 @@ public class WbSchemaReport
 		}
 
 		this.reporter = new SchemaReporter(currentConnection);
+		boolean includeViews = cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true);
+		boolean includeSequences = cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, true);
+		boolean includeTables = cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true);
+
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
 
-		List<String> types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
-		reporter.setObjectTypes(types);
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(cmdLine.getListValue(CommonArgs.ARG_TYPES));
 
-		boolean includeViews = cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true);
-		reporter.setIncludeViews(includeViews);
-		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
-
-		String tableNames = this.cmdLine.getValue(PARAM_TABLE_NAMES);
+		String tableNames = this.cmdLine.getValue(PARAM_OBJECT_NAMES, this.cmdLine.getValue(PARAM_TABLE_NAMES));
 		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
 
-		if (CollectionUtil.isEmpty(types))
+		if (types.isEmpty())
 		{
-			types = currentConnection.getMetadata().getTableTypes();
-		}
-		if (includeViews)
-		{
-			types.add(currentConnection.getMetadata().getViewTypeName());
+			if (includeTables)
+			{
+				types.addAll(currentConnection.getMetadata().getTableTypes());
+			}
+
+			if (includeViews)
+			{
+				types.add(currentConnection.getMetadata().getViewTypeName());
+			}
+
+			if (includeSequences)
+			{
+				SequenceReader reader = currentConnection.getMetadata().getSequenceReader();
+				if (reader != null)
+				{
+					// sequences are also retrieved by SourceTableArgument if provided
+					// as it uses DbMetadata.getObjects()
+					// by adding the type here, the sequences will also be selected using
+					// potential wildcards specified through -tables
+					types.add(reader.getSequenceTypeName());
+				}
+			}
 		}
 
 		String[] typesArray = new String[types.size()];
-		types.toArray(typesArray);
-
-		if (StringUtil.isNonEmpty(tableNames))
+		int index = 0;
+		for (String type : types)
 		{
-			String schema = StringUtil.isEmptyString(tableNames) ? "%" : null;
+			typesArray[index] = type.toUpperCase();
+			index++;
+		}
+
+		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
+
+		List<String> schemas = StringUtil.stringToList(schemaNames, ",");
+		if (schemas.isEmpty())
+		{
+			schemas.add(currentConnection.getCurrentSchema());
+		}
+
+		if (this.rowMonitor != null)
+		{
+			this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
+		}
+
+		for (String schema : schemas)
+		{
 			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, typesArray, this.currentConnection);
 			List<TableIdentifier> tables = tableArg.getTables();
 			if (tables != null && tables.size() > 0)
 			{
-				// The SchemaReporter needs fully initialized TableIdentifiers
-				List<TableIdentifier> dbTables = new ArrayList<TableIdentifier>(tables.size());
-				for (TableIdentifier tbl : tables)
-				{
-					TableIdentifier table = currentConnection.getMetadata().findSelectableObject(tbl);
-					if (table != null)
-					{
-						dbTables.add(table);
-					}
-				}
-				this.reporter.setTableList(dbTables);
-			}
-			else
-			{
-				if (StringUtil.isNonBlank(tableNames))
-				{
-					result.setFailure();
-					result.addMessageByKey("ErrNoTablesFound");
-					return result;
-				}
+				this.reporter.setTableList(tables);
 			}
 		}
-		else if (StringUtil.isNonEmpty(schemaNames))
+
+		if (reporter.getObjectCount() == 0)
 		{
-			List<String> schemas = StringUtil.stringToList(schemaNames, ",");
-			this.reporter.setSchemas(schemas);
+			result.setFailure();
+			result.addMessageByKey("ErrNoTablesFound");
+			return result;
 		}
+
+		// this is important for the retrieval of the stored procedures
+		// which is the only thing the SchemaReporter retrieves
+		this.reporter.setSchemas(schemas);
 
 		String alternateSchema = cmdLine.getValue("useschemaname");
 		this.reporter.setSchemaNameToUse(alternateSchema);
@@ -196,10 +220,8 @@ public class WbSchemaReport
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
-		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
 		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, false));
 
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())

@@ -30,23 +30,27 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import workbench.interfaces.Interruptable;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.DbObjectComparator;
 import workbench.db.DbSettings;
-
 import workbench.db.ProcedureDefinition;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.Interruptable;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
@@ -72,12 +76,10 @@ public class SchemaReporter
 	private RowActionMonitor monitor;
 	private String outputfile;
 	protected boolean cancel;
-	private boolean includeTables = true;
 	private boolean includeProcedures;
 	private boolean includeGrants;
 	private boolean includeTriggers;
 	private boolean includeExtendedOptions;
-	private boolean includeSequences;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
 
@@ -90,7 +92,7 @@ public class SchemaReporter
 		this.dbConn = conn;
 		types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(conn.getMetadata().getTableTypes());
-		setIncludeViews(true);
+		types.addAll(this.dbConn.getDbSettings().getViewTypes());
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)
@@ -105,7 +107,7 @@ public class SchemaReporter
 
 	public void setObjectList(List<? extends DbObject> objectList)
 	{
-		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
+		DbMetadata meta = dbConn.getMetadata();
 
 		for (DbObject dbo : objectList)
 		{
@@ -117,16 +119,52 @@ public class SchemaReporter
 					break;
 				}
 			}
+			if (meta.isSequenceType(dbo.getObjectType()))
+			{
+				SequenceDefinition seq = meta.getSequenceReader().getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
+				this.sequences.add(new ReportSequence(seq));
+			}
 		}
 	}
 
 	/**
-	 *	Define the list of tables to run the report on
+	 * Define the list of tables to run the report on.
+	 * The tables are added to the existing list of tables
+	 *
 	 */
 	public void setTableList(List<TableIdentifier> tableList)
 	{
-		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
-		this.tables.addAll(tableList);
+		DbMetadata meta = dbConn.getMetadata();
+		SequenceReader reader = meta.getSequenceReader();
+
+		for (TableIdentifier tbl : tableList)
+		{
+			if (meta.isSequenceType(tbl.getType()) && reader != null)
+			{
+				SequenceDefinition seq = reader.getSequenceDefinition(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+				this.sequences.add(new ReportSequence(seq));
+			}
+			else
+			{
+				this.tables.add(tbl);
+			}
+		}
+	}
+
+	/**
+	 * Return the count of "table like" objects.
+	 * Stored procedures are not taken into account.
+	 */
+	public int getObjectCount()
+	{
+		return tables.size() + sequences.size();
+	}
+
+	public void clearObjects()
+	{
+		tables.clear();
+		sequences.clear();
+		procedures.clear();
 	}
 
 	public void setSchemas(List<String> list)
@@ -144,40 +182,9 @@ public class SchemaReporter
 		}
 	}
 
-	public final void setIncludeViews(boolean flag)
-	{
-		if (flag)
-		{
-			types.addAll(this.dbConn.getDbSettings().getViewTypes());
-			types.add(DbMetadata.MVIEW_NAME);
-		}
-		else
-		{
-			types.removeAll(this.dbConn.getDbSettings().getViewTypes());
-			types.remove(DbMetadata.MVIEW_NAME);
-		}
-	}
-
-	public void setObjectTypes(List<String> newTypeList)
-	{
-		if (CollectionUtil.isEmpty(newTypeList)) return;
-		types.clear();
-		types.addAll(newTypeList);
-	}
-
 	public void setIncludeExtendedOptions(boolean flag)
 	{
 		this.includeExtendedOptions = flag;
-	}
-
-	public void setIncludeSequences(boolean flag)
-	{
-		this.includeSequences = flag;
-	}
-
-	public void setIncludeTables(boolean flag)
-	{
-		this.includeTables = flag;
 	}
 
 	public void setIncludeProcedures(boolean flag)
@@ -240,6 +247,10 @@ public class SchemaReporter
 		}
 	}
 
+	private void sortTableObjects()
+	{
+		Collections.sort(tables, new DbObjectComparator());
+	}
 	/**
 	 *	Write the XML into the supplied output
 	 */
@@ -248,15 +259,9 @@ public class SchemaReporter
 	{
 		this.cancel = false;
 
-		if (this.includeTables && this.tables.isEmpty()) this.retrieveObjects();
-		if (this.cancel) return;
-
+		sortTableObjects();
 		if (this.includeProcedures && this.procedures.isEmpty()) this.retrieveProcedures();
 		if (this.cancel) return;
-
-		if (this.includeSequences && this.sequences.isEmpty()) this.retrieveSequences();
-		if (this.cancel) return;
-
 
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");
@@ -386,82 +391,6 @@ public class SchemaReporter
 	public boolean confirmCancel()
 	{
 		return true;
-	}
-
-	private void retrieveObjects()
-	{
-		if (this.monitor != null)
-		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
-		}
-		if (CollectionUtil.isEmpty(this.schemas))
-		{
-			this.retrieveObjects(null);
-		}
-		else
-		{
-			int count = this.schemas.size();
-			for (int i=0; i < count; i++)
-			{
-				this.retrieveObjects(schemas.get(i));
-			}
-		}
-		if (this.monitor != null)
-		{
-			this.monitor.setCurrentObject(null, -1, -1);
-		}
-	}
-
-	private void retrieveSequences()
-	{
-		// No need to check the schema/catalog stuff because MySQL
-		// which doesn't support schemas also doesn't support sequences.
-		if (this.monitor != null)
-		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingSequences"), -1, -1);
-		}
-		if (CollectionUtil.isEmpty(schemas))
-		{
-			this.retrieveSequences(null);
-		}
-		else
-		{
-			for (String schema : schemas)
-			{
-				this.retrieveSequences(schema);
-			}
-		}
-		if (this.monitor != null)
-		{
-			this.monitor.setCurrentObject(null, -1, -1);
-		}
-	}
-
-	private void retrieveSequences(String targetSchema)
-	{
-		try
-		{
-			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			if (schema == null)
-			{
-				schema = this.dbConn.getMetadata().getSchemaToUse();
-			}
-			SequenceReader reader = this.dbConn.getMetadata().getSequenceReader();
-			if (reader == null) return;
-
-			List<SequenceDefinition> seqs = reader.getSequences(null, schema, null);
-
-			for (SequenceDefinition seq : seqs)
-			{
-				ReportSequence rseq = new ReportSequence(seq);
-				this.sequences.add(rseq);
-				if (this.cancel) return;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SchemaReporter.retrieveSequences()", "Error retrieving sequences", e);
-		}
 	}
 
 	private void retrieveProcedures()
