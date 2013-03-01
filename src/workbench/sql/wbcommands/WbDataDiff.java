@@ -162,7 +162,7 @@ public class WbDataDiff
 			}
 			else
 			{
-				result.addMessage("Ignoring invalid value: " + def);
+				result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffAltKey", def));
 			}
 		}
 		return map;
