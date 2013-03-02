@@ -57,15 +57,48 @@
 					<entry>-file</entry>
 					<entry>The filename of the output file.</entry>
 				</row>
+
+        <row>
+          <entry>-objects</entry>
+          <entry>
+            <para>
+              A (comma separated) list of objects to report. Default is all objects that are "tables" or views.
+              The list of possible objects corresponds to the objects shown in the "Objects" tab of the DbExplorer.
+            </para>
+            <para>
+              If you want to generate the report on tables from different schemas you have
+              to use fully qualified names in the list (e.g. <literal>-tables=shop.orders,accounting.invoices</literal>)
+              You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
+              an XML report for all tables that start with <literal>CONTRACT_</literal>.
+            </para>
+            <para>
+              If auto-completion is invoked for this parameter, it behaves like the auto-completion e.g. in the <literal>FROM</literal>
+              clause of a SQL statement.
+            </para>
+            <para>
+              If this parameter is specified <literal>-schemas</literal> is ignored.
+            </para>
+          </entry>
+        </row>
+
 				<row>
-					<entry>-tables</entry>
-					<entry>A (comma separated) list of tables to report. Default is
-						all tables. If this parameter is specified <literal>-schemas</literal> is ignored.
-						If you want to generate the report on tables from different users/schemas you have
-						to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
-						You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
-						an XML report for all tables that start with <literal>CONTRACT_</literal>.
-					</entry>
+					<entry>-schemas</entry>
+					<entry>
+            <para>
+              A (comma separated) list of schemas to generate the report from.
+              For each user/schema all tables are included in the report. e.g.
+              <literal>-schemas=public,accounting</literal> would generate a report
+              for all tables in the schemas <literal>public</literal> and <literal>accounting</literal>.
+            </para>
+            <para>
+              The possible values for this parameter correspond to the "Schema" dropdown in the
+              <link linkend="dbexplorer">DbExplorer</link>. The parameter supports auto-completion
+              and will show a list of available schemas.
+            </para>
+            <para>
+              This parameter is ignored if <literal>-objects</literal> is also specified.
+            </para>
+          </entry>
 				</row>
 
 				<row>
@@ -77,22 +110,28 @@
 					</entry>
 				</row>
 
-				<row>
-					<entry>-schemas</entry>
-					<entry>A (comma separated) list of schemas to generate the report from.
-						For each user/schema all tables are included in the report. e.g.
-						<literal>-schemas=MY_USER,OTHER_USER</literal> would generate a report
-						for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
-					</entry>
-				</row>
-
         <row>
           <entry>-types</entry>
-          <entry>A (comma separated) list of object types to include. By default <literal>TABLE</literal>s and
-            <literal>VIEW</literal>s are included. To include e.g. <literal>SYSTEM VIEW</literal>s and
-            <literal>TEMPORARY TABLE</literal>s, use the following option:
-            <literal>-types='TABLE,VIEW,SYSTEM VIEW,TEMPORARY TABLE'</literal>. If you include type names that contain
-            a space (or e.g. a dash) you have to quote the whole list, not just the single value.
+          <entry>
+            <para>
+              A (comma separated) list of "table like" object types to include. By default <literal>TABLE</literal>s and
+              <literal>VIEW</literal>s are included. To include e.g. <literal>SYSTEM VIEW</literal>s and
+              <literal>TEMPORARY TABLE</literal>s, use the following option:
+              <literal>-types='TABLE,VIEW,SYSTEM VIEW,TEMPORARY TABLE'</literal>. If you include type names that contain
+              a space (or e.g. a dash) you have to quote the whole list, not just the single value.
+            </para>
+            <para>
+              The default for this parameter is <literal>TABLE,VIEW</literal>
+            </para>
+            <para>
+              The values for this parameter correspond to the values shown in the "types" dropdown in the
+              <link linkend="dbexplorer-objectlist">"Objects"</link> tab of the DbExplorer. The parameter
+              supports auto-completion and will show a list of the available object types for the current DBMS.
+            </para>
+            <para>
+              You can include any type shown in the DbExplorer's Objects tab. To e.g. include <literal>domain</literal>
+              and <literal>enum</literal> definitions for PostgreSQL use: <literal>-types=table,view,sequence,domain,enum</literal>
+            </para>
           </entry>
         </row>
 
@@ -123,8 +162,15 @@
 				</row>
 				<row>
 					<entry>-includeSequences</entry>
-					<entry>Control the output of sequence information for the report. The default is
-						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+					<entry>
+            <para>
+              Control the output of sequence information for the report. The default is
+              <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+            </para>
+            <para>
+              Adding <literal>sequence</literal> to the list of types specified with the <literal>-types</literal>
+              parameter has the same effect.
+            </para>
 					</entry>
 				</row>
 				<row>
@@ -251,13 +297,15 @@
               </para>
               <para>
                 When specifying a type that contains a space, the type name neeeds to be
-                enclosed in quotes, e.g. -types="materialized view"
+                enclosed in quotes, e.g. <literal>-types="materialized view"</literal>. When specifying multiple types,
+                the whole argument needs to be enclosed in quotes: <literal>-types='table, materialized view'</literal>
               </para>
               <para>
                 The default for this parameter is <literal>view, procedure, function, trigger, materialized view</literal>.
+                To search in all available object types, use <literal>-types=*</literal>.
               </para>
               <para>
-                To search in all available object types, use <literal>-types=*</literal>
+                This parameter supports auto-completion.
               </para>
             </entry>
           </row>
@@ -266,8 +314,10 @@
             <entry>-objects</entry>
             <entry>
               <para>
-                A list of object names to be searched. These names may contain
-                SQL wildcards, e.g. <literal>-objects=PER%,NO%</literal>
+                A list of object names to be searched. These names may contain SQL wildcards, e.g. <literal>-objects=PER%,NO%</literal>
+              </para>
+              <para>
+                This parameter supports auto-completion.
               </para>
             </entry>
           </row>
@@ -279,6 +329,9 @@
                 Specifies a list of schemas to be searched (for DBMS that
                 support schemas). If this parameter is not specified the
                 current schema is searched.
+              </para>
+              <para>
+                This parameter supports auto-completion.
               </para>
             </entry>
           </row>
@@ -376,6 +429,9 @@
                 If you want to search in different schemas, you need to prefix the
                 table names, e.g. <literal>-tables=schema1.p%,schema2.n%</literal>.
               </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
             </entry>
           </row>
           <row>
@@ -387,6 +443,9 @@
                 to search only one of those types, this can be specified with
                 the <literal>-types</literal> parameter. Using <literal>-types=table</literal>
                 will only search table data and skip views in the database.
+              </para>
+              <para>
+                This parameter supports auto-completion.
               </para>
             </entry>
           </row>
@@ -1367,6 +1426,9 @@ WHERE id=42;</programlisting>
                   the objects for each schema are retrieved. e.g. <literal>-objects=person -schemas=prod,test</literal> will
                   show generate the SQL for the <literal>person</literal> table in both schemas.
 								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of the available schemas.
+                </para>
 							</entry>
 						</row>
 						<row>
@@ -1377,6 +1439,9 @@ WHERE id=42;</programlisting>
                   is ignored if <literal>-objects</literal> is specified. The possible values for this parameter
                   are the types listed in the dropdown of the "Objects" tab in the DbExplorer.
 								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of the available object types for the current DBMS.
+                </para>
 							</entry>
 						</row>
 						<row>

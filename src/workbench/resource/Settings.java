@@ -50,18 +50,22 @@ import java.util.StringTokenizer;
 import javax.swing.UIManager;
 
 import workbench.WbManager;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.PropertyStorage;
+import workbench.log.LogMgr;
+
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.FontScaler;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.PropertyStorage;
-import workbench.log.LogMgr;
+
+import workbench.storage.PkMapping;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.formatter.JoinWrapStyle;
-import workbench.storage.PkMapping;
+
 import workbench.util.*;
 
 /**
@@ -715,7 +719,7 @@ public class Settings
 	 */
 	public String getPopularEncodings()
 	{
-		return getProperty("workbench.export.defaultencodings", "UTF-8,ISO-8859-1,ISO-8859-15,<name>");
+		return getProperty("workbench.export.defaultencodings", "UTF-8,ISO-8859-1,ISO-8859-15");
 	}
 
 	/**

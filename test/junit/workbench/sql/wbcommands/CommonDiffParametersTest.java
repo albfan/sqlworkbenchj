@@ -23,17 +23,21 @@
 package workbench.sql.wbcommands;
 
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.sql.wbcommands.CommonDiffParameters.TableMapping;
+
+import workbench.util.ArgumentParser;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.sql.wbcommands.CommonDiffParameters.TableMapping;
-import workbench.util.ArgumentParser;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -173,6 +177,31 @@ public class CommonDiffParametersTest
 
 		assertNotNull(TableIdentifier.findTableByName(result.targetTables, "PERSON"));
 		assertNotNull(TableIdentifier.findTableByName(result.targetTables, "PERSON_ADDRESS"));
+	}
+
+	@Test
+	public void testSingleTable()
+		throws Exception
+	{
+		String sql =
+			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n" +
+			"commit;\n";
+
+		TestUtil.executeScript(source, sql);
+		TestUtil.executeScript(target, sql);
+
+		ArgumentParser cmdLine = new ArgumentParser();
+
+		CommonDiffParameters params = new CommonDiffParameters(cmdLine);
+		cmdLine.parse("-referenceSchema=public -targetSchema=public -referenceTables=person");
+
+		TableMapping result = params.getTables(source, target);
+		assertEquals(1, result.referenceTables.size());
+		assertEquals(1, result.targetTables.size());
+		assertEquals("person", result.referenceTables.get(0).getTableName().toLowerCase());
+		assertEquals("person", result.targetTables.get(0).getTableName().toLowerCase());
 	}
 
 	@Test

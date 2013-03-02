@@ -282,6 +282,9 @@
 								a different user/schema, then you have to use the <literal>-schema</literal>
 								switch for the <link linkend="command-import">import</link> command.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 					<row>
@@ -293,6 +296,9 @@
                 export tables from more than one schema, you need to fully qualify them as shown
                 in the description of the <literal>-sourceTable</literal> parameter.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
             </entry>
           </row>
 					<row>
@@ -303,6 +309,9 @@
                 the content of VIEWs or SYNONYMs as well, you have to specify all types with this parameter.
               </para>
               <para><literal>-sourceTable=* -types=VIEW,SYNONYM</literal> or <literal>-sourceTable=T% -types=TABLE,VIEW,SYNONYM</literal></para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
             </entry>
           </row>
 					<row>
@@ -316,6 +325,9 @@
               </para>
               <para>
                 <literal>-sourceTable=* -excludeTables=TEMP*</literal> will export all tables, but not those starting with <literal>TEMP</literal>.
+              </para>
+              <para>
+                This parameter supports auto-completion.
               </para>
             </entry>
           </row>
@@ -363,11 +375,19 @@
 					<row>
 						<entry>-encoding</entry>
 						<entry>
-							Defines the encoding in which the file should be
-							written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
-							To get a list of available encodings, execut <literal>WbExport</literal>
-							with the parameter <literal>-showencoding</literal>. This parameter is ignored
-							for XLS, XLSX and ODS exports.
+              <para>
+                Defines the encoding in which the file should be
+                written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
+                To get a list of available encodings, execut <literal>WbExport</literal>
+                with the parameter <literal>-showencoding</literal>. This parameter is ignored
+                for XLS, XLSX and ODS exports.
+              </para>
+              <para>
+                If auto-completion is invoked for this parameter, it will show a list of encodings
+                defined through the configuration property <literal>workbench.export.defaultencodings</literal>
+                This is a comma-separated list that can be changed using
+                <link linkend="command-setconfig"><literal>WbSetConfig</literal></link>
+              </para>
 						</entry>
 					</row>
 					<row>

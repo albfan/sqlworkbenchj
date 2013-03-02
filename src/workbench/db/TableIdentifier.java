@@ -901,7 +901,7 @@ public class TableIdentifier
 	{
 		String name = table.getTableName();
 		String schema = table.getSchema();
-		if (schema == null && table.getCatalog() != null)
+		if (StringUtil.isEmptyString(schema) && StringUtil.isNonEmpty(table.getCatalog()))
 		{
 			schema = table.getCatalog();
 		}

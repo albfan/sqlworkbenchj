@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbSchemaReportOracleTest
-extends WbTestCase
+	extends WbTestCase
 {
 	public WbSchemaReportOracleTest()
 	{

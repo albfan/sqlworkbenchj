@@ -23,15 +23,19 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
 import java.util.List;
+
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
-import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.TableIdentifier;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -92,10 +96,10 @@ public class WbListTables extends SqlCommand
 
 			objects = cmdLine.getValue("objects");
 
-			List<String> typeList = cmdLine.getListValue("types");
+			List<String> typeList = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 			if (typeList.size() > 0)
 			{
-				types = StringUtil.toArray(typeList, true);
+				types = StringUtil.toArray(typeList, true, true);
 			}
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);

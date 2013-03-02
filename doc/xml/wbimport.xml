@@ -136,6 +136,9 @@
 								This parameter is ignored, if the files are imported using the
 								<literal>-sourcedir</literal> parameter
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -350,7 +353,15 @@
 
 					<row>
 						<entry>-encoding</entry>
-						<entry>Defines the encoding of the input file (and possible CLOB files)</entry>
+						<entry>
+              <para>Defines the encoding of the input file (and possible CLOB files)</</para>
+              <para>
+                If auto-completion is invoked for this parameter, it will show a list of encodings
+                defined through the configuration property <literal>workbench.export.defaultencodings</literal>
+                This is a comma-separated list that can be changed using
+                <link linkend="command-setconfig"><literal>WbSetConfig</literal></link>
+              </para>
+            </entry>
 					</row>
 
 					<row>

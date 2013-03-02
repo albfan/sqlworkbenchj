@@ -1645,7 +1645,7 @@ public class DbMetadata
 
 	public TableIdentifier findTable(TableIdentifier tbl, String[] types)
 	{
-		return findTable(tbl, types == null ? tableTypesArray : types, false);
+		return findTable(tbl, types == null || types.length == 0 ? tableTypesArray : types, false);
 	}
 
 	private TableIdentifier findTable(TableIdentifier tbl, String[] types, boolean searchAllSchemas)

@@ -168,13 +168,8 @@ public class WbSchemaReport
 			}
 		}
 
-		String[] typesArray = new String[types.size()];
-		int index = 0;
-		for (String type : types)
-		{
-			typesArray[index] = type.toUpperCase();
-			index++;
-		}
+
+		String[] typesArray = StringUtil.toArray(types, true);
 
 		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
 
@@ -195,7 +190,7 @@ public class WbSchemaReport
 			List<TableIdentifier> tables = tableArg.getTables();
 			if (tables != null && tables.size() > 0)
 			{
-				this.reporter.setTableList(tables);
+				this.reporter.setObjectList(tables);
 			}
 		}
 

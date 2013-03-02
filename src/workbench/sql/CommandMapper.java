@@ -167,10 +167,10 @@ public class CommandMapper
 	public final void addCommand(SqlCommand command)
 	{
 		cmdDispatch.put(command.getVerb(), command);
-		String longVerb = command.getAlternateVerb();
-		if (longVerb != null)
+		String alternate = command.getAlternateVerb();
+		if (alternate != null)
 		{
-			cmdDispatch.put(longVerb, command);
+			cmdDispatch.put(alternate, command);
 		}
 	}
 

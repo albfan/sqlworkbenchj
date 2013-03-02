@@ -23,17 +23,21 @@
 package workbench.sql.wbcommands;
 
 
-import org.junit.*;
-import workbench.sql.ScriptParser;
-import workbench.util.WbFile;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
+import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.SqlUtil;
+import workbench.util.WbFile;
+
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -46,23 +50,6 @@ public class WbGenDropTest
 	public WbGenDropTest()
 	{
 		super("WbGenDropTest");
-	}
-
-	@BeforeClass
-	public static void setUpClass()
-		throws Exception
-	{
-	}
-
-	@AfterClass
-	public static void tearDownClass()
-		throws Exception
-	{
-	}
-
-	@Before
-	public void setUp()
-	{
 	}
 
 	@After

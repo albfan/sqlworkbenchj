@@ -22,9 +22,8 @@
   <note>
     <para>
       Every property can also be specified on the commandline when starting &wb-productname; by setting a system
-      property with that name using the <literal>-Dworkbench.property=value</literal> switch. When using one of the Windows launchers (.exe)
-      you have to use <literal>-J-Dworkbench.property=value</literal>. See the section about
-      <link linkend="launcher-parameters">Java options</link> in the description of the Windows launcher.
+      property with that name using the <literal>-Dworkbench.property=value</literal> switch when starting
+      the application using the <literal>java</literal> command directly.
     </para>
   </note>
 
@@ -33,16 +32,20 @@
 
 		<para>
 			Some parameters are used such that a list of "Database Identifiers" is expected.
-			The identifier that needs to be put there can be obtained by hovering the mouse over the connection
-			URL information in the main window, or from the log file.
-			After a successful connect to a database, there will be an entry in the log file similar to this:
+			The identifier that needs to be put there can be obtained by right clicking on the JDBC URL in the main
+      window and then selecting "Connection Info" to show details about the current connection
+    </para>
+
+    <para>
+      The "Database Identifier is also reported in the logfile. After a successful connect to a database,
+      there will be an entry in the log file similar to this:
 		</para>
 
     <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
 
     <para>
-			If the description for a property in this chapter refers to
-			a "Database Identifier", the text between (but not including) the square brackets has to be used.
+			If the description for a property in this chapter refers to a "Database Identifier",
+      the text between (but not including) the square brackets has to be used.
     </para>
 
   </section>
@@ -74,31 +77,6 @@
   <section id="gui-settings">
     <title>GUI related settings</title>
 
-<!--
-		<simplesect id="settings-varchar-multiline-threshold">
-			<title>Controlling display of multiline values</title>
-      <para>Property: <literal>workbench.gui.display.multilinethreshold</literal></para>
-			<para>
-				&wb-productname; uses a special renderer for the contents
-				of <literal>CLOB</literal> columns that is capable of displaying
-				multiple lines. This multi-line renderer is usually not applied for
-				<literal>VARCHAR</literal> columns. If your database stores text
-				in VARCHAR columns that contains line breaks, you can define a threshold
-				for the length of the column. Any column that is defined with a higher value
-				will be displayed with a multiline renderer.
-			</para>
-			<para>
-				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
-				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
-				will be displayed in a single line.
-			</para>
-			<para>
-				Using the multiline renderer has some minor drawbacks when editing the data,
-				and is be a bit slower when displaying large result sets.
-			</para>
-      <para>Default: <literal>250</literal></para>
-		</simplesect>
--->
     <simplesect id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>
@@ -256,7 +234,7 @@
       </para>
     </simplesect>
 
-		<simplesect id="dbexplorer-focus">
+		<simplesect id="dbexplorer-table-retrieval">
 			<title>Customizing the SELECT to be used for the data tab</title>
 			<para>
 				You can customize the generated SELECT that is used to display the table
@@ -453,8 +431,8 @@
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
 				The search panel of the DbExplorer highlights matching values in the result
-				tables. The highlighter needs to know whether string comparisons in the database
-				are case sensitive in order to highlight the correct values.
+				tables. When using the "Server Side Search", the highlighter needs to know whether string comparisons in
+        the database are case sensitive in order to highlight the correct values.
       </para>
       <para>Default: <literal>false</literal></para>
     </simplesect>
@@ -489,31 +467,29 @@
       <para>Default: <literal>true</literal></para>
     </simplesect>
 
-		<simplesect id="db-settings-filter-tables">
-			<title>Filtering tables</title>
-			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.tables</literal></para>
-			<para>
-				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer,
-				auto completion, <link linkend="command-schema-report">WbSchemaReport</link>)
-				certain tables can be filtered out by supplying a regular expression in
-				this property. The default setting will filter Oracle tables that reside
-				in the "Recycle bin". This setting can be applied on a per DBMS basis
-			</para>
-			<para>
-				Default value: <literal>workbench.db.oracle.exclude.tables=^BIN\\$.*</literal>
-			</para>
-			<para>Note that you need to use two backslashes in the RegeEx.</para>
-		</simplesect>
-
 		<simplesect id="db-settings-online-manual">
 			<title>URL for online manual</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.manual</literal></para>
 			<para>
-        This defines the URL of the online manual for that DBMS. This URL is shown
-        in the browser when using the menu item:
+        This defines the URL of the online manual for that DBMS. This URL is shown in the browser when using the menu item:
         <menuchoice><guimenu>Help</guimenu><guimenuitem>DBMS Manual</guimenuitem></menuchoice> will display the
-
 			</para>
+      <para>
+        You can append a version number after the DBID in the property key, to define different URLs for
+        different DBMS versions.
+        The key <literal>workbench.db.microsoft_sql_server.8.manual</literal> defines the URL for SQL Server 2000, whereas
+        <literal>workbench.db.microsoft_sql_server.10.5.manual</literal> defines the URL for SQL Server 2008 R2.
+        The numbers have to be <literal>majorversion.minorversion</literal> as shown in the "Connection Info" dialog
+      </para>
+      <para>
+        If the online manuals always have the version information at the same place of the URL, placeholders can be used, and only
+        a single URL is necessary. For PostgreSQL, the following URL is used:
+        <literal>workbench.db.postgresql.manual=http://www.postgresql.org/docs/{0}.{1}/static/index.html</literal>
+      </para>
+      <para>
+        Where <literal>{0}</literal> is replaced with the major version number and the <literal>{0}</literal> is replaced
+        with the minor version number.
+      </para>
 		</simplesect>
 
 		<simplesect id="db-oracle-filter-syns">

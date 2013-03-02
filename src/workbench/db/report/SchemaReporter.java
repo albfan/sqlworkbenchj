@@ -66,7 +66,7 @@ public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+	private List<DbObject> objects = new ArrayList<DbObject>();
 	private List<ReportProcedure> procedures = new ArrayList<ReportProcedure>();
 	private List<ReportSequence> sequences = new ArrayList<ReportSequence>();
 	private Set<String> types;
@@ -105,48 +105,26 @@ public class SchemaReporter
 		this.reportTitle = title;
 	}
 
-	public void setObjectList(List<? extends DbObject> objectList)
-	{
-		DbMetadata meta = dbConn.getMetadata();
-
-		for (DbObject dbo : objectList)
-		{
-			for (String type : this.types)
-			{
-				if (dbo.getObjectType().equalsIgnoreCase(type))
-				{
-					this.tables.add((TableIdentifier)dbo);
-					break;
-				}
-			}
-			if (meta.isSequenceType(dbo.getObjectType()))
-			{
-				SequenceDefinition seq = meta.getSequenceReader().getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
-				this.sequences.add(new ReportSequence(seq));
-			}
-		}
-	}
-
 	/**
 	 * Define the list of tables to run the report on.
 	 * The tables are added to the existing list of tables
 	 *
 	 */
-	public void setTableList(List<TableIdentifier> tableList)
+	public void setObjectList(List<? extends DbObject> objectList)
 	{
 		DbMetadata meta = dbConn.getMetadata();
 		SequenceReader reader = meta.getSequenceReader();
 
-		for (TableIdentifier tbl : tableList)
+		for (DbObject dbo : objectList)
 		{
-			if (meta.isSequenceType(tbl.getType()) && reader != null)
+			if (meta.isSequenceType(dbo.getObjectType()) && reader != null)
 			{
-				SequenceDefinition seq = reader.getSequenceDefinition(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+				SequenceDefinition seq = reader.getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
 				this.sequences.add(new ReportSequence(seq));
 			}
 			else
 			{
-				this.tables.add(tbl);
+				this.objects.add(dbo);
 			}
 		}
 	}
@@ -157,12 +135,12 @@ public class SchemaReporter
 	 */
 	public int getObjectCount()
 	{
-		return tables.size() + sequences.size();
+		return objects.size() + sequences.size();
 	}
 
 	public void clearObjects()
 	{
-		tables.clear();
+		objects.clear();
 		sequences.clear();
 		procedures.clear();
 	}
@@ -249,7 +227,7 @@ public class SchemaReporter
 
 	private void sortTableObjects()
 	{
-		Collections.sort(tables, new DbObjectComparator());
+		Collections.sort(objects, new DbObjectComparator());
 	}
 	/**
 	 *	Write the XML into the supplied output
@@ -269,61 +247,50 @@ public class SchemaReporter
 		writeReportInfo(out);
 		out.write("\n");
 
-		int count = this.tables.size();
+		int count = this.objects.size();
 		int totalCount = count + this.procedures.size() + this.sequences.size();
 		int totalCurrent = 1;
 
 		DbSettings dbs = dbConn.getMetadata().getDbSettings();
 
-		for (TableIdentifier table : tables)
+		for (DbObject object : objects)
 		{
 			try
 			{
 				if (this.cancel) break;
 
-				String tableName = table.getTableExpression();
+				String tableName = object.getObjectExpression(dbConn);
 				if (this.monitor != null)
 				{
 					this.monitor.setCurrentObject(tableName, totalCurrent, totalCount);
 				}
 
-				String type = table.getType();
-				if (type == null)
-				{
-					type = this.dbConn.getMetadata().getObjectType(table);
-					table.setType(type);
-				}
+				String type = object.getObjectType();
 
-				DbObject dbo = null;
-				if (this.dbConn.getMetadata().isExtendedObject(table))
+				if (dbs.isViewType(type))
 				{
-					 dbo = dbConn.getMetadata().getObjectDefinition(table);
-				}
-
-				if (dbo != null)
-				{
-					GenericReportObject genObject = new GenericReportObject(dbConn, dbo);
-					genObject.writeXml(out);
-				}
-				else if (dbs.isViewType(type))
-				{
-					ReportView rview = new ReportView(table, this.dbConn, true, includeGrants);
+					ReportView rview = new ReportView((TableIdentifier)object, this.dbConn, true, includeGrants);
 					rview.setSchemaNameToUse(this.schemaNameToUse);
 					rview.writeXml(out);
 				}
-				else
+				else if (object instanceof TableIdentifier)
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includeExtendedOptions);
+					ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includeExtendedOptions);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();
+				}
+				else
+				{
+					GenericReportObject genObject = new GenericReportObject(dbConn, object);
+					genObject.writeXml(out);
 				}
 				out.flush();
 				totalCurrent ++;
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + table, e);
+				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + object, e);
 			}
 		}
 		count = this.procedures.size();
@@ -452,33 +419,6 @@ public class SchemaReporter
 		catch (SQLException e)
 		{
 			LogMgr.logError("SchemaReporter.retrieveProcedures()", "Error retrieving procedures", e);
-		}
-	}
-	/**
-	 *	Retrieve all tables for the current user.
-	 *	The "type" of table can be defined by #setTableTypes(String)
-	 */
-	private void retrieveObjects(String targetSchema)
-	{
-		try
-		{
-			if (this.cancel) return;
-			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			String[] typesToUse = new String[types.size()];
-			types.toArray(typesToUse);
-			if (this.dbConn.getDbSettings().supportsSchemas())
-			{
-				this.setTableList(dbConn.getMetadata().getObjectList(schema, typesToUse));
-			}
-			else
-			{
-				// Assume the schema names are really catalogs
-				this.setTableList(dbConn.getMetadata().getObjectList(null, schema, null, typesToUse));
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("SchemaReporter.retrieveTables()", "Error retrieving tables", e);
 		}
 	}
 

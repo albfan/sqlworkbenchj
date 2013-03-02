@@ -261,7 +261,7 @@ public class SourceTableArgument
 		return this.tables;
 	}
 
-	public boolean wasWildCardArgument()
+	public boolean wasWildcardArgument()
 	{
 		return this.wildcardsPresent;
 	}

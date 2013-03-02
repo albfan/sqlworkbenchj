@@ -44,6 +44,9 @@
 							<para>
 								If the profile name contains spaces or dashes, it has to be quoted.
 							</para>
+              <para>
+                This parameter supports auto-completion
+              </para>
 						</entry>
 					</row>
 
@@ -71,6 +74,9 @@
 							<para>
 								If the profile name contains spaces or dashes, it has to be quoted.
 							</para>
+              <para>
+                This parameter supports auto-completion
+              </para>
 						</entry>
 					</row>
 
@@ -261,21 +267,25 @@
 					<row>
 					 <entry>-sourceSchema</entry>
 						<entry>
-              The name of the schema to be copied. When using this parameter, all tables
-              from the specified schema are copied to the target. You must specify either
-              <literal>-sourceSchema</literal>, <literal>-sourceTable</literal> or <literal>-sourceQuery</literal>
-						</entry>
+              <para>
+                The name of the schema to be copied. When using this parameter, all tables
+                from the specified schema are copied to the target. You must specify either
+                <literal>-sourceSchema</literal>, <literal>-sourceTable</literal> or <literal>-sourceQuery</literal>
+              </para>
+            </entry>
 					</row>
 
 					<row>
 						<entry>-sourceTable</entry>
 						<entry>
-							The name of the table(s) to be copied. You can either specifiy a
-							list of tables: <literal>-sourceTable=table1,table2</literal>. Or select
-							the tables using a wildcard: <literal>-sourceTable=*</literal> will copy
-							all tables accessible to the user. If more than one table is specified
-							using this parameter, the <literal>-targetTable</literal> parameter is
-							ignored.
+              <para>
+                The name of the table(s) to be copied. You can either specifiy a
+                list of tables: <literal>-sourceTable=table1,table2</literal>. Or select
+                the tables using a wildcard: <literal>-sourceTable=*</literal> will copy
+                all tables accessible to the user. If more than one table is specified
+                using this parameter, the <literal>-targetTable</literal> parameter is
+                ignored.
+              </para>
 						</entry>
 					</row>
 

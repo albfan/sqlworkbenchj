@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -807,8 +808,20 @@ public class StringUtil
 
 	public static String[] toArray(Collection<String> strings, boolean toUpper)
 	{
+		return toArray(strings, toUpper, false);
+	}
+	
+	public static String[] toArray(Collection<String> strings, boolean toUpper, boolean unique)
+	{
 		if (strings == null) return null;
 		if (strings.isEmpty()) return new String[0];
+
+		if (unique)
+		{
+			Set<String> temp = CollectionUtil.caseInsensitiveSet();
+			temp.addAll(strings);
+			strings = temp;
+		}
 
 		int i = 0;
 		String[] result = new String[strings.size()];

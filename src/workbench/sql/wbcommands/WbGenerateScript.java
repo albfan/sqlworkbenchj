@@ -27,20 +27,24 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
-import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
-import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -59,6 +63,8 @@ public class WbGenerateScript
 {
 
 	public static final String VERB = "WBGENERATESCRIPT";
+	public static final String SHORT_VERB = "WBGENSCRIPT";
+
 	private ObjectScripter scripter;
 	private int currentObject;
 	private int totalObjects;
@@ -88,11 +94,11 @@ public class WbGenerateScript
 
 		List<String> schemas = null;
 		List<String> types = null;
-		List<String> names = null;
+		String names = null;
 
 		if (!cmdLine.hasArguments())
 		{
-			names = StringUtil.stringToList(args, " ");
+			names = args;
 		}
 		else
 		{
@@ -101,7 +107,7 @@ public class WbGenerateScript
 				setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenScriptWrongParam"));
 				return result;
 			}
-			names = cmdLine.getListValue(CommonArgs.ARG_OBJECTS);
+			names = cmdLine.getValue(CommonArgs.ARG_OBJECTS);
 			schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
 			types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 		}
@@ -113,39 +119,12 @@ public class WbGenerateScript
 			schemas = CollectionUtil.arrayList(currentConnection.getCurrentSchema());
 		}
 
-		if (CollectionUtil.isNonEmpty(names))
-		{
-			for (String table : names)
-			{
-				String tname = currentConnection.getMetadata().adjustObjectnameCase(table);
-				for (String schema : schemas)
-				{
-					if (isCancelled) break;
+		String[] typesArray = CollectionUtil.isEmpty(types) ? null : StringUtil.toArray(types, true, true);
 
-					List<TableIdentifier> elements = currentConnection.getMetadata().getObjectList(tname, schema, null);
-					objects.addAll(elements);
-				}
-				if (isCancelled) break;
-			}
-		}
-		else if (CollectionUtil.isNonEmpty(types))
+		for (String schema : schemas)
 		{
-			String[] typeNames = types.toArray(new String[0]);
-			for (String schema : schemas)
-			{
-				if (isCancelled) break;
-				List<TableIdentifier> elements = currentConnection.getMetadata().getObjectList(schema, typeNames);
-				objects.addAll(elements);
-			}
-		}
-		else
-		{
-			for (String schema : schemas)
-			{
-				if (isCancelled) break;
-				List<TableIdentifier> elements = currentConnection.getMetadata().getObjectList(schema, null);
-				objects.addAll(elements);
-			}
+			SourceTableArgument selector = new SourceTableArgument(names, null, schema, typesArray, currentConnection);
+			objects.addAll(selector.getTables());
 		}
 
 		if (cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PROCS, false))
@@ -194,8 +173,11 @@ public class WbGenerateScript
 		}
 		finally
 		{
-			rowMonitor.restoreType("genscript");
-			rowMonitor.jobFinished();
+			if (rowMonitor != null)
+			{
+				rowMonitor.restoreType("genscript");
+				rowMonitor.jobFinished();
+			}
 		}
 
 		if (isCancelled)
@@ -248,6 +230,12 @@ public class WbGenerateScript
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	public String getAlternateVerb()
+	{
+		return SHORT_VERB;
 	}
 
 	@Override
