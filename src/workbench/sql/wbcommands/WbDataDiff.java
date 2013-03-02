@@ -32,6 +32,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -40,13 +44,13 @@ import workbench.db.compare.TableDeleteSync;
 import workbench.db.compare.TableDiffStatus;
 import workbench.db.exporter.BlobMode;
 import workbench.db.importer.TableDependencySorter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
+
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
@@ -162,7 +166,8 @@ public class WbDataDiff
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffAltKey", def));
+				result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", def, PARAM_ALTERNATE_KEYS));
+				result.setWarning(true);
 			}
 		}
 		return map;

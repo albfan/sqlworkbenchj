@@ -76,7 +76,7 @@ public class SchemaReporter
 	private RowActionMonitor monitor;
 	private String outputfile;
 	protected boolean cancel;
-	private boolean includeProcedures;
+	private String procedureNames;
 	private boolean includeGrants;
 	private boolean includeTriggers;
 	private boolean includeExtendedOptions;
@@ -135,7 +135,7 @@ public class SchemaReporter
 	 */
 	public int getObjectCount()
 	{
-		return objects.size() + sequences.size();
+		return objects.size() + sequences.size() + procedures.size();
 	}
 
 	public void clearObjects()
@@ -165,9 +165,26 @@ public class SchemaReporter
 		this.includeExtendedOptions = flag;
 	}
 
+	public void setProcedureNames(String name)
+	{
+		this.procedureNames = name;
+	}
+
+	public boolean proceduresIncluded()
+	{
+		return procedureNames != null;
+	}
+
 	public void setIncludeProcedures(boolean flag)
 	{
-		this.includeProcedures = flag;
+		if (flag)
+		{
+			this.procedureNames = "*";
+		}
+		else
+		{
+			this.procedureNames = null;
+		}
 	}
 
 	public void setIncludeGrants(boolean flag)
@@ -238,7 +255,7 @@ public class SchemaReporter
 		this.cancel = false;
 
 		sortTableObjects();
-		if (this.includeProcedures && this.procedures.isEmpty()) this.retrieveProcedures();
+		if (proceduresIncluded() && this.procedures.isEmpty()) this.retrieveProcedures();
 		if (this.cancel) return;
 
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -247,8 +264,7 @@ public class SchemaReporter
 		writeReportInfo(out);
 		out.write("\n");
 
-		int count = this.objects.size();
-		int totalCount = count + this.procedures.size() + this.sequences.size();
+		int totalCount = this.objects.size() + this.procedures.size() + this.sequences.size();
 		int totalCurrent = 1;
 
 		DbSettings dbs = dbConn.getMetadata().getDbSettings();
@@ -293,8 +309,8 @@ public class SchemaReporter
 				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + object, e);
 			}
 		}
-		count = this.procedures.size();
-		if (count > 0) out.write("\n");
+		
+		if (this.procedures.size() > 0) out.write("\n");
 		for (ReportProcedure proc : procedures)
 		{
 			if (this.monitor != null)
@@ -308,8 +324,7 @@ public class SchemaReporter
 			if (this.cancel) break;
 		}
 
-		count = this.sequences.size();
-		if (count > 0) out.write("\n");
+		if (this.sequences.size() > 0) out.write("\n");
 		for (ReportSequence seq : sequences)
 		{
 			String name = seq.getSequence().getSequenceName();
@@ -360,8 +375,11 @@ public class SchemaReporter
 		return true;
 	}
 
-	private void retrieveProcedures()
+	public void retrieveProcedures()
 	{
+		if (!this.proceduresIncluded()) return;
+		this.procedures.clear();
+
 		if (this.monitor != null)
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingProcedures"), -1, -1);
@@ -375,6 +393,7 @@ public class SchemaReporter
 			for (String schema : schemas)
 			{
 				this.retrieveProcedures(schema);
+				if (this.cancel) return;
 			}
 		}
 		if (this.monitor != null)
@@ -387,16 +406,25 @@ public class SchemaReporter
 	{
 		try
 		{
+			List<String> names = StringUtil.stringToList(procedureNames, ",", true, true, false, false);
+
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
 			List<ProcedureDefinition> procs = null;
-			if (this.dbConn.getDbSettings().supportsSchemas())
+
+			for (String name : names)
 			{
-				procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
+				if (this.cancel) return;
+				String searchName = dbConn.getMetadata().adjustObjectnameCase(name);
+				if (this.dbConn.getDbSettings().supportsSchemas())
+				{
+					procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, searchName);
+				}
+				else
+				{
+					procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(schema, null, searchName);
+				}
 			}
-			else
-			{
-				procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(schema, null, null);
-			}
+
 			Set<String> oraPackages = new HashSet<String>();
 
 			for (ProcedureDefinition def : procs)

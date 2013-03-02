@@ -101,12 +101,12 @@ public class SourceTableArgument
 		throws SQLException
 	{
 		missingTables.clear();
-		List<TableIdentifier> toAdd = parseArgument(includeTables, schema, true, types, dbConn);
+		List<TableIdentifier> toAdd = retrieveObjects(includeTables, schema, true, types, dbConn);
 		tables.addAll(toAdd);
 
 		if (StringUtil.isNonBlank(excludeTables))
 		{
-			List<TableIdentifier> toRemove = parseArgument(excludeTables, schema, false, null, dbConn);
+			List<TableIdentifier> toRemove = retrieveObjects(excludeTables, schema, false, null, dbConn);
 			tables.removeAll(toRemove);
 		}
 	}
@@ -126,7 +126,7 @@ public class SourceTableArgument
 		return typeList.toArray(result);
 	}
 
-	private List<TableIdentifier> parseArgument(String arg, String schema, boolean checkWildcard, String[] types, WbConnection dbConn)
+	private List<TableIdentifier> retrieveObjects(String arg, String schema, boolean checkWildcard, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
 		List<String> args = getObjectNames(arg);

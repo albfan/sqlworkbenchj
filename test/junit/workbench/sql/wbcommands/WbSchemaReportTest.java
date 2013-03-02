@@ -24,7 +24,6 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -35,7 +34,6 @@ import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
 
 import org.junit.Test;
 
@@ -54,6 +52,101 @@ public class WbSchemaReportTest
 	public WbSchemaReportTest()
 	{
 		super("WbSchemaReportTest");
+	}
+
+	@Test
+	public void testTypeFilter()
+		throws Exception
+	{
+		try
+		{
+			TestUtil tutil = getTestUtil();
+			WbConnection conn = tutil.getConnection();
+
+			String script =
+			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100), constraint positive_id check (person_id > 0));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table customer (customer_id integer primary key); \n" +
+			"CREATE VIEW v_person AS SELECT * FROM Person;\n" +
+			"CREATE VIEW customer_view AS SELECT * FROM customer;\n" +
+			"CREATE sequence seq_one;\n" +
+			"CREATE sequence other_seq  increment by 5;\n" +
+			"commit;\n";
+			TestUtil.executeScript(conn, script);
+
+			WbSchemaReport report = new WbSchemaReport();
+			report.setConnection(conn);
+
+			File output = tutil.getFile("selected.xml");
+			output.delete();
+
+			StatementRunnerResult result = report.execute(
+				"WbReport -file='" + output.getAbsolutePath() + "' \n" +
+				"         -objectTypeNames='table:person,address' \n" +
+				"         -objectTypeNames=view:v* \n" +
+				"         -objectTypeNames=sequence:s*"
+			);
+
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue("File not created", output.exists());
+
+			String xml = FileUtil.readFile(output, "UTF-8");
+
+			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+			assertEquals("Incorrect table count", "2", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON'])");
+			assertEquals("PERSON table not written", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='ADDRESS'])");
+			assertEquals("ADDRESS table not written", "1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def)");
+			assertEquals("Incorrect view count", "1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
+			assertEquals("Incorrect sequence count", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def[@name='SEQ_ONE'])");
+			assertEquals("SEQ_ONE not written", "1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
+			assertEquals("V_PERSON not written", "1", count);
+
+			output.delete();
+			result = report.execute(
+				"WbReport -file='" + output.getAbsolutePath() + "' \n" +
+				"         -objectTypeNames=table:* \n" +
+				"         -objectTypeNames=view:* \n" +
+				"         -objectTypeNames=sequence:o*"
+			);
+
+			xml = FileUtil.readFile(output, "UTF-8");
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+			assertEquals("Incorrect table count", "3", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON'])");
+			assertEquals("PERSON table not written", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='ADDRESS'])");
+			assertEquals("ADDRESS table not written", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='CUSTOMER'])");
+			assertEquals("CUSTOMER table not written", "1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def)");
+			assertEquals("Incorrect view count", "2", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
+			assertEquals("V_PERSON not written", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='CUSTOMER_VIEW'])");
+			assertEquals("CUSTOMER_VIEW not written", "1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
+			assertEquals("Incorrect sequence count", "1", count);
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def[@name='OTHER_SEQ'])");
+			assertEquals("OTHER_SEQ not written", "1", count);
+
+			assertTrue("could not delete output file", output.delete());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 	@Test
@@ -237,6 +330,8 @@ public class WbSchemaReportTest
 		name = TestUtil.getXPathValue(xml, "/schema-report/proc-def[1]/proc-name");
 		assertEquals("AN_HOUR_BEFORE", name);
 
+		assertTrue(output.delete());
+
 		util.emptyBaseDirectory();
 		output = new File(util.getBaseDir(), "proc_report_s2.xml");
 
@@ -260,6 +355,8 @@ public class WbSchemaReportTest
 		name = TestUtil.getXPathValue(xml, "/schema-report/proc-def[1]/proc-name");
 		assertEquals("TWO_HOURS_BEFORE", name);
 
+		assertTrue(output.delete());
+
 		output = new File(util.getBaseDir(), "proc_report_s2.xml");
 		result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -tables=s1.person");
 		assertTrue(result.isSuccess());
@@ -274,6 +371,7 @@ public class WbSchemaReportTest
 
 		name = TestUtil.getXPathValue(xml, "/schema-report/table-def[1]/column-def[1]/column-name");
 		assertEquals("ID1", name);
+		assertTrue(output.delete());
 	}
 
 	private void setupDatabase()
@@ -282,33 +380,26 @@ public class WbSchemaReportTest
 		util = new TestUtil("schemaReportTest");
 		this.source = util.getConnection();
 
-		Statement stmt = null;
+		String script =
+			"create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100), constraint positive_id check (person_id > 0));\n" +
+			"create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n" +
+			"create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id));\n" +
 
-		try
-		{
-			stmt = source.createStatement();
-			stmt.executeUpdate("create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100), constraint positive_id check (person_id > 0))");
-			stmt.executeUpdate("create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
-			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
-			stmt.executeUpdate("create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id))");
+			"alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id);\n" +
+			"alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id);\n" +
+			"alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(person_id, address_id);\n" +
 
-			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id)");
-      stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id)");
-      stmt.executeUpdate("alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(person_id, address_id)");
+			"CREATE VIEW v_person AS SELECT * FROM \"Person\";\n" +
+			"CREATE sequence seq_one;\n" +
+			"CREATE sequence seq_two  increment by 5;\n" +
+			"CREATE sequence seq_three;\n" +
 
-			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM \"Person\"");
-			stmt.executeUpdate("CREATE sequence seq_one");
-			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
-			stmt.executeUpdate("CREATE sequence seq_three");
-
-			stmt.executeUpdate("create user arthur password '42'");
-			stmt.executeUpdate("GRANT SELECT ON \"Person\" TO arthur");
-			stmt.executeUpdate("GRANT SELECT,INSERT,UPDATE,DELETE ON \"Address\" TO arthur");
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
+			"create user arthur password '42';\n" +
+			"GRANT SELECT ON \"Person\" TO arthur;\n" +
+			"GRANT SELECT,INSERT,UPDATE,DELETE ON \"Address\" TO arthur;\n " +
+			"commit;\n";
+			TestUtil.executeScript(source,script);
 	}
 
 }

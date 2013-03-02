@@ -64,7 +64,11 @@ extends WbTestCase
 		TestUtil.executeScript(con,
 			"create table foo (id integer);\n" +
 			"create table bar (id integer not null primary key);\n " +
-			"create view v_foo as select * from foo;"
+			"create view v_foo as select * from foo; \n" +
+			"create view foo_view as select * from foo; \n" +
+			"create schema s2; \n" +
+			"create table s2.fx (id integer); \n" +
+			"commit;"
 			);
 	}
 
@@ -75,6 +79,10 @@ extends WbTestCase
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
 		if (con == null) return;
 		SQLServerTestUtil.dropAllObjects(con);
+		TestUtil.executeScript(con,
+			"drop table s2.fx;\n" +
+			"drop schema s2;\n" +
+			"commit;");
 	}
 
 	@Test
@@ -110,7 +118,7 @@ extends WbTestCase
 		assertEquals("Incorrect table count", "2", count);
 
 		count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def)");
-		assertEquals("Incorrect view count", "1", count);
+		assertEquals("Incorrect view count", "2", count);
 
 		assertTrue(output.delete());
 
@@ -124,8 +132,39 @@ extends WbTestCase
 		assertEquals("Incorrect table count", "2", count);
 
 		count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def)");
-		assertEquals("Incorrect view count", "1", count);
+		assertEquals("Incorrect view count", "2", count);
 		assertTrue(output.delete());
+
+		sql = "WbSchemaReport -objectTypeNames=table:f* -objectTypeNames=view:v* -file='" + output.getFullPath() + "'";
+		result = reporter.execute(sql);
+		assertTrue(result.getMessageBuffer().toString(), output.exists());
+
+		xml = FileUtil.readFile(output, "UTF-8");
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+		assertEquals("Incorrect table count", "1", count);
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='foo'])");
+		assertEquals("foo table not written", "1", count);
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def)");
+		assertEquals("Incorrect view count", "1", count);
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='v_foo'])");
+		assertEquals("Incorrect view count", "1", count);
+
+		assertTrue(output.delete());
+
+		sql = "WbSchemaReport -objectTypeNames=table:dbo.f* -objectTypeNames=table:s2.f* -file='" + output.getFullPath() + "'";
+		result = reporter.execute(sql);
+		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		xml = FileUtil.readFile(output, "UTF-8");
+
+		count = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='fx']/table-schema/text()");
+		assertEquals("Wrong schema", "s2", count);
+
+		count = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='foo']/table-schema/text()");
+		assertEquals("Wrong schema", "dbo", count);
+
 	}
 
 }

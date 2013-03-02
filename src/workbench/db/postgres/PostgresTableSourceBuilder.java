@@ -67,12 +67,13 @@ public class PostgresTableSourceBuilder
 		StringBuilder result = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "select bt.relname as table_name, bns.nspname as table_schema \n" +
-             "from pg_class ct \n" +
-             "    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
-             "    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
-             "    join pg_class bt on i.inhparent = bt.oid \n" +
-             "    join pg_namespace bns on bt.relnamespace = bns.oid";
+		String sql =
+			"select bt.relname as table_name, bns.nspname as table_schema \n" +
+			"from pg_class ct \n" +
+			"    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
+			"    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
+			"    join pg_class bt on i.inhparent = bt.oid \n" +
+			"    join pg_namespace bns on bt.relnamespace = bns.oid";
 
 		Savepoint sp = null;
 		try

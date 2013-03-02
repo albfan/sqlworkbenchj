@@ -36,7 +36,8 @@
     <note><para>
       To see table and column comments with an Oracle database, you need to
       <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
-      driver, otherwise the driver will not return comments.
+      driver, otherwise the driver will not return comments. To see the "comment" values
+      from SQL Server's extended properties, please setup the property retrieval as described <link linkend="dbexplorer-ms-remarks-prop">here</link>
     </para></note>
 
     <para>The command supports the following parameters:</para>
@@ -75,9 +76,6 @@
               If auto-completion is invoked for this parameter, it behaves like the auto-completion e.g. in the <literal>FROM</literal>
               clause of a SQL statement.
             </para>
-            <para>
-              If this parameter is specified <literal>-schemas</literal> is ignored.
-            </para>
           </entry>
         </row>
 
@@ -91,23 +89,18 @@
               for all tables in the schemas <literal>public</literal> and <literal>accounting</literal>.
             </para>
             <para>
+              If you combine <literal>-schemas</literal> with <literal>-objects</literal>, the list of objects
+              will be applied to every schema unless the object names are supplied <emphasis role="bold">with</emphasis> a schema:
+              <literal>-schemas=accounting,invoices -objects=o*,customers.c*</literal> will select all objects starting
+              with <literal>O</literal> from the schemas <literal>accounting,invoices</literal> and all objects
+              starting with <literal>C</literal> from the schema <literal>customers</literal>.
+            </para>
+            <para>
               The possible values for this parameter correspond to the "Schema" dropdown in the
               <link linkend="dbexplorer">DbExplorer</link>. The parameter supports auto-completion
               and will show a list of available schemas.
             </para>
-            <para>
-              This parameter is ignored if <literal>-objects</literal> is also specified.
-            </para>
           </entry>
-				</row>
-
-				<row>
-					<entry>-excludeTableNames</entry>
-					<entry>
-            A (comma separated) list of tables to exclude from reporting. This is only used if
-            -tables is also specified. To create a report on all tables, but exclude those that start
-            with 'DEV', use <literal>-tables=* -excludeTableNames=DEV*</literal>
-					</entry>
 				</row>
 
         <row>
@@ -136,30 +129,56 @@
         </row>
 
 				<row>
+					<entry>-excludeObjectNames</entry>
+					<entry>
+            A (comma separated) list of tables to exclude from reporting. This is only used if
+            -tables is also specified. To create a report on all tables, but exclude those that start
+            with 'DEV', use <literal>-tables=* -excludeTableNames=DEV*</literal>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-objectTypeNames</entry>
+					<entry>
+            <para>
+              This parameter can be repeated several times to define the object names per object type to be retrieved.
+              The format of the argument is <literal>-objectTypeNames=typename:namepattern</literal>
+            </para>
+            <para>
+              The following will select the tables <literal>person</literal> and <literal>address</literal>,
+              all sequences starting with "T" and the view <literal>v_person</literal>. If the list of object names
+              contains a comma, the whole parameter value needs to be quoted:
+              <programlisting>-objectTypeNames='table:person,address' -objectTypeNames=sequence:t* -objectTypeNames=view:v_person</programlisting>
+              The type names are the same as can be used with the <literal>-types</literal> parameter.
+            </para>
+            <para>
+              If this parameter specified at least once all other parameters that define the types to be retrieved
+              are ignored: <literal>-types</literal> and <literal>-objects</literal>, <literal>-includeSequences</literal>,
+              <literal>-includeTables</literal> and <literal>-includeViews</literal>
+              are ignored.
+            </para>
+            <para>
+              As all other "inclusion" options are ignored, only the specified object types will be retrieved.
+              To retrieve all objects of a specific type use a wildard: <literal>-objectTypeNames='table:*'</literal>.
+            </para>
+            <para>
+              The exclusion pattern defined through <literal>-excludeObjectNames</literal> is applied to <emphasis>all</emphasis> object types.
+            </para>
+            <para>
+              This parameter can also be used to restrict the retrieval of stored procedures: <literal>-objectNameTypes=procedure:P*</literal>
+              will include all stored procedures (or functions) that start with a "P". In this case the parameter <literal>-includeProcedures</literal>
+              is ignored.
+            </para>
+					</entry>
+				</row>
+
+				<row>
 					<entry>-includeTables</entry>
 					<entry>Control the output of table information for the report. The default is
 						<literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
 					</entry>
 				</row>
-				<row>
-					<entry>-includeTableGrants</entry>
-					<entry>If tables are included in the output, the grants for each table can also be included with
-						this parameter. The default value is <literal>false</literal>.
-					</entry>
-				</row>
-				<row>
-					<entry>-includeProcedures</entry>
-					<entry>Control the output of stored procedure information for the report. The default is
-						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
-					</entry>
-				</row>
-				<row>
-					<entry>-includeTriggers</entry>
-					<entry>
-            This parameter controls if table triggers are added to the output.
-						The default value is <literal>true</literal>.
-					</entry>
-				</row>
+
 				<row>
 					<entry>-includeSequences</entry>
 					<entry>
@@ -173,6 +192,29 @@
             </para>
 					</entry>
 				</row>
+
+				<row>
+					<entry>-includeTableGrants</entry>
+					<entry>If tables are included in the output, the grants for each table can also be included with
+						this parameter. The default value is <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeProcedures</entry>
+					<entry>Control the output of stored procedure information for the report. The default is
+						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeTriggers</entry>
+					<entry>
+            This parameter controls if table triggers are added to the output.
+						The default value is <literal>true</literal>.
+					</entry>
+				</row>
+
 				<row>
 					<entry>-reportTitle</entry>
 					<entry>

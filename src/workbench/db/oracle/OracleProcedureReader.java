@@ -28,6 +28,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
@@ -36,10 +40,11 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
+
 import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -312,6 +317,9 @@ public class OracleProcedureReader
 		{
 			return super.getProcedures(catalog, schema, name);
 		}
+
+		schema = DbMetadata.cleanupWildcards(schema);
+		name = DbMetadata.cleanupWildcards(name);
 
 		// ALL_PROCEDURES does not return invalid procedures
 		// so an outer join against ALL_OBJECTS is necessary

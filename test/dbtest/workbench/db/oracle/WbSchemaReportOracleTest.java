@@ -28,6 +28,7 @@ import workbench.WbTestCase;
 
 import workbench.db.WbConnection;
 
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.WbSchemaReport;
 
@@ -67,6 +68,23 @@ public class WbSchemaReportOracleTest
 			"create table bar (id integer not null primary key);\n " +
 			"create view v_foo as select * from foo;"
 			);
+
+		TestUtil.executeScript(con,
+			"CREATE OR REPLACE PROCEDURE some_proc \n" +
+			"IS \n" +
+			"BEGIN \n" +
+			" null; \n" +
+			"END some_proc; \n" +
+			"/\n", DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		TestUtil.executeScript(con,
+			"CREATE OR REPLACE PROCEDURE proc_two \n" +
+			"IS \n" +
+			"BEGIN \n" +
+			" null; \n" +
+			"END proc_two; \n" +
+			"/\n", DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
 	}
 
 	@AfterClass
@@ -87,7 +105,7 @@ public class WbSchemaReportOracleTest
 		reporter.setConnection(con);
 
 		TestUtil util = getTestUtil();
-		WbFile output = util.getFile("ora_diff.xml");
+		WbFile output = util.getFile("ora_rep.xml");
 		String sql = "WbSchemaReport -tables=* -types=table,sequence -file='" + output.getFullPath() + "'";
 		StatementRunnerResult result = reporter.execute(sql);
 		assertTrue(result.getMessageBuffer().toString(), output.exists());
@@ -144,6 +162,16 @@ public class WbSchemaReportOracleTest
 		count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
 		assertEquals("Incorrect sequence count", "1", count);
 		assertTrue(output.delete());
+
+		sql = "WbSchemaReport -objectTypeNames=procedure:s* -file='" + output.getFullPath() + "'";
+		result = reporter.execute(sql);
+		assertTrue(result.getMessageBuffer().toString(), output.exists());
+
+		xml = FileUtil.readFile(output, "UTF-8");
+		count = TestUtil.getXPathValue(xml, "count(/schema-report/proc-def)");
+		assertEquals("Incorrect procedure count", "1", count);
+		String name = TestUtil.getXPathValue(xml, "/schema-report/proc-def/proc-name");
+		assertEquals("Wrong procedure written", "SOME_PROC", name);
 
 	}
 

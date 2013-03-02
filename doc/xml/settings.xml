@@ -309,7 +309,10 @@
         The name of the extended property can be configured using
         <link linkend="dbexplorer-ms-remarks-prop"><literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></link>
       </para>
-      <para>Default value: <literal>false</literal> for both properties</para>
+      <para>
+        Enabling these options is also necessary in order to get comments in a <link linkend="command-schema-report">WbSchemaReport</link> output
+      </para>
+      <para>Default value: <literal>true</literal> for both properties</para>
     </simplesect>
 	</section>
 

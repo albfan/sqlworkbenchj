@@ -26,11 +26,16 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import workbench.db.JdbcProcedureReader;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbMetadata;
+import workbench.db.JdbcProcedureReader;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -59,6 +64,10 @@ public class Db2ProcedureReader
 		{
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
+
+		catalog = DbMetadata.cleanupWildcards(catalog);
+		schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);
+		namePattern = DbMetadata.cleanupWildcards(namePattern);
 
 		Statement stmt = null;
 		ResultSet rs = null;

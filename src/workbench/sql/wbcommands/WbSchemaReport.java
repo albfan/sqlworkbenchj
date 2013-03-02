@@ -50,6 +50,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
 
+
 /**
  *
  * @author  Thomas Kellerer
@@ -59,6 +60,7 @@ public class WbSchemaReport
 	implements RowActionMonitor
 {
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTableNames";
+	public static final String PARAM_EXCLUDE_OBJECTS = "excludeObjectNames";
 	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
@@ -67,6 +69,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	public static final String PARAM_TABLE_NAMES = "tables";
 	public static final String PARAM_OBJECT_NAMES = "objects";
+	public static final String PARAM_OBJECT_TYPE_NAMES = "objectTypeNames";
 	public static final String PARAM_OBJECT_OPTIONS = "includeExtendedOptions";
 
 	public static final String ALTERNATE_VERB = "WBREPORT";
@@ -83,7 +86,9 @@ public class WbSchemaReport
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.Deprecated);
 		cmdLine.addArgument(PARAM_OBJECT_NAMES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.Deprecated);
+		cmdLine.addArgument(PARAM_OBJECT_TYPE_NAMES, ArgumentType.Repeatable);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
@@ -134,13 +139,15 @@ public class WbSchemaReport
 
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
+		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(cmdLine.getListValue(CommonArgs.ARG_TYPES));
 
 		String tableNames = this.cmdLine.getValue(PARAM_OBJECT_NAMES, this.cmdLine.getValue(PARAM_TABLE_NAMES));
-		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		String exclude = cmdLine.getValue(PARAM_EXCLUDE_OBJECTS, cmdLine.getValue(PARAM_EXCLUDE_TABLES));
 		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
+		List<String> typeFilter = cmdLine.getList(PARAM_OBJECT_TYPE_NAMES);
 
 		if (types.isEmpty())
 		{
@@ -184,26 +191,57 @@ public class WbSchemaReport
 			this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
 		}
 
-		for (String schema : schemas)
+		if (CollectionUtil.isEmpty(typeFilter))
 		{
-			SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, typesArray, this.currentConnection);
-			List<TableIdentifier> tables = tableArg.getTables();
-			if (tables != null && tables.size() > 0)
+			for (String schema : schemas)
 			{
-				this.reporter.setObjectList(tables);
+				SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, typesArray, this.currentConnection);
+				List<TableIdentifier> tables = tableArg.getTables();
+				if (tables != null && tables.size() > 0)
+				{
+					this.reporter.setObjectList(tables);
+				}
 			}
 		}
-
-		if (reporter.getObjectCount() == 0)
+		else
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrNoTablesFound");
-			return result;
+			for (String filter : typeFilter)
+			{
+				String[] def = filter.split(":");
+				if (def != null && def.length == 2)
+				{
+					String type = def[0].toUpperCase();
+					String[] typeNames = new String[] { type };
+					String names = def[1];
+
+					for (String schema : schemas)
+					{
+						if (type.equalsIgnoreCase("procedure"))
+						{
+							this.reporter.setProcedureNames(names);
+						}
+						else
+						{
+							SourceTableArgument tableArg = new SourceTableArgument(names, exclude, schema, typeNames, this.currentConnection);
+							List<TableIdentifier> tables = tableArg.getTables();
+							if (tables != null && tables.size() > 0)
+							{
+								this.reporter.setObjectList(tables);
+							}
+						}
+					}
+				}
+				else
+				{
+					result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", filter, PARAM_OBJECT_TYPE_NAMES));
+					result.setWarning(true);
+				}
+			}
 		}
 
 		// this is important for the retrieval of the stored procedures
 		// which is the only thing the SchemaReporter retrieves
-		this.reporter.setSchemas(schemas);
+		reporter.setSchemas(schemas);
 
 		String alternateSchema = cmdLine.getValue("useschemaname");
 		this.reporter.setSchemaNameToUse(alternateSchema);
@@ -215,7 +253,6 @@ public class WbSchemaReport
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, false));
 
@@ -226,6 +263,15 @@ public class WbSchemaReport
 				result.addMessage(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
 				result.addMessage("");
 			}
+		}
+
+		reporter.retrieveProcedures();
+
+		if (reporter.getObjectCount() == 0)
+		{
+			result.setFailure();
+			result.addMessageByKey("ErrNoTablesFound");
+			return result;
 		}
 
 		// currentTable will be incremented as we have registered

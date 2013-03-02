@@ -30,10 +30,14 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
+
 import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -108,20 +112,9 @@ public class JdbcProcedureReader
 	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
-		if ("*".equals(catalog) || StringUtil.isBlank(catalog))
-		{
-			catalog = null;
-		}
-
-		if ("*".equals(schema) || "%".equals(schema) || StringUtil.isBlank(schema))
-		{
-			schema = null;
-		}
-
-		if (StringUtil.isBlank(name))
-		{
-			name = "%";
-		}
+		catalog = DbMetadata.cleanupWildcards(catalog);
+		schema = DbMetadata.cleanupWildcards(schema);
+		name = DbMetadata.cleanupWildcards(name);
 
 		Savepoint sp = null;
 		try
@@ -494,11 +487,17 @@ public class JdbcProcedureReader
 	 * Return a List of {@link workbench.db.ProcedureDefinition} objects.
 	 */
 	@Override
-	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema, String name)
+	public List<ProcedureDefinition> getProcedureList(String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException
 	{
 		List<ProcedureDefinition> result = new LinkedList<ProcedureDefinition>();
-		DataStore procs = getProcedures(aCatalog, aSchema, name);
+
+		catalogPattern = DbMetadata.cleanupWildcards(catalogPattern);
+		schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);
+		namePattern = DbMetadata.cleanupWildcards(namePattern);
+
+		DataStore procs = getProcedures(catalogPattern, schemaPattern, namePattern);
+
 		if (procs == null || procs.getRowCount() == 0) return result;
 		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
 		int count = procs.getRowCount();

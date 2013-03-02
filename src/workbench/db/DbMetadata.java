@@ -1279,14 +1279,20 @@ public class DbMetadata
 		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 	}
 
+	public static String cleanupWildcards(String pattern)
+	{
+		if (pattern == null) return null;
+		if ("*".equals(pattern) || "%".equals(pattern)) return null;
+		return StringUtil.trimQuotes(StringUtil.replace(pattern, "*", "%"));
+	}
+
 	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
 		throws SQLException
 	{
-		if ("*".equals(schemaPattern) || "%".equals(schemaPattern)) schemaPattern = null;
-		if ("*".equals(namePattern) || "%".equals(namePattern)) namePattern = null;
 
-		if (schemaPattern != null) schemaPattern = StringUtil.trimQuotes(StringUtil.replace(schemaPattern, "*", "%"));
-		if (namePattern != null) namePattern = StringUtil.trimQuotes(StringUtil.replace(namePattern, "*", "%"));
+		catalogPattern = cleanupWildcards(catalogPattern);
+		schemaPattern = cleanupWildcards(schemaPattern);
+		namePattern = cleanupWildcards(namePattern);
 
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
