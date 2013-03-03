@@ -149,25 +149,23 @@
               all sequences starting with "T" and the view <literal>v_person</literal>. If the list of object names
               contains a comma, the whole parameter value needs to be quoted:
               <programlisting>-objectTypeNames='table:person,address' -objectTypeNames=sequence:t* -objectTypeNames=view:v_person</programlisting>
-              The type names are the same as can be used with the <literal>-types</literal> parameter.
+              The type names are the same ones that can be used with the <literal>-types</literal> parameter. This can be combined
+              with schema qualified names:
+              <programlisting>-objectTypeNames='table:cust.person,accounting.address' -objectTypeNames=view:public.*</programlisting>
             </para>
             <para>
-              If this parameter specified at least once all other parameters that define the types to be retrieved
+              This can also be used to restrict the retrieval of stored procedures: <literal>-objectNameTypes=procedure:P*</literal>
+              will include all stored procedures (or functions) that start with a "P". In this case the parameter <literal>-includeProcedures</literal>
+              is ignored.
+            </para>
+            <para>
+              If this parameter is used at least once, all of the following parameters
               are ignored: <literal>-types</literal> and <literal>-objects</literal>, <literal>-includeSequences</literal>,
               <literal>-includeTables</literal> and <literal>-includeViews</literal>
               are ignored.
             </para>
             <para>
-              As all other "inclusion" options are ignored, only the specified object types will be retrieved.
-              To retrieve all objects of a specific type use a wildard: <literal>-objectTypeNames='table:*'</literal>.
-            </para>
-            <para>
               The exclusion pattern defined through <literal>-excludeObjectNames</literal> is applied to <emphasis>all</emphasis> object types.
-            </para>
-            <para>
-              This parameter can also be used to restrict the retrieval of stored procedures: <literal>-objectNameTypes=procedure:P*</literal>
-              will include all stored procedures (or functions) that start with a "P". In this case the parameter <literal>-includeProcedures</literal>
-              is ignored.
             </para>
 					</entry>
 				</row>
