@@ -119,18 +119,18 @@ public class JdbcTableDefinitionReader
 
 			while (rs != null && rs.next())
 			{
-				String colName = StringUtil.trim(rs.getString("COLUMN_NAME"));
-				int sqlType = rs.getInt("DATA_TYPE");
-				String typeName = rs.getString("TYPE_NAME");
+				String colName = StringUtil.trim(rs.getString(4));
+				int sqlType = rs.getInt(5);  // "COLUMN_NAME"
+				String typeName = rs.getString(6); // "TYPE_NAME"
 
 				sqlType = typeResolver.fixColumnType(sqlType, typeName);
 				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), sqlType);
 
-				int size = rs.getInt("COLUMN_SIZE");
+				int size = rs.getInt(7); // "COLUMN_SIZE"
 				int digits = -1;
 				try
 				{
-					digits = rs.getInt("DECIMAL_DIGITS");
+					digits = rs.getInt(9); // "DECIMAL_DIGITS"
 				}
 				catch (Exception e)
 				{
@@ -138,8 +138,8 @@ public class JdbcTableDefinitionReader
 				}
 				if (rs.wasNull()) digits = -1;
 
-				String remarks = rs.getString("REMARKS");
-				String defaultValue = rs.getString("COLUMN_DEF");
+				String remarks = rs.getString(12); // "REMARKS"
+				String defaultValue = rs.getString(13); // "COLUMN_DEF"
 				if (defaultValue != null && dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
@@ -148,7 +148,7 @@ public class JdbcTableDefinitionReader
 				int position = -1;
 				try
 				{
-					position = rs.getInt("ORDINAL_POSITION");
+					position = rs.getInt(17); // "ORDINAL_POSITION"
 				}
 				catch (SQLException e)
 				{
@@ -156,8 +156,8 @@ public class JdbcTableDefinitionReader
 					position = -1;
 				}
 
-				String nullable = rs.getString("IS_NULLABLE");
-				String increment = jdbc4 ? rs.getString("IS_AUTOINCREMENT") : "NO";
+				String nullable = rs.getString(18); // "IS_NULLABLE"
+				String increment = jdbc4 ? rs.getString(23) : "NO"; // "IS_AUTOINCREMENT"
 				boolean autoincrement = StringUtil.stringToBool(increment);
 
 				String display = typeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits);

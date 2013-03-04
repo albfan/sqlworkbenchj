@@ -203,6 +203,11 @@ public class IndexDefinition
 	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
+		if (con != null && con.getMetadata().isSqlServer())
+		{
+			// SQL Server does not support fully qualified names when dropping an index
+			return this.indexName;
+		}
 		return getFullyQualifiedName(con);
 	}
 
