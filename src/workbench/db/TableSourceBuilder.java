@@ -690,6 +690,7 @@ public class TableSourceBuilder
 			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
 		}
 
+		template = template.replaceAll("ADD\\s+PRIMARY", "ADD PRIMARY"); // removing the constraint name leaves two spaces which I find ugly :)
 		result.append(template);
 		if (!forInlineUse)
 		{

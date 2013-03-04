@@ -2074,4 +2074,31 @@ public class SqlUtil
 		return result.toString();
 	}
 
+	public static void dumpResultSetInfo(String methodName, ResultSetMetaData meta)
+	{
+		if (!LogMgr.isDebugEnabled()) return;
+
+		if (meta == null) return;
+		try
+		{
+			int columns = meta.getColumnCount();
+			StringBuilder out = new StringBuilder(columns * 20);
+			out.append(methodName);
+			out.append(" returns: ");
+			for (int col=1; col <= columns; col++)
+			{
+				if (col > 1) out.append(", ");
+				out.append(Integer.toString(col));
+				out.append(": [");
+				out.append(meta.getColumnName(col));
+				out.append(']');
+			}
+			LogMgr.logDebug("SqlUtil.dumpResultSetInfo()", out.toString());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlUtil.dumpResultSetInfo()", "Could not access ResultSetMetaData", e);
+		}
+	}
+
 }

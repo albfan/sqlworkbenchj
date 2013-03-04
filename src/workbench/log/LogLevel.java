@@ -36,11 +36,6 @@ public enum LogLevel
 	debug,
 	trace;
 
-	public boolean isIncluded(LogLevel target)
-	{
-		return false;
-	}
-
 	public static LogLevel getLevel(String type)
 	{
 		if (StringUtil.isBlank(type)) return error;
@@ -63,5 +58,4 @@ public enum LogLevel
 		if (this == trace) return "TRACE";
 		return super.toString();
 	}
-
 }

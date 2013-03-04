@@ -71,9 +71,9 @@ public class LogMgr
 		return new WbFile(f);
 	}
 
-	public static void setMessageFormat(String aFormat)
+	public static void setMessageFormat(String msgFormat)
 	{
-		getLogger().setMessageFormat(aFormat);
+		getLogger().setMessageFormat(msgFormat);
 	}
 
 	public static void logToSystemError(boolean flag)
@@ -111,46 +111,46 @@ public class LogMgr
 		return getLogger().levelEnabled(LogLevel.debug);
 	}
 
-	public static void logDebug(Object aCaller, String aMsg)
+	public static void logDebug(Object caller, String message)
 	{
-		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.debug, caller, message, null);
 	}
 
-	public static void logTrace(Object aCaller, String aMsg)
+	public static void logTrace(Object caller, String message)
 	{
-		getLogger().logMessage(LogLevel.trace, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.trace, caller, message, null);
 	}
 
-	public static void logDebug(Object aCaller, String aMsg, Throwable th)
+	public static void logDebug(Object caller, String message, Throwable th)
 	{
-		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.debug, caller, message, th);
 		logChainedException(LogLevel.debug, th);
 	}
 
-	public static void logInfo(Object aCaller, String aMsg)
+	public static void logInfo(Object caller, String message)
 	{
-		getLogger().logMessage(LogLevel.info, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.info, caller, message, null);
 	}
 
-	public static void logInfo(Object aCaller, String aMsg, Throwable th)
+	public static void logInfo(Object caller, String message, Throwable th)
 	{
-		getLogger().logMessage(LogLevel.info, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.info, caller, message, th);
 	}
 
-	public static void logWarning(Object aCaller, String aMsg)
+	public static void logWarning(Object caller, String message)
 	{
-		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.warning, caller, message, null);
 	}
 
-	public static void logWarning(Object aCaller, String aMsg, Throwable th)
+	public static void logWarning(Object caller, String message, Throwable th)
 	{
-		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.warning, caller, message, th);
 		logChainedException(LogLevel.warning, th);
 	}
 
-	public static void logError(Object aCaller, String aMsg, Throwable th)
+	public static void logError(Object caller, String message, Throwable th)
 	{
-		getLogger().logMessage(LogLevel.error, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.error, caller, message, th);
 		logChainedException(LogLevel.error, th);
 	}
 

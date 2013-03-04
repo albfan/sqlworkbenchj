@@ -143,15 +143,23 @@ public class SimpleLogger
 		return level.compareTo(tolog) >= 0;
 	}
 
+	/**
+	 * Log a message at a specific loglevel
+	 *
+	 * @param logLevel  the loglevel
+	 * @param aCaller   the caller (only logged at debug or higher)
+	 * @param message   the message to log
+	 * @param th        the exception (may be null)
+	 */
 	@Override
-	public synchronized void logMessage(LogLevel level, Object aCaller, String aMsg, Throwable th)
+	public synchronized void logMessage(LogLevel logLevel, Object aCaller, String message, Throwable th)
 	{
-		if (!levelEnabled(level))
+		if (!levelEnabled(logLevel))
 		{
 			return;
 		}
 
-		CharSequence s = formatMessage(level, aCaller, aMsg, th);
+		CharSequence s = formatMessage(logLevel, aCaller, message, th);
 		if (logOut != null)
 		{
 			logOut.append(s);

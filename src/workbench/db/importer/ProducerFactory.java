@@ -332,7 +332,7 @@ public class ProducerFactory
 	 *	Generates a WB SQL command from the current import
 	 *  settings
 	 */
-	public String getWbCommand()
+	public String getWbCommand(boolean ignoreIdentity)
 	{
 		StringBuilder result = new StringBuilder(150);
 		StringBuilder indent = new StringBuilder();
@@ -365,6 +365,7 @@ public class ProducerFactory
 		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
 		appendArgument(result, CommonArgs.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
+		appendArgument(result, CommonArgs.ARG_IGNORE_IDENTITY, Boolean.toString(ignoreIdentity), indent);
 		if (this.batchSize > 0)
 		{
 			appendArgument(result, CommonArgs.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);

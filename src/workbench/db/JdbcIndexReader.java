@@ -129,7 +129,7 @@ public class JdbcIndexReader
 				{
 					if (pkName == null)
 					{
-						pkName = keysRs.getString("PK_NAME");
+						pkName = keysRs.getString(6); // "PK_NAME"
 					}
 					if (pkIndexNameColumn != null && pkIndexName == null)
 					{
@@ -137,8 +137,8 @@ public class JdbcIndexReader
 						// by the OracleIndexReader
 						pkIndexName = keysRs.getString(pkIndexNameColumn);
 					}
-					String colName = keysRs.getString("COLUMN_NAME");
-					int sequence = keysRs.getInt("KEY_SEQ");
+					String colName = keysRs.getString(4); // "COLUMN_NAME"
+					int sequence = keysRs.getInt(5); // "KEY_SEQ"
 					if (sequence < 1)
 					{
 						LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");

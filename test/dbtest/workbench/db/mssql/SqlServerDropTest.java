@@ -96,7 +96,6 @@ public class SqlServerDropTest
 		dropper.setObjects(Collections.singletonList(tbl));
 
 		CharSequence sql = dropper.getScript();
-		System.out.println(sql);
 		ScriptParser p = new ScriptParser(sql.toString());
 		assertEquals(2, p.getSize());
 		String drop = p.getCommand(0);
@@ -127,9 +126,9 @@ public class SqlServerDropTest
 		ScriptParser p = new ScriptParser(sql.toString());
 		assertEquals(3, p.getSize());
 		String drop = p.getCommand(0);
-		assertEquals("DROP INDEX dbo.idx_foo_1 ON dbo.foo", drop);
+		assertEquals("DROP INDEX idx_foo_1 ON wb_junit.dbo.foo", drop);
 		drop = p.getCommand(1);
-		assertEquals("DROP INDEX dbo.idx_foo_2 ON dbo.foo", drop);
+		assertEquals("DROP INDEX idx_foo_2 ON wb_junit.dbo.foo", drop);
 		drop = p.getCommand(2);
 		assertEquals("COMMIT", drop);
 	}

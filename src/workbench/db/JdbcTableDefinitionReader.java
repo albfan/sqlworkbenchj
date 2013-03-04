@@ -107,6 +107,10 @@ public class JdbcTableDefinitionReader
 			rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, "%");
 
 			ResultSetMetaData rsmeta = rs.getMetaData();
+
+			String fqn = SqlUtil.fullyQualifiedName(dbConnection, table);
+			SqlUtil.dumpResultSetInfo("DatabaseMetaData.getColumns() for " + fqn, rsmeta);
+
 			boolean jdbc4 = false;
 
 			if (rsmeta.getColumnCount() > 22)
@@ -117,6 +121,8 @@ public class JdbcTableDefinitionReader
 				jdbc4 = name.equals("IS_AUTOINCREMENT");
 			}
 
+			// apparently some drivers (e.g. for DB2) do not return column names
+			// so I can only access the information by column index, not by name!
 			while (rs != null && rs.next())
 			{
 				String colName = StringUtil.trim(rs.getString(4));

@@ -77,10 +77,13 @@ public class H2IndexReader
 		}
 
 		String sql = "" +
-			"SELECT constraint_name as pk_name, \n" +
-			"       index_name as pk_index_name, \n" +
+			"SELECT table_catalog as table_cat, \n" +
+			"       table_schema as table_schem, \n" +
+			"       table_name, \n" +
 			"       column_name, \n " +
-			"       ordinal_position as key_seq\n " +
+			"       ordinal_position as key_seq, \n " +
+			"       constraint_name as pk_name, \n" +
+			"       index_name as pk_index_name \n" +
       "FROM information_schema.indexes \n" +
       "WHERE primary_key = true \n";
 
