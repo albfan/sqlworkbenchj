@@ -61,6 +61,12 @@ import javax.swing.WindowConstants;
 
 import workbench.AppArguments;
 import workbench.WbManager;
+import workbench.interfaces.StatusBar;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -73,6 +79,7 @@ import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.ProducerFactory;
 import workbench.db.importer.TableStatements;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -87,15 +94,12 @@ import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.help.HelpManager;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
-import workbench.interfaces.StatusBar;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
+import workbench.storage.RowActionMonitor;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbCopy;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -941,6 +945,7 @@ public class DataPumper
     updateOptionPanel.add(ignoreDropError, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblBeforeTable")); // NOI18N
+    jLabel2.setToolTipText(ResourceMgr.getString("d_LblBeforeTable")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
@@ -949,12 +954,15 @@ public class DataPumper
     updateOptionPanel.add(jLabel2, gridBagConstraints);
 
     jLabel3.setText(ResourceMgr.getString("LblAfterTable")); // NOI18N
+    jLabel3.setToolTipText(ResourceMgr.getString("d_LblAfterTable")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(jLabel3, gridBagConstraints);
+
+    preTableStmt.setToolTipText(ResourceMgr.getString("d_LblBeforeTable")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 8;
@@ -963,6 +971,8 @@ public class DataPumper
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(8, 4, 0, 20);
     updateOptionPanel.add(preTableStmt, gridBagConstraints);
+
+    postTableStmt.setToolTipText(ResourceMgr.getString("d_LblAfterTable")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
@@ -1750,7 +1760,7 @@ public class DataPumper
 			result.append("-" + CommonArgs.ARG_IGNORE_IDENTITY + "=");
 			result.append(Boolean.toString(ignoreIdentityCbx.isSelected()));
 		}
-		
+
 		if (StringUtil.isNonBlank(preTableStmt.getText()))
 		{
 			result.append(indent);
