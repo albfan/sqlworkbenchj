@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import workbench.storage.ResultInfo;
+
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -377,7 +378,18 @@ public class ColumnIdentifier
 	public boolean isIdentityColumn()
 	{
 		if (this.dbmsType == null) return false;
-		return (dbmsType.indexOf("identity") > -1);
+		if (dbmsType.toLowerCase().indexOf("identity") > -1)
+		{
+			// SQL Server
+			return true;
+		}
+		
+		if (defaultValue != null && defaultValue.toLowerCase().indexOf("identity") > -1)
+		{
+			// certain DB2 versions
+			return true;
+		}
+		return false;
 	}
 
 	/**
