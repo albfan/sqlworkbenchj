@@ -377,16 +377,17 @@ public class ColumnIdentifier
 
 	public boolean isIdentityColumn()
 	{
-		if (this.dbmsType == null) return false;
-		if (dbmsType.toLowerCase().indexOf("identity") > -1)
+		if (!SqlUtil.isNumberType(this.type)) return false;
+
+		// SQL Server
+		if (this.dbmsType != null && dbmsType.toLowerCase().indexOf("identity") > -1)
 		{
-			// SQL Server
 			return true;
 		}
-		
+
+		// certain DB2 versions
 		if (defaultValue != null && defaultValue.toLowerCase().indexOf("identity") > -1)
 		{
-			// certain DB2 versions
 			return true;
 		}
 		return false;
