@@ -462,10 +462,10 @@
                     <Component class="javax.swing.JCheckBox" name="ignoreIdentityCbx">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                          <ResourceString bundle="language/wbstrings.properties" key="LblIgnoreIdenity" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+                          <ResourceString bundle="language/wbstrings.properties" key="LblIgnoreIdentity" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                         </Property>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                          <ResourceString bundle="language/wbstrings.properties" key="d_LblIgnoreIdenity" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+                          <ResourceString bundle="language/wbstrings.properties" key="d_LblIgnoreIdentity" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                         </Property>
                         <Property name="horizontalTextPosition" type="int" value="4"/>
                         <Property name="name" type="java.lang.String" value="deleteTargetCbx" noResource="true"/>

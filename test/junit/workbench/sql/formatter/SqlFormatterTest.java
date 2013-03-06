@@ -48,6 +48,23 @@ public class SqlFormatterTest
 
 
 	@Test
+	public void testSqlServer()
+	{
+		String sql = "select * from foo join bar on foo.id = bar.id outer apply fn_foo (bar.id) st";
+		SqlFormatter f = new SqlFormatter(sql, 150, "microsoft_sql_server");
+		f.setColumnsPerInsert(1);
+		f.setUseLowerCaseFunctions(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM foo\n" +
+			"  JOIN bar ON foo.id = bar.id\n" +
+			"  OUTER APPLY fn_foo (bar.id) st";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testNestedSelect()
 	{
 		String sql = "select 1, (select foo from bar where bar.id = foobar.id) as foo, col2, col3 from foobar";

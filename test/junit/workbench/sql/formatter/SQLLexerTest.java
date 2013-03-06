@@ -60,6 +60,15 @@ public class SQLLexerTest
 	}
 
 	@Test
+	public void testSqlServer()
+	{
+		String sql = "select * from bar outer apply fn(x) st";
+		List<SQLToken> l = getTokenList(sql);
+		assertNotNull(l.get(4));
+		assertTrue(l.get(4).isReservedWord());
+	}
+
+	@Test
 	public void testWbVar()
 	{
 		String sql = "select $[?wbvar] from table";

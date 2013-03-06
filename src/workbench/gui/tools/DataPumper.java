@@ -855,8 +855,8 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(6, 5, 0, 0);
     updateOptionPanel.add(deleteTargetCbx, gridBagConstraints);
 
-    ignoreIdentityCbx.setText(ResourceMgr.getString("LblIgnoreIdenity")); // NOI18N
-    ignoreIdentityCbx.setToolTipText(ResourceMgr.getString("d_LblIgnoreIdenity")); // NOI18N
+    ignoreIdentityCbx.setText(ResourceMgr.getString("LblIgnoreIdentity")); // NOI18N
+    ignoreIdentityCbx.setToolTipText(ResourceMgr.getString("d_LblIgnoreIdentity")); // NOI18N
     ignoreIdentityCbx.setHorizontalTextPosition(SwingConstants.RIGHT);
     ignoreIdentityCbx.setName("deleteTargetCbx"); // NOI18N
     gridBagConstraints = new GridBagConstraints();

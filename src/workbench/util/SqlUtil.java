@@ -73,7 +73,7 @@ public class SqlUtil
 		protected static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
 				CollectionUtil.caseInsensitiveSet(
 					"JOIN", "INNER JOIN", "NATURAL JOIN", "LEFT JOIN", "LEFT OUTER JOIN", "RIGHT JOIN",
-					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN")
+					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN", "OUTER APPLY", "CROSS APPLY")
 				);
 	}
 	public static Set<String> getJoinKeyWords()

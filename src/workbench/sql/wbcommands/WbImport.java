@@ -319,7 +319,7 @@ public class WbImport
 
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-		
+
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
@@ -641,7 +641,7 @@ public class WbImport
 		parser.setAbortOnError(!continueOnError);
 		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
 
-		ImportFileLister sorter = getFileNameSorter(cmdLine, defaultExtension);
+		ImportFileLister sorter = getFileNameLister(cmdLine, defaultExtension);
 		if (sorter != null)
 		{
 			parser.setSourceFiles(sorter);
@@ -901,7 +901,7 @@ public class WbImport
 		return cols;
 	}
 
-	private ImportFileLister getFileNameSorter(ArgumentParser cmdLine, String defaultExt)
+	private ImportFileLister getFileNameLister(ArgumentParser cmdLine, String defaultExt)
 	{
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
 		if (dir == null) return null;
