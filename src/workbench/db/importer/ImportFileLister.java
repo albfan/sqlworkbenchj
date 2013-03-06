@@ -33,9 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.WbFile;
 
@@ -92,7 +95,35 @@ public class ImportFileLister
 
 	public ImportFileLister(WbConnection con, File baseDir, List<String> filenames)
 	{
-		
+		if (!baseDir.isDirectory()) throw new IllegalArgumentException(baseDir + " is not a directory");
+
+		toProcess = new ArrayList<WbFile>();
+		dbConn = con;
+		sourceDir = new WbFile(baseDir);
+
+		for (String fname : filenames)
+		{
+			WbFile f = new WbFile(fname);
+			if (!f.isAbsolute())
+			{
+				f = new WbFile(baseDir, fname);
+			}
+			if (!f.exists())
+			{
+				LogMgr.logWarning("ImportFileLister.<init>", "Ignoring non existing file: " + f.getAbsolutePath());
+				continue;
+			}
+
+			if (f.length() > 0)
+			{
+				toProcess.add(new WbFile(f));
+			}
+			else
+			{
+				LogMgr.logWarning("ImportFileLister.<init>", "Ignoring empty file: " + f.getAbsolutePath());
+			}
+		}
+		cleanupLobFiles();
 	}
 
 	private void cleanupLobFiles()

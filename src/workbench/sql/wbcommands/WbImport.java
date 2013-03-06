@@ -641,10 +641,10 @@ public class WbImport
 		parser.setAbortOnError(!continueOnError);
 		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
 
-		ImportFileLister sorter = getFileNameLister(cmdLine, defaultExtension);
-		if (sorter != null)
+		ImportFileLister lister = getFileNameLister(cmdLine, defaultExtension);
+		if (lister != null)
 		{
-			parser.setSourceFiles(sorter);
+			parser.setSourceFiles(lister);
 		}
 		parser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, getTrimDefault()));
 
@@ -806,7 +806,7 @@ public class WbImport
 
 		result.addMessage(imp.getMessages());
 
-		if (!result.isSuccess() && sorter != null)
+		if (!result.isSuccess() && lister != null)
 		{
 			appendRestartMessage(parser, result);
 		}

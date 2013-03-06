@@ -22,14 +22,19 @@
  */
 package workbench.db.importer;
 
-import org.junit.Test;
-import workbench.WbTestCase;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -39,6 +44,27 @@ import static org.junit.Assert.*;
 public class ImportFileListerTest
 	extends WbTestCase
 {
+
+	@Test
+	public void testMultipleFiles()
+		throws Exception
+	{
+		TestUtil util = getTestUtil("ImportFileLister");
+		TestUtil.writeFile(util.getFile("file_one.txt"), "foobar");
+		TestUtil.writeFile(util.getFile("afile.txt"), "foobar");
+		TestUtil.writeFile(util.getFile("zfile.txt"), "foobar");
+
+		List<String> names = CollectionUtil.arrayList("zfile.txt", "file_one.txt", "afile.txt");
+
+		ImportFileLister lister = new ImportFileLister(null, new File(util.getBaseDir()), names);
+		List<WbFile> files = lister.getFiles();
+		assertNotNull(files);
+		assertEquals(3, files.size());
+
+		assertEquals("zfile.txt", files.get(0).getName());
+		assertEquals("file_one.txt", files.get(1).getName());
+		assertEquals("afile.txt", files.get(2).getName());
+	}
 
 	@Test
 	public void testIgnoreFiles()
