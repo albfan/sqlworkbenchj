@@ -495,6 +495,23 @@
 
   </target>
 
+  <target name="embeddable-jar" depends="clean, set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, -jar-noclasspath"/>
+  <target name="-jar-noclasspath" depends="prepare,compile">
+    <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
+      <manifest>
+        <attribute name="Main-Class" value="workbench.WbStarter"/>
+        <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
+        <attribute name="Implementation-Title" value="SQL Workbench/J"/>
+        <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
+        <attribute name="WbBuild-Number" value="${build.number}"/>
+        <attribute name="WbBuild-Date" value="${build_timestamp}"/>
+      </manifest>
+      <fileset dir="${build}">
+        <exclude name="**/package.html"/>
+      </fileset>
+    </jar>
+  </target>
+
   <!-- alias for make-src-zip -->
   <target name="src" depends="make-src-zip"/>
 
@@ -585,6 +602,7 @@
   </target>
 
   <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, make-jar"/>
+
   <target name="cj" depends="set-dev-prop, compile, get-dev-build, replace-build-number, make-jar"/>
 
   <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
