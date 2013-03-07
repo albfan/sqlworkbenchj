@@ -31,19 +31,21 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
@@ -92,11 +94,15 @@ public class LogFileViewer
 			@Override
 			public void windowClosing(WindowEvent evt)
 			{
-				if (watcher != null) watcher.cancel();
+				if (watcher != null)
+				{
+					watcher.cancel();
+				}
 				saveSettings();
 				setVisible(false);
 				dispose();
 			}
+
 		});
 	}
 
@@ -120,6 +126,7 @@ public class LogFileViewer
 					load();
 				}
 			}
+
 		};
 		int refreshTime = Settings.getInstance().getIntProperty("workbench.logviewer.refresh", 1000);
 		watcher.schedule(task, refreshTime, refreshTime);
@@ -174,6 +181,7 @@ public class LogFileViewer
 			int max = b.getMaximum();
 			b.setValue(max);
 		}
+
 	};
 
 	protected void scrollToEnd()
@@ -201,18 +209,19 @@ public class LogFileViewer
 		try
 		{
 			FixedSizeList<String> lines = new FixedSizeList<String>(maxLines);
+			lines.doAppend(true);
+			lines.setAllowDuplicates(true);
 			for (String line = reader.readLine(); line != null; line = reader.readLine())
 			{
 				lines.add(line);
 			}
-			StringBuilder result = new StringBuilder(maxLines * 100);
+			StringBuilder result = new StringBuilder(lines.size() * 100);
 			Iterator<String> itr = lines.iterator();
 			while (itr.hasNext())
 			{
 				String line = itr.next();
 				result.append(line);
 				result.append('\n');
-				itr.remove();
 			}
 			return result.toString();
 		}
@@ -221,4 +230,5 @@ public class LogFileViewer
 			FileUtil.closeQuietely(reader);
 		}
 	}
+
 }

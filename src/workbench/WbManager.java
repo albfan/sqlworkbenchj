@@ -92,7 +92,7 @@ public final class WbManager
 	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
-	private WbThread deadlockMonitor;
+	private DeadlockMonitor deadlockMonitor;
 
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
@@ -560,7 +560,7 @@ public final class WbManager
 		}
 		if (this.deadlockMonitor != null)
 		{
-			this.deadlockMonitor.interrupt();
+			this.deadlockMonitor.cancel();
 		}
 	}
 
@@ -938,10 +938,10 @@ public final class WbManager
 			openNewWindow(true);
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enabled", false))
+		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enabled", true))
 		{
 			LogMgr.logInfo("WbManager.runGui()", "Starting DeadlockMonitor");
-			deadlockMonitor = new WbThread(new DeadlockMonitor(), "WbDeadlockMonitor");
+			deadlockMonitor = new DeadlockMonitor();
 			deadlockMonitor.start();
 		}
 

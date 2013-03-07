@@ -30,7 +30,7 @@ import workbench.resource.Settings;
  * @author Thomas Kellerer
  */
 public class DeadlockMonitor
-	implements Runnable
+	extends WbThread
 {
 	private ThreadDumper monitor;
 	private int sleepTime;
@@ -39,8 +39,9 @@ public class DeadlockMonitor
 
 	public DeadlockMonitor()
 	{
+		super("WbDeadlockMonitor");
 		monitor = new ThreadDumper();
-		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 2500);
+		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 5000);
 		minLogDuration = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.logduration", 50);
 	}
 
@@ -60,12 +61,24 @@ public class DeadlockMonitor
 			{
 				LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);
 			}
-			WbThread.sleepSilently(sleepTime);
+			if (keepRunning)
+			{
+				try
+				{
+					Thread.sleep(sleepTime);
+				}
+				catch (InterruptedException ir)
+				{
+					break;
+				}
+			}
 		}
 	}
 
 	public void cancel()
 	{
 		keepRunning = false;
+		interrupt();
 	}
+
 }

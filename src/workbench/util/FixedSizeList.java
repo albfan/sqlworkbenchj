@@ -37,6 +37,8 @@ public class FixedSizeList<T>
 {
 	private LinkedList<T> entries;
 	private int maxSize;
+	private boolean appendEntries;
+	private boolean allowDuplicates = false;
 
 	public FixedSizeList()
 	{
@@ -49,11 +51,22 @@ public class FixedSizeList<T>
 		this.entries = new LinkedList<T>();
 	}
 
+	public void doAppend(boolean flag)
+	{
+		this.appendEntries = flag;
+	}
+
+	public void setAllowDuplicates(boolean flag)
+	{
+		this.allowDuplicates = flag;
+	}
+
 	/**
 	 * Append an entry at the end of the list, without
 	 * checking for duplicates or removing entries
-	 * that exceed the max size. This should be used
-	 * to initially fill the list.
+	 * that exceed the max size.
+	 *
+	 * This should be used to initially fill the list.
 	 */
 	public synchronized void append(T entry)
 	{
@@ -62,26 +75,47 @@ public class FixedSizeList<T>
 	}
 
 	/**
-	 * Add a new entry to "top" of the list.
+	 * Add a new entry to the list.
+	 *
 	 * <br/>
-	 * If the entry is already in the list it is "moved" to the top.
-	 * If the max size of the list is exceeded the last item is removed.
+	 * If duplicates are allowed, no further checks are done. If no duplicates
+	 * are allowed and the entry is already in the list it is "moved" to the top.
+	 * <br/>
+	 * If append mode is enabled, the new entry is add to the end of the list, otherwise to the top.
 	 * @param entry
-	 * @return
+	 * @return the new size of the list
+	 *
+	 * @see #doAppend(boolean)
+	 * @see #setAllowDuplicates(boolean)
 	 */
 	public synchronized int addEntry(T entry)
 	{
 		if (entry == null) return -1;
 
-		// Don't allow duplicates
-		if (entries.contains(entry))
+		if (!allowDuplicates && entries.contains(entry))
 		{
 			entries.remove(entry);
 		}
-		entries.addFirst(entry);
+
+		if (appendEntries)
+		{
+			entries.addLast(entry);
+		}
+		else
+		{
+			entries.addFirst(entry);
+		}
+
 		while (entries.size() > maxSize)
 		{
-			entries.removeLast();
+			if (appendEntries)
+			{
+				entries.removeFirst();
+			}
+			else
+			{
+				entries.removeLast();
+			}
 		}
 		return entries.size();
 	}
