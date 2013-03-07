@@ -40,7 +40,7 @@ public class DeadlockMonitor
 	public DeadlockMonitor()
 	{
 		monitor = new ThreadDumper();
-		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 10000);
+		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 2500);
 		minLogDuration = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.logduration", 50);
 	}
 
