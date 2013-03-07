@@ -46,6 +46,23 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+	@Test
+	public void testNestedFunctionCalls()
+	{
+		String sql =
+			"SELECT a,  \n" +
+			"       (foo(a) - foo(b)) as total \n" +
+			"FROM foobar";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setUseLowerCaseFunctions(true);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT a,\n" +
+			"       (foo(a) - foo(b)) AS total\n" +
+			"FROM foobar";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
 
 	@Test
 	public void testSqlServer()
@@ -60,7 +77,7 @@ public class SqlFormatterTest
 			"FROM foo\n" +
 			"  JOIN bar ON foo.id = bar.id\n" +
 			"  OUTER APPLY fn_foo (bar.id) st";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 	}
 
