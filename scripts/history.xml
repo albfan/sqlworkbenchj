@@ -10,6 +10,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="4" type="fix">Not all changes in the DataPumper copy settings were reflected in the generated SQL script.</entry>
+    <entry dev-build="4" type="fix">The parameter -decimal was not working for WbExport</entry>
     <entry dev-build="4" type="fix">When dropping an index from within the DbExplorer's index list, the wrong DROP statement was generated for SQL Server</entry>
     <entry dev-build="4" type="fix">Implemented a workaround for non-JDBC compliant drivers for retrieving the columns of a table</entry>
     <entry dev-build="3" type="fix">For WbSchemaReport no sequences were written when using the -tables parameter</entry>

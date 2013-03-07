@@ -24,13 +24,17 @@ package workbench.db.importer;
 
 import java.io.File;
 import java.util.List;
+
+import workbench.interfaces.ImportFileParser;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.ImportFileParser;
+
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbImport;
+
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 
@@ -94,6 +98,11 @@ public class ProducerFactory
 		this.connection = conn;
 	}
 
+	public ImportOptions getGeneralOptions()
+	{
+		return generalOptions;
+	}
+
 	public void setGeneralOptions(ImportOptions options)
 	{
 		this.generalOptions = options;
@@ -127,9 +136,13 @@ public class ProducerFactory
 	public void setType(ImportType type)
 	{
 		if (type == ImportType.Text)
+		{
 			this.setImportTypeText();
+		}
 		else if (type == ImportType.XML)
+		{
 			this.setImportTypeXml();
+		}
 	}
 
 	public boolean isTextImport()
@@ -293,46 +306,25 @@ public class ProducerFactory
 		String delim = textOptions.getTextDelimiter();
 		if ("\t".equals(delim)) delim = "\\t";
 
-		appendArgument(command, CommonArgs.ARG_DATE_FORMAT, generalOptions.getDateFormat(), indent);
-		appendArgument(command, CommonArgs.ARG_TIMESTAMP_FORMAT, generalOptions.getTimestampFormat(), indent);
-		appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
-		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
-		appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
-		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
-		appendArgument(command, CommonArgs.ARG_QUOTE_ESCAPE, textOptions.getQuoteEscaping().toString(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_DATE_FORMAT, generalOptions.getDateFormat(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_TIMESTAMP_FORMAT, generalOptions.getTimestampFormat(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
+		CommonArgs.appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
+		CommonArgs.appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_QUOTE_ESCAPE, textOptions.getQuoteEscaping().toString(), indent);
 	}
 
 	private void appendArgument(StringBuilder result, String arg, boolean value, StringBuilder indent)
 	{
-		appendArgument(result, arg, Boolean.toString(value), indent);
-	}
-
-	private void appendArgument(StringBuilder result, String arg, String value, StringBuilder indent)
-	{
-		if (!StringUtil.isEmptyString(value))
-		{
-			result.append(indent);
-			result.append('-');
-			result.append(arg);
-			result.append('=');
-
-			if (value.indexOf('-') > -1 || value.indexOf(';') > -1) result.append('"');
-			else if ("\"".equals(value)) result.append('\'');
-			else if ("\'".equals(value)) result.append('\"');
-
-			result.append(value);
-
-			if (value.indexOf('-') > -1 || value.indexOf(';') > -1) result.append('"');
-			else if ("\"".equals(value)) result.append('\'');
-			else if ("\'".equals(value)) result.append('\"');
-		}
+		CommonArgs.appendArgument(result, arg, Boolean.toString(value), indent);
 	}
 
 	/**
 	 *	Generates a WB SQL command from the current import
 	 *  settings
 	 */
-	public String getWbCommand(boolean ignoreIdentity)
+	public StringBuilder getWbCommand()
 	{
 		StringBuilder result = new StringBuilder(150);
 		StringBuilder indent = new StringBuilder();
@@ -362,20 +354,11 @@ public class ProducerFactory
 			result.append("text");
 		}
 
-		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
-		appendArgument(result, CommonArgs.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
-		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
-		appendArgument(result, CommonArgs.ARG_IGNORE_IDENTITY, Boolean.toString(ignoreIdentity), indent);
-		if (this.batchSize > 0)
-		{
-			appendArgument(result, CommonArgs.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
-		}
+		CommonArgs.appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
+		CommonArgs.appendArgument(result, CommonArgs.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendTextOptions(result, indent);
 
-
-		result.append("\n;");
-
-		return result.toString();
+		return result;
 	}
 
 }

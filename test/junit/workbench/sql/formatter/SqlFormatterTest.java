@@ -60,7 +60,7 @@ public class SqlFormatterTest
 			"SELECT a,\n" +
 			"       (foo(a) - foo(b)) AS total\n" +
 			"FROM foobar";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 	}
 

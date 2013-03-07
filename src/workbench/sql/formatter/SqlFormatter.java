@@ -439,13 +439,17 @@ public class SqlFormatter
 
 	private boolean needsWhitespace(SQLToken last, SQLToken current)
 	{
-		return this.needsWhitespace(last, current, false);
+		return this.needsWhitespace(last, current, false, false);
 	}
 
 	/**
 	 * 	Return true if a whitespace should be added before the current token.
 	 */
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
+	{
+		return needsWhitespace(last, current, ignoreStartOfline, false);
+	}
+	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline, boolean possibleFunction)
 	{
 		if (last == null) return false;
 		if (current.isWhiteSpace()) return false;
@@ -470,7 +474,14 @@ public class SqlFormatter
 		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
 		if (isCurrentOpenBracket && isDatatype(currentText)) return false;
 		if (isCurrentOpenBracket && isKeyword(lastText)) return true;
-		if (isCurrentOpenBracket && last.isIdentifier()) return true;
+		if (possibleFunction)
+		{
+			if (isCurrentOpenBracket && last.isIdentifier()) return false;
+		}
+		else
+		{
+			if (isCurrentOpenBracket && last.isIdentifier()) return true;
+		}
 		if (isLastCloseBracket && currChar == ',') return false;
 		if (isLastCloseBracket && (current.isIdentifier() || isKeyword(currentText))) return true;
 
@@ -795,18 +806,20 @@ public class SqlFormatter
 			}
 			else if (text.equals("("))
 			{
-				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				this.appendText("(");
 				// an equal sign immediately followed by an opening
 				// bracket cannot be a function call (the function name
 				// is missing) so it has to be a sub-select
 				if ("=".equals(lastToken.getContents()) || ",".equals(lastToken.getContents()))
 				{
-					t = this.processSubSelect(false);
+					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
+					this.appendText("(");
+					t = this.processBracketExpression();
 					this.appendTokenText(t);
 				}
 				else
 				{
+					if (this.needsWhitespace(lastToken, t, false, true)) this.appendText(' ');
+					this.appendText("(");
 					t = this.processFunctionCall(t);
 					if (t == null) return null;
 					if (t.isIdentifier())
@@ -869,6 +882,16 @@ public class SqlFormatter
 			t = this.lexer.getNextToken(true, false);
 		}
 		return null;
+	}
+
+	private SQLToken processBracketExpression()
+	{
+		SQLToken t = skipComments();
+		if (t.getContents().equalsIgnoreCase("SELECT"))
+		{
+			return processSubSelect(true, 1, false);
+		}
+		return t;
 	}
 
 	private SQLToken processLobParameter()

@@ -355,4 +355,48 @@ public class CommonArgs
 		}
 		return dropType;
 	}
+
+	public static void appendArgument(StringBuilder result, String arg, String value, CharSequence indent)
+	{
+		if (StringUtil.isNonBlank(value))
+		{
+			if (indent.charAt(0) != '\n')
+			{
+				result.append('\n');
+			}
+			result.append(indent);
+			result.append('-');
+			result.append(arg);
+			result.append('=');
+
+			if (value.indexOf('-') > -1 || value.indexOf(';') > -1)
+			{
+				result.append('"');
+			}
+			else if ("\"".equals(value))
+			{
+				result.append('\'');
+			}
+			else if ("\'".equals(value))
+			{
+				result.append('\"');
+			}
+
+			result.append(value);
+
+			if (value.indexOf('-') > -1 || value.indexOf(';') > -1)
+			{
+				result.append('"');
+			}
+			else if ("\"".equals(value))
+			{
+				result.append('\'');
+			}
+			else if ("\'".equals(value))
+			{
+				result.append('\"');
+			}
+		}
+	}
+
 }

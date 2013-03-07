@@ -77,6 +77,7 @@ import workbench.db.datacopy.DataCopier;
 import workbench.db.datacopy.DropType;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
+import workbench.db.importer.ImportOptions;
 import workbench.db.importer.ProducerFactory;
 import workbench.db.importer.TableStatements;
 
@@ -96,9 +97,11 @@ import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
 
 import workbench.storage.RowActionMonitor;
+
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbCopy;
+import workbench.sql.wbcommands.WbImport;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -1679,20 +1682,77 @@ public class DataPumper
 	private void showImportCommand()
 	{
 		if (this.fileImporter == null || this.targetProfile == null) return;
-		String sql = null;
+		StringBuilder sql = null;
 		try
 		{
 			this.initImporter();
-			sql = this.fileImporter.getWbCommand(ignoreIdentityCbx.isSelected());
+			sql = this.fileImporter.getWbCommand();
+			appendGeneralImportOptions(sql, WbImport.VERB.length());
+			sql.append(";\n");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.showImportCommand()", "Error creating SQL command", e);
-			sql = ExceptionUtil.getDisplay(e);
+			sql = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
-		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql, "workbench.datapumper.scriptwindow", true);
+
+		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql.toString(), "workbench.datapumper.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();
+	}
+
+	private void appendGeneralImportOptions(StringBuilder sql, int indentSize)
+	{
+		String indent = StringUtil.padRight("", indentSize + 1);
+		CommonArgs.appendArgument(sql, CommonArgs.ARG_IGNORE_IDENTITY, Boolean.toString(ignoreIdentityCbx.isSelected()), indent);
+
+		String mode = (String)this.modeComboBox.getSelectedItem();
+		if (!"insert".equals(mode))
+		{
+			CommonArgs.appendArgument(sql, CommonArgs.ARG_IMPORT_MODE, mode, indent);
+			Collection<ColumnIdentifier> keys = this.getKeyColumns();
+			if (keys.size() > 0)
+			{
+				Iterator<ColumnIdentifier> itr = keys.iterator();
+				sql.append("\n");
+				sql.append(indent);
+				sql.append("-" + WbCopy.PARAM_KEYS + "=");
+				while (itr.hasNext())
+				{
+					ColumnIdentifier col = itr.next();
+					sql.append(col.getColumnName());
+					if (itr.hasNext()) sql.append(',');
+				}
+			}
+		}
+
+		CommonArgs.appendArgument(sql, CommonArgs.ARG_DELETE_TARGET, Boolean.toString(this.deleteTargetCbx.isSelected()), indent);
+		CommonArgs.appendArgument(sql, CommonArgs.ARG_CONTINUE, Boolean.toString(this.continueOnErrorCbx.isSelected()), indent);
+
+		int size = getBatchSize();
+		if (size > 0)
+		{
+			CommonArgs.appendArgument(sql, CommonArgs.ARG_BATCHSIZE, Integer.toString(size), indent);
+		}
+
+		if (size <= 0)
+		{
+			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
+			if (commit > 0)
+			{
+				CommonArgs.appendArgument(sql, CommonArgs.ARG_COMMIT, Integer.toString(commit), indent);
+			}
+		}
+
+		if (StringUtil.isNonBlank(preTableStmt.getText()))
+		{
+			CommonArgs.appendArgument(sql, CommonArgs.ARG_PRE_TABLE_STMT, "\""  + preTableStmt.getText() + "\"", indent);
+		}
+
+		if (StringUtil.isNonBlank(postTableStmt.getText()))
+		{
+			CommonArgs.appendArgument(sql, CommonArgs.ARG_POST_TABLE_STMT, "\""  + postTableStmt.getText() + "\"", indent);
+		}
 	}
 
 	private void showCopyCommand()
@@ -1710,8 +1770,7 @@ public class DataPumper
 		StringBuilder result = new StringBuilder(150);
 		result.append(t.formatVerb(WbCopy.VERB));
 		result.append(" -" + WbCopy.PARAM_SOURCEPROFILE + "=");
-		String indent = "\n      ";
-
+		String indent = "\n       ";
 
 		String s = this.sourceProfile.getName();
 		if (s.indexOf(' ') >-1) result.append('\'');
@@ -1753,29 +1812,6 @@ public class DataPumper
 		result.append(indent);
 		result.append("-" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
-
-		if (ignoreIdentityCbx.isSelected())
-		{
-			result.append(indent);
-			result.append("-" + CommonArgs.ARG_IGNORE_IDENTITY + "=");
-			result.append(Boolean.toString(ignoreIdentityCbx.isSelected()));
-		}
-
-		if (StringUtil.isNonBlank(preTableStmt.getText()))
-		{
-			result.append(indent);
-			result.append("-" + CommonArgs.ARG_PRE_TABLE_STMT + "=\"");
-			result.append(preTableStmt.getText());
-			result.append("\"");
-		}
-
-		if (StringUtil.isNonBlank(postTableStmt.getText()))
-		{
-			result.append(indent);
-			result.append("-" + CommonArgs.ARG_POST_TABLE_STMT + "=\"");
-			result.append(postTableStmt.getText());
-			result.append("\"");
-		}
 
 		if (id.isNewTable())
 		{
@@ -1857,53 +1893,7 @@ public class DataPumper
 			result.append(mapping);
 		}
 
-		String mode = (String)this.modeComboBox.getSelectedItem();
-		if (!"insert".equals(mode))
-		{
-			result.append(indent);
-			result.append("-" + CommonArgs.ARG_IMPORT_MODE + "=");
-			result.append(mode);
-			Collection<ColumnIdentifier> keys = this.getKeyColumns();
-			if (keys.size() > 0)
-			{
-				Iterator<ColumnIdentifier> itr = keys.iterator();
-				result.append("\n      -" + WbCopy.PARAM_KEYS + "=");
-				while (itr.hasNext())
-				{
-					ColumnIdentifier col = itr.next();
-					result.append(col.getColumnName());
-					if (itr.hasNext()) result.append(',');
-				}
-			}
-		}
-
-		result.append(indent);
-		result.append("-" + CommonArgs.ARG_DELETE_TARGET + "=");
-		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
-
-		result.append(indent);
-		result.append("-" + CommonArgs.ARG_CONTINUE + "=");
-		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
-
-		int size = getBatchSize();
-		if (size > 0)
-		{
-			result.append(indent);
-			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=");
-			result.append(Integer.toString(size));
-		}
-
-		if (size <= 0)
-		{
-			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
-			if (commit > 0)
-			{
-				result.append(indent);
-				result.append("-" + CommonArgs.ARG_COMMIT + "=");
-				result.append(commit);
-			}
-		}
-
+		appendGeneralImportOptions(result, WbCopy.VERB.length());
 		result.append("\n;");
 
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), result.toString(), "workbench.datapumper.scriptwindow", true);
@@ -2027,6 +2017,11 @@ public class DataPumper
 		this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
 		this.fileImporter.setImportColumns(cols);
 		this.fileImporter.setBatchSize(this.getBatchSize());
+		ImportOptions options = fileImporter.getGeneralOptions();
+		if (options != null)
+		{
+			options.setMode((String)modeComboBox.getSelectedItem());
+		}
 	}
 
 	private void startCopy()
