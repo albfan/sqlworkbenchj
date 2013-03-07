@@ -60,6 +60,9 @@ public class WbNumberFormatterTest
 		assertEquals("1.1234567890", f.format(new BigDecimal("1.1234567890")));
 		assertEquals("1", f.format(new Double(1)));
 		assertEquals("1.123456", f.format(new Double(1.123456)));
+
+		f = new WbNumberFormatter(',');
+		assertEquals("3,14", f.format(new BigDecimal("3.14")));
 	}
 
 }

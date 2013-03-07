@@ -117,6 +117,28 @@ public class WbExportTest
 	}
 
 	@Test
+	public void testDecimal()
+		throws Exception
+	{
+		TestUtil.executeScript(connection,
+			"create table products (id integer, price decimal(10,2));\n" +
+			"insert into products values (1, 3.14);\n" +
+			"commit;");
+
+		WbFile out = util.getFile("products.txt");
+
+		StatementRunnerResult result = exportCmd.execute(
+			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -file='" + out.getFullPath() + "'"
+		);
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+		assertTrue(out.exists());
+		String content = FileUtil.readFile(out, null);
+		assertNotNull(content);
+		assertEquals("1|3,14", content.trim());
+	}
+
+	@Test
 	public void testPrefix()
 		throws Exception
 	{
@@ -125,7 +147,8 @@ public class WbExportTest
 			"-sourceTablePrefix=public. " +
 			"-outputDir='" +  util.getBaseDir() + "' " +
 			"-type=text");
-//		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
 		File person = new File(util.getBaseDir(), "person.txt");
 		assertTrue(person.exists());
 		File test = new File(util.getBaseDir(), "junit_test.txt");

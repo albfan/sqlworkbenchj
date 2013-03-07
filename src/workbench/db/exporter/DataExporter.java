@@ -31,7 +31,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -888,13 +887,7 @@ public class DataExporter
 	{
 		if (StringUtil.isNonBlank(aSymbol))
 		{
-			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-			symbols.setDecimalSeparator(aSymbol.charAt(0));
 			numberFormatter = new WbNumberFormatter(aSymbol.charAt(0));
-		}
-		else
-		{
-			numberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		}
 	}
 

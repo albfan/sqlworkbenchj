@@ -113,12 +113,12 @@ public class WbNumberFormatter
 	private String format(BigDecimal value)
 	{
 		String display = value.toPlainString();
-		if (maxDigits <= 0) return display; // no maximum given
+		if (maxDigits <= 0 && decimalSeparator == '.') return display; // no maximum given
 
 		int scale = value.scale();
 		if (scale <= 0) return display; // no decimal digits, nothing to do
 
-		if (scale > maxDigits)
+		if (scale > maxDigits && maxDigits > 0)
 		{
 			BigDecimal rounded = value.setScale(this.maxDigits, RoundingMode.HALF_UP);
 			display = rounded.toPlainString();
