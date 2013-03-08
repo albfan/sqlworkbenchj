@@ -63,6 +63,16 @@ public class WbNumberFormatterTest
 
 		f = new WbNumberFormatter(',');
 		assertEquals("3,14", f.format(new BigDecimal("3.14")));
+		assertEquals("42", f.format(new BigDecimal("42")));
+
+		f = new WbNumberFormatter(2, ',');
+		assertEquals("3,14", f.format(new BigDecimal("3.14152")));
+		assertEquals("3,14", f.format(new Double(3.14)));
+
+		f = new WbNumberFormatter(4, ',');
+		assertEquals("3,1415", f.format(new BigDecimal("3.14152")));
+		assertEquals("3,1415", f.format(new Double(3.14152)));
+		assertEquals("0,1", f.format(new Double(0.1)));
 	}
 
 }
