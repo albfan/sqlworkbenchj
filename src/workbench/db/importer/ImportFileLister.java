@@ -126,6 +126,11 @@ public class ImportFileLister
 		cleanupLobFiles();
 	}
 
+	public int getFileCount()
+	{
+		return this.toProcess.size();
+	}
+	
 	private void cleanupLobFiles()
 	{
 		// Cleanup possible _lob files
