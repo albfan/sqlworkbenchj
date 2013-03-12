@@ -259,7 +259,9 @@ public class ProfileEditorPanel
 		JComboBox groupBox = new JComboBox(m);
 		groupBox.setSelectedIndex(0);
 		p.setLayout(new BorderLayout(0, 5));
-		p.add(new JLabel(ResourceMgr.getString("LblDeleteNonEmptyGroup")), BorderLayout.NORTH);
+		String groupName = (String)groupNode.getUserObject();
+		String lbl = ResourceMgr.getFormattedString("LblDeleteNonEmptyGroup", groupName);
+		p.add(new JLabel(lbl), BorderLayout.NORTH);
 		p.add(groupBox, BorderLayout.SOUTH);
 		String[] options = new String[]{ResourceMgr.getString("LblMoveProfiles"), ResourceMgr.getString("LblDeleteProfiles")};
 
