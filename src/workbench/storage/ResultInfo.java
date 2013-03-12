@@ -28,6 +28,7 @@ import java.sql.Types;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.IndexReader;
 import workbench.db.PkDefinition;
@@ -137,6 +138,12 @@ public class ResultInfo
 			useGetXML = sourceConnection.getDbSettings().useGetXML();
 		}
 
+		DataTypeResolver resolver = null;
+		if (dbMeta != null)
+		{
+			resolver = dbMeta.getDataTypeResolver();
+		}
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			// Not all drivers will really return the column label if an alias is used
@@ -190,7 +197,11 @@ public class ResultInfo
 				// use the Java name if the driver did not return a type name for this column
 				typename = SqlUtil.getTypeName(type);
 			}
-			if (dbMeta != null) type = dbMeta.getDataTypeResolver().fixColumnType(type, typename);
+
+			if (resolver != null)
+			{
+				type = resolver.fixColumnType(type, typename);
+			}
 
 			col.setDataType(type);
 			col.setColumnTypeName(typename);
@@ -220,46 +231,45 @@ public class ResultInfo
 				prec = 0;
 			}
 
-			int size = 0;
+			int displaySize = 0;
 			try
 			{
-				size = metaData.getColumnDisplaySize(i + 1);
+				displaySize = metaData.getColumnDisplaySize(i + 1);
 			}
 			catch (Exception e)
 			{
-				size = prec;
+				displaySize = prec;
 			}
 
-			col.setDisplaySize(size);
+			col.setDisplaySize(displaySize);
 			col.setDecimalDigits(scale);
 			String dbmsType = null;
-			if (dbMeta != null)
+
+			int sizeToUse = prec;
+
+			if (type == Types.VARCHAR && sourceConnection != null && sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize())
 			{
-				dbmsType = dbMeta.getDataTypeResolver().getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+				sizeToUse = displaySize;
+			}
+
+			if (resolver != null)
+			{
+				dbmsType = resolver.getSqlTypeDisplay(typename, col.getDataType(), sizeToUse, scale);
 			}
 			else
 			{
-				dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+				dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), sizeToUse, scale);
 			}
 
 			if (type == Types.VARCHAR)
 			{
-				// HSQL reports the VARCHAR size in displaySize()
-				if (sourceConnection != null && sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize())
-				{
-					dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
-					col.setColumnSize(size);
-				}
-				else
-				{
-					// all others seem to report the VARCHAR size in precision
-					col.setColumnSize(prec);
-				}
+				col.setColumnSize(sizeToUse);
 			}
 			else
 			{
-				col.setColumnSize(size);
+				col.setColumnSize(displaySize);
 			}
+
 			col.setDbmsType(dbmsType);
 
 			try

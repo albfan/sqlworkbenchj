@@ -74,6 +74,8 @@ public class PostgresDataTypeResolver
 			if ("_int4".equals(dbmsName)) return "integer[]";
 			if ("_int8".equals(dbmsName)) return "bigint[]";
 		}
+		if ("_varchar".equals(dbmsName)) return "varchar[]";
+
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
