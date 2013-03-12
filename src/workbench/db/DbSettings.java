@@ -1280,7 +1280,7 @@ public class DbSettings
 
 	public boolean useInlineColumnComments()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + dbId, false);
+		return Settings.getInstance().getBoolProperty(prefix + "colcommentinline" + dbId, false);
 	}
 
 	/**
