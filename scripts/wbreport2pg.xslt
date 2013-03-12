@@ -15,6 +15,7 @@
 />
 
   <xsl:param name="useJdbcTypes">true</xsl:param>
+  <xsl:param name="makeLowerCase">false</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -167,11 +168,16 @@
     <xsl:value-of select="$newline"/>
     <xsl:for-each select="column-def">
       <xsl:sort select="column-name"/>
+      <xsl:variable name="colname">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="column-name"/>
+        </xsl:call-template>
+      </xsl:variable>
       <xsl:if test="string-length(comment) &gt; 0">
         <xsl:text>COMMENT ON COLUMN </xsl:text>
         <xsl:value-of select="$tablename"/>
         <xsl:text>.</xsl:text>
-        <xsl:value-of select="column-name"/>
+        <xsl:value-of select="$colname"/>
         <xsl:text> IS '</xsl:text>
         <xsl:value-of select="comment"/>
         <xsl:text>';</xsl:text>
@@ -180,6 +186,7 @@
     </xsl:for-each>
 
     <xsl:for-each select="index-def">
+      <xsl:value-of select="$newline"/>
       <xsl:call-template name="create-index">
         <xsl:with-param name="tablename" select="$tablename"/>
       </xsl:call-template>
@@ -216,8 +223,13 @@
       <xsl:text>(</xsl:text>
       <xsl:value-of select="$newline"/>
       <xsl:for-each select="column-list/column">
+        <xsl:variable name="colname">
+          <xsl:call-template name="write-object-name">
+            <xsl:with-param name="objectname" select="@name"/>
+          </xsl:call-template>
+        </xsl:variable>
         <xsl:text>  </xsl:text>
-        <xsl:value-of select="@name"/>
+        <xsl:value-of select="$colname"/>
         <xsl:if test="position() &lt; last()">
           <xsl:text>,</xsl:text>
         </xsl:if>
@@ -443,7 +455,14 @@
 
     <xsl:variable name="clean-name">
       <xsl:call-template name="_replace_text">
-        <xsl:with-param name="text" select="objectname"/>
+        <xsl:with-param name="text">
+          <xsl:choose>
+            <xsl:when test="$makeLowerCase = 'true'"><xsl:value-of select="$lower-name"/></xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$objectname"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:with-param>
         <xsl:with-param name="replace" select="$backtick"/>
         <xsl:with-param name="by" select="''"/>
       </xsl:call-template>
@@ -456,7 +475,7 @@
       <xsl:when test="contains($clean-name,' ')">
         <xsl:value-of select="concat($quote, $clean-name, $quote)"/>
       </xsl:when>
-      <xsl:when test="$objectname != $lower-name">
+      <xsl:when test="$objectname != $lower-name and $makeLowerCase = 'false'">
         <xsl:text>"</xsl:text><xsl:value-of select="$objectname"/><xsl:text>"</xsl:text>
       </xsl:when>
       <xsl:otherwise>

@@ -23,9 +23,10 @@
 package workbench.db;
 
 import java.util.List;
+
+import workbench.db.sqltemplates.ColumnChanger;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -114,27 +115,16 @@ public class TableCommentReader
 		String columnStatement = mgr.getCommentSqlTemplate("column");
 		if (StringUtil.isBlank(columnStatement)) return null;
 		StringBuilder result = new StringBuilder(columns.size() * 25);
+		ColumnChanger colChanger = new ColumnChanger(con);
+
 		for (ColumnIdentifier col : columns)
 		{
-			String column = col.getColumnName();
 			String comment = col.getComment();
 			if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 			{
 				try
 				{
-					String commentSql = null;
-					if (columnStatement.contains(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER))
-					{
-						commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(con));
-					}
-					else
-					{
-						commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
-						commentSql = replaceObjectNamePlaceholder(commentSql, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
-						commentSql = replaceObjectNamePlaceholder(commentSql, CommentSqlManager.COMMENT_CATALOG_PLACEHOLDER, table.getCatalog());
-					}
-					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : SqlUtil.escapeQuotes(comment));
+					String commentSql = colChanger.getColumnCommentSql(table, col);
 					result.append(commentSql);
 					result.append(";\n");
 				}

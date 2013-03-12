@@ -161,11 +161,14 @@ public class TableSourceBuilder
 				result.append(tableComment);
 			}
 
-			StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
-			if (StringUtil.isNonBlank(colComments))
+			if (!dbConnection.getDbSettings().useInlineColumnComments())
 			{
-				result.append(lineEnding);
-				result.append(colComments);
+				StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
+				if (StringUtil.isNonBlank(colComments))
+				{
+					result.append(lineEnding);
+					result.append(colComments);
+				}
 			}
 		}
 
@@ -520,7 +523,7 @@ public class TableSourceBuilder
 	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
-		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
+		boolean inlineColumnComments = dbConnection.getDbSettings().useInlineColumnComments();
 
 		StringBuilder result = new StringBuilder(50);
 
@@ -530,7 +533,7 @@ public class TableSourceBuilder
 		tmpl.setFixDefaultValues(!dbConnection.getDbSettings().returnsValidDefaultExpressions());
 		result.append(tmpl.getColumnDefinitionSQL(toUse, columnConstraint, maxTypeLength));
 
-		if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))
+		if (inlineColumnComments && StringUtil.isNonBlank(column.getComment()))
 		{
 			result.append(" COMMENT '");
 			result.append(SqlUtil.escapeQuotes(column.getComment()));

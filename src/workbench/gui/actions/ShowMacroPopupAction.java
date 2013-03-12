@@ -64,6 +64,14 @@ public class ShowMacroPopupAction
 		macroWindow.setVisible(true);
 	}
 
+	public void saveWorkspaceSettings()
+	{
+		if (this.macroWindow != null)
+		{
+			macroWindow.saveWorkspaceSettings();
+		}
+	}
+
 	public void workspaceChanged()
 	{
 		if (this.macroWindow != null)

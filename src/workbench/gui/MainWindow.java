@@ -1424,7 +1424,7 @@ public class MainWindow
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.showMacroPopup.workspaceChanged();
-		
+
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
 		DatabaseMetaData meta = conn.getMetadata().getJdbcMetaData();
@@ -2645,6 +2645,8 @@ public class MainWindow
 			f.makeBackup();
 		}
 
+		this.showMacroPopup.saveWorkspaceSettings();
+
 		try
 		{
 			int count = this.sqlTab.getTabCount();
@@ -2664,6 +2666,7 @@ public class MainWindow
 				}
 			}
 			w = new WbWorkspace(realFilename, true);
+			w.setToolProperties(this.toolProperties);
 			int selected = this.sqlTab.getSelectedIndex();
 			w.setSelectedTab(selected);
 			w.setEntryCount(count);
@@ -2672,7 +2675,6 @@ public class MainWindow
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
 			}
-
 		}
 		catch (Throwable e)
 		{
@@ -2683,6 +2685,7 @@ public class MainWindow
 		{
 			FileUtil.closeQuietely(w);
 		}
+
 
 		this.currentWorkspaceFile = filename;
 

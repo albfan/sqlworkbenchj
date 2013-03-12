@@ -1278,6 +1278,11 @@ public class DbSettings
 		return sql;
 	}
 
+	public boolean useInlineColumnComments()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + dbId, false);
+	}
+
 	/**
 	 * Checks if the current DBMS supports comments for the given DB object type
 	 * @param objectType the type to be checked (e.g. TABLE, COLUMN)

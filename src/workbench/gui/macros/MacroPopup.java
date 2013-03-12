@@ -41,7 +41,6 @@ import workbench.interfaces.FileActions;
 import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.PropertyStorage;
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -60,6 +59,8 @@ import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+
+import workbench.resource.GuiSettings;
 
 /**
  * Display a floating window with the MacroTree.
@@ -140,9 +141,33 @@ public class MacroPopup
 		ToolTipManager.sharedInstance().registerComponent(tree);
 	}
 
+	private boolean useWorkspace()
+	{
+		return GuiSettings.getStoreMacroPopupInWorkspace() && mainWindow != null;
+	}
+
+	private void saveExpandedGroups()
+	{
+		List<String> groups = tree.getExpandedGroupNames();
+		String grouplist = StringUtil.listToString(groups, ',', true);
+		PropertyStorage config = getConfig();
+		config.setProperty(propkey, grouplist);
+	}
+
+	public void saveWorkspaceSettings()
+	{
+		if (useWorkspace())
+		{
+			saveExpandedGroups();
+		}
+	}
+
 	public void workspaceChanged()
 	{
-		restoreExpandedGroups();
+		if (useWorkspace())
+		{
+			restoreExpandedGroups();
+		}
 	}
 
 	private void restoreExpandedGroups()
@@ -158,16 +183,9 @@ public class MacroPopup
 		return StringUtil.stringToList(groups, ",", true, true);
 	}
 
-	private void saveExpandedGroups(List<String> groups)
-	{
-		String grouplist = StringUtil.listToString(groups, ',', true);
-		PropertyStorage config = getConfig();
-		config.setProperty(propkey, grouplist);
-	}
-
 	private PropertyStorage getConfig()
 	{
-		if (GuiSettings.getStoreMacroPopupInWorkspace() && mainWindow != null)
+		if (useWorkspace())
 		{
 			return mainWindow.getToolProperties(toolkey);
 		}
@@ -225,13 +243,12 @@ public class MacroPopup
 				saveMacros(false);
 			}
 		}
+		saveExpandedGroups();
+		Settings.getInstance().storeWindowPosition(this);
+		Settings.getInstance().storeWindowSize(this);
 		removeWindowListener(this);
 		tree.removeTreeSelectionListener(this);
 
-		List<String> groups = tree.getExpandedGroupNames();
-		saveExpandedGroups(groups);
-		Settings.getInstance().storeWindowPosition(this);
-		Settings.getInstance().storeWindowSize(this);
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override

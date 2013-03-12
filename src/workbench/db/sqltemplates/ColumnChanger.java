@@ -327,6 +327,7 @@ public class ColumnChanger
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
+		sql = sql.replace(PARAM_DATATYPE, newDefinition.getDbmsType());
 		if (oldDefinition != null)
 		{
 			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
@@ -350,6 +351,8 @@ public class ColumnChanger
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(column));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, remarks.replace("'", "''"));
+		sql = sql.replace(PARAM_DATATYPE, column.getDbmsType());
+
 		if (column != null)
 		{
 			sql = sql.replace(PARAM_NEW_DATATYPE, column.getDbmsType());
