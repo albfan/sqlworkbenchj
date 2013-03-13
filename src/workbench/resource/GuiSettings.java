@@ -792,4 +792,14 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.editor.wheelscroll.units", lines);
 	}
+
+	public static boolean getApplySQLSortInDbExplorer()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.datapanel.applysqlorder", false);
+	}
+
+	public static void setApplySQLSortInDbExplorer(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.dbexplorer.datapanel.applysqlorder", flag);
+	}
 }

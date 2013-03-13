@@ -23,16 +23,16 @@
 package workbench.storage;
 
 /**
- * A class to save the sort definition for a DataStoreTableModel. 
+ * A class to save the sort definition for a DataStoreTableModel.
  * The sorted columns are saved by name, not by index position.
- * 
+ *
  * @author Thomas Kellerer
  */
-public class NamedSortDefinition 
+public class NamedSortDefinition
 {
 	private String[] sortColumns;
 	private boolean[] sortAscending;
-	
+
 	public NamedSortDefinition(DataStore data, SortDefinition sort)
 	{
 		if (sort != null && sort.hasColumns())
@@ -47,17 +47,40 @@ public class NamedSortDefinition
 			}
 		}
 	}
-	
+
 	public SortDefinition getSortDefinition(DataStore data)
 	{
 		if (sortColumns == null) return new SortDefinition();
-		
+
 		int[] columns = new int[sortColumns.length];
 		for (int i=0; i < sortColumns.length; i++)
 		{
 			columns[i] = data.getColumnIndex(sortColumns[i]);
-		}	
+		}
 		return new SortDefinition(columns, sortAscending);
 	}
-	
+
+	public String getSqlExpression()
+	{
+		if (sortColumns == null) return "";
+		StringBuilder result = new StringBuilder(sortColumns.length * 20);
+		for (int i=0; i < sortColumns.length; i++)
+		{
+			if (i > 0)
+			{
+				result.append(',');
+			}
+			result.append(sortColumns[i]);
+			if (sortAscending[i])
+			{
+				result.append(" ASC");
+			}
+			else
+			{
+				result.append(" DESC");
+			}
+		}
+		return result.toString();
+	}
+
 }

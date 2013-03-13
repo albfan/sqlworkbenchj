@@ -595,6 +595,14 @@ public class TableDataPanel
 
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, "tabledata");
 		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
+		if (GuiSettings.getApplySQLSortInDbExplorer() && lastSort != null)
+		{
+			String sort = lastSort.getSqlExpression();
+			if (sort != null)
+			{
+				sql += " \nORDER BY " + sort;
+			}
+		}
 		return sql;
 	}
 

@@ -1554,4 +1554,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "export.blob.use.streams", true);
 	}
+
+	public boolean getUseGenericExecuteForSelect()
+	{
+		boolean global = Settings.getInstance().getUseGenericExecuteForSelect();
+		return Settings.getInstance().getBoolProperty(prefix + ".select.executegeneric", global);
+	}
 }

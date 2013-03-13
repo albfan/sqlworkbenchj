@@ -89,6 +89,7 @@ public class SelectCommand
 			{
 				if (this.queryTimeout > 0 && currentConnection.supportsQueryTimeout())
 				{
+					LogMgr.logTrace("SelectCommand.execute()", "Setting query timeout to: " + this.queryTimeout);
 					this.currentStatement.setQueryTimeout(this.queryTimeout);
 				}
 			}
@@ -99,6 +100,7 @@ public class SelectCommand
 
 			try
 			{
+				LogMgr.logTrace("SelectCommand.execute()", "Setting maxrows to: " + maxRows);
 				this.currentStatement.setMaxRows(this.maxRows);
 			}
 			catch (Exception e)
@@ -120,8 +122,9 @@ public class SelectCommand
 			}
 			else
 			{
-				if (Settings.getInstance().getUseGenericExecuteForSelect())
+				if (currentConnection.getDbSettings().getUseGenericExecuteForSelect())
 				{
+					LogMgr.logDebug("SelectCommand.execute()", "Using execute() instead of executeQuery()");
 					hasResult = this.currentStatement.execute(sql);
 				}
 				else

@@ -63,6 +63,7 @@ public class DbExplorerOptionsPanel
 		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
 		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		GuiSettings.setAutorRetrieveFKTree(retrieveFKTree.isSelected());
+		GuiSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
@@ -81,6 +82,7 @@ public class DbExplorerOptionsPanel
 		selectSrcPanel.setSelected(set.getSelectSourcePanelAfterRetrieve());
 		((PlacementChooser)tabPlacement).showPlacement();
 		partialMatchSearch.setEnabled(!useQuickFilterRegex.isSelected());
+		applySQLSort.setSelected(GuiSettings.getApplySQLSortInDbExplorer());
 	}
 
 	/** This method is called from within the constructor to
@@ -98,6 +100,7 @@ public class DbExplorerOptionsPanel
     retrieveDbExplorer = new javax.swing.JCheckBox();
     rememberObject = new javax.swing.JCheckBox();
     rememberSort = new javax.swing.JCheckBox();
+    applySQLSort = new javax.swing.JCheckBox();
     autoselectDataPanel = new javax.swing.JCheckBox();
     showFocus = new javax.swing.JCheckBox();
     autogeneratePK = new javax.swing.JCheckBox();
@@ -166,11 +169,11 @@ public class DbExplorerOptionsPanel
     rememberObject.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     rememberObject.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
     add(rememberObject, gridBagConstraints);
 
     rememberSort.setSelected(Settings.getInstance().getRememberSortInDbExplorer());
@@ -185,6 +188,19 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(rememberSort, gridBagConstraints);
+
+    applySQLSort.setSelected(Settings.getInstance().getRememberSortInDbExplorer());
+    applySQLSort.setText(ResourceMgr.getString("LblApplySQLSort")); // NOI18N
+    applySQLSort.setToolTipText(ResourceMgr.getString("d_LblApplySQLSort")); // NOI18N
+    applySQLSort.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    applySQLSort.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    add(applySQLSort, gridBagConstraints);
 
     autoselectDataPanel.setSelected(Settings.getInstance().getSelectDataPanelAfterRetrieve());
     autoselectDataPanel.setText(ResourceMgr.getString("LblSelectDataPanel")); // NOI18N
@@ -226,7 +242,7 @@ public class DbExplorerOptionsPanel
     add(autogeneratePK, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 16;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
@@ -285,7 +301,7 @@ public class DbExplorerOptionsPanel
     rememberColOrder.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
@@ -381,6 +397,7 @@ public class DbExplorerOptionsPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox allowTableAlter;
+  private javax.swing.JCheckBox applySQLSort;
   private javax.swing.JCheckBox autogeneratePK;
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;
