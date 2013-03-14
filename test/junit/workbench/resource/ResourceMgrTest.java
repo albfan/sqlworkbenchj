@@ -22,23 +22,25 @@
  */
 package workbench.resource;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.junit.Test;
-import workbench.WbTestCase;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.TreeSet;
-import workbench.util.FileUtil;
-import static org.junit.Assert.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import workbench.WbTestCase;
+
 import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -67,20 +69,26 @@ public class ResourceMgrTest
 		assertNotNull(enBundle);
 		assertNotNull(deBundle);
 
-		HashSet<String> wrongKeys = new HashSet<String>();
+		Set<String> wrongKeys = CollectionUtil.caseInsensitiveSet();
 		InputStream in = getClass().getResourceAsStream("ignore_keys.txt");
 		List<String> keys = FileUtil.getLines(new BufferedReader(new InputStreamReader(in)), true);
-		HashSet<String> ignoreKeys = new HashSet<String>(keys);
 
-		Enumeration<String> enKeys = enBundle.getKeys();
+		Set<String> ignoredKeys = CollectionUtil.caseInsensitiveSet();
+		ignoredKeys.addAll(keys);
+
+		Set<String> allKeys = CollectionUtil.caseInsensitiveSet();
+		allKeys.addAll(enBundle.keySet());
+		allKeys.addAll(deBundle.keySet());
+
 		Set<String> wrongParameters = CollectionUtil.caseInsensitiveSet();
-		while (enKeys.hasMoreElements())
+		for (String key : allKeys)
 		{
-			String key = enKeys.nextElement();
-			if (ignoreKeys.contains(key)) continue;
-			String enValue = enBundle.getString(key);
-			String deValue = deBundle.getString(key);
-			if (enValue.equals(deValue))
+			if (ignoredKeys.contains(key)) continue;
+
+			String enValue = getString(enBundle, key);
+			String deValue = getString(deBundle, key);
+
+			if (StringUtil.isBlank(enValue) || StringUtil.isBlank(deValue) || enValue.equals(deValue))
 			{
 				wrongKeys.add(key + ", en=" + enValue + ", de=" + deValue);
 			}
@@ -116,6 +124,18 @@ public class ResourceMgrTest
 		}
 	}
 
+	private String getString(ResourceBundle bundle, String key)
+	{
+		try
+		{
+			return bundle.getString(key);
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
+	}
+
 	@Test
 	public void testQuoting()
 	{
@@ -144,7 +164,8 @@ public class ResourceMgrTest
 
 	private Set<String> getParameter(String message)
 	{
-		Set<String> result = new TreeSet<String>();
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		
 		// first find all %foobar% parameters
 		Pattern oldParms = Pattern.compile("\\%[a-zA-Z]+\\%");
 		Matcher m = oldParms.matcher(message);
