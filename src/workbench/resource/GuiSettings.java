@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.util.Set;
 
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
@@ -61,10 +62,13 @@ public class GuiSettings
 	public static final String PROP_TITLE_GROUP_SEP = "workbench.gui.display.titlegroupsep";
 	public static final String PROP_TITLE_GROUP_BRACKET = "workbench.gui.display.titlegroupbracket";
 
+	public static final String PROP_NUMBER_ALIGN = "workbench.gui.renderer.numberalignment";
+
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
 		PROP_TITLE_SHOW_EDITOR_FILE, PROP_TITLE_GROUP_SEP, PROP_TITLE_GROUP_BRACKET);
+	public static final String PROP_DBEXP_USE_SQLSORT = "workbench.dbexplorer.datapanel.applysqlorder";
 
 	public static int getMaxExpansionPause()
 	{
@@ -795,11 +799,31 @@ public class GuiSettings
 
 	public static boolean getApplySQLSortInDbExplorer()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.datapanel.applysqlorder", false);
+		return Settings.getInstance().getBoolProperty(PROP_DBEXP_USE_SQLSORT, false);
 	}
 
 	public static void setApplySQLSortInDbExplorer(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.dbexplorer.datapanel.applysqlorder", flag);
+		Settings.getInstance().setProperty(PROP_DBEXP_USE_SQLSORT, flag);
 	}
+
+	public static int getNumberDataAlignment()
+	{
+		String align = Settings.getInstance().getProperty(PROP_NUMBER_ALIGN, "right");
+
+		if ("left".equalsIgnoreCase(align)) return SwingConstants.LEFT;
+		return SwingConstants.RIGHT;
+	}
+
+	public static void setNumberDataAlignment(String align)
+	{
+		if (StringUtil.isNonBlank(align))
+		{
+			if ("left".equalsIgnoreCase(align) || "right".equalsIgnoreCase(align))
+			{
+				Settings.getInstance().setProperty(PROP_NUMBER_ALIGN, align.toLowerCase());
+			}
+		}
+	}
+
 }

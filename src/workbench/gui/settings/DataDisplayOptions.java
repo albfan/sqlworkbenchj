@@ -28,7 +28,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
@@ -57,6 +60,9 @@ public class DataDisplayOptions
 	{
 		super();
 		initComponents();
+		ComboBoxModel model = new DefaultComboBoxModel(new String[] {ResourceMgr.getString("TxtTabRight"), ResourceMgr.getString("TxtTabLeft") });
+		alignmentDropDown.setModel(model);
+
 		WbSwingUtilities.setMinimumSize(defMaxRows, 6);
 		WbSwingUtilities.setMinimumSize(multiLineThreshold, 6);
 		WbSwingUtilities.setMinimumSize(minColSizeField, 6);
@@ -83,6 +89,15 @@ public class DataDisplayOptions
 		showMaxRowsWarn.setSelected(GuiSettings.getShowMaxRowsReached());
 		nullString.setText(GuiSettings.getDisplayNullString());
 		showGeneratingSQL.setSelected(GuiSettings.getShowResultSQL());
+		int align = GuiSettings.getNumberDataAlignment();
+		if (align == SwingConstants.LEFT)
+		{
+			alignmentDropDown.setSelectedIndex(1);
+		}
+		else
+		{
+			alignmentDropDown.setSelectedIndex(0);
+		}
 		fillLanguageDropDown();
 	}
 
@@ -108,6 +123,14 @@ public class DataDisplayOptions
 		GuiSettings.setShowResultSQL(showGeneratingSQL.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
+		if (alignmentDropDown.getSelectedIndex() == 1)
+		{
+			GuiSettings.setNumberDataAlignment("left");
+		}
+		else
+		{
+			GuiSettings.setNumberDataAlignment("right");
+		}
 	}
 
 	@Override
@@ -188,13 +211,14 @@ public class DataDisplayOptions
     selectSummary = new javax.swing.JCheckBox();
     jLabel3 = new javax.swing.JLabel();
     multiLineThreshold = new javax.swing.JTextField();
-    jPanel6 = new javax.swing.JPanel();
     retrieveComments = new javax.swing.JCheckBox();
     jLabel5 = new javax.swing.JLabel();
     defMaxRows = new javax.swing.JTextField();
     showRowNumbers = new javax.swing.JCheckBox();
     showMaxRowsWarn = new javax.swing.JCheckBox();
     showGeneratingSQL = new javax.swing.JCheckBox();
+    alignLabel = new javax.swing.JLabel();
+    alignmentDropDown = new javax.swing.JComboBox();
     nullStringLabel = new javax.swing.JLabel();
     nullString = new javax.swing.JTextField();
     colWidthPanel = new javax.swing.JPanel();
@@ -254,21 +278,16 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 25, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 7);
     generalPanel.add(jLabel3, gridBagConstraints);
 
     multiLineThreshold.setColumns(6);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 19);
     generalPanel.add(multiLineThreshold, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.weightx = 1.0;
-    generalPanel.add(jPanel6, gridBagConstraints);
 
     retrieveComments.setText(ResourceMgr.getString("LblRetrieveColComments")); // NOI18N
     retrieveComments.setToolTipText(ResourceMgr.getString("d_LblRetrieveColComments")); // NOI18N
@@ -287,7 +306,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 25, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(5, 16, 0, 7);
     generalPanel.add(jLabel5, gridBagConstraints);
 
     defMaxRows.setColumns(6);
@@ -295,9 +314,8 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 19);
     generalPanel.add(defMaxRows, gridBagConstraints);
 
     showRowNumbers.setText(ResourceMgr.getString("LblShowRowNumbers")); // NOI18N
@@ -319,7 +337,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 25, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 16, 0, 0);
     generalPanel.add(showMaxRowsWarn, gridBagConstraints);
 
     showGeneratingSQL.setText(ResourceMgr.getString("LblShowGenSQL")); // NOI18N
@@ -329,8 +347,27 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
     generalPanel.add(showGeneratingSQL, gridBagConstraints);
+
+    alignLabel.setText(ResourceMgr.getString("LblAlignNum")); // NOI18N
+    alignLabel.setToolTipText(ResourceMgr.getString("d_LblAlignNum")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 16, 0, 0);
+    generalPanel.add(alignLabel, gridBagConstraints);
+
+    alignmentDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Left", "Right" }));
+    alignmentDropDown.setSelectedItem("Right");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 19);
+    generalPanel.add(alignmentDropDown, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -346,14 +383,14 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
     add(nullStringLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 5);
     add(nullString, gridBagConstraints);
 
     colWidthPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtColWidthSettings"))); // NOI18N
@@ -515,6 +552,8 @@ public class DataDisplayOptions
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JLabel alignLabel;
+  private javax.swing.JComboBox alignmentDropDown;
   private javax.swing.JCheckBox autoColWidth;
   private javax.swing.JCheckBox autoRowHeight;
   private javax.swing.JPanel colWidthPanel;
@@ -529,7 +568,6 @@ public class DataDisplayOptions
   private javax.swing.JLabel jLabel6;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
-  private javax.swing.JPanel jPanel6;
   private javax.swing.JComboBox localeDropDown;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel;

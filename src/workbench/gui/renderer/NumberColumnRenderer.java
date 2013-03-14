@@ -24,7 +24,7 @@ package workbench.gui.renderer;
 
 import java.math.BigDecimal;
 
-import javax.swing.SwingConstants;
+import workbench.resource.GuiSettings;
 
 import workbench.util.WbNumberFormatter;
 
@@ -42,14 +42,14 @@ public class NumberColumnRenderer
 	{
 		super();
 		formatter = new WbNumberFormatter(4, '.');
-		this.setHorizontalAlignment(SwingConstants.RIGHT);
+		this.setHorizontalAlignment(GuiSettings.getNumberDataAlignment());
 	}
 
 	public NumberColumnRenderer(int maxDigits, char sep)
 	{
 		super();
 		formatter = new WbNumberFormatter(maxDigits, sep);
-		this.setHorizontalAlignment(SwingConstants.RIGHT);
+		this.setHorizontalAlignment(GuiSettings.getNumberDataAlignment());
 	}
 
 	@Override

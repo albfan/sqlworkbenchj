@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-03-10">
+    <entry dev-build="5" type="enh">A new option to change the alignment of numbers in the result display has been added</entry>
+    <entry dev-build="5" type="enh">A new option has been added to use an ORDER BY reflecting the current sort order when reloading table data in the DbExplorer</entry>
     <entry dev-build="4" type="enh">The new -ignoreIdentityColumns as well as the pre and post-table statements can now be specified in the DataPumper</entry>
     <entry dev-build="3" type="enh">A new option for WbSchemaReport -objectTypeNames is available to select objects by type and name (possibly with wildcards)</entry>
     <entry dev-build="1" type="enh">When editing a date or timestamp column, the value is now displayed in the same format that is defined in the options dialog for "Data formatting"</entry>
