@@ -1598,6 +1598,8 @@ public class MainWindow
 					updateWindowTitle();
 					checkWorkspaceActions();
 					updateAddMacroAction();
+					toolProperties.clear();
+					toolProperties.putAll(w.getToolProperties());
 
 					setIgnoreTabChange(false);
 

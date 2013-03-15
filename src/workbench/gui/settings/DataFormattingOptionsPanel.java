@@ -23,14 +23,18 @@
 package workbench.gui.settings;
 
 import java.awt.event.MouseListener;
+
 import javax.swing.JPanel;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.NumberField;
-import workbench.gui.help.HelpManager;
+
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.NumberField;
+import workbench.gui.help.HelpManager;
+
 import workbench.util.StringUtil;
 
 /**
@@ -241,7 +245,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
     add(oraDateFix, gridBagConstraints);
 
-    helpLabel.setText("<html><u>Help for format mask</u></html>");
+    helpLabel.setText(ResourceMgr.getString("d_LblFmtDateHelp")); // NOI18N
     helpLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     helpLabel.addMouseListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();

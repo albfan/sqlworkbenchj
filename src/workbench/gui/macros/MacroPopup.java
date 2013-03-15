@@ -41,6 +41,7 @@ import workbench.interfaces.FileActions;
 import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.PropertyStorage;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -59,8 +60,6 @@ import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
-
-import workbench.resource.GuiSettings;
 
 /**
  * Display a floating window with the MacroTree.
@@ -172,6 +171,7 @@ public class MacroPopup
 
 	private void restoreExpandedGroups()
 	{
+		tree.collapseAll();
 		List<String> groups = getExpanedGroups();
 		tree.expandGroups(groups);
 	}
