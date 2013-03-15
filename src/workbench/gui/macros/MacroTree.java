@@ -30,6 +30,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -44,21 +46,21 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import java.util.LinkedList;
-import java.util.List;
+import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.ExpandableTree;
+import workbench.interfaces.GroupTree;
+import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.menu.CutCopyPastePopup;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.ExpandableTree;
-import workbench.interfaces.GroupTree;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
+
 import workbench.util.StringUtil;
 
 /**
@@ -116,7 +118,7 @@ public class MacroTree
 		pasteToFolderAction = new WbAction(this, "pasteToFolder");
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
-		popup.addAction(pasteToFolderAction, true);
+		popup.addAction(pasteToFolderAction, false);
 
 		MacroTreeCellRenderer renderer = new MacroTreeCellRenderer();
 		setCellRenderer(renderer);

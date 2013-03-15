@@ -30,13 +30,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ibm.DB2UniqueConstraintReader;
 import workbench.db.mssql.SqlServerUniqueConstraintReader;
 import workbench.db.oracle.OracleUniqueConstraintReader;
 import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.log.LogMgr;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -588,13 +591,13 @@ public class JdbcIndexReader
 
 		while (idxRs != null && idxRs.next())
 		{
-			boolean nonUniqueFlag = idxRs.getBoolean("NON_UNIQUE");
-			String indexName = idxRs.getString("INDEX_NAME");
-			if (idxRs.wasNull()) continue;
-			if (indexName == null) continue;
+			boolean nonUniqueFlag = idxRs.getBoolean(4); // "NON_UNIQUE"
+			String indexName = idxRs.getString(6); // "INDEX_NAME"
 
-			String colName = idxRs.getString("COLUMN_NAME");
-			String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
+			if (idxRs.wasNull() || indexName == null) continue;
+
+			String colName = idxRs.getString(9); // "COLUMN_NAME"
+			String dir = (supportsDirection ? idxRs.getString(10) : null); // "ASC_OR_DESC"
 
 			IndexDefinition def = defs.get(indexName);
 			if (def == null)

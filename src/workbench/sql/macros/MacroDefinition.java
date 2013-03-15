@@ -23,6 +23,7 @@
 package workbench.sql.macros;
 
 import workbench.resource.StoreableKeyStroke;
+
 import workbench.util.StringUtil;
 
 /**
@@ -61,7 +62,7 @@ public class MacroDefinition
 
 	public void setExpandWhileTyping(boolean flag)
 	{
-		modified = (expandWhileTyping != flag);
+		modified = modified || (expandWhileTyping != flag);
 		this.expandWhileTyping = flag;
 	}
 
@@ -77,7 +78,7 @@ public class MacroDefinition
 
 	public void setVisibleInMenu(boolean flag)
 	{
-		modified = (showInMenu != flag);
+		modified = modified || (showInMenu != flag);
 		this.showInMenu = flag;
 	}
 
@@ -88,7 +89,7 @@ public class MacroDefinition
 
 	public void setAppendResult(boolean flag)
 	{
-		modified = (appendResult != flag);
+		modified = modified || (appendResult != flag);
 		this.appendResult = flag;
 	}
 
@@ -127,14 +128,22 @@ public class MacroDefinition
 		this.text = macroText;
 	}
 
+	public void copyTo(MacroDefinition def)
+	{
+		def.setName(this.name);
+		def.setText(this.text);
+		def.setSortOrder(this.sortOrder);
+		def.setVisibleInMenu(this.showInMenu);
+		def.setShortcut(this.shortcut);
+		def.setExpandWhileTyping(this.expandWhileTyping);
+		def.setAppendResult(this.appendResult);
+	}
+
 	public MacroDefinition createCopy()
 	{
 		MacroDefinition def = new MacroDefinition(this.name, this.text);
-		def.sortOrder = this.sortOrder;
-		def.showInMenu = this.showInMenu;
-		def.shortcut = this.shortcut;
-		def.expandWhileTyping = this.expandWhileTyping;
-		def.appendResult = this.appendResult;
+		this.copyTo(def);
+		def.modified = false;
 		return def;
 	}
 

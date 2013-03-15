@@ -48,6 +48,7 @@ import workbench.resource.Settings;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.EditMacroAction;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
@@ -75,6 +76,7 @@ public class MacroPopup
 	private MacroTree tree;
 	private MainWindow mainWindow;
 	private RunMacroAction runAction;
+	private EditMacroAction editAction;
 	private boolean isClosing;
 	private final String propkey = getClass().getName() + ".expandedgroups";
 	private final String toolkey = "macropopup";
@@ -104,6 +106,8 @@ public class MacroPopup
 		tree.addMouseListener(this);
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
+		editAction = new EditMacroAction(mainWindow);
+		tree.addPopupAction(editAction, true);
 		tree.addPopupActionAtTop(runAction);
 		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
@@ -132,7 +136,7 @@ public class MacroPopup
 		};
 
 		DeleteListEntryAction delete = new DeleteListEntryAction(actions);
-		tree.addPopupAction(delete, true);
+		tree.addPopupAction(delete, false);
 		SaveListFileAction save = new SaveListFileAction(actions, "LblSaveMacros");
 		tree.addPopupAction(save, false);
 
@@ -346,10 +350,12 @@ public class MacroPopup
 				runAction.setEnabled(true);
 				runAction.setMacro(macro);
 			}
+			editAction.setMacro(macro);
 		}
 		else
 		{
 			runAction.setEnabled(false);
+			editAction.setMacro(null);
 		}
 	}
 

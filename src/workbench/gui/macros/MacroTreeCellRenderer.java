@@ -24,14 +24,19 @@ package workbench.gui.macros;
 
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.macros.MacroDefinition;
+
+import workbench.util.HtmlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -88,7 +93,7 @@ public class MacroTreeCellRenderer
 				{
 					setIcon(ResourceMgr.getPng("macro"));
 				}
-				setToolTipText(StringUtil.getMaxSubstring(macro.getText(), 350));
+				setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
 			}
 			else
 			{

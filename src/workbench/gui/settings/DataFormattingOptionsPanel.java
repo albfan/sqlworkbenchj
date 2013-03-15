@@ -245,7 +245,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
     add(oraDateFix, gridBagConstraints);
 
-    helpLabel.setText(ResourceMgr.getString("d_LblFmtDateHelp")); // NOI18N
+    helpLabel.setText(ResourceMgr.getString("LblFmtDateHelp")); // NOI18N
     helpLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     helpLabel.addMouseListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();

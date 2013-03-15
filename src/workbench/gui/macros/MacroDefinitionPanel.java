@@ -39,7 +39,14 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+
+import workbench.interfaces.StatusBar;
+import workbench.resource.ResourceMgr;
+import workbench.resource.ShortcutManager;
+import workbench.resource.StoreableKeyStroke;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.components.BooleanPropertyEditor;
@@ -47,10 +54,6 @@ import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.settings.KeyboardMapper;
 import workbench.gui.sql.EditorPanel;
-import workbench.interfaces.StatusBar;
-import workbench.resource.ResourceMgr;
-import workbench.resource.ShortcutManager;
-import workbench.resource.StoreableKeyStroke;
 
 import workbench.sql.macros.MacroDefinition;
 
@@ -104,7 +107,10 @@ public class MacroDefinitionPanel
 		policy.setDefaultComponent(macroEditor);
 		setFocusTraversalPolicy(policy);
 
-		tfName.addPropertyChangeListener(l);
+		if (l != null)
+		{
+			tfName.addPropertyChangeListener(l);
+		}
 	}
 
 	/**

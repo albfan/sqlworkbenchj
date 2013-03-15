@@ -24,10 +24,14 @@ package workbench.sql.macros;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
+
 import workbench.resource.StoreableKeyStroke;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -74,6 +78,10 @@ public class MacroDefinitionTest
 
 		macro.resetModified();
 		macro.setVisibleInMenu(false);
+		assertTrue(macro.isModified());
+		macro.setAppendResult(false);
+		assertTrue(macro.isModified());
+		macro.setExpandWhileTyping(false);
 		assertTrue(macro.isModified());
 	}
 }
