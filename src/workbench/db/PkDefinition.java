@@ -82,7 +82,7 @@ public class PkDefinition
 	{
 		this.validated = flag;
 	}
-	
+
 	public String getPkIndexName()
 	{
 		if (pkIndexName == null) return pkName;
@@ -145,6 +145,7 @@ public class PkDefinition
 	@Override
 	public String toString()
 	{
-		return pkName + " " + columns;
+		if (pkName == null) return columns.toString();
+		return pkName + ": " + columns;
 	}
 }

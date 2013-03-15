@@ -200,8 +200,9 @@ public class TableCreator
 				CharSequence pkSql = builder.getPkSource(this.tablename, pk, false);
 				if (pkSql.length() > 0)
 				{
-					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
-					stmt.executeUpdate(pkSql.toString());
+					String alterTable = pkSql.toString();
+					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + alterTable);
+					stmt.executeUpdate(alterTable);
 				}
 
 				if (storeSQL)
