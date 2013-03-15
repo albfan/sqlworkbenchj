@@ -194,6 +194,11 @@ public class HelpManager
 
 	public static void showHelpFile(String topic)
 	{
+		showHelpFile(topic, null);
+	}
+
+	public static void showHelpFile(String topic, String anchor)
+	{
 		String basefile;
 
 		if (Settings.getInstance().useSinglePageHelp())
@@ -212,7 +217,7 @@ public class HelpManager
 		File dir = getHtmlManualDir();
 		if (dir == null)
 		{
-			showOnlineHelp(basefile);
+			showOnlineHelp(basefile, anchor);
 			return;
 		}
 
@@ -225,7 +230,7 @@ public class HelpManager
 		if (manual == null || !manual.exists())
 		{
 			LogMgr.logInfo("HelpManager.showHelpFile()", "Help file: '" + manual + "' not found. Showing online help");
-			showOnlineHelp(basefile);
+			showOnlineHelp(basefile, anchor);
 			return;
 		}
 
@@ -236,6 +241,10 @@ public class HelpManager
 			{
 				url = url + "#" + topic;
 			}
+			else if (anchor != null)
+			{
+				url += "#" + anchor;
+			}
 			BrowserLauncher.openURL(new URI(url));
 		}
 		catch (Exception ex)
@@ -244,11 +253,16 @@ public class HelpManager
 		}
 	}
 
-	private static void showOnlineHelp(String basefile)
+	private static void showOnlineHelp(String basefile, String anchor)
 	{
 		try
 		{
-			BrowserLauncher.openURL("http://www.sql-workbench.net/manual/" + (basefile == null ? "" : basefile));
+			String page = (basefile == null ? "" : basefile);
+			if (anchor != null)
+			{
+				page += "#" + anchor;
+			}
+			BrowserLauncher.openURL("http://www.sql-workbench.net/manual/" + page);
 		}
 		catch (Exception ex)
 		{
@@ -279,6 +293,11 @@ public class HelpManager
 	public static void showDriverHelp()
 	{
 		showHelpFile("jdbc-setup");
+	}
+
+	public static void showDateFormatHelp()
+	{
+		showHelpFile("options", "options-data-formatting");
 	}
 
 }
