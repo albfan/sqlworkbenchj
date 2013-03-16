@@ -106,7 +106,7 @@ public class MacroPopup
 		tree.addMouseListener(this);
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
-		editAction = new EditMacroAction(mainWindow);
+		editAction = new EditMacroAction();
 		tree.addPopupAction(editAction, true);
 		tree.addPopupActionAtTop(runAction);
 		tree.addTreeSelectionListener(this);

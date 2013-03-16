@@ -24,9 +24,11 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.JFrame;
+
+import workbench.WbManager;
 import workbench.resource.Settings;
 
-import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.macros.MacroDefinitionPanel;
@@ -40,13 +42,11 @@ public class EditMacroAction
 	extends WbAction
 {
 	private final String windowKey = "workbench.gui.macroeditor";
-	private MainWindow client;
 	private MacroDefinition macro;
 
-	public EditMacroAction(MainWindow window)
+	public EditMacroAction()
 	{
 		super();
-		this.client = window;
 		setMenuTextByKey("LblEditMacro");
 		this.setIcon(null);
 		setEnabled(false);
@@ -55,22 +55,23 @@ public class EditMacroAction
 	public void setMacro(MacroDefinition def)
 	{
 		this.macro = def;
-		setEnabled(macro != null && client != null);
+		setEnabled(macro != null);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (this.client == null || this.macro == null) return;
+		if (this.macro == null) return;
+		JFrame frame = WbManager.getInstance().getCurrentWindow();
 		MacroDefinitionPanel panel = new MacroDefinitionPanel(null);
 		MacroDefinition editMacro = macro.createCopy();
 		panel.setMacro(editMacro);
-		ValidatingDialog dialog = new ValidatingDialog(client, "Edit macro", panel);
+		ValidatingDialog dialog = new ValidatingDialog(frame, "Edit macro", panel);
 		if (!Settings.getInstance().restoreWindowPosition(dialog, windowKey))
 		{
 			dialog.setSize(650, 500);
 		}
-		WbSwingUtilities.center(dialog, client);
+		WbSwingUtilities.center(dialog, frame);
 		dialog.setVisible(true);
 		Settings.getInstance().storeWindowSize(dialog, windowKey);
 		if (!dialog.isCancelled())
