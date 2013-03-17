@@ -93,7 +93,8 @@ class TableCopy
 
 		copier.setPerTableStatements(new TableStatements(cmdLine));
 		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-
+		copier.setIgnoreColumnDefaults(cmdLine.getBoolean(WbCopy.PARAM_REMOVE_DEFAULTS, false));
+		
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(mode))
 		{

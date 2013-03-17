@@ -74,9 +74,10 @@ public class DataCopier
 	private Map<ColumnIdentifier, ColumnIdentifier> columnMap;
 
 	private List<ColumnIdentifier> targetColumnsForQuery;
-	private MessageBuffer messages = null;
-	private MessageBuffer errors = null;
-	private boolean doSyncDelete = false;
+	private MessageBuffer messages;
+	private MessageBuffer errors;
+	private boolean doSyncDelete;
+	private boolean ignoreColumnDefaultsForCreate;
 
 	public DataCopier()
 	{
@@ -97,11 +98,20 @@ public class DataCopier
 		errors = new MessageBuffer();
 	}
 
+	/**
+	 * Controls if column defaults should be used when creating the targt table.
+	 * @param flag
+	 */
+	public void setIgnoreColumnDefaults(boolean flag)
+	{
+		this.ignoreColumnDefaultsForCreate = flag;
+	}
+
 	public void setIgnoreIdentityColumns(boolean flag)
 	{
 		this.importer.setIgnoreIdentityColumns(flag);
 	}
-	
+
 	public void setTransactionControl(boolean flag)
 	{
 		this.importer.setTransactionControl(flag);
@@ -331,6 +341,7 @@ public class DataCopier
 			TableCreator creator = new TableCreator(this.targetConnection, createType, this.targetTable, targetCols);
 			creator.setUseColumnAlias(true); // if an alias was specified in the original query, the new table should use that one
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
+			creator.setRemoveDefaults(ignoreColumnDefaultsForCreate);
 			creator.createTable();
 
 			TableDefinition newTable = targetConnection.getMetadata().getTableDefinition(targetTable);

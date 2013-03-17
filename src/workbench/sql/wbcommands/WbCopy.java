@@ -72,6 +72,7 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
+	public static final String PARAM_REMOVE_DEFAULTS = "removeDefaults";
 
 
 	/**
@@ -129,6 +130,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolArgument);
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_REMOVE_DEFAULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		cmdLine.addArgumentWithValues(PARAM_TABLE_TYPE, DbSettings.getCreateTableTypes());

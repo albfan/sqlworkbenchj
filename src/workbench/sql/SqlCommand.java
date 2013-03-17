@@ -833,7 +833,17 @@ public class SqlCommand
 		if (con == null || con.isClosed()) return true;
 		ConnectionProfile prof = getModificationTarget(con, sql);
 		if (prof == null) return true;
-		if (isUpdatingCommand(con, sql))
+
+		// if the modification target is not the profile of the current connection
+		// only the readOnly property of the profile is relevant
+		if (!con.getProfile().equals(prof) && prof.isReadOnly())
+		{
+			return false;
+		}
+
+		// the command modifies the profile of the current connection,
+		// the state of the current connection is relevant.
+		if (con.getProfile().equals(prof) && isUpdatingCommand(con, sql))
 		{
 			if (con.isSessionReadOnly()) return false;
 		}

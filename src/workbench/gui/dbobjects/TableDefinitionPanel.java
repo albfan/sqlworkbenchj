@@ -34,6 +34,7 @@ import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
@@ -41,16 +42,25 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import workbench.interfaces.DbData;
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.*;
+
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.CreateDummySqlAction;
-import workbench.gui.actions.DropDbObjectAction;
-import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ColumnAlterAction;
+import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.CreatePKAction;
 import workbench.gui.actions.DeleteRowAction;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.DropPKAction;
 import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
@@ -61,13 +71,9 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.DbData;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -325,12 +331,12 @@ public class TableDefinitionPanel
 	protected void retrieveTableDefinition()
 		throws SQLException
 	{
-		if (currentTable == null) return;
-
 		if (this.isBusy()) return;
 
 		synchronized (connectionLock)
 		{
+			if (currentTable == null)	return;
+
 			try
 			{
 				WbSwingUtilities.invoke(new Runnable()

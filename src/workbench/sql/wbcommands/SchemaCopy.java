@@ -358,6 +358,7 @@ class SchemaCopy
 		skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
 		this.copier = new DataCopier();
+		copier.setIgnoreColumnDefaults(cmdLine.getBoolean(WbCopy.PARAM_REMOVE_DEFAULTS, false));
 
 		this.rowMonitor = monitor;
 
@@ -372,7 +373,7 @@ class SchemaCopy
 		copier.setPerTableStatements(new TableStatements(cmdLine));
 		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
 		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-		
+
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
 
 		CommonArgs.setProgressInterval(copier, arguments);

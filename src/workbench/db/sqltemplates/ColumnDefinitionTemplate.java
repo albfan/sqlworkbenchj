@@ -22,8 +22,10 @@
  */
 package workbench.db.sqltemplates;
 
-import workbench.db.ColumnIdentifier;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -120,7 +122,6 @@ public class ColumnDefinitionTemplate
 			isDefaultConstraint = colConstraint.indexOf("DEFAULT") > -1;
 		}
 
-
 		String def = getDefaultExpression(column);
 		if (isDefaultConstraint)
 		{
@@ -183,7 +184,7 @@ public class ColumnDefinitionTemplate
 		}
 
 		if (!fixDefaultExpression) return value;
-		
+
 		if (SqlUtil.isCharacterType(column.getDataType()))
 		{
 			value = value.trim();

@@ -22,15 +22,18 @@
  */
 package workbench.db;
 
-import java.util.ArrayList;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
 import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -176,7 +179,7 @@ public class TableCreatorTest
 			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " " +
 				MetaDataSqlManager.PK_INLINE_DEFINITION +
 			"\n)";
-			
+
 			con.getDbSettings().setCreateTableTemplate("creator_inline_test", template);
 
 			List<TableIdentifier> tables = con.getMetadata().getTableList("%", "PUBLIC");
@@ -290,8 +293,8 @@ public class TableCreatorTest
 		try
 		{
 			WbConnection con = util.getConnection();
-			
-			TestUtil.executeScript(con, 
+
+			TestUtil.executeScript(con,
 				"create schema other;\n" +
 				"commit;\n");
 
@@ -327,10 +330,34 @@ public class TableCreatorTest
 	}
 
 	@Test
-	public void testColumnAlias()
+	public void testRemoveDefaults()
 		throws Exception
 	{
+		try {
+			WbConnection con = util.getConnection();
+			Statement stmt = con.createStatement();
 
+			// Include column names that are keywords or contain special characters to
+			// make sure TableCreator is properly handling those names
+			stmt.executeUpdate("CREATE TABLE create_test (id integer not null default 42)");
+			TableIdentifier oldTable = new TableIdentifier("create_test");
+			TableIdentifier newTable = new TableIdentifier("new_table");
+
+			List<ColumnIdentifier> clist = con.getMetadata().getTableColumns(oldTable);
+			assertEquals("42", clist.get(0).getDefaultValue());
+
+			TableCreator creator = new TableCreator(con, null, newTable, clist);
+			creator.setRemoveDefaults(true);
+			creator.createTable();
+
+			List<ColumnIdentifier> newCols = con.getMetadata().getTableColumns(newTable);
+			assertEquals(1, newCols.size());
+			assertNull(newCols.get(0).getDefaultValue());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 }

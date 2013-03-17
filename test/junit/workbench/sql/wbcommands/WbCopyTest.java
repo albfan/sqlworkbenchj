@@ -25,19 +25,25 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
-import org.junit.After;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
+import workbench.db.MetaDataSqlManager;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
+import org.junit.After;
 import org.junit.Test;
-import workbench.db.MetaDataSqlManager;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -384,6 +390,40 @@ public class WbCopyTest
 			{
 				fail("Record with nr = 4 not copied");
 			}
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+	}
+
+	@Test
+	public void testRemoveDefaults() throws Exception
+	{
+		TestUtil util = new TestUtil("WbCopyRemoveDefault");
+		util.prepareEnvironment();
+
+		StatementRunner runner = util.createConnectedStatementRunner();
+		WbConnection con = runner.getConnection();
+
+		try
+		{
+			TestUtil.executeScript(con,
+			  "create table source_data (nr integer not null primary key, lastname varchar(50) default 'Dent', firstname varchar(50));\n" +
+				"insert into source_data (nr, lastname, firstname) values (1,'Dent', 'Arthur');\n" +
+				"commit;");
+
+			String sql = "wbcopy -sourceTable=source_data -targettable=target_data -createTarget=true -removeDefaults=true";
+			runner.runStatement(sql);
+			StatementRunnerResult result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from target_data");
+			assertEquals(1, count.intValue());
+			List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("target_data"));
+			ColumnIdentifier col = columns.get(1);
+			assertEquals("LASTNAME", col.getColumnName());
+			assertNull(col.getDefaultValue());
 		}
 		finally
 		{

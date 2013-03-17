@@ -50,6 +50,7 @@ public class TableCreator
 	private TypeMapper mapper;
 	private boolean useDbmsDataType;
 	private boolean useColumnAlias;
+	private boolean removeDefaults;
 	private String creationType;
 	private ColumnDefinitionTemplate columnTemplate;
 	private boolean storeSQL;
@@ -111,6 +112,11 @@ public class TableCreator
 	public void useDbmsDataType(boolean flag)
 	{
 		this.useDbmsDataType = flag;
+	}
+
+	public void setRemoveDefaults(boolean flag)
+	{
+		this.removeDefaults = flag;
 	}
 
 	public TableIdentifier getTable()
@@ -277,6 +283,11 @@ public class TableCreator
 			typeName = this.mapper.getTypeName(type, size, digits);
 		}
 
+		if (removeDefaults)
+		{
+			col = col.createCopy();
+			col.setDefaultValue(null);
+		}
 		result.append(columnTemplate.getColumnDefinitionSQL(col, null, 0, typeName));
 
 		return result.toString();
