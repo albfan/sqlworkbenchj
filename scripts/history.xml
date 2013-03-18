@@ -2,7 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-03-10">
-    <entry dev-build="5" type="enh">A new option "ignoreColumnDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</entry>
+    <entry dev-build="5" type="enh">A new option "-removeDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</entry>
     <entry dev-build="5" type="enh">A new option to change the alignment of numbers in the result display has been added</entry>
     <entry dev-build="5" type="enh">A new option has been added to use an ORDER BY reflecting the current sort order when reloading table data in the DbExplorer</entry>
     <entry dev-build="4" type="enh">The new -ignoreIdentityColumns as well as the pre and post-table statements can now be specified in the DataPumper</entry>
