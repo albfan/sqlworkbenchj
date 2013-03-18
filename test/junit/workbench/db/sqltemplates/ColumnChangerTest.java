@@ -47,6 +47,31 @@ public class ColumnChangerTest
 	}
 
 	@Test
+	public void testSqlServer()
+	{
+		DbSettings settings = new DbSettings("microsoft_sql_server", "Microsoft SQL Server");
+		ColumnChanger changer = new ColumnChanger(settings);
+
+		assertTrue(changer.canAddColumn());
+		assertTrue(changer.canAlterType());
+		assertTrue(changer.canChangeComment());
+		assertTrue(changer.canChangeNullable());
+		assertTrue(changer.canRenameColumn());
+
+		TableIdentifier table = new TableIdentifier("PERSON");
+		ColumnIdentifier oldCol = new ColumnIdentifier("FIRST_NAME", java.sql.Types.VARCHAR, false);
+		oldCol.setDbmsType("VARCHAR(20)");
+		oldCol.setIsNullable(false);
+
+		ColumnIdentifier newCol = oldCol.createCopy();
+		newCol.setDbmsType("VARCHAR(50)");
+
+		List<String> sqls = changer.getAlterStatements(table, oldCol, newCol);
+		assertEquals(1, sqls.size());
+		assertEquals("ALTER TABLE PERSON ALTER COLUMN FIRST_NAME VARCHAR(50) NOT NULL", sqls.get(0));
+	}
+
+	@Test
 	public void testPostgres()
 	{
 		DbSettings settings = new DbSettings("postgresql", "PostgreSQL");
