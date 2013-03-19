@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-03-10">
+  <release build="-1" date="2013-03-18">
     <entry dev-build="5" type="enh">A new option "-removeDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</entry>
     <entry dev-build="5" type="enh">A new option to change the alignment of numbers in the result display has been added</entry>
     <entry dev-build="5" type="enh">A new option has been added to use an ORDER BY reflecting the current sort order when reloading table data in the DbExplorer</entry>
