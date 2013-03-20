@@ -35,6 +35,7 @@ import java.util.List;
 
 import javax.swing.CellEditor;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -969,6 +970,8 @@ public class DwPanel
 			if (maxRows)
 			{
 				tab.setIconAt(index, getWarningIcon());
+				JComponent comp = (JComponent)tab.getTabComponentAt(index);
+				WbSwingUtilities.showToolTip(comp, ResourceMgr.getString("MsgRetrieveAbort"));
 			}
 			else
 			{
