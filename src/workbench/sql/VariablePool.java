@@ -24,9 +24,10 @@ package workbench.sql;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,18 +40,18 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.io.File;
-import java.io.IOException;
-
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
+
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -80,6 +81,7 @@ public class VariablePool
 
 	private Pattern validNamePattern = Pattern.compile("[\\w\\.]*");;
 	private Pattern promptPattern;
+	private Pattern variablePattern;
 
 	public static VariablePool getInstance()
 	{
@@ -106,6 +108,9 @@ public class VariablePool
 		{
 			String expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
 			this.promptPattern = Pattern.compile(expr);
+
+			expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&]{0,1}[\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
+			variablePattern = Pattern.compile(expr);
 		}
 	}
 
@@ -175,10 +180,8 @@ public class VariablePool
 		synchronized (this.data)
 		{
 			this.data.clear();
-			Iterator itr = props.entrySet().iterator();
-			while (itr.hasNext())
+			for (Map.Entry<Object, Object> entry : props.entrySet())
 			{
-				Entry entry = (Entry)itr.next();
 				String key = (String)entry.getKey();
 				if (key.startsWith(PROP_PREFIX))
 				{
@@ -296,6 +299,11 @@ public class VariablePool
 		return vardata;
 	}
 
+	public boolean isDefined(String varName)
+	{
+		return StringUtil.isNonBlank(getParameterValue(varName));
+	}
+	
 	public String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
@@ -339,6 +347,14 @@ public class VariablePool
 			replaceVarValue(newSql, var, value);
 		}
 		return newSql.toString();
+	}
+
+	public String removeVariables(String data)
+	{
+		if (data == null) return data;
+		Matcher m = variablePattern.matcher(data);
+		if (m == null) return data;
+		return m.replaceAll("");
 	}
 
 	/**

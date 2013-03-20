@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-03-18">
+    <entry dev-build="6" type="enh">WbInclude now supports conditional inclusion based on variables through -ifDefined and -ifNotDefined</entry>
+    <entry dev-build="6" type="enh">WbVarDef now supports an option -removeUndefined which replaces undefined variables in the assigned value with an empty string</entry>
     <entry dev-build="5" type="enh">A new option "-removeDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</entry>
     <entry dev-build="5" type="enh">A new option to change the alignment of numbers in the result display has been added</entry>
     <entry dev-build="5" type="enh">A new option has been added to use an ORDER BY reflecting the current sort order when reloading table data in the DbExplorer</entry>
@@ -13,6 +15,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="6" type="fix">Prompting for variables of prepared statements did not work any longer</entry>
+    <entry dev-build="6" type="fix">"Save Data As" was not working for results not obtained from the database (e.g. table list, table columns, indexes, ...)</entry>
     <entry dev-build="5" type="fix">For SQL Server, when changing the datatype of a column in the DbExplorer, the generated DDL did not preserve NOT NULL constraints</entry>
     <entry dev-build="5" type="fix">WbCopy refused to run if the current connection was set to read-only instead of checking the target connection.</entry>
     <entry dev-build="4" type="fix">Not all changes in the DataPumper copy settings were reflected in the generated SQL script.</entry>

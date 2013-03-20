@@ -28,16 +28,23 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.VariablePool;
+
 import workbench.util.EncodingUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
 import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -61,6 +68,50 @@ public class WbIncludeTest
 	{
 		util.emptyBaseDirectory();
 		runner = util.createConnectedStatementRunner();
+	}
+
+	@Test
+	public void testConditionalInclude()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = runner.getConnection();
+
+			TestUtil.executeScript(con,
+				"create table include_test (some_name varchar(100));\n" +
+				"commit;");
+
+			String encoding = "ISO-8859-1";
+			File scriptFile = new File(util.getBaseDir(), "test_1.sql");
+
+			Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
+			w.write("insert into include_test (some_name) values ('one');\n");
+			w.close();
+
+			String sql = "WbInclude -ifDefined=foobar -file='" + scriptFile.getAbsolutePath() + "'";
+
+			runner.runStatement(sql);
+			StatementRunnerResult result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Number cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
+			int count = cnt.intValue();
+			assertEquals(0, count);
+
+			VariablePool.getInstance().setParameterValue("foobar", "test");
+			runner.runStatement(sql);
+			result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
+			count = cnt.intValue();
+			assertEquals(1, count);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 	@Test

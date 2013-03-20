@@ -27,15 +27,16 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import workbench.db.WbConnection;
-import workbench.util.ArgumentParser;
-import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.SqlCommand;
-import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.VariablePool;
+
 import workbench.util.*;
 
 /**
@@ -59,6 +60,7 @@ public class WbDefineVar
 		this.cmdLine.addArgument("contentFile", ArgumentType.StringArgument);
 		this.cmdLine.addArgument("variable", ArgumentType.StringArgument);
 		this.cmdLine.addArgument("replaceVars", ArgumentType.BoolArgument);
+		this.cmdLine.addArgument("removeUndefined", ArgumentType.BoolSwitch);
 
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -85,6 +87,9 @@ public class WbDefineVar
 		cmdLine.parse(sql);
 		WbFile file = this.evaluateFileArgument(cmdLine.getValue("file"));
 		WbFile contentFile = this.evaluateFileArgument(cmdLine.getValue("contentFile"));
+
+		boolean removeUndefined = cmdLine.getBoolean("removeUndefined");
+		String varDef = cmdLine.getNonArguments();
 
 		if (file != null && contentFile != null)
 		{
@@ -132,7 +137,7 @@ public class WbDefineVar
 		else
 		{
 			WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
-			tok.setSourceString(sql);
+			tok.setSourceString(varDef);
 			tok.setKeepQuotes(true);
 			String value = null;
 			String var = null;
@@ -181,6 +186,12 @@ public class WbDefineVar
 					// WbStringTokenizer returned any quotes that were used, so
 					// we have to remove them again as they should not be part of the variable value
 					value = StringUtil.trimQuotes(value.trim());
+					if (removeUndefined)
+					{
+						// as the SQL that was passed to this command already has all variables replaced,
+						// we can simply remove anything that looks like a variable in the value.
+						value = VariablePool.getInstance().removeVariables(value);
+					}
 				}
 				setVariable(result, var, value);
 				if (result.isSuccess())

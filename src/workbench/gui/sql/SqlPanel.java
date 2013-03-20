@@ -1598,7 +1598,11 @@ public class SqlPanel
 	private boolean doRollbackOnSetConnection()
 	{
 		if (dbConnection == null) return false;
-		if (!dbConnection.getDbSettings().endTransactionAfterConnect()) return false;
+		DbSettings dbs = dbConnection.getDbSettings();
+		if (dbs != null)
+		{
+			if (!dbs.endTransactionAfterConnect()) return false;
+		}
 		if (dbConnection.getAutoCommit()) return false;
 		if (dbConnection.isBusy()) return false;
 		if (dbConnection.getProfile() == null) return false;

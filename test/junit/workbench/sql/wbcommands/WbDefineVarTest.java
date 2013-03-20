@@ -27,20 +27,24 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
+
 import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -59,6 +63,22 @@ public class WbDefineVarTest
 	public static void tearDown()
 	{
 		VariablePool.getInstance().clear();
+	}
+
+	@Test
+	public void testEmpty()
+		throws Exception
+	{
+		VariablePool.getInstance().clear();
+		WbDefineVar cmd = new WbDefineVar();
+		cmd.execute("WbVardef foo=$[foo]2");
+		String value = VariablePool.getInstance().getParameterValue("foo");
+		assertEquals("$[foo]2", value);
+
+		VariablePool.getInstance().clear();
+		cmd.execute("WbVardef -removeUndefined foo=$[foo]42");
+		value = VariablePool.getInstance().getParameterValue("foo");
+		assertEquals("42", value);
 	}
 
 	@Test

@@ -80,5 +80,12 @@ public enum ArgumentType
 	 */
 	CatalogArgument,
 
+	/**
+	 * A boolean argument which is treated as true if it's present
+	 * <tt>-foo</tt> is equivalent to <tt>-foo=true</tt>
+	 * To set it to false, <tt>-foo=false</tt> is required
+	 */
+	BoolSwitch,
+
 	Deprecated;
 }

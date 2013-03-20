@@ -75,14 +75,19 @@ public abstract class ExportWriter
 	{
 		this.exporter = exp;
 		converter = createConverter();
+
+		WbConnection con = exporter.getConnection();
+
 		// configureConverter() might be called more than once!
 		// To prevent connection dependent information to be read
-		// more than once, call setOriginalConnection() only
-		// here and now
-		converter.setOriginalConnection(this.exporter.getConnection());
+		// more than once, call setOriginalConnection() only here and now
+		converter.setOriginalConnection(con);
 		configureConverter();
 
-		useStreamsForBlobs = this.exporter.getConnection().getDbSettings().getUseStreamsForBlobExport();
+		if (con != null)
+		{
+			useStreamsForBlobs = con.getDbSettings().getUseStreamsForBlobExport();
+		}
 	}
 
 	public void configureConverter()

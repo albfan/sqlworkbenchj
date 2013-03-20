@@ -25,19 +25,21 @@ package workbench.sql;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
 import java.util.Set;
-
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -62,6 +64,23 @@ public class VariablePoolTest
 	public void beforeTest()
 	{
 		VariablePool.getInstance().reset();
+	}
+
+	@Test
+	public void testRemoveVars()
+	{
+		VariablePool pool = VariablePool.getInstance();
+		String result = pool.removeVariables("42$[foo]");
+		assertEquals("42", result);
+
+		result = pool.removeVariables("$[foo]42");
+		assertEquals("42", result);
+
+		result = pool.removeVariables("$[?foo]42");
+		assertEquals("42", result);
+
+		result = pool.removeVariables("4$[&foo]2");
+		assertEquals("42", result);
 	}
 
 	@Test

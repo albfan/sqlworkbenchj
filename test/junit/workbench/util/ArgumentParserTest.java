@@ -26,10 +26,13 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -41,6 +44,49 @@ public class ArgumentParserTest
 	public ArgumentParserTest()
 	{
 		super("ArgumentParserTest");
+	}
+
+	@Test
+	public void testMixNonArgs()
+	{
+		ArgumentParser cmd = new ArgumentParser();
+		cmd.addArgument("someFlag", ArgumentType.BoolSwitch);
+		cmd.parse("-someFlag foo=bar");
+
+		assertTrue(cmd.isArgPresent("someFlag"));
+		assertTrue(cmd.getBoolean("someFlag", false));
+		assertEquals("foo=bar", cmd.getNonArguments());
+
+		cmd.parse("foo=bar");
+		assertEquals("foo=bar", cmd.getNonArguments());
+
+		cmd.parse("foo = ' bar '");
+		assertEquals("foo = ' bar '", cmd.getNonArguments());
+
+	}
+
+	@Test
+	public void testBoolSwitch()
+	{
+		ArgumentParser arg = new ArgumentParser();
+		arg.addArgument("flagone", ArgumentType.BoolSwitch);
+		arg.addArgument("flagtwo", ArgumentType.BoolArgument);
+
+		arg.parse("-flagone -flagtwo=false");
+
+		assertTrue(arg.isArgPresent("flagone"));
+		assertTrue(arg.getBoolean("flagone", false));
+		assertTrue(arg.getBoolean("flagone"));
+		assertFalse(arg.getBoolean("flagtwo", false));
+
+		arg.parse("-flagone=true -flagtwo=true");
+		assertTrue(arg.getBoolean("flagone", false));
+		assertTrue(arg.getBoolean("flagtwo", false));
+
+		arg.parse("-flagone=false -flagtwo=true");
+		assertFalse(arg.getBoolean("flagone", false));
+		assertTrue(arg.getBoolean("flagtwo", false));
+
 	}
 
 	@Test

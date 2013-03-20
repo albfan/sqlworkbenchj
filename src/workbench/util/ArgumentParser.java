@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 
@@ -58,7 +60,7 @@ public class ArgumentParser
 	private Map<String, Collection<ArgumentValue>> allowedValues;
 	private int argCount = 0;
 	private boolean needSwitch = true;
-
+	private String nonArguments;
 
 	public ArgumentParser()
 	{
@@ -193,22 +195,57 @@ public class ArgumentParser
 		parse(entries);
 	}
 
+	public String getNonArguments()
+	{
+		return nonArguments;
+	}
+
+	private void appendNonArg(String value)
+	{
+		if (nonArguments.length() > 0)
+		{
+			nonArguments += " ";
+		}
+		nonArguments += value.trim();
+	}
+
 	protected void parse(List<String> entries)
 	{
+		this.nonArguments = "";
+		Pattern equals = Pattern.compile("\\s+=\\s+");
+
 		try
 		{
-			for (String word : entries)
+			for (String entry : entries)
 			{
-				if (word == null || word.length() == 0) continue;
-				String arg = word.trim();
+				if (StringUtil.isBlank(entry)) continue;
+
+				String arg = entry.trim();
+				Matcher m = equals.matcher(arg);
+				if (m.find())
+				{
+					arg = m.replaceFirst("=");
+				}
+
+				String key = arg;
 				String value = null;
-				int pos = word.indexOf('=');
+				int pos = arg.indexOf('=');
+
+				int whiteSpace = StringUtil.findFirstWhiteSpace(arg);
+				if (pos > -1 && whiteSpace > 0 && whiteSpace < pos)
+				{
+					appendNonArg(arg.substring(whiteSpace));
+					arg = arg.substring(0, whiteSpace);
+					pos = arg.indexOf('=');
+					key = arg;
+				}
+
 				boolean wasQuoted = false;
 
 				if (pos > -1)
 				{
-					arg = word.substring(0, pos).trim();
-					value = pos < word.length() - 1 ? word.substring(pos + 1).trim() : "";
+					key = arg.substring(0, pos).trim();
+					value = pos < arg.length() - 1 ? arg.substring(pos + 1).trim() : "";
 					if (value.length() > 0)
 					{
 						char first = value.charAt(0);
@@ -230,16 +267,16 @@ public class ArgumentParser
 					value = ARG_PRESENT;
 				}
 
-				if (arguments.containsKey(arg))
+				if (arguments.containsKey(key))
 				{
-					ArgumentType type = argTypes.get(arg);
+					ArgumentType type = argTypes.get(key);
 					if (type == ArgumentType.Repeatable)
 					{
-						List<String> list = (List<String>)arguments.get(arg);
+						List<String> list = (List<String>)arguments.get(key);
 						if (list == null)
 						{
 							list = new ArrayList<String>();
-							arguments.put(arg, list);
+							arguments.put(key, list);
 						}
 						if (wasQuoted)
 						{
@@ -253,13 +290,14 @@ public class ArgumentParser
 					}
 					else
 					{
-						arguments.put(arg, value);
+						arguments.put(key, value);
 					}
 					this.argCount ++;
 				}
 				else
 				{
-					this.unknownParameters.add(arg);
+					appendNonArg(entry);
+					this.unknownParameters.add(key);
 				}
 			}
 		}
@@ -424,6 +462,7 @@ public class ArgumentParser
 	 *
 	 * @param key the parameter key
 	 * @param defaultValue the default to be returned if the parameter is not present
+	 *                     (this is ignored for parameters of type BoolSwitch)
 	 *
 	 * @return the value as passed on the commandline
 	 *         the defaultValue if the parameter was not supplied by the user
@@ -432,10 +471,17 @@ public class ArgumentParser
 	 * @see #getBoolean(String)
 	 * @see StringUtil#stringToBool(String)
 	 */
-	public boolean getBoolean(String key,boolean defaultValue)
+	public boolean getBoolean(String key, boolean defaultValue)
 	{
 		String value = this.getValue(key);
-		if (StringUtil.isBlank(value)) return defaultValue;
+		if (StringUtil.isBlank(value))
+		{
+			if (getArgumentType(key) == ArgumentType.BoolSwitch && isArgPresent(key))
+			{
+				return true;
+			}
+			return defaultValue;
+		}
 		return StringUtil.stringToBool(value);
 	}
 

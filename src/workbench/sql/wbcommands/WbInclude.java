@@ -30,11 +30,15 @@ import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+import workbench.sql.VariablePool;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -52,6 +56,8 @@ public class WbInclude
 {
 	public static final String VERB = "WBINCLUDE";
 	public static final String ORA_INCLUDE = "@";
+	public static final String PARAM_IF_DEF = "ifDefined";
+	public static final String PARAM_IF_NOTDEF = "ifNotDefined";
 
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
@@ -69,6 +75,8 @@ public class WbInclude
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/:nl','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_IF_DEF);
+		cmdLine.addArgument(PARAM_IF_NOTDEF);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -126,6 +134,35 @@ public class WbInclude
 				// support a short version of WbInclude that simply specifies the filename
 				file = evaluateFileArgument(clean);
 				checkParms = false;
+			}
+		}
+
+		if (checkParms && cmdLine.isArgPresent(PARAM_IF_DEF) && cmdLine.isArgPresent(PARAM_IF_NOTDEF))
+		{
+			result.addMessage(PARAM_IF_DEF + " and " + PARAM_IF_NOTDEF + " cannot be specified together");
+			result.setFailure();
+			return result;
+		}
+
+		if (checkParms && cmdLine.isArgPresent(PARAM_IF_DEF))
+		{
+			String var = cmdLine.getValue(PARAM_IF_DEF);
+			if (!VariablePool.getInstance().isDefined(var))
+			{
+				result.addMessage("File not included because variable " + var + " is not defined");
+				result.setSuccess();
+				return result;
+			}
+		}
+
+		if (checkParms && cmdLine.isArgPresent(PARAM_IF_NOTDEF))
+		{
+			String var = cmdLine.getValue(PARAM_IF_NOTDEF);
+			if (VariablePool.getInstance().isDefined(var))
+			{
+				result.addMessage("File not included because variable " + var + " is defined");
+				result.setSuccess();
+				return result;
 			}
 		}
 
