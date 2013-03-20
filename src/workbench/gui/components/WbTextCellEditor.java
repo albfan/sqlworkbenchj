@@ -176,14 +176,21 @@ public class WbTextCellEditor
 	{
 		String displayValue = WbDateFormatter.getDisplayValue(value);
 		Component result = super.getTableCellEditorComponent(table, displayValue, isSelected, row, column);
+
 		textField.selectAll();
-		setEditable(!(parentTable != null && parentTable.isReadOnly()));
 		changed = false;
 		isNull = false;
-		DataStoreTableModel model = parentTable.getDataStoreTableModel();
+
+		WbTable tbl = (WbTable)table;
+		setEditable(!tbl.isReadOnly());
+		DataStoreTableModel model = tbl.getDataStoreTableModel();
 		if (model != null)
 		{
 			restoreValue.setEnabled(model.isColumnModified(row, column));
+		}
+		else
+		{
+			restoreValue.setEnabled(false);
 		}
 		return result;
 	}
