@@ -826,4 +826,9 @@ public class GuiSettings
 		}
 	}
 
+	public static boolean getShowMaxRowsTooltip()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.tooltipwarning", true);
+	}
+
 }

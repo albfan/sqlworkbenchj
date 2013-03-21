@@ -67,7 +67,7 @@ public class EditMacroAction
 		MacroDefinition editMacro = macro.createCopy();
 		panel.setMacro(editMacro);
 		ValidatingDialog dialog = new ValidatingDialog(frame, "Edit macro", panel);
-		if (!Settings.getInstance().restoreWindowPosition(dialog, windowKey))
+		if (!Settings.getInstance().restoreWindowSize(dialog, windowKey))
 		{
 			dialog.setSize(650, 500);
 		}
@@ -76,6 +76,7 @@ public class EditMacroAction
 		Settings.getInstance().storeWindowSize(dialog, windowKey);
 		if (!dialog.isCancelled())
 		{
+			panel.applyChanges();
 			editMacro.copyTo(macro);
 		}
 	}

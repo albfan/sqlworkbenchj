@@ -26,7 +26,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -62,7 +61,6 @@ public class ColumnAlterAction
 	private TableIdentifier sourceTable;
 	private WbConnection dbConnection;
 	private Reloadable client;
-	private JButton guiButton;
 
 	public ColumnAlterAction(WbTable defTable)
 	{
@@ -72,11 +70,6 @@ public class ColumnAlterAction
 		this.setIcon("runAlter");
 		this.setEnabled(false);
 		definition.addTableModelListener(this);
-	}
-
-	public void setButton(JButton button)
-	{
-		guiButton = button;
 	}
 
 	public void setReloader(Reloadable reload)
@@ -117,6 +110,10 @@ public class ColumnAlterAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+		if (this.definition == null) return;
+
+		this.definition.stopEditing();
+
 		String alterScript = getScript();
 		if (alterScript == null)
 		{

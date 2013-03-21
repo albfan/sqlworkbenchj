@@ -971,7 +971,10 @@ public class DwPanel
 			{
 				tab.setIconAt(index, getWarningIcon());
 				JComponent comp = (JComponent)tab.getTabComponentAt(index);
-				WbSwingUtilities.showToolTip(comp, ResourceMgr.getString("MsgRetrieveAbort"));
+				if (GuiSettings.getShowMaxRowsTooltip())
+				{
+					WbSwingUtilities.showToolTip(comp, ResourceMgr.getString("MsgRetrieveAbort"));
+				}
 			}
 			else
 			{
