@@ -121,6 +121,7 @@ public class WbExport
 	public static final String ARG_INFINITY_LITERALS = "infinityLiterals";
 	public static final String ARG_MERGE_TYPE = "mergeType";
 	public static final String ARG_NULL_STRING = "nullString";
+	public static final String ARG_TRIM_CHARDATA = "trimCharData";
 
 	// </editor-fold>
 
@@ -204,6 +205,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_INFINITY_LITERALS, ArgumentType.ListArgument);
 		cmdLine.addArgument(ARG_MERGE_TYPE, MergeGenerator.Factory.getSupportedTypes());
 		cmdLine.addArgument(ARG_NULL_STRING);
+		cmdLine.addArgument(ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -377,6 +379,10 @@ public class WbExport
 		}
 
 		this.exporter = new DataExporter(this.currentConnection);
+		if (cmdLine.isArgPresent(ARG_TRIM_CHARDATA))
+		{
+			this.exporter.setTrimCharData(cmdLine.getBoolean(ARG_TRIM_CHARDATA, false));
+		}
 
 		String tables = cmdLine.getValue(ARG_SOURCETABLE);
 		String od = cmdLine.getValue(ARG_OUTPUTDIR);

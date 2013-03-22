@@ -36,6 +36,8 @@ import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
+import workbench.db.datacopy.DataCopier;
+import workbench.db.importer.TableStatements;
 
 import workbench.gui.profiles.ProfileKey;
 
@@ -133,6 +135,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_REMOVE_DEFAULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbExport.ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
 		cmdLine.addArgumentWithValues(PARAM_TABLE_TYPE, DbSettings.getCreateTableTypes());
 	}
 
@@ -411,4 +414,32 @@ public class WbCopy
 		return prof;
 	}
 
+	/**
+	 * Factory method to create a DataCopier instance initialized from the passed commandline arguments.
+	 *
+	 * @param cmdLine  the commandline arguments
+	 * @param db       the DbSettings for thet target connection
+	 * @return an initialized DataCopier
+	 */
+	static DataCopier createDataCopier(ArgumentParser cmdLine, DbSettings db)
+	{
+		DataCopier copier = new DataCopier();
+		copier.setIgnoreColumnDefaults(cmdLine.getBoolean(WbCopy.PARAM_REMOVE_DEFAULTS, false));
+		if (cmdLine.isArgPresent(WbExport.ARG_TRIM_CHARDATA))
+		{
+			copier.setTrimCharData(cmdLine.getBoolean(WbExport.ARG_TRIM_CHARDATA, false));
+		}
+
+		copier.setPerTableStatements(new TableStatements(cmdLine));
+		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
+		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
+		copier.setContinueOnError(cmdLine.getBoolean(CommonArgs.ARG_CONTINUE));
+		copier.setDeleteTarget(CommonArgs.getDeleteType(cmdLine));
+		copier.setUseSavepoint(cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, db.useSavepointForImport()));
+
+		CommonArgs.setProgressInterval(copier, cmdLine);
+		CommonArgs.setCommitAndBatchParams(copier, cmdLine);
+
+		return copier;
+	}
 }

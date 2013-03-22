@@ -37,7 +37,6 @@ import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.datacopy.DropType;
-import workbench.db.importer.TableStatements;
 
 import workbench.storage.RowActionMonitor;
 
@@ -78,23 +77,15 @@ class TableCopy
 			targettable = sourcetable;
 		}
 
-		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
-
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		DropType dropType = CommonArgs.getDropType(cmdLine);
 		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
+		this.copier = WbCopy.createDataCopier(cmdLine, targetConnection.getDbSettings());
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
-
-		this.copier = new DataCopier();
-		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
 		copier.setKeyColumns(keys);
 
-		copier.setPerTableStatements(new TableStatements(cmdLine));
-		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-		copier.setIgnoreColumnDefaults(cmdLine.getBoolean(WbCopy.PARAM_REMOVE_DEFAULTS, false));
-		
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(mode))
 		{
@@ -103,13 +94,7 @@ class TableCopy
 			return false;
 		}
 
-		CommonArgs.setProgressInterval(copier, cmdLine);
 		copier.setRowActionMonitor(monitor);
-		copier.setContinueOnError(cont);
-
-		CommonArgs.setCommitAndBatchParams(copier, cmdLine);
-
-		copier.setDeleteTarget(CommonArgs.getDeleteType(cmdLine));
 
 		String createTableType = null;
 		TableIdentifier targetId = null;
@@ -169,9 +154,6 @@ class TableCopy
 			}
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropType, ignoreDropError, skipTargetCheck);
 		}
-
-		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());
-		copier.setUseSavepoint(useSp);
 
 		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
 		copier.setDoDeleteSync(doSyncDelete);

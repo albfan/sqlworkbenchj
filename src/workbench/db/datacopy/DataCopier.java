@@ -78,6 +78,7 @@ public class DataCopier
 	private MessageBuffer errors;
 	private boolean doSyncDelete;
 	private boolean ignoreColumnDefaultsForCreate;
+	private boolean trimCharData;
 
 	public DataCopier()
 	{
@@ -96,6 +97,11 @@ public class DataCopier
 		importer.clearMessages();
 		messages = new MessageBuffer();
 		errors = new MessageBuffer();
+	}
+
+	public void setTrimCharData(boolean trimCharData)
+	{
+		this.trimCharData = trimCharData;
 	}
 
 	/**
@@ -666,6 +672,7 @@ public class DataCopier
 	private void initQuerySource(String sql)
 	{
 		QueryCopySource source = new QueryCopySource(this.sourceConnection, sql);
+		source.setTrimCharData(trimCharData);
 		this.sourceData = source;
 		this.importer.setProducer(source);
 	}

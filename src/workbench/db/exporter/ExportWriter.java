@@ -32,7 +32,6 @@ import java.util.Set;
 import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -111,7 +110,7 @@ public abstract class ExportWriter
 		converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
 		converter.setMaxLobFilesPerDirectory(exporter.getMaxLobFilesPerDirectory());
 		converter.setInfinityLiterals(exporter.getInfinityLiterals());
-    trimCharData = getTrimCharData();
+    trimCharData = exporter.getTrimCharData();
 	}
 
 	public abstract RowDataConverter createConverter();
@@ -136,21 +135,6 @@ public abstract class ExportWriter
 	public long getNumberOfRecords()
 	{
 		return rows;
-	}
-
-	private boolean getTrimCharData()
-	{
-		boolean trim = false;
-		WbConnection con = exporter.getConnection();
-		if (con != null)
-		{
-			ConnectionProfile profile = con.getProfile();
-			if (profile != null)
-			{
-				trim = profile.getTrimCharData();
-			}
-		}
-		return trim;
 	}
 
 	public void writeExport(DataStore ds, List<ColumnIdentifier> columnsToExport)

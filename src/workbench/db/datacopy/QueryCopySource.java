@@ -68,11 +68,19 @@ public class QueryCopySource
 	private boolean hasWarnings = false;
 	private RowData currentRow;
 
+	private boolean trimCharData;
+
 	public QueryCopySource(WbConnection source, String sql)
 	{
 		this.sourceConnection = source;
 		this.retrieveSql = SqlUtil.trimSemicolon(sql);
 	}
+
+	public void setTrimCharData(boolean trim)
+	{
+		this.trimCharData = trim;
+	}
+
 
 	@Override
 	public boolean hasErrors()
@@ -128,7 +136,7 @@ public class QueryCopySource
 				// more flexible when copying from Oracle
 				// to other systems
 				// That's why I'm reading the result set into a RowData object
-			  currentRow = reader.read(rs, false);
+			  currentRow = reader.read(rs, trimCharData);
 				if (!keepRunning) break;
 
 				try

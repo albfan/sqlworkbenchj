@@ -42,9 +42,7 @@ import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.datacopy.DropType;
 import workbench.db.importer.DataReceiver;
-import workbench.db.importer.DeleteType;
 import workbench.db.importer.TableDependencySorter;
-import workbench.db.importer.TableStatements;
 
 import workbench.storage.RowActionMonitor;
 
@@ -53,6 +51,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
+
 
 /**
  * Handles a WbCopy call for a whole schema.
@@ -71,7 +70,6 @@ class SchemaCopy
 	private DropType dropTable;
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
-	private boolean useSavepoint;
 	private boolean skipTargetCheck;
 
 	private List<TableIdentifier> sourceTables;
@@ -151,7 +149,6 @@ class SchemaCopy
 				this.messages.appendNewLine();
 
 				copier.copyFromTable(sourceConnection, targetConnection, sourceTable, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
-				copier.setUseSavepoint(useSavepoint);
 				totalRows += copier.startCopy();
 
 				this.messages.append(copier.getMessageBuffer());
@@ -339,10 +336,6 @@ class SchemaCopy
 		this.sourceConnection = source;
 		this.targetConnection = target;
 
-		ArgumentParser arguments = cmdLine;
-
-		DeleteType deleteTarget = CommonArgs.getDeleteType(cmdLine);
-		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET, false);
 		if (createTable)
 		{
@@ -357,11 +350,10 @@ class SchemaCopy
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 		skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
-		this.copier = new DataCopier();
-		copier.setIgnoreColumnDefaults(cmdLine.getBoolean(WbCopy.PARAM_REMOVE_DEFAULTS, false));
-
 		this.rowMonitor = monitor;
 
+		this.copier = WbCopy.createDataCopier(cmdLine, target.getDbSettings());
+		
 		cmdLineMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(cmdLineMode))
 		{
@@ -370,21 +362,11 @@ class SchemaCopy
 			return false;
 		}
 
-		copier.setPerTableStatements(new TableStatements(cmdLine));
-		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
-		copier.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
 
-		CommonArgs.setProgressInterval(copier, arguments);
-		CommonArgs.setCommitAndBatchParams(copier, arguments);
-		copier.setContinueOnError(continueOnError);
-		copier.setDeleteTarget(deleteTarget);
 		copier.setRowActionMonitor(rowMonitor);
 		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && (!createTargetTable());
 		mapTables();
-
-		useSavepoint = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, target.getDbSettings().useSavepointForImport());
 
 		if (checkDependencies && !doSyncDelete)
 		{

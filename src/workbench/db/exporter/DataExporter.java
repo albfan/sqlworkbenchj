@@ -51,6 +51,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -157,6 +158,7 @@ public class DataExporter
 	private String nullString;
 
 	private int maxBlobFilesPerDir = -1;
+	private boolean trimCharData;
 
 
 	/**
@@ -195,7 +197,26 @@ public class DataExporter
 		this.jobQueue = new LinkedList<ExportJobEntry>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
+		if (con != null)
+		{
+			ConnectionProfile profile = con.getProfile();
+			if (profile != null)
+			{
+				this.trimCharData = profile.getTrimCharData();
+			}
+		}
 	}
+
+	public boolean getTrimCharData()
+	{
+		return trimCharData;
+	}
+
+	public void setTrimCharData(boolean trim)
+	{
+		this.trimCharData = trim;
+	}
+
 
 	public String getMergeType()
 	{
