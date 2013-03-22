@@ -151,7 +151,6 @@ public class DbObjectChangerTest
 		TableIdentifier oldTable = new TableIdentifier("first_db", null, "bar");
 		TableIdentifier newTable = new TableIdentifier("second_db", null, "bar");
 		String sql = changer.getCatalogChange(oldTable, newTable);
-		System.out.println(sql);
 		assertEquals("RENAME TABLE first_db.bar TO second_db.bar", sql);
 	}
 

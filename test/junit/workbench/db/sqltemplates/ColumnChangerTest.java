@@ -68,7 +68,7 @@ public class ColumnChangerTest
 
 		List<String> sqls = changer.getAlterStatements(table, oldCol, newCol);
 		assertEquals(1, sqls.size());
-		assertEquals("ALTER TABLE PERSON ALTER COLUMN FIRST_NAME VARCHAR(50) NOT NULL", sqls.get(0));
+		assertEquals("ALTER TABLE PERSON\n    ALTER COLUMN FIRST_NAME VARCHAR(50) NOT NULL", sqls.get(0));
 	}
 
 	@Test
@@ -227,7 +227,6 @@ public class ColumnChangerTest
 		newCol.setIsNullable(false);
 
 		String alterScript = changer.getAlterScript(table, oldCol, newCol);
-		System.out.println(alterScript);
 		assertEquals("ALTER TABLE PERSON CHANGE FIRST_NAME FIRSTNAME VARCHAR(20) NOT NULL ;", alterScript.trim());
 	}
 }
