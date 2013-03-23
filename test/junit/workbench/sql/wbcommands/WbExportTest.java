@@ -117,6 +117,58 @@ public class WbExportTest
 	}
 
 	@Test
+	public void testTrimData()
+		throws Exception
+	{
+		WbConnection con = util.getHSQLConnection("trimtest");
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table test (some_data char(20), id integer); \n" +
+				"insert into test values ('42', 1); \n" +
+				"commit;");
+
+			WbFile out = util.getFile("trim.txt");
+
+			exportCmd.setConnection(con);
+			StatementRunnerResult result = exportCmd.execute(
+				"wbexport -sourceTable=test -delimiter='|' -header=false -type=text -file='" + out.getFullPath() + "'");
+
+
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+			assertTrue(out.exists());
+			String content = FileUtil.readFile(out, null);
+			assertNotNull(content);
+			assertEquals("42                  |1", content.trim());
+
+			result = exportCmd.execute(
+				"wbexport -sourceTable=test -delimiter='|' -header=false -trimCharData=true -type=text -file='" + out.getFullPath() + "'");
+
+			msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+			assertTrue(out.exists());
+			content = FileUtil.readFile(out, null);
+			assertNotNull(content);
+			assertEquals("42|1", content.trim());
+
+			con.getProfile().setTrimCharData(true);
+			result = exportCmd.execute(
+				"wbexport -sourceTable=test -delimiter='|' -header=false -type=text -file='" + out.getFullPath() + "'");
+			msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+			assertTrue(out.exists());
+			content = FileUtil.readFile(out, null);
+			assertNotNull(content);
+			assertEquals("42|1", content.trim());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
 	public void testDecimal()
 		throws Exception
 	{

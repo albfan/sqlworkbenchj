@@ -74,6 +74,62 @@ public class WbCopyTest
 
 
 	@Test
+	public void testTrimData()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+
+		util.prepareEnvironment();
+		WbConnection source = util.getHSQLConnection("namedSchemaCopySource");
+		WbConnection target = util.getConnection("namedSchemaCopyTarget");
+		target.getProfile().setTrimCharData(false);
+		source.getProfile().setTrimCharData(false);
+
+		try
+		{
+			TestUtil.executeScript(source,
+				"create table test (some_data char(5), id integer); \n" +
+				"insert into test values ('42', 1); \n" +
+				"commit;");
+
+			TestUtil.executeScript(target,
+				"create table test (some_data varchar(5), id integer); \n" +
+				"commit;");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(source);
+
+			String sql =
+				"wbcopy -sourceTable=test " +
+				"       -sourceProfile='namedSchemaCopySource' " +
+				"       -targetProfile='namedSchemaCopyTarget'";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			String data = (String)TestUtil.getSingleQueryValue(target, "select some_data from test");
+			assertEquals("42   ", data);
+
+			TestUtil.executeScript(target,
+				"delete from test;\n" +
+				"commit;");
+
+			sql =
+				"wbcopy -sourceTable=test -trimCharData=true " +
+				"       -sourceProfile='namedSchemaCopySource' " +
+				"       -targetProfile='namedSchemaCopyTarget'";
+
+			 result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			data = (String)TestUtil.getSingleQueryValue(target, "select some_data from test");
+			assertEquals("42", data);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
 	public void testSchemaCopy()
 		throws Exception
 	{
