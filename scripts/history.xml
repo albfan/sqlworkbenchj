@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-03-18">
+  <release build="-1" date="2013-03-24">
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
     <entry dev-build="6" type="enh">WbInclude now supports conditional inclusion based on variables through -ifDefined, -ifNotDefined and -ifEquals</entry>
     <entry dev-build="6" type="enh">WbVarDef now supports an option -removeUndefined which replaces undefined variables in the assigned value with an empty string</entry>

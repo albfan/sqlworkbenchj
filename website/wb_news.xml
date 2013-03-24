@@ -14,6 +14,23 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (114.6) released</title>
+      <description>        <![CDATA[<p>Changes from build 114.5 to build 114.6</p><p>Enhancements</p><ul>
+<li>A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</li>
+<li>WbInclude now supports conditional inclusion based on variables through -ifDefined, -ifNotDefined and -ifEquals</li>
+<li>WbVarDef now supports an option -removeUndefined which replaces undefined variables in the assigned value with an empty string</li>
+</ul><p>Bug Fixes</p><ul>
+<li>Prompting for variables of prepared statements did not work any longer</li>
+<li>"Save Data As" was not working for results not obtained from the database (e.g. table list, table columns, indexes, ...)</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/dev-download.html</link>
+      <guid>sql-workbench-build-114.6</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 24 Mar 2013 21:21:34 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (114.5) released</title>
       <description>        <![CDATA[<p>Changes from build 114.4 to build 114.5</p><p>Enhancements</p><ul>
 <li>A new option "-removeDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</li>
@@ -23,6 +40,7 @@
 <li>For SQL Server, when changing the datatype of a column in the DbExplorer, the generated DDL did not preserve NOT NULL constraints</li>
 <li>WbCopy refused to run if the current connection was set to read-only instead of checking the target connection.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -41,6 +59,7 @@
 <li>Implemented a workaround for non-JDBC compliant drivers for retrieving the columns of a table</li>
 </ul>
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -57,6 +76,7 @@
 <li>When using WbDataDiff without any schema or table parameters, nothing was compared in Oracle</li>
 <li>When using "Generate Schema Report" from the DbExplorer not all types were included in the output (e.g. Postgres domains)</li>
 </ul>
+
 
 
 ]]>
@@ -77,6 +97,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -89,6 +110,7 @@
       <description>        <![CDATA[<p>Changes from build 114.1 to build 114.2</p><p>Bug Fixes</p><ul>
 <li>Source for views and procedures was not shown for SQL Server for objects not in the "default" schema.</li>
 </ul>
+
 
 
 
@@ -169,6 +191,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -183,6 +206,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>WbCopy did not find the target tables if the two DBMS were using different default casing for table names (foo vs. FOO)</li>
 </ul>
+
 
 
 
@@ -209,6 +233,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -224,6 +249,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When exporting to Excel or OpenOffice, using an extension that identifies a template would result in invalid files.</li>
 </ul>
+
 
 
 
@@ -257,6 +283,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -271,6 +298,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</li>
 </ul>
+
 
 
 
@@ -309,6 +337,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -327,6 +356,7 @@
 <li>For PostgreSQL columns that are defined as arrays weren't shown correctly in the DbExplorer.</li>
 <li>When searching in the result set, "Highlight All" did no longer work.</li>
 </ul>
+
 
 
 
@@ -374,6 +404,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -392,6 +423,7 @@
 <li>Table comments were not shown completely for SQL Server.</li>
 <li>For MySQL if an index only included part of a column, the index definition was now shown correctly.</li>
 </ul>
+
 
 
 
@@ -441,6 +473,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -458,6 +491,7 @@
 <li>Code completion for SQL Server did not work without a schema.</li>
 <li>Exporting of the result data (e.g. copy to clipboard) did not deal properly with duplicate column names</li>
 </ul>
+
 
 
 
@@ -492,6 +526,7 @@
 <li>The "USE" command did not work any longer for SQL Server</li>
 <li>The DbExplorer's table list did not work for SQL Server 2012 using the Microsoft JDBC Driver 4.0 (and possibly previous versions as well)</li>
 </ul>
+
 
 
 
@@ -600,6 +635,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -614,6 +650,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>For WbDataDiff the option -alternateKeys did not work with columns that needed quoting.</li>
 </ul>
+
 
 
 
@@ -668,6 +705,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -681,6 +719,7 @@
 <li>When using fixed width text files, ignoring columns by using -fileColumns and -importColumns together did not work</li>
 <li>Using WbImport with XML files and the -sourceDir argument did not work any longer</li>
 </ul>
+
 
 
 
@@ -739,6 +778,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -751,6 +791,7 @@
       <description>        <![CDATA[<p>Changes from build 112.14 to build 112.15</p><p>Bug Fixes</p><ul>
 <li>-excludeTables (for WbDataDiff and WbSchemaDiff) was not working properly when the tables were specified using -referenceTables (rather than -referenceSchema)</li>
 </ul>
+
 
 
 
@@ -810,6 +851,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -822,6 +864,7 @@
       <description>        <![CDATA[<p>Changes from build 112.12 to build 112.13</p><p>Bug Fixes</p><ul>
 <li>For MySQL tables from a database other than the current one weren't handled properly.</li>
 </ul>
+
 
 
 
@@ -886,6 +929,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -898,6 +942,7 @@
       <description>        <![CDATA[<p>Changes from build 112.10 to build 112.11</p><p>Bug Fixes</p><ul>
 <li>When using alternate primary key columns for WbDataDiff the generated DELETE statements did not use the alternate PK</li>
 </ul>
+
 
 
 
@@ -969,6 +1014,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -984,6 +1030,7 @@
 <li>Displaying object list in the DbExplorer did not work for Vertica if no schema was selected</li>
 <li>Displaying object list in the DbExplorer did not work for Informix if the schema name contained an underscore</li>
 </ul>
+
 
 
 
@@ -1062,6 +1109,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -1108,6 +1156,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-download.html</link>
@@ -1122,6 +1171,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>For SQL Server it was no longer possible to display databases with an underscore in their name in the DbExplorer</li>
 </ul>
+
 
 
 
@@ -1206,6 +1256,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1222,6 +1273,7 @@
 <li>WbCopy's option -dropTable=true was no longer working</li>
 <li>When expanding macros the cursor would not be located at the correct position if the expanded text did not start at the first character of the line</li>
 </ul>
+
 
 
 
@@ -1312,6 +1364,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1324,6 +1377,7 @@
       <description>        <![CDATA[<p>Changes from build 112.0 to build 112.1</p><p>Bug Fixes</p><ul>
 <li>On some (slow) computers the application would hang when trying to display the initial connection selection dialog</li>
 </ul>
+
 
 
 
@@ -1468,6 +1522,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1481,6 +1536,7 @@
 <li>Fixed several problems for DB2 on iSeries</li>
 <li>Autocompletion for tables and columns was not working with MySQL</li>
 </ul>
+
 
 
 
@@ -1577,6 +1633,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1592,6 +1649,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>Date and timestamp columns where not properly formatted when exported to OpenOffice</li>
 </ul>
+
 
 
 
@@ -1694,6 +1752,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1752,6 +1811,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1766,6 +1826,7 @@
 <li>Implemented a workaround for Firebird JDBC driver which does not return function based indexes (and thus they were not shown in the DbExplorer)</li>
 <li>Code completion now honors the setting of the "search_path" in PostgreSQL</li>
 </ul>
+
 
 
 
@@ -1874,6 +1935,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1890,6 +1952,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>A CASE statement with a column alias not using the AS keyword word was not always formatted correctly.</li>
 </ul>
+
 
 
 
@@ -2005,6 +2068,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2017,6 +2081,7 @@
       <description>        <![CDATA[<p>Changes from build 111.6 to build 111.7</p><p>Bug Fixes</p><ul>
 <li>Implemented a workaround for the Vertica JDBC driver to allow running DML statements.</li>
 </ul>
+
 
 
 
@@ -2128,6 +2193,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2189,6 +2255,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2201,6 +2268,7 @@
       <description>        <![CDATA[<p>Changes from build 111.3 to build 111.4</p><p>Bug Fixes</p><ul>
 <li>The ACTION part for foreign key definitions was displayed incorrectly in the generated SQL source and the "References Tab" of DbExplorer</li>
 </ul>
+
 
 
 
@@ -2309,6 +2377,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2321,6 +2390,7 @@
       <description>        <![CDATA[<p>Changes from build 111.1 to build 111.2</p><p>Bug Fixes</p><ul>
 <li>Displaying the source code for functions did not always work properly in PostgreSQL</li>
 </ul>
+
 
 
 
@@ -2385,6 +2455,7 @@
 <li>If more than one statement was selected reformatting the SQL would remove the delimiter</li>
 <li>Implemented a workaround for a bug in old MySQL drivers that would cause an error when processing the result of a SELECT statement</li>
 </ul>
+
 
 
 
@@ -2542,6 +2613,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2558,6 +2630,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>For Oracle unique constraints that were backed by a non-unique index were not displayed.</li>
 </ul>
+
 
 
 
@@ -2666,6 +2739,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2678,6 +2752,7 @@
       <description>        <![CDATA[<p>Changes from build 110.8 to build 110.9</p><p>Bug Fixes</p><ul>
 <li>The dependency display in the DbExplorer did not work with unique constraints in Oracle</li>
 </ul>
+
 
 
 
@@ -2741,6 +2816,7 @@
 <li>The source for XMLTYPE columns was generated incorrectly for Oracle</li>
 <li>The correct source code for unique constraints is now shown in the DbExplorer for Oracle, PostgreSQL, DB2 and SQL Server 2005+</li>
 </ul>
+
 
 
 
@@ -2856,6 +2932,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2877,6 +2954,7 @@
 <li>When selecting * in the schema dropdown of the DbExplorer no triggers where displayed in the trigger panel</li>
 <li>WbSchemaDiff did not compare indexes and check constraints correctly</li>
 </ul>
+
 
 
 
@@ -2986,6 +3064,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -2998,6 +3077,7 @@
       <description>        <![CDATA[<p>Changes from build 110.3 to build 110.4</p><p>Bug Fixes</p><ul>
 <li>Fixed a bug where that caused the code completion to be extremely slow on.</li>
 </ul>
+
 
 
 
@@ -3060,6 +3140,7 @@
 <li>Fixed a problem with schema detection in the DbExplorer when the JDBC driver did not support all metadata calls (e.g. DB2 for host systems)</li>
 <li>In Oracle, compilation errors for a TYPE BODY were not displayed</li>
 </ul>
+
 
 
 
@@ -3170,6 +3251,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3185,6 +3267,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>Retrieving of column comments for queries did not work when the table had an alias</li>
 </ul>
+
 
 
 
@@ -3352,6 +3435,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3414,6 +3498,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3429,6 +3514,7 @@
 <li>The JOIN completion did not always detect the FKs correctly.</li>
 <li>Cancelling an import did not rollback the changes.</li>
 </ul>
+
 
 
 
@@ -3569,6 +3655,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3581,6 +3668,7 @@
       <description>        <![CDATA[<p>Changes from build 109.8 to build 109.9</p><p>Bug Fixes</p><ul>
 <li>JOIN completion did not work</li>
 </ul>
+
 
 
 
@@ -3752,6 +3840,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3767,6 +3856,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</li>
 </ul>
+
 
 
 
@@ -3831,6 +3921,7 @@
 <li>Postgres DOMAINs where not displayed if the DOMAIN was created in a schema that is not in the schema search_path</li>
 <li>A selection of '*' in the DbExplorer's schema selector was not restored if "Remember DbExplorer schema" was enabled for the workspace</li>
 </ul>
+
 
 
 
@@ -3948,6 +4039,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -3965,6 +4057,7 @@
 <li>The generated XML content was not valid for ODS or OpenXML export if the generating SQL contained characters that needed escaping in XML.</li>
 <li>Statements where not closed properly when retrieving Oracle Object type information.</li>
 </ul>
+
 
 
 
@@ -4078,6 +4171,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4097,6 +4191,7 @@
 <li>When using the new lobsPerDirectory parameter for WbExport, the directory numbering did not restart with a new table.</li>
 <li>WbSchemaReport created invalid SQL if column names contained characters that needed a replacement with an XML entity.</li>
 </ul>
+
 
 
 
@@ -4265,6 +4360,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4289,6 +4385,7 @@
 <li>Auto completion of column names did not work for table or column names that contained spaces (and thus needed qutoes)</li>
 <li>The width of the column&amp;s header was not evaluated correctly for all look and feels when optimizing width</li>
 </ul>
+
 
 
 
@@ -4399,6 +4496,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4462,6 +4560,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4477,6 +4576,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The generated WbCopy command in the DataPumper was wrong, if * was selected as the schema</li>
 </ul>
+
 
 
 
@@ -4590,6 +4690,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4656,6 +4757,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4668,6 +4770,7 @@
       <description>        <![CDATA[<p>Changes from build 108.3 to build 108.4</p><p>Enhancements</p><ul>
 <li>WbSchemaDiff now detects renamed foreign keys</li>
 </ul>
+
 
 
 
@@ -4781,6 +4884,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4847,6 +4951,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -4866,6 +4971,7 @@
 <li>The "Object Info" function did not display information about TYPEs (e.g. Oracle, Postgres)</li>
 <li>For Oracle object TYPEs, member variables declared with the data type "NUMBER" where not displayed correctly</li>
 </ul>
+
 
 
 
@@ -5020,6 +5126,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -5033,6 +5140,7 @@
 <li>The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</li>
 <li>A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</li>
 </ul>
+
 
 
 
@@ -5143,6 +5251,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -5157,6 +5266,7 @@
 <li>Defined schema or catalog filters in the connection profile were not displayed correctly (even though they were stored correctly).</li>
 <li>Exporting only some of the columns of a result using "Save As" did not work.</li>
 </ul>
+
 
 
 
@@ -5222,6 +5332,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The current schema and database of the DbExplorer were not always saved correctly in the workspace.</li>
 </ul>
+
 
 
 
@@ -5336,6 +5447,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -5396,6 +5508,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -5409,6 +5522,7 @@
 <li>For results the row numbers can now also be displayed (similar to the line numbers in the editor)</li>
 <li>Oracle object type columns are now displayed correctly. As this is a generic solution to display JDBC "Struct" values, it should work for any driver that returns the correct type.</li>
 </ul>
+
 
 
 
@@ -5524,6 +5638,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -5544,6 +5659,7 @@
 <li>Setting the editor color for datatypes changed the color for the cursor (and vice versa)</li>
 <li>When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL</li>
 </ul>
+
 
 
 
@@ -5658,6 +5774,7 @@
 <li>Formatting UPDATEs with Sub-Select was not working properly</li>
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
+
 
 
 
