@@ -107,6 +107,30 @@ public class WbIncludeTest
 			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			count = cnt.intValue();
 			assertEquals(1, count);
+
+			TestUtil.executeScript(con,
+				"delete from include_test;" +
+				"commit;");
+
+			VariablePool.getInstance().setParameterValue("debug", "false");
+			sql = "WbInclude -ifEquals='debug=true' -file='" + scriptFile.getAbsolutePath() + "'";
+			runner.runStatement(sql);
+			result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
+			count = cnt.intValue();
+			assertEquals(0, count);
+
+			VariablePool.getInstance().setParameterValue("debug", "foobar");
+			sql = "WbInclude -ifEquals='debug=foobar' -file='" + scriptFile.getAbsolutePath() + "'";
+			runner.runStatement(sql);
+			result = runner.getResult();
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
+			count = cnt.intValue();
+			assertEquals(1, count);
 		}
 		finally
 		{
