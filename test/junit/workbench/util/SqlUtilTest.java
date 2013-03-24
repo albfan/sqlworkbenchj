@@ -25,16 +25,19 @@ package workbench.util;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.junit.Test;
-import workbench.db.TableIdentifier;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.ResultInfo;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -846,27 +849,20 @@ public class SqlUtilTest
 
 	@Test
 	public void testDataTypeNames()
+		throws Exception
 	{
-		try
+		Field[] fields = java.sql.Types.class.getDeclaredFields();
+		boolean missing = false;
+		for (int i=0; i < fields.length; i++)
 		{
-			Field[] fields = java.sql.Types.class.getDeclaredFields();
-			boolean missing = false;
-			for (int i=0; i < fields.length; i++)
+			int type = fields[i].getInt(null);
+			if (SqlUtil.getTypeName(type).equals("UNKNOWN"))
 			{
-				int type = fields[i].getInt(null);
-				if (SqlUtil.getTypeName(type).equals("UNKNOWN"))
-				{
-					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
-					missing = true;
-				}
+				System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
+				missing = true;
 			}
-			assertFalse("Not all types mapped!", missing);
 		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-			fail(th.getMessage());
-		}
+		assertFalse("Not all types mapped!", missing);
 	}
 
 	@Test
