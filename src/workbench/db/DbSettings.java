@@ -1558,6 +1558,11 @@ public class DbSettings
 	public boolean getUseGenericExecuteForSelect()
 	{
 		boolean global = Settings.getInstance().getUseGenericExecuteForSelect();
-		return Settings.getInstance().getBoolProperty(prefix + ".select.executegeneric", global);
+		return Settings.getInstance().getBoolProperty(prefix + "select.executegeneric", global);
+	}
+
+	public boolean useCleanSQLForPreparedStatements()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "preparedstaments.cleansql", false);
 	}
 }

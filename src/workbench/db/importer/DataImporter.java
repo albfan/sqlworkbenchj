@@ -33,6 +33,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
@@ -53,6 +54,8 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
+import workbench.db.JdbcUtils;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1309,7 +1312,12 @@ public class DataImporter
 					pstmt.setObject(colIndex, null);
 				}
 			}
-			else if (SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()))
+			else if (SqlUtil.isXMLType(targetSqlType) && (row[i] instanceof String))
+			{
+				SQLXML xml = JdbcUtils.createXML((String)row[i], dbConn);
+				pstmt.setXML(colIndex, xml);
+			}
+			else if (SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()) || SqlUtil.isXMLType(targetSqlType))
 			{
 				Reader in = null;
 				int size = -1;
@@ -1387,10 +1395,18 @@ public class DataImporter
 
 				if (in != null)
 				{
-          // For Oracle, this will only work with Oracle 10g drivers.
-          // Oracle 9i drivers do not implement the setCharacterStream()
-          // and associated methods properly
-					pstmt.setCharacterStream(colIndex, in, size);
+					if (SqlUtil.isXMLType(targetSqlType))
+					{
+						SQLXML xml = JdbcUtils.createXML(in, dbConn);
+						pstmt.setXML(colIndex, xml);
+					}
+          else
+					{
+						// For Oracle, this will only work with Oracle 10g drivers.
+						// Oracle 9i drivers do not implement the setCharacterStream()
+						// and associated methods properly
+						pstmt.setCharacterStream(colIndex, in, size);
+					}
 				}
 			}
 			else if (SqlUtil.isBlobType(targetSqlType) || "BLOB".equals(targetDbmsType))

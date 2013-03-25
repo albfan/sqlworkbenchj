@@ -22,9 +22,15 @@
  */
 package workbench.db;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+
+import workbench.util.FileUtil;
 import workbench.util.VersionNumber;
 import workbench.util.StringUtil;
 
@@ -43,7 +49,7 @@ public class JdbcUtils
 	 *
 	 * @return true if the server's version is at least the one requested or higher.
 	 * @see VersionNumber
-	 * @see WbConnection#getDatabaseVersion() 
+	 * @see WbConnection#getDatabaseVersion()
 	 */
 	public static boolean hasMinimumServerVersion(WbConnection con, String targetVersion)
 	{
@@ -182,6 +188,29 @@ public class JdbcUtils
 			return url.indexOf("selectMethod=cursor") == -1;
 		}
 		return false;
+	}
+
+
+	public static SQLXML createXML(String content, WbConnection con)
+		throws SQLException
+	{
+		SQLXML xml = con.getSqlConnection().createSQLXML();
+		xml.setString(content);
+		return xml;
+	}
+
+	public static SQLXML createXML(Reader in, WbConnection con)
+		throws SQLException
+	{
+		try
+		{
+			String xml = FileUtil.readCharacters(in);
+			return createXML(xml, con);
+		}
+		catch (IOException io)
+		{
+			throw new SQLException("Can not read input data", io);
+		}
 	}
 
 }

@@ -23,6 +23,7 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -61,168 +63,178 @@ public class SetCommand
 	public static final String VERB = "SET";
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String userSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = null;
 
+		String command = null;
+		int commandEnd = -1;
+		String param = null;
 		try
 		{
-			String command = null;
-			int commandEnd = -1;
-			String param = null;
-			try
+			SQLLexer l = new SQLLexer(userSql);
+			SQLToken t = l.getNextToken(false, false); // ignore the verb
+			t = l.getNextToken(false, false);
+			if (t != null)
 			{
-				SQLLexer l = new SQLLexer(aSql);
-				SQLToken t = l.getNextToken(false, false); // ignore the verb
+				command = t.getContents();
+				commandEnd = t.getCharEnd();
+			}
+			t = l.getNextToken(false, false);
+
+			// Ignore a possible equal sign
+			if (t != null && t.getContents().equals("="))
+			{
 				t = l.getNextToken(false, false);
-				if (t != null)
-				{
-					command = t.getContents();
-					commandEnd = t.getCharEnd();
-				}
-				t = l.getNextToken(false, false);
-
-				// Ignore a possible equal sign
-				if (t != null && t.getContents().equals("="))
-				{
-					t = l.getNextToken(false, false);
-				}
-
-				if (t != null)
-				{
-					param = t.getContents();
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
 			}
 
-			boolean execSql = true;
-			boolean pgSchemaChange = false;
-
-			if (command != null)
+			if (t != null)
 			{
-				// those SET commands that have a SQL Workbench equivalent (JDBC API)
-				// will be "executed" by calling the approriate functions.
-				// We don't need to send the SQL to the server in this case
-				// Any other command is sent to the server without modification.
-				if (command.equalsIgnoreCase("autocommit"))
-				{
-					result = this.setAutocommit(currentConnection, param);
-					execSql = false;
-				}
-				else if (currentConnection.getMetadata().isOracle())
-				{
-					Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");
-					List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "");
-					allowed.addAll(options);
-
-					execSql = false;
-					if (command.equalsIgnoreCase("serveroutput"))
-					{
-						result = this.setServeroutput(currentConnection, param);
-					}
-					else if (command.equalsIgnoreCase("feedback"))
-					{
-						result = this.setFeedback(param);
-					}
-					else if (command.equalsIgnoreCase("autotrace"))
-					{
-						result = handleAutotrace(aSql.substring(commandEnd).trim());
-					}
-					else if (allowed.contains(command))
-					{
-						execSql = true;
-					}
-					else
-					{
-						result = new StatementRunnerResult();
-						String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", aSql);
-						result.addMessage(msg);
-						result.setSuccess();
-					}
-				}
-				else if (command.equalsIgnoreCase("maxrows"))
-				{
-					result = new StatementRunnerResult();
-					execSql = false;
-					try
-					{
-						int rows = Integer.parseInt(param);
-						this.runner.setMaxRows(rows);
-						result.setSuccess();
-						result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, rows));
-					}
-					catch (Exception e)
-					{
-						result.setFailure();
-						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
-					}
-				}
-				else if (command.equalsIgnoreCase("timeout"))
-				{
-					result = new StatementRunnerResult();
-					execSql = false;
-					try
-					{
-						int timeout = Integer.parseInt(param);
-						this.runner.setQueryTimeout(timeout);
-						result.setSuccess();
-						result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, timeout));
-					}
-					catch (Exception e)
-					{
-						result.setFailure();
-						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
-					}
-				}
-				else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
-				{
-					pgSchemaChange = true;
-				}
-			}
-
-			if (execSql)
-			{
-				String oldSchema = null;
-				if (pgSchemaChange)
-				{
-					oldSchema = currentConnection.getCurrentSchema();
-				}
-				result = new StatementRunnerResult();
-				aSql = getSqlToExecute(aSql);
-				this.currentStatement = currentConnection.createStatement();
-
-				// Using a generic execute ensures that servers that
-				// can process more than one statement with a single SQL
-				// are treated correctly. E.g. when sending a SET and a SELECT
-				// as one statement for SQL Server
-				boolean hasResult = this.currentStatement.execute(aSql);
-				processMoreResults(aSql, result, hasResult);
-				result.setSuccess();
-
-				if (!pgSchemaChange)
-				{
-					appendSuccessMessage(result);
-				}
-
-				if (pgSchemaChange)
-				{
-					String newSchema = handlePgSchemaChange(oldSchema);
-					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
-				}
+				param = t.getContents();
 			}
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
+			result.setFailure();
+			result.addMessage(ExceptionUtil.getDisplay(e));
+			return result;
+		}
+
+		boolean execSql = true;
+		boolean pgSchemaChange = false;
+
+		if (command != null)
+		{
+			// those SET commands that have a SQL Workbench equivalent (JDBC API)
+			// will be "executed" by calling the approriate functions.
+			// We don't need to send the SQL to the server in this case
+			// Any other command is sent to the server without modification.
+			if (command.equalsIgnoreCase("autocommit"))
+			{
+				result = this.setAutocommit(currentConnection, param);
+				execSql = false;
+			}
+			else if (currentConnection.getMetadata().isOracle())
+			{
+				Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");
+				List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "");
+				allowed.addAll(options);
+
+				execSql = false;
+				if (command.equalsIgnoreCase("serveroutput"))
+				{
+					result = this.setServeroutput(currentConnection, param);
+				}
+				else if (command.equalsIgnoreCase("feedback"))
+				{
+					result = this.setFeedback(param);
+				}
+				else if (command.equalsIgnoreCase("autotrace"))
+				{
+					result = handleAutotrace(userSql.substring(commandEnd).trim());
+				}
+				else if (allowed.contains(command))
+				{
+					execSql = true;
+				}
+				else
+				{
+					result = new StatementRunnerResult();
+					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", execSql);
+					result.addMessage(msg);
+					result.setSuccess();
+				}
+			}
+			else if (command.equalsIgnoreCase("maxrows"))
+			{
+				result = new StatementRunnerResult();
+				execSql = false;
+				try
+				{
+					int rows = Integer.parseInt(param);
+					this.runner.setMaxRows(rows);
+					result.setSuccess();
+					result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, rows));
+				}
+				catch (Exception e)
+				{
+					result.setFailure();
+					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+				}
+			}
+			else if (command.equalsIgnoreCase("timeout"))
+			{
+				result = new StatementRunnerResult();
+				execSql = false;
+				try
+				{
+					int timeout = Integer.parseInt(param);
+					this.runner.setQueryTimeout(timeout);
+					result.setSuccess();
+					result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, timeout));
+				}
+				catch (Exception e)
+				{
+					result.setFailure();
+					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+				}
+			}
+			else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
+			{
+				pgSchemaChange = true;
+			}
+		}
+
+		if (!execSql)
+		{
+			return result;
+		}
+
+		Savepoint sp = null;
+		try
+		{
+			if (currentConnection.getDbSettings().useSavePointForDML())
+			{
+				sp = currentConnection.setSavepoint();
+			}
+
+			String oldSchema = null;
+			if (pgSchemaChange)
+			{
+				oldSchema = currentConnection.getCurrentSchema();
+			}
+			result = new StatementRunnerResult();
+			String toExecute = getSqlToExecute(userSql);
+			this.currentStatement = currentConnection.createStatement();
+
+			// Using a generic execute ensures that DBMS which can process more than one statement with a single SQL
+			// are treated correctly. E.g. when sending a SET and a SELECT as one statement for SQL Server
+			boolean hasResult = this.currentStatement.execute(toExecute);
+			processMoreResults(toExecute, result, hasResult);
+			result.setSuccess();
+
+			if (pgSchemaChange)
+			{
+				String newSchema = handlePgSchemaChange(oldSchema);
+				result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
+			}
+			else
+			{
+				appendSuccessMessage(result);
+			}
+
+			currentConnection.releaseSavepoint(sp);
+		}
+		catch (Exception e)
+		{
+			currentConnection.rollback(sp);
 			result = new StatementRunnerResult();
 			result.clear();
 			if (currentConnection.getMetadata().isOracle())
 			{
-				// for oracle we'll simply ignore the error as the SET command
-				// is a SQL*Plus command
+				// for oracle we'll simply ignore the error as the SET command is a SQL*Plus command
 				result.setSuccess();
 				result.setWarning(true);
 				result.addMessage(ResourceMgr.getString("MsgSetErrorIgnored") + ": " + e.getMessage());
@@ -236,7 +248,6 @@ public class SetCommand
 		}
 		finally
 		{
-			// done() will close the currentStatement
 			this.done();
 		}
 
@@ -249,6 +260,9 @@ public class SetCommand
 		String newSchema = null;
 		try
 		{
+			// getCurrentSchema() will not work if the connection is marked as busy
+			// the StatementRunner will set it to busy when calling execute()
+			// so we need to clear it here.
 			currentConnection.setBusy(false);
 			LogMgr.logDebug("SetCommand.execute()", "Updating current schema");
 			newSchema = currentConnection.getCurrentSchema();
@@ -289,19 +303,19 @@ public class SetCommand
 		return result;
 	}
 
-	private StatementRunnerResult setServeroutput(WbConnection aConnection, String param)
+	private StatementRunnerResult setServeroutput(WbConnection connection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
 		if ("off".equalsIgnoreCase(param))
 		{
-			aConnection.getMetadata().disableOutput();
+			connection.getMetadata().disableOutput();
 			result.addMessageByKey("MsgDbmsOutputDisabled");
 		}
 		else if ("on".equalsIgnoreCase(param))
 		{
-			aConnection.getMetadata().enableOutput();
+			connection.getMetadata().enableOutput();
 			result.addMessageByKey("MsgDbmsOutputEnabled");
 		}
 		else
@@ -312,7 +326,7 @@ public class SetCommand
 		return result;
 	}
 
-	private StatementRunnerResult setAutocommit(WbConnection aConnection, String param)
+	private StatementRunnerResult setAutocommit(WbConnection connection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
@@ -330,13 +344,13 @@ public class SetCommand
 		{
 			if (offValues.contains(param))
 			{
-				aConnection.setAutoCommit(false);
+				connection.setAutoCommit(false);
 				result.addMessageByKey("MsgAutocommitDisabled");
 				result.setSuccess();
 			}
 			else if (onValues.contains(param))
 			{
-				aConnection.setAutoCommit(true);
+				connection.setAutoCommit(true);
 				result.addMessageByKey("MsgAutocommitEnabled");
 				result.setSuccess();
 			}

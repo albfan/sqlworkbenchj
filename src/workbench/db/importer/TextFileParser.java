@@ -708,9 +708,9 @@ public class TextFileParser
 							value = valueModifier.modifyValue(col, value);
 						}
 
-						if (SqlUtil.isCharacterType(colType))
+						if (SqlUtil.isCharacterType(colType) || SqlUtil.isXMLType(colType))
 						{
-							if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType, dbmsType, connection.getDbSettings()))
+							if (clobsAreFilenames && value != null && (SqlUtil.isClobType(colType, dbmsType, connection.getDbSettings()) || SqlUtil.isXMLType(colType) ))
 							{
 								File cfile = new File(value);
 								if (!cfile.isAbsolute())

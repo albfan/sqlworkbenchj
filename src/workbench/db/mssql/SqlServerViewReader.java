@@ -8,6 +8,7 @@ import workbench.db.DefaultViewReader;
 import workbench.db.NoConfigException;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -28,6 +29,13 @@ public class SqlServerViewReader
 	{
 		SpHelpTextRunner runner = new SpHelpTextRunner();
 		CharSequence sql = runner.getSource(connection, viewId.getRawCatalog(), viewId.getRawSchema(), viewId.getRawTableName());
+		if (!StringUtil.endsWith(sql, ';'))
+		{
+			StringBuilder full = new StringBuilder(sql.length() + 1);
+			full.append(sql);
+			full.append(';');
+			return full;
+		}
 		return sql;
 	}
 

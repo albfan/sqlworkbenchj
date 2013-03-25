@@ -61,6 +61,7 @@ public class SpHelpTextRunner
 						source.append(rs.getString(1));
 					}
 				}
+				StringUtil.trimTrailingWhitespace(source);
 				sql = source;
 			}
 		}

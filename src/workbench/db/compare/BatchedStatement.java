@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,6 +163,12 @@ public class BatchedStatement
 		statement.setNull(index, type);
 	}
 
+	public void setXML(int index, SQLXML xml)
+		throws SQLException
+	{
+		statement.setSQLXML(index, xml);
+	}
+
 	/**
 	 * Wrapped PreparedStatement method
 	 */
@@ -262,7 +269,7 @@ public class BatchedStatement
 		{
 			statement.getConnection().commit();
 		}
-		
+
 		statement.clearBatch();
 		closeStreams();
 		return rows;

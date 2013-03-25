@@ -29,13 +29,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
+
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- * A class to analyze the {$blobfile= } and {$clobfile= } 
+ * A class to analyze the {$blobfile= } and {$clobfile= }
  * parameters in a SQL statement. This class supports INSERT and UPDATE
  * statements. To retrieve a blob from the database {@link workbench.sql.wbcommands.WbSelectBlob}
  * has to be used.
@@ -47,31 +52,31 @@ public class LobFileStatement
 	private String sqlToUse;
 	private LobFileParameter[] parameters;
 	private int parameterCount = 0;
-	
+
 	public LobFileStatement(String sql)
 		throws FileNotFoundException
 	{
 		this(sql, null);
 	}
-	
+
 	public LobFileStatement(String sql, final String dir)
 		throws FileNotFoundException
 	{
 
 		LobFileParameterParser p = new LobFileParameterParser(sql);
-		
+
 		this.parameters = p.getParameters();
 		if (this.parameters == null) return;
-		
+
 		parameterCount = this.parameters.length;
 		for (int index=0; index < parameterCount; index++)
 		{
-			if (parameters[index] == null) 
+			if (parameters[index] == null)
 			{
 				String msg = ResourceMgr.getString("ErrUpdateBlobSyntax");
 				throw new IllegalArgumentException(msg);
 			}
-			
+
 			if (parameters[index].getFilename() == null)
 			{
 				String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter");
@@ -84,7 +89,7 @@ public class LobFileStatement
 				f = new File(dir, parameters[index].getFilename());
 				parameters[index].setFilename(f.getAbsolutePath());
 			}
-						
+
 			if (f.isDirectory() || !f.exists())
 			{
 				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", parameters[index].getFilename());
@@ -92,21 +97,23 @@ public class LobFileStatement
 			}
 		}
 		this.sqlToUse = sql.replaceAll(MARKER, " ? ");
-		//LogMgr.logDebug("LobFileStatement.<init>", "Using SQL: " + sqlToUse);
 	}
 
-	public String getPreparedSql() { return sqlToUse; }
-	
+	public String getPreparedSql()
+	{
+		return sqlToUse;
+	}
+
 	public LobFileParameter[] getParameters()
 	{
 		return parameters;
 	}
-	
+
 	public int getParameterCount()
 	{
 		return parameterCount;
 	}
-	
+
 	public boolean containsParameter()
 	{
 		return (parameterCount > 0);
@@ -117,12 +124,24 @@ public class LobFileStatement
 	{
 		if (this.parameters == null) return null;
 		if (this.parameters.length == 0) return null;
+
 		PreparedStatement pstmt = conn.getSqlConnection().prepareStatement(sqlToUse);
+		ParameterMetaData meta = null;
+		try
+		{
+			// Microsoft's JDBC driver does not support getParameterMetaData() for prepared statements!
+			meta = pstmt.getParameterMetaData();
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logDebug("LobFileStatement.prepareStatement()", "Cannot determine parameter meta data", sql);
+		}
+
 		final int buffSize = 64*1024;
 		for (int i = 0; i < parameters.length; i++)
 		{
 			File f = new File(parameters[i].getFilename());
-			int length = (int)f.length(); 
+			int length = (int)f.length();
 			if (parameters[i].isBinary())
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
@@ -137,17 +156,12 @@ public class LobFileStatement
 					pstmt.setBinaryStream(i+1, in, length);
 				}
 			}
-			else if (parameters[i].getEncoding() == null)
-			{
-				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].setDataStream(in);
-				pstmt.setAsciiStream(i+1, in, length);
-			}
 			else
 			{
+				// createBufferedReader can handle null for the encoding
 				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].getEncoding());
-				parameters[i].setDataStream(in);
-				// The value of the length parameter is actually wrong if 
+
+				// The value of the length parameter is actually wrong if
 				// a multi-byte encoding is used. So far only Derby seems to choke
 				// on this, so we need to calculate the file length in characters
 				// which is probably very slow. So this is not turned on by default.
@@ -155,16 +169,27 @@ public class LobFileStatement
 				{
 					length = (int) FileUtil.getCharacterLength(f, parameters[i].getEncoding());
 				}
-				pstmt.setCharacterStream(i+1, in, length);
+
+				if (meta != null && SqlUtil.isXMLType(meta.getParameterType(i+1)))
+				{
+					// createXML closes the stream, so there is no need to keep the reference in the LobFileParameter instance
+					SQLXML xml = JdbcUtils.createXML(in, conn);
+					pstmt.setSQLXML(i+1, xml);
+				}
+				else
+				{
+					parameters[i].setDataStream(in);
+					pstmt.setCharacterStream(i+1, in, length);
+				}
 			}
 		}
 		return pstmt;
 	}
-	
+
 	public void done()
 	{
 		if (this.parameters == null) return;
-		
+
 		for (int i = 0; i < parameters.length; i++)
 		{
 			if (parameters[i] != null)
@@ -173,5 +198,5 @@ public class LobFileStatement
 			}
 		}
 	}
-	
+
 }

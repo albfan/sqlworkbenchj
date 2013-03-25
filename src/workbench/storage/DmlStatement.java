@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -131,9 +132,7 @@ public class DmlStatement
 				}
 				else if (SqlUtil.isXMLType(type) && value instanceof String)
 				{
-					String s = value.toString();
-					SQLXML xml = aConnection.getSqlConnection().createSQLXML();
-					xml.setString(s);
+					SQLXML xml = JdbcUtils.createXML((String)value, aConnection);
 					stmt.setSQLXML(i+ 1, xml);
 				}
 				else if (value instanceof File)
