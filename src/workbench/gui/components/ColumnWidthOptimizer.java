@@ -209,11 +209,11 @@ public class ColumnWidthOptimizer
 		{
 			if (table.isPrimarySortColumn(col))
 			{
-				headerWidth += SortArrowIcon.ARROW_UP.width;
+				headerWidth += SortArrowIcon.ARROW_UP.getIconWidth();
 			}
 			else
 			{
-				headerWidth += SortArrowIcon.SMALL_ARROW_UP.width;
+				headerWidth += SortArrowIcon.SMALL_ARROW_UP.getIconWidth();
 			}
 			headerWidth ++;
 		}

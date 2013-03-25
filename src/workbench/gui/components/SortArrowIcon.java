@@ -35,26 +35,31 @@ import javax.swing.Icon;
 public class SortArrowIcon
 	implements Icon
 {
-	public static final int UP = 1;
-	public static final int DOWN = 2;
-	public static final SortArrowIcon ARROW_UP = new SortArrowIcon(UP);
-	public static final SortArrowIcon ARROW_DOWN = new SortArrowIcon(DOWN);
-	public static final SortArrowIcon SMALL_ARROW_UP = new SortArrowIcon(UP, 6);
-	public static final SortArrowIcon SMALL_ARROW_DOWN = new SortArrowIcon(DOWN, 6);
-	protected int direction;
-	protected int width = 8;
-	protected int height = 8;
+	private enum Direction
+	{
+		UP,
+		DOWN;
+	}
 
-	private SortArrowIcon(int dir, int size)
+	public static final SortArrowIcon ARROW_UP = new SortArrowIcon(Direction.UP);
+	public static final SortArrowIcon ARROW_DOWN = new SortArrowIcon(Direction.DOWN);
+	public static final SortArrowIcon SMALL_ARROW_UP = new SortArrowIcon(Direction.UP, 6);
+	public static final SortArrowIcon SMALL_ARROW_DOWN = new SortArrowIcon(Direction.DOWN, 6);
+
+	private final Direction direction;
+	private final int width;
+	private final int height;
+
+	private SortArrowIcon(Direction dir)
+	{
+		this(dir, 8);
+	}
+
+	private SortArrowIcon(Direction dir, int size)
 	{
 		this.direction = dir;
 		this.width = size;
 		this.height = size;
-	}
-
-	private SortArrowIcon(int dir)
-	{
-		this.direction = dir;
 	}
 
 	@Override
@@ -80,7 +85,8 @@ public class SortArrowIcon
 		int w = width;
 		int h = height;
 		int m = w / 2;
-		if (direction == UP)
+
+		if (direction == Direction.UP)
 		{
 			g.setColor(shade);
 			g.drawLine(x, y, x + w, y);
@@ -88,7 +94,7 @@ public class SortArrowIcon
 			g.setColor(light);
 			g.drawLine(x + w, y, x + m, y + h);
 		}
-		if (direction == DOWN)
+		if (direction == Direction.DOWN)
 		{
 			g.setColor(shade);
 			g.drawLine(x + m, y, x, y + h);

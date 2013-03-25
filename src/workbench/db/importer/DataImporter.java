@@ -562,7 +562,7 @@ public class DataImporter
 	}
 
 	/**
-	 *	Return the numer mode value based on keywords.
+	 *	Return the numeric mode value based on keywords.
 	 *
 	 *	Valid mode definitions are:
 	 *	<ul>
