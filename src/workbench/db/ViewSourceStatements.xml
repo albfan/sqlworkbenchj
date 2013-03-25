@@ -3,6 +3,25 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>MonetDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+SELECT tbl.query
+FROM sys.tables tbl
+  join sys.schemas sch on sch.id = tbl.schema_id
+    </string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl.name</string>
+    </void>
+    <void property="schemaField">
+     <string>sch.name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>NuoDB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

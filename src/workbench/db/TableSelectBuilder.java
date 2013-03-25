@@ -24,8 +24,11 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.log.LogMgr;
+
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 

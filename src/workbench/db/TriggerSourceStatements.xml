@@ -3,6 +3,26 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>MonetDB</string>
+   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+          select "statement"
+          from sys.triggers trg
+            join sys.tables tbl on tbl.id = trg.table_id
+            join sys.schemas sh on sh.id = tbl.schema_id
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>trg.name</string>
+    </void>
+    <void property="schemaField">
+     <string>sh.name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>NuoDB</string>
    <object id="db2_host_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

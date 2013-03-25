@@ -942,7 +942,10 @@ public class DwPanel
 		int index = getTabIndex(tab);
 		if (index == -1) return;
 
-		String timeString  = StringUtil.formatIsoTimestamp(getDataStore().getLoadedAt());
+		DataStore ds = getDataStore();
+		if (ds == null) return;
+
+		String timeString  = StringUtil.formatIsoTimestamp(ds.getLoadedAt());
 
 		String msg = ResourceMgr.getFormattedString("TxtLastExec", timeString);
 		String tip = "<html>";

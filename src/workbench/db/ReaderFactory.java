@@ -22,6 +22,8 @@
  */
 package workbench.db;
 
+import workbench.resource.Settings;
+
 import workbench.db.cubrid.CubridSequenceReader;
 import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySequenceReader;
@@ -39,6 +41,7 @@ import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.InformixSequenceReader;
 import workbench.db.ingres.IngresSequenceReader;
+import workbench.db.monetdb.MonetDbSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerIndexReader;
 import workbench.db.mssql.SqlServerProcedureReader;
@@ -57,7 +60,6 @@ import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresProcedureReader;
 import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.vertica.VerticaSequenceReader;
-import workbench.resource.Settings;
 
 /**
  * A factory to create instances of the various readers specific for a DBMS.
@@ -149,6 +151,10 @@ public class ReaderFactory
 		if (con.getDbId().equals("nuodb"))
 		{
 			return new NuoDBSequenceReader(con);
+		}
+		if (con.getDbId().equals("monetdb"))
+		{
+			return new MonetDbSequenceReader(con);
 		}
 		return null;
 	}

@@ -3,6 +3,41 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>MonetDB</string>
+   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+          select trg.name as trigger_name,
+                 case
+                    when trg.time = 1 then 'AFTER'
+                    when trg.time = 0 then 'BEFORE'
+                    else 'n/a'
+                 end as trigger_type,
+                 case
+                    when trg.event = 0 then 'INSERT'
+                    when trg.event = 1 then 'DELETE'
+                    when trg.event = 2 then 'UPDATE'
+                    else 'n/a'
+                 end as trigger_event,
+                 tbl.name as trigger_table
+          from sys.triggers trg
+            join sys.tables tbl on tbl.id = trg.table_id
+            join sys.schemas sh on tbl.schema_id = sh.id
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl.name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trg.name</string>
+    </void>
+    <void property="schemaField">
+     <string>sh.name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>NuoDB</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
