@@ -221,7 +221,7 @@ public class TableDataDiff
 	{
 		if (columnNames == null)
 		{
-			this.columnsToIgnore = null;
+			this.columnsToIgnore.clear();
 			return;
 		}
 		this.columnsToIgnore = CollectionUtil.caseInsensitiveSet();
