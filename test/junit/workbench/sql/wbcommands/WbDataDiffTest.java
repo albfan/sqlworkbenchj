@@ -28,19 +28,25 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Set;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
+
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+
+import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-import workbench.util.WbFile;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
+import workbench.util.WbFile;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -73,6 +79,77 @@ public class WbDataDiffTest
 		this.target = util.getConnection("dataDiffTarget");
 	}
 
+	@Test
+	public void testExclude()
+		throws Exception
+	{
+		String script = "drop all objects;\n" +
+			"create table some_data (id integer primary key, code varchar(10), firstname varchar(100), lastname varchar(100), foo varchar(20), bar varchar(20));\n" +
+			"commit;\n";
+
+		setupConnections();
+
+		try
+		{
+			util.prepareEnvironment();
+			TestUtil.executeScript(source, script);
+			TestUtil.executeScript(target, script);
+
+			TestUtil.executeScript(source,
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (1, 'ad', 'Arthur', 'Dent', 'foo');\n" +
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (2, 'fp', 'Ford', 'Prefect', 'foobar');\n" +
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (3, 'zb', 'Zaphod', 'Beeblebrox', 'bar');\n " +
+				"commit;\n");
+
+			TestUtil.executeScript(target,
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (100, 'ad', 'Arthur', 'Dent', 'foox');\n" +
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (200, 'fp', 'Ford', 'Prefect', 'foobar');\n" +
+				"insert into some_data (id, code, firstname, lastname, foo) \n" +
+				"values (300, 'zb', 'Zaphod2', 'Beeblebrox', 'bar');\n " +
+				"commit;\n");
+
+			util.emptyBaseDirectory();
+
+			StatementRunner runner = new StatementRunner();
+			runner.setBaseDir(util.getBaseDir());
+
+			String sql = "WbDataDiff " +
+				" -referenceProfile=dataDiffSource " +
+				" -targetProfile=dataDiffTarget " +
+				" -includeDelete=false -excludeRealPK=true " +
+				" -alternateKey='some_data=code' -ignoreColumns='foo,bar' "  +
+				" -singleFile=true " +
+				" -file=sync_ex.sql -encoding=UTF8";
+			runner.runStatement(sql);
+
+			StatementRunnerResult result = runner.getResult();
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+
+			WbFile main = new WbFile(util.getBaseDir(), "sync_ex.sql");
+			assertTrue(main.exists());
+			String diffScript = FileUtil.readFile(main, "UTF-8");
+			ScriptParser parser = new ScriptParser(diffScript);
+			assertEquals(3, parser.getSize()); // 2 updates plus a commit
+
+
+			String upd = SqlUtil.makeCleanSql(parser.getCommand(0), false, false);
+			assertEquals("UPDATE SOME_DATA SET FOO = 'foo' WHERE CODE = 'ad'", upd);
+
+			upd = SqlUtil.makeCleanSql(parser.getCommand(1), false, false);
+			assertEquals("UPDATE SOME_DATA SET FIRSTNAME = 'Zaphod' WHERE CODE = 'zb'", upd);
+			assertTrue(main.delete());
+		}
+		finally
+		{
+			source.disconnect();
+			target.disconnect();
+		}
+	}
 
 	@Test
 	public void testNoPkTables()
