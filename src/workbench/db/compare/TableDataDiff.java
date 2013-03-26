@@ -93,7 +93,7 @@ public class TableDataDiff
 	private boolean cancelExecution;
 	private int progressInterval = 10;
 
-	private Set<String> columnsToIgnore;
+	private Set<String> columnsToIgnore = CollectionUtil.caseInsensitiveSet();
 	private RowDataComparer comparer;
 
 	private MessageBuffer warnings = new MessageBuffer();
@@ -101,7 +101,7 @@ public class TableDataDiff
 	private long currentRowNumber;
 
 	private Map<String, Set<String>> alternateKeys;
-	private Set<String> realPKCols;
+	private Set<String> realPKCols = CollectionUtil.caseInsensitiveSet();
 	private boolean excludeRealPK;
 
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
@@ -291,10 +291,10 @@ public class TableDataDiff
 		this.pkColumns = new ArrayList<ColumnIdentifier>();
 		Set<String> alternatePK = getAlternatePKs(refTable.getTableName());
 
-		if (!alternatePK.isEmpty() && columnsToIgnore == null)
+		if (!alternatePK.isEmpty())
 		{
-			columnsToIgnore = CollectionUtil.caseInsensitiveSet();
-			realPKCols = CollectionUtil.caseInsensitiveSet();
+			columnsToIgnore.clear();
+			realPKCols.clear();
 		}
 
 		for (ColumnIdentifier col : cols)
