@@ -61,6 +61,7 @@ public class DataFormattingOptionsPanel
 		decimalField.setText(Settings.getInstance().getDecimalSymbol());
 		timeFormat.setText(Settings.getInstance().getDefaultTimeFormat());
 		maxDigitsField.setText(Integer.toString(Settings.getInstance().getMaxFractionDigits()));
+		oraDateFix.setSelected(Settings.getInstance().fixOracleDateType());
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class DataFormattingOptionsPanel
 		Settings.getInstance().setDefaultTimestampFormat(this.timestampFormatTextField.getText());
 		Settings.getInstance().setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
 		Settings.getInstance().setDecimalSymbol(this.decimalField.getText());
-		Settings.getInstance().setProperty("workbench.db.oracle.fixdatetype", oraDateFix.isSelected());
+		Settings.getInstance().setFixOracleDateType(oraDateFix.isSelected());
 	}
 
 
@@ -229,7 +230,6 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 79);
     add(timeFormat, gridBagConstraints);
 
-    oraDateFix.setSelected(Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false));
     oraDateFix.setText(ResourceMgr.getString("LblOraDataTS")); // NOI18N
     oraDateFix.setToolTipText(ResourceMgr.getString("d_LblOraDataTS")); // NOI18N
     oraDateFix.setBorder(null);

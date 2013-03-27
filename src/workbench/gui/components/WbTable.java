@@ -1919,7 +1919,7 @@ public class WbTable
 	 */
 	public void scrollToRow(int aRow)
 	{
-		Rectangle rect = this.getCellRect(aRow, 1, true);
+		Rectangle rect = this.getCellRect(aRow, 0, true);
 		this.scrollRectToVisible(rect);
 	}
 

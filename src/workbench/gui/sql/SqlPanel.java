@@ -181,6 +181,7 @@ import workbench.storage.DataStore;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
+import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
@@ -3452,6 +3453,13 @@ public class SqlPanel
 			this.resultTab.setSelectedIndex(0);
 		}
 		data.checkLimitReachedDisplay();
+		String sql = (ds != null ? ds.getGeneratingSql() : "");
+		ScrollAnnotation scroll = new ScrollAnnotation();
+		boolean scrollToEnd = scroll.scrollToEnd(sql);
+		if (scrollToEnd && tbl != null)
+		{
+			tbl.scrollToRow(tbl.getRowCount() - 1);
+		}
 		return newIndex;
 	}
 

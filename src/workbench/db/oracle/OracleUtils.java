@@ -70,7 +70,7 @@ public class OracleUtils
 
 	static boolean getMapDateToTimestamp(WbConnection conn)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false)) return true;
+		if (Settings.getInstance().fixOracleDateType()) return true;
 		// if the mapping hasn't been enabled globally, then check the driver property
 
 		// Newer Oracle drivers support a connection property to automatically

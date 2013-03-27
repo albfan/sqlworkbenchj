@@ -702,6 +702,16 @@ public class Settings
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", false);
 	}
 
+	public boolean fixOracleDateType()
+	{
+		return getBoolProperty("workbench.db.oracle.fixdatetype", false);
+	}
+
+	public void setFixOracleDateType(boolean flag)
+	{
+		setProperty("workbench.db.oracle.fixdatetype", flag);
+	}
+
 	public boolean getConvertOracleTypes()
 	{
 		return getBoolProperty("workbench.db.oracle.types.autoconvert", true);
