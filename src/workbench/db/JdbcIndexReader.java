@@ -187,7 +187,6 @@ public class JdbcIndexReader
 		List<IndexDefinition> unique = getTableIndexList(tbl, true, false);
 		if (CollectionUtil.isEmpty(unique)) return null;
 
-		// try to find one index that was marked as the PK because of to the "pk index has the same name as the table" property
 		// see DbSettings.pkIndexHasTableName()
 		// this will be checked in processIndexResult
 		for (IndexDefinition idx : unique)
@@ -257,7 +256,6 @@ public class JdbcIndexReader
 		}
 		return result;
 	}
-
 
 	protected String getUniqueConstraint(TableIdentifier table, IndexDefinition indexDefinition)
 	{

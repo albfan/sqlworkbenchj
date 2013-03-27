@@ -120,9 +120,45 @@ public class TableSourceBuilder
 		return getTableSource(table, columns, indexInfo, null, false, true);
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore aFkDef, boolean includeDrop, boolean includeFk)
+	private boolean isFKName(String name, DataStore foreignKeys)
 	{
-		CharSequence createSql = getCreateTable(table, columns, indexList, aFkDef, includeDrop, includeFk);
+		if (StringUtil.isEmptyString(name)) return false;
+		for (int row=0; row < foreignKeys.getRowCount(); row ++)
+		{
+			String fkname = foreignKeys.getValueAsString(row, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
+			if (name.equalsIgnoreCase(fkname)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the indexes that should really be re-created.
+	 *
+	 * If the DBMS automatically creates an index when a FK constraint is defined (e.g. MySQL)
+	 * the corresponding CREATE INDEX should not be part of the generated table source.
+	 * 
+	 * @see DbSettings#supportsAutomaticFkIndexes()
+	 */
+	private List<IndexDefinition> getIndexesToCreate(List<IndexDefinition> indexList, DataStore foreignKeys)
+	{
+		if (!dbConnection.getDbSettings().supportsAutomaticFkIndexes()) return indexList;
+		if (CollectionUtil.isEmpty(indexList)) return indexList;
+		if (foreignKeys.getRowCount() == 0) return indexList;
+
+		List<IndexDefinition> result = new ArrayList<IndexDefinition>(indexList.size());
+		for (IndexDefinition idx : indexList)
+		{
+			if (!isFKName(idx.getName(), foreignKeys))
+			{
+				result.add(idx);
+			}
+		}
+		return result;
+	}
+
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkList, boolean includeDrop, boolean includeFk)
+	{
+		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, includeDrop, includeFk);
 
 		StringBuilder result = new StringBuilder(createSql.length() + 50);
 		result.append(createSql);
@@ -133,7 +169,7 @@ public class TableSourceBuilder
 
 		if (!inlineFK && includeFk && dbConnection.getDbSettings().getGenerateTableFKSource())
 		{
-			CharSequence fk = getFkSource(table, aFkDef, false);
+			CharSequence fk = getFkSource(table, fkList, false);
 			if (StringUtil.isNonBlank(fk))
 			{
 				result.append(lineEnding);
@@ -143,7 +179,8 @@ public class TableSourceBuilder
 
 		if (dbConnection.getDbSettings().getGenerateTableIndexSource())
 		{
-			StringBuilder indexSource = getIndexReader().getIndexSource(table, indexList);
+			List<IndexDefinition> toCreate = getIndexesToCreate(indexList, fkList);
+			StringBuilder indexSource = getIndexReader().getIndexSource(table, toCreate);
 			if (StringUtil.isNonBlank(indexSource))
 			{
 				result.append(lineEnding);

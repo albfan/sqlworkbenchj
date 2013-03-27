@@ -1280,7 +1280,7 @@ public class DbSettings
 
 	public boolean useInlineColumnComments()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "colcommentinline" + dbId, false);
+		return Settings.getInstance().getBoolProperty(prefix + "colcommentinline", false);
 	}
 
 	/**
@@ -1564,5 +1564,10 @@ public class DbSettings
 	public boolean useCleanSQLForPreparedStatements()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "preparedstaments.cleansql", false);
+	}
+
+	public boolean supportsAutomaticFkIndexes()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "fk.index.automatic", false);
 	}
 }
