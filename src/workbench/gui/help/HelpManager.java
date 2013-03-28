@@ -262,7 +262,13 @@ public class HelpManager
 			{
 				page += "#" + anchor;
 			}
-			BrowserLauncher.openURL("http://www.sql-workbench.net/manual/" + page);
+			String baseUrl = "http://www.sql-workbench.net/";
+			if (WbManager.getInstance().isDevBuild())
+			{
+				baseUrl += "dev";
+			}
+			baseUrl += "manual/";
+			BrowserLauncher.openURL(baseUrl + page);
 		}
 		catch (Exception ex)
 		{

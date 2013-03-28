@@ -382,7 +382,7 @@ public class JdbcIndexReader
 		sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
 		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectName());
 		idx.append(sql);
-		String options = getIndexOptions(indexDefinition);
+		String options = getIndexOptions(table, indexDefinition);
 		if (options != null)
 		{
 			idx.append(options);
@@ -398,7 +398,7 @@ public class JdbcIndexReader
 	}
 
 	@Override
-	public String getIndexOptions(IndexDefinition type)
+	public String getIndexOptions(TableIdentifier table, IndexDefinition type)
 	{
 		return null;
 	}

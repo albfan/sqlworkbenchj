@@ -139,5 +139,5 @@ public interface IndexReader
 	 * @return additionial option
 	 *
 	 */
-	String getIndexOptions(IndexDefinition index);
+	String getIndexOptions(TableIdentifier table, IndexDefinition index);
 }

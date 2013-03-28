@@ -31,13 +31,16 @@ import java.util.List;
 import java.util.Map;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleIndexPartition;
 import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * Class to retrieve all index definitions for a table and
@@ -56,6 +59,7 @@ public class IndexReporter
 	public static final String TAG_INDEX_EXPR = "index-expression";
 	public static final String TAG_INDEX_COLUMN_LIST = "column-list";
 	public static final String TAG_INDEX_COLUMN_NAME = "column";
+	public static final String TAG_INDEX_OPTION = "index-option";
 
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
@@ -66,14 +70,15 @@ public class IndexReporter
 	{
 		this(tbl, conn, true);
 	}
-	
+
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includeOptions)
 	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
 		if (includeOptions)
 		{
-			retrieveIndexOptions(conn);
+			retrieveOracleOptions(conn);
 		}
+		retrieveSqlServerOptions(tbl, conn);
 	}
 
 	public IndexReporter(IndexDefinition index)
@@ -155,7 +160,26 @@ public class IndexReporter
 		output.append("</index-options>\n");
 	}
 
-	private void retrieveIndexOptions(WbConnection conn)
+	private void retrieveSqlServerOptions(TableIdentifier table, WbConnection conn)
+	{
+		if (!conn.getMetadata().isSqlServer()) return;
+		if (!SqlServerUtil.isSqlServer2005(conn)) return;
+		IndexReader reader = conn.getMetadata().getIndexReader();
+
+		for (IndexDefinition index : indexList)
+		{
+			String included = reader.getIndexOptions(table, index);
+			if (StringUtil.isNonEmpty(included))
+			{
+				String cols = included.replaceAll("(?i)\\s+INCLUDE\\s+", "");
+				ObjectOption option = new ObjectOption("included-columns", cols);
+				option.setWriteFlaxXML(true);
+				addOption(index, option);
+			}
+		}
+	}
+
+	private void retrieveOracleOptions(WbConnection conn)
 	{
 		if (!conn.getMetadata().isOracle()) return;
 
@@ -174,7 +198,7 @@ public class IndexReporter
 		}
 		catch (SQLException sql)
 		{
-			LogMgr.logWarning("IndexReporter.retrieveIndexOptions()", "Could not retrieve index options", sql);
+			LogMgr.logWarning("IndexReporter.retrieveOracleOptions()", "Could not retrieve index options", sql);
 		}
 	}
 

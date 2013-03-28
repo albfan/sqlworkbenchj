@@ -284,7 +284,7 @@ public class OracleIndexReader
 	}
 
 	@Override
-	public String getIndexOptions(IndexDefinition index)
+	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
 		if ("NORMAL/REV".equals(index.getIndexType())) return "\n    REVERSE";
 		return null;

@@ -24,6 +24,11 @@ package workbench.gui.macros;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -71,12 +76,13 @@ import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
  */
 public class MacroPopup
 	extends JDialog
-	implements WindowListener, MouseListener, TreeSelectionListener, MacroChangeListener
+	implements WindowListener, MouseListener, TreeSelectionListener, MacroChangeListener, ActionListener
 {
 	private MacroTree tree;
 	private MainWindow mainWindow;
 	private RunMacroAction runAction;
 	private EditMacroAction editAction;
+	private WbAction copyTextAction;
 	private boolean isClosing;
 	private final String propkey = getClass().getName() + ".expandedgroups";
 	private final String toolkey = "macropopup";
@@ -107,7 +113,10 @@ public class MacroPopup
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
 		editAction = new EditMacroAction();
+		copyTextAction = new WbAction(this, "copy-query-text");
+		copyTextAction.setMenuTextByKey("MnuTxtCopyMacroTxt");
 		tree.addPopupAction(editAction, true);
+		tree.addPopupAction(copyTextAction, false);
 		tree.addPopupActionAtTop(runAction);
 		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
@@ -365,6 +374,24 @@ public class MacroPopup
 		List<String> groups = tree.getExpandedGroupNames();
 		tree.loadMacros();
 		tree.expandGroups(groups);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() == this.copyTextAction)
+		{
+			copyMacroText();
+		}
+	}
+
+	private void copyMacroText()
+	{
+		MacroDefinition macro = tree.getSelectedMacro();
+		if (macro == null) return;
+		String sql = macro.getText();
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(new StringSelection(sql),null);
 	}
 
 }

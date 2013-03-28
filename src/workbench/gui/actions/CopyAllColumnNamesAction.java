@@ -22,6 +22,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -73,7 +74,7 @@ public class CopyAllColumnNamesAction
 				}
 			}
 
-			Clipboard clipboard = client.getToolkit().getSystemClipboard();
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(new StringSelection(columnNames.toString()),null);
 		}
 	}

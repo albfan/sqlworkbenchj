@@ -502,7 +502,7 @@ public class WbExportTest
 //			System.out.println("Statement=" + sql);
 		assertEquals("Not an insert statement", "INSERT", verb);
 		assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01'") > -1);
-		assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16") > -1);
+		assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_timestamp('2007-02-02 14:15:16.000") > -1);
 	}
 
 	@Test

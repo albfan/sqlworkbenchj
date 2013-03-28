@@ -71,6 +71,7 @@ import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.util.ThreadDumper;
 import workbench.util.UpdateCheck;
+import workbench.util.VersionNumber;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
 
@@ -190,6 +191,12 @@ public final class WbManager
 		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgLowMemoryError");
 	}
 
+	public boolean isDevBuild()
+	{
+		VersionNumber buildNumber = ResourceMgr.getBuildNumber();
+		return buildNumber.getMajorVersion() == 999 || buildNumber.getMinorVersion() != -1;
+	}
+	
 	public JFrame getCurrentWindow()
 	{
 		if (this.mainWindows == null) return getCurrentToolWindow();

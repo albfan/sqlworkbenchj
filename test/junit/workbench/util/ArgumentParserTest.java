@@ -47,6 +47,19 @@ public class ArgumentParserTest
 	}
 
 	@Test
+	public void testNewLines()
+	{
+		ArgumentParser cmd = new ArgumentParser();
+		cmd.addArgument("singleFile", ArgumentType.BoolArgument);
+		cmd.addArgument("reference");
+		cmd.addArgument("file");
+		cmd.parse("-reference=one\n-singleFile=true\n-file=foo.log");
+		assertEquals("one", cmd.getValue("reference"));
+		assertEquals("true", cmd.getValue("singleFile"));
+		assertEquals("foo.log", cmd.getValue("file"));
+	}
+
+	@Test
 	public void testMixNonArgs()
 	{
 		ArgumentParser cmd = new ArgumentParser();

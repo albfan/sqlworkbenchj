@@ -158,6 +158,6 @@ public class SqlLiteralFormatterTest
 		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
 		data = new ColumnData(ts, tscol);
 		literal = f.getDefaultLiteral(data);
-		assertEquals("Oracle timestamp incorrect", "to_date('2002-04-02 14:15:16.000', 'YYYY-MM-DD HH24:MI:SS.FFF')", literal);
+		assertEquals("Oracle timestamp incorrect", "to_timestamp('2002-04-02 14:15:16.000', 'YYYY-MM-DD HH24:MI:SS.FF')", literal);
 	}
 }

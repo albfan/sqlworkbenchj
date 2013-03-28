@@ -266,6 +266,10 @@ public class ArgumentParser
 				{
 					value = ARG_PRESENT;
 				}
+				else if (!wasQuoted)
+				{
+					value = value.trim();
+				}
 
 				if (arguments.containsKey(key))
 				{
@@ -515,6 +519,7 @@ public class ArgumentParser
 		}
 		Object value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
+		if (value == null) return null;
 		return (String)value;
 	}
 
