@@ -22,12 +22,21 @@
  */
 package workbench.db.oracle;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Utility methods for Oracle
@@ -38,6 +47,7 @@ public class OracleUtils
 {
 	public static final int BYTE_SEMANTICS = 1;
 	public static final int CHAR_SEMANTICS = 2;
+	public static final String PROP_KEY_TBLSPACE = "oracle_default_tablespace";
 
 	public static final Set<String> STANDARD_TYPES = CollectionUtil.caseInsensitiveSet
 		("INTERVALDS", "INTERVALYM", "TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP WITH TIME ZONE",
@@ -114,5 +124,60 @@ public class OracleUtils
 			value = props.getProperty("remarksReporting", "false");
 		}
 		return "true".equals(value);
+	}
+
+	public static String getDefaultTablespace(WbConnection conn)
+	{
+		readDefaultTableSpace(conn);
+		return conn.getSessionProperty(PROP_KEY_TBLSPACE);
+	}
+
+	public static synchronized void readDefaultTableSpace(final WbConnection conn)
+	{
+		if (conn.getSessionProperty(PROP_KEY_TBLSPACE) != null) return;
+
+		Statement stmt = null;
+		ResultSet rs = null;
+		String sql = "select /* SQLWorkbench */ default_tablespace from user_users";
+
+		try
+		{
+			stmt = conn.createStatementForQuery();
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.readDefaultTableSpace()", "Using sql: " + sql);
+			}
+
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+				conn.setSessionProperty(PROP_KEY_TBLSPACE, rs.getString(1));
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.readDefaultTableSpace()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+	public static boolean checkDefaultTablespace()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.check_default_tablespace", false);
+	}
+
+	public static boolean retrieveTablespaceInfo()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true);
+	}
+
+	public static boolean shouldAppendTablespace(String tablespace, String defaultTablespace)
+	{
+		if (!retrieveTablespaceInfo()) return false;
+		if (StringUtil.isEmptyString(defaultTablespace) && StringUtil.isNonEmpty(tablespace)) return true;
+		return (!tablespace.equals(defaultTablespace));
 	}
 }

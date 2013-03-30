@@ -26,14 +26,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -52,6 +57,8 @@ import workbench.util.StringUtil;
 public class PostgresIndexReader
 	extends JdbcIndexReader
 {
+	private static final String PROP_RETRIEVE_TABLESPACE = "workbench.db.postgres.tablespace.retrieve.index";
+
 	public PostgresIndexReader(DbMetadata meta)
 	{
 		super(meta);
@@ -77,12 +84,18 @@ public class PostgresIndexReader
 		// The full CREATE INDEX Statement is stored in pg_indexes for each
 		// index. So all we need to do, is retrieve the indexdef value
 		// from that table for all indexes defined for this table.
-
 		int count = indexList.size();
-		if (count == 0) return StringUtil.emptyBuffer();
+		String schema = "'" + table.getRawSchema() + "'";
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
-		sql.append("SELECT indexdef FROM pg_indexes WHERE indexname in (");
+		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
+		{
+			sql.append("SELECT indexdef, indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+		}
+		else
+		{
+			sql.append("SELECT indexdef, indexname, null::text as tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+		}
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
@@ -94,7 +107,7 @@ public class PostgresIndexReader
 		{
 			for (IndexDefinition index : indexList)
 			{
-				String idxName = index.getObjectExpression(con);
+				String idxName = con.getMetadata().removeQuotes(index.getName());
 
 				if (index.isPrimaryKeyIndex()) continue;
 
@@ -107,9 +120,11 @@ public class PostgresIndexReader
 				else
 				{
 					if (indexCount > 0) sql.append(',');
-					sql.append('\'');
+					sql.append('(');
+					sql.append(schema);
+					sql.append(",'");
 					sql.append(idxName);
-					sql.append('\'');
+					sql.append("')");
 					indexCount++;
 				}
 			}
@@ -129,6 +144,16 @@ public class PostgresIndexReader
 				while (rs.next())
 				{
 					source.append(rs.getString(1));
+
+					String idxName = rs.getString(2);
+					String tblSpace = rs.getString(3);
+					if (StringUtil.isNonEmpty(tblSpace))
+					{
+						IndexDefinition idx = findIndexByName(indexList, idxName);
+						idx.setTablespace(tblSpace);
+						source.append(" TABLESPACE ");
+						source.append(tblSpace);
+					}
 					source.append(';');
 					source.append(nl);
 				}
@@ -149,6 +174,95 @@ public class PostgresIndexReader
 		if (source.length() > 0) source.append(nl);
 
 		return source;
+	}
+
+	/**
+	 * Return the SQL to re-create any (non default) options for the index.
+	 *
+	 * The returned String has to be structured so that it can be appended
+	 * after the DBMS specific basic CREATE INDEX statement.
+	 *
+	 * @return null if not options are applicable
+	 *         a SQL "fragment" to be appended at the end of the create index statement if an option is available.
+	 */
+	@Override
+	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
+	{
+		if (index != null && StringUtil.isNonEmpty(index.getTablespace()))
+		{
+			return "\n   TABLESPACE " + index.getTablespace();
+		}
+		return null;
+	}
+
+	@Override
+	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
+	{
+		if (!Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true)) return;
+
+		if (CollectionUtil.isEmpty(indexDefs)) return;
+
+		WbConnection con = this.metaData.getWbConnection();
+		if (!JdbcUtils.hasMinimumServerVersion(con, "8.0")) return;
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		int count = indexDefs.size();
+
+		StringBuilder sql = new StringBuilder(50 + count * 20);
+		sql.append("SELECT indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+		String schema = "'" + tbl.getRawSchema() + "'";
+
+		int indexCount = 0;
+		for (IndexDefinition index : indexDefs)
+		{
+			String idxName = con.getMetadata().removeQuotes(index.getName());
+
+			if (indexCount > 0) sql.append(',');
+			sql.append('(');
+			sql.append(schema);
+			sql.append(",'");
+			sql.append(idxName);
+			sql.append("')");
+			indexCount++;
+		}
+		sql.append(')');
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresIndexReader.processIndexList()", "Using sql: " + sql.toString());
+		}
+
+		Savepoint sp = null;
+
+		try
+		{
+			sp = con.setSavepoint();
+			stmt = con.createStatementForQuery();
+
+			rs = stmt.executeQuery(sql.toString());
+			while (rs.next())
+			{
+				String idxName = rs.getString(1);
+				String tblSpace = rs.getString(2);
+				if (StringUtil.isNonEmpty(tblSpace))
+				{
+					IndexDefinition idx = findIndexByName(indexDefs, idxName);
+					idx.setTablespace(tblSpace);
+				}
+			}
+			con.releaseSavepoint(sp);
+		}
+		catch (Exception e)
+		{
+			con.rollback(sp);
+			LogMgr.logError("PostgresIndexReader.processIndexList()", "Error retrieving source", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
 	}
 
 	@Override
@@ -178,12 +292,13 @@ public class PostgresIndexReader
 		String result = null;
 
 		StringBuilder sql = new StringBuilder(100);
-		sql.append("SELECT indexdef FROM pg_indexes WHERE indexname = ?");
-		boolean hasSchema = false;
-		if (indexDefinition.getSchema() != null)
+		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
 		{
-			sql.append(" AND schemaname = ? ");
-			hasSchema = true;
+			sql.append("SELECT indexdef, tablespace FROM pg_indexes WHERE indexname = ? and schemaname = ? ");
+		}
+		else
+		{
+			sql.append("SELECT indexdef, null::text as tablespace FROM pg_indexes WHERE indexname = ? and schemaname = ? ");
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -197,14 +312,13 @@ public class PostgresIndexReader
 			sp = con.setSavepoint();
 			stmt = con.getSqlConnection().prepareStatement(sql.toString());
 			stmt.setString(1, indexDefinition.getName());
-			if (hasSchema)
-			{
-				stmt.setString(2, indexDefinition.getSchema());
-			}
+			stmt.setString(2, table.getSchema());
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
 				result = rs.getString(1);
+				String tblSpace = rs.getString(2);
+				indexDefinition.setTablespace(tblSpace);
 			}
 			con.releaseSavepoint(sp);
 		}

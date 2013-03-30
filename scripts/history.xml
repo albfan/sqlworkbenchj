@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-03-24">
+    <entry dev-build="7" type="enh">For Oracle and Postgres tablespace information is now shown for indexes</entry>
+    <entry dev-build="7" type="enh">For SQL Server "included" columns are now displayed in the generated SQL code for a CREATE INDEX statement.</entry>
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
     <entry dev-build="6" type="enh">WbInclude now supports conditional inclusion based on variables through -ifDefined, -ifNotDefined and -ifEquals</entry>
     <entry dev-build="6" type="enh">WbVarDef now supports an option -removeUndefined which replaces undefined variables in the assigned value with an empty string</entry>
@@ -16,6 +18,9 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="7" type="fix">For Postgres additional indexes defined on the PK columns of a table where not included in the generated table source</entry>
+    <entry dev-build="7" type="fix">WbImport did not work properly with XML columns.</entry>
+    <entry dev-build="7" type="fix">The DbExplorer was not working properly with SQL Server 2000 (and older)</entry>
     <entry dev-build="7" type="fix">Using -ignoreColumns together with -alternateKey and -excludeRealPK with WbDataDiff did not work</entry>
     <entry dev-build="6" type="fix">Prompting for variables of prepared statements did not work any longer</entry>
     <entry dev-build="6" type="fix">"Save Data As" was not working for results not obtained from the database (e.g. table list, table columns, indexes, ...)</entry>

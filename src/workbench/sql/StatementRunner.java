@@ -190,8 +190,7 @@ public class StatementRunner
 	}
 
 	/**
-	 * For testing purposes, to that non-default commands can be added
-	 * during a JUnit test
+	 * For testing purposes only, so that non-default commands can be added during a JUnit test.
 	 */
 	public void addCommand(SqlCommand command)
 	{

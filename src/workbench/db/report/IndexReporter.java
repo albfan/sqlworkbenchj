@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
@@ -36,11 +39,13 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleIndexPartition;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+
+import static workbench.db.report.ReportTable.TAG_TABLESPACE;
 
 /**
  * Class to retrieve all index definitions for a table and
@@ -134,6 +139,10 @@ public class IndexReporter
 					result.append("/>\n");
 				}
 				tagWriter.appendCloseTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
+			}
+			if (StringUtil.isNonBlank(index.getTablespace()))
+			{
+				tagWriter.appendTag(result, defIndent, TAG_TABLESPACE, index.getTablespace(), false);
 			}
 			writeDbmsOptions(result, defIndent, index);
 			tagWriter.appendCloseTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);

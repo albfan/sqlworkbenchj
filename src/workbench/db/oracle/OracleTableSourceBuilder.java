@@ -25,7 +25,6 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -54,39 +53,9 @@ public class OracleTableSourceBuilder
 	public OracleTableSourceBuilder(WbConnection con)
 	{
 		super(con);
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.check_default_tablespace", false))
+		if (OracleUtils.checkDefaultTablespace())
 		{
-			readDefaultTableSpace();
-		}
-	}
-
-	private void readDefaultTableSpace()
-	{
-		Statement stmt = null;
-		ResultSet rs = null;
-		String sql = "select /* SQLWorkbench */ default_tablespace from user_users";
-
-		try
-		{
-			stmt = this.dbConnection.createStatementForQuery();
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readDefaultTableSpace()", "Using sql: " + sql);
-			}
-
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				this.defaultTablespace = rs.getString(1);
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleTableSourceBuilder.readDefaultTableSpace()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
+			defaultTablespace = OracleUtils.getDefaultTablespace(con);
 		}
 	}
 
@@ -121,18 +90,15 @@ public class OracleTableSourceBuilder
 			result.append(table.getTableConfigOptions());
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true))
+		String tablespace = table.getTablespace();
+		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace))
 		{
-			String tablespace = table.getTablespace();
-			if (StringUtil.isNonEmpty(tablespace) && !tablespace.equals(defaultTablespace))
+			if (result.length() > 0)
 			{
-				if (result.length() > 0)
-				{
-					result.append('\n');
-				}
-				result.append("TABLESPACE ");
-				result.append(tablespace);
+				result.append('\n');
 			}
+			result.append("TABLESPACE ");
+			result.append(tablespace);
 		}
 
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))

@@ -33,7 +33,9 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import workbench.interfaces.DbExecutionListener;
 import workbench.log.LogMgr;
@@ -101,6 +103,7 @@ public class WbConnection
 
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
+	private Map<String, String> sessionProps = new HashMap<String, String>();
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
@@ -130,6 +133,16 @@ public class WbConnection
 			}
 			removeNewLines = db.removeNewLinesInSQL();
 		}
+	}
+
+	public void setSessionProperty(String key, String value)
+	{
+		sessionProps.put(key, value);
+	}
+
+	public String getSessionProperty(String key)
+	{
+		return sessionProps.get(key);
 	}
 
 	public TransactionChecker getTransactionChecker()
@@ -715,6 +728,7 @@ public class WbConnection
 	 */
 	public void disconnect()
 	{
+		sessionProps.clear();
 		ConnectionMgr.getInstance().disconnect(this);
 		fireConnectionStateChanged(PROP_CONNECTION_STATE, CONNECTION_OPEN, CONNECTION_CLOSED);
 	}
@@ -736,6 +750,7 @@ public class WbConnection
 	 */
 	public void shutdown()
 	{
+		sessionProps.clear();
 		shutdown(true);
 	}
 

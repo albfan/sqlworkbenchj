@@ -28,9 +28,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.*;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -51,18 +54,24 @@ import workbench.util.StringUtil;
 public class OracleIndexReader
 	extends JdbcIndexReader
 {
+	private static final String PROP_USE_JDBC_FOR_PK_INFO = "workbench.db.oracle.getprimarykeyindex.usejdbc";
+	private static final String PROP_USE_JDBC_FOR_INDEXLIST = "workbench.db.oracle.indexlist.usejdbc";
+
 	private PreparedStatement indexStatement;
 	private PreparedStatement pkStament;
-	private boolean useJDBCRetrieval;
+	private String defaultTablespace;
 
 	public OracleIndexReader(DbMetadata meta)
 	{
 		super(meta);
-		useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.usejdbc", false);
-		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
-		if (!useJDBC)
+		boolean useJdbcForPk = Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_PK_INFO, false);
+		if (!useJdbcForPk)
 		{
 			pkIndexNameColumn = "PK_INDEX_NAME";
+		}
+		if (OracleUtils.checkDefaultTablespace())
+		{
+			defaultTablespace = OracleUtils.getDefaultTablespace(meta.getWbConnection());
 		}
 	}
 
@@ -76,12 +85,11 @@ public class OracleIndexReader
 	/**
 	 * Replacement for the DatabaseMetaData.getIndexInfo() method.
 	 * <br/>
-	 * Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
-	 * requested which slows down the retrieval of index information.
-	 * (and is not necessary at all for SQL Workbench, as  the cardinality field isn't displayed anyway)
+	 * Oracle's JDBC driver does an <tt>ANALYZE INDEX</tt> each time an getIndexInfo() is called which slows down the
+	 * retrieval of index information (and is not necessary at all for SQL Workbench, because the cardinality field isn't
+	 * displayed anyway)
 	 * <br/>
-	 * Additionally, function based indexes are not returned correctly by the Oracle driver
-	 * which is also fixed with this method.
+	 * Additionally, function based indexes are not returned correctly by the Oracle driver which is also fixed with this method.
 	 * <br/>
 	 * When the workbench property <tt>workbench.db.oracle.indexlist.usejdbc</tt> is set to <tt>true</tt>
 	 * the original driver API will be used.
@@ -90,7 +98,7 @@ public class OracleIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
-		if (useJDBCRetrieval)
+		if (Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_INDEXLIST, false))
 		{
 			return super.getIndexInfo(table, unique);
 		}
@@ -106,13 +114,15 @@ public class OracleIndexReader
 			indexInfoProcessed();
 		}
 
+		// Views can't have indexes (only MATERIALIZED VIEWs)
 		if ("VIEW".equals(table.getType())) return null;
 
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
 
 		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT null as table_cat, \n" +
+		sql.append(
+			"SELECT null as table_cat, \n" +
 			"       i.owner as table_schem, \n" +
 			"       i.table_name, \n" +
 			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, \n" +
@@ -124,13 +134,14 @@ public class OracleIndexReader
 			"       decode(c.descend, 'ASC', 'A', 'DESC', 'D', null) as asc_or_desc, \n" +
 			"       i.distinct_keys as cardinality, \n" +
 			"       i.leaf_blocks as pages, \n" +
-			"       null as filter_condition \n" +
+			"       null as filter_condition, \n" +
+			"       i.tablespace_name \n" +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c " +
-			"       ON i.index_name = c.index_name " +
-			"          AND i.table_owner = c.table_owner " +
-			"          AND i.table_name = c.table_name " +
-			"          AND i.owner = c.index_owner \n" +
+			"    ON i.index_name = c.index_name " +
+			"   AND i.table_owner = c.table_owner " +
+			"   AND i.table_name = c.table_name " +
+			"   AND i.owner = c.index_owner \n" +
 			"WHERE i.table_name = ? \n");
 
 		if (tbl.getSchema() != null)
@@ -174,6 +185,15 @@ public class OracleIndexReader
 		if (table.getSchema() != null) this.indexStatement.setString(2, table.getSchema());
 		ResultSet rs = this.indexStatement.executeQuery();
 		return rs;
+	}
+
+	@Override
+	protected void processIndexResultRow(ResultSet rs, IndexDefinition index, TableIdentifier tbl)
+		throws SQLException
+	{
+		if (Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_INDEXLIST, false)) return;
+		String tblSpace = rs.getString("TABLESPACE_NAME");
+		index.setTablespace(tblSpace);
 	}
 
 	public IndexDefinition getIndexDefinition(TableIdentifier table, String indexName, String indexSchema)
@@ -286,8 +306,25 @@ public class OracleIndexReader
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
-		if ("NORMAL/REV".equals(index.getIndexType())) return "\n    REVERSE";
-		return null;
+		String option = null;
+		if (OracleUtils.shouldAppendTablespace(index.getTablespace(), defaultTablespace))
+		{
+			option = "\n    TABLESPACE " + index.getTablespace();
+		}
+
+		if ("NORMAL/REV".equals(index.getIndexType()))
+		{
+			String reverse = "\n    REVERSE";
+			if (option == null)
+			{
+				option = reverse;
+			}
+			else
+			{
+				option += reverse;
+			}
+		}
+		return option;
 	}
 
 	/**
@@ -426,6 +463,8 @@ public class OracleIndexReader
 	 * But in Oracle one can create a PK that is supported by an existing index and thus those two names
 	 * do not need to be identical.
 	 *
+	 * Therefor the usage of getPrimaryKey() is disabled by default and replaced with our own statement.
+	 *
 	 * @param catalog  the table's catalog (ignored)
 	 * @param schema   the table's schema
 	 * @param table    the tablename
@@ -436,9 +475,9 @@ public class OracleIndexReader
 	protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String table)
 		throws SQLException
 	{
-		boolean useJDBC = Settings.getInstance().getBoolProperty("workbench.db.oracle.getprimarykeyindex.usejdbc", false);
+		boolean useJdbcForPk = Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_PK_INFO, false);
 
-		if (useJDBC)
+		if (useJdbcForPk)
 		{
 			return super.getPrimaryKeyInfo(catalog, schema, table);
 		}

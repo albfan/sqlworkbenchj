@@ -111,7 +111,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
 			return null;
 		}
 		finally

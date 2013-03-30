@@ -44,6 +44,8 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import static workbench.db.IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE;
+
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
  * to get the index information.
@@ -397,6 +399,15 @@ public class JdbcIndexReader
 		return idx;
 	}
 
+	/**
+	 * Return the SQL to re-create any (non default) options for the index.
+	 *
+	 * The returned String has to be structured so that it can be appended
+	 * after the DBMS specific basic CREATE INDEX statement
+	 *
+	 * @return null if not options are applicable
+	 *         a SQL "fragment" to be appended at the end of the create index statement if an option is available.
+	 */
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition type)
 	{
@@ -479,9 +490,23 @@ public class JdbcIndexReader
 	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.OTHER, Types.VARCHAR};
-		final int sizes[] =   {30, 7, 6, 40, 10};
+		boolean supportsTableSpaces = this.metaData.getDbSettings().supportsTableSpaceForIndexes();
+		String[] cols;
+		final int types[];
+		final int sizes[];
+
+		if (supportsTableSpaces)
+		{
+			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE", "TABLESPACE"};
+			types= new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes= new int[] {30, 7, 6, 40, 10, 15};
+		}
+		else
+		{
+			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[]  {30, 7, 6, 40, 10};
+		}
 		DataStore idxData = new DataStore(cols, types, sizes);
 		if (table == null) return idxData;
 		Collection<IndexDefinition> indexes = getTableIndexList(table);
@@ -493,6 +518,10 @@ public class JdbcIndexReader
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
+			if (supportsTableSpaces)
+			{
+				idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
+			}
 			idxData.getRow(row).setUserObject(idx);
 		}
 		idxData.sortByColumn(0, true);
@@ -622,15 +651,45 @@ public class JdbcIndexReader
 
 		Collection<IndexDefinition> indexes = defs.values();
 
-		for (IndexDefinition index : indexes)
+		// first try to find the PK index by only checking the PkDefinition
+		boolean pkFound = false;
+
+		// Because isPkIndex() will check if the PK columns are part of the index
+		// expression, that should only be called if the real PK index cannot be identified
+		// through the passed PkDefinition.
+		// Otherwise additional indexes defined on the PK columns will be reported as PK index
+		// as well, and will be left out of the table's source
+		// only one index should be marked as the PK index!
+		if (pkIndex != null)
 		{
-			if (!index.isPrimaryKeyIndex())
+			for (IndexDefinition index : indexes)
 			{
-				boolean isPK = isPkIndex(index, pkIndex);
-				index.setPrimaryKeyIndex(isPK);
-				if (isPK && pkIndex != null)
+				if (!index.isPrimaryKeyIndex())
 				{
-					pkIndex.setIndexType(index.getIndexType());
+					boolean isPK = index.getName().equals(pkIndex.getPkIndexName());
+					if (isPK)
+					{
+						index.setPrimaryKeyIndex(true);
+						pkFound = true;
+						break; // don't look any further. There can only be one PK index
+					}
+				}
+			}
+		}
+
+		if (!pkFound)
+		{
+			for (IndexDefinition index : indexes)
+			{
+				if (!index.isPrimaryKeyIndex())
+				{
+					boolean isPK = isPkIndex(index, pkIndex);
+					index.setPrimaryKeyIndex(isPK);
+					if (isPK && pkIndex != null)
+					{
+						pkIndex.setIndexType(index.getIndexType());
+					}
+					if (isPK) break;
 				}
 			}
 		}
@@ -645,6 +704,7 @@ public class JdbcIndexReader
 		if (toCheck.getName().equals(pkIndex.getPkIndexName())) return true;
 
 		// not the same name, check if they have the same definition (same columns at the same position)
+		// note that this test will yield false positives for DBMS that allow multiple identical index expressions
 		List<IndexColumn> checkCols = toCheck.getColumns();
 		List<String> pkCols = pkIndex.getColumns();
 		int count = pkCols.size();
@@ -655,4 +715,16 @@ public class JdbcIndexReader
 		}
 		return true;
 	}
+
+	protected IndexDefinition findIndexByName(Collection<IndexDefinition> indexList, String toFind)
+	{
+		if (StringUtil.isEmptyString(toFind)) return null;
+		if (CollectionUtil.isEmpty(indexList)) return null;
+		for (IndexDefinition index : indexList)
+		{
+			if (index != null && index.getName().equalsIgnoreCase(toFind)) return index;
+		}
+		return null;
+	}
+
 }

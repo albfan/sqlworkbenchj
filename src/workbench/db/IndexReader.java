@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+
 import workbench.storage.DataStore;
 
 /**
@@ -44,6 +45,7 @@ public interface IndexReader
 	int COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG = 2;
 	int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
 	int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
+	int COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE = 5;
 
 	/**
 	 * Replacement for the JDBC's getIndexInfo method.
