@@ -85,7 +85,7 @@ public class PostgresIndexReader
 		// index. So all we need to do, is retrieve the indexdef value
 		// from that table for all indexes defined for this table.
 		int count = indexList.size();
-		String schema = "'" + table.getRawSchema() + "'";
+		String schema = "quote_ident('" + table.getRawSchema() + "')";
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
 		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
@@ -122,9 +122,9 @@ public class PostgresIndexReader
 					if (indexCount > 0) sql.append(',');
 					sql.append('(');
 					sql.append(schema);
-					sql.append(",'");
+					sql.append(",quote_ident('");
 					sql.append(idxName);
-					sql.append("')");
+					sql.append("'))");
 					indexCount++;
 				}
 			}
@@ -196,6 +196,26 @@ public class PostgresIndexReader
 	}
 
 	@Override
+	public boolean supportsTableSpaces()
+	{
+		// only make this dependent on the property to actually retrieve the tablespace, because
+		// we know that Postgres supports table spaces
+		return Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true);
+	}
+
+	/**
+	 * Enhance the retrieved indexes with additional information.
+	 *
+	 * Currently this only reads the tablespace for each index.
+	 * Reading the tablespace information can be turned off using the config setting {@link PROP_RETRIEVE_TABLESPACE}
+	 *
+	 * @param tbl        the table for which the indexes were retrieved
+	 * @param indexDefs  the list of retrieved indexes
+	 *
+	 * @see IndexDefinition#setTablespace(java.lang.String)
+	 * @see #PROP_RETRIEVE_TABLESPACE
+	 */
+	@Override
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
 		if (!Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true)) return;
@@ -212,7 +232,7 @@ public class PostgresIndexReader
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
 		sql.append("SELECT indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
-		String schema = "'" + tbl.getRawSchema() + "'";
+		String schema = "quote_ident('" + tbl.getRawSchema() + "')";
 
 		int indexCount = 0;
 		for (IndexDefinition index : indexDefs)
@@ -222,9 +242,9 @@ public class PostgresIndexReader
 			if (indexCount > 0) sql.append(',');
 			sql.append('(');
 			sql.append(schema);
-			sql.append(",'");
+			sql.append(",quote_ident('");
 			sql.append(idxName);
-			sql.append("')");
+			sql.append("'))");
 			indexCount++;
 		}
 		sql.append(')');

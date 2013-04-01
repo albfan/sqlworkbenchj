@@ -142,4 +142,6 @@ public interface IndexReader
 	 *
 	 */
 	String getIndexOptions(TableIdentifier table, IndexDefinition index);
+
+	boolean supportsTableSpaces();
 }

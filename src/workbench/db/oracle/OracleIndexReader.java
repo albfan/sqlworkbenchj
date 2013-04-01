@@ -105,6 +105,13 @@ public class OracleIndexReader
 		return getIndexInfo(table, null, null, unique);
 	}
 
+	@Override
+	public boolean supportsTableSpaces()
+	{
+		// We can only return tablespace information when using our own SQL statement for the index retrieval.
+		return !Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_INDEXLIST, false);
+	}
+	
 	private ResultSet getIndexInfo(TableIdentifier table, String indexName, String indexSchema, boolean unique)
 		throws SQLException
 	{

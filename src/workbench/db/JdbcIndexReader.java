@@ -63,6 +63,12 @@ public class JdbcIndexReader
 		this.metaData = meta;
 	}
 
+	@Override
+	public boolean supportsTableSpaces()
+	{
+		return metaData.getDbSettings().supportsTableSpaceForIndexes();
+	}
+
 	/**
 	 * This method is called after the ResultSet obtained from getIndexInfo() has been processed.
 	 *
@@ -490,12 +496,12 @@ public class JdbcIndexReader
 	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-		boolean supportsTableSpaces = this.metaData.getDbSettings().supportsTableSpaceForIndexes();
+
 		String[] cols;
 		final int types[];
 		final int sizes[];
 
-		if (supportsTableSpaces)
+		if (this.supportsTableSpaces())
 		{
 			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE", "TABLESPACE"};
 			types= new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
@@ -518,7 +524,7 @@ public class JdbcIndexReader
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
-			if (supportsTableSpaces)
+			if (this.supportsTableSpaces())
 			{
 				idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
 			}
