@@ -650,8 +650,10 @@ public class CompletionPopup
 	@Override
 	public void keyPressed(KeyEvent evt)
 	{
-		int index = -1;
+		int currentIndex = elementList.getSelectedIndex();
+		int nextIndex = -1;
 		boolean syncEntry = false;
+		boolean cycleList = GuiSettings.getCycleCompletionPopup();
 
 		switch (evt.getKeyCode())
 		{
@@ -668,36 +670,45 @@ public class CompletionPopup
 				break;
 
 			case KeyEvent.VK_UP:
-				// When the searchfield is displayed the list
-				// does not have the focus, und therefor the up and down
-				// keys only scroll the list, but do not move the selection
-				if (this.searchField != null)
+				if (cycleList && currentIndex == 0)
 				{
-					index = elementList.getSelectedIndex();
-					if (index > 0)
-					{
-						elementList.setSelectedIndex(index - 1);
-						elementList.ensureIndexIsVisible(index - 1);
-						syncEntry = true;
-					}
+					nextIndex = data.getSize() - 1;
+				}
+				else if (currentIndex > 0)
+				{
+					nextIndex = currentIndex - 1;
+				}
+
+				if (nextIndex != -1)
+				{
+					elementList.setSelectedIndex(nextIndex);
+					elementList.ensureIndexIsVisible(nextIndex);
+					syncEntry = true;
 					evt.consume();
 				}
 				break;
+				
 			case KeyEvent.VK_DOWN:
-				if (this.searchField != null)
+				if (cycleList && currentIndex == data.getSize() - 1)
 				{
-					index = elementList.getSelectedIndex();
-					if (index < data.getSize() - 1)
-					{
-						elementList.setSelectedIndex(index + 1);
-						elementList.ensureIndexIsVisible(index + 1);
-						syncEntry = true;
-					}
+					nextIndex = 0;
+				}
+				else if (currentIndex < data.getSize() - 1)
+				{
+					nextIndex = currentIndex + 1;
+				}
+
+				if (nextIndex != -1)
+				{
+					elementList.setSelectedIndex(nextIndex);
+					elementList.ensureIndexIsVisible(nextIndex);
+					syncEntry = true;
 					evt.consume();
 				}
 				break;
 		}
-		if (syncEntry)
+
+		if (syncEntry && searchField != null)
 		{
 			try
 			{

@@ -271,19 +271,10 @@ public class SelectAnalyzer
 
 	private String getColumnNameForCondition()
 	{
-		String currentOperator = null;
-		int pos = StringUtil.findWordBoundary(sql, cursorPos - 1, " ");
-		if (pos > -1)
-		{
-			currentOperator = StringUtil.getWordLeftOfCursor(sql, pos, " ");
-		}
-		if (currentOperator == null || !currentOperator.equals("=")) return null;
-		int pos2 = StringUtil.findWordBoundary(sql, pos - currentOperator.length() - 1, " ");
-		String col = null;
-		if (pos2 > -1)
-		{
-			col = StringUtil.getWordLeftOfCursor(sql, pos2, " ");
-		}
+		SQLToken prev = SqlUtil.getTokenBeforeCursor(sql, cursorPos);
+		if (prev == null || !prev.isOperator()) return null;
+		int pos = prev.getCharBegin() - 1;
+		String col = StringUtil.getWordLeftOfCursor(sql, pos, " ");
 		return col;
 	}
 

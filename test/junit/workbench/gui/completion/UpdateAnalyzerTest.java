@@ -43,14 +43,74 @@ public class UpdateAnalyzerTest
 	@Test
 	public void testGetColumns()
 	{
-		String sql = "update foo set col_1 = x, col_3 = y, col_5 = 'foobar'";
+		String sql = "update foo set col_1 = 10, col_3 = y, col_5 = 'foobar'";
 
-		int pos = sql.indexOf("x,") - 2;
+		int pos = sql.indexOf("10,");
 		UpdateAnalyzer check = new UpdateAnalyzer(null, sql, pos);
 		List<UpdateAnalyzer.ColumnInfo> cols = check.getColumns();
-		System.out.println(cols);
 		assertEquals(3, cols.size());
-		UpdateAnalyzer.ColumnInfo col = cols.get(1);
-		System.out.println(sql.substring(col.valueStartPos, col.valueEndPos));
+		UpdateAnalyzer.ColumnInfo col = cols.get(0);
+		assertEquals("10", sql.substring(col.valueStartPos, col.valueEndPos).trim());
+		assertEquals("col_1", col.name);
+
+		String currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("col_1", currentColumn.toString());
+
+		sql = "update foo set col_2 = 42 where bar = 0;";
+		pos = sql.indexOf("42 ");
+		check = new UpdateAnalyzer(null, sql, pos);
+		cols = check.getColumns();
+//		System.out.println("cursor at: " + pos);
+//		System.out.println(cols);
+		assertEquals(2, cols.size());
+		currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("col_2", currentColumn.toString());
+
+		sql = "update foo set col_2 =  where bar = 0;";
+		pos = sql.indexOf(" = ") + 3;
+		check = new UpdateAnalyzer(null, sql, pos);
+		cols = check.getColumns();
+//		System.out.println("cursor at: " + pos);
+//		System.out.println(cols);
+		assertEquals(2, cols.size());
+		currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("col_2", currentColumn.toString());
+
+		sql = "update foo set col_3 = 42;";
+		pos = sql.indexOf("42");
+		check = new UpdateAnalyzer(null, sql, pos);
+		cols = check.getColumns();
+//		System.out.println("cursor at: " + pos);
+//		System.out.println(cols);
+		assertEquals(1, cols.size());
+		currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("col_3", currentColumn.toString());
+
+		sql = "update foo set col_3 = 42 where bar =";
+		pos = sql.indexOf("bar =") + "bar =".length();
+		check = new UpdateAnalyzer(null, sql, pos);
+		cols = check.getColumns();
+//		System.out.println("cursor at: " + pos);
+//		System.out.println(cols);
+		assertEquals(2, cols.size());
+		currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("bar", currentColumn.toString());
+
+		sql = "update foo set col_3 = 42 where bar <> ";
+		pos = sql.indexOf("bar <>") + "bar <>".length();
+		check = new UpdateAnalyzer(null, sql, pos);
+		cols = check.getColumns();
+//		System.out.println("cursor at: " + pos);
+//		System.out.println(cols);
+		assertEquals(2, cols.size());
+		currentColumn = check.getCurrentColumn();
+		assertNotNull(currentColumn);
+		assertEquals("bar", currentColumn.toString());
 	}
+
 }

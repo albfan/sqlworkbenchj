@@ -453,7 +453,14 @@ public abstract class BaseAnalyzer
 			{
 				TableIdentifier tbl = (tableForFkSelect != null ? tableForFkSelect : tableForColumnList);
 				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tbl);
-				elements.add(fk);
+				if (GuiSettings.showSelectFkValueAtTop())
+				{
+					elements.add(0, fk);
+				}
+				else
+				{
+					elements.add(fk);
+				}
 			}
 		}
 		return (elements == null ? false : (elements.size() > 0));

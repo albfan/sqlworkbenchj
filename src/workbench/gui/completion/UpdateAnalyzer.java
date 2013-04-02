@@ -28,6 +28,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.TableAlias;
 
@@ -92,7 +93,7 @@ public class UpdateAnalyzer
 					state = IN_SET;
 				}
 			}
-			else if (t.getContents().equals("WHERE"))
+			else if (SqlFormatter.SET_TERMINAL.contains(t.getContents()))
 			{
 				if (cursorPos > t.getCharEnd())
 				{
@@ -119,7 +120,12 @@ public class UpdateAnalyzer
 		}
 	}
 
-	private String getCurrentColumn()
+	/**
+	 * Package visible for testing purposes.
+	 *
+	 * @return
+	 */
+	String getCurrentColumn()
 	{
 		List<ColumnInfo> columns = getColumns();
 		for (ColumnInfo col : columns)
@@ -141,14 +147,28 @@ public class UpdateAnalyzer
 
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
-		boolean inSet = false;
+		SQLToken lastToken = null;
+		boolean inColumns = false;
 		boolean nextIsColumn = false;
+		boolean afterSet = false;
+
 		while (t != null)
 		{
 			String text = t.getContents();
-			if (inSet)
+
+			if (inColumns)
 			{
-				if (nextIsColumn)
+				if (SqlFormatter.SET_TERMINAL.contains(text))
+				{
+					nextIsColumn = true;
+					afterSet = true;
+					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
+					if (last != null && last.valueEndPos == 0)
+					{
+						last.valueEndPos = t.getCharBegin();
+					}
+				}
+				else if (nextIsColumn && !t.isReservedWord())
 				{
 					ColumnInfo col = new ColumnInfo();
 					col.name = text;
@@ -166,7 +186,15 @@ public class UpdateAnalyzer
 						last.valueEndPos = t.getCharBegin();
 					}
 				}
-				else if (text.equals("="))
+				else if (t.isLiteral() && (lastToken != null && lastToken.getText().equals("=")))
+				{
+					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
+					if (last != null)
+					{
+						last.valueEndPos = t.getCharEnd();
+					}
+				}
+				else if (t.isOperator())
 				{
 					nextIsColumn = false;
 					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
@@ -178,11 +206,23 @@ public class UpdateAnalyzer
 			}
 			else if (text.equalsIgnoreCase("SET"))
 			{
-				inSet = true;
+				inColumns = true;
 				nextIsColumn = true;
 			}
 
+			lastToken = t;
 			t = lexer.getNextToken(false, false);
+		}
+
+		// deal with a dangling operator at the end of the statement (e.g. "where foo = ")
+		if (inColumns && lastToken != null && lastToken.isOperator())
+		{
+			ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
+			// if the value for the last column does not have "an end", assume it ends with the statement
+			if (last != null && last.valueEndPos == 0)
+			{
+				last.valueEndPos = sql.length();
+			}
 		}
 		return result;
 	}
@@ -207,8 +247,8 @@ public class UpdateAnalyzer
 		@Override
 		public String toString()
 		{
-			return name + " from: " + valueStartPos + " to: " + valueEndPos;
+			return "Column: " + name + ", value from: " + valueStartPos + " to: " + valueEndPos;
 		}
 	}
-	
+
 }

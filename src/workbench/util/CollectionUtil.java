@@ -66,6 +66,16 @@ public class CollectionUtil
 		return new TreeSet<String>(CaseInsensitiveComparator.INSTANCE);
 	}
 
+	public static Set<String> unmodifiableSet(Set<String> base, String... add)
+	{
+		return Collections.unmodifiableSet(caseInsensitiveSet(base, add));
+	}
+
+	public static Set<String> unmodifiableSet(String... a)
+	{
+		return Collections.unmodifiableSet(CollectionUtil.caseInsensitiveSet(a));
+	}
+
 	public static Set<String> caseInsensitiveSet(String... a)
 	{
 		Set<String> result = caseInsensitiveSet();

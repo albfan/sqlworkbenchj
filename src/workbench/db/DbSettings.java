@@ -1571,14 +1571,4 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "fk.index.automatic", false);
 	}
 
-	public boolean supportsTableSpaceForTables()
-	{
-		return Settings.getInstance().getBoolProperty(prefix + "tablespace.supported.table", false);
-	}
-
-	public boolean supportsTableSpaceForIndexes()
-	{
-		return Settings.getInstance().getBoolProperty(prefix + "tablespace.supported.index", false);
-	}
-
 }

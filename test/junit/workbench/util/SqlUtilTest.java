@@ -39,6 +39,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.formatter.SQLToken;
+
 /**
  *
  * @author Thomas Kellerer
@@ -946,4 +948,14 @@ public class SqlUtilTest
 		assertEquals("varchar", type);
 	}
 
+	@Test
+	public void testGetPreviousToken()
+	{
+		String sql = "select * from foo where x < 1";
+		int pos = sql.indexOf('<')+ 1;
+		SQLToken prev = SqlUtil.getTokenBeforeCursor(sql, pos);
+		assertNotNull(prev);
+		assertTrue(prev.isOperator());
+		assertEquals("<", prev.getContents());
+	}
 }

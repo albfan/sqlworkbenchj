@@ -45,47 +45,44 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.caseInsensitiveSet(
+	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.unmodifiableSet(
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
 		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY");
 
-	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.caseInsensitiveSet(
+	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.unmodifiableSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
-	public static final Set<String> HAVING_TERMINAL = CollectionUtil.caseInsensitiveSet(
+	public static final Set<String> HAVING_TERMINAL = CollectionUtil.unmodifiableSet(
 		"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
 	// keywords terminating a WHERE clause
-	public static final Set<String> WHERE_TERMINAL = CollectionUtil.caseInsensitiveSet(
-		HAVING_TERMINAL, "HAVING");
+	public static final Set<String> WHERE_TERMINAL = CollectionUtil.unmodifiableSet(HAVING_TERMINAL, "HAVING");
 
 	// keywords terminating a HAVING clause
 
 	// keywords terminating the FROM part
-	public static final Set<String> FROM_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
-		"WHERE", "START WITH", "CONNECT BY");
+	public static final Set<String> FROM_TERMINAL = CollectionUtil.unmodifiableSet(WHERE_TERMINAL,"WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating a a JOIN clause
-	public static final Set<String> JOIN_TERMINAL = CollectionUtil.caseInsensitiveSet(
-		"WHERE", "ORDER BY", "GROUP BY");
+	public static final Set<String> JOIN_TERMINAL = CollectionUtil.unmodifiableSet("WHERE", "ORDER BY", "GROUP BY");
 
 	// keywords terminating an GROUP BY clause
 	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,
 		"SELECT", "UPDATE", "DELETE", "INSERT", "CREATE", "CREATE OR REPLACE");
 
-	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.caseInsensitiveSet(
+	private final Set<String> CREATE_TABLE_TERMINAL = CollectionUtil.unmodifiableSet(
 		"UNIQUE", "CONSTRAINT", "FOREIGN KEY", "PRIMARY KEY");
 
-	private final Set<String> DATE_LITERALS = CollectionUtil.caseInsensitiveSet("DATE", "TIME", "TIMESTAMP");
+	private final Set<String> DATE_LITERALS = CollectionUtil.unmodifiableSet("DATE", "TIME", "TIMESTAMP");
 
-	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(";");
+	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.unmodifiableSet(";");
 
-	public static final Set<String> SELECT_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM");
+	public static final Set<String> SELECT_TERMINAL = CollectionUtil.unmodifiableSet("FROM");
 
-	private final Set<String> SET_TERMINAL = CollectionUtil.caseInsensitiveSet("FROM", "WHERE");
+	public static final Set<String> SET_TERMINAL = CollectionUtil.unmodifiableSet("FROM", "WHERE");
 
 	private CharSequence sql;
 	private SQLLexer lexer;

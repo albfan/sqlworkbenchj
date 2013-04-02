@@ -182,6 +182,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.table.rownumber.show", flag);
 	}
 
+	public static boolean getCycleCompletionPopup()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.cycle.popup", false);
+	}
+
 	public static boolean getSortCompletionColumns()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.sortcolumns", true);
@@ -829,6 +834,11 @@ public class GuiSettings
 	public static boolean getShowMaxRowsTooltip()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.tooltipwarning", true);
+	}
+
+	public static boolean showSelectFkValueAtTop()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.sql.show.selectfk.top", false);
 	}
 
 }

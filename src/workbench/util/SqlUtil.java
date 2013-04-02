@@ -2101,4 +2101,21 @@ public class SqlUtil
 		}
 	}
 
+	public static SQLToken getTokenBeforeCursor(String sql, int cursor)
+	{
+		if (StringUtil.isBlank(sql)) return null;
+		SQLLexer lexer = new SQLLexer(sql);
+		List<SQLToken> tokens = new ArrayList<SQLToken>();
+		SQLToken token = lexer.getNextToken(false, false);
+		while (token != null)
+		{
+			tokens.add(token);
+			token = lexer.getNextToken(false, false);
+		}
+		for (int i = tokens.size() - 1; i >= 0; i--)
+		{
+			if (tokens.get(i).getCharEnd() <= cursor) return tokens.get(i);
+		}
+		return null;
+	}
 }

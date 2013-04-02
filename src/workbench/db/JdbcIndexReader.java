@@ -63,10 +63,19 @@ public class JdbcIndexReader
 		this.metaData = meta;
 	}
 
+	/**
+	 * Returns false.
+	 *
+	 * Needs to be overriden by a specialized IndexReader for each DBMS
+	 * @return
+	 */
 	@Override
 	public boolean supportsTableSpaces()
 	{
-		return metaData.getDbSettings().supportsTableSpaceForIndexes();
+		// needs to be implemented by a specialized Index reader that
+		// either retrieves tablespace information directly in getTableIndexList()
+		// or enhances the index list in processIndexList()
+		return false;
 	}
 
 	/**
