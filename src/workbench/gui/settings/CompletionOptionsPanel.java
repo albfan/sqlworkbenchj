@@ -83,6 +83,7 @@ public class CompletionOptionsPanel
 		filterSearch.setSelected(GuiSettings.getFilterCompletionSearch());
 		partialMatch.setSelected(GuiSettings.getPartialCompletionSearch());
 		sortColumns.setSelected(GuiSettings.getSortCompletionColumns());
+		cyleEntries.setSelected(GuiSettings.getCycleCompletionPopup());
 	}
 
 	@Override
@@ -116,6 +117,7 @@ public class CompletionOptionsPanel
 		GuiSettings.setFilterCompletionSearch(filterSearch.isSelected());
 		GuiSettings.setPartialCompletionSearch(partialMatch.isSelected());
 		GuiSettings.setSortCompletionColumns(sortColumns.isSelected());
+		GuiSettings.setCycleCompletionPopup(cyleEntries.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -125,8 +127,9 @@ public class CompletionOptionsPanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-		GridBagConstraints gridBagConstraints;
+  private void initComponents()
+  {
+    GridBagConstraints gridBagConstraints;
 
     pasteLabel = new JLabel();
     completionPasteCase = new JComboBox();
@@ -136,6 +139,7 @@ public class CompletionOptionsPanel
     sortColumns = new JCheckBox();
     partialMatch = new JCheckBox();
     filterSearch = new JCheckBox();
+    cyleEntries = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -222,14 +226,26 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(9, 12, 0, 0);
     add(filterSearch, gridBagConstraints);
+
+    cyleEntries.setText(ResourceMgr.getString("LblCompletionCycle")); // NOI18N
+    cyleEntries.setToolTipText(ResourceMgr.getString("d_LblCompletionCycle")); // NOI18N
+    cyleEntries.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    add(cyleEntries, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox closePopup;
   private JComboBox completionColumnSort;
   private JComboBox completionPasteCase;
+  private JCheckBox cyleEntries;
   private JCheckBox filterSearch;
   private JCheckBox partialMatch;
   private JLabel pasteLabel;

@@ -187,6 +187,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.cycle.popup", false);
 	}
 
+	public static void setCycleCompletionPopup(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.autocompletion.cycle.popup", flag);
+	}
+
 	public static boolean getSortCompletionColumns()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.sortcolumns", true);
