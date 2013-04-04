@@ -184,7 +184,7 @@ public class GuiSettings
 
 	public static boolean getCycleCompletionPopup()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.cycle.popup", false);
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.cycle.popup", true);
 	}
 
 	public static void setCycleCompletionPopup(boolean flag)
