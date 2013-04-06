@@ -36,14 +36,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import workbench.db.JdbcUtils;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.JdbcUtils;
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
+import workbench.util.SqlUtil;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -104,6 +107,7 @@ public class DmlStatement
 		int rows = -1;
 
 		boolean useSetNull = aConnection.getDbSettings().useSetNull();
+		boolean useXmlApi = aConnection.getDbSettings().xmlApiSupported();
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
@@ -130,7 +134,7 @@ public class DmlStatement
 					stmt.setCharacterStream(i + 1, in, s.length());
 					streamsToClose.add(in);
 				}
-				else if (SqlUtil.isXMLType(type) && value instanceof String)
+				else if (useXmlApi && SqlUtil.isXMLType(type) && value instanceof String)
 				{
 					SQLXML xml = JdbcUtils.createXML((String)value, aConnection);
 					stmt.setSQLXML(i+ 1, xml);

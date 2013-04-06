@@ -1286,6 +1286,8 @@ public class DataImporter
 		throws SQLException
 	{
 		int colIndex = 0;
+		boolean xmlApiSupported = dbConn.getDbSettings().xmlApiSupported();
+
 		for (int i=0; i < row.length; i++)
 		{
 			if (ignoreColumn(targetColumns.get(i))) continue;
@@ -1312,7 +1314,7 @@ public class DataImporter
 					pstmt.setObject(colIndex, null);
 				}
 			}
-			else if (SqlUtil.isXMLType(targetSqlType) && (row[i] instanceof String))
+			else if (xmlApiSupported && SqlUtil.isXMLType(targetSqlType) && (row[i] instanceof String))
 			{
 				SQLXML xml = JdbcUtils.createXML((String)row[i], dbConn);
 				pstmt.setXML(colIndex, xml);

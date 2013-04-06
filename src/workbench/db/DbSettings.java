@@ -1306,6 +1306,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db.postgresql.exclude.defaultselectrule", true);
 	}
 
+	public boolean xmlApiSupported()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "xmlapi.supported", true);
+	}
+
 	public boolean isClobType(String dbmsType)
 	{
 		if (dbmsType == null) return false;
