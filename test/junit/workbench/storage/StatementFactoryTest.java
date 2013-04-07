@@ -23,14 +23,18 @@
 package workbench.storage;
 
 import java.sql.Types;
+
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
-import workbench.resource.Settings;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
 import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -57,7 +61,7 @@ public class StatementFactoryTest
 		throws Exception
 	{
 		// Make sure the datatype defines a valuetemplate
-		Settings.getInstance().setProperty("workbench.db.testmodedeb.valuetemplate.inet", "inet '%value%'");
+		Settings.getInstance().setProperty("workbench.db.testmodedeb.dmlexpression.inet", "cast(? as inet)");
 		DbSettings forTest = new DbSettings("testmodedeb", "TestMode");
 
 		ColumnIdentifier inetCol = new ColumnIdentifier("ip_address", java.sql.Types.OTHER);
@@ -89,12 +93,12 @@ public class StatementFactoryTest
 			factory.setTestSettings(forTest);
 			DmlStatement dml = factory.createUpdateStatement(row, false, "\n");
 			String sql = dml.getSql();
-			String expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = ? WHERE ip_address = inet '127.0.0.1'";
-//			System.out.println("----------------\n" + sql + "\n---------\n" + expected);
+			String expected = "UPDATE inet_test SET ip_address = cast(? as inet), id = ? WHERE ip_address = cast(? as inet)";
 			assertEquals(expected, sql);
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter();
-			expected = "UPDATE inet_test SET ip_address = inet '127.0.0.2', id = 43 WHERE ip_address = inet '127.0.0.1'";
+			expected = "UPDATE inet_test SET ip_address = cast('127.0.0.2' as inet), id = 43 WHERE ip_address = cast('127.0.0.1' as inet)";
 			String result = dml.getExecutableStatement(formatter, null).toString();
+//			System.out.println("----------------\n" + result + "\n---------\n" + expected);
 			assertEquals(expected, result);
 		}
 		finally

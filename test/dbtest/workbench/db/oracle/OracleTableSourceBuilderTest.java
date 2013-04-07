@@ -23,14 +23,17 @@
 package workbench.db.oracle;
 
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.ScriptParser;
+
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -85,7 +88,7 @@ public class OracleTableSourceBuilderTest
 		String indexSql = p.getCommand(1);
 		indexSql = indexSql.replaceAll("\\s+", " ");
 //		System.out.println(indexSql);
-		String expected = "ALTER TABLE INDEX_TEST ADD CONSTRAINT PK_INDEXES PRIMARY KEY (TEST_ID) USING INDEX ( CREATE INDEX IDX_PK_INDEX_TEST ON INDEX_TEST (TEST_ID ASC, TENANT_ID ASC) REVERSE )";
+		String expected = "ALTER TABLE INDEX_TEST ADD CONSTRAINT PK_INDEXES PRIMARY KEY (TEST_ID) USING INDEX ( CREATE INDEX IDX_PK_INDEX_TEST ON INDEX_TEST (TEST_ID ASC, TENANT_ID ASC) TABLESPACE USERS REVERSE )";
 		assertEquals(expected, indexSql);
 
 	}

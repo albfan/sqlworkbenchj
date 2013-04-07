@@ -24,13 +24,15 @@ package workbench.storage;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
-
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -130,17 +132,9 @@ public class StatementFactory
 				}
 				else
 				{
-					String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
-					if (literal != null)
-					{
-						sql.append(" = ");
-						sql.append(literal);
-					}
-					else
-					{
-						sql.append(" = ?");
-						values.add(new ColumnData(value, this.resultInfo.getColumn(col)));
-					}
+					sql.append(" = ");
+					sql.append(getDmlExpression(this.resultInfo.getColumn(col)));
+					values.add(new ColumnData(value, this.resultInfo.getColumn(col)));
 				}
 			}
 		}
@@ -169,21 +163,20 @@ public class StatementFactory
 			else
 			{
 				sql.append(" = ");
-				String literal = getTemplateValue(resultInfo.getDbmsTypeName(j), value);
-				if (literal != null)
-				{
-					sql.append(literal);
-				}
-				else
-				{
-					sql.append("?");
-					values.add(new ColumnData(value, resultInfo.getColumn(j)));
-				}
+				sql.append(getDmlExpression(resultInfo.getColumn(j)));
+				values.add(new ColumnData(value, resultInfo.getColumn(j)));
 			}
 		}
 
 		dml = new DmlStatement(sql, values);
 		return dml;
+	}
+
+	private String getDmlExpression(ColumnIdentifier column)
+	{
+		DbSettings settings = getDbSettings();
+		if (settings == null) return "?";
+		return settings.getDataTypeDmlExpression(column.getDbmsType());
 	}
 
 	private String getColumnName(int column)
@@ -208,15 +201,6 @@ public class StatementFactory
 		if (testSettings != null) return testSettings;
 		if (dbConnection == null) return null;
 		return dbConnection.getDbSettings();
-	}
-
-	protected String getTemplateValue(String dbmsType, Object value)
-	{
-		if (value == null) return null;
-		if (this.getDbSettings() == null) return null;
-		String template = getDbSettings().getValueTemplate(dbmsType);
-		if (template == null) return null;
-		return template.replace("%value%", value.toString());
 	}
 
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
@@ -291,16 +275,8 @@ public class StatementFactory
 				}
 
 				sql.append(getColumnName(col));
-				String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
-				if (literal != null)
-				{
-					valuePart.append(literal);
-				}
-				else
-				{
-					valuePart.append('?');
-					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
-				}
+				valuePart.append(getDmlExpression(resultInfo.getColumn(col)));
+				values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
 			}
 		}
 		sql.append(") VALUES (");
@@ -360,17 +336,9 @@ public class StatementFactory
 			}
 			else
 			{
-				String literal = getTemplateValue(resultInfo.getDbmsTypeName(j), value);
-				if (literal != null)
-				{
-					sql.append(" = ");
-					sql.append(literal);
-				}
-				else
-				{
-					sql.append(" = ?");
-					values.add(new ColumnData(value, resultInfo.getColumn(j)));
-				}
+				sql.append(" = ");
+				sql.append(getDmlExpression(resultInfo.getColumn(j)));
+				values.add(new ColumnData(value, resultInfo.getColumn(j)));
 			}
 		}
 

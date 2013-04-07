@@ -431,7 +431,7 @@ public class WbCopyTest
 			stmt.executeUpdate("update source_data set lastname = 'Prefect' where nr = 4");
 			con.commit();
 
-			sql = "--update target table\nwbcopy -sourceTable=source_data -targettable=target_data -mode=update";
+			sql = "wbcopy -sourceTable=source_data -targettable=target_data -mode=update";
 			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Copy not successful", true, result.isSuccess());

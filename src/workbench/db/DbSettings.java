@@ -468,12 +468,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "ddl.usesavepoint", false);
 	}
 
-	public String getValueTemplate(String dbmsType)
-	{
-		if (dbmsType == null) return null;
-		return Settings.getInstance().getProperty(prefix + "valuetemplate." + dbmsType.toLowerCase(), null);
-	}
-
 	/**
 	 * Returns the default type for the Blob formatter
 	 * @return hex, octal, char
@@ -906,23 +900,55 @@ public class DbSettings
 	}
 
 	/**
-	 * Retrieves a "select" expression for the given datatype.
+	 * Retrieves an expression to be used inside a select statement for the given datatype.
+	 *
 	 * The DbExplorer will use this expression instead of the "plain" column
 	 * name to retrieve data for this data type. This can be used to make
 	 * data readable in the DbExplorer for data types that are not natively supported
 	 * by the JDBC driver.
 	 *
-	 * The expression must contain a placeholder for the column name.
+	 * The expression must contain the placeholder <tt>${column}</tt> for the column name.
 	 *
-	 * @param cleanType
+	 * @param dbmsType
 	 * @return null if nothing is configured
+	 *
 	 * @see workbench.db.TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
 	 * @see workbench.db.TableSelectBuilder#COLUMN_PLACEHOLDER
 	 */
-	public String getDataTypeExpression(String cleanType)
+	public String getDataTypeSelectExpression(String dbmsType)
+	{
+		if (dbmsType == null) return null;
+		return Settings.getInstance().getProperty(prefix + "selectexpression." + dbmsType.toLowerCase(), null);
+	}
+
+	private String getDmlExpressionValue(String cleanType)
 	{
 		if (cleanType == null) return null;
-		return Settings.getInstance().getProperty(prefix + "selectexpression." + cleanType.toLowerCase(), null);
+		return Settings.getInstance().getProperty(prefix + "dmlexpression." + cleanType.toLowerCase(), null);
+	}
+
+	public boolean isDmlExpressionDefined(String cleanType)
+	{
+		return getDmlExpressionValue(cleanType) != null;
+	}
+
+	/**
+	 * Return an expression to be used in a PreparedStatement as the value placeholder.
+	 *
+	 * For e.g. Postgres to be able to update an <tt>XML</tt> column, the expression
+	 * <tt>cast(? as xml)</tt> is required.
+	 *
+	 * @param dbmsType  the DBMS data type of the column
+	 * @return a DBMS specific expression or ? if nothing was defined (or the datatype is null)
+	 *
+	 * @see #isDmlExpressionDefined(java.lang.String)
+	 */
+	public String getDataTypeDmlExpression(String dbmsType)
+	{
+		if (dbmsType == null) return "?";
+		String expr = getDmlExpressionValue(dbmsType);
+		if (StringUtil.isBlank(expr)) return "?";
+		return expr;
 	}
 
 	/**
@@ -1306,9 +1332,9 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db.postgresql.exclude.defaultselectrule", true);
 	}
 
-	public boolean xmlApiSupported()
+	public boolean useXmlAPI()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "xmlapi.supported", true);
+		return Settings.getInstance().getBoolProperty(prefix + "use.xmlapi", false);
 	}
 
 	public boolean isClobType(String dbmsType)

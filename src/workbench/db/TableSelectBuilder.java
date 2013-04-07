@@ -230,7 +230,7 @@ public class TableSelectBuilder
 		if (db == null) return colname;
 
 		String type = SqlUtil.getPlainTypeName(col.getDbmsType());
-		String expr = db.getDataTypeExpression(type);
+		String expr = db.getDataTypeSelectExpression(type);
 		if (expr == null)
 		{
 			return colname;

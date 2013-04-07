@@ -33,7 +33,6 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
@@ -55,7 +54,6 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
-import workbench.db.JdbcUtils;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1286,11 +1284,11 @@ public class DataImporter
 		throws SQLException
 	{
 		int colIndex = 0;
-		boolean xmlApiSupported = dbConn.getDbSettings().xmlApiSupported();
 
 		for (int i=0; i < row.length; i++)
 		{
-			if (ignoreColumn(targetColumns.get(i))) continue;
+			ColumnIdentifier column = targetColumns.get(i);
+			if (ignoreColumn(column)) continue;
 			colIndex ++;
 
 			if (useColMap)
@@ -1300,26 +1298,21 @@ public class DataImporter
 				colIndex = this.columnMap[i] + 1;
 			}
 
-			int targetSqlType = this.targetColumns.get(i).getDataType();
-			String targetDbmsType = this.targetColumns.get(i).getDbmsType();
+			int jdbcType = column.getDataType();
+			String dbmsType = column.getDbmsType();
 
 			if (row[i] == null)
 			{
 				if (useSetNull)
 				{
-					pstmt.setNull(colIndex, targetSqlType);
+					pstmt.setNull(colIndex, jdbcType);
 				}
 				else
 				{
 					pstmt.setObject(colIndex, null);
 				}
 			}
-			else if (xmlApiSupported && SqlUtil.isXMLType(targetSqlType) && (row[i] instanceof String))
-			{
-				SQLXML xml = JdbcUtils.createXML((String)row[i], dbConn);
-				pstmt.setXML(colIndex, xml);
-			}
-			else if (SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()) || SqlUtil.isXMLType(targetSqlType))
+			else if (SqlUtil.isClobType(jdbcType, dbmsType, dbConn.getDbSettings()) || SqlUtil.isXMLType(jdbcType))
 			{
 				Reader in = null;
 				int size = -1;
@@ -1390,28 +1383,19 @@ public class DataImporter
 					// this assumes that the JDBC driver will actually
 					// implement the toString() for whatever object
 					// it created when reading that column!
-					String value = row[i].toString();
 					in = null;
-					pstmt.setObject(colIndex, value);
+					pstmt.setObject(colIndex, row[i]);
 				}
 
 				if (in != null)
 				{
-					if (SqlUtil.isXMLType(targetSqlType))
-					{
-						SQLXML xml = JdbcUtils.createXML(in, dbConn);
-						pstmt.setXML(colIndex, xml);
-					}
-          else
-					{
-						// For Oracle, this will only work with Oracle 10g drivers.
-						// Oracle 9i drivers do not implement the setCharacterStream()
-						// and associated methods properly
-						pstmt.setCharacterStream(colIndex, in, size);
-					}
+					// For Oracle, this will only work with Oracle 10g drivers (and later)
+					// Oracle 9i drivers do not implement the setCharacterStream()
+					// and associated methods properly
+					pstmt.setCharacterStream(colIndex, in, size);
 				}
 			}
-			else if (SqlUtil.isBlobType(targetSqlType) || "BLOB".equals(targetDbmsType))
+			else if (SqlUtil.isBlobType(jdbcType) || "BLOB".equals(dbmsType))
 			{
 				InputStream in = null;
 				int len = -1;
@@ -1473,14 +1457,14 @@ public class DataImporter
 			}
 			else
 			{
-				if (isOracle &&	targetSqlType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
+				if (isOracle &&	jdbcType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
 				{
 					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
 					pstmt.setTimestamp(colIndex, ts);
 				}
 				else if (useSetObjectWithType)
 				{
-					pstmt.setObject(colIndex, row[i], targetSqlType);
+					pstmt.setObject(colIndex, row[i], jdbcType);
 				}
 				else
 				{
@@ -1813,7 +1797,7 @@ public class DataImporter
 			colname = meta.quoteObjectname(colname);
 			text.append(colname);
 
-			parms.append('?');
+			parms.append(getDmlExpression(col));
 			colIndex ++;
 		}
 
@@ -1857,6 +1841,11 @@ public class DataImporter
 			this.hasErrors = true;
 			throw e;
 		}
+	}
+
+	private String getDmlExpression(ColumnIdentifier column)
+	{
+		return dbConn.getDbSettings().getDataTypeDmlExpression(column.getDbmsType());
 	}
 
 	/**
@@ -1908,7 +1897,8 @@ public class DataImporter
 				if (pkAdded) where.append(" AND ");
 				else pkAdded = true;
 				where.append(colname);
-				where.append(" = ?");
+				where.append(" = ");
+				where.append(getDmlExpression(col));
 				pkIndex ++;
 				pkCount ++;
 			}
@@ -1920,7 +1910,8 @@ public class DataImporter
 					sql.append(", ");
 				}
 				sql.append(colname);
-				sql.append(" = ?");
+				sql.append(" = ");
+				sql.append(getDmlExpression(col));
 				colIndex ++;
 			}
 		}

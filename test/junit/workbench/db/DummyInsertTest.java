@@ -25,10 +25,14 @@ package workbench.db;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
+
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -88,7 +92,6 @@ public class DummyInsertTest
 
 			DummyInsert insert = new DummyInsert(person, cols);
 			String sql = insert.getSource(con).toString();
-//			System.out.println("*********\n"+sql);
 			assertTrue(sql.trim().equals("INSERT INTO PERSON\n(\n  NR\n)\nVALUES\n(\n  NR_value\n);"));
 		}
 		finally

@@ -39,6 +39,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbSettings;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
@@ -106,15 +107,18 @@ public class DmlStatement
 		PreparedStatement stmt = null;
 		int rows = -1;
 
-		boolean useSetNull = aConnection.getDbSettings().useSetNull();
-		boolean useXmlApi = aConnection.getDbSettings().xmlApiSupported();
+		DbSettings dbs = aConnection.getDbSettings();
+		boolean useSetNull = dbs.useSetNull();
+		boolean useXmlApi = dbs.useXmlAPI();
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
+			
 			for (int i=0; i < this.values.size(); i++)
 			{
 				ColumnData data = this.values.get(i);
 				int type = data.getIdentifier().getDataType();
+				String dbmsType = data.getIdentifier().getDbmsType();
 				Object value = data.getValue();
 				if (value == null)
 				{
@@ -134,7 +138,7 @@ public class DmlStatement
 					stmt.setCharacterStream(i + 1, in, s.length());
 					streamsToClose.add(in);
 				}
-				else if (useXmlApi && SqlUtil.isXMLType(type) && value instanceof String)
+				else if (useXmlApi && SqlUtil.isXMLType(type) && !dbs.isDmlExpressionDefined(dbmsType) && (value instanceof String))
 				{
 					SQLXML xml = JdbcUtils.createXML((String)value, aConnection);
 					stmt.setSQLXML(i+ 1, xml);
@@ -147,7 +151,7 @@ public class DmlStatement
 					try
 					{
 						InputStream in = new FileInputStream(f);
-						if (aConnection.getDbSettings().useGetBytesForBlobs())
+						if (dbs.useGetBytesForBlobs())
 						{
 							byte[] array = FileUtil.readBytes(in);
 							stmt.setBytes(i + 1, array);
