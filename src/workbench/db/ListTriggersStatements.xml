@@ -351,9 +351,9 @@ from syscat.triggers</string>
 	   when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') then 'DELETE'
      when ObjectProperty( tr.id, 'ExecIsInsertTrigger') then 'INSERT'
   end as trigger_event, tab.name as table_name
-	from sysobjects tr, sysobjects tab
-	where tab.id = tr.parent_obj
-	 and  tr.xtype = 'TR'
+	from sysobjects tr with (nolock)
+	  join sysobjects tab with (nolock) on tab.id = tr.parent_obj
+	where  tr.xtype = 'TR'
      </string>
     </void>
     <void property="objectNameField">

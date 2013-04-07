@@ -1602,4 +1602,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "fk.index.automatic", false);
 	}
 
+	public boolean useReadUncommittedForDbExplorer()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.use.read_uncommitted", false);
+	}
 }

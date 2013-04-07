@@ -86,7 +86,7 @@ public class ConnectionInfoBuilder
 			else
 			{
 				username = conn.getCurrentUser();
-				isolationlevel = conn.getIsolationLevel();
+				isolationlevel = conn.getIsolationLevelName();
 				productVersion = conn.getDatabaseProductVersion();
 				driverName = conn.getSqlConnection().getMetaData().getDriverName();
 			}

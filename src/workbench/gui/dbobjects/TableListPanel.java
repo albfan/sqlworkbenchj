@@ -198,6 +198,7 @@ public class TableListPanel
 	private final Object msgLock = new Object();
 
 	private TableChangeValidator validator = new TableChangeValidator();
+	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 	// </editor-fold>
 
 	public TableListPanel(MainWindow aParent)
@@ -961,6 +962,7 @@ public class TableListPanel
 				}
 			}
 
+			levelChanger.changeIsolationLevel(dbConnection);
 			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
 			dbConnection.getObjectCache().addTableList(ds, currentSchema);
 			tableList.setOriginalOrder(ds);
@@ -1019,7 +1021,9 @@ public class TableListPanel
 			WbSwingUtilities.showDefaultCursor(this);
 			setBusy(false);
 			tableTypes.setEnabled(true);
+			levelChanger.restoreIsolationLevel(dbConnection);
 			endTransaction();
+
 		}
 	}
 
@@ -1616,9 +1620,10 @@ public class TableListPanel
 		int index = this.displayTab.getSelectedIndex();
 
 		this.setBusy(true);
-
 		try
 		{
+			levelChanger.changeIsolationLevel(dbConnection);
+
 			synchronized (this.connectionLock)
 			{
 				switch (index)
@@ -1652,6 +1657,7 @@ public class TableListPanel
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
+			levelChanger.restoreIsolationLevel(dbConnection);
 			endTransaction();
 		}
 	}

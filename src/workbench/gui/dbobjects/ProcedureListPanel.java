@@ -47,6 +47,13 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import workbench.WbManager;
+import workbench.interfaces.CriteriaPanel;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.NoConfigException;
@@ -58,6 +65,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.SourceCache;
 import workbench.db.oracle.OraclePackageParser;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CompileDbObjectAction;
@@ -77,13 +85,9 @@ import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
-import workbench.interfaces.CriteriaPanel;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Reloadable;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
@@ -124,6 +128,7 @@ public class ProcedureListPanel
 
   private EditorTabSelectMenu generateWbCall;
 	private SourceCache cache;
+	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 
 	public ProcedureListPanel(MainWindow window)
 	{
@@ -349,6 +354,7 @@ public class ProcedureListPanel
 			});
 
 			this.isRetrieving = true;
+			levelChanger.changeIsolationLevel(dbConnection);
 			DbMetadata meta = dbConnection.getMetadata();
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
@@ -382,6 +388,7 @@ public class ProcedureListPanel
 		{
 			this.isRetrieving = false;
 			this.dbConnection.setBusy(false);
+			levelChanger.restoreIsolationLevel(dbConnection);
 			WbSwingUtilities.showDefaultCursor(parent);
 		}
 	}
@@ -593,6 +600,7 @@ public class ProcedureListPanel
 
 		try
 		{
+			levelChanger.changeIsolationLevel(dbConnection);
 			dbConnection.setBusy(true);
 			try
 			{
@@ -650,6 +658,7 @@ public class ProcedureListPanel
 		finally
 		{
 			WbSwingUtilities.showDefaultCursor(parent);
+			levelChanger.restoreIsolationLevel(dbConnection);
 			dbConnection.setBusy(false);
 		}
 

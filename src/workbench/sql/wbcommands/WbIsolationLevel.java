@@ -78,7 +78,7 @@ public class WbIsolationLevel
 		String parameter = getCommandLine(sql);
 		if (StringUtil.isBlank(parameter))
 		{
-			String level = currentConnection.getIsolationLevel();
+			String level = currentConnection.getIsolationLevelName();
 			result.addMessage(ResourceMgr.getFormattedString("MsgLevelCurrent", level));
 			result.setSuccess();
 			return result;
@@ -97,7 +97,7 @@ public class WbIsolationLevel
 				boolean supported = currentConnection.getSqlConnection().getMetaData().supportsTransactionIsolationLevel(level);
 				currentConnection.getSqlConnection().setTransactionIsolation(level);
 				result.setSuccess();
-				result.addMessage(ResourceMgr.getFormattedString("MsgLevelChanged", currentConnection.getIsolationLevel()));
+				result.addMessage(ResourceMgr.getFormattedString("MsgLevelChanged", currentConnection.getIsolationLevelName()));
 				if (!supported)
 				{
 					result.addMessage(ResourceMgr.getFormattedString("MsgLevelNotSupported", SqlUtil.getIsolationLevelName(level)));

@@ -28,8 +28,9 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.util.ArrayList;
-
 import java.util.List;
+
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -37,33 +38,36 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
+import workbench.WbManager;
+import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import javax.swing.JLabel;
-import workbench.WbManager;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
+import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.CriteriaPanel;
+
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.WbWorkspace;
@@ -97,6 +101,7 @@ public class TriggerListPanel
 	private MainWindow parentWindow;
 	private boolean initialized;
 	private FilteredProperties workspaceProperties;
+	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 
 	public TriggerListPanel(MainWindow window)
 	{
@@ -423,6 +428,7 @@ public class TriggerListPanel
 
 		try
 		{
+			levelChanger.changeIsolationLevel(dbConnection);
 			dbConnection.setBusy(true);
 
 			try
@@ -447,6 +453,7 @@ public class TriggerListPanel
 		finally
 		{
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			levelChanger.restoreIsolationLevel(dbConnection);
 			dbConnection.setBusy(false);
 		}
 

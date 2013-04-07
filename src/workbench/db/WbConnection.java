@@ -248,11 +248,41 @@ public class WbConnection
 		return getProfile().getConfirmUpdates();
 	}
 
+	public int getIsolationLevel()
+	{
+		if (sqlConnection == null) return Connection.TRANSACTION_NONE;
+		try
+		{
+			return sqlConnection.getTransactionIsolation();
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logWarning("WbConnection.getIsolationLevel()", "Could not retrieve isolation level", sql);
+			return Connection.TRANSACTION_NONE;
+		}
+	}
+
+	public void setIsolationLevel(int newLevel)
+	{
+		if (sqlConnection == null) return;
+		if (newLevel == Connection.TRANSACTION_NONE) return;
+		
+		try
+		{
+			sqlConnection.setTransactionIsolation(newLevel);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logWarning("WbConnection.setIsolationLevel()", "Could not set isolation level", sql);
+		}
+	}
+
+
 	/**
 	 * Returns the current isolation level as a readable string
 	 * @return
 	 */
-	public String getIsolationLevel()
+	public String getIsolationLevelName()
 	{
 		if (this.sqlConnection == null) return "";
 
