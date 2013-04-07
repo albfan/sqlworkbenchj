@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-03-24">
+  <release build="-1" date="2013-04-07">
     <entry dev-build="7" type="enh">For Oracle and Postgres tablespace information is now shown for indexes</entry>
     <entry dev-build="7" type="enh">For SQL Server "included" columns are now displayed in the generated SQL code for a CREATE INDEX statement.</entry>
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
