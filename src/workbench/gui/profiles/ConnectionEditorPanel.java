@@ -52,7 +52,13 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import workbench.interfaces.SimplePropertyEditor;
+import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.*;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.DelimiterDefinitionPanel;
@@ -63,11 +69,9 @@ import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbColorPicker;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.interfaces.SimplePropertyEditor;
-import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.DelimiterDefinition;
+
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 

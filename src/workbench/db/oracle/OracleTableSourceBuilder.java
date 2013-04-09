@@ -91,7 +91,7 @@ public class OracleTableSourceBuilder
 		}
 
 		String tablespace = table.getTablespace();
-		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace))
+		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace, table.getRawSchema(), dbConnection.getCurrentUser()))
 		{
 			if (result.length() > 0)
 			{
@@ -307,7 +307,7 @@ public class OracleTableSourceBuilder
 
 		if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
 		{
-			if (OracleUtils.shouldAppendTablespace(idx.getTablespace(), defaultTablespace))
+			if (OracleUtils.shouldAppendTablespace(idx.getTablespace(), defaultTablespace, idx.getSchema(), dbConnection.getCurrentUser()))
 			{
 				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + idx.getTablespace());
 			}

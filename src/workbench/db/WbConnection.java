@@ -266,7 +266,7 @@ public class WbConnection
 	{
 		if (sqlConnection == null) return;
 		if (newLevel == Connection.TRANSACTION_NONE) return;
-		
+
 		try
 		{
 			sqlConnection.setTransactionIsolation(newLevel);
@@ -338,8 +338,6 @@ public class WbConnection
 	 * Return the name of the current user.
 	 * <br/>
 	 * @return the current user as returned by the database.
-	 *
-	 * @see #isBusy()
 	 */
 	public String getCurrentUser()
 	{

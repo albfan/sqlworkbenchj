@@ -27,6 +27,17 @@
     </para>
   </note>
 
+  <para>
+    You can edit the file using a text editor. In that case you must close the application before editing the file,
+    otherwise your changes will be overwritten when the application is closed.
+  </para>
+
+  <para>
+    You can also change any property using the &wb-productname; command <link linkend="command-setconfig">WbSetConfig</link>.
+    For most of the parameters the change will be in effect immediately. For some you will still need to restart the application
+    or at least re-connect to the database.
+  </para>
+
   <section id="dbms-identifier">
     <title>Database Identifier</title>
 
@@ -215,6 +226,22 @@
 	<section id="db-explorer-settings">
 		<title>DbExplorer Settings</title>
 
+		<simplesect id="db-settings-switch-catalog">
+      <title>Switching the current database in the DbExplorer</title>
+      <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
+      <para>
+				When connected to a DBMS that supports multiple databases (catalogs) for the
+				same connection, the DbExplorer displays a dropdown list with the available
+				databases. Switching the selected catalog in the dropdown will trigger a switch
+				of the current catalog/database if the DbExplorer uses
+				its <link linkend="profile-separate-connection">own connection</link>.
+				If you do not want to switch the database, but merely apply the new
+				selection as a filter (which is always done, if the DbExplorer shares the connection
+				with the other SQL panels) set this property to <literal>false</literal>.
+      </para>
+      <para>Default: <literal>true</literal></para>
+    </simplesect>
+
     <simplesect id="selectable-objects-setting">
       <title>Controlling data display in the DbExplorer</title>
       <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
@@ -314,66 +341,49 @@
       </para>
       <para>Default value: <literal>true</literal> for both properties</para>
     </simplesect>
+
+		<simplesect id="dbexplorer-read-uncommmitted">
+      <indexterm><primary>DbExplorer</primary><secondary>prevent locking</secondary></indexterm>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>prevent locking in DbExplorer</secondary></indexterm>
+			<title>Changing the isolation level for the table list retrieval</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.dbexplorer.use.read_uncommitted</literal></para>
+      <para>
+        To avoid blocking of the table list retrieval, the isolation level used in the DbExplorer can be switched to
+        <literal>READ_UNCOMMITTED</literal> for DBMS that support this. This is e.g. necessary for Microsoft SQL Server
+        as an uncommitted DDL statement from a different connection can block the <literal>SELECT</literal> statement
+        that retrieves the table information.
+      </para>
+      <para>
+        The isolation level will <emphasis role="bold">only</emphasis> be changed if
+        <link linkend="profile-separate-connection">Separate connection per tab</link> is enabled.
+      </para>
+      <para>
+        For Microsoft SQL Server the <link linkend="mssql-dbexplorer-locktimeout">timeout</link>
+        waiting for such a lock can be configured as an alternative.
+      </para>
+      <para>Default values:
+        <simplelist columns="1">
+          <member>For Microsoft SQL Server: <literal>true</literal></member>
+        </simplelist>
+      </para>
+    </simplesect>
+
 	</section>
 
-	<!--
-  <section id="settings-sorting">
-
-    <title>Controlling sorting of data</title>
-		<para>
-			When you sort data in the result set (by clicking on the column header) this
-			is performed using Java built-in comparisons. For performance reasons the sorting
-			of character values (Strings) is done based on the ASCII value of the characters which
-			results in a case-sensitive sorting. Another disadvantage of this method is, that
-			non-ascii characters might not be sorted correctly either.
-		</para>
-		<para>
-			The sorting of character values can be influenced with three different settings
-			in <literal>workbench.settings</literal> that control the collation to be used.
-			The first property enables the usage of a country and language aware collation
-			sequence, the other two properties control the language and the country to
-			be used for the collator.
-		</para>
-
-		<simplesect id="sorting-use-collator">
-      <title>Using language aware collations for sorting</title>
-      <para>Property: <literal>workbench.sort.usecollator</literal></para>
+  <section id="general-config-settings">
+    <title>General configuration settings</title>
+    <simplesect id="settings-libdir">
+      <title>Defining a base directory for JDBC libraries</title>
+      <para>Property: <literal>workbench.libdir</literal></para>
       <para>
-      	When you sort the result set, characters values will be sorted case-sensitiv by default.
-      	This is caused by the <literal>compareTo()</literal> method available in the Java
-      	environment which puts lower case characters in front of upper case characters when sorting.
-				When setting <literal>workbench.sort.usecollator</literal> to <literal>true</literal> a
-				language sensitive comparison is used to sort character values, that will treat lowercase
-				and uppercase letters the same during sorting. As the policy on how special characters
-				are sorted is different for each language, you can also define the language and country
-				that should be used when initializing these sorting rules.
+        A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>.
+        The value of this property can be referenced using <literal>%LibDir%</literal>
+        in the driver's definition. The value for this can also be specified
+        <link linkend="cmdline-parameter-libdir">on the commandline</link>.
       </para>
-      <para>Default value: false</para>
+      <para>No default</para>
     </simplesect>
-
-		<simplesect id="sorting-sort-language">
-      <title>Sort language</title>
-      <para>Property: <literal>workbench.sort.language</literal></para>
-      <para>
-        If you want to use a language/country specific collation sequence,
-        this property defines the sort language to be used.
-      </para>
-      <para>Default value: en</para>
-    </simplesect>
-
-		<simplesect id="sorting-sort-country">
-      <title>Sort country</title>
-      <para>Property: <literal>workbench.sort.country</literal></para>
-      <para>
-        If you want to use a language/country specific collation sequence,
-        this property defines the sort country to be used when setting up
-        the collation sequence.
-      </para>
-      <para>Default value: The country defined by your operating system</para>
-    </simplesect>
-
   </section>
-	-->
 
   <section id="settings-db">
     <title>Database related settings</title>
@@ -454,20 +464,29 @@
       <para>No default</para>
     </simplesect>
 
-		<simplesect id="db-settings-switch-catalog">
-      <title>Database switch in DbExplorer</title>
-      <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
+		<simplesect id="db-settings-check-trans-drivers">
+      <title>Databases supporting the check for uncommitted changes</title>
+      <para>Property: <literal>workbench.db.drivers.opentransaction.check</literal></para>
       <para>
-				When connected to a DBMS that supports multiple databases (catalogs) for the
-				same connection, the DbExplorer displays a dropdown list with the available
-				databases. Switching the selected catalog in the dropdown will trigger a switch
-				of the current catalog/database if the DbExplorer uses
-				its <link linkend="profile-separate-connection">own connection</link>.
-				If you do not want to switch the database, but merely apply the new
-				selection as a filter (which is always done, if the DbExplorer shares the connection
-				with the other SQL panels) set this property to <literal>false</literal>.
+        A list of JDBC driver classnames that map to databases that support checking for uncommitted changes.
+        If one of these drivers is selected in a connection profile, the option <link linkend="profile-open-trans">Check for uncomitted changes</link>
+        will be visible in the connection dialog.
       </para>
-      <para>Default: <literal>true</literal></para>
+      <para>
+        To make this option work, a query that counts the number of uncommitted changes needs to be configured as well.
+      </para>
+      <para>Default: <literal>oracle.jdbc.OracleDriver,org.postgresql.Driver</literal></para>
+    </simplesect>
+
+		<simplesect id="db-settings-check-trans-query">
+      <title>Query to check for uncommitted changes</title>
+      <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.opentransaction.query</literal></para>
+      <para>
+        A query that can be used to check if the current connection has any uncommitted transactions. The query
+        is expected to return a single row with a single numeric column. If the value is zero, no uncommitted
+        changes are detected. Any number greater than zero means that there is an uncommitted change.
+      </para>
+      <para>Default: For Oracle and PostgreSQL, the corresponding queries are configured</para>
     </simplesect>
 
 		<simplesect id="db-settings-online-manual">
@@ -508,64 +527,6 @@
 			</para>
 			<para>Default value (for Oracle): <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
 			<para>Note that you need to use two backslashes in the RegeEx.</para>
-		</simplesect>
-
-		<simplesect id="db-oracle-detect-snapshots">
-			<title>Support for Oracle materialized views (snapshots)</title>
-			<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
-			<para>
-				When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link>
-				Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
-				To identify a specific "table" as a materialized view, a second request to the database
-				is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this
-				request can slow down the retrieval performance, this feature can be turned off. If for
-				any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
-				will be turned off until you re-connect to the database.
-			</para>
-			<para>Default value: <literal>true</literal></para>
-		</simplesect>
-
-		<simplesect id="db-oracle-char-semantics-fix">
-		  <title>Fix type display for VARCHAR columns in Oracle</title>
-		  <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
-		  <para>
-			  The Oracle driver does not report the size of VARCHAR2 columns correctly
-			  if the character semantic has been set to "char". The JDBC driver always returns
-			  the length in bytes.
-			  When this property is set to true, the length for those columns will
-			  be displayed correctly in the DbExplorer. As this means &wb-productname;
-			  is using it's own query to retrieve the table definition, this might not
-			  always yield the same results as the original statement from the Oracle driver.
-			  If your table definitions are not displayed correcly, set this value
-			  to <literal>false</literal> so that the original driver methods are used.
-			  The statement used by &wb-productname; is a bit faster then then original
-			  Oracle statement, as it does not use a <literal>LIKE</literal> predicate
-			  (which is required to comply with the JDBC specs).
-		  </para>
-		  <para>Default value: <literal>true</literal></para>
-		</simplesect>
-
-		<simplesect id="db-oracle-nvarchar-fix">
-		  <title>Fix type display for NVARCHAR2 columns in Oracle</title>
-		  <para>Property: <literal>workbench.db.oracle.fixnvarchartype</literal></para>
-		  <para>
-			  The Oracle driver does not report the type of NVARCHAR2 columns correctly. They
-				are returned as Types.OTHER. If this property is enabled, than &wb-productname;
-				is also using it's own SELECT statement to retrieve the table definition.
-		  </para>
-		  <para>Default value: <literal>true</literal></para>
-		</simplesect>
-
-		<simplesect id="settings-libdir">
-		  <title>Defining a base directory for JDBC libraries</title>
-		  <para>Property: <literal>workbench.libdir</literal></para>
-		  <para>
-				A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>.
-				The value of this property can be referenced using <literal>%LibDir%</literal>
-				in the driver's definition. The value for this can also be specified
-				<link linkend="cmdline-parameter-libdir">on the commandline</link>.
-		  </para>
-		  <para>No default</para>
 		</simplesect>
 
 		<simplesect id="settings-date-keywords">
@@ -634,6 +595,9 @@
 				before executing the first (insert or update) statement. In case of an error the savepoint
 				will be rolledback and WbImport will try to execute the second statement.
 			</para>
+      <para>
+        Note that enabling savepoints can drastically reduce the performance of the import.
+      </para>
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
@@ -712,7 +676,112 @@
 				</itemizedlist>
 			</para>
 		</simplesect>
+  </section>
 
+  <section id="dbms-specific-settings">
+    <title>DBMS specific settings</title>
+
+    <section id="oracle-config-settings">
+      <title>Oracle specific settings</title>
+      <simplesect id="db-oracle-detect-snapshots">
+        <title>Support for Oracle materialized views</title>
+        <para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
+        <para>
+          When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link>
+          Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
+          To identify a specific "table" as a materialized view, a second request to the database
+          is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this
+          request can slow down the retrieval performance, this feature can be turned off. If for
+          any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
+          will be turned off until you re-connect to the database.
+        </para>
+        <para>Default value: <literal>true</literal></para>
+      </simplesect>
+
+      <simplesect id="db-oracle-char-semantics-fix">
+        <title>Fix type display for VARCHAR columns in Oracle</title>
+        <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
+        <para>
+          The Oracle driver does not report the size of VARCHAR2 columns correctly
+          if the character semantic has been set to "char". The JDBC driver always returns
+          the length in bytes.
+          When this property is set to true, the length for those columns will
+          be displayed correctly in the DbExplorer. As this means &wb-productname;
+          is using it's own query to retrieve the table definition, this might not
+          always yield the same results as the original statement from the Oracle driver.
+          If your table definitions are not displayed correcly, set this value
+          to <literal>false</literal> so that the original driver methods are used.
+          The statement used by &wb-productname; is a bit faster then then original
+          Oracle statement, as it does not use a <literal>LIKE</literal> predicate
+          (which is required to comply with the JDBC specs).
+        </para>
+        <para>Default value: <literal>true</literal></para>
+      </simplesect>
+
+      <simplesect id="db-oracle-nvarchar-fix">
+        <title>Fix type display for NVARCHAR2 columns in Oracle</title>
+        <para>Property: <literal>workbench.db.oracle.fixnvarchartype</literal></para>
+        <para>
+          The Oracle driver does not report the type of NVARCHAR2 columns correctly. They
+          are returned as Types.OTHER. If this property is enabled, than &wb-productname;
+          is also using it's own SELECT statement to retrieve the table definition.
+        </para>
+        <para>Default value: <literal>true</literal></para>
+      </simplesect>
+
+      <simplesect id="db-oracle-default-tablespace">
+        <indexterm><primary>Oracle</primary><secondary>tablespace information</secondary></indexterm>
+        <title>Include tablespace information in the generated SQL source</title>
+        <para>Property: <literal>workbench.db.oracle.retrieve_tablespace</literal></para>
+        <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+        <para>
+          If this is enabled, the generated SQL source for tables and indexes will contain the
+          corresponding <literal>TABLESPACE xxx</literal> option to reflect the way the table was created.
+          If this option should not be included in the SQL, set this parameter to <literal>false</literal>.
+        </para>
+        <para>Default value: <literal>true</literal></para>
+      </simplesect>
+
+      <simplesect id="db-oracle-default-tablespace">
+        <indexterm><primary>Oracle</primary><secondary>tablespace information</secondary></indexterm>
+        <title>Check for the user's default tablespace</title>
+        <para>Property: <literal>workbench.db.oracle.check_default_tablespace</literal></para>
+        <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+        <para>
+          When including the tablespace for an index or table, and this option is enabled, the
+          tablespace for tables and indexes owned by the current user is only displayed if it is different from the default tablespace.
+          For tables and indexes owned by other users, the tablespace will still be displayed even if it's the default
+          tablespace of the owner.
+        </para>
+        <para>Default value: <literal>false</literal></para>
+      </simplesect>
+    </section>
+
+    <section id="mssql-config-settings">
+      <title>Microsoft SQL Server specific settings</title>
+      <simplesect id="mssql-dbexplorer-locktimeout">
+        <indexterm><primary>Microsoft SQL Server</primary><secondary>lock timeout for DbExplorer</secondary></indexterm>
+        <title>Define a lock timeout for the DbExplorer</title>
+        <para>Property: <literal>workbench.db.microsoft_sql_server.dbexplorer.locktimeout</literal></para>
+        <para>Possible values: positive integer value. (Timeout in milliseconds)</para>
+        <para>
+          This defines timeout that limits the time the driver should wait when hitting a read lock
+          during retrieval of the table information. The timeout will be changed by running
+          <literal>SET LOCK_TIMEOUT ...</literal> after the DbExplorer is opened.
+        </para>
+        <para>
+          The timeout will only be changed if <link linkend="profile-separate-connection">Separate connection per tab</link>
+          is enabled.
+        </para>
+        <para>
+          As an alternative, the DbExplorer can be configured to change the isolation
+          level to <link linkend="dbexplorer-read-uncommmitted"><literal>READ UNCOMMITTED</literal></link>
+          to avoid the locks alltogether (but display pontially wrong information).
+        </para>
+        <para>Default value: 2500</para>
+      </simplesect>
+
+    </section>
   </section>
 
   <section id="sql-execution-settings">
@@ -1162,6 +1231,13 @@
     </para>
     <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%table_name%
 workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
+
+    <para>
+      The following example configures a SQL statement to retrieve the table's source using Oracle's
+      <ulink url="http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_metada.htm">DBMS_METADATA</ulink> package:
+      "SHOW CREATE TABLE":
+    </para>
+    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('TABLE', '%schema%', '%table_name%') from dual;</programlisting>
 
     <para>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table

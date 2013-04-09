@@ -111,7 +111,7 @@ public class OracleIndexReader
 		// We can only return tablespace information when using our own SQL statement for the index retrieval.
 		return !Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_INDEXLIST, false);
 	}
-	
+
 	private ResultSet getIndexInfo(TableIdentifier table, String indexName, String indexSchema, boolean unique)
 		throws SQLException
 	{
@@ -314,7 +314,7 @@ public class OracleIndexReader
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
 		String option = null;
-		if (OracleUtils.shouldAppendTablespace(index.getTablespace(), defaultTablespace))
+		if (OracleUtils.shouldAppendTablespace(index.getTablespace(), defaultTablespace, index.getSchema(), metaData.getWbConnection().getCurrentUser()))
 		{
 			option = "\n    TABLESPACE " + index.getTablespace();
 		}

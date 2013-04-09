@@ -174,8 +174,9 @@ public class OracleUtils
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true);
 	}
 
-	public static boolean shouldAppendTablespace(String tablespace, String defaultTablespace)
+	public static boolean shouldAppendTablespace(String tablespace, String defaultTablespace, String objectOwner, String currentUser)
 	{
+		if (!StringUtil.equalStringIgnoreCase(StringUtil.trimQuotes(objectOwner), currentUser)) return true;
 		if (!retrieveTablespaceInfo()) return false;
 		if (StringUtil.isEmptyString(defaultTablespace) && StringUtil.isNonEmpty(tablespace)) return true;
 		return (!tablespace.equals(defaultTablespace));
