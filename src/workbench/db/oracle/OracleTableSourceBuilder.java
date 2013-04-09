@@ -307,7 +307,14 @@ public class OracleTableSourceBuilder
 
 		if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
 		{
-			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, "");
+			if (OracleUtils.shouldAppendTablespace(idx.getTablespace(), defaultTablespace))
+			{
+				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + idx.getTablespace());
+			}
+			else
+			{
+				sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, "");
+			}
 		}
 		else
 		{

@@ -27,14 +27,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -136,7 +139,7 @@ public class TableSourceBuilder
 	 *
 	 * If the DBMS automatically creates an index when a FK constraint is defined (e.g. MySQL)
 	 * the corresponding CREATE INDEX should not be part of the generated table source.
-	 * 
+	 *
 	 * @see DbSettings#supportsAutomaticFkIndexes()
 	 */
 	private List<IndexDefinition> getIndexesToCreate(List<IndexDefinition> indexList, DataStore foreignKeys)

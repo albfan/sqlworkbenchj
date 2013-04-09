@@ -821,6 +821,10 @@
 								values. The delimiter could also be escaped inside a quoted value if the
 								delimiter falls into the selected escape range (e.g. a tab character).
 							</para>
+              <para>
+                To import a text file with escaped values using <link linkend="text-import-decode">WbImport</link>,
+                the <literal>-decode=true</literal> must be used.
+              </para>
 						</entry>
 					</row>
 
