@@ -68,7 +68,10 @@ public class GuiSettings
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
 		PROP_TITLE_SHOW_EDITOR_FILE, PROP_TITLE_GROUP_SEP, PROP_TITLE_GROUP_BRACKET);
+
 	public static final String PROP_DBEXP_USE_SQLSORT = "workbench.dbexplorer.datapanel.applysqlorder";
+	public static final String PROP_TABLE_HEADER_BOLD = "workbench.gui.table.header.bold";
+	public static final String PROP_TABLE_HEADER_FULL_TYPE_INFO = "workbench.gui.table.header.typeinfo.full";
 
 	public static int getMaxExpansionPause()
 	{
@@ -846,4 +849,13 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.show.selectfk.top", false);
 	}
 
+	public static boolean showTableHeaderInBold()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_TABLE_HEADER_BOLD, false);
+	}
+
+	public static void setShowTableHeaderInBold(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_TABLE_HEADER_BOLD, flag);
+	}
 }

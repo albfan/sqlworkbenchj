@@ -23,6 +23,9 @@
 package workbench.gui.renderer;
 
 import java.awt.Component;
+import java.awt.Font;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Types;
 
 import javax.swing.JComponent;
@@ -35,6 +38,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
@@ -54,14 +58,28 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SortHeaderRenderer
-	implements TableCellRenderer
+	implements TableCellRenderer, PropertyChangeListener
 {
 	private JLabel displayLabel = new JLabel();
 	private boolean showFullTypeInfo;
+	private boolean showBoldHeader;
 
 	public SortHeaderRenderer()
 	{
-		showFullTypeInfo = Settings.getInstance().getBoolProperty("workbench.gui.db.showfulltypeinfo", false);
+		readSettings();
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_TABLE_HEADER_BOLD, GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO);
+	}
+
+	private void readSettings()
+	{
+		showBoldHeader = GuiSettings.showTableHeaderInBold();
+		showFullTypeInfo = Settings.getInstance().getBoolProperty(GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO, false);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		readSettings();
 	}
 
 	@Override
@@ -92,6 +110,10 @@ public class SortHeaderRenderer
 			display = displayLabel;
 		}
 
+		if (showBoldHeader)
+		{
+			display.setFont(display.getFont().deriveFont(Font.BOLD));
+		}
 		display.setHorizontalTextPosition(SwingConstants.LEFT);
 		display.setHorizontalAlignment(SwingConstants.LEFT);
 
@@ -179,5 +201,6 @@ public class SortHeaderRenderer
 		}
 		return display;
 	}
+
 }
 

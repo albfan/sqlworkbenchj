@@ -750,6 +750,12 @@ public class WbTable
 				}
 			}
 		});
+		
+		if (sortRenderer instanceof PropertyChangeListener)
+		{
+			PropertyChangeListener l = (PropertyChangeListener)sortRenderer;
+			Settings.getInstance().removePropertyChangeListener(l);
+		}
 	}
 
 	@Override
