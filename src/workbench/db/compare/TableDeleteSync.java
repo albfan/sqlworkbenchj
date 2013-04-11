@@ -34,20 +34,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.exporter.XmlRowDataConverter;
+
 import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.db.exporter.XmlRowDataConverter;
+
 import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
+
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -307,7 +312,7 @@ public class TableDeleteSync
 			}
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
-			RowDataReader reader = new RowDataReader(info, toDelete);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, toDelete);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
@@ -372,7 +377,7 @@ public class TableDeleteSync
 			rs = checkStatement.executeQuery(sql);
 			List<RowData> checkRows = new ArrayList<RowData>(referenceRows.size());
 			ResultInfo ri = new ResultInfo(rs.getMetaData(), reference);
-			RowDataReader reader = new RowDataReader(ri, reference);
+			RowDataReader reader = RowDataReaderFactory.createReader(ri, reference);
 			while (rs.next())
 			{
 				if (cancelExecution) break;

@@ -39,6 +39,7 @@ import workbench.db.importer.RowDataProducer;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
@@ -125,7 +126,7 @@ public class QueryCopySource
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
-			RowDataReader reader = new RowDataReader(info, sourceConnection);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, sourceConnection);
 			while (this.keepRunning && rs.next())
 			{
 				// RowDataReader will make some transformation

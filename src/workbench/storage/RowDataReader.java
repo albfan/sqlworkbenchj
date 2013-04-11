@@ -33,12 +33,15 @@ import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerDataConverter;
 import workbench.db.oracle.OracleDataConverter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -62,7 +65,7 @@ public class RowDataReader
 	private boolean adjustArrayDisplay;
 	private ResultInfo resultInfo;
 
-	public RowDataReader(ResultInfo info, WbConnection conn)
+	RowDataReader(ResultInfo info, WbConnection conn)
 	{
 		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 		converter = getConverterInstance(conn);
@@ -117,7 +120,7 @@ public class RowDataReader
 	 * @param flag if true, return <tt>Reader</tt>s instead of <tt>String</tt>s
 	 *
 	 * @see #read(java.sql.ResultSet, boolean)
-	 * @see ResultInfo#useGetStringForClobs() 
+	 * @see ResultInfo#useGetStringForClobs()
 	 */
 	public void setUseStreamsForClobs(boolean flag)
 	{
@@ -179,7 +182,7 @@ public class RowDataReader
 				}
 				else if (type == Types.TIMESTAMP)
 				{
-					value = rs.getTimestamp(i+1);
+					value = readTimestampValue(rs, i+1);
 				}
 				else if (type == Types.DATE)
 				{
@@ -308,6 +311,12 @@ public class RowDataReader
 			colData[i] = value;
 		}
 		return new RowData(colData);
+	}
+
+	protected Object readTimestampValue(ResultSet rs, int column)
+		throws SQLException
+	{
+		return rs.getTimestamp(column);
 	}
 
 	private void addStream(InputStream in)

@@ -1281,7 +1281,7 @@ public class DataStore
 		{
 			int rowCount = 0;
 			if (this.data == null) this.data = createData();
-			RowDataReader reader = new RowDataReader(resultInfo, originalConnection);
+			RowDataReader reader = RowDataReaderFactory.createReader(resultInfo, originalConnection);
 
 			while (!this.cancelRetrieve && aResultSet.next())
 			{

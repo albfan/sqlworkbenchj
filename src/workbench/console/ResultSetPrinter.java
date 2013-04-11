@@ -134,7 +134,7 @@ public class ResultSetPrinter
 			printHeader(pw);
 
 			//RowData row = new RowData(info);
-			RowDataReader reader = new RowDataReader(info, null);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, null);
 			int count = 0;
 			while (data.next())
 			{

@@ -40,6 +40,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -209,7 +210,7 @@ public abstract class ExportWriter
 		boolean first = true;
 		if (this.exporter.writeEmptyResults()) writeStart();
 
-		RowDataReader reader = new RowDataReader(info, exporter.getConnection());
+		RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
 		reader.setUseStreamsForBlobs(useStreamsForBlobs);
 		while (rs.next())
 		{

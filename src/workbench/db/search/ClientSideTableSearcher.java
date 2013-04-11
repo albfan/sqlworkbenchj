@@ -26,18 +26,23 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.TableIdentifier;
-import workbench.db.TableSelectBuilder;
-import workbench.db.WbConnection;
+
 import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -189,7 +194,7 @@ public class ClientSideTableSearcher
 
 			boolean trimCharData = this.connection.trimCharData();
 
-			RowDataReader reader = new RowDataReader(info, connection);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, connection);
 			while (rs.next())
 			{
 				if (cancelSearch) break;

@@ -28,22 +28,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.exporter.BlobMode;
+
 import workbench.interfaces.ErrorReporter;
 import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.db.exporter.BlobMode;
+
 import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
+
 import workbench.util.*;
 
 /**
@@ -384,7 +389,7 @@ public class TableDataDiff
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
-			RowDataReader reader = new RowDataReader(info, this.reference);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, this.reference);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
@@ -430,7 +435,7 @@ public class TableDataDiff
 
 			if (currentRowNumber == 0) comparer.setResultInfo(ri);
 
-			RowDataReader reader = new RowDataReader(ri, toSync);
+			RowDataReader reader = RowDataReaderFactory.createReader(ri, toSync);
 			while (rs.next())
 			{
 				RowData r = reader.read(rs, false);

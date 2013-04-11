@@ -28,20 +28,28 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
+
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
+
 import org.junit.After;
-import workbench.storage.RowDataReader;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -99,7 +107,7 @@ public class UpdatingCommandTest
 			stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, blob_data from blob_test");
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.connection);
-			RowDataReader reader = new RowDataReader(info, connection);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, connection);
 			if (rs.next())
 			{
 

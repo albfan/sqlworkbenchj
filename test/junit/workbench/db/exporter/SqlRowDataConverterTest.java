@@ -22,27 +22,35 @@
  */
 package workbench.db.exporter;
 
-import org.junit.Test;
-import workbench.WbTestCase;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.sql.ScriptParser;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
+import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
+
+import workbench.sql.ScriptParser;
+
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.db.ColumnIdentifier;
-import workbench.storage.RowDataReader;
-import workbench.util.CollectionUtil;
 
 /**
  *
@@ -81,7 +89,7 @@ public class SqlRowDataConverterTest
 			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
 			TableIdentifier tbl = con.getMetadata().findObject(new TableIdentifier("person"));
 			info.setUpdateTable(tbl);
-			RowDataReader reader = new RowDataReader(info, con);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, con);
 			rs.next();
 			RowData row = reader.read(rs, false);
 
