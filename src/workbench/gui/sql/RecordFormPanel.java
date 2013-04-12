@@ -62,6 +62,7 @@ import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.BlobColumnPanel;
+import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.WbRenderer;
 import workbench.interfaces.ValidatingComponent;
@@ -298,7 +299,7 @@ public class RecordFormPanel
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
-		WbRenderer numberRenderer = (WbRenderer)RendererFactory.createNumberRenderer(maxDigits, sep);
+		WbRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep);
 		for (int i=0; i < fieldDef.getColumnCount(); i++)
 		{
 			int type = fieldDef.getColumnType(i);

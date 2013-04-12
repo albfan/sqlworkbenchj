@@ -129,10 +129,16 @@ import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
+import workbench.gui.renderer.BlobColumnRenderer;
+import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
+import workbench.gui.renderer.SortHeaderRenderer;
+import workbench.gui.renderer.StringColumnRenderer;
+import workbench.gui.renderer.TextAreaRenderer;
+import workbench.gui.renderer.ToolTipRenderer;
 import workbench.gui.sql.DwStatusBar;
 
 import workbench.storage.DataConverter;
@@ -165,7 +171,7 @@ public class WbTable
 	private WbTextCellEditor defaultEditor;
 	private WbCellEditor multiLineEditor;
 	private TableCellRenderer multiLineRenderer;
-	private TableCellRenderer sortRenderer;
+	private SortHeaderRenderer sortRenderer;
 
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
@@ -275,8 +281,8 @@ public class WbTable
 		}
 
 		this.multiLineEditor = new WbCellEditor(this);
-		this.multiLineRenderer = RendererFactory.getMultiLineRenderer();
-		this.sortRenderer = RendererFactory.getSortHeaderRenderer();
+		this.multiLineRenderer = new TextAreaRenderer();
+		this.sortRenderer = new SortHeaderRenderer();
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -750,12 +756,7 @@ public class WbTable
 				}
 			}
 		});
-		
-		if (sortRenderer instanceof PropertyChangeListener)
-		{
-			PropertyChangeListener l = (PropertyChangeListener)sortRenderer;
-			Settings.getInstance().removePropertyChangeListener(l);
-		}
+		Settings.getInstance().removePropertyChangeListener(sortRenderer);
 	}
 
 	@Override
@@ -1501,26 +1502,19 @@ public class WbTable
 
 	protected void updateSortRenderer()
 	{
-		JTableHeader header = getTableHeader();
-		if (header == null) return;
+		TableColumnModel columns = getColumnModel();
+		if (columns == null) return;
 
-		TableColumnModel model = header.getColumnModel();
-		if (model == null) return;
-
-		for (int col = 0; col < model.getColumnCount(); col ++)
+		for (int col = 0; col < columns.getColumnCount(); col ++)
 		{
 			try
 			{
-				// By setting the renderer for each column seperately
-				// instead of using a default renderer, we can re-use
-				// the rendering done by the Look & Feel's default renderer
-				TableColumn column = getColumn(getColumnName(col));
+				TableColumn column = columns.getColumn(col);
 				if (column == null) continue;
 				column.setHeaderRenderer(sortRenderer);
 			}
 			catch (Throwable th)
 			{
-				// just in case, because getColumn() can throw an IllegalArgumentException
 			}
 		}
 	}
@@ -1633,7 +1627,7 @@ public class WbTable
 
 		if (isBlobColumn(column))
 		{
-			rend = RendererFactory.getBlobRenderer();
+			rend = new BlobColumnRenderer();
 		}
 		else
 		{
@@ -1690,18 +1684,17 @@ public class WbTable
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
-		TableCellRenderer numberRenderer = RendererFactory.createNumberRenderer(maxDigits, sep);
+		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
 
-		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
+		this.setDefaultRenderer(byte[].class, new BlobColumnRenderer());
 
-		this.setDefaultRenderer(byte[].class, RendererFactory.getBlobRenderer());
-
+		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep);
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);
 		this.setDefaultRenderer(BigDecimal.class, numberRenderer);
 
-		TableCellRenderer intRenderer = RendererFactory.getIntegerRenderer();
+		TableCellRenderer intRenderer = new NumberColumnRenderer();
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
@@ -1712,7 +1705,7 @@ public class WbTable
 		// search value was found
 		if (this.useDefaultStringRenderer)
 		{
-			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
+			this.setDefaultRenderer(String.class, new StringColumnRenderer());
 			initMultiLineRenderer();
 		}
 	}
@@ -1798,7 +1791,7 @@ public class WbTable
 			}
 			else if (isBlobColumn(i))
 			{
-				col.setCellEditor((TableCellEditor)RendererFactory.getBlobRenderer());
+				col.setCellEditor(new BlobColumnRenderer());
 			}
 			else if (isMultiLineColumn(i))
 			{

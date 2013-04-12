@@ -28,8 +28,8 @@ import javax.swing.table.TableCellRenderer;
 import workbench.log.LogMgr;
 
 /**
- * A factory for TableCellRenderers. 
- * <br/> 
+ * A factory for TableCellRenderers.
+ * <br/>
  * Classes are created using  Class.forName() to avoid unnecessary class loading during startup.
  * This is used from within WbTable
  *
@@ -39,7 +39,7 @@ import workbench.log.LogMgr;
  */
 public class RendererFactory
 {
-	
+
 	private static TableCellRenderer createRenderer(String className)
 	{
 		TableCellRenderer rend = null;
@@ -54,13 +54,8 @@ public class RendererFactory
 			rend = new DefaultTableCellRenderer();
 		}
 		return rend;
-	}	
-	
-	public static TableCellRenderer getSortHeaderRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.SortHeaderRenderer");
 	}
-	
+
 	public static TableCellRenderer getDateRenderer(String format)
 	{
 		TableCellRenderer rend = null;
@@ -76,56 +71,13 @@ public class RendererFactory
 		{
 			LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
-		} 
+		}
 		return rend;
 	}
 
-	public static TableCellRenderer getTooltipRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.ToolTipRenderer");
-	}
-	
-	public static TableCellRenderer getStringRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.StringColumnRenderer");
-	}
-	
-	public static TableCellRenderer getIntegerRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.NumberColumnRenderer");
-	}
-	
-	public static TableCellRenderer createNumberRenderer(int maxDigits, char sep)
-	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.renderer.NumberColumnRenderer");
-			Class[] types = new Class[] { int.class, char.class };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { Integer.valueOf(maxDigits), Character.valueOf(sep) };
-			TableCellRenderer rend = (TableCellRenderer)cons.newInstance(args);
-			return rend;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getNumberRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
-	}
-
-	public static TableCellRenderer getMultiLineRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.TextAreaRenderer");
-	}
-	
 	public static TableCellRenderer getSqlTypeRenderer()
 	{
 		return createRenderer("workbench.gui.renderer.SqlTypeRenderer");
 	}
-	
-	public static TableCellRenderer getBlobRenderer()
-	{
-		return createRenderer("workbench.gui.renderer.BlobColumnRenderer");
-	}
-	
+
 }
