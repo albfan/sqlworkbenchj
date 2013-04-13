@@ -29,13 +29,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.StreamImporter;
 import workbench.db.importer.TextImportOptions;
-import workbench.log.LogMgr;
+
 import workbench.util.FileUtil;
 
 /**
@@ -72,6 +75,7 @@ public class PgCopyImporter
 	{
 		useDefaultClassloader = flag;
 	}
+	
 	public boolean isSupported()
 	{
 		try

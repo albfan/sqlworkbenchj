@@ -24,8 +24,10 @@ package workbench.util;
 
 import java.util.LinkedList;
 import java.util.List;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -57,6 +59,7 @@ public class StringUtilTest
 		assertEquals("0123", StringUtil.formatInt(123, 4).toString());
 		assertEquals("123", StringUtil.formatInt(123, 3).toString());
 		assertEquals("123", StringUtil.formatInt(123, 1).toString());
+		assertEquals("-01", StringUtil.formatInt(-1, 2).toString());
 	}
 
 	@Test

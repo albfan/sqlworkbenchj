@@ -810,7 +810,7 @@ public class StringUtil
 	{
 		return toArray(strings, toUpper, false);
 	}
-	
+
 	public static String[] toArray(Collection<String> strings, boolean toUpper, boolean unique)
 	{
 		if (strings == null) return null;
@@ -1352,7 +1352,11 @@ public class StringUtil
 	public static CharSequence formatInt(int value, int length)
 	{
 		StringBuilder result = new StringBuilder(length);
-		String nr = Integer.toString(value);
+		if (value < 0)
+		{
+			result.append('-');
+		}
+		String nr = Integer.toString(Math.abs(value));
 		for (int i=0; i < length - nr.length(); i++)
 		{
 			result.append('0');

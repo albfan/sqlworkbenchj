@@ -63,7 +63,7 @@ public class RowDataReader
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean adjustArrayDisplay;
-	private ResultInfo resultInfo;
+	protected ResultInfo resultInfo;
 
 	RowDataReader(ResultInfo info, WbConnection conn)
 	{
