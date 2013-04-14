@@ -33,15 +33,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -340,8 +344,9 @@ public class PostgresProcedureReader
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
 		if (hasCost)
 		{
-			sql += ",\n        p.procost ,\n        p.prorows ";
+			sql += ",\n       p.procost ,\n       p.prorows ";
 		}
+		
 		sql +=
 			"\nFROM pg_proc p \n" +
 			"   JOIN pg_language l ON p.prolang = l.oid \n" +
@@ -356,7 +361,11 @@ public class PostgresProcedureReader
 		String oids = name.getOIDs();
 		if (StringUtil.isNonBlank(oids))
 		{
-			sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector) \n";
+			sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector)";
+		}
+		else
+		{
+			sql += " AND (p.proargtypes IS NULL OR array_length(p.proargtypes,1) = 0)";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())

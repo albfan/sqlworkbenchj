@@ -34,7 +34,7 @@ public class RowDataReaderFactory
 {
 	public static RowDataReader createReader(ResultInfo info, WbConnection conn)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fix.timstamptz", true) && conn.getMetadata().isOracle())
+		if (conn != null  && conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.db.oracle.fix.timstamptz", true))
 		{
 			try
 			{

@@ -83,25 +83,27 @@ public class OracleRowDataReader
 		throws SQLException
 	{
 		String type = this.resultInfo.getDbmsTypeName(column-1);
-		if (type.equalsIgnoreCase("TIMESTAMP WITH TIME ZONE"))
+		if (!type.equalsIgnoreCase("TIMESTAMP WITH TIME ZONE"))
 		{
-			Object value = rs.getObject(column);
-			if (value == null) return null;
-			if (rs.wasNull()) return null;
+			return rs.getTimestamp(column);
+		}
 
-			if (value.getClass().getName().equals("oracle.sql.TIMESTAMPTZ"))
+		Object value = rs.getObject(column);
+		if (value == null) return null;
+		if (rs.wasNull()) return null;
+
+		if (value.getClass().getName().equals("oracle.sql.TIMESTAMPTZ"))
+		{
+			try
 			{
-				try
-				{
-					return adjustTimezone(value);
-				}
-				catch (Exception ex)
-				{
-					LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp", ex);
-				}
+				return adjustTimezone(value);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp", ex);
 			}
 		}
-		return super.readTimestampValue(rs, column);
+		return rs.getTimestamp(column);
 	}
 
 	private Object adjustTimezone(Object tz)

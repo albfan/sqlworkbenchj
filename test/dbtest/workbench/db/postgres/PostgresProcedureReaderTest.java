@@ -22,18 +22,24 @@
  */
 package workbench.db.postgres;
 
-import workbench.db.ProcedureReader;
 import java.sql.Statement;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ProcedureDefinition;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
