@@ -32,25 +32,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
+import workbench.interfaces.StatementParameterPrompter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.oracle.OracleProcedureReader;
+
 import workbench.gui.preparedstatement.ParameterEditor;
-import workbench.interfaces.StatementParameterPrompter;
-import workbench.log.LogMgr;
-import workbench.util.ExceptionUtil;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.preparedstatement.ParameterDefinition;
 import workbench.sql.preparedstatement.StatementParameters;
-import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -495,7 +500,7 @@ public class WbCall
 
 		int parameterIndexOffset = 0;
 		boolean needFuncCall = ProcedureDefinition.returnsRefCursor(currentConnection, params);
-		if (!needFuncCall && procDef.isFunction())
+		if (!needFuncCall && ProcedureDefinition.isFunction(procDef, params))
 		{
 			needFuncCall = true;
 			parameterIndexOffset = 1;

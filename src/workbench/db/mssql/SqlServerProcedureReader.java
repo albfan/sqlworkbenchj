@@ -27,14 +27,18 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -124,7 +128,7 @@ public class SqlServerProcedureReader
 			else
 			{
 				useOwnSQL = false;
-				LogMgr.logError("SqlServerProcedureReader.getProcedures()", "Could not retrieve procedures using a call to sp_stored_procedures", null);
+				LogMgr.logError("SqlServerProcedureReader.getProcedures()", "Could not retrieve procedures using [sp_stored_procedures]", null);
 				return super.getProcedures(catalog, owner, null);
 			}
 
@@ -175,7 +179,7 @@ public class SqlServerProcedureReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("SqlServerProcedureReader", "Could not retrieve procedures using a call to sp_stored_procedures", e);
+			LogMgr.logError("SqlServerProcedureReader", "Could not retrieve procedures using [p_stored_procedures]", e);
 			useOwnSQL = false;
 			return super.getProcedures(catalog, owner, null);
 		}

@@ -30,9 +30,12 @@ import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbCall;
-import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -552,6 +555,19 @@ public class ProcedureDefinition
 			String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 			String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 			if (isRefCursor(conn, typeName) && "RETURN".equals(resultType)) return true;
+		}
+		return false;
+	}
+
+	public static boolean isFunction(ProcedureDefinition def, DataStore params)
+	{
+		if (def.isFunction()) return true;
+
+		// This is mainly for SQL Server which can have procedures that have a return value like a function.
+		for (int i=0; i < params.getRowCount(); i++)
+		{
+			String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			if ("RETURN".equals(resultType)) return true;
 		}
 		return false;
 	}
