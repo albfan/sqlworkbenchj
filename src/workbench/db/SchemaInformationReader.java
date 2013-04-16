@@ -31,4 +31,5 @@ public interface SchemaInformationReader
 	String getCurrentSchema();
 	String getCachedSchema();
 	void dispose();
+	void clearCache();
 }

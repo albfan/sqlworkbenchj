@@ -67,7 +67,7 @@ public class SqlFormatter
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.unmodifiableSet(WHERE_TERMINAL,"WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating a a JOIN clause
-	public static final Set<String> JOIN_TERMINAL = CollectionUtil.unmodifiableSet("WHERE", "ORDER BY", "GROUP BY");
+	public static final Set<String> JOIN_TERMINAL = CollectionUtil.unmodifiableSet("WHERE", "ORDER BY", "GROUP BY", "UNION", "UNION ALL");
 
 	// keywords terminating an GROUP BY clause
 	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.caseInsensitiveSet(WHERE_TERMINAL,

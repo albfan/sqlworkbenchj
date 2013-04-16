@@ -109,6 +109,8 @@ public class AlterSessionCommand
 			}
 			else
 			{
+				meta.clearCachedSchemaInformation();
+				
 				// if the current schema is changed, a schemaChanged should be fired
 				String schema = meta.getCurrentSchema();
 				if (!oldSchema.equalsIgnoreCase(schema))

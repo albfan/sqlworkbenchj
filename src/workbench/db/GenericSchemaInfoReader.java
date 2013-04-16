@@ -83,6 +83,12 @@ public class GenericSchemaInfoReader
 	}
 
 	@Override
+	public void clearCache()
+	{
+		this.cachedSchema = null;
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.connection && evt.getPropertyName().equals(WbConnection.PROP_SCHEMA))

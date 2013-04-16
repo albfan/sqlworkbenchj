@@ -1220,6 +1220,14 @@ public class DbMetadata
 		return null;
 	}
 
+	public void clearCachedSchemaInformation()
+	{
+		if (dbSettings.supportsSchemas() && this.schemaInfoReader != null)
+		{
+			this.schemaInfoReader.clearCache();
+		}
+	}
+
 	/**
 	 * Returns the schema that should be used for the current user
 	 * This essentially calls {@link #getCurrentSchema()}. The method

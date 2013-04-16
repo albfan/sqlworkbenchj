@@ -65,6 +65,12 @@ public class SqlServerSchemaInfoReader
 	}
 
 	@Override
+	public void clearCache()
+	{
+		this.defaultSchema = null;
+	}
+
+	@Override
 	public String getCachedSchema()
 	{
 		return defaultSchema;
