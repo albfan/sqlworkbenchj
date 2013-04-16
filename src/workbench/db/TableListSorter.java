@@ -25,6 +25,7 @@ package workbench.db;
 import workbench.storage.RowData;
 import workbench.storage.RowDataListSorter;
 import workbench.storage.SortDefinition;
+
 import workbench.util.StringUtil;
 
 /**
@@ -62,16 +63,19 @@ public class TableListSorter
 	{
 		if (mviewAsTable && column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
 		{
-			String value1 = (String)row1.getValue(column);
-			if (value1 == null) value1 = StringUtil.EMPTY_STRING;
-			if (DbMetadata.MVIEW_NAME.equals(value1)) value1 = TABLE_TYPE;
-
-			String value2 = (String)row2.getValue(column);
-			if (value2 == null) value2 = StringUtil.EMPTY_STRING;
-			if (DbMetadata.MVIEW_NAME.equals(value2)) value2 = TABLE_TYPE;
-
+			String value1 = getType(row1);
+			String value2 = getType(row2);
 			return value1.compareTo(value2);
 		}
 		return super.compareColumn(column, row1, row2);
 	}
+
+	private String getType(RowData row)
+	{
+		String value = (String)row.getValue(DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+		if (value == null) return StringUtil.EMPTY_STRING;
+		if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
+		return value;
+	}
+	
 }
