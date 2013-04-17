@@ -93,14 +93,23 @@ public class OdsRowDataConverterTest
 		// Start writing
 		converter.getStart();
 
-		RowData data = new RowData(info);
-		data.setValue(0, "char_column_data");
-		data.setValue(1, new Integer(42));
+		RowData row1 = new RowData(info);
+		row1.setValue(0, "char_column_data");
+		row1.setValue(1, new Integer(42));
 		ValueConverter valueConverter = new ValueConverter("yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss");
-		data.setValue(2, valueConverter.convertValue("2008-07-23", Types.DATE));
-		data.setValue(3, valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP));
+		row1.setValue(2, valueConverter.convertValue("2008-07-23", Types.DATE));
+		row1.setValue(3, valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP));
 
-		converter.convertRowData(data, 1);
+		converter.convertRowData(row1, 1);
+
+
+		RowData row2 = new RowData(info);
+		row2.setValue(0, "foobar");
+		row2.setValue(1, null);
+		row2.setValue(2, null);
+		row2.setValue(3, null);
+
+		converter.convertRowData(row2, 2);
 
 		// Finish writing, make sure the archive is closed properly
 		converter.getEnd(1);
@@ -126,12 +135,12 @@ public class OdsRowDataConverterTest
 		String colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[1]/text:p/text()",
 			contentNamespaces);
-		assertEquals(data.getValue(0), colValue);
+		assertEquals(row1.getValue(0), colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[2]/text:p/text()",
 			contentNamespaces);
-		assertEquals(data.getValue(1).toString(), colValue);
+		assertEquals(row1.getValue(1).toString(), colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[3]/text:p/text()",
