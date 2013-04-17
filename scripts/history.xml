@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="8" type="fix">When exporting to ODS, numeric columns with a NULL value would cause the export to fail</entry>
     <entry dev-build="8" type="fix">For Oracle, displaying the source of a table with a disabled primary key generated an error</entry>
     <entry dev-build="8" type="fix">For SQL Server, WbCall now displays the (scalar) return value of a stored procedures when using the jTDS driver</entry>
     <entry dev-build="8" type="fix">For Oracle, the value for a TIMESTAMP WITH TIME ZONE column is now displayed correctly</entry>
