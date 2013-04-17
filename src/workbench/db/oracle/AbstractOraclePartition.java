@@ -68,7 +68,7 @@ public abstract class AbstractOraclePartition
 	public void retrieve(DbObject object, WbConnection conn)
 		throws SQLException
 	{
-		boolean hasPartitions = retrieveDefinition(object, conn);
+		boolean hasPartitions = object != null ? retrieveDefinition(object, conn) : false;
 		if (hasPartitions)
 		{
 			retrieveColumns(object, conn);

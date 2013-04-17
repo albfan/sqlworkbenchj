@@ -291,25 +291,39 @@ public class OracleTableSourceBuilder
 
 		// The name used by the index is not necessarily the same as the one used by the constraint.
 		String pkIndexName = pk.getPkIndexName();
-		IndexDefinition idx = getIndexDefinition(table, pkIndexName);
+
+		boolean pkEnabled = pk.isEnabled() != null ? pk.isEnabled().booleanValue() : true;
+		IndexDefinition pkIdx = null;
 		boolean isPartitioned = false;
+
+		if (pkEnabled)
+		{
+			pkIdx = getIndexDefinition(table, pkIndexName);
+		}
 
 		try
 		{
-			OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
-			partIndex.retrieve(idx, dbConnection);
-			isPartitioned = partIndex.isPartitioned();
+			if (pkIdx != null)
+			{
+				OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
+				partIndex.retrieve(pkIdx, dbConnection);
+				isPartitioned = partIndex.isPartitioned();
+			}
 		}
 		catch (SQLException ex)
 		{
 			isPartitioned = false;
 		}
 
-		if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
+		if (!pkEnabled || pkIdx == null )
 		{
-			if (OracleUtils.shouldAppendTablespace(idx.getTablespace(), defaultTablespace, idx.getSchema(), dbConnection.getCurrentUser()))
+			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, " DISABLE");
+		}
+		else if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
+		{
+			if (pkIdx != null && OracleUtils.shouldAppendTablespace(pkIdx.getTablespace(), defaultTablespace, pkIdx.getSchema(), dbConnection.getCurrentUser()))
 			{
-				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + idx.getTablespace());
+				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + pkIdx.getTablespace());
 			}
 			else
 			{
@@ -318,8 +332,8 @@ public class OracleTableSourceBuilder
 		}
 		else
 		{
-			String indexSql = reader.getExtendedIndexSource(table, idx, "    ").toString();
-			if ("NORMAL/REV".equals(idx.getIndexType()))
+			String indexSql = reader.getExtendedIndexSource(table, pkIdx, "    ").toString();
+			if ("NORMAL/REV".equals(pkIdx.getIndexType()))
 			{
 				indexSql = indexSql.replace("\n    REVERSE", " REVERSE"); // cosmetic cleanup
 			}

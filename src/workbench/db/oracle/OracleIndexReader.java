@@ -68,6 +68,7 @@ public class OracleIndexReader
 		if (!useJdbcForPk)
 		{
 			pkIndexNameColumn = "PK_INDEX_NAME";
+			pkStatusColumn = "PK_STATUS";
 		}
 		if (OracleUtils.checkDefaultTablespace())
 		{
@@ -496,7 +497,8 @@ public class OracleIndexReader
 			"       cols.column_name,  \n" +
 			"       cols.position as key_seq,  \n" +
 			"       cons.constraint_name as pk_name,  \n" +
-			"       cons.index_name as pk_index_name  \n" +
+			"       cons.index_name as pk_index_name,  \n" +
+			"       cons.status as pk_status \n" +
 			"from all_cons_columns cols  \n" +
 			"  join all_constraints cons on cols.constraint_name = cons.constraint_name and cols.owner = cons.owner  \n" +
 			"where cons.constraint_type = 'P' \n" +
@@ -530,6 +532,13 @@ public class OracleIndexReader
 	{
 		SqlUtil.closeStatement(pkStament);
 		pkStament = null;
+	}
+
+	@Override
+	protected Boolean isStatusEnabled(String status)
+	{
+		if (status == null) return null;
+		return ("ENABLED".equals(status));
 	}
 
 }

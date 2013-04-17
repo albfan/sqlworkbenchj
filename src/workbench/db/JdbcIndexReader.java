@@ -57,6 +57,7 @@ public class JdbcIndexReader
 {
 	protected DbMetadata metaData;
 	protected String pkIndexNameColumn;
+	protected String pkStatusColumn;
 
 	public JdbcIndexReader(DbMetadata meta)
 	{
@@ -142,6 +143,7 @@ public class JdbcIndexReader
 			List<IndexColumn> cols = new ArrayList<IndexColumn>();
 
 			ResultSet keysRs = null;
+			String pkStatus = null;
 			try
 			{
 				keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getTableName());
@@ -156,6 +158,10 @@ public class JdbcIndexReader
 						// this is supplied by our own statement that is used
 						// by the OracleIndexReader
 						pkIndexName = keysRs.getString(pkIndexNameColumn);
+					}
+					if (pkStatusColumn != null && pkStatus == null)
+					{
+						pkStatus = keysRs.getString(pkStatusColumn);
 					}
 					String colName = keysRs.getString(4); // "COLUMN_NAME"
 					int sequence = keysRs.getInt(5); // "KEY_SEQ"
@@ -182,6 +188,7 @@ public class JdbcIndexReader
 			{
 				pk = new PkDefinition(getPkName(pkName, pkIndexName, tbl), cols);
 				pk.setPkIndexName(pkIndexName);
+				pk.setEnabled(isStatusEnabled(pkStatus));
 			}
 		}
 
@@ -197,6 +204,11 @@ public class JdbcIndexReader
 		}
 
 		return pk;
+	}
+
+	protected Boolean isStatusEnabled(String status)
+	{
+		return null;
 	}
 
 	private PkDefinition findPKFromIndexList(TableIdentifier tbl)
