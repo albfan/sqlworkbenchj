@@ -62,6 +62,8 @@ public class WbListVars extends SqlCommand
 
 		DataStore ds = VariablePool.getInstance().getVariablesDataStore();
 		ds.setResultName(ResourceMgr.getString("TxtVariables"));
+		CommandTester ct = new CommandTester();
+		ds.setGeneratingSql(ct.formatVerb(getVerb()));
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

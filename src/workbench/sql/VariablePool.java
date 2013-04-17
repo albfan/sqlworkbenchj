@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -303,7 +302,7 @@ public class VariablePool
 	{
 		return StringUtil.isNonBlank(getParameterValue(varName));
 	}
-	
+
 	public String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
@@ -491,10 +490,8 @@ public class VariablePool
 		if (!f.exists()) return;
 
 		props.loadTextFile(filename, encoding);
-		Iterator itr = props.entrySet().iterator();
-		while (itr.hasNext())
+		for (Entry entry : props.entrySet())
 		{
-			Entry entry = (Entry)itr.next();
 			Object key = entry.getKey();
 			Object value = entry.getValue();
 			if (key != null && value != null)
@@ -542,6 +539,18 @@ class VariableDataStore
 
 	@Override
 	public boolean hasUpdateableColumns()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean checkUpdateTable()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean checkUpdateTable(WbConnection aConn)
 	{
 		return true;
 	}

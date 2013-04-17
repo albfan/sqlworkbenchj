@@ -1466,6 +1466,7 @@ public class DbMetadata
 		// original sort is no longer "correct".
 		SortDefinition def = new SortDefinition();
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
+		def.addSortColumn(COLUMN_IDX_TABLE_LIST_CATALOG, true);
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
 		result.sort(def);

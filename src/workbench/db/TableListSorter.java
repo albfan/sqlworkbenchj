@@ -58,7 +58,18 @@ public class TableListSorter
 		this.mviewAsTable = flag;
 	}
 
-	@Override
+	protected int _compareColumn(int column, RowData row1, RowData row2)
+	{
+		if (mviewAsTable && column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
+		{
+			String value1 = (String)row1.getValue(column);
+			String value2 = (String)row2.getValue(column);
+			if (value1.equals(DbMetadata.MVIEW_NAME) && value2.equals(TABLE_TYPE)) return 0;
+			if (value1.equals(TABLE_TYPE) && value2.equals(DbMetadata.MVIEW_NAME)) return 0;
+		}
+		return super.compareColumn(column, row1, row2);
+	}
+
 	protected int compareColumn(int column, RowData row1, RowData row2)
 	{
 		if (mviewAsTable && column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
@@ -77,5 +88,5 @@ public class TableListSorter
 		if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
 		return value;
 	}
-	
+
 }
