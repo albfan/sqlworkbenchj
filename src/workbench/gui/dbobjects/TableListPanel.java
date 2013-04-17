@@ -56,7 +56,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import workbench.WbManager;
-import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.ListSelectionControl;
@@ -132,7 +131,7 @@ public class TableListPanel
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
 	protected JPanel listPanel;
-	protected CriteriaPanel findPanel;
+	protected QuickFilterPanel findPanel;
 	protected DbObjectTable tableList;
 	protected TableDefinitionPanel tableDefinition;
 	protected WbTable indexes;
@@ -298,11 +297,9 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		QuickFilterPanel filterPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
-		filterPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		filterPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
-
-		this.findPanel = filterPanel;
+		findPanel =  new QuickFilterPanel(this.tableList, false, "tablelist");
+		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_DBEXP_INSTANT_FILTER,

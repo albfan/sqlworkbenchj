@@ -47,7 +47,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import workbench.WbManager;
-import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -107,7 +106,7 @@ public class ProcedureListPanel
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
-	private CriteriaPanel findPanel;
+	private QuickFilterPanel findPanel;
 	private DbObjectTable procList;
 	private WbTable procColumns;
 	protected DbObjectSourcePanel source;
@@ -202,6 +201,8 @@ public class ProcedureListPanel
 		this.procList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("procedurelist"));
 
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
+		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
 

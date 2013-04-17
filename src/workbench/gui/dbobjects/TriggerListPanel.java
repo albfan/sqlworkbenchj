@@ -39,7 +39,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
-import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -84,7 +83,7 @@ public class TriggerListPanel
 {
 	private WbConnection dbConnection;
 	private TriggerReader reader;
-	private CriteriaPanel findPanel;
+	private QuickFilterPanel findPanel;
 	private WbTable triggerList;
 
 	protected DbObjectSourcePanel source;
@@ -160,7 +159,9 @@ public class TriggerListPanel
 		this.triggerList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		triggerList.setReadOnly(true);
 
-		this.findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
+		findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
+		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
 
