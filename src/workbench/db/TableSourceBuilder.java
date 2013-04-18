@@ -332,6 +332,13 @@ public class TableSourceBuilder
 			}
 		}
 
+		String tblOptions = getInlineTableOptions(table, columns, indexList);
+		if (tblOptions != null)
+		{
+			result.append(",\n    ");
+			result.append(tblOptions);
+		}
+
 		result.append('\n');
 		result.append(")");
 		String options = getAdditionalTableOptions(table, columns, indexList);
@@ -580,6 +587,11 @@ public class TableSourceBuilder
 			result.append('\'');
 		}
 		return result.toString();
+	}
+
+	protected String getInlineTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	{
+		return null;
 	}
 
 	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)

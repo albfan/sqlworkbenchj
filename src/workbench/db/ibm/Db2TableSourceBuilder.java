@@ -1,0 +1,115 @@
+/*
+ * Db2TableSourceBuilder.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
+ */
+package workbench.db.ibm;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.List;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.JdbcUtils;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.SqlUtil;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class Db2TableSourceBuilder
+	extends TableSourceBuilder
+{
+	private boolean checkHistoryTable;
+
+	public Db2TableSourceBuilder(WbConnection con)
+	{
+		super(con);
+		checkHistoryTable = JdbcUtils.hasMinimumServerVersion(con, "10.1");
+	}
+
+	@Override
+	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		if (!checkHistoryTable)
+		{
+			return null;
+		}
+
+		String addSql = null;
+
+		String sql =
+			"select periodname, \n" +
+			"       begincolname, \n" +
+			"       endcolname, \n" +
+			"       periodtype, \n" +
+			"       historytabschema, \n" +
+			"       historytabname, \n" +
+			"       periodtype \n" +
+			"from syscat.periods \n" +
+			"where tabschema = ? \n" +
+			"  and tabname = ? ";
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		String tablename = table.getTableName();
+		String schema = table.getSchema();
+
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("Db2SequenceReader.getAdditionalTableSql()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+		}
+
+		try
+		{
+			stmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, schema);
+			stmt.setString(2, tablename);
+			rs = stmt.executeQuery();
+
+			if (rs.next())
+			{
+				String histSchema = rs.getString(5);
+				String histTab = rs.getString(6);
+				TableIdentifier histTable = new TableIdentifier(histSchema, histTab);
+				addSql = "ALTER TABLE " + table.getTableExpression(dbConnection) + "\n" +
+					"  ADD VERSIONING USE HISTORY TABLE " + histTable.getTableExpression(dbConnection)  + ";\n";
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("Db2TableSourceBuilder.getAdditionalTableSql()", "Could not retrieve history table", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return addSql;
+	}
+
+
+
+}

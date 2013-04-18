@@ -61,6 +61,8 @@ public class ColumnDefinitionTemplate
 
 	public static final String PARAM_COLLATION_NAME = "%collation%";
 
+	public static final String PARAM_GENERATED = "%generated%";
+
 	private String dbid;
 	private String template;
 	private boolean fixDefaultExpression;
@@ -147,6 +149,7 @@ public class ColumnDefinitionTemplate
 		}
 		sql = replaceArg(sql, PARAM_EXPRESSION, expr);
 		sql = replaceArg(sql, PARAM_COLLATION_NAME, column.getCollationExpression());
+		sql = replaceArg(sql, PARAM_GENERATED, column.getGeneratorExpression());
 		return sql.trim();
 	}
 

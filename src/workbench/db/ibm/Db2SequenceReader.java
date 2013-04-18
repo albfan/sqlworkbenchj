@@ -330,7 +330,7 @@ public class Db2SequenceReader
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
-		if (start.longValue() > 0)
+		if (start != null && start.longValue() > 0)
 		{
 			if (doFormat) result.append(nl + "       ");
 			result.append("START WITH ");

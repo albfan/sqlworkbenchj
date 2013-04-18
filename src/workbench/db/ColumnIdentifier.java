@@ -60,6 +60,7 @@ public class ColumnIdentifier
 	private boolean autoincrement;
 	private String collation;
 	private String collationExpression;
+	private String generatorExpression;
 
 	/**
 	 * Stores the definition of "computed" columns (e.g. Oracle, Firebird, SQL Server, DB2)
@@ -186,6 +187,16 @@ public class ColumnIdentifier
 	public void setComputedColumnExpression(String expr)
 	{
 		this.expression = expr;
+	}
+
+	public String getGeneratorExpression()
+	{
+		return generatorExpression;
+	}
+
+	public void setGeneratorExpression(String expr)
+	{
+		this.generatorExpression = expr;
 	}
 
 	/**
@@ -379,7 +390,7 @@ public class ColumnIdentifier
 	{
 		return isAutoincrement() || isIdentityColumn();
 	}
-	
+
 	public boolean isIdentityColumn()
 	{
 		if (!SqlUtil.isNumberType(this.type)) return false;

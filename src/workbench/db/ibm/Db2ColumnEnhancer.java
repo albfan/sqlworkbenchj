@@ -29,9 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
+import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -57,7 +59,7 @@ public class Db2ColumnEnhancer
 		String tablename = table.getTable().getTableName();
 		String schema = table.getTable().getSchema();
 
-		String sql = "SELECT c.colname, \n" +
+		String columns = "SELECT c.colname, \n" +
 								 "       c.generated, \n" +
 								 "       c.text, \n" +
 								 "       a.start, \n" +
@@ -66,12 +68,33 @@ public class Db2ColumnEnhancer
 								 "       a.maxvalue, \n" +
 								 "       a.cycle, \n" +
 								 "       a.cache, \n" +
-								 "       a.order  \n" +
-								 "FROM syscat.columns c  \n" +
+								 "       a.order";
+
+		String from = "FROM syscat.columns c  \n" +
 								 "     LEFT JOIN syscat.colidentattributes a ON c.tabname = a.tabname AND c.tabschema = a.tabschema AND c.colname = a.colname \n" +
 								 "WHERE c.generated <> ' ' \n" +
 								 "AND   c.tabname = ? \n" +
 								 "AND   c.tabschema = ? ";
+
+		boolean checkHistory = false;
+
+		if (JdbcUtils.hasMinimumServerVersion(conn, "10.1"))
+		{
+				columns += ", \n" +
+					"       c.rowbegin, \n" +
+					"       c.rowend, \n" +
+					"       c.transactionstartid \n";
+				checkHistory = true;
+		}
+
+		String sql = columns + from;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("Db2SequenceReader.updateComputedColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+		}
+
+
 		Map<String, String> expressions = new HashMap<String, String>();
 		try
 		{
@@ -92,6 +115,18 @@ public class Db2ColumnEnhancer
 				Integer cache = rs.getInt(9);
 				String order = rs.getString(10);
 
+				String rowbegin = "N";
+				String rowend = "N";
+				String transid = "N";
+				if (checkHistory)
+				{
+					rowbegin = rs.getString(11);
+					rowend = rs.getString(12);
+					transid = rs.getString(13);
+				}
+
+				boolean isHistoryTCol= "Y".equals(rowbegin) || "Y".equals(rowend) || "Y".equals(transid);
+
 				String expr = "GENERATED";
 
 				if ("A".equals(gentype))
@@ -103,10 +138,25 @@ public class Db2ColumnEnhancer
 					expr += " BY DEFAULT";
 				}
 
-				if (computedCol == null)
+				if (computedCol == null && !isHistoryTCol)
 				{
 					// IDENTITY column
 					expr += " AS IDENTITY (" + Db2SequenceReader.buildSequenceDetails(false, start, min, max, inc, cycle, order, cache) + ")";
+				}
+				else if (isHistoryTCol)
+				{
+					if ("Y".equals(rowbegin))
+					{
+						expr += " AS ROW BEGIN";
+					}
+					else if ("Y".equals(rowend))
+					{
+						expr += " AS ROW END";
+					}
+					else if ("Y".equals(transid))
+					{
+						expr += " AS TRANSACTION START ID";
+					}
 				}
 				else
 				{
@@ -123,13 +173,21 @@ public class Db2ColumnEnhancer
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		
+
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String expr = expressions.get(col.getColumnName());
 			if (StringUtil.isNonBlank(expr))
 			{
-				col.setComputedColumnExpression(expr);
+				if (expr.contains("AS ROW") || expr.contains("AS TRANSACTION"))
+				{
+					col.setGeneratorExpression(expr);
+				}
+				else
+				{
+					col.setComputedColumnExpression(expr);
+				}
+
 				if (expr.indexOf("IDENTITY") > -1)
 				{
 					col.setIsAutoincrement(true);
