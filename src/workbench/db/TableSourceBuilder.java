@@ -338,7 +338,7 @@ public class TableSourceBuilder
 		String tblOptions = sourceOptions == null ? null : sourceOptions.getInlineOption();
 		if (tblOptions != null)
 		{
-			result.append(",\n    ");
+			result.append(",\n   ");
 			result.append(tblOptions);
 		}
 
