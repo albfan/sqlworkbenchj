@@ -27,11 +27,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -327,10 +331,10 @@ public class TableIdentifierTest
 		assertEquals("this is a comment", t2.getComment());
 
 		tbl = new TableIdentifier("foo");
-		tbl.setTableTypeOption("TEMP");
+		tbl.getSourceOptions().setTypeModifier("TEMP");
 
 		t2 = tbl.createCopy();
-		assertEquals(tbl.getTableTypeOption(), t2.getTableTypeOption());
+		assertEquals(tbl.getSourceOptions().getTypeModifier(), t2.getSourceOptions().getTypeModifier());
 	}
 
 	@Test

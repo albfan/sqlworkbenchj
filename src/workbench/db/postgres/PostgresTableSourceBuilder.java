@@ -55,106 +55,44 @@ public class PostgresTableSourceBuilder
 	}
 
 	@Override
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
-		if (table == null) return null;
+		TableSourceOptions option = table.getSourceOptions();
+
+		PostgresRuleReader ruleReader = new PostgresRuleReader();
+		CharSequence rule = ruleReader.getTableRuleSource(dbConnection, table);
+		if (rule != null)
+		{
+			option.setAdditionalSql(rule.toString());
+		}
 
 		if ("FOREIGN TABLE".equals(table.getType()))
 		{
-			return getForeignTableOptions(table);
+			readForeignTableOptions(table);
 		}
-
-		StringBuilder result = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select bt.relname as table_name, bns.nspname as table_schema \n" +
-			"from pg_class ct \n" +
-			"    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
-			"    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
-			"    join pg_class bt on i.inhparent = bt.oid \n" +
-			"    join pg_namespace bns on bt.relnamespace = bns.oid";
-
-		Savepoint sp = null;
-		try
+		else
 		{
-			// Retrieve parent table(s) for this table
-			sp = dbConnection.setSavepoint();
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, table.getSchema());
-			pstmt.setString(2, table.getTableName());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Using sql: " + pstmt.toString());
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				result = new StringBuilder(50);
-				result.append("INHERITS (");
-
-				String tableName = rs.getString(1);
-				result.append(tableName);
-				while (rs.next())
-				{
-					tableName = rs.getString(1);
-					result.append(',');
-					result.append(tableName);
-				}
-				result.append(')');
-			}
-
-			// retrieve child tables for this table
-
-			dbConnection.releaseSavepoint(sp);
+			readTableOptions(table);
 		}
-		catch (SQLException e)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
-			return null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-
-		String options = table.getTableConfigOptions();
-		if (StringUtil.isNonEmpty(options))
-		{
-			if (result == null)
-			{
-				result = new StringBuilder(options.length() + 10);
-			}
-			else
-			{
-				result.append('\n');
-			}
-			result.append("WITH (");
-			result.append(options);
-			result.append(")");
-		}
-
-		String tblSpace = table.getTablespace();
-		if (StringUtil.isNonEmpty(tblSpace))
-		{
-			if (result == null)
-			{
-				result = new StringBuilder(tblSpace.length() + 10);
-			}
-			else
-			{
-				result.append('\n');
-			}
-			result.append("TABLESPACE ");
-			result.append(tblSpace);
-		}
-		return (result == null ? null : result.toString());
 	}
 
-	@Override
-	public void readTableConfigOptions(TableIdentifier tbl)
+	private void readTableOptions(TableIdentifier tbl)
 	{
+		TableSourceOptions option = tbl.getSourceOptions();
+		StringBuilder inherit = readInherits(tbl);
+
+		StringBuilder tableSql = new StringBuilder();
+		if (option.getAdditionalSql() != null)
+		{
+			tableSql.append(option.getAdditionalSql());
+		}
+
+		if (inherit != null)
+		{
+			if (tableSql.length() > 0) tableSql.append('\n');
+			tableSql.append(inherit);
+		}
+
 		String optionsCol = null;
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.1"))
 		{
@@ -212,19 +150,30 @@ public class PostgresTableSourceBuilder
 					switch (persistence.charAt(0))
 					{
 						case 'u':
-							tbl.setTableTypeOption("UNLOGGED");
+							option.setTypeModifier("UNLOGGED");
 							break;
 						case 't':
-							tbl.setTableTypeOption("TEMPORARY");
+							option.setTypeModifier("TEMPORARY");
 							break;
 					}
 				}
 				if ("f".equalsIgnoreCase(type))
 				{
-					tbl.setTableTypeOption("FOREIGN");
+					option.setTypeModifier("FOREIGN");
 				}
-				tbl.setTableConfigOptions(options);
 				tbl.setTablespace(tableSpace);
+				if (StringUtil.isNonEmpty(options))
+				{
+					option.setConfigOption(options);
+					tableSql.append("\nWITH (");
+					tableSql.append(options);
+					tableSql.append(")");
+				}
+				if (StringUtil.isNonBlank(tableSpace))
+				{
+					tableSql.append("\nTABLESPACE ");
+					tableSql.append(tableSpace);
+				}
 			}
 			dbConnection.releaseSavepoint(sp);
 		}
@@ -237,10 +186,75 @@ public class PostgresTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+		option.setTableOption(tableSql.toString());
 	}
 
-	public String getForeignTableOptions(TableIdentifier table)
+	private StringBuilder readInherits(TableIdentifier table)
 	{
+		if (table == null) return null;
+
+		StringBuilder result = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		String sql =
+			"select bt.relname as table_name, bns.nspname as table_schema \n" +
+			"from pg_class ct \n" +
+			"    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
+			"    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
+			"    join pg_class bt on i.inhparent = bt.oid \n" +
+			"    join pg_namespace bns on bt.relnamespace = bns.oid";
+
+		Savepoint sp = null;
+		try
+		{
+			// Retrieve parent table(s) for this table
+			sp = dbConnection.setSavepoint();
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, table.getSchema());
+			pstmt.setString(2, table.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				result = new StringBuilder(50);
+				result.append("INHERITS (");
+
+				String tableName = rs.getString(1);
+				result.append(tableName);
+				while (rs.next())
+				{
+					tableName = rs.getString(1);
+					result.append(',');
+					result.append(tableName);
+				}
+				result.append(')');
+			}
+
+			// retrieve child tables for this table
+
+			dbConnection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return result;
+	}
+
+	public void readForeignTableOptions(TableIdentifier table)
+	{
+		TableSourceOptions option = table.getSourceOptions();
+
 		String sql =
 			"select ft.ftoptions, fs.srvname \n" +
 			"from pg_foreign_table ft \n" +
@@ -281,16 +295,14 @@ public class PostgresTableSourceBuilder
 					}
 					result.append(')');
 				}
-				return result.toString();
+				option.setTableOption(result.toString());
 			}
-			return null;
 		}
 		catch (SQLException ex)
 		{
 			dbConnection.rollback(sp);
 			sp = null;
 			LogMgr.logError("PostgresTableSourceBuilder.getForeignTableOptions()", "Could not retrieve table options", ex);
-			return null;
 		}
 		finally
 		{
@@ -329,13 +341,6 @@ public class PostgresTableSourceBuilder
 		if (children != null) result.append(children);
 
 		return result.toString();
-	}
-
-	@Override
-	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		PostgresRuleReader ruleReader = new PostgresRuleReader();
-		return ruleReader.getTableRuleSource(dbConnection, table);
 	}
 
 	private CharSequence getColumnSequenceInformation(TableIdentifier table, List<ColumnIdentifier> columns)

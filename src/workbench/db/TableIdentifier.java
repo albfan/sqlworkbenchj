@@ -56,12 +56,8 @@ public class TableIdentifier
 	private String tableComment;
 	private boolean commentWasInitialized;
 	private boolean retrieveFkSource;
-	private String tableTypeOption;
 
-	/**
-	 * DBMS specific options for the table
-	 */
-	private String tableConfigOptions;
+	private TableSourceOptions sourceOptions = new TableSourceOptions();
 
 	/**
 	 * DBMS specific tablespace options
@@ -154,31 +150,20 @@ public class TableIdentifier
 	 * Return DBMS specific configuration options for this table.
 	 * @return
 	 */
-	public String getTableConfigOptions()
+	public String getAdditionalSql()
 	{
-		return this.tableConfigOptions;
+		return sourceOptions.getAdditionalSql();
 	}
 
-	public void setTableConfigOptions(String options)
+	public void setAdditionalSql(String options)
 	{
-		this.tableConfigOptions = options;
+		this.sourceOptions.setAdditionalSql(options);
 	}
 
-	/**
-	 * Return an expression that should be used in the CREATE TABLE statement to specify
-	 * an optional table type.
-	 * (e.g. CREATE UNLOGGED TABLE for Postgres, or GLOBAL TEMPORARY for Oracle
-	 */
-	public String getTableTypeOption()
+	public TableSourceOptions getSourceOptions()
 	{
-		return tableTypeOption;
+		return this.sourceOptions;
 	}
-
-	public void setTableTypeOption(String option)
-	{
-		this.tableTypeOption = option;
-	}
-
 
 	@Override
 	public void setComment(String comment)
@@ -288,7 +273,7 @@ public class TableIdentifier
 		copy.retrieveFkSource = this.retrieveFkSource;
 		copy.commentWasInitialized = this.commentWasInitialized;
 		copy.tableComment = this.tableComment;
-		copy.tableTypeOption = this.tableTypeOption;
+		copy.sourceOptions = this.sourceOptions == null ? null : sourceOptions.createCopy();
 		return copy;
 	}
 

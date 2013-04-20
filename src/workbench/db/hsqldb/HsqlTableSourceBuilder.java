@@ -24,11 +24,13 @@ package workbench.db.hsqldb;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.JdbcUtils;
+import workbench.db.ColumnIdentifier;
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -49,14 +51,12 @@ public class HsqlTableSourceBuilder
 	}
 
 	@Override
-	public void readTableConfigOptions(TableIdentifier tbl)
+	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
-		if (!JdbcUtils.hasMinimumServerVersion(dbConnection, "2.2")) return;
-
-		if (tbl.getTableTypeOption() != null) return;
+		if (tbl.getSourceOptions().getTypeModifier() != null) return;
 
 		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
-		
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
@@ -86,7 +86,7 @@ public class HsqlTableSourceBuilder
 				}
 				if (alwaysShowType || !defaultType.equals(type))
 				{
-					tbl.setTableTypeOption(type);
+					tbl.getSourceOptions().setTypeModifier(type);
 				}
 			}
 		}

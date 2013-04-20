@@ -59,8 +59,124 @@ public class OracleTableSourceBuilder
 		}
 	}
 
+	/**
+	 * Read additional options for the CREATE TABLE part.
+	 *
+	 * @param tbl
+	 */
 	@Override
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	{
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration \n" +
+			"from all_tables  \n" +
+			"where owner = ? \n" +
+			"and table_name = ? ";
+
+		StringBuilder options =new StringBuilder(100);
+
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getSchema());
+			pstmt.setString(2, tbl.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Using sql:\n" +
+					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+			}
+
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String tablespace = rs.getString(1);
+				tbl.setTablespace(tablespace);
+				String degree = rs.getString(2);
+				if (degree != null) degree = degree.trim();
+				if (!StringUtil.equalString("1", degree))
+				{
+					if ("DEFAULT".equals(degree))
+					{
+						options.append("PARALLEL");
+					}
+					else
+					{
+						options.append("PARALLEL " + degree);
+					}
+				}
+				String movement = rs.getString(3);
+				if (movement != null) movement = movement.trim();
+				if (StringUtil.equalString("ENABLED", movement))
+				{
+					if (options.length() > 0) options.append('\n');
+					options.append("ENABLE ROW MOVEMENT");
+				}
+
+				String tempTable = rs.getString(4);
+				String duration = rs.getString(5);
+				if (StringUtil.equalString("Y", tempTable))
+				{
+					tbl.getSourceOptions().setTypeModifier("GLOBAL TEMPORARY");
+					if (options.length() > 0) options.append('\n');
+					if (StringUtil.equalString("SYS$TRANSACTION", duration))
+					{
+						options.append("ON COMMIT DELETE ROWS");
+					}
+					else if (StringUtil.equalString("SYS$SESSION", duration))
+					{
+						options.append("ON COMMIT PRESERVE ROWS");
+					}
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.readTableOptions()", "Error retrieving table options", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+
+		String tablespace = tbl.getTablespace();
+		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace, tbl.getRawSchema(), dbConnection.getCurrentUser()))
+		{
+			if (options.length() > 0)
+			{
+				options.append('\n');
+			}
+			options.append("TABLESPACE ");
+			options.append(tablespace);
+		}
+
+		StringBuilder partition = getPartitionSql(tbl);
+		if (partition != null && partition.length() > 0)
+		{
+			options.append('\n');
+			options.append(partition);
+		}
+
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
+		{
+			OracleExternalTableReader reader = new OracleExternalTableReader();
+			CharSequence ext = reader.getDefinition(tbl, dbConnection);
+			if (ext != null)
+			{
+				options.append(ext);
+			}
+		}
+
+		StringBuilder nested = getNestedTableSql(tbl, columns);
+		if (nested != null && nested.length() > 0)
+		{
+			options.append(nested);
+		}
+		tbl.getSourceOptions().setTableOption(options.toString());
+	}
+
+	private StringBuilder getPartitionSql(TableIdentifier table)
 	{
 		StringBuilder result = new StringBuilder(100);
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_partitions", true))
@@ -80,36 +196,12 @@ public class OracleTableSourceBuilder
 				LogMgr.logError("OracleTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving partitions", sql);
 			}
 		}
+		return result;
+	}
 
-		if (StringUtil.isNonEmpty(table.getTableConfigOptions()))
-		{
-			if (result.length() > 0)
-			{
-				result.append('\n');
-			}
-			result.append(table.getTableConfigOptions());
-		}
-
-		String tablespace = table.getTablespace();
-		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace, table.getRawSchema(), dbConnection.getCurrentUser()))
-		{
-			if (result.length() > 0)
-			{
-				result.append('\n');
-			}
-			result.append("TABLESPACE ");
-			result.append(tablespace);
-		}
-
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
-		{
-			OracleExternalTableReader reader = new OracleExternalTableReader();
-			CharSequence ext = reader.getDefinition(table, dbConnection);
-			if (ext != null)
-			{
-				result.append(ext);
-			}
-		}
+	private StringBuilder getNestedTableSql(TableIdentifier tbl, List<ColumnIdentifier> columns)
+	{
+		StringBuilder options = new StringBuilder();
 
 		// retrieving the nested table options requires another query to the Oracle
 		// catalogs which is always horribly slow. In order to prevent this,
@@ -128,20 +220,8 @@ public class OracleTableSourceBuilder
 			}
 		}
 
-		if (hasUserType)
-		{
-			String options = readNestedTableOptions(table);
-			if (options.trim().length() > 0)
-			{
-				result.append('\n');
-				result.append(options);
-			}
-		}
-		return result.toString();
-	}
+		if (!hasUserType) return null;
 
-	private String readNestedTableOptions(TableIdentifier tbl)
-	{
 		String sql =
 			"SELECT /* SQLWorkbench */ 'NESTED TABLE '||parent_table_column||' STORE AS '||table_name \n" +
 			"FROM all_nested_tables \n" +
@@ -150,7 +230,6 @@ public class OracleTableSourceBuilder
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuilder options = new StringBuilder();
 
 		try
 		{
@@ -182,90 +261,7 @@ public class OracleTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
-		return options.toString();
-	}
-
-	/**
-	 * Read additional options for the CREATE TABLE part.
-	 *
-	 * @param tbl
-	 */
-	@Override
-	public void readTableConfigOptions(TableIdentifier tbl)
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration \n" +
-			"from all_tables  \n" +
-			"where owner = ? \n" +
-			"and table_name = ? ";
-
-		try
-		{
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getSchema());
-			pstmt.setString(2, tbl.getTableName());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readTableConfigOptions()", "Using sql:\n" +
-					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
-			}
-
-			String options = "";
-
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String tablespace = rs.getString(1);
-				tbl.setTablespace(tablespace);
-				String degree = rs.getString(2);
-				if (degree != null) degree = degree.trim();
-				if (!StringUtil.equalString("1", degree))
-				{
-					if ("DEFAULT".equals(degree))
-					{
-						options = "PARALLEL";
-					}
-					else
-					{
-						options = "PARALLEL " + degree;
-					}
-				}
-				String movement = rs.getString(3);
-				if (movement != null) movement = movement.trim();
-				if (StringUtil.equalString("ENABLED", movement))
-				{
-					if (options.length() > 0) options += "\n";
-					options += "ENABLE ROW MOVEMENT";
-				}
-
-				String tempTable = rs.getString(4);
-				String duration = rs.getString(5);
-				if (StringUtil.equalString("Y", tempTable))
-				{
-					tbl.setTableTypeOption("GLOBAL TEMPORARY");
-					if (options.length() > 0) options += "\n";
-					if (StringUtil.equalString("SYS$TRANSACTION", duration))
-					{
-						options += "ON COMMIT DELETE ROWS";
-					}
-					else if (StringUtil.equalString("SYS$SESSION", duration))
-					{
-						options += "ON COMMIT PRESERVE ROWS";
-					}
-				}
-			}
-			tbl.setTableConfigOptions(options);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+		return options;
 	}
 
 	/**

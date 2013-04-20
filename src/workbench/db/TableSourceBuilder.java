@@ -146,7 +146,7 @@ public class TableSourceBuilder
 	{
 		if (!dbConnection.getDbSettings().supportsAutomaticFkIndexes()) return indexList;
 		if (CollectionUtil.isEmpty(indexList)) return indexList;
-		if (foreignKeys.getRowCount() == 0) return indexList;
+		if (foreignKeys == null || foreignKeys.getRowCount() == 0) return indexList;
 
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>(indexList.size());
 		for (IndexDefinition idx : indexList)
@@ -159,8 +159,14 @@ public class TableSourceBuilder
 		return result;
 	}
 
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	{
+	}
+
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkList, boolean includeDrop, boolean includeFk)
 	{
+		readTableOptions(table, columns, indexList);
+
 		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, includeDrop, includeFk);
 
 		StringBuilder result = new StringBuilder(createSql.length() + 50);
@@ -223,18 +229,13 @@ public class TableSourceBuilder
 			}
 		}
 
-		CharSequence extendedSQL = getAdditionalTableSql(table, columns);
+		CharSequence extendedSQL = table.getSourceOptions() == null ? null : table.getSourceOptions().getAdditionalSql();
 		if (extendedSQL != null)
 		{
 			result.append(lineEnding);
 			result.append(extendedSQL);
 		}
 		return result.toString();
-	}
-
-	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		return null;
 	}
 
 	/**
@@ -272,9 +273,11 @@ public class TableSourceBuilder
 		ConstraintReader consReader = ReaderFactory.getConstraintReader(meta);
 		Map<String, String> columnConstraints = consReader.getColumnConstraints(dbConnection, table);
 
-		readTableConfigOptions(table);
+		// this should have been populated previously!
+		TableSourceOptions sourceOptions = table.getSourceOptions();
+		String typeOption = sourceOptions == null ? null : sourceOptions.getTypeModifier();
 
-		result.append(generateCreateObject(includeDrop, table, table.getTableTypeOption()));
+		result.append(generateCreateObject(includeDrop, table, typeOption));
 		result.append("\n(\n");
 
 		appendColumnDefinitions(result, columns, meta, columnConstraints);
@@ -332,7 +335,7 @@ public class TableSourceBuilder
 			}
 		}
 
-		String tblOptions = getInlineTableOptions(table, columns, indexList);
+		String tblOptions = sourceOptions == null ? null : sourceOptions.getInlineOption();
 		if (tblOptions != null)
 		{
 			result.append(",\n    ");
@@ -341,7 +344,7 @@ public class TableSourceBuilder
 
 		result.append('\n');
 		result.append(")");
-		String options = getAdditionalTableOptions(table, columns, indexList);
+		String options = sourceOptions == null ? null : sourceOptions.getTableOption();
 		if (StringUtil.isNonEmpty(options))
 		{
 			result.append('\n');
@@ -555,17 +558,6 @@ public class TableSourceBuilder
 		}
 		return columns;
 	}
-	/**
-	 * Read additional options for the CREATE TABLE part.
-	 *
-	 * This could be tablespace definitions or other options that are valid for the CREATE TABLE
-	 *
-	 * @param tbl the table for which to read the options
-	 */
-	public void readTableConfigOptions(TableIdentifier tbl)
-	{
-		// nothing here
-	}
 
 	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
 	{
@@ -587,16 +579,6 @@ public class TableSourceBuilder
 			result.append('\'');
 		}
 		return result.toString();
-	}
-
-	protected String getInlineTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
-	{
-		return null;
-	}
-
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
-	{
-		return null;
 	}
 
 	protected String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)

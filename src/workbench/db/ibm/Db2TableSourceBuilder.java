@@ -26,13 +26,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
+import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceOptions;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -51,23 +55,16 @@ public class Db2TableSourceBuilder
 	}
 
 	@Override
-	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
-		if (!checkHistoryTable)
-		{
-			return null;
-		}
-
-		String addSql = null;
+		if (!checkHistoryTable)	return;
 
 		String sql =
 			"select periodname, \n" +
 			"       begincolname, \n" +
 			"       endcolname, \n" +
-			"       periodtype, \n" +
 			"       historytabschema, \n" +
-			"       historytabname, \n" +
-			"       periodtype \n" +
+			"       historytabname \n " +
 			"from syscat.periods \n" +
 			"where tabschema = ? \n" +
 			"  and tabname = ? ";
@@ -80,7 +77,7 @@ public class Db2TableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SequenceReader.getAdditionalTableSql()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+			LogMgr.logInfo("Db2TableSourceBuilder.readTableOptions()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
 		try
@@ -92,24 +89,32 @@ public class Db2TableSourceBuilder
 
 			if (rs.next())
 			{
-				String histSchema = rs.getString(5);
-				String histTab = rs.getString(6);
+				String period = rs.getString(1);
+				String begin = rs.getString(2);
+				String end = rs.getString(3);
+				String histSchema = rs.getString(4);
+				String histTab = rs.getString(5);
 				TableIdentifier histTable = new TableIdentifier(histSchema, histTab);
-				addSql = "ALTER TABLE " + table.getTableExpression(dbConnection) + "\n" +
+
+				TableSourceOptions options = table.getSourceOptions();
+
+				String inline = "PERIOD " + period + " (" + begin + ", " + end + ")";
+				options.setInlineOption(inline);
+
+				String addSql =
+					"ALTER TABLE " + table.getTableExpression(dbConnection) + "\n" +
 					"  ADD VERSIONING USE HISTORY TABLE " + histTable.getTableExpression(dbConnection)  + ";\n";
+				options.setAdditionalSql(addSql);
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("Db2TableSourceBuilder.getAdditionalTableSql()", "Could not retrieve history table", e);
+			LogMgr.logWarning("Db2TableSourceBuilder.readTableOptions()", "Could not retrieve history table", e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return addSql;
 	}
-
-
 
 }

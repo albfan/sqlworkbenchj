@@ -24,18 +24,23 @@ package workbench.db.postgres;
 
 import java.util.Collection;
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import workbench.storage.DataStore;
-import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -126,7 +131,8 @@ public class PostgresDomainReaderTest
 		dropper.setConnection(con);
 
 		String drop = dropper.getScript().toString().trim();
-		assertTrue(drop.startsWith("DROP DOMAIN " + TEST_SCHEMA + ".salary"));
+		assertTrue(drop.contains("DROP DOMAIN " + TEST_SCHEMA + ".zz_int"));
+		assertTrue(drop.contains("DROP DOMAIN " + TEST_SCHEMA + ".salary"));
 		assertTrue(drop.contains("DROP DOMAIN other.positive_int"));
 
 		DataStore details = reader.getObjectDetails(con, salary);

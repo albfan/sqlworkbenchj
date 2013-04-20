@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import workbench.resource.Settings;
+
 import workbench.db.IndexDefinition;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
@@ -37,7 +40,7 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -186,8 +189,8 @@ public class TableDiff
 
 		boolean indexDifferent = indexDiff != null && indexDiff.length() > 0;
 
-		String refOptionType = referenceTable.getTable().getTableTypeOption();
-		String tgOptionType = targetTable.getTable().getTableTypeOption();
+		String refOptionType = referenceTable.getTable().getSourceOptions().getTypeModifier();
+		String tgOptionType = targetTable.getTable().getSourceOptions().getTypeModifier();
 		boolean typesAreEquals = StringUtil.equalStringOrEmpty(refOptionType, tgOptionType, false);
 
 		String refTblSpace = referenceTable.getTable().getTablespace();
@@ -279,7 +282,7 @@ public class TableDiff
 
 		if (typesAreEquals)
 		{
-			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_TYPE, referenceTable.getTable().getTableTypeOption());
+			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_TYPE, referenceTable.getTable().getSourceOptions().getTypeModifier());
 		}
 
 		if (tblSpacesAreEquals)

@@ -27,9 +27,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.*;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -47,9 +50,9 @@ public class MySQLTableSourceBuilder
 	}
 
 	@Override
-	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
-		if (table == null) return null;
+		if (table == null) return;
 
 		StringBuilder result = null;
 
@@ -92,14 +95,16 @@ public class MySQLTableSourceBuilder
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logDebug("MySQLTableSourceBuilder.getAdditionalTableOptions()", "Could not read table status", ex);
+			LogMgr.logDebug("MySQLTableSourceBuilder.readTableOptions()", "Could not read table status", ex);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
-		if (result == null) return null;
-		return result.toString();
+		if (result != null)
+		{
+			table.getSourceOptions().setTableOption(result.toString());
+		}
 	}
 
 	private void appendOption(StringBuilder result, String option, String value)

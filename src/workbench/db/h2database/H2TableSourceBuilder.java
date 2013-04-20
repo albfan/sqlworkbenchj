@@ -25,10 +25,13 @@ package workbench.db.h2database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -115,9 +118,9 @@ public class H2TableSourceBuilder
 	}
 
 	@Override
-	public void readTableConfigOptions(TableIdentifier tbl)
+	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
 	{
-		if (tbl.getTableTypeOption() != null) return;
+		if (tbl.getSourceOptions().getTypeModifier() != null) return;
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -154,7 +157,7 @@ public class H2TableSourceBuilder
 				}
 				if (alwaysShowType || !defaultType.equals(type))
 				{
-					tbl.setTableTypeOption(type);
+					tbl.getSourceOptions().setTypeModifier(type);
 				}
 			}
 		}

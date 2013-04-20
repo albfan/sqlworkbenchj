@@ -227,6 +227,16 @@ public class ReportTable
 		return Collections.unmodifiableList(dbmsOptions);
 	}
 
+	private List<ColumnIdentifier> getColumnList()
+	{
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columns.length);
+		for (ReportColumn col : columns)
+		{
+			cols.add(col.getColumn());
+		}
+		return cols;
+	}
+
 	private void retrieveOptions(WbConnection conn)
 		throws SQLException
 	{
@@ -242,9 +252,11 @@ public class ReportTable
 				dbmsOptions.add(option);
 			}
 		}
+
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(conn);
-		builder.readTableConfigOptions(table);
-		String options = table.getTableConfigOptions();
+		builder.readTableOptions(table, getColumnList(), null);
+
+		String options = table.getSourceOptions().getConfigOption();
 		if (StringUtil.isNonBlank(options))
 		{
 			ObjectOption option = new ObjectOption("options", options);
@@ -485,9 +497,11 @@ public class ReportTable
 		{
 			tagWriter.appendTag(line, colindent, TAG_TABLESPACE, table.getTablespace(), false);
 		}
-		if (StringUtil.isNonBlank(table.getTableTypeOption()))
+
+		String modifier = table.getSourceOptions().getTypeModifier();
+		if (StringUtil.isNonBlank(modifier))
 		{
-			tagWriter.appendTag(line, colindent, TAG_TABLE_TYPE, table.getTableTypeOption(), false);
+			tagWriter.appendTag(line, colindent, TAG_TABLE_TYPE, modifier, false);
 		}
 
 		int cols = this.columns.length;

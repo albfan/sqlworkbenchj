@@ -27,13 +27,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -68,7 +71,7 @@ public class Db2ColumnEnhancer
 								 "       a.maxvalue, \n" +
 								 "       a.cycle, \n" +
 								 "       a.cache, \n" +
-								 "       a.order";
+								 "       a.order \n";
 
 		String from = "FROM syscat.columns c  \n" +
 								 "     LEFT JOIN syscat.colidentattributes a ON c.tabname = a.tabname AND c.tabschema = a.tabschema AND c.colname = a.colname \n" +

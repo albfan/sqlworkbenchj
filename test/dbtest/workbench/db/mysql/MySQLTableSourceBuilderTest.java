@@ -92,13 +92,16 @@ public class MySQLTableSourceBuilderTest
 		TableIdentifier inno = con.getMetadata().findTable(new TableIdentifier("tbl_inno"));
 		MySQLTableSourceBuilder builder = (MySQLTableSourceBuilder)TableSourceBuilderFactory.getBuilder(con);
 
-		String options = builder.getAdditionalTableOptions(isam, null, null);
+		builder.readTableOptions(isam, null, null);
+		String options = isam.getSourceOptions().getTableOption();
+
 		List<String> lines = StringUtil.getLines(options);
 		assertEquals(2, lines.size());
 		assertEquals("ENGINE=MyISAM", lines.get(0));
 		assertEquals("COMMENT='myisam table'", lines.get(1));
 
-		options = builder.getAdditionalTableOptions(inno, null, null);
+		builder.readTableOptions(inno, null, null);
+		options = inno.getSourceOptions().getTableOption();
 		lines = StringUtil.getLines(options);
 		assertEquals(2, lines.size());
 		assertEquals("ENGINE=InnoDB", lines.get(0));
