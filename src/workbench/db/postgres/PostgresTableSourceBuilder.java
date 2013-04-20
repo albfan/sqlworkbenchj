@@ -165,7 +165,8 @@ public class PostgresTableSourceBuilder
 				if (StringUtil.isNonEmpty(options))
 				{
 					option.setConfigOption(options);
-					tableSql.append("\nWITH (");
+					if (tableSql.length() > 0) tableSql.append('\n');
+					tableSql.append("WITH (");
 					tableSql.append(options);
 					tableSql.append(")");
 				}

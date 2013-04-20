@@ -84,6 +84,11 @@ public class PostgresTableSourceBuilderTest
 		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "child_table");
 		String sql = tbl.getSource(con).toString();
 		assertTrue(sql.contains("INHERITS (base_table)"));
+
+		TestUtil.executeScript(con, "create table child_fill (foo_data text) inherits (base_table) with (fillfactor=40);");
+		tbl = con.getMetadata().findTable(new TableIdentifier("child_fill"));
+		String source = tbl.getSource(con).toString();
+		assertTrue(source.contains("INHERITS (base_table)\nWITH (fillfactor=40)"));
 	}
 
 	@Test
@@ -123,6 +128,18 @@ public class PostgresTableSourceBuilderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("no_crash_safe"));
 		String source = tbl.getSource(con).toString();
 		assertTrue(source.indexOf("CREATE UNLOGGED TABLE") > -1);
+	}
+
+	@Test
+	public void testConfigOption()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+		TestUtil.executeScript(con, "create table foo_fill (id integer, some_data varchar(100)) with (fillfactor=40);");
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo_fill"));
+		String source = tbl.getSource(con).toString();
+		assertTrue(source.contains("fillfactor=40"));
 	}
 
 }
