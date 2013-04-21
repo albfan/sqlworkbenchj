@@ -131,7 +131,7 @@ public class PostgresTableSourceBuilderTest
 	}
 
 	@Test
-	public void testConfigOption()
+	public void testConfigSettings()
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();

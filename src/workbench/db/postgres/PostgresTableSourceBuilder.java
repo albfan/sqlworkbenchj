@@ -55,9 +55,10 @@ public class PostgresTableSourceBuilder
 	}
 
 	@Override
-	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		TableSourceOptions option = table.getSourceOptions();
+		if (option.isInitialized()) return;
 
 		PostgresRuleReader ruleReader = new PostgresRuleReader();
 		CharSequence rule = ruleReader.getTableRuleSource(dbConnection, table);
@@ -74,6 +75,7 @@ public class PostgresTableSourceBuilder
 		{
 			readTableOptions(table);
 		}
+		option.setInitialized();
 	}
 
 	private void readTableOptions(TableIdentifier tbl)
@@ -136,14 +138,14 @@ public class PostgresTableSourceBuilder
 			pstmt.setString(2, tbl.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Using sql: " + pstmt.toString());
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				String persistence = rs.getString(1);
 				String type = rs.getString(2);
-				String options = rs.getString(3);
+				String tblSettings = rs.getString(3);
 				String tableSpace = rs.getString(4);
 				if (StringUtil.isNonEmpty(persistence))
 				{
@@ -162,12 +164,12 @@ public class PostgresTableSourceBuilder
 					option.setTypeModifier("FOREIGN");
 				}
 				tbl.setTablespace(tableSpace);
-				if (StringUtil.isNonEmpty(options))
+				if (StringUtil.isNonEmpty(tblSettings))
 				{
-					option.setConfigOption(options);
+					setConfigSettings(tblSettings, option);
 					if (tableSql.length() > 0) tableSql.append('\n');
 					tableSql.append("WITH (");
-					tableSql.append(options);
+					tableSql.append(tblSettings);
 					tableSql.append(")");
 				}
 				if (StringUtil.isNonBlank(tableSpace))
@@ -181,13 +183,26 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.readTableOptions()", "Error retrieving table options", e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
 		option.setTableOption(tableSql.toString());
+	}
+
+	private void setConfigSettings(String options, TableSourceOptions tblOption)
+	{
+		List<String> l = StringUtil.stringToList(options, ",", true, true, false, true);
+		for (String s : l)
+		{
+			String[] opt = s.split("=");
+			if (opt.length == 2)
+			{
+				tblOption.addConfigSetting(opt[0], opt[1]);
+			}
+		}
 	}
 
 	private StringBuilder readInherits(TableIdentifier table)
@@ -216,21 +231,22 @@ public class PostgresTableSourceBuilder
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.readInherits()", "Using sql: " + pstmt.toString());
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				result = new StringBuilder(50);
 				result.append("INHERITS (");
-
 				String tableName = rs.getString(1);
 				result.append(tableName);
+				table.getSourceOptions().addConfigSetting("inherits", tableName);
 				while (rs.next())
 				{
 					tableName = rs.getString(1);
 					result.append(',');
 					result.append(tableName);
+					table.getSourceOptions().addConfigSetting("inherits", tableName);
 				}
 				result.append(')');
 			}
@@ -242,7 +258,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.readInherits()", "Error retrieving table inheritance", e);
 			return null;
 		}
 		finally

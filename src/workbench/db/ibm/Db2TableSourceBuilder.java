@@ -30,7 +30,6 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
@@ -55,9 +54,11 @@ public class Db2TableSourceBuilder
 	}
 
 	@Override
-	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		if (!checkHistoryTable)	return;
+		if (table == null) return;
+		if (table.getSourceOptions().isInitialized()) return;
 
 		String sql =
 			"select periodname, \n" +
@@ -115,6 +116,7 @@ public class Db2TableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+		table.getSourceOptions().setInitialized();
 	}
 
 }

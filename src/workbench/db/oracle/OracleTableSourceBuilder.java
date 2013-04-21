@@ -62,15 +62,18 @@ public class OracleTableSourceBuilder
 	/**
 	 * Read additional options for the CREATE TABLE part.
 	 *
-	 * @param tbl
+	 * @param tbl        the table for which the options should be retrieved
+	 * @param columns    the table's columns
 	 */
 	@Override
-	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
 	{
+		if (tbl.getSourceOptions().isInitialized()) return;
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration \n" +
+			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration, pct_free, pct_used, pct_increase, logging \n" +
 			"from all_tables  \n" +
 			"where owner = ? \n" +
 			"and table_name = ? ";
@@ -91,31 +94,34 @@ public class OracleTableSourceBuilder
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				String tablespace = rs.getString(1);
+				String tablespace = rs.getString("tablespace_name");
 				tbl.setTablespace(tablespace);
-				String degree = rs.getString(2);
+				String degree = rs.getString("degree");
 				if (degree != null) degree = degree.trim();
 				if (!StringUtil.equalString("1", degree))
 				{
 					if ("DEFAULT".equals(degree))
 					{
 						options.append("PARALLEL");
+						tbl.getSourceOptions().addConfigSetting("parallel", "default");
 					}
 					else
 					{
 						options.append("PARALLEL " + degree);
+						tbl.getSourceOptions().addConfigSetting("parallel", degree);
 					}
 				}
-				String movement = rs.getString(3);
+				String movement = rs.getString("row_movement");
 				if (movement != null) movement = movement.trim();
 				if (StringUtil.equalString("ENABLED", movement))
 				{
 					if (options.length() > 0) options.append('\n');
 					options.append("ENABLE ROW MOVEMENT");
+					tbl.getSourceOptions().addConfigSetting("row_movement", "enabled");
 				}
 
-				String tempTable = rs.getString(4);
-				String duration = rs.getString(5);
+				String tempTable = rs.getString("temporary");
+				String duration = rs.getString("duration");
 				if (StringUtil.equalString("Y", tempTable))
 				{
 					tbl.getSourceOptions().setTypeModifier("GLOBAL TEMPORARY");
@@ -123,11 +129,31 @@ public class OracleTableSourceBuilder
 					if (StringUtil.equalString("SYS$TRANSACTION", duration))
 					{
 						options.append("ON COMMIT DELETE ROWS");
+						tbl.getSourceOptions().addConfigSetting("on_commit", "delete");
 					}
 					else if (StringUtil.equalString("SYS$SESSION", duration))
 					{
 						options.append("ON COMMIT PRESERVE ROWS");
+						tbl.getSourceOptions().addConfigSetting("on_commit", "preserve");
 					}
+				}
+
+				int free = rs.getInt("pct_free");
+				if (!rs.wasNull())
+				{
+					tbl.getSourceOptions().addConfigSetting("pct_free", Integer.toString(free));
+				}
+
+				int used = rs.getInt("pct_used");
+				if (!rs.wasNull())
+				{
+					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
+				}
+
+				String logging = rs.getString("logging");
+				if (StringUtil.equalStringIgnoreCase("NO", logging))
+				{
+					tbl.getSourceOptions().addConfigSetting("logging", logging);
 				}
 			}
 		}
@@ -174,6 +200,7 @@ public class OracleTableSourceBuilder
 			options.append(nested);
 		}
 		tbl.getSourceOptions().setTableOption(options.toString());
+		tbl.getSourceOptions().setInitialized();
 	}
 
 	private StringBuilder getPartitionSql(TableIdentifier table)
@@ -193,7 +220,7 @@ public class OracleTableSourceBuilder
 			}
 			catch (SQLException sql)
 			{
-				LogMgr.logError("OracleTableSourceBuilder.getAdditionalTableOptions()", "Error retrieving partitions", sql);
+				LogMgr.logError("OracleTableSourceBuilder.getPartitionSql()", "Error retrieving partitions", sql);
 			}
 		}
 		return result;
@@ -238,7 +265,7 @@ public class OracleTableSourceBuilder
 			pstmt.setString(2, tbl.getSchema());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readNestedTableOptions()", "Using sql:\n" +
+				LogMgr.logDebug("OracleTableSourceBuilder.getNestedTableSql()", "Using sql:\n" +
 					SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
 			}
 
@@ -255,7 +282,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.readNestedTableOptions()", "Error retrieving table options", e);
+			LogMgr.logError("OracleTableSourceBuilder.getNestedTableSql()", "Error retrieving table options", e);
 		}
 		finally
 		{

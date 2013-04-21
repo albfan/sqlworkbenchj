@@ -26,16 +26,22 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.List;
+
 import javax.swing.SwingUtilities;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ProgressDialog;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.WbThread;
@@ -77,6 +83,7 @@ public class SchemaReportAction
 		if (filename == null) return;
 
 		final SchemaReporter reporter = new SchemaReporter(client.getConnection());
+		reporter.setIncludeExtendedOptions(true);
 		reporter.setObjectList(objects);
 		reporter.setOutputFilename(filename);
 

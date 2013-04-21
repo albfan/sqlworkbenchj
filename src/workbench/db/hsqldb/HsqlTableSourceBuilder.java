@@ -30,7 +30,6 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -51,9 +50,10 @@ public class HsqlTableSourceBuilder
 	}
 
 	@Override
-	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
 	{
-		if (tbl.getSourceOptions().getTypeModifier() != null) return;
+		if (tbl == null) return;
+		if (tbl.getSourceOptions().isInitialized()) return;
 
 		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
 
@@ -98,6 +98,7 @@ public class HsqlTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+		tbl.getSourceOptions().setInitialized();
 	}
 
 }

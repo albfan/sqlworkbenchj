@@ -160,6 +160,14 @@ public class TableIdentifier
 		this.sourceOptions.setAdditionalSql(options);
 	}
 
+	public void setSourceOptions(TableSourceOptions options)
+	{
+		if (options != null)
+		{
+			this.sourceOptions = options;
+		}
+	}
+	
 	public TableSourceOptions getSourceOptions()
 	{
 		return this.sourceOptions;

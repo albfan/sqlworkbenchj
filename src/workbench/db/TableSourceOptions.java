@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +36,11 @@ public class TableSourceOptions
 	private final String KEY_INLINE_OPTION = "inlineSql";
 	private final String KEY_TABLE_OPTION = "tbleOpt";
 	private final String KEY_ADDITIONAL_SQL = "addSql";
-	private final String KEY_CONFIG_OPTION = "cfgOpt";
 
 	private final Map<String, String> options = new HashMap<String, String>();
+	private final Map<String, String> configSettings = new HashMap<String, String>();
+
+	private boolean initialized;
 
 	/**
 	 * Return an expression that should be used in the CREATE TABLE statement to specify an optional table type.
@@ -106,30 +109,44 @@ public class TableSourceOptions
 		options.put(KEY_ADDITIONAL_SQL, sql);
 	}
 
-	public void setConfigOption(String option)
+	/**
+	 * Add a configuration setting that is used for the XML schema report.
+	 * @param key    the DBMS specific option keyword
+	 * @param value  the DBMS specific value
+	 *
+	 * @see #getConfigSettings()
+	 */
+	public void addConfigSetting(String key, String value)
 	{
-		options.put(KEY_CONFIG_OPTION, option);
+		this.configSettings.put(key, value);
 	}
 
-	public String getConfigOption()
+	/**
+	 * Return a DBMS specific key/value mapping for table options.
+	 * @return the settings defined through {@link #addConfigSetting(java.lang.String, java.lang.String)}
+	 * @see #addConfigSetting(java.lang.String, java.lang.String)
+	 */
+	public Map<String, String> getConfigSettings()
 	{
-		return options.get(KEY_CONFIG_OPTION);
-	}
-	
-	public void setOption(String key, String source)
-	{
-		options.put(key, source);
+		return Collections.unmodifiableMap(configSettings);
 	}
 
-	public String getOption(String key)
+	public void setInitialized()
 	{
-		return options.get(key);
+		this.initialized = true;
+	}
+
+	public boolean isInitialized()
+	{
+		return this.initialized;
 	}
 
 	public TableSourceOptions createCopy()
 	{
 		TableSourceOptions copy = new TableSourceOptions();
 		copy.options.putAll(this.options);
+		copy.configSettings.putAll(this.configSettings);
+		copy.initialized = this.initialized;
 		return copy;
 	}
 

@@ -101,7 +101,7 @@ public class ReportTable
 	private List<TableConstraint> tableConstraints;
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
-	private List<ObjectOption> dbmsOptions;
+	private final List<ObjectOption> dbmsOptions = new ArrayList<ObjectOption>();
 	private char catalogSeparator;
 
 	/**
@@ -201,6 +201,7 @@ public class ReportTable
 				triggers = null;
 			}
 		}
+		
 		if (includeOptions)
 		{
 			retrieveOptions(conn);
@@ -220,10 +221,6 @@ public class ReportTable
 
 	public List<ObjectOption> getDbmsOptions()
 	{
-		if (dbmsOptions == null)
-		{
-			return Collections.emptyList();
-		}
 		return Collections.unmodifiableList(dbmsOptions);
 	}
 
@@ -247,24 +244,23 @@ public class ReportTable
 			if (partition.isPartitioned())
 			{
 				String source = partition.getSourceForTableDefinition();
-				dbmsOptions = new ArrayList<ObjectOption>();
 				ObjectOption option = new ObjectOption("partition", source);
 				dbmsOptions.add(option);
 			}
 		}
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(conn);
-		builder.readTableOptions(table, getColumnList(), null);
+		builder.readTableOptions(table, getColumnList());
 
-		String options = table.getSourceOptions().getConfigOption();
-		if (StringUtil.isNonBlank(options))
+		Map<String, String> options = table.getSourceOptions().getConfigSettings();
+		if (!options.isEmpty())
 		{
-			ObjectOption option = new ObjectOption("options", options);
-			if (dbmsOptions == null)
+			for (Map.Entry<String, String> entry : options.entrySet())
 			{
-				dbmsOptions = new ArrayList<ObjectOption>();
+				ObjectOption option = new ObjectOption(entry.getKey(), entry.getValue());
+				option.setWriteFlaxXML(true);
+				dbmsOptions.add(option);
 			}
-			dbmsOptions.add(option);
 		}
 	}
 

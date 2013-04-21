@@ -114,6 +114,10 @@ public class TableSourceBuilder
 			fkDef = fk.getForeignKeys(def.getTable(), false);
 		}
 		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk);
+
+		// copy the source to the original table so that they are available later as well
+		// and don't need to be re-retrieved
+		table.setSourceOptions(def.getTable().getSourceOptions());
 		return source;
 	}
 
@@ -159,13 +163,13 @@ public class TableSourceBuilder
 		return result;
 	}
 
-	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 	}
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkList, boolean includeDrop, boolean includeFk)
 	{
-		readTableOptions(table, columns, indexList);
+		readTableOptions(table, columns);
 
 		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, includeDrop, includeFk);
 

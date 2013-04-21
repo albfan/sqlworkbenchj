@@ -50,9 +50,10 @@ public class MySQLTableSourceBuilder
 	}
 
 	@Override
-	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
+	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		if (table == null) return;
+		if (table.getSourceOptions().isInitialized()) return;
 
 		StringBuilder result = null;
 
@@ -77,7 +78,10 @@ public class MySQLTableSourceBuilder
 			if (rs.next())
 			{
 				result = new StringBuilder(100);
-				appendOption(result, "ENGINE", rs.getString("engine"));
+				String engine = rs.getString("engine");
+				appendOption(result, "ENGINE", engine);
+				table.getSourceOptions().addConfigSetting("engine", engine);
+
 				String comment = rs.getString("table_comment");
 				if (StringUtil.isNonBlank(comment))
 				{
@@ -91,6 +95,7 @@ public class MySQLTableSourceBuilder
 				{
 					appendOption(result, "COLLATE", collation);
 				}
+				table.getSourceOptions().addConfigSetting("collation", collation);
 			}
 		}
 		catch (SQLException ex)
@@ -105,6 +110,7 @@ public class MySQLTableSourceBuilder
 		{
 			table.getSourceOptions().setTableOption(result.toString());
 		}
+		table.getSourceOptions().setInitialized();
 	}
 
 	private void appendOption(StringBuilder result, String option, String value)
