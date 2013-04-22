@@ -199,8 +199,84 @@ public class OracleTableSourceBuilder
 		{
 			options.append(nested);
 		}
+
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_flashback", false))
+		{
+			retrieveFlashbackInfo(tbl);
+		}
 		tbl.getSourceOptions().setTableOption(options.toString());
 		tbl.getSourceOptions().setInitialized();
+	}
+
+	private void retrieveFlashbackInfo(TableIdentifier tbl)
+	{
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+
+		// Using the table's tablespace for the flashback archive is not correct,
+		// but there isn't a way to retrieve that information as far as I can tell
+		// (not even SQL Developer displays the flashback archive information!)
+		String sql =
+			"select fa.flashback_archive_name,   \n" +
+			"       fa.retention_in_days, \n" +
+			"       tbl.tablespace_name \n" +
+			"from dba_flashback_archive fa  \n" +  // this should be user_flashback_archive but that does not contain any information!
+			"  join user_flashback_archive_tables fat  \n" +
+			"    on fat.flashback_archive_name = fa.flashback_archive_name  \n" +
+			"  join all_tables tbl  \n" +
+			"    on tbl.owner = fat.owner_name  \n" +
+			"   and tbl.table_name = fat.table_name \n" +
+		  "where fat.owner_name = ? \n" +
+			"  and fat.table_name = ? ";
+
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, tbl.getSchema());
+			pstmt.setString(2, tbl.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Using sql:\n" +
+					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+			}
+
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				String archiveName = rs.getString(1);
+				int days = rs.getInt(2);
+				String tbSpace = rs.getString(3);
+				String rentention = "RETENTION ";
+				if (days < 30)
+				{
+					rentention += Integer.toString(days) + " DAY";
+				}
+				else if (days < 365)
+				{
+					rentention += Integer.toString(days / 30) + " MONTH";
+				}
+				else
+				{
+					rentention += Integer.toString(days / 365) + " YEAR";
+				}
+				String create =
+					"CREATE FLASHBACK ARCHIVE " + archiveName + "\n" +
+					"  TABLESPACE " + tbSpace +"\n  " + rentention + ";\n" +
+					"ALTER TABLE " + tbl.getTableExpression(dbConnection) + "\n" +
+					"  FLASHBACK ARCHIVE " + archiveName + ";";
+
+				tbl.getSourceOptions().setAdditionalSql(create);
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logWarning("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Could not retrieve flashback information", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
 	}
 
 	private StringBuilder getPartitionSql(TableIdentifier table)
