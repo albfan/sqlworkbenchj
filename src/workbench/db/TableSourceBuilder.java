@@ -233,7 +233,7 @@ public class TableSourceBuilder
 			}
 		}
 
-		CharSequence extendedSQL = table.getSourceOptions() == null ? null : table.getSourceOptions().getAdditionalSql();
+		CharSequence extendedSQL = table.getSourceOptions().getAdditionalSql();
 		if (extendedSQL != null)
 		{
 			result.append(lineEnding);
@@ -279,7 +279,7 @@ public class TableSourceBuilder
 
 		// this should have been populated previously!
 		TableSourceOptions sourceOptions = table.getSourceOptions();
-		String typeOption = sourceOptions == null ? null : sourceOptions.getTypeModifier();
+		String typeOption = sourceOptions.getTypeModifier();
 
 		result.append(generateCreateObject(includeDrop, table, typeOption));
 		result.append("\n(\n");
@@ -339,7 +339,7 @@ public class TableSourceBuilder
 			}
 		}
 
-		String tblOptions = sourceOptions == null ? null : sourceOptions.getInlineOption();
+		String tblOptions = sourceOptions.getInlineOption();
 		if (tblOptions != null)
 		{
 			result.append(",\n   ");
@@ -348,7 +348,7 @@ public class TableSourceBuilder
 
 		result.append('\n');
 		result.append(")");
-		String options = sourceOptions == null ? null : sourceOptions.getTableOption();
+		String options = sourceOptions.getTableOption();
 		if (StringUtil.isNonEmpty(options))
 		{
 			result.append('\n');

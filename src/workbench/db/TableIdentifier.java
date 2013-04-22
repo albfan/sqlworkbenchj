@@ -160,6 +160,11 @@ public class TableIdentifier
 		this.sourceOptions.setAdditionalSql(options);
 	}
 
+	/**
+	 * Define the source options to be used.
+	 *
+	 * @param options  the new options. If null, the call is ignored
+	 */
 	public void setSourceOptions(TableSourceOptions options)
 	{
 		if (options != null)
@@ -167,7 +172,12 @@ public class TableIdentifier
 			this.sourceOptions = options;
 		}
 	}
-	
+
+	/**
+	 * Returns the source options to build the table's SQL
+	 *
+	 * @return the options. Never null
+	 */
 	public TableSourceOptions getSourceOptions()
 	{
 		return this.sourceOptions;
