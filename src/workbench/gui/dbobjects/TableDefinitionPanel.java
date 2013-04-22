@@ -161,6 +161,10 @@ public class TableDefinitionPanel
 		// properly in the QuickFilterPanel, although it wouldn't be necessary
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
+		
+		columnFilter.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+		columnFilter.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+
 
 		DbData db = new DbData()
 		{
