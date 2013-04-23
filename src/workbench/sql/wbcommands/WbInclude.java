@@ -37,7 +37,6 @@ import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.VariablePool;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -56,9 +55,6 @@ public class WbInclude
 {
 	public static final String VERB = "WBINCLUDE";
 	public static final String ORA_INCLUDE = "@";
-	public static final String PARAM_IF_DEF = "ifDefined";
-	public static final String PARAM_IF_NOTDEF = "ifNotDefined";
-	public static final String PARAM_IF_EQUALS = "ifEquals";
 
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
@@ -76,9 +72,7 @@ public class WbInclude
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/:nl','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_IF_DEF);
-		cmdLine.addArgument(PARAM_IF_NOTDEF);
-		cmdLine.addArgument(PARAM_IF_EQUALS);
+		ConditionCheck.addParameters(cmdLine);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -139,14 +133,13 @@ public class WbInclude
 			}
 		}
 
-		if (checkParms && cmdLine.isArgPresent(PARAM_IF_DEF) && cmdLine.isArgPresent(PARAM_IF_NOTDEF) && cmdLine.isArgPresent(PARAM_IF_EQUALS))
+		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
 		{
-			result.addMessage(PARAM_IF_DEF + ", " + PARAM_IF_NOTDEF + " or " + PARAM_IF_EQUALS + " cannot be specified together");
 			result.setFailure();
 			return result;
 		}
 
-		if (checkParms && !checkConditions(result))
+		if (!checkConditions(result))
 		{
 			return result;
 		}
@@ -316,44 +309,13 @@ public class WbInclude
 
 	private boolean checkConditions(StatementRunnerResult result)
 	{
-		if (cmdLine.isArgPresent(PARAM_IF_DEF))
+		ConditionCheck.Result check = ConditionCheck.checkConditions(cmdLine);
+		if (check.isOK())
 		{
-			String var = cmdLine.getValue(PARAM_IF_DEF);
-			if (!VariablePool.getInstance().isDefined(var))
-			{
-				result.addMessage("File not included because variable " + var + " is not defined");
-				result.setSuccess();
-				return false;
-			}
+			return true;
 		}
-
-		if (cmdLine.isArgPresent(PARAM_IF_NOTDEF))
-		{
-			String var = cmdLine.getValue(PARAM_IF_NOTDEF);
-			if (VariablePool.getInstance().isDefined(var))
-			{
-				result.addMessage("File not included because variable " + var + " is defined");
-				result.setSuccess();
-				return false;
-			}
-		}
-
-		if (cmdLine.isArgPresent(PARAM_IF_EQUALS))
-		{
-			String var = cmdLine.getValue(PARAM_IF_EQUALS);
-			String[] elements = var.split("=");
-			if (elements.length == 2)
-			{
-				String value = VariablePool.getInstance().getParameterValue(elements[0]);
-				if (value != null && value.equals(elements[1]))
-				{
-					return true;
-				}
-				result.addMessage("File not included because variable " + var + " is not set to '" + elements[1] + "'");
-				result.setSuccess();
-				return false;
-			}
-		}
-		return true;
+		result.addMessage(ConditionCheck.getMessage("ErrInclude", check));
+		result.setSuccess();
+		return false;
 	}
 }

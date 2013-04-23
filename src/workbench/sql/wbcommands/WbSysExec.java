@@ -30,9 +30,12 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.log.LogMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.*;
 
 /**
@@ -59,6 +62,7 @@ public class WbSysExec
 		cmdLine.addArgument(ARG_WORKING_DIR);
 		cmdLine.addArgument(ARG_DOCUMENT);
 		cmdLine.addArgument(ARG_PRG_ARG, ArgumentType.Repeatable);
+		ConditionCheck.addParameters(cmdLine);
 	}
 
 	@Override
@@ -92,6 +96,15 @@ public class WbSysExec
 			cmdLine.parse(command);
 			String prg = cmdLine.getValue(ARG_PROGRAM);
 			String doc = cmdLine.getValue(ARG_DOCUMENT);
+
+			ConditionCheck.Result check = ConditionCheck.checkConditions(cmdLine);
+			if (!check.isOK())
+			{
+				result.addMessage(ConditionCheck.getMessage("ErrExec", check));
+				result.setSuccess();
+				return result;
+			}
+
 			if (StringUtil.isNonBlank(prg))
 			{
 				List<String> args = new ArrayList<String>();
