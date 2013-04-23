@@ -2,9 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-04-07">
+    <entry dev-build="8" type="enh">WbInclude and WbSysExec now support conditional execution based on variables through -ifDefined, -ifNotDefined, -ifEquals, -ifNotEquals, -ifEmpty and -ifNotEmpty</entry>
     <entry dev-build="7" type="enh">For SQL Server "included" columns are now displayed in the generated SQL code for a CREATE INDEX statement.</entry>
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
-    <entry dev-build="6" type="enh">WbInclude now supports conditional inclusion based on variables through -ifDefined, -ifNotDefined and -ifEquals</entry>
     <entry dev-build="6" type="enh">WbVarDef now supports an option -removeUndefined which replaces undefined variables in the assigned value with an empty string</entry>
     <entry dev-build="5" type="enh">A new option "-removeDefaults" has been added to WbCopy to be used together with the createTable=true argument. If enabled, any column defaults from the source table are ignored.</entry>
     <entry dev-build="5" type="enh">A new option to change the alignment of numbers in the result display has been added</entry>
