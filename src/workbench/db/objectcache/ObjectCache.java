@@ -279,18 +279,20 @@ class ObjectCache
 
 			if (schemasToCheck.contains(tSchema) || schemasToCheck.isEmpty())
 			{
-				boolean ignoreSchema = !alwaysUseSchema && currentSchema != null && meta.ignoreSchema(tSchema, currentSchema);
-
 				TableIdentifier copy = tbl.createCopy();
+
+				boolean ignoreSchema = (alwaysUseSchema ? false : meta.ignoreSchema(tSchema, currentSchema));
 				if (ignoreSchema)
 				{
 					copy.setSchema(null);
 				}
 
-				if (!alwaysUseCatalog && meta.ignoreCatalog(copy.getCatalog()))
+				boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(copy.getCatalog()));
+				if (ignoreCatalog)
 				{
 					copy.setCatalog(null);
 				}
+				
 				result.add(copy);
 			}
 		}
