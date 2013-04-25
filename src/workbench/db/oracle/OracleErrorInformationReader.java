@@ -126,7 +126,7 @@ public class OracleErrorInformationReader
 			String currentName = null;
 
 			boolean firstHeading = true;
-			int indentLength = 14;
+			int indentLength = 15;
 
 			String indent = StringUtil.padRight("", indentLength);
 			while (rs.next())
@@ -163,10 +163,11 @@ public class OracleErrorInformationReader
 				if (formatMessages)
 				{
 					String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
-					lineInfo = StringUtil.padRight(lineInfo, indentLength + 2);
+					lineInfo = StringUtil.padRight(lineInfo, indentLength);
 					result.append(lineInfo);
+					msg = msg.trim().replace("\n\n", "\n"); // remove duplicate newlines
 					// indent all lines of the message
-					msg = msg.trim().replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
+					msg = msg.replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
 				}
 				result.append(msg);
 				count++;
