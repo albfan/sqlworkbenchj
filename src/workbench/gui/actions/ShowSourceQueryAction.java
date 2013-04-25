@@ -26,20 +26,25 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -72,7 +77,7 @@ public class ShowSourceQueryAction
 
 	public void showQuery()
 	{
-		final EditorPanel editor = EditorPanel.createSqlEditor();
+		EditorPanel editor = EditorPanel.createSqlEditor();
 		WbTabbedPane tab = new WbTabbedPane();
 
 		String sql = panel.getSourceQuery();
@@ -96,7 +101,8 @@ public class ShowSourceQueryAction
 		String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
 		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt);
 		JLabel lbl = new JLabel(msg);
-		lbl.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(3, 2, 2, 0)));
+		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
+		lbl.setBorder(new CompoundBorder(etched, new EmptyBorder(3, 2, 2, 0)));
 
 		display.add(editor, BorderLayout.CENTER);
 		display.add(lbl, BorderLayout.NORTH);
@@ -104,7 +110,7 @@ public class ShowSourceQueryAction
 		ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(panel.getCurrentResult());
 
 		tab.addTab("SQL", display);
-		tab.addTab("ResultSet", resultInfo);
+		tab.addTab(ResourceMgr.getString("LblResultMeta"), resultInfo);
 
 		ValidatingDialog d = new ValidatingDialog(f, panel.getCurrentResultTitle(), tab, false);
 		if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))

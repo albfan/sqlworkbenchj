@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-04-07">
+    <entry dev-build="8" type="enh">When displaying the generating SQL for a result, the metadata of the result set is now also displayed.</entry>
     <entry dev-build="8" type="enh">WbInclude and WbSysExec now support conditional execution based on variables through -ifDefined, -ifNotDefined, -ifEquals, -ifNotEquals, -ifEmpty and -ifNotEmpty</entry>
     <entry dev-build="7" type="enh">For SQL Server "included" columns are now displayed in the generated SQL code for a CREATE INDEX statement.</entry>
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
