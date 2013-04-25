@@ -29,10 +29,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
@@ -70,9 +73,11 @@ public class ShowSourceQueryAction
 	public void showQuery()
 	{
 		final EditorPanel editor = EditorPanel.createSqlEditor();
+		WbTabbedPane tab = new WbTabbedPane();
+
 		String sql = panel.getSourceQuery();
 
-		JPanel display = new JPanel(new BorderLayout());
+		JPanel display = new JPanel(new BorderLayout(0,5));
 
 		editor.setText(sql);
 		editor.setCaretPosition(0);
@@ -91,12 +96,17 @@ public class ShowSourceQueryAction
 		String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
 		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt);
 		JLabel lbl = new JLabel(msg);
-		lbl.setBorder(new EmptyBorder(0, 2, 3, 0));
+		lbl.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(3, 2, 2, 0)));
 
 		display.add(editor, BorderLayout.CENTER);
 		display.add(lbl, BorderLayout.NORTH);
 
-		ValidatingDialog d = new ValidatingDialog(f, "SQL", display, false);
+		ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(panel.getCurrentResult());
+
+		tab.addTab("SQL", display);
+		tab.addTab("ResultSet", resultInfo);
+
+		ValidatingDialog d = new ValidatingDialog(f, panel.getCurrentResultTitle(), tab, false);
 		if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))
 		{
 			d.setSize(500,350);

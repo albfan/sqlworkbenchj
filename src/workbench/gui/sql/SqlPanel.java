@@ -2506,6 +2506,12 @@ public class SqlPanel
 		checkResultSetActions();
 	}
 
+	public String getCurrentResultTitle()
+	{
+		int index = resultTab.getSelectedIndex();
+		return resultTab.getTitleAt(index);
+	}
+	
 	public DwPanel getCurrentResult()
 	{
 		Component c = resultTab.getSelectedComponent();
