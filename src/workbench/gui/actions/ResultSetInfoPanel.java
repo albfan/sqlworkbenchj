@@ -34,6 +34,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.DwPanel;
+import workbench.resource.GuiSettings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
@@ -56,18 +57,25 @@ public class ResultSetInfoPanel
 
 		add(scroll, BorderLayout.CENTER);
 		DataStore ds = data.getDataStore();
-		
+
 		if (ds != null)
 		{
 			ResultInfo info = ds.getResultInfo();
-			String[] cols = new String[]
+			String[] cols;
+			int[] types;
+
+			boolean showComments = GuiSettings.getRetrieveQueryComments();
+			if (showComments)
 			{
-				"COLUMN_NAME", "DATA_TYPE", "JDBC Type"
-			};
-			int[] types = new int[]
+				cols = new String[] { "COLUMN_NAME", "DATA_TYPE", "JDBC Type", "REMARKS", "BASE TABLE"	};
+				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
+			}
+			else
 			{
-				Types.VARCHAR, Types.VARCHAR, Types.INTEGER
-			};
+				cols = new String[] { "COLUMN_NAME", "DATA_TYPE", "JDBC Type"};
+				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
+			}
+
 			DataStore infoDs = new DataStore(cols, types);
 			for (ColumnIdentifier col : info.getColumns())
 			{
@@ -75,6 +83,11 @@ public class ResultSetInfoPanel
 				infoDs.setValue(row, 0, col.getColumnName());
 				infoDs.setValue(row, 1, col.getDbmsType());
 				infoDs.setValue(row, 2, col.getDataType());
+				if (showComments)
+				{
+					infoDs.setValue(row, 3, col.getComment());
+					infoDs.setValue(row, 4, col.getSourceTableName());
+				}
 			}
 			DataStoreTableModel model = new DataStoreTableModel(infoDs);
 			display.setAutoCreateColumnsFromModel(true);
