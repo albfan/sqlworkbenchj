@@ -74,7 +74,7 @@ public class ResultSetInfoPanel
 			else
 			{
 				cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "CLASS_NAME"};
-				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
+				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR };
 			}
 
 			DataStore infoDs = new DataStore(cols, types);
@@ -98,7 +98,7 @@ public class ResultSetInfoPanel
 			DataStoreTableModel model = new DataStoreTableModel(infoDs);
 			display.setAutoCreateColumnsFromModel(true);
 			display.setModel(model);
-			
+
 			TableColumnModel colmod = display.getColumnModel();
 			int index = colmod.getColumnIndex("JDBC Type");
 			TableColumn col = colmod.getColumn(index);
