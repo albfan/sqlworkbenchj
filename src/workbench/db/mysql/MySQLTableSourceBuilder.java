@@ -67,7 +67,7 @@ public class MySQLTableSourceBuilder
 			"where table_schema = ? \n " +
 			"  and table_name = ? ";
 
-		String defaultCollation = getDefaultCollation(dbConnection);
+		String defaultCollation = getDefaultCollation();
 		try
 		{
 			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
@@ -124,7 +124,7 @@ public class MySQLTableSourceBuilder
 		}
 	}
 
-	private String getDefaultCollation(WbConnection con)
+	private String getDefaultCollation()
 	{
 		Statement stmt = null;
 		ResultSet rs = null;

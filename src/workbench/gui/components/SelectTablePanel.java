@@ -25,6 +25,7 @@ package workbench.gui.components;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -33,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
+
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 
@@ -113,7 +115,7 @@ public class SelectTablePanel
 
 	private void tablesActionPerformed(ActionEvent evt)//GEN-FIRST:event_tablesActionPerformed
 	{//GEN-HEADEREND:event_tablesActionPerformed
-		// TODO add your handling code here:
+		
 	}//GEN-LAST:event_tablesActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -45,7 +45,7 @@ public interface WbLogger
 
 	File getCurrentFile();
 
-	public void shutdownWbLog();
+	void shutdownWbLog();
 
 	boolean levelEnabled(LogLevel tolog);
 }

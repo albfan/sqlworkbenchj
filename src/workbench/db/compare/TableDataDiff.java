@@ -386,7 +386,6 @@ public class TableDataDiff
 				this.monitor.setCurrentObject(msg, -1, -1);
 			}
 
-			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
 			RowDataReader reader = RowDataReaderFactory.createReader(info, this.reference);

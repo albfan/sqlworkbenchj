@@ -23,7 +23,9 @@
 package workbench.db;
 
 import java.util.List;
+
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -37,7 +39,7 @@ public interface TransactionChecker
 	/**
 	 * Dummy implementation that does no checking at all.
 	 */
-	public static final TransactionChecker NO_CHECK = new TransactionChecker()
+	TransactionChecker NO_CHECK = new TransactionChecker()
 	{
 		/**
 		 * Always returns false.
@@ -60,7 +62,7 @@ public interface TransactionChecker
 	 * @see DefaultTransactionChecker
 	 * @see ConnectionProfile#getDetectOpenTransaction()
 	 */
-	public static class Factory
+	class Factory
 	{
 		/**
 		 * Returns a TransactionChecker for the given connection.

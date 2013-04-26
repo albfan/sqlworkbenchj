@@ -338,7 +338,7 @@ public class DbMetadata
 			LogMgr.logError("DbMetadata.<init>", "Error when retrieving identifier quote character", e);
 		}
 
-		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
+		this.dbSettings = new DbSettings(this.getDbId());
 
 		String quote = dbSettings.getQuoteEscapeCharacter();
 		if (quote != null)
@@ -2297,12 +2297,9 @@ public class DbMetadata
 
 		// If only a single catalog is returned and that is the current one,
 		// is is assumed, that the system does not have catalogs.
-		if (result.size() == 1)
+		if (result.size() == 1 && result.get(0).equals(this.getCurrentCatalog()))
 		{
-			if (result.get(0).equals(this.getCurrentCatalog()))
-			{
-				result.clear();
-			}
+			result.clear();
 		}
 		Collections.sort(result);
 		return result;

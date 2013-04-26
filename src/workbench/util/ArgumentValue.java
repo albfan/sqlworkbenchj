@@ -33,7 +33,7 @@ public interface ArgumentValue
 	String getDisplay();
 	String getValue();
 
-	public Comparator<ArgumentValue> COMPARATOR = new Comparator<ArgumentValue>()
+	Comparator<ArgumentValue> COMPARATOR = new Comparator<ArgumentValue>()
 	{
 		@Override
 		public int compare(ArgumentValue o1, ArgumentValue o2)

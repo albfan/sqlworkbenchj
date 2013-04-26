@@ -1519,7 +1519,7 @@ public class SqlFormatter
 				if (word.equals("CREATE") || word.equals("CREATE OR REPLACE"))
 				{
 					lastToken = t;
-					t = this.processCreate(t);
+					t = this.processCreate();
 					if (t == null) return;
 					continue;
 				}
@@ -1933,7 +1933,7 @@ public class SqlFormatter
 		return t;
 	}
 
-	private SQLToken processCreate(SQLToken previous)
+	private SQLToken processCreate()
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents();
@@ -1943,7 +1943,7 @@ public class SqlFormatter
 			this.appendText(' ');
 			this.appendTokenText(t);
 			this.appendText(' ');
-			t = this.processCreateTable(t);
+			t = this.processCreateTable();
 			return t;
 		}
 		else if (verb.equals("VIEW") || verb.equals("SNAPSHOT"))
@@ -2149,7 +2149,7 @@ public class SqlFormatter
 	 * Process a CREATE TABLE statement.
 	 * The CREATE TABLE has already been added!
 	 */
-	private SQLToken processCreateTable(SQLToken previous)
+	private SQLToken processCreateTable()
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		if (t == null) return t;

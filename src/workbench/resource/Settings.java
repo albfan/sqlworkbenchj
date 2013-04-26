@@ -63,6 +63,7 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
 
 import workbench.storage.PkMapping;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.formatter.JoinWrapStyle;
 
@@ -297,28 +298,25 @@ public class Settings
 			}
 		}
 
-		if (useLog4j)
+		if (useLog4j && StringUtil.isNonBlank(log4jConfig))
 		{
-			if (StringUtil.isNonBlank(log4jConfig))
+			try
 			{
-				try
+				File f = new File(log4jConfig);
+				if (!f.isAbsolute() && configfile != null)
 				{
-					File f = new File(log4jConfig);
-					if (!f.isAbsolute() && configfile != null)
-					{
-						f = new File(configfile.getParentFile(), log4jConfig);
-					}
+					f = new File(configfile.getParentFile(), log4jConfig);
+				}
 
-					if (f.exists())
-					{
-						String fileUrl = f.toURI().toString();
-						System.setProperty("log4j.configuration", fileUrl);
-					}
-				}
-				catch (Throwable th)
+				if (f.exists())
 				{
-					// ignore
+					String fileUrl = f.toURI().toString();
+					System.setProperty("log4j.configuration", fileUrl);
 				}
+			}
+			catch (Throwable th)
+			{
+				// ignore
 			}
 		}
 		return useLog4j;

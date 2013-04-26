@@ -25,8 +25,11 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.resource.Settings;
+
 import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.StringUtil;
 
 /**
@@ -134,8 +137,6 @@ public class DummySelect
 		int colCount = cols.size();
 
 		StringBuilder sql = new StringBuilder(colCount * 80);
-
-		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
 
 		sql.append("SELECT ");
 		for (int i = 0; i < colCount; i++)

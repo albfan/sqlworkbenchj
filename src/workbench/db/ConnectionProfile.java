@@ -28,10 +28,13 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import workbench.gui.profiles.ProfileKey;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.sql.DelimiterDefinition;
+
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbDesCipher;
@@ -601,13 +604,10 @@ public class ConnectionProfile
 
 	private String encryptPassword(String aPwd)
 	{
-		if (Settings.getInstance().getUseEncryption())
+		if (Settings.getInstance().getUseEncryption() && !this.isEncrypted(aPwd))
 		{
-			if (!this.isEncrypted(aPwd))
-			{
-				WbCipher des = WbDesCipher.getInstance();
-				aPwd = CRYPT_PREFIX + des.encryptString(aPwd);
-			}
+			WbCipher des = WbDesCipher.getInstance();
+			aPwd = CRYPT_PREFIX + des.encryptString(aPwd);
 		}
 		return aPwd;
 	}

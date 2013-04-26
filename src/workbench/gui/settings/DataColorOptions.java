@@ -28,18 +28,15 @@ import java.awt.*;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Locale;
-
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbColorPicker;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbColorPicker;
+
 import workbench.util.StringUtil;
 
 /**
@@ -88,7 +85,7 @@ public class DataColorOptions
 		GuiSettings.setNullColor(nullColor.getSelectedColor());
 		GuiSettings.setColumnModifiedColor(modifiedColor.getSelectedColor());
 		GuiSettings.setExpressionHighlightColor(searchHilite.getSelectedColor());
-		
+
 		Settings.getInstance().setColor("workbench.gui.table.background", stdBackground.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.foreground", textColor.getSelectedColor());
 		Settings.getInstance().setColor("workbench.gui.table.selection.background", selectionColor.getSelectedColor());
@@ -145,29 +142,6 @@ public class DataColorOptions
 			return false;
 		}
 		return true;
-	}
-
-	private Locale[] readLocales()
-	{
-		long start = System.currentTimeMillis();
-		Locale[] locales = Locale.getAvailableLocales();
-		long duration = System.currentTimeMillis() - start;
-		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Reading " + locales.length + " locales took: " + duration);
-
-		start = System.currentTimeMillis();
-		Comparator<Locale> localeComp = new Comparator<Locale>()
-		{
-			private Locale l = Settings.getInstance().getLanguage();
-			@Override
-			public int compare(Locale o1, Locale o2)
-			{
-				return o1.getDisplayLanguage(l).compareTo(o2.getDisplayLanguage(l));
-			}
-		};
-		Arrays.sort(locales, localeComp);
-		duration = System.currentTimeMillis() - start;
-		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Sorting locales took: " + duration);
-		return locales;
 	}
 
 	/** This method is called from within the constructor to

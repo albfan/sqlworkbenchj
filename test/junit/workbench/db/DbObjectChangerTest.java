@@ -75,7 +75,7 @@ public class DbObjectChangerTest
 	public void testPostgreSQL()
 		throws Exception
 	{
-		DbSettings settings = new DbSettings("postgresql", "PostgreSQL");
+		DbSettings settings = new DbSettings("postgresql");
 		DbObjectChanger changer = new DbObjectChanger(settings);
 		TableIdentifier table = new TableIdentifier("person_address");
 
@@ -131,7 +131,7 @@ public class DbObjectChangerTest
 	public void testSQLServer()
 		throws Exception
 	{
-		DbSettings settings = new DbSettings("microsoft_sql_server", "Microsoft SQL Server");
+		DbSettings settings = new DbSettings("microsoft_sql_server");
 		DbObjectChanger changer = new DbObjectChanger(settings);
 
 		TableIdentifier oldTable = new TableIdentifier("dbo", "bar");
@@ -145,7 +145,7 @@ public class DbObjectChangerTest
 	public void testMySQL()
 		throws Exception
 	{
-		DbSettings settings = new DbSettings("mysql", "Wannabee");
+		DbSettings settings = new DbSettings("mysql");
 		DbObjectChanger changer = new DbObjectChanger(settings);
 
 		TableIdentifier oldTable = new TableIdentifier("first_db", null, "bar");

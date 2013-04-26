@@ -38,7 +38,6 @@ import java.awt.event.WindowListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.border.EmptyBorder;
@@ -46,16 +45,17 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import workbench.interfaces.EventDisplay;
-import workbench.db.ConnectionMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.util.EventNotifier;
 import workbench.util.NotifierEvent;
@@ -296,25 +296,6 @@ public class ProfileSelectionDialog
 		{
 			HelpManager.showProfileHelp();
 		}
-	}
-
-	private boolean checkModifiedGroups()
-	{
-		if (profiles.profilesChanged())
-		{
-			int result = WbSwingUtilities.getYesNoCancel(this, ResourceMgr.getString("MsgProfilesChanged"));
-			if (result == JOptionPane.YES_OPTION)
-			{
-				profiles.applyProfiles();
-				return true;
-			}
-			if (result == JOptionPane.NO_OPTION)
-			{
-				return true;
-			}
-			return false;
-		}
-		return true;
 	}
 
 	public boolean isCancelled()

@@ -135,7 +135,6 @@ public class WbInclude
 
 		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
 		{
-			result.setFailure();
 			return result;
 		}
 

@@ -62,7 +62,7 @@ public class StatementFactoryTest
 	{
 		// Make sure the datatype defines a valuetemplate
 		Settings.getInstance().setProperty("workbench.db.testmodedeb.dmlexpression.inet", "cast(? as inet)");
-		DbSettings forTest = new DbSettings("testmodedeb", "TestMode");
+		DbSettings forTest = new DbSettings("testmodedeb");
 
 		ColumnIdentifier inetCol = new ColumnIdentifier("ip_address", java.sql.Types.OTHER);
 		inetCol.setDbmsType("inet");

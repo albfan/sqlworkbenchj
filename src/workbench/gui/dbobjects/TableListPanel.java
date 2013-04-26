@@ -340,7 +340,6 @@ public class TableListPanel
 		this.statusPanel = new JPanel(new BorderLayout());
 		this.alterButton = new FlatButton(this.renameAction);
 		this.alterButton.setResourceKey("MnuTxtRunAlter");
-		renameAction.setButton(alterButton);
 
 		this.summaryStatusBarLabel = new SummaryLabel("");
 		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);

@@ -30,7 +30,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,17 +48,18 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.DividerBorder;
-import workbench.gui.components.SelectionDisplay;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbTextLabel;
 import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.EventDisplay;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.DividerBorder;
+import workbench.gui.components.SelectionDisplay;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTextLabel;
+
 import workbench.util.DurationFormatter;
 import workbench.util.NotifierEvent;
 import workbench.util.NumberStringCache;
@@ -452,16 +452,12 @@ public class DwStatusBar
 		notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		notificationLabel.addMouseListener(this);
 
-		final Frame f = WbManager.getInstance().getCurrentWindow();
-
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				alertPanel.add(notificationLabel);
-//				NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
-//				w.show(notificationLabel);
 				validate();
 			}
 		});

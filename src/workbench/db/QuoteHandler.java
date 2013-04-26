@@ -23,6 +23,7 @@
 package workbench.db;
 
 import java.util.regex.Matcher;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -67,7 +68,7 @@ public interface QuoteHandler
 	 * @see SqlUtil#quoteObjectname(java.lang.String)
 	 * @see SqlUtil#removeQuoting(java.lang.String)
 	 */
-	public static final QuoteHandler STANDARD_HANDLER = new QuoteHandler()
+	QuoteHandler STANDARD_HANDLER = new QuoteHandler()
 	{
 		@Override
 		public boolean isQuoted(String name)

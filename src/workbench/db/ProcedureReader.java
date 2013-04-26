@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.storage.DataStore;
 
 /**
@@ -42,7 +43,7 @@ public interface ProcedureReader
 	int COLUMN_IDX_PROC_LIST_SPECIFIC_NAME = 5;
 
 	// column index definitions for the list of procedure columns
-	
+
 	int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
 	int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
 	int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
@@ -50,9 +51,9 @@ public interface ProcedureReader
 	int COLUMN_IDX_PROC_COLUMNS_REMARKS = 4;
 	int COLUMN_IDX_PROC_COLUMNS_COL_NR = 5;
 
-	final String PROC_RESULT_UNKNOWN = "";
-	final String PROC_RESULT_YES = "RESULT";
-	final String PROC_RESULT_NO = "NO RESULT";
+	String PROC_RESULT_UNKNOWN = "";
+	String PROC_RESULT_YES = "RESULT";
+	String PROC_RESULT_NO = "NO RESULT";
 
 	StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType);
 

@@ -35,6 +35,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
@@ -46,14 +51,14 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.ResultNameParser;
+
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
+
+import workbench.sql.ResultNameParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;

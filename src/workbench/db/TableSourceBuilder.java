@@ -303,7 +303,7 @@ public class TableSourceBuilder
 		{
 			// this can happen in DB2 iSeries. Apparently the columns are not always marked as PK
 			// but the PK index is detected by SQL Workbench
-			pkCols = getPKColsFromIndex(indexList, pkname);
+			pkCols = getPKColsFromIndex(indexList);
 		}
 
 		PkDefinition pk = table.getPrimaryKey();
@@ -547,7 +547,7 @@ public class TableSourceBuilder
 
 	}
 
-	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList, String pkname)
+	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList)
 	{
 		List<String> columns = new ArrayList<String>();
 		for (IndexDefinition index : indexList)

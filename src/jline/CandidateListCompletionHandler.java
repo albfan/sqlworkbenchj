@@ -55,7 +55,6 @@ public class CandidateListCompletionHandler implements CompletionHandler {
             return true;
         } else if (candidates.size() > 1) {
             String value = getUnambiguousCompletions(candidates);
-            String bufString = buf.toString();
             setBuffer(reader, value, pos);
         }
 

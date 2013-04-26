@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.util.Collections;
 import java.util.List;
+
 import workbench.db.ibm.Db2SearchPath;
 import workbench.db.postgres.PostgresUtil;
 
@@ -35,7 +36,7 @@ public interface DbSearchPath
 {
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema);
 
-	public static DbSearchPath DEFAULT_HANDLER = new DbSearchPath()
+	DbSearchPath DEFAULT_HANDLER = new DbSearchPath()
 	{
 		@Override
 		public List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
@@ -52,7 +53,7 @@ public interface DbSearchPath
 		}
 	};
 
-	public static DbSearchPath PG_HANDLER = new DbSearchPath()
+	DbSearchPath PG_HANDLER = new DbSearchPath()
 	{
 		@Override
 		public List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
@@ -65,7 +66,7 @@ public interface DbSearchPath
 		}
 	};
 
-	public static class Factory
+	class Factory
 	{
 		public static DbSearchPath getSearchPathHandler(WbConnection con)
 		{

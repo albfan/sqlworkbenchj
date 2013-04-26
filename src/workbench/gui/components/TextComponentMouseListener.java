@@ -28,16 +28,19 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.swing.InputMap;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.JTextComponent;
-import workbench.gui.actions.WbAction;
-import workbench.gui.menu.TextPopup;
+
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.Settings;
+
+import workbench.gui.actions.WbAction;
+import workbench.gui.menu.TextPopup;
 
 /**
  * Provide a Cut, Copy, Paste popup menu for Text components
@@ -97,7 +100,6 @@ public class TextComponentMouseListener
 	private void setExtendedCopyAndPasteKeys()
 	{
 		InputMap im = text.getInputMap();
-		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier());
 		KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, PlatformShortcuts.getDefaultModifier());
 
 		Object cmd = im.get(popup.getCopyAction().getAccelerator());

@@ -26,14 +26,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.db.exporter.XmlRowDataConverter;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+
 import workbench.util.StrBuffer;
 import workbench.util.WbFile;
 
@@ -55,8 +58,7 @@ public class RowDataComparer
 	private XmlRowDataConverter xmlConverter;
 	private String sqlDateLiteral;
 	private WbFile baseDir;
-	private Set<String> excludeColumns;
-
+	
 	/**
 	 * Compares two database rows.
 	 */
@@ -203,7 +205,7 @@ public class RowDataComparer
 		}
 		sqlConverter.setColumnsToExport(toExport);
 	}
-	
+
 	/**
 	 * Returns the representation for the changes between the rows
 	 * defined by setRows().

@@ -58,4 +58,12 @@ public class ComparatorListItem
 		}
 		return false;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 11 * hash + (this.comparator != null ? this.comparator.hashCode() : 0);
+		return hash;
+	}
 }

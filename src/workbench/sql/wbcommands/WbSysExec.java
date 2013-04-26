@@ -82,6 +82,7 @@ public class WbSysExec
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		String command = getCommandLine(sql);
+		
 		if (StringUtil.isBlank(command))
 		{
 			result.setFailure();
@@ -89,11 +90,16 @@ public class WbSysExec
 			return result;
 		}
 
+		cmdLine.parse(command);
+		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+		{
+			return result;
+		}
+
 		BufferedReader stdIn = null;
 		BufferedReader stdError = null;
 		try
 		{
-			cmdLine.parse(command);
 			String prg = cmdLine.getValue(ARG_PROGRAM);
 			String doc = cmdLine.getValue(ARG_DOCUMENT);
 

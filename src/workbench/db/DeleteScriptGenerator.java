@@ -29,18 +29,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import workbench.WbManager;
-import workbench.gui.components.WbTable;
-import workbench.gui.dbobjects.ObjectScripterUI;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.formatter.SqlFormatter;
+
+import workbench.gui.components.WbTable;
+import workbench.gui.dbobjects.ObjectScripterUI;
+
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
+
+import workbench.sql.formatter.SqlFormatter;
 
 /**
  * Generates a SQL script to delete a record from the given table and
@@ -254,7 +258,7 @@ public class DeleteScriptGenerator
 	private void appendColumnData(StringBuilder sql, String column, ColumnData data)
 	{
 		sql.append(connection.getMetadata().quoteObjectname(column));
-		if (data.isNull() || data == null)
+		if (data == null || data.isNull())
 		{
 			sql.append(" IS NULL");
 		}

@@ -29,14 +29,18 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -77,7 +81,7 @@ public class FirebirdDomainReader
              "FROM rdb$fields \n" +
              "WHERE rdb$field_name NOT LIKE 'RDB$%'";
 
-	private String getSql(WbConnection connection, String schema, String name)
+	private String getSql(WbConnection connection, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
 
@@ -119,7 +123,7 @@ public class FirebirdDomainReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern);
+			String sql = getSql(connection, namePattern);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{

@@ -30,5 +30,5 @@ import workbench.storage.RowData;
  */
 public interface ExportDataModifier
 {
-	public void modifyData(RowDataConverter converter, RowData row, long currentRowNumber);
+	void modifyData(RowDataConverter converter, RowData row, long currentRowNumber);
 }

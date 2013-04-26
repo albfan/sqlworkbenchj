@@ -29,14 +29,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.ReplaceDataAction;
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
@@ -44,6 +47,7 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.RegExComparator;
+
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
@@ -240,11 +244,10 @@ public class TableReplacer
 		boolean replaced = false;
 		try
 		{
-			Position pos = this.replacer.getLastFoundPosition();
 			replaced = this.replacer.replaceCurrent(aReplacement);
 			if (replaced)
 			{
-				fireTableChanged(pos);
+				fireTableChanged();
 			}
 		}
 		catch (ConverterException e)
@@ -268,7 +271,7 @@ public class TableReplacer
 		return replaced;
 	}
 
-	private void fireTableChanged(Position pos)
+	private void fireTableChanged()
 	{
 		try
 		{
@@ -299,7 +302,7 @@ public class TableReplacer
 			replaced = this.replacer.replaceAll(value, replacement, rows, ignoreCase, wholeWord, useRegex);
 			if (replaced > 0)
 			{
-				fireTableChanged(null);
+				fireTableChanged();
 			}
 		}
 		catch (ConverterException e)

@@ -159,14 +159,15 @@ public class DriverEditorDialog
 		}
 		else if (e.getSource() == cancelButton || e.getActionCommand().equals(escAction.getActionName()))
 		{
-			cancelButtonActionPerformed(e);
+			cancelButtonActionPerformed();
 		}
 		else if (e.getSource() == helpButton)
 		{
 			HelpManager.showDriverHelp();
 		}
 	}
-	private void cancelButtonActionPerformed(ActionEvent evt)
+
+	private void cancelButtonActionPerformed()
 	{
 		this.cancelled = true;
 		this.closeDialog();

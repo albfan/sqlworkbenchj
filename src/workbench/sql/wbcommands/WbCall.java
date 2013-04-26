@@ -47,6 +47,7 @@ import workbench.db.oracle.OracleProcedureReader;
 import workbench.gui.preparedstatement.ParameterEditor;
 
 import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
@@ -230,7 +231,6 @@ public class WbCall
 
 			if (refCursor != null)
 			{
-				int outIndex = 0;
 				for (Map.Entry<Integer, ParameterDefinition> refs : refCursor.entrySet())
 				{
 					try
@@ -253,7 +253,6 @@ public class WbCall
 								}
 							}
 						}
-						outIndex ++;
 					}
 					catch (Exception e)
 					{

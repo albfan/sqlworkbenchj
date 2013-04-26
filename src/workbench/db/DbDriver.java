@@ -34,10 +34,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
-import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.postgres.PostgresUtil;
+
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -500,14 +502,12 @@ public class DbDriver
 		String appNameProperty = null;
 		String prgName = getProgramName();
 
-		if (url.startsWith("jdbc:postgresql"))
+		if (url.startsWith("jdbc:postgresql") && PostgresUtil.supportsAppInfoProperty(this.driverClassInstance.getClass()))
 		{
-			if (PostgresUtil.supportsAppInfoProperty(this.driverClassInstance.getClass()))
-			{
-				appNameProperty = PostgresUtil.APP_NAME_PROPERTY;
-				prgName += " (" + id + ")";
-			}
+			appNameProperty = PostgresUtil.APP_NAME_PROPERTY;
+			prgName += " (" + id + ")";
 		}
+		
 		if (url.startsWith("jdbc:oracle:thin"))
 		{
 			appNameProperty = "v$session.program";

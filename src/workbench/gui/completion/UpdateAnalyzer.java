@@ -24,11 +24,14 @@ package workbench.gui.completion;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.SqlUtil;
 import workbench.util.TableAlias;
 
@@ -150,7 +153,6 @@ public class UpdateAnalyzer
 		SQLToken lastToken = null;
 		boolean inColumns = false;
 		boolean nextIsColumn = false;
-		boolean afterSet = false;
 
 		while (t != null)
 		{
@@ -161,7 +163,6 @@ public class UpdateAnalyzer
 				if (SqlFormatter.SET_TERMINAL.contains(text))
 				{
 					nextIsColumn = true;
-					afterSet = true;
 					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);
 					if (last != null && last.valueEndPos == 0)
 					{

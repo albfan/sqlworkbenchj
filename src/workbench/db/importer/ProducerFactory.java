@@ -77,16 +77,10 @@ public class ProducerFactory
 	private RowDataProducer producer;
 	private ImportFileParser fileParser;
 	private WbConnection connection;
-	private int batchSize = -1;
 
 	public ProducerFactory(File file)
 	{
 		this.setInputFile(file);
-	}
-
-	public void setBatchSize(int size)
-	{
-		this.batchSize = (size > 0 ? size : -1);
 	}
 
 	public void setConnection(WbConnection conn)

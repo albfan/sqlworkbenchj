@@ -2016,7 +2016,6 @@ public class DataPumper
 		List<ColumnIdentifier> cols = columnMapper.getMappingForImport();
 		this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
 		this.fileImporter.setImportColumns(cols);
-		this.fileImporter.setBatchSize(this.getBatchSize());
 		ImportOptions options = fileImporter.getGeneralOptions();
 		if (options != null)
 		{

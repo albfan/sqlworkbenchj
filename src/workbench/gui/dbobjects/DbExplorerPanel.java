@@ -38,8 +38,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.BorderFactory;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -52,33 +52,36 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import workbench.db.CatalogChanger;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 
-import workbench.db.WbConnection;
-import workbench.db.mssql.SqlServerUtil;
-import workbench.gui.components.FlatButton;
-import workbench.interfaces.DbExecutionListener;
-import workbench.util.ExceptionUtil;
-import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.WbAction;
-import workbench.gui.components.ConnectionInfo;
-import workbench.gui.components.ConnectionSelector;
-import workbench.gui.components.WbTabbedPane;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarButton;
-import workbench.gui.sql.PanelTitleSetter;
-import workbench.gui.sql.PanelType;
 import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.CatalogChanger;
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerUtil;
+
+import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.ConnectionSelector;
+import workbench.gui.components.FlatButton;
+import workbench.gui.components.WbTabbedPane;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarButton;
+import workbench.gui.sql.PanelTitleSetter;
+import workbench.gui.sql.PanelType;
+
+import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -678,9 +681,7 @@ public class DbExplorerPanel
 		else
 		{
 			String catalogTerm = StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
-
 			String catalogToSelect = null;
-			boolean selectLastCatalog = false;
 
 			if (this.dbConnection.getProfile().getStoreExplorerSchema() && this.catalogFromWorkspace != null)
 			{

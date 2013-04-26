@@ -27,7 +27,6 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -57,7 +56,6 @@ public class AlterObjectAction
 	extends WbAction
 	implements TableModelListener
 {
-	private JButton guiButton;
 	private WbTable tableList;
 	private WbConnection dbConnection;
 	private Reloadable client;
@@ -68,11 +66,6 @@ public class AlterObjectAction
 		initMenuDefinition("MnuTxtAlterObjects");
 		tableList.addTableModelListener(this);
 		checkEnabled();
-	}
-
-	public void setButton(JButton button)
-	{
-		guiButton = button;
 	}
 
 	public void setReloader(Reloadable reload)

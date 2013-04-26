@@ -11,7 +11,9 @@ package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -21,7 +23,7 @@ import workbench.util.StringUtil;
  */
 public class TextUtilities
 {
-	private static final String SEPARATOR_CHARS = "()/";
+
 	/**
 	 * Returns the offset of the bracket matching the one at the
 	 * specified offset of the document, or -1 if the bracket is

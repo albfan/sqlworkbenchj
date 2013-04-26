@@ -25,6 +25,7 @@ package workbench.storage;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import workbench.db.AnsiSQLMergeGenerator;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdMergeGenerator;
@@ -35,6 +36,7 @@ import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
@@ -93,7 +95,7 @@ public interface MergeGenerator
 	/**
 	 * The factory go create MergeGenerator instances depending on the DBMS.
 	 */
-	public final class Factory
+	class Factory
 	{
 		private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 		static

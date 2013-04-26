@@ -26,6 +26,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
@@ -33,8 +34,11 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import workbench.gui.renderer.WbRenderer;
+
 import workbench.resource.GuiSettings;
+
+import workbench.gui.renderer.WbRenderer;
+
 import workbench.util.StringUtil;
 
 /**
@@ -107,7 +111,7 @@ public class ColumnWidthOptimizer
 		String s = null;
 		int stringWidth = 0;
 
-		int addWidth = getAdditionalColumnSpace(col);
+		int addWidth = getAdditionalColumnSpace();
 
 		for (int row = 0; row < rowCount; row++)
 		{
@@ -204,7 +208,7 @@ public class ColumnWidthOptimizer
 		Font headerFont = c.getFont();
 		FontMetrics hfm = c.getFontMetrics(headerFont);
 		Insets ins = c.getInsets();
-		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace(col) + ins.left + ins.right;
+		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
 		if (table.isViewColumnSorted(col))
 		{
 			if (table.isPrimarySortColumn(col))
@@ -221,7 +225,7 @@ public class ColumnWidthOptimizer
 		return headerWidth;
 	}
 
-	private int getAdditionalHeaderSpace(int col)
+	private int getAdditionalHeaderSpace()
 	{
 		int addWidth = table.getIntercellSpacing().width;
 		if (table.getShowVerticalLines())
@@ -239,7 +243,7 @@ public class ColumnWidthOptimizer
 		return addWidth;
 	}
 
-	private int getAdditionalColumnSpace(int col)
+	private int getAdditionalColumnSpace()
 	{
 		int addWidth = table.getIntercellSpacing().width;
 		if (table.getShowVerticalLines())
@@ -273,11 +277,12 @@ public class ColumnWidthOptimizer
 		int minWidth = GuiSettings.getMinColumnWidth();
 		int maxWidth = GuiSettings.getMaxColumnWidth();
 
+		int addWidth = this.getAdditionalColumnSpace();
+		int addHeaderWidth = this.getAdditionalColumnSpace();
+
 		for (int i = 0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			int addWidth = this.getAdditionalColumnSpace(i);
-			int addHeaderWidth = this.getAdditionalColumnSpace(i);
 
 			int lblWidth = 0;
 			if (adjustToColumnLabel)

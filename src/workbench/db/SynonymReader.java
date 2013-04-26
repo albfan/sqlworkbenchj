@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ibm.InformixSynonymReader;
@@ -38,7 +39,7 @@ import workbench.db.oracle.OracleSynonymReader;
  */
 public interface SynonymReader
 {
-	public static final String SYN_TYPE_NAME = "SYNONYM";
+	String SYN_TYPE_NAME = "SYNONYM";
 
 	String getSynonymSource(WbConnection con, String catalog, String schema, String aSynonym)
 			throws SQLException;
@@ -49,7 +50,7 @@ public interface SynonymReader
 	List<TableIdentifier> getSynonymList(WbConnection con, String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException;
 
-	public final class Factory
+	class Factory
 	{
 		public static SynonymReader getSynonymReader(WbConnection conn)
 		{

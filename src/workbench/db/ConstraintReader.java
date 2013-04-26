@@ -25,6 +25,7 @@ package workbench.db;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import workbench.util.StringUtil;
 
 /**
@@ -67,7 +68,7 @@ public interface ConstraintReader
 	/**
 	 * A ConstraintReader which does nothing.
 	 */
-	public static final ConstraintReader NULL_READER = new ConstraintReader()
+	ConstraintReader NULL_READER = new ConstraintReader()
 	{
 		@Override
 		public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier table)

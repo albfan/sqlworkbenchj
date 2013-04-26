@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.storage.DataStore;
 
 /**
@@ -32,7 +33,7 @@ import workbench.storage.DataStore;
  */
 public interface SequenceReader
 {
-	static final String DEFAULT_TYPE_NAME = "SEQUENCE";
+	String DEFAULT_TYPE_NAME = "SEQUENCE";
 
 	/**
 	 *	Return a SQL String to recreate the given sequence

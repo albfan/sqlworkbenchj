@@ -41,21 +41,21 @@ public class DbSettingsTest
 	@Test
 	public void testOraDefaults()
 	{
-		DbSettings pg = new DbSettings("postgresql", "Postgres Test");
+		DbSettings pg = new DbSettings("postgresql");
 		assertFalse(pg.getConvertDateInExport());
 	}
 
 	@Test
 	public void testPgDefaults()
 	{
-		DbSettings pg = new DbSettings("postgresql", "Postgres Test");
+		DbSettings pg = new DbSettings("postgresql");
 		assertFalse(pg.getConvertDateInExport());
 	}
 
 	@Test
 	public void testGetIdentifierCase()
 	{
-		DbSettings test = new DbSettings("dummy", "Dummy Test");
+		DbSettings test = new DbSettings("dummy");
 
 		IdentifierCase idCase = test.getObjectNameCase();
 		assertEquals(IdentifierCase.unknown, idCase);
@@ -76,31 +76,31 @@ public class DbSettingsTest
 	@Test
 	public void testTruncate()
 	{
-		DbSettings db = new DbSettings("oracle", "oracle");
+		DbSettings db = new DbSettings("oracle");
 		assertTrue(db.supportsTruncate());
 		assertFalse(db.supportsCascadedTruncate());
 		assertFalse(db.truncateNeedsCommit());
 
-		db = new DbSettings("postgresql", "PostgreSQL");
+		db = new DbSettings("postgresql");
 		assertTrue(db.supportsTruncate());
 		assertTrue(db.supportsCascadedTruncate());
 		assertTrue(db.truncateNeedsCommit());
 
-		db = new DbSettings("microsoft_sql_server", "SQL Server");
+		db = new DbSettings("microsoft_sql_server");
 		assertTrue(db.supportsTruncate());
 		assertFalse(db.supportsCascadedTruncate());
 		assertTrue(db.truncateNeedsCommit());
 
-		db = new DbSettings("mysql", "MySQL");
+		db = new DbSettings("mysql");
 		assertTrue(db.supportsTruncate());
 
-		db = new DbSettings("h2", "h2");
+		db = new DbSettings("h2");
 		assertTrue(db.supportsTruncate());
 
-		db = new DbSettings("hsql_database_engine", "HyperSQL");
+		db = new DbSettings("hsql_database_engine");
 		assertTrue(db.supportsTruncate());
 
-		db = new DbSettings("apache_derby", "Derby");
+		db = new DbSettings("apache_derby");
 		assertTrue(db.supportsTruncate());
 
 	}

@@ -37,7 +37,7 @@ public interface RowDataContainer
 	TableIdentifier getUpdateTable();
 	WbConnection getOriginalConnection();
 
-	public static class Factory
+	class Factory
 	{
 		public static RowDataContainer createContainer(DataStore data)
 		{

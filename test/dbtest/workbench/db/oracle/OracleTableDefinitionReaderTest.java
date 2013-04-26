@@ -22,28 +22,27 @@
  */
 package workbench.db.oracle;
 
-import workbench.db.ColumnIdentifier;
-import java.sql.Types;
-import java.util.Collections;
-import workbench.db.IndexColumn;
-import workbench.db.IndexReader;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
-import workbench.storage.DataStore;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+
+import workbench.db.*;
+
+import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.DbObjectComparator;
-import workbench.db.IndexDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
-import workbench.db.*;
 
 /**
  *

@@ -49,7 +49,7 @@ public class ColumnChangerTest
 	@Test
 	public void testSqlServer()
 	{
-		DbSettings settings = new DbSettings("microsoft_sql_server", "Microsoft SQL Server");
+		DbSettings settings = new DbSettings("microsoft_sql_server");
 		ColumnChanger changer = new ColumnChanger(settings);
 
 		assertTrue(changer.canAddColumn());
@@ -74,7 +74,7 @@ public class ColumnChangerTest
 	@Test
 	public void testPostgres()
 	{
-		DbSettings settings = new DbSettings("postgresql", "PostgreSQL");
+		DbSettings settings = new DbSettings("postgresql");
 		ColumnChanger changer = new ColumnChanger(settings);
 
 		assertTrue(changer.canAddColumn());
@@ -141,7 +141,7 @@ public class ColumnChangerTest
 	@Test
 	public void testOracle()
 	{
-		DbSettings settings = new DbSettings("oracle", "Oracle");
+		DbSettings settings = new DbSettings("oracle");
 		ColumnChanger changer = new ColumnChanger(settings);
 
 		assertTrue(changer.canAddColumn());
@@ -208,7 +208,7 @@ public class ColumnChangerTest
 	@Test
 	public void testMySQL()
 	{
-		DbSettings settings = new DbSettings("mysql", "MySQL");
+		DbSettings settings = new DbSettings("mysql");
 		ColumnChanger changer = new ColumnChanger(settings);
 
 		assertTrue(changer.canAddColumn());

@@ -68,7 +68,7 @@ public class DbSettings
 	private Set<String> updatingCommands;
 	private final String prefix;
 
-	public DbSettings(String id, String productName)
+	public DbSettings(String id)
 	{
 		this.dbId = id;
 		this.prefix = "workbench.db." + id + ".";

@@ -23,16 +23,22 @@
 package workbench.db.compare;
 
 import java.sql.Types;
-import org.junit.Test;
+
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.StatementFactory;
+
 import workbench.util.SqlUtil;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.resource.Settings;
 
 /**
  * @author Thomas Kellerer
@@ -244,7 +250,7 @@ public class RowDataComparerTest
 		instance.setConnection(null);
 		instance.setResultInfo(info2);
 		instance.setRows(reference, target);
-		String xml = instance.getMigration(1);
+//		String xml = instance.getMigration(1);
 //		System.out.println(xml);
 	}
 
