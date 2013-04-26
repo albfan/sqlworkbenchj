@@ -38,11 +38,18 @@ import workbench.util.SqlUtil;
 public class SqlTypeRenderer
 	extends ToolTipRenderer
 {
+	private boolean showNumericValue;
 
 	public SqlTypeRenderer()
 	{
+		this(false);
+	}
+
+	public SqlTypeRenderer(boolean showValue)
+	{
 		super();
 		this.setHorizontalAlignment(JLabel.LEFT);
+		showNumericValue = showValue;
 	}
 
 	@Override
@@ -60,7 +67,12 @@ public class SqlTypeRenderer
 				tip.append(" (");
 				tip.append(NumberStringCache.getNumberString(type));
 				tip.append(')');
-				setTooltip(tip.toString());
+				String toolTip = tip.toString();
+				setTooltip(toolTip);
+				if (showNumericValue)
+				{
+					displayValue = toolTip;
+				}
 			}
 			catch (Exception e)
 			{
