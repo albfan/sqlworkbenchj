@@ -29,10 +29,11 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.db.ColumnIdentifier;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
-import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
+import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.DwPanel;
 import workbench.resource.GuiSettings;
 import workbench.storage.DataStore;
@@ -67,34 +68,44 @@ public class ResultSetInfoPanel
 			boolean showComments = GuiSettings.getRetrieveQueryComments();
 			if (showComments)
 			{
-				cols = new String[] { "COLUMN_NAME", "DATA_TYPE", "JDBC Type", "REMARKS", "BASE TABLE"	};
-				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
+				cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "REMARKS", "BASE TABLE", "CLASS_NAME"};
+				types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR , Types.VARCHAR };
 			}
 			else
 			{
-				cols = new String[] { "COLUMN_NAME", "DATA_TYPE", "JDBC Type"};
-				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
+				cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "CLASS_NAME"};
+				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
 			}
 
 			DataStore infoDs = new DataStore(cols, types);
 			for (ColumnIdentifier col : info.getColumns())
 			{
 				int row = infoDs.addRow();
-				infoDs.setValue(row, 0, col.getColumnName());
-				infoDs.setValue(row, 1, col.getDbmsType());
-				infoDs.setValue(row, 2, col.getDataType());
+				int colIndex = 0;
+				infoDs.setValue(row, colIndex++, col.getPosition());
+				infoDs.setValue(row, colIndex++, col.getColumnName());
+				infoDs.setValue(row, colIndex++, col.getColumnAlias());
+				infoDs.setValue(row, colIndex++, col.getDbmsType());
+				infoDs.setValue(row, colIndex++, col.getDataType());
 				if (showComments)
 				{
-					infoDs.setValue(row, 3, col.getComment());
-					infoDs.setValue(row, 4, col.getSourceTableName());
+					infoDs.setValue(row, colIndex++, col.getComment());
+					infoDs.setValue(row, colIndex++, col.getSourceTableName());
 				}
+				infoDs.setValue(row, colIndex++, col.getColumnClassName());
 			}
+
 			DataStoreTableModel model = new DataStoreTableModel(infoDs);
 			display.setAutoCreateColumnsFromModel(true);
 			display.setModel(model);
+			
 			TableColumnModel colmod = display.getColumnModel();
-			TableColumn col = colmod.getColumn(2);
-			col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+			int index = colmod.getColumnIndex("JDBC Type");
+			TableColumn col = colmod.getColumn(index);
+			col.setCellRenderer(new SqlTypeRenderer(true));
+
+			ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(display);
+			optimizer.optimizeAllColWidth(true);
 		}
 	}
 }
