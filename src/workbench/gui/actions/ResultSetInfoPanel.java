@@ -23,21 +23,23 @@
 package workbench.gui.actions;
 
 import java.awt.BorderLayout;
-import java.sql.Types;
 
 import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import workbench.db.ColumnIdentifier;
+
+import workbench.resource.GuiSettings;
+
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.DwPanel;
-import workbench.resource.GuiSettings;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+import workbench.storage.ResultInfoDisplayBuilder;
 
 /**
  *
@@ -62,39 +64,8 @@ public class ResultSetInfoPanel
 		if (ds != null)
 		{
 			ResultInfo info = ds.getResultInfo();
-			String[] cols;
-			int[] types;
-
 			boolean showComments = GuiSettings.getRetrieveQueryComments();
-			if (showComments)
-			{
-				cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "REMARKS", "BASE TABLE", "CLASS_NAME"};
-				types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR , Types.VARCHAR };
-			}
-			else
-			{
-				cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "CLASS_NAME"};
-				types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR };
-			}
-
-			DataStore infoDs = new DataStore(cols, types);
-			for (ColumnIdentifier col : info.getColumns())
-			{
-				int row = infoDs.addRow();
-				int colIndex = 0;
-				infoDs.setValue(row, colIndex++, col.getPosition());
-				infoDs.setValue(row, colIndex++, col.getColumnName());
-				infoDs.setValue(row, colIndex++, col.getColumnAlias());
-				infoDs.setValue(row, colIndex++, col.getDbmsType());
-				infoDs.setValue(row, colIndex++, col.getDataType());
-				if (showComments)
-				{
-					infoDs.setValue(row, colIndex++, col.getComment());
-					infoDs.setValue(row, colIndex++, col.getSourceTableName());
-				}
-				infoDs.setValue(row, colIndex++, col.getColumnClassName());
-			}
-
+			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, showComments);
 			DataStoreTableModel model = new DataStoreTableModel(infoDs);
 			display.setAutoCreateColumnsFromModel(true);
 			display.setModel(model);
