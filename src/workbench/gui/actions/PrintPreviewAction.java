@@ -22,21 +22,29 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.print.PageFormat;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.gui.components.WbTable;
+
 import workbench.print.PrintPreview;
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
+import workbench.gui.components.WbTable;
+import workbench.gui.print.PrintPreviewDialog;
+import workbench.gui.print.WbTablePrinter;
 
 /**
  *	@author  Thomas Kellerer
  */
-public class PrintPreviewAction 		
+public class PrintPreviewAction
 	extends WbAction
 	implements TableModelListener
 {
@@ -54,18 +62,32 @@ public class PrintPreviewAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		TablePrinter printer = new TablePrinter(this.client);
-
 		Window w = SwingUtilities.getWindowAncestor(this.client);
 		JFrame parent = null;
 		if (w instanceof JFrame)
 		{
-			parent = (JFrame)w;
+			parent = (JFrame) w;
 		}
-		PrintPreview preview = new PrintPreview(parent, printer);
-		preview.setVisible(true);
+
+		if (Settings.getInstance().getBoolProperty("workbench.print.newapi", false))
+		{
+			PageFormat pformat = Settings.getInstance().getPageFormat();
+			Font printerFont = Settings.getInstance().getPrinterFont();
+			WbTablePrinter printer = new WbTablePrinter(client, pformat, null, null);
+			printer.setFont(printerFont);
+			printer.setFitWidth(true);
+			PrintPreviewDialog dlg = new PrintPreviewDialog(parent, printer);
+			dlg.setVisible(true);
+		}
+		else
+		{
+			TablePrinter printer = new TablePrinter(this.client);
+
+			PrintPreview preview = new PrintPreview(parent, printer);
+			preview.setVisible(true);
+		}
 	}
-	
+
 	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{

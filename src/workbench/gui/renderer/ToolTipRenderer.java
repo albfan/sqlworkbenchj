@@ -101,8 +101,6 @@ public class ToolTipRenderer
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
 
-	private boolean isPrinting ;
-
 	protected Insets focusedInsets;
 	protected Insets regularInsets;
 
@@ -258,11 +256,16 @@ public class ToolTipRenderer
 		}
 	}
 
+	private boolean isPrinting()
+	{
+		return isPaintingForPrint();
+	}
+
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
 		initDisplay(table, value, selected, focus, row, col);
-		if (isPrinting && printFont != null)
+		if (isPrinting() && printFont != null)
 		{
 			this.setFont(printFont);
 		}
@@ -312,7 +315,7 @@ public class ToolTipRenderer
 
 	protected Color getBackgroundColor()
 	{
-		if (isPrinting)
+		if (isPrinting())
 		{
 			return unselectedBackground;
 		}
@@ -406,7 +409,7 @@ public class ToolTipRenderer
 		if (textY < 0) textY = 0;
 
 		Graphics2D g2d = (Graphics2D) g;
-		if (!isPrinting && renderingHints != null)
+		if (renderingHints != null)
 		{
 			g2d.addRenderingHints(renderingHints);
 		}
@@ -419,20 +422,6 @@ public class ToolTipRenderer
 		if (hasFocus)
 		{
 			WbSwingUtilities.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
-		}
-	}
-
-	@Override
-	public void print(Graphics g)
-	{
-		this.isPrinting = true;
-		try
-		{
-			super.print(g);
-		}
-		finally
-		{
-			this.isPrinting = false;
 		}
 	}
 

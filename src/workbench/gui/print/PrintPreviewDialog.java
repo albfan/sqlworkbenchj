@@ -22,13 +22,16 @@
  */
 package workbench.gui.print;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -155,8 +158,6 @@ public class PrintPreviewDialog
 
 		this.addWindowListener(this);
 
-		showCurrentPage();
-
 		this.preview = new PrintPreviewPanel();
 		this.scroll = new JScrollPane(this.preview);
 		adjustScrollbar();
@@ -164,6 +165,8 @@ public class PrintPreviewDialog
 		getContentPane().add(scroll, BorderLayout.CENTER);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+		showCurrentPage();
 	}
 
 	private void selectPrintFont()
@@ -213,13 +216,16 @@ public class PrintPreviewDialog
 			{
 				BufferedImage img = new BufferedImage(pageWidth, pageHeight, BufferedImage.TYPE_INT_RGB);
 				Graphics2D g = img.createGraphics();
-//				g.setColor(Color.white);
-//				g.fillRect(0, 0, pageWidth, pageHeight);
-//				g.setColor(Color.LIGHT_GRAY);
-//				Stroke s = g.getStroke();
-//				g.setStroke(new BasicStroke(0.2f));
-//				g.drawRect((int) pageFormat.getImageableX() - 1, (int) pageFormat.getImageableY() - 1, (int) pageFormat.getImageableWidth() + 1, (int) pageFormat.getImageableHeight() + 1);
-//				g.setStroke(s);
+				g.setColor(Color.white);
+				g.fillRect(0, 0, pageWidth, pageHeight);
+				g.setColor(Color.LIGHT_GRAY);
+				
+				Stroke s = g.getStroke();
+				g.setStroke(new BasicStroke(0.2f));
+
+				g.drawRect((int) pageFormat.getImageableX() - 1, (int) pageFormat.getImageableY() - 1, (int) pageFormat.getImageableWidth() + 1, (int) pageFormat.getImageableHeight() + 1);
+				g.setStroke(s);
+
 				if (this.printTarget.print(g, pageFormat, this.currentPage) == Printable.PAGE_EXISTS)
 				{
 					this.preview.setPreviewImage(img);
@@ -244,7 +250,6 @@ public class PrintPreviewDialog
 
 		this.pageUp.setEnabled(currentPage > 0);
 		this.pageDown.setEnabled(currentPage < printTarget.getNumberOfPages() - 1);
-
 	}
 
 	public void doPrint()
@@ -280,12 +285,18 @@ public class PrintPreviewDialog
 		}
 
 		pageDialogShowing = true;
-		PrinterJob prnJob = PrinterJob.getPrinterJob();
-		PageFormat oldFormat = this.printTarget.getPageFormat();
-		PrintRequestAttributeSet attr = PrintUtil.getPrintAttributes(oldFormat);
-		PageFormat newFormat = prnJob.pageDialog(attr);
-		pageDialogShowing = false;
-		applyNewPage(newFormat, oldFormat);
+		try
+		{
+			PrinterJob prnJob = PrinterJob.getPrinterJob();
+			PageFormat oldFormat = this.printTarget.getPageFormat();
+			PrintRequestAttributeSet attr = PrintUtil.getPrintAttributes(oldFormat);
+			PageFormat newFormat = prnJob.pageDialog(attr);
+			applyNewPage(newFormat, oldFormat);
+		}
+		finally
+		{
+			pageDialogShowing = false;
+		}
 	}
 
 	protected void showNativePageSetup()
@@ -294,13 +305,19 @@ public class PrintPreviewDialog
 		{
 			return;
 		}
-		pageDialogShowing = true;
 
-		PrinterJob prnJob = PrinterJob.getPrinterJob();
-		PageFormat oldFormat = this.printTarget.getPageFormat();
-		PageFormat newFormat = prnJob.pageDialog(oldFormat);
-		pageDialogShowing = false;
-		applyNewPage(newFormat, oldFormat);
+		try
+		{
+			pageDialogShowing = true;
+			PrinterJob prnJob = PrinterJob.getPrinterJob();
+			PageFormat oldFormat = this.printTarget.getPageFormat();
+			PageFormat newFormat = prnJob.pageDialog(oldFormat);
+			applyNewPage(newFormat, oldFormat);
+		}
+		finally
+		{
+			pageDialogShowing = false;
+		}
 	}
 
 	protected void applyNewPage(final PageFormat newFormat, final PageFormat oldFormat)

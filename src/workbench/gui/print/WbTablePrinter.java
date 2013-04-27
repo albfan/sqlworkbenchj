@@ -31,9 +31,12 @@ import java.awt.print.Pageable;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.text.MessageFormat;
+
 import javax.swing.JTable.PrintMode;
-import workbench.gui.components.WbTable;
+
 import workbench.log.LogMgr;
+
+import workbench.gui.components.WbTable;
 
 /**
  *
@@ -47,21 +50,22 @@ public class WbTablePrinter
 	private String headerText;
 	private PageFormat pageFormat;
 	private int pageCount;
-	private boolean fitWidth;
+	private boolean fitWidth = true;
+	private Printable printable;
 
 	public WbTablePrinter(WbTable table, PageFormat pageSize, String header, String footer)
 	{
 		this.table = table;
 		this.pageFormat = pageSize;
+		this.footerText = footer;
 	}
 
 	public void setFitWidth(boolean flag)
 	{
-		boolean old = this.fitWidth;
-		this.fitWidth = flag;
-		if (old != fitWidth)
+		if (flag != fitWidth)
 		{
-			calculatePages();
+			this.fitWidth = flag;
+			recalc();
 		}
 	}
 
@@ -77,13 +81,23 @@ public class WbTablePrinter
 
 	public void setPageFormat(PageFormat newFormat)
 	{
-		this.pageFormat = newFormat;
+		if (this.pageFormat != null || !pageFormat.equals(newFormat))
+		{
+			this.pageFormat = newFormat;
+			recalc();
+		}
+	}
+
+	private synchronized void recalc()
+	{
+		this.printable = null;
+		calculatePages();
 	}
 
 	public void setFont(Font printFont)
 	{
 		this.table.setPrintFont(printFont);
-		calculatePages();
+		recalc();
 	}
 
 	public int print(Graphics g, PageFormat format, int pageIndex)
@@ -92,15 +106,20 @@ public class WbTablePrinter
 		return getPrintable().print(g, format, pageIndex);
 	}
 
-	public Printable getPrintable()
+	public synchronized Printable getPrintable()
 	{
-		MessageFormat header = new MessageFormat(headerText);
-		return table.getPrintable(fitWidth ? PrintMode.FIT_WIDTH : PrintMode.NORMAL, header, null);
+		if (printable == null)
+		{
+			MessageFormat header = headerText == null ? null : new MessageFormat(headerText);
+			MessageFormat footer = footerText == null ? null : new MessageFormat(footerText);
+			printable = table.getPrintable(fitWidth ? PrintMode.FIT_WIDTH : PrintMode.NORMAL, header, footer);
+		}
+		return printable;
 	}
 
 	private void calculatePages()
 	{
-		Printable printable = getPrintable();
+		Printable print = getPrintable();
 		int width = (int) pageFormat.getWidth();
 		int height = (int) pageFormat.getHeight();
 
@@ -110,11 +129,11 @@ public class WbTablePrinter
 		int result;
 		try
 		{
-			result = printable.print(g, pageFormat, pageCount);
-			while (result != Printable.PAGE_EXISTS)
+			result = print.print(g, pageFormat, pageCount);
+			while (result == Printable.PAGE_EXISTS)
 			{
 				pageCount ++;
-				result = printable.print(g, pageFormat, pageCount);
+				result = print.print(g, pageFormat, pageCount);
 			}
 		}
 		catch (PrinterException ex)
