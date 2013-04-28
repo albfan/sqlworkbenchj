@@ -729,7 +729,7 @@
         <para>Default value: <literal>true</literal></para>
       </simplesect>
 
-      <simplesect id="db-oracle-default-tablespace">
+      <simplesect id="db-oracle-check-tablespace">
         <indexterm><primary>Oracle</primary><secondary>tablespace information</secondary></indexterm>
         <title>Include tablespace information in the generated SQL source</title>
         <para>Property: <literal>workbench.db.oracle.retrieve_tablespace</literal></para>
