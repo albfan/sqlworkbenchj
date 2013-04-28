@@ -47,8 +47,22 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to read the data from a ResultSet.
+ *
+ * Different data types are handled correctly and different strategies for "extended" types (BLOB, CLOB XML, ...) can
+ * be chosen.
+ * <br/>
+ * Errors during the retrieval of one row are re-thrown to be shown in the frontend. This behaviour can
+ * be disabled using the config property <tt>workbench.db.ignore.readerror</tt>.
  *
  * @author Thomas Kellerer
+ *
+ * @see ResultInfo#treatLongVarcharAsClob()
+ * @see ResultInfo#useGetBytesForBlobs()
+ * @see ResultInfo#useGetStringForClobs()
+ * @see ResultInfo#useGetStringForBit()
+ * @see ResultInfo#useGetXML()
+ * @see ResultInfo#convertArrays()
  */
 public class RowDataReader
 {
@@ -91,8 +105,10 @@ public class RowDataReader
 
 	/**
 	 * Controls how BLOB columns are returned.
-	 * By default they are converted to a byte[] array, if this is set to true,
+	 * <br/>
+	 * By default they are converted to a byte[] array. If setUseStreamsForBlobs() is enabled.
 	 * then they will be returned as InputStreams (as returned by ResultSet.getBinaryStream()).
+	 * <br/>
 	 *
 	 * <b>If this is set to true, the consumer of the RowData instance is responsible for closing
 	 * all InputStreams returned by this class.</b>
@@ -108,7 +124,10 @@ public class RowDataReader
 
 	/**
 	 * Controls how CLOB columns are returned.
+	 * <br/>
+	 *
 	 * By default CLOB data is converted to a String.<br/>
+	 *
 	 * Setting useStreamsForClobs to true will return a <tt>Reader</tt> instance for the CLOB columns
 	 * (as returned by ResultSet.getCharacterStream()).
 	 *
@@ -151,6 +170,7 @@ public class RowDataReader
 	 *
 	 * @see #setConverter(workbench.storage.DataConverter)
 	 * @see #setUseStreamsForBlobs(boolean)
+	 * @see #setUseStreamsForClobs(boolean)
 	 */
 	public RowData read(ResultSet rs, boolean trimCharData)
 		throws SQLException
@@ -313,6 +333,22 @@ public class RowDataReader
 		return new RowData(colData);
 	}
 
+	/**
+	 * Read a timestamp value from the current row and given column.
+	 * <br/>
+	 * <br/>
+	 * This is made a separate method to allow DBMS specifc implementations of the RowDataReader to
+	 * tread timestamps differently.<br/>
+	 * <br/>
+	 * Currently this is used to adjust the timezone information returned by the Oracle driver
+	 * (see {@linkplain OracleRowDataReader#readTimestampValue(java.sql.ResultSet, int)})
+	 *
+	 * @param rs      the ResultSet to read from
+	 * @param column  the timestamp column
+	 * @return the value retrieved.
+	 *
+	 * @throws SQLException
+	 */
 	protected Object readTimestampValue(ResultSet rs, int column)
 		throws SQLException
 	{

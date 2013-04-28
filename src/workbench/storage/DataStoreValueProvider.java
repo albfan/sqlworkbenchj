@@ -25,6 +25,7 @@ package workbench.storage;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+
 import workbench.interfaces.ValueProvider;
 
 /**
@@ -32,7 +33,7 @@ import workbench.interfaces.ValueProvider;
  * @author Thomas Kellerer
  */
 public class DataStoreValueProvider
-implements ValueProvider
+	implements ValueProvider
 {
 	private DataStore data;
 
