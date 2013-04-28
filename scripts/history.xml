@@ -2,7 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-04-07">
-    <entry dev-build="8" type="enh">When displaying the generating SQL for a result, the metadata of the result set is now also displayed.</entry>
+    <entry dev-build="8" type="enh">When showing the query on which a result is based through the context menu of the result tab, the metadata of the result set is now also displayed.</entry>
     <entry dev-build="8" type="enh">WbInclude and WbSysExec now support conditional execution based on variables through -ifDefined, -ifNotDefined, -ifEquals, -ifNotEquals, -ifEmpty and -ifNotEmpty</entry>
     <entry dev-build="7" type="enh">For SQL Server "included" columns are now displayed in the generated SQL code for a CREATE INDEX statement.</entry>
     <entry dev-build="6" type="enh">A new option -trimCharData was added to WbExport and WbCopy which allows overwriting the setting in the connection profile.</entry>
@@ -18,6 +18,7 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="8" type="fix">For Oracle, the DbExplorer did not display the table source of tables without a primary key</entry>
     <entry dev-build="8" type="fix">For Oracle, the DbExplorer sometimes failed to load the table list with the error "Comparison method violates its general contract"</entry>
     <entry dev-build="8" type="fix">When exporting to ODS, numeric columns with a NULL value would cause the export to fail</entry>
     <entry dev-build="8" type="fix">For Oracle, displaying the source of a table with a disabled primary key generated an error</entry>

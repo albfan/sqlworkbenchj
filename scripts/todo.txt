@@ -32,18 +32,14 @@ Features:
 - Show table data from the result of "Search table data" (or make the result editable)
 - search BLOB columns as Text in "Search table data"
 - Multi-Threaded WbImport
-- "Generate Default ..." in DbExplorer for jOOQ
-- SQL Export type as jOOQ Queries
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
-- ResultSet info display
 - Import profiles from other WbProfiles.xml
 - Import macros from other WbMacros.xml
 - Allow full script in DataPumper as SQL Query source
   (pre-copy and post-copy scripts)
 - History of selected tables in DbExplorer
-- hierarchyid, http://technet.microsoft.com/en-us/library/bb677213.aspx
 
 Bugs:
 -----
