@@ -39,6 +39,7 @@ import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
 import workbench.util.ArgumentParser;
+import workbench.util.StringUtil;
 
 
 /**
@@ -54,7 +55,7 @@ public class WbSysProps
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("type");
+		cmdLine.addArgument("type", StringUtil.stringToList("wb,system"));
 	}
 
 	@Override
