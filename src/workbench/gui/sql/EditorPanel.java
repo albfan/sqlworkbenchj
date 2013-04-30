@@ -116,6 +116,7 @@ public class EditorPanel
 	private MatchBracketAction matchBracket;
 	private CommentAction commentAction;
 	private UnCommentAction unCommentAction;
+	private JumpToLineAction jumpToLineAction;
 
 	private List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 	private File currentFile;
@@ -157,6 +158,7 @@ public class EditorPanel
 		this.addPopupMenuItem(fileSaveAs, true);
 		this.fileOpen = new FileOpenAction(this);
 		this.addPopupMenuItem(this.fileOpen, false);
+		this.jumpToLineAction = new JumpToLineAction(this);
 
 		this.fileReloadAction = new FileReloadAction(this);
 		this.fileReloadAction.setEnabled(false);
@@ -166,6 +168,7 @@ public class EditorPanel
 		this.addKeyBinding(this.getFindPreviousAction());
 		this.addKeyBinding(this.getFindNextAction());
 		this.addKeyBinding(this.getReplaceAction());
+		this.addKeyBinding(getJumpToLineAction());
 
 		if (aMarker != null) this.setTokenMarker(aMarker);
 
@@ -292,6 +295,11 @@ public class EditorPanel
 
 	public UndoAction getUndoAction() { return this.undo; }
 	public RedoAction getRedoAction() { return this.redo; }
+
+	public JumpToLineAction getJumpToLineAction()
+	{
+		return this.jumpToLineAction;
+	}
 
 	protected final FindPreviousAction getFindPreviousAction() { return this.replacer.getFindPreviousAction(); }
 	protected final FindAction getFindAction() { return this.replacer.getFindAction(); }

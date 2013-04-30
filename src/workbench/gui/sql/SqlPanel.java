@@ -810,6 +810,7 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getShowLastStatementAction());
 		this.actions.add(this.sqlHistory.getClearHistoryAction());
 		actions.add(new JumpToStatement(this));
+		actions.add(editor.getJumpToLineAction());
 
 		this.actions.add(new AutoJumpNextStatement());
 		this.appendResultsAction = new AppendResultsAction(this);
@@ -2511,7 +2512,7 @@ public class SqlPanel
 		int index = resultTab.getSelectedIndex();
 		return resultTab.getTitleAt(index);
 	}
-	
+
 	public DwPanel getCurrentResult()
 	{
 		Component c = resultTab.getSelectedComponent();
