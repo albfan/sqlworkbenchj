@@ -26,13 +26,18 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.JComboBox;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.ScriptParser;
+
 import workbench.util.StringUtil;
 
 /**
@@ -47,10 +52,8 @@ public class JumpToStatement
 	public JumpToStatement(SqlPanel panel)
 	{
 		super();
-		initMenuDefinition("MnuTxtJumpToStatementNr");
-		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
+		initMenuDefinition("MnuTxtJumpToStatementNr", KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
 		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		initializeShortcut();
 		client = panel;
 	}
 

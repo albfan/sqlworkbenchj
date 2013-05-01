@@ -24,12 +24,12 @@ package workbench.gui.actions;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.KeyStroke;
+
+import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -45,9 +45,7 @@ public class JumpToLineAction
 	{
 		super();
 		initMenuDefinition("MnuTxtJumpToLineNr");
-		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_MASK));
 		setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		initializeShortcut();
 		editor = panel;
 	}
 
