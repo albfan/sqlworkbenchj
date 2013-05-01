@@ -26,8 +26,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.gui.actions.WbAction;
 
 /**
@@ -49,10 +47,7 @@ public abstract class FontSizeAction
 	protected FontSizeAction(String resourceKey, int keyCode, int keyMask, FontZoomer fontZoomer)
 	{
 		super();
-		setMenuTextByKey(resourceKey);
-		setTooltip(ResourceMgr.getDescription(resourceKey));
-		setDefaultAccelerator(KeyStroke.getKeyStroke(keyCode, keyMask));
-		initializeShortcut();
+		initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(keyCode, keyMask));
 		zoomer = fontZoomer;
 	}
 

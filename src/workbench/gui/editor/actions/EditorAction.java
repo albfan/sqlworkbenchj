@@ -23,8 +23,8 @@
 package workbench.gui.editor.actions;
 
 import javax.swing.KeyStroke;
+
 import workbench.gui.actions.WbAction;
-import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -38,31 +38,17 @@ public class EditorAction
 	{
 		super();
 	}
-	
+
 	protected EditorAction(String resourceKey, int key, int modifier)
 	{
 		super();
-		init(resourceKey, key, modifier);
+		initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(key, modifier));
 	}
 
 	protected EditorAction(String resourceKey, KeyStroke keyStroke)
 	{
 		super();
-		init(resourceKey, keyStroke);
+		initMenuDefinition(resourceKey, keyStroke);
 	}
 
-	protected void init(String resourceKey, int key, int modifier)
-	{
-		setMenuText(ResourceMgr.getString(resourceKey));
-		setDefaultAccelerator(KeyStroke.getKeyStroke(key, modifier));
-		initializeShortcut();
-	}
-
-	protected void init(String resourceKey, KeyStroke key)
-	{
-		setMenuText(ResourceMgr.getString(resourceKey));
-		setDefaultAccelerator(key);
-		initializeShortcut();
-	}
-	
 }

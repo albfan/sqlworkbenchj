@@ -39,15 +39,14 @@ import javax.swing.KeyStroke;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
 
-import workbench.gui.actions.WbAction;
-import workbench.gui.completion.ParameterTipProvider;
-import workbench.gui.components.MultiLineToolTip;
-import workbench.gui.editor.JEditTextArea;
-
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.actions.WbAction;
+import workbench.gui.completion.ParameterTipProvider;
+import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.editor.InsertTipProvider;
+import workbench.gui.editor.JEditTextArea;
 
 /**
  * Display a tooltip for the current statement.
@@ -72,10 +71,8 @@ public class ShowTipAction
 		super();
 		area = edit;
 		tipProvider = provider;
-		setMenuTextByKey("MnuTxtShowInsertParms");
+		initMenuDefinition("MnuTxtShowInsertParms", KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, KeyEvent.CTRL_MASK));
 		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, KeyEvent.CTRL_MASK));
-		initializeShortcut();
 	}
 
 	/**
