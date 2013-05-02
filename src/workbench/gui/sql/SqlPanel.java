@@ -2374,7 +2374,7 @@ public class SqlPanel
 	@Override
 	public String getPassword(String prompt)
 	{
-		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
+		String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return null;
 		return pwd;
 	}

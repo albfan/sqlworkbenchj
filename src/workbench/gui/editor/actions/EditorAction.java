@@ -24,6 +24,8 @@ package workbench.gui.editor.actions;
 
 import javax.swing.KeyStroke;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.actions.WbAction;
 
 /**
@@ -42,13 +44,22 @@ public class EditorAction
 	protected EditorAction(String resourceKey, int key, int modifier)
 	{
 		super();
-		initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(key, modifier));
+		init(resourceKey, KeyStroke.getKeyStroke(key, modifier));
 	}
 
 	protected EditorAction(String resourceKey, KeyStroke keyStroke)
 	{
 		super();
-		initMenuDefinition(resourceKey, keyStroke);
+		init(resourceKey, keyStroke);
+	}
+
+	protected void init(String resourceKey, KeyStroke key)
+	{
+		// initMenuDefinition cannot be used because the editor actions don't have a description/tooltip
+		// therefor a "resource not found exception" would be thrown
+		setMenuText(ResourceMgr.getString(resourceKey));
+		setDefaultAccelerator(key);
+		initializeShortcut();
 	}
 
 }

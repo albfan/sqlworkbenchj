@@ -39,6 +39,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -64,16 +65,25 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+
 import workbench.WbManager;
-import workbench.db.WbConnection;
-import workbench.gui.components.PlainEditor;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.ValidatingDialog;
-import workbench.gui.components.WbOptionPane;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.gui.components.PlainEditor;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbOptionPane;
+
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -787,29 +797,76 @@ public class WbSwingUtilities
 		}
 	}
 
+   private enum UserInputType
+   {
+      TEXT,
+      NUMBER,
+      HIDDEN
+   }
+
 	public static String getUserInput(Component caller, String title, String initialValue)
 	{
-		return getUserInput(caller, title, initialValue, false, 40);
+		return getUserInput(caller, title, initialValue, UserInputType.TEXT, 40);
 	}
 
-	public static String getUserInput(Component caller, String title, String initialValue, boolean hideInput)
+	public static String getUserInputHidden(Component caller, String title, String initialValue)
 	{
-		return getUserInput(caller, title, initialValue, hideInput, 40);
+		return getUserInput(caller, title, initialValue, UserInputType.HIDDEN, 40);
 	}
 
-	public static String getUserInput(Component caller, String title, String initialValue, boolean hideInput, int textSize)
+	public static String getUserInputNumber(Component caller, String title, String initialValue)
+	{
+	   return getUserInput(caller, title, initialValue, UserInputType.NUMBER, 40);
+	}
+
+	private static String getUserInput(Component caller, String title, String initialValue, UserInputType inputType, int textSize)
 	{
 		Window parent = getWindowAncestor(caller);
 
 		final JTextField input;
-		if (hideInput)
+		switch (inputType)
 		{
-			input = new JPasswordField();
+			case NUMBER:
+				input = new JTextField();
+				Document document = input.getDocument();
+				if (document instanceof AbstractDocument)
+				{
+					AbstractDocument abDocument = (AbstractDocument) document;
+					abDocument.setDocumentFilter(new DocumentFilter()
+					{
+						@Override
+						public void insertString(FilterBypass fb, int offset,String text,AttributeSet attr)
+							throws BadLocationException
+						{
+							int len = text.length();
+							if (Character.isDigit(text.charAt(len - 1)))
+							{
+								super.insertString(fb, offset, text, attr);
+							}
+						}
+
+						@Override
+						public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+							throws BadLocationException
+						{
+							int len = text.length();
+							if (Character.isDigit(text.charAt(len - 1)))
+							{
+								super.replace(fb, offset, length, text, attrs);
+							}
+						}
+					});
+				}
+				break;
+			case HIDDEN:
+				input = new JPasswordField();
+				break;
+			case TEXT:
+			default:
+				input = new JTextField();
+				break;
 		}
-		else
-		{
-			input = new JTextField();
-		}
+
 		input.setColumns(textSize);
 		input.setText(initialValue);
 		if (initialValue != null)

@@ -39,7 +39,7 @@ import workbench.util.StringUtil;
 public class JumpToLineAction
 	extends WbAction
 {
-	private EditorPanel editor;
+   private EditorPanel editor;
 
 	public JumpToLineAction(EditorPanel panel)
 	{
@@ -52,8 +52,11 @@ public class JumpToLineAction
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		String lineInput = WbSwingUtilities.getUserInput(editor, ResourceMgr.getString("TxtJumpToLine"), null);
-		if (StringUtil.isBlank(lineInput)) return;
+		String lineInput = WbSwingUtilities.getUserInputNumber(editor, ResourceMgr.getString("TxtJumpToLine"), null);
+		if (StringUtil.isBlank(lineInput))
+		{
+			return;
+		}
 
 		int line = -1;
 		try
@@ -67,14 +70,20 @@ public class JumpToLineAction
 
 		if (line > 0)
 		{
-			final int pos = editor.getLineStartOffset(line);
-			EventQueue.invokeLater( new Runnable()
+			int pos = editor.getLineStartOffset(line);
+			if (pos == -1)
+			{
+				pos = editor.getLineStartOffset(editor.getLineCount() - 1);
+			}
+			final int finalPos = pos;
+			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					editor.setCaretPosition(pos);
+					editor.setCaretPosition(finalPos);
 				}
+
 			});
 		}
 	}

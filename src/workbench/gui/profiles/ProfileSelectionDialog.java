@@ -258,7 +258,7 @@ public class ProfileSelectionDialog
 		if (this.selectedProfile == null) return false;
 		if (this.selectedProfile.getStorePassword()) return true;
 
-		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
+		String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;
 		this.selectedProfile.setPassword(pwd);
 		return true;
