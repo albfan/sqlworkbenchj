@@ -33,8 +33,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.BorderFactory;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -42,20 +42,24 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroDefinition;
+
 import workbench.util.StringUtil;
 
 /**
@@ -189,6 +193,7 @@ public class MacroManagerDialog
 		dummyPanel.setMinimumSize(new Dimension(1, 1));
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
+		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton);
 	}
 
 	@Override

@@ -32,10 +32,10 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -49,30 +49,29 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import workbench.interfaces.ValidatingComponent;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
-import workbench.interfaces.ValidatingComponent;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  * @author Thomas Kellerer
  */
 public class SettingsPanel
 	extends JPanel
-	implements ActionListener, ListSelectionListener, WindowListener,
-						ValidatingComponent
+	implements ActionListener, ListSelectionListener, WindowListener, ValidatingComponent
 {
+	private static final long serialVersionUID = -1922805582361974003L;
 	private JButton cancelButton;
 	private JButton helpButton;
 	private JPanel content;
 	private JList pageList;
 	private JPanel currentPanel;
-
 	private JButton okButton;
-
 	private JDialog dialog;
 	private EscAction escAction;
 	private List<OptionPanelPage> pages;
@@ -130,7 +129,6 @@ public class SettingsPanel
 		}
 	}
 
-
 	private void initComponents()
 	{
 		ListModel model = new AbstractListModel()
@@ -161,6 +159,8 @@ public class SettingsPanel
 		cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		helpButton = new JButton(ResourceMgr.getString("LblHelp"));
 
+		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton, helpButton);
+
 		okButton.addActionListener(this);
 		cancelButton.addActionListener(this);
 		helpButton.addActionListener(this);
@@ -177,13 +177,13 @@ public class SettingsPanel
 		constraints.insets = new Insets(0, 5, 0, 0);
 		buttonPanel.add(helpButton, constraints);
 
-		constraints.gridx ++;
+		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.EAST;
 		constraints.insets = new Insets(7, 0, 7, 10);
 		constraints.weightx = 1.0;
 		buttonPanel.add(okButton, constraints);
 
-		constraints.gridx ++;
+		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.EAST;
 		constraints.weightx = 0.0;
 		constraints.insets = new Insets(7, 0, 7, 4);
@@ -191,7 +191,7 @@ public class SettingsPanel
 
 		add(content, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.SOUTH);
-  }
+	}
 
 	private void saveSettings()
 	{
@@ -217,7 +217,7 @@ public class SettingsPanel
 		}
 		else
 		{
-			this.dialog.setSize(640,540);
+			this.dialog.setSize(640, 540);
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);
@@ -239,7 +239,7 @@ public class SettingsPanel
 
 	private void closeWindow()
 	{
-		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
+		Settings.getInstance().setWindowSize(this.getClass().getName(),this.dialog.getWidth(),this.dialog.getHeight());
 		for (OptionPanelPage page : pages)
 		{
 			page.dispose();
@@ -270,46 +270,46 @@ public class SettingsPanel
 		}
 	}
 
-	@Override
-	public void windowActivated(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowActivated(WindowEvent e)
+   {
+   }
 
-	@Override
-	public void windowClosed(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowClosed(WindowEvent e)
+   {
+   }
 
-	@Override
-	public void windowClosing(WindowEvent e)
-	{
-		closeWindow();
-	}
+   @Override
+   public void windowClosing(WindowEvent e)
+   {
+      closeWindow();
+   }
 
-	@Override
-	public void windowDeactivated(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowDeactivated(WindowEvent e)
+   {
+   }
 
-	@Override
-	public void windowDeiconified(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowDeiconified(WindowEvent e)
+   {
+   }
 
-	@Override
-	public void windowIconified(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowIconified(WindowEvent e)
+   {
+   }
 
-	@Override
-	public void windowOpened(WindowEvent e)
-	{
-	}
+   @Override
+   public void windowOpened(WindowEvent e)
+   {
+   }
 
 	@Override
 	public boolean validateInput()
 	{
-		for (int i=0; i < pages.size(); i++)
+		for (int i = 0; i < pages.size(); i++)
 		{
 			OptionPanelPage page = pages.get(i);
 			final int index = i;
@@ -333,6 +333,4 @@ public class SettingsPanel
 	public void componentDisplayed()
 	{
 	}
-
-
 }

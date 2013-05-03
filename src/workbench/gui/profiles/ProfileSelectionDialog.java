@@ -69,7 +69,6 @@ public class ProfileSelectionDialog
 	extends JDialog
 	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener, EventDisplay
 {
-
 	private JPanel okCancelPanel;
 	private JButton okButton;
 	private JButton cancelButton;
@@ -134,6 +133,8 @@ public class ProfileSelectionDialog
 		okButton.setEnabled(profiles.getSelectedProfile() != null);
 
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
+
+		WbSwingUtilities.setJButtonPreferredWidth(manageDriversButton, okButton, helpButton, cancelButton);
 
 		addWindowListener(this);
 		okCancelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -281,8 +282,7 @@ public class ProfileSelectionDialog
 			profiles.applyProfiles();
 			selectProfile();
 		}
-		else if (e.getSource() == this.cancelButton ||
-			e.getActionCommand().equals(escActionCommand))
+		else if (e.getSource() == this.cancelButton || e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;
 			this.cancelled = true;

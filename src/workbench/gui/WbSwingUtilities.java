@@ -1274,6 +1274,36 @@ public class WbSwingUtilities
 		}
 	}
 
+	/**
+	 * Sets the minimum width of a {@link JButton} to 80.
+	 * <p/>
+	 * @param button the button to change
+	 * @see #setJButtonPreferredWidth(javax.swing.JButton, int)
+	 */
+	public static void setJButtonPreferredWidth(JButton... buttons)
+	{
+		for (JButton button : buttons)
+		{
+			setJButtonPreferredWidth(button, 80);
+		}
+	}
+
+	/**
+	 * Sets the minimum width of a {@link JButton}.
+	 * <p/>
+	 * @param button    the button to change
+	 * @param minWidth  the minimum width to apply
+	 */
+	public static void setJButtonPreferredWidth(JButton button, int minWidth)
+	{
+		Dimension size = button.getPreferredSize();
+		if (size.width < minWidth)
+		{
+			size.width = minWidth;
+			button.setPreferredSize(size);
+		}
+	}
+
 	public static void adjustTreeRowHeight(JTree tree)
 	{
 		Font std = Settings.getInstance().getStandardFont();

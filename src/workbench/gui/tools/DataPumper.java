@@ -158,6 +158,8 @@ public class DataPumper
 		this.targetProfile = target;
 
 		initComponents();
+		WbSwingUtilities.setJButtonPreferredWidth(cancelButton, closeButton, startButton, showLogButton, showWbCommand, helpButton);
+
 		sourceTable.setAutoSyncVisible(false);
 
 		commitEvery.setMinimumSize(commitEvery.getPreferredSize());

@@ -37,6 +37,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
 import java.util.Collection;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -48,20 +49,23 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
+
+import workbench.resource.*;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ActionRegistration;
 import workbench.gui.actions.EscAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
-import workbench.resource.*;
 
-import workbench.gui.actions.WbAction;
+import workbench.storage.DataStore;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
-import workbench.storage.DataStore;
 
 /**
  * @author Thomas Kellerer
@@ -71,7 +75,7 @@ public class ShortcutEditor
 	extends JPanel
 	implements ActionListener, ListSelectionListener, WindowListener, MouseListener
 {
-	private static final String KEY_WINDOW_SIZE = "workbench.shortcuteditor";
+  private static final String KEY_WINDOW_SIZE = "workbench.shortcuteditor";
 	private WbTable keysTable;
 	private DataStore definitions;
 	private DataStoreTableModel model;
@@ -128,6 +132,8 @@ public class ShortcutEditor
 
 		okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		okButton.addActionListener(this);
+
+		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
