@@ -3,6 +3,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-04-28">
+    <entry dev-build="9" type="enh">Column headings can now be displayed in bold face (Tools -&gt; Options -&gt; Data display)</entry>
     <entry dev-build="9" type="enh">The editor now supports "Jump to line#"</entry>
     <entry dev-build="8" type="enh">When showing the query on which a result is based through the context menu of the result tab, the metadata of the result set is now also displayed.</entry>
     <entry dev-build="8" type="enh">WbInclude and WbSysExec now support conditional execution based on variables through -ifDefined, -ifNotDefined, -ifEquals, -ifNotEquals, -ifEmpty and -ifNotEmpty</entry>
