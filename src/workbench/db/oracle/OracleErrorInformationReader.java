@@ -25,12 +25,15 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import workbench.db.DbMetadata;
-import workbench.db.ErrorInformationReader;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbMetadata;
+import workbench.db.ErrorInformationReader;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -63,7 +66,7 @@ public class OracleErrorInformationReader
 	{
 		String query =
 			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
-			" FROM all_errors \n" +
+			"FROM all_errors \n" +
 			"WHERE owner = ? \n";
 
 		int typeIndex = -1;
