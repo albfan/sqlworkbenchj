@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -63,7 +64,7 @@ public class DbmsOutput
 		try
 		{
 			enableStatement = conn.prepareCall( "{call dbms_output.enable(?) }" );
-			if (size < 0)
+			if (size <= 0)
 			{
 				enableStatement.setNull(1, Types.BIGINT);
 			}
