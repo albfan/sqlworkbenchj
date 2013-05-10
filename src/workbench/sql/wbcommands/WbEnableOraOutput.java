@@ -25,10 +25,14 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DbMetadata;
+import workbench.db.oracle.DbmsOutput;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
+
+import workbench.util.StringUtil;
 
 /**
  * A class to turn on support for Oracle's <tt>DBMS_OUTPUT</tt> package.
@@ -37,6 +41,9 @@ import workbench.sql.formatter.SQLToken;
  * be shown in the message tab of the GUI.
  *
  * @author Thomas Kellerer
+ * 
+ * @see DbmsOutput
+ * @see DbMetadata#enableOutput()
  */
 public class WbEnableOraOutput extends SqlCommand
 {
@@ -49,21 +56,14 @@ public class WbEnableOraOutput extends SqlCommand
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
-		SQLLexer lexer = new SQLLexer(aSql);
-		SQLToken t = lexer.getNextToken(false, false);
-
-		// First token is the verb
-		if (t != null) t = lexer.getNextToken(false, false);
-
 		long limit = -1;
 
-		// second token is the buffer size
-		if (t != null)
+		String value = getCommandLine(sql);
+		if (StringUtil.isNonBlank(value))
 		{
-			String value = t.getContents();
 			try
 			{
 				limit = Long.parseLong(value);
