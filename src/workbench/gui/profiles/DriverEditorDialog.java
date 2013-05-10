@@ -106,7 +106,6 @@ public class DriverEditorDialog
 		helpButton.setResourceKey("LblHelp");
 		helpButton.addActionListener(this);
 
-
 		setTitle(ResourceMgr.getString("TxtDriverEditorWindowTitle"));
 		setModal(true);
 		setName("DriverEditorDialog");
@@ -147,7 +146,7 @@ public class DriverEditorDialog
 		dummyPanel.setMinimumSize(new Dimension(1, 1));
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
-
+		WbSwingUtilities.makeEqualSize(okButton, cancelButton, helpButton);
 	}
 
 	@Override

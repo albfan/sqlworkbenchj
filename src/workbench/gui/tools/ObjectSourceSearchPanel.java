@@ -108,7 +108,7 @@ public class ObjectSourceSearchPanel
 	{
 		this.instanceId = ++instanceCount;
 		initComponents();
-		WbSwingUtilities.setJButtonPreferredWidth(closeButton, showScriptButton, startButton);
+		WbSwingUtilities.makeEqualSize(closeButton, showScriptButton, startButton);
 		checkButtons();
 
 		results = new WbTable(true, false, false);

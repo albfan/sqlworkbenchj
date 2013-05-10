@@ -51,7 +51,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbLabelField;
 
@@ -74,7 +73,6 @@ public class WbAboutDialog
 	{
 		super(parent, true);
 		initComponents();
-    WbSwingUtilities.setJButtonPreferredWidth(closeButton);
 		homepageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		mailToLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		builtWithNbLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -149,8 +147,7 @@ public class WbAboutDialog
         closeButtonActionPerformed(evt);
       }
     });
-    
-    WbSwingUtilities.setJButtonPreferredWidth(closeButton);
+
     buttonPanel.add(closeButton);
 
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);

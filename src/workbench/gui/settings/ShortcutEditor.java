@@ -133,7 +133,7 @@ public class ShortcutEditor
 		okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		okButton.addActionListener(this);
 
-		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton);
+		WbSwingUtilities.makeEqualSize(okButton, cancelButton);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));

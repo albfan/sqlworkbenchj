@@ -159,7 +159,7 @@ public class SettingsPanel
 		cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		helpButton = new JButton(ResourceMgr.getString("LblHelp"));
 
-		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton, helpButton);
+		WbSwingUtilities.makeEqualSize(okButton, cancelButton, helpButton);
 
 		okButton.addActionListener(this);
 		cancelButton.addActionListener(this);

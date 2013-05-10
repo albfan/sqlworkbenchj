@@ -1,5 +1,5 @@
 /*
- * WbDescribeTableTest.java
+ * WbDescribeObjectTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -45,13 +45,13 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class WbDescribeTableTest
+public class WbDescribeObjectTest
 	extends WbTestCase
 {
 
-	public WbDescribeTableTest()
+	public WbDescribeObjectTest()
 	{
-		super("WbDescribeTableTest");
+		super("WbDescribeObjectTest");
 	}
 
 	@After

@@ -193,7 +193,7 @@ public class MacroManagerDialog
 		dummyPanel.setMinimumSize(new Dimension(1, 1));
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
-		WbSwingUtilities.setJButtonPreferredWidth(okButton, cancelButton);
+		WbSwingUtilities.makeEqualSize(runButton, okButton, cancelButton);
 	}
 
 	@Override

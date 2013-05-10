@@ -134,7 +134,8 @@ public class ProfileSelectionDialog
 
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 
-		WbSwingUtilities.setJButtonPreferredWidth(manageDriversButton, okButton, helpButton, cancelButton);
+		WbSwingUtilities.makeEqualSize(manageDriversButton, helpButton);
+		WbSwingUtilities.makeEqualSize(okButton, cancelButton);
 
 		addWindowListener(this);
 		okCancelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));

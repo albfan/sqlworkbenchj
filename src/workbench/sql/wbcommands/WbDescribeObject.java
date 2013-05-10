@@ -23,17 +23,19 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.log.LogMgr;
 
 import workbench.db.TriggerReader;
-import workbench.log.LogMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
-import workbench.util.SqlUtil;
 
 /**
  * Display the definition of a database object
@@ -92,26 +94,15 @@ public class WbDescribeObject
 		{
 			ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
-			cmdLine.parse(getCommandLine(sql));
-			String object = null;
-			boolean includeDependencies = true;
+			String args = getCommandLine(sql);
+			cmdLine.parse(args);
 
+			boolean includeDependencies = true;
+			String object = cmdLine.getValue(ARG_OBJECT, cmdLine.getNonArguments());
+			
 			if (cmdLine.hasArguments())
 			{
-				object = cmdLine.getValue(ARG_OBJECT);
 				includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
-				if (object == null)
-				{
-					object = cmdLine.getUnknownArguments();
-					if (object.startsWith("-"))
-					{
-						object = object.substring(1);
-					}
-				}
-			}
-			else
-			{
-				object = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 			}
 
 			ObjectInfo info = new ObjectInfo();
