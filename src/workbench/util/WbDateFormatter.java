@@ -79,7 +79,7 @@ public class WbDateFormatter
 			if (dt == DATE_POSITIVE_INFINITY)
 			{
 				return toAppendTo.append(infinityLiterals.getPositiveInfinity());
-		}
+			}
 			else if (dt == DATE_NEGATIVE_INFINITY)
 			{
 				return toAppendTo.append(infinityLiterals.getNegativeInfinity());
@@ -122,6 +122,20 @@ public class WbDateFormatter
 	{
 		if (value == null) return "";
 
+		if (value instanceof java.sql.Date)
+		{
+			String format = Settings.getInstance().getDefaultDateFormat();
+			WbDateFormatter formatter = new WbDateFormatter(format);
+			return formatter.format((java.sql.Date) value);
+		}
+
+		if (value instanceof java.sql.Timestamp)
+		{
+			String format = Settings.getInstance().getDefaultTimestampFormat();
+			WbDateFormatter formatter = new WbDateFormatter(format);
+			return formatter.format((java.sql.Timestamp) value);
+		}
+
 		if (value instanceof java.util.Date)
 		{
 			long time = ((java.util.Date)value).getTime();
@@ -133,20 +147,6 @@ public class WbDateFormatter
 			{
 				return InfinityLiterals.PG_NEGATIVE_LITERAL;
 			}
-		}
-
-		if (value instanceof java.sql.Date)
-		{
-			String format = Settings.getInstance().getDefaultDateFormat();
-			WbDateFormatter formatter = new WbDateFormatter(format);
-			return formatter.format((java.sql.Date)value);
-		}
-
-		if (value instanceof java.sql.Timestamp)
-		{
-			String format = Settings.getInstance().getDefaultTimestampFormat();
-			WbDateFormatter formatter = new WbDateFormatter(format);
-			return formatter.format((java.sql.Timestamp)value);
 		}
 
 		return value.toString();

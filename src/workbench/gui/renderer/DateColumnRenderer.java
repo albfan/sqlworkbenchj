@@ -22,7 +22,6 @@
  */
 package workbench.gui.renderer;
 
-import java.text.SimpleDateFormat;
 import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
 import workbench.util.WbDateFormatter;
@@ -37,7 +36,7 @@ import workbench.util.WbDateFormatter;
 public class DateColumnRenderer
 	extends ToolTipRenderer
 {
-	private final SimpleDateFormat dateFormatter;
+	private final WbDateFormatter dateFormatter;
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
