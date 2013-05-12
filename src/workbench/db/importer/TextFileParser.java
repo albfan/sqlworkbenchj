@@ -22,7 +22,6 @@
  */
 package workbench.db.importer;
 
-import workbench.interfaces.TabularDataParser;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,14 +38,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.TabularDataParser;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.CsvLineParser;
 import workbench.util.ExceptionUtil;
@@ -559,7 +562,7 @@ public class TextFileParser
 			return;
 		}
 
-		Object[] rowData = new Object[columnsToImport.size()];
+		final Object[] rowData = new Object[columnsToImport.size()];
 
 		int importRow = 0;
 
@@ -663,6 +666,7 @@ public class TextFileParser
 				includeLine = true;
 				int targetIndex = -1;
 
+				Arrays.fill(rowData, null);
 				for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
 				{
 					ImportFileColumn fileCol = importColumns.get(sourceIndex);

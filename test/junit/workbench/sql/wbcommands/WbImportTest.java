@@ -109,6 +109,41 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testMissingColumns()
+		throws Exception
+	{
+		File input = new File(util.getBaseDir(), "id_data.txt");
+
+		TestUtil.writeFile(input,
+			"nr\tfirstname\tlastname\n" +
+			"1\tArthur\tDent\n" +
+			"2\tFord\n" +
+			"3\tZaphod\tBeeblebrox\n",
+			"ISO-8859-1");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-header=true " +
+			"-continueonerror=false " +
+			"-table=junit_test");
+
+		assertTrue(input.delete());
+
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=1");
+		assertEquals("Dent", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=2");
+		assertNull(name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=3");
+		assertEquals("Beeblebrox", name);
+	}
+
+	@Test
 	public void testIdentityInsert()
 		throws Exception
 	{
