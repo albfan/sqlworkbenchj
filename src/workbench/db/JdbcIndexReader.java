@@ -24,9 +24,11 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,6 +47,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import static workbench.db.IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE;
+import workbench.db.sqltemplates.IndexListSelectTemplate;
 
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
@@ -752,6 +755,53 @@ public class JdbcIndexReader
 			if (index != null && index.getName().equalsIgnoreCase(toFind)) return index;
 		}
 		return null;
+	}
+
+	@Override
+	public List<IndexDefinition> getIndexes(String catalog, String schema)
+	{
+		IndexListSelectTemplate tmpl = new IndexListSelectTemplate(this.metaData.getDbId());
+		String sql = tmpl.getSQL(catalog, schema);
+		if (sql == null) return Collections.emptyList();
+		List<IndexDefinition> result = new ArrayList<IndexDefinition>();
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = this.metaData.getWbConnection().createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			while (rs.next())
+			{
+				String idxName = rs.getString("index_name");
+				String tableName = rs.getString("table_name");
+				String tableSchema = rs.getString("table_schema");
+				String tableCatalog = rs.getString("table_catalog");
+				String idxType = rs.getString("index_type");
+				String isUnique = rs.getString("is_unique");
+				String isPK = rs.getString("is_pk");
+
+				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
+				IndexDefinition idx = new IndexDefinition(tbl, idxName);
+				idx.setIndexType(idxType);
+				if (isUnique != null)
+				{
+					idx.setUnique(StringUtil.stringToBool(isUnique));
+				}
+				if (isPK != null)
+				{
+					idx.setPrimaryKeyIndex(StringUtil.stringToBool(isPK));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("JdbcIndexReader.getIndexes()", "Error retrieving index list", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
 	}
 
 }

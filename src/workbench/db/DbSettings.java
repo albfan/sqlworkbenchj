@@ -1606,4 +1606,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.use.read_uncommitted", false);
 	}
+
+	public String getIndexListStatement()
+	{
+		return Settings.getInstance().getProperty(prefix + "indexlist.select", null);
+	}
 }

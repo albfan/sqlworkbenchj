@@ -37,8 +37,6 @@ public class CommentSqlManager
 	 */
 	public static final String COMMENT_FQ_OBJECT_NAME_PLACEHOLDER = "%fq_object_name%";
 	public static final String COMMENT_OBJECT_NAME_PLACEHOLDER = "%object_name%";
-	public static final String COMMENT_CATALOG_PLACEHOLDER = "%catalog%";
-	public static final String COMMENT_SCHEMA_PLACEHOLDER = "%schema%";
 	public static final String COMMENT_COLUMN_PLACEHOLDER = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
 	public static final String COMMENT_PLACEHOLDER = "%comment%";
 

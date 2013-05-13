@@ -399,7 +399,7 @@ public class JdbcProcedureReader
 			if (StringUtil.isNonBlank(template))
 			{
 				template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, def.getProcedureName());
-				template = template.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, def.getSchema());
+				template = template.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, def.getSchema());
 				template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment.replace("'", "''"));
 				source.append('\n');
 				source.append(template);

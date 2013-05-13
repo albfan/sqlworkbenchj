@@ -202,7 +202,7 @@ public class DbObjectChanger
 		// schema and table name placeholders are intended where those names are individual parameters
 		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
 		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldDefinition.getObjectName());
-		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, schema);
+		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, schema);
 
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
 		return sql;

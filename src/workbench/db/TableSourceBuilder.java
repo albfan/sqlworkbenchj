@@ -53,6 +53,8 @@ import workbench.util.StringUtil;
  */
 public class TableSourceBuilder
 {
+	public static final String SCHEMA_PLACEHOLDER = "%schema%";
+	public static final String CATALOG_PLACEHOLDER = "%catalog%";
 	protected WbConnection dbConnection;
 	private ConstraintNameTester nameTester;
 
@@ -623,24 +625,24 @@ public class TableSourceBuilder
 
 		if (StringUtil.isBlank(table.getCatalog()))
 		{
-			sql = sql.replace("%catalog%.", ""); // in case the sql contains %catalog%.%tablename%
-			sql = sql.replace("%catalog%", ""); // in case no trailing dot is present (e.g. for a procedure call)
+			sql = sql.replace(CATALOG_PLACEHOLDER + ".", ""); // in case the sql contains %catalog%.%tablename%
+			sql = sql.replace(CATALOG_PLACEHOLDER, ""); // in case no trailing dot is present (e.g. for a procedure call)
 		}
 		else
 		{
 			String cat = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getCatalog()) : table.getCatalog());
-			sql = sql.replace("%catalog%", cat);
+			sql = sql.replace(CATALOG_PLACEHOLDER, cat);
 		}
 
 		if (StringUtil.isBlank(table.getSchema()))
 		{
-			sql = sql.replace("%schema%.", "");
-			sql = sql.replace("%schema%", "");
+			sql = sql.replace(SCHEMA_PLACEHOLDER + ".", "");
+			sql = sql.replace(SCHEMA_PLACEHOLDER, "");
 		}
 		else
 		{
 			String schema = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getSchema()) : table.getSchema());
-			sql = sql.replace("%schema%", schema);
+			sql = sql.replace(SCHEMA_PLACEHOLDER, schema);
 		}
 
 		String tname = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getTableName()) : table.getTableName());

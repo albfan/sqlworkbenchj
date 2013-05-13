@@ -79,8 +79,8 @@ public class TableCommentReader
 			else
 			{
 				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
-				result = replaceObjectNamePlaceholder(result, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
-				result = replaceObjectNamePlaceholder(result, CommentSqlManager.COMMENT_CATALOG_PLACEHOLDER, table.getCatalog());
+				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema());
+				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, table.getCatalog());
 			}
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
 			result += ";";

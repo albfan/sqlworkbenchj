@@ -144,4 +144,13 @@ public interface IndexReader
 	String getIndexOptions(TableIdentifier table, IndexDefinition index);
 
 	boolean supportsTableSpaces();
+
+	/**
+	 * Return a list of indexes defined in the system.
+	 *
+	 * @param catalog   the catalog for which to retrieve the indexes, may be null
+	 * @param schema    the schema for which to retrieve the indexes, may be null
+	 * @return
+	 */
+	List<IndexDefinition> getIndexes(String catalog, String schema);
 }
