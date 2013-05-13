@@ -135,7 +135,7 @@ public class CompletionPopup
 			headerComponent.doLayout();
 			final Dimension d = headerComponent.getPreferredSize();
 			d.height += 35;
-			d.width += 20;
+			d.width += 25;
 			elementList.setMinimumSize(d);
 			scroll.setMinimumSize(d);
 
@@ -291,12 +291,14 @@ public class CompletionPopup
 	private String getPasteValue(String value)
 	{
 		if (value == null) return value;
-		String result = value;
+		String result;
 		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
+
+		boolean isKeyword = context.getAnalyzer().getContext() == BaseAnalyzer.CONTEXT_KW_LIST;
 
 		if (this.context.getAnalyzer().convertCase())
 		{
-			if (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase)
+			if (!isKeyword && (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase ))
 			{
 				result = value;
 			}
@@ -304,18 +306,31 @@ public class CompletionPopup
 			{
 				result = value.toLowerCase();
 			}
-			else if ("upper".equalsIgnoreCase(pasteCase))
+			else
 			{
 				result = value.toUpperCase();
 			}
 		}
+		else
+		{
+			result = value;
+		}
 
-		if (this.context.getAnalyzer().appendDotToSelection()) result += ".";
-		if (this.context.getAnalyzer().isKeywordList()) result += " ";
+		if (this.context.getAnalyzer().appendDotToSelection())
+		{
+			result += ".";
+		}
+
+		if (this.context.getAnalyzer().isKeywordList())
+		{
+			result += " ";
+		}
+
 		if (this.context.getAnalyzer().isWbParam())
 		{
 			result = "-" + result + "=";
 		}
+
 		char c = this.context.getAnalyzer().quoteCharForValue(result);
 		if (c != 0)
 		{
@@ -383,7 +398,6 @@ public class CompletionPopup
 
 		try
 		{
-
 			if (entrySelected)
 			{
 				boolean handled = handleFKSelection();
@@ -687,7 +701,7 @@ public class CompletionPopup
 					evt.consume();
 				}
 				break;
-				
+
 			case KeyEvent.VK_DOWN:
 				if (cycleList && currentIndex == data.getSize() - 1)
 				{

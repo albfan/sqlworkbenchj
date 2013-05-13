@@ -124,7 +124,7 @@ public class SqlKeywordHelper
 
 	/**
 	 * Loads the keywords from the keyword file.
-	 * First the built-in "general" file is read, then the database specific one.
+	 * First the passed filename is read, then the database specific one.
 	 *
 	 * After reading the built-in definitions, the file is also searched
 	 * for in the config directory.
@@ -132,7 +132,7 @@ public class SqlKeywordHelper
 	 * @param filename
 	 * @return
 	 */
-	private Set<String> loadKeywordsFromFile(String filename)
+	public Set<String> loadKeywordsFromFile(String filename)
 	{
 		Set<String> result = readFile(filename);
 		if (this.dbId != null)

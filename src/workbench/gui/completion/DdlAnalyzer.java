@@ -23,13 +23,20 @@
 package workbench.gui.completion;
 
 import workbench.db.WbConnection;
+import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
+import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.CollectionUtil;
 
 /**
- * Analyze a DDL statement regarding the context for the auto-completion
+ * Analyze a DDL statement regarding the context for the auto-completion.
+ *
+ * Currently only TRUNCATE and DROP are supported.
+ *
  * @author Thomas Kellerer
+ * @see CreateAnalyzer
+ * @see AlterTableAnalyzer
  */
 public class DdlAnalyzer
 	extends BaseAnalyzer
@@ -60,6 +67,7 @@ public class DdlAnalyzer
 
 		SQLToken typeToken = lexer.getNextToken(false, false);
 		String type = (typeToken != null ? typeToken.getContents() : null);
+		SQLToken nameToken = lexer.getNextToken(false, false);
 
 		String q = this.getQualifierLeftOfCursor();
 		if (q != null)
@@ -76,37 +84,73 @@ public class DdlAnalyzer
 			if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
 			{
 				context = CONTEXT_KW_LIST;
-				this.keywordFile = "drop_types.txt";
+				keywordFile = "drop_types.txt";
 			}
+
+			boolean showObjectList = typeToken != null && cursorPos >= typeToken.getCharEnd() && (nameToken == null || cursorPos < nameToken.getCharBegin());
+			boolean showDropOption = nameToken != null && cursorPos >=  nameToken.getCharEnd();
 
 			// for DROP etc, we'll need to be after the table keyword
 			// otherwise it could be a DROP PROCEDURE as well.
-			if ("TABLE".equals(type) && cursorPos >= typeToken.getCharEnd())
+			if ("TABLE".equals(type))
 			{
-				context = CONTEXT_TABLE_LIST;
-				setTableTypeFilter(this.dbConnection.getMetadata().getTableTypes());
+				if (showObjectList)
+				{
+					context = CONTEXT_TABLE_LIST;
+					setTableTypeFilter(this.dbConnection.getMetadata().getTableTypes());
+				}
+				else if (showDropOption)
+				{
+					// probably after the table name
+					context = CONTEXT_KW_LIST;
+					keywordFile = "table.drop_options.txt";
+				}
 			}
-			else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
+			else if ("VIEW".equals(type) && showObjectList)
 			{
 				context = CONTEXT_TABLE_LIST;
 				setTableTypeFilter(CollectionUtil.arrayList(this.dbConnection.getMetadata().getViewTypeName()));
 			}
-//			else if ("INDEX".equals(type) && cursorPos >= typeToken.getCharEnd())
-//			{
-//			IndexDefinition[] idx = this.dbConnection.getMetadata().getIndexList(this.schemaForTableList);
-//			this.elements = new ArrayList();
-//			for (int i = 0; i < idx.length; i++)
-//			{
-//				this.elements.add(idx[i].getName());
-//			}
-//			}
+			else if (isDropSchema(type))
+			{
+				if (showObjectList)
+				{
+					context = CONTEXT_SCHEMA_LIST;
+				}
+				else if (showDropOption)
+				{
+					context = CONTEXT_KW_LIST;
+					keywordFile = type.trim().toLowerCase() + ".drop_options.txt";
+				}
+			}
+			else if ("DATABASE".equals(type) && showObjectList)
+			{
+				context = CONTEXT_CATALOG_LIST;
+			}
+			else if ("SEQUENCE".equals(type) && showObjectList)
+			{
+				if (showObjectList)
+				{
+					context = CONTEXT_SEQUENCE_LIST;
+				}
+				else if (showDropOption)
+				{
+					// probably after the table name
+					context = CONTEXT_KW_LIST;
+					keywordFile = "sequence.drop_options.txt";
+				}
+			}
 		}
 		else
 		{
 			context = NO_CONTEXT;
 		}
-
 	}
 
+	private boolean isDropSchema(String type)
+	{
+		return "SCHEMA".equalsIgnoreCase(type) ||
+			     dbConnection.getMetadata().isOracle() && "USER".equalsIgnoreCase(type);
 
+	}
 }

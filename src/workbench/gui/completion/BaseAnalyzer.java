@@ -23,22 +23,22 @@
 package workbench.gui.completion;
 
 import java.awt.Toolkit;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.util.EncodingUtil;
-import workbench.util.FileUtil;
+import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -91,6 +91,9 @@ public abstract class BaseAnalyzer
 
 	protected static final int CONTEXT_SYNTAX_COMPLETION = 8;
 	protected static final int CONTEXT_STATEMENT_PARAMETER = 9;
+	protected static final int CONTEXT_SCHEMA_LIST = 10;
+	protected static final int CONTEXT_CATALOG_LIST = 11;
+	protected static final int CONTEXT_SEQUENCE_LIST = 12;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
@@ -370,6 +373,20 @@ public abstract class BaseAnalyzer
 				this.title = ResourceMgr.getString("LblCompletionListParmValues");
 			}
 		}
+		else if (context == CONTEXT_SCHEMA_LIST)
+		{
+			this.title = StringUtil.capitalize(dbConnection.getMetadata().getSchemaTerm());
+			retrieveSchemas();
+		}
+		else if (context == CONTEXT_CATALOG_LIST)
+		{
+			this.title = StringUtil.capitalize(dbConnection.getMetadata().getCatalogTerm());
+			retrieveCatalogs();
+		}
+		else if (context == CONTEXT_SEQUENCE_LIST)
+		{
+			retrieveSequences();
+		}
 		else if (context == CONTEXT_WB_COMMANDS)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListWbCmd");
@@ -392,21 +409,51 @@ public abstract class BaseAnalyzer
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<String> readKeywords()
 	{
 		if (this.keywordFile == null) return null;
-		InputStream in = getClass().getResourceAsStream(keywordFile);
+		SqlKeywordHelper helper = new SqlKeywordHelper(dbConnection.getDbId());
+		Set<String> kwlist = helper.loadKeywordsFromFile(keywordFile);
+		return new ArrayList<String>(kwlist);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void retrieveSchemas()
+	{
+		List<String> schemas = dbConnection.getMetadata().getSchemas();
+		this.elements = new ArrayList(schemas.size());
+		this.elements.addAll(schemas);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void retrieveCatalogs()
+	{
+		List<String> catalogs = dbConnection.getMetadata().getCatalogs();
+		this.elements = new ArrayList(catalogs.size());
+		this.elements.addAll(catalogs);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void retrieveSequences()
+	{
+		SequenceReader reader = dbConnection.getMetadata().getSequenceReader();
+		if (reader == null) return;
 		try
 		{
-			BufferedReader reader = new BufferedReader(EncodingUtil.createReader(in, "ISO-8859-1"));
-			return FileUtil.getLines(reader, true);
+			title = StringUtil.capitalize(reader.getSequenceTypeName());
+			List<SequenceDefinition> sequences = reader.getSequences(null, schemaForTableList, null);
+			elements = new ArrayList(sequences.size());
+			for (SequenceDefinition def : sequences)
+			{
+				elements.add(def);
+			}
 		}
-		catch (IOException io)
+		catch (SQLException se)
 		{
-			return new ArrayList<String>();
+			LogMgr.logError("BaseAnalyzer.retrieveSequences()", "Could not retrieve sequences", se);
 		}
 	}
+
 
 	@SuppressWarnings("unchecked")
 	protected void retrieveTables()

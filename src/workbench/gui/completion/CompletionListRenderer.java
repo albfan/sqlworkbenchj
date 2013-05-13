@@ -31,6 +31,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A ListCellRenderer for the completion popup.
@@ -62,22 +63,28 @@ public class CompletionListRenderer
 				setText(colname);
 			}
 		}
+
 		if (value instanceof DbObject)
 		{
 			DbObject dbo = (DbObject)value;
-			String type = (dbo instanceof ColumnIdentifier ? null : dbo.getObjectType());
+			String type = (dbo instanceof ColumnIdentifier ? ((ColumnIdentifier)dbo).getDbmsType() : dbo.getObjectType());
 			String tooltip = null;
 			String comment = dbo.getComment();
-			if (comment == null || comment.isEmpty() && type != null)
+			if (StringUtil.isBlank(comment) && StringUtil.isNonBlank(type))
 			{
 				tooltip = "<html><tt>" + type + "</tt></html>";
 			}
-			else if (type != null)
+			else if (StringUtil.isNonBlank(type))
 			{
-				tooltip = "<html><tt>" + type + "</tt><br><i>"+ comment + "</i></html>";
+				tooltip = "<html><tt>" + type + "</tt><br><i>" + comment + "</i></html>";
 			}
 			setToolTipText(tooltip);
 		}
+		else
+		{
+			setToolTipText(null);
+		}
+
 		return c;
 	}
 

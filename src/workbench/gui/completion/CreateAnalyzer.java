@@ -29,8 +29,11 @@ import workbench.sql.formatter.SQLToken;
 import workbench.util.StringUtil;
 
 /**
- * Analyze a CREATE INDEX statement to provide completion for tables and columns
+ * Analyze a CREATE INDEX statement to provide completion for tables and columns.
+ *
  * @author Thomas Kellerer
+ * @see DdlAnalyzer
+ * @see AlterTableAnalyzer
  */
 public class CreateAnalyzer
 	extends BaseAnalyzer
@@ -105,7 +108,7 @@ public class CreateAnalyzer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
+			LogMgr.logError("CreateAnalyzer", "Error parsing SQL", e);
 		}
 
 		if (showTables)
