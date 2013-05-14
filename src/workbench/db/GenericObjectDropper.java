@@ -26,11 +26,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
-import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
+
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -160,11 +163,18 @@ public class GenericObjectDropper
 
 	private CharSequence getDropStatement(int index)
 	{
-		String drop = this.objects.get(index).getDropStatement(connection, cascadeConstraints);
+		DbObject toDrop = this.objects.get(index);
+		return getDropForObject(toDrop);
+	}
+
+	@Override
+	public CharSequence getDropForObject(DbObject toDrop)
+	{
+		String drop = toDrop.getDropStatement(connection, cascadeConstraints);
 		if (drop != null) return drop;
 
-		String name = this.objects.get(index).getObjectNameForDrop(this.connection);
-		String type = this.objects.get(index).getObjectType();
+		String name = toDrop.getObjectNameForDrop(this.connection);
+		String type = toDrop.getObjectType();
 
 		StringBuilder sql = new StringBuilder(120);
 		String ddl = this.connection.getDbSettings().getDropDDL(type, cascadeConstraints);

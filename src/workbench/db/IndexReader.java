@@ -150,7 +150,18 @@ public interface IndexReader
 	 *
 	 * @param catalog   the catalog for which to retrieve the indexes, may be null
 	 * @param schema    the schema for which to retrieve the indexes, may be null
-	 * @return
+	 * @return a list of indexes
+	 * 
+	 * @see #supportsIndexList()
 	 */
 	List<IndexDefinition> getIndexes(String catalog, String schema);
+
+	/**
+	 * Returns true if this IndexReader supports retrieving a list of indexes
+	 * without any table parameter.
+	 *
+	 * @return  true if getInd
+	 * @see #getIndexes(String, String)
+	 */
+	boolean supportsIndexList();
 }

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.WbPersistence;
 
 /**
@@ -68,12 +69,26 @@ public class MetaDataSqlManager
 	private GetMetaDataSql viewSource;
 	private GetMetaDataSql listTrigger;
 	private GetMetaDataSql triggerSource;
+	private GetMetaDataSql listIndexes;
 
 	private final Object LOCK = new Object();
 
 	public MetaDataSqlManager(String product)
 	{
 		this.productName = product;
+	}
+
+	public GetMetaDataSql getListIndexesSql()
+	{
+		synchronized (LOCK)
+		{
+			if (this.listIndexes == null)
+			{
+				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListIndexStatements.xml");
+				this.listIndexes = sql.get(this.productName);
+			}
+			return this.listIndexes;
+		}
 	}
 
 	public GetMetaDataSql getProcedureSourceSql()

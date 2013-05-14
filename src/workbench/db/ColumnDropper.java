@@ -26,9 +26,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -196,6 +199,18 @@ public class ColumnDropper
 			SqlUtil.closeStatement(currentStatement);
 			currentStatement = null;
 		}
+	}
+
+	/**
+	 * Not implemented.
+	 *
+	 * @param toDrop
+	 * @return always null
+	 */
+	@Override
+	public CharSequence getDropForObject(DbObject toDrop)
+	{
+		return null;
 	}
 
 	public static List<String> getSql(TableIdentifier table, List<ColumnIdentifier> columns, WbConnection conn)

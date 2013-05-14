@@ -47,7 +47,6 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import static workbench.db.IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE;
-import workbench.db.sqltemplates.IndexListSelectTemplate;
 
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
@@ -758,11 +757,22 @@ public class JdbcIndexReader
 	}
 
 	@Override
+	public boolean supportsIndexList()
+	{
+		GetMetaDataSql sql = metaData.getMetaDataSQLMgr().getListIndexesSql();
+		return sql !=null;
+	}
+
+	@Override
 	public List<IndexDefinition> getIndexes(String catalog, String schema)
 	{
-		IndexListSelectTemplate tmpl = new IndexListSelectTemplate(this.metaData.getDbId());
-		String sql = tmpl.getSQL(catalog, schema);
-		if (sql == null) return Collections.emptyList();
+		GetMetaDataSql sqlDef = metaData.getMetaDataSQLMgr().getListIndexesSql();
+		if (sqlDef == null) return Collections.emptyList();
+
+		sqlDef.setCatalog(catalog);
+		sqlDef.setSchema(schema);
+		String sql = sqlDef.getSql();
+
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>();
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -773,6 +783,7 @@ public class JdbcIndexReader
 			while (rs.next())
 			{
 				String idxName = rs.getString("index_name");
+				String idxSchema = rs.getString("index_schema");
 				String tableName = rs.getString("table_name");
 				String tableSchema = rs.getString("table_schema");
 				String tableCatalog = rs.getString("table_catalog");
@@ -782,6 +793,7 @@ public class JdbcIndexReader
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
 				IndexDefinition idx = new IndexDefinition(tbl, idxName);
+				idx.setSchema(idxSchema);
 				idx.setIndexType(idxType);
 				if (isUnique != null)
 				{
@@ -791,6 +803,7 @@ public class JdbcIndexReader
 				{
 					idx.setPrimaryKeyIndex(StringUtil.stringToBool(isPK));
 				}
+				result.add(idx);
 			}
 		}
 		catch (Exception e)

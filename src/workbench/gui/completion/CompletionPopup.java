@@ -464,10 +464,18 @@ public class CompletionPopup
 		{
 			return;
 		}
+
 		String value = "";
 
 		for (Object o : selected)
 		{
+			String pv = this.context.getAnalyzer().getPasteValue(o);
+			if (pv != null)
+			{
+				value += pv;
+				continue;
+			}
+			
 			if (o instanceof TableAlias)
 			{
 				TableAlias a = (TableAlias) o;

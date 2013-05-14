@@ -392,7 +392,7 @@
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
       <para>
-				When opening the <link linkend="data-pumper">DataPumper</link> it will
+				When opening the <link linkend="data-pumper">DataPumper</link> as a separate window it will
 				connect to the current profile as the source connection. If you do not want the DataPumper to
 				connect automatically set this property to <literal>false</literal>
       </para>

@@ -39,6 +39,7 @@ public class IndexDefinition
 {
 	private boolean isPK;
 	private boolean isUnique;
+	private String schema;
 	private String indexName;
 	private String indexType;
 	private TableIdentifier baseTable;
@@ -46,6 +47,7 @@ public class IndexDefinition
 	private String comment;
 	private ConstraintDefinition uniqueConstraint;
 	private String indexExpression;
+	private String displayName;
 
 	// For Oracle, Postgres
 	private String tableSpace;
@@ -87,7 +89,7 @@ public class IndexDefinition
 	{
 		this.tableSpace = tableSpaceName;
 	}
-	
+
 	public String getDirection()
 	{
 		return direction;
@@ -130,9 +132,15 @@ public class IndexDefinition
 		comment = c;
 	}
 
+	public void setSchema(String idxSchema)
+	{
+		this.schema = idxSchema;
+	}
+	
 	@Override
 	public String getSchema()
 	{
+		if (schema != null) return schema;
 		return baseTable.getSchema();
 	}
 
@@ -257,10 +265,21 @@ public class IndexDefinition
 		return this.indexType;
 	}
 
+	public TableIdentifier getBaseTable()
+	{
+		return baseTable;
+	}
+
+	public void setDisplayName(String name)
+	{
+		this.displayName = name;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getExpression();
+		if (displayName != null) return displayName;
+		return indexName;
 	}
 
 	public String getColumnList()

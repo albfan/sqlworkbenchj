@@ -73,6 +73,42 @@ public class PostgresIndexReaderTest
 	}
 
 	@Test
+	public void testGetIndexList()
+		throws Exception
+	{
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+		if (conn == null)
+		{
+			System.out.println("No local postgres connection. Skipping test...");
+			return;
+		}
+
+		String sql =
+			"CREATE TABLE foo \n" +
+			"( \n" +
+			"   id integer not null primary key, \n" +
+			"   code varchar(40) not null, \n" +
+			"   name text not null, \n" +
+			"   some_date date \n" +
+			"); \n" +
+			" \n" +
+			"CREATE unique INDEX foo_one ON foo (code); \n" +
+			"CREATE INDEX name_lower ON foo (lower((name)::text)); \n" +
+			" \n" +
+			"COMMIT;";
+
+		TestUtil.executeScript(conn, sql);
+
+		DbMetadata meta = conn.getMetadata();
+		IndexReader reader = meta.getIndexReader();
+
+		assertTrue(reader.supportsIndexList());
+		List<IndexDefinition> indexList = reader.getIndexes(null, TESTID);
+		assertNotNull(indexList);
+		assertEquals(3, indexList.size());
+	}
+
+	@Test
 	public void testGetIndexSource()
 		throws SQLException
 	{

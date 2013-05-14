@@ -8,14 +8,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -88,7 +92,7 @@ public class SqlServerIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("SqlServerIndexReader.getIncludedColumns()", "Using SQL=\n" + 
+			LogMgr.logDebug("SqlServerIndexReader.getIncludedColumns()", "Using SQL=\n" +
 				SqlUtil.replaceParameters(sql, index.getName(), table.getRawTableName(), table.getRawSchema()));
 		}
 
@@ -138,4 +142,21 @@ public class SqlServerIndexReader
 		}
 		return sql;
 	}
+
+	@Override
+	public boolean supportsIndexList()
+	{
+		return SqlServerUtil.isSqlServer2005(metaData.getWbConnection());
+	}
+
+	@Override
+	public List<IndexDefinition> getIndexes(String catalog, String schema)
+	{
+		if (SqlServerUtil.isSqlServer2005(metaData.getWbConnection()))
+		{
+			return super.getIndexes(catalog, schema);
+		}
+		return Collections.emptyList();
+	}
+	
 }

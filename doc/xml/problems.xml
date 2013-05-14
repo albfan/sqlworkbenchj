@@ -139,6 +139,17 @@
     </para>
   </section>
 
+  <section id="db-problems">
+    <title>General DBMS problems</title>
+    <section id="dbexplorer_wildcards">
+      <indexterm><primary>Problems</primary><secondary>DbExplorer</secondary></indexterm>
+      <title>DbExplorer does not display information for schemas with underscore</title>
+      <para>
+
+      </para>
+    </section>
+  </section>
+  
 	<section id="oracle-problems">
 		<title>Oracle Problems</title>
     <indexterm><primary>Problems</primary><secondary>Oracle</secondary></indexterm>
@@ -331,9 +342,9 @@ SELECT 42 FROM dual;</programlisting>
         and the source is not displayed in the DbExplorer.
 			</para>
       <para>
-        To make &wb-productname; use MySQL's <tt>SHOW CREATE VIEW</tt> statement instead of the <tt>INFORMATION_SCHEMA</tt>,
-        you can set the property <tt>workbench.db.mysql.use.showcreate.view</tt> to true, e.g. by running
-        <tt>WbSetConfig workbench.db.mysql.use.showcreate.view=true</tt>
+        To make &wb-productname; use MySQL's <literal>SHOW CREATE VIEW</literal> statement instead of the <literal>INFORMATION_SCHEMA</literal>,
+        you can set the property <literal>workbench.db.mysql.use.showcreate.view</literal> to true, e.g. by running
+        <literal>WbSetConfig workbench.db.mysql.use.showcreate.view=true</literal>
       </para>
 		</section>
 

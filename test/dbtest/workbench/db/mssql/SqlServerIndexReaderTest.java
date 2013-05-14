@@ -23,17 +23,20 @@
 package workbench.db.mssql;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -67,7 +70,7 @@ public class SqlServerIndexReaderTest
 	}
 
 	@Test
-	public void testGetIndexSource()
+	public void testReader()
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
@@ -89,5 +92,10 @@ public class SqlServerIndexReaderTest
 		assertEquals("ix_one", index.getName());
 		String source = reader.getIndexSource(tbl, index).toString();
 		assertTrue(source.contains("INCLUDE (id2)"));
+
+		List<IndexDefinition> indexList = reader.getIndexes(null, "dbo");
+		assertNotNull(indexList);
+		assertEquals(1, indexList.size());
+		assertEquals("ix_one", indexList.get(0).getName());
 	}
 }

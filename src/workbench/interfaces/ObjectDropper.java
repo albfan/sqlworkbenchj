@@ -28,6 +28,7 @@ import java.util.List;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.RowActionMonitor;
 
 /**
@@ -55,4 +56,5 @@ public interface ObjectDropper
 	void setRowActionMonitor(RowActionMonitor monitor);
 
 	CharSequence getScript();
+	CharSequence getDropForObject(DbObject toDrop);
 }

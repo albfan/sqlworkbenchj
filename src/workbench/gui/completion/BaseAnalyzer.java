@@ -29,16 +29,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
+import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -94,6 +99,7 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_SCHEMA_LIST = 10;
 	protected static final int CONTEXT_CATALOG_LIST = 11;
 	protected static final int CONTEXT_SEQUENCE_LIST = 12;
+	protected static final int CONTEXT_INDEX_LIST = 13;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
@@ -122,6 +128,18 @@ public abstract class BaseAnalyzer
 		this.sql = statement;
 		this.cursorPos = cursorPos;
 		this.catalogSeparator = SqlUtil.getCatalogSeparator(this.dbConnection);
+	}
+
+	/**
+	 * To be implemented by specialized analyzers that might need more complex logic
+	 * when the user selects an entry from the popup list.
+	 *
+	 * @param selectedObject
+	 * @return the value to paste or null if the standard behaviour should be used
+	 */
+	public String getPasteValue(Object selectedObject)
+	{
+		return null;
 	}
 
 	public WbConnection getConnection()
@@ -387,6 +405,10 @@ public abstract class BaseAnalyzer
 		{
 			retrieveSequences();
 		}
+		else if (context == CONTEXT_INDEX_LIST)
+		{
+			retrieveIndexes();
+		}
 		else if (context == CONTEXT_WB_COMMANDS)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListWbCmd");
@@ -434,6 +456,30 @@ public abstract class BaseAnalyzer
 	}
 
 	@SuppressWarnings("unchecked")
+	protected void retrieveIndexes()
+	{
+		IndexReader reader = dbConnection.getMetadata().getIndexReader();
+		title = "Index";
+		String schema = schemaForTableList;
+		String catalog = null;
+		if (!dbConnection.getDbSettings().supportsSchemas())
+		{
+			schema = null;
+			catalog = schemaForTableList;
+		}
+		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema);
+		this.elements = new ArrayList(indexes.size());
+		for (IndexDefinition idx : indexes)
+		{
+			if (!idx.isPrimaryKeyIndex())
+			{
+				idx.setDisplayName(idx.getObjectExpression(dbConnection) + " (" + idx.getBaseTable().getTableExpression(dbConnection) + ")");
+				elements.add(idx);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	protected void retrieveSequences()
 	{
 		SequenceReader reader = dbConnection.getMetadata().getSequenceReader();
@@ -442,11 +488,7 @@ public abstract class BaseAnalyzer
 		{
 			title = StringUtil.capitalize(reader.getSequenceTypeName());
 			List<SequenceDefinition> sequences = reader.getSequences(null, schemaForTableList, null);
-			elements = new ArrayList(sequences.size());
-			for (SequenceDefinition def : sequences)
-			{
-				elements.add(def);
-			}
+			elements = new ArrayList(sequences);
 		}
 		catch (SQLException se)
 		{

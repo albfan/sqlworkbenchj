@@ -22,12 +22,17 @@
  */
 package workbench.gui.completion;
 
+import workbench.db.GenericObjectDropper;
+import workbench.db.IndexDefinition;
 import workbench.db.WbConnection;
-import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
-import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
+
+import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
+import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
 
 /**
  * Analyze a DDL statement regarding the context for the auto-completion.
@@ -76,7 +81,14 @@ public class DdlAnalyzer
 		}
 		else
 		{
-			this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
+			if (dbConnection.getDbSettings().supportsSchemas())
+			{
+				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
+			}
+			else
+			{
+				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentCatalog();
+			}
 		}
 
 		if ("DROP".equals(verb))
@@ -105,6 +117,10 @@ public class DdlAnalyzer
 					context = CONTEXT_KW_LIST;
 					keywordFile = "table.drop_options.txt";
 				}
+			}
+			else if ("INDEX".equals(type) && showObjectList)
+			{
+				context = CONTEXT_INDEX_LIST;
 			}
 			else if ("VIEW".equals(type) && showObjectList)
 			{
@@ -153,4 +169,20 @@ public class DdlAnalyzer
 			     dbConnection.getMetadata().isOracle() && "USER".equalsIgnoreCase(type);
 
 	}
+
+	@Override
+	public String getPasteValue(Object selectedObject)
+	{
+		if (selectedObject instanceof IndexDefinition)
+		{
+			IndexDefinition idx = (IndexDefinition)selectedObject;
+			GenericObjectDropper dropper = new GenericObjectDropper();
+			dropper.setConnection(dbConnection);
+			dropper.setObjectTable(idx.getBaseTable());
+			String drop = dropper.getDropForObject(idx).toString();
+			return drop.replaceFirst("(?i)drop\\s+index\\s+", "");
+		}
+		return null;
+	}
+
 }
