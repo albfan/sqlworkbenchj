@@ -249,6 +249,7 @@ public class ObjectInfo
 
 		CharSequence source = null;
 		String displayName = null;
+		String displayedObject = "";
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
@@ -267,11 +268,16 @@ public class ObjectInfo
 			displayName = toDescribe.getObjectName();
 		}
 
+		if (toDescribe != null)
+		{
+			displayedObject = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
+		}
+
 		if (details != null)
 		{
 			ColumnRemover remover = new ColumnRemover(details);
 			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-			cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
+			cols.setResultName(displayedObject);
 			result.addDataStore(cols);
 			result.setSuccess();
 		}
@@ -292,7 +298,7 @@ public class ObjectInfo
 				DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
 				if (index != null && index.getRowCount() > 0)
 				{
-					index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
+					index.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
 					result.addDataStore(index);
 				}
 			}
@@ -307,7 +313,7 @@ public class ObjectInfo
 				DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
 				if (triggers != null && triggers.getRowCount() > 0)
 				{
-					triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
+					triggers.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
 					result.addDataStore(triggers);
 				}
 			}
@@ -324,13 +330,13 @@ public class ObjectInfo
 					DataStore references = fk.getForeignKeys(toDescribe, false);
 					if (references.getRowCount() > 0)
 					{
-						references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+						references.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
 						result.addDataStore(references);
 					}
 					DataStore referencedBy = fk.getReferencedBy(toDescribe);
 					if (referencedBy.getRowCount() > 0)
 					{
-						referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+						referencedBy.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
 						result.addDataStore(referencedBy);
 					}
 				}
