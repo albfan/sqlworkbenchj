@@ -782,17 +782,17 @@ public class JdbcIndexReader
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
-				String idxName = rs.getString("index_name");
-				String idxSchema = rs.getString("index_schema");
-				String tableName = rs.getString("table_name");
-				String tableSchema = rs.getString("table_schema");
-				String tableCatalog = rs.getString("table_catalog");
-				String idxType = rs.getString("index_type");
-				String isUnique = rs.getString("is_unique");
-				String isPK = rs.getString("is_pk");
+				String idxName = StringUtil.rtrim(rs.getString("index_name"));
+				String idxSchema = StringUtil.rtrim(rs.getString("index_schema"));
+				String tableName = StringUtil.rtrim(rs.getString("table_name"));
+				String tableSchema = StringUtil.rtrim(rs.getString("table_schema"));
+				String tableCatalog = StringUtil.rtrim(rs.getString("table_catalog"));
+				String idxType = StringUtil.rtrim(rs.getString("index_type"));
+				String isUnique = StringUtil.rtrim(rs.getString("is_unique"));
+				String isPK = StringUtil.rtrim(rs.getString("is_pk"));
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
-				IndexDefinition idx = new IndexDefinition(tbl, idxName);
+				IndexDefinition idx = new IndexDefinition(tbl, idxName.trim());
 				idx.setSchema(idxSchema);
 				idx.setIndexType(idxType);
 				if (isUnique != null)

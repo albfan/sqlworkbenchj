@@ -3,6 +3,38 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>Firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select idx.rdb$index_name as index_name,
+       null as index_schema,
+       null as table_catalog,
+       null as table_schema,
+       idx.rdb$relation_name as table_name,
+       case
+          when idx.rdb$unique_flag = 1 then 'YES'
+          else 'NO'
+       end as is_unique,
+       case
+         when pk.rdb$constraint_name is not null then 'YES'
+         else 'NO'
+       end as is_pk,
+       null as index_type
+from rdb$indices as idx
+  left join rdb$relation_constraints as pk
+         on idx.rdb$index_name = pk.rdb$index_name
+        and pk.rdb$constraint_type = 'PRIMARY KEY'
+where idx.rdb$relation_name not like 'RDB$%'
+</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY 1,2,4</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MySQL</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
