@@ -22,13 +22,16 @@
  */
 package workbench.console;
 
-import workbench.storage.*;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.*;
+
 import workbench.util.StringUtil;
 
 /**
@@ -113,47 +116,23 @@ public class DataStorePrinter
 	public void printTo(PrintStream out)
 	{
 		PrintWriter pw = new PrintWriter(out);
-		printTo(pw);
-	}
-
-	public void printTo(PrintWriter pw, int[] rows)
-	{
-		if (rows == null)
-		{
-			printTo(pw);
-			return;
-		}
-
-		try
-		{
-			printHeader(pw);
-			for (int row : rows)
-			{
-				RowData rowData = data.getRow(row);
-				printRow(pw, rowData, row);
-			}
-			if (showRowCount)
-			{
-				pw.println();
-				pw.println(ResourceMgr.getFormattedString("MsgRows", rows.length));
-			}
-			pw.flush();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConsolePrinter.printToSelected()", "Error when printing DataStore contents", e);
-		}
+		printTo(pw, null);
 	}
 
 	public void printTo(PrintWriter pw)
 	{
+		printTo(pw, null);
+	}
+
+	public void printTo(PrintWriter pw, int[] rows)
+	{
+		int count = rows == null ? data.getRowCount() : rows.length;
 		try
 		{
 			printHeader(pw);
-
-			int count = data.getRowCount();
-			for (int row=0; row < count; row++)
+			for (int i=0; i < count; i++)
 			{
+				int row = rows == null ? i : rows[i];
 				RowData rowData = data.getRow(row);
 				printRow(pw, rowData, row);
 			}
@@ -166,7 +145,7 @@ public class DataStorePrinter
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ConsolePrinter.printTo()", "Error when printing DataStore contents", e);
+			LogMgr.logError("ConsolePrinter.printToSelected()", "Error when printing DataStore contents", e);
 		}
 	}
 

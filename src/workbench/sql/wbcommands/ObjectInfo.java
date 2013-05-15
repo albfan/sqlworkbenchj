@@ -24,12 +24,17 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.StatementRunnerResult;
+
+import workbench.db.*;
+
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
+
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
 
 /**
@@ -248,13 +253,12 @@ public class ObjectInfo
 		boolean isExtended = connection.getMetadata().isExtendedObject(toDescribe);
 
 		CharSequence source = null;
-		String displayName = null;
-		String displayedObject = "";
+		String displayName = "";
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
-			displayName = synonymTarget.getTableExpression();
+			displayName = synonymTarget.getTableExpression(connection);
 		}
 		else if (dbs.isViewType(toDescribe.getType()))
 		{
@@ -267,17 +271,16 @@ public class ObjectInfo
 			source = connection.getMetadata().getObjectSource(toDescribe);
 			displayName = toDescribe.getObjectName();
 		}
-
-		if (toDescribe != null)
+		else if (toDescribe != null)
 		{
-			displayedObject = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
+			displayName = toDescribe.getTableExpression(connection);
 		}
 
 		if (details != null)
 		{
 			ColumnRemover remover = new ColumnRemover(details);
 			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-			cols.setResultName(displayedObject);
+			cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
 			result.addDataStore(cols);
 			result.setSuccess();
 		}
@@ -298,7 +301,7 @@ public class ObjectInfo
 				DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
 				if (index != null && index.getRowCount() > 0)
 				{
-					index.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
+					index.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
 					result.addDataStore(index);
 				}
 			}
@@ -313,7 +316,7 @@ public class ObjectInfo
 				DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
 				if (triggers != null && triggers.getRowCount() > 0)
 				{
-					triggers.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
+					triggers.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
 					result.addDataStore(triggers);
 				}
 			}
@@ -330,13 +333,13 @@ public class ObjectInfo
 					DataStore references = fk.getForeignKeys(toDescribe, false);
 					if (references.getRowCount() > 0)
 					{
-						references.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+						references.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
 						result.addDataStore(references);
 					}
 					DataStore referencedBy = fk.getReferencedBy(toDescribe);
 					if (referencedBy.getRowCount() > 0)
 					{
-						referencedBy.setResultName(displayedObject +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+						referencedBy.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
 						result.addDataStore(referencedBy);
 					}
 				}
