@@ -116,6 +116,35 @@ public class DataStorePrinter
 		printTo(pw);
 	}
 
+	public void printTo(PrintWriter pw, int[] rows)
+	{
+		if (rows == null)
+		{
+			printTo(pw);
+			return;
+		}
+
+		try
+		{
+			printHeader(pw);
+			for (int row : rows)
+			{
+				RowData rowData = data.getRow(row);
+				printRow(pw, rowData, row);
+			}
+			if (showRowCount)
+			{
+				pw.println();
+				pw.println(ResourceMgr.getFormattedString("MsgRows", rows.length));
+			}
+			pw.flush();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConsolePrinter.printToSelected()", "Error when printing DataStore contents", e);
+		}
+	}
+
 	public void printTo(PrintWriter pw)
 	{
 		try
@@ -137,7 +166,7 @@ public class DataStorePrinter
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ConsolePrinter.printTo", "Error when printing DataStore contents", e);
+			LogMgr.logError("ConsolePrinter.printTo()", "Error when printing DataStore contents", e);
 		}
 	}
 

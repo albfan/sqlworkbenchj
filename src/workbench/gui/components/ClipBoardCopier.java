@@ -148,7 +148,7 @@ public class ClipBoardCopier
 					printer.setColumnsToPrint(colNames);
 				}
 				PrintWriter pw = new PrintWriter(out);
-				printer.printTo(pw);
+				printer.printTo(pw, rows);
 			}
 			else
 			{
