@@ -2401,6 +2401,10 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
+		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
+		{
+			result.add("MATERIALIZED VIEW");
+		}
 		return result;
 	}
 

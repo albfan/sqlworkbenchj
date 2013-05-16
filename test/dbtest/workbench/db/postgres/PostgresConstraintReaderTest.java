@@ -22,18 +22,23 @@
  */
 package workbench.db.postgres;
 
+import java.util.Collections;
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.db.ConstraintReader;
-import workbench.db.ReaderFactory;
 
 /**
  *
@@ -86,6 +91,9 @@ public class PostgresConstraintReaderTest
 		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);
 		assertEquals(2, cons.size());
+
+		Collections.sort(cons);
+
 		TableConstraint check = cons.get(0);
 		assertEquals("aaa_check_id", check.getConstraintName());
 		assertEquals("(id > 42)", check.getExpression());

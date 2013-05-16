@@ -23,10 +23,12 @@
 package workbench.db.postgres;
 
 import java.sql.SQLException;
+
+import workbench.resource.Settings;
+
 import workbench.db.DefaultViewReader;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 /**
  *
@@ -53,6 +55,7 @@ public class PostgresViewReader
 		result.append(source);
 		if (rules != null)
 		{
+			result.append("\n\n");
 			result.append(rules);
 		}
 
