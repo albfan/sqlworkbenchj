@@ -37,15 +37,19 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.Icon;
 import javax.swing.RepaintManager;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import workbench.gui.components.WbTable;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.components.WbTable;
+
 import workbench.util.WbThread;
 
 /**
@@ -77,6 +81,7 @@ public class TablePrinter
 	private int pagesDown = 0;
 	private int lineSpacing = 2;
 	private int colSpacing = 4;
+	private boolean showHeader;
 
 	public TablePrinter(WbTable toPrint)
 	{
@@ -96,6 +101,15 @@ public class TablePrinter
 			setHeaderText(header);
 		}
 		calculatePages();
+	}
+
+	public void setShowHeader(boolean flag)
+	{
+		if (flag != this.showHeader)
+		{
+			this.showHeader = flag;
+			calculatePages();
+		}
 	}
 
 	public void setHeaderText(String aText)
@@ -242,7 +256,7 @@ public class TablePrinter
 
 		int rowsPerPage = (pageHeight / lineHeight);
 
-		if (this.headerText != null)
+		if (this.headerText != null && showHeader)
 		{
 			rowsPerPage--;
 		}
@@ -387,7 +401,7 @@ public class TablePrinter
 
 		pg.drawString(footer.toString(), (int) ((wPage - len) / 2), hPage - fm.getDescent());
 
-		if (this.headerText != null)
+		if (this.headerText != null && showHeader)
 		{
 			bounds = fm.getStringBounds(this.headerText, pg);
 			pg.drawString(this.headerText, 0, fm.getAscent());

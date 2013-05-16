@@ -31,8 +31,8 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 
 import workbench.util.FileUtil;
-import workbench.util.VersionNumber;
 import workbench.util.StringUtil;
+import workbench.util.VersionNumber;
 
 /**
  *
@@ -84,6 +84,11 @@ public class JdbcUtils
 		{
 			return false;
 		}
+	}
+
+	public static boolean hasMiniumDriverVersion(WbConnection con, String targetVersion)
+	{
+		return hasMiniumDriverVersion(con.getSqlConnection(), targetVersion);
 	}
 
 	/**

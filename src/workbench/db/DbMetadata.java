@@ -203,7 +203,9 @@ public class DbMetadata
 				extenders.add(new PostgresEnumReader());
 			}
 			extenders.add(new PostgresRuleReader());
-			extenders.add(new PostgresTypeReader());
+			PostgresTypeReader typeReader = new PostgresTypeReader();
+			extenders.add(typeReader);
+			objectListEnhancer = typeReader;
 		}
 		else if (productLower.indexOf("oracle") > -1)
 		{

@@ -22,13 +22,16 @@
  */
 package workbench.db.postgres;
 
-import workbench.db.BaseObjectType;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.sqltemplates.ColumnChanger;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.BaseObjectType;
 import workbench.db.ColumnIdentifier;
 import workbench.db.CommentSqlManager;
 import workbench.db.DbMetadata;
@@ -40,9 +43,10 @@ import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import workbench.db.sqltemplates.ColumnChanger;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -60,13 +64,29 @@ public class PostgresTypeReader
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		int count = result.getRowCount();
-		for (int row=0; row < count; row++)
+		String replacement = null;
+
+		if (JdbcUtils.hasMinimumServerVersion(con, "9.3"))
 		{
-			String type = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			if (type == null)
+			// this assumes that the 9.3 server is used together with a 9.x driver!
+			replacement = DbMetadata.MVIEW_NAME;
+		}
+		else if (!JdbcUtils.hasMiniumDriverVersion(con, "9.0"))
+		{
+			// pre-9.0 drivers did no handle types correctly
+			replacement = "TYPE";
+		}
+
+		if (DbMetadata.typeIncluded(replacement, requestedTypes))
+		{
+			int count = result.getRowCount();
+			for (int row=0; row < count; row++)
 			{
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, "TYPE");
+				String type = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+				if (type == null)
+				{
+					result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, replacement);
+				}
 			}
 		}
 	}
@@ -76,7 +96,7 @@ public class PostgresTypeReader
 	{
 		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
-		if (JdbcUtils.hasMiniumDriverVersion(con.getSqlConnection(), "9.0"))
+		if (JdbcUtils.hasMiniumDriverVersion(con, "9.0"))
 		{
 			// nothing to do, the 9.0 driver will correctly return the TYPE entries
 			return false;
@@ -84,12 +104,12 @@ public class PostgresTypeReader
 
 		if (requestedTypes == null)
 		{
-			// if all objects were selected, the driver will already return the types
-			// we just need to update the TABLE_TYPE column
-			updateObjectList(con, result, catalog, schemaPattern, objectPattern, requestedTypes);
+			// if all objects were selected, even the old driver will already return the types
 			return true;
 		}
 
+		// this is only needed for pre 9.0 drivers as they did not return
+		// any object types, if that was specifically requested
 		List<BaseObjectType> types = getTypes(con, schemaPattern, objectPattern);
 		if (types.isEmpty()) return false;
 

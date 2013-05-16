@@ -48,21 +48,24 @@ import java.awt.print.PrinterJob;
 
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.MatteBorder;
+
 import workbench.WbManager;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbFontChooser;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.WbThread;
 
 /**
@@ -72,6 +75,7 @@ public class PrintPreview
 	extends JDialog
 	implements ActionListener, WindowListener
 {
+	public static final String PROP_SHOW_SQLHEADER = "workbench.print.showsql";
 	protected int pageWidth;
 	protected int pageHeight;
 	private int scale = 100;
@@ -85,6 +89,7 @@ public class PrintPreview
 	private JButton pageLeft;
 	private JButton pageDown;
 	private JButton pageUp;
+	private JCheckBox showSQL;
 	private boolean hasHorizontalPages;
 	private JScrollPane scroll;
 	private PreviewContainer preview;
@@ -124,6 +129,14 @@ public class PrintPreview
 		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LblPageSetupButton"));
 		this.pageSetupButton.addActionListener(this);
 		tb.add(this.pageSetupButton);
+
+		boolean showHeader = Settings.getInstance().getBoolProperty(PROP_SHOW_SQLHEADER, true);
+		printTarget.setShowHeader(showHeader);
+
+		this.showSQL = new JCheckBox(ResourceMgr.getString("LblPrintShowSQL"));
+		this.showSQL.setSelected(showHeader);
+		this.showSQL.addActionListener(this);
+		tb.add(this.showSQL);
 
 		tb.addSeparator();
 
@@ -433,6 +446,12 @@ public class PrintPreview
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
+		if (e.getSource() == this.showSQL)
+		{
+			Settings.getInstance().setProperty(PROP_SHOW_SQLHEADER, showSQL.isSelected());
+			this.printTarget.setShowHeader(showSQL.isSelected());
+			showCurrentPage();
+		}
 		if (e.getSource() == this.printButton)
 		{
 			this.doPrint();
