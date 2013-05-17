@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-05-12">
+    <entry dev-build="10" type="enh">When printing a result set the SQL shown above the result is now properly wrapped if too long for a single line. Displaying the SQL can also be disabled. If enabled, the SQL will only be shown on the first page</entry>
+    <entry dev-build="10" type="enh">Added support for PostgreSQL 9.3 MATERIALIZED VIEWs</entry>
     <entry dev-build="9" type="enh">Column headings can now be displayed in bold face (Tools -&gt; Options -&gt; Data display)</entry>
     <entry dev-build="9" type="enh">The editor now supports "Jump to line#"</entry>
     <entry dev-build="8" type="enh">When showing the query on which a result is based through the context menu of the result tab, the metadata of the result set is now also displayed.</entry>
