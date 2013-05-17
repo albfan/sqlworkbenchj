@@ -36,6 +36,7 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -75,6 +76,7 @@ public class TablePrinter
 
 	private Font printFont;
 	private String headerText = null;
+	private List<String> headerLines = null;
 	private TablePrintPage[] pages = null;
 
 	private int pagesAcross = 0;
@@ -236,6 +238,16 @@ public class TablePrinter
 		this.calculatePages();
 	}
 
+	private void calculateHeaderLines(FontMetrics fm, int maxWidth)
+	{
+		if (this.headerText == null || !showHeader)
+		{
+			this.headerLines = null;
+			return;
+		}
+		this.headerLines = RenderUtils.wrap(headerText, fm, maxWidth);
+	}
+
 	private void calculatePages()
 	{
 		if (this.format == null) return;
@@ -255,18 +267,21 @@ public class TablePrinter
 		pageHeight -= (lineHeight + 10); // reserve one row for the column headers
 
 		int rowsPerPage = (pageHeight / lineHeight);
+		int titleRows = 0;
 
 		if (this.headerText != null && showHeader)
 		{
-			rowsPerPage--;
+			calculateHeaderLines(fm, pageWidth);
+			titleRows = headerLines.size();
 		}
+
 		rowsPerPage--; // one line for the page information
 
 		TableColumnModel colModel = table.getColumnModel();
 		int colCount = colModel.getColumnCount();
 
 		int rowCount = table.getRowCount();
-		pagesDown = (int)Math.ceil((double)rowCount / (double)rowsPerPage);
+		pagesDown = (int)Math.ceil((double)(rowCount + titleRows) / (double)rowsPerPage);
 
 		int currentPageWidth = 0;
 		int[] width = new int[colCount]; // stores the width for each column
@@ -340,6 +355,10 @@ public class TablePrinter
 					endCol = horizontalBrakeColumns.get(pa + 1) - 1;
 				}
 				int endRow = startRow + rowsPerPage;
+				if (currentPage == 0)
+				{
+					endRow -= titleRows;
+				}
 				if (endRow >= rowCount)
 				{
 					endRow = rowCount - 1;
@@ -401,11 +420,16 @@ public class TablePrinter
 
 		pg.drawString(footer.toString(), (int) ((wPage - len) / 2), hPage - fm.getDescent());
 
-		if (this.headerText != null && showHeader)
+		if (this.headerLines != null && showHeader && pageIndex == 0)
 		{
-			bounds = fm.getStringBounds(this.headerText, pg);
-			pg.drawString(this.headerText, 0, fm.getAscent());
-			pg.translate(0, lineSpacing + fm.getAscent() + 5);
+			int y = fm.getAscent();
+			for (String line : headerLines)
+			{
+				bounds = fm.getStringBounds(line, pg);
+				pg.drawString(line, 0, y);
+				y += fm.getAscent() + lineSpacing;
+			}
+			pg.translate(0, y + lineSpacing);
 		}
 		currentPage.print(pg);
 
