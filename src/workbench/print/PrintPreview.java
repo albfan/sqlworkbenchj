@@ -150,20 +150,20 @@ public class PrintPreview
 		this.pageUp.setEnabled(false);
 		tb.add(this.pageUp);
 
-		if (this.printTarget.getPagesAcross() > 1)
-		{
-			this.hasHorizontalPages = true;
 
-			this.pageLeft = new WbToolbarButton(ResourceMgr.getImage("Back"));
-			this.pageLeft.addActionListener(this);
-			this.pageLeft.setEnabled(false);
-			tb.add(this.pageLeft);
+		this.pageLeft = new WbToolbarButton(ResourceMgr.getImage("Back"));
+		this.pageLeft.addActionListener(this);
+		this.pageLeft.setEnabled(false);
+		tb.add(this.pageLeft);
 
-			this.pageRight = new WbToolbarButton(ResourceMgr.getImage("Forward"));
-			this.pageRight.addActionListener(this);
-			this.pageRight.setEnabled(false);
-			tb.add(this.pageRight);
-		}
+		this.pageRight = new WbToolbarButton(ResourceMgr.getImage("Forward"));
+		this.pageRight.addActionListener(this);
+		this.pageRight.setEnabled(false);
+		tb.add(this.pageRight);
+
+		this.hasHorizontalPages = this.printTarget.getPagesAcross() > 1;
+		this.pageLeft.setVisible(hasHorizontalPages);
+		this.pageLeft.setVisible(hasHorizontalPages);
 
 		tb.addSeparator();
 
@@ -236,6 +236,11 @@ public class PrintPreview
 	private void showCurrentPage()
 	{
 		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		this.hasHorizontalPages = this.printTarget.getPagesAcross() > 1;
+		this.pageLeft.setVisible(hasHorizontalPages);
+		this.pageLeft.setVisible(hasHorizontalPages);
+
 		try
 		{
 			PageFormat pageFormat = this.printTarget.getPageFormat();
@@ -281,6 +286,9 @@ public class PrintPreview
 
 		this.pageUp.setEnabled(this.printTarget.getPreviousVerticalPage(this.currentPage) != -1);
 		this.pageDown.setEnabled(this.printTarget.getNextVerticalPage(this.currentPage) != -1);
+
+		this.pageLeft.setVisible(hasHorizontalPages);
+		this.pageRight.setVisible(hasHorizontalPages);
 
 		if (this.hasHorizontalPages)
 		{
@@ -452,7 +460,7 @@ public class PrintPreview
 			this.printTarget.setShowHeader(showSQL.isSelected());
 			showCurrentPage();
 		}
-		if (e.getSource() == this.printButton)
+		else if (e.getSource() == this.printButton)
 		{
 			this.doPrint();
 		}

@@ -33,17 +33,17 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.Icon;
-import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
 
+import workbench.gui.components.WbTable;
 import workbench.gui.renderer.WbRenderer;
 
 
 /**
  *	This class is responsible for keeping a page definition while printing a JTable.
+ * 
  *	When printing this page, the TablePrintPage assumes that the clipping is set in
  *  a way that it can start printing at 0,0 and can print over the whole Graphics object
  *  This means the caller needs to set the margins according to the page layout.
@@ -56,12 +56,12 @@ import workbench.gui.renderer.WbRenderer;
 public class TablePrintPage
 {
 
-	private JTable table;
-	private int startRow;
-	private int endRow;
-	private int startCol;
-	private int endCol;
-	private int[] colWidth;
+	final private WbTable table;
+	final private int startRow;
+	final private int endRow;
+	final private int startCol;
+	final private int endCol;
+	final private int[] colWidth;
 	private Font printFont;
 	private int pageNumDown = -1;
 	private int pageNumAcross = -1;
@@ -70,19 +70,14 @@ public class TablePrintPage
 	private int colSpacing;
 	private String[] colHeaders;
 
-	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn)
-	{
-		this(source, startRow, endRow, startColumn, endColumn, null);
-	}
-
-	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn, int[] width)
+	public TablePrintPage(WbTable source, int startRow, int endRow, int startColumn, int endColumn, int[] widths)
 	{
 		this.table = source;
 		this.startRow = startRow;
 		this.endRow = endRow;
 		this.startCol = startColumn;
 		this.endCol = endColumn;
-		this.colWidth = width;
+		this.colWidth = widths;
 	}
 
 	public void setFont(Font aFont)
@@ -130,43 +125,16 @@ public class TablePrintPage
 		this.colHeaders = headers;
 	}
 
-	public void setColumnWidths(int[] widths)
-	{
-		this.colWidth = widths;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Page V:" + this.pageNumDown + ", H:" + this.pageNumAcross + ", from row " + this.startRow + " to " + this.endRow + ", from column " + this.startCol + " to " + this.endCol;
-	}
-
 	public void setSpacing(int line, int column)
 	{
 		this.lineSpacing = line;
 		this.colSpacing = column;
 	}
 
-	private void calculateColWidth()
-	{
-		TableColumnModel model =  this.table.getColumnModel();
-		int colCount = model.getColumnCount();
-		this.colWidth = new int[colCount];
-		for (int col = 0; col < colCount; col++)
-		{
-			this.colWidth[col] = model.getColumn(col).getWidth();
-		}
-	}
-
 	public void print(Graphics2D pg)
 	{
 		Font dataFont = this.printFont;
 		if (dataFont == null) dataFont = this.table.getFont();
-
-		if (this.colWidth == null)
-		{
-			this.calculateColWidth();
-		}
 
 		Font headerFont = dataFont.deriveFont(Font.BOLD);
 		FontMetrics fm = pg.getFontMetrics(headerFont);
@@ -254,4 +222,14 @@ public class TablePrintPage
 			pg.translate(0, y);
 		}
 	}
+
+	@Override
+	public String toString()
+	{
+		return "V-page:" + this.pageNumDown + ", H-page:" + this.pageNumAcross +
+			", from row: " + this.startRow + " to row: " + this.endRow +
+			", from column: " + this.startCol + " to column: " + this.endCol;
+	}
+
+
 }

@@ -46,9 +46,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.WbTable;
 
 import workbench.util.WbThread;
@@ -82,11 +84,13 @@ public class TablePrinter
 	private int pagesAcross = 0;
 	private int pagesDown = 0;
 	private int lineSpacing = 2;
-	private int colSpacing = 4;
+	private int colSpacing = 5;
 	private boolean showHeader;
+	private boolean autoAdjustColumns;
 
 	public TablePrinter(WbTable toPrint)
 	{
+		autoAdjustColumns = GuiSettings.getAutomaticOptimalWidth();
 		PageFormat pformat = Settings.getInstance().getPageFormat();
 		Font printerFont = Settings.getInstance().getPrinterFont();
 		init(toPrint, pformat, printerFont);
@@ -114,6 +118,15 @@ public class TablePrinter
 		}
 	}
 
+	public void setAutoadjustColumns(boolean flag)
+	{
+		if (flag != autoAdjustColumns)
+		{
+			autoAdjustColumns = flag;
+			calculatePages();
+		}
+	}
+
 	public void setHeaderText(String aText)
 	{
 		this.headerText = aText;
@@ -125,7 +138,10 @@ public class TablePrinter
 		this.calculatePages();
 	}
 
-	public Font getFont() { return this.printFont; }
+	public Font getFont()
+	{
+		return this.printFont;
+	}
 
 	public void startPrint()
 	{
@@ -251,6 +267,7 @@ public class TablePrinter
 	private void calculatePages()
 	{
 		if (this.format == null) return;
+		if (this.table == null) return;
 
 		int pageWidth = (int)format.getImageableWidth();
 		int pageHeight = (int)format.getImageableHeight();
@@ -284,7 +301,7 @@ public class TablePrinter
 		pagesDown = (int)Math.ceil((double)(rowCount + titleRows) / (double)rowsPerPage);
 
 		int currentPageWidth = 0;
-		int[] width = new int[colCount]; // stores the width for each column
+		int[] colWidths = calculateColumnWidths(fm);
 
 		// the key to the map is the horizontal page number
 		// the value will be the column were that page starts
@@ -300,17 +317,14 @@ public class TablePrinter
 		Rectangle paintTextR = new Rectangle();
 		Rectangle paintViewR = new Rectangle();
 
-		// TODO: horizontal pages do not work when a column exceeds the horizontal space
 		for (int col = 0; col < colCount; col++)
 		{
 			TableColumn column = colModel.getColumn(col);
 			String title = (String)column.getIdentifier();
 
-			width[col] = column.getWidth();
-
 			paintViewR.x = 0;
 			paintViewR.y = 0;
-			paintViewR.width = width[col];
+			paintViewR.width = colWidths[col];
 			paintViewR.height = lineHeight;
 
 			paintIconR.setBounds(0, 0, 0, 0);
@@ -324,13 +338,13 @@ public class TablePrinter
 							,SwingConstants.RIGHT
 							,paintViewR, paintIconR, paintTextR, 0);
 
-			if ((currentPageWidth + width[col] + colSpacing) >= pageWidth)
+			if (currentPageWidth + colWidths[col] + colSpacing >= pageWidth)
 			{
 				horizontalBrakeColumns.put(Integer.valueOf(pagesAcross), Integer.valueOf(col));
 				pagesAcross++;
 				currentPageWidth = 0;
 			}
-			currentPageWidth += (width[col] + colSpacing);
+			currentPageWidth += (colWidths[col] + colSpacing);
 		}
 
 		int currentPage = 0;
@@ -363,7 +377,7 @@ public class TablePrinter
 				{
 					endRow = rowCount - 1;
 				}
-				TablePrintPage p = new TablePrintPage(this.table, startRow, endRow, startCol, endCol);
+				TablePrintPage p = new TablePrintPage(this.table, startRow, endRow, startCol, endCol, colWidths);
 				p.setPageIndex(currentPage + 1);
 				if (pagesAcross > 1)
 				{
@@ -372,13 +386,41 @@ public class TablePrinter
 				}
 				p.setSpacing(lineSpacing, colSpacing);
 				p.setColumnHeaders(colHeaders);
-				p.setColumnWidths(width);
 				p.setFont(this.printFont);
 				this.pages[currentPage] = p;
 				currentPage++;
 			}
 			startRow += rowsPerPage + 1;
 		}
+	}
+
+	private int[] calculateColumnWidths(FontMetrics fm)
+	{
+		int colCount = table.getColumnCount();
+		int[] colwidth = new int[colCount];
+		int pageWidth = (int) format.getImageableWidth();
+
+		TableColumnModel colMod = table.getColumnModel();
+		int min = GuiSettings.getMinColumnWidth();
+		int max = pageWidth;
+
+		if (autoAdjustColumns)
+		{
+			ColumnWidthOptimizer opt = new ColumnWidthOptimizer(table);
+			for (int col = 0; col < colCount; col++)
+			{
+				colwidth[col] = opt.calculateOptimalColumnWidth(col, min, max, true, fm);
+			}
+		}
+		else
+		{
+			for (int col = 0; col < colCount; col++)
+			{
+				TableColumn column = colMod.getColumn(col);
+				colwidth[col] = Math.min(column.getWidth(), pageWidth);
+			}
+		}
+		return colwidth;
 	}
 
 	@Override

@@ -84,16 +84,22 @@ public class ColumnWidthOptimizer
 		this.optimizeColWidth(aColumn, GuiSettings.getMinColumnWidth(), GuiSettings.getMaxColumnWidth(), respectColName);
 	}
 
-	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth)
+	public void optimizeColWidth(int col, int minWidth, int maxWidth, boolean respectColumnName)
 	{
-		this.optimizeColWidth(aColumn, minWidth, maxWidth, false);
+		int width = calculateOptimalColumnWidth(col, minWidth, maxWidth, respectColumnName, null);
+		if (width > 0)
+		{
+			TableColumnModel colMod = this.table.getColumnModel();
+			TableColumn column = colMod.getColumn(col);
+			column.setPreferredWidth(width);
+		}
 	}
 
-	public void optimizeColWidth(int col, int minWidth, int maxWidth, boolean respectColumnName)
+	public int calculateOptimalColumnWidth(int col, int minWidth, int maxWidth, boolean respectColumnName, FontMetrics fontInfo)
 	{
 		if (table == null || col < 0 || col > table.getColumnCount() - 1)
 		{
-			return;
+			return -1;
 		}
 
 		int optWidth = minWidth;
@@ -102,9 +108,6 @@ public class ColumnWidthOptimizer
 		{
 			optWidth = optimizeHeaderColumn(col);
 		}
-
-		TableColumnModel colMod = this.table.getColumnModel();
-		TableColumn column = colMod.getColumn(col);
 
 		int rowCount = this.table.getRowCount();
 		int maxLines = GuiSettings.getAutRowHeightMaxLines();
@@ -117,8 +120,12 @@ public class ColumnWidthOptimizer
 		{
 			TableCellRenderer rend = this.table.getCellRenderer(row, col);
 			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, col), false, false, row, col);
-			Font f = c.getFont();
-			FontMetrics fm = c.getFontMetrics(f);
+			FontMetrics fm = fontInfo;
+			if (fm == null)
+			{
+				Font f = c.getFont();
+				fm = c.getFontMetrics(f);
+			}
 
 			// The value that is displayed in the table through the renderer
 			// is not necessarily identical to the String returned by table.getValueAsString()
@@ -164,11 +171,7 @@ public class ColumnWidthOptimizer
 		{
 			optWidth = Math.min(optWidth, maxWidth);
 		}
-
-		if (optWidth > 0)
-		{
-			column.setPreferredWidth(optWidth);
-		}
+		return optWidth;
 	}
 
 	public void optimizeHeader()
@@ -256,8 +259,9 @@ public class ColumnWidthOptimizer
 
 	/**
 	 * Adjusts the columns to the width defined from the
-	 * underlying tables (i.e. getColumnWidth() for each column)
-	 * This does not adjust the width of the columns to the content.
+	 * underlying tables.
+	 *
+	 * This will use getColumnWidth() for each column, it does not take the columns content into account
 	 *
 	 * @see #optimizeAllColWidth()
 	 */
@@ -270,7 +274,7 @@ public class ColumnWidthOptimizer
 
 		Font f = this.table.getFont();
 		FontMetrics fm = this.table.getFontMetrics(f);
-		int charWidth = fm.stringWidth("n");
+		int charWidth = Math.max(fm.getMaxAdvance(), fm.charWidth('M'));
 		TableColumnModel colMod = this.table.getColumnModel();
 		if (colMod == null) return;
 
@@ -278,20 +282,20 @@ public class ColumnWidthOptimizer
 		int maxWidth = GuiSettings.getMaxColumnWidth();
 
 		int addWidth = this.getAdditionalColumnSpace();
-		int addHeaderWidth = this.getAdditionalColumnSpace();
 
 		for (int i = 0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-
 			int lblWidth = 0;
 			if (adjustToColumnLabel)
 			{
 				String s = dwModel.getColumnName(i);
-				lblWidth = fm.stringWidth(s) + addHeaderWidth;
+				lblWidth = fm.stringWidth(s) + addWidth;
 			}
+
 			int width = (dwModel.getColumnWidth(i) * charWidth) + addWidth;
 			int w = Math.max(width, lblWidth);
+
 			if (maxWidth > 0)
 			{
 				w = Math.min(w, maxWidth);

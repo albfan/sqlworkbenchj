@@ -1547,13 +1547,7 @@ public class StringUtil
 		}
 		finally
 		{
-			try
-			{
-				in.close();
-			}
-			catch (Throwable th)
-			{
-			}
+			FileUtil.closeQuietely(in);
 		}
 		return result;
 	}
