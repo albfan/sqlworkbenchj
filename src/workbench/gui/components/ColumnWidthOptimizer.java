@@ -106,7 +106,7 @@ public class ColumnWidthOptimizer
 
 		if (respectColumnName)
 		{
-			optWidth = optimizeHeaderColumn(col);
+			optWidth = optimizeHeaderColumn(col, fontInfo);
 		}
 
 		int rowCount = this.table.getRowCount();
@@ -174,6 +174,9 @@ public class ColumnWidthOptimizer
 		return optWidth;
 	}
 
+	/**
+	 * Adjust the column header width after sorting.
+	 */
 	public void optimizeHeader()
 	{
 		if (table == null) return;
@@ -187,7 +190,7 @@ public class ColumnWidthOptimizer
 			// As the current width is most probably already adjusted (and reflects the size of the data in this column)
 			// the new width should not be smaller than the old width (because the row data is not evaluated here!)
 			int oldWidth = column.getWidth();
-			int width = optimizeHeaderColumn(col);
+			int width = optimizeHeaderColumn(col, null);
 
 			if (width > oldWidth)
 			{
@@ -196,7 +199,7 @@ public class ColumnWidthOptimizer
 		}
 	}
 
-	public int optimizeHeaderColumn(int col)
+	public int optimizeHeaderColumn(int col, FontMetrics fm)
 	{
 		if (table == null || col < 0 || col > table.getColumnCount() - 1)
 		{
@@ -208,8 +211,13 @@ public class ColumnWidthOptimizer
 		String colName = table.getColumnName(col);
 
 		JComponent c = (JComponent)rend.getTableCellRendererComponent(table, colName, false, false, -1, col);
-		Font headerFont = c.getFont();
-		FontMetrics hfm = c.getFontMetrics(headerFont);
+
+		FontMetrics hfm = fm;
+		if (hfm == null)
+		{
+			Font headerFont = c.getFont();
+			hfm = c.getFontMetrics(headerFont);
+		}
 		Insets ins = c.getInsets();
 		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
 		if (table.isViewColumnSorted(col))

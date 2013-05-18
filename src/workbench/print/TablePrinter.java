@@ -46,6 +46,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -67,7 +68,7 @@ printer.startPrint();
 </pre>
  *  The printout will be started in a separate thread on the default printer.
  *
- * @author support@sql-workbench.et
+ * @author Thomas Kellerer
  */
 public class TablePrinter
 	implements Printable, Pageable
@@ -78,7 +79,7 @@ public class TablePrinter
 
 	private Font printFont;
 	private String headerText = null;
-	private List<String> headerLines = null;
+	private List<String> wrappedHeader = null;
 	private TablePrintPage[] pages = null;
 
 	private int pagesAcross = 0;
@@ -87,10 +88,12 @@ public class TablePrinter
 	private int colSpacing = 5;
 	private boolean showHeader;
 	private boolean autoAdjustColumns;
+	private boolean useAlternateColor;
 
 	public TablePrinter(WbTable toPrint)
 	{
 		autoAdjustColumns = GuiSettings.getAutomaticOptimalWidth();
+		useAlternateColor = GuiSettings.getAlternateRowColor() != null;
 		PageFormat pformat = Settings.getInstance().getPageFormat();
 		Font printerFont = Settings.getInstance().getPrinterFont();
 		init(toPrint, pformat, printerFont);
@@ -107,6 +110,21 @@ public class TablePrinter
 			setHeaderText(header);
 		}
 		calculatePages();
+	}
+
+	public void setUseAlternateColor(boolean flag)
+	{
+		if (flag != useAlternateColor)
+		{
+			this.useAlternateColor = flag;
+			if (this.pages != null)
+			{
+				for (TablePrintPage page : pages)
+				{
+					page.setUseAlternateColor(flag);
+				}
+			}
+		}
 	}
 
 	public void setShowHeader(boolean flag)
@@ -169,6 +187,7 @@ public class TablePrinter
 				}
 				catch (Exception e)
 				{
+					LogMgr.logWarning("TablePrinter.startPrint()", "Error during printing", e);
 				}
 			}
 		};
@@ -258,10 +277,10 @@ public class TablePrinter
 	{
 		if (this.headerText == null || !showHeader)
 		{
-			this.headerLines = null;
+			this.wrappedHeader = null;
 			return;
 		}
-		this.headerLines = RenderUtils.wrap(headerText, fm, maxWidth);
+		this.wrappedHeader = RenderUtils.wrap(headerText, fm, maxWidth);
 	}
 
 	private void calculatePages()
@@ -289,7 +308,7 @@ public class TablePrinter
 		if (this.headerText != null && showHeader)
 		{
 			calculateHeaderLines(fm, pageWidth);
-			titleRows = headerLines.size();
+			titleRows = wrappedHeader.size();
 		}
 
 		rowsPerPage--; // one line for the page information
@@ -400,24 +419,24 @@ public class TablePrinter
 		int[] colwidth = new int[colCount];
 		int pageWidth = (int) format.getImageableWidth();
 
-		TableColumnModel colMod = table.getColumnModel();
 		int min = GuiSettings.getMinColumnWidth();
 		int max = pageWidth;
 
-		if (autoAdjustColumns)
+		if (printFont.equals(table.getFont()) || !autoAdjustColumns)
+		{
+			TableColumnModel colMod = table.getColumnModel();
+			for (int col = 0; col < colCount; col++)
+			{
+				TableColumn column = colMod.getColumn(col);
+				colwidth[col] = Math.min(column.getWidth(), pageWidth);
+			}
+		}
+		else
 		{
 			ColumnWidthOptimizer opt = new ColumnWidthOptimizer(table);
 			for (int col = 0; col < colCount; col++)
 			{
 				colwidth[col] = opt.calculateOptimalColumnWidth(col, min, max, true, fm);
-			}
-		}
-		else
-		{
-			for (int col = 0; col < colCount; col++)
-			{
-				TableColumn column = colMod.getColumn(col);
-				colwidth[col] = Math.min(column.getWidth(), pageWidth);
 			}
 		}
 		return colwidth;
@@ -462,10 +481,10 @@ public class TablePrinter
 
 		pg.drawString(footer.toString(), (int) ((wPage - len) / 2), hPage - fm.getDescent());
 
-		if (this.headerLines != null && showHeader && pageIndex == 0)
+		if (this.wrappedHeader != null && showHeader && pageIndex == 0)
 		{
 			int y = fm.getAscent();
-			for (String line : headerLines)
+			for (String line : wrappedHeader)
 			{
 				bounds = fm.getStringBounds(line, pg);
 				pg.drawString(line, 0, y);

@@ -236,7 +236,6 @@ public class WbTable
 	private FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
-	private Font printFont;
 
 	// </editor-fold>
 
@@ -442,16 +441,6 @@ public class WbTable
 	public boolean isReadOnly()
 	{
 		return readOnly;
-	}
-
-	public Font getPrintFont()
-	{
-		return printFont;
-	}
-
-	public void setPrintFont(Font font)
-	{
-		this.printFont = font;
 	}
 
 	public RendererSetup getRendererSetup()

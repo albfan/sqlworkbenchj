@@ -37,13 +37,16 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.WbRenderer;
 
 
 /**
  *	This class is responsible for keeping a page definition while printing a JTable.
- * 
+ *
  *	When printing this page, the TablePrintPage assumes that the clipping is set in
  *  a way that it can start printing at 0,0 and can print over the whole Graphics object
  *  This means the caller needs to set the margins according to the page layout.
@@ -70,6 +73,9 @@ public class TablePrintPage
 	private int colSpacing;
 	private String[] colHeaders;
 
+	private Color alternateBackground = GuiSettings.getAlternateRowColor();
+	private boolean useAlternatingColors = false;
+
 	public TablePrintPage(WbTable source, int startRow, int endRow, int startColumn, int endColumn, int[] widths)
 	{
 		this.table = source;
@@ -78,8 +84,14 @@ public class TablePrintPage
 		this.startCol = startColumn;
 		this.endCol = endColumn;
 		this.colWidth = widths;
+		useAlternatingColors = Settings.getInstance().getBoolProperty(PrintPreview.PROP_ALTERNATE_COLORS, false);
 	}
 
+	public void setUseAlternateColor(boolean flag)
+	{
+		this.useAlternatingColors = flag;
+	}
+	
 	public void setFont(Font aFont)
 	{
 		this.printFont = aFont;
@@ -114,6 +126,7 @@ public class TablePrintPage
 	{
 		this.pageIndex = aNum;
 	}
+
 
 	public int getPageIndex()
 	{
@@ -169,13 +182,32 @@ public class TablePrintPage
 		pg.translate(0, y);
 		pg.setFont(dataFont);
 
-
 		Rectangle paintIconR = new Rectangle();
 		Rectangle paintTextR = new Rectangle();
 		Rectangle paintViewR = new Rectangle();
 
 		for (int row = this.startRow; row <= this.endRow; row++)
 		{
+			int rowWidth = 0;
+			for (int col = this.startCol; col <= this.endCol; col++)
+			{
+				rowWidth += colWidth[col];
+			}
+			if (useAlternatingColors && alternateBackground != null)
+			{
+				boolean isAlternatingRow = ((row % 2) == 1);
+				if (isAlternatingRow)
+				{
+					pg.setColor(alternateBackground);
+				}
+				else
+				{
+					pg.setColor(Color.WHITE);
+				}
+				pg.fillRect(0, lineSpacing * 2, rowWidth, lineHeight + lineSpacing);
+				pg.setColor(Color.BLACK);
+			}
+
 			int cx = 0;
 			for (int col= this.startCol; col <= this.endCol; col++)
 			{

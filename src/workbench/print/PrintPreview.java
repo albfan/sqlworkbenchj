@@ -58,6 +58,7 @@ import javax.swing.border.MatteBorder;
 
 import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -76,6 +77,7 @@ public class PrintPreview
 	implements ActionListener, WindowListener
 {
 	public static final String PROP_SHOW_SQLHEADER = "workbench.print.showsql";
+	public static final String PROP_ALTERNATE_COLORS = "workbench.print.alternate.colors";
 	protected int pageWidth;
 	protected int pageHeight;
 	private int scale = 100;
@@ -90,6 +92,7 @@ public class PrintPreview
 	private JButton pageDown;
 	private JButton pageUp;
 	private JCheckBox showSQL;
+	private JCheckBox useAlternateColor;
 	private boolean hasHorizontalPages;
 	private JScrollPane scroll;
 	private PreviewContainer preview;
@@ -137,6 +140,14 @@ public class PrintPreview
 		this.showSQL.setSelected(showHeader);
 		this.showSQL.addActionListener(this);
 		tb.add(this.showSQL);
+
+		Color cl = GuiSettings.getAlternateRowColor();
+		boolean useAlternate = Settings.getInstance().getBoolProperty(PROP_ALTERNATE_COLORS, false);
+		this.useAlternateColor = new JCheckBox(ResourceMgr.getString("LblPrintAltColor"));
+		this.useAlternateColor.setSelected(useAlternate);
+		this.useAlternateColor.setEnabled(cl != null);
+		this.useAlternateColor.addActionListener(this);
+		tb.add(this.useAlternateColor);
 
 		tb.addSeparator();
 
@@ -458,6 +469,12 @@ public class PrintPreview
 		{
 			Settings.getInstance().setProperty(PROP_SHOW_SQLHEADER, showSQL.isSelected());
 			this.printTarget.setShowHeader(showSQL.isSelected());
+			showCurrentPage();
+		}
+		else if (e.getSource() == this.useAlternateColor)
+		{
+			Settings.getInstance().setProperty(PROP_ALTERNATE_COLORS, useAlternateColor.isSelected());
+			this.printTarget.setUseAlternateColor(useAlternateColor.isSelected());
 			showCurrentPage();
 		}
 		else if (e.getSource() == this.printButton)
