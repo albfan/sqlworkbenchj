@@ -91,7 +91,7 @@ public class TablePrintPage
 	{
 		this.useAlternatingColors = flag;
 	}
-	
+
 	public void setFont(Font aFont)
 	{
 		this.printFont = aFont;
@@ -191,7 +191,7 @@ public class TablePrintPage
 			int rowWidth = 0;
 			for (int col = this.startCol; col <= this.endCol; col++)
 			{
-				rowWidth += colWidth[col];
+				rowWidth += colWidth[col] + colSpacing;
 			}
 			if (useAlternatingColors && alternateBackground != null)
 			{
