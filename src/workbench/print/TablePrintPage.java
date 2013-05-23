@@ -161,6 +161,8 @@ public class TablePrintPage
 		int x = 0;
 		int y = 0;
 		pg.translate(0, lineHeight);
+		
+		int rowWidth = 0;
 		for (int col= this.startCol; col <= this.endCol; col++)
 		{
 			if (this.colHeaders[col] != null)
@@ -168,6 +170,7 @@ public class TablePrintPage
 				pg.drawString(this.colHeaders[col], x, 0);
 			}
 			x += this.colWidth[col] + this.colSpacing;
+			rowWidth += colWidth[col] + colSpacing;
 		}
 
 		Stroke s = pg.getStroke();
@@ -188,11 +191,6 @@ public class TablePrintPage
 
 		for (int row = this.startRow; row <= this.endRow; row++)
 		{
-			int rowWidth = 0;
-			for (int col = this.startCol; col <= this.endCol; col++)
-			{
-				rowWidth += colWidth[col] + colSpacing;
-			}
 			if (useAlternatingColors && alternateBackground != null)
 			{
 				boolean isAlternatingRow = ((row % 2) == 1);
