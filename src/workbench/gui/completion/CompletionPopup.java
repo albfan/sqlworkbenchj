@@ -475,7 +475,7 @@ public class CompletionPopup
 				value += pv;
 				continue;
 			}
-			
+
 			if (o instanceof TableAlias)
 			{
 				TableAlias a = (TableAlias) o;
@@ -532,6 +532,7 @@ public class CompletionPopup
 					value += ", ";
 				}
 				WbConnection connection = this.context.getAnalyzer().getConnection();
+				tbl = cleanupTable(tbl);
 				String name = tbl.getTableExpression(connection);
 				if (!name.contains("\"") && !name.contains("[") && !name.contains("`"))
 				{
@@ -558,6 +559,33 @@ public class CompletionPopup
 				editor.selectWordAtCursor(" =-\t\n");
 			}
 		}
+	}
+
+	private TableIdentifier cleanupTable(TableIdentifier tbl)
+	{
+		String schema = this.context.getAnalyzer().getSchemaForTableList();
+		if (schema == null) return tbl;
+		WbConnection connection = this.context.getAnalyzer().getConnection();
+		if (connection.getDbSettings().supportsSchemas())
+		{
+			if (schema.equals(tbl.getSchema()))
+			{
+				tbl = tbl.createCopy();
+				tbl.setSchema(null);
+				return tbl;
+			}
+		}
+		else if (connection.getDbSettings().supportsCatalogs())
+		{
+			// treat catalogs as schemas
+			if (schema.equals(tbl.getCatalog()))
+			{
+				tbl = tbl.createCopy();
+				tbl.setCatalog(null);
+				return tbl;
+			}
+		}
+		return tbl;
 	}
 
 	public void selectCurrentWordInEditor(boolean flag)

@@ -74,7 +74,7 @@ public class DdlAnalyzer
 		String type = (typeToken != null ? typeToken.getContents() : null);
 		SQLToken nameToken = lexer.getNextToken(false, false);
 
-		String q = this.getQualifierLeftOfCursor();
+		String q = this.getSchemaFromCurrentWord();
 		if (q != null)
 		{
 			this.schemaForTableList = q;
