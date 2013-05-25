@@ -56,7 +56,7 @@ import workbench.util.TableAlias;
  */
 public abstract class BaseAnalyzer
 {
-	public static final String QUALIFIER_DELIM = "\\?*=<>!/{}\\#%[]'\"(),:;";
+	public static final String QUALIFIER_DELIM = "\\?*=<>!/{}\\#%'(),:;";
 	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
 	public static final String SELECT_WORD_DELIM = WORD_DELIM + ".";
 
@@ -464,8 +464,9 @@ public abstract class BaseAnalyzer
 		String catalog = null;
 		if (!dbConnection.getDbSettings().supportsSchemas())
 		{
+			// no schemas supported (e.g. MySQL) --> use the "schema" for the catalog
+			catalog = schema;
 			schema = null;
-			catalog = schemaForTableList;
 		}
 		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema);
 		this.elements = new ArrayList(indexes.size());

@@ -33,6 +33,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
@@ -47,13 +51,12 @@ import workbench.db.report.ReportSequence;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
 
 
 /**
@@ -633,7 +636,7 @@ public class SchemaDiff
 
 			TableIdentifier rid = refTables.get(i);
 
-			String tname = StringUtil.trimQuotes(rid.getTableName());
+			String tname = SqlUtil.removeObjectQuotes(rid.getTableName());
 
 			if (this.tablesToIgnore.contains(tname)) continue;
 
@@ -679,7 +682,7 @@ public class SchemaDiff
 			for (int i=0; i < count; i++)
 			{
 				TableIdentifier t = targetTables.get(i);
-				String tbl = StringUtil.trimQuotes(t.getTableName());
+				String tbl = SqlUtil.removeObjectQuotes(t.getTableName());
 				if (this.tablesToIgnore.contains(tbl)) continue;
 
 				if (targetDb.getMetadata().isDefaultCase(tbl))
@@ -1333,8 +1336,8 @@ public class SchemaDiff
 			{
 				DiffEntry de = (DiffEntry)o;
 				tbls[0] = de.reference.getType();
-				tbls[1] = (de.target == null ? "" : StringUtil.trimQuotes(de.target.getTableName()));
-				tbls[2] = StringUtil.trimQuotes(de.reference.getTableName());
+				tbls[1] = (de.target == null ? "" : SqlUtil.removeObjectQuotes(de.target.getTableName()));
+				tbls[2] = SqlUtil.removeObjectQuotes(de.reference.getTableName());
 				if (dbs.isViewType(tbls[0]))
 				{
 					tw.appendOpenTag(info, indent2, TAG_VIEW_PAIR, tattr, tbls, false);

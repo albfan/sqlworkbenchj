@@ -26,6 +26,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.report.ColumnReference;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.TagWriter;
+
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -213,7 +214,7 @@ public class ColumnDiff
 			  fkNameDifferent || fkDefinitionDifferent ||
 			  computedColIsDifferent || collationsDifferent)
 		{
-			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", StringUtil.trimQuotes(tId.getColumnName()));
+			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", SqlUtil.removeObjectQuotes(tId.getColumnName()));
 			result.append('\n');
 
 			// for some DBMS the full definition of the column must be used in order

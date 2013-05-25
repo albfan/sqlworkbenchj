@@ -24,9 +24,13 @@ package workbench.db.exporter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import workbench.db.report.TagWriter;
+
 import workbench.storage.RowData;
+
 import workbench.util.EncodingUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -97,7 +101,7 @@ public class XlsXMLRowDataConverter
 			{
 				if (!this.includeColumnInExport(i)) continue;
 				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
-				out.append(StringUtil.trimQuotes(metaData.getColumnDisplayName(i)));
+				out.append(SqlUtil.removeObjectQuotes(metaData.getColumnDisplayName(i)));
 				out.append("</Data></Cell>\n");
 			}
 			out.append("</Row>");

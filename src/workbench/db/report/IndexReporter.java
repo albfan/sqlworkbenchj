@@ -129,7 +129,7 @@ public class IndexReporter
 				{
 
 					List<TagAttribute> attrs = new ArrayList<TagAttribute>(2);
-					attrs.add(new TagAttribute("name", SqlUtil.removeQuoting(col.getColumn())));
+					attrs.add(new TagAttribute("name", SqlUtil.removeObjectQuotes(col.getColumn())));
 
 					if (col.getDirection() != null)
 					{

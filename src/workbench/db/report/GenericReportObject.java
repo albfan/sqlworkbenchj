@@ -35,6 +35,7 @@ import workbench.db.TableConstraint;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -102,17 +103,17 @@ public class GenericReportObject
 		TagWriter tagWriter = new TagWriter();
 
 		att[0] = "name";
-		val[0] = StringUtil.trimQuotes(this.object.getObjectName());
+		val[0] = SqlUtil.removeObjectQuotes(this.object.getObjectName());
 		att[1] = "object-type";
 		val[1] = object.getObjectType();
 
 		tagWriter.appendOpenTag(line, indent, TAG_OBJECT_DEF, att, val);
 
 		line.append('\n');
-		tagWriter.appendTag(line, defIndent, TAG_OBJECT_CATALOG, StringUtil.trimQuotes(this.object.getCatalog()));
-		tagWriter.appendTag(line, defIndent, TAG_OBJECT_SCHEMA, (this.schemaNameToUse == null ? StringUtil.trimQuotes(this.object.getSchema()) : this.schemaNameToUse));
-		tagWriter.appendTag(line, defIndent, TAG_OBJECT_NAME, StringUtil.trimQuotes(object.getObjectName()));
-		tagWriter.appendTag(line, defIndent, TAG_OBJECT_TYPE, StringUtil.trimQuotes(object.getObjectType()));
+		tagWriter.appendTag(line, defIndent, TAG_OBJECT_CATALOG, SqlUtil.removeObjectQuotes(this.object.getCatalog()));
+		tagWriter.appendTag(line, defIndent, TAG_OBJECT_SCHEMA, (this.schemaNameToUse == null ? SqlUtil.removeObjectQuotes(this.object.getSchema()) : this.schemaNameToUse));
+		tagWriter.appendTag(line, defIndent, TAG_OBJECT_NAME, SqlUtil.removeObjectQuotes(object.getObjectName()));
+		tagWriter.appendTag(line, defIndent, TAG_OBJECT_TYPE, SqlUtil.removeObjectQuotes(object.getObjectType()));
 		tagWriter.appendTag(line, defIndent, TAG_OBJECT_COMMENT, object.getComment(), true);
 
 		StrBuffer details = new StrBuffer(defIndent);

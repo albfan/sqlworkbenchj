@@ -40,13 +40,17 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.importer.RowDataProducer;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbScrollPane;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.importer.RowDataProducer;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbScrollPane;
+
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -154,7 +158,7 @@ public class ColumnMapper
 			ColumnIdentifier targetCol = this.targetColumns.get(i);
 			row.setTarget(targetCol);
 
-			ColumnIdentifier sourceCol = this.findSourceColumnByName(StringUtil.trimQuotes(targetCol.getColumnName()));
+			ColumnIdentifier sourceCol = this.findSourceColumnByName(SqlUtil.removeObjectQuotes(targetCol.getColumnName()));
 			if (syncDataTypes && sourceCol != null)
 			{
 				sourceCol.setDataType(targetCol.getDataType());
@@ -198,7 +202,7 @@ public class ColumnMapper
 	{
 		for (ColumnIdentifier col : this.sourceColumns)
 		{
-			if (StringUtil.trimQuotes(col.getColumnName()).equalsIgnoreCase(aName)) return col;
+			if (SqlUtil.removeObjectQuotes(col.getColumnName()).equalsIgnoreCase(aName)) return col;
 		}
 		return null;
 	}

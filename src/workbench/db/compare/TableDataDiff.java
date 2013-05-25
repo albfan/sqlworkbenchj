@@ -579,10 +579,10 @@ public class TableDataDiff
 
 	private ColumnIdentifier findTargetColumn(ColumnIdentifier toFind)
 	{
-		String cname = StringUtil.trimQuotes(toFind.getColumnName());
+		String cname = SqlUtil.removeObjectQuotes(toFind.getColumnName());
 		for (ColumnIdentifier col : toSyncDef.getColumns())
 		{
-			if (StringUtil.trimQuotes(col.getColumnName()).equalsIgnoreCase(cname))
+			if (SqlUtil.removeObjectQuotes(col.getColumnName()).equalsIgnoreCase(cname))
 			{
 				return col;
 			}

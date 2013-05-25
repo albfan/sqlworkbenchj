@@ -22,21 +22,24 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
+import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.ScriptParser;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -73,9 +76,10 @@ public class ColumnDropperPostgresTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		Statement stmt = con.createStatement();
-		stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20), dummy1 integer, dummy2 date)");
-		con.commit();
+		TestUtil.executeScript(con,
+			"create table person (nr integer, firstname varchar(20), lastname varchar(20), dummy1 integer, dummy2 date);\n" +
+			"commit;");
+
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("person"));
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 		cols.add(new ColumnIdentifier("dummy1"));

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-05-12">
+  <release build="-1" date="2013-05-25">
     <entry dev-build="10" type="enh">When printing a result set the SQL shown above the result is now properly wrapped if too long for a single line. Displaying the SQL can also be disabled. If enabled, the SQL will only be shown on the first page</entry>
     <entry dev-build="10" type="enh">Added support for PostgreSQL 9.3 MATERIALIZED VIEWs</entry>
     <entry dev-build="9" type="enh">Column headings can now be displayed in bold face (Tools -&gt; Options -&gt; Data display)</entry>
@@ -22,6 +22,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="10" type="fix">The office libraries (for exporting Excel files) were not bundled correctly in the Mac package</entry>
+    <entry dev-build="10" type="fix">Code completion for a specific schema did not work if quoted identifiers were used (e.g. "foobar".) </entry>
     <entry dev-build="9" type="fix">When importing text files where columns at the end are missing, the value from the previous row was used for the missing column</entry>
     <entry dev-build="8" type="fix">For Oracle, the DbExplorer did not display the table source of tables without a primary key</entry>
     <entry dev-build="8" type="fix">For Oracle, the DbExplorer sometimes failed to load the table list with the error "Comparison method violates its general contract"</entry>

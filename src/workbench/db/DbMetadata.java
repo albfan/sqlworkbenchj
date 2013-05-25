@@ -1136,7 +1136,7 @@ public class DbMetadata
 		if (StringUtil.isBlank(schema)) return null;
 		if (respectQuotes && isQuoted(schema)) return schema;
 
-		schema = StringUtil.trimQuotes(schema).trim();
+		schema = SqlUtil.removeObjectQuotes(schema).trim();
 
 		if (this.storesUpperCaseSchemas())
 		{
@@ -1293,7 +1293,7 @@ public class DbMetadata
 	{
 		if (pattern == null) return null;
 		if ("*".equals(pattern) || "%".equals(pattern)) return null;
-		return StringUtil.trimQuotes(StringUtil.replace(pattern, "*", "%"));
+		return SqlUtil.removeObjectQuotes(StringUtil.replace(pattern, "*", "%"));
 	}
 
 	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
@@ -1336,7 +1336,7 @@ public class DbMetadata
 
 		String escapedNamePattern = namePattern;
 		String escapedSchema = schemaPattern;
-		String escapedCatalog = StringUtil.trimQuotes(catalogPattern);
+		String escapedCatalog = SqlUtil.removeObjectQuotes(catalogPattern);
 
 		if (getDbSettings().supportsMetaDataWildcards())
 		{
@@ -2019,9 +2019,9 @@ public class DbMetadata
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
-			String schema = StringUtil.trimQuotes(table.getSchema());
-			String seqname = StringUtil.trimQuotes(table.getObjectName());
-			String catalog = StringUtil.trimQuotes(table.getCatalog());
+			String schema = SqlUtil.removeObjectQuotes(table.getSchema());
+			String seqname = SqlUtil.removeObjectQuotes(table.getObjectName());
+			String catalog = SqlUtil.removeObjectQuotes(table.getCatalog());
 			DataStore seqDef = getSequenceReader().getRawSequenceDefinition(catalog, schema, seqname);
 			if (GuiSettings.getTransformSequenceDisplay() && seqDef != null && seqDef.getRowCount() == 1)
 			{
@@ -2189,13 +2189,13 @@ public class DbMetadata
 	 *
 	 * @see DbSettings#getQueryForCurrentCatalog()
 	 *
-	 * @return The name of the current catalog or an empty String if there is no current catalog
+	 * @return The name of the current catalog or null if there is no current catalog
 	 */
 	public String getCurrentCatalog()
 	{
 		if (!dbSettings.supportsCatalogs())
 		{
-			return StringUtil.EMPTY_STRING;
+			return null;
 		}
 
 		String catalog = null;
@@ -2238,7 +2238,6 @@ public class DbMetadata
 				catalog = null;
 			}
 		}
-		if (catalog == null) catalog = StringUtil.EMPTY_STRING;
 
 		return catalog;
 	}

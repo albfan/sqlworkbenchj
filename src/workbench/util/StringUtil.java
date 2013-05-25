@@ -920,9 +920,7 @@ public class StringUtil
 		char lastChar = result.charAt(len - 1);
 
 		if ( (firstChar == '"' && lastChar == '"') ||
-		     (firstChar == '\'' && lastChar == '\'') ||
-				 (firstChar == '`' && lastChar == '`') /* workaround the idiotic MySQL quoting */
-				 )
+		     (firstChar == '\'' && lastChar == '\''))
 		{
 			return result.substring(1, len - 1);
 		}

@@ -638,8 +638,8 @@ public class TableIdentifier
 	private void setTablename(String name)
 	{
 		if (name == null) return;
-		tableWasQuoted = name.trim().startsWith("\"");
-		this.tablename = StringUtil.trimQuotes(name).trim();
+		tableWasQuoted = SqlUtil.isQuotedIdentifier(name.trim());
+		tablename = SqlUtil.removeObjectQuotes(name).trim();
 	}
 
 	@Override
@@ -665,8 +665,8 @@ public class TableIdentifier
 		}
 		else
 		{
-			schemaWasQuoted = aSchema.trim().startsWith("\"");
-			this.schema = StringUtil.trimQuotes(aSchema).trim();
+			schemaWasQuoted = SqlUtil.isQuotedIdentifier(aSchema.trim());
+			schema = SqlUtil.removeObjectQuotes(aSchema).trim();
 		}
 	}
 
@@ -693,8 +693,8 @@ public class TableIdentifier
 		}
 		else
 		{
-			catalogWasQuoted = aCatalog.trim().startsWith("\"");
-			this.catalog = StringUtil.trimQuotes(aCatalog).trim();
+			catalogWasQuoted = SqlUtil.isQuotedIdentifier(aCatalog.trim());
+			catalog = SqlUtil.removeObjectQuotes(aCatalog).trim();
 		}
 	}
 

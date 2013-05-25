@@ -769,8 +769,8 @@ public class JdbcIndexReader
 		GetMetaDataSql sqlDef = metaData.getMetaDataSQLMgr().getListIndexesSql();
 		if (sqlDef == null) return Collections.emptyList();
 
-		sqlDef.setCatalog(catalog);
-		sqlDef.setSchema(schema);
+		sqlDef.setCatalog(SqlUtil.removeObjectQuotes(catalog));
+		sqlDef.setSchema(SqlUtil.removeObjectQuotes(schema));
 		String sql = sqlDef.getSql();
 
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>();

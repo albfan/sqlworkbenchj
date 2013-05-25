@@ -42,6 +42,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -49,13 +52,13 @@ import workbench.db.DbSettings;
 import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
+
+import workbench.storage.ResultInfo;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.storage.ResultInfo;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -254,13 +257,13 @@ public class SqlUtil
 	 * <br/>
 	 * For performance reasons the input is not trimmed and is not tested (unlike StringUtil.trimQuotes)
 	 *
-	 * It does take the idiotic MySQL backticks into account but not SQL Server's imbecile [..] quoting.
+	 * It does take the idiotic MySQL backticks and SQL Server's imbecile [..] quoting into account.
 	 *
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
 	 * @see workbench.util.StringUtil#trimQuotes(java.lang.String)
 	 */
-	public static String removeQuoting(String input)
+	public static String removeObjectQuotes(String input)
 	{
 		if (input == null) return input;
 
@@ -270,8 +273,8 @@ public class SqlUtil
 		char lastChar = input.charAt(len - 1);
 
 		if ( (firstChar == '"' && lastChar == '"') ||
-		     (firstChar == '\'' && lastChar == '\'') ||
-				 (firstChar == '`' && lastChar == '`') /* workaround the idiotic MySQL quoting */
+				 (firstChar == '`' && lastChar == '`') || /* workaround the idiotic MySQL quoting */
+ 			   (firstChar == '[' && lastChar == ']') /* workaround the idiotic SQL Server quoting */
 				 )
 		{
 			return input.substring(1, len - 1);
@@ -289,7 +292,8 @@ public class SqlUtil
 		char lastChar = input.charAt(len - 1);
 
 		if ( (firstChar == '"' && lastChar == '"') ||
-				 (firstChar == '`' && lastChar == '`') /* workaround the idiotic MySQL quoting */
+				 (firstChar == '`' && lastChar == '`') || /* workaround the idiotic MySQL quoting */
+ 			   (firstChar == '[' && lastChar == ']')    /* workaround the idiotic SQL Server quoting */
 				 )
 		{
 			return true;
@@ -373,7 +377,7 @@ public class SqlUtil
 
 				if (info.objectName != null)
 				{
-					info.objectName = removeQuoting(info.objectName);
+					info.objectName = removeObjectQuotes(info.objectName);
 				}
 			}
 			return info;

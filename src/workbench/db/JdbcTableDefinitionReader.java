@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.h2database.H2ColumnEnhancer;
@@ -39,7 +41,7 @@ import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLColumnEnhancer;
 import workbench.db.nuodb.NuoDbColumnEnhancer;
 import workbench.db.postgres.PostgresColumnEnhancer;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -80,9 +82,9 @@ public class JdbcTableDefinitionReader
 		DbSettings dbSettings = dbConnection.getDbSettings();
 		DbMetadata dbmeta = dbConnection.getMetadata();
 
-		String tablename = StringUtil.trimQuotes(table.getTableName());
-		String schema = StringUtil.trimQuotes(table.getSchema());
-		String catalog = StringUtil.trimQuotes(table.getCatalog());
+		String tablename = SqlUtil.removeObjectQuotes(table.getTableName());
+		String schema = SqlUtil.removeObjectQuotes(table.getSchema());
+		String catalog = SqlUtil.removeObjectQuotes(table.getCatalog());
 
 		if (dbConnection.getDbSettings().supportsMetaDataWildcards())
 		{
@@ -217,9 +219,9 @@ public class JdbcTableDefinitionReader
 		TableIdentifier table = toRead.createCopy();
 		table.adjustCase(dbConnection);
 
-		String catalog = StringUtil.trimQuotes(table.getCatalog());
-		String schema = StringUtil.trimQuotes(table.getSchema());
-		String tablename = StringUtil.trimQuotes(table.getTableName());
+		String catalog = SqlUtil.removeObjectQuotes(table.getCatalog());
+		String schema = SqlUtil.removeObjectQuotes(table.getSchema());
+		String tablename = SqlUtil.removeObjectQuotes(table.getTableName());
 
 		DbMetadata meta = dbConnection.getMetadata();
 		if (schema == null)

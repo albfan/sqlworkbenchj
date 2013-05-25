@@ -66,7 +66,7 @@ public interface QuoteHandler
 	 *
 	 * @see SqlUtil#SQL_IDENTIFIER
 	 * @see SqlUtil#quoteObjectname(java.lang.String)
-	 * @see SqlUtil#removeQuoting(java.lang.String)
+	 * @see SqlUtil#removeObjectQuotes(java.lang.String)
 	 */
 	QuoteHandler STANDARD_HANDLER = new QuoteHandler()
 	{
@@ -81,7 +81,7 @@ public interface QuoteHandler
 		@Override
 		public String removeQuotes(String name)
 		{
-			return SqlUtil.removeQuoting(name);
+			return SqlUtil.removeObjectQuotes(name);
 		}
 
 		@Override

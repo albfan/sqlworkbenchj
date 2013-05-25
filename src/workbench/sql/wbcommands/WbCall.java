@@ -433,12 +433,12 @@ public class WbCall
 
 		ArrayList<ParameterDefinition> parameterNames = null;
 
-		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(schema, true));
+		String schemaToUse = SqlUtil.removeObjectQuotes(meta.adjustSchemaNameCase(schema, true));
 		if (schemaToUse == null)
 		{
 			schemaToUse = meta.getCurrentSchema();
 		}
-		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(procname));
+		String nameToUse = SqlUtil.removeObjectQuotes(meta.adjustObjectnameCase(procname));
 
 		ProcedureDefinition procDef = null;
 		DataStore params = null;

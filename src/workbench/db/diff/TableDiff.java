@@ -42,6 +42,7 @@ import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -148,8 +149,8 @@ public class TableDiff
 		// we have to do a case-sensitiv comparison
 		if (refname.charAt(0) == '\"' || tname.charAt(0) == '\"')
 		{
-			refname = StringUtil.trimQuotes(refname);
-			tname = StringUtil.trimQuotes(tname);
+			refname = SqlUtil.removeObjectQuotes(refname);
+			tname = SqlUtil.removeObjectQuotes(tname);
 			rename = !refname.equals(tname);
 		}
 		else
@@ -206,14 +207,14 @@ public class TableDiff
 			return result;
 		}
 
-		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", StringUtil.trimQuotes(target.getTableName()));
+		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", SqlUtil.removeObjectQuotes(target.getTableName()));
 		result.append('\n');
 		if (rename)
 		{
 			writer.appendOpenTag(result, myindent, TAG_RENAME_TABLE);
 			result.append('\n');
 			myindent.append("  ");
-			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, StringUtil.trimQuotes(this.referenceTable.getTable().getTableName()));
+			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, SqlUtil.removeObjectQuotes(this.referenceTable.getTable().getTableName()));
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}
@@ -252,7 +253,7 @@ public class TableDiff
 			myindent.append("  ");
 			for (String col : pkcols)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, StringUtil.trimQuotes(col));
+				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, SqlUtil.removeObjectQuotes(col));
 			}
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, pkTagToUse);
@@ -576,7 +577,7 @@ public class TableDiff
 		while (itr.hasNext())
 		{
 			ReportColumn col = (ReportColumn)itr.next();
-			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", StringUtil.trimQuotes(col.getColumn().getColumnName()));
+			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", SqlUtil.removeObjectQuotes(col.getColumn().getColumnName()));
 			result.append('\n');
 		}
 	}

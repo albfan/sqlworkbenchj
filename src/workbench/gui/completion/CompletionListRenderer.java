@@ -53,7 +53,7 @@ public class CompletionListRenderer
 		if (value instanceof ColumnIdentifier)
 		{
 			ColumnIdentifier col = (ColumnIdentifier)value;
-			String colname = SqlUtil.removeQuoting(col.getColumnName());
+			String colname = SqlUtil.removeObjectQuotes(col.getColumnName());
 			if (col.isPkColumn())
 			{
 				setText("<html><b>" + colname + "</b></html>");

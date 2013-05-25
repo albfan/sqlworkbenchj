@@ -214,8 +214,8 @@ public abstract class AbstractOraclePartition
 					SqlUtil.replaceParameters(retrievePartitionDefinitionSql, dbObject.getSchema(), dbObject.getObjectName()));
 			}
 
-			pstmt.setString(1, SqlUtil.removeQuoting(dbObject.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(dbObject.getObjectName()));
+			pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
+			pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
 			rs = pstmt.executeQuery();
 
 			if (rs.next())
@@ -262,8 +262,8 @@ public abstract class AbstractOraclePartition
 					SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getObjectName()));
 			}
 
-			pstmt.setString(1, SqlUtil.removeQuoting(table.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(table.getObjectName()));
+			pstmt.setString(1, SqlUtil.removeObjectQuotes(table.getSchema()));
+			pstmt.setString(2, SqlUtil.removeObjectQuotes(table.getObjectName()));
 			rs = pstmt.executeQuery();
 
 			columns = new ArrayList<String>();
@@ -293,8 +293,8 @@ public abstract class AbstractOraclePartition
 					SqlUtil.replaceParameters(retrieveSubColumns, dbObject.getSchema(), dbObject.getObjectName()));
 			}
 
-			pstmt.setString(1, SqlUtil.removeQuoting(dbObject.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(dbObject.getObjectName()));
+			pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
+			pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
 			rs = pstmt.executeQuery();
 
 			subColumns = new ArrayList<String>();
@@ -338,8 +338,8 @@ public abstract class AbstractOraclePartition
 					SqlUtil.replaceParameters(retrieveSubPartitions, object.getSchema(), object.getObjectName()));
 			}
 
-			pstmt.setString(1, SqlUtil.removeQuoting(object.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(object.getObjectName()));
+			pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
+			pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
 			rs = pstmt.executeQuery();
 
 			while (rs.next())
@@ -388,8 +388,8 @@ public abstract class AbstractOraclePartition
 					SqlUtil.replaceParameters(retrievePartitionSQL, object.getSchema(), object.getObjectName()));
 			}
 
-			pstmt.setString(1, SqlUtil.removeQuoting(object.getSchema()));
-			pstmt.setString(2, SqlUtil.removeQuoting(object.getObjectName()));
+			pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
+			pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
 			rs = pstmt.executeQuery();
 
 			partitions = new ArrayList<OraclePartitionDefinition>();

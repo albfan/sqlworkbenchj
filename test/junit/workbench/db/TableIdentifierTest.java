@@ -139,13 +139,13 @@ public class TableIdentifierTest
 
 		assertEquals("some_table", tbl.getTableName());
 		assertEquals("dbo", tbl.getSchema());
-		assertEquals("[some_catalog]", tbl.getCatalog());
+		assertEquals("some_catalog", tbl.getCatalog());
 		assertEquals("[linked_server]", tbl.getServerPart());
 
 		TableIdentifier copy = tbl.createCopy();
 		assertEquals("some_table", copy.getTableName());
 		assertEquals("dbo", copy.getSchema());
-		assertEquals("[some_catalog]", copy.getCatalog());
+		assertEquals("some_catalog", copy.getCatalog());
 		assertEquals("[linked_server]", copy.getServerPart());
 
 		assertEquals(tbl, copy);

@@ -26,18 +26,20 @@ package workbench.db.mssql;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -102,7 +104,7 @@ public class SqlServerSequenceReader
 			"FROM sys.sequences sq with (nolock)  \n" +
 			"   join sys.schemas sc with (nolock) on sq.schema_id = sc.schema_id " +
 			"WHERE sc.name = '");
-		sql.append(StringUtil.trimQuotes(schema));
+		sql.append(SqlUtil.removeObjectQuotes(schema));
 		sql.append("' ");
 
 		if (StringUtil.isNonEmpty(sequence))

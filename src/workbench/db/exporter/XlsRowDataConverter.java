@@ -26,6 +26,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+
+import workbench.storage.RowData;
+
+import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
+
+import org.apache.poi.POIXMLProperties;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -33,16 +42,7 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import workbench.storage.RowData;
-import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
-import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
-
-import org.apache.poi.POIXMLProperties;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -130,7 +130,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = headRow.createCell(column);
-					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnDisplayName(c)), true, false);
+					setCellValueAndStyle(cell, SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(c)), true, false);
 					column ++;
 				}
 			}

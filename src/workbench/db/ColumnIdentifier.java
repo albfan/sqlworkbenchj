@@ -483,7 +483,7 @@ public class ColumnIdentifier
 		this.isExpression = false;
 		this.isPk = false;
 		this.isNullable = true;
-		this.hashCode = (name == null ? -1 : StringUtil.trimQuotes(name).toLowerCase().hashCode());
+		this.hashCode = (name == null ? -1 : SqlUtil.removeObjectQuotes(name).toLowerCase().hashCode());
 	}
 
 	/**
@@ -531,7 +531,7 @@ public class ColumnIdentifier
 		try
 		{
 			ColumnIdentifier col = (ColumnIdentifier)other;
-			return StringUtil.equalStringIgnoreCase(StringUtil.trimQuotes(this.name), StringUtil.trimQuotes(col.name));
+			return StringUtil.equalStringIgnoreCase(SqlUtil.removeObjectQuotes(this.name), SqlUtil.removeObjectQuotes(col.name));
 		}
 		catch (Exception e)
 		{
@@ -708,7 +708,7 @@ public class ColumnIdentifier
 	{
 		if (other == null) return 1;
 		if (this.name == null) return -1;
-		return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(other.name));
+		return SqlUtil.removeObjectQuotes(name).compareToIgnoreCase(SqlUtil.removeObjectQuotes(other.name));
 	}
 
 	/**
@@ -798,10 +798,10 @@ public class ColumnIdentifier
 		if (columns == null) return null;
 		if (colname == null) return null;
 
-		String toTest = StringUtil.trimQuotes(colname);
+		String toTest = SqlUtil.removeObjectQuotes(colname);
 		for (ColumnIdentifier col : columns)
 		{
-			String name = StringUtil.trimQuotes(col.getColumnName());
+			String name = SqlUtil.removeObjectQuotes(col.getColumnName());
 			if (name.equalsIgnoreCase(toTest)) return col;
 		}
 		return null;

@@ -66,6 +66,7 @@ import workbench.gui.editor.JEditTextArea;
 import workbench.gui.sql.LookupValuePicker;
 
 import workbench.util.ArgumentValue;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
@@ -563,9 +564,21 @@ public class CompletionPopup
 
 	private TableIdentifier cleanupTable(TableIdentifier tbl)
 	{
-		String schema = this.context.getAnalyzer().getSchemaForTableList();
+		String schema = SqlUtil.removeObjectQuotes(this.context.getAnalyzer().getSchemaForTableList());
 		if (schema == null) return tbl;
-		WbConnection connection = this.context.getAnalyzer().getConnection();
+		
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		int currentContext = analyzer.getContext();
+		switch (currentContext)
+		{
+			case BaseAnalyzer.CONTEXT_KW_LIST:
+			case BaseAnalyzer.CONTEXT_STATEMENT_PARAMETER:
+			case BaseAnalyzer.CONTEXT_WB_COMMANDS:
+			case BaseAnalyzer.CONTEXT_WB_PARAMS:
+			case BaseAnalyzer.NO_CONTEXT:
+				return tbl;
+		}
+		WbConnection connection = analyzer .getConnection();
 		if (connection.getDbSettings().supportsSchemas())
 		{
 			if (schema.equals(tbl.getSchema()))
@@ -629,7 +642,7 @@ public class CompletionPopup
 			String search = s.toLowerCase();
 			for (int i=0; i < count; i++)
 			{
-				String entry = StringUtil.trimQuotes(this.data.getElementAt(i).toString());
+				String entry = SqlUtil.removeObjectQuotes(this.data.getElementAt(i).toString());
 				if (partialSearch)
 				{
 					if (entry.toLowerCase().contains(search)) return i;

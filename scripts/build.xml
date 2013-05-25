@@ -689,6 +689,32 @@
       </tarfileset>
     </tar>
 
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava7-with-office-libs.tgz">
+      <tarfileset dir="${bundledir}">
+        <include name="**/*"/>
+        <exclude name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset mode="555" dir="${bundledir}">
+        <include name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Java/manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="history.html"/>
+        <include name="LICENSE"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </tarfileset>
+      <tarfileset dir="../libs/poi" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset dir="../libs/odf" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+    </tar>
+
   </target>
 
   <target name="mac-package" depends="init">
@@ -753,10 +779,10 @@
         <include name="**/*"/>
         <exclude name="**/SQLWorkbench"/>
       </tarfileset>
-      <tarfileset dir="../libs/poi">
+      <tarfileset dir="../libs/poi" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="*.jar"/>
       </tarfileset>
-      <tarfileset dir="../libs/odf">
+      <tarfileset dir="../libs/odf" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="*.jar"/>
       </tarfileset>
       <tarfileset mode="555" dir="${bundledir}">

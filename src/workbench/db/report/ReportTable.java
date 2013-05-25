@@ -59,6 +59,7 @@ import workbench.db.oracle.OracleTablePartition;
 import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -201,7 +202,7 @@ public class ReportTable
 				triggers = null;
 			}
 		}
-		
+
 		if (includeOptions)
 		{
 			retrieveOptions(conn);
@@ -456,9 +457,9 @@ public class ReportTable
 
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, StringUtil.trimQuotes(this.table.getCatalog()));
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? StringUtil.trimQuotes(this.table.getSchema()) : this.schemaNameToUse));
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, StringUtil.trimQuotes(this.table.getTableName()));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, SqlUtil.removeObjectQuotes(this.table.getCatalog()));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? SqlUtil.removeObjectQuotes(this.table.getSchema()) : this.schemaNameToUse));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, SqlUtil.removeObjectQuotes(this.table.getTableName()));
 	}
 
 	/**
@@ -477,12 +478,12 @@ public class ReportTable
 		if (!"TABLE".equalsIgnoreCase(type))
 		{
 			String[] att = new String[] {"name", "type"};
-			String[] val = new String[] { StringUtil.trimQuotes(this.table.getTableName()), type };
+			String[] val = new String[] { SqlUtil.removeObjectQuotes(this.table.getTableName()), type };
 			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, att, val);
 		}
 		else
 		{
-			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", StringUtil.trimQuotes(this.table.getTableName()));
+			tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", SqlUtil.removeObjectQuotes(this.table.getTableName()));
 		}
 		line.append('\n');
 		appendTableNameXml(line, colindent);

@@ -25,8 +25,10 @@ package workbench.db.importer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import workbench.db.ColumnIdentifier;
-import workbench.util.StringUtil;
+
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -97,8 +99,8 @@ public class ImportFileColumn
 		}
 		else if (obj instanceof String)
 		{
-			String thisName = StringUtil.trimQuotes(tableColumn.getColumnName());
-			return thisName.equalsIgnoreCase(StringUtil.trimQuotes((String)obj));
+			String thisName = SqlUtil.removeObjectQuotes(tableColumn.getColumnName());
+			return thisName.equalsIgnoreCase(SqlUtil.removeObjectQuotes((String)obj));
 		}
 		return false;
 	}

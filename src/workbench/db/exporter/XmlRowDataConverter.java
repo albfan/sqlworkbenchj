@@ -25,17 +25,20 @@ package workbench.db.exporter;
 import java.io.File;
 import java.sql.SQLException;
 import java.sql.Types;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
-
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.RowData;
+
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -528,13 +531,13 @@ public class XmlRowDataConverter
 			String colname = this.metaData.getColumnName(i);
 
 			result.append(indent);
-			appendTag(result, "    ", COLUMN_NAME_TAG, StringUtil.trimQuotes(colname));
+			appendTag(result, "    ", COLUMN_NAME_TAG, SqlUtil.removeObjectQuotes(colname));
 
 			String label = this.metaData.getColumnDisplayName(i);
 			if (!label.equals(colname))
 			{
 				result.append(indent);
-				appendTag(result, "    ", "column-label", StringUtil.trimQuotes(label));
+				appendTag(result, "    ", "column-label", SqlUtil.removeObjectQuotes(label));
 			}
 
 			String comment = this.metaData.getColumn(i).getComment();

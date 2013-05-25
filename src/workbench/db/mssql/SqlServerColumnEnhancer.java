@@ -29,12 +29,15 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -78,8 +81,8 @@ public class SqlServerColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String tablename = StringUtil.trimQuotes(table.getTable().getTableName());
-		String schema = StringUtil.trimQuotes(table.getTable().getSchema());
+		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
+		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
 
 		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 
