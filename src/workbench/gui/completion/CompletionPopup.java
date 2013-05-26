@@ -565,20 +565,22 @@ public class CompletionPopup
 	private TableIdentifier cleanupTable(TableIdentifier tbl)
 	{
 		String schema = SqlUtil.removeObjectQuotes(this.context.getAnalyzer().getSchemaForTableList());
+
 		if (schema == null) return tbl;
-		
+
 		BaseAnalyzer analyzer = context.getAnalyzer();
 		int currentContext = analyzer.getContext();
-		switch (currentContext)
+		if (
+				currentContext != BaseAnalyzer.CONTEXT_TABLE_LIST &&
+				currentContext != BaseAnalyzer.CONTEXT_TABLE_OR_COLUMN_LIST &&
+				currentContext != BaseAnalyzer.CONTEXT_INDEX_LIST &&
+				currentContext != BaseAnalyzer.CONTEXT_SEQUENCE_LIST
+			)
 		{
-			case BaseAnalyzer.CONTEXT_KW_LIST:
-			case BaseAnalyzer.CONTEXT_STATEMENT_PARAMETER:
-			case BaseAnalyzer.CONTEXT_WB_COMMANDS:
-			case BaseAnalyzer.CONTEXT_WB_PARAMS:
-			case BaseAnalyzer.NO_CONTEXT:
-				return tbl;
+			return tbl;
 		}
-		WbConnection connection = analyzer .getConnection();
+		
+		WbConnection connection = analyzer.getConnection();
 		if (connection.getDbSettings().supportsSchemas())
 		{
 			if (schema.equals(tbl.getSchema()))

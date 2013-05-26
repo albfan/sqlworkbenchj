@@ -26,7 +26,6 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.util.StringUtil;
 
 /**
  * Analyze a CREATE INDEX statement to provide completion for tables and columns.
@@ -114,15 +113,7 @@ public class CreateAnalyzer
 		if (showTables)
 		{
 			context = CONTEXT_TABLE_LIST;
-			String q = getQualifierLeftOfCursor();
-			if (StringUtil.isEmptyString(q))
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-			}
-			else
-			{
-				this.schemaForTableList = q;
-			}
+			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 		else if (showColumns)
 		{

@@ -25,10 +25,13 @@ package workbench.gui.completion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
@@ -132,7 +135,7 @@ public class WbCommandAnalyzer
 			else if (type == ArgumentType.TableArgument)
 			{
 				this.context = CONTEXT_TABLE_LIST;
-				this.schemaForTableList = this.dbConnection.getCurrentSchema();
+				this.schemaForTableList = getSchemaFromCurrentWord();
 			}
 			else if (type == ArgumentType.ListArgument)
 			{

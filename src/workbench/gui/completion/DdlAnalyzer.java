@@ -74,22 +74,7 @@ public class DdlAnalyzer
 		String type = (typeToken != null ? typeToken.getContents() : null);
 		SQLToken nameToken = lexer.getNextToken(false, false);
 
-		String q = this.getSchemaFromCurrentWord();
-		if (q != null)
-		{
-			this.schemaForTableList = q;
-		}
-		else
-		{
-			if (dbConnection.getDbSettings().supportsSchemas())
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-			}
-			else
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentCatalog();
-			}
-		}
+		this.schemaForTableList = getSchemaFromCurrentWord();
 
 		if ("DROP".equals(verb))
 		{

@@ -34,6 +34,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbSearchPath;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceDefinition;
@@ -244,10 +245,34 @@ public abstract class BaseAnalyzer
 		return schemaForTableList;
 	}
 
+	protected String getCurrentSchemaToUse()
+	{
+		if (dbConnection == null) return null;
+
+		if (!dbConnection.getDbSettings().supportsSchemas())
+		{
+			// No schemas supported (e.g. MySQL) pretend a catalog is the same thing
+			return this.dbConnection.getMetadata().getCurrentCatalog();
+		}
+
+		String schema = this.dbConnection.getCurrentSchema();
+		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConnection).getSearchPath(dbConnection, schema);
+		if (schemas.isEmpty())
+		{
+			// DBMS does not have a search path, so use the current schema
+			return schema;
+		}
+		else if (schemas.size() == 1)
+		{
+			return schemas.get(0);
+		}
+		return null;
+	}
+
 	protected String getSchemaFromCurrentWord()
 	{
 		String word = getCurrentWord();
-		String q = this.getQualifierLeftOfCursor();
+		String q = getQualifierLeftOfCursor();
 		if (q != null)
 		{
 			return q;
@@ -257,11 +282,7 @@ public abstract class BaseAnalyzer
 
 		if (tbl == null || StringUtil.isBlank(tbl.getSchema()))
 		{
-			if (this.dbConnection != null)
-			{
-				return this.dbConnection.getMetadata().getCurrentSchema();
-			}
-			return null;
+			return getCurrentSchemaToUse();
 		}
 
 		return tbl.getSchema();
@@ -561,7 +582,7 @@ public abstract class BaseAnalyzer
 		this.typeFilter = new ArrayList<String>(filter);
 	}
 
-	protected String getQualifierLeftOfCursor()
+	public String getQualifierLeftOfCursor()
 	{
 		int len = this.sql.length();
 		int start = this.cursorPos - 1;

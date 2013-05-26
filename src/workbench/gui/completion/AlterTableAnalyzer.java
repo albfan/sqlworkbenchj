@@ -22,9 +22,11 @@
  */
 package workbench.gui.completion;
 
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -78,15 +80,7 @@ public class AlterTableAnalyzer
 			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
 		}
 
-		String q = this.getQualifierLeftOfCursor();
-		if (q != null)
-		{
-			this.schemaForTableList = q;
-		}
-		else
-		{
-			this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-		}
+		schemaForTableList = getSchemaFromCurrentWord();;
 
 		if (between(cursorPos, tablePos, modifyPos) || between(cursorPos, tablePos, addPos) ||
 			 (modifyPos == -1 && addPos == -1))
