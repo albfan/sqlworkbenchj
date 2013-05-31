@@ -52,6 +52,7 @@ class ObjectCache
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
+	private boolean supportsSchemas;
 
 	ObjectCache(WbConnection conn)
 	{
@@ -59,6 +60,7 @@ class ObjectCache
 		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
 		schemaFilter = conn.getProfile().getSchemaFilter();
 		catalogFilter = conn.getProfile().getCatalogFilter();
+		supportsSchemas = conn.getDbSettings().supportsSchemas();
 	}
 
 	private void createCache()
@@ -86,16 +88,16 @@ class ObjectCache
 	 */
 	private void setTables(List<TableIdentifier> tables)
 	{
-
 		for (TableIdentifier tbl : tables)
 		{
 			if (!isFiltered(tbl) && !this.objects.containsKey(tbl))
 			{
 				this.objects.put(tbl, null);
 
-				if (tbl.getSchema() != null)
+				String schema = supportsSchemas ? tbl.getSchema() : tbl.getCatalog();
+				if (schema != null)
 				{
-					this.schemasInCache.add(tbl.getSchema());
+					this.schemasInCache.add(schema);
 				}
 				else
 				{
@@ -270,12 +272,12 @@ class ObjectCache
 		String currentSchema = null;
 		if (schemasToCheck.size() == 1)
 		{
-			currentSchema = meta.getCurrentSchema();
+			currentSchema = supportsSchemas ? meta.getCurrentSchema() : meta.getCurrentCatalog();
 		}
 
 		for (TableIdentifier tbl : objects.keySet())
 		{
-			String tSchema = tbl.getSchema();
+			String tSchema = supportsSchemas ? tbl.getSchema() : tbl.getCatalog();
 
 			if (schemasToCheck.contains(tSchema) || schemasToCheck.isEmpty())
 			{
@@ -292,7 +294,7 @@ class ObjectCache
 				{
 					copy.setCatalog(null);
 				}
-				
+
 				result.add(copy);
 			}
 		}

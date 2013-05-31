@@ -682,6 +682,10 @@ public class DbMetadata
 				// for all HSQL versions.
 				dbId = "hsql_database_engine";
 			}
+			else if (productName.toLowerCase().contains("ucanaccess"))
+			{
+				dbId = "ucanaccess";
+			}
 			LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
 		}
 		return this.dbId;
@@ -2107,52 +2111,66 @@ public class DbMetadata
 		return getObjectList(table, schema, tableTypesArray);
 	}
 
-	public List<TableIdentifier> getTableList(String table, String catalog, String schema)
-		throws SQLException
-	{
-		return getObjectList(table, catalog, schema, tableTypesArray);
-	}
-
 	/**
 	 * Returns a list of objects from which a SELECT can be run.
 	 * <br/>
 	 * Typically these are tables, views and materialized views.
 	 *
-	 * @param name a pattern to search for object names
-	 * @param schema
+	 * @param namePattern      a pattern to search for object names
+	 * @param schemaOrCatalog  the schema or catalog pattern (if the DBMS does not support schemas)
+	 * @see #getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 * @throws SQLException
 	 */
-	public List<TableIdentifier> getSelectableObjectsList(String name, String schema)
+	public List<TableIdentifier> getSelectableObjectsList(String namePattern, String schemaOrCatalog)
 		throws SQLException
 	{
-		return getObjectList(name, schema, selectableTypes);
+		if (getDbSettings().supportsSchemas())
+		{
+			return getObjectList(namePattern, null, schemaOrCatalog, selectableTypes);
+		}
+		else if (getDbSettings().supportsCatalogs())
+		{
+			return getObjectList(namePattern, schemaOrCatalog, null, selectableTypes);
+		}
+		return getObjectList(namePattern, null, null, selectableTypes);
 	}
 
 	/**
 	 * Return a list of tables for the given schema
 	 * if the table name is null, all tables will be returned
 	 *
+	 * @param namePattern  the search pattern for the objects to be retrieved
+	 * @param schema       the schema or catalog pattern (if the DBMS does not support schemas)
 	 * @see #getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 */
-	public List<TableIdentifier> getObjectList(String table, String schema, String[] types)
+	public List<TableIdentifier> getObjectList(String namePattern, String schema, String[] types)
 		throws SQLException
 	{
-		return getObjectList(table, null, schema, types);
+		if (getDbSettings().supportsSchemas())
+		{
+			return getObjectList(namePattern, null, schema, types);
+		}
+		else if (getDbSettings().supportsCatalogs())
+		{
+			return getObjectList(namePattern, schema, null, types);
+		}
+		return getObjectList(namePattern, null, null, types);
 	}
 
 	/**
 	 * Return a list of tables for the given schema
 	 * if the table name is null, all tables will be returned
 	 *
-	 * @param table    the (wildcard) name of a table
-	 * @param catalog  the catalog for which to retrieve the objects (may be null)
-	 * @param schema   the schema for which to retrieve the objects (may be null)
+	 * @param namePattern     the (wildcard) name of a table
+	 * @param catalogPattern  the catalog for which to retrieve the objects (may be null)
+	 * @param schemaPattern   the schema for which to retrieve the objects (may be null)
+	 *
 	 * @see #getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 */
-	public List<TableIdentifier> getObjectList(String table, String catalog, String schema, String[] types)
+	public List<TableIdentifier> getObjectList(String namePattern, String catalogPattern, String schemaPattern, String[] types)
 		throws SQLException
 	{
-		DataStore ds = getObjects(catalog, schema, table, types);
+		DataStore ds = getObjects(catalogPattern, schemaPattern, namePattern, types);
 		int count = ds.getRowCount();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
 		for (int i=0; i < count; i++)
@@ -2176,8 +2194,9 @@ public class DbMetadata
 	}
 
 	/**
-	 * Return the current catalog for this connection. If no catalog is defined
-	 * or the DBMS does not support catalogs, an empty string is returned.
+	 * Return the current catalog for this connection.
+	 *
+	 * If no catalog is defined or the DBMS does not support catalogs, null is returned.
 	 *
 	 * This method works around a bug in Microsoft's JDBC driver which does
 	 * not return the correct database (=catalog) after the database has
@@ -2188,6 +2207,7 @@ public class DbMetadata
 	 * workbench.db.[dbid].currentcatalog.query
 	 *
 	 * @see DbSettings#getQueryForCurrentCatalog()
+	 * @see DbSettings#supportsCatalogs() 
 	 *
 	 * @return The name of the current catalog or null if there is no current catalog
 	 */

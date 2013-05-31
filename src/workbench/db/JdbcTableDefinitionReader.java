@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.firebird.FirebirdColumnEnhancer;
@@ -106,12 +107,15 @@ public class JdbcTableDefinitionReader
 
 		try
 		{
-			rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, "%");
+			rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, null);
 
 			ResultSetMetaData rsmeta = rs.getMetaData();
 
-			String fqn = SqlUtil.fullyQualifiedName(dbConnection, table);
-			SqlUtil.dumpResultSetInfo("DatabaseMetaData.getColumns() for " + fqn, rsmeta);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				String fqn = SqlUtil.fullyQualifiedName(dbConnection, table);
+				SqlUtil.dumpResultSetInfo("DatabaseMetaData.getColumns() for " + fqn, rsmeta);
+			}
 
 			boolean jdbc4 = false;
 
