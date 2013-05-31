@@ -83,10 +83,10 @@ public class WbSetProp
 			String type = cmdLine.getValue(PARAM_TYPE, "temp");
 			String prop = cmdLine.getValue(PARAM_PROP);
 			String value = null;
-			int pos = prop.indexOf(':');
+			int pos = prop != null ? prop.indexOf(':') : -1;
 			if (pos < 0)
 			{
-				cmdLine.getValue(PARAM_VALUE);
+				value = cmdLine.getValue(PARAM_VALUE);
 			}
 			else
 			{
