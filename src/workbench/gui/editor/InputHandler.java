@@ -39,6 +39,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+import workbench.resource.ShortcutManager;
+
 import workbench.gui.actions.WbAction;
 import workbench.gui.editor.actions.DelPrevWord;
 import workbench.gui.editor.actions.DeleteChar;
@@ -73,9 +77,6 @@ import workbench.gui.editor.actions.SelectPreviousPage;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
-import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
-import workbench.resource.ShortcutManager;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -335,12 +336,18 @@ public class InputHandler
 		}
 
 		ActionListener l = bindings.get(keyStroke);
+
+		// workaround to enable Shift-Backspace to behave like Backspace
+		if (l == null && keyCode == KeyEvent.VK_BACK_SPACE && evt.isShiftDown())
+		{
+			l = BACKSPACE;
+		}
+
 		if (l != null)
 		{
 			executeAction(l, evt.getSource(), null);
 			evt.consume();
 		}
-
 	}
 
 	void resetStatus()

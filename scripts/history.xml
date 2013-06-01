@@ -23,6 +23,7 @@
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
     <entry dev-build="10" type="fix">The office libraries (for exporting Excel files) were not bundled correctly in the Mac package</entry>
+    <entry dev-build="10" type="fix">When invoking code completion for an already schema-qualified identifier, the schema would be pasted into the editor again</entry>
     <entry dev-build="10" type="fix">Code completion for a specific schema did not work if quoted identifiers were used (e.g. "foobar".) </entry>
     <entry dev-build="9" type="fix">When importing text files where columns at the end are missing, the value from the previous row was used for the missing column</entry>
     <entry dev-build="8" type="fix">For Oracle, the DbExplorer did not display the table source of tables without a primary key</entry>
