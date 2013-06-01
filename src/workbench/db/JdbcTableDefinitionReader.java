@@ -107,7 +107,7 @@ public class JdbcTableDefinitionReader
 
 		try
 		{
-			rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, null);
+			rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, "%");
 
 			ResultSetMetaData rsmeta = rs.getMetaData();
 
