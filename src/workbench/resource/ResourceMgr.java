@@ -38,6 +38,7 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
@@ -292,13 +293,13 @@ public class ResourceMgr
 			boolean setDefaultLocale = Settings.getInstance().getBoolProperty(PROP_CHANGE_LOCALE, true);
 			if (setDefaultLocale)
 			{
-				LogMgr.logDebug("ResourceMgr.getResources()", "Setting default locale to: " + l.toString());
+				LogMgr.logInfo("ResourceMgr.getResources()", "Setting default locale to: " + l.toString());
 				Locale.setDefault(l);
 			}
 			else
 			{
 				Locale def = Locale.getDefault();
-				LogMgr.logDebug("ResourceMgr.getResources()", "Default locale is : " + def.toString());
+				LogMgr.logInfo("ResourceMgr.getResources()", "Default locale is : " + def.toString());
 			}
 		}
 		return resources;
