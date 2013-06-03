@@ -67,7 +67,9 @@ public class ResourceMgr
 	public static final String MNU_TXT_TOOLS = "MnuTxtTools";
 	public static final String MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
+
 	private static ResourceBundle resources;
+	private static final String PROP_CHANGE_LOCALE = "workbench.gui.setdefaultlocale";
 
 	private ResourceMgr()
 	{
@@ -286,10 +288,17 @@ public class ResourceMgr
 		{
 			Locale l = Settings.getInstance().getLanguage();
 			resources = getResourceBundle(l);
-			boolean setDefaultLocale = Settings.getInstance().getBoolProperty("workbench.gui.setdefaultlocale", true);
+
+			boolean setDefaultLocale = Settings.getInstance().getBoolProperty(PROP_CHANGE_LOCALE, true);
 			if (setDefaultLocale)
 			{
+				LogMgr.logDebug("ResourceMgr.getResources()", "Setting default locale to: " + l.toString());
 				Locale.setDefault(l);
+			}
+			else
+			{
+				Locale def = Locale.getDefault();
+				LogMgr.logDebug("ResourceMgr.getResources()", "Default locale is : " + def.toString());
 			}
 		}
 		return resources;
