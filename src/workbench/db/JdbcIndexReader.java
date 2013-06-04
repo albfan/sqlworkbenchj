@@ -545,7 +545,7 @@ public class JdbcIndexReader
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
 			if (this.supportsTableSpaces())
 			{
