@@ -105,12 +105,12 @@ public class ConnectionProfile
 	public ConnectionProfile(String profileName, String driverClass, String url, String userName, String pwd)
 	{
 		this();
-		this.setUrl(url);
-		this.setDriverclass(driverClass);
-		this.setUsername(userName);
-		this.setPassword(pwd);
-		this.setName(profileName);
-		this.reset();
+		setUrl(url);
+		setDriverclass(driverClass);
+		setUsername(userName);
+		setPassword(pwd);
+		setName(profileName);
+		reset();
 	}
 
 	public static ConnectionProfile createEmptyProfile()
@@ -621,6 +621,10 @@ public class ConnectionProfile
 		return this.name;
 	}
 
+	public String getIdString()
+	{
+		return getKey().toString() + " using: " + this.driverclass;
+	}
 	/**
 	 * The hashCode is based on the profile key's hash code.
 	 *
@@ -660,6 +664,20 @@ public class ConnectionProfile
 		this.url = newUrl;
 	}
 
+	public String getDriverName()
+	{
+		return driverName;
+	}
+
+	public final void setDriverName(String name)
+	{
+		if (name != null && !StringUtil.equalStringOrEmpty(name, this.driverName))
+		{
+			this.driverName = name.trim();
+			this.changed = true;
+		}
+	}
+
 	public String getDriverclass()
 	{
 		return this.driverclass;
@@ -667,12 +685,20 @@ public class ConnectionProfile
 
 	public final void setDriverclass(String drvClass)
 	{
-		if (!StringUtil.equalString(drvClass, driverclass)) changed = true;
-		if (drvClass != null)
+		if (drvClass != null && !StringUtil.equalString(drvClass, driverclass))
 		{
-			drvClass = drvClass.trim();
+			changed = true;
+			this.driverclass = drvClass.trim();
 		}
-		this.driverclass = drvClass;
+	}
+
+	public void setDriver(DbDriver driver)
+	{
+		if (driver != null)
+		{
+			setDriverName(driver.getName());
+			setDriverclass(driver.getDriverClass());
+		}
 	}
 
 	public String getUsername()
@@ -879,20 +905,6 @@ public class ConnectionProfile
 		{
 			this.connectionProperties = null;
 			if (wasDefined) this.changed = true;
-		}
-	}
-
-	public String getDriverName()
-	{
-		return driverName;
-	}
-
-	public void setDriverName(java.lang.String name)
-	{
-		if (!StringUtil.equalStringOrEmpty(name, this.driverName))
-		{
-			this.driverName = name;
-			this.changed = true;
 		}
 	}
 

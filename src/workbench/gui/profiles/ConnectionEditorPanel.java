@@ -908,8 +908,7 @@ public class ConnectionEditorPanel
 				newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
 				if (this.currentProfile != null)
 				{
-					this.currentProfile.setDriverclass(newDriver.getDriverClass());
-					this.currentProfile.setDriverName(newDriver.getName());
+					this.currentProfile.setDriver(newDriver);
 				}
 				if (oldDriver == null || !oldDriver.equals(newDriver.getDriverClass()))
 				{
@@ -1104,11 +1103,12 @@ public class ConnectionEditorPanel
 
 		DbDriver current = getCurrentDriver();
 		String driverName = currentProfile.getDriverName();
-		if (current != null && !current.getName().equals(driverName))
+		String drvClass = currentProfile.getDriverclass();
+		if (current != null && (!current.getName().equals(driverName) || !current.getDriverClass().equals(drvClass)))
 		{
 			// an alternate driver was chosen, because the original driver was not available.
-			LogMgr.logDebug("ConnectionEditorPanel.updateProfile()", "Adjusting selected driver name for non-existing driver: " + currentProfile.getDriverName());
-			currentProfile.setDriverName(current.getName());
+			LogMgr.logDebug("ConnectionEditorPanel.updateProfile()", "Adjusting selected driver name for non-existing driver: " + currentProfile.getIdString());
+			currentProfile.setDriver(current);
 			changed = true;
 		}
 
