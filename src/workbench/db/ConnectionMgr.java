@@ -275,13 +275,13 @@ public class ConnectionMgr
 		return false;
 	}
 
-	public DbDriver findDriverByName(String drvClassName, String aName)
+	public DbDriver findDriverByName(String drvClassName, String driverName)
 	{
 		DbDriver firstMatch = null;
 
 		if (this.drivers == null) this.readDrivers();
 
-		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
+		if (driverName == null || driverName.length() == 0) return this.findDriver(drvClassName);
 
 		for (DbDriver db : drivers)
 		{
@@ -290,7 +290,7 @@ public class ConnectionMgr
 				// if the classname and the driver name are the same return the driver immediately
 				// If we don't find a match for the name, we'll use
 				// the first match for the classname
-				if (db.getName().equals(aName)) return db;
+				if (db.getName().equals(driverName)) return db;
 				if (firstMatch == null)
 				{
 					firstMatch = db;
@@ -303,10 +303,10 @@ public class ConnectionMgr
 		{
 			// We simple pretend there is one available, this will e.g. make
 			// the ODBC Bridge work without a WbDrivers.xml
-			return new DbDriver(aName, drvClassName, null);
+			return new DbDriver(driverName, drvClassName, null);
 		}
 
-		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Did not find driver with name="+ aName + ", using " + (firstMatch == null ? "(n/a)" : firstMatch.getName()));
+		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Did not find driver with name="+ driverName + ", using " + (firstMatch == null ? "(n/a)" : firstMatch.getName()));
 
 		return firstMatch;
 	}

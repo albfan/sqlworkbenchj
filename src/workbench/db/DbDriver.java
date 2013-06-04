@@ -507,7 +507,7 @@ public class DbDriver
 			appNameProperty = PostgresUtil.APP_NAME_PROPERTY;
 			prgName += " (" + id + ")";
 		}
-		
+
 		if (url.startsWith("jdbc:oracle:thin"))
 		{
 			appNameProperty = "v$session.program";
