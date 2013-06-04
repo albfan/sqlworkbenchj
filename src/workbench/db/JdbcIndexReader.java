@@ -519,16 +519,15 @@ public class JdbcIndexReader
 	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-
-		String[] cols;
+		final String[] cols;
 		final int types[];
 		final int sizes[];
 
 		if (this.supportsTableSpaces())
 		{
 			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE", "TABLESPACE"};
-			types= new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes= new int[] {30, 7, 6, 40, 10, 15};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {30, 7, 6, 40, 10, 15};
 		}
 		else
 		{
@@ -538,6 +537,7 @@ public class JdbcIndexReader
 		}
 		DataStore idxData = new DataStore(cols, types, sizes);
 		if (table == null) return idxData;
+
 		Collection<IndexDefinition> indexes = getTableIndexList(table);
 		for (IndexDefinition idx : indexes)
 		{
@@ -580,8 +580,10 @@ public class JdbcIndexReader
 	}
 
 	/**
-	 * Returns a list of indexes defined for the given table
+	 * Returns a list of indexes defined for the given table.
+	 *
 	 * @param table the table to get the indexes for
+	 * @see #getTableIndexList(workbench.db.TableIdentifier, boolean, boolean)
 	 */
 	@Override
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
@@ -589,12 +591,35 @@ public class JdbcIndexReader
 		return getTableIndexList(table, false, true);
 	}
 
+	/**
+	 * Returns a list of unique indexes defined for the given table.
+	 *
+	 * @param table the table to get the indexes for
+	 * @see #getTableIndexList(workbench.db.TableIdentifier, boolean, boolean)
+	 */
 	@Override
 	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
 	{
 		return getTableIndexList(table, true, true);
 	}
 
+	/**
+	 * Return a list of indexes for the given table.
+	 *
+	 * if the parameter checkPk is true, the primary key of the table is determined by
+	 * calling {@link #getPrimaryKey(workbench.db.TableIdentifier)}. If a PkDefinition is
+	 * found the corresponding index will be marked as such
+	 *
+	 * @param table         the table for which to return the indexes
+	 * @param uniqueOnly    if true only unique indexes are returned
+	 * @param checkPK       if true, the PK index will be searched and identified (if possible)
+	 *
+	 * @return the list of indexes
+	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean)
+	 * @see #processIndexResult(java.sql.ResultSet, workbench.db.PkDefinition, workbench.db.TableIdentifier)
+	 * @see #getPrimaryKey(workbench.db.TableIdentifier)
+	 * @see IndexDefinition#isPrimaryKeyIndex()
+	 */
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK)
 	{
 		ResultSet idxRs = null;
@@ -627,12 +652,6 @@ public class JdbcIndexReader
 			reader.processIndexList(result, this.metaData.getWbConnection());
 		}
 		return result;
-	}
-
-	protected void processIndexResultRow(ResultSet rs, IndexDefinition index, TableIdentifier tbl)
-		throws SQLException
-	{
-		// nothing to do
 	}
 
 	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, PkDefinition pkIndex, TableIdentifier tbl)
@@ -727,6 +746,27 @@ public class JdbcIndexReader
 		return new ArrayList<IndexDefinition>(indexes);
 	}
 
+	/**
+	 * Callback function for specialized index readers to process a single row
+	 * while retrieving the index information.
+	 *
+	 * This will be called by {@link #processIndexResult(ResultSet, PkDefinition, TableIdentifier)} for each row
+	 * of the passed result set.
+	 *
+	 * This is an empty definition, to be overwritten by descendant classes.
+	 *
+	 * @param rs       the index information ResultSet being processed. This is already positioned to the "current" row.
+	 * @param index    the index for which the information is processed
+	 * @param tbl      the table for which the indexes are retrieved.
+	 *
+	 * @throws SQLException
+	 */
+	protected void processIndexResultRow(ResultSet rs, IndexDefinition index, TableIdentifier tbl)
+		throws SQLException
+	{
+		// nothing to do
+	}
+
 	private boolean isPkIndex(IndexDefinition toCheck, PkDefinition pkIndex)
 	{
 		if (toCheck == null || pkIndex == null) return false;
@@ -756,6 +796,13 @@ public class JdbcIndexReader
 		return null;
 	}
 
+	/**
+	 * Checks if the current DBMS supports returning a list of indexes.
+	 *
+	 * This method checks if a SQL was configured using {@link MetaDataSqlManager#getListIndexesSql()}
+	 * 
+	 * @return true if such a list can be retrieved.
+	 */
 	@Override
 	public boolean supportsIndexList()
 	{
@@ -763,6 +810,31 @@ public class JdbcIndexReader
 		return sql !=null;
 	}
 
+	/**
+	 * Return all indexes defined for the given catalog and/or schema.
+	 *
+	 * The method checks for a configured SQL statement to retrieve the indexes.
+	 * If nothing is configured, an empty result is returned.
+	 * <br/><br/>
+	 * The configured SQL must return the following columns (in that order):<br/>
+	 *
+	 * <ol>
+	 * <li>index_name</li>
+	 * <li>index_schema</li>
+	 * <li>table_name</li>
+	 * <li>table_catalog</li>
+	 * <li>index_type</li>
+	 * <li>is_unique</li>
+	 * <li>is_pk</li>
+	 * </ol>
+	 *
+	 * @param catalog  the catalog to search, may be null. No wildcards allowed
+	 * @param schema   the schema to search, may be null. No wildcards allowed
+	 *
+	 * @return a list of indexes in the catalog/schema
+	 *
+	 * @see MetaDataSqlManager#getListIndexesSql()
+	 */
 	@Override
 	public List<IndexDefinition> getIndexes(String catalog, String schema)
 	{

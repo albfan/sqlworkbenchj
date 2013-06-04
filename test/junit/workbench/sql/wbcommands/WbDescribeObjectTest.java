@@ -109,10 +109,11 @@ public class WbDescribeObjectTest
 		assertEquals(1, indexDs.getRowCount());
 		assertEquals("IDX_NR", indexDs.getValue(0, "INDEX_NAME"));
 		assertEquals("NO", indexDs.getValue(0, "UNIQUE"));
-		Object o = indexDs.getValue(0, "DEFINITION");
+		Object o = indexDs.getRow(0).getUserObject();
 		assertTrue(o instanceof IndexDefinition);
-		String def = ((IndexDefinition) o).getExpression();
+		IndexDefinition idx = (IndexDefinition)o;
+		String def = indexDs.getValueAsString(0, "DEFINITION");
 		assertEquals("NR ASC", def);
-
+		assertEquals(def, idx.getExpression());
 	}
 }
