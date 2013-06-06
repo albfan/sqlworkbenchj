@@ -266,23 +266,25 @@ public class TableRowCountPanel
 				sp = dbConnection.setSavepoint();
 			}
 
-			for (TableIdentifier table : tables)
+			int tblCount = tables.size();
+			for (int tableNum=0; tableNum < tblCount; tableNum++)
 			{
 				if (cancel) break;
 
-				showTable(table);
+				TableIdentifier table = tables.get(tableNum);
+				showTable(table, tableNum, tblCount);
 				String sql = builder.getSelectForCount(table);
 
 				rs = currentStatement.executeQuery(sql);
 				if (cancel) break;
 
-				long count = 0;
+				long rowCount = 0;
 				if (rs.next())
 				{
-					count = rs.getLong(1);
+					rowCount = rs.getLong(1);
 				}
 				SqlUtil.closeResult(rs);
-				addRowCount(table, count);
+				addRowCount(table, rowCount);
 			}
 
 			if (useSeparateConnection)
@@ -323,9 +325,9 @@ public class TableRowCountPanel
 		});
 	}
 
-	private void showTable(final TableIdentifier table)
+	private void showTable(final TableIdentifier table, int current, int total)
 	{
-		String msg = ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableExpression());
+		String msg = ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableExpression(), current, total);
 		showStatusMessage(msg);
 	}
 
