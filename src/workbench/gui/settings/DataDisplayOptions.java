@@ -82,6 +82,8 @@ public class DataDisplayOptions
 		maxColSizeField.setText(Integer.toString(GuiSettings.getMaxColumnWidth()));
 		selectSummary.setSelected(GuiSettings.getShowSelectionSummary());
 		multiLineThreshold.setText(Integer.toString(GuiSettings.getMultiLineThreshold()));
+		wrapMultineRender.setSelected(GuiSettings.getWrapMultilineRenderer());
+		wrapMultlineEdit.setSelected(GuiSettings.getWrapMultilineEditor());
 
 		defMaxRows.setText(Integer.toString(GuiSettings.getDefaultMaxRows()));
 		retrieveComments.setSelected(GuiSettings.getRetrieveQueryComments());
@@ -123,6 +125,9 @@ public class DataDisplayOptions
 		GuiSettings.setDisplayNullString(nullString.getText());
 		GuiSettings.setShowResultSQL(showGeneratingSQL.isSelected());
 		GuiSettings.setShowTableHeaderInBold(boldHeader.isSelected());
+		GuiSettings.setWrapMultilineEditor(wrapMultlineEdit.isSelected());
+		GuiSettings.setWrapMultilineRenderer(wrapMultineRender.isSelected());
+
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
 		if (alignmentDropDown.getSelectedIndex() == 1)
@@ -211,8 +216,6 @@ public class DataDisplayOptions
     localeDropDown = new javax.swing.JComboBox();
     generalPanel = new javax.swing.JPanel();
     selectSummary = new javax.swing.JCheckBox();
-    jLabel3 = new javax.swing.JLabel();
-    multiLineThreshold = new javax.swing.JTextField();
     retrieveComments = new javax.swing.JCheckBox();
     jLabel5 = new javax.swing.JLabel();
     defMaxRows = new javax.swing.JTextField();
@@ -241,6 +244,11 @@ public class DataDisplayOptions
     maxRowHeightLabel = new javax.swing.JLabel();
     maxRowHeight = new NumberField();
     rowHeightResize = new javax.swing.JCheckBox();
+    multiLinePanel = new javax.swing.JPanel();
+    wrapMultineRender = new javax.swing.JCheckBox();
+    wrapMultlineEdit = new javax.swing.JCheckBox();
+    multilineThresholLabel = new javax.swing.JLabel();
+    multiLineThreshold = new NumberField();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -274,24 +282,6 @@ public class DataDisplayOptions
     gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
     generalPanel.add(selectSummary, gridBagConstraints);
 
-    jLabel3.setLabelFor(multiLineThreshold);
-    jLabel3.setText(ResourceMgr.getString("LblMultiLineLimit")); // NOI18N
-    jLabel3.setToolTipText(ResourceMgr.getString("d_LblMultiLineLimit")); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 7);
-    generalPanel.add(jLabel3, gridBagConstraints);
-
-    multiLineThreshold.setColumns(6);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 19);
-    generalPanel.add(multiLineThreshold, gridBagConstraints);
-
     retrieveComments.setText(ResourceMgr.getString("LblRetrieveColComments")); // NOI18N
     retrieveComments.setToolTipText(ResourceMgr.getString("d_LblRetrieveColComments")); // NOI18N
     retrieveComments.setBorder(null);
@@ -307,7 +297,7 @@ public class DataDisplayOptions
     jLabel5.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(3, 16, 0, 7);
     generalPanel.add(jLabel5, gridBagConstraints);
@@ -316,7 +306,7 @@ public class DataDisplayOptions
     defMaxRows.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 19);
     generalPanel.add(defMaxRows, gridBagConstraints);
@@ -336,7 +326,7 @@ public class DataDisplayOptions
     showMaxRowsWarn.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
@@ -357,7 +347,7 @@ public class DataDisplayOptions
     alignLabel.setToolTipText(ResourceMgr.getString("d_LblAlignNum")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(4, 16, 0, 0);
     generalPanel.add(alignLabel, gridBagConstraints);
@@ -366,7 +356,7 @@ public class DataDisplayOptions
     alignmentDropDown.setSelectedItem("Right");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 19);
     generalPanel.add(alignmentDropDown, gridBagConstraints);
@@ -385,13 +375,13 @@ public class DataDisplayOptions
     nullStringLabel.setToolTipText(ResourceMgr.getString("d_LblNullDisp")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
     generalPanel.add(nullStringLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
@@ -554,7 +544,7 @@ public class DataDisplayOptions
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -562,6 +552,53 @@ public class DataDisplayOptions
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
     add(rowHeightPanel, gridBagConstraints);
+
+    multiLinePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblMultiLineCols"))); // NOI18N
+    multiLinePanel.setLayout(new java.awt.GridBagLayout());
+
+    wrapMultineRender.setText(ResourceMgr.getString("LblMultiWrapRender")); // NOI18N
+    wrapMultineRender.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    multiLinePanel.add(wrapMultineRender, gridBagConstraints);
+
+    wrapMultlineEdit.setText(ResourceMgr.getString("LblMultiWrapEdit")); // NOI18N
+    wrapMultlineEdit.setBorder(null);
+    wrapMultlineEdit.setMargin(new java.awt.Insets(0, 10, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 2, 0);
+    multiLinePanel.add(wrapMultlineEdit, gridBagConstraints);
+
+    multilineThresholLabel.setText(ResourceMgr.getString("LblMultiLineLimit")); // NOI18N
+    multilineThresholLabel.setToolTipText(ResourceMgr.getString("d_LblMultiLineLimit")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 11, 0, 0);
+    multiLinePanel.add(multilineThresholLabel, gridBagConstraints);
+
+    multiLineThreshold.setColumns(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(1, 5, 0, 0);
+    multiLinePanel.add(multiLineThreshold, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
+    add(multiLinePanel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -577,7 +614,6 @@ public class DataDisplayOptions
   private javax.swing.JCheckBox ignoreEmptyRows;
   private javax.swing.JCheckBox includeHeaderWidth;
   private javax.swing.JLabel jLabel1;
-  private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
@@ -590,7 +626,9 @@ public class DataDisplayOptions
   private javax.swing.JLabel maxRowHeightLabel;
   private javax.swing.JTextField minColSizeField;
   private javax.swing.JLabel minColSizeLabel;
+  private javax.swing.JPanel multiLinePanel;
   private javax.swing.JTextField multiLineThreshold;
+  private javax.swing.JLabel multilineThresholLabel;
   private javax.swing.JTextField nullString;
   private javax.swing.JLabel nullStringLabel;
   private javax.swing.JCheckBox retrieveComments;
@@ -600,6 +638,8 @@ public class DataDisplayOptions
   private javax.swing.JCheckBox showGeneratingSQL;
   private javax.swing.JCheckBox showMaxRowsWarn;
   private javax.swing.JCheckBox showRowNumbers;
+  private javax.swing.JCheckBox wrapMultineRender;
+  private javax.swing.JCheckBox wrapMultlineEdit;
   // End of variables declaration//GEN-END:variables
 
 }
