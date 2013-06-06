@@ -30,7 +30,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Disconnect the current window.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class FileDisconnectAction

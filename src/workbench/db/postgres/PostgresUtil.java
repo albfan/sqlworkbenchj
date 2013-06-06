@@ -118,7 +118,7 @@ public class PostgresUtil
 	/**
 	 * Returns the current search path defined in the session (or the user).
 	 * <br/>
-	 * This uses the Postgres function <tt>current_schemas()</tt>
+	 * This uses the Postgres function <tt>current_schemas(boolean)</tt>
 	 * <br/>
 	 * @param con the connection for which the search path should be retrieved
 	 * @return the list of schemas in the search path.
@@ -135,7 +135,7 @@ public class PostgresUtil
 		{
 			sp = con.setSavepoint();
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery("select array_to_string(current_schemas(false), ';')");
+			rs = stmt.executeQuery("select array_to_string(current_schemas(true), ';')");
 			if (rs.next())
 			{
 				String path = rs.getString(1);
