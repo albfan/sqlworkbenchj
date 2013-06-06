@@ -29,6 +29,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
@@ -67,8 +68,9 @@ public class TextAreaRenderer
 
 		};
 
-		textDisplay.setWrapStyleWord(false);
-		textDisplay.setLineWrap(false);
+		boolean wrap = GuiSettings.getWrapMultilineRenderer();
+		textDisplay.setWrapStyleWord(wrap);
+		textDisplay.setLineWrap(wrap);
 		textDisplay.setAutoscrolls(false);
 		textDisplay.setTabSize(Settings.getInstance().getEditorTabWidth());
 		textDisplay.setBorder(WbSwingUtilities.EMPTY_BORDER);

@@ -42,10 +42,12 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.interfaces.NullableEditor;
+import workbench.resource.GuiSettings;
 import workbench.util.WbDateFormatter;
 
 /**
@@ -76,16 +78,25 @@ public class WbCellEditor
 		scroll = new TextAreaScrollPane(editor);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		editor.setLineWrap(false);
-		editor.setWrapStyleWord(true);
+		boolean wrap = GuiSettings.getWrapMultilineEditor();
+		editor.setLineWrap(wrap);
+		editor.setWrapStyleWord(wrap);
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		restoreValue = new RestoreDataAction(this);
 		TextComponentMouseListener l = new TextComponentMouseListener();
 		l.addAction(new SetNullAction(this));
 		l.addAction(restoreValue);
+		l.addAction(new MultilineWrapAction(this));
 		editor.addMouseListener(l);
 		editor.addMouseListener(this);
+	}
+
+	public void setWordwrap(boolean flag)
+	{
+		editor.setLineWrap(flag);
+		editor.setWrapStyleWord(flag);
+		GuiSettings.setWrapMultilineEditor(flag);
 	}
 
 	@Override

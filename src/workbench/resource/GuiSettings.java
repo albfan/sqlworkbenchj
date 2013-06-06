@@ -72,6 +72,8 @@ public class GuiSettings
 	public static final String PROP_DBEXP_USE_SQLSORT = "workbench.dbexplorer.datapanel.applysqlorder";
 	public static final String PROP_TABLE_HEADER_BOLD = "workbench.gui.table.header.bold";
 	public static final String PROP_TABLE_HEADER_FULL_TYPE_INFO = "workbench.gui.table.header.typeinfo.full";
+	public static final String PROP_WRAP_MULTILINE_RENDERER = "workbench.gui.display.multiline.renderer.wrap";
+	public static final String PROP_WRAP_MULTILINE_EDITOR = "workbench.gui.display.multiline.editor.wrap";
 
 	public static int getMaxExpansionPause()
 	{
@@ -376,6 +378,27 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON, flag);
 	}
+
+	public static boolean getWrapMultilineEditor()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_WRAP_MULTILINE_EDITOR, false);
+	}
+
+	public static void setWrapMultilineEditor(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_WRAP_MULTILINE_EDITOR, flag);
+	}
+
+	public static boolean getWrapMultilineRenderer()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_WRAP_MULTILINE_RENDERER, false);
+	}
+
+	public static void setWrapMultilineRenderer(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_WRAP_MULTILINE_RENDERER, flag);
+	}
+
 
 	public static int getMultiLineThreshold()
 	{
