@@ -55,6 +55,7 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
+import workbench.util.FileVersioner;
 import workbench.util.PropertiesCopier;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
@@ -660,6 +661,22 @@ public class ConnectionMgr
 		return false;
 	}
 
+	private void createBackup(WbFile f)
+	{
+		int maxVersions = Settings.getInstance().getMaxWorkspaceBackup();
+		String dir = Settings.getInstance().getWorkspaceBackupDir();
+		String sep = Settings.getInstance().getFileVersionDelimiter();
+		FileVersioner version = new FileVersioner(maxVersions, dir, sep);
+		try
+		{
+			version.createBackup(f);
+		}
+		catch (IOException e)
+		{
+			LogMgr.logWarning("ConnectionMgr.createBackup()", "Error when creating backup for: " + f.getAbsolutePath(), e);
+		}
+	}
+
 	/**
 	 * Saves the driver definitions to an external file.
 	 *
@@ -670,11 +687,18 @@ public class ConnectionMgr
 	 */
 	public void saveDrivers()
 	{
+
+		if (Settings.getInstance().getCreateDriverBackup())
+		{
+			WbFile f = new WbFile(Settings.getInstance().getDriverConfigFilename());
+			createBackup(f);
+		}
+
 		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
 
-		// As drivers an profiles can be saved in console mode, we need to make
-		// sure, the "internal" drivers that are created "on-the-fly" when connecting
-		// from the commandline are not stored
+		// As drivers and profiles can be saved in console mode, we need to make
+		// sure, that the "internal" drivers that are created "on-the-fly" when connecting
+		// from the commandline are not stored in the configuration file.
 		List<DbDriver> allDrivers = new ArrayList<DbDriver>(this.drivers);
 		Iterator<DbDriver> itr = allDrivers.iterator();
 		while (itr.hasNext())
@@ -906,9 +930,11 @@ public class ConnectionMgr
 		{
 			if (this.profiles != null)
 			{
-				WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
-				WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
-				WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
+				if (Settings.getInstance().getCreateProfileBackup())
+				{
+					WbFile f = new WbFile(getFileName());
+					createBackup(f);
+				}
 
 				WbPersistence writer = new WbPersistence(getFileName());
 				try

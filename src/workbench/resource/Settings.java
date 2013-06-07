@@ -2038,6 +2038,15 @@ public class Settings
 		return getProperty("workbench.workspace.backup.dir", null);
 	}
 
+	public boolean getCreateProfileBackup()
+	{
+		return getBoolProperty("workbench.profiles.createbackup", false);
+	}
+
+	public boolean getCreateDriverBackup()
+	{
+		return getBoolProperty("workbench.drivers.createbackup", false);
+	}
 
 	public void setFilesInWorkspaceHandling(ExternalFileHandling handling)
 	{
