@@ -867,6 +867,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.tooltipwarning", true);
 	}
 
+	public static void setShowMaxRowsTooltip(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.maxrows.tooltipwarning", flag);
+	}
+
 	public static boolean showSelectFkValueAtTop()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.show.selectfk.top", false);

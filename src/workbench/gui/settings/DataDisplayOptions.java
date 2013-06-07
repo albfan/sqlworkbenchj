@@ -24,6 +24,7 @@ package workbench.gui.settings;
 
 
 
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
@@ -53,7 +54,7 @@ import workbench.util.WbLocale;
  */
 public class DataDisplayOptions
 	extends JPanel
-	implements Restoreable, ValidatingComponent
+	implements Restoreable, ValidatingComponent, ActionListener
 {
 
 	public DataDisplayOptions()
@@ -89,6 +90,7 @@ public class DataDisplayOptions
 		retrieveComments.setSelected(GuiSettings.getRetrieveQueryComments());
 		showRowNumbers.setSelected(GuiSettings.getShowTableRowNumbers());
 		showMaxRowsWarn.setSelected(GuiSettings.getShowMaxRowsReached());
+		showMaxRowsTooltip.setSelected(GuiSettings.getShowMaxRowsTooltip());
 		nullString.setText(GuiSettings.getDisplayNullString());
 		showGeneratingSQL.setSelected(GuiSettings.getShowResultSQL());
 		int align = GuiSettings.getNumberDataAlignment();
@@ -127,7 +129,7 @@ public class DataDisplayOptions
 		GuiSettings.setShowTableHeaderInBold(boldHeader.isSelected());
 		GuiSettings.setWrapMultilineEditor(wrapMultlineEdit.isSelected());
 		GuiSettings.setWrapMultilineRenderer(wrapMultineRender.isSelected());
-
+		GuiSettings.setShowMaxRowsTooltip(showMaxRowsTooltip.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
 		if (alignmentDropDown.getSelectedIndex() == 1)
@@ -221,6 +223,7 @@ public class DataDisplayOptions
     defMaxRows = new javax.swing.JTextField();
     showRowNumbers = new javax.swing.JCheckBox();
     showMaxRowsWarn = new javax.swing.JCheckBox();
+    showMaxRowsTooltip = new javax.swing.JCheckBox();
     showGeneratingSQL = new javax.swing.JCheckBox();
     alignLabel = new javax.swing.JLabel();
     alignmentDropDown = new javax.swing.JComboBox();
@@ -324,6 +327,7 @@ public class DataDisplayOptions
     showMaxRowsWarn.setText(ResourceMgr.getString("LblShowMaxRowsWarning")); // NOI18N
     showMaxRowsWarn.setToolTipText(ResourceMgr.getString("d_LblShowMaxRowsWarning")); // NOI18N
     showMaxRowsWarn.setBorder(null);
+    showMaxRowsWarn.addActionListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -332,6 +336,18 @@ public class DataDisplayOptions
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
     generalPanel.add(showMaxRowsWarn, gridBagConstraints);
+
+    showMaxRowsTooltip.setText(ResourceMgr.getString("LblShowMaxRowsTooltip")); // NOI18N
+    showMaxRowsTooltip.setToolTipText(ResourceMgr.getString("d_LblShowMaxRowsTooltip")); // NOI18N
+    showMaxRowsTooltip.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
+    generalPanel.add(showMaxRowsTooltip, gridBagConstraints);
 
     showGeneratingSQL.setText(ResourceMgr.getString("LblShowGenSQL")); // NOI18N
     showGeneratingSQL.setToolTipText(ResourceMgr.getString("d_LblShowGenSQL")); // NOI18N
@@ -347,18 +363,18 @@ public class DataDisplayOptions
     alignLabel.setToolTipText(ResourceMgr.getString("d_LblAlignNum")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(4, 16, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 16, 0, 0);
     generalPanel.add(alignLabel, gridBagConstraints);
 
     alignmentDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Left", "Right" }));
     alignmentDropDown.setSelectedItem("Right");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 19);
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 19);
     generalPanel.add(alignmentDropDown, gridBagConstraints);
 
     boldHeader.setText(ResourceMgr.getString("LblBoldHeader")); // NOI18N
@@ -368,20 +384,20 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     generalPanel.add(boldHeader, gridBagConstraints);
 
     nullStringLabel.setText(ResourceMgr.getString("LblNullString")); // NOI18N
     nullStringLabel.setToolTipText(ResourceMgr.getString("d_LblNullDisp")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
     generalPanel.add(nullStringLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
@@ -599,7 +615,22 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
     add(multiLinePanel, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt)
+  {
+    if (evt.getSource() == showMaxRowsWarn)
+    {
+      DataDisplayOptions.this.showMaxRowsWarnActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+  private void showMaxRowsWarnActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showMaxRowsWarnActionPerformed
+  {//GEN-HEADEREND:event_showMaxRowsWarnActionPerformed
+    showMaxRowsTooltip.setEnabled(showMaxRowsWarn.isSelected());
+  }//GEN-LAST:event_showMaxRowsWarnActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -636,6 +667,7 @@ public class DataDisplayOptions
   private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JCheckBox selectSummary;
   private javax.swing.JCheckBox showGeneratingSQL;
+  private javax.swing.JCheckBox showMaxRowsTooltip;
   private javax.swing.JCheckBox showMaxRowsWarn;
   private javax.swing.JCheckBox showRowNumbers;
   private javax.swing.JCheckBox wrapMultineRender;
