@@ -95,7 +95,7 @@ public final class WbManager
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private DeadlockMonitor deadlockMonitor;
 
-	private AppArguments cmdLine = new AppArguments();
+	private final AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
 	private JDialog closeMessage;
 
@@ -196,7 +196,7 @@ public final class WbManager
 		VersionNumber buildNumber = ResourceMgr.getBuildNumber();
 		return buildNumber.getMajorVersion() == 999 || buildNumber.getMinorVersion() != -1;
 	}
-	
+
 	public JFrame getCurrentWindow()
 	{
 		if (this.mainWindows == null) return getCurrentToolWindow();
@@ -285,7 +285,9 @@ public final class WbManager
 	}
 
 	/**
-	 * Returns the location of the application's jar file
+	 * Returns the location of the application's jar file.
+	 *
+	 * @return the file object denoting the running jar file.
 	 * @see #getJarPath()
 	 */
 	public File getJarFile()
@@ -310,7 +312,9 @@ public final class WbManager
 	}
 
 	/**
-	 * Returns the directory in which the application is installed
+	 * Returns the directory in which the application is installed.
+	 *
+	 * @return the full path to the jarfile
 	 * @see #getJarFile()
 	 */
 	public String getJarPath()
@@ -614,6 +618,8 @@ public final class WbManager
 	/**
 	 * Called whenever a MainWindow is closed.
 	 *
+	 * @param win the window to close
+	 * 
 	 * @see workbench.gui.MainWindow#windowClosing(java.awt.event.WindowEvent)
 	 * @see workbench.gui.MainWindow#connectCancelled()
 	 */
