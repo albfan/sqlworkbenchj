@@ -48,7 +48,7 @@ import java.util.jar.JarFile;
  */
 public class ClassFinder
 {
-	private Class toFind;
+	private final Class toFind;
 	private Set<String> excludedClasses = Collections.emptySet();;
 
 	public ClassFinder(Class clz)
@@ -68,7 +68,7 @@ public class ClassFinder
 			excludedClasses = new TreeSet<String>(classNames);
 		}
 	}
-	
+
 	/**
 	 * Search all files for an implementation of java.sql.Driver.
 	 * <br/>
