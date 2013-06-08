@@ -158,7 +158,7 @@ public class DataDisplayOptions
 		long start = System.currentTimeMillis();
 		Locale[] locales = Locale.getAvailableLocales();
 		long duration = System.currentTimeMillis() - start;
-		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Reading " + locales.length + " locales took: " + duration);
+		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Reading " + locales.length + " locales took: " + duration + "ms");
 
 		start = System.currentTimeMillis();
 		Comparator<Locale> localeComp = new Comparator<Locale>()
@@ -172,7 +172,7 @@ public class DataDisplayOptions
 		};
 		Arrays.sort(locales, localeComp);
 		duration = System.currentTimeMillis() - start;
-		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Sorting locales took: " + duration);
+		LogMgr.logDebug("DataDisplayOptions.readLocales()", "Sorting locales took: " + duration + "ms");
 		return locales;
 	}
 
