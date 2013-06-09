@@ -253,8 +253,17 @@ WHERE id=42;</p>
       <ul>
         <li>Read the <a href="manual/workbench-manual.html" target="_blank">manual</a></li>
         <li>Check out the SQL Workbench/J <a href="http://groups.google.com/group/sql-workbench" target="_blank">google group</a></li>
-        <li>Send an email to <mail-to/></li>
+        <li>Send an email to <mail-to/> (or use <span style="padding:2px;background-color:lightgray">Help &raquo; Contact the author</span> from within the application)</li>
       </ul>
+      <p>
+        When reporting a problem, always include the build number of SQL Workbench/J you are using together with the DBMS, its version
+        and the JDBC driver you are using. This information is shown in the connection info dialog, that can be obtained
+        by right clicking on the connection URL in the main window and choosing "Connection info".
+      </p>
+      <p>
+        Please also attach the <b>full</b> logfile. The location of the logfile is shown in the
+        About dialog (the you can copy the filename from within the dialog).
+      </p>
     </content>
   </page>
 
