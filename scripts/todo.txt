@@ -3,7 +3,7 @@ Features:
 - Load different WbProfiles.xml from within the connection dialog
   Dropdown with the last used files
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
-  (Auto-Completion not working for UPDATE ... FROM .. JOIN)
+- save code-completion cache locally
 - save table sort of DbExplorer in Workspace
 - undo tab close
 - open file after "Save Data As"
@@ -11,7 +11,7 @@ Features:
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
 - Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
 - DbExplorer panel showing all indexes (will also enable auto completion for DROP INDEX)
-- Treat Oracle's BFILE, Postgres' LargeObjects as BLOBs, SQL Server's FileStream
+- Treat Oracle's BFILE, Postgres' LargeObjects and SQL Server's FileStream as BLOBs
 - Support external SQL formatter
 - Convert DDL from one DBMS to another using "intelligent" search & replace (MySQL -> PG, PG -> Oracle)
 - Support N'   ' strings for SQL generation
