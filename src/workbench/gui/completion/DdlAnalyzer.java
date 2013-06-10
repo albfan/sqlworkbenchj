@@ -30,6 +30,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
 import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
@@ -84,8 +85,9 @@ public class DdlAnalyzer
 				keywordFile = "drop_types.txt";
 			}
 
-			boolean showObjectList = typeToken != null && cursorPos >= typeToken.getCharEnd() && (nameToken == null || cursorPos < nameToken.getCharBegin());
-			boolean showDropOption = nameToken != null && cursorPos >=  nameToken.getCharEnd();
+			boolean showObjectList = typeToken != null && cursorPos >= typeToken.getCharEnd()
+				&& (nameToken == null || schemaForTableList != null || cursorPos < nameToken.getCharBegin());
+			boolean showDropOption = nameToken != null && cursorPos >=  nameToken.getCharEnd() && schemaForTableList == null;
 
 			// for DROP etc, we'll need to be after the table keyword
 			// otherwise it could be a DROP PROCEDURE as well.
@@ -161,6 +163,27 @@ public class DdlAnalyzer
 		if (selectedObject instanceof IndexDefinition)
 		{
 			IndexDefinition idx = (IndexDefinition)selectedObject;
+			String schema = SqlUtil.removeObjectQuotes(this.schemaForTableList);
+			idx = idx.createCopy();
+
+			if (dbConnection.getDbSettings().supportsSchemas())
+			{
+				if (schema.equalsIgnoreCase(idx.getSchema()))
+				{
+					idx.setSchema(null);
+					idx.getBaseTable().setSchema(null);
+				}
+			}
+			else if (dbConnection.getDbSettings().supportsCatalogs())
+			{
+				// treat catalogs as schemas
+				if (schema.equalsIgnoreCase(idx.getCatalog()))
+				{
+					idx.setCatalog(null);
+					idx.getBaseTable().setCatalog(null);
+				}
+			}
+
 			GenericObjectDropper dropper = new GenericObjectDropper();
 			dropper.setConnection(dbConnection);
 			dropper.setObjectTable(idx.getBaseTable());

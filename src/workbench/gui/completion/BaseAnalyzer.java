@@ -481,7 +481,7 @@ public abstract class BaseAnalyzer
 	{
 		IndexReader reader = dbConnection.getMetadata().getIndexReader();
 		title = "Index";
-		String schema = schemaForTableList;
+		String schema = dbConnection.getMetadata().adjustSchemaNameCase(schemaForTableList);
 		String catalog = null;
 		if (!dbConnection.getDbSettings().supportsSchemas())
 		{
@@ -509,7 +509,8 @@ public abstract class BaseAnalyzer
 		try
 		{
 			title = StringUtil.capitalize(reader.getSequenceTypeName());
-			List<SequenceDefinition> sequences = reader.getSequences(null, schemaForTableList, null);
+			String schema = dbConnection.getMetadata().adjustSchemaNameCase(schemaForTableList);
+			List<SequenceDefinition> sequences = reader.getSequences(null, schema, null);
 			elements = new ArrayList(sequences);
 		}
 		catch (SQLException se)

@@ -527,14 +527,12 @@ public class CompletionPopup
 			}
 			else if (o instanceof TableIdentifier)
 			{
-				TableIdentifier tbl = (TableIdentifier)o;
 				if (value.length() > 0)
 				{
 					value += ", ";
 				}
 				WbConnection connection = this.context.getAnalyzer().getConnection();
-				tbl = cleanupTable(tbl);
-				String name = tbl.getTableExpression(connection);
+				String name = getTableName(connection, (TableIdentifier)o);
 				if (!name.contains("\"") && !name.contains("[") && !name.contains("`"))
 				{
 					// only change the case if the name is not quoted
@@ -562,11 +560,11 @@ public class CompletionPopup
 		}
 	}
 
-	private TableIdentifier cleanupTable(TableIdentifier tbl)
+	private String getTableName(WbConnection conn, TableIdentifier tbl)
 	{
 		String schema = SqlUtil.removeObjectQuotes(this.context.getAnalyzer().getSchemaForTableList());
 
-		if (schema == null) return tbl;
+		if (schema == null) return tbl.getObjectExpression(conn);
 
 		BaseAnalyzer analyzer = context.getAnalyzer();
 		int currentContext = analyzer.getContext();
@@ -577,30 +575,29 @@ public class CompletionPopup
 				currentContext != BaseAnalyzer.CONTEXT_SEQUENCE_LIST
 			)
 		{
-			return tbl;
+			return tbl.getObjectExpression(conn);
 		}
-		
+
 		WbConnection connection = analyzer.getConnection();
+
+		tbl = tbl.createCopy();
+
 		if (connection.getDbSettings().supportsSchemas())
 		{
-			if (schema.equals(tbl.getSchema()))
+			if (schema.equalsIgnoreCase(tbl.getSchema()))
 			{
-				tbl = tbl.createCopy();
 				tbl.setSchema(null);
-				return tbl;
 			}
 		}
 		else if (connection.getDbSettings().supportsCatalogs())
 		{
 			// treat catalogs as schemas
-			if (schema.equals(tbl.getCatalog()))
+			if (schema.equalsIgnoreCase(tbl.getCatalog()))
 			{
-				tbl = tbl.createCopy();
 				tbl.setCatalog(null);
-				return tbl;
 			}
 		}
-		return tbl;
+		return tbl.getObjectExpression(conn);
 	}
 
 	public void selectCurrentWordInEditor(boolean flag)
