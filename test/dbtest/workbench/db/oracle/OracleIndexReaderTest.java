@@ -81,6 +81,29 @@ public class OracleIndexReaderTest
 	}
 
 	@Test
+	public void testGetIndexList()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		TestUtil.executeScript(con,
+			"create table foo (id integer);\n" +
+			"create index zzz_foo on foo (id);");
+		try
+		{
+			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getIndexes(null, OracleTestUtil.SCHEMA_NAME);
+			assertEquals(3, indexes.size());
+			assertEquals("AAA_UPPER", indexes.get(0).getName());
+			assertEquals("BBB_ID", indexes.get(1).getName());
+			assertEquals("ZZZ_FOO", indexes.get(2).getName());
+		}
+		finally
+		{
+			TestUtil.executeScript(con,"drop table foo;");
+		}
+	}
+
+	@Test
 	public void testGetIndexSource()
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
