@@ -549,6 +549,8 @@ public class ProcedureListPanel
 			String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 			String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 			String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+			String specificName = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME);
+
 			int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 
 			if (this.dbConnection.getMetadata().isOracle() && catalog != null)
@@ -560,6 +562,7 @@ public class ProcedureListPanel
 				def = new ProcedureDefinition(catalog, schema, proc, type);
 				def.setComment(comment);
 			}
+			def.setSpecificName(specificName);
 		}
 		return def;
 	}

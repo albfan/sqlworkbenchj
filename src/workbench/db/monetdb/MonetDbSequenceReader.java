@@ -24,6 +24,7 @@ package workbench.db.monetdb;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -114,14 +115,18 @@ public class MonetDbSequenceReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
+		Savepoint sp = null;
 		try
 		{
+			sp = this.dbConn.setSavepoint();
 			stmt = this.dbConn.getSqlConnection().prepareStatement(query.toString());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
+			dbConn.releaseSavepoint(sp);
 		}
 		catch (Throwable e)
 		{
+			dbConn.rollback(sp);
 			LogMgr.logError("MonetDbSequenceReader.getSequenceDefinition()", "Error when retrieving sequence definition", e);
 		}
 		finally

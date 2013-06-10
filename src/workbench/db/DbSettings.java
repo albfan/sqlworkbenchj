@@ -1611,4 +1611,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "indexlist.select", null);
 	}
+
+	public boolean useFullSearchPathForCompletion()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "completion.full.searchpath", false);
+	}
 }

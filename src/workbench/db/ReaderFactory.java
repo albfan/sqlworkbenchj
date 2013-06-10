@@ -41,6 +41,7 @@ import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.InformixSequenceReader;
 import workbench.db.ingres.IngresSequenceReader;
+import workbench.db.monetdb.MonetDbProcedureReader;
 import workbench.db.monetdb.MonetDbSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerIndexReader;
@@ -93,6 +94,10 @@ public class ReaderFactory
 		if (meta.isMySql())
 		{
 			return new MySqlProcedureReader(meta.getWbConnection());
+		}
+		if (meta.getDbId().equals("monetdb") && !Settings.getInstance().getBoolProperty("workbench.db.monetdb.procedurelist.usedriver"))
+		{
+			return new MonetDbProcedureReader(meta.getWbConnection());
 		}
 		return new JdbcProcedureReader(meta.getWbConnection());
 	}

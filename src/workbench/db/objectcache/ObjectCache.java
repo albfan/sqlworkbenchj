@@ -115,6 +115,10 @@ class ObjectCache
 
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 	{
+		if (dbConn.getDbSettings().useFullSearchPathForCompletion())
+		{
+			defaultSchema = null;
+		}
 		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
 		if (schemas.isEmpty())
 		{

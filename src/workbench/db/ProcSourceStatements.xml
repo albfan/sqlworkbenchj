@@ -3,6 +3,25 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>MonetDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select fct.func
+from sys.functions fct
+  left join sys.schemas sch on sch.id = fct.schema_id
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>fct.name</string>
+    </void>
+    <void property="schemaField">
+     <string>sch.name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>Apache Derby</string>
    <object id="derby_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

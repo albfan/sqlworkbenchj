@@ -72,6 +72,8 @@ public class ProcedureDefinition
 
 	private final Object typeLock = new Object();
 
+	private String specificName;
+
 	/**
 	 * Creates a new ProcedureDefinition.
 	 *
@@ -97,6 +99,16 @@ public class ProcedureDefinition
 			}
 		}
 		return def;
+	}
+
+	public String getSpecificName()
+	{
+		return specificName;
+	}
+
+	public void setSpecificName(String specificName)
+	{
+		this.specificName = specificName;
 	}
 
 	public void setOracleOverloadIndex(String indicator)
