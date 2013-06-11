@@ -446,7 +446,7 @@ public class TableDataPanel
 				rowCountLabel.setText("");
 				rowCountLabel.setIcon(getLoadingIndicator());
 				reloadAction.setEnabled(false);
-				dataDisplay.setStatusMessage(ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableName()));
+				dataDisplay.setStatusMessage(ResourceMgr.getFormattedString("MsgCalculatingTableRows", table.getTableName()));
 			}
 		});
 
