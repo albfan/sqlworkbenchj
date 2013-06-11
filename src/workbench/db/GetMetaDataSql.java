@@ -22,6 +22,10 @@
  */
 package workbench.db;
 
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
+import workbench.sql.formatter.SqlFormatter;
+
 /**
  *
  * @author Thomas Kellerer
@@ -383,4 +387,40 @@ public class GetMetaDataSql
 		this.baseObjectSchemaField = baseObjectSchemaField;
 	}
 
+	boolean containsWhere(String sql)
+	{
+		if (sql == null) return false;
+		sql = sql.toLowerCase();
+		if (!sql.contains("where")) return false;
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken token = lexer.getNextToken(false, false);
+		int bracketCount = 0;
+		boolean inFrom = false;
+		while (token != null)
+		{
+			String text = token.getText();
+			if (text.equals(")"))
+			{
+				bracketCount --;
+			}
+			else if (text.equals("("))
+			{
+				bracketCount ++;
+			}
+			else if (text.equals("from") && bracketCount == 0)
+			{
+				inFrom = true;
+			}
+			else if (inFrom && text.equals("where") && bracketCount == 0)
+			{
+				return true;
+			}
+			else if (SqlFormatter.FROM_TERMINAL.contains(text) && bracketCount == 0)
+			{
+				inFrom = false;
+			}
+			token = lexer.getNextToken(false, false);
+		}
+		return false;
+	}
 }

@@ -378,9 +378,9 @@ SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
                else '  FOR EACH ROW' end
        || '\n'
        || trg.triggerdefinition
-from sys.systriggers trg, sys.systables t, sys.sysschemas s
-where trg.tableid = t.tableid
-and   t.schemaid = s.schemaid
+from sys.systriggers trg
+   join sys.systables t on trg.tableid = t.tableid
+   join sys.sysschemas s on t.schemaid = s.schemaid
       </string>
     </void>
     <void property="objectNameField">
