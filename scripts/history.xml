@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-06-09">
+    <entry dev-build="11" type="enh">Implemented a workaround for a bug in the MonetDB driver in order to display stored procedures properly</entry>
     <entry dev-build="10" type="enh">When editing or displaying long strings (that exceed the multi-line threshold) word wrapping can now be enabled</entry>
     <entry dev-build="10" type="enh">When printing a result set the SQL shown above the result is now properly wrapped if too long for a single line. Displaying the SQL can also be disabled. If enabled, the SQL will only be shown on the first page</entry>
     <entry dev-build="10" type="enh">Added support for PostgreSQL 9.3 MATERIALIZED VIEWs</entry>
@@ -23,6 +24,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="11" type="fix">When invoking code-completion for a specific schema, the schema name appended twice if the case written in the editor did not match the actual case as stored by the DBMS</entry>
+    <entry dev-build="11" type="fix">Configured SQL statements to retrieve view, trigger or procedure source would not work if they had sub-selects with a WHERE condition</entry>
     <entry dev-build="10" type="fix">The columns of an index where no longer displayed in the index list of the DbExplorer</entry>
     <entry dev-build="10" type="fix">The office libraries (for exporting Excel files) were not bundled correctly in the Mac package</entry>
     <entry dev-build="10" type="fix">When invoking code completion for an already schema-qualified identifier, the schema would be pasted into the editor again</entry>
