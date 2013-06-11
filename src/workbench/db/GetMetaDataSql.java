@@ -63,17 +63,10 @@ public class GetMetaDataSql
 
 	private String getSelectSql()
 	{
-		boolean needsAnd = false;
-		boolean needsWhere = false;
+		boolean containsWhere = containsWhere(baseSql);
+		boolean needsAnd = containsWhere;
+		boolean needsWhere = !containsWhere;
 		StringBuilder sql = new StringBuilder(baseSql);
-		if (baseSql.toLowerCase().indexOf("where") == -1)
-		{
-			needsWhere = true;
-		}
-		else
-		{
-			needsAnd = true;
-		}
 
 		if (schema != null && schemaField != null)
 		{

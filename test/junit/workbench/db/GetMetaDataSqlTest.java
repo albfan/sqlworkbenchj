@@ -23,6 +23,7 @@
 package workbench.db;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -53,5 +54,29 @@ public class GetMetaDataSqlTest
 
 		sql = "select * from (select x from y where a = 42) t where t.x = 6";
 		assertTrue(meta.containsWhere(sql));
+	}
+
+	@Test
+	public void testGenerateSql()
+	{
+		GetMetaDataSql meta = new GetMetaDataSql();
+		meta.setBaseSql("select * from all_source");
+		meta.setSchemaField("owner");
+		meta.setSchema("FOOBAR");
+		String sql = meta.getSql();
+		assertEquals("select * from all_source WHERE owner = 'FOOBAR'", sql);
+
+		meta.setBaseSql("select * from all_source where type = 'V'");
+		sql = meta.getSql();
+		assertEquals("select * from all_source where type = 'V' AND owner = 'FOOBAR'", sql);
+
+		meta.setBaseSql("select * from (select foo from bar) t where type = 'V'");
+		sql = meta.getSql();
+		assertEquals("select * from (select foo from bar) t where type = 'V' AND owner = 'FOOBAR'", sql);
+
+		meta.setBaseSql("select * from (select foo from bar) t ");
+		sql = meta.getSql();
+		assertEquals("select * from (select foo from bar) t  WHERE owner = 'FOOBAR'", sql);
+
 	}
 }
