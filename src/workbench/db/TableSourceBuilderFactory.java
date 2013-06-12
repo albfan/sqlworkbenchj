@@ -26,6 +26,7 @@ import workbench.db.derby.DerbyTableSourceBuilder;
 import workbench.db.h2database.H2TableSourceBuilder;
 import workbench.db.hsqldb.HsqlTableSourceBuilder;
 import workbench.db.ibm.Db2TableSourceBuilder;
+import workbench.db.ibm.InformixTableSourceBuilder;
 import workbench.db.mssql.SqlServerTableSourceBuilder;
 import workbench.db.mysql.MySQLTableSourceBuilder;
 import workbench.db.oracle.OracleTableSourceBuilder;
@@ -72,6 +73,10 @@ public class TableSourceBuilderFactory
 		else if (con.getDbId().equals("db2"))
 		{
 			return new Db2TableSourceBuilder(con);
+		}
+		if (con.getDbId().equals("informix_dynamic_server"))
+		{
+			return new InformixTableSourceBuilder(con);
 		}
 		return new TableSourceBuilder(con);
 	}
