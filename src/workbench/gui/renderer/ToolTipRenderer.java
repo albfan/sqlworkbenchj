@@ -144,22 +144,23 @@ public class ToolTipRenderer
 	static Insets getDefaultInsets()
 	{
 		Insets result = null;
-		List<String> i = Settings.getInstance().getListProperty("workbench.gui.renderer.insets", true, "1,1,1,1");
 
-		if (i.size() == 4)
+		String prop = Settings.getInstance().getProperty("workbench.gui.renderer.insets", null);
+		List<String> values = prop != null ? StringUtil.stringToList(prop, ",", true, true, false) : null;
+
+		if (values != null && values.size() == 4)
 		{
 			try
 			{
-				int top = Integer.valueOf(i.get(0));
-				int left = Integer.valueOf(i.get(1));
-				int bottom = Integer.valueOf(i.get(2));
-				int right = Integer.valueOf(i.get(3));
+				int top = Integer.valueOf(values.get(0));
+				int left = Integer.valueOf(values.get(1));
+				int bottom = Integer.valueOf(values.get(2));
+				int right = Integer.valueOf(values.get(3));
 				result = new Insets(top,left,bottom,right);
 			}
 			catch (Exception e)
 			{
-				String value = Settings.getInstance().getProperty("workbench.gui.renderer.insets", null);
-				LogMgr.logError("ToolTipRenderer.getDefaultInsets()", "Error reading default insets from settings: " + value, e);
+				LogMgr.logError("ToolTipRenderer.getDefaultInsets()", "Error reading default insets from settings: " + prop, e);
 				result = null;
 			}
 		}
