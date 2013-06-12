@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -99,7 +102,7 @@ public class DerbySynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
 		String sql = "select a.aliasinfo \n" +
@@ -110,12 +113,12 @@ public class DerbySynonymReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + sql);
+			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + SqlUtil.replaceParameters(sql, synonym, owner));
 		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
-		stmt.setString(1, aSynonym);
-		stmt.setString(2, anOwner);
+		stmt.setString(1, synonym);
+		stmt.setString(2, owner);
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
 		TableIdentifier result = null;

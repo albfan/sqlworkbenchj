@@ -21,6 +21,9 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A TableSourceBuilder that will read the lock mode setting for the table.
+ *
+ * The lock mode will be stored in the TableSourceOptions of the table.
  *
  * @author Thomas Kellerer
  */
@@ -33,6 +36,14 @@ public class InformixTableSourceBuilder
 		super(con);
 	}
 
+	/**
+	 * Read additional table options.
+	 *
+	 * @param table    the table to process
+	 * @param columns  the columns (not used)
+	 *
+	 * @see TableSourceOptions#getAdditionalSql()
+	 */
 	@Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
@@ -54,19 +65,19 @@ public class InformixTableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixSynonymReader.readLockMode()", "Using query=\n" + sql);
+			LogMgr.logInfo("InformixSynonymReader.readLockMode()", "Using query=\n" + SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()));
 		}
 
-		PreparedStatement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try
 		{
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getRawTableName());
-			stmt.setString(2, table.getRawSchema());
+			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, table.getRawTableName());
+			pstmt.setString(2, table.getRawSchema());
 
-			rs = stmt.executeQuery(sql.toString());
+			rs = pstmt.executeQuery(sql.toString());
 			if (rs.next())
 			{
 				TableSourceOptions option = table.getSourceOptions();
@@ -92,7 +103,7 @@ public class InformixTableSourceBuilder
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeAll(rs, pstmt);
 		}
 	}
 }

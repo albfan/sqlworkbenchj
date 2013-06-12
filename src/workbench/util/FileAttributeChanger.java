@@ -38,7 +38,7 @@ public class FileAttributeChanger
 
 	public void removeHidden(File dir)
 	{
-		if (isWindows())
+		if (PlatformHelper.isWindows())
 		{
 			boolean done = false;
 			if (isJava7())
@@ -94,11 +94,6 @@ public class FileAttributeChanger
 			LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute", th);
 			return false;
 		}
-	}
-
-	private boolean isWindows()
-	{
-		return System.getProperty("os.name").contains("Windows");
 	}
 
 	public static boolean isJava7()
