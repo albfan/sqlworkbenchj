@@ -135,7 +135,6 @@ public abstract class AbstractOraclePartition
 		}
 		if (locality == null)
 		{
-			result.append('\n');
 			result.append(indent);
 			result.append("PARTITION BY ");
 			result.append(type);

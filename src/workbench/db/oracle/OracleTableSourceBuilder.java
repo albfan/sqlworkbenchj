@@ -180,7 +180,10 @@ public class OracleTableSourceBuilder
 		StringBuilder partition = getPartitionSql(tbl);
 		if (partition != null && partition.length() > 0)
 		{
-			options.append('\n');
+			if (options.length() > 0 && options.charAt(options.length() - 1) != '\n')
+			{
+				options.append('\n');
+			}
 			options.append(partition);
 		}
 
