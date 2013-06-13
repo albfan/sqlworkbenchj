@@ -36,12 +36,11 @@ import javax.swing.event.ListSelectionListener;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
-import workbench.db.DbSettings;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
-
-import workbench.db.TableIdentifier;
 import workbench.gui.dbobjects.TableRowCountPanel;
 
 /**
@@ -121,26 +120,12 @@ public class CountTableRowsAction
 		}
 
 		DbMetadata meta = source.getConnection().getMetadata();
-		DbSettings dbs = source.getConnection().getDbSettings();
-
 		Set<String> typesWithData = meta.getObjectsWithData();
 		List<TableIdentifier> objects = new ArrayList<TableIdentifier>();
 
 		for (DbObject dbo : selected)
 		{
 			String type = dbo.getObjectType();
-			if (meta.supportsSynonyms() && dbs.isSynonymType(type))
-			{
-				TableIdentifier rt = meta.resolveSynonym((TableIdentifier)dbo);
-				if (rt == null)
-				{
-					type = "";
-				}
-				else
-				{
-					type = rt.getType();
-				}
-			}
 			if (typesWithData.contains(type))
 			{
 				objects.add((TableIdentifier)dbo);

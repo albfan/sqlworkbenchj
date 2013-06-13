@@ -1373,7 +1373,7 @@ public class TableListPanel
 			else if (dbs.isSynonymType(type))
 			{
 				SynonymDDLHandler synHandler = new SynonymDDLHandler();
-				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, true);
+				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, true, true);
 			}
 			else if (meta.isSequenceType(type))
 			{
@@ -2114,11 +2114,11 @@ public class TableListPanel
 		}
 		else if (Settings.PROPERTY_DBEXP_INSTANT_FILTER.equals(evt.getPropertyName()))
 		{
-			((QuickFilterPanel)findPanel).setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
+			findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
 		}
 		else if (Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS.equals(evt.getPropertyName()))
 		{
-			((QuickFilterPanel)findPanel).setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+			findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 		}
 		else if (PlacementChooser.PLACEMENT_PROPERTY.equals(evt.getPropertyName()))
 		{

@@ -22,18 +22,22 @@
  */
 package workbench.db.oracle;
 
-import workbench.WbTestCase;
-import java.util.List;
-import workbench.db.TableIdentifier;
 import java.util.Collection;
-import org.junit.AfterClass;
-import workbench.db.SynonymReader;
-import org.junit.Test;
+import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.SynonymDDLHandler;
+import workbench.db.SynonymReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import static org.junit.Assert.*;
+
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -102,16 +106,18 @@ public class OracleSynonymReaderTest
 		if (con == null) return;
 
 		SynonymDDLHandler handler = new SynonymDDLHandler();
-		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "SYNONYM"});
+		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] {"SYNONYM"});
 		assertNotNull(objects);
 		assertEquals(1, objects.size());
 		TableIdentifier syn = objects.get(0);
 
-		String sql = handler.getSynonymSource(con, syn, true);
+		String sql = handler.getSynonymSource(con, syn, true, false);
+//		System.out.println(sql);
+
 		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
 		assertTrue(sql.contains("CREATE TABLE PERSON"));
 
-		sql = handler.getSynonymSource(con, syn, false);
+		sql = handler.getSynonymSource(con, syn, false, false);
 //		System.out.println(sql);
 		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
 		assertFalse(sql.contains("CREATE TABLE PERSON"));

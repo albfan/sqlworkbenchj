@@ -38,8 +38,8 @@ import workbench.sql.ScriptParser;
 
 import workbench.util.SqlUtil;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -58,15 +58,15 @@ public class PostgresIndexReaderTest
 		super("PostgresIndexReaderTest");
 	}
 
-	@BeforeClass
-	public static void setUpClass()
+	@Before
+	public void setUpClass()
 		throws Exception
 	{
 		PostgresTestUtil.initTestCase(TESTID);
 	}
 
-	@AfterClass
-	public static void tearDownClass()
+	@After
+	public void tearDownClass()
 		throws Exception
 	{
 		PostgresTestUtil.cleanUpTestCase();

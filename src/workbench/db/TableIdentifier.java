@@ -842,7 +842,7 @@ public class TableIdentifier
 		else if ("SYNONYM".equalsIgnoreCase(type))
 		{
 			SynonymDDLHandler synHandler = new SynonymDDLHandler();
-			source = synHandler.getSynonymSource(con, this, false);
+			source = synHandler.getSynonymSource(con, this, false, false);
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{

@@ -22,7 +22,9 @@
  */
 package workbench.db;
 
+
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -42,11 +44,19 @@ public class SynonymDDLHandler
 	 * @return the SQL to create the synonym.
 	 * @see SynonymReader#getSynonymSource(workbench.db.WbConnection, java.lang.String, java.lang.String)
 	 */
-	public String getSynonymSource(WbConnection dbConnection, TableIdentifier synonym, boolean includeTable)
+	public String getSynonymSource(WbConnection dbConnection, TableIdentifier synonym, boolean includeTable, boolean includeDrop)
 	{
 		SynonymReader reader = dbConnection.getMetadata().getSynonymReader();
 		if (reader == null) return StringUtil.EMPTY_STRING;
 		StringBuilder result = new StringBuilder(100);
+
+		if (includeDrop)
+		{
+			GenericObjectDropper dropper = new GenericObjectDropper();
+			dropper.setConnection(dbConnection);
+			result.append(dropper.getDropForObject(synonym));
+			result.append(";\n");
+		}
 		TableIdentifier tbl = synonym.createCopy();
 		tbl.adjustCase(dbConnection);
 		try

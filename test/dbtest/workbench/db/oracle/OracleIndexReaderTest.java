@@ -92,6 +92,7 @@ public class OracleIndexReaderTest
 		try
 		{
 			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getIndexes(null, OracleTestUtil.SCHEMA_NAME);
+			System.out.println(indexes);
 			assertEquals(3, indexes.size());
 			assertEquals("AAA_UPPER", indexes.get(0).getName());
 			assertEquals("BBB_ID", indexes.get(1).getName());
@@ -158,26 +159,33 @@ public class OracleIndexReaderTest
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
-		String sql =
-			"CREATE TABLE index_test (id integer not null);\n" +
-			"ALTER TABLE index_test ADD CONSTRAINT pk_t PRIMARY KEY (id) USING INDEX (CREATE UNIQUE INDEX UNIQUE_ID ON index_test (id));";
-		TestUtil.executeScript(con, sql);
+		try
+		{
+			String sql =
+				"CREATE TABLE index_test (id integer not null);\n" +
+				"ALTER TABLE index_test ADD CONSTRAINT pk_t PRIMARY KEY (id) USING INDEX (CREATE UNIQUE INDEX UNIQUE_ID ON index_test (id));";
+			TestUtil.executeScript(con, sql);
 
-		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("INDEX_TEST"));
-		List<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
-		assertEquals(1, idx.size());
-		IndexDefinition def = idx.get(0);
-		assertTrue(def.isPrimaryKeyIndex());
-		assertEquals("UNIQUE_ID", def.getName());
-		assertEquals("PK_T", tbl.getTable().getPrimaryKeyName());
+			TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("INDEX_TEST"));
+			List<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
+			assertEquals(1, idx.size());
+			IndexDefinition def = idx.get(0);
+			assertTrue(def.isPrimaryKeyIndex());
+			assertEquals("UNIQUE_ID", def.getName());
+			assertEquals("PK_T", tbl.getTable().getPrimaryKeyName());
 
-		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		PkDefinition pk = new PkDefinition(CollectionUtil.arrayList("ID"));
-		pk.setPkName("PK_T");
-		pk.setPkIndexName("UNIQUE_ID");
-		String pkSource = builder.getPkSource(tbl.getTable(), pk, false).toString();
-		assertTrue(pkSource.indexOf("USING INDEX") > -1);
-		assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX UNIQUE_ID") > -1);
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+			PkDefinition pk = new PkDefinition(CollectionUtil.arrayList("ID"));
+			pk.setPkName("PK_T");
+			pk.setPkIndexName("UNIQUE_ID");
+			String pkSource = builder.getPkSource(tbl.getTable(), pk, false).toString();
+			assertTrue(pkSource.indexOf("USING INDEX") > -1);
+			assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX UNIQUE_ID") > -1);
+		}
+		finally
+		{
+			TestUtil.executeScript(con, "drop table index_test;");
+		}
 	}
 
 }

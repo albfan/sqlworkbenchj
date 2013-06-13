@@ -98,10 +98,6 @@ public class CreateDropScriptAction
 	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
-		DbMetadata meta = source.getConnection().getMetadata();
-		Set<String> types = CollectionUtil.caseInsensitiveSet();
-		types.addAll(meta.getTableTypes());
-
 		List<? extends DbObject> objects = source.getSelectedObjects();
 
 		if (CollectionUtil.isEmpty(objects))
@@ -110,6 +106,9 @@ public class CreateDropScriptAction
 		}
 		else
 		{
+			DbMetadata meta = source.getConnection().getMetadata();
+			Set<String> types = CollectionUtil.caseInsensitiveSet();
+			types.addAll(meta.getTableTypes());
 			for (DbObject dbo : objects)
 			{
 				if (!types.contains(dbo.getObjectType()))

@@ -1052,10 +1052,12 @@ public class WbConnection
 			DbMetadata meta = getMetadata();
 			StringBuilder buff = new StringBuilder(100);
 			String user = getDisplayUser();
-			buff.append(ResourceMgr.getString("TxtUser"));
-			buff.append('=');
-			buff.append(user);
-
+			if (user != null)
+			{
+				buff.append(ResourceMgr.getString("TxtUser"));
+				buff.append('=');
+				buff.append(user);
+			}
 			String catalog = isBusy ? currentCatalog : meta.getCurrentCatalog();
 			if (catalog != null && catalog.length() > 0)
 			{

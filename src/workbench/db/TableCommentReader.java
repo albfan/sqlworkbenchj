@@ -24,9 +24,11 @@ package workbench.db;
 
 import java.util.List;
 
-import workbench.db.sqltemplates.ColumnChanger;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.sqltemplates.ColumnChanger;
+
 import workbench.util.StringUtil;
 
 /**
@@ -92,6 +94,7 @@ public class TableCommentReader
 	public String getTableComment(WbConnection dbConnection, TableIdentifier tbl)
 	{
 		TableIdentifier id = dbConnection.getMetadata().findObject(tbl);
+		if (id == null) return null;
 		return id.getComment();
 	}
 

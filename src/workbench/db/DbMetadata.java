@@ -1392,8 +1392,8 @@ public class DbMetadata
 			// if the types are cleaned up, an empty array can be returned
 			// in that case this means that only non-native types are requested
 			// which are handled by one of the extenders. In that case there is no
-			// need to call getTables() 
-			if (typesToUse != null && typesToUse.length > 0)
+			// need to call getTables()
+			if (typesToUse == null || typesToUse.length > 0)
 			{
 				tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, typesToUse);
 				if (tableRs == null)

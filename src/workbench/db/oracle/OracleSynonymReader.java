@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import workbench.db.SynonymReader;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -51,39 +54,66 @@ public class OracleSynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
-		StringBuilder sql = new StringBuilder(400);
+		boolean readComments = OracleUtils.getRemarksReporting(con);
+
+		StringBuilder sql = new StringBuilder(100);
 		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner ");
-		sql.append("FROM all_synonyms s, all_objects o  ");
-		sql.append("where s.table_name = o.object_name ");
-		sql.append("and s.table_owner = o.owner ");
-		sql.append("and ((s.synonym_name = ? AND s.owner = ?) ");
-		sql.append(" or (s.synonym_name = ? AND s.owner = 'PUBLIC')) ");
-		sql.append("ORDER BY decode(s.owner, 'PUBLIC',9,1)");
+		if (readComments)
+		{
+			sql.append(", tc.comments ");
+		}
+
+		sql.append(
+			"\nFROM all_synonyms s \n" +
+			"  JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n"
+		);
+
+		if (readComments)
+		{
+			sql.append("  LEFT JOIN all_tab_comments tc on tc.table_name = o.object_name AND tc.owner = o.owner \n");
+		}
+
+		sql.append(
+			"WHERE ((s.synonym_name = ? AND s.owner = ?)  \n" +
+			"    OR (s.synonym_name = ? AND s.owner = 'PUBLIC'))  \n" +
+			"ORDER BY decode(s.owner, 'PUBLIC',9,1)"
+		);
+
+		if (owner == null)
+		{
+			owner = con.getCurrentUser();
+		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("OracleSynonymReader.getSynonymTable()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, synonym, owner, synonym));
+		}
 
 		PreparedStatement stmt = null;
-
 		ResultSet rs = null;
 
 		TableIdentifier result = null;
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql.toString());
-			stmt.setString(1, aSynonym);
-			stmt.setString(2, anOwner == null ? con.getCurrentUser() : anOwner);
-			stmt.setString(3, aSynonym);
+			stmt.setString(1, synonym);
+			stmt.setString(2, owner);
+			stmt.setString(3, synonym);
 
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
-				String owner = rs.getString(2);
+				String towner = rs.getString(2);
 				String table = rs.getString(3);
 				String dblink = rs.getString(4);
 				String type = rs.getString(5);
+				String comment = (readComments ? rs.getString(6) : null);
 				if (dblink != null) table = table + "@" + dblink;
-				result = new TableIdentifier(null, owner, table);
+				result = new TableIdentifier(null, towner, table);
+				result.setComment(comment);
 				result.setType(type);
 			}
 		}
