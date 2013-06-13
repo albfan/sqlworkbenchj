@@ -26,6 +26,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JMenuItem;
 import javax.swing.ListSelectionModel;
@@ -119,10 +120,28 @@ public class CountTableRowsAction
 			return null;
 		}
 
+		DbMetadata meta = source.getConnection().getMetadata();
+		DbSettings dbs = source.getConnection().getDbSettings();
+
+		Set<String> typesWithData = meta.getObjectsWithData();
 		List<TableIdentifier> objects = new ArrayList<TableIdentifier>();
+
 		for (DbObject dbo : selected)
 		{
-			if (canContainData(dbo))
+			String type = dbo.getObjectType();
+			if (meta.supportsSynonyms() && dbs.isSynonymType(type))
+			{
+				TableIdentifier rt = meta.resolveSynonym((TableIdentifier)dbo);
+				if (rt == null)
+				{
+					type = "";
+				}
+				else
+				{
+					type = rt.getType();
+				}
+			}
+			if (typesWithData.contains(type))
 			{
 				objects.add((TableIdentifier)dbo);
 			}
@@ -134,23 +153,6 @@ public class CountTableRowsAction
 	{
 		List<TableIdentifier> selected = getSelectedObjects();
 		this.setEnabled(selected != null && selected.size() > 0);
-	}
-
-	private boolean canContainData(DbObject dbo)
-	{
-		if (!(dbo instanceof TableIdentifier)) return false;
-		TableIdentifier tbl = (TableIdentifier)dbo;
-
-		String type = dbo.getObjectType();
-		DbMetadata meta = source.getConnection().getMetadata();
-		DbSettings dbs = source.getConnection().getDbSettings();
-		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
-		{
-			TableIdentifier rt = meta.resolveSynonym(tbl);
-			if (rt == null) return false;
-			type = rt.getType();
-		}
-		return meta.objectTypeCanContainData(type);
 	}
 
 	@Override
