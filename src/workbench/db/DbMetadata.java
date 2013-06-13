@@ -147,6 +147,7 @@ public class DbMetadata
 	private ViewReader viewReader;
 	private char catalogSeparator;
 	private SelectIntoVerifier selectIntoVerifier;
+	private Set<String> tableTypesFromDriver;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -1300,6 +1301,26 @@ public class DbMetadata
 		return SqlUtil.removeObjectQuotes(StringUtil.replace(pattern, "*", "%"));
 	}
 
+	private String[] cleanupTypes(String[] types)
+	{
+		if (types == null || types.length == 0) return types;
+
+		List<String> typesToUse = new ArrayList<String>(types.length);
+
+		Collection<String> nativeTypes = retrieveTableTypes();
+		for (String type : types)
+		{
+			if (nativeTypes.contains(type))
+			{
+				typesToUse.add(type);
+			}
+		}
+
+		String[] cleanTypes = new String[typesToUse.size()];
+		cleanTypes = typesToUse.toArray(cleanTypes);
+		return cleanTypes;
+	}
+
 	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
 		throws SQLException
 	{
@@ -1362,14 +1383,27 @@ public class DbMetadata
 					", types=" + (types == null ? "null" : Arrays.asList(types).toString()));
 			}
 
-			tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, types);
-			if (tableRs == null)
+			String[] typesToUse = types;
+			if (getDbSettings().cleanupTypeList())
 			{
-				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
-				return result;
+				typesToUse = cleanupTypes(types);
 			}
 
-			while (tableRs.next())
+			// if the types are cleaned up, an empty array can be returned
+			// in that case this means that only non-native types are requested
+			// which are handled by one of the extenders. In that case there is no
+			// need to call getTables() 
+			if (typesToUse != null && typesToUse.length > 0)
+			{
+				tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, typesToUse);
+				if (tableRs == null)
+				{
+					LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
+					return result;
+				}
+			}
+
+			while (tableRs != null && tableRs.next())
 			{
 				String cat = tableRs.getString(1);
 				String schema = tableRs.getString(2);
@@ -2207,7 +2241,7 @@ public class DbMetadata
 	 * workbench.db.[dbid].currentcatalog.query
 	 *
 	 * @see DbSettings#getQueryForCurrentCatalog()
-	 * @see DbSettings#supportsCatalogs() 
+	 * @see DbSettings#supportsCatalogs()
 	 *
 	 * @return The name of the current catalog or null if there is no current catalog
 	 */
@@ -2392,9 +2426,11 @@ public class DbMetadata
 		return (type.indexOf("INDEX") > -1);
 	}
 
-	private Collection<String> retrieveTableTypes()
+	private synchronized Collection<String> retrieveTableTypes()
 	{
-		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		if (tableTypesFromDriver != null) return tableTypesFromDriver;
+
+		tableTypesFromDriver = CollectionUtil.caseInsensitiveSet();
 		ResultSet rs = null;
 
 		try
@@ -2411,7 +2447,7 @@ public class DbMetadata
 				type = type.trim();
 
 				if (isIndexType(type)) continue;
-				result.add(type);
+				tableTypesFromDriver.add(type);
 			}
 		}
 		catch (Exception e)
@@ -2424,9 +2460,9 @@ public class DbMetadata
 		}
 		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
 		{
-			result.add("MATERIALIZED VIEW");
+			tableTypesFromDriver.add("MATERIALIZED VIEW");
 		}
-		return result;
+		return tableTypesFromDriver;
 	}
 
 	/**

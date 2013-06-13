@@ -1616,4 +1616,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "completion.full.searchpath", false);
 	}
+
+	public boolean cleanupTypeList()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "metadata.cleanup.types", false);
+	}
 }
