@@ -21,7 +21,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A TableSourceBuilder that will read the lock mode setting for the table.
+ * A TableSourceBuilder for Informix that will read the lock mode setting for the table.
  *
  * The lock mode will be stored in the TableSourceOptions of the table.
  *
@@ -47,19 +47,26 @@ public class InformixTableSourceBuilder
 	@Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
-		TableSourceOptions option = table.getSourceOptions();
-		if (!option.isInitialized())
+		if (Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.tablesource.lockmode", true))
 		{
-			readLockMode(table);
-			option.setInitialized();
+			TableSourceOptions option = table.getSourceOptions();
+			if (!option.isInitialized())
+			{
+				readLockMode(table);
+				option.setInitialized();
+			}
 		}
 	}
 
 	private void readLockMode(TableIdentifier table)
 	{
+		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
+		TableIdentifier syst = new TableIdentifier(table.getRawCatalog(), systemSchema, "systables");
+		String systables = syst.getFullyQualifiedName(dbConnection);
+
 		String sql =
 			"select locklevel \n" +
-			"from systables \n" +
+			"from " + systables + " \n" +
 			"where tabname = ? \n" +
 			"  and owner = ? \n";
 

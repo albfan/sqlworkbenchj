@@ -60,18 +60,25 @@ public class InformixSynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
+		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
+		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
+		TableIdentifier synTabs = new TableIdentifier(catalog, systemSchema, "syssyntable");
+
+		String systables = sysTabs.getFullyQualifiedName(con);
+		String syntable = synTabs.getFullyQualifiedName(con);
+
 		String sql =
 			"select bt.owner as table_schema, \n" +
 			"       bt.tabname as table_name \n" +
-			"from systables syn \n" +
-			"  join syssyntable lnk on lnk.tabid = syn.tabid \n" +
-			"  join systables bt on bt.tabid = lnk.btabid \n" +
+			"from " + systables + " syn \n" +
+			"  join " + syntable + " lnk on lnk.tabid = syn.tabid \n" +
+			"  join " + systables + " bt on bt.tabid = lnk.btabid \n" +
 			"and syn.tabname = ? \n" +
 			"and syn.owner = ?";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Using query=\n" + sql);
+			LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Using query=\n" + SqlUtil.replaceParameters(sql, synonymName, schema));
 		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());

@@ -35,11 +35,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 
 /**
- * SequenceReader for Apache Derby 10.6
+ * SequenceReader for Informix
  *
  * @author  Thomas Kellerer
  */
@@ -47,23 +49,10 @@ public class InformixSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConn;
-	private final String baseQuery;
 
 	public InformixSequenceReader(WbConnection conn)
 	{
 		dbConn = conn;
-		baseQuery =
-			"select trim(t.tabname) as sequence_name, \n" +
-			"       trim(t.owner) as sequence_schema, \n" +
-			"       seq.start_val, \n" +
-			"       seq.inc_val, \n" +
-			"       seq.min_val, \n" +
-			"       seq.max_val, \n" +
-			"       seq.cycle, \n" +
-			"       seq.cache, \n" +
-			"       seq.order \n" +
-			" from syssequences seq \n" +
-			"   join systables t on seq.tabid = t.tabid";
 	}
 
 	@Override
@@ -105,8 +94,30 @@ public class InformixSequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		StringBuilder sql = new StringBuilder(baseQuery.length() + 20);
-		sql.append(baseQuery);
+
+		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
+		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
+		TableIdentifier seqTabs = new TableIdentifier(catalog, systemSchema, "syssequences");
+
+		String systables = sysTabs.getFullyQualifiedName(this.dbConn);
+		String syssequences = seqTabs.getFullyQualifiedName(this.dbConn);
+
+		StringBuilder sql = new StringBuilder(100);
+		sql.append(
+			"select trim(t.tabname) as sequence_name, \n" +
+			"       trim(t.owner) as sequence_schema, \n" +
+			"       seq.start_val, \n" +
+			"       seq.inc_val, \n" +
+			"       seq.min_val, \n" +
+			"       seq.max_val, \n" +
+			"       seq.cycle, \n" +
+			"       seq.cache, \n" +
+			"       seq.order \n" +
+			" from ");
+		sql.append(syssequences);
+		sql.append("seq \n   join ");
+		sql.append(systables);
+		sql.append(" t on seq.tabid = t.tabid");
 
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(schema))
