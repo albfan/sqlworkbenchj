@@ -77,7 +77,7 @@ public class InformixTableSourceBuilder
 			pstmt.setString(1, table.getRawTableName());
 			pstmt.setString(2, table.getRawSchema());
 
-			rs = pstmt.executeQuery(sql.toString());
+			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				TableSourceOptions option = table.getSourceOptions();
