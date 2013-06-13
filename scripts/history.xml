@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-06-09">
+    <entry dev-build="11" type="enh">For Informix the lock mode of a table is now displayed in the table's source</entry>
     <entry dev-build="11" type="enh">Implemented a workaround for a bug in the MonetDB driver in order to display stored procedures properly</entry>
     <entry dev-build="10" type="enh">When editing or displaying long strings (that exceed the multi-line threshold) word wrapping can now be enabled</entry>
     <entry dev-build="10" type="enh">When printing a result set the SQL shown above the result is now properly wrapped if too long for a single line. Displaying the SQL can also be disabled. If enabled, the SQL will only be shown on the first page</entry>
