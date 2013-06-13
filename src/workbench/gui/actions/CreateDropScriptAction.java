@@ -25,6 +25,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -32,6 +33,7 @@ import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
 
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DropScriptGenerator;
 import workbench.db.TableIdentifier;
@@ -66,9 +68,13 @@ public class CreateDropScriptAction
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(objects.size());
+		DbMetadata meta = source.getConnection().getMetadata();
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(meta.getTableTypes());
+
 		for (DbObject dbo : objects)
 		{
-			if (dbo instanceof TableIdentifier)
+			if (types.contains(dbo.getObjectType()))
 			{
 				tables.add((TableIdentifier)dbo);
 			}
@@ -92,7 +98,12 @@ public class CreateDropScriptAction
 	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
+		DbMetadata meta = source.getConnection().getMetadata();
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(meta.getTableTypes());
+
 		List<? extends DbObject> objects = source.getSelectedObjects();
+
 		if (CollectionUtil.isEmpty(objects))
 		{
 			setEnabled(false);
@@ -101,7 +112,7 @@ public class CreateDropScriptAction
 		{
 			for (DbObject dbo : objects)
 			{
-				if (!(dbo instanceof TableIdentifier))
+				if (!types.contains(dbo.getObjectType()))
 				{
 					setEnabled(false);
 					return;
