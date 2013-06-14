@@ -241,11 +241,20 @@ public class SqlLiteralFormatter
 		try
 		{
 			pattern = Settings.getInstance().getProperty(key, null);
+
+			if (pattern != null && pattern.startsWith("${") && pattern.endsWith("}"))
+			{
+				format = pattern.substring(2, pattern.length() - 1);
+				key = "workbench.sql.literals." + format + "." + type + ".pattern";
+				pattern = Settings.getInstance().getProperty(key, null);
+			}
+
 			if (pattern == null)
 			{
 				key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
 				pattern = Settings.getInstance().getProperty(key, defaultPattern);
 			}
+
 			f = new WbDateFormatter(pattern);
 		}
 		catch (Exception e)
