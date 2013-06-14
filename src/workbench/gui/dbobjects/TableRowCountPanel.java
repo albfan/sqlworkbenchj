@@ -259,13 +259,6 @@ public class TableRowCountPanel
 			this.window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleRowCount"));
 			boolean useSavepoint = dbConnection.getDbSettings().useSavePointForDML();
 
-			Savepoint sp = null;
-
-			if (useSavepoint)
-			{
-				sp = dbConnection.setSavepoint();
-			}
-
 			int tblCount = tables.size();
 			for (int tableNum=0; tableNum < tblCount; tableNum++)
 			{
@@ -275,28 +268,20 @@ public class TableRowCountPanel
 				showTable(table, tableNum, tblCount);
 				String sql = builder.getSelectForCount(table);
 
-				rs = currentStatement.executeQuery(sql);
+				rs = runStatement(sql, useSavepoint);
 				if (cancel) break;
 
 				long rowCount = 0;
-				if (rs.next())
+				if (rs == null)
+				{
+					rowCount = -1;
+				}
+				else if (rs.next())
 				{
 					rowCount = rs.getLong(1);
 				}
 				SqlUtil.closeResult(rs);
 				addRowCount(table, rowCount);
-			}
-
-			if (useSeparateConnection)
-			{
-				if (this.dbConnection.selectStartsTransaction())
-				{
-					dbConnection.rollback();
-				}
-			}
-			else
-			{
-				dbConnection.rollback(sp);
 			}
 		}
 		catch (SQLException sql)
@@ -323,6 +308,40 @@ public class TableRowCountPanel
 				data.requestFocusInWindow();
 			}
 		});
+	}
+
+	private ResultSet runStatement(String sql, boolean useSavepoint)
+	{
+		ResultSet rs = null;
+		Savepoint sp = null;
+
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = dbConnection.setSavepoint();
+			}
+
+			rs = currentStatement.executeQuery(sql);
+			if (useSeparateConnection)
+			{
+				if (this.dbConnection.selectStartsTransaction())
+				{
+					dbConnection.rollback();
+				}
+			}
+			else
+			{
+				dbConnection.rollback(sp);
+			}
+		}
+		catch (SQLException ex)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logError("TableRowCountPanel.retrieveRowCounts()", "Error retrieving table count", ex);
+			rs = null;
+		}
+		return rs;
 	}
 
 	private void showTable(final TableIdentifier table, int current, int total)

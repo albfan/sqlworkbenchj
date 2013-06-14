@@ -37,8 +37,7 @@ public class OracleIndexPartition
 	public OracleIndexPartition(WbConnection conn)
 		throws SQLException
 	{
-		super(conn, false);
-		isIndex = true;
+		this(conn, false);
 	}
 
 	protected OracleIndexPartition(WbConnection conn, boolean retrieveCompression)
@@ -46,6 +45,7 @@ public class OracleIndexPartition
 	{
 		super(conn, retrieveCompression);
 		isIndex = true;
+		supportsIntervals = false; // indexes do not support the INTERVAL option
 	}
 
 	public String getLocality()

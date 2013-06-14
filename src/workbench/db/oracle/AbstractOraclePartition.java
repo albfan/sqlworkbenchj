@@ -50,8 +50,10 @@ public abstract class AbstractOraclePartition
 	private int defaultSubpartitionCount;
 	private List<String> subColumns;
 	protected boolean useCompression;
+	protected boolean supportsIntervals;
 	protected boolean isIndex;
 	protected String locality; // only used for indexes
+	protected String intervalDefinition;
 
 	public AbstractOraclePartition(WbConnection conn)
 		throws SQLException
@@ -62,7 +64,9 @@ public abstract class AbstractOraclePartition
 	protected AbstractOraclePartition(WbConnection conn, boolean retrieveCompression)
 		throws SQLException
 	{
-		useCompression = retrieveCompression && JdbcUtils.hasMinimumServerVersion(conn, "11.1");
+		boolean is11r1 = JdbcUtils.hasMinimumServerVersion(conn, "11.1");;
+		useCompression = retrieveCompression && is11r1;
+		supportsIntervals = is11r1;
 	}
 
 	public void retrieve(DbObject object, WbConnection conn)
@@ -145,6 +149,12 @@ public abstract class AbstractOraclePartition
 				result.append(StringUtil.listToString(columns, ','));
 				result.append(')');
 			}
+			if (StringUtil.isNonBlank(intervalDefinition))
+			{
+				result.append(" INTERVAL (");
+				result.append(intervalDefinition);
+				result.append(") ");
+			}
 			if (!"NONE".equals(subType))
 			{
 				result.append('\n');
@@ -226,6 +236,7 @@ public abstract class AbstractOraclePartition
 					locality = rs.getString("LOCALITY");
 				}
 				defaultSubpartitionCount = rs.getInt("DEF_SUBPARTITION_COUNT");
+				intervalDefinition = supportsIntervals ? rs.getString("INTERVAL") : null;
 				subKeyCount = rs.getInt("SUBPARTITIONING_KEY_COUNT");
 				int colCount = rs.getInt("PARTITIONING_KEY_COUNT");
 				columns = new ArrayList<String>(colCount);

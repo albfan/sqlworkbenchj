@@ -23,6 +23,7 @@
 package workbench.db.oracle;
 
 import java.sql.SQLException;
+
 import workbench.db.WbConnection;
 
 /**
@@ -65,14 +66,14 @@ public class OracleTablePartition
 	protected String getRetrievePartitionDefinitionSql()
 	{
 		return
-			"select pt.owner,  \n" +
-			"       pt.table_name, \n" +
-			"       pt.partitioning_type,  \n" +
-			"       pt.partition_count, \n" +
-			"       pt.partitioning_key_count, \n" +
-			"       pt.subpartitioning_type, \n" +
-			"       pt.subpartitioning_key_count, \n" +
-			"       pt.def_subpartition_count \n" +
+			"select owner,  \n" +
+			"       table_name, \n" +
+			"       partitioning_type,  \n" +
+			"       partition_count, \n" +
+			"       partitioning_key_count, \n" +
+			"       subpartitioning_type, \n" +
+			"       subpartitioning_key_count, \n" +
+			"       def_subpartition_count " + (supportsIntervals ? "\n,       interval \n" : "") +
 			"from all_part_tables pt \n" +
 			"where pt.owner = ? \n" +
 			"  and pt.table_name = ? ";
