@@ -68,19 +68,18 @@ public class OracleSynonymReader
 
 		sql.append(
 			"\nFROM all_synonyms s \n" +
-			"  JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n"
-		);
+			"  JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n");
 
 		if (readComments)
 		{
-			sql.append("  LEFT JOIN all_tab_comments tc on tc.table_name = o.object_name AND tc.owner = o.owner \n");
+			sql.append(
+				"  LEFT JOIN all_tab_comments tc on tc.table_name = o.object_name AND tc.owner = o.owner \n");
 		}
 
 		sql.append(
 			"WHERE ((s.synonym_name = ? AND s.owner = ?)  \n" +
 			"    OR (s.synonym_name = ? AND s.owner = 'PUBLIC'))  \n" +
-			"ORDER BY decode(s.owner, 'PUBLIC',9,1)"
-		);
+			"ORDER BY decode(s.owner, 'PUBLIC',9,1)");
 
 		if (owner == null)
 		{
@@ -110,10 +109,13 @@ public class OracleSynonymReader
 				String table = rs.getString(3);
 				String dblink = rs.getString(4);
 				String type = rs.getString(5);
-				String comment = (readComments ? rs.getString(6) : null);
+				if (readComments)
+				{
+					String comment = rs.getString(6);
+					result.setComment(comment);
+				}
 				if (dblink != null) table = table + "@" + dblink;
 				result = new TableIdentifier(null, towner, table);
-				result.setComment(comment);
 				result.setType(type);
 			}
 		}
