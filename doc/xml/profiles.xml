@@ -91,102 +91,91 @@
 
 <section id="profile-jdbc-properties">
 	<title>JDBC related profile settings</title>
-	<informaltable frame="all">
-		<tgroup cols="2" align="left">
-			<colspec colname="c1" colwidth="3cm" />
-			<colspec colname="c2" />
-			<thead valign="top">
-				<row>
-					<entry><para>Property</para> </entry>
-					<entry> <para>Description</para></entry>
-				</row>
-			</thead>
-			<tbody valign="top">
-				<row>
-					<entry> <para>Driver</para> </entry>
-					<entry> <para>This is the classname for the JDBC driver. The exact
-							name depends on the DBMS and driver combination. The documentation
-							for your driver should contain this information. &wb-productname; has some
-							drivers pre-configured. See <xref linkend="jdbc-setup"/> for details on
-							how to configure your JDBC driver for &wb-productname;.
-					</para> </entry>
-				</row>
-				<row>
-					<entry><para>URL</para></entry>
-          <entry><para>
-              <indexterm><primary>Connection profile</primary><secondary>connection URL</secondary></indexterm>
-              The connection URL for your DBMS.
-              This value is DBMS specific. The pre-configured drivers from &wb-productname; contain
-							a sample URL. If the sample URL (which gets filled into the text field
-							when you select a driver class) contains words in brackets, then these
-							words (including the brackets) are placeholders for the actual values.
-							You have to replace them (including the brackets) with the appropriate values
-							for your DBMS connection.
-					</para></entry>
-				</row>
-				<row>
-					<entry><para>Username</para></entry>
-					<entry><para>This is the name of the DBMS user account</para></entry>
-				</row>
-				<row>
-					<entry><para>Password</para></entry>
-					<entry><para>This is the password for your DBMS user account. You can
-					choose not to store the password in the connection profile.</para></entry>
-				</row>
-				<row>
-					<entry id="profile-autocommit"><para>Autocommit</para></entry>
-					<entry><para>
-              <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
-              This checkbox enables/disables the property
-							for the connection. If autocommit is enabled, then each SQL statement
-							is automatically committed on the DBMS. If this is disabled, any DML
-							statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be
-							committed in order to make the change permanent. Some DBMS
-							require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>)
-							as well. Please refer to the documentation of your DBMS.
-					</para></entry>
-				</row>
-				<row>
-					<entry id="profile-fetch-size"><para>Fetch size</para></entry>
-					<entry>
-            <para>
-              <indexterm><primary>Connection profile</primary><secondary>default fetch size</secondary></indexterm>
-              This setting controls the default fetch size for data retrieval. This parameter will directly be passed to the
-							<ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
-							method of the <literal>Statement</literal> object.
-							For some combinations of JDBC driver and DBMS, setting this parameter to a
-							rather large number can improve retrieval performance because it saves network traffic.
-						</para>
-						<para>
-							The <ulink url="http://jdbc.postgresql.org">JDBC driver</ulink> for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
-							of ResultSets through this parameter. As the results are cached by &wb-productname;
-							anyway, it is suggested to set this parameter to a value greater then zero to disable
-							the caching in the driver. Especially when exporting large results using
-							<link linkend="command-export">WbExport</link> or <link linkend="command-copy">WbCopy</link>
-							it is recommended to turn off the caching in the driver (e.g. by setting the value
-							for this property to 1).
-						</para>
-            <para>
-              You can change the fetch size for the current connection manually by running the &wb-productname; specific
-              command <link linkend="command-fetchsize">WbFetchSize</link>
-            </para>
-					</entry>
-				</row>
-				<row>
-					<entry id="profile-timeout"><para>Timeout</para></entry>
-					<entry><para>
-              <indexterm><primary>Connection profile</primary><secondary>timeout</secondary></indexterm>
-              This property defines a timeout in seconds that is applied when establishing the connection to the
-              database server. If no connection is possible in that time, the attempt will be aborted. If this
-              is empty, the default timeout defined by the JDBC driver is used.
-					</para></entry>
-				</row>
 
-			</tbody>
-		</tgroup>
+  <section id="profile-driver">
+    <title>Driver</title>
+    <para>This is the classname for the JDBC driver. The exact
+      name depends on the DBMS and driver combination. The documentation
+      for your driver should contain this information. &wb-productname; has some
+      drivers pre-configured. See <xref linkend="jdbc-setup"/> for details on
+      how to configure your JDBC driver for &wb-productname;.
+    </para>
+  </section>
 
-	</informaltable>
+  <section id="profile-url">
+    <title>URL</title>
+    <indexterm><primary>Connection profile</primary><secondary>connection URL</secondary></indexterm>
+    <para>
+        The connection URL for your DBMS.
+        This value is DBMS specific. The pre-configured drivers from &wb-productname; contain
+        a sample URL. If the sample URL (which gets filled into the text field
+        when you select a driver class) contains words in brackets, then these
+        words (including the brackets) are placeholders for the actual values.
+        You have to replace them (including the brackets) with the appropriate values
+        for your DBMS connection.
+    </para>
+  </section>
 
+  <section id="profile-username">
+    <title>Username</title>
+    <para>This is the name of the DBMS user account</para>
+  </section>
+  <section id="profile-username">
+    <title>Password</title>
+    <para>
+      This is the password for your DBMS user account. You can
+      choose not to store the password in the connection profile.
+    </para>
+  </section>
+
+  <section id="profile-autocommit">
+    <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
+    <title>Autocommit</title>
+    <para>
+      This checkbox enables/disables the "auto commit" property for the connection.
+      If autocommit is enabled, then each SQL statement
+      is automatically committed on the DBMS. If this is disabled, any DML
+      statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be
+      committed in order to make the change permanent. Some DBMS
+      require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>)
+      as well. Please refer to the documentation of your DBMS.
+    </para>
+  </section>
+
+  <section id="profile-fetch-size">
+    <indexterm><primary>Connection profile</primary><secondary>default fetch size</secondary></indexterm>
+    <title>Fetch size</title>
+    <para>
+      This setting controls the default fetch size for data retrieval. This parameter will directly be passed to the
+      <ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
+      method of the <literal>Statement</literal> object.
+      For some combinations of JDBC driver and DBMS, setting this parameter to a
+      rather large number can improve retrieval performance because it saves network traffic.
+    </para>
+    <para>
+      The <ulink url="http://jdbc.postgresql.org">JDBC driver</ulink> for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
+      of ResultSets through this parameter. As the results are cached by &wb-productname;
+      anyway, it is suggested to set this parameter to a value greater then zero to disable
+      the caching in the driver. Especially when exporting large results using
+      <link linkend="command-export">WbExport</link> or <link linkend="command-copy">WbCopy</link>
+      it is recommended to turn off the caching in the driver (e.g. by setting the value
+      for this property to 1).
+    </para>
+    <para>
+      You can change the fetch size for the current connection manually by running the &wb-productname; specific
+      command <link linkend="command-fetchsize">WbFetchSize</link>
+    </para>
+  </section>
+
+	<section id="profile-timeout">
+    <indexterm><primary>Connection profile</primary><secondary>timeout</secondary></indexterm>
+    <title>Timeout</title>
+    <para>
+      This property defines a timeout in seconds that is applied when establishing the connection to the
+      database server. If no connection is possible in that time, the attempt will be aborted. If this
+      is empty, the default timeout defined by the JDBC driver is used.
+    </para>
+  </section>
 </section>
 
 <section id="profile-extended-properties">
