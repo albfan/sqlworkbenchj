@@ -25,6 +25,7 @@ package workbench.gui.dialogs.export;
 import java.util.List;
 
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.ExportType;
 
 /**
  *
@@ -36,12 +37,8 @@ public interface SqlOptions
 	void setCreateTable(boolean flag);
 	void setCommitEvery(int value);
 	int getCommitEvery();
-	boolean getCreateInsert();
-	boolean getCreateUpdate();
-	boolean getCreateDeleteInsert();
-	void setCreateInsert();
-	void setCreateUpdate();
-	void setCreateDeleteInsert();
+	ExportType getExportType();
+	void setExportType(ExportType type);
 	String getAlternateUpdateTable();
 	void setAlternateUpdateTable(String table);
 	List<String> getKeyColumns();

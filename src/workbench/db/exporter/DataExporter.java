@@ -818,6 +818,7 @@ public class DataExporter
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_DELETE:
 			case SQL_MERGE:
 				this.exportWriter = new SqlExportWriter(this);
 				break;
@@ -1344,18 +1345,7 @@ public class DataExporter
 
 	public void setSqlOptions(SqlOptions sqlOptions)
 	{
-		if (sqlOptions.getCreateInsert())
-		{
-			this.setOutputType(ExportType.SQL_INSERT);
-		}
-		else if (sqlOptions.getCreateUpdate())
-		{
-			this.setOutputType(ExportType.SQL_UPDATE);
-		}
-		else if (sqlOptions.getCreateDeleteInsert())
-		{
-			this.setOutputType(ExportType.SQL_DELETE_INSERT);
-		}
+		this.setOutputType(sqlOptions.getExportType());
 		this.setIncludeCreateTable(sqlOptions.getCreateTable());
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());

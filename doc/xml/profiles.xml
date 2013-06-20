@@ -465,7 +465,7 @@
 		<section id="profile-open-trans">
 			<title>Check for uncommitted changes</title>
 			<para>
-        This option is (currently) only available for Oracle and PostgreSQL.
+        This option is (currently) only available for PostgreSQL, HSQLDB 2.x and Oracle
 			</para>
 			<para>
         When closing the application (or a SQL panel) &wb-productname; will check if the current

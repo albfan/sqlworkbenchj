@@ -36,6 +36,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
@@ -123,7 +124,7 @@ public class SqlRowDataConverterTest
 	}
 
 	@Test
-	public void testSqlGeneration()
+	public void testCreateTable()
 		throws Exception
 	{
 		WbConnection con = null;
@@ -161,6 +162,72 @@ public class SqlRowDataConverterTest
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
+	@Test
+	public void testSqlGeneration()
+		throws Exception
+	{
+		WbConnection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			TestUtil util = new TestUtil("testDateLiterals");
+			util.prepareEnvironment();
+
+			con = util.getConnection("sqlConverterTest");
+			String script =
+				"CREATE TABLE person (id integer primary key, name varchar(20));\n" +
+				"insert into person values (1, 'Arthur');\n" +
+				"commit;\n";
+			TestUtil.executeScript(con, script);
+
+			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("SELECT * FROM person");
+			DataStore ds = new DataStore(rs, true, null, 0, con);
+			ds.setUpdateTableToBeUsed(tbl);
+			ds.checkUpdateTable(con);
+			SqlRowDataConverter converter = new SqlRowDataConverter(con);
+			converter.setResultInfo(ds.getResultInfo());
+			converter.setCreateTable(false);
+
+			converter.setType(ExportType.SQL_INSERT);
+			RowData row = ds.getRow(0);
+			String sql = converter.convertRowData(row, 1).toString();
+			ScriptParser p = new ScriptParser(sql);
+			assertEquals(1, p.getSize());
+			assertTrue(sql.startsWith("INSERT INTO PERSON"));
+
+			converter.setType(ExportType.SQL_UPDATE);
+			sql = converter.convertRowData(row, 1).toString();
+			p = new ScriptParser(sql);
+			assertEquals(1, p.getSize());
+			assertTrue(sql.startsWith("UPDATE PERSON"));
+
+			converter.setType(ExportType.SQL_DELETE);
+			sql = SqlUtil.makeCleanSql(converter.convertRowData(row, 1).toString(), false);
+			p = new ScriptParser(sql);
+			assertEquals(1, p.getSize());
+			assertTrue(sql.startsWith("DELETE FROM PERSON"));
+
+			converter.setType(ExportType.SQL_DELETE_INSERT);
+			sql = converter.convertRowData(row, 1).toString();
+			p = new ScriptParser(sql);
+			assertEquals(2, p.getSize());
+			String delete = SqlUtil.makeCleanSql(p.getCommand(0), false);
+			assertTrue(delete.startsWith("DELETE FROM PERSON"));
+			String insert = SqlUtil.makeCleanSql(p.getCommand(1), false);
+			assertTrue(insert.startsWith("INSERT INTO PERSON"));
+		}
+		finally
+		{
+			con.disconnect();
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
 
 	@Test
 	public void testConvert()

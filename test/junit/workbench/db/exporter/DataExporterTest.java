@@ -233,16 +233,9 @@ public class DataExporterTest
 			@Override
 			public int getCommitEvery() { return 0; }
 			@Override
-			public boolean getCreateInsert() { return true; }
+			public ExportType getExportType() { return ExportType.SQL_INSERT; }
 			@Override
-			public boolean getCreateUpdate() { return false; }
-			@Override
-			public boolean getCreateDeleteInsert() { return false; }
-			@Override
-			public void setCreateInsert() { }
-			@Override
-			public void setCreateUpdate() { }
-			@Override
+			public void setExportType(ExportType type) { }
 			public void setCreateDeleteInsert() { }
 			@Override
 			public String getAlternateUpdateTable() { return null; }

@@ -126,6 +126,11 @@ public class SqlCommand
 		{
 			verb = SqlUtil.getSqlVerb(result.getSourceCommand());
 		}
+
+		msg = ResourceMgr.getDynamicString("MsgStmtSuccess", verb);
+
+		if (msg != null) return msg;
+
 		if (StringUtil.isEmptyString(verb))
 		{
 			verb = ResourceMgr.getString("TxtStatement");
@@ -387,6 +392,9 @@ public class SqlCommand
 		this.isCancelled = false;
 
 		sql = getSqlToExecute(sql);
+		String verb = SqlUtil.getSqlVerb(sql);
+		
+		result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
 
 		runner.setSavepoint();
 		try

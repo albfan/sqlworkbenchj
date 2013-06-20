@@ -574,7 +574,10 @@ public class WbImportTest
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
 			" -importColumns=id,firstname,lastname " +
 			" -constantValues=\"type_id=$@{select id from type_lookup where type_name = $5 and type_code = $3}\" " +
-			" -type=text -header=true -continueonerror=false -table=person2"
+			" -type=text " +
+			" -header=true " +
+			" -continueonerror=false " +
+			" -table=person2"
 		);
 		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
@@ -680,7 +683,11 @@ public class WbImportTest
 		out.println("3\tBeeblebrox");
 		out.close();
 
-		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"firstname=Unknown\" -type=text -header=true -continueonerror=false -table=junit_test");
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
+			"-constantValues=\"firstname=Unknown\" " +
+			"-type=text " +
+			"-header=true " +
+			"-continueonerror=false -table=junit_test");
 		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 		Statement stmt = this.connection.createStatementForQuery();

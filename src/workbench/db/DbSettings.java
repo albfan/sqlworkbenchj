@@ -1621,4 +1621,12 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.cleanup.types", false);
 	}
+
+	public Set<String> verbsWithoutUpdateCount()
+	{
+		List<String> verbs = Settings.getInstance().getListProperty(prefix + "no.updatecount", true);
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		result.addAll(verbs);
+		return result;
+	}
 }

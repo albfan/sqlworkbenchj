@@ -143,6 +143,22 @@ public class ResourceMgr
 		return getString(aKey, false);
 	}
 
+	public static String getDynamicString(String baseKey, String option)
+	{
+		if (baseKey == null || option == null) return null;
+		
+		try
+		{
+			String value = getResources().getString(baseKey + "." + option.toLowerCase());
+			return value;
+		}
+		catch (MissingResourceException e)
+		{
+			// It's ok if this happens, no need to log the exception
+			return null;
+		}
+	}
+
 	public static String getString(String aKey, boolean replaceModifiers)
 	{
 		try

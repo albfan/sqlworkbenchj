@@ -95,12 +95,14 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CopyAllColumnNamesAction;
+import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.CopyColumnNameAction;
+import workbench.gui.actions.CopySelectedAsSqlDeleteAction;
 import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlMergeAction;
@@ -190,6 +192,7 @@ public class WbTable
 	private CopyAsSqlInsertAction copyInsertAction;
 	private CopyAsSqlMergeAction copyMergeAction;
 	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
+	private CopyAsSqlDeleteAction copyDeleteAction;
 	private CopyAsSqlUpdateAction copyUpdateAction;
 
 	private CopySelectedAsTextAction copySelectedAsTextAction;
@@ -197,6 +200,7 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
+	private CopySelectedAsSqlDeleteAction copySelectedDeleteAction;
 
 	private ResetHighlightAction resetHighlightAction;
 
@@ -302,18 +306,25 @@ public class WbTable
 
 		if (sqlCopyAllowed)
 		{
+			WbMenu sqlCopyMenu = new WbMenu(ResourceMgr.getString("MnuTxtCopyAsSQL"));
+			sqlCopyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
+
 			this.copyInsertAction = new CopyAsSqlInsertAction(this);
 			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
+			this.copyDeleteAction = new CopyAsSqlDeleteAction(this);
 			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 			this.copyMergeAction = new CopyAsSqlMergeAction(this);
 
-			this.addPopupAction(this.copyUpdateAction, false);
-			this.addPopupAction(this.copyMergeAction, false);
-			this.addPopupAction(this.copyInsertAction, false);
-			this.addPopupAction(this.copyDeleteInsertAction, false);
+			sqlCopyMenu.add(this.copyUpdateAction);
+			sqlCopyMenu.add(this.copyMergeAction);
+			sqlCopyMenu.add(this.copyInsertAction);
+			sqlCopyMenu.add(this.copyDeleteInsertAction);
+			sqlCopyMenu.add(this.copyDeleteAction);
+
+			this.addPopupSubMenu(sqlCopyMenu, false);
 
 			WbMenu copy = this.getCopySelectedMenu();
-			this.addPopupSubMenu(copy, true);
+			this.addPopupSubMenu(copy, false);
 		}
 		else
 		{
@@ -668,6 +679,11 @@ public class WbTable
 			copySelectedAsDeleteInsertAction = new CopySelectedAsSqlDeleteInsertAction(this);
 		}
 
+		if (copySelectedDeleteAction == null && copyDeleteAction != null)
+		{
+			copySelectedDeleteAction = new CopySelectedAsSqlDeleteAction(this);
+		}
+
 		if (copySelectedAsUpdateAction == null && copyUpdateAction != null)
 		{
 			copySelectedAsUpdateAction = new CopySelectedAsSqlUpdateAction(this);
@@ -679,6 +695,7 @@ public class WbTable
 		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
 		if (copySelectedAsMergeAction != null) copyMenu.add(copySelectedAsMergeAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
+		if (copySelectedDeleteAction != null) copyMenu.add(copySelectedDeleteAction);
 	}
 
 	public final WbMenu getCopySelectedMenu()
@@ -703,6 +720,11 @@ public class WbTable
 	public CopyAsSqlDeleteInsertAction getCopyAsDeleteInsertAction()
 	{
 		 return this.copyDeleteInsertAction;
+	}
+
+	public CopyAsSqlDeleteAction getCopyAsDeleteAction()
+	{
+		 return this.copyDeleteAction;
 	}
 
 	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
@@ -869,6 +891,11 @@ public class WbTable
 		if (this.copySelectedAsDeleteInsertAction != null)
 		{
 			this.copySelectedAsDeleteInsertAction.setEnabled(selected);
+		}
+
+		if (this.copySelectedDeleteAction != null)
+		{
+			this.copySelectedDeleteAction.setEnabled(selected);
 		}
 	}
 
@@ -2220,6 +2247,11 @@ public class WbTable
 		if (this.copyDeleteInsertAction != null)
 		{
 			this.copyDeleteInsertAction.setEnabled(hasRows);
+		}
+
+		if (this.copyDeleteAction != null)
+		{
+			this.copyDeleteAction.setEnabled(hasRows);
 		}
 	}
 

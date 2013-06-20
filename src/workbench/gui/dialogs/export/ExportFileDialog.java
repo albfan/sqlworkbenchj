@@ -345,6 +345,7 @@ public class ExportFileDialog
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_DELETE:
 				exporter.setSqlOptions(this.getSqlOptions());
 				break;
 			case TEXT:

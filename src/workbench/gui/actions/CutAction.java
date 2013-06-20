@@ -23,15 +23,19 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
+import javax.swing.KeyStroke;
 
 import workbench.interfaces.ClipboardSupport;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
+import workbench.util.MacOSHelper;
+
 /**
  *	Action to cut  the contents of an entry field
- * 
+ *
  *	@author  Thomas Kellerer
  */
 public class CutAction extends WbAction
@@ -43,6 +47,10 @@ public class CutAction extends WbAction
 		super();
 		this.client = aClient;
 		initMenuDefinition("MnuTxtCut", PlatformShortcuts.getDefaultCutShortcut());
+		if (!MacOSHelper.isMacOS())
+		{
+			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK));
+		}
 		this.setIcon("Cut");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}

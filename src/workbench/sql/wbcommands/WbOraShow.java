@@ -29,15 +29,20 @@ import java.sql.Types;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import workbench.db.oracle.OracleErrorInformationReader;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.oracle.OracleErrorInformationReader;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.storage.DataStore;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -171,15 +176,15 @@ public class WbOraShow
 
 		ResultSet rs = null;
 
-		Statement stmt = null;
 		try
 		{
-			stmt = this.currentConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
+			currentStatement = this.currentConnection.createStatementForQuery();
+			rs = currentStatement.executeQuery(sql);
 			processResults(result, true, rs);
 			if (result.hasDataStores() && result.getDataStores().get(0).getRowCount() == 0)
 			{
 				result.clear();
+				result.addMessage("Recyclebin is empty.");
 			}
 			result.setSuccess();
 		}
@@ -190,7 +195,7 @@ public class WbOraShow
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeAll(rs, currentStatement);
 		}
 		return result;
 	}

@@ -33,18 +33,23 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
-import workbench.db.WbConnection;
-import workbench.gui.components.BlobHandler;
+
 import workbench.interfaces.DataFileWriter;
 import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.gui.components.BlobHandler;
+
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+
 import workbench.util.*;
 
 /**
@@ -94,6 +99,7 @@ public abstract class RowDataConverter
 	protected boolean includeColumnComments;
 
 	protected InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
+	protected List<String> keyColumnsToUse;
 
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
@@ -891,5 +897,33 @@ public abstract class RowDataConverter
 		String extension = f.getExtension();
 		return extension.equalsIgnoreCase(ext);
 	}
-	
+
+	protected boolean checkKeyColumns()
+	{
+		boolean keysPresent = metaData.hasPkColumns();
+		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
+		{
+			// make sure the default key columns are not used
+			this.metaData.resetPkColumns();
+			for (String col : keyColumnsToUse)
+			{
+				this.metaData.setIsPkColumn(col, true);
+			}
+			keysPresent = true;
+		}
+		if (!keysPresent)
+		{
+			try
+			{
+				this.metaData.readPkDefinition(this.originalConnection);
+				keysPresent = this.metaData.hasPkColumns();
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("SqlRowDataConverter.setCreateInsert", "Could not read PK columns for update table", e);
+			}
+		}
+		return keysPresent;
+	}
+
 }

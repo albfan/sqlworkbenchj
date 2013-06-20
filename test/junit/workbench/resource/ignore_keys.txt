@@ -1,3 +1,4 @@
+MsgStmtSuccess.purge
 LblMergeType
 TxtEdPrefix
 TxtZoom

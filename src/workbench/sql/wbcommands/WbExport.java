@@ -135,7 +135,7 @@ public class WbExport
 	private boolean showProgress = true;
 	private int progressInterval = 1;
 
-	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,sqlmerge,ods,xlsm,html,xlsx,xls,json";
+	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,sqlmerge,sqldelete,ods,xlsm,html,xlsx,xls,json";
 
 	public WbExport()
 	{

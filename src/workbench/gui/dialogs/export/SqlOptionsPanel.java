@@ -51,6 +51,7 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
+import workbench.db.exporter.ExportType;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnSelectorPanel;
@@ -214,6 +215,7 @@ public class SqlOptionsPanel
 		}
 		return -1;
 	}
+
 	private void addSyntaxType(String type)
 	{
 		DefaultComboBoxModel model = (DefaultComboBoxModel)syntaxType.getModel();
@@ -271,10 +273,12 @@ public class SqlOptionsPanel
 		if (flag)
 		{
 			addSyntaxType("DELETE/INSERT");
+			addSyntaxType("DELETE");
 		}
 		else
 		{
 			removeSyntaxType("DELETE/INSERT");
+			removeSyntaxType("DELETE");
 		}
 	}
 
@@ -284,21 +288,26 @@ public class SqlOptionsPanel
 	}
 
 	@Override
-	public boolean getCreateInsert()
+	public ExportType getExportType()
 	{
-		return getSelectedSyntaxType().equals("INSERT");
-	}
-
-	@Override
-	public boolean getCreateUpdate()
-	{
-		return getSelectedSyntaxType().equals("UPDATE");
-	}
-
-	@Override
-	public boolean getCreateDeleteInsert()
-	{
-		return getSelectedSyntaxType().equals("DELETE/INSERT");
+		String type = getSelectedSyntaxType();
+		if (type.equals("UPDATE"))
+		{
+			return ExportType.SQL_UPDATE;
+		}
+		if (type.equals("DELETE"))
+		{
+			return ExportType.SQL_DELETE;
+		}
+		if (type.equals("DELETE/INSERT"))
+		{
+			return ExportType.SQL_DELETE_INSERT;
+		}
+		if (type.equals("MERGE"))
+		{
+			return ExportType.SQL_MERGE;
+		}
+		return ExportType.SQL_INSERT;
 	}
 
 	@Override
@@ -321,21 +330,25 @@ public class SqlOptionsPanel
 	}
 
 	@Override
-	public void setCreateInsert()
+	public void setExportType(ExportType type)
 	{
-		syntaxType.setSelectedItem("INSERT");
-	}
-
-	@Override
-	public void setCreateUpdate()
-	{
-		syntaxType.setSelectedItem("UPDATE");
-	}
-
-	@Override
-	public void setCreateDeleteInsert()
-	{
-		syntaxType.setSelectedItem("DELETE/INSERT");
+		switch (type)
+		{
+			case SQL_DELETE:
+				syntaxType.setSelectedItem("DELETE");
+				break;
+			case SQL_DELETE_INSERT:
+				syntaxType.setSelectedItem("DELETE/INSERT");
+				break;
+			case SQL_UPDATE:
+				syntaxType.setSelectedItem("UPDATE");
+				break;
+			case SQL_MERGE:
+				syntaxType.setSelectedItem("MERGE");
+				break;
+			default:
+				syntaxType.setSelectedItem("INSERT");
+		}
 	}
 
 	@Override
@@ -513,7 +526,7 @@ public class SqlOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     jPanel4.add(jLabel2, gridBagConstraints);
 
-    syntaxType.setModel(new DefaultComboBoxModel(new String[] { "INSERT", "UPDATE", "DELETE/INSERT", "MERGE" }));
+    syntaxType.setModel(new DefaultComboBoxModel(new String[] { "INSERT", "UPDATE", "DELETE/INSERT", "MERGE", "DELETE" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(0, 4, 0, 0);

@@ -117,7 +117,65 @@
        <indexterm><primary>Oracle</primary><secondary>show system information</secondary></indexterm>
        <title>Using SQL*Plus' SHOW command</title>
        <para>
-         ...
+         &wb-productname; supports most of the parameters and options the <literal>SHOW</literal> from SQL*Plus does.
+
+        <informaltable frame="all">
+          <tgroup cols="2" align="left">
+            <colspec colname="c1" />
+            <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>SHOW option</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry>ERRORS</entry>
+                <entry>Displays errors from the last PL/SQL compilation.</entry>
+              </row>
+              <row>
+                <entry>PARAMETERS</entry>
+                <entry>
+                  <para>Displays configuration parameters.</para>
+                  <para>As with SQL*Plus, you need the <literal>SELECT</literal> privilege on <literal>V_$PARAMETER</literal>
+                  to use the <literal>PARAMETERS</literal> option.</para>
+                </entry>
+              </row>
+              <row>
+                <entry>SGA</entry>
+                <entry>
+                  <para>Displays memory information.</para>
+                  <para>
+                    As with SQL*Plus, you need <literal>SELECT</literal> privilege on
+                    <literal>V_$SGA</literal> to use the <literal>sga</literal> (or <literal>sgainfo</literal> option.
+                  </para>
+                </entry>
+              </row>
+              <row>
+                <entry>SGAINFO</entry>
+                <entry>Displays extended memory information not available in SQL*Plus.</entry>
+              </row>
+              <row>
+                <entry>RECYCLEBIN</entry>
+                <entry>Shows the content of the recyclebin.</entry>
+              </row>
+              <row>
+                <entry>USER</entry>
+                <entry>Shows the current user.</entry>
+              </row>
+              <row>
+                <entry>AUTOCOMMIT</entry>
+                <entry>Shows the state of the autocommit property.</entry>
+              </row>
+              <row>
+                <entry>LOGSOURCE</entry>
+                <entry>Displays the location of the archive logs.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
        </para>
      </section>
 

@@ -23,13 +23,14 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.ClipBoardCopier;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
+
 /**
- * Action to copy the contents of a table to the clipboard as pairs of 
+ * Action to copy the contents of a table to the clipboard as pairs of
  * DELETE/INSERT statements
  * @see workbench.gui.components.ClipBoardCopier
  * @author  Thomas Kellerer
@@ -48,10 +49,17 @@ public class CopyAsSqlDeleteInsertAction extends WbAction
 	}
 
 	@Override
-	public boolean hasCtrlModifier() { return true; }
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
+
 	@Override
-	public boolean hasShiftModifier() { return true; }	
-	
+	public boolean hasShiftModifier()
+	{
+		return true;
+	}
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{

@@ -1,5 +1,5 @@
 /*
- * CopyAction.java
+ * CopySelectedAsSqlDeleteAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -23,42 +23,54 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
-import workbench.interfaces.ClipboardSupport;
-import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
-import workbench.util.MacOSHelper;
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
 
 /**
- *	Action to copy the contents of an entry field into the clipboard
+ * Action to copy the selected rows of a table to the clipboard as DELETE statements.
  *
- *	@author  Thomas Kellerer
+ * @see workbench.gui.components.ClipBoardCopier
+ *
+ * @author  Thomas Kellerer
  */
-public class CopyAction
-	extends WbAction
+public class CopySelectedAsSqlDeleteAction extends WbAction
 {
-	private ClipboardSupport client;
+	private WbTable client;
 
-	public CopyAction(ClipboardSupport aClient)
+	public CopySelectedAsSqlDeleteAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
-		initMenuDefinition("MnuTxtCopy", PlatformShortcuts.getDefaultCopyShortcut());
-		if (!MacOSHelper.isMacOS())
-		{
-			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_MASK));
-		}
-		this.setIcon("Copy");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.initMenuDefinition("MnuTxtCopySelectedAsSqlDelete");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
+	}
+
+	@Override
+	public boolean hasCtrlModifier()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean hasShiftModifier()
+	{
+		return true;
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.copy();
+		ClipBoardCopier copier = new ClipBoardCopier(this.client);
+		boolean selectColumns = false;
+		if (invokedByMouse(e))
+		{
+			selectColumns = isCtrlPressed(e) ;
+		}
+		copier.copyAsSqlDelete(true, selectColumns);
 	}
+
 }

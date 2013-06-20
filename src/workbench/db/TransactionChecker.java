@@ -22,7 +22,8 @@
  */
 package workbench.db;
 
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import workbench.resource.Settings;
 
@@ -98,7 +99,9 @@ public interface TransactionChecker
 		public static boolean supportsTransactionCheck(String driverClass)
 		{
 			if (StringUtil.isBlank(driverClass)) return false;
-			List<String> drivers = Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check", false);
+			Set<String> drivers = new TreeSet<String>();
+			drivers.addAll(Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check.builtin", false));
+			drivers.addAll(Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check", false));
 			return drivers.contains(driverClass);
 		}
 	}

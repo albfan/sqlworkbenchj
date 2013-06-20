@@ -30,24 +30,30 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumnModel;
+
 import workbench.WbManager;
 import workbench.console.DataStorePrinter;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
+
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -209,6 +215,11 @@ public class ClipBoardCopier
 	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(ExportType.SQL_DELETE_INSERT, selectedOnly, showSelectColumns);
+	}
+
+	public void copyAsSqlDelete(boolean selectedOnly, boolean showSelectColumns)
+	{
+		this.copyAsSql(ExportType.SQL_DELETE, selectedOnly, showSelectColumns);
 	}
 
 	/**

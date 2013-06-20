@@ -26,10 +26,12 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
+
 import workbench.util.DurationFormatter;
 import workbench.util.MessageBuffer;
 
@@ -57,6 +59,7 @@ public class StatementRunnerResult
 	private boolean wasCancelled;
 	private boolean stopScriptExecution;
 	private boolean showRowCount = true;
+	private boolean ignoreUpdateCount;
 
 	private long executionTime = -1;
 	private static final DurationFormatter timingFormatter = new DurationFormatter();
@@ -72,6 +75,11 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
+	public void ignoreUpdateCounts(boolean flag)
+	{
+		ignoreUpdateCount = flag;
+	}
+	
 	public void setRowsProcessed(long rows)
 	{
 		this.totalRowsProcessed = rows;
@@ -86,7 +94,7 @@ public class StatementRunnerResult
 	{
 		this.totalRowsProcessed += rows;
 	}
-	
+
 	public boolean stopScript()
 	{
 		return stopScriptExecution;
@@ -187,6 +195,7 @@ public class StatementRunnerResult
 
 	public void addUpdateCountMsg(int count)
 	{
+		if (ignoreUpdateCount) return;
 		this.totalUpdateCount += count;
 		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
 	}

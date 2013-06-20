@@ -22,17 +22,19 @@
  */
 package workbench.db.exporter;
 
-import java.sql.SQLException;
 import java.util.List;
+
+import workbench.interfaces.Committer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
-import workbench.interfaces.Committer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
 import workbench.storage.MergeGenerator;
@@ -41,9 +43,12 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataContainer;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+
+import static workbench.db.exporter.ExportType.SQL_DELETE_INSERT;
 
 /**
  * Export data as SQL INSERT statements.
@@ -71,7 +76,6 @@ public class SqlRowDataConverter
 	private String chrFunction;
 	private String concatFunction;
 	private StatementFactory statementFactory;
-	private List<String> keyColumnsToUse;
 	private String lineTerminator = "\n";
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
@@ -100,6 +104,14 @@ public class SqlRowDataConverter
 		this.literalFormatter.setInfinityLiterals(literals);
 	}
 
+	private boolean needPrimaryKey()
+	{
+		return this.sqlType == ExportType.SQL_DELETE_INSERT
+				|| this.sqlType == ExportType.SQL_UPDATE
+				|| this.sqlType == ExportType.SQL_MERGE
+				|| this.sqlType == ExportType.SQL_DELETE;
+	}
+
 	@Override
 	public void setResultInfo(ResultInfo meta)
 	{
@@ -112,7 +124,7 @@ public class SqlRowDataConverter
 
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
-		if (!keysPresent && (this.sqlType == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_UPDATE || this.sqlType == ExportType.SQL_MERGE))
+		if (!keysPresent && needPrimaryKey())
 		{
 			String tbl = "";
 			if (meta.getUpdateTable() != null)
@@ -129,7 +141,6 @@ public class SqlRowDataConverter
 			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
 			this.sqlTypeToUse = ExportType.SQL_INSERT;
 		}
-
 	}
 
 	public void setMergeType(String type)
@@ -184,6 +195,9 @@ public class SqlRowDataConverter
 			case SQL_DELETE_INSERT:
 				this.setCreateInsertDelete();
 				break;
+			case SQL_DELETE:
+				this.setCreateDelete();
+				break;
 			case SQL_MERGE:
 				this.setCreateMerge();
 				break;
@@ -212,14 +226,21 @@ public class SqlRowDataConverter
 			result.append(lineTerminator);
 		}
 
+		if (this.sqlTypeToUse == ExportType.SQL_DELETE)
+		{
+			dml = this.statementFactory.createDeleteStatement(row, true);
+		}
+
 		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_INSERT)
 		{
 			dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
-		else // implies sqlType == SQL_UPDATE
+
+		if (sqlType == ExportType.SQL_UPDATE)
 		{
 			dml = this.statementFactory.createUpdateStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
+
 		if (dml == null) return null;
 
 		dml.setChrFunction(this.chrFunction);
@@ -328,35 +349,11 @@ public class SqlRowDataConverter
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 
-	private boolean checkKeyColumns()
+	public void setCreateDelete()
 	{
-		boolean keysPresent = metaData.hasPkColumns();
-
-		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
-		{
-			// make sure the default key columns are not used
-			this.metaData.resetPkColumns();
-
-			for (String col : keyColumnsToUse )
-			{
-				this.metaData.setIsPkColumn(col, true);
-			}
-			keysPresent = true;
-		}
-
-		if (!keysPresent)
-		{
-			try
-			{
-				this.metaData.readPkDefinition(this.originalConnection);
-				keysPresent = this.metaData.hasPkColumns();
-			}
-			catch (SQLException e)
-			{
-				LogMgr.logError("SqlRowDataConverter.setCreateInsert", "Could not read PK columns for update table", e);
-			}
-		}
-		return keysPresent;
+		this.sqlType = ExportType.SQL_DELETE;
+		this.sqlTypeToUse = this.sqlType;
+		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.delete.doformat",true);
 	}
 
 	public void setCommitEvery(int interval)

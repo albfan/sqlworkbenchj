@@ -31,6 +31,7 @@ public enum ExportType
 	SQL_INSERT("SQL"),
 	SQL_UPDATE("SQL Update"),
 	SQL_DELETE_INSERT("SQL Delete/Insert"),
+	SQL_DELETE("SQL Delete"),
 	SQL_MERGE("SQL MERGE"),
 	HTML("HTML"),
 	TEXT("Text"),
@@ -61,6 +62,7 @@ public enum ExportType
 		if (type.equalsIgnoreCase("sqlinsert")) return SQL_INSERT;
 		if (type.equalsIgnoreCase("sqlupdate")) return SQL_UPDATE;
 		if (type.equalsIgnoreCase("sqldeleteinsert")) return SQL_DELETE_INSERT;
+		if (type.equalsIgnoreCase("sqldelete")) return SQL_DELETE;
 		if (type.equalsIgnoreCase("sqlmerge")) return SQL_MERGE;
 		if (type.equalsIgnoreCase("merge")) return SQL_MERGE;
 
@@ -91,7 +93,7 @@ public enum ExportType
 
 	public boolean isSqlType()
 	{
-		return this == SQL_INSERT || this == SQL_UPDATE || this == SQL_DELETE_INSERT;
+		return this == SQL_INSERT || this == SQL_UPDATE || this == SQL_DELETE_INSERT || this == SQL_DELETE;
 	}
 
 	public String getDefaultFileExtension()
@@ -101,6 +103,7 @@ public enum ExportType
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_DELETE:
 				return ".sql";
 
 			case TEXT:
