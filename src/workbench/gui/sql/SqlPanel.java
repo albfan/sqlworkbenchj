@@ -99,6 +99,7 @@ import workbench.gui.actions.ClearMessagesAction;
 import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
@@ -249,6 +250,7 @@ public class SqlPanel
 	protected CopyAsSqlInsertAction copyAsSqlInsert;
 	protected CopyAsSqlUpdateAction copyAsSqlUpdate;
 	protected CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
+	protected CopyAsSqlDeleteAction copyAsSqlDelete;
 	protected CreateDeleteScriptAction createDeleteScript;
 	protected ImportFileAction importFileAction;
 	protected ImportClipboardAction importClipAction;
@@ -277,6 +279,7 @@ public class SqlPanel
 	protected ShowObjectInfoAction showObjectInfoAction;
 	protected JoinCompletionAction joinCompletion;
 
+	protected WbMenu copyAsSQLMenu;
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
 	protected CommitAction commitAction;
@@ -757,14 +760,19 @@ public class SqlPanel
 		this.actions.add(this.exportDataAction);
 		this.actions.add(this.dataToClipboard);
 
-		this.copyAsSqlInsert = new CopyAsSqlInsertAction(null);
-		this.actions.add(this.copyAsSqlInsert);
+		copyAsSQLMenu = WbTable.createCopyAsSQLMenu();
+		copyAsSqlInsert = new CopyAsSqlInsertAction(null);
+		copyAsSQLMenu.add(this.copyAsSqlInsert);
 
-		this.copyAsSqlUpdate = new CopyAsSqlUpdateAction(null);
-		this.actions.add(this.copyAsSqlUpdate);
+		copyAsSqlUpdate = new CopyAsSqlUpdateAction(null);
+		copyAsSQLMenu.add(this.copyAsSqlUpdate);
 
-		this.copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null);
-		this.actions.add(this.copyAsSqlDeleteInsert);
+		copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null);
+		copyAsSQLMenu.add(this.copyAsSqlDeleteInsert);
+		copyAsSqlDelete = new CopyAsSqlDeleteAction(null);
+		copyAsSQLMenu.add(copyAsSqlDelete);
+
+		actions.add(copyAsSQLMenu);
 
 		copySelectedMenu = WbTable.createCopySelectedMenu();
 		copySelectedMenu.setEnabled(false);
@@ -2713,7 +2721,7 @@ public class SqlPanel
 		});
 	}
 
-	protected void _updateProxiedActions()
+	private synchronized void _updateProxiedActions()
 	{
 		if (currentData == null)
 		{
@@ -2731,6 +2739,7 @@ public class SqlPanel
 			copyAsSqlInsert.setOriginal(null);
 			copyAsSqlUpdate.setOriginal(null);
 			copyAsSqlDeleteInsert.setOriginal(null);
+			copyAsSqlDelete.setOriginal(null);
 			findDataAction.setOriginal(null);
 			findDataAgainAction.setOriginal(null);
 			copySelectedMenu.removeAll();
@@ -2760,6 +2769,7 @@ public class SqlPanel
 			copyAsSqlInsert.setOriginal(currentData.getTable().getCopyAsInsertAction());
 			copyAsSqlUpdate.setOriginal(currentData.getTable().getCopyAsUpdateAction());
 			copyAsSqlDeleteInsert.setOriginal(currentData.getTable().getCopyAsDeleteInsertAction());
+			copyAsSqlDelete.setOriginal(currentData.getTable().getCopyAsDeleteAction());
 			findDataAction.setOriginal(currentData.getTable().getReplacer().getFindAction());
 			findDataAgainAction.setOriginal(currentData.getTable().getReplacer().getFindAgainAction());
 			replaceDataAction.setOriginal(currentData.getTable().getReplacer().getReplaceAction());

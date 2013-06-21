@@ -42,7 +42,7 @@ public enum ExportType
 	XLSX("XLSX"),
 	JSON("JSON");
 
-	private String display;
+	private final String display;
 
 	private ExportType(String disp)
 	{
@@ -140,6 +140,7 @@ public enum ExportType
 			case SQL_INSERT:
 			case SQL_UPDATE:
 			case SQL_DELETE_INSERT:
+			case SQL_DELETE:
 				return "1";
 
 			case TEXT:
