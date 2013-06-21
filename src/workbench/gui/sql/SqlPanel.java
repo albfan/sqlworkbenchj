@@ -2694,8 +2694,12 @@ public class SqlPanel
 						resultTab.removeTabAt(0);
 					}
 					resultTab.setSelectedIndex(0);
+					boolean wasNull = currentData == null;
 					currentData = null;
-					updateProxiedActions();
+					if (!wasNull)
+					{
+						updateProxiedActions();
+					}
 					checkResultSetActions();
 				}
 			});
@@ -2721,7 +2725,7 @@ public class SqlPanel
 		});
 	}
 
-	private synchronized void _updateProxiedActions()
+	private void _updateProxiedActions()
 	{
 		if (currentData == null)
 		{
