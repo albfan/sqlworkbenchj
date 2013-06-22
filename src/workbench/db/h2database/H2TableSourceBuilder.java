@@ -146,7 +146,7 @@ public class H2TableSourceBuilder
 			{
 				String type = rs.getString(1);
 				String defaultType = rs.getString(2);
-				if (defaultType == null || "0".equals(defaultType))
+				if ("0".equals(defaultType))
 				{
 					defaultType = "CACHED";
 				}
@@ -154,6 +154,7 @@ public class H2TableSourceBuilder
 				{
 					defaultType = "MEMORY";
 				}
+				
 				if (alwaysShowType || !defaultType.equals(type))
 				{
 					tbl.getSourceOptions().setTypeModifier(type);
