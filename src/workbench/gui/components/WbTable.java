@@ -733,6 +733,11 @@ public class WbTable
 		 return this.copyDeleteAction;
 	}
 
+	public CopyAsSqlMergeAction getCopyAsSqlMergeAction()
+	{
+		return this.copyMergeAction;
+	}
+	
 	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
 	{
 		return this.copyUpdateAction;

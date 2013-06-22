@@ -102,6 +102,7 @@ import workbench.gui.actions.CommitAction;
 import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.CopyRowAction;
@@ -251,6 +252,7 @@ public class SqlPanel
 	protected CopyAsSqlUpdateAction copyAsSqlUpdate;
 	protected CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
 	protected CopyAsSqlDeleteAction copyAsSqlDelete;
+	protected CopyAsSqlMergeAction copyAsSqlMerge;
 	protected CreateDeleteScriptAction createDeleteScript;
 	protected ImportFileAction importFileAction;
 	protected ImportClipboardAction importClipAction;
@@ -761,14 +763,20 @@ public class SqlPanel
 		this.actions.add(this.dataToClipboard);
 
 		copyAsSQLMenu = WbTable.createCopyAsSQLMenu();
+		copyAsSQLMenu.setEnabled(false);
+
 		copyAsSqlInsert = new CopyAsSqlInsertAction(null);
 		copyAsSQLMenu.add(this.copyAsSqlInsert);
 
 		copyAsSqlUpdate = new CopyAsSqlUpdateAction(null);
 		copyAsSQLMenu.add(this.copyAsSqlUpdate);
+		
+		copyAsSqlMerge = new CopyAsSqlMergeAction(null);
+		copyAsSQLMenu.add(copyAsSqlMerge);
 
 		copyAsSqlDeleteInsert = new CopyAsSqlDeleteInsertAction(null);
 		copyAsSQLMenu.add(this.copyAsSqlDeleteInsert);
+
 		copyAsSqlDelete = new CopyAsSqlDeleteAction(null);
 		copyAsSQLMenu.add(copyAsSqlDelete);
 
@@ -2744,8 +2752,10 @@ public class SqlPanel
 			copyAsSqlUpdate.setOriginal(null);
 			copyAsSqlDeleteInsert.setOriginal(null);
 			copyAsSqlDelete.setOriginal(null);
+			copyAsSqlMerge.setOriginal(null);
 			findDataAction.setOriginal(null);
 			findDataAgainAction.setOriginal(null);
+			copyAsSQLMenu.setEnabled(false);
 			copySelectedMenu.removeAll();
 			copySelectedMenu.setEnabled(false);
 			printDataAction.setOriginal(null);
@@ -2774,9 +2784,11 @@ public class SqlPanel
 			copyAsSqlUpdate.setOriginal(currentData.getTable().getCopyAsUpdateAction());
 			copyAsSqlDeleteInsert.setOriginal(currentData.getTable().getCopyAsDeleteInsertAction());
 			copyAsSqlDelete.setOriginal(currentData.getTable().getCopyAsDeleteAction());
+			copyAsSqlMerge.setOriginal(currentData.getTable().getCopyAsSqlMergeAction());
 			findDataAction.setOriginal(currentData.getTable().getReplacer().getFindAction());
 			findDataAgainAction.setOriginal(currentData.getTable().getReplacer().getFindAgainAction());
 			replaceDataAction.setOriginal(currentData.getTable().getReplacer().getReplaceAction());
+			copyAsSQLMenu.setEnabled(true);
 			copySelectedMenu.removeAll();
 			currentData.getTable().populateCopySelectedMenu(copySelectedMenu);
 			copySelectedMenu.setEnabled(true);

@@ -22,12 +22,27 @@
  */
 package workbench.gui;
 
-import workbench.gui.tools.DbExplorerTester;
-import org.junit.Test;
 import javax.swing.Action;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.ConnectionMgr;
+
+import workbench.gui.actions.AppendResultsAction;
+import workbench.gui.actions.SqlPanelReloadAction;
+import workbench.gui.sql.SqlPanel;
+import workbench.gui.tools.DbExplorerTester;
+
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
+import workbench.util.WbThread;
+
+import org.junit.Test;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -43,15 +58,7 @@ import org.netbeans.jemmy.operators.JTableOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import org.netbeans.jemmy.operators.Operator.DefaultStringComparator;
 import org.netbeans.jemmy.operators.Operator.StringComparator;
-import workbench.db.ConnectionMgr;
-import workbench.gui.actions.AppendResultsAction;
-import workbench.gui.actions.SqlPanelReloadAction;
-import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
-import workbench.util.WbThread;
+
 import static org.junit.Assert.*;
 
 /**
@@ -166,7 +173,7 @@ public class MainWindowTest
 
 		QueueTool tool = new QueueTool();
 
-		chooser.setName("sqlpanel1");
+		chooser.setName("sqlpanel-1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
@@ -224,7 +231,7 @@ public class MainWindowTest
 
 		QueueTool tool = new QueueTool();
 
-		chooser.setName("sqlpanel1");
+		chooser.setName("sqlpanel-1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
@@ -295,7 +302,7 @@ public class MainWindowTest
 		// Connecting can take some time...
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
-		chooser.setName("sqlpanel1");
+		chooser.setName("sqlpanel-1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 		testUtil.waitUntilConnected(sqlPanel);
@@ -305,10 +312,17 @@ public class MainWindowTest
 	{
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
 
+		JMenuItem copyAsText = (JMenuItem)dataMenu.getMenuComponent(12);
+		assertTrue(copyAsText.isEnabled());
+
+		JMenu copyAsSql = (JMenu)dataMenu.getMenuComponent(13);
+		assertTrue(copyAsSql.isEnabled());
+
+		assertEquals(5, copyAsSql.getMenuComponentCount());
 		// Copy as text menu item
-		for (int i=11; i < 16; i++)
+		for (int i=0; i < 5; i++)
 		{
-			JMenuItem item = (JMenuItem)dataMenu.getMenuComponent(i);
+			JMenuItem item = copyAsSql.getItem(i);
 			JMenuItemOperator op = new JMenuItemOperator(item);
 			assertTrue(op.isEnabled());
 		}
@@ -321,7 +335,7 @@ public class MainWindowTest
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 
-		chooser.setName("sqlpanel1");
+		chooser.setName("sqlpanel-1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
@@ -423,7 +437,7 @@ public class MainWindowTest
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		NamedComponentChooser chooser = new NamedComponentChooser();
-		chooser.setName("sqlpanel1");
+		chooser.setName("sqlpanel-1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
@@ -508,11 +522,12 @@ public class MainWindowTest
 	{
 		try
 		{
+			System.setProperty("workbench.db.hsql_database_engine.table_type.show_always", "false");
 			startApplication();
-			showLogFile();
-			connect();
 			aboutTest();
 			settingsTest();
+			showLogFile();
+			connect();
 			runSql();
 			appendTest();
 			pkWarningsTest();

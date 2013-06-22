@@ -146,7 +146,7 @@ public class H2TableSourceBuilder
 			{
 				String type = rs.getString(1);
 				String defaultType = rs.getString(2);
-				if ("0".equals(defaultType))
+				if (defaultType == null || "0".equals(defaultType))
 				{
 					defaultType = "CACHED";
 				}

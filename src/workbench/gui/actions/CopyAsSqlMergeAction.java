@@ -23,18 +23,21 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.db.exporter.ExportType;
-import workbench.gui.components.ClipBoardCopier;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.exporter.ExportType;
+
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the contents of a table to the clipboard as SQL INSERT statements
  * @see workbench.gui.components.ClipBoardCopier
  * @author  Thomas Kellerer
  */
-public class CopyAsSqlMergeAction extends WbAction
+public class CopyAsSqlMergeAction
+	extends WbAction
 {
 	private WbTable client;
 

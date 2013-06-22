@@ -22,19 +22,24 @@
  */
 package workbench.gui.tools;
 
-import workbench.gui.dbobjects.DbObjectSourcePanel;
 import javax.swing.JTabbedPane;
-import org.netbeans.jemmy.QueueTool;
-import org.netbeans.jemmy.operators.JComponentOperator;
+
 import workbench.db.DbMetadata;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableIdentifier;
+
 import workbench.gui.NamedComponentChooser;
 import workbench.gui.components.WbTable;
+import workbench.gui.dbobjects.DbObjectSourcePanel;
 import workbench.gui.dbobjects.TableDataPanel;
 import workbench.gui.dbobjects.TableDefinitionPanel;
 import workbench.gui.dbobjects.TableListPanel;
+
 import workbench.storage.DataStore;
+
+import org.netbeans.jemmy.QueueTool;
+import org.netbeans.jemmy.operators.JComponentOperator;
+
 import static org.junit.Assert.*;
 
 /**

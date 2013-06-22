@@ -408,7 +408,7 @@ public class RowDataReader
 		}
 		catch (IOException e)
 		{
-			LogMgr.logWarning("RowDataReader.read()", "Error retrieving clob data for column '" + rs.getMetaData().getColumnName(column) + "'", e);
+			LogMgr.logWarning("RowDataReader.read()", "Error retrieving clob data for column #" + column, e);
 			value = rs.getObject(column);
 		}
 		return value;
