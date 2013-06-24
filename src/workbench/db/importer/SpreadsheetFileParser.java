@@ -47,7 +47,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 
 
 /**
@@ -67,6 +66,7 @@ public class SpreadsheetFileParser
 	private String nullString;
 	private int currentRow;
 	private int sheetIndex;
+	private String sheetName;
 	private SpreadsheetReader content;
 	protected List<Object> dataRowValues;
 
@@ -298,16 +298,9 @@ public class SpreadsheetFileParser
 	{
 		if (content == null)
 		{
-			WbFile f = new WbFile(inputFile);
-			String ext = f.getExtension();
-
-			if (ext.startsWith("xls"))
+			content = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex);
+			if (sheetIndex < 0 && StringUtil.isNonBlank(sheetName))
 			{
-				content = new ExcelReader(inputFile, sheetIndex);
-			}
-			else if (ext.equals("ods"))
-			{
-				content = new OdsReader(inputFile, sheetIndex);
 			}
 			content.load();
 		}

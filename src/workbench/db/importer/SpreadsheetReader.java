@@ -22,8 +22,11 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import workbench.util.WbFile;
 
 /**
  *
@@ -47,4 +50,24 @@ public interface SpreadsheetReader
 		throws IOException;
 
 	List<String> getSheets();
+
+	public static class Factory
+	{
+		public static SpreadsheetReader createReader(File inputFile, int sheetIndex)
+		{
+			WbFile f = new WbFile(inputFile);
+			String ext = f.getExtension();
+			SpreadsheetReader reader = null;
+
+			if (ext.startsWith("xls"))
+			{
+				reader = new ExcelReader(inputFile, sheetIndex);
+			}
+			else if (ext.equals("ods"))
+			{
+				reader = new OdsReader(inputFile, sheetIndex);
+			}
+			return reader;
+		}
+	}
 }

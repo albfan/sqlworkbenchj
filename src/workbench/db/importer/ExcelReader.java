@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -48,6 +47,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import workbench.log.LogMgr;
 
 /**
  *
@@ -87,16 +88,27 @@ public class ExcelReader
 	@Override
 	public List<String> getSheets()
 	{
-		if (dataFile != null)
+		List<String> names = new ArrayList<String>();
+
+		if (dataFile == null)
 		{
-			int count = dataFile.getNumberOfSheets();
-			List<String> names = new ArrayList<String>(count);
-			for (int i=0; i < count; i++)
+			try
 			{
-				names.add(dataFile.getSheetName(i));
+				load();
+			}
+			catch (Exception io)
+			{
+				LogMgr.logError("ExcelReader.getSheets()", "Could not load Excel file: " + inputFile.getFullPath(), io);
+				return names;
 			}
 		}
-		return Collections.emptyList();
+
+		int count = dataFile.getNumberOfSheets();
+		for (int i=0; i < count; i++)
+		{
+			names.add(dataFile.getSheetName(i));
+		}
+		return names;
 	}
 
 

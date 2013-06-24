@@ -28,15 +28,19 @@ import java.util.List;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.db.importer.SpreadsheetReader;
+import workbench.log.LogMgr;
 
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
+import workbench.sql.wbcommands.WbImport;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * @author Thomas Kellerer
@@ -51,6 +55,7 @@ public class WbCommandAnalyzer
 
 	private boolean changeCase;
 	private final String wordDelimiters = " \t";
+	private boolean useSheetIndex = true;
 
 	public WbCommandAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -158,6 +163,18 @@ public class WbCommandAnalyzer
 				this.elements = ConnectionMgr.getInstance().getProfileKeys();
 				changeCase = false;
 			}
+			else if (parameter.equals(WbImport.ARG_SHEET_NR))
+			{
+				this.useSheetIndex = true;
+				this.elements = getSheetnames(cmd, p);
+				changeCase = false;
+			}
+			else if (parameter.equals(WbImport.ARG_SHEET_NAME))
+			{
+				this.useSheetIndex = false;
+				this.elements = getSheetnames(cmd, p);
+				changeCase = false;
+			}
 			else
 			{
 				this.context = NO_CONTEXT;
@@ -175,6 +192,64 @@ public class WbCommandAnalyzer
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = p.needsSwitch();
 		}
+	}
+
+	@Override
+	public String getPasteValue(Object selectedObject)
+	{
+		if (selectedObject instanceof SheetEntry)
+		{
+			SheetEntry entry = (SheetEntry)selectedObject;
+			if (useSheetIndex)
+			{
+				return Integer.toString(entry.sheetIndex);
+			}
+			else
+			{
+				return entry.sheetName;
+			}
+		}
+		return null;
+	}
+
+	private List getSheetnames(SqlCommand wbImport, ArgumentParser cmdLine)
+	{
+		cmdLine.parse(this.sql);
+		String fname = cmdLine.getValue(WbImport.ARG_FILE);
+		WbFile input = wbImport.evaluateFileArgument(fname);
+
+		List result = new ArrayList();
+		if (input == null) return result;
+
+		SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(input, -1);
+		try
+		{
+			List<String> sheets = reader.getSheets();
+			for (int index = 0; index < sheets.size(); index++ )
+			{
+				String display = null;
+				String name = sheets.get(index);
+				if (useSheetIndex)
+				{
+					display = Integer.toString(index + 1) + " - " + name;
+				}
+				else
+				{
+					display = name;
+				}
+				SheetEntry entry = new SheetEntry(index + 1, name, display);
+				result.add(entry);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("WbCommandAnalyzer.getSheetnames()", "Could not read spreadsheet: " + input.getFullPath(), e);
+		}
+		finally
+		{
+			reader.done();
+		}
+		return result;
 	}
 
 	@Override
@@ -215,4 +290,23 @@ public class WbCommandAnalyzer
 		return null;
 	}
 
+	private static class SheetEntry
+	{
+		private final int sheetIndex;
+		private final String sheetName;
+		private final String displayString;
+
+		public SheetEntry(int index, String name, String display)
+		{
+			this.sheetIndex = index;
+			this.sheetName = name;
+			this.displayString = display;
+		}
+
+		@Override
+		public String toString()
+		{
+			return displayString;
+		}
+	}
 }

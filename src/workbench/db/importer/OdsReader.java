@@ -39,6 +39,7 @@ import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 
+
 /**
  *
  * @author Thomas Kellerer
@@ -53,10 +54,10 @@ public class OdsReader
 	private int worksheetIndex = 0;
 	private List<String> headerColumns;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
-	
-	public OdsReader(File f, int sheetIndex)
+
+	public OdsReader(File odsFile, int sheetIndex)
 	{
-		inputFile = f;
+		inputFile = odsFile;
 		worksheetIndex = sheetIndex;
 	}
 
@@ -218,8 +219,21 @@ public class OdsReader
 	@Override
 	public List<String> getSheets()
 	{
+		List<String> result = new ArrayList<String>();
+		if (dataFile == null)
+		{
+			try
+			{
+				load();
+			}
+			catch (IOException io)
+			{
+				LogMgr.logError("OdsReader.getSheets()", io.getMessage(), io);
+				return result;
+			}
+		}
+
 		int sheetCount = dataFile.getSheetCount();
-		List<String> result = new ArrayList<String>(sheetCount);
 		for (int i=0; i < sheetCount; i ++)
 		{
 			String name = dataFile.getSheetByIndex(i).getTableName();

@@ -109,6 +109,7 @@ public class WbImport
 	public static final String ARG_EMPTY_FILE = "emptyFile";
 	public static final String ARG_PG_COPY = "usePgCopy";
 	public static final String ARG_SHEET_NR = "sheetNumber";
+	public static final String ARG_SHEET_NAME = "sheetName";
 
 	private DataImporter imp;
 
@@ -147,6 +148,7 @@ public class WbImport
 
 		cmdLine.addArgument(ARG_TYPE, types);
 		cmdLine.addArgument(ARG_SHEET_NR);
+		cmdLine.addArgument(ARG_SHEET_NAME);
 		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);

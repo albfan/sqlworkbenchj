@@ -393,7 +393,7 @@ public class SqlCommand
 
 		sql = getSqlToExecute(sql);
 		String verb = SqlUtil.getSqlVerb(sql);
-		
+
 		result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
 
 		runner.setSavepoint();
@@ -895,7 +895,7 @@ public class SqlCommand
 	 * @return a File object pointing to the file indicated by the user.
 	 * @see workbench.sql.StatementRunner#getBaseDir()
 	 */
-	protected WbFile evaluateFileArgument(String fileName)
+	public WbFile evaluateFileArgument(String fileName)
 	{
 		if (StringUtil.isEmptyString(fileName)) return null;
 
