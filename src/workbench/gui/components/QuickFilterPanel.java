@@ -115,6 +115,15 @@ public class QuickFilterPanel
 		this.initGui(historyProperty);
 	}
 
+	@Override
+	public void setEnabled(boolean flag)
+	{
+		super.setEnabled(flag);
+		toolbar.setEnabled(flag);
+		filterAction.setEnabled(flag);
+		filterValue.setEnabled(flag);
+	}
+
 	public void setFilterOnType(boolean flag)
 	{
 		if (flag)

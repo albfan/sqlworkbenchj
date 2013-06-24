@@ -938,6 +938,8 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			tableTypes.setEnabled(false);
+			findPanel.setEnabled(false);
+			reloadAction.setEnabled(false);
 			summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			reset();
 
@@ -1018,8 +1020,9 @@ public class TableListPanel
 			setBusy(false);
 			tableTypes.setEnabled(true);
 			levelChanger.restoreIsolationLevel(dbConnection);
+			findPanel.setEnabled(true);
+			reloadAction.setEnabled(true);
 			endTransaction();
-
 		}
 	}
 
