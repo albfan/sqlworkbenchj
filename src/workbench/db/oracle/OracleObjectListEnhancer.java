@@ -49,12 +49,13 @@ import workbench.util.SqlUtil;
 public class OracleObjectListEnhancer
 	implements ObjectListEnhancer
 {
-
 	private boolean canRetrieveSnapshots = true;
 
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String catalogPattern, String schema, String objectNamePattern, String[] types)
 	{
+		if (con == null) return;
+
 		boolean checkSnapshots = Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && DbMetadata.typeIncluded("TABLE", types);
 		if (!checkSnapshots) return;
 
@@ -80,10 +81,11 @@ public class OracleObjectListEnhancer
 	 */
 	public Set<String> getSnapshots(WbConnection connection, String schema)
 	{
-		if (!canRetrieveSnapshots)
+		if (!canRetrieveSnapshots || connection == null)
 		{
 			return Collections.emptySet();
 		}
+
 		Set<String> result = new HashSet<String>();
 		String sql = "SELECT /* SQLWorkbench */ owner||'.'||mview_name FROM all_mviews";
 		if (schema != null)
