@@ -23,9 +23,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.WbManager;
-import workbench.db.ConnectionInfoBuilder;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionInfoBuilder;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -61,17 +64,25 @@ public class WbConnInfo
 		}
 		else
 		{
-			int indent = 0;
-			ConnectionInfoBuilder info = new ConnectionInfoBuilder();
-			if (WbManager.getInstance().isConsoleMode())
+			try
 			{
-				result.addMessage(" ");
-				indent = 2;
+				currentConnection.setBusy(false);
+				int indent = 0;
+				ConnectionInfoBuilder info = new ConnectionInfoBuilder();
+				if (WbManager.getInstance().isConsoleMode())
+				{
+					result.addMessage(" ");
+					indent = 2;
+				}
+				result.addMessage(info.getPlainTextDisplay(currentConnection, indent));
+				if (WbManager.getInstance().isConsoleMode())
+				{
+					result.addMessage("");
+				}
 			}
-			result.addMessage(info.getPlainTextDisplay(currentConnection, indent));
-			if (WbManager.getInstance().isConsoleMode())
+			finally
 			{
-				result.addMessage("");
+				currentConnection.setBusy(true);
 			}
 		}
 		return result;

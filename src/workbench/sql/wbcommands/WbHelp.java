@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.ResourceBundle;
 
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -70,6 +71,11 @@ public class WbHelp
 		commands.remove("ENABLEOUT");
 		commands.remove("DISABLEOUT");
 		commands.remove("SHOW");
+
+		if (!WbManager.getInstance().isConsoleMode())
+		{
+			commands.remove("WbRun");
+		}
 
 		for (String verb : commands)
 		{

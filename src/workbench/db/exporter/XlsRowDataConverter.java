@@ -42,6 +42,8 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -141,11 +143,6 @@ public class XlsRowDataConverter
 	@Override
 	public StrBuffer getEnd(long totalRows)
 	{
-		for (short i = 0; i < this.metaData.getColumnCount(); i++)
-		{
-			sheet.autoSizeColumn(i);
-		}
-
 		if (getAppendInfoSheet())
 		{
 			Sheet info = workbook.createSheet("SQL");
@@ -164,6 +161,20 @@ public class XlsRowDataConverter
 		if (getEnableFixedHeader() && writeHeader)
 		{
 			sheet.createFreezePane(0, firstRow);
+		}
+
+		if (getEnableAutoFilter() && writeHeader)
+		{
+			String lastColumn = CellReference.convertNumToColString(metaData.getColumnCount() - 1);
+
+			String rangeName = "A1:" + lastColumn + Long.toString(totalRows + 1);
+			CellRangeAddress range = CellRangeAddress.valueOf(rangeName);
+			sheet.setAutoFilter(range);
+		}
+
+		for (short i = 0; i < this.metaData.getColumnCount(); i++)
+		{
+			sheet.autoSizeColumn(i, true);
 		}
 
 		FileOutputStream fileOut = null;
@@ -187,6 +198,8 @@ public class XlsRowDataConverter
 
 		return null;
 	}
+
+
 
 	@Override
 	public StrBuffer convertRowData(RowData row, long rowIndex)
