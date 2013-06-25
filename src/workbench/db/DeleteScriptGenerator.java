@@ -39,13 +39,13 @@ import workbench.resource.Settings;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
 
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
 /**
@@ -67,6 +67,7 @@ public class DeleteScriptGenerator
 	private List<String> statements = new LinkedList<String>();
 	private SqlLiteralFormatter formatter;
 	private boolean formatSql = true;
+	private boolean removeReduntant;
 
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -80,6 +81,11 @@ public class DeleteScriptGenerator
 	public WbConnection getCurrentConnection()
 	{
 		return connection;
+	}
+
+	public void setRemoveRedundant(boolean flag)
+	{
+		this.removeReduntant = flag;
 	}
 
 	public void setFormatSql(boolean flag)
@@ -118,7 +124,10 @@ public class DeleteScriptGenerator
 	@Override
 	public void cancel()
 	{
-		// not implemented yet
+		if (dependency != null)
+		{
+			dependency.cancel();
+		}
 	}
 
 	private void createStatements(boolean includeRoot)
@@ -128,9 +137,22 @@ public class DeleteScriptGenerator
 		this.dependency.readDependencyTree(true);
 		List<DependencyNode> leafs = this.dependency.getLeafs();
 
+		List<DependencyNode> toIgnore;
+		if (removeReduntant)
+		{
+			DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
+			toIgnore = finder.getDuplicates();
+		}
+		else
+		{
+			toIgnore = Collections.emptyList();
+		}
+
 		for (DependencyNode node : leafs)
 		{
+			if (toIgnore.contains(node)) continue;
 			if (visitedTables.contains(node)) continue;
+
 			statements.add(createDeleteStatement(node));
 			visitedTables.add(node);
 			DependencyNode p = node.getParent();
@@ -146,7 +168,9 @@ public class DeleteScriptGenerator
 
 		for (DependencyNode pnode : parents)
 		{
+			if (toIgnore.contains(pnode)) continue;
 			if (visitedTables.contains(pnode)) continue;
+
 			statements.add(createDeleteStatement(pnode));
 			visitedTables.add(pnode);
 		}
@@ -169,7 +193,7 @@ public class DeleteScriptGenerator
 		{
 			return sql.toString();
 		}
-		
+
 		try
 		{
 			SqlFormatter f = new SqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength(), connection.getDbId());
@@ -283,12 +307,6 @@ public class DeleteScriptGenerator
 		if (value == null)
 		{
 			return false;
-		}
-
-		int type = data.getIdentifier().getDataType();
-		if (type == 0)
-		{
-			return true;
 		}
 
 		if (value instanceof String)
@@ -418,5 +436,4 @@ public class DeleteScriptGenerator
 			connection.setBusy(false);
 		}
 	}
-
 }

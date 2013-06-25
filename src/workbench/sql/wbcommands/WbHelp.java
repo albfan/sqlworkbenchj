@@ -24,8 +24,10 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.ResourceBundle;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -63,11 +65,12 @@ public class WbHelp
 		Collection<String> commands = this.runner.getAllWbCommands();
 		StringBuffer msg = new StringBuffer(commands.size() * 25);
 		ResourceBundle bundle = ResourceBundle.getBundle("language/cmdhelp", Settings.getInstance().getLanguage());
-		commands.remove("DESC"); // only the "long" Verb is needed
+		commands.remove("DESC");
+		commands.add("DESCRIBE"); // only the "long" Verb is needed
 		commands.remove("ENABLEOUT");
 		commands.remove("DISABLEOUT");
 		commands.remove("SHOW");
-		
+
 		for (String verb : commands)
 		{
 			msg.append(verb);

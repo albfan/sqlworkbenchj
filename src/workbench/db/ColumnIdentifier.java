@@ -43,6 +43,8 @@ import workbench.util.StringUtil;
 public class ColumnIdentifier
 	implements ComparableDbObject, Comparable<ColumnIdentifier>
 {
+	public static final int NO_TYPE_INFO = Integer.MIN_VALUE;
+	
 	private String name;
 	private String alias;
 	private int type = Types.OTHER;

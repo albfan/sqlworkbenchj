@@ -28,12 +28,16 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import workbench.db.DbSettings;
-import workbench.db.WbConnection;
-import workbench.db.exporter.InfinityLiterals;
+
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
+import workbench.db.WbConnection;
+import workbench.db.exporter.InfinityLiterals;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
@@ -296,8 +300,11 @@ public class SqlLiteralFormatter
 		Object value = data.getValue();
 		if (value == null) return "NULL";
 
+
 		int type = data.getIdentifier().getDataType();
 		String dbmsType = data.getIdentifier().getDbmsType();
+
+		if (type == ColumnIdentifier.NO_TYPE_INFO) return value.toString();
 
 		if (type == Types.STRUCT)
 		{

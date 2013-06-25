@@ -22,18 +22,24 @@
  */
 package workbench.db;
 
-import org.junit.Test;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.sql.ScriptParser;
+
 import workbench.storage.ColumnData;
+
+import workbench.sql.ScriptParser;
+
 import workbench.util.SqlUtil;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -48,6 +54,56 @@ public class DeleteScriptGeneratorTest
 	public DeleteScriptGeneratorTest()
 	{
 		super("DeleteScriptGeneratorTest");
+	}
+
+	@Test
+	public void testCleanup()
+		throws Exception
+	{
+		String sql =
+			"create table root  \n" +
+			"( \n" +
+			"  r_id integer primary key not null \n" +
+			"); \n" +
+			" \n" +
+			"create table details \n" +
+			"( \n" +
+			"  d_id integer not null primary key \n" +
+			"); \n" +
+			" \n" +
+			"create table level1 \n" +
+			"( \n" +
+			"  l1_id integer primary key not null, \n" +
+			"  r_id integer not null references root (r_id), \n" +
+			"  d_id integer not null references details(d_id) \n" +
+			"); \n" +
+			" \n" +
+			"create table details_item \n" +
+			"( \n" +
+			"  di_id integer not null primary key, \n" +
+			"  d_id integer not null references details(d_id), \n" +
+			"  r_id integer not null references root (r_id), \n" +
+			"  l1_id integer not null references level1 (l1_id) \n" +
+			");\n" +
+			"commit;";
+		TestUtil util = getTestUtil();
+		this.dbConnection = util.getConnection();
+		TestUtil.executeScript(dbConnection, sql);
+		TableIdentifier tbl = dbConnection.getMetadata().findTable(new TableIdentifier("ROOT"));
+
+		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
+		generator.setFormatSql(false);
+		generator.setTable(tbl);
+		generator.setRemoveRedundant(true);
+
+		List<ColumnData> pk = new ArrayList<ColumnData>();
+		ColumnData id = new ColumnData("42", new ColumnIdentifier("R_ID", ColumnIdentifier.NO_TYPE_INFO));
+		pk.add(id);
+		List<String> script = generator.getStatementsForValues(pk, true);
+		assertEquals(3, script.size());
+		assertEquals("DELETE FROM DETAILS_ITEM WHERE R_ID = 42", script.get(0));
+		assertEquals("DELETE FROM LEVEL1 WHERE R_ID = 42", script.get(1));
+		assertEquals("DELETE FROM ROOT WHERE R_ID = 42", script.get(2));
 	}
 
 	@Test
