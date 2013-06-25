@@ -38,6 +38,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateSnippetAction;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
@@ -109,9 +110,11 @@ public class ObjectScripterUI
 			@Override
 			public void run()
 			{
+				String baseTitle = window.getTitle();
 				try
 				{
 					setRunning(true);
+					window.setTitle(RunningJobIndicator.TITLE_PREFIX + baseTitle);
 					scripter.generateScript();
 					if (!scripter.isCancelled())
 					{
@@ -128,6 +131,7 @@ public class ObjectScripterUI
 				}
 				finally
 				{
+					window.setTitle(baseTitle);
 					setRunning(false);
 					EventQueue.invokeLater(new Runnable()
 					{
