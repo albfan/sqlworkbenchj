@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -480,4 +481,30 @@ public class FileUtil
 		return result;
 	}
 
+	public static void writeString(File file, String content)
+		throws IOException
+	{
+		writeString(file, content, EncodingUtil.getDefaultEncoding(), false);
+	}
+
+	public static void writeString(File file, String content, boolean append)
+		throws IOException
+	{
+		writeString(file, content, EncodingUtil.getDefaultEncoding(), append);
+	}
+
+	public static void writeString(File file, String content, String encoding, boolean append)
+		throws IOException
+	{
+		Writer writer = null;
+		try
+		{
+			writer = EncodingUtil.createWriter(file, encoding, append);
+			writer.write(content);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(writer);
+		}
+	}
 }

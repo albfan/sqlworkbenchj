@@ -84,6 +84,12 @@ public class ObjectScripter
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 	}
 
+	@Override
+	public WbConnection getCurrentConnection()
+	{
+		return dbConnection;
+	}
+
 	public void setUseSeparator(boolean flag)
 	{
 		this.useSeparator = flag;

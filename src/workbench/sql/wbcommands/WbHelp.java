@@ -64,12 +64,10 @@ public class WbHelp
 		StringBuffer msg = new StringBuffer(commands.size() * 25);
 		ResourceBundle bundle = ResourceBundle.getBundle("language/cmdhelp", Settings.getInstance().getLanguage());
 		commands.remove("DESC"); // only the "long" Verb is needed
-		if (currentConnection != null && !currentConnection.getMetadata().isOracle())
-		{
-			commands.remove("ENABLEOUT");
-			commands.remove("DISABLEOUT");
-		}
-
+		commands.remove("ENABLEOUT");
+		commands.remove("DISABLEOUT");
+		commands.remove("SHOW");
+		
 		for (String verb : commands)
 		{
 			msg.append(verb);

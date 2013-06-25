@@ -122,6 +122,7 @@ public class CommandMapper
 		addCommand(new WbDeleteProfile());
 		addCommand(new WbGenDrop());
 		addCommand(new WbGenerateScript());
+		addCommand(new WbGenDelete());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.getCommit());

@@ -63,6 +63,12 @@ public class DropScriptGenerator
 		dropTemplate = connection.getDbSettings().getDropConstraint("table");
 	}
 
+	@Override
+	public WbConnection getCurrentConnection()
+	{
+		return connection;
+	}
+
 	public void setIncludeComments(boolean flag)
 	{
 		this.includeTableMarkers = flag;

@@ -22,10 +22,7 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -41,10 +38,10 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
-import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
 import static workbench.sql.wbcommands.WbGenDrop.PARAM_INCLUDE_CREATE;
+import workbench.util.FileUtil;
 
 /**
  * A SqlCommand to create a DROP script for one or more tables that will drop referencing foreign keys
@@ -116,7 +113,7 @@ public class WbGenDrop
 		boolean onlyFk = cmdLine.getBoolean(PARAM_DROP_FK_ONLY, false);
 		boolean sortByType = cmdLine.getBoolean(PARAM_SORT_BY_TYPE, false);
 		boolean includeComments = cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, true);
-		
+
 		DropScriptGenerator gen = new DropScriptGenerator(currentConnection);
 		gen.setIncludeRecreateStatements(includeCreate);
 		gen.setIncludeComments(includeComments);
@@ -153,12 +150,12 @@ public class WbGenDrop
 				WbFile output = new WbFile(dirFile, "drop_" + tbl.getTableName().toLowerCase() + ".sql");
 				try
 				{
-					writeFile(output, gen.getScriptFor(tbl));
+					FileUtil.writeString(output, gen.getScriptFor(tbl));
 					count ++;
 				}
 				catch (IOException io)
 				{
-					result.addMessageByKey("ErrExportFileCreate");
+					result.addMessageByKey("ErrFileCreate");
 					result.addMessage(ExceptionUtil.getDisplay(io));
 					result.setFailure();
 					return result;
@@ -172,13 +169,13 @@ public class WbGenDrop
 			WbFile output = new WbFile(file);
 			try
 			{
-				writeFile(output, gen.getScript());
+				FileUtil.writeString(output, gen.getScript());
 				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getFullPath()));
 				result.setSuccess();
 			}
 			catch (IOException io)
 			{
-				result.addMessageByKey("ErrExportFileCreate");
+				result.addMessageByKey("ErrFileCreate");
 				result.addMessage(ExceptionUtil.getDisplay(io));
 				result.setFailure();
 			}
@@ -189,21 +186,6 @@ public class WbGenDrop
 			result.addMessage(gen.getScript());
 		}
 		return result;
-	}
-
-	private void writeFile(File file, String script)
-		throws IOException
-	{
-		PrintWriter writer = null;
-		try
-		{
-			writer = new PrintWriter(new FileWriter(file));
-			writer.print(script);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
 	}
 
 	@Override

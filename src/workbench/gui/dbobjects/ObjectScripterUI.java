@@ -105,6 +105,12 @@ public class ObjectScripterUI
 	private void startScripting()
 	{
 		if (this.isRunning()) return;
+
+		if (!WbSwingUtilities.isConnectionIdle(this, scripter.getCurrentConnection()))
+		{
+			return;
+		}
+
 		WbThread t = new WbThread("ObjectScripter Thread")
 		{
 			@Override
@@ -118,8 +124,8 @@ public class ObjectScripterUI
 					scripter.generateScript();
 					if (!scripter.isCancelled())
 					{
-						WbSwingUtilities.invoke(new Runnable() {
-
+						WbSwingUtilities.invoke(new Runnable()
+						{
 							@Override
 							public void run()
 							{

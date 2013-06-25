@@ -52,98 +52,122 @@ public class DeleteScriptGeneratorTest
 
 	@Test
 	public void testGenerateScript()
+		throws Exception
 	{
-		try
-		{
-			createSimpleTables();
-			DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
-			TableIdentifier table = new TableIdentifier("PERSON");
-			generator.setTable(table);
-			List<ColumnData> pk = new ArrayList<ColumnData>();
-			ColumnData id = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
-			pk.add(id);
-			CharSequence sql = generator.getScriptForValues(pk);
-//			System.out.println("***");
-//			System.out.println(sql);
-			ScriptParser parser = new ScriptParser(sql.toString());
-			assertEquals(2, parser.getSize());
-			String addressDelete = parser.getCommand(0);
-			String addressTable = SqlUtil.getDeleteTable(addressDelete);
-			Pattern p = Pattern.compile("\\s*person_id\\s*=\\s*1", Pattern.CASE_INSENSITIVE);
-			Matcher m = p.matcher(addressDelete);
-			assertEquals("ADDRESS", addressTable);
-			assertTrue(m.find());
+		createSimpleTables();
+		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
+		TableIdentifier table = new TableIdentifier("PERSON");
+		generator.setTable(table);
+		List<ColumnData> pk = new ArrayList<ColumnData>();
+		ColumnData id = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
+		pk.add(id);
+		CharSequence sql = generator.getScriptForValues(pk);
+		ScriptParser parser = new ScriptParser(sql.toString());
+		assertEquals(2, parser.getSize());
+		String addressDelete = parser.getCommand(0);
+		String addressTable = SqlUtil.getDeleteTable(addressDelete);
+		Pattern p = Pattern.compile("\\s*person_id\\s*=\\s*1", Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(addressDelete);
+		assertEquals("ADDRESS", addressTable);
+		assertTrue(m.find());
 
-			String personTable = SqlUtil.getDeleteTable(parser.getCommand(1));
-			assertEquals("PERSON", personTable);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String personTable = SqlUtil.getDeleteTable(parser.getCommand(1));
+		assertEquals("PERSON", personTable);
 	}
 
 	@Test
 	public void testGenerateStatements()
+		throws Exception
 	{
-		try
+		createMultiColumnPkTables();
+		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
+		TableIdentifier table = new TableIdentifier("BASE");
+		generator.setTable(table);
+		List<ColumnData> pk = new ArrayList<ColumnData>();
+		pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID1")));
+		pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID2")));
+
+		List<String> statements = generator.getStatementsForValues(pk, true);
+
+		assertEquals(4, statements.size());
+
+		Statement stmt = dbConnection.createStatement();
+		for (String sql : statements)
 		{
-			createMultiColumnPkTables();
-			DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
-			TableIdentifier table = new TableIdentifier("BASE");
-			generator.setTable(table);
-			List<ColumnData> pk = new ArrayList<ColumnData>();
-			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID1")));
-			pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID2")));
-
-			List<String> statements = generator.getStatementsForValues(pk, true);
-
-			assertEquals(4, statements.size());
-
-			Statement stmt = dbConnection.createStatement();
-			for (String sql : statements)
-			{
-				stmt.executeUpdate(sql);
-			}
-			dbConnection.commit();
-
-			String[] tables = new String[] { "BASE", "CHILD1", "CHILD2", "CHILD22" };
-
-			for (String st : tables)
-			{
-				ResultSet rs = stmt.executeQuery("select count(*) from " + st);
-				int count = -1;
-				if (rs.next())
-				{
-					count = rs.getInt(1);
-				}
-				assertEquals("Wrong count in table: " + st, 1, count);
-			}
-
-			stmt.close();
-
-			String sql = statements.get(3);
-			String t = SqlUtil.getDeleteTable(sql);
-			assertEquals("BASE", t);
-
-			sql = statements.get(2);
-			t = SqlUtil.getDeleteTable(sql);
-			assertEquals("CHILD1", t);
-
-			// Test when root table should not be included
-			statements = generator.getStatementsForValues(pk, false);
-			assertEquals(3, statements.size());
-			sql = statements.get(2);
-			t = SqlUtil.getDeleteTable(sql);
-			assertEquals("CHILD1", t);
+			stmt.executeUpdate(sql);
 		}
-		catch (Exception e)
+		dbConnection.commit();
+
+		String[] tables = new String[]
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			"BASE", "CHILD1", "CHILD2", "CHILD22"
+		};
+
+		for (String st : tables)
+		{
+			ResultSet rs = stmt.executeQuery("select count(*) from " + st);
+			int count = -1;
+			if (rs.next())
+			{
+				count = rs.getInt(1);
+			}
+			assertEquals("Wrong count in table: " + st, 1, count);
 		}
+
+		stmt.close();
+
+		String sql = statements.get(3);
+		String t = SqlUtil.getDeleteTable(sql);
+		assertEquals("BASE", t);
+
+		sql = statements.get(2);
+		t = SqlUtil.getDeleteTable(sql);
+		assertEquals("CHILD1", t);
+
+		// Test when root table should not be included
+		statements = generator.getStatementsForValues(pk, false);
+		assertEquals(3, statements.size());
+		sql = statements.get(2);
+		t = SqlUtil.getDeleteTable(sql);
+		assertEquals("CHILD1", t);
 	}
+
+	@Test
+	public void testExpression()
+		throws Exception
+	{
+		createSimpleTables();
+
+		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
+		generator.setFormatSql(false);
+		TableIdentifier table = new TableIdentifier("PERSON");
+		generator.setTable(table);
+
+		List<ColumnData> pk = new ArrayList<ColumnData>();
+		ColumnData id = new ColumnData("IN (1,2,3)", new ColumnIdentifier("ID"));
+		pk.add(id);
+
+		List<String> statements = generator.getStatementsForValues(pk, true);
+		assertEquals(2, statements.size());
+		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID IN (1,2,3)", statements.get(0));
+
+		pk.clear();
+		id = new ColumnData("between -1000 and -100", new ColumnIdentifier("ID"));
+		pk.add(id);
+		statements = generator.getStatementsForValues(pk, true);
+		assertEquals(2, statements.size());
+		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID between -1000 and -100", statements.get(0));
+		assertEquals("DELETE FROM PERSON WHERE ID between -1000 and -100", statements.get(1));
+
+		pk.clear();
+		id = new ColumnData("< 0", new ColumnIdentifier("ID"));
+		pk.add(id);
+		statements = generator.getStatementsForValues(pk, true);
+		assertEquals(2, statements.size());
+		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID < 0", statements.get(0));
+		assertEquals("DELETE FROM PERSON WHERE ID < 0", statements.get(1));
+	}
+
 
 	private void createMultiColumnPkTables()
 		throws Exception
@@ -220,7 +244,6 @@ public class DeleteScriptGeneratorTest
 		dbConnection.commit();
 		stmt.close();
 	}
-
 
 	private void createSimpleTables()
 		throws Exception

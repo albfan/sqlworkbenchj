@@ -22,6 +22,8 @@
  */
 package workbench.interfaces;
 
+import workbench.db.WbConnection;
+
 /**
  *
  * @author Thomas Kellerer
@@ -33,4 +35,5 @@ public interface Scripter
 	void setProgressMonitor(ScriptGenerationMonitor monitor);
 	void cancel();
 	boolean isCancelled();
+	WbConnection getCurrentConnection();
 }

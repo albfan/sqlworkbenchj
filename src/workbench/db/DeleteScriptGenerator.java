@@ -39,6 +39,8 @@ import workbench.resource.Settings;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -64,6 +66,7 @@ public class DeleteScriptGenerator
 	private ScriptGenerationMonitor monitor;
 	private List<String> statements = new LinkedList<String>();
 	private SqlLiteralFormatter formatter;
+	private boolean formatSql = true;
 
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -71,6 +74,17 @@ public class DeleteScriptGenerator
 		this.connection = aConnection;
 		this.meta = this.connection.getMetadata();
 		this.formatter = new SqlLiteralFormatter(this.connection);
+	}
+
+	@Override
+	public WbConnection getCurrentConnection()
+	{
+		return connection;
+	}
+
+	public void setFormatSql(boolean flag)
+	{
+		this.formatSql = flag;
 	}
 
 	public void setSource(WbTable aTable)
@@ -151,6 +165,11 @@ public class DeleteScriptGenerator
 
 	private String formatSql(StringBuilder sql)
 	{
+		if (!formatSql)
+		{
+			return sql.toString();
+		}
+		
 		try
 		{
 			SqlFormatter f = new SqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength(), connection.getDbId());
@@ -255,12 +274,48 @@ public class DeleteScriptGenerator
 		appendColumnData(sql, childColumn, data);
 	}
 
+	private boolean isExpression(ColumnData data)
+	{
+		if (data == null) return false;
+		if (data.getIdentifier() == null) return false;
+
+		Object value = data.getValue();
+		if (value == null)
+		{
+			return false;
+		}
+
+		int type = data.getIdentifier().getDataType();
+		if (type == 0)
+		{
+			return true;
+		}
+
+		if (value instanceof String)
+		{
+			String s = (String)value;
+			SQLLexer lexer = new SQLLexer(s);
+			SQLToken first = lexer.getNextToken(false, false);
+			if (first.isNumberLiteral() || first.isLiteral())
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	private void appendColumnData(StringBuilder sql, String column, ColumnData data)
 	{
 		sql.append(connection.getMetadata().quoteObjectname(column));
 		if (data == null || data.isNull())
 		{
 			sql.append(" IS NULL");
+		}
+		else if (isExpression(data))
+		{
+			sql.append(' ');
+			sql.append(data.getValue());
 		}
 		else
 		{
