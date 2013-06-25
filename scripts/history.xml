@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-06-09">
+    <entry dev-build="11" type="enh">A new command (WbGenerateDelete) to generate a delete statement with respect to foreign keys has been added. This the same as the "Generate delete script" menu item.</entry>
     <entry dev-build="11" type="enh">Data can now be exported (saved, copied) as SQL DELETE statements as well.</entry>
     <entry dev-build="11" type="enh">For Informix the lock mode of a table is now displayed in the table's source</entry>
     <entry dev-build="11" type="enh">Implemented a workaround for a bug in the MonetDB driver in order to display stored procedures properly</entry>
@@ -26,6 +27,7 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="11" type="fix">The option -autoFilter=true was not working for XLS or XLSX exports</entry>
     <entry dev-build="11" type="fix">For Informix synonyms and sequences from other schemas were not displayed correctly in the DbExplorer</entry>
     <entry dev-build="11" type="fix">When configuring shortcuts, the alternate shortcuts for Cut, Copy, and Paste (using e.g. Shift-Insert) were no longer working</entry>
     <entry dev-build="11" type="fix">When invoking code-completion for a specific schema, the schema name appended twice if the case written in the editor did not match the actual case as stored by the DBMS</entry>
