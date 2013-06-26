@@ -60,7 +60,7 @@ public class WbGenDelete
 	public static final String PARAM_COLUMN_VAL = "columnValue";
 	public static final String PARAM_DO_FORMAT = "formatSql";
 	public static final String PARAM_INCLUDE_COMMIT = "includeCommit";
-	public static final String PARAM_REMOVE_REDUNDANT = "removeRedundant";
+	public static final String PARAM_APPEND = "appendFile";
 
 	private DeleteScriptGenerator generator;
 
@@ -74,7 +74,7 @@ public class WbGenDelete
 		cmdLine.addArgument(PARAM_TABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_COLUMN_VAL, ArgumentType.Repeatable);
 		cmdLine.addArgument(PARAM_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(PARAM_REMOVE_REDUNDANT, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(PARAM_APPEND, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -132,15 +132,15 @@ public class WbGenDelete
 		generator = new DeleteScriptGenerator(this.currentConnection);
 		generator.setTable(table);
 		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, true));
-		generator.setRemoveRedundant(cmdLine.getBoolean(PARAM_REMOVE_REDUNDANT, true));
 		CharSequence script = generator.getScriptForValues(values);
 
 		WbFile output = evaluateFileArgument(cmdLine.getValue(PARAM_FILE));
 		if (output != null)
 		{
+			boolean append = cmdLine.getBoolean(PARAM_APPEND, false);
 			try
 			{
-				FileUtil.writeString(output, script.toString());
+				FileUtil.writeString(output, script.toString(), append);
 				if (cmdLine.getBoolean(PARAM_INCLUDE_COMMIT))
 				{
 					FileUtil.writeString(output, "\ncommit;\n", true);
