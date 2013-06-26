@@ -44,7 +44,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.helpers.ColumnHelper;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -180,9 +185,33 @@ public class XlsRowDataConverter
 
 		if (optimizeCols)
 		{
-			for (int i = 0; i < this.metaData.getColumnCount(); i++)
+			for (int col = 0; col < this.metaData.getColumnCount(); col++)
 			{
-				sheet.autoSizeColumn(i);
+				sheet.autoSizeColumn(col);
+			}
+
+			// POI seems to use a strange unit for specifying column widths.
+			int charWidth = Settings.getInstance().getIntProperty("workbench.export.xls.defaultcharwidth", 250);
+
+			for (int col = 0; col < this.metaData.getColumnCount(); col++)
+			{
+				int width = sheet.getColumnWidth(col);
+				int minWidth = metaData.getColumnName(col).length() * charWidth;
+				if (getEnableAutoFilter())
+				{
+					minWidth += charWidth * 2;
+				}
+				if (width < minWidth)
+				{
+					LogMgr.logDebug("XlsRowDataConverter.getEnd()", "Calculated width of column " + col + " is: " + width + ". Applying min width: " + minWidth);
+					sheet.setColumnWidth(col, minWidth);
+					if (sheet instanceof XSSFSheet)
+					{
+						ColumnHelper helper = ((XSSFSheet)sheet).getColumnHelper();
+						helper.setColBestFit(col, false);
+						helper.setColHidden(col, false);
+					}
+				}
 			}
 		}
 
