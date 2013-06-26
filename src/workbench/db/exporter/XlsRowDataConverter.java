@@ -60,6 +60,7 @@ public class XlsRowDataConverter
 	private ExcelDataFormat excelFormat = null;
 	private boolean useXLSX;
 	private int firstRow = 0;
+	private boolean optimizeCols = true;
 
 	public XlsRowDataConverter()
 	{
@@ -72,6 +73,11 @@ public class XlsRowDataConverter
 	public void setUseXLSX()
 	{
 		useXLSX = true;
+	}
+
+	public void setOptimizeColumns(boolean flag)
+	{
+		this.optimizeCols = flag;
 	}
 
 	// This should not be called in the constructor as
@@ -172,9 +178,12 @@ public class XlsRowDataConverter
 			sheet.setAutoFilter(range);
 		}
 
-		for (short i = 0; i < this.metaData.getColumnCount(); i++)
+		if (optimizeCols)
 		{
-			sheet.autoSizeColumn(i, true);
+			for (int i = 0; i < this.metaData.getColumnCount(); i++)
+			{
+				sheet.autoSizeColumn(i);
+			}
 		}
 
 		FileOutputStream fileOut = null;

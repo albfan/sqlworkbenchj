@@ -167,6 +167,11 @@ public class DataExporter
 	private boolean appendInfoSheet;
 
 	/**
+	 * Enables/Disables automatic sizing of spreadsheet columns
+	 */
+	private boolean optimizeCols;
+
+	/**
 	 * Enables an auto-filter for ODS and Excel XML exports
 	 */
 	private boolean enableAutoFilter;
@@ -266,6 +271,16 @@ public class DataExporter
 	public void setAppendInfoSheet(boolean flag)
 	{
 		this.appendInfoSheet = flag;
+	}
+
+	public boolean getOptimizeSpreadsheetColumns()
+	{
+		return optimizeCols;
+	}
+
+	public void setOptimizeSpreadsheetColumns(boolean flag)
+	{
+		this.optimizeCols = flag;
 	}
 
 	public void setIncludeColumnComments(boolean flag)

@@ -47,6 +47,7 @@ public class XlsExportWriter
 	{
 		super.configureConverter();
 		converter.setNullString(exporter.getNullString());
+		((XlsRowDataConverter)converter).setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
 	}
 
 	@Override

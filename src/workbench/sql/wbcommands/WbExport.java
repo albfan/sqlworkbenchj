@@ -97,6 +97,7 @@ public class WbExport
 	public static final String ARG_OUTPUT_FILENAME = "file";
 	public static final String ARG_ADD_INFOSHEET = "infoSheet";
 	public static final String ARG_AUTOFILTER = "autoFilter";
+	public static final String ARG_OPT_WIDTH = "autoColWidth";
 	public static final String ARG_CHARFUNC = "charFunc";
 	public static final String ARG_CONCAT_FUNCTION = "concatFunc";
 	public static final String ARG_CONCAT_OPERATOR = "concat";
@@ -194,6 +195,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument(ARG_TABLEWHERE);
 		cmdLine.addArgument(ARG_ADD_INFOSHEET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_OPT_WIDTH, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_AUTOFILTER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FIXED_HEADER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
@@ -454,6 +456,7 @@ public class WbExport
 		exporter.setEnableAutoFilter(cmdLine.getBoolean(ARG_AUTOFILTER, true));
 		exporter.setEnableFixedHeader(cmdLine.getBoolean(ARG_FIXED_HEADER, true));
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
+		exporter.setOptimizeSpreadsheetColumns(cmdLine.getBoolean(ARG_OPT_WIDTH, true));
 		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
 		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
