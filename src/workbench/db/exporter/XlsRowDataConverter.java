@@ -27,6 +27,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.storage.RowData;
 
 import workbench.util.FileUtil;
@@ -47,9 +50,6 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.helpers.ColumnHelper;
-
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -191,7 +191,7 @@ public class XlsRowDataConverter
 			}
 
 			// POI seems to use a strange unit for specifying column widths.
-			int charWidth = Settings.getInstance().getIntProperty("workbench.export.xls.defaultcharwidth", 250);
+			int charWidth = Settings.getInstance().getIntProperty("workbench.export.xls.defaultcharwidth", 200);
 
 			for (int col = 0; col < this.metaData.getColumnCount(); col++)
 			{

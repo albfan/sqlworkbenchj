@@ -27,11 +27,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
@@ -43,8 +45,7 @@ import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -210,27 +211,27 @@ public class OracleTableDefinitionReader
 	public static String getDecodeForDataType(String colname, boolean fixNVARCHAR, boolean mapDateToTimestamp)
 	{
 			return
-			"     DECODE(" + colname + ", " +
-			"            'CHAR', " + Types.CHAR + ", " +
-			"            'VARCHAR2', " + Types.VARCHAR + ", " +
-			"            'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", " +
-			"            'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", " +
-			"            'NUMBER', " + Types.DECIMAL + ", " +
-			"            'LONG', " + Types.LONGVARCHAR + ", " +
-			"            'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", " +
-			"            'RAW', " + Types.VARBINARY + ", " +
-			"            'LONG RAW', " + Types.LONGVARBINARY + ", " +
-			"            'BLOB', " + Types.BLOB + ", " +
-			"            'CLOB', " + Types.CLOB + ", " +
-			"            'NCLOB', " + (fixNVARCHAR ? Types.NCLOB : Types.OTHER) + ", " +
-			"            'BFILE', -13, " +
-			"            'FLOAT', " + Types.FLOAT + ", " +
-			"            'TIMESTAMP(6)', " + Types.TIMESTAMP + ", " +
-			"            'TIMESTAMP(6) WITH TIME ZONE', -101, " +
-			"            'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, " +
-			"            'INTERVAL YEAR(2) TO MONTH', -103, " +
-			"            'INTERVAL DAY(2) TO SECOND(6)', -104, " +
-			"            'BINARY_FLOAT', 100, " +
+			"     DECODE(" + colname + ", \n" +
+			"            'CHAR', " + Types.CHAR + ", \n" +
+			"            'VARCHAR2', " + Types.VARCHAR + ", \n" +
+			"            'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", \n" +
+			"            'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", \n" +
+			"            'NUMBER', " + Types.DECIMAL + ", \n" +
+			"            'LONG', " + Types.LONGVARCHAR + ", \n" +
+			"            'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", \n" +
+			"            'RAW', " + Types.VARBINARY + ", \n" +
+			"            'LONG RAW', " + Types.LONGVARBINARY + ", \n" +
+			"            'BLOB', " + Types.BLOB + ", \n" +
+			"            'CLOB', " + Types.CLOB + ", \n" +
+			"            'NCLOB', " + (fixNVARCHAR ? Types.NCLOB : Types.OTHER) + ", \n" +
+			"            'BFILE', -13, \n" +
+			"            'FLOAT', " + Types.FLOAT + ", \n" +
+			"            'TIMESTAMP(6)', " + Types.TIMESTAMP + ", \n" +
+			"            'TIMESTAMP(6) WITH TIME ZONE', -101, \n" +
+			"            'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, \n" +
+			"            'INTERVAL YEAR(2) TO MONTH', -103, \n" +
+			"            'INTERVAL DAY(2) TO SECOND(6)', -104, \n" +
+			"            'BINARY_FLOAT', 100, \n" +
 			"            'BINARY_DOUBLE', 101, " + Types.OTHER + ")";
 	}
 
@@ -247,20 +248,22 @@ public class OracleTableDefinitionReader
 			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n   " +
 			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
-			"     DECODE(t.data_precision, null, " +
-			"        decode(t.data_type, 'VARCHAR', t.char_length, " +
-			"                            'VARCHAR2', t.char_length, " +
-			"                            'NVARCHAR', t.char_length, " +
-			"                            'NVARCHAR2', t.char_length, " +
-			"                            'CHAR', t.char_length, " +
-			"                            'NCHAR', t.char_length, t.data_length), " +
-			"               t.data_precision) AS column_size,  \n" +
+			"      decode(t.data_type, 'VARCHAR', t.char_length, \n" +
+			"                          'VARCHAR2', t.char_length, \n" +
+			"                          'NVARCHAR', t.char_length, \n" +
+			"                          'NVARCHAR2', t.char_length, \n" +
+			"                          'CHAR', t.char_length, \n" +
+			"                          'NCHAR', t.char_length, \n" +
+			"                          'NUMBER', nvl(t.data_precision, 38), \n" +  // if data_precision is NULL for NUMBERs this is the same as 38
+			"                          'FLOAT', t.data_precision, \n" +
+			"                          'REAL', t.data_precision, \n" +
+			"             t.data_length) AS column_size,  \n" +
 			"     t.data_scale AS decimal_digits,  \n" +
 			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 
 		String sql2 =
 			"     t.data_default AS column_def,  \n" +
-			"     t.char_used, \n " +
+			"     t.char_used, \n" +
 			"     t.column_id AS ordinal_position,   \n" +
 			"     DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
 
@@ -273,10 +276,10 @@ public class OracleTableDefinitionReader
 		}
 		else
 		{
-			sql2 += " \n FROM all_tab_columns t \n";
+			sql2 += " \n FROM all_tab_columns t";
 		}
 
-		String where = " WHERE t.owner = ? AND t.table_name = ? \n";
+		String where = "\nWHERE t.owner = ? AND t.table_name = ? \n";
 		if (includeVirtualColumns)
 		{
 			where += " AND t.hidden_column = 'NO' ";
@@ -284,7 +287,7 @@ public class OracleTableDefinitionReader
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY t.column_id";
 
-		final String sql_comment = sql1 + "       c.comments AS remarks, \n" + sql2 + ", all_col_comments c  \n" + where + comment_join + order;
+		final String sql_comment = sql1 + "     c.comments AS remarks, \n" + sql2 + ", all_col_comments c " + where + comment_join + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
 
 		String sql = null;
