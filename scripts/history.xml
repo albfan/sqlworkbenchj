@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-06-09">
+    <entry dev-build="11" type="enh">WbImport for XLS and XLSX now supports the "append" option to add a new worksheet to an existing spreadsheet.</entry>
     <entry dev-build="11" type="enh">A new command (WbGenerateDelete) to generate a delete statement with respect to foreign keys has been added. This the same as the "Generate delete script" menu item.</entry>
     <entry dev-build="11" type="enh">Data can now be exported (saved, copied) as SQL DELETE statements as well.</entry>
     <entry dev-build="11" type="enh">For Informix the lock mode of a table is now displayed in the table's source</entry>
@@ -27,6 +28,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="11" type="fix">When exporting XLS or XLSX, the width of columns was sometimes set to zero.</entry>
+    <entry dev-build="11" type="fix">When importing XLS or XLSX files, formula values could not be imported</entry>
     <entry dev-build="11" type="fix">The definition of Oracle NUMBER columns was not displayed correctly</entry>
     <entry dev-build="11" type="fix">The option -autoFilter=true was not working for XLS or XLSX exports</entry>
     <entry dev-build="11" type="fix">For Informix synonyms and sequences from other schemas were not displayed correctly in the DbExplorer</entry>
