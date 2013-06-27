@@ -770,7 +770,7 @@ public class SqlPanel
 
 		copyAsSqlUpdate = new CopyAsSqlUpdateAction(null);
 		copyAsSQLMenu.add(this.copyAsSqlUpdate);
-		
+
 		copyAsSqlMerge = new CopyAsSqlMergeAction(null);
 		copyAsSQLMenu.add(copyAsSqlMerge);
 
@@ -2942,6 +2942,8 @@ public class SqlPanel
 
 		StatementRunnerResult statementResult = null;
 
+		int currentCursor = this.editor.getCaretPosition();
+
 		try
 		{
 			if (appendResult)
@@ -3290,6 +3292,10 @@ public class SqlPanel
 						this.editor.setCaretPosition(oldSelectionStart);
 					}
 				}
+			}
+			else if (highlightCurrent && currentCursor > -1)
+			{
+				editor.setCaretPosition(currentCursor);
 			}
 		}
 		catch (SQLException e)
