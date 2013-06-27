@@ -146,7 +146,7 @@ public class DataStorePrinter
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ConsolePrinter.printToSelected()", "Error when printing DataStore contents", e);
+			LogMgr.logError("DataStorePrinter.printToSelected()", "Error when printing DataStore contents", e);
 		}
 	}
 
