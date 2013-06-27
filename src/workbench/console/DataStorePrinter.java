@@ -98,7 +98,8 @@ public class DataStorePrinter
 		int width = data.getColumnName(col).length();
 		for (int row = 0; row < data.getRowCount(); row ++)
 		{
-			String value = data.getValueAsString(row, col);
+			RowData rowData = data.getRow(row);
+			String value = getDisplayValue(rowData, col);
 			if (value != null)
 			{
 				int len = value.length();
