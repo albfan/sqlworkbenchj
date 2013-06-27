@@ -406,7 +406,7 @@ public class WbExport
 		}
 
 		boolean appendToFile = cmdLine.getBoolean(ARG_APPEND, false);
-		if (appendToFile && !type.equals("text") && !type.startsWith("sql"))
+		if (appendToFile && !type.equals("text") && !type.startsWith("sql") && !type.equals("xlsx") && !type.equals("xls"))
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));

@@ -219,7 +219,10 @@ public abstract class ExportWriter
 			if (first)
 			{
 				first = false;
-				if (!this.exporter.writeEmptyResults()) writeStart();
+				if (!this.exporter.writeEmptyResults())
+				{
+					writeStart();
+				}
 			}
 			updateProgress(rows);
 

@@ -22,9 +22,11 @@
  */
 package workbench.db.exporter;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 
 import workbench.log.LogMgr;
@@ -51,6 +53,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.helpers.ColumnHelper;
 
+import workbench.util.WbFile;
+
 /**
  * Export data into an Excel spreadsheet using Apache's POI
  *
@@ -66,10 +70,16 @@ public class XlsRowDataConverter
 	private boolean useXLSX;
 	private int firstRow = 0;
 	private boolean optimizeCols = true;
+	private boolean append;
 
 	public XlsRowDataConverter()
 	{
 		super();
+	}
+
+	public void setAppend(boolean flag)
+	{
+		this.append = flag;
 	}
 
 	/**
@@ -95,22 +105,54 @@ public class XlsRowDataConverter
 		excelFormat = new ExcelDataFormat(numFormat, dateFormat, "0", tsFormat);
 	}
 
+	private void loadExcelFile()
+	{
+		InputStream in = null;
+		try
+		{
+			WbFile file = new WbFile(getOutputFile());
+			useXLSX = file.getExtension().equalsIgnoreCase("xlsx");
+			in = new FileInputStream(file);
+			if (useXLSX)
+			{
+				workbook = new XSSFWorkbook(in);
+			}
+			else
+			{
+				workbook = new HSSFWorkbook(in);
+			}
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("XlsRowDataConverter.loadExcelFile()", "Could not load Excel file", io);
+			workbook = null;
+		}
+	}
+
+
 	@Override
 	public StrBuffer getStart()
 	{
 		createFormatters();
 
-		if (useXLSX)
+		if (append && getOutputFile().exists())
 		{
-			workbook = new XSSFWorkbook();
-			if (isTemplate())
-			{
-				makeTemplate();
-			}
+			loadExcelFile();
 		}
 		else
 		{
-			workbook = new HSSFWorkbook();
+			if (useXLSX)
+			{
+				workbook = new XSSFWorkbook();
+				if (isTemplate())
+				{
+					makeTemplate();
+				}
+			}
+			else
+			{
+				workbook = new HSSFWorkbook();
+			}
 		}
 
 		excelFormat.setupWithWorkbook(workbook);

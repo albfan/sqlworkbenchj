@@ -28,7 +28,7 @@ package workbench.db.exporter;
  * @author Alessandro Palumbo
  */
 public class XlsxExportWriter
-	extends ExportWriter
+	extends XlsExportWriter
 {
 
 	public XlsxExportWriter(DataExporter exp)
@@ -37,25 +37,11 @@ public class XlsxExportWriter
 	}
 
 	@Override
-	public void configureConverter()
-	{
-		super.configureConverter();
-		converter.setNullString(exporter.getNullString());
-		((XlsRowDataConverter)converter).setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
-	}
-
-	@Override
 	public RowDataConverter createConverter()
 	{
-		XlsRowDataConverter xls = new XlsRowDataConverter();
+		XlsRowDataConverter xls = (XlsRowDataConverter)super.createConverter();
 		xls.setUseXLSX();
 		return xls;
 	}
-
-	@Override
-	public boolean managesOutput()
-	{
-		return true;
-	}
-
+	
 }

@@ -34,6 +34,7 @@ public class XlsExportWriter
 	public XlsExportWriter(DataExporter exp)
 	{
 		super(exp);
+		canAppendStart = true;
 	}
 
 	@Override
@@ -47,7 +48,9 @@ public class XlsExportWriter
 	{
 		super.configureConverter();
 		converter.setNullString(exporter.getNullString());
-		((XlsRowDataConverter)converter).setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
+		XlsRowDataConverter xls = (XlsRowDataConverter) converter;
+		xls.setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
+		xls.setAppend(exporter.getAppendToFile());
 	}
 
 	@Override
@@ -55,5 +58,4 @@ public class XlsExportWriter
 	{
 		return true;
 	}
-
 }
