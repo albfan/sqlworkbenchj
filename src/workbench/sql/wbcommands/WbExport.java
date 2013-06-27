@@ -55,6 +55,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterRange;
+import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -405,8 +406,9 @@ public class WbExport
 			return result;
 		}
 
+		Set<String> noAppendTypes = CollectionUtil.caseInsensitiveSet("html","json","xml","xlsm", "ods");
 		boolean appendToFile = cmdLine.getBoolean(ARG_APPEND, false);
-		if (appendToFile && !type.equals("text") && !type.startsWith("sql") && !type.equals("xlsx") && !type.equals("xls"))
+		if (appendToFile && noAppendTypes.contains(type))
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));

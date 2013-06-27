@@ -245,49 +245,57 @@ public class OracleTableDefinitionReader
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
 		final String sql1 =
-			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n   " +
+			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n" +
 			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
-			"      decode(t.data_type, 'VARCHAR', t.char_length, \n" +
-			"                          'VARCHAR2', t.char_length, \n" +
-			"                          'NVARCHAR', t.char_length, \n" +
-			"                          'NVARCHAR2', t.char_length, \n" +
-			"                          'CHAR', t.char_length, \n" +
-			"                          'NCHAR', t.char_length, \n" +
-			"                          'NUMBER', nvl(t.data_precision, 38), \n" +  // if data_precision is NULL for NUMBERs this is the same as 38
-			"                          'FLOAT', t.data_precision, \n" +
-			"                          'REAL', t.data_precision, \n" +
-			"             t.data_length) AS column_size,  \n" +
-			"     t.data_scale AS decimal_digits,  \n" +
-			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
+			"     decode(t.data_type, 'VARCHAR', t.char_length, \n" +
+			"                         'VARCHAR2', t.char_length, \n" +
+			"                         'NVARCHAR', t.char_length, \n" +
+			"                         'NVARCHAR2', t.char_length, \n" +
+			"                         'CHAR', t.char_length, \n" +
+			"                         'NCHAR', t.char_length, \n" +
+			"                         'NUMBER', nvl(t.data_precision, 38), \n" +  // if data_precision is NULL for NUMBERs this is the same as 38
+			"                         'FLOAT', t.data_precision, \n" +
+			"                         'REAL', t.data_precision, \n" +
+			"            t.data_length) AS column_size,  \n" +
+			"     case \n" +
+			"        when t.data_type = 'NUMBER' and t.data_precision is null then -127 \n" +
+			"        else t.data_scale \n" +
+			"     end AS decimal_digits,  \n" +
+			"     DECODE(t.nullable, 'N', 0, 1) AS nullable, \n";
 
 		String sql2 =
 			"     t.data_default AS column_def,  \n" +
 			"     t.char_used, \n" +
 			"     t.column_id AS ordinal_position,   \n" +
-			"     DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
+			"     DECODE(t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
 
 		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
 		if (includeVirtualColumns)
 		{
 			// for some reason XMLTYPE columns and "table type" columns are returned with virtual_column = 'YES'
 			// which seems like a bug in all_tab_cols....
-			sql2 += ", case when data_type <> 'XMLTYPE' and DATA_TYPE_OWNER is null THEN t.virtual_column else 'NO' end as virtual_column \n FROM all_tab_cols t \n";
+			sql2 +=
+				",\n     case \n" +
+				"          when data_type <> 'XMLTYPE' and DATA_TYPE_OWNER is null THEN t.virtual_column \n" +
+				"          else 'NO' \n" +
+				"      end as virtual_column \n" +
+				"FROM all_tab_cols t";
 		}
 		else
 		{
-			sql2 += " \n FROM all_tab_columns t";
+			sql2 += "\nFROM all_tab_columns t";
 		}
 
 		String where = "\nWHERE t.owner = ? AND t.table_name = ? \n";
 		if (includeVirtualColumns)
 		{
-			where += " AND t.hidden_column = 'NO' ";
+			where += "  AND t.hidden_column = 'NO' ";
 		}
-		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
-		final String order = "ORDER BY t.column_id";
+		final String comment_join = "\n  LEFT JOIN all_col_comments c ON t.owner = c.owner AND t.table_name = c.table_name AND t.column_name = c.column_name";
+		final String order = "\nORDER BY t.column_id";
 
-		final String sql_comment = sql1 + "     c.comments AS remarks, \n" + sql2 + ", all_col_comments c " + where + comment_join + order;
+		final String sql_comment = sql1 + "     c.comments AS remarks, \n" + sql2 + comment_join + where + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
 
 		String sql = null;
