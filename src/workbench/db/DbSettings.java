@@ -1629,4 +1629,9 @@ public class DbSettings
 		result.addAll(verbs);
 		return result;
 	}
+
+	public boolean disableEscapesForDDL()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "ddl.disable.escapeprocessing", true);
+	}
 }
