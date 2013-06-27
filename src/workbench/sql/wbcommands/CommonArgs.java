@@ -241,13 +241,13 @@ public class CommonArgs
 	public static void setCommitAndBatchParams(BatchCommitter committer, ArgumentParser cmdLine)
 	{
 
-		int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
+		int batchSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
 		String commitParam = cmdLine.getValue("commitevery");
 
-		if (queueSize > 0)
+		if (batchSize > 0)
 		{
 			committer.setUseBatch(true);
-			committer.setBatchSize(queueSize);
+			committer.setBatchSize(batchSize);
 
 			if (cmdLine.isArgPresent(ARG_COMMIT_BATCH))
 			{

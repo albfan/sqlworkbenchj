@@ -698,8 +698,16 @@ public class WbImport
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
 		if (value == null && inputFile != null)
 		{
-			int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
-			imp.setReportInterval(interval);
+			int batchSize = imp.getBatchSize();
+			if (batchSize > 0)
+			{
+				imp.setReportInterval(batchSize);
+			}
+			else
+			{
+				int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
+				imp.setReportInterval(interval);
+			}
 		}
 		else if ("true".equalsIgnoreCase(value))
 		{
