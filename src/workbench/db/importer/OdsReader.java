@@ -112,6 +112,8 @@ public class OdsReader
 		Row rowData = worksheet.getRowByIndex(row);
 		int colCount = rowData.getCellCount();
 		List<Object> result = new ArrayList<Object>(colCount);
+		int nullCount = 0;
+
 		for (int col=0; col < colCount; col++)
 		{
 			Cell cell = rowData.getCellByIndex(col);
@@ -173,7 +175,16 @@ public class OdsReader
 			{
 				value = null;
 			}
+
+			if (value == null)
+			{
+				nullCount ++;
+			}
 			result.add(value);
+		}
+		if (nullCount == result.size())
+		{
+			result.clear();
 		}
 		return result;
 	}

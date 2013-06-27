@@ -437,6 +437,10 @@ public class ValueConverter
 				return value.toString();
 
 			case Types.DATE:
+				if (value instanceof java.util.Date)
+				{
+					return value;
+				}
 				if (StringUtil.isBlank(makeString(value))) return null;
 
 				try
@@ -449,6 +453,10 @@ public class ValueConverter
 				}
 
 			case Types.TIMESTAMP:
+				if (value instanceof java.util.Date)
+				{
+					return value;
+				}
 				String ts = makeString(value);
 				if (StringUtil.isBlank(ts)) return null;
 				try
@@ -461,6 +469,10 @@ public class ValueConverter
 				}
 
 			case Types.TIME:
+				if (value instanceof java.util.Date)
+				{
+					return value;
+				}
 				String t = makeString(value);
 				if (StringUtil.isBlank(t)) return null;
 

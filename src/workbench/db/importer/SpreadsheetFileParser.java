@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -367,6 +368,7 @@ public class SpreadsheetFileParser
 		{
 			for (currentRow = startRow; currentRow < rowCount; currentRow++)
 			{
+				Arrays.fill(rowData, null);
 				if (cancelImport) break;
 
 				boolean processRow = receiver.shouldProcessNextRow();
@@ -379,6 +381,10 @@ public class SpreadsheetFileParser
 
 				importRow ++;
 				dataRowValues = content.getRowValues(currentRow);
+
+				// Silently ignore empty rows
+				if (dataRowValues.isEmpty()) continue;
+				if (dataRowValues.size() < rowData.length) continue;
 
 				int targetIndex = -1;
 
@@ -436,7 +442,7 @@ public class SpreadsheetFileParser
 						}
 						else
 						{
-							rowData[targetIndex] = value; // converter.convertValue(value, colType);
+							rowData[targetIndex] = converter.convertValue(value, colType);
 						}
 					}
 					catch (Exception e)
@@ -444,7 +450,7 @@ public class SpreadsheetFileParser
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrConvertError");
 						msg = msg.replace("%row%", Integer.toString(importRow));
-						msg = msg.replace("%col%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
+						msg = msg.replace("%column%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
 						msg = msg.replace("%value%", (svalue == null ? "(NULL)" : svalue));
 						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						msg = msg.replace("%type%", SqlUtil.getTypeName(colType));

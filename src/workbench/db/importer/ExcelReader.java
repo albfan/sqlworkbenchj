@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import workbench.log.LogMgr;
@@ -68,7 +70,7 @@ public class ExcelReader
 	private Sheet dataSheet;
 	private List<String> headerColumns;
 	private String nullString;
-
+	private List<CellRangeAddress> mergedRegions;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 
 	private boolean useXLSX;
@@ -153,6 +155,12 @@ public class ExcelReader
 		{
 			int index = dataFile.getActiveSheetIndex();
 			dataSheet = dataFile.getSheetAt(index);
+		}
+		int numMergedRegions = dataSheet.getNumMergedRegions();
+		mergedRegions = new ArrayList<CellRangeAddress>(numMergedRegions);
+		for (int i=0; i < numMergedRegions; i++)
+		{
+			mergedRegions.add(dataSheet.getMergedRegion(i));
 		}
 	}
 
@@ -240,6 +248,14 @@ public class ExcelReader
 		return calendar.getTime();
 	}
 
+	private boolean isMerged(Cell cell)
+	{
+		for (CellRangeAddress range : mergedRegions)
+		{
+			if (range.isInRange(cell.getRowIndex(), cell.getColumnIndex())) return true;
+		}
+		return false;
+	}
 
 	@Override
 	public List<Object> getRowValues(int rowIndex)
@@ -247,11 +263,21 @@ public class ExcelReader
 		Row row = dataSheet.getRow(rowIndex);
 		ArrayList<Object> values = new ArrayList<Object>();
 		Iterator<Cell> cells = row.cellIterator();
+		int nullCount = 0;
+
 		while (cells.hasNext())
 		{
 			Cell cell = cells.next();
 			int type = cell.getCellType();
 			Object value = null;
+
+			// treat rows with merged cells as "empty"
+			if (isMerged(cell)) return Collections.emptyList();
+
+			if (type == Cell.CELL_TYPE_FORMULA)
+			{
+				type = cell.getCachedFormulaResultType();
+			}
 
 			switch (type)
 			{
@@ -294,8 +320,19 @@ public class ExcelReader
 						value = svalue;
 					}
 			}
+			if (value == null)
+			{
+				nullCount ++;
+			}
 			values.add(value);
 		}
+
+		if (nullCount == values.size())
+		{
+			// return an empty list if all columns are null
+			values.clear();
+		}
+
 		return values;
 	}
 
