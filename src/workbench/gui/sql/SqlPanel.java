@@ -3250,53 +3250,7 @@ public class SqlPanel
 			}
 
 			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight() && !editorWasModified;
-
-			if (!(highlightCurrent && GuiSettings.getKeepCurrentSqlHighlight()))
-			{
-				if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
-				{
-					final int selstart = oldSelectionStart;
-					final int selend = oldSelectionEnd;
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							editor.select(selstart, selend);
-						}
-					});
-				}
-
-				if (highlightCurrent && !restoreSelection && commandWithError == -1)
-				{
-					int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
-					startPos = scriptParser.findNextLineStart(startPos);
-					if (startPos > -1 && startPos < this.editor.getText().length())
-					{
-						this.editor.setCaretPosition(startPos);
-					}
-				}
-
-				// Only jump to next statement if no error occurred
-				if (commandWithError == -1 && jumpToNext)
-				{
-					int nextCommand = startIndex + 1;
-					int startPos = scriptParser.getStartPosForCommand(nextCommand);
-					startPos = scriptParser.findNextLineStart(startPos);
-					if (startPos > -1)
-					{
-						this.editor.setCaretPosition(startPos);
-					}
-					else if (oldSelectionStart > -1)
-					{
-						this.editor.setCaretPosition(oldSelectionStart);
-					}
-				}
-			}
-			else if (highlightCurrent && currentCursor > -1)
-			{
-				editor.setCaretPosition(currentCursor);
-			}
+			restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
 		}
 		catch (SQLException e)
 		{
@@ -3328,6 +3282,61 @@ public class SqlPanel
 		{
 			stmtRunner.done();
 			ignoreStateChange = false;
+		}
+	}
+
+	private void restoreSelection(final boolean highlightCurrent, final boolean jumpToNext, final boolean restoreSelection, final int currentCursor, final int oldSelectionStart, final int oldSelectionEnd, final int commandWithError, final int startIndex, final int endIndex, final ScriptParser scriptParser)
+	{
+		// changing the selection and the caret should be done on the EDT
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
+			}
+		});
+	}
+
+	private void _restoreSelection(boolean highlightCurrent, boolean jumpToNext, boolean restoreSelection, int currentCursor, int oldSelectionStart, int oldSelectionEnd, int commandWithError, int startIndex, int endIndex, ScriptParser scriptParser)
+	{
+		if (!(highlightCurrent && GuiSettings.getKeepCurrentSqlHighlight()))
+		{
+			if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
+			{
+				final int selstart = oldSelectionStart;
+				final int selend = oldSelectionEnd;
+				editor.select(selstart, selend);
+			}
+
+			if (highlightCurrent && !restoreSelection && commandWithError == -1)
+			{
+				int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
+				startPos = scriptParser.findNextLineStart(startPos);
+				if (startPos > -1 && startPos < this.editor.getText().length())
+				{
+					this.editor.setCaretPosition(startPos);
+				}
+			}
+
+			if (commandWithError == -1 && jumpToNext)
+			{
+				int nextCommand = startIndex + 1;
+				int startPos = scriptParser.getStartPosForCommand(nextCommand);
+				startPos = scriptParser.findNextLineStart(startPos);
+				if (startPos > -1)
+				{
+					this.editor.setCaretPosition(startPos);
+				}
+				else if (oldSelectionStart > -1)
+				{
+					this.editor.setCaretPosition(oldSelectionStart);
+				}
+			}
+		}
+		else if (highlightCurrent && currentCursor > -1)
+		{
+			editor.setCaretPosition(currentCursor);
 		}
 	}
 
