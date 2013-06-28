@@ -1318,6 +1318,9 @@ public class TableListPanel
 
 		String type = selectedTable.getType();
 		if (meta.isTableType(type)) return true;
+
+		if (!GuiSettings.showSynonymTargetInDbExplorer()) return false;
+
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
 			TableIdentifier rt = getObjectTable();
@@ -1333,8 +1336,10 @@ public class TableListPanel
 		String type = selectedTable.getType();
 		DbMetadata meta = this.dbConnection.getMetadata();
 		DbSettings dbs = this.dbConnection.getDbSettings();
+
 		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
+			if (!GuiSettings.showSynonymTargetInDbExplorer()) return false;
 			TableIdentifier rt = getObjectTable();
 			if (rt == null) return false;
 			type = rt.getType();
@@ -1376,7 +1381,7 @@ public class TableListPanel
 			else if (dbs.isSynonymType(type))
 			{
 				SynonymDDLHandler synHandler = new SynonymDDLHandler();
-				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, true, true);
+				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, GuiSettings.showSynonymTargetInDbExplorer(), true);
 			}
 			else if (meta.isSequenceType(type))
 			{

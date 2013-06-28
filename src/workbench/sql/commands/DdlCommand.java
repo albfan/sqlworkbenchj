@@ -104,12 +104,12 @@ public class DdlCommand
 
 		try
 		{
+			this.currentStatement = currentConnection.createStatement();
+
 			if (currentConnection.getDbSettings().disableEscapesForDDL())
 			{
 				currentStatement.setEscapeProcessing(false);
 			}
-			
-			this.currentStatement = currentConnection.createStatement();
 
 			sql = getSqlToExecute(sql);
 

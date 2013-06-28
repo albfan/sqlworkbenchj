@@ -32,6 +32,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,6 @@ import javax.swing.table.TableModel;
 
 import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -71,12 +71,13 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
+import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
-
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
+
 
 /**
  * A panel to display the table definition information inside the DbExplorer.
@@ -161,7 +162,7 @@ public class TableDefinitionPanel
 		// properly in the QuickFilterPanel, although it wouldn't be necessary
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
-		
+
 		columnFilter.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
 		columnFilter.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
 
@@ -332,6 +333,43 @@ public class TableDefinitionPanel
 		retrieveTableDefinition();
 	}
 
+	private DataStore getPlainSynonymInfo(TableIdentifier syn)
+	{
+		String[] columns = {"NAME", "VALUE" };
+		int[] types = { Types.VARCHAR, Types.VARCHAR };
+		int[] sizes = {20, 20 };
+		DataStore ds = new DataStore(columns, types, sizes);
+
+		DbMetadata meta = this.dbConnection.getMetadata();
+		DbSettings dbs = this.dbConnection.getDbSettings();
+
+		int row = -1;
+		if (dbs.supportsCatalogs())
+		{
+			row = ds.addRow();
+			ds.setValue(row, 0, "SYNONYM_CATALOG");
+			ds.setValue(row, 1, syn.getCatalog());
+		}
+		if (dbs.supportsSchemas())
+		{
+			row = ds.addRow();
+			ds.setValue(row, 0, "SYNONYM_SCHEMA");
+			ds.setValue(row, 1, syn.getSchema());
+		}
+		row = ds.addRow();
+		ds.setValue(row, 0, "SYNONYM_NAME");
+		ds.setValue(row, 1, syn.getObjectName());
+
+		TableIdentifier baseTable = meta.getSynonymTable(syn);
+		if (baseTable != null)
+		{
+			row = ds.addRow();
+			ds.setValue(row, 0, "BASE_TABLE");
+			ds.setValue(row, 1, baseTable.getTableExpression(dbConnection));
+		}
+		return ds;
+	}
+
 	protected void retrieveTableDefinition()
 		throws SQLException
 	{
@@ -356,7 +394,16 @@ public class TableDefinitionPanel
 				});
 
 				DbMetadata meta = this.dbConnection.getMetadata();
-				DataStore def = meta.getObjectDetails(currentTable);
+				DataStore def = null;
+				if (dbConnection.getDbSettings().isSynonymType(currentTable.getType()) && !GuiSettings.showSynonymTargetInDbExplorer())
+				{
+					def = getPlainSynonymInfo(currentTable);
+				}
+				else
+				{
+					def = meta.getObjectDetails(currentTable);
+				}
+				
 				final TableModel model = def == null ? EmptyTableModel.EMPTY_MODEL : new DataStoreTableModel(def) ;
 
 				if (def instanceof TableColumnsDatastore)

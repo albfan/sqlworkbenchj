@@ -269,6 +269,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.script.alert.minduration", Long.toString(millis));
 	}
 
+	public static boolean showSynonymTargetInDbExplorer()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.synonyms.showtarget", true);
+	}
+
 	public static boolean allowAlterInDbExplorer()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_ALLOW_ALTER_TABLE, false);
