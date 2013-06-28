@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
+import workbench.sql.VariablePool;
 import workbench.sql.wbcommands.WbImport;
 
 import workbench.util.ArgumentParser;
@@ -216,6 +217,7 @@ public class WbCommandAnalyzer
 	{
 		cmdLine.parse(this.sql);
 		String fname = cmdLine.getValue(WbImport.ARG_FILE);
+		fname = VariablePool.getInstance().replaceAllParameters(fname);
 		WbFile input = wbImport.evaluateFileArgument(fname);
 
 		List result = new ArrayList();

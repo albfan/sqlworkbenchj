@@ -384,7 +384,14 @@ public class SpreadsheetFileParser
 
 				// Silently ignore empty rows
 				if (dataRowValues.isEmpty()) continue;
-				if (dataRowValues.size() < rowData.length) continue;
+				
+				if (dataRowValues.size() < rowData.length)
+				{
+					String msg = ResourceMgr.getFormattedString("ErrImpIgnoreShortRow", currentRow, dataRowValues.size(), rowData.length);
+					messages.append(msg);
+					messages.appendNewLine();
+					continue;
+				}
 
 				int targetIndex = -1;
 
