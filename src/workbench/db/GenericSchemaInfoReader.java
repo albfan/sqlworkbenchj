@@ -154,7 +154,7 @@ public class GenericSchemaInfoReader
 		boolean isCacheable = isCacheable();
 		if (isCacheable && cachedSchema != null)
 		{
-			LogMgr.logDebug("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
+			LogMgr.logTrace("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
 			return cachedSchema;
 		}
 
