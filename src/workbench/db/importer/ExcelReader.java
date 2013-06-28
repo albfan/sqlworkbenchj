@@ -165,13 +165,20 @@ public class ExcelReader
 			mergedRegions.add(dataSheet.getMergedRegion(i));
 		}
 
-		if (useXLSX)
+		try
 		{
-			XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)dataFile);
+			if (useXLSX)
+			{
+				XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)dataFile);
+			}
+			else
+			{
+				HSSFFormulaEvaluator.evaluateAllFormulaCells((HSSFWorkbook)dataFile);
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			HSSFFormulaEvaluator.evaluateAllFormulaCells((HSSFWorkbook)dataFile);
+			LogMgr.logError("ExcelReader.load()", "Could not refresh formulas!", ex);
 		}
 	}
 
