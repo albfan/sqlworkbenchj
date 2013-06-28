@@ -42,12 +42,14 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import workbench.log.LogMgr;
@@ -161,6 +163,15 @@ public class ExcelReader
 		for (int i=0; i < numMergedRegions; i++)
 		{
 			mergedRegions.add(dataSheet.getMergedRegion(i));
+		}
+
+		if (useXLSX)
+		{
+			XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)dataFile);
+		}
+		else
+		{
+			HSSFFormulaEvaluator.evaluateAllFormulaCells((HSSFWorkbook)dataFile);
 		}
 	}
 
