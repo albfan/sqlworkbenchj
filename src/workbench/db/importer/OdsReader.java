@@ -33,6 +33,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.table.Cell;
@@ -51,14 +52,27 @@ public class OdsReader
 	private File inputFile;
 	private SpreadsheetDocument dataFile;
 	private Table worksheet;
-	private int worksheetIndex = 0;
+	private int worksheetIndex;
+	private String worksheetName;
 	private List<String> headerColumns;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 
-	public OdsReader(File odsFile, int sheetIndex)
+	public OdsReader(File odsFile, int sheetIndex, String name)
 	{
 		inputFile = odsFile;
-		worksheetIndex = sheetIndex;
+		if (sheetIndex > -1 && StringUtil.isBlank(name))
+		{
+			worksheetIndex = sheetIndex;
+		}
+		else if (StringUtil.isNonBlank(name))
+		{
+			worksheetIndex = -1;
+			worksheetName = name;
+		}
+		else
+		{
+			worksheetIndex = 0;
+		}
 	}
 
 	@Override
@@ -91,9 +105,32 @@ public class OdsReader
 	public void setActiveWorksheet(int index)
 	{
 		worksheetIndex = index;
-		if (dataFile != null)
+		worksheetName = null;
+		initCurrentWorksheet();
+	}
+
+	@Override
+	public void setActiveWorksheet(String name)
+	{
+		worksheetIndex = -1;
+		worksheetName = name;
+		initCurrentWorksheet();
+	}
+
+	private void initCurrentWorksheet()
+	{
+		if (dataFile == null) return;
+		if (worksheetIndex > -1)
 		{
 			worksheet = dataFile.getSheetByIndex(worksheetIndex);
+		}
+		else if (worksheetName != null)
+		{
+			worksheet = dataFile.getSheetByName(worksheetName);
+		}
+		else
+		{
+			worksheet = dataFile.getSheetByIndex(0);
 		}
 	}
 
@@ -219,7 +256,7 @@ public class OdsReader
 		try
 		{
 			dataFile = SpreadsheetDocument.loadDocument(inputFile);
-			worksheet = dataFile.getSheetByIndex(worksheetIndex);
+			initCurrentWorksheet();
 		}
 		catch (Exception ex)
 		{

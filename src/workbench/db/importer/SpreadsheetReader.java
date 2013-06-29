@@ -36,6 +36,7 @@ public interface SpreadsheetReader
 {
 	List<String> getHeaderColumns();
 	void setActiveWorksheet(int index);
+	void setActiveWorksheet(String name);
 	List<Object> getRowValues(int row);
 	void setNullString(String nullString);
 
@@ -53,7 +54,7 @@ public interface SpreadsheetReader
 
 	public static class Factory
 	{
-		public static SpreadsheetReader createReader(File inputFile, int sheetIndex)
+		public static SpreadsheetReader createReader(File inputFile, int sheetIndex, String sheetName)
 		{
 			WbFile f = new WbFile(inputFile);
 			String ext = f.getExtension();
@@ -61,11 +62,11 @@ public interface SpreadsheetReader
 
 			if (ext.startsWith("xls"))
 			{
-				reader = new ExcelReader(inputFile, sheetIndex);
+				reader = new ExcelReader(inputFile, sheetIndex, sheetName);
 			}
 			else if (ext.equals("ods"))
 			{
-				reader = new OdsReader(inputFile, sheetIndex);
+				reader = new OdsReader(inputFile, sheetIndex, sheetName);
 			}
 			return reader;
 		}

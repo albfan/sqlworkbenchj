@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
 import workbench.util.FileUtil;
@@ -52,8 +54,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import workbench.log.LogMgr;
-
 /**
  *
  * @author Thomas Kellerer
@@ -67,6 +67,8 @@ public class ExcelReader
 	private static final long ONE_DAY = (24L * DurationFormatter.ONE_HOUR);
 
 	private int sheetIndex = -1;
+	private String sheetName;
+
 	private WbFile inputFile;
 	private Workbook dataFile;
 	private Sheet dataSheet;
@@ -77,15 +79,18 @@ public class ExcelReader
 
 	private boolean useXLSX;
 
-	public ExcelReader(File excelFile)
-	{
-		this(excelFile, 0);
-	}
-
-	public ExcelReader(File excelFile, int sheetNumber)
+	public ExcelReader(File excelFile, int sheetNumber, String name)
 	{
 		inputFile = new WbFile(excelFile);
 		sheetIndex = sheetNumber > -1 ? sheetNumber : -1;
+		if (sheetIndex < 0 && StringUtil.isNonBlank(name))
+		{
+			sheetName = name.trim();
+		}
+		else
+		{
+			sheetName = null;
+		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
 	}
 
@@ -120,7 +125,7 @@ public class ExcelReader
 	public void load()
 		throws IOException
 	{
-		if (dataSheet != null)
+		if (dataFile != null)
 		{
 			// do not load the file twice.
 			return;
@@ -144,20 +149,8 @@ public class ExcelReader
 			FileUtil.closeQuietely(in);
 		}
 
-		dataSheet = null;
-		if (sheetIndex > -1)
-		{
-			dataSheet = dataFile.getSheetAt(sheetIndex);
-			if (dataSheet == null)
-			{
-				throw new IndexOutOfBoundsException("Sheet with index " + sheetIndex + " does not exist");
-			}
-		}
-		else
-		{
-			int index = dataFile.getActiveSheetIndex();
-			dataSheet = dataFile.getSheetAt(index);
-		}
+		initActiveSheet();
+
 		int numMergedRegions = dataSheet.getNumMergedRegions();
 		mergedRegions = new ArrayList<CellRangeAddress>(numMergedRegions);
 		for (int i=0; i < numMergedRegions; i++)
@@ -179,6 +172,33 @@ public class ExcelReader
 		catch (Exception ex)
 		{
 			LogMgr.logError("ExcelReader.load()", "Could not refresh formulas!", ex);
+		}
+	}
+
+	private void initActiveSheet()
+	{
+		if (dataFile == null) return;
+
+		if (sheetIndex > -1)
+		{
+			dataSheet = dataFile.getSheetAt(sheetIndex);
+			if (dataSheet == null)
+			{
+				throw new IndexOutOfBoundsException("Sheet with index " + sheetIndex + " does not exist");
+			}
+		}
+		else if (sheetName != null)
+		{
+			dataSheet = dataFile.getSheet(sheetName);
+			if (dataSheet == null)
+			{
+				throw new IndexOutOfBoundsException("Sheet with name " + sheetName + " does not exist");
+			}
+		}
+		else
+		{
+			int index = dataFile.getActiveSheetIndex();
+			dataSheet = dataFile.getSheetAt(index);
 		}
 	}
 
@@ -205,20 +225,24 @@ public class ExcelReader
 	}
 
 	@Override
+	public void setActiveWorksheet(String name)
+	{
+		if (StringUtil.isNonBlank(name))
+		{
+			this.sheetName = name;
+			this.sheetIndex = -1;
+			initActiveSheet();
+		}
+	}
+
+	@Override
 	public void setActiveWorksheet(int index)
 	{
 		if (index > -1)
 		{
 			sheetIndex = index;
-			if (dataFile != null)
-			{
-				dataSheet = dataFile.getSheetAt(index);
-				headerColumns = null;
-				if (dataSheet == null)
-				{
-					throw new IndexOutOfBoundsException("Sheet with index " + sheetIndex + " does not exist");
-				}
-			}
+			sheetName = null;
+			initActiveSheet();
 		}
 	}
 

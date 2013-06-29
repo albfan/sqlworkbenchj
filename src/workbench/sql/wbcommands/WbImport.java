@@ -626,9 +626,11 @@ public class WbImport
 			if (inputFile != null)
 			{
 				int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
+				String name = cmdLine.getValue(ARG_SHEET_NAME);
 				spreadSheetParser.setInputFile(inputFile);
 				// the index is zero-based, but the user supplies a one-based index
 				spreadSheetParser.setSheetIndex(index - 1);
+				spreadSheetParser.setSheetName(name);
 			}
 
 			initParser(table, spreadSheetParser, result);

@@ -104,6 +104,11 @@ public class SpreadsheetFileParser
 		this.sheetIndex = index;
 	}
 
+	public void setSheetName(String name)
+	{
+		this.sheetName = name;
+	}
+
 	@Override
 	public void setContainsHeader(boolean aFlag)
 	{
@@ -299,9 +304,10 @@ public class SpreadsheetFileParser
 	{
 		if (content == null)
 		{
-			content = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex);
+			content = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, sheetName);
 			if (sheetIndex < 0 && StringUtil.isNonBlank(sheetName))
 			{
+				content.setActiveWorksheet(sheetName);
 			}
 			content.load();
 		}
@@ -384,7 +390,7 @@ public class SpreadsheetFileParser
 
 				// Silently ignore empty rows
 				if (dataRowValues.isEmpty()) continue;
-				
+
 				if (dataRowValues.size() < rowData.length)
 				{
 					String msg = ResourceMgr.getFormattedString("ErrImpIgnoreShortRow", currentRow, dataRowValues.size(), rowData.length);

@@ -60,6 +60,11 @@ public class WbNumberFormatter
 		return decimalSeparator;
 	}
 
+	/**
+	 * Returns a pattern suitable to be applied for a DecimalFormat isntance.
+	 *
+	 * @return  the pattern;
+	 */
 	public String toFormatterPattern()
 	{
 		return decimalFormatter.toPattern();

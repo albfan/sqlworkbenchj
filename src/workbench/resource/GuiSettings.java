@@ -274,6 +274,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.synonyms.showtarget", true);
 	}
 
+	public static void setShowSynonymTargetInDbExplorer(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.dbexplorer.synonyms.showtarget", flag);
+	}
+
 	public static boolean allowAlterInDbExplorer()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_ALLOW_ALTER_TABLE, false);

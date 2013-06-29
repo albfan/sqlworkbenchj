@@ -22,6 +22,7 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -69,6 +70,29 @@ public class ExcelReaderTest
 	}
 
 	@Test
+	public void testSwitchSheets()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("ExcelReader");
+		File input = util.copyResourceFile(this, "data.xls");
+		ExcelReader reader = new ExcelReader(input, 1, null);
+		try
+		{
+			reader.load();
+			assertEquals(5, reader.getRowCount());
+			reader.setActiveWorksheet("orders");
+			assertEquals(5, reader.getRowCount());
+			reader.setActiveWorksheet("person");
+			assertEquals(3, reader.getRowCount());
+		}
+		finally
+		{
+			reader.done();
+		}
+		assertTrue(input.delete());
+	}
+
+	@Test
 	public void testXlsX()
 		throws Exception
 	{
@@ -77,7 +101,7 @@ public class ExcelReaderTest
 
 		try
 		{
-			ExcelReader reader = new ExcelReader(data, 0);
+			ExcelReader reader = new ExcelReader(data, 0, null);
 			reader.load();
 			List<String> columns = reader.getHeaderColumns();
 			assertNotNull(columns);
@@ -114,7 +138,7 @@ public class ExcelReaderTest
 		WbFile data = createExcelFile("data.xls");
 		try
 		{
-			ExcelReader reader = new ExcelReader(data, 0);
+			ExcelReader reader = new ExcelReader(data, 0, null);
 			reader.load();
 			List<String> columns = reader.getHeaderColumns();
 			assertNotNull(columns);
@@ -134,7 +158,7 @@ public class ExcelReaderTest
 	private WbFile createExcelFile(String filename)
 		throws Exception
 	{
-		TestUtil util = new TestUtil("XlsHeaderReaderTest");
+		TestUtil util = new TestUtil("ExcelReader");
 		WbFile data = new WbFile(util.getBaseDir(), filename);
 
 		ColumnIdentifier[] cols = new ColumnIdentifier[5];

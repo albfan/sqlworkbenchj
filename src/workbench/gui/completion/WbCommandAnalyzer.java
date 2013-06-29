@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.importer.SpreadsheetReader;
-import workbench.log.LogMgr;
 
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
@@ -223,7 +224,7 @@ public class WbCommandAnalyzer
 		List result = new ArrayList();
 		if (input == null) return result;
 
-		SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(input, -1);
+		SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(input, -1, null);
 		try
 		{
 			List<String> sheets = reader.getSheets();
@@ -298,7 +299,7 @@ public class WbCommandAnalyzer
 		private final String sheetName;
 		private final String displayString;
 
-		public SheetEntry(int index, String name, String display)
+		SheetEntry(int index, String name, String display)
 		{
 			this.sheetIndex = index;
 			this.sheetName = name;

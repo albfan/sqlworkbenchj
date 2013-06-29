@@ -52,11 +52,15 @@ public class OdsReaderTest
 	{
 		TestUtil util = getTestUtil();
 		File input = util.copyResourceFile(this, "data.ods");
-		OdsReader reader = new OdsReader(input, 1);
+		OdsReader reader = new OdsReader(input, 1, null);
 		try
 		{
 			reader.load();
 			assertEquals(5, reader.getRowCount());
+			reader.setActiveWorksheet("orders");
+			assertEquals(5, reader.getRowCount());
+			reader.setActiveWorksheet("person");
+			assertEquals(3, reader.getRowCount());
 		}
 		finally
 		{
@@ -71,7 +75,7 @@ public class OdsReaderTest
 	{
 		TestUtil util = getTestUtil();
 		File input = util.copyResourceFile(this, "data.ods");
-		OdsReader reader = new OdsReader(input, 0);
+		OdsReader reader = new OdsReader(input, 0, null);
 
 		try
 		{

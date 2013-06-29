@@ -23,7 +23,9 @@
 package workbench.gui.settings;
 
 import java.awt.event.ActionListener;
+
 import javax.swing.JPanel;
+
 import workbench.interfaces.Restoreable;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -64,6 +66,7 @@ public class DbExplorerOptionsPanel
 		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		GuiSettings.setAutorRetrieveFKTree(retrieveFKTree.isSelected());
 		GuiSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
+		GuiSettings.setShowSynonymTargetInDbExplorer(showSynDetails.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
@@ -83,6 +86,7 @@ public class DbExplorerOptionsPanel
 		((PlacementChooser)tabPlacement).showPlacement();
 		partialMatchSearch.setEnabled(!useQuickFilterRegex.isSelected());
 		applySQLSort.setSelected(GuiSettings.getApplySQLSortInDbExplorer());
+		showSynDetails.setSelected(GuiSettings.showSynonymTargetInDbExplorer());
 	}
 
 	/** This method is called from within the constructor to
@@ -117,6 +121,7 @@ public class DbExplorerOptionsPanel
     retrieveFKTree = new javax.swing.JCheckBox();
     selectSrcPanel = new javax.swing.JCheckBox();
     partialMatchSearch = new javax.swing.JCheckBox();
+    showSynDetails = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -288,7 +293,7 @@ public class DbExplorerOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -377,6 +382,16 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(partialMatchSearch, gridBagConstraints);
+
+    showSynDetails.setText(ResourceMgr.getString("LblShowSynTarget")); // NOI18N
+    showSynDetails.setToolTipText(ResourceMgr.getString("d_LblShowSynTarget")); // NOI18N
+    showSynDetails.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
+    add(showSynDetails, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -415,6 +430,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox selectSrcPanel;
   private javax.swing.JCheckBox showDbExplorer;
   private javax.swing.JCheckBox showFocus;
+  private javax.swing.JCheckBox showSynDetails;
   private javax.swing.JCheckBox showTriggerPanel;
   private javax.swing.JComboBox tabPlacement;
   private javax.swing.JCheckBox useQuickFilterRegex;
