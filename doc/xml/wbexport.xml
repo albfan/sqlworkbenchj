@@ -580,8 +580,11 @@
 							</para>
 							<para>
 								Controls whether results are appended to an existing file, or overwrite an existing
-								file. This parameter is only supported for text or SQL export types.
+								file. This parameter is only supported for text, SQL, XLS and XLSX export types.
 							</para>
+              <para>
+                When used with XLS oder XSLX exports, a new worksheet will be created.
+              </para>
 						</entry>
 					</row>
 
