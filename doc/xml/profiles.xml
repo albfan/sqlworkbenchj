@@ -120,7 +120,8 @@
     <title>Username</title>
     <para>This is the name of the DBMS user account</para>
   </section>
-  <section id="profile-username">
+
+  <section id="profile-password">
     <title>Password</title>
     <para>
       This is the password for your DBMS user account. You can

@@ -1016,7 +1016,7 @@
     </cobertura-instrument>
   </target>
 
-  <target name="coverage" depends="clean, clean-junit, compile-tests, compile-db-tests, compile-gui-tests, init-cobertura">
+  <target name="coverage" depends="clean, clean-junit, compile-tests, compile-db-tests, init-cobertura">
     <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${instrumented.dir}"/>
@@ -1032,21 +1032,16 @@
         <formatter type="plain"/>
         <fileset dir="${unittest}">
           <include name="**/*Test.java"/>
-          <exclude name="workbench/storage/filter/ComparatorFactoryTest.java"/>
+          <exclude name="**/XsltTransformerTest.java"/>
+          <exclude name="**/ClassFinderTest.java"/>
+          <exclude name="**/ComparatorFactoryTest.java"/>
         </fileset>
       </batchtest>
 
       <batchtest todir="../junit">
         <formatter type="plain"/>
         <fileset dir="${dbtest}">
-          <include name="**/*Test.java"/>
-        </fileset>
-      </batchtest>
-
-      <batchtest todir="../junit">
-        <formatter type="plain"/>
-        <fileset dir="${guitest}">
-          <include name="**/*Test.java"/>
+          <include name="workbench/db/postgres/*Test.java"/>
         </fileset>
       </batchtest>
     </junit>
