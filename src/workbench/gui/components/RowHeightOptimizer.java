@@ -26,20 +26,27 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
+
 import javax.swing.JTextArea;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
+
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+
 import workbench.util.StringUtil;
 
 
 /**
  * A class to optimize the height of each table row according to their values.
- * 
+ *
  * @author Thomas Kellerer
  */
-public class RowHeightOptimizer 
+public class RowHeightOptimizer
 {
 	private WbTable table;
 
@@ -63,7 +70,7 @@ public class RowHeightOptimizer
 			}
 		});
 	}
-	
+
 	public void optimizeAllRows()
 	{
 		final int count = this.table.getRowCount();
@@ -74,6 +81,7 @@ public class RowHeightOptimizer
 		{
 			optimizeRowHeight(row, maxLines, ignore);
 		}
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -88,21 +96,31 @@ public class RowHeightOptimizer
 		});
 	}
 
-	public void optimizeRowHeight(int row)
+	private int countWrappedLines(JTextArea textArea, int colWidth)
 	{
-		int maxLines = GuiSettings.getAutRowHeightMaxLines();
-		boolean ignore = GuiSettings.getIgnoreWhitespaceForAutoRowHeight();
-		optimizeRowHeight(row, maxLines, ignore);
-		notifyRowHeader(row);
+		AttributedString text = new AttributedString(textArea.getText());
+		FontRenderContext frc = textArea.getFontMetrics(textArea.getFont()).getFontRenderContext();
+
+		AttributedCharacterIterator chars = text.getIterator();
+		LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(chars, frc);
+		lineMeasurer.setPosition(0);
+
+		int numLines = 1;
+		while (lineMeasurer.getPosition() < chars.getEndIndex())
+		{
+			lineMeasurer.nextLayout(colWidth);
+			numLines++;
+		}
+		return numLines;
 	}
-	
+
 	private void optimizeRowHeight(int row, int maxLines, boolean ignoreEmptyLines)
 	{
 		int colCount = this.table.getColumnCount();
 
 		int defaultHeight = table.getRowHeight();
 		int optHeight = defaultHeight;
-		
+
 		for (int col = 0; col < colCount; col++)
 		{
 			TableCellRenderer rend = this.table.getCellRenderer(row, col);
@@ -114,7 +132,7 @@ public class RowHeightOptimizer
 			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, col), false, false, row, col);
 			Font f = c.getFont();
 			FontMetrics fm = c.getFontMetrics(f);
-			
+
 			int lines = 1;
 
 			// Calculating the lines for the value only makes sense
@@ -129,16 +147,21 @@ public class RowHeightOptimizer
 				else
 				{
 					lines = text.getLineCount();
+					if (lines == 1 && text.getLineWrap())
+					{
+						int colWidth = table.getColumnModel().getColumn(col).getPreferredWidth();
+						lines = countWrappedLines(text, colWidth);
+					}
 				}
 			}
-			
+
 			if (lines > maxLines) lines = maxLines;
 			int fheight = (fm == null ? 16 : fm.getHeight());
 			int stringHeight = lines * fheight;// + addHeight;
-			
+
 			optHeight = Math.max(optHeight, stringHeight);
 		}
-		
+
 		if (optHeight > 0 && optHeight != table.getRowHeight(row))
 		{
 			table.setRowHeight(row, optHeight);
@@ -178,5 +201,5 @@ public class RowHeightOptimizer
 		}
 		return line + 1;
 	}
-	
+
 }

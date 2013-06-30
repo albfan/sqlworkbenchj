@@ -23,16 +23,18 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import workbench.gui.components.WbTable;
+
 import workbench.util.WbThread;
 
 /**
  *	@author  Thomas Kellerer
  */
-public class OptimizeRowHeightAction 
+public class OptimizeRowHeightAction
 	extends WbAction
 	implements TableModelListener
 {
@@ -42,7 +44,7 @@ public class OptimizeRowHeightAction
 	{
 		super();
 		initMenuDefinition("LblRowHeightOpt");
-		this.setEnabled(false);		
+		this.setEnabled(false);
 	}
 
 	public OptimizeRowHeightAction(WbTable table)
@@ -50,21 +52,13 @@ public class OptimizeRowHeightAction
 		this();
 		setClient(table);
 	}
-	
+
 	public void setClient(WbTable table)
 	{
-//		if (client != null)
-//		{
-//			client.removeTableModelListener(this);
-//		}
 		this.client = table;
-//		if (client != null)
-//		{
-//			client.addTableModelListener(this);
-//		}
 		checkEnabled();
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -72,7 +66,7 @@ public class OptimizeRowHeightAction
 		Thread t = new WbThread("OptimizeRows Thread")
 		{
 			@Override
-			public void run()	
+			public void run()
 			{
 				client.optimizeRowHeight();
 			}
@@ -91,7 +85,7 @@ public class OptimizeRowHeightAction
 			setEnabled(false);
 		}
 	}
-	
+
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{

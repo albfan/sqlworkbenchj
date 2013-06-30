@@ -737,7 +737,7 @@ public class WbTable
 	{
 		return this.copyMergeAction;
 	}
-	
+
 	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
 	{
 		return this.copyUpdateAction;
