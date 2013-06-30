@@ -618,29 +618,29 @@
 		<section id="options-multiline">
 			<title>Displaying multi-line values</title>
 			<para>
-				&wb-productname; uses a special renderer for the contents
+				&wb-productname; uses a special display component for the contents
 				of <literal>CLOB</literal> columns that is capable of displaying
-				multiple lines (i.e. honors newlines and linefeeds in the data retrieved from the database).
+				multiple lines. This component honors newlines and linefeeds in the data retrieved from the database and
+        is capable of using word wrapping for long lines (even if no newlines are embedded).
 			</para>
-
 			<para>
-				This multi-line renderer is usually not applied for
-				<literal>VARCHAR</literal> columns. If your database stores text
-				in VARCHAR columns that contains line breaks, you can define a threshold
-				for the length of the column. Any column that is defined with a higher value
-				will be displayed with a multiline renderer.
+        By default only <literal>CLOB</literal> are considered to be able to contain multiple lines, so
+        <literal>VARCHAR</literal> columns are usually not treated as multi-line columns.
+        If your database stores text in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value will be displayed with the
+        multiline component.
 			</para>
 			<para>
 				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
 				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
-				will be displayed in a single line.
+        will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
+        length of the column, not the actual length of the data.
 			</para>
 			<para>
-				Using the multiline renderer has some minor drawbacks when editing the data,
-				and is be a bit slower when displaying large result sets.
+				Displaying data using the multiline component is slower than using the standard (single line) component.
 			</para>
 			<para>
-				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line fields.
+				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
 			</para>
 		</section>
 
