@@ -23,6 +23,7 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -96,23 +97,62 @@ public class RowHeightOptimizer
 		});
 	}
 
-	private int countWrappedLines(JTextArea textArea, int colWidth)
+	private int countWrappedLines(JTextArea edit, int colWidth)
 	{
-		AttributedString text = new AttributedString(textArea.getText());
-		FontRenderContext frc = textArea.getFontMetrics(textArea.getFont()).getFontRenderContext();
+		// Using a LineBreakMeasurer seems to do wrapping differently than JTextArea.
+		// The lines "counted" by this method are longer than those that are actually
+		// displayed and thus the line count is wrong.
+		//
+		// But it is a somewhat safe fallback in case countVisibleLines() doesn't work
+		// because the TextArea wasn't properly initialized.
+		String content = edit.getText();
+		if (StringUtil.isEmptyString(content)) return 0;
 
-		AttributedCharacterIterator chars = text.getIterator();
-		LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(chars, frc);
-		lineMeasurer.setPosition(0);
-
-		int numLines = 1;
-		while (lineMeasurer.getPosition() < chars.getEndIndex())
+		int numLines = 0;
+		try
 		{
-			lineMeasurer.nextLayout(colWidth);
-			numLines++;
+			AttributedString text = new AttributedString(content);
+			FontRenderContext frc = edit.getFontMetrics(edit.getFont()).getFontRenderContext();
+
+			AttributedCharacterIterator chars = text.getIterator();
+			LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(chars, frc);
+			lineMeasurer.setPosition(0);
+
+			while (lineMeasurer.getPosition() < chars.getEndIndex())
+			{
+				lineMeasurer.nextLayout(colWidth);
+				numLines++;
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logDebug("RowHeightOptimizer.countWrappedLines()", "Error when counting lines", th);
 		}
 		return numLines;
 	}
+
+	public int countVisibleLines(JTextArea edit, FontMetrics fm, int colWidth)
+	{
+		String content = edit.getText();
+		if (StringUtil.isEmptyString(content)) return 0;
+
+		int fontHeight = fm.getHeight();
+		int lineCount;
+		try
+		{
+			int height = edit.modelToView(content.length() - 1).y;
+			lineCount = height / fontHeight + 1;
+		}
+		catch (Throwable th)
+		{
+			// if something goes wrong because the TextArea wasn't initialized properly,
+			// fall back to the less accurate method
+			LogMgr.logDebug("RowHeightOptimizer.countVisibleLines()", "Error when counting lines", th);
+			lineCount = countWrappedLines(edit, colWidth - 32);
+		}
+		return lineCount;
+	}
+
 
 	private void optimizeRowHeight(int row, int maxLines, boolean ignoreEmptyLines)
 	{
@@ -139,7 +179,16 @@ public class RowHeightOptimizer
 			// when a multi-line renderer is used which is essentially a JTextArea
 			if (c instanceof JTextArea)
 			{
-				JTextArea text = (JTextArea)c;
+				JTextArea text = (JTextArea) c;
+
+				int colWidth = table.getColumnModel().getColumn(col).getPreferredWidth();
+
+				// if the size and preferredSize is not set, counting lines doesn't work
+				Dimension size = text.getPreferredSize();
+				size.setSize(colWidth, size.height);
+				text.setSize(size);
+				text.setPreferredSize(size);
+
 				if (ignoreEmptyLines)
 				{
 					lines = getLineCount(text);
@@ -149,8 +198,7 @@ public class RowHeightOptimizer
 					lines = text.getLineCount();
 					if (lines == 1 && text.getLineWrap())
 					{
-						int colWidth = table.getColumnModel().getColumn(col).getPreferredWidth();
-						lines = countWrappedLines(text, colWidth);
+						lines = countVisibleLines(text, fm, colWidth);
 					}
 				}
 			}
