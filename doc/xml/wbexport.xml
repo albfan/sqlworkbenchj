@@ -573,7 +573,7 @@
 					</row>
 
 					<row>
-						<entry>-append</entry>
+						<entry id="export-append">-append</entry>
 						<entry>
 							<para>
 								Possible values: <literal>true</literal>,<literal>false</literal>
