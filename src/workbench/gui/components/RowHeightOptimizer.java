@@ -127,6 +127,7 @@ public class RowHeightOptimizer
 		catch (Throwable th)
 		{
 			LogMgr.logDebug("RowHeightOptimizer.countWrappedLines()", "Error when counting lines", th);
+			numLines = 1;
 		}
 		return numLines;
 	}
@@ -188,6 +189,7 @@ public class RowHeightOptimizer
 				size.setSize(colWidth, size.height);
 				text.setSize(size);
 				text.setPreferredSize(size);
+				text.setMaximumSize(size);
 
 				if (ignoreEmptyLines)
 				{
