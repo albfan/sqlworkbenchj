@@ -110,7 +110,7 @@ WHERE id=42;</p>
     <p>SQL Workbench/J has been specifically tested with the following or they have been reported to work with SQL Workbench/J:</p>
     <ul>
       <li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
-      <li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html">(Download JDBC driver)</a></li>
       <li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
       <li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;amp;sub=jdbc">(Download JDBC driver)</a></li>
       <li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>

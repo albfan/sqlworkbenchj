@@ -154,7 +154,7 @@
 						<entry>PostgreSQL</entry>
 						<entry>org.postgresql.Driver</entry>
 						<entry> <simplelist columns="1">
-							<member>postgresql-8.4-701.jdbc4.jar (exact name depends on PostgreSQL version)</member>
+							<member>postgresql-9.2-1002.jdbc4.jar (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>
