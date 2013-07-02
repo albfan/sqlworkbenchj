@@ -280,7 +280,10 @@ public class ObjectInfo
 		{
 			ColumnRemover remover = new ColumnRemover(details);
 			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-			cols.setResultName(showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection));
+			String fname = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
+			cols.setResultName(fname);
+			cols.setGeneratingSql("DESCRIBE " + fname);
+			result.setSourceCommand("DESCRIBE " + fname);
 			result.addDataStore(cols);
 			result.setSuccess();
 		}

@@ -24,6 +24,7 @@ package workbench.gui.actions;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -46,7 +47,7 @@ import workbench.storage.ResultInfoDisplayBuilder;
  * @author Thomas Kellerer
  */
 public class ResultSetInfoPanel
-	extends javax.swing.JPanel
+	extends JPanel
 {
 	private WbTable display;
 

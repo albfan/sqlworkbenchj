@@ -24,7 +24,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
 import workbench.gui.sql.SqlPanel;
@@ -96,13 +95,19 @@ public class ShowObjectInfoAction
 			{
 				text = display.getEditor().getWordAtCursor();
 			}
+
 			if (conn != null && StringUtil.isNonBlank(text))
 			{
 				display.setStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
 				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps);
+
 				if (result != null)
 				{
 					int count = display.getResultTabCount();
+
+					// if the display is "kept busy" the current "data" will not be recognized
+					// when switching panels
+					display.setBusy(false);
 
 					// Retrieving the messages will reset the hasMessages() flag...
 					boolean hasMessages = result.hasMessages();
@@ -115,10 +120,9 @@ public class ShowObjectInfoAction
 
 					if (result.hasDataStores())
 					{
-						List<DataStore> data = result.getDataStores();
-						for (int i=0; i < data.size(); i++)
+						for (DataStore data : result.getDataStores())
 						{
-							data.get(i).resetStatus();
+							data.resetStatus();
 						}
 						display.addResult(result);
 						display.setSelectedResultTab(count - 1);
@@ -137,7 +141,8 @@ public class ShowObjectInfoAction
 		finally
 		{
 			display.fireDbExecEnd();
-			display.setBusy(false);
+			// just in case...
+			if (display.isBusy()) display.setBusy(false);
 			display.clearStatusMessage();
 			checkEnabled();
 		}
