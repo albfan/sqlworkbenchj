@@ -28,9 +28,10 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
+
 import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -204,12 +205,12 @@ public class TypeMapper
 				try
 				{
 					Integer typeValue = Integer.parseInt(def[0]);
-					LogMgr.logDebug("TypeMapp.parseTypeMap()", "Mapping JDBC Type " + SqlUtil.getTypeName(typeValue) + " to usertype: " + def[1]);
+					LogMgr.logDebug("TypeMapp.parseUserTypeMap()", "Mapping JDBC Type " + SqlUtil.getTypeName(typeValue) + " to usertype: " + def[1]);
 					this.userMapping.put(typeValue, def[1]);
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("TypeMapp.parseTypeMap()", "Could not parse entry: " + type, e);
+					LogMgr.logError("TypeMapp.parseUserTypeMap()", "Could not parse entry: " + type, e);
 				}
 			}
 		}
