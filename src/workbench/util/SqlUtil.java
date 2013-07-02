@@ -268,6 +268,7 @@ public class SqlUtil
 		if (input == null) return input;
 
 		int len = input.length();
+		if (len < 2) return input;
 
 		char firstChar = input.charAt(0);
 		char lastChar = input.charAt(len - 1);
@@ -1659,6 +1660,8 @@ public class SqlUtil
 	 */
 	public static String getSqlTypeDisplay(String typeName, int sqlType, int size, int digits)
 	{
+		if (typeName == null) return "";
+
 		String display = typeName;
 
 		switch (sqlType)
@@ -1670,15 +1673,10 @@ public class SqlUtil
 				// Postgres' text datatype does not have a size parameter
 				if ("text".equals(typeName)) return "text";
 
-				// Some drivers already include the column size in the data type;
-
-				if (display.indexOf('(') > -1) return display;
-
-				if (size > 0)
+				if (size > 0 && typeName.indexOf('(') == -1)
 				{
 					display = typeName + "(" + size + ")";
 				}
-
 				break;
 
 			case Types.DOUBLE:
@@ -1690,10 +1688,6 @@ public class SqlUtil
 				if (size > 0)
 				{
 					display = typeName + "(" + size + ")";
-				}
-				else
-				{
-					display = typeName;
 				}
 				break;
 

@@ -23,6 +23,7 @@
 package workbench.util;
 
 import java.lang.reflect.Field;
+import java.sql.Types;
 import java.util.List;
 
 import workbench.TestUtil;
@@ -52,6 +53,27 @@ public class SqlUtilTest
 	public SqlUtilTest()
 	{
 		super("SqlUtilTest");
+	}
+
+	@Test
+	public void testTypeDisplay()
+	{
+		assertEquals("varchar(50)", SqlUtil.getSqlTypeDisplay("varchar", Types.VARCHAR, 50, 0));
+		assertEquals("varchar", SqlUtil.getSqlTypeDisplay("varchar", Types.VARCHAR, 0, 0));
+		assertEquals("varchar(10)", SqlUtil.getSqlTypeDisplay("varchar(10)", Types.VARCHAR, 999, 0));
+		assertEquals("text", SqlUtil.getSqlTypeDisplay("text", Types.VARCHAR, Integer.MAX_VALUE, 0));
+	}
+
+	@Test
+	public void testRemoveQuotes()
+	{
+		assertEquals("foo", SqlUtil.removeObjectQuotes("\"foo\""));
+		assertEquals("\"foo", SqlUtil.removeObjectQuotes("\"foo"));
+		assertEquals("foo", SqlUtil.removeObjectQuotes("`foo`"));
+		assertEquals("", SqlUtil.removeObjectQuotes(""));
+		assertEquals("\"", SqlUtil.removeObjectQuotes("\""));
+		assertEquals("foo", SqlUtil.removeObjectQuotes("[foo]"));
+		assertEquals("\"foo]", SqlUtil.removeObjectQuotes("\"foo]"));
 	}
 
 	@Test

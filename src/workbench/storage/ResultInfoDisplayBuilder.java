@@ -49,11 +49,14 @@ public class ResultInfoDisplayBuilder
 		}
 
 		DataStore infoDs = new DataStore(cols, types);
-		for (ColumnIdentifier col : info.getColumns())
+		//for (ColumnIdentifier col : info.getColumns())
+		for (int columnPosition=0; columnPosition < info.getColumnCount(); columnPosition++)
 		{
 			int row = infoDs.addRow();
 			int colIndex = 0;
-			infoDs.setValue(row, colIndex++, col.getPosition());
+			ColumnIdentifier col = info.getColumns()[columnPosition];
+			int colPos = col.getPosition() == 0 ? columnPosition + 1 : col.getPosition();
+			infoDs.setValue(row, colIndex++, colPos);
 			infoDs.setValue(row, colIndex++, col.getColumnName());
 			infoDs.setValue(row, colIndex++, col.getColumnAlias());
 			infoDs.setValue(row, colIndex++, col.getDbmsType());
