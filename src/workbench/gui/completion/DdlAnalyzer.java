@@ -24,6 +24,7 @@ package workbench.gui.completion;
 
 import workbench.db.GenericObjectDropper;
 import workbench.db.IndexDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
@@ -31,6 +32,7 @@ import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
 import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
@@ -75,7 +77,23 @@ public class DdlAnalyzer
 		String type = (typeToken != null ? typeToken.getContents() : null);
 		SQLToken nameToken = lexer.getNextToken(false, false);
 
-		this.schemaForTableList = getSchemaFromCurrentWord();
+		String tableName = null;
+
+		if (nameToken != null)
+		{
+			TableIdentifier tbl = new TableIdentifier(nameToken.getContents());
+			this.schemaForTableList = tbl.getSchema();
+			tableName = tbl.getTableName();
+			if (StringUtil.isEmptyString(tableName))
+			{
+				tableName = null;
+			}
+		}
+
+		if (schemaForTableList == null)
+		{
+			this.schemaForTableList = getSchemaFromCurrentWord();
+		}
 
 		if ("DROP".equals(verb))
 		{
@@ -86,8 +104,8 @@ public class DdlAnalyzer
 			}
 
 			boolean showObjectList = typeToken != null && cursorPos >= typeToken.getCharEnd()
-				&& (nameToken == null || schemaForTableList != null || cursorPos < nameToken.getCharBegin());
-			boolean showDropOption = nameToken != null && cursorPos >=  nameToken.getCharEnd() && schemaForTableList == null;
+				&& (nameToken == null || (tableName == null && cursorPos == nameToken.getCharEnd()));
+			boolean showDropOption = nameToken != null && cursorPos >  nameToken.getCharEnd();
 
 			// for DROP etc, we'll need to be after the table keyword
 			// otherwise it could be a DROP PROCEDURE as well.
