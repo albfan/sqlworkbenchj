@@ -23,8 +23,10 @@
 package workbench.db;
 
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -42,7 +44,6 @@ public class TypeMapperTest
 	@Test
 	public void testGetTypeName()
 	{
-
 		TypeMapper mapper = new TypeMapper();
 		mapper.parseUserTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
 		String type = mapper.getUserMapping(3, 1, 1);

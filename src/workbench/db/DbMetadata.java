@@ -65,6 +65,7 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
+import workbench.db.oracle.OracleUtils;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -1296,7 +1297,7 @@ public class DbMetadata
 
 	public static String cleanupWildcards(String pattern)
 	{
-		if (pattern == null) return null;
+		if (StringUtil.isEmptyString(pattern)) return null;
 		if ("*".equals(pattern) || "%".equals(pattern)) return null;
 		return SqlUtil.removeObjectQuotes(StringUtil.replace(pattern, "*", "%"));
 	}

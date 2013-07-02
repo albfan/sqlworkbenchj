@@ -205,8 +205,8 @@ public class TypeMapper
 				try
 				{
 					Integer typeValue = Integer.parseInt(def[0]);
-					LogMgr.logDebug("TypeMapp.parseUserTypeMap()", "Mapping JDBC Type " + SqlUtil.getTypeName(typeValue) + " to usertype: " + def[1]);
-					this.userMapping.put(typeValue, def[1]);
+					String old = this.userMapping.put(typeValue, def[1]);
+					LogMgr.logInfo("TypeMapp.parseUserTypeMap()", "Mapping java.sql.Types." + SqlUtil.getTypeName(typeValue) + " to usertype: [" + def[1] + "] overwriting mapping to [" + old == null ? "" : old + "]");
 				}
 				catch (Exception e)
 				{
@@ -237,6 +237,7 @@ public class TypeMapper
 			{
 				String name = rs.getString(1);
 				int type = rs.getInt(2);
+				String localName = rs.getString(13);
 
 				// we can't handle arrays anyway
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
@@ -244,11 +245,11 @@ public class TypeMapper
 				Integer key = Integer.valueOf(type);
 				if (this.typeInfo.containsKey(key))
 				{
-					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from JDBC type "  + SqlUtil.getTypeName(type) + " to  DB type " + name + " will be ignored. A mapping is already present.");
+					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from java.sql.Types."  + SqlUtil.getTypeName(type) + " to  DB type [" + name + "] will be ignored. A mapping is already present.");
 				}
 				else
 				{
-					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping JDBC type "  + SqlUtil.getTypeName(type) + " to DB type " + name);
+					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping java.sql.Types."  + SqlUtil.getTypeName(type) + " to DB type [" + name + "]");
 					this.typeInfo.put(key, name);
 				}
 			}
