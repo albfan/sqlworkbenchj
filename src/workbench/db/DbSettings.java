@@ -960,6 +960,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "typemap", null);
 	}
 
+	public boolean cleanupTypeMappingNames()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "typemap.cleanup", false);
+	}
+
 	/**
 	 * Returns if setObject() should be used with the target JDBC datatype or
 	 * without

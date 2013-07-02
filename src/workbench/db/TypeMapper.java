@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 
@@ -117,9 +119,12 @@ public class TypeMapper
 	/**
 	 * Returns a parsed version of the user type-mapping if available.
 	 *
-	 * If a user type-mappin is available for the given type, this will
+	 * If a user type-mapping is available for the given type, this will
 	 * be returned, with the placeholders <tt>$size</tt> and <tt>$digits</tt>
 	 * replaced in the type definition.
+	 *
+	 * Unlike the built-in types, the placeholders <tt>$size</tt> and <tt>$digits</tt> are required
+	 * in the definition.
 	 *
 	 * @param type
 	 * @param size
@@ -230,6 +235,10 @@ public class TypeMapper
 	{
 		ResultSet rs = null;
 		this.typeInfo = new HashMap<Integer, String>(27);
+		boolean cleanup = targetDb.getDbSettings().cleanupTypeMappingNames();
+
+		Pattern p = Pattern.compile("[\\(\\)\\[\\]{}'\"`]");
+
 		try
 		{
 			rs = this.targetDb.getSqlConnection().getMetaData().getTypeInfo();
@@ -237,19 +246,29 @@ public class TypeMapper
 			{
 				String name = rs.getString(1);
 				int type = rs.getInt(2);
-				String localName = rs.getString(13);
 
 				// we can't handle arrays anyway
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
 
+				if (cleanup)
+				{
+					Matcher m = p.matcher(name);
+					String clean = m.replaceAll("");
+					if (!clean.equals(name))
+					{
+						LogMgr.logInfo("TypeMapper.createTypeMap()", "Using type name ["  + clean + "] instead of [" + name + "]");
+						name = clean;
+					}
+				}
+
 				Integer key = Integer.valueOf(type);
 				if (this.typeInfo.containsKey(key))
 				{
-					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from java.sql.Types."  + SqlUtil.getTypeName(type) + " to  DB type [" + name + "] will be ignored. A mapping is already present.");
+					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from java.sql.Types."  + SqlUtil.getTypeName(type) + " to  DBMS type [" + name + "] will be ignored. A mapping is already present.");
 				}
 				else
 				{
-					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping java.sql.Types."  + SqlUtil.getTypeName(type) + " to DB type [" + name + "]");
+					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping java.sql.Types."  + SqlUtil.getTypeName(type) + " to DBMS type [" + name + "] ");
 					this.typeInfo.put(key, name);
 				}
 			}
@@ -265,5 +284,6 @@ public class TypeMapper
 		}
 		parseUserTypeMap(targetDb.getDbSettings().getJDBCTypeMapping());
 	}
+
 }
 

@@ -22,6 +22,10 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
+import java.sql.Types;
+
+import workbench.TestUtil;
 import workbench.WbTestCase;
 
 import org.junit.Test;
@@ -41,6 +45,7 @@ public class TypeMapperTest
 		super("TypeMapperTest");
 	}
 
+
 	@Test
 	public void testGetTypeName()
 	{
@@ -54,5 +59,23 @@ public class TypeMapperTest
 		assertEquals("VARCHAR2(100)", type);
 		type = mapper.getUserMapping(93, 0, 0);
 		assertEquals("datetime year to second", type);
+	}
+
+	@Test
+	public void testDbMapping()
+		throws SQLException, ClassNotFoundException
+	{
+		try
+		{
+			TestUtil util = getTestUtil();
+			WbConnection conn = util.getConnection("TypeMapper");
+			TypeMapper mapper = new TypeMapper(conn);
+			String type = mapper.getTypeName(Types.VARCHAR, 20, -1);
+			assertEquals("VARCHAR(20)", type);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 }
