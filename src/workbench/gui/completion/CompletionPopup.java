@@ -592,7 +592,7 @@ public class CompletionPopup
 				tbl.setCatalog(null);
 			}
 		}
-		return tbl.getObjectExpression(conn);
+		return tbl.getTableExpression();
 	}
 
 	public void selectCurrentWordInEditor(boolean flag)
