@@ -162,13 +162,7 @@ public class CompletionPopup
 			boolean showQuickSearch = false;
 			String initialSearchValue = null;
 
-			String s = editor.getSelectedText();
-			if (s != null)
-			{
-				index = findEntry(s);
-				initialSearchValue = s;
-			}
-			else if (StringUtil.isNonBlank(valueToSelect))
+			if (StringUtil.isNonBlank(valueToSelect))
 			{
 				index = findEntry(valueToSelect);
 				initialSearchValue = valueToSelect;
