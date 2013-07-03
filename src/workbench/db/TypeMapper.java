@@ -241,6 +241,7 @@ public class TypeMapper
 
 		try
 		{
+			LogMgr.logInfo("TypeMapper.createTypeMap()", "Reading type map for " + targetDb.getDbId());
 			rs = this.targetDb.getSqlConnection().getMetaData().getTypeInfo();
 			while (rs.next())
 			{

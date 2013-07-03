@@ -1079,6 +1079,7 @@ public class WbConnection
 				currentSchema = schema;
 			}
 
+			// the dummy schema in the ignoreSchema() call is there to prevent another lookup for the current schema
 			if (schema != null && !schema.equalsIgnoreCase(user) && !meta.ignoreSchema(schema, "%.INVALID.%"))
 			{
 				String schemaName = meta.getSchemaTerm();
