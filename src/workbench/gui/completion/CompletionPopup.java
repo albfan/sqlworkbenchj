@@ -61,6 +61,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.sql.LookupValuePicker;
@@ -710,6 +711,7 @@ public class CompletionPopup
 		int nextIndex = -1;
 		boolean syncEntry = false;
 		boolean cycleList = GuiSettings.getCycleCompletionPopup();
+		boolean shiftPressed = WbAction.isShiftPressed(evt.getModifiers());
 
 		switch (evt.getKeyCode())
 		{
@@ -737,7 +739,14 @@ public class CompletionPopup
 
 				if (nextIndex != -1)
 				{
-					elementList.setSelectedIndex(nextIndex);
+					if (shiftPressed)
+					{
+						elementList.addSelectionInterval(nextIndex,nextIndex);
+					}
+					else
+					{
+						elementList.setSelectedIndex(nextIndex);
+					}
 					elementList.ensureIndexIsVisible(nextIndex);
 					syncEntry = true;
 					evt.consume();
@@ -745,6 +754,17 @@ public class CompletionPopup
 				break;
 
 			case KeyEvent.VK_DOWN:
+				// when moving down while extending the selection, we need to use the last selected entry
+				// as the "base" index (not necessary when moving up, as getSelectedIndex() will return the first entry)
+				if (shiftPressed)
+				{
+					int[] selected = elementList.getSelectedIndices();
+					if (selected.length > 1)
+					{
+						currentIndex = selected[selected.length - 1];
+					}
+				}
+
 				if (cycleList && currentIndex == data.getSize() - 1)
 				{
 					nextIndex = 0;
@@ -756,7 +776,14 @@ public class CompletionPopup
 
 				if (nextIndex != -1)
 				{
-					elementList.setSelectedIndex(nextIndex);
+					if (shiftPressed)
+					{
+						elementList.addSelectionInterval(nextIndex,nextIndex);
+					}
+					else
+					{
+						elementList.setSelectedIndex(nextIndex);
+					}
 					elementList.ensureIndexIsVisible(nextIndex);
 					syncEntry = true;
 					evt.consume();
