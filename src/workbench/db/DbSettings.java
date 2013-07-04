@@ -1639,4 +1639,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "ddl.disable.escapeprocessing", true);
 	}
+
+	public boolean hideOracleIdentitySequences()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "sequence.identity.hide", true);
+	}
+
 }

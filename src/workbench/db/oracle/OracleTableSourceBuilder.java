@@ -193,6 +193,10 @@ public class OracleTableSourceBuilder
 			CharSequence ext = reader.getDefinition(tbl, dbConnection);
 			if (ext != null)
 			{
+				if (options.length() > 0)
+				{
+					options.append('\n');
+				}
 				options.append(ext);
 			}
 		}

@@ -126,8 +126,6 @@ public class OracleTableDefinitionReader
 
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
 
-		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
-
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 
@@ -158,6 +156,7 @@ public class OracleTableDefinitionReader
 
 				String nullable = rs.getString("IS_NULLABLE");
 				String byteOrChar = rs.getString("CHAR_USED");
+
 				int charSemantics = oraTypes.getDefaultCharSemantics();
 
 				if (StringUtil.isEmptyString(byteOrChar))
@@ -173,12 +172,11 @@ public class OracleTableDefinitionReader
 					charSemantics = OracleDataTypeResolver.CHAR_SEMANTICS;
 				}
 
-				boolean isVirtual = false;
-				if (includeVirtualColumns)
-				{
-					String virtual = rs.getString("VIRTUAL_COLUMN");
-					isVirtual = StringUtil.stringToBool(virtual);
-				}
+				String identity = rs.getString("IDENTITY_COLUMN");
+				boolean isIdentity = "YES".equalsIgnoreCase(identity);
+
+				String virtual = rs.getString("VIRTUAL_COLUMN");
+				boolean isVirtual = StringUtil.stringToBool(virtual);
 				String display = oraTypes.getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
 
 				col.setDbmsType(display);
@@ -190,6 +188,18 @@ public class OracleTableDefinitionReader
 					String exp = "GENERATED ALWAYS AS (" + defaultValue + ")";
 					col.setComputedColumnExpression(exp);
 				}
+				else if (isIdentity)
+				{
+					String type = rs.getString("GENERATION_TYPE");
+					String exp = "GENERATED " + type + " AS IDENTITY";
+					String options = rs.getString("IDENTITY_OPTIONS");
+					String addOptions = getIdentitySequenceOptions(options);
+					if (addOptions != null)
+					{
+						exp += " " + addOptions;
+					}
+					col.setComputedColumnExpression(exp);
+				}
 				else
 				{
 					col.setDefaultValue(defaultValue);
@@ -198,6 +208,7 @@ public class OracleTableDefinitionReader
 				col.setColumnSize(size);
 				col.setDecimalDigits(digits);
 				col.setPosition(position);
+				col.setIsAutoincrement(isIdentity);
 				columns.add(col);
 			}
 		}
@@ -206,6 +217,42 @@ public class OracleTableDefinitionReader
 			SqlUtil.closeAll(rs, pstmt);
 		}
 		return columns;
+	}
+
+	private String getIdentitySequenceOptions(String options)
+	{
+		if (options == null)
+		{
+			return null;
+		}
+
+		final String defaultOptions = "START WITH: 1, INCREMENT BY: 1, MAX_VALUE: 9999999999999999999999999999, MIN_VALUE: 1, CYCLE_FLAG: N, CACHE_SIZE: 20, ORDER_FLAG: N";
+
+		if (defaultOptions.equalsIgnoreCase(options))
+		{
+			return null;
+		}
+		String result = options.trim().toUpperCase().replace(", ", " ");
+		// convert the "property syntax" into the correct one.
+		result = result.replace("START WITH: ", "START WITH ");
+		result = result.replace("MIN_VALUE: ", "MINVALUE ");
+		result = result.replace("MAX_VALUE: ", "MAXVALUE ");
+		result = result.replace("INCREMENT BY: ", "INCREMENT BY ");
+		result = result.replace("CYCLE_FLAG: N", "NOCYCLE");
+		result = result.replace("CYCLE_FLAG: Y", "CYCLE");
+		result = result.replace("ORDER_FLAG: N", "NOORDER");
+		result = result.replace("ORDER_FLAG: Y", "ORDER");
+		result = result.replace("CACHE_SIZE: ", "CACHE ");
+
+		// remove default values of the options to make the SQL a bit more readable
+		result = result.replace("START WITH 1 ", "");
+		result = result.replace("MAXVALUE 9999999999999999999999999999 ", "");
+		result = result.replace("MINVALUE 1 ", "");
+		result = result.replace("INCREMENT BY 1 ", "");
+		result = result.replace("NOCYCLE ", "");
+		result = result.replace("NOORDER", "");
+		result = result.replace("CACHE 20 ", "");
+		return result.trim();
 	}
 
 	public static String getDecodeForDataType(String colname, boolean fixNVARCHAR, boolean mapDateToTimestamp)
@@ -239,7 +286,7 @@ public class OracleTableDefinitionReader
 		throws SQLException
 	{
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
-
+		boolean is12c = JdbcUtils.hasMinimumServerVersion(dbConnection, "12.1");
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE
@@ -262,13 +309,16 @@ public class OracleTableDefinitionReader
 			"        when t.data_type = 'NUMBER' and t.data_precision is null then -127 \n" +
 			"        else t.data_scale \n" +
 			"     end AS decimal_digits,  \n" +
-			"     DECODE(t.nullable, 'N', 0, 1) AS nullable, \n";
+			"     DECODE(t.nullable, 'N', 0, 1) AS nullable, \n" +
+			"     " + (is12c ? "IDENTITY_COLUMN" : " 'NO' AS IDENTITY_COLUMN") + ", \n" +
+			"     " + (is12c ? "DEFAULT_ON_NULL" : " 'NO' AS DEFAULT_ON_NULL") + ", \n";
 
 		String sql2 =
 			"     t.data_default AS column_def,  \n" +
 			"     t.char_used, \n" +
 			"     t.column_id AS ordinal_position,   \n" +
-			"     DECODE(t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
+			"     DECODE(t.nullable, 'N', 'NO', 'YES') AS is_nullable, \n";
+
 
 		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.0");
 		if (includeVirtualColumns)
@@ -276,17 +326,35 @@ public class OracleTableDefinitionReader
 			// for some reason XMLTYPE columns and "table type" columns are returned with virtual_column = 'YES'
 			// which seems like a bug in all_tab_cols....
 			sql2 +=
-				",\n     case \n" +
+				"     case \n" +
 				"          when data_type <> 'XMLTYPE' and DATA_TYPE_OWNER is null THEN t.virtual_column \n" +
 				"          else 'NO' \n" +
-				"      end as virtual_column \n" +
-				"FROM all_tab_cols t";
+				"      end as virtual_column ";
+			if (is12c)
+			{
+				sql2 += ",\n" +
+				"     ic.generation_type, \n" +
+				"     ic.identity_options ";
+			}
+		}
+		else
+		{
+			sql2 +=
+				"     null as virtual_column ";
+		}
+
+		if (includeVirtualColumns)
+		{
+			sql2 += "\nFROM all_tab_cols t";
 		}
 		else
 		{
 			sql2 += "\nFROM all_tab_columns t";
 		}
-
+		if (is12c)
+		{
+			sql2 += "\n  LEFT JOIN all_tab_identity_cols ic ON ic.owner = t.owner and ic.table_name = t.table_Name and ic.column_name = t.column_name ";
+		}
 		String where = "\nWHERE t.owner = ? AND t.table_name = ? \n";
 		if (includeVirtualColumns)
 		{

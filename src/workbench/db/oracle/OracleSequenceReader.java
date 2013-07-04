@@ -27,6 +27,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
@@ -44,10 +46,12 @@ public class OracleSequenceReader
   implements SequenceReader
 {
   private WbConnection connection;
+	private boolean is12c;
 
   public OracleSequenceReader(WbConnection conn)
   {
     this.connection = conn;
+		this.is12c = JdbcUtils.hasMinimumServerVersion(connection, "12.1");
   }
 
 	@Override
@@ -89,6 +93,11 @@ public class OracleSequenceReader
 			"WHERE sequence_owner = '");
 		sql.append(StringUtil.trimQuotes(owner));
 		sql.append("'\n ");
+
+		if (is12c && connection.getDbSettings().hideOracleIdentitySequences())
+		{
+			sql.append("  AND sequence_name NOT LIKE 'ISEQ$$%'"); // remove Oracle 12c sequences used for identity columns
+		}
 
 		if (StringUtil.isNonEmpty(sequence))
 		{

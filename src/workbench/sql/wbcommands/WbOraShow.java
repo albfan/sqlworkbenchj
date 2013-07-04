@@ -312,11 +312,11 @@ public class WbOraShow
 			LogMgr.logDebug("WbOraShow.getParameterValues()", "Using SQL: " + query);
 		}
 
-		Statement stmt = null;
 		try
 		{
-			stmt = this.currentConnection.createStatementForQuery();
-			rs = stmt.executeQuery(query);
+			// processResults needs currentStatement
+			currentStatement = this.currentConnection.createStatementForQuery();
+			rs = currentStatement.executeQuery(query);
 			processResults(result, true, rs);
 			if (result.hasDataStores())
 			{
@@ -341,7 +341,7 @@ public class WbOraShow
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeAll(rs, currentStatement);
 		}
 		return result;
 	}
