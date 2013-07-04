@@ -461,6 +461,8 @@ public class CompletionPopup
 			return;
 		}
 
+		boolean needsComma = this.context.getAnalyzer().needsCommaForMultipleSelection();
+
 		String value = "";
 
 		for (Object o : selected)
@@ -537,7 +539,7 @@ public class CompletionPopup
 			}
 			else
 			{
-				if (value.length() > 0)
+				if (value.length() > 0 && needsComma)
 				{
 					value += ", ";
 				}
@@ -547,7 +549,7 @@ public class CompletionPopup
 
 		if (StringUtil.isNonBlank(value))
 		{
-			editor.setSelectedText(value);
+			editor.setSelectedText(value.trim());
 			if (value.charAt(0) == '<' || value.charAt(0) == '>')
 			{
 				editor.selectWordAtCursor(" =-\t\n");

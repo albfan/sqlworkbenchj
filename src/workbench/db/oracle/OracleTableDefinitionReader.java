@@ -202,6 +202,11 @@ public class OracleTableDefinitionReader
 				}
 				else
 				{
+					String defOnNull = rs.getString("DEFAULT_ON_NULL");
+					if ("YES".equalsIgnoreCase(defOnNull))
+					{
+						defaultValue = " ON NULL " + defaultValue;
+					}
 					col.setDefaultValue(defaultValue);
 				}
 				col.setComment(remarks);
@@ -310,8 +315,8 @@ public class OracleTableDefinitionReader
 			"        else t.data_scale \n" +
 			"     end AS decimal_digits,  \n" +
 			"     DECODE(t.nullable, 'N', 0, 1) AS nullable, \n" +
-			"     " + (is12c ? "IDENTITY_COLUMN" : " 'NO' AS IDENTITY_COLUMN") + ", \n" +
-			"     " + (is12c ? "DEFAULT_ON_NULL" : " 'NO' AS DEFAULT_ON_NULL") + ", \n";
+			"     " + (is12c ? "t.identity_column" : " 'NO' AS IDENTITY_COLUMN") + ", \n" +
+			"     " + (is12c ? "t.default_on_null" : " 'NO' AS DEFAULT_ON_NULL") + ", \n";
 
 		String sql2 =
 			"     t.data_default AS column_def,  \n" +

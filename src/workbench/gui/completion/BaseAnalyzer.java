@@ -153,6 +153,11 @@ public abstract class BaseAnalyzer
 		return SELECT_WORD_DELIM;
 	}
 
+	public boolean needsCommaForMultipleSelection()
+	{
+		return true;
+	}
+	
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator

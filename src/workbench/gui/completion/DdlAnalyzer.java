@@ -211,4 +211,10 @@ public class DdlAnalyzer
 		return null;
 	}
 
+	@Override
+	public boolean needsCommaForMultipleSelection()
+	{
+		return (context != CONTEXT_KW_LIST);
+	}
+
 }
