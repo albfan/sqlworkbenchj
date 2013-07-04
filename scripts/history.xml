@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-06-30">
+    <entry dev-build="12" type="enh">Added support for the new table definition features (identity columns, default on null) in Oracle 12c</entry>
     <entry dev-build="11" type="enh">WbImport for XLS and XLSX now supports the "append" option to add a new worksheet to an existing workbook.</entry>
     <entry dev-build="11" type="enh">A new command (WbGenerateDelete) to generate a delete statement with respect to foreign keys has been added. This the same as the "Generate delete script" menu item.</entry>
     <entry dev-build="11" type="enh">Data can now be exported (saved, copied) as SQL DELETE statements as well.</entry>
