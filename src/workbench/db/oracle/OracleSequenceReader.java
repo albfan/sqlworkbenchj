@@ -81,16 +81,18 @@ public class OracleSequenceReader
   {
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(
-			"SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
-			"MIN_VALUE, \n       " +
-			"MAX_VALUE, \n       " +
-			"INCREMENT_BY, \n       " +
-			"CASE WHEN CYCLE_FLAG = 'Y' then 'CYCLE' ELSE 'NOCYCLE' END AS CYCLE_FLAG, \n       " +
-			"CASE WHEN ORDER_FLAG = 'Y' then 'ORDER' ELSE 'NOORDER' END AS ORDER_FLAG, \n       " +
-			"CACHE_SIZE, \n" +
-			"LAST_NUMBER \n" +
+			"SELECT SEQUENCE_OWNER, \n" +
+			"       SEQUENCE_NAME, \n" +
+			"       MIN_VALUE, \n" +
+			"       MAX_VALUE, \n" +
+			"       INCREMENT_BY, \n" +
+			"       CASE WHEN CYCLE_FLAG = 'Y' then 'CYCLE' ELSE 'NOCYCLE' END AS CYCLE_FLAG, \n" +
+			"       CASE WHEN ORDER_FLAG = 'Y' then 'ORDER' ELSE 'NOORDER' END AS ORDER_FLAG, \n" +
+			"       CACHE_SIZE, \n" +
+			"       LAST_NUMBER \n" +
 			"FROM ALL_SEQUENCES \n" +
 			"WHERE sequence_owner = '");
+
 		sql.append(StringUtil.trimQuotes(owner));
 		sql.append("'\n ");
 
@@ -103,7 +105,7 @@ public class OracleSequenceReader
 		{
 			SqlUtil.appendAndCondition(sql, "sequence_name", sequence, connection);
 		}
-		sql.append("\n ORDER BY 1,2");
+		sql.append("\nORDER BY 1,2");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

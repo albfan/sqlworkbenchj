@@ -159,6 +159,11 @@ public class ColumnIdentifierTest
 		col.setPosition(35);
 		copy = col.createCopy();
 		assertEquals(col.getPosition(), copy.getPosition());
+		assertEquals("DEFAULT", col.getDefaultClause());
+
+		col.setDefaultClause("DEFAULT ON NULL");
+		copy = col.createCopy();
+		assertEquals(col.getDefaultClause(), copy.getDefaultClause());
 	}
 
 	@Test

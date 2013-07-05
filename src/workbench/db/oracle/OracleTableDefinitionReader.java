@@ -205,7 +205,7 @@ public class OracleTableDefinitionReader
 					String defOnNull = rs.getString("DEFAULT_ON_NULL");
 					if ("YES".equalsIgnoreCase(defOnNull))
 					{
-						defaultValue = " ON NULL " + defaultValue;
+						col.setDefaultClause("DEFAULT ON NULL");
 					}
 					col.setDefaultValue(defaultValue);
 				}

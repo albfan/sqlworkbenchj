@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import workbench.storage.ResultInfo;
 
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -44,7 +43,7 @@ public class ColumnIdentifier
 	implements ComparableDbObject, Comparable<ColumnIdentifier>
 {
 	public static final int NO_TYPE_INFO = Integer.MIN_VALUE;
-	
+
 	private String name;
 	private String alias;
 	private int type = Types.OTHER;
@@ -64,6 +63,9 @@ public class ColumnIdentifier
 	private String collationExpression;
 	private String generatorExpression;
 
+	// an additional "modifier" to be used instead of the "DEFAULT" keyword
+	// currently only used for Oracle's "DEFAULT ON NULL"
+	private String defaultClause;
 	/**
 	 * Stores the definition of "computed" columns (e.g. Oracle, Firebird, SQL Server, DB2)
 	 */
@@ -98,6 +100,37 @@ public class ColumnIdentifier
 		setColumnName(aName.trim());
 		this.type = aType;
 		this.isPk = isPkColumn;
+	}
+
+	/**
+	 * Returns the keyword that should be used to define the default value.
+	 *
+	 * Usually this is "DEFAULT", but can be overwritten to e.g. support Oracle 12c's "DEFAULT ON NULL" option.
+	 *
+	 * @return the SQL clause to define a default value
+	 * @see #setDefaultClause(java.lang.String)
+	 */
+	public String getDefaultClause()
+	{
+		if (defaultClause == null) return "DEFAULT";
+		return defaultClause;
+	}
+
+	/**
+	 * Change the SQL clause to define a default value to be different than "DEFAULT".
+	 *
+	 * @param clause the new clause that can be used instead of "DEFAULT"
+	 */
+	public void setDefaultClause(String clause)
+	{
+		if (StringUtil.isBlank(clause))
+		{
+			this.defaultClause = null;
+		}
+		else
+		{
+			this.defaultClause = clause.trim();
+		}
 	}
 
 	/**
@@ -449,6 +482,7 @@ public class ColumnIdentifier
 		result.displaySize = this.displaySize;
 		result.expression = this.expression;
 		result.alias = this.alias;
+		result.defaultClause = this.defaultClause;
 
 		return result;
 	}

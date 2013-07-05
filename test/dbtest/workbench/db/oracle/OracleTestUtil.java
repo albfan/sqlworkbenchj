@@ -70,6 +70,11 @@ public class OracleTestUtil
 
 	public static WbConnection getOracleConnection(String username)
 	{
+		return getOracleConnection(username, "wbjunit", "localhost", "oradb");
+	}
+
+	public static WbConnection getOracleConnection(String username, String password, String servername, String sid)
+	{
 		final String id = "Oracle_" + username;
 		try
 		{
@@ -77,7 +82,7 @@ public class OracleTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:oracle:thin:@localhost:1521:oradb' -username=" + username + " -password=wbjunit -driver=oracle.jdbc.OracleDriver");
+			parser.parse("-url='jdbc:oracle:thin:@" + servername + ":1521:" + sid + "' -username=" + username + " -password=" + password + " -driver=oracle.jdbc.OracleDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 			prof.setName(id);

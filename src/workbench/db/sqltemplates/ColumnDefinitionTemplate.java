@@ -131,7 +131,7 @@ public class ColumnDefinitionTemplate
 		}
 		else if (StringUtil.isNonBlank(def))
 		{
-			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "DEFAULT " + def);
+			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, column.getDefaultClause() + " " + def);
 		}
 		else
 		{

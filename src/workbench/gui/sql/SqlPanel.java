@@ -1574,10 +1574,11 @@ public class SqlPanel
 		checkResultSetActions();
 		checkCommitAction();
 
+		setExecuteActionStates(false);
+
 		if (this.dbConnection != null)
 		{
 			dbConnection.addChangeListener(this);
-			setExecuteActionStates(false);
 
 			// ConnectionInfo.setConnection() might access the database (to retrieve the current schema, database and user)
 			// In order to not block the GUI this is done in a separate thread.
@@ -1609,7 +1610,7 @@ public class SqlPanel
 		}
 		else
 		{
-			setExecuteActionStates(false);
+			connectionInfo.setConnection(null);
 		}
 	}
 
