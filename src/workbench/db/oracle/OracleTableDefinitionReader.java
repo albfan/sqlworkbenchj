@@ -74,6 +74,7 @@ public class OracleTableDefinitionReader
 {
 	private boolean useOwnSql = true;
 	private final OracleDataTypeResolver oraTypes;
+	private boolean is12c;
 
 	public OracleTableDefinitionReader(WbConnection conn)
 	{
@@ -81,6 +82,7 @@ public class OracleTableDefinitionReader
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
 		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 
+		is12c = JdbcUtils.hasMinimumServerVersion(dbConnection, "12.1");
 		useOwnSql = (JdbcUtils.hasMinimumServerVersion(conn, "8.0") && (checkCharSemantics || fixNVARCHAR));
 
 		// The incorrectly reported search string escape bug was fixed with 11.2
@@ -291,7 +293,6 @@ public class OracleTableDefinitionReader
 		throws SQLException
 	{
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
-		boolean is12c = JdbcUtils.hasMinimumServerVersion(dbConnection, "12.1");
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE
