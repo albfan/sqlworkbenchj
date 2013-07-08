@@ -30,7 +30,6 @@ import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -40,6 +39,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.BlobHandler;
@@ -593,7 +593,11 @@ public abstract class RowDataConverter
 		this.originalConnection = conn;
 		if (originalConnection != null)
 		{
-			this.convertDateToTimestamp = this.originalConnection.getDbSettings().getConvertDateInExport();
+			DbSettings dbs = this.originalConnection.getDbSettings();
+			if (dbs != null)
+			{
+				this.convertDateToTimestamp = dbs.getConvertDateInExport();
+			}
 		}
 	}
 
