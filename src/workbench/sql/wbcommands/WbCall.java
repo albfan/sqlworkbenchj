@@ -433,7 +433,7 @@ public class WbCall
 
 		ArrayList<ParameterDefinition> parameterNames = null;
 
-		String schemaToUse = SqlUtil.removeObjectQuotes(meta.adjustSchemaNameCase(schema, true));
+		String schemaToUse = SqlUtil.removeObjectQuotes(meta.adjustSchemaNameCase(schema));
 		if (schemaToUse == null)
 		{
 			schemaToUse = meta.getCurrentSchema();

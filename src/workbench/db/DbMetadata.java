@@ -65,7 +65,6 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
-import workbench.db.oracle.OracleUtils;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -1003,7 +1002,8 @@ public class DbMetadata
 	@Override
 	public boolean isQuoted(String name)
 	{
-		if (StringUtil.isEmptyString(name)) return false;
+		if (StringUtil.isBlank(name)) return false;
+		name = name.trim();
 		if (name.startsWith(quoteCharacter)) return true;
 
 		// SQL Server driver claims that a " is the quote character but still
@@ -1121,11 +1121,6 @@ public class DbMetadata
 		return needQuote;
 	}
 
-	public String adjustSchemaNameCase(String schema)
-	{
-		return adjustSchemaNameCase(schema, false);
-	}
-
 	/**
 	 * Adjusts the case of the given schema name to the
 	 * case in which the server stores schema names.
@@ -1134,13 +1129,15 @@ public class DbMetadata
 	 * table name, and that value is used to retrieve
 	 * the table definition.
 	 *
+	 * If the schema name is quoted, then the case will not be adjusted.
+	 *
 	 * @param schema the schema name to adjust
 	 * @return the adjusted schema name
 	 */
-	public String adjustSchemaNameCase(String schema, boolean respectQuotes)
+	public String adjustSchemaNameCase(String schema)
 	{
 		if (StringUtil.isBlank(schema)) return null;
-		if (respectQuotes && isQuoted(schema)) return schema;
+		if (isQuoted(schema)) return schema.trim();
 
 		schema = SqlUtil.removeObjectQuotes(schema).trim();
 
