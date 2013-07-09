@@ -21,9 +21,9 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A TableSourceBuilder for Informix that will read the lock mode setting for the table.
+ * A TableSourceBuilder for Informix that will read the lock mode and extent settings for the table.
  *
- * The lock mode will be stored in the TableSourceOptions of the table.
+ * The options will be stored in the TableSourceOptions of the table.
  *
  * @author Thomas Kellerer
  */
@@ -60,12 +60,20 @@ public class InformixTableSourceBuilder
 
 	private void readLockMode(TableIdentifier table)
 	{
+		boolean showExtents = Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.showextentinfo", true);
 		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
 		TableIdentifier syst = new TableIdentifier(table.getRawCatalog(), systemSchema, "systables");
 		String systables = syst.getFullyQualifiedName(dbConnection);
 
-		String sql =
-			"select locklevel \n" +
+		String sql = "select locklevel ";
+
+		if (showExtents)
+		{
+			sql += ",\n" +
+				"       fextsize, \n" +
+				"       nextsize \n";
+		}
+		sql +=
 			"from " + systables + " \n" +
 			"where tabname = ? \n" +
 			"  and owner = ? \n";
@@ -89,19 +97,43 @@ public class InformixTableSourceBuilder
 			{
 				TableSourceOptions option = table.getSourceOptions();
 				String lvl = rs.getString(1);
-				LogMgr.logDebug("InformixTableSourceBuilder.readLockMode()", "Lockmode for " + table.getTableExpression() + "is: " + lvl);
+
+				int fext = -1;
+				int next = -1;
+				if (showExtents)
+				{
+					fext = rs.getInt(2);
+					if (rs.wasNull()) fext = -1;
+
+					next = rs.getInt(3);
+					if (rs.wasNull()) next = -1;
+				}
+
+				String options = "";
+				if (fext > -1 && next > -1)
+				{
+					table.getSourceOptions().addConfigSetting("extent", Integer.toString(fext));
+					table.getSourceOptions().addConfigSetting("next_extent", Integer.toString(next));
+					options = "EXTENT SIZE " + Integer.toString(fext) + "\nNEXT SIZE " + Integer.toString(next);
+				}
+
 				if (StringUtil.isNonEmpty(lvl))
 				{
 					switch (lvl.charAt(0))
 					{
 						case 'B':
 						case 'P':
-							option.setTableOption("LOCK MODE PAGE");
+							if (options.length() > 0) options += "\n";
+							options += "LOCK MODE PAGE";
+							table.getSourceOptions().addConfigSetting("lock_mode", "page");
 							break;
 						case 'R':
-							option.setTableOption("LOCK MODE ROW");
+							if (options.length() > 0) options += "\n";
+							table.getSourceOptions().addConfigSetting("lock_mode", "row");
+							options += "LOCK MODE ROW";
 					}
 				}
+				option.setTableOption(options);
 			}
 		}
 		catch (Exception e)

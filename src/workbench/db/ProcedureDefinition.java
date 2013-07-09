@@ -246,10 +246,10 @@ public class ProcedureDefinition
 			return getObjectExpression(con);
 		}
 
-		if (this.procName.indexOf('(') > -1) return procName;
+		if (this.procName.indexOf('(') > -1) return getObjectExpression(con);
 
 		List<String> params = getParameterTypes(con);
-		if (params.isEmpty()) return procName + "()";
+		if (params.isEmpty()) return getObjectExpression(con) + "()";
 		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
 		result.append(getObjectExpression(con));
 		result.append('(');
@@ -284,7 +284,12 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectName(WbConnection conn)
 	{
-		return conn.getMetadata().quoteObjectname(this.procName);
+		String name = procName;
+		if (procName.indexOf('(') > -1)
+		{
+			name = procName.substring(0, name.indexOf('('));
+		}
+		return conn.getMetadata().quoteObjectname(name);
 	}
 
 	@Override
@@ -296,7 +301,17 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
-		return SqlUtil.buildExpression(conn, catalog, schema, procName);
+		String name = procName;
+		if (procName.indexOf('(') > -1)
+		{
+			name = procName.substring(0, name.indexOf('('));
+		}
+		String expr = SqlUtil.buildExpression(conn, catalog, schema, name);
+		if (procName.indexOf('(') > -1)
+		{
+			expr = expr + procName.substring(procName.indexOf('('));
+		}
+		return expr;
 	}
 
 	@Override

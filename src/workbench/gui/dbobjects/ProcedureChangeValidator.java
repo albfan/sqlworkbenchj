@@ -23,11 +23,14 @@
 package workbench.gui.dbobjects;
 
 import java.sql.DatabaseMetaData;
+
 import workbench.db.DbObjectChanger;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
+
 import workbench.gui.components.DataStoreTableModel;
+
 import workbench.storage.InputValidator;
 
 /**
@@ -79,6 +82,10 @@ public class ProcedureChangeValidator
 		else if (col == ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG)
 		{
 			return changer.getChangeCatalogSql(type) != null;
+		}
+		else if (col == ProcedureReader.COLUMN_IDX_PROC_LIST_NAME)
+		{
+			return changer.getRenameObjectSql(type) != null;
 		}
 		return false;
 	}

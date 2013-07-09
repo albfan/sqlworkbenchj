@@ -24,12 +24,13 @@ package workbench.db;
 
 
 import java.sql.SQLException;
-
 import java.util.List;
 import java.util.Map;
 
-import workbench.db.sqltemplates.ColumnChanger;
 import workbench.log.LogMgr;
+
+import workbench.db.sqltemplates.ColumnChanger;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -133,7 +134,8 @@ public class DbObjectChanger
 		sql = sql.replace(PARAM_OLD_SCHEMA_NAME, oldSchema.trim());
 		sql = sql.replace(PARAM_NEW_SCHEMA_NAME, newSchema.trim());
 		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName());
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName(dbConnection));
+		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldTable.getObjectName(dbConnection));
 
 		return sql;
 	}
@@ -159,21 +161,21 @@ public class DbObjectChanger
 		return sql;
 	}
 
-	public String getRename(DbObject oldTable, DbObject newTable)
+	public String getRename(DbObject oldObject, DbObject newObject)
 	{
-		if (newTable == null || oldTable == null) return null;
+		if (newObject == null || oldObject == null) return null;
 
-		String type = oldTable.getObjectType();
+		String type = oldObject.getObjectType();
 		String sql = getRenameObjectSql(type);
 		if (sql == null) return null;
 
-		String oldName = oldTable.getObjectName();
-		String newName = newTable.getObjectName();
+		String oldName = oldObject.getObjectExpression(dbConnection);
+		String newName = newObject.getObjectName(dbConnection);
 
 		if (StringUtil.equalStringOrEmpty(oldName.trim(), newName.trim(), true)) return null; // no change
 		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldName.trim());
 		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newName.trim());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldObject));
 		return sql;
 	}
 

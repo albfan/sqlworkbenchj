@@ -52,6 +52,7 @@ import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -69,7 +70,7 @@ import workbench.db.oracle.OraclePackageParser;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.AlterObjectAction;
+import workbench.gui.actions.AlterProcedureAction;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -88,7 +89,6 @@ import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
 
@@ -138,7 +138,7 @@ public class ProcedureListPanel
 
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 	private ProcedureChangeValidator validator = new ProcedureChangeValidator();
-	private AlterObjectAction renameAction;
+	private AlterProcedureAction renameAction;
 
 	public ProcedureListPanel(MainWindow window)
 	{
@@ -227,6 +227,11 @@ public class ProcedureListPanel
 
 		this.listPanel.add(new WbScrollPane(this.procList), BorderLayout.CENTER);
 
+		renameAction = new AlterProcedureAction(procList);
+		renameAction.setReloader(this);
+		renameAction.setEnabled(false);
+		renameAction.addPropertyChangeListener(this);
+
 		this.statusPanel = new JPanel(new BorderLayout());
 		this.alterButton = new FlatButton(this.renameAction);
 		this.alterButton.setResourceKey("MnuTxtRunAlter");
@@ -255,9 +260,8 @@ public class ProcedureListPanel
 		source.setDatabaseConnection(dbConnection);
 		compileAction.setConnection(dbConnection);
 
-		renameAction = new AlterObjectAction(procList);
-		renameAction.setReloader(this);
-		renameAction.addPropertyChangeListener(this);
+		this.validator.setConnection(dbConnection);
+		this.renameAction.setConnection(dbConnection);
 
 		initialized = true;
 		restoreSettings();
@@ -354,7 +358,8 @@ public class ProcedureListPanel
 		{
 			cache = new SourceCache(dbConnection.getDbId());
 		}
-		this.validator.setConnection(dbConnection);
+		if (validator != null) this.validator.setConnection(dbConnection);
+		if (renameAction != null) this.renameAction.setConnection(dbConnection);
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -598,25 +603,54 @@ public class ProcedureListPanel
 		}
 		else
 		{
-			String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-			String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
-			String specificName = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME);
-
-			int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-
-			if (this.dbConnection.getMetadata().isOracle() && catalog != null)
-			{
-				def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
-			}
-			else
-			{
-				def = new ProcedureDefinition(catalog, schema, proc, type);
-				def.setComment(comment);
-			}
-			def.setSpecificName(specificName);
+			def = buildDefinitionFromDataStore(dbConnection, procList.getDataStore(), row, true);
 		}
+		return def;
+	}
+
+	public static ProcedureDefinition buildDefinitionFromDataStore(WbConnection conn, DataStore data, int row, boolean currentValue)
+	{
+		String proc = null;
+		String schema = null;
+		String catalog = null;
+		String comment = null;
+		String specificName = null;
+		int type = DatabaseMetaData.procedureResultUnknown;
+		boolean useSpecificName = data.getColumnIndex("SPECIFIC_NAME") > 1;
+
+		if (currentValue)
+		{
+			proc = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			schema = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			catalog = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			comment = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+			specificName = useSpecificName ? data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME) : null;
+			type = data.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+		}
+		else
+		{
+			proc = (String)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			schema = (String)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			catalog = (String)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			comment = (String)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+			specificName = useSpecificName ?  (String)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME) : null;
+			Integer iType = (Integer)data.getOriginalValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE);
+			if (iType != null)
+			{
+				type = iType.intValue();
+			}
+		}
+		ProcedureDefinition def = null;
+		if (conn.getMetadata().isOracle() && catalog != null)
+		{
+			def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
+		}
+		else
+		{
+			def = new ProcedureDefinition(catalog, schema, proc, type);
+			def.setComment(comment);
+		}
+		def.setSpecificName(specificName);
 		return def;
 	}
 
