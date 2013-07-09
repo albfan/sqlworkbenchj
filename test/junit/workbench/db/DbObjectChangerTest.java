@@ -26,12 +26,17 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
 import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

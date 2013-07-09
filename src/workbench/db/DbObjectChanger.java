@@ -41,6 +41,8 @@ import workbench.util.StringUtil;
 public class DbObjectChanger
 {
 	public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
+	public static final String PARAM_OLD_FQ_OBJECT_NAME = "%fq_object_name%";
+	public static final String PARAM_NEW_FQ_OBJECT_NAME = "%new_fq_object_name%";
 	public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
 
 	public static final String PARAM_OLD_SCHEMA_NAME = "%schema_name%";
@@ -169,13 +171,20 @@ public class DbObjectChanger
 		String sql = getRenameObjectSql(type);
 		if (sql == null) return null;
 
-		String oldName = oldObject.getObjectExpression(dbConnection);
+		// don't check the fully qualified name. Any schema or catalog change will be handled separately
+		String oldName = oldObject.getObjectName(dbConnection);
 		String newName = newObject.getObjectName(dbConnection);
 
 		if (StringUtil.equalStringOrEmpty(oldName.trim(), newName.trim(), true)) return null; // no change
-		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldName.trim());
-		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newName.trim());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldObject));
+		String fqOld = SqlUtil.fullyQualifiedName(dbConnection, oldObject);
+		String fqNew = SqlUtil.fullyQualifiedName(dbConnection, newObject);
+
+		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldObject.getObjectExpression(dbConnection));
+		sql = sql.replace(PARAM_OLD_FQ_OBJECT_NAME, fqOld);
+		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newObject.getObjectExpression(dbConnection));
+		sql = sql.replace(PARAM_NEW_FQ_OBJECT_NAME, fqNew);
+		
+		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqOld);
 		return sql;
 	}
 
