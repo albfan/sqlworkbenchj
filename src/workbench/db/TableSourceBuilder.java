@@ -323,7 +323,7 @@ public class TableSourceBuilder
 		}
 		syncPkIndexType(pk, indexList);
 
-		boolean inlinePK = getCreateInlinePKConstraints();
+		boolean inlinePK = table.getUseInlinePK() || getCreateInlinePKConstraints();
 		if (includePK && inlinePK && pk != null)
 		{
 			result.append("\n   ,");

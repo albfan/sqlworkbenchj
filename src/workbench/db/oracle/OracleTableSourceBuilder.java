@@ -73,10 +73,21 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select /* SQLWorkbench */ tablespace_name, degree, row_movement, temporary, duration, pct_free, pct_used, pct_increase, logging \n" +
-			"from all_tables  \n" +
-			"where owner = ? \n" +
-			"and table_name = ? ";
+			"select /* SQLWorkbench */ atb.tablespace_name, \n" +
+			"       atb.degree, \n" +
+			"       atb.row_movement, \n" +
+			"       atb.temporary, \n" +
+			"       atb.duration, \n" +
+			"       atb.pct_free, \n" +
+			"       atb.pct_used, \n" +
+			"       atb.pct_increase, \n" +
+			"       atb.logging, \n" +
+			"       atb.iot_type, \n" +
+			"       iot.tablespace_name as iot_overflow \n" +
+			"from all_tables atb \n" +
+			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
+			"where atb.owner = ? \n" +
+			"and atb.table_name = ? ";
 
 		StringBuilder options =new StringBuilder(100);
 
@@ -96,14 +107,31 @@ public class OracleTableSourceBuilder
 			{
 				String tablespace = rs.getString("tablespace_name");
 				tbl.setTablespace(tablespace);
+
+				String iot = rs.getString("IOT_TYPE");
+				if (StringUtil.isNonBlank(iot))
+				{
+					tbl.getSourceOptions().addConfigSetting("organization", "index");
+					options.append("ORGANIZATION INDEX");
+					String overflow = rs.getString("IOT_OVERFLOW");
+					if (StringUtil.isNonBlank(overflow))
+					{
+						options.append("\nOVERFLOW TABLESPACE ");
+						options.append(overflow);
+						tbl.getSourceOptions().addConfigSetting("overflow_tablespace", "overflow");
+					}
+					tbl.setUseInlinePK(true); // you cannot define a IOT without a PK therefor the PK has to be inline!
+				}
+
 				String degree = rs.getString("degree");
 				if (degree != null) degree = degree.trim();
 				if (!StringUtil.equalString("1", degree))
 				{
+					if (options.length() > 0) options.append('\n');
 					if ("DEFAULT".equals(degree))
 					{
 						options.append("PARALLEL");
-						tbl.getSourceOptions().addConfigSetting("parallel", "default");
+						tbl.getSourceOptions().addConfigSetting("parallel", "default");  // make this show in the XML schema report
 					}
 					else
 					{
@@ -390,7 +418,7 @@ public class OracleTableSourceBuilder
 	public CharSequence getPkSource(TableIdentifier table, PkDefinition def, boolean forInlineUse)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		String sql = super.getPkSource(table, def, false).toString();
+		String sql = super.getPkSource(table, def, forInlineUse).toString();
 		if (StringUtil.isEmptyString(sql)) return sql;
 
 		PkDefinition pk = def == null ? table.getPrimaryKey() : def;

@@ -56,6 +56,7 @@ public class TableIdentifier
 	private String tableComment;
 	private boolean commentWasInitialized;
 	private boolean retrieveFkSource;
+	private boolean useInlinePK;
 
 	private TableSourceOptions sourceOptions = new TableSourceOptions();
 
@@ -181,6 +182,16 @@ public class TableIdentifier
 	public TableSourceOptions getSourceOptions()
 	{
 		return this.sourceOptions;
+	}
+
+	public boolean getUseInlinePK()
+	{
+		return useInlinePK;
+	}
+
+	public void setUseInlinePK(boolean flag)
+	{
+		this.useInlinePK = flag;
 	}
 
 	@Override

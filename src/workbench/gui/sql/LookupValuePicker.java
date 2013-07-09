@@ -59,6 +59,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.text.JTextComponent;
 
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Restoreable;
@@ -739,7 +740,6 @@ public class LookupValuePicker
 
 		ResultSetter result = new ResultSetter()
 		{
-
 			@Override
 			public Object getCurrentValue()
 			{
@@ -747,9 +747,25 @@ public class LookupValuePicker
 			}
 
 			@Override
-			public void setResult(Object value)
+			public void setResult(final Object value)
 			{
-				table.setValueAt(value, row, col);
+				JComponent editor = (JComponent)table.getEditorComponent();
+				if (editor instanceof JTextComponent)
+				{
+					((JTextComponent)editor).setText(value == null ? "" : value.toString());
+				}
+				else
+				{
+					WbSwingUtilities.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							table.stopEditing();
+							table.setValueAt(value, row, col);
+						}
+					});
+				}
 			}
 		};
 		pickValue(table, result, conn, column, baseTable);

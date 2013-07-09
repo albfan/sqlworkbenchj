@@ -266,6 +266,7 @@ public class PostgresProcedureReader
 				}
 				def.setDisplayName(pname.getFormattedName());
 				def.setDbmsProcType(type);
+				def.setComment(remark);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
@@ -319,8 +320,9 @@ public class PostgresProcedureReader
 
 		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
 
-		String sql = "SELECT p.prosrc, \n" +
-								"       l.lanname as lang_name, \n";
+		String sql =
+			"SELECT p.prosrc, \n" +
+			"       l.lanname as lang_name, \n";
 
 		if (JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
@@ -339,14 +341,15 @@ public class PostgresProcedureReader
 						"       p.proretset, \n" +
 						"       p.provolatile, \n" +
 						"       p.proisstrict, \n" +
-						"       p.proisagg ";
+						"       p.proisagg, \n" +
+			      "       obj_description(p.oid, 'pg_proc') as remarks ";
 
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
 		if (hasCost)
 		{
 			sql += ",\n       p.procost ,\n       p.prorows ";
 		}
-		
+
 		sql +=
 			"\nFROM pg_proc p \n" +
 			"   JOIN pg_language l ON p.prolang = l.oid \n" +
@@ -380,6 +383,7 @@ public class PostgresProcedureReader
 		Statement stmt = null;
 
 		boolean isAggregate = false;
+		String comment = null;
 
 		try
 		{
@@ -390,10 +394,10 @@ public class PostgresProcedureReader
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 
-			if (rs.next())
-			{
-				isAggregate = rs.getBoolean("proisagg");
-			}
+			rs.next();
+
+			comment = rs.getString("remarks");
+			isAggregate = rs.getBoolean("proisagg");
 
 			if (!isAggregate)
 			{
@@ -508,7 +512,7 @@ public class PostgresProcedureReader
 				source.append('\n');
 				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 				source.append('\n');
-				if (StringUtil.isNonBlank(def.getComment()))
+				if (StringUtil.isNonBlank(comment))
 				{
 					source.append("\nCOMMENT ON FUNCTION ");
 					source.append(name.getFormattedName());
@@ -535,7 +539,7 @@ public class PostgresProcedureReader
 		if (isAggregate)
 		{
 			source.append(getAggregateSource(name, def.getSchema()));
-			if (StringUtil.isNonBlank(def.getComment()))
+			if (StringUtil.isNonBlank(comment))
 			{
 				source.append("\n\nCOMMENT ON AGGREGATE IS '");
 				source.append(SqlUtil.escapeQuotes(def.getComment()));

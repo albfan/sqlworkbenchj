@@ -28,6 +28,7 @@ import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -41,6 +42,7 @@ public class ReportProcedure
 	public static final String TAG_PROC_SCHEMA = "proc-schema";
 	public static final String TAG_PROC_TYPE = "proc-type";
 	public static final String TAG_PROC_SOURCE = "proc-source";
+	public static final String TAG_PROC_COMMENT = "proc-comment";
 
 	private ProcedureDefinition procDef;
 	private WbConnection dbConn;
@@ -114,6 +116,11 @@ public class ReportProcedure
 		}
 		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, procDef.getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
+
+		if (StringUtil.isNonBlank(procDef.getComment()))
+		{
+			tagWriter.appendTag(result, indent2, TAG_PROC_COMMENT, procDef.getComment());
+		}
 
 		tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getObjectType(), "jdbcResultType", Integer.toString(procDef.getResultType()));
 

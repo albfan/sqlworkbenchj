@@ -31,6 +31,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,7 @@ import workbench.db.oracle.OraclePackageParser;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -74,6 +77,7 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -84,6 +88,7 @@ import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
 
@@ -102,7 +107,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, DbObjectList, ActionListener
+	implements ListSelectionListener, Reloadable, DbObjectList, ActionListener, PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -111,6 +116,9 @@ public class ProcedureListPanel
 	private WbTable procColumns;
 	protected DbObjectSourcePanel source;
 	private JTabbedPane displayTab;
+	private JPanel statusPanel;
+	private FlatButton alterButton;
+
 	private WbSplitPane splitPane;
 	private String currentSchema;
 	private String currentCatalog;
@@ -127,7 +135,10 @@ public class ProcedureListPanel
 
   private EditorTabSelectMenu generateWbCall;
 	private SourceCache cache;
+
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
+	private ProcedureChangeValidator validator = new ProcedureChangeValidator();
+	private AlterObjectAction renameAction;
 
 	public ProcedureListPanel(MainWindow window)
 	{
@@ -195,7 +206,7 @@ public class ProcedureListPanel
 				return super.getCellRenderer(row, column);
 			}
 		};
-		procList.setReadOnly(true);
+		procList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("procedurelist"));
@@ -216,8 +227,14 @@ public class ProcedureListPanel
 
 		this.listPanel.add(new WbScrollPane(this.procList), BorderLayout.CENTER);
 
+		this.statusPanel = new JPanel(new BorderLayout());
+		this.alterButton = new FlatButton(this.renameAction);
+		this.alterButton.setResourceKey("MnuTxtRunAlter");
+
 		this.infoLabel = new SummaryLabel("");
-		this.listPanel.add(infoLabel, BorderLayout.SOUTH);
+		this.statusPanel.add(infoLabel, BorderLayout.CENTER);
+
+		this.listPanel.add(statusPanel, BorderLayout.SOUTH);
 
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
@@ -238,6 +255,10 @@ public class ProcedureListPanel
 		source.setDatabaseConnection(dbConnection);
 		compileAction.setConnection(dbConnection);
 
+		renameAction = new AlterObjectAction(procList);
+		renameAction.setReloader(this);
+		renameAction.addPropertyChangeListener(this);
+
 		initialized = true;
 		restoreSettings();
 		if (workspaceSettings != null)
@@ -245,6 +266,35 @@ public class ProcedureListPanel
 			readSettings(workspaceSettings, workspaceSettings.getFilterPrefix());
 			workspaceSettings = null;
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getSource() == renameAction)
+		{
+			checkAlterButton();
+		}
+	}
+
+	protected void checkAlterButton()
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
+				{
+					statusPanel.add(alterButton, BorderLayout.EAST);
+					statusPanel.validate();
+				}
+				else
+				{
+					statusPanel.remove(alterButton);
+				}
+			}
+		});
 	}
 
 	private void extendPopupMenu()
@@ -304,6 +354,7 @@ public class ProcedureListPanel
 		{
 			cache = new SourceCache(dbConnection.getDbId());
 		}
+		this.validator.setConnection(dbConnection);
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -360,6 +411,8 @@ public class ProcedureListPanel
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
+
+			model.setValidator(validator);
 
 			WbSwingUtilities.invoke(new Runnable()
 			{

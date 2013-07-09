@@ -57,7 +57,7 @@ public class OracleIndexPartition
 	protected String getRetrieveColumnsSql()
 	{
 		return
-			"select column_name, \n" +
+			"select /* SQLWorkbench */ column_name, \n" +
 			"       column_position \n" +
 			"from all_part_key_columns \n" +
 			"where object_type = 'INDEX' \n" +
@@ -70,7 +70,7 @@ public class OracleIndexPartition
 	protected String getRetrievePartitionDefinitionSql()
 	{
 		return
-			"select owner,  \n" +
+			"select /* SQLWorkbench */ owner,  \n" +
 			"       table_name, \n" +
 			"       partitioning_type,  \n" +
 			"       partition_count, \n" +
@@ -78,7 +78,8 @@ public class OracleIndexPartition
 			"       partitioning_key_count, \n" +
 			"       subpartitioning_type, \n" +
 			"       subpartitioning_key_count, \n" +
-			"       def_subpartition_count \n" +
+			"       def_subpartition_count, \n" +
+			"       def_tablespace_name \n" +
 			"from all_part_indexes \n" +
 			"where owner = ? \n" +
 			"  and index_name = ? ";
@@ -90,7 +91,7 @@ public class OracleIndexPartition
 		if (useCompression)
 		{
 			return
-					"SELECT partition_name,  \n" +
+					"SELECT /* SQLWorkbench */ partition_name,  \n" +
 					"       high_value,  \n" +
 					"       partition_position, \n" +
 					"       subpartition_count, \n" +
@@ -101,7 +102,7 @@ public class OracleIndexPartition
 					"ORDER BY partition_position";
 		}
 		return
-			"SELECT partition_name,  \n" +
+			"SELECT /* SQLWorkbench */ partition_name,  \n" +
 			"       high_value,  \n" +
 			"       partition_position, \n" +
 		  "       subpartition_count \n" +
@@ -115,7 +116,7 @@ public class OracleIndexPartition
 	protected String getRetrieveSubColumnsSql()
 	{
 		return
-		"select name, \n" +
+		"select /* SQLWorkbench */ name, \n" +
 		"       object_type, \n" +
 		"       column_name, \n" +
 		"       column_position \n" +
@@ -132,7 +133,7 @@ public class OracleIndexPartition
 		if (useCompression)
 		{
 		return
-			"select partition_name,  \n" +
+			"select /* SQLWorkbench */ partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
 			"       subpartition_position, \n" +
@@ -143,7 +144,7 @@ public class OracleIndexPartition
 			"order by subpartition_position";
 		}
 		return
-			"select partition_name,  \n" +
+			"select /* SQLWorkbench */ partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
 			"       subpartition_position \n" +

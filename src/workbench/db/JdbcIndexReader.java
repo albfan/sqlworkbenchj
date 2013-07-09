@@ -342,6 +342,7 @@ public class JdbcIndexReader
 		{
 			sql += ";";
 		}
+		sql += "\n";
 		return sql;
 	}
 
@@ -800,7 +801,7 @@ public class JdbcIndexReader
 	 * Checks if the current DBMS supports returning a list of indexes.
 	 *
 	 * This method checks if a SQL was configured using {@link MetaDataSqlManager#getListIndexesSql()}
-	 * 
+	 *
 	 * @return true if such a list can be retrieved.
 	 */
 	@Override

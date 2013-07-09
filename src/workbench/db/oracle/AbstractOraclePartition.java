@@ -54,6 +54,10 @@ public abstract class AbstractOraclePartition
 	protected boolean isIndex;
 	protected String locality; // only used for indexes
 	protected String intervalDefinition;
+	protected String tableSpace;
+	protected String objectOwner;
+	protected String defaultUserTablespace;
+	protected String currentUser;
 
 	public AbstractOraclePartition(WbConnection conn)
 		throws SQLException
@@ -64,14 +68,19 @@ public abstract class AbstractOraclePartition
 	protected AbstractOraclePartition(WbConnection conn, boolean retrieveCompression)
 		throws SQLException
 	{
-		boolean is11r1 = JdbcUtils.hasMinimumServerVersion(conn, "11.1");;
+		boolean is11r1 = JdbcUtils.hasMinimumServerVersion(conn, "11.1");
 		useCompression = retrieveCompression && is11r1;
 		supportsIntervals = is11r1;
+		currentUser = conn.getMetadata().getCurrentSchema();
 	}
 
 	public void retrieve(DbObject object, WbConnection conn)
 		throws SQLException
 	{
+		if (OracleUtils.checkDefaultTablespace())
+		{
+			defaultUserTablespace = OracleUtils.getDefaultTablespace(conn);
+		}
 		boolean hasPartitions = object != null ? retrieveDefinition(object, conn) : false;
 		if (hasPartitions)
 		{
@@ -190,6 +199,11 @@ public abstract class AbstractOraclePartition
 		result.append("\n");
 		result.append(indent);
 		result.append(')');
+		if (OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
+		{
+			result.append("\nTABLESPACE ");
+			result.append(tableSpace);
+		}
 		return result.toString();
 	}
 
@@ -212,6 +226,7 @@ public abstract class AbstractOraclePartition
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int subKeyCount = 0;
+
 		String retrievePartitionDefinitionSql = getRetrievePartitionDefinitionSql();
 
 		try
@@ -242,6 +257,8 @@ public abstract class AbstractOraclePartition
 				columns = new ArrayList<String>(colCount);
 				int partCount = rs.getInt("PARTITION_COUNT");
 				partitions = new ArrayList<OraclePartitionDefinition>(partCount);
+				tableSpace = rs.getString("DEF_TABLESPACE_NAME");
+				objectOwner = dbObject.getSchema();
 			}
 		}
 		finally
