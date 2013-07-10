@@ -213,7 +213,7 @@ public class SourceTableArgument
 					else
 					{
 						missingTables.add(t);
-						LogMgr.logDebug("SourceTableArgument.parseArgument()", "Table " + t + " not found!");
+						LogMgr.logDebug("SourceTableArgument.retrieveObjects()", "Table " + t + " not found!");
 					}
 				}
 			}
