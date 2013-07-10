@@ -88,7 +88,7 @@ public class OracleTableDefinitionReader
 		// The incorrectly reported search string escape bug was fixed with 11.2
 		// The 11.1 and earlier drivers do not report the correct escape character and thus
 		// escaping in DbMetadata doesn't return anything if the username (schema) contains an underscore
-		if (!JdbcUtils.hasMiniumDriverVersion(conn.getSqlConnection(), "11.1")
+		if (!JdbcUtils.hasMiniumDriverVersion(conn.getSqlConnection(), "11.2")
 			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true)
 			&& Settings.getInstance().getProperty("workbench.db.oracle.searchstringescape", null) == null)
 		{
