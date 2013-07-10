@@ -70,6 +70,7 @@ import workbench.util.ArgumentValue;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
+import workbench.util.WbDateFormatter;
 
 /**
  * @author  Thomas Kellerer
@@ -441,7 +442,7 @@ public class CompletionPopup
 				{
 					if (value != null)
 					{
-						editor.setSelectedText(value.toString());
+						editor.setSelectedText(WbDateFormatter.getDisplayValue(value));
 					}
 				}
 			};

@@ -32,6 +32,7 @@ import java.awt.event.MouseListener;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.Set;
+
 import javax.swing.AbstractCellEditor;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -41,13 +42,16 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
+
+import workbench.interfaces.NullableEditor;
+import workbench.resource.GuiSettings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.renderer.TextAreaRenderer;
-import workbench.interfaces.NullableEditor;
-import workbench.resource.GuiSettings;
+
 import workbench.util.WbDateFormatter;
 
 /**
@@ -55,7 +59,6 @@ import workbench.util.WbDateFormatter;
  *
  * @author Thomas Kellerer
  */
-@SuppressWarnings({"deprecation"})
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener

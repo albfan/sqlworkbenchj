@@ -95,6 +95,7 @@ import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
+import workbench.util.WbDateFormatter;
 import workbench.util.WbThread;
 
 /**
@@ -752,7 +753,7 @@ public class LookupValuePicker
 				JComponent editor = (JComponent)table.getEditorComponent();
 				if (editor instanceof JTextComponent)
 				{
-					((JTextComponent)editor).setText(value == null ? "" : value.toString());
+					((JTextComponent)editor).setText(value == null ? "" : WbDateFormatter.getDisplayValue(value));
 				}
 				else
 				{
