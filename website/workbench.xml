@@ -142,6 +142,7 @@ WHERE id=42;</p>
       <li><image-link title="SQL Formatter" name="SqlFormat.png">SQL Formatter</image-link></li>
       <li><image-link title="Select related child rows" name="child_rows.png">Select related child rows</image-link></li>
       <li><image-link title="Select parent rows" name="parent_rows.png">Select related parent rows</image-link></li>
+      <li><image-link title="Select foreign key values from referenced table" name="fk_lookup.png">Select foreign key values from referenced table</image-link></li>
       <li><image-link title="Search object source" name="objectsearcher.png">Search in the source of all objects</image-link></li>
       <li><image-link title="Using WbGrepSource" name="wbgrepsource.png">Search in the source code using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-source">WbGrepSource</a></b></li>
       <li><image-link title="Search table data" name="SearchTables.png">Search data in all tables in the DbExplorer</image-link></li>
