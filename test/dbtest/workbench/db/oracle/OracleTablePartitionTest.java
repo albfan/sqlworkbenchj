@@ -51,6 +51,8 @@ public class OracleTablePartitionTest
 	public static void setUpClass()
 		throws Exception
 	{
+		System.setProperty("workbench.db.oracle.retrieve_tablespace", "false");
+
 		// More examples: http://psoug.org/reference/partitions.html
 		String sql =
 			"CREATE TABLE wb_list_partition_test \n" +
@@ -153,6 +155,7 @@ public class OracleTablePartitionTest
 	public static void tearDownClass()
 		throws Exception
 	{
+		System.clearProperty("workbench.db.oracle.retrieve_tablespace");
 		OracleTestUtil.cleanUpTestCase();
 	}
 
