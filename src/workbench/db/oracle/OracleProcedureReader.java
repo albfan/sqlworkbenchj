@@ -220,7 +220,7 @@ public class OracleProcedureReader
 	{
 		if (useCustomSql())
 		{
-			String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
+			String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "PACKAGE", meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
 			int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 			int[] sizes = new int[] {30,12,10,10,20,20};
 			DataStore ds = new DataStore(cols, types, sizes);
