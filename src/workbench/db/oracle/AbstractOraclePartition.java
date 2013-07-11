@@ -185,7 +185,7 @@ public abstract class AbstractOraclePartition
 		result.append('\n');
 		result.append(indent);
 		result.append("(\n");
-		int maxLength = forTable ? getMaxPartitionNameLength(): 0;
+		int maxLength = forTable ? OraclePartitionDefinition.getMaxPartitionNameLength(partitions): 0;
 		for (int i=0; i < partitions.size(); i++)
 		{
 			if (i > 0)
@@ -207,18 +207,6 @@ public abstract class AbstractOraclePartition
 		return result.toString();
 	}
 
-	private int getMaxPartitionNameLength()
-	{
-		int maxLength = 0;
-		for (OraclePartitionDefinition def : partitions)
-		{
-			if (def.getName().length() > maxLength)
-			{
-				maxLength = def.getName().length();
-			}
-		}
-		return maxLength;
-	}
 
 	private boolean retrieveDefinition(DbObject dbObject, WbConnection conn)
 		throws SQLException

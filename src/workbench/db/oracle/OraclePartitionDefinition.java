@@ -25,6 +25,8 @@ package workbench.db.oracle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -146,7 +148,7 @@ public class OraclePartitionDefinition
 			result.append("  PARTITION ");
 		}
 
-		result.append(StringUtil.padRight(name, nameLength));
+		result.append(StringUtil.padRight(SqlUtil.quoteObjectname(name), nameLength));
 		if (partitionValue != null && forTable)
 		{
 			if ("RANGE".equals(type))
@@ -177,14 +179,7 @@ public class OraclePartitionDefinition
 
 		if (subPartitions != null && !subPartitions.isEmpty())
 		{
-			int maxLength = 0;
-			for (OraclePartitionDefinition def : subPartitions)
-			{
-				if (def.getName().length() > maxLength)
-				{
-					maxLength = def.getName().length();
-				}
-			}
+			int maxLength = getMaxPartitionNameLength(subPartitions);
 			result.append("\n  ");
 			result.append(indent);
 			result.append("(\n");
@@ -206,4 +201,18 @@ public class OraclePartitionDefinition
 	}
 
 
+
+	static int getMaxPartitionNameLength(List<OraclePartitionDefinition> parts)
+	{
+		int maxLength = 0;
+		for (OraclePartitionDefinition def : parts)
+		{
+			String name = SqlUtil.quoteObjectname(def.getName());
+			if (name.length() > maxLength)
+			{
+				maxLength = name.length();
+			}
+		}
+		return maxLength;
+	}
 }
