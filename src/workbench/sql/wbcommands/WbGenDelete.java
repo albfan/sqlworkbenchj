@@ -113,7 +113,7 @@ public class WbGenDelete
 		List<ColumnData> values = new ArrayList<ColumnData>();
 		for (String def : cols)
 		{
-			String[] pair = def.split("=");
+			String[] pair = def.split(":");
 			if (pair.length == 2)
 			{
 				String column = pair[0];

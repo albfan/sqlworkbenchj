@@ -87,38 +87,6 @@ FROM person p
 		</para>
 	</section>
 
-	<section id="command-join-completion">
-		<title>JOIN completion</title>
-    <para>
-      When using ANSI JOIN syntax to create table joins with tables linked by foreign keys in the database,
-      the command <literal>JOIN completion</literal> can be used to automatically generate the necessary
-      join condition. Consider the following statement
-    </para>
-    <programlisting>
-SELECT ord.amount, ord.order_date, prod.name
-FROM orders ord
-  JOIN product prod ON</programlisting>
-    <para>
-      When the cursor is located behind the <literal>ON</literal> keyword and you select
-      <menuchoice><guimenu>SQL</guimenu><guimenuitem>JOIN completion</guimenuitem></menuchoice>, &wb-productname; will
-      retrieve the foreign key and corresponding primary key definitions between the tables <literal>orders</literal> and
-      <literal>product</literal>. If such constraints exist, the corresponding condition will be generated and
-      written into the editor. After executing <guimenuitem>JOIN completion</guimenuitem>, the SQL statement will look like this:
-    </para>
-    <programlisting>SELECT ord.amount, ord.order_date, prod.name
-FROM orders ord
-  JOIN product prod ON prod.id = ord.product_id</programlisting>
-    <para>
-      This feature requires on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
-    </para>
-    <para>
-      By default &wb-productname; tries to create a join condition on the table from the "previous" <literal>JOIN</literal> condition
-      (or the <literal>FROM</literal>) clause. If no foreign key constraint is found linking the "current" and the "previous" table,
-      a popup window with all tables in the select statement that could be used for completion is displayed. This popup merely
-      looks at the tables in the statement, no test for foreign key constraints is done when displaying this list.
-    </para>
-  </section>
-
 	<section id="insert-value-hinting">
 		<title>Show hints for INSERT statements</title>
     <para>

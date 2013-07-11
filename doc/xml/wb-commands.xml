@@ -1426,6 +1426,111 @@ WHERE id=42;</programlisting>
     </para>
   </section>
 
+  <section id="command-gendelete">
+    <title>Generate DELETE statements with dependencies - WbGenerateDelete</title>
+    <para>
+      The command <literal>WbGenerateDelete</literal> can be used to generate a SQL script for one or more rows
+      that should be deleted including all rows from referencing tables (if foreign key constraints are defined)
+    </para>
+    <para>
+      This is also available throug the menu item <menuchoice><guimenu>Data</guimenu><guimenuitem>Generate delete script</guimenuitem></menuchoice>
+      which will generate the delete for the selected row(s) in the current result.
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-table</entry>
+							<entry>
+								<para>
+                  Specifies the root table of the hierarchy from which to delete the rows.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-columnValue</entry>
+							<entry>
+								<para>
+                  Defines the expression for each PK column to select the rows to be deleted. The value for this parameter
+                  is the column name followed by a colon, followed by the value for this column or an expression.
+                </para>
+                <para>
+                  e.g.: <literal>-columnValue="person_id:42"</literal> will select rows where person_id has the value 42.
+                </para>
+                <para>
+                  You can also specify expressions instead: <literal>-columnValue="id:&lt;0"</literal> or <literal>-columnValue="id:in (1,2,3)"</literal>.
+                </para>
+                <para>
+                  For a multi-column primary key, specify the parameter multiple times:
+                  <literal>-columnValue="person_id:100" -columnValue="address_id:200"</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeCommit</entry>
+              <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+							<entry>
+								<para>
+                  If <literal>true</literal> a <literal>COMMIT</literal> statement will be appended
+                  to the generated script.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-outputFile</entry>
+							<entry>
+								<para>
+                  The file into which the generated statements should be written. If this is omitted, the
+                  statements are displayed in the message area.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-appendFile</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  If <literal>true</literal>, the statements are appended to an existing file. Otherwise any existing file
+                  will be overwritten.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-formatSql</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  If <literal>true</literal>, the generated SQL will be formatted using the SQL formatter.
+                  If <literal>false</literal> each statement will be written as a single line.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+
+    <section id="gendelete-examples">
+      <para>
+        To generate a script that delete a person and all rows referencing that person, use the following statement:
+<programlisting>WbGenerateDelete -table=person -columnValue="id:42";</programlisting>
+      </para>
+    </section>
+  </section>
+
   <section id="command-genscript">
     <title>Generate SQL script for database objects - WbGenerateScript</title>
     <para>

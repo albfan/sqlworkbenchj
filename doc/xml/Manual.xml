@@ -11,6 +11,7 @@
 	<!ENTITY profiles SYSTEM "profiles.xml">
 	<!ENTITY editor SYSTEM "editor.xml">
 	<!ENTITY using SYSTEM "using.xml">
+	<!ENTITY using-fk SYSTEM "foreign-keys.xml">
 	<!ENTITY scripting SYSTEM "scripting.xml">
 	<!ENTITY console-mode SYSTEM "console.xml">
 	<!ENTITY export-import SYSTEM "export-import.xml">
@@ -44,6 +45,7 @@
 &profiles;
 &editor;
 &using;
+&using-fk;
 &dbms-specific;
 &variables;
 &scripting;
