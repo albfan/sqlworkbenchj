@@ -66,8 +66,6 @@ public class WbGenerateScript
 	public static final String SHORT_VERB = "WBGENSCRIPT";
 
 	private ObjectScripter scripter;
-	private int currentObject;
-	private int totalObjects;
 
 	public WbGenerateScript()
 	{
@@ -157,8 +155,6 @@ public class WbGenerateScript
 
 		WbFile output = evaluateFileArgument(cmdLine.getValue("file"));
 
-		totalObjects = objects.size();
-		currentObject = 0;
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));
 		if (this.rowMonitor != null)
@@ -241,13 +237,11 @@ public class WbGenerateScript
 	@Override
 	public void done()
 	{
-		totalObjects = 0;
-		currentObject = 0;
 		scripter = null;
 	}
 
 	@Override
-	public void setCurrentObject(String anObject)
+	public void setCurrentObject(String anObject, int current, int count)
 	{
 		if (this.rowMonitor != null)
 		{
@@ -257,7 +251,7 @@ public class WbGenerateScript
 				{
 					rowMonitor.saveCurrentType("gen2");
 					rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-					rowMonitor.setCurrentObject(anObject, currentObject, totalObjects);
+					rowMonitor.setCurrentObject(anObject, current, count);
 				}
 				finally
 				{
@@ -266,11 +260,9 @@ public class WbGenerateScript
 			}
 			else
 			{
-				currentObject ++;
-				rowMonitor.setCurrentObject(anObject, currentObject, totalObjects);
+				rowMonitor.setCurrentObject(anObject, current, count);
 			}
 		}
 	}
-
 
 }

@@ -350,7 +350,7 @@ public class DropScriptGenerator
 			}
 			if (scriptMonitor != null)
 			{
-				scriptMonitor.setCurrentObject(table.getTableName());
+				scriptMonitor.setCurrentObject(table.getTableName(), currentTable, count);
 			}
 			createStatementsForTable(table);
 			currentTable ++;

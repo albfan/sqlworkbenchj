@@ -362,7 +362,7 @@ public class WbSchemaReport
 				}
 				else if (rowMonitor instanceof ScriptGenerationMonitor)
 				{
-					((ScriptGenerationMonitor)this.rowMonitor).setCurrentObject(anObject);
+					((ScriptGenerationMonitor)this.rowMonitor).setCurrentObject(anObject, (int)number, (int)total);
 				}
 
 			}

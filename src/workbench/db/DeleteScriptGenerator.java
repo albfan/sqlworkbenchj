@@ -423,7 +423,7 @@ public class DeleteScriptGenerator
 			{
 				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
 				this.setValues(pkvalues);
-				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + (i + 1));
+				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow"), i+1, numRows);
 				this.createStatements(true);
 			}
 		}

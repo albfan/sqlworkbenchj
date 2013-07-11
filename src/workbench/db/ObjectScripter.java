@@ -158,7 +158,7 @@ public class ObjectScripter
 	{
 		if (this.progressMonitor != null)
 		{
-			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"));
+			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"), -1, -1);
 		}
 		boolean first = true;
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
@@ -200,6 +200,9 @@ public class ObjectScripter
 
 	private void appendObjectType(String typeFilter)
 	{
+		int current = 1;
+		int count = objectList.size();
+
 		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
@@ -211,7 +214,7 @@ public class ObjectScripter
 
 			if (this.progressMonitor != null)
 			{
-				this.progressMonitor.setCurrentObject(dbo.getObjectName());
+				this.progressMonitor.setCurrentObject(dbo.getObjectName(), current++, count);
 			}
 
 			try

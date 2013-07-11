@@ -151,9 +151,16 @@ public class ObjectScripterUI
 	}
 
 	@Override
-	public void setCurrentObject(String aTableName)
+	public void setCurrentObject(String aTableName, int current, int total)
 	{
-		this.statusMessage.setText(aTableName);
+		if (current > 0 && total > 0)
+		{
+			this.statusMessage.setText(aTableName + " (" + current + "/" + total + ")");
+		}
+		else
+		{
+			this.statusMessage.setText(aTableName);
+		}
 		this.statusMessage.repaint();
 	}
 

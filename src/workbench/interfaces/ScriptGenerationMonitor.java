@@ -28,5 +28,5 @@ package workbench.interfaces;
  */
 public interface ScriptGenerationMonitor
 {
-	void setCurrentObject(String anObject);
+	void setCurrentObject(String anObject, int current, int total);
 }
