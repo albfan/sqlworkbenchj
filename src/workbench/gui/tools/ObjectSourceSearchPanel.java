@@ -154,6 +154,8 @@ public class ObjectSourceSearchPanel
 
 		final List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
 
+		window.setTitle(RunningJobIndicator.TITLE_PREFIX + ResourceMgr.getString("TxtWindowTitleObjectSearcher"));
+
 		searchThread = new WbThread("SourceSearch")
 		{
 			@Override
@@ -181,11 +183,12 @@ public class ObjectSourceSearchPanel
 	protected void searchEnded()
 	{
 		searchThread = null;
-		EventQueue.invokeLater(new Runnable()
+		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				window.setTitle(ResourceMgr.getString("TxtWindowTitleObjectSearcher"));
 				String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), results.getRowCount());
 				statusbar.setText(msg);
 				checkButtons();
