@@ -59,6 +59,8 @@ public class ObjectResultListDataStore
 	public final void setResultList(WbConnection con, List<DbObject> resultList, boolean showFullname)
 		throws SQLException
 	{
+		if (resultList == null) return;
+		
 		for (DbObject object : resultList)
 		{
 			int row = addRow();

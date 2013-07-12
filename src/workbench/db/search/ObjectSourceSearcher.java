@@ -35,6 +35,7 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.db.objectcache.SourceCache;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
@@ -60,13 +61,14 @@ public class ObjectSourceSearcher
 	private boolean cancelSearch;
 	private boolean isRunning;
 	private int numSearched;
-
+	private SourceCache cache;
 	public ObjectSourceSearcher(WbConnection con)
 	{
 		connection = con;
 		schemas = CollectionUtil.arrayList();
 		names = CollectionUtil.arrayList();
 		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view", DbMetadata.MVIEW_NAME);
+		cache = new SourceCache(connection.getDbId());
 	}
 
 	public int getNumberOfObjectsSearched()
@@ -239,7 +241,19 @@ public class ObjectSourceSearcher
 				{
 					((TableIdentifier)object).setRetrieveFkSource(true);
 				}
-				source = object.getSource(connection);
+
+				String key = getCacheKey(object);
+				source = cache.getSource(object.getObjectType(), key);
+
+				if (source == null)
+				{
+					source = object.getSource(connection);
+					if (cache.shouldCache(object.getObjectType()))
+					{
+						LogMgr.logDebug("ObjectSourceSearcher.searchList()", "Caching source for: " + object.getObjectType() + ": " + object.toString());
+						cache.addSource(object.getObjectType(), key, source);
+					}
+				}
 
 				if (StringUtil.isBlank(source))
 				{
@@ -334,6 +348,32 @@ public class ObjectSourceSearcher
 			}
 		}
 		return result;
+	}
+
+	private String getCacheKey(DbObject def)
+	{
+		if (def instanceof ProcedureDefinition)
+		{
+			ProcedureDefinition proc = (ProcedureDefinition)def;
+			if (proc.isOraclePackage())
+			{
+				return proc.getSchema() + "." + proc.getPackageName();
+			}
+		}
+		return def.getObjectNameForDrop(connection);
+	}
+
+	private void putSourceToCache(DbObject def, CharSequence source)
+	{
+		if (source == null) return;
+		if (cache.addSource(def.getObjectType(), getCacheKey(def), source))
+		{
+			if (def instanceof ProcedureDefinition)
+			{
+				// make sure procedure source code is not stored twice
+				((ProcedureDefinition)def).setSource(null);
+			}
+		}
 	}
 
 }
