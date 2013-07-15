@@ -362,7 +362,7 @@ public class DbMetadata
 		Collection<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, null);
 		if (ttypes.isEmpty())
 		{
-			ttypes = retrieveTableTypes();
+			ttypes.addAll(retrieveTableTypes());
 			Iterator<String> itr = ttypes.iterator();
 			while (itr.hasNext())
 			{
@@ -373,7 +373,6 @@ public class DbMetadata
 					itr.remove();
 				}
 			}
-			LogMgr.logDebug("DbMetadata.<init>", "Using table types returned by the JDBC driver: " + ttypes);
 		}
 		else
 		{
@@ -2428,7 +2427,7 @@ public class DbMetadata
 	{
 		if (tableTypesFromDriver != null) return tableTypesFromDriver;
 
-		tableTypesFromDriver = CollectionUtil.caseInsensitiveSet();
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		ResultSet rs = null;
 
 		try
@@ -2445,7 +2444,7 @@ public class DbMetadata
 				type = type.trim();
 
 				if (isIndexType(type)) continue;
-				tableTypesFromDriver.add(type);
+				types.add(type);
 			}
 		}
 		catch (Exception e)
@@ -2456,10 +2455,13 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
+		LogMgr.logDebug("DbMetadata.<init>", "Using table types returned by the JDBC driver: " + types);
 		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
 		{
-			tableTypesFromDriver.add("MATERIALIZED VIEW");
+			types.add("MATERIALIZED VIEW");
 		}
+		tableTypesFromDriver = Collections.unmodifiableSet(types);
+
 		return tableTypesFromDriver;
 	}
 
