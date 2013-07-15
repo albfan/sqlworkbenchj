@@ -39,7 +39,7 @@ public class TagAttribute
 		StringBuilder b = new StringBuilder(len);
 		b.append(name);
 		b.append("=\"");
-		b.append(value == null ? "" : HtmlUtil.escapeHTML(value));
+		b.append(value == null ? "" : HtmlUtil.escapeXML(value));
 		b.append('"');
 		tagText = b;
 	}
