@@ -1525,9 +1525,19 @@ WHERE id=42;</programlisting>
 
     <section id="gendelete-examples">
       <para>
-        To generate a script that delete a person and all rows referencing that person, use the following statement:
+        To generate a script that deletes the person with ID=42 and all rows referencing that person, use the following statement:
 <programlisting>WbGenerateDelete -table=person -columnValue="id:42";</programlisting>
       </para>
+      <para>
+        To generate a script that deletes any person with an ID greater than 10 and all rows referencing those rows, use the following statement:
+<programlisting>WbGenerateDelete -table=person -columnValue="id: > 10";</programlisting>
+      </para>
+      <para>
+        To generate a script that deletes rows from the <literal>film_category</literal> where the primary key consists of
+        the columns <literal>film_id</literal> and <literal>category_id</literal>:
+<programlisting>WbGenerateDelete -table=person -columnValue="film_id: in (1,2,5)" -columnValue="category_id: in (7,3,5);</programlisting>
+      </para>
+
     </section>
   </section>
 

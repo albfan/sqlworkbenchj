@@ -67,10 +67,11 @@ WHERE base_id = 1;</programlisting>
       the command <literal>JOIN completion</literal> can be used to automatically generate the necessary
       join condition. Consider the following statement
     </para>
+    <para>
     <programlisting>
 SELECT ord.amount, ord.order_date, prod.name
 FROM orders ord
-  JOIN product prod ON</programlisting>
+  JOIN product prod ON |</programlisting>(the | denoting the location of the cursor).</para>
     <para>
       When the cursor is located behind the <literal>ON</literal> keyword and you select
       <menuchoice><guimenu>SQL</guimenu><guimenuitem>JOIN completion</guimenuitem></menuchoice>, &wb-productname; will
@@ -92,47 +93,76 @@ FROM orders ord
     </para>
   </section>
 
-  <section id="edit-fk-lookup">
-    <title>Editing foreign key values</title>
-    <indexterm><primary>Editing data</primary><secondary>select values for foreign key columns</secondary></indexterm>
+  <section id="select-fk-values">
+    <title>Selecting foreign key values in referencing tables</title>
     <para>
-      After starting to edit a cell, the context menu contains an item <guimenuitem>Select FK value</guimenuitem>. Once this
-      item is selected &wb-productname; will detect the table that the current column references. If a foreign
-      key is detected a dialog window will be shown containing the data from the rerenced table. For performance reasons
-      the check if the current column is referencing another table is only done <emphasis>after</emphasis> the item has been selected.
-      If no foreign key could be found, a message is displayed in the status bar.
+      &wb-productname; supports the selection of foreign key values (i.e. the primary key values of the referenced
+      table) in two different situations: while editing a result set and while writing a DML statement.
     </para>
-    <para>
-      By default the dialog will not load more than 150 rows from that table. The number of retrieved rows can be
-      configured through the "Max. Rows" input field.
-    </para>
-    <para>
-      There are two ways to find the desired target row which can be selected using the radio buttons
-      above the input field.
-      <itemizedlist>
-        <listitem>
-          <para id="filter-fk-lookup">Applying a filter</para>
-          <para>
-            This mode is intended for small lookup tables. All rows are loaded into memory and the
-            rows are filtered immediately when typing. The typed value is searched in all columns of the
-            result set. Clicking on the reload button will always re-retrieve all rows.
-          </para>
-        </listitem>
-        <listitem>
-          <para id="retrieve-fk-lookup">Retrieving data</para>
+
+    <section id="edit-fk-lookup">
+      <title>Editing foreign key values</title>
+      <indexterm><primary>Editing data</primary><secondary>select values for foreign key columns</secondary></indexterm>
+      <indexterm><primary>Foreign keys</primary><secondary>editing values of foreign key columns</secondary></indexterm>
       <para>
-        This mode is intended for large tables where not all rows can be loaded into memory. After
-        entering a search term and hitting the <keycap>ENTER</keycap> key (or clicking on the
-        reload button), a SQL statement to retrieve the rows containing the search statement will be executed.
-        The returned rows are then displayed.
+        After starting to edit a cell, the context menu contains an item <guimenuitem>Select FK value</guimenuitem>. Once this
+        item is selected &wb-productname; will detect the table that the current column references. If a foreign
+        key is detected a dialog window will be shown containing the data from the rerenced table. For performance reasons
+        the check if the current column is referencing another table is only done <emphasis>after</emphasis> the item has been selected.
+        If no foreign key could be found, a message is displayed in the status bar.
       </para>
-        </listitem>
-      </itemizedlist>
-    </para>
-    <para>
-      Once you have selected the desired row, clicking the <guibutton>OK</guibutton> will put the value
-      of the corresponding primary key column into the currently edited cell.
-    </para>
+      <para>
+        By default the dialog will not load more than 150 rows from that table. The number of retrieved rows can be
+        configured through the "Max. Rows" input field.
+      </para>
+      <para>
+        There are two ways to find the desired target row which can be selected using the radio buttons
+        above the input field.
+        <itemizedlist>
+          <listitem>
+            <para id="filter-fk-lookup">Applying a filter</para>
+            <para>
+              This mode is intended for small lookup tables. All rows are loaded into memory and the
+              rows are filtered immediately when typing. The typed value is searched in all columns of the
+              result set. Clicking on the reload button will always re-retrieve all rows.
+            </para>
+          </listitem>
+          <listitem>
+            <para id="retrieve-fk-lookup">Retrieving data</para>
+        <para>
+          This mode is intended for large tables where not all rows can be loaded into memory. After
+          entering a search term and hitting the <keycap>ENTER</keycap> key (or clicking on the
+          reload button), a SQL statement to retrieve the rows containing the search statement will be executed.
+          The returned rows are then displayed.
+        </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        Once you have selected the desired row, clicking the <guibutton>OK</guibutton> will put the value
+        of the corresponding primary key column into the currently edited cell.
+      </para>
+    </section>
+
+    <section id="fk-lookup-dml">
+      <title>Selecting FK values when editing DML statements</title>
+      <indexterm><primary>DML</primary><secondary>select values for foreign key columns</secondary></indexterm>
+      <indexterm><primary>Foreign keys</primary><secondary>Update foreign key columns</secondary></indexterm>
+      <para>
+        When invoking code-completion inside a DML (<literal>UPDATE, DELETE, INSERT, SELECT</literal>) statement, an additional
+        entry <literal>(Select FK value)</literal> is available in the popup if the cursor is located inside the value assignment
+        or condition, e.g. in the following example:
+        <programlisting>update film_category
+    set category_id = |
+  where film_id = 42;</programlisting>(the | denoting the location of the cursor).
+      </para>
+      <para>
+        When that menu item is selected, the statement is analyzed and if the column of the current expression is
+        a foreign key to a different table, the lookup dialog will appear and will let you select the approriate PK
+        value from the referenced table.
+      </para>
+    </section>
+
     <section id="fk-lookup-limits">
       <title>Limitations of the foreign key lookup</title>
       <para>
@@ -150,6 +180,7 @@ FROM orders ord
         </itemizedlist>
       </para>
     </section>
+
   </section>
 
 	<section id="edit-data-delete-referenced">
