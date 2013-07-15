@@ -2116,4 +2116,35 @@ public class SqlUtil
 		}
 		return null;
 	}
+
+
+	/**
+	 * Compare two object names for equality.
+	 *
+	 * If at least one of them is a quoted identified, comparison is done case-sensitive.
+	 *
+	 * If both are non-quoted, comparison is case insensitive.
+	 *
+	 * This does not take into account non-standard DBMS that support unquoted case-sensitive identifiers.
+	 *
+	 * @param one     the first object name
+	 * @param other   the second object name
+	 * @return true if both names are identical considering quoted identifiers
+	 *
+	 * @see #isQuotedIdentifier(java.lang.String) 
+	 */
+	public static boolean objectNamesAreEqual(String one, String other)
+	{
+		if (one == null && other == null) return true;
+		if (one == null || other == null) return false;
+
+		boolean firstQuoted = isQuotedIdentifier(one);
+		boolean secondQuoted = isQuotedIdentifier(other);
+
+		if (firstQuoted || secondQuoted)
+		{
+			return removeObjectQuotes(one).equals(removeObjectQuotes(other));
+		}
+		return removeObjectQuotes(one).equalsIgnoreCase(removeObjectQuotes(other));
+	}
 }

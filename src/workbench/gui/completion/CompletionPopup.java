@@ -560,7 +560,7 @@ public class CompletionPopup
 
 	private String getTableName(WbConnection conn, TableIdentifier tbl)
 	{
-		String schema = SqlUtil.removeObjectQuotes(this.context.getAnalyzer().getSchemaForTableList());
+		String schema = this.context.getAnalyzer().getSchemaForTableList();
 
 		if (schema == null) return tbl.getObjectExpression(conn);
 
@@ -582,7 +582,7 @@ public class CompletionPopup
 
 		if (connection.getDbSettings().supportsSchemas())
 		{
-			if (schema.equalsIgnoreCase(tbl.getSchema()))
+			if (SqlUtil.objectNamesAreEqual(schema, tbl.getSchema()))
 			{
 				tbl.setSchema(null);
 			}
@@ -590,7 +590,7 @@ public class CompletionPopup
 		else if (connection.getDbSettings().supportsCatalogs())
 		{
 			// treat catalogs as schemas
-			if (schema.equalsIgnoreCase(tbl.getCatalog()))
+			if (SqlUtil.objectNamesAreEqual(schema, tbl.getCatalog()))
 			{
 				tbl.setCatalog(null);
 			}
