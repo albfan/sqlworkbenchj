@@ -23,7 +23,8 @@
 			The output is intended to be transformed using XSLT (e.g. with the
       <link linkend="command-xslt">WbXSLT Command</link>).
 
-      Sample XSLT transformations can be found on the
+      Sample XSLT transformations are stored in the <literal>xslt</literal> subdirectory of the &wb-productname; installation
+      directory. All scripts that are part of the download can also be found on the
 			<ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
     </para>
 
@@ -323,6 +324,35 @@
 			</tbody>
       </tgroup>
     </informaltable>
+
+    <simplesect  id="schema-diff-examples">
+			<title>WbSchemaDiff Examples</title>
+			<para>
+				Compare all tables between two connections, and write the output to the
+				file <literal>migrate_prod.xml</literal> and convert the XML to a series
+        of SQL statements for PostgreSQL
+			</para>
+<programlisting>WbSchemaDiff -referenceProfile="Staging"
+             -targetProfile="Production"
+             -file=migrate_prod.xml
+             -styleSheet=wbdiff2pg.xslt
+             -xsltOutput=migrate_prod.sql</programlisting>
+
+			<para>
+				Compare a list of matching tables between two databases and write the output to the
+        file <literal>migrate_staging.xml</literal> ignoring all tables that start with <literal>TMP_</literal>
+        and exclude any index definition from the comparsion. Convert the output to a SQL script for Oracle
+			</para>
+
+<programlisting>WbSchemaDiff -referenceProfile="Development"
+             -targetProfile="Staging"
+             -file=migrate_stage.xml
+             -excludeTables=TMP_*
+             -includeIndex=false
+             -styleSheet=wbdiff2oracle.xslt
+             -xsltOutput=migrate_stage.sql</programlisting>
+    </simplesect>
+
   </section>
 
 	<section id="command-data-diff">
