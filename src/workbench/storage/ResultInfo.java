@@ -32,6 +32,7 @@ import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.IndexReader;
 import workbench.db.PkDefinition;
+import workbench.db.QuoteHandler;
 import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -540,19 +541,23 @@ public class ResultInfo
 
 	public int findColumn(String name)
 	{
+		return findColumn(name, QuoteHandler.STANDARD_HANDLER);
+	}
+	
+	public int findColumn(String name, QuoteHandler handler)
+	{
 		if (name == null) return -1;
 
-		String plain = StringUtil.trimQuotes(name);
+		String plain = handler.removeQuotes(name);
 
 		for (int i = 0; i < this.columns.length; i++)
 		{
-			String col = StringUtil.trimQuotes(columns[i].getColumnName());
+			String col = handler.removeQuotes(columns[i].getColumnName());
 			if (plain.equalsIgnoreCase(col))
 			{
 				return i;
 			}
 		}
-
 		return -1;
 	}
 

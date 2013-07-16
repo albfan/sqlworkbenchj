@@ -287,6 +287,7 @@ public class WbDataDiff
 		if (tableCount == 0)
 		{
 			LogMgr.logWarning("WbDataDiff.execute()", "No tables found.");
+			result.addMessageByKey("ErrNoTablesFound");
 			result.setWarning(true);
 			result.setSuccess();
 			close(targetCon);

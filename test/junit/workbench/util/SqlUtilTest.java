@@ -980,4 +980,17 @@ public class SqlUtilTest
 		assertTrue(prev.isOperator());
 		assertEquals("<", prev.getContents());
 	}
+
+	@Test
+	public void testCompareIdentifiers()
+	{
+		assertTrue(SqlUtil.objectNamesAreEqual("foo", "FOO"));
+		assertTrue(SqlUtil.objectNamesAreEqual("\"foo\"", "\"foo\""));
+		assertFalse(SqlUtil.objectNamesAreEqual("\"foo\"", "\"Foo\""));
+		assertFalse(SqlUtil.objectNamesAreEqual("\"foo\"", "\"Foo\""));
+		assertTrue(SqlUtil.objectNamesAreEqual("\"FOO\"", "\"FOO\""));
+		assertFalse(SqlUtil.objectNamesAreEqual("`Foo`", "`foo`"));
+		assertFalse(SqlUtil.objectNamesAreEqual("[FOO]", "[foo]"));
+	}
+
 }

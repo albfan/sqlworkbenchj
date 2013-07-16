@@ -182,7 +182,14 @@ public class CommonDiffParameters
 		}
 		else if (StringUtil.isEmptyString(targetTableNames) && StringUtil.isEmptyString(targetSchema))
 		{
-			targetSchema = targetCon.getCurrentSchema();
+			if (targetCon.getDbSettings().supportsSchemas())
+			{
+				targetSchema = targetCon.getCurrentSchema();
+			}
+			else
+			{
+				targetSchema = targetCon.getCurrentCatalog();
+			}
 		}
 		else if (StringUtil.isNonEmpty(targetSchema))
 		{

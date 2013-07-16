@@ -47,6 +47,7 @@ import workbench.db.DeleteScriptGenerator;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
+import workbench.db.QuoteHandler;
 import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -1202,7 +1203,7 @@ public class DataStore
 
 	private int findColumn(String name)
 	{
-		return this.resultInfo.findColumn(name);
+		return this.resultInfo.findColumn(name, this.originalConnection != null ? originalConnection.getMetadata() : QuoteHandler.STANDARD_HANDLER);
 	}
 
 	@Override
