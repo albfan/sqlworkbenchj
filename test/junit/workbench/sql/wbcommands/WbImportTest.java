@@ -109,6 +109,26 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testMultiSheetImport()
+		throws Exception
+	{
+		File input = util.copyResourceFile(this, "person_orders.ods");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' -type=ods -sheetNumber=* -header=true -continueonerror=false ");
+
+		assertTrue(input.delete());
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		int rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from person")).intValue();
+		assertEquals(2, rows);
+
+		rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from orders")).intValue();
+		assertEquals(4, rows);
+	}
+
+	@Test
 	public void testMissingColumns()
 		throws Exception
 	{
@@ -4478,6 +4498,9 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE a_child1_child (id integer primary key, child_id integer not null, info varchar(50))");
 		stmt.executeUpdate("alter table child1 add foreign key (base_id) references zzbase(id)");
 		stmt.executeUpdate("alter table a_child1_child add foreign key (child_id) references child1(id)");
+
+		stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50), hiredate date, salary numeric(10,2), last_login timestamp)");
+		stmt.executeUpdate("CREATE TABLE orders (customer_id integer not null, order_id integer not null, product_id integer not null, amount integer not null)");
 
 		wb.commit();
 		stmt.close();

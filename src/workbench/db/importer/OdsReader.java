@@ -106,6 +106,7 @@ public class OdsReader
 	{
 		worksheetIndex = index;
 		worksheetName = null;
+		headerColumns = null;
 		initCurrentWorksheet();
 	}
 
@@ -114,6 +115,7 @@ public class OdsReader
 	{
 		worksheetIndex = -1;
 		worksheetName = name;
+		headerColumns = null;
 		initCurrentWorksheet();
 	}
 

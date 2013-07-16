@@ -1474,7 +1474,25 @@
               <entry>
                 <para>
                   Selects the spreedsheet inside the file to be imported. If this is not specified the first
-                  sheet is used. The first sheet has the number 1.</para>
+                  sheet is used. The first sheet has the number 1.
+                </para>
+                <para>
+                  All sheets can be imported with a single command when using <literal>-sheetNumber=*</literal>. In that
+                  case it is assumed that each sheet has the same name as the target table.
+                </para>
+                <para>
+                  If all sheets are imported, the parameters <literal>-table</literal>, <literal>-fileColumns</literal>
+                  and <literal>-importColumns</literal> are ignored.
+                </para>
+              </entry>
+            </row>
+            <row>
+              <entry>-sheetName</entry>
+              <entry>
+                <para>
+                  Defines the name of the spreedsheet inside the file to be imported. If this is not specified the first
+                  sheet is used.
+                </para>
               </entry>
             </row>
           </tbody>

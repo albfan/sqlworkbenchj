@@ -582,6 +582,10 @@ public class WbImport
 		}
 		else if (type.startsWith("xls") || type.equals("ods"))
 		{
+			String snr = cmdLine.getValue(ARG_SHEET_NR, "");
+			String sname = cmdLine.getValue(ARG_SHEET_NAME);
+			boolean importAllSheets = ("*".equals(snr) || "%".equals(snr) || "*".equals(sname) || "%".equals(sname));
+
 			if (type.startsWith("xls") && !PoiHelper.isPoiAvailable())
 			{
 				result.addMessage(ResourceMgr.getString("ErrNoXLS"));
@@ -602,7 +606,7 @@ public class WbImport
 				return result;
 			}
 
-			if (table == null && dir == null)
+			if (table == null && dir == null && !importAllSheets)
 			{
 				String msg = ResourceMgr.getString("ErrTextImportRequiresTableName");
 				LogMgr.logError("WbImport.execute()", msg, null);
@@ -625,12 +629,21 @@ public class WbImport
 
 			if (inputFile != null)
 			{
-				int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
-				String name = cmdLine.getValue(ARG_SHEET_NAME);
+				if (importAllSheets)
+				{
+					spreadSheetParser.setSheetIndex(-1);
+					spreadSheetParser.setSheetName(null);
+					table = null;
+				}
+				else
+				{
+					int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
+					String name = cmdLine.getValue(ARG_SHEET_NAME);
+					// the index is zero-based, but the user supplies a one-based index
+					spreadSheetParser.setSheetIndex(index - 1);
+					spreadSheetParser.setSheetName(name);
+				}
 				spreadSheetParser.setInputFile(inputFile);
-				// the index is zero-based, but the user supplies a one-based index
-				spreadSheetParser.setSheetIndex(index - 1);
-				spreadSheetParser.setSheetName(name);
 			}
 
 			initParser(table, spreadSheetParser, result);

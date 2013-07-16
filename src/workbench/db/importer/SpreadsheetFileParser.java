@@ -68,7 +68,7 @@ public class SpreadsheetFileParser
 	private int currentRow;
 	private int sheetIndex;
 	private String sheetName;
-	private SpreadsheetReader content;
+	private SpreadsheetReader reader;
 	protected List<Object> dataRowValues;
 
 	public SpreadsheetFileParser()
@@ -126,10 +126,10 @@ public class SpreadsheetFileParser
 	public void setInputFile(File file)
 	{
 		super.setInputFile(file);
-		if (content != null)
+		if (reader != null)
 		{
-			content.done();
-			content = null;
+			reader.done();
+			reader = null;
 		}
 	}
 
@@ -263,7 +263,7 @@ public class SpreadsheetFileParser
 	{
 		if (currentRow < 0) return null;
 		StringBuilder result = new StringBuilder(100);
-		List<Object> values = content.getRowValues(currentRow);
+		List<Object> values = reader.getRowValues(currentRow);
 		boolean first = true;
 		SimpleDateFormat dtFormatter = new SimpleDateFormat(StringUtil.ISO_DATE_FORMAT);
 		SimpleDateFormat tsFormatter = new SimpleDateFormat(StringUtil.ISO_TIMESTAMP_FORMAT);
@@ -302,16 +302,17 @@ public class SpreadsheetFileParser
 	private void createReader()
 		throws IOException
 	{
-		if (content == null)
+		if (reader == null)
 		{
-			content = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, sheetName);
+			reader = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, sheetName);
 			if (sheetIndex < 0 && StringUtil.isNonBlank(sheetName))
 			{
-				content.setActiveWorksheet(sheetName);
+				reader.setActiveWorksheet(sheetName);
 			}
-			content.load();
+			reader.load();
 		}
 	}
+
 
 	@Override
 	protected void processOneFile()
@@ -321,16 +322,52 @@ public class SpreadsheetFileParser
 		{
 			this.baseDir = this.inputFile.getParentFile();
 		}
-		if (baseDir == null) this.baseDir = new File(".");
 
-		if (content != null)
+		if (baseDir == null)
 		{
-			content.done();
-			content = null;
+			this.baseDir = new File(".");
 		}
-		createReader();
-		content.setNullString(nullString);
 
+		if (reader != null)
+		{
+			reader.done();
+			reader = null;
+		}
+
+		createReader();
+
+		reader.setNullString(nullString);
+
+		try
+		{
+			if (sheetIndex != -1)
+			{
+				processOneSheet();
+			}
+			else
+			{
+				List<String> sheets = reader.getSheets();
+				for (int i=0; i < sheets.size(); i++)
+				{
+					sheetIndex = i;
+					sheetName = null;
+					importColumns = null;
+					tableName = sheets.get(i);
+					targetTable = null;
+					reader.setActiveWorksheet(i);
+					processOneSheet();
+				}
+			}
+		}
+		finally
+		{
+			done();
+		}
+	}
+
+	protected void processOneSheet()
+		throws Exception
+	{
 		if (this.withHeader && importColumns == null)
 		{
 			setupFileColumns(null); // null means: import all columns
@@ -369,173 +406,166 @@ public class SpreadsheetFileParser
 
 		converter.setIllegalDateIsNull(illegalDateIsNull);
 
-		long rowCount = content.getRowCount();
-		try
+		long rowCount = reader.getRowCount();
+		for (currentRow = startRow; currentRow < rowCount; currentRow++)
 		{
-			for (currentRow = startRow; currentRow < rowCount; currentRow++)
+			Arrays.fill(rowData, null);
+			if (cancelImport) break;
+
+			boolean processRow = receiver.shouldProcessNextRow();
+			if (!processRow) receiver.nextRowSkipped();
+
+			if (!processRow)
 			{
-				Arrays.fill(rowData, null);
-				if (cancelImport) break;
+				continue;
+			}
 
-				boolean processRow = receiver.shouldProcessNextRow();
-				if (!processRow) receiver.nextRowSkipped();
+			importRow ++;
+			dataRowValues = reader.getRowValues(currentRow);
 
-				if (!processRow)
+			// Silently ignore empty rows
+			if (dataRowValues.isEmpty()) continue;
+
+			if (dataRowValues.size() < rowData.length)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrImpIgnoreShortRow", currentRow, dataRowValues.size(), rowData.length);
+				messages.append(msg);
+				messages.appendNewLine();
+				continue;
+			}
+
+			int targetIndex = -1;
+
+			for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
+			{
+				ImportFileColumn fileCol = importColumns.get(sourceIndex);
+				if (fileCol == null) continue;
+
+				targetIndex = fileCol.getTargetIndex();
+				if (targetIndex == -1) continue;
+
+				if (sourceIndex >= dataRowValues.size())
 				{
+					// Log this warning only once
+					if (importRow == 1)
+					{
+						LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");
+					}
 					continue;
 				}
+				Object value = dataRowValues.get(sourceIndex);
+				String svalue = (value != null ? value.toString() : null);
 
-				importRow ++;
-				dataRowValues = content.getRowValues(currentRow);
-
-				// Silently ignore empty rows
-				if (dataRowValues.isEmpty()) continue;
-
-				if (dataRowValues.size() < rowData.length)
-				{
-					String msg = ResourceMgr.getFormattedString("ErrImpIgnoreShortRow", currentRow, dataRowValues.size(), rowData.length);
-					messages.append(msg);
-					messages.appendNewLine();
-					continue;
-				}
-
-				int targetIndex = -1;
-
-				for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
-				{
-					ImportFileColumn fileCol = importColumns.get(sourceIndex);
-					if (fileCol == null) continue;
-
-					targetIndex = fileCol.getTargetIndex();
-					if (targetIndex == -1) continue;
-
-					if (sourceIndex >= dataRowValues.size())
-					{
-						// Log this warning only once
-						if (importRow == 1)
-						{
-							LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");
-						}
-						continue;
-					}
-					Object value = dataRowValues.get(sourceIndex);
-					String svalue = (value != null ? value.toString() : null);
-
-					ColumnIdentifier col = fileCol.getColumn();
-					int colType = col.getDataType();
-					try
-					{
-						if (fileCol.getColumnFilter() != null)
-						{
-							if (value == null)
-							{
-								includeRow = false;
-								break;
-							}
-							Matcher m = fileCol.getColumnFilter().matcher(svalue);
-							if (!m.matches())
-							{
-								includeRow = false;
-								break;
-							}
-						}
-
-						if (valueModifier != null)
-						{
-							value = valueModifier.modifyValue(col, svalue);
-						}
-
-						if (SqlUtil.isCharacterType(colType))
-						{
-							if (this.emptyStringIsNull && StringUtil.isEmptyString(svalue))
-							{
-								value = null;
-							}
-							rowData[targetIndex] = value;
-						}
-						else
-						{
-							rowData[targetIndex] = converter.convertValue(value, colType);
-						}
-					}
-					catch (Exception e)
-					{
-						if (targetIndex != -1) rowData[targetIndex] = null;
-						String msg = ResourceMgr.getString("ErrConvertError");
-						msg = msg.replace("%row%", Integer.toString(importRow));
-						msg = msg.replace("%column%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
-						msg = msg.replace("%value%", (svalue == null ? "(NULL)" : svalue));
-						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
-						msg = msg.replace("%type%", SqlUtil.getTypeName(colType));
-						msg = msg.replace("%error%", e.getMessage());
-						this.messages.append(msg);
-						this.messages.appendNewLine();
-						if (this.abortOnError)
-						{
-							this.hasErrors = true;
-							this.cancelImport = true;
-							throw e;
-						}
-						this.hasWarnings = true;
-						LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", msg, e);
-						if (this.errorHandler != null)
-						{
-							int choice = errorHandler.getActionOnError(importRow, fileCol.getColumn().getColumnName(), (svalue == null ? "(NULL)" : svalue), ExceptionUtil.getDisplay(e, false));
-							if (choice == JobErrorHandler.JOB_ABORT) throw e;
-							if (choice == JobErrorHandler.JOB_IGNORE_ALL)
-							{
-								this.abortOnError = false;
-							}
-						}
-						this.receiver.recordRejected(getLastRecord(), importRow, e);
-						includeRow = false;
-					}
-				}
-
-				if (this.cancelImport) break;
-
+				ColumnIdentifier col = fileCol.getColumn();
+				int colType = col.getDataType();
 				try
 				{
-					if (includeRow) receiver.processRow(rowData);
-				}
-				catch (Exception e)
-				{
-					if (cancelImport)
+					if (fileCol.getColumnFilter() != null)
 					{
-						LogMgr.logDebug("SpreadsheetFileParser.processOneFile()", "Error sending line " + importRow, e);
+						if (value == null)
+						{
+							includeRow = false;
+							break;
+						}
+						Matcher m = fileCol.getColumnFilter().matcher(svalue);
+						if (!m.matches())
+						{
+							includeRow = false;
+							break;
+						}
+					}
+
+					if (valueModifier != null)
+					{
+						value = valueModifier.modifyValue(col, svalue);
+					}
+
+					if (SqlUtil.isCharacterType(colType))
+					{
+						if (this.emptyStringIsNull && StringUtil.isEmptyString(svalue))
+						{
+							value = null;
+						}
+						rowData[targetIndex] = value;
 					}
 					else
 					{
-						hasErrors = true;
-						cancelImport = true;
-						// processRow() will only throw an exception if abortOnError is true
-						// so we can always re-throw the exception here.
-						LogMgr.logError("SpreadsheetFileParser.processOneFile()", "Error sending line " + importRow, e);
-						throw e;
+						rowData[targetIndex] = converter.convertValue(value, colType);
 					}
 				}
-
-				// read next line from Excel file
+				catch (Exception e)
+				{
+					if (targetIndex != -1) rowData[targetIndex] = null;
+					String msg = ResourceMgr.getString("ErrConvertError");
+					msg = msg.replace("%row%", Integer.toString(importRow));
+					msg = msg.replace("%column%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
+					msg = msg.replace("%value%", (svalue == null ? "(NULL)" : svalue));
+					msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+					msg = msg.replace("%type%", SqlUtil.getTypeName(colType));
+					msg = msg.replace("%error%", e.getMessage());
+					this.messages.append(msg);
+					this.messages.appendNewLine();
+					if (this.abortOnError)
+					{
+						this.hasErrors = true;
+						this.cancelImport = true;
+						throw e;
+					}
+					this.hasWarnings = true;
+					LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", msg, e);
+					if (this.errorHandler != null)
+					{
+						int choice = errorHandler.getActionOnError(importRow, fileCol.getColumn().getColumnName(), (svalue == null ? "(NULL)" : svalue), ExceptionUtil.getDisplay(e, false));
+						if (choice == JobErrorHandler.JOB_ABORT) throw e;
+						if (choice == JobErrorHandler.JOB_IGNORE_ALL)
+						{
+							this.abortOnError = false;
+						}
+					}
+					this.receiver.recordRejected(getLastRecord(), importRow, e);
+					includeRow = false;
+				}
 			}
 
-			filesProcessed.add(inputFile);
-			if (!cancelImport)
+			if (this.cancelImport) break;
+
+			try
 			{
-				receiver.tableImportFinished();
+				if (includeRow) receiver.processRow(rowData);
 			}
+			catch (Exception e)
+			{
+				if (cancelImport)
+				{
+					LogMgr.logDebug("SpreadsheetFileParser.processOneFile()", "Error sending line " + importRow, e);
+				}
+				else
+				{
+					hasErrors = true;
+					cancelImport = true;
+					// processRow() will only throw an exception if abortOnError is true
+					// so we can always re-throw the exception here.
+					LogMgr.logError("SpreadsheetFileParser.processOneFile()", "Error sending line " + importRow, e);
+					throw e;
+				}
+			}
+
+			// read next line from Excel file
 		}
-		finally
+
+		filesProcessed.add(inputFile);
+		if (!cancelImport)
 		{
-			done();
+			receiver.tableImportFinished();
 		}
 	}
 
 	@Override
 	public void done()
 	{
-		if (content != null)
+		if (reader != null)
 		{
-			content.done();
+			reader.done();
 		}
 	}
 
@@ -554,7 +584,7 @@ public class SpreadsheetFileParser
 		try
 		{
 			createReader();
-			List<String> columns = content.getHeaderColumns();
+			List<String> columns = reader.getHeaderColumns();
 			for (String col : columns)
 			{
 				cols.add(new ColumnIdentifier(col));
