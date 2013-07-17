@@ -305,9 +305,17 @@ public class XlsRowDataConverter
 
 	private boolean isIntegerColumn(int column)
 	{
-		int type = metaData.getColumnType(column);
-		String name = metaData.getDbmsTypeName(column);
-		return SqlUtil.isIntegerType(type) || "NUMBER".equals(name);
+		try
+		{
+			int type = metaData.getColumnType(column);
+			String name = metaData.getDbmsTypeName(column);
+			return (SqlUtil.isIntegerType(type) || (name.startsWith("NUMBER") && name.indexOf(',') == -1));
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("XlsRowDataConverter.isIntegerColumn()", "Could not check data type for column " + column, e);
+			return false;
+		}
 	}
 
 	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline, int column)
@@ -318,8 +326,9 @@ public class XlsRowDataConverter
 		{
 			BigDecimal bd = (BigDecimal)value;
 
-			// this is basically a workaround for exports using Oracle and NUMBER columns
-			// which are essentially integer values.
+			// this is a workaround for exports using Oracle and NUMBER columns
+			// which are essentially integer values. But it shouldn't hurt for other DBMS
+			// either in case the driver returns a BigDecimal for "real" integer column
 			if (bd.scale() == 0 && isIntegerColumn(column))
 			{
 				cellStyle = excelFormat.integerCellStyle;
