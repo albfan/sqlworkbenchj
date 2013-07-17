@@ -107,6 +107,7 @@ public abstract class BaseAnalyzer
 	protected String keywordFile;
 	protected WbConnection dbConnection;
 	protected final String sql;
+	protected final String verb;
 	protected final int cursorPos;
 	protected int context;
 	protected TableIdentifier tableForColumnList;
@@ -127,6 +128,7 @@ public abstract class BaseAnalyzer
 	{
 		this.dbConnection = conn;
 		this.sql = statement;
+		this.verb = SqlUtil.getSqlVerb(sql);
 		this.cursorPos = cursorPos;
 		this.catalogSeparator = SqlUtil.getCatalogSeparator(this.dbConnection);
 	}
@@ -157,7 +159,7 @@ public abstract class BaseAnalyzer
 	{
 		return true;
 	}
-	
+
 	/**
 	 * For testing purposes only!
 	 * @param newSeparator

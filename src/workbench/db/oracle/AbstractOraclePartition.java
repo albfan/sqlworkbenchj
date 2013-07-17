@@ -58,6 +58,7 @@ public abstract class AbstractOraclePartition
 	protected String objectOwner;
 	protected String defaultUserTablespace;
 	protected String currentUser;
+	protected boolean retrievePartitionsForLocalIndex;
 
 	public AbstractOraclePartition(WbConnection conn)
 		throws SQLException
@@ -182,23 +183,26 @@ public abstract class AbstractOraclePartition
 				}
 			}
 		}
-		result.append('\n');
-		result.append(indent);
-		result.append("(\n");
-		int maxLength = forTable ? OraclePartitionDefinition.getMaxPartitionNameLength(partitions): 0;
-		for (int i=0; i < partitions.size(); i++)
+		if (partitions.size() > 0)
 		{
-			if (i > 0)
+			result.append('\n');
+			result.append(indent);
+			result.append("(\n");
+			int maxLength = forTable ? OraclePartitionDefinition.getMaxPartitionNameLength(partitions): 0;
+			for (int i=0; i < partitions.size(); i++)
 			{
-				result.append(',');
-				result.append(indent);
-				result.append('\n');
+				if (i > 0)
+				{
+					result.append(',');
+					result.append(indent);
+					result.append('\n');
+				}
+				result.append(partitions.get(i).getSource(forTable, maxLength, indent));
 			}
-			result.append(partitions.get(i).getSource(forTable, maxLength, indent));
+			result.append("\n");
+			result.append(indent);
+			result.append(')');
 		}
-		result.append("\n");
-		result.append(indent);
-		result.append(')');
 		if (OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
 		{
 			result.append("\nTABLESPACE ");
@@ -387,9 +391,16 @@ public abstract class AbstractOraclePartition
 	}
 
 
+	protected boolean shouldRetrievePartitions()
+	{
+		return true;
+	}
+	
 	private void retrievePartitions(DbObject object, WbConnection conn)
 		throws SQLException
 	{
+		if (!shouldRetrievePartitions()) return;
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String retrievePartitionSQL = getRetrievePartitionsSql();

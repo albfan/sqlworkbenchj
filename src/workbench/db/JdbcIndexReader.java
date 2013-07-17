@@ -60,6 +60,7 @@ public class JdbcIndexReader
 	protected DbMetadata metaData;
 	protected String pkIndexNameColumn;
 	protected String pkStatusColumn;
+	protected String partitionedFlagColumn;
 
 	public JdbcIndexReader(DbMetadata meta)
 	{
@@ -664,6 +665,7 @@ public class JdbcIndexReader
 		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
 
 		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
+		boolean isPartitioned = false;
 
 		while (idxRs != null && idxRs.next())
 		{
@@ -678,8 +680,13 @@ public class JdbcIndexReader
 			IndexDefinition def = defs.get(indexName);
 			if (def == null)
 			{
+				if (partitionedFlagColumn != null)
+				{
+					isPartitioned = StringUtil.stringToBool(idxRs.getString(partitionedFlagColumn));
+				}
 				def = new IndexDefinition(tbl, indexName);
 				def.setUnique(!nonUniqueFlag);
+				def.setPartitioned(isPartitioned);
 				if (metaData.getDbSettings().pkIndexHasTableName())
 				{
 					def.setPrimaryKeyIndex(indexName.equals(tbl.getRawTableName()));

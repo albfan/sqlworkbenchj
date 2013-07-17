@@ -467,6 +467,7 @@ public class WbExport
 		exporter.setDataModifier(modifier);
 
 		String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
+		boolean containerFileSupported = CollectionUtil.caseInsensitiveSet("xls", "xlsx").contains(type);
 		BlobMode btype = BlobMode.getMode(bmode);
 
 		if (bmode != null && btype == null)
@@ -822,7 +823,7 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner);
+					exportTableList(tablesToExport, result, outputdir, outputFile, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner, containerFileSupported);
 				}
 				else
 				{
@@ -872,43 +873,61 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix, String where, boolean ignoreOwner)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, File outfile, String prefix, String where, boolean ignoreOwner, boolean exporterSupportsContainers)
 		throws SQLException
 	{
 		result.setSuccess();
 
 		int tableCount = tableList.size();
 
-		// when more than one table is selected or no outputfile is specified
-		// then we require an output directory
-		if (outdir == null)
+		if (exporterSupportsContainers)
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
-			return;
+			exporter.setAppendToFile(true);
+			exporter.setPageTitle(null);
+			if (outfile != null && outfile.exists())
+			{
+				outfile.delete();
+			}
 		}
-
-		if (outdir == null || !outdir.exists())
+		else
 		{
-			String msg = ResourceMgr.getFormattedString("ErrOutputDirNotFound", outdir.getAbsolutePath());
-			result.addMessage(msg);
-			result.setFailure();
-			return;
-		}
+			// when more than one table is selected or no outputfile is specified then we require an output directory
+			if (outdir == null)
+			{
+				result.setFailure();
+				result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
+				return;
+			}
 
-		if (!outdir.isDirectory())
-		{
-			String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotDir", outdir.getAbsolutePath());
-			result.addMessage(msg);
-			result.setFailure();
-			return;
-		}
+			if (outdir == null || !outdir.exists())
+			{
+				String msg = ResourceMgr.getFormattedString("ErrOutputDirNotFound", outdir.getAbsolutePath());
+				result.addMessage(msg);
+				result.setFailure();
+				return;
+			}
 
+			if (!outdir.isDirectory())
+			{
+				String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotDir", outdir.getAbsolutePath());
+				result.addMessage(msg);
+				result.setFailure();
+				return;
+			}
+		}
 
 		for (TableIdentifier tbl : tableList)
 		{
 			String fname = StringUtil.makeFilename(ignoreOwner ? tbl.getTableName() : tbl.getTableExpression());
-			WbFile f = new WbFile(outdir, fname + defaultExtension);
+			WbFile f = null;
+			if (outdir == null)
+			{
+				f = new WbFile(outfile);
+			}
+			else
+			{
+				f = new WbFile(outdir, fname + defaultExtension);
+			}
 			try
 			{
 				if (StringUtil.isBlank(prefix))
@@ -942,7 +961,14 @@ public class WbExport
 			tableCount = exporter.getNumberExportedTables();
 			String msg = ResourceMgr.getString("MsgExportNumTables");
 			msg = msg.replace("%numtables%", Integer.toString(tableCount));
-			msg = msg.replace("%dir%", outdir.getAbsolutePath());
+			if (outdir == null)
+			{
+				msg = msg.replace("%dir%", outfile.getAbsolutePath());
+			}
+			else
+			{
+				msg = msg.replace("%dir%", outdir.getAbsolutePath());
+			}
 			result.addMessage(msg);
 			result.setSuccess();
 		}

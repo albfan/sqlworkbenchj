@@ -69,6 +69,7 @@ public class OracleIndexReader
 		{
 			pkIndexNameColumn = "PK_INDEX_NAME";
 			pkStatusColumn = "PK_STATUS";
+			partitionedFlagColumn = "PARTITIONED";
 		}
 		if (OracleUtils.checkDefaultTablespace())
 		{
@@ -143,7 +144,8 @@ public class OracleIndexReader
 			"       i.distinct_keys as cardinality, \n" +
 			"       i.leaf_blocks as pages, \n" +
 			"       null as filter_condition, \n" +
-			"       i.tablespace_name \n" +
+			"       i.tablespace_name, \n" +
+			"       i.partitioned \n" +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c " +
 			"    ON i.index_name = c.index_name " +
@@ -445,6 +447,8 @@ public class OracleIndexReader
 
 	public CharSequence getPartitionDefinition(IndexDefinition def, String indent)
 	{
+		if (!def.isPartitioned()) return null;
+
 		WbConnection conn = this.metaData.getWbConnection();
 		try
 		{

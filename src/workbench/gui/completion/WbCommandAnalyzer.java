@@ -35,6 +35,7 @@ import workbench.db.importer.SpreadsheetReader;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
+import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
 
 import workbench.util.ArgumentParser;
@@ -151,6 +152,12 @@ public class WbCommandAnalyzer
 			else if (type == ArgumentType.ObjectTypeArgument)
 			{
 				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getObjectTypes());
+				if (verb.equalsIgnoreCase(WbGrepSource.VERB))
+				{
+					elements.add("FUNCTION");
+					elements.add("PROCEDURE");
+					elements.add("TRIGGER");
+				}
 			}
 			else if (type == ArgumentType.SchemaArgument)
 			{

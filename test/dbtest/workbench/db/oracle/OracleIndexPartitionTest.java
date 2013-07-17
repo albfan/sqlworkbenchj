@@ -52,6 +52,7 @@ public class OracleIndexPartitionTest
 	public static void setUpClass()
 		throws Exception
 	{
+		System.setProperty("workbench.db.oracle.partition.index.local.retrieve", "true");
 		String sql =
 			"CREATE TABLE wb_list_partition_test \n" +
 			"( \n" +
@@ -114,6 +115,7 @@ public class OracleIndexPartitionTest
 	public static void tearDownClass()
 		throws Exception
 	{
+		System.clearProperty("workbench.db.oracle.partition.index.local.retrieve");
 		OracleTestUtil.cleanUpTestCase();
 	}
 

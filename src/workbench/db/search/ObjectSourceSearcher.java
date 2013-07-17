@@ -35,7 +35,6 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
-import workbench.db.objectcache.SourceCache;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
@@ -61,14 +60,15 @@ public class ObjectSourceSearcher
 	private boolean cancelSearch;
 	private boolean isRunning;
 	private int numSearched;
-	private SourceCache cache;
+	private Set<String> searchedObjects;
+
 	public ObjectSourceSearcher(WbConnection con)
 	{
 		connection = con;
 		schemas = CollectionUtil.arrayList();
 		names = CollectionUtil.arrayList();
 		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view", DbMetadata.MVIEW_NAME);
-		cache = new SourceCache(connection.getDbId());
+		searchedObjects = CollectionUtil.caseInsensitiveSet();
 	}
 
 	public int getNumberOfObjectsSearched()
@@ -153,6 +153,7 @@ public class ObjectSourceSearcher
 	 */
 	public synchronized List<DbObject> searchObjects(List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
+		searchedObjects.clear();
 		cancelSearch = false;
 		isRunning = true;
 		numSearched = 0;
@@ -234,6 +235,7 @@ public class ObjectSourceSearcher
 			{
 				monitor.setCurrentObject(object.getObjectName(), current, total);
 			}
+
 			try
 			{
 				CharSequence source = null;
@@ -242,26 +244,26 @@ public class ObjectSourceSearcher
 					((TableIdentifier)object).setRetrieveFkSource(true);
 				}
 
-				String key = getCacheKey(object);
-				source = cache.getSource(object.getObjectType(), key);
+				ProcedureDefinition def = null;
+				if (object instanceof ProcedureDefinition)
+				{
+					def = (ProcedureDefinition)object;
+				}
 
-				if (source == null)
+				String key = getObjectKey(object);
+				if (!searchedObjects.contains(key))
 				{
 					source = object.getSource(connection);
-					if (cache.shouldCache(object.getObjectType()))
+					if (StringUtil.isBlank(source))
 					{
-						LogMgr.logDebug("ObjectSourceSearcher.searchList()", "Caching source for: " + object.getObjectType() + ": " + object.toString());
-						cache.addSource(object.getObjectType(), key, source);
+						LogMgr.logWarning("ObjectSourceSearcher.searchObjects()", "Empty source returned for " + object.toString());
 					}
-				}
 
-				if (StringUtil.isBlank(source))
-				{
-					LogMgr.logWarning("ObjectSourceSearcher.searchObjects()", "Empty source returned for " + object.toString());
-				}
-				if (StringUtil.containsWords(source, searchValues, matchAll, ignoreCase, useRegex))
-				{
-					searchResult.add(object);
+					if (StringUtil.containsWords(source, searchValues, matchAll, ignoreCase, useRegex))
+					{
+						searchResult.add(object);
+					}
+					searchedObjects.add(key);
 				}
 			}
 			catch (SQLException sql)
@@ -350,7 +352,7 @@ public class ObjectSourceSearcher
 		return result;
 	}
 
-	private String getCacheKey(DbObject def)
+	private String getObjectKey(DbObject def)
 	{
 		if (def instanceof ProcedureDefinition)
 		{
@@ -363,17 +365,5 @@ public class ObjectSourceSearcher
 		return def.getObjectNameForDrop(connection);
 	}
 
-	private void putSourceToCache(DbObject def, CharSequence source)
-	{
-		if (source == null) return;
-		if (cache.addSource(def.getObjectType(), getCacheKey(def), source))
-		{
-			if (def instanceof ProcedureDefinition)
-			{
-				// make sure procedure source code is not stored twice
-				((ProcedureDefinition)def).setSource(null);
-			}
-		}
-	}
 
 }

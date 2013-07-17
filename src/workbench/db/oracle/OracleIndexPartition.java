@@ -24,6 +24,7 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 /**
  * A class to read information about a partitioned index in Oracle
@@ -33,6 +34,7 @@ import workbench.db.WbConnection;
 public class OracleIndexPartition
 	extends AbstractOraclePartition
 {
+	private boolean showLocalIndexPartitions;
 
 	public OracleIndexPartition(WbConnection conn)
 		throws SQLException
@@ -46,6 +48,7 @@ public class OracleIndexPartition
 		super(conn, retrieveCompression);
 		isIndex = true;
 		supportsIntervals = false; // indexes do not support the INTERVAL option
+		showLocalIndexPartitions = Settings.getInstance().getBoolProperty("workbench.db.oracle.partition.index.local.retrieve", false);
 	}
 
 	public String getLocality()
@@ -154,4 +157,13 @@ public class OracleIndexPartition
 			"order by subpartition_position";
 	}
 
+	@Override
+	protected boolean shouldRetrievePartitions()
+	{
+		if ("LOCAL".equalsIgnoreCase(locality) && !showLocalIndexPartitions)
+		{
+			return false;
+		}
+		return true;
+	}
 }

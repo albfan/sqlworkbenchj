@@ -1042,6 +1042,11 @@ public class DataExporter
 					this.rowMonitor.setCurrentObject(job.getTable().getTableName(), i + 1, count);
 				}
 
+				if (append && exportWriter.managesOutput())
+				{
+					this.pageTitle = job.getTable().getTableExpression(this.dbConn);
+				}
+
 				try
 				{
 					totalRows += runJob(job);

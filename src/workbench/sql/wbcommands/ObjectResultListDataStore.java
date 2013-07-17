@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 
@@ -60,11 +61,13 @@ public class ObjectResultListDataStore
 		throws SQLException
 	{
 		if (resultList == null) return;
-		
+
 		for (DbObject object : resultList)
 		{
 			int row = addRow();
 			String name = null;
+			String type = object.getObjectType();
+
 			if (showFullname)
 			{
 				name = object.getFullyQualifiedName(con);
@@ -73,8 +76,18 @@ public class ObjectResultListDataStore
 			{
 				name = object.getObjectName();
 			}
+
+			if (object instanceof ProcedureDefinition)
+			{
+				ProcedureDefinition def = (ProcedureDefinition)object;
+				if (def.isOraclePackage())
+				{
+					name = def.getPackageName();
+					type = "PACKAGE";
+				}
+			}
 			setValue(row, COL_IDX_OBJECT_NAME, name);
-			setValue(row, COL_IDX_OBJECT_TYPE, object.getObjectType());
+			setValue(row, COL_IDX_OBJECT_TYPE, type);
 			setValue(row, COL_IDX_SOURCE, object.getSource(con));
 		}
 		resetStatus();

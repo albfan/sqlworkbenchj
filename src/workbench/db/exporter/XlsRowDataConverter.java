@@ -129,11 +129,11 @@ public class XlsRowDataConverter
 		}
 	}
 
-
 	@Override
 	public StrBuffer getStart()
 	{
 		createFormatters();
+		firstRow = 0;
 
 		if (append && getOutputFile().exists())
 		{
