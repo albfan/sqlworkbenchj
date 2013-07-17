@@ -38,6 +38,7 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 import org.apache.poi.POIXMLProperties;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -52,8 +53,6 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.helpers.ColumnHelper;
-
-import workbench.util.WbFile;
 
 /**
  * Export data into an Excel spreadsheet using Apache's POI
@@ -168,7 +167,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = commentRow.createCell(column);
-					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true, false);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true, false, c);
 					column ++;
 				}
 			}
@@ -185,7 +184,7 @@ public class XlsRowDataConverter
 				if (includeColumnInExport(c))
 				{
 					Cell cell = headRow.createCell(column);
-					setCellValueAndStyle(cell, SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(c)), true, false);
+					setCellValueAndStyle(cell, SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(c)), true, false, c);
 					column ++;
 				}
 			}
@@ -297,21 +296,43 @@ public class XlsRowDataConverter
 
 				Object value = row.getValue(c);
 				boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
-				setCellValueAndStyle(cell, value, false, multiline);
+				setCellValueAndStyle(cell, value, false, multiline, c);
 				column ++;
 			}
 		}
 		return ret;
 	}
 
-	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline)
+	private boolean isIntegerColumn(int column)
+	{
+		int type = metaData.getColumnType(column);
+		String name = metaData.getDbmsTypeName(column);
+		if (SqlUtil.isIntegerType(type) || "NUMBER".equals(name))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline, int column)
 	{
 		CellStyle cellStyle = null;
 
 		if (value instanceof BigDecimal)
 		{
-			cellStyle = excelFormat.decimalCellStyle;
-			cell.setCellValue(((BigDecimal)value).doubleValue());
+			BigDecimal bd = (BigDecimal)value;
+
+			// this is basically a workaround for exports using Oracle and NUMBER columns
+			// which are essentially integer values.
+			if (bd.scale() == 0 && isIntegerColumn(column))
+			{
+				cellStyle = excelFormat.integerCellStyle;
+			}
+			else
+			{
+				cellStyle = excelFormat.decimalCellStyle;
+			}
+			cell.setCellValue(bd.doubleValue());
 		}
 		else if (value instanceof Double)
 		{
