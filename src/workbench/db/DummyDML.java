@@ -24,13 +24,17 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.resource.Settings;
-import workbench.sql.formatter.SqlFormatter;
+
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
+
+import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -39,10 +43,11 @@ import workbench.util.SqlUtil;
 public class DummyDML
 	implements DbObject
 {
-	private TableIdentifier table;
+	private final TableIdentifier table;
 	private List<ColumnIdentifier> columns;
+	
 	// if false, an INSERT will be created, otherwise an UPDATE
-	private boolean createUpdateStatement;
+	private final boolean createUpdateStatement;
 
 	protected DummyDML(TableIdentifier tbl, boolean buildUpdate)
 	{

@@ -69,7 +69,7 @@ public class ExcelReader
 	private int sheetIndex = -1;
 	private String sheetName;
 
-	private WbFile inputFile;
+	private final WbFile inputFile;
 	private Workbook dataFile;
 	private Sheet dataSheet;
 	private List<String> headerColumns;
@@ -77,7 +77,7 @@ public class ExcelReader
 	private List<CellRangeAddress> mergedRegions;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 
-	private boolean useXLSX;
+	private final boolean useXLSX;
 
 	public ExcelReader(File excelFile, int sheetNumber, String name)
 	{

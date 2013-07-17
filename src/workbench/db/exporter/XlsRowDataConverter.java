@@ -307,11 +307,7 @@ public class XlsRowDataConverter
 	{
 		int type = metaData.getColumnType(column);
 		String name = metaData.getDbmsTypeName(column);
-		if (SqlUtil.isIntegerType(type) || "NUMBER".equals(name))
-		{
-			return true;
-		}
-		return false;
+		return SqlUtil.isIntegerType(type) || "NUMBER".equals(name);
 	}
 
 	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline, int column)
