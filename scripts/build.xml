@@ -159,6 +159,7 @@
         <include name="**/*.sql"/>
         <include name="**/*.xml"/>
         <include name="**/*.xslt"/>
+        <include name="**/*.xlsx"/>
         <include name="**/*.xls"/>
         <include name="**/*.ods"/>
         <include name="**/*.txt"/>

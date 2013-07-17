@@ -30,8 +30,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.sql.Connection;
@@ -448,6 +450,14 @@ public class TestUtil
 		Writer w = EncodingUtil.createWriter(f, encoding, false);
 		w.write(content);
 		w.close();
+	}
+
+	public static void executeScript(WbConnection con, InputStream in)
+		throws SQLException, IOException
+	{
+		Reader r = new InputStreamReader(in);
+		String script = FileUtil.readCharacters(r);
+		executeScript(con, script, null, false);
 	}
 
 	public static void executeScript(WbConnection con, String script)

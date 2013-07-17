@@ -63,6 +63,7 @@ public class SpreadsheetFileParser
 	private boolean withHeader = true;
 	private boolean emptyStringIsNull;
 	private boolean illegalDateIsNull;
+	private boolean checkDependencies;
 
 	private String nullString;
 	private int currentRow;
@@ -82,6 +83,11 @@ public class SpreadsheetFileParser
 	{
 		this();
 		this.inputFile = aFile;
+	}
+
+	public void setCheckDependencies(boolean flag)
+	{
+		this.checkDependencies = flag;
 	}
 
 	public void setNullString(String value)
@@ -313,6 +319,56 @@ public class SpreadsheetFileParser
 		}
 	}
 
+	private List<Integer> getSheets()
+	{
+		List<String> allSheets = reader.getSheets();
+		List<Integer> result = new  ArrayList<Integer>(allSheets.size());
+		if (this.checkDependencies)
+		{
+			TableDependencySorter sorter = new TableDependencySorter(this.connection);
+			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
+			for (String sheet : allSheets)
+			{
+				TableIdentifier tbl = connection.getMetadata().findObject(new TableIdentifier(sheet));
+				if (tbl != null)
+				{
+					tables.add(tbl);
+				}
+				else
+				{
+					LogMgr.logWarning("SpreadsheetFileParser.getSheets()", "Could not find table " + sheet);
+				}
+			}
+			List<TableIdentifier> sorted = sorter.sortForInsert(tables);
+			LogMgr.logDebug("SpreadsheetFileParser.getSheets()", "Using insert sequence: " + sorted);
+			for (TableIdentifier table : sorted)
+			{
+				int index = findSheet(table, allSheets);
+				result.add(Integer.valueOf(index));
+			}
+		}
+		else
+		{
+			for (int i=0; i < allSheets.size(); i++)
+			{
+				result.add(Integer.valueOf(i));
+			}
+		}
+		return result;
+	}
+
+	private int findSheet(TableIdentifier table, List<String> sheets)
+	{
+		for (int i=0; i < sheets.size(); i++)
+		{
+			TableIdentifier sheet = new TableIdentifier(sheets.get(i));
+			if (sheet.compareNames(table))
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	@Override
 	protected void processOneFile()
@@ -346,15 +402,16 @@ public class SpreadsheetFileParser
 			}
 			else
 			{
-				List<String> sheets = reader.getSheets();
+				List<Integer> sheets = getSheets();
+				List<String> allSheets = reader.getSheets();
 				for (int i=0; i < sheets.size(); i++)
 				{
-					sheetIndex = i;
-					sheetName = null;
+					sheetIndex = sheets.get(i);
+					sheetName = allSheets.get(sheetIndex);
 					importColumns = null;
-					tableName = sheets.get(i);
+					tableName = allSheets.get(sheetIndex);
 					targetTable = null;
-					reader.setActiveWorksheet(i);
+					reader.setActiveWorksheet(sheetIndex);
 					processOneSheet();
 				}
 			}
@@ -657,5 +714,4 @@ public class SpreadsheetFileParser
 	public void addColumnFilter(String colname, String regex)
 	{
 	}
-
 }

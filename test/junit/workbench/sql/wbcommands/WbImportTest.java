@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -71,6 +72,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
+import workbench.db.importer.TableDependencySorterTest;
 /**
  *
  * @author Thomas Kellerer
@@ -106,6 +109,32 @@ public class WbImportTest
 		throws Exception
 	{
 		this.connection.disconnect();
+	}
+
+	@Test
+	public void testMultiSheetExcelImport()
+		throws Exception
+	{
+		util.dropAll(connection);
+		InputStream in = TableDependencySorterTest.class.getResourceAsStream("hr_schema.sql");
+		TestUtil.executeScript(connection, in);
+		File input = util.copyResourceFile(this, "hr.xlsx");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' -type=xlsx -sheetNumber=* -header=true -continueonerror=false -checkDependencies=true");
+
+		assertTrue(input.delete());
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		int rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from countries")).intValue();
+		assertEquals(25, rows);
+
+		rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from employees")).intValue();
+		assertEquals(107, rows);
+
+		rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from job_history")).intValue();
+		assertEquals(10, rows);
 	}
 
 	@Test

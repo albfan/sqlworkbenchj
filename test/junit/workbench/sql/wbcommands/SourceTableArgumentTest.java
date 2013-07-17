@@ -230,10 +230,10 @@ public class SourceTableArgumentTest
       assertEquals("Wrong table retrieved", true, tables.get(2).getTableName().equalsIgnoreCase("third_table"));
       assertEquals("Wrong table retrieved", true, tables.get(2).getSchema().equalsIgnoreCase("myschema"));
 
-      parser = new SourceTableArgument("*", con);
+      parser = new SourceTableArgument("*.*", con);
       tables = parser.getTables();
-      assertEquals("Wrong number of table", 4, tables.size());
 			Set<String> names = CollectionUtil.caseInsensitiveSet("THIRD_TABLE", "ARG_TEST", "FIRST_TABLE", "SECOND_TABLE");
+      assertEquals("Wrong number of table", names.size(), tables.size());
 			for (TableIdentifier tbl : tables)
 			{
 				assertTrue(names.remove(tbl.getTableName()));

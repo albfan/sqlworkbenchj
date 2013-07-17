@@ -151,13 +151,6 @@ public class ExcelReader
 
 		initActiveSheet();
 
-		int numMergedRegions = dataSheet.getNumMergedRegions();
-		mergedRegions = new ArrayList<CellRangeAddress>(numMergedRegions);
-		for (int i=0; i < numMergedRegions; i++)
-		{
-			mergedRegions.add(dataSheet.getMergedRegion(i));
-		}
-
 		try
 		{
 			if (useXLSX)
@@ -199,6 +192,13 @@ public class ExcelReader
 		{
 			int index = dataFile.getActiveSheetIndex();
 			dataSheet = dataFile.getSheetAt(index);
+		}
+		headerColumns = null;
+		int numMergedRegions = dataSheet.getNumMergedRegions();
+		mergedRegions = new ArrayList<CellRangeAddress>(numMergedRegions);
+		for (int i = 0; i < numMergedRegions; i++)
+		{
+			mergedRegions.add(dataSheet.getMergedRegion(i));
 		}
 	}
 

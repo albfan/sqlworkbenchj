@@ -173,7 +173,7 @@ public class SourceTableArgument
 				{
 					if (checkWildcard) this.wildcardsPresent = true;
 					TableIdentifier tbl = new TableIdentifier(t);
-					if (tbl.getSchema() == null && StringUtil.isNonEmpty(schema))
+					if (tbl.getSchema() == null && StringUtil.isNonEmpty(schemaToUse))
 					{
 						tbl.setSchema(schemaToUse);
 					}

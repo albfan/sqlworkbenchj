@@ -46,7 +46,7 @@ public class TableDependencySorterTest
 	extends WbTestCase
 {
 	private WbConnection dbConn;
-	
+
 	public TableDependencySorterTest()
 	{
 		super("ImportFileHandlerTest");
@@ -58,72 +58,72 @@ public class TableDependencySorterTest
 		TestUtil util = getTestUtil("dependencyTest");
 		dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
-			String baseSql = "CREATE TABLE base  \n" + 
-             "( \n" + 
-             "   id1  INTEGER NOT NULL, \n" + 
-             "   id2  INTEGER NOT NULL, \n" + 
-             "   primary key (id1, id2) \n" + 
-             ")";			
+			String baseSql = "CREATE TABLE base  \n" +
+             "( \n" +
+             "   id1  INTEGER NOT NULL, \n" +
+             "   id2  INTEGER NOT NULL, \n" +
+             "   primary key (id1, id2) \n" +
+             ")";
 			stmt.execute(baseSql);
-			
-			String child1Sql = "CREATE TABLE child1 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
-             ")";			
+
+			String child1Sql = "CREATE TABLE child1 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+             ")";
 			stmt.executeUpdate(child1Sql);
-			
-			String child2Sql = "CREATE TABLE child2 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
-             ")";			
+
+			String child2Sql = "CREATE TABLE child2 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+             ")";
 			stmt.executeUpdate(child2Sql);
 
-			String child3Sql = "CREATE TABLE child2_detail \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   child_id    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" + 
-             ")";			
+			String child3Sql = "CREATE TABLE child2_detail \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   child_id    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
+             ")";
 			stmt.executeUpdate(child3Sql);
-			
-			String sql = "CREATE TABLE child1_detail \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   child1_id    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" + 
-             ")";			
+
+			String sql = "CREATE TABLE child1_detail \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   child1_id    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" +
+             ")";
 			stmt.executeUpdate(sql);
 
-			sql = "CREATE TABLE child1_detail2 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   detail_id    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" + 
-             ")";			
+			sql = "CREATE TABLE child1_detail2 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   detail_id    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" +
+             ")";
 			stmt.executeUpdate(sql);
 
-			sql = "CREATE TABLE tbl1 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY" + 
-             ")";			
+			sql = "CREATE TABLE tbl1 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY" +
+             ")";
 			stmt.executeUpdate(sql);
-			
-			sql = "CREATE TABLE tbl2 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY" + 
-             ")";			
+
+			sql = "CREATE TABLE tbl2 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY" +
+             ")";
 			stmt.executeUpdate(sql);
-			
-			sql = "CREATE TABLE tbl3 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY" + 
-             ")";			
+
+			sql = "CREATE TABLE tbl3 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY" +
+             ")";
 			stmt.executeUpdate(sql);
 	}
 
@@ -144,7 +144,7 @@ public class TableDependencySorterTest
 		{
 			tables.add(new TableIdentifier("tbl" + (i + 1)));
 		}
-		
+
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForInsert(tables);
 		assertEquals("Not enough entries", tables.size(), result.size());
@@ -208,7 +208,7 @@ public class TableDependencySorterTest
 //		System.out.println("--------------------");
 		assertEquals("Not enough entries", tbl.size(), result.size());
 		assertEquals("Wrong first table", result.get(0).getTableName().toUpperCase(), child1_detail2.getTableName().toUpperCase());
-		
+
 		// the second entry is either child1_detail or child2_detail
 		TableIdentifier second = result.get(1);
 		second.setSchema(null);
@@ -217,10 +217,10 @@ public class TableDependencySorterTest
 
 		TableIdentifier last = result.get(result.size() - 1);
 		assertEquals("Wrong last table", true, last.compareNames(base));
-		
+
 		TableIdentifier lastButOne = result.get(result.size() - 2);
 		assertEquals(true, lastButOne.compareNames(child1) || lastButOne.compareNames(child2));
-		
+
 		List<TableIdentifier> insertList = sorter.sortForInsert(tbl);
 //		for (TableIdentifier t : insertList)
 //		{
@@ -238,7 +238,7 @@ public class TableDependencySorterTest
 		TableIdentifier child1 = new TableIdentifier("child1");
 		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
 		tbl.add(child1);
-		
+
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForDelete(tbl, true);
 //		for (TableIdentifier t : result)
@@ -246,7 +246,7 @@ public class TableDependencySorterTest
 //			System.out.println(t.toString());
 //		}
 //		System.out.println("--------------------");
-		
+
 		// Should have added child1_detail and child1_detail2
 		assertEquals("Not enough entries", 3, result.size());
 		String first = result.get(0).getTableName().toLowerCase();
@@ -262,7 +262,7 @@ public class TableDependencySorterTest
 	{
 		TestUtil util = new TestUtil("dependencyTest");
 		dbConn = util.getConnection();
-		
+
 		InputStream in = getClass().getResourceAsStream("dependency_tables.sql");
 		Reader r = new InputStreamReader(in);
 		String script = FileUtil.readCharacters(r);
@@ -290,22 +290,55 @@ public class TableDependencySorterTest
 	{
 		TestUtil util = new TestUtil("dependencyTest");
 		dbConn = util.getConnection();
-		
+
 		InputStream in = getClass().getResourceAsStream("dependency_tables.sql");
 		Reader r = new InputStreamReader(in);
 		String script = FileUtil.readCharacters(r);
 		TestUtil.executeScript(dbConn, script);
-		
+
 		ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
 		TableIdentifier cat = new TableIdentifier("catalogue");
 		TableIdentifier node = new TableIdentifier("catalogue_node");
 		tbl.add(cat);
 		tbl.add(node);
-		
+
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForInsert(tbl);
 		assertEquals(2, result.size());
 		assertTrue(node.compareNames(result.get(0)));
 		assertTrue(cat.compareNames(result.get(1)));
+	}
+
+	@Test
+	public void testInsertSorterHR()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		try
+		{
+			dbConn = util.getHSQLConnection("hr");
+
+			InputStream in = getClass().getResourceAsStream("hr_schema.sql");
+			Reader r = new InputStreamReader(in);
+			String script = FileUtil.readCharacters(r);
+			TestUtil.executeScript(dbConn, script);
+
+			ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
+			tbl.add(new TableIdentifier("countries"));
+			tbl.add(new TableIdentifier("departments"));
+			tbl.add(new TableIdentifier("employees"));
+			tbl.add(new TableIdentifier("jobs"));
+			tbl.add(new TableIdentifier("job_history"));
+			tbl.add(new TableIdentifier("locations"));
+			tbl.add(new TableIdentifier("regions"));
+
+			TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+			List<TableIdentifier> result = sorter.sortForInsert(tbl);
+			System.out.println(result);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 }
