@@ -619,7 +619,7 @@ public final class WbManager
 	 * Called whenever a MainWindow is closed.
 	 *
 	 * @param win the window to close
-	 * 
+	 *
 	 * @see workbench.gui.MainWindow#windowClosing(java.awt.event.WindowEvent)
 	 * @see workbench.gui.MainWindow#connectCancelled()
 	 */
@@ -1089,9 +1089,16 @@ public final class WbManager
 
 		wb.cmdLine.parse(args);
 		boolean showHelp = wb.cmdLine.isArgPresent("help");
+		boolean showVersion = wb.cmdLine.isArgPresent("version");
 		if (showHelp)
 		{
 			System.out.println(wb.cmdLine.getHelp());
+			Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+			System.exit(0);
+		}
+		else if (showVersion)
+		{
+			System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
 			Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 			System.exit(0);
 		}

@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
@@ -159,6 +160,7 @@ public class AppArguments
 		addArgument(ARG_CONSOLIDATE_LOG, ArgumentType.BoolArgument);
 		addArgument(ARG_INTERACTIVE, ArgumentType.BoolArgument);
 		addArgument("help");
+		addArgument("version");
 		addArgument(ARG_PROP, ArgumentType.Repeatable);
 	}
 
