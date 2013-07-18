@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-07-16">
+    <entry dev-build="14" type="enh">The connection profile allows to specify a custom icon for the main window now (thanks to Charles)</entry>
     <entry dev-build="14" type="enh">Multiple tables can now be exported into a Excel file (using -sourceTable=* and -file=foobar.xlsx)</entry>
     <entry dev-build="13" type="enh">When using WbImport with a spreadsheet (OpenOffice, Excel), all sheets can now be imported with a single statement</entry>
     <entry dev-build="12" type="enh">For Postgres 9.3 the new event triggers are now shown in the "Triggers" tab of the DbExplorer.</entry>
