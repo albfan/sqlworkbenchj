@@ -64,6 +64,7 @@ public class SpreadsheetFileParser
 	private boolean emptyStringIsNull;
 	private boolean illegalDateIsNull;
 	private boolean checkDependencies;
+	private boolean ignoreOwner;
 
 	private String nullString;
 	private int currentRow;
@@ -83,6 +84,11 @@ public class SpreadsheetFileParser
 	{
 		this();
 		this.inputFile = aFile;
+	}
+
+	public void setIgnoreOwner(boolean flag)
+	{
+		this.ignoreOwner = flag;
 	}
 
 	public void setCheckDependencies(boolean flag)
@@ -305,6 +311,20 @@ public class SpreadsheetFileParser
 		return result.toString();
 	}
 
+	@Override
+	public String getSourceFilename()
+	{
+		if (this.inputFile == null) return null;
+		String fname = inputFile.getAbsolutePath();
+		String sheet = sheetName;
+		if (sheet == null)
+		{
+			sheet = Integer.toString(sheetIndex);
+		}
+		fname += ":" + sheet;
+		return fname;
+	}
+
 	private void createReader()
 		throws IOException
 	{
@@ -329,7 +349,14 @@ public class SpreadsheetFileParser
 			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
 			for (String sheet : allSheets)
 			{
-				TableIdentifier tbl = connection.getMetadata().findObject(new TableIdentifier(sheet));
+				TableIdentifier ts = new TableIdentifier(sheet);
+				if (this.cancelImport) break;
+				if (ignoreOwner)
+				{
+					ts.setSchema(null);
+					ts.setCatalog(null);
+				}
+				TableIdentifier tbl = connection.getMetadata().findObject(ts);
 				if (tbl != null)
 				{
 					tables.add(tbl);
@@ -362,6 +389,11 @@ public class SpreadsheetFileParser
 		for (int i=0; i < sheets.size(); i++)
 		{
 			TableIdentifier sheet = new TableIdentifier(sheets.get(i));
+			if (ignoreOwner)
+			{
+				sheet.setSchema(null);
+				sheet.setCatalog(null);
+			}
 			if (sheet.compareNames(table))
 			{
 				return i;
@@ -369,6 +401,7 @@ public class SpreadsheetFileParser
 		}
 		return -1;
 	}
+
 
 	@Override
 	protected void processOneFile()
@@ -402,6 +435,7 @@ public class SpreadsheetFileParser
 			}
 			else
 			{
+				this.receiver.beginMultiTable();
 				List<Integer> sheets = getSheets();
 				List<String> allSheets = reader.getSheets();
 				for (int i=0; i < sheets.size(); i++)

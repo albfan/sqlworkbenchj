@@ -304,6 +304,9 @@ public class ExcelReader
 	{
 		Row row = dataSheet.getRow(rowIndex);
 		ArrayList<Object> values = new ArrayList<Object>();
+
+		if (row == null) return values;
+		
 		Iterator<Cell> cells = row.cellIterator();
 		int nullCount = 0;
 

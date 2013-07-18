@@ -35,6 +35,8 @@
     <entry dev-build="1" type="enh">For H2 and HSQLDB the generated source of a table now contains the MEMORY/CACHED option</entry>
     <entry dev-build="1" type="enh">For SQL Server the generated source of primary keys and indexes now contains the clustered/nonclustered attribute</entry>
     <entry dev-build="1" type="enh">WbCopy now supports using DROP .. CASCADE (if the DBMS supports is) by specifying -dropTarget=cascade (instead of -dropTarget=true)</entry>
+    <entry dev-build="14" type="fix">Importing multiple worksheets using -mode=update,insert did not work for the Excel import.</entry>
+    <entry dev-build="14" type="fix">-ignoreOwner was not working for WbImport when importing Excel Spreadsheets</entry>
     <entry dev-build="13" type="fix">In the "type" dropdown in the DbExplorer's table list, entries with "VIEW" were not shown for some DBMS</entry>
     <entry dev-build="13" type="fix">Fixed some problems when using quoted identifiers for code completion</entry>
     <entry dev-build="12" type="fix">For Oracle, the source of index organized tables wasn't displayed correctly</entry>

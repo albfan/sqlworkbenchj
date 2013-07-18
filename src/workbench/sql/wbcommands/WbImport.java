@@ -627,6 +627,7 @@ public class WbImport
 			spreadSheetParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			spreadSheetParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 			spreadSheetParser.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
+			spreadSheetParser.setIgnoreOwner(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
 
 			if (inputFile != null)
 			{

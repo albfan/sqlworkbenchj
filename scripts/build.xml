@@ -85,7 +85,7 @@
     <antcall target="replace-build-number"/>
   </target>
 
-  <target name="replace-build-number">
+  <target name="replace-build-number" depends="copy-resources">
     <replace dir="${build}/language" token="@BUILD_NUMBER@" value="${build.number}"/>
     <replace dir="${build}/language" token="@BUILD_DATE@" value="${build_timestamp}"/>
   </target>
@@ -627,7 +627,7 @@
   <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
 
   <!-- create an internal build (= unpublished dev-build) -->
-  <target name="internal-build" depends="clean, compile, test, set-internal-build, replace-build-number, make-jar"/>
+  <target name="internal-build" depends="clean, compile, set-internal-build, replace-build-number, make-jar"/>
 
   <!-- build a development release -->
   <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
