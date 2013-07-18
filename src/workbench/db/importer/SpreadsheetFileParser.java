@@ -317,9 +317,17 @@ public class SpreadsheetFileParser
 		if (this.inputFile == null) return null;
 		String fname = inputFile.getAbsolutePath();
 		String sheet = sheetName;
-		if (sheet == null)
+		if (sheet == null && sheetIndex > -1)
 		{
-			sheet = Integer.toString(sheetIndex);
+			List<String> sheetNames = reader.getSheets();
+			if (sheetIndex < sheetNames.size())
+			{
+				sheet = sheetNames.get(sheetIndex);
+			}
+			else
+			{
+				sheet = Integer.toString(sheetIndex);
+			}
 		}
 		fname += ":" + sheet;
 		return fname;
