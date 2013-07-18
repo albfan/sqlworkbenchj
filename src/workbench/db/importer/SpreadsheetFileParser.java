@@ -353,6 +353,7 @@ public class SpreadsheetFileParser
 		List<Integer> result = new  ArrayList<Integer>(allSheets.size());
 		if (this.checkDependencies)
 		{
+			LogMgr.logDebug("SpreadsheetFileParser.getSheets()", "Evaluating tables to import");
 			TableDependencySorter sorter = new TableDependencySorter(this.connection);
 			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
 			for (String sheet : allSheets)
