@@ -49,6 +49,14 @@ public class VersionNumberTest
 		two = new VersionNumber("2.1.1");
 		assertTrue(two.isNewerThan(one));
 		assertFalse(one.isNewerThan(two));
+
+		one = new VersionNumber("114.13");
+		two = new VersionNumber("114.13.1");
+		assertTrue(two.isNewerOrEqual(one));
+
+		one = new VersionNumber("115");
+		two = new VersionNumber("114.13.1");
+		assertTrue(one.isNewerOrEqual(two));
 	}
 
 	@Test
