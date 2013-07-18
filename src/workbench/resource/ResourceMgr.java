@@ -123,8 +123,19 @@ public class ResourceMgr
 	public static void setWindowIcons(Window window, String baseName)
 	{
 		List<Image> icons = new ArrayList<Image>(2);
-		icons.add(getPng(baseName + "16").getImage());
-		icons.add(getPng(baseName + "32").getImage());
+		ImageIcon image16 = getPng(baseName + "16");
+		if (image16 == null)
+		{
+			image16 = getPng("workbench16");
+		}
+		icons.add(image16.getImage());
+
+		ImageIcon image32 = getPng(baseName + "32");
+		if (image32 == null)
+		{
+			image32 = getPng("workbench32");
+		}
+		icons.add(image32.getImage());
 		window.setIconImages(icons);
 	}
 
@@ -146,7 +157,7 @@ public class ResourceMgr
 	public static String getDynamicString(String baseKey, String option)
 	{
 		if (baseKey == null || option == null) return null;
-		
+
 		try
 		{
 			String value = getResources().getString(baseKey + "." + option.toLowerCase());
@@ -261,6 +272,8 @@ public class ResourceMgr
 
 	/**
 	 * Retrieves a PNG image with no size specified
+	 * @param aName the base name of the icon
+	 * @return the ImageIcon
 	 */
 	public static ImageIcon getPng(String aName)
 	{

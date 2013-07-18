@@ -56,6 +56,7 @@ public class ConnectionProfile
 	private String password;
 	private String driverName;
 	private String group;
+	private String icon;
 	private boolean autocommit;
 	private boolean rollbackBeforeDisconnect;
 	private boolean changed;
@@ -338,6 +339,18 @@ public class ConnectionProfile
 		this.groupChanged = true;
 	}
 
+	public String getIcon()
+	{
+		return this.icon;
+	}
+
+	public void setIcon(String icon)
+	{
+		if (this.icon != null && StringUtil.equalString(this.icon, icon)) return;
+		this.icon = icon;
+		this.changed = true;
+	}
+	
 	public boolean isProfileForKey(ProfileKey key)
 	{
 		ProfileKey myKey = getKey();
@@ -788,6 +801,7 @@ public class ConnectionProfile
 		result.setDriverName(driverName);
 		result.setName(name);
 		result.setGroup(group);
+		result.setIcon(icon);
 		result.setPassword(getPassword());
 		result.setUrl(url);
 		result.setOracleSysDBA(oracleSysDBA);

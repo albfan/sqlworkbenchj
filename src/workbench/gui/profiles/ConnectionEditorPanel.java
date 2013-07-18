@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -43,6 +44,7 @@ import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -51,23 +53,31 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileSystemView;
 
+import workbench.WbManager;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.*;
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
+import workbench.db.ObjectNameFilter;
+import workbench.db.TransactionChecker;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.DelimiterDefinitionPanel;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbColorPicker;
+import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTraversalPolicy;
 
 import workbench.sql.DelimiterDefinition;
@@ -122,6 +132,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(altDelimiter.getCheckBox());
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(tfWorkspaceFile);
+		policy.addComponent(icon);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(editFilterButton);
 
@@ -133,6 +144,7 @@ public class ConnectionEditorPanel
 		this.initEditorList();
 
 		this.selectWkspButton.addActionListener(this);
+		this.selectIconButton.addActionListener(this);
 		this.showPassword.addActionListener(this);
 		this.infoColor.setActionListener(this);
 		this.confirmUpdates.addActionListener(this);
@@ -245,6 +257,10 @@ public class ConnectionEditorPanel
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new FlatButton();
+    jLabel3 = new javax.swing.JLabel();
+    jPanel4 = new javax.swing.JPanel();
+    icon = new StringPropertyEditor();
+    selectIconButton = new FlatButton();
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
@@ -746,6 +762,49 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel1, gridBagConstraints);
 
+    jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel3.setText(ResourceMgr.getString("LblIcon")); // NOI18N
+    jLabel3.setToolTipText(ResourceMgr.getString("d_LblIcon")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    jPanel3.add(jLabel3, gridBagConstraints);
+
+    jPanel4.setLayout(new java.awt.GridBagLayout());
+
+    icon.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    icon.setToolTipText(ResourceMgr.getString("d_LblIcon")); // NOI18N
+    icon.setName("icon"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel4.add(icon, gridBagConstraints);
+
+    selectIconButton.setText("...");
+    selectIconButton.setMaximumSize(null);
+    selectIconButton.setMinimumSize(null);
+    selectIconButton.setPreferredSize(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel4.add(selectIconButton, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
+    jPanel3.add(jPanel4, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 13;
@@ -981,13 +1040,16 @@ public class ConnectionEditorPanel
   protected javax.swing.JLabel filterLabel;
   protected javax.swing.JPanel filterPanel;
   protected javax.swing.JCheckBox hideWarnings;
+  protected javax.swing.JTextField icon;
   protected javax.swing.JCheckBox includeNull;
   protected workbench.gui.components.WbColorPicker infoColor;
   protected javax.swing.JLabel infoColorLabel;
   protected javax.swing.JLabel jLabel1;
+  protected javax.swing.JLabel jLabel3;
   protected javax.swing.JPanel jPanel1;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
+  protected javax.swing.JPanel jPanel4;
   protected javax.swing.JPanel jPanel6;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JSeparator jSeparator3;
@@ -1002,6 +1064,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox removeComments;
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
   protected javax.swing.JLabel scriptLabel;
+  protected javax.swing.JButton selectIconButton;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
   protected javax.swing.JTextField tfFetchSize;
@@ -1063,6 +1126,40 @@ public class ConnectionEditorPanel
 				checkExtendedProps();
 			}
 		});
+	}
+
+	public void selectIcon()
+	{
+		File jarDir = new File(WbManager.getInstance().getJarPath());
+		FileSystemView fsv = new RestrictedFileSystemView(jarDir);
+		JFileChooser fc = new WbFileChooser(jarDir, fsv);
+		ExtensionFileFilter ff = new ExtensionFileFilter(ResourceMgr.getString("TxtFileFilterPng"), "png", true)
+		{
+			@Override
+			public boolean accept(File f)
+			{
+				if (super.accept(f))
+				{
+					String name = f.getName().toLowerCase();
+					return name.endsWith("16.png");
+				}
+				return false;
+			}
+		};
+
+		fc.setMultiSelectionEnabled(false);
+		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+		fc.addChoosableFileFilter(ff);
+		fc.setFileFilter(ff);
+
+		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			File fl = fc.getSelectedFile();
+			this.icon.setText(fl.getName());
+		}
 	}
 
 	public void selectWorkspace()
@@ -1334,6 +1431,10 @@ public class ConnectionEditorPanel
 		else if (e.getSource() == this.selectWkspButton)
 		{
 			this.selectWorkspace();
+		}
+		else if (e.getSource() == this.selectIconButton)
+		{
+			this.selectIcon();
 		}
 		else if (e.getSource() == this.showPassword)
 		{

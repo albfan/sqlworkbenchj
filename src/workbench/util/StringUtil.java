@@ -703,8 +703,14 @@ public class StringUtil
 
 	/**
 	 * Checks if both Strings are equal considering null values.
+	 * 
 	 * A null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
+	 *
+	 * @param one the first String, maybe null
+	 * @param other the second String, maybe null
+	 * @return true if both strings are equals
+	 *
 	 * @see #isBlank(java.lang.CharSequence)
 	 */
 	public static boolean equalStringOrEmpty(String one, String other)
@@ -717,6 +723,11 @@ public class StringUtil
 	 * Checks if both Strings are equal considering null values.
 	 * A null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
+	 *
+	 * @param one the first String, maybe null
+	 * @param other the second String, maybe null
+	 * @param ignoreCase if true the string comparison is done using compareToIgnoreCase()
+	 * @return true if both strings are equals
 	 * @see #isBlank(java.lang.CharSequence)
 	 */
 	public static boolean equalStringOrEmpty(String one, String other, boolean ignoreCase)
@@ -733,6 +744,7 @@ public class StringUtil
 	/**
 	 * @param value1 the first String, maybe null
 	 * @param value2 the second String, maybe null
+	 * @param ignoreCase if true the string comparison is done using compareToIgnoreCase()
 	 * @return 0 if both are null
 	 */
 	public static int compareStrings(String value1, String value2, boolean ignoreCase)

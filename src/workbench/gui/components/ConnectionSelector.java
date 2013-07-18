@@ -26,19 +26,22 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.sql.SQLException;
 
-
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.profiles.ProfileSelectionDialog;
+
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.WbThread;
 
 /**
@@ -191,6 +194,25 @@ public class ConnectionSelector
 
 	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
+		String icon = aProfile.getIcon();
+		if (StringUtil.isEmptyString(icon))
+		{
+			icon = "workbench";
+		}
+		else
+		{
+			WbFile f = new WbFile(icon);
+			if (StringUtil.isNonBlank(f.getExtension()))
+			{
+				icon = f.getFileName();
+			}
+			if (icon.endsWith("16") || icon.endsWith("32"))
+			{
+				icon = icon.substring(0, icon.length() - 2);
+			}
+		}
+		ResourceMgr.setWindowIcons(this.parent, icon);
+
 		if (isConnectInProgress()) return;
 
 		WbConnection conn = null;

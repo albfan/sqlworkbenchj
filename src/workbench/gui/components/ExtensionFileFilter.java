@@ -65,13 +65,13 @@ public class ExtensionFileFilter
 	private boolean ignoreCase = true;
 	private ExportType exportType;
 
-	public ExtensionFileFilter(String aDescription, String extension, boolean ignore)
+	public ExtensionFileFilter(String aDescription, String extension, boolean ignoreFilenameCase)
 	{
 		super();
 		this.desc = aDescription;
 		this.extensions = new ArrayList<String>();
 		this.extensions.add(extension);
-		this.ignoreCase = ignore;
+		this.ignoreCase = ignoreFilenameCase;
 	}
 
 	public ExtensionFileFilter(String aDescription, List<String> anExtensionList)
