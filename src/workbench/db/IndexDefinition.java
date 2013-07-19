@@ -48,6 +48,7 @@ public class IndexDefinition
 	private ConstraintDefinition uniqueConstraint;
 	private String indexExpression;
 	private String displayName;
+	private ObjectSourceOptions sourceOptions = new ObjectSourceOptions();
 
 	// For Oracle, Postgres
 	private String tableSpace;
@@ -69,6 +70,29 @@ public class IndexDefinition
 		this.baseTable = table;
 	}
 
+	/**
+	 * Define the source options to be used.
+	 *
+	 * @param options  the new options. If null, the call is ignored
+	 */
+	public void setSourceOptions(ObjectSourceOptions options)
+	{
+		if (options != null)
+		{
+			this.sourceOptions = options;
+		}
+	}
+
+	/**
+	 * Returns the source options to build the table's SQL
+	 *
+	 * @return the options. Never null
+	 */
+	public ObjectSourceOptions getSourceOptions()
+	{
+		return this.sourceOptions;
+	}
+	
 	public boolean isPartitioned()
 	{
 		return partitioned;

@@ -280,7 +280,7 @@ public class TableSourceBuilder
 		Map<String, String> columnConstraints = consReader.getColumnConstraints(dbConnection, table);
 
 		// this should have been populated previously!
-		TableSourceOptions sourceOptions = table.getSourceOptions();
+		ObjectSourceOptions sourceOptions = table.getSourceOptions();
 		String typeOption = sourceOptions.getTypeModifier();
 
 		result.append(generateCreateObject(includeDrop, table, typeOption));

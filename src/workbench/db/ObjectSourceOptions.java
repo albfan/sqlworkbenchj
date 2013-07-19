@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @author Thomas Kellerer
  */
-public class TableSourceOptions
+public class ObjectSourceOptions
 {
 	private final String KEY_TYPE_MODIFIER = "typMod";
 	private final String KEY_INLINE_OPTION = "inlineSql";
@@ -141,9 +141,9 @@ public class TableSourceOptions
 		return this.initialized;
 	}
 
-	public TableSourceOptions createCopy()
+	public ObjectSourceOptions createCopy()
 	{
-		TableSourceOptions copy = new TableSourceOptions();
+		ObjectSourceOptions copy = new ObjectSourceOptions();
 		copy.options.putAll(this.options);
 		copy.configSettings.putAll(this.configSettings);
 		copy.initialized = this.initialized;

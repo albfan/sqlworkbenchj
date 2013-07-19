@@ -58,7 +58,7 @@ public class TableIdentifier
 	private boolean retrieveFkSource;
 	private boolean useInlinePK;
 
-	private TableSourceOptions sourceOptions = new TableSourceOptions();
+	private ObjectSourceOptions sourceOptions = new ObjectSourceOptions();
 
 	/**
 	 * DBMS specific tablespace options
@@ -166,7 +166,7 @@ public class TableIdentifier
 	 *
 	 * @param options  the new options. If null, the call is ignored
 	 */
-	public void setSourceOptions(TableSourceOptions options)
+	public void setSourceOptions(ObjectSourceOptions options)
 	{
 		if (options != null)
 		{
@@ -179,7 +179,7 @@ public class TableIdentifier
 	 *
 	 * @return the options. Never null
 	 */
-	public TableSourceOptions getSourceOptions()
+	public ObjectSourceOptions getSourceOptions()
 	{
 		return this.sourceOptions;
 	}

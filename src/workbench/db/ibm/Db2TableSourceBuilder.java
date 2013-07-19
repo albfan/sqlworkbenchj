@@ -33,7 +33,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceOptions;
+import workbench.db.ObjectSourceOptions;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
@@ -97,7 +97,7 @@ public class Db2TableSourceBuilder
 				String histTab = rs.getString(5);
 				TableIdentifier histTable = new TableIdentifier(histSchema, histTab);
 
-				TableSourceOptions options = table.getSourceOptions();
+				ObjectSourceOptions options = table.getSourceOptions();
 
 				String inline = "PERIOD " + period + " (" + begin + ", " + end + ")";
 				options.setInlineOption(inline);

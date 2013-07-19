@@ -57,7 +57,7 @@ public class PostgresTableSourceBuilder
 	@Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
-		TableSourceOptions option = table.getSourceOptions();
+		ObjectSourceOptions option = table.getSourceOptions();
 		if (option.isInitialized()) return;
 
 		PostgresRuleReader ruleReader = new PostgresRuleReader();
@@ -80,7 +80,7 @@ public class PostgresTableSourceBuilder
 
 	private void readTableOptions(TableIdentifier tbl)
 	{
-		TableSourceOptions option = tbl.getSourceOptions();
+		ObjectSourceOptions option = tbl.getSourceOptions();
 		StringBuilder inherit = readInherits(tbl);
 
 		StringBuilder tableSql = new StringBuilder();
@@ -192,7 +192,7 @@ public class PostgresTableSourceBuilder
 		option.setTableOption(tableSql.toString());
 	}
 
-	private void setConfigSettings(String options, TableSourceOptions tblOption)
+	private void setConfigSettings(String options, ObjectSourceOptions tblOption)
 	{
 		List<String> l = StringUtil.stringToList(options, ",", true, true, false, true);
 		for (String s : l)
@@ -270,7 +270,7 @@ public class PostgresTableSourceBuilder
 
 	public void readForeignTableOptions(TableIdentifier table)
 	{
-		TableSourceOptions option = table.getSourceOptions();
+		ObjectSourceOptions option = table.getSourceOptions();
 
 		String sql =
 			"select ft.ftoptions, fs.srvname \n" +

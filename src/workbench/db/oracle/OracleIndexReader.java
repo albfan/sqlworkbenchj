@@ -60,6 +60,7 @@ public class OracleIndexReader
 	private PreparedStatement indexStatement;
 	private PreparedStatement pkStament;
 	private String defaultTablespace;
+	private final boolean hasCompression;
 
 	public OracleIndexReader(DbMetadata meta)
 	{
@@ -75,6 +76,7 @@ public class OracleIndexReader
 		{
 			defaultTablespace = OracleUtils.getDefaultTablespace(meta.getWbConnection());
 		}
+		hasCompression = JdbcUtils.hasMinimumServerVersion(meta.getWbConnection(), "9.0");
 	}
 
 	@Override
@@ -145,7 +147,13 @@ public class OracleIndexReader
 			"       i.leaf_blocks as pages, \n" +
 			"       null as filter_condition, \n" +
 			"       i.tablespace_name, \n" +
-			"       i.partitioned \n" +
+			"       i.partitioned, \n" +
+			(hasCompression ?
+			"       i.compression, \n" +
+			"       i.prefix_length " :
+			// no compression
+			"       null as compression, \n" +
+			"       -1 as prefix_length ") +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c " +
 			"    ON i.index_name = c.index_name " +
@@ -203,6 +211,16 @@ public class OracleIndexReader
 	{
 		if (Settings.getInstance().getBoolProperty(PROP_USE_JDBC_FOR_INDEXLIST, false)) return;
 		String tblSpace = rs.getString("TABLESPACE_NAME");
+		if (hasCompression)
+		{
+			String compressed = rs.getString("COMPRESSION");
+			int compressLevel = rs.getInt("PREFIX_LENGTH");
+			if ("ENABLED".equals(compressed) && compressLevel > 0)
+			{
+				ObjectSourceOptions options = index.getSourceOptions();
+				options.addConfigSetting("compression_level", Integer.toString(compressLevel));
+			}
+		}
 		index.setTablespace(tblSpace);
 	}
 
@@ -319,7 +337,7 @@ public class OracleIndexReader
 		String option = null;
 		if (OracleUtils.shouldAppendTablespace(index.getTablespace(), defaultTablespace, index.getSchema(), metaData.getWbConnection().getCurrentUser()))
 		{
-			option = "\n    TABLESPACE " + index.getTablespace();
+			option = "\n   TABLESPACE " + index.getTablespace();
 		}
 
 		if ("NORMAL/REV".equals(index.getIndexType()))
@@ -333,6 +351,11 @@ public class OracleIndexReader
 			{
 				option += reverse;
 			}
+		}
+		String level = index.getSourceOptions().getConfigSettings().get("compression_level");
+		if (level != null)
+		{
+			option += "\n   COMPRESS " + level;
 		}
 		return option;
 	}

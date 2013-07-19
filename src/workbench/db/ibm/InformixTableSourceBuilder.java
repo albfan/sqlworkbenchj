@@ -14,7 +14,7 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceOptions;
+import workbench.db.ObjectSourceOptions;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
@@ -49,7 +49,7 @@ public class InformixTableSourceBuilder
 	{
 		if (Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.tablesource.lockmode", true))
 		{
-			TableSourceOptions option = table.getSourceOptions();
+			ObjectSourceOptions option = table.getSourceOptions();
 			if (!option.isInitialized())
 			{
 				readLockMode(table);
@@ -95,7 +95,7 @@ public class InformixTableSourceBuilder
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				TableSourceOptions option = table.getSourceOptions();
+				ObjectSourceOptions option = table.getSourceOptions();
 				String lvl = rs.getString(1);
 
 				int fext = -1;
