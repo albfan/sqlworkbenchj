@@ -1730,7 +1730,7 @@ public class SqlPanel
 			this.cancelExecution = true;
 			this.executionThread.interrupt();
 			this.executionThread = null;
-			this.stmtRunner.abort();
+			if (this.stmtRunner != null) this.stmtRunner.abort();
 			LogMgr.logDebug("SqlPanel.forceAbort()", "'" + name + "' was interrupted.");
 		}
 		catch (Exception e)
@@ -1834,36 +1834,29 @@ public class SqlPanel
 
 	protected void cancelRetrieve()
 	{
-		try
+		cancelExecution = true;
+		setCancelState(false);
+		stmtRunner.cancel();
+		Thread.yield();
+		if (this.executionThread != null)
 		{
-			cancelExecution = true;
-			setCancelState(false);
-			stmtRunner.cancel();
-			Thread.yield();
-			if (this.executionThread != null)
+			// Wait for the execution thread to finish because of the cancel() call.
+			// but wait at most 2.5 seconds (configurable) for the statement to respond
+			// to the cancel() call. Depending on the sate of the statement, calling Statement.cancel()
+			// might not have any effect.
+			try
 			{
-				// Wait for the execution thread to finish because of the cancel() call.
-				// but wait at most 2.5 seconds (configurable) for the statement to respond
-				// to the cancel() call. Depending on the sate of the statement, calling Statement.cancel()
-				// might not have any effect.
-				try
-				{
-					executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
-				}
-				catch (InterruptedException ex)
-				{
-					LogMgr.logDebug("SqlPanel.cancelRetrieve()", "Error when waiting for cancel to finish", ex);
-				}
+				executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
 			}
-			// Apparently cancelling the SQL statement did not work, so kill it the brutal way...
-			if (this.executionThread != null && executionThread.isAlive())
+			catch (InterruptedException ex)
 			{
-				executionThread.interrupt();
+				LogMgr.logDebug("SqlPanel.cancelRetrieve()", "Error when waiting for cancel to finish", ex);
 			}
 		}
-		finally
+		// Apparently cancelling the SQL statement did not work, so kill it the brutal way...
+		if (this.executionThread != null && executionThread.isAlive())
 		{
-//			iconHandler.showBusyIcon(false);
+			executionThread.interrupt();
 		}
 	}
 
@@ -1887,9 +1880,9 @@ public class SqlPanel
 			@Override
 			public void run()
 			{
-				for (int i=0; i < anActionList.length; i++)
+				for (Action action : anActionList)
 				{
-					anActionList[i].setEnabled(aFlag);
+					if (action != null) action.setEnabled(aFlag);
 				}
 			}
 		});
@@ -3804,14 +3797,24 @@ public class SqlPanel
 	@Override
 	public void reset()
 	{
-		editor.reset();
-		setLocked(false);
+		locked = false;
+		if (editor != null) editor.reset();
 		clearLog();
 		clearResultTabs();
-		if (this.currentData != null) this.currentData.dispose();
+		if (this.currentData != null)
+		{
+			this.currentData.dispose();
+		}
 		currentData = null;
-		iconHandler.flush();
+		if (iconHandler != null) iconHandler.flush();
 		if (sqlHistory != null) sqlHistory.clear();
+	}
+
+	@Override
+	public void removeNotify()
+	{
+		dispose();
+		super.removeNotify();
 	}
 
 	@Override
@@ -3821,7 +3824,7 @@ public class SqlPanel
 		Settings.getInstance().removeFontChangedListener(this);
 
 		reset();
-		iconHandler.dispose();
+		if (iconHandler != null) iconHandler.dispose();
 		if (this.stmtRunner != null) this.stmtRunner.dispose();
 
 		if (this.execListener != null) execListener.clear();

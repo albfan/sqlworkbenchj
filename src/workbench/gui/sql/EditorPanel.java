@@ -382,17 +382,24 @@ public class EditorPanel
 	}
 
 	@Override
+	public void removeNotify()
+	{
+		dispose();
+		super.removeNotify();
+	}
+
+	@Override
 	public void dispose()
 	{
 		super.dispose();
 		Settings.getInstance().removeFontChangedListener(this);
 		Settings.getInstance().removePropertyChangeListener(this);
 		this.clearUndoBuffer();
-		this.popup.removeAll();
+		if (this.popup != null) this.popup.removeAll();
 		this.popup = null;
 		this.stopBlinkTimer();
-		this.painter.dispose();
-		inputHandler.dispose();
+		if (painter != null) this.painter.dispose();
+		if (inputHandler != null) inputHandler.dispose();
 		disposeAction(this.columnSelection);
 		disposeAction(this.commentAction);
 		disposeAction(this.fileOpen);

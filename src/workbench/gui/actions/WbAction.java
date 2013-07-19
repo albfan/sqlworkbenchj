@@ -671,7 +671,6 @@ public class WbAction
 			}
 			createdItems.clear();
 		}
-		this.createdItems = null;
 		this.delegate = null;
 		this.original = null;
 		this.proxy = null;

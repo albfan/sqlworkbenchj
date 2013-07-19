@@ -43,12 +43,17 @@ public class PanelTitleSetter
 		{
 			JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(p);
-			client.setTabTitle(tab, index);
+			if (index > -1)
+			{
+				client.setTabTitle(tab, index);
+			}
 		}
 	}
 
 	public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
 	{
+		if (index < 0) return;
+		
 		String title = plainTitle;
 		if (panel.isLocked())
 		{

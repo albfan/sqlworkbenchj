@@ -25,6 +25,8 @@ package workbench.gui.components;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
+
+import workbench.gui.actions.WbAction;
 import workbench.resource.ResourceMgr;
 
 /**
