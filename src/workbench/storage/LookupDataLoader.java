@@ -142,6 +142,7 @@ public class LookupDataLoader
 				order.append(',');
 			}
 			order.append(handler.quoteObjectname(colName));
+			cols++;
 		}
 		return order.toString();
 	}
