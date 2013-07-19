@@ -636,19 +636,18 @@
         You can assign an icon file for each connection profile. The icon will then be used for the main window
         instead of the default application icon.
       </para>
+      <para>
+        The icon file can be a <literal>png</literal> or <literal>gif</literal> file.
+      </para>
       <caution>
         <para>
-          The icon file <emphasis role="bold">has</emphasis> to be stored in the same directory as <literal>sqlworkbench.jar</literal>.
-          Using an icon from a different directory will not work.
+          Do <emphasis role="bold">not</emphasis> use an animated GIF file because that will hang the application!
         </para>
       </caution>
       <para>
-        The icon file needs to be a <literal>png</literal> file and the filename has to end with 16 to indicate the icon's
-        size in pixel (16x16 pixel).
-      </para>
-      <para>
-        If you specify e.g. <literal>attention16.png</literal> then &wb-productname; also tries to load <literal>attention32.png</literal>.
-        Whether the 32x32pixel icon is used, depends on your operating system and desktop theme.
+        At least one file with an icon of 16x16 pixel should be selected. You can select multiple files with different
+        icon sizes (e.g. a 16x16 and a 32x32 icon). Whether or not the additional sizes (i.e. bigger than 16x16)
+        will be used depends on your operating system and desktop theme.
       </para>
     </section>
   </section>

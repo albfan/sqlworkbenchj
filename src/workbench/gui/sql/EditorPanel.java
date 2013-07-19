@@ -22,9 +22,6 @@
  */
 package workbench.gui.sql;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -35,16 +32,16 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -59,20 +56,52 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
 
 import workbench.WbManager;
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.*;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.WbFileChooser;
-import workbench.gui.components.WbMenuItem;
-import workbench.gui.editor.*;
-import workbench.interfaces.*;
+import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.EncodingSelector;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.FormattableSql;
+import workbench.interfaces.SqlTextContainer;
+import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ColumnSelectionAction;
+import workbench.gui.actions.CommentAction;
+import workbench.gui.actions.FileOpenAction;
+import workbench.gui.actions.FileReloadAction;
+import workbench.gui.actions.FileSaveAction;
+import workbench.gui.actions.FileSaveAsAction;
+import workbench.gui.actions.FindAction;
+import workbench.gui.actions.FindNextAction;
+import workbench.gui.actions.FindPreviousAction;
+import workbench.gui.actions.FormatSqlAction;
+import workbench.gui.actions.JumpToLineAction;
+import workbench.gui.actions.MatchBracketAction;
+import workbench.gui.actions.RedoAction;
+import workbench.gui.actions.ReplaceAction;
+import workbench.gui.actions.UnCommentAction;
+import workbench.gui.actions.UndoAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.WbFileChooser;
+import workbench.gui.components.WbMenuItem;
+import workbench.gui.editor.AnsiSQLTokenMarker;
+import workbench.gui.editor.JEditTextArea;
+import workbench.gui.editor.SearchAndReplace;
+import workbench.gui.editor.SyntaxDocument;
+import workbench.gui.editor.SyntaxUtilities;
+import workbench.gui.editor.TextFormatter;
+import workbench.gui.editor.TokenMarker;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -331,14 +360,14 @@ public class EditorPanel
 		if (!editable)
 		{
 			Component[] c = this.popup.getComponents();
-			for (int i = 0; i < c.length; i++)
+			for (Component c1 : c)
 			{
-				if (c[i] instanceof WbMenuItem)
+				if (c1 instanceof WbMenuItem)
 				{
-					WbMenuItem menu = (WbMenuItem)c[i];
+					WbMenuItem menu = (WbMenuItem) c1;
 					if (menu.getAction() == fileOpen)
 					{
-						popup.remove(c[i]);
+						popup.remove(c1);
 						return;
 					}
 				}
@@ -379,13 +408,6 @@ public class EditorPanel
 		}
 		this.popup.add(anAction.getMenuItem());
 		this.addKeyBinding(anAction);
-	}
-
-	@Override
-	public void removeNotify()
-	{
-		dispose();
-		super.removeNotify();
 	}
 
 	@Override

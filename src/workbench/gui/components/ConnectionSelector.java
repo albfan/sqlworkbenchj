@@ -24,7 +24,9 @@ package workbench.gui.components;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.interfaces.Connectable;
 import workbench.interfaces.StatusBar;
@@ -40,8 +42,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.profiles.ProfileSelectionDialog;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.ImageUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbFile;
 import workbench.util.WbThread;
 
 /**
@@ -192,28 +194,29 @@ public class ConnectionSelector
 		});
 	}
 
+
 	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
-		String icon = aProfile.getIcon();
-		if (StringUtil.isEmptyString(icon))
+		if (isConnectInProgress()) return;
+
+		List<File> iconFiles = ImageUtil.getIcons(aProfile.getIcon());
+		if (iconFiles.size() > 0)
 		{
-			icon = "workbench";
+			try
+			{
+				ResourceMgr.setWindowIcons(parent, iconFiles);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logError("ConnectionSelector.doConnect()", "Could not set window icon", th);
+				ResourceMgr.setWindowIcons(this.parent, "workbench");
+			}
 		}
 		else
 		{
-			WbFile f = new WbFile(icon);
-			if (StringUtil.isNonBlank(f.getExtension()))
-			{
-				icon = f.getFileName();
-			}
-			if (icon.endsWith("16") || icon.endsWith("32"))
-			{
-				icon = icon.substring(0, icon.length() - 2);
-			}
+			// make sure to clear any previously assigned customized icon
+			ResourceMgr.setWindowIcons(this.parent, "workbench");
 		}
-		ResourceMgr.setWindowIcons(this.parent, icon);
-
-		if (isConnectInProgress()) return;
 
 		WbConnection conn = null;
 		String error = null;

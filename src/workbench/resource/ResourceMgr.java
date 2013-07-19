@@ -25,6 +25,7 @@ package workbench.resource;
 import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -120,21 +121,33 @@ public class ResourceMgr
 		return new VersionNumber(nr);
 	}
 
+	public static void setWindowIcons(Window window, List<File> iconFiles)
+	{
+		if (iconFiles == null) return;
+		try
+		{
+			List<Image> icons = new ArrayList<Image>(iconFiles.size());
+			for (File f : iconFiles)
+			{
+				URL url = f.toURI().toURL();
+				ImageIcon img = new ImageIcon(url);
+				icons.add(img.getImage());
+			}
+			window.setIconImages(icons);
+		}
+		catch (Throwable ex)
+		{
+			LogMgr.logError("ResourceMgr.setWindowIcons()", "Could not set icons!", ex);
+			setWindowIcons(window, "workbench");
+		}
+	}
+
 	public static void setWindowIcons(Window window, String baseName)
 	{
 		List<Image> icons = new ArrayList<Image>(2);
 		ImageIcon image16 = getPng(baseName + "16");
-		if (image16 == null)
-		{
-			image16 = getPng("workbench16");
-		}
 		icons.add(image16.getImage());
-
 		ImageIcon image32 = getPng(baseName + "32");
-		if (image32 == null)
-		{
-			image32 = getPng("workbench32");
-		}
 		icons.add(image32.getImage());
 		window.setIconImages(icons);
 	}

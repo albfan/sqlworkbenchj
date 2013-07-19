@@ -1027,17 +1027,11 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public void removeNotify()
-	{
-		dispose();
-		super.removeNotify();
-	}
-	
-	@Override
 	public void dispose()
 	{
 		this.reset();
 		this.tables.dispose();
+		this.procs.reset();
 		if (mainWindow != null)
 		{
 			mainWindow.removeExecutionListener(this);

@@ -53,13 +53,12 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileSystemView;
 
-import workbench.WbManager;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -82,8 +81,11 @@ import workbench.gui.components.WbTraversalPolicy;
 
 import workbench.sql.DelimiterDefinition;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
+import workbench.util.ImageUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -1130,24 +1132,21 @@ public class ConnectionEditorPanel
 
 	public void selectIcon()
 	{
-		File jarDir = new File(WbManager.getInstance().getJarPath());
-		FileSystemView fsv = new RestrictedFileSystemView(jarDir);
-		JFileChooser fc = new WbFileChooser(jarDir, fsv);
-		ExtensionFileFilter ff = new ExtensionFileFilter(ResourceMgr.getString("TxtFileFilterPng"), "png", true)
-		{
-			@Override
-			public boolean accept(File f)
-			{
-				if (super.accept(f))
-				{
-					String name = f.getName().toLowerCase();
-					return name.endsWith("16.png");
-				}
-				return false;
-			}
-		};
+		String last = Settings.getInstance().getProperty("workbench.iconfile.lastdir", null);
+		File lastDir = null;
 
-		fc.setMultiSelectionEnabled(false);
+		if (StringUtil.isNonBlank(last))
+		{
+			lastDir = new File(last);
+		}
+		else
+		{
+			lastDir = Settings.getInstance().getConfigDir();
+		}
+
+		JFileChooser fc = new WbFileChooser(lastDir);
+		ExtensionFileFilter ff = new ExtensionFileFilter(ResourceMgr.getString("TxtFileFilterIcons"), CollectionUtil.arrayList("png","gif"), true);
+		fc.setMultiSelectionEnabled(true);
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
 		fc.addChoosableFileFilter(ff);
@@ -1157,8 +1156,36 @@ public class ConnectionEditorPanel
 
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			File fl = fc.getSelectedFile();
-			this.icon.setText(fl.getName());
+			File[] files = fc.getSelectedFiles();
+			String fnames = "";
+			String sep = System.getProperty("path.separator");
+			int imgCount = 0;
+
+			for (File sf : files)
+			{
+				WbFile fl = new WbFile(sf);
+				if (ImageUtil.isPng(sf) || ImageUtil.isGifIcon(sf))
+				{
+					if (imgCount > 0) fnames += sep;
+					fnames += fl.getFullPath();
+					imgCount ++;
+				}
+				else
+				{
+					String msg = ResourceMgr.getFormattedString("ErrInvalidIcon", fl.getName());
+					WbSwingUtilities.showErrorMessage(this, msg);
+					fnames = null;
+					break;
+				}
+			}
+
+			if (fnames != null)
+			{
+				this.icon.setText(fnames);
+				this.icon.setCaretPosition(0);
+			}
+			WbFile dir = new WbFile(fc.getCurrentDirectory());
+			Settings.getInstance().setProperty("workbench.iconfile.lastdir", dir.getFullPath());
 		}
 	}
 

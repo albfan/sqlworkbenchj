@@ -3099,8 +3099,8 @@ public class MainWindow
 			// the actual disconnect from the DB is done afterwards
 			// through the ConnectionMgr
 			panel.disconnect();
-			
-			this.sqlTab.remove(index);
+
+			panel.dispose();
 
 			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
 
@@ -3112,6 +3112,7 @@ public class MainWindow
 			}
 			disposeMenu(panelMenus.get(index));
 			this.panelMenus.remove(index);
+			this.sqlTab.remove(index);
 
 			if (updateGUI)
 			{

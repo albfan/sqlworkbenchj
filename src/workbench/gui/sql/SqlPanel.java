@@ -3811,13 +3811,6 @@ public class SqlPanel
 	}
 
 	@Override
-	public void removeNotify()
-	{
-		dispose();
-		super.removeNotify();
-	}
-
-	@Override
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);

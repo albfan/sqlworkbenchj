@@ -43,7 +43,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -92,11 +94,42 @@ public class OracleIndexReaderTest
 		try
 		{
 			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getIndexes(null, OracleTestUtil.SCHEMA_NAME);
-			System.out.println(indexes);
 			assertEquals(3, indexes.size());
 			assertEquals("AAA_UPPER", indexes.get(0).getName());
 			assertEquals("BBB_ID", indexes.get(1).getName());
 			assertEquals("ZZZ_FOO", indexes.get(2).getName());
+		}
+		finally
+		{
+			TestUtil.executeScript(con,"drop table foo;");
+		}
+	}
+
+	@Test
+	public void testCompress()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table foo (id1 integer, id2 integer, id3 integer);\n" +
+				"create index c1 on foo (id1, id2) compress 1;\n" +
+				"create index c2 on foo (id1, id2, id3) compress 2;\n"
+			);
+			TableIdentifier tbl = new TableIdentifier("FOO");
+			List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(tbl);
+			assertNotNull(indexList);
+			assertEquals(2, indexList.size());
+			IndexDefinition c1 = indexList.get(0);
+			String source1 = c1.getSource(con).toString();
+			assertTrue(source1.contains("COMPRESS 1"));
+
+			IndexDefinition c2 = indexList.get(1);
+			String source2 = c2.getSource(con).toString();
+			assertTrue(source2.contains("COMPRESS 2"));
 		}
 		finally
 		{
