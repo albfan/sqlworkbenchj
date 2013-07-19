@@ -169,6 +169,11 @@ public abstract class BaseAnalyzer
 		this.catalogSeparator = newSeparator;
 	}
 
+	public String getSqlVerb()
+	{
+		return this.verb;
+	}
+	
 	public String getAnalyzedSql()
 	{
 		return this.sql;

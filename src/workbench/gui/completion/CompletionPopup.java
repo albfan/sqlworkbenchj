@@ -91,6 +91,7 @@ public class CompletionPopup
 	protected CompletionSearchField searchField;
 	private boolean dbStoresMixedCase;
 	private boolean ignoreSearchChange;
+	private CompletionListRenderer listRenderer;
 
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -103,7 +104,8 @@ public class CompletionPopup
 		this.elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		Border b = new CompoundBorder(elementList.getBorder(), new EmptyBorder(0,2,0,2));
 		this.elementList.setBorder(b);
-		elementList.setCellRenderer(new CompletionListRenderer());
+		listRenderer = new CompletionListRenderer();
+		elementList.setCellRenderer(listRenderer);
 
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);
@@ -123,7 +125,7 @@ public class CompletionPopup
 		this.context = c;
 	}
 
-	public void showPopup(String valueToSelect)
+	public void showPopup(String valueToSelect, boolean hightlightNotNulls)
 	{
 		if (!editor.isReallyVisible())
 		{
@@ -134,6 +136,7 @@ public class CompletionPopup
 
 		try
 		{
+			this.listRenderer.setShowNotNulls(hightlightNotNulls);
 			scroll.setColumnHeaderView(headerComponent);
 			headerComponent.doLayout();
 			final Dimension d = headerComponent.getPreferredSize();

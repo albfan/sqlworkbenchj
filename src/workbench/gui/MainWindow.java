@@ -59,6 +59,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -3115,6 +3116,7 @@ public class MainWindow
 				ConnectionMgr.getInstance().disconnect(conn);
 				showStatusMessage("");
 			}
+			disposeMenu(panelMenus.get(index));
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
 
@@ -3142,6 +3144,24 @@ public class MainWindow
 		{
 			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
+	}
+
+	private void disposeMenu(JMenuBar menuBar)
+	{
+		if (menuBar == null) return;
+		MenuElement[] elements = menuBar.getSubElements();
+		for (MenuElement menu : elements)
+		{
+			if (menu instanceof JMenu)
+			{
+				((JMenu)menu).removeAll();
+			}
+			else if (menu instanceof Container)
+			{
+				((Container)menu).removeAll();
+			}
+		}
+		menuBar.removeAll();
 	}
 
 	@Override

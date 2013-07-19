@@ -77,7 +77,7 @@ public class JoinCompletionPopup
 
 	public void showPopup()
 	{
-		super.showPopup(null);
+		super.showPopup(null, false);
 	}
 
 	@Override

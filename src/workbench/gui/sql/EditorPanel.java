@@ -393,9 +393,28 @@ public class EditorPanel
 		this.stopBlinkTimer();
 		this.painter.dispose();
 		inputHandler.dispose();
+		disposeAction(this.columnSelection);
+		disposeAction(this.commentAction);
+		disposeAction(this.fileOpen);
+		disposeAction(this.fileReloadAction);
+		disposeAction(this.fileSave);
+		disposeAction(this.fileSaveAs);
+		disposeAction(this.formatSql);
+		disposeAction(this.jumpToLineAction);
+		disposeAction(this.matchBracket);
+		disposeAction(this.redo);
+		disposeAction(this.unCommentAction);
+		disposeAction(this.undo);
 		this.setDocument(new SyntaxDocument());
 	}
 
+	private void disposeAction(WbAction action)
+	{
+		if (action != null)
+		{
+			action.dispose();
+		}
+	}
 	/**
 	 * Return the selected statement of the editor. If no
 	 * text is selected, the whole text will be returned

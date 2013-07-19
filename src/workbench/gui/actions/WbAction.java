@@ -661,4 +661,20 @@ public class WbAction
 		return hash;
 	}
 
+	public void dispose()
+	{
+		if (this.createdItems != null)
+		{
+			for (JMenuItem item : createdItems)
+			{
+				item.removeAll();
+			}
+			createdItems.clear();
+		}
+		this.createdItems = null;
+		this.delegate = null;
+		this.original = null;
+		this.proxy = null;
+		this.toolbarButton = null;
+	}
 }

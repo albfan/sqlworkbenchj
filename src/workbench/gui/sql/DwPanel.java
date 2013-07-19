@@ -81,6 +81,7 @@ import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.UpdateDatabaseAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.GenericRowMonitor;
@@ -195,6 +196,21 @@ public class DwPanel
 	{
 		clearContent();
 		Settings.getInstance().removePropertyChangeListener(this);
+		disposeAction(createDeleteScript);
+		disposeAction(deleteDependentRow);
+		disposeAction(deleteRow);
+		disposeAction(duplicateRow);
+		disposeAction(insertRow);
+		disposeAction(selectKeys);
+		disposeAction(updateAction);
+	}
+
+	private void disposeAction(WbAction action)
+	{
+		if (action != null)
+		{
+			action.dispose();
+		}
 	}
 
 	public void setSqlInfoEnabled(boolean flag)

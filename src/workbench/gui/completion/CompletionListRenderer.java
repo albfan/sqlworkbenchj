@@ -45,6 +45,12 @@ import workbench.util.StringUtil;
 public class CompletionListRenderer
 	extends DefaultListCellRenderer
 {
+	private boolean showNotNulls;
+
+	public void setShowNotNulls(boolean flag)
+	{
+		this.showNotNulls = flag;
+	}
 
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
@@ -58,6 +64,10 @@ public class CompletionListRenderer
 			{
 				setText("<html><b>" + colname + "</b></html>");
 			}
+			else if (showNotNulls && !col.isNullable())
+			{
+				setText("<html><span style='color:red'>" + colname + "</span></html>");
+			}
 			else
 			{
 				setText(colname);
@@ -67,9 +77,24 @@ public class CompletionListRenderer
 		if (value instanceof DbObject)
 		{
 			DbObject dbo = (DbObject)value;
-			String type = (dbo instanceof ColumnIdentifier ? ((ColumnIdentifier)dbo).getDbmsType() : dbo.getObjectType());
+			String type = null;
+
+			if (dbo instanceof ColumnIdentifier)
+			{
+				ColumnIdentifier col = ((ColumnIdentifier)dbo);
+				type = col.getDbmsType();
+				if (!col.isNullable())
+				{
+					type += " (NN)";
+				}
+			}
+			else
+			{
+				type = dbo.getObjectType();
+			}
 			String tooltip = null;
 			String comment = dbo.getComment();
+
 			if (StringUtil.isBlank(comment) && StringUtil.isNonBlank(type))
 			{
 				tooltip = "<html><tt>" + type + "</tt></html>";
@@ -84,7 +109,6 @@ public class CompletionListRenderer
 		{
 			setToolTipText(null);
 		}
-
 		return c;
 	}
 

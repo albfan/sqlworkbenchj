@@ -26,6 +26,7 @@ import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.ListModel;
@@ -39,6 +40,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -60,6 +62,7 @@ public class CompletionHandler
 	private CompletionPopup window;
 	protected StatusBar statusBar;
 	private String currentWord;
+	private boolean highlightNotNulls;
 
 	public CompletionHandler()
 	{
@@ -95,7 +98,7 @@ public class CompletionHandler
 			statusBar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
 			if (this.updateSelectionList())
 			{
-				this.window.showPopup(currentWord);
+				this.window.showPopup(currentWord, highlightNotNulls);
 			}
 		}
 		catch (Throwable th)
@@ -134,6 +137,7 @@ public class CompletionHandler
 	private boolean updateSelectionList()
 	{
 		boolean result = false;
+		highlightNotNulls = false;
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script);
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
@@ -170,6 +174,9 @@ public class CompletionHandler
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
 				this.window.setContext(ctx);
+
+				Set<String> dml = CollectionUtil.caseInsensitiveSet("insert", "update", "merge");
+				highlightNotNulls = dml.contains(analyzer.getSqlVerb());
 
 				result = getSize() > 0;
 				if (result)

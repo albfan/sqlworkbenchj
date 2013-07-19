@@ -550,8 +550,7 @@ public class SqlPanel
 	{
 		if (this.editor == null) return true;
 		int result = this.editor.checkAndSaveFile();
-		if (result == JOptionPane.CANCEL_OPTION) return false;
-		return true;
+		return result != JOptionPane.CANCEL_OPTION;
 	}
 
 	/**
@@ -3824,13 +3823,35 @@ public class SqlPanel
 		reset();
 		iconHandler.dispose();
 		if (this.stmtRunner != null) this.stmtRunner.dispose();
+
 		if (this.execListener != null) execListener.clear();
+		this.execListener = null;
+
 		if (this.editor != null) this.editor.dispose();
 		this.editor = null;
-		if (this.actions != null) this.actions.clear();
-		if (this.toolbarActions != null) this.toolbarActions.clear();
+
+		if (this.actions != null)
+		{
+			for (Object o : actions)
+			{
+				if (o instanceof WbAction)
+				{
+					((WbAction)o).dispose();
+				}
+				else if (o instanceof WbMenu)
+				{
+					((WbMenu)o).removeAll();
+				}
+			}
+			this.actions.clear();
+		}
+
+		if (this.toolbarActions != null)
+		{
+			this.toolbarActions.clear();
+		}
+
 		if (this.filenameChangeListeners != null) this.filenameChangeListeners.clear();
-		if (this.execListener != null) this.execListener.clear();
 		if (this.toolbar != null) this.toolbar.removeAll();
 		this.toolbar = null;
 		this.forceAbort();
