@@ -927,9 +927,7 @@ public class DataImporter
 	@Override
 	public boolean shouldProcessNextRow()
 	{
-		if (currentImportRow + 1 < startRow) return false;
-		if (currentImportRow + 1 > endRow) return false;
-		return true;
+		return currentImportRow + 1 >= startRow && currentImportRow + 1 <= endRow;
 	}
 
 	@Override
