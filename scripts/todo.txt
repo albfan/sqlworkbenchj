@@ -1,7 +1,9 @@
 Features:
 ---------
-- Load different WbProfiles.xml from within the connection dialog
-  Dropdown with the last used files
+- Profiles
+  - Import profiles from other WbProfiles.xml
+  - Load different WbProfiles.xml from within the connection dialog
+    Dropdown with the last used files
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
 - save code-completion cache locally
 - save table sort of DbExplorer in Workspace
@@ -10,7 +12,7 @@ Features:
 - WbClipCopy: Copy result set data to the clipboard
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
 - Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
-- DbExplorer panel showing all indexes (will also enable auto completion for DROP INDEX)
+- DbExplorer panel showing all indexes
 - Treat Oracle's BFILE, Postgres' LargeObjects and SQL Server's FileStream as BLOBs
 - Support external SQL formatter
 - Convert DDL from one DBMS to another using "intelligent" search & replace (MySQL -> PG, PG -> Oracle)
@@ -25,7 +27,9 @@ Features:
 - Compare ResultSets
 - Support ${guid} calls
   (or more generic: Support ${...} syntax for calling function during data editing )
-- Filterdefinition: show unique values per column as a dropdown in the dialog
+- Filterdefinition: 
+  - show unique values per column as a dropdown in the dialog
+  - autofilter dropdown directly in the result set
 - Paging for console mode
 - DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
 - WbCopy with multiple tables and -deleteTarget (do a delete with dependencies first, then run Copy)
@@ -35,7 +39,6 @@ Features:
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
-- Import profiles from other WbProfiles.xml
 - Import macros from other WbMacros.xml
 - Allow full script in DataPumper as SQL Query source
   (pre-copy and post-copy scripts)
@@ -55,3 +58,7 @@ ToDo/Cleanup
 - Rework SQLFormatter, needs to be modularized (one "formatter" for each command, chained together)
 - Change print header and font for header in print preview
 - Rework printing
+- Rework handling of feedback messages during SQL execution so that messages
+  show up as soon as the command generates them
+  (might remove the need for the MessageBuffer)
+  
