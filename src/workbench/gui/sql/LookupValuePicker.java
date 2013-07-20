@@ -39,6 +39,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -80,6 +82,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.NumberField;
+import workbench.gui.components.RowHighlighter;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbScrollPane;
@@ -90,8 +93,6 @@ import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
-import workbench.storage.filter.ColumnComparator;
-import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
@@ -112,22 +113,25 @@ public class LookupValuePicker
 	private ButtonGroup buttonGroup;
 	private NumberField maxRows;
 	private WbTable lookupData;
-	private LookupDataLoader lookupLoader;
+	private final LookupDataLoader lookupLoader;
 	private WbScrollPane scroll;
 	private JPanel statusPanel;
 	private JLabel statusBar;
 	private JLabel rowCount;
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
-	private Object currentValue;
+	private final Map<String, Object> currentValues = new HashMap<String, Object>();
 
-	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Object current)
+	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Map<String, Object> values)
 	{
 		super(new GridBagLayout());
 
 		lookupLoader = loader;
 		dbConnection = conn;
-		currentValue = current;
+		if (values != null)
+		{
+			currentValues.putAll(values);
+		}
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -270,7 +274,7 @@ public class LookupValuePicker
 
 		rowCount = new JLabel("   ");
 		rowCount.setIconTextGap(2);
-		rowCount.setBorder(new DividerBorder(DividerBorder.LEFT));
+		rowCount.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 5, 0, 0)));
 		gc.insets = small;
 		gc.weightx = 0.0;
 		gc.gridx ++;
@@ -310,96 +314,43 @@ public class LookupValuePicker
 		}
 	}
 
-	private void findCurrentValue(boolean selectRow)
+	private int highlightCurrentValues()
 	{
-		if (currentValue == null) return;
-
-		String colName = this.lookupLoader.getReferencedColumn();
-		int colIndex = lookupData.getDataStore().getColumnIndex(colName);
-		if (colIndex < 0)
+		if (currentValues.isEmpty())
 		{
-			LogMgr.logError("LookupValuePicker.findCurrentValue()", "Referenced column " + colName + " not found!", null);
-			return;
+			return -1;
 		}
 
-		if (selectRow)
+		int found = -1;
+
+		int rows = lookupData.getRowCount();
+		DataStore ds = lookupData.getDataStore();
+
+		for (int row = 0; row < rows; row++)
 		{
-			int rows = lookupData.getRowCount();
-			for (int row = 0; row < rows; row++)
+			Map<String, Object> rowValues = ds.getRowData(row);
+			rowValues.keySet().retainAll(currentValues.keySet());
+			if (rowValues.equals(currentValues))
 			{
-				Object pk = lookupData.getValueAt(row, colIndex);
-				if (currentValue.equals(pk))
+				found = row;
+				break;
+			}
+		}
+
+		if (found > -1)
+		{
+			final int hrow = found;
+			RowHighlighter highlighter = new RowHighlighter()
+			{
+				@Override
+				public boolean hightlightColumn(int row, String column, Object columnValue)
 				{
-					lookupData.getSelectionModel().setSelectionInterval(row, row);
-					break;
+					return row == hrow && currentValues.containsKey(column);
 				}
-			}
+			};
+			lookupData.applyHighlightExpression(highlighter);
 		}
-		ColumnComparator comp = getComparator();
-		ColumnExpression search = new ColumnExpression(colName, comp, currentValue);
-		lookupData.applyHighlightExpression(search);
-	}
-
-	private ColumnComparator getComparator()
-	{
-		return new ColumnComparator()
-		{
-			@Override
-			public String getOperator()
-			{
-				return "=";
-			}
-
-			@Override
-			public String getDescription()
-			{
-				return "equals";
-			}
-
-			@Override
-			public boolean evaluate(Object reference, Object value, boolean ignoreCase)
-			{
-				if (reference == null && value == null) return true;
-				if (reference == null || value == null) return false;
-				return value.equals(reference);
-			}
-
-			@Override
-			public boolean supportsType(Class valueClass)
-			{
-				return true;
-			}
-
-			@Override
-			public boolean supportsIgnoreCase()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean needsValue()
-			{
-				return true;
-			}
-
-			@Override
-			public String getValueExpression(Object value)
-			{
-				return value == null ? "" : value.toString();
-			}
-
-			@Override
-			public boolean validateInput(Object input)
-			{
-				return true;
-			}
-
-			@Override
-			public boolean comparesEquality()
-			{
-				return true;
-			}
-		};
+		return found;
 	}
 
 	@Override
@@ -491,20 +442,18 @@ public class LookupValuePicker
 					DataStoreTableModel model = new DataStoreTableModel(data);
 					model.setAllowEditing(false);
 					lookupData.setModel(model, true);
-					if (currentValue != null)
-					{
-						findCurrentValue(selectCurrent);
-					}
-					else
-					{
-						lookupData.getSelectionModel().setSelectionInterval(0, 0);
-					}
+
+					int row = highlightCurrentValues();
+
+					if (!selectCurrent || row < 0) row = 0;
+					lookupData.getSelectionModel().setSelectionInterval(row, row);
 					lookupData.requestFocusInWindow();
+
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
-					rowCount.setText(rows + " rows");
+					rowCount.setText(ResourceMgr.getFormattedString("MsgRows", rows).replaceAll("[\\(\\)]", ""));
 
-					if (rows == maxRowNum || rows == maxRowNum + 1)
+					if (rows >= maxRowNum) // some drivers return one row more than requested
 					{
 						rowCount.setIcon(ResourceMgr.getPng("alert"));
 					}
@@ -527,10 +476,10 @@ public class LookupValuePicker
 		}
 	}
 
-	public Map<String, Object> getSelectedPKValue()
+	public Map<String, Object> getSelectedPKValues()
 	{
 		int row = lookupData.getSelectedRow();
-		if (row < 0) return null;
+		if (row < 0) return Collections.emptyMap();
 		PkDefinition pk = lookupLoader.getPK();
 		Map<String, Object> values = new TreeMap<String, Object>();
 		List<String> columns = pk.getColumns();
@@ -692,8 +641,9 @@ public class LookupValuePicker
 
 			// the found table is cached in the loader, so this call does not access the database
 			TableIdentifier lookupTable = loader.getLookupTable();
+			List<String> refColumns = loader.getReferencingColumns();
 
-			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getCurrentValue());
+			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getFKValues(refColumns));
 			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
 
 			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
@@ -711,9 +661,8 @@ public class LookupValuePicker
 
 			if (!dialog.isCancelled())
 			{
-				Map<String, Object> values = picker.getSelectedPKValue();
-				Object value = values.get(loader.getReferencedColumn());
-				result.setResult(value);
+				Map<String, Object> values = picker.getSelectedPKValues();
+				result.setResult(values);
 			}
 		}
 		finally
@@ -730,46 +679,64 @@ public class LookupValuePicker
 		final int row = table.getEditingRow();
 
 		DataStore ds = table.getDataStore();
-		final Object currentValue = table.getValueAt(row, col);
 
 		WbConnection conn = ds.getOriginalConnection();
 		if (!WbSwingUtilities.isConnectionIdle(table, conn)) return;
 
-		String column = table.getColumnName(col);
+		final String editColumn = table.getColumnName(col);
 		ds.checkUpdateTable();
 		TableIdentifier baseTable = ds.getUpdateTable();
 
 		ResultSetter result = new ResultSetter()
 		{
+
 			@Override
-			public Object getCurrentValue()
+			public Map<String, Object> getFKValues(List<String> columns)
 			{
-				return currentValue;
+				Map<String, Object> result = new HashMap<String, Object>(columns.size());
+				for (String name : columns)
+				{
+					int colIndex = table.getColumnIndex(name);
+					if (colIndex > -1)
+					{
+						result.put(name, table.getValueAt(row, colIndex));
+					}
+				}
+				return result;
 			}
 
 			@Override
-			public void setResult(final Object value)
+			public void setResult(final Map<String, Object> values)
 			{
-				JComponent editor = (JComponent)table.getEditorComponent();
-				if (editor instanceof JTextComponent)
+				JComponent comp = (JComponent)table.getEditorComponent();
+				final JTextComponent editor;
+				if (comp instanceof JTextComponent)
 				{
-					((JTextComponent)editor).setText(value == null ? "" : WbDateFormatter.getDisplayValue(value));
+					editor = (JTextComponent)comp;
 				}
 				else
 				{
-					WbSwingUtilities.invokeLater(new Runnable()
+					editor = null;
+				}
+
+				final Object value = values.get(editColumn);
+
+				for (Map.Entry<String, Object> entry : values.entrySet())
+				{
+					String col = entry.getKey();
+					int colIndex = table.getColumnIndex(col);
+					if (col.equals(editColumn) && editor != null)
 					{
-						@Override
-						public void run()
-						{
-							table.stopEditing();
-							table.setValueAt(value, row, col);
-						}
-					});
+						editor.setText(value == null ? "" : WbDateFormatter.getDisplayValue(value));
+					}
+					if (colIndex > -1)
+					{
+						table.setValueAt(entry.getValue(), row, colIndex);
+					}
 				}
 			}
 		};
-		pickValue(table, result, conn, column, baseTable);
+		pickValue(table, result, conn, editColumn, baseTable);
 	}
 
 	private static void showNotFound(JComponent current)

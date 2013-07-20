@@ -82,6 +82,7 @@ public abstract class ComplexExpression
 			return false;
 		}
 	}
+	
 	@Override
 	public boolean isColumnSpecific()
 	{

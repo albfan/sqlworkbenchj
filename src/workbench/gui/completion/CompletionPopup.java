@@ -35,7 +35,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -434,15 +436,17 @@ public class CompletionPopup
 
 			ResultSetter result = new ResultSetter()
 			{
+
 				@Override
-				public Object getCurrentValue()
+				public Map<String, Object> getFKValues(List<String> columns)
 				{
-					return null;
+					return Collections.emptyMap();
 				}
 
 				@Override
-				public void setResult(Object value)
+				public void setResult(Map<String, Object> values)
 				{
+					Object value = values.get(marker.getColumnName());
 					if (value != null)
 					{
 						editor.setSelectedText(WbDateFormatter.getDisplayValue(value));

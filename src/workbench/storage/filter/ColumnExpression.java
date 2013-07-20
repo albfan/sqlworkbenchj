@@ -24,13 +24,17 @@ package workbench.storage.filter;
 
 import java.util.Map;
 
+import workbench.gui.components.RowHighlighter;
+
+import workbench.util.StringUtil;
+
 /**
  * A class to define the filter criteria for a single column
  *
  * @author Thomas Kellerer
  */
 public class ColumnExpression
-	implements FilterExpression, ExpressionValue
+	implements FilterExpression, ExpressionValue, RowHighlighter
 {
 	private String columnName;
 	private Object filterValue;
@@ -170,4 +174,16 @@ public class ColumnExpression
 		}
 		return true;
 	}
+
+	@Override
+	public boolean hightlightColumn(int row, String column, Object columnValue)
+	{
+		if (!isColumnSpecific() || StringUtil.compareStrings(getColumnName(), column, true) == 0)
+		{
+			return evaluate(columnValue);
+		}
+		return false;
+	}
+
+
 }

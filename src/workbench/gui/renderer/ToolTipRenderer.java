@@ -47,9 +47,8 @@ import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.RowHighlighter;
 import workbench.gui.components.WbTable;
-
-import workbench.storage.filter.ColumnExpression;
 
 import workbench.util.StringUtil;
 
@@ -94,6 +93,7 @@ public class ToolTipRenderer
 	private boolean isEditing;
 	private boolean[] highlightCols;
 	private int currentColumn = -1;
+	private int currentRow = -1;
 	private String currentColumnName;
 
 	private Rectangle paintIconR = new Rectangle();
@@ -107,7 +107,7 @@ public class ToolTipRenderer
 	protected boolean hasFocus;
 	protected boolean isNull;
 
-	protected ColumnExpression filter;
+	protected RowHighlighter filter;
 
 	private int valign = SwingConstants.TOP;
 	private int halign = SwingConstants.LEFT;
@@ -222,6 +222,7 @@ public class ToolTipRenderer
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
 		this.currentColumnName = table.getColumnName(col);
+		this.currentRow = row;
 		this.isSelected = selected;
 		this.currentValue = value;
 
@@ -299,7 +300,7 @@ public class ToolTipRenderer
 
 	protected Color getBackgroundColor()
 	{
-		Color c = getColumnHighlightColor();
+		Color c = getColumnHighlightColor(currentRow);
 		if (isSelected)
 		{
 			return ColorUtils.blend(selectedBackground, c, selectionBlendFactor);
@@ -312,7 +313,7 @@ public class ToolTipRenderer
 		return unselectedBackground;
 	}
 
-	protected Color getColumnHighlightColor()
+	protected Color getColumnHighlightColor(int row)
 	{
 		if (isEditing)
 		{
@@ -326,7 +327,7 @@ public class ToolTipRenderer
 			}
 		}
 
-		if (checkHighlightExpression(currentValue))
+		if (checkHighlightExpression(row, currentValue))
 		{
 			return filterHighlightColor;
 		}
@@ -429,17 +430,13 @@ public class ToolTipRenderer
 		setTooltip(displayValue);
 	}
 
-	protected boolean checkHighlightExpression(Object value)
+	protected boolean checkHighlightExpression(int row, Object value)
 	{
 		if (this.filter == null)
 		{
 			return false;
 		}
-		if (!filter.isColumnSpecific() || StringUtil.compareStrings(filter.getColumnName(), currentColumnName, true) == 0)
-		{
-			return filter.evaluate(value);
-		}
-		return false;
+		return filter.hightlightColumn(row, currentColumnName, currentValue);
 	}
 
 	@Override

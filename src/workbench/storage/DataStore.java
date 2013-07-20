@@ -1206,6 +1206,16 @@ public class DataStore
 		return this.resultInfo.findColumn(name, this.originalConnection != null ? originalConnection.getMetadata() : QuoteHandler.STANDARD_HANDLER);
 	}
 
+	public Map<String, Object> getRowData(int row)
+	{
+		Map<String, Object> result = new HashMap<String, Object>(this.getColumnCount());
+		for (int i=0; i < this.resultInfo.getColumnCount(); i++)
+		{
+			result.put(getColumnName(i), getValue(row, i));
+		}
+		return result;
+	}
+
 	@Override
 	public RowData getRow(int aRow)
 		throws IndexOutOfBoundsException

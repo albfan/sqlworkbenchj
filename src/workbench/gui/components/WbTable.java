@@ -149,7 +149,6 @@ import workbench.storage.MergeGenerator;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowDataReader;
-import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 
 import workbench.util.FileDialogUtil;
@@ -204,7 +203,7 @@ public class WbTable
 
 	private ResetHighlightAction resetHighlightAction;
 
-	private ColumnExpression highlightExpression;
+	private RowHighlighter highlightExpression;
 	private TransposeRowAction transposeRow;
 
 	private FilterDataAction filterAction;
@@ -417,6 +416,13 @@ public class WbTable
 		{
 			im.put(copyShortcut, uiAction);
 		}
+	}
+
+	public int getColumnIndex(String colName)
+	{
+		int modelCol = this.getDataStoreTableModel().findColumn(colName);
+		if (modelCol < 0) return -1;
+		return this.convertColumnIndexToView(modelCol);
 	}
 
 	public void setTransposeRowEnabled(boolean flag)
@@ -1752,12 +1758,12 @@ public class WbTable
 		applyHighlightExpression(null);
 	}
 
-	public ColumnExpression getHighlightExpression()
+	public RowHighlighter getHighlightExpression()
 	{
 		return highlightExpression;
 	}
 
-	public void applyHighlightExpression(ColumnExpression filter)
+	public void applyHighlightExpression(RowHighlighter filter)
 	{
 		this.highlightExpression = filter;
 		this.resetHighlightAction.setEnabled(filter != null);

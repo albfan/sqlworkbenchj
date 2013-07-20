@@ -22,12 +22,15 @@
  */
 package workbench.interfaces;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public interface ResultSetter
 {
-	Object getCurrentValue();
-	void setResult(Object value);
+	Map<String, Object> getFKValues(List<String> columns);
+	void setResult(Map<String, Object> values);
 }

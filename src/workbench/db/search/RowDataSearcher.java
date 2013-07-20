@@ -23,12 +23,13 @@
 package workbench.db.search;
 
 import workbench.db.exporter.TextRowDataConverter;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
-import workbench.storage.filter.DataRowExpression;
+
 import workbench.util.SqlUtil;
 
 /**

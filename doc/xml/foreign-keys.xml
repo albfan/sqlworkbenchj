@@ -83,7 +83,7 @@ FROM orders ord
 FROM orders ord
   JOIN product prod ON prod.id = ord.product_id</programlisting>
     <para>
-      This feature requires on the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported!
+      This feature requires the usage of the JOIN keyword. Joining tables in the <literal>WHERE</literal> clause is not supported.
     </para>
     <para>
       By default &wb-productname; tries to create a join condition on the table from the "previous" <literal>JOIN</literal> condition
@@ -108,9 +108,14 @@ FROM orders ord
         After starting to edit a cell, the context menu contains an item <guimenuitem>Select FK value</guimenuitem>. Once this
         item is selected &wb-productname; will detect the table that the current column references. If a foreign
         key is detected a dialog window will be shown containing the data from the rerenced table. For performance reasons
-        the check if the current column is referencing another table is only done <emphasis>after</emphasis> the item has been selected.
+        the check if the current column is referencing another table is only done <emphasis>after</emphasis> the menu item has been invoked.
         If no foreign key could be found, a message is displayed in the status bar.
       </para>
+      <note>
+        <para>
+          This is only supported for result sets that are based on a single table.
+        </para>
+      </note>
       <para>
         By default the dialog will not load more than 150 rows from that table. The number of retrieved rows can be
         configured through the "Max. Rows" input field.
@@ -139,8 +144,8 @@ FROM orders ord
         </itemizedlist>
       </para>
       <para>
-        Once you have selected the desired row, clicking the <guibutton>OK</guibutton> will put the value
-        of the corresponding primary key column into the currently edited cell.
+        Once you have selected the desired row, clicking the <guibutton>OK</guibutton> will put the value(s)
+        of the corresponding primary key column(s) into the currently edited row.
       </para>
     </section>
 
@@ -161,23 +166,8 @@ FROM orders ord
         a foreign key to a different table, the lookup dialog will appear and will let you select the approriate PK
         value from the referenced table.
       </para>
-    </section>
-
-    <section id="fk-lookup-limits">
-      <title>Limitations of the foreign key lookup</title>
       <para>
-        Currently the lookup has the following limitations:
-        <itemizedlist>
-          <listitem>
-            <para>Only result sets for a single table are supported</para>
-          </listitem>
-          <listitem>
-            <para>
-              To select the values for a multi-column foreign key, you need to do this for each column
-              individually. The dialog will not automatically fill all foreign key columns in the result set.
-            </para>
-          </listitem>
-        </itemizedlist>
+        Foreign key lookup for DML statement is currently only supported for single column primary keys.
       </para>
     </section>
 

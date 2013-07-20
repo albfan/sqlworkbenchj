@@ -25,6 +25,7 @@ package workbench.storage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +63,7 @@ public class LookupDataLoader
 	private TableIdentifier baseTable;
 	private String referencingColumn;
 	private String referencedColumn;
+	private List<String> referencingColumns;
 
 	/**
 	 * Create a new LookupDataLoader
@@ -147,6 +149,11 @@ public class LookupDataLoader
 		return order.toString();
 	}
 
+	public List<String> getReferencingColumns()
+	{
+		return referencingColumns;
+	}
+
 	public void retrieveReferencedTable(WbConnection conn)
 		throws SQLException
 	{
@@ -166,6 +173,7 @@ public class LookupDataLoader
 					{
 						table = node.getTable();
 						referencedColumn = entry.getKey();
+						referencingColumns = new ArrayList<String>(node.getColumns().values());
 					}
 				}
 			}
