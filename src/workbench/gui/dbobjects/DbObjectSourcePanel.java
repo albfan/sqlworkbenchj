@@ -27,9 +27,19 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JPanel;
+
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SourceStatementsHelp;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -38,12 +48,7 @@ import workbench.gui.components.FocusIndicator;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelContentSender;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -312,4 +317,10 @@ public class DbObjectSourcePanel
 		}
 	}
 
+	public void dispose()
+	{
+		reset();
+		if (sourceEditor != null)	sourceEditor.dispose();
+		if (editButton != null) editButton.dispose();
+	}
 }

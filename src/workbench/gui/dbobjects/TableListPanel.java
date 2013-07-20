@@ -459,7 +459,22 @@ public class TableListPanel
 		tableDefinition.removePropertyChangeListener(this);
 		tableDefinition.dispose();
 		tableData.dispose();
+		tableSource.dispose();
+		disposeAction(compileAction);
+		disposeAction(countAction);
+		disposeAction(reloadAction);
+		disposeAction(renameAction);
+		disposeAction(spoolData);
+		disposeAction(toggleTableSource);
 		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
+	private void disposeAction(WbAction action)
+	{
+		if (action != null)
+		{
+			action.dispose();
+		}
 	}
 
 	private void extendPopupMenu()

@@ -272,6 +272,15 @@ public class ProcedureListPanel
 		}
 	}
 
+	public void dispose()
+	{
+		reset();
+		if (this.generateWbCall != null) this.generateWbCall.removeAll();
+		if (procList != null) procList.dispose();
+		if (source != null) source.dispose();
+		if (compileAction != null) compileAction.dispose();
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{

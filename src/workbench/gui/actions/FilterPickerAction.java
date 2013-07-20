@@ -29,18 +29,23 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbTable;
 import workbench.gui.filter.FilterDefinitionManager;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.filter.FilterExpression;
+
 import workbench.util.WbFile;
 
 /**
@@ -166,4 +171,17 @@ public class FilterPickerAction
 		}
 		dropDownButton.setDropDownMenu(menu.getPopupMenu());
 	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (this.dropDownButton != null)
+		{
+			this.dropDownButton.dispose();
+			this.dropDownButton = null;
+		}
+	}
+
+
 }

@@ -213,6 +213,14 @@ public class TriggerListPanel
 		}
 	}
 
+	public void dispose()
+	{
+		reset();
+		if (dropAction != null) dropAction.dispose();
+		if (compileAction != null) compileAction.dispose();
+		if (source != null) source.dispose();
+	}
+	
 	public void disconnect()
 	{
 		this.reader = null;

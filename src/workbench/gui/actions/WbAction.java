@@ -27,9 +27,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -41,11 +43,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-import workbench.gui.components.WbMenuItem;
-import workbench.gui.components.WbToolbarButton;
+
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.ShortcutManager;
+
+import workbench.gui.components.WbMenuItem;
+import workbench.gui.components.WbToolbarButton;
 
 /**
  * Base class for Actions in SQL Workbench/J
@@ -69,7 +73,7 @@ public class WbAction
 	protected WbAction proxy;
 	private WbAction original;
 	private String iconKey;
-	private List<JMenuItem> createdItems = new LinkedList<JMenuItem>();
+	private List<WeakReference<JMenuItem>> createdItems = new LinkedList<WeakReference<JMenuItem>>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
 
@@ -302,10 +306,16 @@ public class WbAction
 	public void setAccelerator(KeyStroke key)
 	{
 		putValue(Action.ACCELERATOR_KEY, key);
-		Iterator<JMenuItem> itr = this.createdItems.iterator();
+		Iterator<WeakReference<JMenuItem>> itr = this.createdItems.iterator();
 		while (itr.hasNext())
 		{
-			JMenuItem item = itr.next();
+			WeakReference<JMenuItem> ref = itr.next();
+			if (ref == null)
+			{
+				itr.remove();
+				continue;
+			}
+			JMenuItem item = ref.get();
 			if (item == null)
 			{
 				itr.remove();
@@ -389,7 +399,7 @@ public class WbAction
 			{
 			}
 		}
-		this.createdItems.add(item);
+		this.createdItems.add(new WeakReference(item));
 		return item;
 	}
 
@@ -665,11 +675,13 @@ public class WbAction
 	{
 		if (this.createdItems != null)
 		{
-			for (JMenuItem item : createdItems)
+			for (WeakReference<JMenuItem> ref : createdItems)
 			{
-				item.removeAll();
+				JMenuItem item = ref.get();
+				if (item != null) item.removeAll();
 			}
 			createdItems.clear();
+			createdItems = null;
 		}
 		this.delegate = null;
 		this.original = null;

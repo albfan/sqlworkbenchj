@@ -25,6 +25,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JPopupMenu;
@@ -60,6 +61,17 @@ public class DropDownButton
 		setFocusable(false);
 		addActionListener(this);
 		enableToolbarRollover();
+	}
+
+	public void dispose()
+	{
+		if (this.popup != null)
+		{
+			this.popup.removePopupMenuListener(this);
+			this.popup.setVisible(false);
+			this.popup.removeAll();
+			this.popup = null;
+		}
 	}
 
 	public void setDropDownMenu(JPopupMenu menu)
