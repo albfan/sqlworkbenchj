@@ -33,6 +33,8 @@
     <xsl:apply-templates select="/schema-report/table-def"/>
     <xsl:apply-templates select="/schema-report/view-def"/>
     <xsl:call-template name="process-fk"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>commit;</xsl:text>
   </xsl:template>
 
   <xsl:template match="table-def">
@@ -146,10 +148,9 @@
       <xsl:text> ADD PRIMARY KEY </xsl:text>
       <xsl:text>(</xsl:text>
       <xsl:for-each select="column-def[primary-key='true']">
-        <xsl:text>  </xsl:text>
         <xsl:value-of select="column-name"/>
         <xsl:if test="position() &lt; last()">
-          <xsl:text>,</xsl:text>
+          <xsl:text>, </xsl:text>
         </xsl:if>
       </xsl:for-each>
       <xsl:text>);</xsl:text>
@@ -255,12 +256,12 @@
           <xsl:text>ALTER TABLE </xsl:text>
           <xsl:value-of select="$table"/>
           <xsl:value-of select="$newline"/>
-          <xsl:text> ADD CONSTRAINT </xsl:text>
+          <xsl:text>  ADD CONSTRAINT </xsl:text>
           <xsl:call-template name="write-object-name">
             <xsl:with-param name="objectname" select="constraint-name"/>
           </xsl:call-template>
           <xsl:value-of select="$newline"/>
-          <xsl:text> FOREIGN KEY (</xsl:text>
+          <xsl:text>  FOREIGN KEY (</xsl:text>
           <xsl:for-each select="source-columns/column">
             <xsl:call-template name="write-object-name">
               <xsl:with-param name="objectname" select="."/>
@@ -271,7 +272,7 @@
           </xsl:for-each>
           <xsl:text>)</xsl:text>
           <xsl:value-of select="$newline"/>
-          <xsl:text> REFERENCES </xsl:text>
+          <xsl:text>  REFERENCES </xsl:text>
           <xsl:call-template name="write-object-name">
             <xsl:with-param name="objectname" select="$targetTable"/>
           </xsl:call-template>
@@ -284,12 +285,50 @@
               <xsl:text>,</xsl:text>
             </xsl:if>
           </xsl:for-each>
-          <xsl:text>);</xsl:text>
+          <xsl:text>)</xsl:text>
+          <xsl:call-template name="define-fk-actions"/>
+          <xsl:call-template name="add-defer-rule"/>
+          <xsl:text>;</xsl:text>
           <xsl:value-of select="$newline"/>
         </xsl:for-each>
         <xsl:value-of select="$newline"/>
       </xsl:if>
     </xsl:for-each>
+  </xsl:template>
+
+  <xsl:template name="define-fk-actions">
+    <xsl:call-template name="add-fk-action">
+      <xsl:with-param name="event-name" select="'ON DELETE'"/>
+      <xsl:with-param name="action" select="delete-rule"/>
+    </xsl:call-template>
+    <xsl:call-template name="add-fk-action">
+      <xsl:with-param name="event-name" select="'ON UPDATE'"/>
+      <xsl:with-param name="action" select="update-rule"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xsl:template name="add-fk-action">
+    <xsl:param name="event-name"/>
+    <xsl:param name="action"/>
+    <xsl:if test="$action != 'NO ACTION'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  </xsl:text>
+      <xsl:value-of select="$event-name"/><xsl:text> </xsl:text><xsl:value-of select="$action"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="add-defer-rule">
+    <xsl:variable name="defer" select="deferrable"/>
+    <xsl:choose>
+      <xsl:when test="$defer='INITIALLY DEFERRED'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY DEFERRED</xsl:text>
+      </xsl:when>
+      <xsl:when test="$defer='INITIALLY IMMEDIATE'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY IMMEDIATE</xsl:text>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="view-def">
@@ -485,4 +524,3 @@
   </xsl:template>
 
 </xsl:stylesheet>
-

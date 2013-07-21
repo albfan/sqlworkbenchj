@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<!-- 
-  Convert a SQL Workbench/J schema report (http://www.sql-workbench.net) 
+<!--
+  Convert a SQL Workbench/J schema report (http://www.sql-workbench.net)
   into a SQL script for Oracle (http://www.oracle.com)
-  
-  Author: Thomas Kellerer  
+
+  Author: Thomas Kellerer
 -->
 
-<xsl:output 
-  encoding="iso-8859-15" 
-  method="text" 
-  indent="no" 
-  standalone="yes"  
+<xsl:output
+  encoding="iso-8859-15"
+  method="text"
+  indent="no"
+  standalone="yes"
   omit-xml-declaration="yes"
 />
 
@@ -35,7 +35,7 @@
   <xsl:value-of select="table-name"/>
   <xsl:text> CASCADE CONSTRAINTS;</xsl:text>
   <xsl:value-of select="$newline"/>
-  
+
   <xsl:text>CREATE TABLE </xsl:text><xsl:value-of select="table-name"/>
   <xsl:value-of select="$newline"/>
   <xsl:text>(</xsl:text>
@@ -56,13 +56,13 @@
     <xsl:variable name="nullable">
       <xsl:if test="nullable = 'false'"> NOT NULL</xsl:if>
     </xsl:variable>
-    
+
     <xsl:variable name="defaultvalue">
       <xsl:if test="string-length(default-value) &gt; 0">
         <xsl:text> </xsl:text>DEFAULT <xsl:value-of select="default-value"/>
       </xsl:if>
     </xsl:variable>
-    
+
     <xsl:variable name="datatype">
       <xsl:choose>
         <xsl:when test="dbms-data-type = 'datetime'">
@@ -85,7 +85,7 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    
+
     <xsl:text>  </xsl:text>
     <xsl:copy-of select="$colname"/>
     <xsl:text> </xsl:text>
@@ -109,7 +109,7 @@
     <xsl:text>CHECK </xsl:text>
     <xsl:copy-of select="normalize-space(.)"/>
   </xsl:for-each>
-  
+
   <xsl:value-of select="$newline"/>
   <xsl:text>);</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -117,9 +117,9 @@
   <xsl:variable name="pkcount">
     <xsl:value-of select="count(column-def[primary-key='true'])"/>
   </xsl:variable>
-  
+
   <xsl:if test="$pkcount &gt; 0">
-    <xsl:text>ALTER TABLE </xsl:text><xsl:value-of select="$tablename"/> 
+    <xsl:text>ALTER TABLE </xsl:text><xsl:value-of select="$tablename"/>
     <xsl:value-of select="$newline"/>
 	<xsl:variable name="constraintname">
     <xsl:if test="string-length(primary-key-name) &gt; 0">
@@ -129,17 +129,13 @@
       <xsl:value-of select="concat('pk_', $tablename)"/>
     </xsl:if>
 	</xsl:variable>
-    <xsl:text>ADD CONSTRAINT </xsl:text><xsl:value-of select="$constraintname"/><xsl:text> PRIMARY KEY </xsl:text>
-    <xsl:value-of select="$newline"/>
-    <xsl:text>(</xsl:text>
-    <xsl:value-of select="$newline"/>
+    <xsl:text>ADD CONSTRAINT </xsl:text><xsl:value-of select="$constraintname"/><xsl:text> PRIMARY KEY (</xsl:text>
     <xsl:for-each select="column-def[primary-key='true']">
-      <xsl:text>  </xsl:text><xsl:value-of select="column-name"/>
+      <xsl:value-of select="column-name"/>
       <xsl:if test="position() &lt; last()">
-        <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
+        <xsl:text>, </xsl:text>
       </xsl:if>
     </xsl:for-each>
-    <xsl:value-of select="$newline"/>
     <xsl:text>);</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:if>
@@ -170,14 +166,14 @@
       <xsl:with-param name="tablename" select="$tablename"/>
     </xsl:call-template>
   </xsl:for-each>
-  
+
   <xsl:value-of select="$newline"/>
   <xsl:value-of select="$newline"/>
-  
+
 </xsl:template>
 
 <xsl:template name="create-index">
-  <xsl:param name="tablename"/> 
+  <xsl:param name="tablename"/>
   <xsl:variable name="pk" select="primary-key"/>
   <xsl:if test="$pk = 'false'">
     <xsl:variable name="unique">
@@ -194,12 +190,12 @@
         <xsl:text>  </xsl:text><xsl:value-of select="@name"/>
         <xsl:if test="position() &lt; last()">
           <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
-        </xsl:if>        
+        </xsl:if>
     </xsl:for-each>
     <xsl:value-of select="$newline"/>
       <xsl:text>);</xsl:text>
       <xsl:value-of select="$newline"/>
-    </xsl:if>  
+    </xsl:if>
 </xsl:template>
 
 <xsl:template name="process-fk">
@@ -218,7 +214,7 @@
           <xsl:value-of select="."/>
           <xsl:if test="position() &lt; last()">
             <xsl:text>,</xsl:text>
-          </xsl:if>        
+          </xsl:if>
         </xsl:for-each>
         <xsl:text>)</xsl:text>
         <xsl:value-of select="$newline"/>
@@ -227,14 +223,44 @@
           <xsl:value-of select="."/>
           <xsl:if test="position() &lt; last()">
             <xsl:text>,</xsl:text>
-          </xsl:if>        
+          </xsl:if>
         </xsl:for-each>
-        <xsl:text>);</xsl:text>
+        <xsl:text>)</xsl:text>
+        <xsl:call-template name="add-fk-action">
+          <xsl:with-param name="event-name" select="'ON DELETE'"/>
+          <xsl:with-param name="action" select="delete-rule"/>
+        </xsl:call-template>
+        <xsl:call-template name="add-defer-rule"/>
+        <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
       <xsl:value-of select="$newline"/>
     </xsl:if>
   </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="add-fk-action">
+  <xsl:param name="event-name"/>
+  <xsl:param name="action"/>
+  <xsl:if test="$action != 'NO ACTION'">
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  </xsl:text>
+    <xsl:value-of select="$event-name"/><xsl:text> </xsl:text><xsl:value-of select="$action"/>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template name="add-defer-rule">
+  <xsl:variable name="defer" select="deferrable"/>
+  <xsl:choose>
+    <xsl:when test="$defer='INITIALLY DEFERRED'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  DEFERRABLE INITIALLY DEFERRED</xsl:text>
+    </xsl:when>
+    <xsl:when test="$defer='INITIALLY IMMEDIATE'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  DEFERRABLE INITIALLY IMMEDIATE</xsl:text>
+    </xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template match="sequence-def">
@@ -244,20 +270,20 @@
 <xsl:template match="view-def">
   <xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
   <xsl:variable name="backtick"><xsl:text>&#96;</xsl:text></xsl:variable>
-  
+
   <xsl:value-of select="$newline"/>
   <xsl:text>CREATE OR REPLACE VIEW </xsl:text><xsl:value-of select="view-name"/>
   <xsl:value-of select="$newline"/>
   <xsl:text>(</xsl:text>
   <xsl:value-of select="$newline"/>
-  
+
   <xsl:for-each select="column-def">
     <xsl:sort select="dbms-position"/>
     <xsl:variable name="orgname" select="column-name"/>
     <xsl:variable name="uppername">
     <xsl:value-of select="translate(column-name,
                                   'abcdefghijklmnopqrstuvwxyz`',
-                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>   
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
     </xsl:variable>
     <xsl:variable name="colname">
       <xsl:choose>
