@@ -94,7 +94,7 @@
     <propertyfile file="devbuild.number">
       <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
-    <propertyfile file="internal-build.number">
+    <propertyfile file="internal-build.properties">
       <entry key="internal-build.number" type="int" operation="=" value="0"/>
     </propertyfile>
     <loadproperties srcFile="release.property"/>
