@@ -391,6 +391,11 @@ public class WbTable
 		configureEnterKeyAction(a);
 	}
 
+	public SortHeaderRenderer getHeaderRenderer()
+	{
+		return sortRenderer;
+	}
+	
 	public void configureEnterKeyAction(Action enterAction)
 	{
 		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");

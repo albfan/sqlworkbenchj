@@ -34,14 +34,18 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
-import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -63,11 +67,17 @@ public class SortHeaderRenderer
 	private JLabel displayLabel = new JLabel();
 	private boolean showFullTypeInfo;
 	private boolean showBoldHeader;
+	private boolean highlightPk;
 
 	public SortHeaderRenderer()
 	{
 		readSettings();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_TABLE_HEADER_BOLD, GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO);
+	}
+
+	public void setShowPKIcon(boolean flag)
+	{
+		this.highlightPk = flag;
 	}
 
 	private void readSettings()
@@ -150,6 +160,11 @@ public class SortHeaderRenderer
 						javaType = colId.getDataType();
 						javaTypeName = SqlUtil.getTypeName(javaType);
 						remarks = colId.getComment();
+						if (highlightPk && colId.isPkColumn())
+						{
+							Font f = display.getFont().deriveFont(Font.ITALIC);
+							display.setFont(f);
+						}
 					}
 				}
 			}

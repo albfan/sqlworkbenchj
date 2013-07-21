@@ -62,8 +62,7 @@ public class LookupDataLoader
 	private boolean retrieved;
 	private TableIdentifier baseTable;
 	private String referencingColumn;
-	private String referencedColumn;
-	private List<String> referencingColumns;
+	private Map<String, String> columnMap;
 
 	/**
 	 * Create a new LookupDataLoader
@@ -92,6 +91,7 @@ public class LookupDataLoader
 		if (searchValue == null)
 		{
 			TableSelectBuilder builder = new TableSelectBuilder (conn, "lookupretrieval");
+			builder.setSortPksFirst(true);
 			builder.setExcludeLobColumns(true);
 			sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns());
 		}
@@ -151,7 +151,7 @@ public class LookupDataLoader
 
 	public List<String> getReferencingColumns()
 	{
-		return referencingColumns;
+		return new ArrayList<String>(columnMap.values());
 	}
 
 	public void retrieveReferencedTable(WbConnection conn)
@@ -172,8 +172,7 @@ public class LookupDataLoader
 					if (entry.getValue().equalsIgnoreCase(referencingColumn))
 					{
 						table = node.getTable();
-						referencedColumn = entry.getKey();
-						referencingColumns = new ArrayList<String>(node.getColumns().values());
+						columnMap = node.getColumns();
 					}
 				}
 			}
@@ -185,20 +184,6 @@ public class LookupDataLoader
 			conn.setBusy(false);
 			retrieved = true;
 		}
-	}
-
-	/**
-	 * Return the column that is referenced.
-	 *
-	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
-	 * calling this method, otherwise null will be returned.
-	 *
-	 * @return the referenced column or null if no FK was found or retrieveReferencedTable() was not yet called
-	 * @see #getLookupTable()
-	 */
-	public String getReferencedColumn()
-	{
-		return referencedColumn;
 	}
 
 	/**

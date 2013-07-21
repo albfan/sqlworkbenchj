@@ -25,10 +25,12 @@ package workbench.db;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import workbench.storage.ResultInfo;
 
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -779,21 +781,6 @@ public class ColumnIdentifier
 		return false;
 	}
 
-	public static void sortByPosition(List<ColumnIdentifier> columnList)
-	{
-		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
-		{
-			@Override
-			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
-			{
-				int pos1 = o1.getPosition();
-				int pos2 = o2.getPosition();
-				return pos1 - pos2;
-			}
-		};
-		Collections.sort(columnList, c);
-	}
-
 	public static int getMaxNameLength(List<ColumnIdentifier> columns)
 	{
 		int maxLength = 0;
@@ -842,5 +829,59 @@ public class ColumnIdentifier
 		}
 		return null;
 	}
+
+	/**
+	 * Resturns a new list where the PK columns are sorted first.
+	 *
+	 * The columns keep their original order inside each "block".
+	 *
+	 * The passed list will not be changed.
+	 *
+	 * @param columns  the columns to sort.
+	 * @return a new list where the PK columns are at the beginning.
+	 */
+	public static List<ColumnIdentifier> sortPksFirst(List<ColumnIdentifier> columns)
+	{
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(columns.size());
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.isPkColumn())
+			{
+				result.add(col);
+			}
+		}
+		for (ColumnIdentifier col : columns)
+		{
+			if (!col.isPkColumn())
+			{
+				result.add(col);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Sort the given list by the position of the columns.
+	 *
+	 * This will sort the columns "in-place", the passed list is modified.
+	 *
+	 * @param columnList  the column list to sort
+	 * @see #getPosition()
+	 */
+	public static void sortByPosition(List<ColumnIdentifier> columnList)
+	{
+		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
+		{
+			@Override
+			public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
+			{
+				int pos1 = o1.getPosition();
+				int pos2 = o2.getPosition();
+				return pos1 - pos2;
+			}
+		};
+		Collections.sort(columnList, c);
+	}
+
 
 }

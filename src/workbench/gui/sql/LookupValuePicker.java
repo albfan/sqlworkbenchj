@@ -93,9 +93,11 @@ import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
+import workbench.storage.ResultInfo;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
+import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
 import workbench.util.WbThread;
 
@@ -145,7 +147,7 @@ public class LookupValuePicker
 		lookupData.addMouseListener(this);
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
-
+		lookupData.getHeaderRenderer().setShowPKIcon(true);
 		Action nextComponent = new AbstractAction()
 		{
 			@Override
@@ -433,7 +435,17 @@ public class LookupValuePicker
 
 			boolean useOrderBy = Settings.getInstance().getBoolProperty("workbench.gui.lookupvaluepicker.useorderby", true);
 			final DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression(), useOrderBy);
-
+			PkDefinition pk = lookupLoader.getPK();
+			ResultInfo metadata = data.getResultInfo();
+			for (String pkCol : pk.getColumns())
+			{
+				int index = metadata.findColumn(pkCol);
+				if (index > -1)
+				{
+					metadata.getColumn(index).setIsPkColumn(true);
+				}
+			}
+			
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
@@ -445,9 +457,11 @@ public class LookupValuePicker
 
 					int row = highlightCurrentValues();
 
+					// always select at least one row.
+					// as the focus is set to the table containing the lookup data,
+					// the user can immediately use the cursor keys to select one entry.
 					if (!selectCurrent || row < 0) row = 0;
 					lookupData.getSelectionModel().setSelectionInterval(row, row);
-					lookupData.requestFocusInWindow();
 
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
@@ -462,6 +476,8 @@ public class LookupValuePicker
 						rowCount.setIcon(null);
 					}
 					statusPanel.doLayout();
+
+					lookupData.requestFocusInWindow();
 				}
 			});
 		}
@@ -620,7 +636,7 @@ public class LookupValuePicker
 						@Override
 						public void run()
 						{
-							showDialog(parent, result, conn, column, baseTable, loader);
+							showDialog(parent, result, conn, baseTable, loader);
 						}
 					});
 				}
@@ -633,7 +649,7 @@ public class LookupValuePicker
 		retrieve.start();
 	}
 
-	private static void showDialog(final JComponent parent, final ResultSetter result, WbConnection conn, String column, TableIdentifier baseTable, final LookupDataLoader loader)
+	private static void showDialog(final JComponent parent, final ResultSetter result, WbConnection conn, TableIdentifier baseTable, final LookupDataLoader loader)
 	{
 		try
 		{
@@ -643,10 +659,12 @@ public class LookupValuePicker
 			TableIdentifier lookupTable = loader.getLookupTable();
 			List<String> refColumns = loader.getReferencingColumns();
 
+			String cols  = "(" + StringUtil.listToString(refColumns, ',') + ")";
+
 			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getFKValues(refColumns));
 			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
 
-			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + "." + column, lookupTable.getTableExpression());
+			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + cols, lookupTable.getTableExpression());
 
 			ValidatingDialog dialog = new ValidatingDialog(window, title, picker);
 			picker.dialog = dialog;

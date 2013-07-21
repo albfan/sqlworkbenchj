@@ -43,11 +43,17 @@ public class TableSelectBuilder
 	private WbConnection dbConnection;
 	private boolean includLobColumns = true;
 	private boolean useColumnAlias;
+	private boolean sortPksFirst;
 	private String sqlTemplate;
 
 	public TableSelectBuilder(WbConnection source)
 	{
 		this(source, null);
+	}
+
+	public void setSortPksFirst(boolean flag)
+	{
+		this.sortPksFirst = flag;
 	}
 
 	public TableSelectBuilder(WbConnection source, String templateKey)
@@ -152,6 +158,11 @@ public class TableSelectBuilder
 		{
 			int colsInList = 0;
 
+			if (sortPksFirst)
+			{
+				columns = ColumnIdentifier.sortPksFirst(columns);
+			}
+			
 			for (ColumnIdentifier column : columns)
 			{
 				String expr = null;

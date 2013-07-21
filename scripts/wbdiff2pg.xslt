@@ -16,7 +16,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:text>&#10;</xsl:text>
   </xsl:variable>
 
-
   <xsl:template match="/">
 
     <xsl:text>-- Added Tables without Foreign Keys</xsl:text>
@@ -28,65 +27,52 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:value-of select="$newline"/>
     <!-- Drop Foreign Keys of Modified Tables. This assures that droped tables doesn't generate an error -->
     <xsl:for-each select="/schema-diff/modify-table">
-
       <xsl:variable name="table">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
         </xsl:call-template>
       </xsl:variable>
-
       <xsl:for-each select="drop-foreign-keys/foreign-key">
         <xsl:call-template name="drop-fk">
           <xsl:with-param name="tablename" select="$table"/>
         </xsl:call-template>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-
     </xsl:for-each>
 
     <xsl:text>-- Modified Tables Definition</xsl:text>
     <xsl:value-of select="$newline"/>
     <!--Modified Tables Definition -->
     <xsl:for-each select="/schema-diff/modify-table">
-
       <xsl:variable name="table2">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
         </xsl:call-template>
       </xsl:variable>
-
       <xsl:apply-templates select="remove-column">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="add-column">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="modify-column">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="remove-primary-key">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="add-primary-key">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="drop-index">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="add-index">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:apply-templates select="update-trigger">
         <xsl:with-param name="table" select="$table2"/>
       </xsl:apply-templates>
-
       <xsl:for-each select="table-constraints/drop-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
         <xsl:value-of select="$table2"/>
@@ -98,7 +84,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
       <xsl:value-of select="$newline"/>
-
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
         <xsl:value-of select="$table2"/>
@@ -108,7 +93,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         </xsl:call-template>
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
-
         <xsl:text>ALTER TABLE </xsl:text>
         <xsl:value-of select="$table2"/>
         <xsl:text> ADD</xsl:text>
@@ -123,7 +107,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-
       <xsl:for-each select="table-constraints/add-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
         <xsl:value-of select="$table2"/>
@@ -139,11 +122,9 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-
     </xsl:for-each>
 
-
-    <xsl:text>-- Foreign Keys of Added Tables</xsl:text>
+    <xsl:text>-- Create foreign keys of new tables</xsl:text>
     <xsl:value-of select="$newline"/>
     <!-- Foreign Keys of Added Tables -->
     <xsl:for-each select="/schema-diff/add-table">
@@ -152,7 +133,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
           <xsl:with-param name="objectname" select="@name"/>
         </xsl:call-template>
       </xsl:variable>
-
       <xsl:for-each select="table-def/foreign-keys">
         <xsl:for-each select="foreign-key">
           <xsl:call-template name="add-fk">
@@ -166,34 +146,28 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
           </xsl:call-template>
         </xsl:for-each>
       </xsl:for-each>
-
     </xsl:for-each>
 
-
-    <xsl:text>-- Foreign Keys of Modified Tables</xsl:text>
+    <xsl:text>-- Re-create foreign keys of modified tables</xsl:text>
     <xsl:value-of select="$newline"/>
+
     <!-- Foreign Keys of Modified Tables. This assures al tables needed for foreign keys are created -->
     <xsl:for-each select="/schema-diff/modify-table">
-
       <xsl:variable name="table3">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
         </xsl:call-template>
       </xsl:variable>
-
       <xsl:for-each select="add-foreign-keys/foreign-key">
         <xsl:call-template name="add-fk">
           <xsl:with-param name="tablename" select="$table3"/>
         </xsl:call-template>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-
     </xsl:for-each>
-
     <xsl:if test="count(/schema-diff/modify-table) &gt; 0">
        <xsl:value-of select="$newline"/>
     </xsl:if>
-
     <!-- Processes out of table modifications cycles -->
     <xsl:for-each select="/schema-diff/drop-view">
       <xsl:text>DROP VIEW </xsl:text>
@@ -203,21 +177,16 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
     </xsl:for-each>
-
     <xsl:for-each select="/schema-diff/create-view">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
-
     <xsl:for-each select="/schema-diff/update-view">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
-
     <xsl:value-of select="$newline"/>
     <xsl:text>COMMIT;</xsl:text>
     <xsl:value-of select="$newline"/>
-
   </xsl:template>
-
   <xsl:template match="drop-index">
     <xsl:param name="table"/>
     <xsl:text>DROP INDEX </xsl:text>
@@ -288,13 +257,11 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 <!-- Process the modify-column part -->
   <xsl:template match="modify-column">
     <xsl:param name="table"/>
-
     <xsl:variable name="column">
       <xsl:call-template name="write-object-name">
         <xsl:with-param name="objectname" select="@name"/>
       </xsl:call-template>
     </xsl:variable>
-
     <xsl:if test="string-length(dbms-data-type) &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
@@ -305,7 +272,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-
     <xsl:if test="nullable = 'true'">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
@@ -314,7 +280,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text> DROP NOT NULL;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-
     <xsl:if test="nullable = 'false'">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
@@ -323,7 +288,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text> SET NOT NULL;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-
     <xsl:if test="string-length(default-value) &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
@@ -334,7 +298,14 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-
+    <xsl:if test="default-value/@remove = 'true'">
+      <xsl:text>ALTER TABLE </xsl:text>
+      <xsl:value-of select="$table"/>
+      <xsl:text> ALTER COLUMN </xsl:text>
+      <xsl:value-of select="$column"/>
+      <xsl:text> DROP DEFAULT;</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
     <xsl:if test="string-length(comment) &gt; 0">
       <xsl:text>COMMENT ON COLUMN </xsl:text>
       <xsl:value-of select="$table"/>
@@ -345,7 +316,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text>';</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-
   </xsl:template>
 
 <!-- Add primary keys -->
@@ -534,8 +504,46 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
           <xsl:text>, </xsl:text>
         </xsl:if>
     </xsl:for-each>
-    <xsl:text>);</xsl:text>
+    <xsl:text>)</xsl:text>
+    <xsl:call-template name="define-fk-actions"/>
+    <xsl:call-template name="add-defer-rule"/>
+    <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
+  </xsl:template>
+
+  <xsl:template name="define-fk-actions">
+    <xsl:call-template name="add-fk-action">
+      <xsl:with-param name="event-name" select="'ON DELETE'"/>
+      <xsl:with-param name="action" select="delete-rule"/>
+    </xsl:call-template>
+    <xsl:call-template name="add-fk-action">
+      <xsl:with-param name="event-name" select="'ON UPDATE'"/>
+      <xsl:with-param name="action" select="update-rule"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xsl:template name="add-fk-action">
+    <xsl:param name="event-name"/>
+    <xsl:param name="action"/>
+    <xsl:if test="$action != 'NO ACTION'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  </xsl:text>
+      <xsl:value-of select="$event-name"/><xsl:text> </xsl:text><xsl:value-of select="$action"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="add-defer-rule">
+    <xsl:variable name="defer" select="deferrable"/>
+    <xsl:choose>
+      <xsl:when test="$defer='INITIALLY DEFERRED'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY DEFERRED</xsl:text>
+      </xsl:when>
+      <xsl:when test="$defer='INITIALLY IMMEDIATE'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY IMMEDIATE</xsl:text>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template name="create-index">

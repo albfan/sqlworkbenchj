@@ -200,8 +200,38 @@
           <xsl:text>, </xsl:text>
         </xsl:if>
     </xsl:for-each>
-    <xsl:text>);</xsl:text>
+    <xsl:text>)</xsl:text>
+    <xsl:call-template name="add-fk-action">
+      <xsl:with-param name="event-name" select="'ON DELETE'"/>
+      <xsl:with-param name="action" select="delete-rule"/>
+    </xsl:call-template>
+    <xsl:call-template name="add-defer-rule"/>
+    <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
+  </xsl:template>
+
+  <xsl:template name="add-fk-action">
+    <xsl:param name="event-name"/>
+    <xsl:param name="action"/>
+    <xsl:if test="$action != 'NO ACTION'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  </xsl:text>
+      <xsl:value-of select="$event-name"/><xsl:text> </xsl:text><xsl:value-of select="$action"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="add-defer-rule">
+    <xsl:variable name="defer" select="deferrable"/>
+    <xsl:choose>
+      <xsl:when test="$defer='INITIALLY DEFERRED'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY DEFERRED</xsl:text>
+      </xsl:when>
+      <xsl:when test="$defer='INITIALLY IMMEDIATE'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  DEFERRABLE INITIALLY IMMEDIATE</xsl:text>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="proc-def">
@@ -299,6 +329,14 @@
       <xsl:text> DEFAULT </xsl:text>
       <xsl:value-of select="default-value"/>
       <xsl:text>;</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
+    <xsl:if test="default-value/@remove = 'true'">
+      <xsl:text>ALTER TABLE </xsl:text>
+      <xsl:value-of select="$table"/>
+      <xsl:text> ALTER COLUMN </xsl:text>
+      <xsl:value-of select="$column"/>
+      <xsl:text> SET DEFAULT NULL;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
     <xsl:if test="string-length(comment) &gt; 0">
