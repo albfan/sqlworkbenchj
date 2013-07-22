@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -147,6 +148,19 @@ public class LookupDataLoader
 			cols++;
 		}
 		return order.toString();
+	}
+
+	/**
+	 * Get the mapping between the foreign keys and the primary keys for this loader.
+	 *
+	 * The key to the map is the PK column from the table being referenced.
+	 * The value is the FK column of the referencing table.
+	 *
+	 * @return the FK to PK mapping
+	 */
+	public Map<String, String> getForeignkeyMap()
+	{
+		return Collections.unmodifiableMap(columnMap);
 	}
 
 	public List<String> getReferencingColumns()

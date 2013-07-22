@@ -328,11 +328,22 @@ public class LookupValuePicker
 		int rows = lookupData.getRowCount();
 		DataStore ds = lookupData.getDataStore();
 
+		final Map<String, String> fkMap = lookupLoader.getForeignkeyMap();
+
 		for (int row = 0; row < rows; row++)
 		{
 			Map<String, Object> rowValues = ds.getRowData(row);
-			rowValues.keySet().retainAll(currentValues.keySet());
-			if (rowValues.equals(currentValues))
+			int matchingCount = 0;
+			for (Map.Entry<String, String> entry : fkMap.entrySet())
+			{
+				Object fkValue = currentValues.get(entry.getValue());
+				Object pkValue = rowValues.get(entry.getKey());
+				if (fkValue != null && pkValue != null)
+				{
+					if (fkValue.equals(pkValue)) matchingCount++;
+				}
+			}
+			if (matchingCount == fkMap.size())
 			{
 				found = row;
 				break;
@@ -347,13 +358,15 @@ public class LookupValuePicker
 				@Override
 				public boolean hightlightColumn(int row, String column, Object columnValue)
 				{
-					return row == hrow && currentValues.containsKey(column);
+					String pkColumn = fkMap.get(column);
+					return row == hrow && currentValues.containsKey(pkColumn);
 				}
 			};
 			lookupData.applyHighlightExpression(highlighter);
 		}
 		return found;
 	}
+
 
 	@Override
 	public void reload()
@@ -445,7 +458,7 @@ public class LookupValuePicker
 					metadata.getColumn(index).setIsPkColumn(true);
 				}
 			}
-			
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
