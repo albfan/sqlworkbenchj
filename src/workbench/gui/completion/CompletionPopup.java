@@ -444,12 +444,21 @@ public class CompletionPopup
 				}
 
 				@Override
-				public void setResult(Map<String, Object> values)
+				public void setResult(Map<String, Object> values, Map<String, String> fkColumnMap)
 				{
-					Object value = values.get(marker.getColumnName());
-					if (value != null)
+					String editColumn = marker.getColumnName();
+					for (Map.Entry<String, Object> entry : values.entrySet())
 					{
-						editor.setSelectedText(WbDateFormatter.getDisplayValue(value));
+						String fkColumn = fkColumnMap.get(entry.getKey());
+						if (SqlUtil.objectNamesAreEqual(fkColumn, editColumn))
+						{
+							Object value = entry.getValue();
+							if (value != null)
+							{
+								editor.setSelectedText(WbDateFormatter.getDisplayValue(value));
+							}
+							break;
+						}
 					}
 				}
 			};

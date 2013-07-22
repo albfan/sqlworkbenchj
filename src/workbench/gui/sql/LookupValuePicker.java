@@ -94,6 +94,7 @@ import workbench.gui.renderer.RendererSetup;
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
 import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
@@ -338,9 +339,9 @@ public class LookupValuePicker
 			{
 				Object fkValue = currentValues.get(entry.getValue());
 				Object pkValue = rowValues.get(entry.getKey());
-				if (fkValue != null && pkValue != null)
+				if (RowData.objectsAreEqual(pkValue, fkValue))
 				{
-					if (fkValue.equals(pkValue)) matchingCount++;
+					matchingCount++;
 				}
 			}
 			if (matchingCount == fkMap.size())
@@ -693,7 +694,7 @@ public class LookupValuePicker
 			if (!dialog.isCancelled())
 			{
 				Map<String, Object> values = picker.getSelectedPKValues();
-				result.setResult(values);
+				result.setResult(values, loader.getForeignkeyMap());
 			}
 		}
 		finally
@@ -737,7 +738,7 @@ public class LookupValuePicker
 			}
 
 			@Override
-			public void setResult(final Map<String, Object> values)
+			public void setResult(final Map<String, Object> values, Map<String, String> fkColumnMap)
 			{
 				JComponent comp = (JComponent)table.getEditorComponent();
 				final JTextComponent editor;
@@ -750,19 +751,20 @@ public class LookupValuePicker
 					editor = null;
 				}
 
-				final Object value = values.get(editColumn);
-
 				for (Map.Entry<String, Object> entry : values.entrySet())
 				{
 					String col = entry.getKey();
-					int colIndex = table.getColumnIndex(col);
-					if (col.equals(editColumn) && editor != null)
+					String fkColumn = fkColumnMap.get(col);
+					int colIndex = table.getColumnIndex(fkColumn);
+
+					Object value = entry.getValue();
+					if (fkColumn.equals(editColumn) && editor != null)
 					{
 						editor.setText(value == null ? "" : WbDateFormatter.getDisplayValue(value));
 					}
 					if (colIndex > -1)
 					{
-						table.setValueAt(entry.getValue(), row, colIndex);
+						table.setValueAt(value, row, colIndex);
 					}
 				}
 			}

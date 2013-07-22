@@ -32,5 +32,5 @@ import java.util.Map;
 public interface ResultSetter
 {
 	Map<String, Object> getFKValues(List<String> columns);
-	void setResult(Map<String, Object> values);
+	void setResult(Map<String, Object> values, Map<String, String> fkColumnsMap);
 }
