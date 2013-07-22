@@ -690,6 +690,7 @@ public class LookupValuePicker
 			dialog.setVisible(true);
 
 			Settings.getInstance().storeWindowSize(dialog, "workbench.gui.lookupvaluepicker");
+			picker.saveSettings();
 
 			if (!dialog.isCancelled())
 			{
