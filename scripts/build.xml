@@ -684,7 +684,7 @@
       <option value="-Dapple.laf.useScreenMenuBar=true"/>
       <option value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
       <option value="-Dapple.awt.showGrowBoxtrue=true"/>
-      <option value="-Xmx256m"/>
+      <option value="-Xmx512m"/>
       <option value="-Xdock:name=SQLWorkbench/J"/>
     </bundleapp>
 
@@ -753,7 +753,7 @@
       infostring="SQL Workbench/J"
       signature="sqwb"
       icon="Workbench.icns"
-      vmoptions="-Xmx256m"
+      vmoptions="-Xmx512m"
       stubfile="../libs/jarbundler/SQLWorkbench">
 
       <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
