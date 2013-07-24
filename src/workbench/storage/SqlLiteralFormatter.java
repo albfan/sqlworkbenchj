@@ -365,7 +365,7 @@ public class SqlLiteralFormatter
 				return "{$clobfile='" + path + "' encoding='" + this.clobEncoding + "'}";
 			}
 		}
-		else if (type == java.sql.Types.BIT && "bit".equalsIgnoreCase(data.getIdentifier().getDbmsType()))
+		else if (type == java.sql.Types.BIT && "bit".equalsIgnoreCase(dbmsType))
 		{
 			// this is for MS SQL Server
 			// we cannot convert all values denoted as Types.BIT to 0/1 as
@@ -402,6 +402,11 @@ public class SqlLiteralFormatter
 					LogMgr.logError("SqlLiteralFormatter.getDefaultLiteral", "Error converting BLOB value", e);
 				}
 			}
+		}
+		else if (type == Types.OTHER && "uuid".equalsIgnoreCase(dbmsType))
+		{
+			// this is for Postgres
+			return quoteString(type, value.toString());
 		}
 
 		// Fallback, let the JDBC driver format the value
