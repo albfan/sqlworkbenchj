@@ -160,4 +160,15 @@ public class SqlLiteralFormatterTest
 		literal = f.getDefaultLiteral(data);
 		assertEquals("Oracle timestamp incorrect", "to_timestamp('2002-04-02 14:15:16.000', 'YYYY-MM-DD HH24:MI:SS.FF')", literal);
 	}
+
+	@Test
+	public void testUUIDLiteral()
+	{
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		ColumnIdentifier uid = new ColumnIdentifier("uid", Types.OTHER);
+		uid.setDbmsType("uuid");
+		ColumnData data = new ColumnData("5b14ca52-3025-4c2e-8987-1c9f9d66acd5", uid);
+		String literal = f.getDefaultLiteral(data).toString();
+		assertEquals("'5b14ca52-3025-4c2e-8987-1c9f9d66acd5'", literal);
+	}
 }
