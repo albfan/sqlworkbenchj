@@ -30,17 +30,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.interfaces.ImportFileParser;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.db.importer.modifier.ImportValueModifier;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.BlobDecoder;
 import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
@@ -91,6 +94,7 @@ public abstract class AbstractImportFileParser
 	protected List<File> filesProcessed = new ArrayList<File>(25);
 	protected BlobDecoder blobDecoder = new BlobDecoder();
 	protected RowActionMonitor rowMonitor;
+	protected boolean ignoreMissingColumns;
 
 	public AbstractImportFileParser()
 	{
@@ -100,6 +104,12 @@ public abstract class AbstractImportFileParser
 	{
 		this();
 		this.inputFile = aFile;
+	}
+
+	@Override
+	public void setIgnoreMissingColumns(boolean flag)
+	{
+		ignoreMissingColumns = flag;
 	}
 
 	@Override

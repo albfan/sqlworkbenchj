@@ -266,7 +266,7 @@ public class TextFileParser
 				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
 				if (index < 0 && tableCols != null)
 				{
-					if (this.abortOnError)
+					if (this.abortOnError && !ignoreMissingColumns)
 					{
 						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), this.tableName);
 						this.messages.append(msg);

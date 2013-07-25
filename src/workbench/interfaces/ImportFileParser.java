@@ -25,12 +25,14 @@ package workbench.interfaces;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ImportFileHandler;
+import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.modifier.ImportValueModifier;
+
 import workbench.storage.RowActionMonitor;
 
 /**
@@ -100,4 +102,6 @@ public interface ImportFileParser
 	void setConnection(WbConnection connection);
 
 	void setRowMonitor(RowActionMonitor monitor);
+
+	void setIgnoreMissingColumns(boolean flag);
 }

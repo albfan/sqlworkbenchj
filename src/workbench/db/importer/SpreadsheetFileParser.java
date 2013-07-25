@@ -43,6 +43,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+
 import workbench.storage.RowActionMonitor;
 
 import workbench.util.CollectionUtil;
@@ -180,8 +181,6 @@ public class SpreadsheetFileParser
 		{
 			columnsToImport = Collections.emptyList();
 		}
-
-		boolean ignoreMissingColumns = CollectionUtil.isEmpty(columnsToImport);
 
 		try
 		{

@@ -110,6 +110,7 @@ public class WbImport
 	public static final String ARG_PG_COPY = "usePgCopy";
 	public static final String ARG_SHEET_NR = "sheetNumber";
 	public static final String ARG_SHEET_NAME = "sheetName";
+	public static final String ARG_IGNORE_MISSING_COLS = "ignoreMissingColumns";
 
 	private DataImporter imp;
 
@@ -147,6 +148,7 @@ public class WbImport
 		}
 
 		cmdLine.addArgument(ARG_TYPE, types);
+		cmdLine.addArgument(ARG_IGNORE_MISSING_COLS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_SHEET_NR);
 		cmdLine.addArgument(ARG_SHEET_NAME);
 		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
@@ -217,6 +219,11 @@ public class WbImport
 		boolean useSP = (currentConnection == null ? false : currentConnection.getDbSettings().useSavepointForImport());
 		result = result.replace("%savepoint_default%", Boolean.toString(useSP));
 		return result;
+	}
+
+	static boolean getIgnoreMissingDefault()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.import.default.ignoremissingcolumns", true);
 	}
 
 	static boolean getContinueDefault()
@@ -318,6 +325,8 @@ public class WbImport
 
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, getContinueDefault());
 		imp.setContinueOnError(continueOnError);
+
+		boolean ignoreMissingCols = cmdLine.getBoolean(ARG_IGNORE_MISSING_COLS, getIgnoreMissingDefault());
 
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
@@ -447,7 +456,8 @@ public class WbImport
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
 			textParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
 			textParser.setAbortOnError(!continueOnError);
-			
+			textParser.setIgnoreMissingColumns(ignoreMissingCols);
+
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isBlank(delimiter))
 			{
@@ -552,6 +562,7 @@ public class WbImport
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
+			xmlParser.setIgnoreMissingColumns(ignoreMissingCols);
 			parser = xmlParser;
 
 			// The encoding must be set as early as possible
@@ -632,6 +643,8 @@ public class WbImport
 			spreadSheetParser.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
 			spreadSheetParser.setIgnoreOwner(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
 			spreadSheetParser.setAbortOnError(!continueOnError);
+			spreadSheetParser.setIgnoreMissingColumns(ignoreMissingCols);
+
 			if (inputFile != null)
 			{
 				if (importAllSheets)
