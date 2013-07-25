@@ -31,6 +31,7 @@ import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ImportFileHandler;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.modifier.ImportValueModifier;
+import workbench.storage.RowActionMonitor;
 
 /**
  * @author Thomas Kellerer
@@ -98,4 +99,5 @@ public interface ImportFileParser
 
 	void setConnection(WbConnection connection);
 
+	void setRowMonitor(RowActionMonitor monitor);
 }

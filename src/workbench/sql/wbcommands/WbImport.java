@@ -446,6 +446,8 @@ public class WbImport
 			textParser.setNullString(cmdLine.getValue(WbExport.ARG_NULL_STRING, null));
 			textParser.setAlwaysQuoted(cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false));
 			textParser.setIllegalDateIsNull(cmdLine.getBoolean(ARG_ILLEGAL_DATE_NULL, false));
+			textParser.setAbortOnError(!continueOnError);
+			
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isBlank(delimiter))
 			{
@@ -549,6 +551,7 @@ public class WbImport
 
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
+			xmlParser.setAbortOnError(!continueOnError);
 			parser = xmlParser;
 
 			// The encoding must be set as early as possible
@@ -628,7 +631,7 @@ public class WbImport
 			spreadSheetParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 			spreadSheetParser.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
 			spreadSheetParser.setIgnoreOwner(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
-
+			spreadSheetParser.setAbortOnError(!continueOnError);
 			if (inputFile != null)
 			{
 				if (importAllSheets)
@@ -657,7 +660,7 @@ public class WbImport
 		}
 
 		imp.setProducer(parser);
-		parser.setAbortOnError(!continueOnError);
+		parser.setRowMonitor(this.rowMonitor);
 		imp.setInsertStart(cmdLine.getValue(ARG_INSERT_START));
 
 		ImportFileLister lister = getFileNameLister(cmdLine, defaultExtension);

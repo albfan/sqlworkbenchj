@@ -40,6 +40,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.RowActionMonitor;
 import workbench.util.BlobDecoder;
 import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
@@ -89,6 +90,7 @@ public abstract class AbstractImportFileParser
 
 	protected List<File> filesProcessed = new ArrayList<File>(25);
 	protected BlobDecoder blobDecoder = new BlobDecoder();
+	protected RowActionMonitor rowMonitor;
 
 	public AbstractImportFileParser()
 	{
@@ -98,6 +100,12 @@ public abstract class AbstractImportFileParser
 	{
 		this();
 		this.inputFile = aFile;
+	}
+
+	@Override
+	public void setRowMonitor(RowActionMonitor rowMonitor)
+	{
+		this.rowMonitor = rowMonitor;
 	}
 
 	@Override

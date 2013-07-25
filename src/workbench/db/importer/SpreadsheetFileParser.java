@@ -43,6 +43,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.storage.RowActionMonitor;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -147,10 +148,14 @@ public class SpreadsheetFileParser
 
 	/**
 	 * Define the columns in the input file.
-	 * If a column name equals RowDataProducer.SKIP_INDICATOR
-	 * then the column will not be imported.
+	 * If a column name equals RowDataProducer.SKIP_INDICATOR then the column will not be imported.
+	 *
+	 * If columnsToImport is empty, then columns from the file that are not present in the target table
+	 * are silently ignored.
+	 *
 	 * @param fileColumns the list of columns present in the input file
-	 * @param columnsToImport the list of columns to import, if null all columns are imported
+	 * @param columnsToImport the list of columns to import, if null or empty all columns are imported
+	 *
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
@@ -176,6 +181,8 @@ public class SpreadsheetFileParser
 			columnsToImport = Collections.emptyList();
 		}
 
+		boolean ignoreMissingColumns = CollectionUtil.isEmpty(columnsToImport);
+
 		try
 		{
 			for (ColumnIdentifier sourceCol : fileColumns)
@@ -193,10 +200,12 @@ public class SpreadsheetFileParser
 					importColumns.add(col);
 					continue;
 				}
+
 				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
+
 				if (index < 0 && tableCols != null)
 				{
-					if (this.abortOnError)
+					if (this.abortOnError && !ignoreMissingColumns)
 					{
 						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), this.tableName);
 						this.messages.append(msg);
@@ -353,6 +362,13 @@ public class SpreadsheetFileParser
 		List<Integer> result = new  ArrayList<Integer>(allSheets.size());
 		if (this.checkDependencies)
 		{
+			if (this.rowMonitor != null)
+			{
+				rowMonitor.saveCurrentType("spreadsheet-deps");
+				rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+				rowMonitor.setCurrentObject(ResourceMgr.getString("MsgCalcDependencies"), -1, -1);
+			}
+
 			LogMgr.logDebug("SpreadsheetFileParser.getSheets()", "Evaluating tables to import");
 			TableDependencySorter sorter = new TableDependencySorter(this.connection);
 			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
@@ -381,6 +397,11 @@ public class SpreadsheetFileParser
 			{
 				int index = findSheet(table, allSheets);
 				result.add(Integer.valueOf(index));
+			}
+			if (this.rowMonitor != null)
+			{
+				rowMonitor.jobFinished();
+				rowMonitor.restoreType("spreadsheet-deps");
 			}
 		}
 		else
