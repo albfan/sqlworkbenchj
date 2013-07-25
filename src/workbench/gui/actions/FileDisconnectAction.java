@@ -24,9 +24,10 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.resource.ResourceMgr;
 
 /**
  * Disconnect the current window.
@@ -49,7 +50,7 @@ public class FileDisconnectAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (isCtrlPressed(e))
+		if (isCtrlPressed(e) && invokedByMouse(e))
 		{
 			boolean doIt = WbSwingUtilities.getYesNo(window, ResourceMgr.getString("MsgAbortWarning"));
 
