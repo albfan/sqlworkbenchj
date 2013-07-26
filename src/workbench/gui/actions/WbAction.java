@@ -306,6 +306,8 @@ public class WbAction
 	public void setAccelerator(KeyStroke key)
 	{
 		putValue(Action.ACCELERATOR_KEY, key);
+		if (createdItems == null) return;
+		
 		Iterator<WeakReference<JMenuItem>> itr = this.createdItems.iterator();
 		while (itr.hasNext())
 		{
