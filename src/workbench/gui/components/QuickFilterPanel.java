@@ -376,6 +376,11 @@ public class QuickFilterPanel
 		applyFilter(this.filterValue.getText(), true);
 	}
 
+	public void resetFilter()
+	{
+		applyFilter("", false);
+	}
+
 	private void applyFilter(String filterExpression, boolean storeInHistory)
 	{
 		try
@@ -472,9 +477,9 @@ public class QuickFilterPanel
 		else if (e.getSource() instanceof JMenuItem)
 		{
 			JMenuItem item = (JMenuItem)e.getSource();
-			for (int i=0; i < columnItems.length; i++)
+			for (JCheckBoxMenuItem columnItem : columnItems)
 			{
-				columnItems[i].setSelected(false);
+				columnItem.setSelected(false);
 			}
 			item.setSelected(true);
 			this.searchColumn = (String)item.getClientProperty("filterColumn");
@@ -492,9 +497,9 @@ public class QuickFilterPanel
 			}
 			if (columnItems != null)
 			{
-				for (int i=0; i < columnItems.length; i++)
+				for (JCheckBoxMenuItem columnItem : columnItems)
 				{
-					columnItems[i].setSelected(columnItems[i].getText().equals(searchColumn));
+					columnItem.setSelected(columnItem.getText().equals(searchColumn));
 				}
 			}
 		}

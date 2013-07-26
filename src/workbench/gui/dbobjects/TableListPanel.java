@@ -2067,17 +2067,33 @@ public class TableListPanel
 	@Override
 	public void selectTable(TableIdentifier table)
 	{
-		for (int row = 0; row < this.tableList.getRowCount(); row ++)
+		int row = findTable(table);
+
+		if (row < 0 && tableList.getDataStore().isFiltered())
+		{
+			findPanel.resetFilter();
+			row = findTable(table);
+		}
+
+		if (row > -1)
+		{
+			displayTab.setSelectedIndex(0);
+			tableList.scrollToRow(row);
+			tableList.setRowSelectionInterval(row, row);
+		}
+	}
+
+	private int findTable(TableIdentifier table)
+	{
+		for (int row = 0; row < this.tableList.getRowCount(); row++)
 		{
 			TableIdentifier tbl = createTableIdentifier(row);
-			if (tbl.equals(table))
+			if (tbl.compareNames(table))
 			{
-				displayTab.setSelectedIndex(0);
-				tableList.scrollToRow(row);
-				tableList.setRowSelectionInterval(row, row);
-				break;
+				return row;
 			}
 		}
+		return -1;
 	}
 
 	@Override

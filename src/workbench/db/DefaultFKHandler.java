@@ -108,7 +108,6 @@ public class DefaultFKHandler
 	 * The column indexes of this datastore are defined by the COLUMN_IDX_xxx constants in this class
 	 *
 	 * @param table the table to check
-	 * @param includeNumericRuleValue
 	 * @return all "incoming" foreign keys
 	 */
 	@Override

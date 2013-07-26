@@ -23,13 +23,17 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import javax.swing.JCheckBox;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import workbench.db.DefaultFKHandler;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.TableIdentifier;
@@ -46,6 +50,7 @@ import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.util.WbThread;
@@ -56,7 +61,7 @@ import workbench.util.WbThread;
  */
 public class FkDisplayPanel
 	extends JPanel
-	implements Resettable, Reloadable, Interruptable
+	implements Resettable, Reloadable, Interruptable, ActionListener
 {
 	protected WbTable keys;
 	private TableDependencyTreeDisplay dependencyTree;
@@ -72,6 +77,8 @@ public class FkDisplayPanel
 	private boolean isTreeRetrieving;
 
 	private TableIdentifier currentTable;
+	private JMenuItem selectTableItem;
+	private TableLister tables;
 
 	public FkDisplayPanel(TableLister lister, boolean showImported)
 	{
@@ -84,6 +91,7 @@ public class FkDisplayPanel
 		this.splitPanel.setDividerLocation(100);
 		this.splitPanel.setDividerSize(8);
 		this.splitPanel.setTopComponent(scroll);
+		tables = lister;
 		this.dependencyTree = new TableDependencyTreeDisplay(lister);
 		this.dependencyTree.reset();
 		JPanel treePanel = new JPanel(new BorderLayout());
@@ -108,6 +116,10 @@ public class FkDisplayPanel
 		retrieveAll.setBorder(new EmptyBorder(0, 5, 0,0));
 		retrieveAll.setSelected(true);
 		toolbar.add(retrieveAll);
+
+		selectTableItem = new JMenuItem(ResourceMgr.getString("MnuTextSelectInList"));
+		selectTableItem.addActionListener(this);
+		keys.addPopupMenu(selectTableItem, true);
 	}
 
 	public boolean getRetrieveAll()
@@ -257,5 +269,32 @@ public class FkDisplayPanel
 	public boolean confirmCancel()
 	{
 		return true;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		if (tables == null) return;
+		if (e.getSource() != selectTableItem) return;
+		int selected = keys.getSelectedRow();
+		if (selected < 0) return;
+
+		int colIndex = keys.convertColumnIndexToView(DefaultFKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
+		String col = keys.getValueAsString(selected, colIndex);
+		int pos = col.lastIndexOf('.');
+		if (pos > 0)
+		{
+			String tname = col.substring(0, pos);
+			final TableIdentifier tbl = new TableIdentifier(tname);
+			LogMgr.logDebug("FkDisplayPanel.actionPerformed()", "Trying to select table: " + tname);
+			WbSwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					tables.selectTable(tbl);
+				}
+			});
+		}
 	}
 }
