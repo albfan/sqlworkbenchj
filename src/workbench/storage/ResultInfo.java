@@ -27,6 +27,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
@@ -36,7 +38,7 @@ import workbench.db.QuoteHandler;
 import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -147,9 +149,19 @@ public class ResultInfo
 
 		for (int i=0; i < this.colCount; i++)
 		{
-			// Not all drivers will really return the column label if an alias is used
-			String name = metaData.getColumnName(i + 1);
-			String alias = metaData.getColumnLabel(i + 1);
+			String name = null;
+			String alias = null;
+
+			try
+			{
+				// Not all drivers will really return the column label if an alias is used
+				name = metaData.getColumnName(i + 1);
+				alias = metaData.getColumnLabel(i + 1);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("ResultInfo.<init>", "Could not obtain column name or alias", th);
+			}
 
 			boolean realColumn = true;
 			if (StringUtil.isNonBlank(name))
@@ -179,7 +191,7 @@ public class ResultInfo
 			}
 			catch (Throwable th)
 			{
-				LogMgr.logWarning("ResultInfo.initMetadata()", "Error when checking nullable for column : " + name, th);
+				LogMgr.logWarning("ResultInfo.<init>", "Error when checking nullable for column : " + name, th);
 			}
 
 			String typename = null;
@@ -543,7 +555,7 @@ public class ResultInfo
 	{
 		return findColumn(name, QuoteHandler.STANDARD_HANDLER);
 	}
-	
+
 	public int findColumn(String name, QuoteHandler handler)
 	{
 		if (name == null) return -1;
