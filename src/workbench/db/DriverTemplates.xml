@@ -5,6 +5,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>nl.cwi.monetdb.jdbc.MonetDriver</string>
+    </void>
+    <void property="library">
+     <string>monetdb-jdbc-2.9-java6.jar</string>
+    </void>
+    <void property="name">
+     <string>Apache Derby Embedded</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:monetdb://(hostname)/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>org.apache.derby.jdbc.EmbeddedDriver</string>
     </void>
     <void property="library">

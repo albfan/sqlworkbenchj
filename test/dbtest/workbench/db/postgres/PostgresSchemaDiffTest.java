@@ -27,16 +27,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.Writer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 
@@ -184,4 +190,62 @@ public class PostgresSchemaDiffTest
 		assertTrue("Could not delete output", outfile.delete());
 	}
 
+	@Test
+	public void testProcDiff()
+		throws Exception
+	{
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+		if (conn == null)
+		{
+			return;
+		}
+
+		TestUtil.executeScript(conn,
+			"create schema " + TARGET_SCHEMA  + "\n/\n" +
+			"create function " + REFERENCE_SCHEMA + ".to_create() returns integer as $$ begin return 42; end; $$ language plpgsql;\n" +
+			"/\n" +
+			"create function " + REFERENCE_SCHEMA + ".to_modify() returns integer as $$ begin return 42; end; $$ language plpgsql; \n" +
+			"/\n" +
+			"create function " + TARGET_SCHEMA + ".to_modify() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
+			"/\n" +
+			"create function " + TARGET_SCHEMA + ".to_delete() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
+			"/\n"  +
+			"commit\n" +
+			"/\n",
+			DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		SchemaDiff diff = new SchemaDiff(conn, conn);
+		diff.setIncludeViews(false);
+		diff.setIncludeExtendedOptions(false);
+		diff.setIncludeIndex(false);
+		diff.setIncludeSequences(false);
+		diff.setIncludeProcedures(true);
+		diff.setIncludeTriggers(false);
+		diff.setSchemas(REFERENCE_SCHEMA, TARGET_SCHEMA);
+
+		TestUtil util = getTestUtil();
+
+		File outfile = new File(util.getBaseDir(), "pg_proc_diff.xml");
+		Writer out = new FileWriter(outfile);
+		diff.writeXml(out);
+		FileUtil.closeQuietely(out);
+
+		assertTrue(outfile.exists());
+		assertTrue(outfile.length() > 0);
+		Reader in = new FileReader(outfile);
+		String xml = FileUtil.readCharacters(in);
+		assertNotNull(xml);
+		System.out.println(xml);
+
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/create-proc/proc-def/proc-name");
+		assertEquals("to_create", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/update-proc/proc-def/proc-name");
+		assertEquals("to_modify", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-procedure/proc-def/proc-name");
+		assertEquals("to_delete", value);
+
+		assertTrue("Could not delete output", outfile.delete());
+	}
 }

@@ -25,11 +25,13 @@ package workbench.db;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.util.VersionNumber;
 import workbench.util.WbPersistence;
 
 /**
@@ -64,6 +66,8 @@ public class MetaDataSqlManager
 	public static final String CONS_VALIDATED = "%validated%";
 
 	private String productName;
+	private int majorVersion = -1;
+	private int minorVersion = -1;
 
 	private GetMetaDataSql procedureSource;
 	private GetMetaDataSql viewSource;
@@ -73,9 +77,14 @@ public class MetaDataSqlManager
 
 	private final Object LOCK = new Object();
 
-	public MetaDataSqlManager(String product)
+	public MetaDataSqlManager(String product, VersionNumber version)
 	{
 		this.productName = product;
+		if (version != null)
+		{
+			this.majorVersion = version.getMajorVersion();
+			this.minorVersion = version.getMinorVersion();
+		}
 	}
 
 	public GetMetaDataSql getListIndexesSql()
@@ -85,7 +94,7 @@ public class MetaDataSqlManager
 			if (this.listIndexes == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListIndexStatements.xml");
-				this.listIndexes = sql.get(this.productName);
+				this.listIndexes = getEntry(sql);
 			}
 			return this.listIndexes;
 		}
@@ -98,7 +107,7 @@ public class MetaDataSqlManager
 			if (this.procedureSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ProcSourceStatements.xml");
-				this.procedureSource = sql.get(this.productName);
+				this.procedureSource = getEntry(sql);
 			}
 			return this.procedureSource;
 		}
@@ -111,7 +120,7 @@ public class MetaDataSqlManager
 			if (this.viewSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ViewSourceStatements.xml");
-				this.viewSource = sql.get(this.productName);
+				this.viewSource = getEntry(sql);
 			}
 			return this.viewSource;
 		}
@@ -125,7 +134,7 @@ public class MetaDataSqlManager
 			if (this.listTrigger == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListTriggersStatements.xml");
-				this.listTrigger = sql.get(this.productName);
+				this.listTrigger = getEntry(sql);
 			}
 			return this.listTrigger;
 		}
@@ -138,10 +147,34 @@ public class MetaDataSqlManager
 			if (this.triggerSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("TriggerSourceStatements.xml");
-				this.triggerSource = sql.get(this.productName);
+				this.triggerSource = getEntry(sql);
 			}
 			return this.triggerSource;
 		}
+	}
+
+	private GetMetaDataSql getEntry(Map<String, GetMetaDataSql> statements)
+	{
+		String key = null;
+		GetMetaDataSql sql = null;
+
+		if (majorVersion != -1 && minorVersion != -1)
+		{
+			key = productName + "-" + Integer.toString(majorVersion) + "." + Integer.toString(minorVersion);
+			sql = statements.get(key);
+		}
+
+		// second try: only major version
+		if (sql != null) return sql;
+		if (majorVersion != -1)
+		{
+			key = productName + "-" + Integer.toString(majorVersion);
+			sql = statements.get(key);
+		}
+		if (sql != null) return sql;
+
+		// last try: only productname
+		return statements.get(productName);
 	}
 
 	@SuppressWarnings("unchecked")

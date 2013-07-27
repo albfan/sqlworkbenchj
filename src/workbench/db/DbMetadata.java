@@ -477,7 +477,7 @@ public class DbMetadata
 	{
 		if (this.metaSqlMgr == null)
 		{
-			this.metaSqlMgr = new MetaDataSqlManager(productName);
+			this.metaSqlMgr = new MetaDataSqlManager(productName, this.dbConnection.getDatabaseVersion());
 		}
 		return this.metaSqlMgr;
 	}

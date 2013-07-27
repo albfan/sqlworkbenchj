@@ -73,7 +73,7 @@ public class WbAction
 	protected WbAction proxy;
 	private WbAction original;
 	private String iconKey;
-	private List<WeakReference<JMenuItem>> createdItems = new LinkedList<WeakReference<JMenuItem>>();
+	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<WeakReference<JMenuItem>>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
 
@@ -306,8 +306,7 @@ public class WbAction
 	public void setAccelerator(KeyStroke key)
 	{
 		putValue(Action.ACCELERATOR_KEY, key);
-		if (createdItems == null) return;
-		
+
 		Iterator<WeakReference<JMenuItem>> itr = this.createdItems.iterator();
 		while (itr.hasNext())
 		{
@@ -675,16 +674,12 @@ public class WbAction
 
 	public void dispose()
 	{
-		if (this.createdItems != null)
+		for (WeakReference<JMenuItem> ref : createdItems)
 		{
-			for (WeakReference<JMenuItem> ref : createdItems)
-			{
-				JMenuItem item = ref.get();
-				if (item != null) item.removeAll();
-			}
-			createdItems.clear();
-			createdItems = null;
+			JMenuItem item = ref.get();
+			if (item != null) item.removeAll();
 		}
+		createdItems.clear();
 		this.delegate = null;
 		this.original = null;
 		this.proxy = null;
