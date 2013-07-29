@@ -304,6 +304,7 @@ public class ExcelReader
 
 	private boolean isMerged(Cell cell)
 	{
+		if (cell == null) return false;
 		for (CellRangeAddress range : mergedRegions)
 		{
 			if (range.isInRange(cell.getRowIndex(), cell.getColumnIndex())) return true;
@@ -321,7 +322,13 @@ public class ExcelReader
 
 		int nullCount = 0;
 
-		for (int col=0; col < this.columnCount; col++)
+		int colCount = this.columnCount;
+		if (colCount < 0)
+		{
+			colCount = row.getLastCellNum();
+		}
+
+		for (int col=0; col < colCount; col++)
 		{
 			Cell cell = row.getCell(col);
 
