@@ -31,7 +31,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -76,6 +75,7 @@ public class ExcelReader
 	private String nullString;
 	private List<CellRangeAddress> mergedRegions;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
+	private int columnCount = -1;
 
 	private final boolean useXLSX;
 
@@ -92,6 +92,12 @@ public class ExcelReader
 			sheetName = null;
 		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
+	}
+
+	@Override
+	public void setColumnCount(int count)
+	{
+		this.columnCount = count;
 	}
 
 	@Override
@@ -207,13 +213,19 @@ public class ExcelReader
 	{
 		if (headerColumns == null)
 		{
-			List<Object> values = getRowValues(0);
-			headerColumns = new ArrayList<String>(values.size());
-			for (int i=0; i < values.size(); i++)
+			Row row = dataSheet.getRow(0);
+
+			headerColumns = new ArrayList<String>();
+			int colCount = row.getLastCellNum();
+
+			for (int i=0; i < colCount; i++)
 			{
-				if (values.get(i) != null)
+				Cell cell = row.getCell(i);
+				Object value = getCellValue(cell);
+
+				if (value != null)
 				{
-					headerColumns.add(values.get(i).toString());
+					headerColumns.add(value.toString());
 				}
 				else
 				{
@@ -307,14 +319,11 @@ public class ExcelReader
 
 		if (row == null) return values;
 
-		Iterator<Cell> cells = row.cellIterator();
 		int nullCount = 0;
 
-		while (cells.hasNext())
+		for (int col=0; col < this.columnCount; col++)
 		{
-			Cell cell = cells.next();
-			int type = cell.getCellType();
-			Object value = null;
+			Cell cell = row.getCell(col);
 
 			// treat rows with merged cells as "empty"
 			if (isMerged(cell))
@@ -323,52 +332,8 @@ public class ExcelReader
 				return Collections.emptyList();
 			}
 
-			if (type == Cell.CELL_TYPE_FORMULA)
-			{
-				type = cell.getCachedFormulaResultType();
-			}
+			Object value = getCellValue(cell);
 
-			switch (type)
-			{
-				case Cell.CELL_TYPE_BLANK:
-				case Cell.CELL_TYPE_ERROR:
-					value = null;
-					break;
-				case Cell.CELL_TYPE_NUMERIC:
-					boolean isDate = HSSFDateUtil.isCellDateFormatted(cell);
-					String fmt = cell.getCellStyle().getDataFormatString();
-					double dv = cell.getNumericCellValue();
-					if (isDate)
-					{
-						java.util.Date dval = getJavaDate(dv);
-						if (dval != null)
-						{
-							if (isTimestampFormat(fmt))
-							{
-								value = new java.sql.Timestamp(dval.getTime());
-							}
-							else
-							{
-								value = new java.sql.Date(dval.getTime());
-							}
-						}
-					}
-					else
-					{
-						value = Double.valueOf(dv);
-					}
-					break;
-				default:
-					String svalue = cell.getStringCellValue();
-					if (svalue != null && StringUtil.equalString(svalue, nullString))
-					{
-						value = null;
-					}
-					else
-					{
-						value = svalue;
-					}
-			}
 			if (value == null)
 			{
 				nullCount ++;
@@ -383,6 +348,61 @@ public class ExcelReader
 		}
 
 		return values;
+	}
+
+	private Object getCellValue(Cell cell)
+	{
+		if (cell == null) return null;
+		int type = cell.getCellType();
+		if (type == Cell.CELL_TYPE_FORMULA)
+		{
+			type = cell.getCachedFormulaResultType();
+		}
+
+		Object value = null;
+
+		switch (type)
+		{
+			case Cell.CELL_TYPE_BLANK:
+			case Cell.CELL_TYPE_ERROR:
+				value = null;
+				break;
+			case Cell.CELL_TYPE_NUMERIC:
+				boolean isDate = HSSFDateUtil.isCellDateFormatted(cell);
+				String fmt = cell.getCellStyle().getDataFormatString();
+				double dv = cell.getNumericCellValue();
+				if (isDate)
+				{
+					java.util.Date dval = getJavaDate(dv);
+					if (dval != null)
+					{
+						if (isTimestampFormat(fmt))
+						{
+							value = new java.sql.Timestamp(dval.getTime());
+						}
+						else
+						{
+							value = new java.sql.Date(dval.getTime());
+						}
+					}
+				}
+				else
+				{
+					value = Double.valueOf(dv);
+				}
+				break;
+			default:
+				String svalue = cell.getStringCellValue();
+				if (svalue != null && StringUtil.equalString(svalue, nullString))
+				{
+					value = null;
+				}
+				else
+				{
+					value = svalue;
+				}
+		}
+		return value;
 	}
 
 	@Override

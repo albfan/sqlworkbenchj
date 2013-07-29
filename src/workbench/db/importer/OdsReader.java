@@ -76,6 +76,12 @@ public class OdsReader
 	}
 
 	@Override
+	public void setColumnCount(int count)
+	{
+		// not needed for ODS format
+	}
+
+	@Override
 	public List<String> getHeaderColumns()
 	{
 		if (headerColumns == null)

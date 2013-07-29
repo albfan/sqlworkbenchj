@@ -523,6 +523,7 @@ public class SpreadsheetFileParser
 		int importRow = 0;
 		boolean includeRow = true;
 		int sourceCount = importColumns.size();
+		this.reader.setColumnCount(sourceCount);
 
 		converter.setIllegalDateIsNull(illegalDateIsNull);
 
