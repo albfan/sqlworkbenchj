@@ -116,8 +116,9 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfFetchSize);
 		policy.addComponent(cbAutocommit);
 		policy.addComponent(extendedProps);
-		policy.addComponent(cbStorePassword);
+		policy.addComponent(cbxPromptUsername);
 		policy.addComponent(rollbackBeforeDisconnect);
+		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(confirmUpdates);
 		policy.addComponent(readOnly);
@@ -151,6 +152,7 @@ public class ConnectionEditorPanel
 		this.infoColor.setActionListener(this);
 		this.confirmUpdates.addActionListener(this);
 		this.readOnly.addActionListener(this);
+		this.cbxPromptUsername.addActionListener(this);
 		((FlatButton)editConnectionScriptsButton).setCustomInsets(FlatButton.LARGER_MARGIN);
 		((FlatButton)editFilterButton).setCustomInsets(FlatButton.LARGER_MARGIN);
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
@@ -241,6 +243,7 @@ public class ConnectionEditorPanel
     hideWarnings = new BooleanPropertyEditor();
     checkOpenTrans = new BooleanPropertyEditor();
     preventNoWhere = new BooleanPropertyEditor();
+    cbxPromptUsername = new BooleanPropertyEditor();
     jPanel2 = new javax.swing.JPanel();
     tfFetchSize = new IntegerPropertyEditor();
     cbAutocommit = new BooleanPropertyEditor();
@@ -408,7 +411,7 @@ public class ConnectionEditorPanel
     cbStorePassword.setName("storePassword"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -433,7 +436,7 @@ public class ConnectionEditorPanel
     cbIgnoreDropErrors.setName("ignoreDropErrors"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -445,7 +448,7 @@ public class ConnectionEditorPanel
     cbSeparateConnections.setName("useSeparateConnectionPerTab"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -457,7 +460,7 @@ public class ConnectionEditorPanel
     emptyStringIsNull.setName("emptyStringIsNull"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -508,7 +511,7 @@ public class ConnectionEditorPanel
     trimCharData.setName("trimCharData"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -543,7 +546,7 @@ public class ConnectionEditorPanel
     hideWarnings.setName("hideWarnings"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -555,9 +558,8 @@ public class ConnectionEditorPanel
     checkOpenTrans.setMargin(new java.awt.Insets(2, 0, 2, 2));
     checkOpenTrans.setName("detectOpenTransaction"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -575,6 +577,16 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(preventNoWhere, gridBagConstraints);
+
+    cbxPromptUsername.setText("Prompt for username");
+    cbxPromptUsername.setBorder(null);
+    cbxPromptUsername.setName("promptForUsername"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
+    wbOptionsPanel.add(cbxPromptUsername, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1031,6 +1043,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox cbIgnoreDropErrors;
   protected javax.swing.JCheckBox cbSeparateConnections;
   protected javax.swing.JCheckBox cbStorePassword;
+  protected javax.swing.JCheckBox cbxPromptUsername;
   protected javax.swing.JCheckBox checkOpenTrans;
   protected javax.swing.JCheckBox confirmUpdates;
   protected javax.swing.JPanel controlUpdates;
@@ -1276,6 +1289,13 @@ public class ConnectionEditorPanel
 		return f.getSize();
 	}
 
+	private void checkPromptUsername()
+	{
+    boolean prompt = cbxPromptUsername.isSelected();
+		tfUserName.setEnabled(!prompt);
+		tfPwd.setEnabled(!prompt);
+	}
+
 	private void checkFilters()
 	{
 		int f1 = currentProfile == null ? 0 : getFilterSize(currentProfile.getSchemaFilter());
@@ -1350,6 +1370,7 @@ public class ConnectionEditorPanel
 			checkFilters();
 			checkOracle();
 			checkUncommitted();
+			checkPromptUsername();
 		}
 		catch (Exception e)
 		{
@@ -1482,6 +1503,10 @@ public class ConnectionEditorPanel
 		else if (e.getSource() == this.infoColor && this.currentProfile != null)
 		{
 			this.currentProfile.setInfoDisplayColor(this.infoColor.getSelectedColor());
+		}
+		else if (e.getSource() == cbxPromptUsername)
+		{
+			checkPromptUsername();
 		}
 	}
 

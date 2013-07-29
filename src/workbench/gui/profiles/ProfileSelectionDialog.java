@@ -54,6 +54,7 @@ import workbench.db.DbDriver;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
 
@@ -243,7 +244,17 @@ public class ProfileSelectionDialog
 		if (this.profiles.validateInput())
 		{
 			this.selectedProfile = this.profiles.getSelectedProfile();
-			if (this.checkPassword())
+			boolean ok = true;
+			if (this.selectedProfile.getPromptForUsername())
+			{
+				ok = this.promptUsername();
+			}
+			else if (!this.selectedProfile.getStorePassword())
+			{
+				ok = this.promptPassword();
+			}
+
+			if (ok)
 			{
 				this.cancelled = false;
 				this.closeDialog();
@@ -255,7 +266,20 @@ public class ProfileSelectionDialog
 		}
 	}
 
-	private boolean checkPassword()
+	private boolean promptUsername()
+	{
+		if (this.selectedProfile == null) return false;
+		if (!this.selectedProfile.getPromptForUsername()) return true;
+
+		LoginPrompt prompt = new LoginPrompt();
+		boolean ok = ValidatingDialog.showConfirmDialog(this, prompt, ResourceMgr.getString("TxtEnterLogin"));
+		if (!ok) return false;
+		this.selectedProfile.setPassword(prompt.getPassword());
+		this.selectedProfile.setTemporaryUsername(prompt.getUserName());
+		return true;
+	}
+
+	private boolean promptPassword()
 	{
 		if (this.selectedProfile == null) return false;
 		if (this.selectedProfile.getStorePassword()) return true;

@@ -53,6 +53,7 @@ public class ConnectionProfile
 	private String url;
 	private String driverclass;
 	private String username;
+	private String temporaryUsername;
 	private String password;
 	private String driverName;
 	private String group;
@@ -75,6 +76,7 @@ public class ConnectionProfile
 	private boolean readOnly;
 	private boolean preventNoWhere;
 	private boolean confirmUpdates;
+	private boolean promptForUsername;
 
 	private Integer defaultFetchSize;
 
@@ -121,6 +123,17 @@ public class ConnectionProfile
 		cp.setStoreExplorerSchema(true);
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
+	}
+
+	public boolean getPromptForUsername()
+	{
+		return promptForUsername;
+	}
+
+	public void setPromptForUsername(boolean flag)
+	{
+		changed = (flag != promptForUsername);
+		this.promptForUsername = flag;
 	}
 
 	public boolean getDetectOpenTransaction()
@@ -350,7 +363,7 @@ public class ConnectionProfile
 		this.icon = icon;
 		this.changed = true;
 	}
-	
+
 	public boolean isProfileForKey(ProfileKey key)
 	{
 		ProfileKey myKey = getKey();
@@ -716,13 +729,20 @@ public class ConnectionProfile
 
 	public String getUsername()
 	{
+		if (temporaryUsername != null) return temporaryUsername;
 		return this.username;
 	}
 
-	public final void setUsername(java.lang.String newName)
+	public void setTemporaryUsername(String tempName)
+	{
+		this.temporaryUsername = tempName;
+	}
+
+	public final void setUsername(String newName)
 	{
 		if (newName != null) newName = newName.trim();
-		if (!StringUtil.equalString(newName, username) && !changed) changed = true;
+		if (!StringUtil.equalString(newName, username) && !changed && !promptForUsername) changed = true;
+		this.temporaryUsername = null;
 		this.username = newName;
 	}
 
@@ -831,6 +851,7 @@ public class ConnectionProfile
 		result.setSchemaFilter(this.schemaFilter == null ? null : schemaFilter.createCopy());
 		result.setDetectOpenTransaction(this.detectOpenTransaction);
 		result.setPreventDMLWithoutWhere(this.preventNoWhere);
+		result.setPromptForUsername(this.promptForUsername);
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();
