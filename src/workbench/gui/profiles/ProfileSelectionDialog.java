@@ -245,13 +245,14 @@ public class ProfileSelectionDialog
 		{
 			this.selectedProfile = this.profiles.getSelectedProfile();
 			boolean ok = true;
-			if (this.selectedProfile.getPromptForUsername())
+
+			if (selectedProfile != null && this.selectedProfile.getPromptForUsername())
 			{
-				ok = this.promptUsername();
+				ok = promptUsername();
 			}
-			else if (!this.selectedProfile.getStorePassword())
+			else if (selectedProfile != null && !this.selectedProfile.getStorePassword())
 			{
-				ok = this.promptPassword();
+				ok = promptPassword();
 			}
 
 			if (ok)
@@ -269,7 +270,6 @@ public class ProfileSelectionDialog
 	private boolean promptUsername()
 	{
 		if (this.selectedProfile == null) return false;
-		if (!this.selectedProfile.getPromptForUsername()) return true;
 
 		LoginPrompt prompt = new LoginPrompt();
 		boolean ok = ValidatingDialog.showConfirmDialog(this, prompt, ResourceMgr.getString("TxtEnterLogin"));
@@ -282,7 +282,6 @@ public class ProfileSelectionDialog
 	private boolean promptPassword()
 	{
 		if (this.selectedProfile == null) return false;
-		if (this.selectedProfile.getStorePassword()) return true;
 
 		String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;
