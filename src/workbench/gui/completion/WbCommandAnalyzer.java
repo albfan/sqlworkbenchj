@@ -75,7 +75,11 @@ public class WbCommandAnalyzer
 	@Override
 	public String getWordDelimiters()
 	{
-		return wordDelimiters;
+		if (context == CONTEXT_WB_COMMANDS)
+		{
+			return wordDelimiters;
+		}
+		return super.getWordDelimiters();
 	}
 
 	@Override
