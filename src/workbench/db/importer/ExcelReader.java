@@ -306,7 +306,7 @@ public class ExcelReader
 		ArrayList<Object> values = new ArrayList<Object>();
 
 		if (row == null) return values;
-		
+
 		Iterator<Cell> cells = row.cellIterator();
 		int nullCount = 0;
 
@@ -317,7 +317,11 @@ public class ExcelReader
 			Object value = null;
 
 			// treat rows with merged cells as "empty"
-			if (isMerged(cell)) return Collections.emptyList();
+			if (isMerged(cell))
+			{
+				LogMgr.logDebug("ExcelReader.getRowValues()", dataSheet.getSheetName() + ": column:" + cell.getColumnIndex() + ", row:" + cell.getRowIndex() + " is merged. Ignoring row!");
+				return Collections.emptyList();
+			}
 
 			if (type == Cell.CELL_TYPE_FORMULA)
 			{
