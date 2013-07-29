@@ -26,10 +26,14 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import workbench.WbTestCase;
+
 import workbench.sql.DelimiterDefinition;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -69,6 +73,7 @@ public class ConnectionProfileTest
 		old.setUrl("jdbc:some:database");
 		old.setHideWarnings(true);
 		old.setRemoveComments(true);
+		old.setPromptForUsername(true);
 		ObjectNameFilter filter = new ObjectNameFilter();
 		filter.addExpression("^pg_toast.*");
 		filter.resetModified();
@@ -87,6 +92,7 @@ public class ConnectionProfileTest
 		assertTrue(copy.getTrimCharData());
 		assertTrue(copy.getIncludeNullInInsert());
 		assertTrue(copy.getRemoveComments());
+		assertTrue(copy.getPromptForUsername());
 		assertNull(copy.getSchemaFilter());
 		assertNotNull(copy.getCatalogFilter());
 		assertEquals(1, copy.getCatalogFilter().getSize());
