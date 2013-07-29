@@ -564,7 +564,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
     wbOptionsPanel.add(checkOpenTrans, gridBagConstraints);
 
     preventNoWhere.setText(ResourceMgr.getString("LblConnPreventNoWhere")); // NOI18N
