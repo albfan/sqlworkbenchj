@@ -49,6 +49,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
+import workbench.db.importer.TableDependencySorterTest;
 
 import workbench.sql.StatementRunnerResult;
 
@@ -72,8 +73,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.importer.TableDependencySorterTest;
 /**
  *
  * @author Thomas Kellerer
@@ -158,6 +157,42 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testIgnoreMissing()
+		throws Exception
+	{
+		File input = new File(util.getBaseDir(), "id_data.txt");
+
+		TestUtil.writeFile(input,
+			"nr\tfirstname\tfoobar\tlastname\n" +
+			"1\tArthur\txxxx\tDent\n" +
+			"2\tFord\tyyyy\tPrefect\n" +
+			"3\tZaphod\tzzz\tBeeblebrox\n",
+			"ISO-8859-1");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-header=true " +
+			"-ignoreMissingColumns=true " +
+			"-continueonerror=false " +
+			"-table=junit_test");
+
+		assertTrue(input.delete());
+
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=1");
+		assertEquals("Dent", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=2");
+		assertEquals("Prefect", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=3");
+		assertEquals("Beeblebrox", name);
+	}
+
+	@Test
 	public void testMissingColumns()
 		throws Exception
 	{
@@ -221,6 +256,33 @@ public class WbImportTest
 		id = (Number)TestUtil.getSingleQueryValue(connection, "select id from id_test where lastname = 'Prefect'");
 		assertNotNull(id);
 		assertEquals(2, id.intValue());
+	}
+
+	@Test
+	public void testSpreadSheetIgnoreColumn()
+		throws Exception
+	{
+		File input = util.copyResourceFile(this, "data-2.ods");
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=ods " +
+			"-sheetName=person " +
+			"-header=true " +
+			"-ignoreMissingColumns=true " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(input.delete());
+
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		Number id = (Number)TestUtil.getSingleQueryValue(connection, "select id from person where lastname = 'Dent'");
+		assertNotNull(id);
+		assertEquals(1, id.intValue());
+
+		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select salary from person where id = 2");
+		assertNotNull(salary);
+		double sal = salary.doubleValue();
+		assertEquals(1234.56, sal, 0.1);
 	}
 
 	@Test
