@@ -650,16 +650,19 @@ public class WbImport
 				if (importAllSheets)
 				{
 					spreadSheetParser.setSheetIndex(-1);
-					spreadSheetParser.setSheetName(null);
 					table = null;
+				}
+				else if (cmdLine.isArgPresent(ARG_SHEET_NAME))
+				{
+					// sheet name overrides the index parameter if both are supplied, so test this first
+					String name = cmdLine.getValue(ARG_SHEET_NAME);
+					spreadSheetParser.setSheetName(name);
 				}
 				else
 				{
 					int index = cmdLine.getIntValue(ARG_SHEET_NR, 1);
-					String name = cmdLine.getValue(ARG_SHEET_NAME);
 					// the index is zero-based, but the user supplies a one-based index
 					spreadSheetParser.setSheetIndex(index - 1);
-					spreadSheetParser.setSheetName(name);
 				}
 				spreadSheetParser.setInputFile(inputFile);
 			}

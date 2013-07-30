@@ -40,8 +40,6 @@ public interface SpreadsheetReader
 	List<Object> getRowValues(int row);
 	void setNullString(String nullString);
 
-	void setColumnCount(int count);
-
 	/**
 	 * Return the total row count in the spreadsheet including a possible header row.
 	 *

@@ -116,11 +116,13 @@ public class SpreadsheetFileParser
 	public void setSheetIndex(int index)
 	{
 		this.sheetIndex = index;
+		this.sheetName = null;
 	}
 
 	public void setSheetName(String name)
 	{
 		this.sheetName = name;
+		this.sheetIndex = -1;
 	}
 
 	@Override
@@ -166,10 +168,13 @@ public class SpreadsheetFileParser
 	{
 		TableDefinition target = getTargetTable();
 		List<ColumnIdentifier> tableCols = null;
-
-		// When using the TextFileParser to import into a DataStore
-		// no target table is defined, so this is an expected situation
-		if (target != null)
+		if (target == null)
+		{
+			// this is acceptable if no real target table has been defined
+			// in this case assume the file columns and table columns are identical
+			tableCols = new ArrayList<ColumnIdentifier>(fileColumns);
+		}
+		else
 		{
 			tableCols = target.getColumns();
 		}
@@ -192,17 +197,9 @@ public class SpreadsheetFileParser
 					ignoreColumn = !columnsToImport.contains(sourceCol);
 				}
 
-				if (ignoreColumn)
-				{
-					ImportFileColumn col = new ImportFileColumn(sourceCol);
-					col.setTargetIndex(-1);
-					importColumns.add(col);
-					continue;
-				}
+				int index = tableCols.indexOf(sourceCol);
 
-				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
-
-				if (index < 0 && tableCols != null)
+				if (!ignoreColumn && index < 0)
 				{
 					if (this.abortOnError && !ignoreMissingColumns)
 					{
@@ -219,11 +216,19 @@ public class SpreadsheetFileParser
 						this.hasWarnings = true;
 						this.messages.append(msg);
 						this.messages.appendNewLine();
+						ignoreColumn = true;
 					}
+				}
+
+				if (ignoreColumn)
+				{
+					ImportFileColumn col = new ImportFileColumn(sourceCol);
+					col.setTargetIndex(-1);
+					importColumns.add(col);
 				}
 				else
 				{
-					ColumnIdentifier col = (tableCols != null ? tableCols.get(index) : sourceCol);
+					ColumnIdentifier col = tableCols.get(index);
 					ImportFileColumn importCol = new ImportFileColumn(col);
 
 					importCol.setTargetIndex(colCount);
@@ -446,20 +451,22 @@ public class SpreadsheetFileParser
 			this.baseDir = new File(".");
 		}
 
-		if (reader != null)
-		{
-			reader.done();
-			reader = null;
-		}
-
 		createReader();
 
 		reader.setNullString(nullString);
 
 		try
 		{
-			if (sheetIndex != -1)
+			if (sheetIndex != -1 || sheetName != null)
 			{
+				if (sheetName != null)
+				{
+					reader.setActiveWorksheet(sheetName);
+				}
+				else if (sheetIndex > -1)
+				{
+					reader.setActiveWorksheet(sheetIndex);
+				}
 				processOneSheet();
 			}
 			else
@@ -523,7 +530,6 @@ public class SpreadsheetFileParser
 		int importRow = 0;
 		boolean includeRow = true;
 		int sourceCount = importColumns.size();
-		this.reader.setColumnCount(sourceCount);
 
 		converter.setIllegalDateIsNull(illegalDateIsNull);
 

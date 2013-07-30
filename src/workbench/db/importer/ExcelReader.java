@@ -75,7 +75,6 @@ public class ExcelReader
 	private String nullString;
 	private List<CellRangeAddress> mergedRegions;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
-	private int columnCount = -1;
 
 	private final boolean useXLSX;
 
@@ -92,12 +91,6 @@ public class ExcelReader
 			sheetName = null;
 		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
-	}
-
-	@Override
-	public void setColumnCount(int count)
-	{
-		this.columnCount = count;
 	}
 
 	@Override
@@ -183,7 +176,7 @@ public class ExcelReader
 			dataSheet = dataFile.getSheetAt(sheetIndex);
 			if (dataSheet == null)
 			{
-				throw new IndexOutOfBoundsException("Sheet with index " + sheetIndex + " does not exist");
+				throw new IndexOutOfBoundsException("Sheet with index " + sheetIndex + " does not exist in file: " + inputFile.getFullPath());
 			}
 		}
 		else if (sheetName != null)
@@ -191,7 +184,7 @@ public class ExcelReader
 			dataSheet = dataFile.getSheet(sheetName);
 			if (dataSheet == null)
 			{
-				throw new IndexOutOfBoundsException("Sheet with name " + sheetName + " does not exist");
+				throw new IllegalArgumentException("Sheet with name " + sheetName + " does not exist in file: " + inputFile.getFullPath());
 			}
 		}
 		else
@@ -239,7 +232,7 @@ public class ExcelReader
 	@Override
 	public void setActiveWorksheet(String name)
 	{
-		if (StringUtil.isNonBlank(name))
+		if (StringUtil.isNonBlank(name) && !StringUtil.equalStringIgnoreCase(name, sheetName))
 		{
 			this.sheetName = name;
 			this.sheetIndex = -1;
@@ -250,7 +243,7 @@ public class ExcelReader
 	@Override
 	public void setActiveWorksheet(int index)
 	{
-		if (index > -1)
+		if (index > -1 && index != sheetIndex)
 		{
 			sheetIndex = index;
 			sheetName = null;
@@ -321,12 +314,7 @@ public class ExcelReader
 		if (row == null) return values;
 
 		int nullCount = 0;
-
-		int colCount = this.columnCount;
-		if (colCount < 0)
-		{
-			colCount = row.getLastCellNum();
-		}
+		int colCount = row.getLastCellNum();
 
 		for (int col=0; col < colCount; col++)
 		{

@@ -231,9 +231,14 @@ public class TextFileParser
 		TableDefinition target = getTargetTable();
 		List<ColumnIdentifier> tableCols = null;
 
-		// When using the TextFileParser to import into a DataStore
-		// no target table is defined, so this is an expected situation
-		if (target != null)
+		if (target == null)
+		{
+			// When using the TextFileParser to import into a DataStore
+			// no target table is defined, so this is an expected situation and we simply
+			// pretend the file columns are the target columns
+			tableCols = new ArrayList<ColumnIdentifier>(fileColumns);
+		}
+		else
 		{
 			tableCols = target.getColumns();
 		}
@@ -256,15 +261,9 @@ public class TextFileParser
 					ignoreColumn = !columnsToImport.contains(sourceCol);
 				}
 
-				if (ignoreColumn)
-				{
-					ImportFileColumn col = new ImportFileColumn(sourceCol);
-					col.setTargetIndex(-1);
-					importColumns.add(col);
-					continue;
-				}
-				int index = (tableCols == null ? -1 : tableCols.indexOf(sourceCol));
-				if (index < 0 && tableCols != null)
+				int index = tableCols.indexOf(sourceCol);
+
+				if (!ignoreColumn && index < 0)
 				{
 					if (this.abortOnError && !ignoreMissingColumns)
 					{
@@ -281,14 +280,20 @@ public class TextFileParser
 						this.hasWarnings = true;
 						this.messages.append(msg);
 						this.messages.appendNewLine();
+						ignoreColumn = true;
 					}
+				}
+
+				if (ignoreColumn)
+				{
+					ImportFileColumn col = new ImportFileColumn(sourceCol);
+					col.setTargetIndex(-1);
+					importColumns.add(col);
 				}
 				else
 				{
-					ColumnIdentifier col = (tableCols != null ? tableCols.get(index) : sourceCol);
+					ColumnIdentifier col = tableCols.get(index);
 					ImportFileColumn importCol = new ImportFileColumn(col);
-
-					// TODO: this should be index, not colCount, but for some reason using index is not working in all cases
 					importCol.setTargetIndex(colCount);
 					importColumns.add(importCol);
 					colCount ++;

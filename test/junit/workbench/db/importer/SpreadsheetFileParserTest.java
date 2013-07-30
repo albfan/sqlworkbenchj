@@ -82,6 +82,34 @@ public class SpreadsheetFileParserTest
 	}
 
 	@Test
+	public void testImportByName()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		File input = util.copyResourceFile(this, filename);
+
+		SpreadsheetFileParser parser = new SpreadsheetFileParser();
+		parser.setContainsHeader(true);
+		parser.setReceiver(getReceiver());
+		parser.setInputFile(input);
+		parser.setSheetName("orders");
+		try
+		{
+			colCount = 0;
+			importedRows = 0;
+
+			parser.processOneFile();
+			assertEquals(4, importedRows);
+			assertEquals(4, colCount);
+		}
+		finally
+		{
+			parser.done();
+		}
+		assertTrue(input.delete());
+	}
+
+	@Test
 	public void testFirstSheet()
 		throws Exception
 	{
