@@ -699,4 +699,29 @@ public class TestUtil
 		return result;
 	}
 
+	public static String cleanupSql(CharSequence sql)
+	{
+		if (StringUtil.isBlank(sql)) return "";
+		SQLLexer lexer = new SQLLexer(sql);
+		StringBuilder result = new StringBuilder(sql.length());
+		SQLToken last = null;
+		SQLToken t = lexer.getNextToken(false, true);
+		while (t != null)
+		{
+			if (t.isWhiteSpace())
+			{
+				if (last != null && !last.isWhiteSpace())
+				{
+					result.append(' ');
+				}
+			}
+			else
+			{
+				result.append(t.getText());
+			}
+			last = t;
+			t = lexer.getNextToken(false, true);
+		}
+		return result.toString().trim();
+	}
 }

@@ -27,17 +27,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.Writer;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
-import workbench.util.FileUtil;
-import static org.junit.Assert.*;
+
 import workbench.sql.DelimiterDefinition;
 
 import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
+
 import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -259,7 +264,6 @@ public class OracleSchemaDiffTest
 
 			SchemaDiff diff = new SchemaDiff(reference, target);
 			diff.setIncludeViews(false);
-			diff.setIncludeExtendedOptions(false);
 			diff.setIncludeIndex(false);
 			diff.setIncludeSequences(false);
 			diff.setIncludeProcedures(false);

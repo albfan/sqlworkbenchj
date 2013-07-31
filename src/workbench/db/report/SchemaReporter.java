@@ -79,7 +79,6 @@ public class SchemaReporter
 	private String procedureNames;
 	private boolean includeGrants;
 	private boolean includeTriggers;
-	private boolean includeExtendedOptions;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
 
@@ -158,11 +157,6 @@ public class SchemaReporter
 		{
 			this.schemaNameToUse = name;
 		}
-	}
-
-	public void setIncludeExtendedOptions(boolean flag)
-	{
-		this.includeExtendedOptions = flag;
 	}
 
 	public void setProcedureNames(String name)
@@ -291,7 +285,7 @@ public class SchemaReporter
 				}
 				else if (object instanceof TableIdentifier)
 				{
-					ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includeExtendedOptions);
+					ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();
@@ -309,7 +303,7 @@ public class SchemaReporter
 				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + object, e);
 			}
 		}
-		
+
 		if (this.procedures.size() > 0) out.write("\n");
 		for (ReportProcedure proc : procedures)
 		{

@@ -103,6 +103,7 @@ public class WbDataDiff
 		cmdLine.addArgument(WbExport.ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_ALTERNATE_KEYS, ArgumentType.Repeatable);
 		cmdLine.addArgument(PARAM_EXCLUDE_REAL_PK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_EXCLUDE_IGNORED, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_SINGLE_FILE, ArgumentType.BoolArgument);
 
 		CommonArgs.addCheckDepsParameter(cmdLine);
@@ -751,7 +752,7 @@ public class WbDataDiff
 			{
 				if (!line.startsWith("--") && StringUtil.isNonEmpty(line))
 				{
-					out.write(line.trim());
+					out.write(line);
 					out.write(newLine);
 				}
 				line = reader.readLine();

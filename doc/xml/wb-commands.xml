@@ -229,15 +229,6 @@
 					<entry>-xsltOutput</entry>
 					<entry>The name of the generated output file when applying the XSLT transformation.</entry>
 				</row>
-				<row>
-					<entry>-includeExtendedOptions</entry>
-          <entry>
-            <para>Include additional information for tables like tablespace definition or partition defintion for Oracle.</para>
-						<para>
-							Valid values are <literal>true</literal> or <literal>false</literal>. The default is <literal>false</literal>
-						</para>
-          </entry>
-				</row>
 			</tbody>
       </tgroup>
     </informaltable>

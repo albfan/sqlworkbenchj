@@ -32,11 +32,13 @@ public class SqlServerIndexReader
 {
 	public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
 	private boolean checkOptions;
+	private boolean checkFilteredIndex;
 
 	public SqlServerIndexReader(DbMetadata meta)
 	{
 		super(meta);
 		checkOptions = SqlServerUtil.isSqlServer2005(meta.getWbConnection());
+		checkFilteredIndex = SqlServerUtil.isSqlServer2008(meta.getWbConnection());
 	}
 
 	@Override
@@ -62,8 +64,18 @@ public class SqlServerIndexReader
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
+		String select = "select ix.ignore_dup_key, ix.is_padded, ic.is_included_column, ix.fill_factor";
+		if (checkFilteredIndex)
+		{
+			select += ", ix.filter_definition";
+		}
+		else
+		{
+			select += ", null as filter_definition";
+		}
+
 		String sql =
-			"select ix.ignore_dup_key, ix.is_padded, ic.is_included_column, ix.fill_factor, col.name as column_name \n" +
+			select + ", col.name as column_name \n" +
 			"from sys.index_columns ic with (nolock) \n" +
 			"  join sys.columns col with (nolock) on col.object_id = ic.object_id and col.column_id = ic.column_id \n" +
 			"  join sys.indexes ix with (nolock) on ix.index_id = ic.index_id and ix.object_id = col.object_id \n" +
@@ -84,7 +96,7 @@ public class SqlServerIndexReader
 		boolean ignoreDups = false;
 		boolean isPadded = false;
 		int fillFactor = -1;
-
+		String filter = null;
 		try
 		{
 			pstmt = this.metaData.getSqlConnection().prepareStatement(sql);
@@ -100,6 +112,7 @@ public class SqlServerIndexReader
 					ignoreDups = rs.getBoolean("ignore_dup_key");
 					isPadded = rs.getBoolean("is_padded");
 					fillFactor = rs.getInt("fill_factor");
+					filter = rs.getString("filter_definition");
 					first = false;
 				}
 				boolean isIncluded = rs.getBoolean("is_included_column");
@@ -128,6 +141,14 @@ public class SqlServerIndexReader
 				options.append(cols.get(i));
 			}
 			options.append(')');
+			index.getSourceOptions().addConfigSetting("include_columns", StringUtil.listToString(cols, ','));
+		}
+
+		if (StringUtil.isNonBlank(filter))
+		{
+			options.append("\n   WHERE ");
+			options.append(filter.trim());
+			index.getSourceOptions().addConfigSetting("filter", filter.trim());
 		}
 
 		if (isPadded || ignoreDups || fillFactor > 0)
@@ -138,6 +159,7 @@ public class SqlServerIndexReader
 			{
 				options.append("IGNORE_DUP_KEY = ON");
 				optCount ++;
+				index.getSourceOptions().addConfigSetting("ignore_dup_key", "true");
 			}
 
 			if (fillFactor > 0)
@@ -146,11 +168,13 @@ public class SqlServerIndexReader
 				options.append("FILLFACTOR = ");
 				options.append(fillFactor);
 				optCount ++;
+				index.getSourceOptions().addConfigSetting("fillfactor", Integer.toString(fillFactor));
 			}
 			if (isPadded)
 			{
 				if (optCount > 0) options.append(", ");
 				options.append("PAD_INDEX = ON");
+				index.getSourceOptions().addConfigSetting("pad_index", "true");
 				optCount ++;
 			}
 			options.append(')');

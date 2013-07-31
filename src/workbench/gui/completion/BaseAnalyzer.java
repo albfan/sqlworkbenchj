@@ -86,7 +86,7 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_KW_LIST = 5;
 
 	/**
-	 * Context value to list parameters for WB command parameters
+	 * Context value to list parameters for WB commands
 	 */
 	protected static final int CONTEXT_WB_PARAMS = 6;
 
@@ -95,12 +95,17 @@ public abstract class BaseAnalyzer
 	 */
 	protected static final int CONTEXT_WB_COMMANDS = 7;
 
-	protected static final int CONTEXT_SYNTAX_COMPLETION = 8;
-	protected static final int CONTEXT_STATEMENT_PARAMETER = 9;
-	protected static final int CONTEXT_SCHEMA_LIST = 10;
-	protected static final int CONTEXT_CATALOG_LIST = 11;
-	protected static final int CONTEXT_SEQUENCE_LIST = 12;
-	protected static final int CONTEXT_INDEX_LIST = 13;
+	/**
+	 * Context value to list values for a specific command parameter
+	 */
+	protected static final int CONTEXT_WB_PARAMVALUES = 8;
+
+	protected static final int CONTEXT_SYNTAX_COMPLETION = 9;
+	protected static final int CONTEXT_STATEMENT_PARAMETER = 10;
+	protected static final int CONTEXT_SCHEMA_LIST = 11;
+	protected static final int CONTEXT_CATALOG_LIST = 12;
+	protected static final int CONTEXT_SEQUENCE_LIST = 13;
+	protected static final int CONTEXT_INDEX_LIST = 14;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
@@ -173,7 +178,7 @@ public abstract class BaseAnalyzer
 	{
 		return this.verb;
 	}
-	
+
 	public String getAnalyzedSql()
 	{
 		return this.sql;
@@ -375,6 +380,8 @@ public abstract class BaseAnalyzer
 				return "CONTEXT_WB_COMMANDS";
 			case CONTEXT_WB_PARAMS:
 				return "CONTEXT_WB_PARAMS";
+			case CONTEXT_WB_PARAMVALUES:
+				return "CONTEXT_WB_PARAMVALUES";
 			case CONTEXT_SYNTAX_COMPLETION:
 				return "CONTEXT_SYNTAX_COMPLETION";
 			case CONTEXT_STATEMENT_PARAMETER:
@@ -414,15 +421,11 @@ public abstract class BaseAnalyzer
 		}
 		else if (context == CONTEXT_WB_PARAMS)
 		{
-			// element list has already been filled
-			if (isWbParam())
-			{
-				this.title = ResourceMgr.getString("LblCompletionListParams");
-			}
-			else
-			{
-				this.title = ResourceMgr.getString("LblCompletionListParmValues");
-			}
+			this.title = ResourceMgr.getString("LblCompletionListParams");
+		}
+		else if (context == CONTEXT_WB_PARAMVALUES)
+		{
+			this.title = ResourceMgr.getString("LblCompletionListParmValues");
 		}
 		else if (context == CONTEXT_SCHEMA_LIST)
 		{

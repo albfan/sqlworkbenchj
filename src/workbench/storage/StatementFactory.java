@@ -264,14 +264,14 @@ public class StatementFactory
 
 			if (includeCol)
 			{
-				if (!first)
+				if (first)
 				{
-					sql.append(',');
-					valuePart.append(',');
+					first = false;
 				}
 				else
 				{
-					first = false;
+					sql.append(',');
+					valuePart.append(',');
 				}
 
 				sql.append(getColumnName(col));

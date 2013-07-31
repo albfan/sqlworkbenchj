@@ -304,15 +304,6 @@
           </entry>
         </row>
         <row>
-          <entry id="schema-diff-includeextopts">-includeExtendedOptions</entry>
-          <entry>
-            <para>Include additional information for tables like tablespace definition or partition defintion for Oracle.</para>
-            <para>
-              Valid values are <literal>true</literal> or <literal>false</literal>. The default is <literal>false</literal>
-            </para>
-          </entry>
-        </row>
-        <row>
           <entry id="schema-diff-stylesheet">-stylesheet</entry>
           <entry>Define the filename of a XSLT transformation that is to be applied to the generated XML file.</entry>
         </row>
@@ -562,8 +553,8 @@
             <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
             <para>
               Generates <literal>DELETE</literal> statements for rows that are present
-              in the target table, but not in the reference table. Note that enabling this 
-              option will result in additional overhead reading the target table's data and 
+              in the target table, but not in the reference table. Note that enabling this
+              option will result in additional overhead reading the target table's data and
               will slow down the overal comparison speed.
             </para>
             <para>
@@ -618,10 +609,26 @@
               that should not be taken into account when checking for changes.
             </para>
             <para>
-              They will however be part of generated <literal>INSERT</literal> statements.
+              They will however be part of generated <literal>INSERT</literal> or <literal>UPDATE</literal> statements
+              unless <literal>-exclueIgnored=true</literal> is also specified.
             </para>
           </entry>
         </row>
+
+        <row>
+          <entry id="data-diff-exclignored">-excludeIgnored</entry>
+          <entry>
+            <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+            <para>
+              If this is set to <literal>true</literal>, the ignored columns will also be removed from any
+              <literal>INSERT</literal> or <literal>UPDATE</literal> statement
+            </para>
+            <para>
+              The default is <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
 
         <row>
           <entry id="data-diff-altkey">-alternateKey</entry>

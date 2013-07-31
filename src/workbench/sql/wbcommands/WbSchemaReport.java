@@ -70,7 +70,6 @@ public class WbSchemaReport
 	public static final String PARAM_TABLE_NAMES = "tables";
 	public static final String PARAM_OBJECT_NAMES = "objects";
 	public static final String PARAM_OBJECT_TYPE_NAMES = "objectTypeNames";
-	public static final String PARAM_OBJECT_OPTIONS = "includeExtendedOptions";
 
 	public static final String ALTERNATE_VERB = "WBREPORT";
 	public static final String VERB = "WBSCHEMAREPORT";
@@ -98,7 +97,6 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_OBJECT_OPTIONS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -254,7 +252,6 @@ public class WbSchemaReport
 		}
 
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
-		this.reporter.setIncludeExtendedOptions(cmdLine.getBoolean(PARAM_OBJECT_OPTIONS, false));
 
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{

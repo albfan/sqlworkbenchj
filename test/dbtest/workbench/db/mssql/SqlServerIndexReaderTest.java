@@ -107,7 +107,19 @@ public class SqlServerIndexReaderTest
 		assertEquals(1, indexes.size());
 		IndexDefinition idx2 = indexes.get(0);
 		assertEquals("ix_two", idx2.getName());
-		source = reader.getIndexSource(tbl, idx2).toString();
-		assertTrue(source.contains("WITH (IGNORE_DUP_KEY = ON)"));
+		source = TestUtil.cleanupSql(reader.getIndexSource(tbl, idx2));
+		assertEquals("CREATE NONCLUSTERED UNIQUE INDEX ix_two ON dbo.foo (id1 ASC, id2 ASC) WITH (IGNORE_DUP_KEY = ON);", source);
+
+		TestUtil.executeScript(con,
+			"drop index ix_two on foo;\n" +
+			"create unique index ix_three on foo (id1) where id2 > 0 with (fillfactor = 80, PAD_INDEX = on);\n " +
+			"commit;\n");
+
+		indexes = reader.getTableIndexList(tbl);
+		assertEquals(1, indexes.size());
+		IndexDefinition idx3 = indexes.get(0);
+		assertEquals("ix_three", idx3.getName());
+		source = TestUtil.cleanupSql(reader.getIndexSource(tbl, idx3));
+		assertEquals("CREATE NONCLUSTERED UNIQUE INDEX ix_three ON dbo.foo (id1 ASC) WHERE ([id2]>(0)) WITH (FILLFACTOR = 80, PAD_INDEX = ON);", source);
 	}
 }

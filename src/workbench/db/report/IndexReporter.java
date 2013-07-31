@@ -37,7 +37,6 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleIndexPartition;
 
 import workbench.util.CollectionUtil;
@@ -69,21 +68,14 @@ public class IndexReporter
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
 	private String mainTagToUse;
-	private Map<IndexDefinition, List<ObjectOption>> indexOptions;
+	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new HashMap<IndexDefinition, List<ObjectOption>>();
+
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
-		this(tbl, conn, true);
-	}
-
-	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includeOptions)
-	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
-		if (includeOptions)
-		{
-			retrieveOracleOptions(conn);
-		}
-		retrieveSqlServerOptions(tbl, conn);
+		retrieveOracleOptions(conn);
+		retrieveSourceOptions(tbl, conn);
 	}
 
 	public IndexReporter(IndexDefinition index)
@@ -151,8 +143,6 @@ public class IndexReporter
 
 	private void writeDbmsOptions(StrBuffer output, StrBuffer indent, IndexDefinition index)
 	{
-		if (indexOptions == null) return;
-
 		List<ObjectOption> options = indexOptions.get(index);
 		if (CollectionUtil.isEmpty(options)) return;
 
@@ -169,20 +159,17 @@ public class IndexReporter
 		output.append("</index-options>\n");
 	}
 
-	private void retrieveSqlServerOptions(TableIdentifier table, WbConnection conn)
+	private void retrieveSourceOptions(TableIdentifier table, WbConnection conn)
 	{
-		if (!conn.getMetadata().isSqlServer()) return;
-		if (!SqlServerUtil.isSqlServer2005(conn)) return;
 		IndexReader reader = conn.getMetadata().getIndexReader();
-
 		for (IndexDefinition index : indexList)
 		{
-			String included = reader.getIndexOptions(table, index);
-			if (StringUtil.isNonEmpty(included))
+			reader.getIndexOptions(table, index);
+			Map<String, String> config = index.getSourceOptions().getConfigSettings();
+			for (Map.Entry<String, String> entry : config.entrySet())
 			{
-				String cols = included.replaceAll("(?i)\\s+INCLUDE\\s+", "");
-				ObjectOption option = new ObjectOption("included-columns", cols);
-				option.setWriteFlaxXML(true);
+				ObjectOption option = new ObjectOption(entry.getKey(), entry.getValue());
+				option.setWriteFlaxXML(!TagWriter.needsCData(entry.getValue()));
 				addOption(index, option);
 			}
 		}
@@ -213,10 +200,6 @@ public class IndexReporter
 
 	private void addOption(IndexDefinition index, ObjectOption option)
 	{
-		if (indexOptions == null)
-		{
-			indexOptions = new HashMap<IndexDefinition, List<ObjectOption>>();
-		}
 		List<ObjectOption> options = indexOptions.get(index);
 		if (options == null)
 		{

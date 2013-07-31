@@ -45,6 +45,9 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
+import static workbench.gui.completion.BaseAnalyzer.CONTEXT_WB_PARAMS;
+
+
 /**
  * @author Thomas Kellerer
  */
@@ -130,13 +133,12 @@ public class WbCommandAnalyzer
 			return;
 		}
 
-		context = CONTEXT_WB_PARAMS;
-
 		String parameter = getCurrentParameter();
 		this.isParameter = false;
 
 		if (p.isRegistered(parameter))
 		{
+			context = CONTEXT_WB_PARAMVALUES;
 			ArgumentType type = p.getArgumentType(parameter);
 			if (type == ArgumentType.BoolArgument)
 			{
@@ -196,6 +198,7 @@ public class WbCommandAnalyzer
 		}
 		else
 		{
+			context = CONTEXT_WB_PARAMS;
 			List<String> arguments = p.getRegisteredArguments();
 			this.elements = arguments;
 			String params = SqlUtil.stripVerb(this.sql);
@@ -323,4 +326,11 @@ public class WbCommandAnalyzer
 			return displayString;
 		}
 	}
+
+	@Override
+	public boolean needsCommaForMultipleSelection()
+	{
+		return (context != CONTEXT_WB_PARAMS);
+	}
+
 }

@@ -91,7 +91,7 @@ public class TableDataDiff
 	private boolean firstInsert;
 
 	private SqlLiteralFormatter formatter;
-	private List<ColumnIdentifier> pkColumns;
+	private List<ColumnIdentifier> pkColumns = new ArrayList<ColumnIdentifier>();
 	private String lineEnding = "\n";
 	private String encoding = "UTF-8";
 
@@ -302,29 +302,28 @@ public class TableDataDiff
 	{
 		firstUpdate = true;
 		firstInsert = true;
+		pkColumns.clear();
+		realPKCols.clear();
+
 		referenceTable = this.reference.getMetadata().findSelectableObject(refTable);
 		if (referenceTable == null)
 		{
 			LogMgr.logError("TableDataDiff.setTableName()", "Reference table " + refTable.getTableName() + " not found!", null);
 			return TableDiffStatus.ReferenceNotFound;
 		}
-		List<ColumnIdentifier> cols = this.reference.getMetadata().getTableColumns(referenceTable);
-		this.pkColumns = new ArrayList<ColumnIdentifier>();
-		Set<String> alternatePK = getAlternatePKs(refTable.getTableName());
 
-		if (CollectionUtil.isNonEmpty(alternatePK))
-		{
-			realPKCols.clear();
-		}
+		List<ColumnIdentifier> cols = this.reference.getMetadata().getTableColumns(referenceTable);
+		Set<String> alternatePK = getAlternatePKs(refTable.getTableName());
+		boolean useAlternatePK = CollectionUtil.isNonEmpty(alternatePK);
 
 		for (ColumnIdentifier col : cols)
 		{
-			if ((alternatePK.isEmpty() && col.isPkColumn()) || alternatePK.contains(col.getColumnName()))
+			if ((!useAlternatePK && col.isPkColumn()) || alternatePK.contains(col.getColumnName()))
 			{
 				pkColumns.add(col);
 			}
 
-			if (CollectionUtil.isNonEmpty(alternatePK) && col.isPkColumn() && excludeRealPK)
+			if (useAlternatePK && col.isPkColumn())
 			{
 				realPKCols.add(col.getColumnName());
 			}
@@ -469,9 +468,13 @@ public class TableDataDiff
 
 				Writer writerToUse = null;
 				comparer.setRows(toInsert, i > -1 ? checkRows.get(i) : null);
-				comparer.ignoreColumns(columnsToIgnore, ri);
-				Set<String> toExclude = CollectionUtil.caseInsensitiveSet();
 
+				Set<String> toIgnore = CollectionUtil.caseInsensitiveSet();
+				toIgnore.addAll(columnsToIgnore);
+				toIgnore.addAll(realPKCols);
+				comparer.ignoreColumns(toIgnore, ri);
+
+				Set<String> toExclude = CollectionUtil.caseInsensitiveSet();
 				if (excludeRealPK && CollectionUtil.isNonEmpty(realPKCols))
 				{
 					toExclude.addAll(realPKCols);
@@ -486,6 +489,7 @@ public class TableDataDiff
 				{
 					comparer.excludeColumns(toExclude, info);
 				}
+
 				String output = comparer.getMigration(currentRowNumber);
 
 				if (output != null)

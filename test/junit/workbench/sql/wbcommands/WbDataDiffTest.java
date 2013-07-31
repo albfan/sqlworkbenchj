@@ -134,15 +134,34 @@ public class WbDataDiffTest
 			assertTrue(main.exists());
 			String diffScript = FileUtil.readFile(main, "UTF-8");
 			ScriptParser parser = new ScriptParser(diffScript);
-			assertEquals(3, parser.getSize()); // 2 updates plus a commit
+			assertEquals(2, parser.getSize()); // 1 update plus a commit
 
-
-			String upd = SqlUtil.makeCleanSql(parser.getCommand(0), false, false);
-			assertEquals("UPDATE SOME_DATA SET FOO = 'foo' WHERE CODE = 'ad'", upd);
-
-			upd = SqlUtil.makeCleanSql(parser.getCommand(1), false, false);
+			String upd = TestUtil.cleanupSql(parser.getCommand(0));
 			assertEquals("UPDATE SOME_DATA SET FIRSTNAME = 'Zaphod' WHERE CODE = 'zb'", upd);
 			assertTrue(main.delete());
+
+			TestUtil.executeScript(source,
+				"insert into some_data (id, code, firstname, lastname, foo, bar) \n" +
+				"values (4, 'tm', 'Tricia', 'McMillan', 'foo', 'bar');\n " +
+				"commit;\n");
+
+			sql = "WbDataDiff " +
+				" -referenceProfile=dataDiffSource " +
+				" -targetProfile=dataDiffTarget " +
+				" -includeDelete=false -excludeRealPK=true " +
+				" -alternateKey='some_data=code' -ignoreColumns='foo,bar' "  +
+				" -singleFile=true " +
+				" -excludeIgnored=true " +
+				" -file=sync_ex.sql -encoding=UTF8";
+			runner.runStatement(sql);
+
+			result = runner.getResult();
+			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			diffScript = FileUtil.readFile(main, "UTF-8");
+			parser = new ScriptParser(diffScript);
+			assertEquals(3, parser.getSize()); // 1 update, 1 insert plus a commit
+			String ins = TestUtil.cleanupSql(parser.getCommand(0));
+			assertEquals("INSERT INTO SOME_DATA ( CODE, FIRSTNAME, LASTNAME ) VALUES ( 'tm', 'Tricia', 'McMillan' )", ins);
 		}
 		finally
 		{

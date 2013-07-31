@@ -83,7 +83,6 @@ public class SchemaReportAction
 		if (filename == null) return;
 
 		final SchemaReporter reporter = new SchemaReporter(client.getConnection());
-		reporter.setIncludeExtendedOptions(true);
 		reporter.setObjectList(objects);
 		reporter.setOutputFilename(filename);
 

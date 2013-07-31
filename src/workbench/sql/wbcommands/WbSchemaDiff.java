@@ -32,14 +32,19 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.FileUtil;
@@ -89,7 +94,6 @@ public class WbSchemaDiff
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbSchemaReport.PARAM_OBJECT_OPTIONS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ADD_TYPES, ArgumentType.ListArgument);
 	}
 
@@ -157,7 +161,6 @@ public class WbSchemaDiff
 		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, true));
-		diff.setIncludeExtendedOptions(cmdLine.getBoolean(WbSchemaReport.PARAM_OBJECT_OPTIONS, false));
 		List<String> types = cmdLine.getListValue(ARG_ADD_TYPES);
 		diff.setAdditionalTypes(types);
 

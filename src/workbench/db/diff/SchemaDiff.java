@@ -115,7 +115,6 @@ public class SchemaDiff
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
-	private boolean includeExtendedOptions;
 	private String[] additionalTypes;
 
 	private RowActionMonitor monitor;
@@ -142,11 +141,6 @@ public class SchemaDiff
 	{
 		referenceDb = reference;
 		targetDb = target;
-	}
-
-	public void setIncludeExtendedOptions(boolean flag)
-	{
-		this.includeExtendedOptions = flag;
 	}
 
 	public void setCompareConstraintsByName(boolean flag)
@@ -366,7 +360,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportTable rTable = new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers, includeExtendedOptions);
+		ReportTable rTable = new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers);
 		return rTable;
 	}
 

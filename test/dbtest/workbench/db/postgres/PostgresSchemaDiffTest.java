@@ -157,7 +157,6 @@ public class PostgresSchemaDiffTest
 
 		SchemaDiff diff = new SchemaDiff(conn, conn);
 		diff.setIncludeViews(false);
-		diff.setIncludeExtendedOptions(false);
 		diff.setIncludeIndex(false);
 		diff.setIncludeSequences(false);
 		diff.setIncludeProcedures(false);
@@ -216,7 +215,6 @@ public class PostgresSchemaDiffTest
 
 		SchemaDiff diff = new SchemaDiff(conn, conn);
 		diff.setIncludeViews(false);
-		diff.setIncludeExtendedOptions(false);
 		diff.setIncludeIndex(false);
 		diff.setIncludeSequences(false);
 		diff.setIncludeProcedures(true);

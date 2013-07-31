@@ -4,6 +4,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-07-30">
+    <entry dev-build="16" type="enh">For SQL Server the source for filtered indexes is now shown correctly.</entry>
+    <entry dev-build="16" type="enh">WbDataDiff now supports the -excludeIgnored parameter that will exclude the ignored columns from any UPDATE or INSERT statement.</entry>
     <entry dev-build="15" type="enh">The connection profile can now be configured to always prompt for username and password.</entry>
     <entry dev-build="14" type="enh">When selecting a FK value while editing the result set, foreign keys with multiple columns are now supported.</entry>
     <entry dev-build="14" type="enh">The connection profile now allows to specify a custom icon for the main window now (thanks to Charles)</entry>

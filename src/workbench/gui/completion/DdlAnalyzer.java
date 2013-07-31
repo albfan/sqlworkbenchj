@@ -65,9 +65,9 @@ public class DdlAnalyzer
 			return;
 		}
 
-		String verb = verbToken.getContents();
+		String sqlVerb = verbToken.getContents();
 
-		if ("TRUNCATE".equalsIgnoreCase(verb))
+		if ("TRUNCATE".equalsIgnoreCase(sqlVerb))
 		{
 			context = CONTEXT_TABLE_LIST;
 			return;
@@ -95,7 +95,7 @@ public class DdlAnalyzer
 			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 
-		if ("DROP".equals(verb))
+		if ("DROP".equals(sqlVerb))
 		{
 			if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
 			{
