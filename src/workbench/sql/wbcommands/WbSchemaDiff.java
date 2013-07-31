@@ -242,15 +242,8 @@ public class WbSchemaDiff
 			}
 			else
 			{
-				String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
-				if (encoding == null)
-				{
-					encoding = diff.getEncoding();
-				}
-				else
-				{
-					diff.setEncoding(encoding);
-				}
+				String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, "UTF-8");
+				diff.setEncoding(encoding);
 				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), encoding), 256*1024);
 			}
 

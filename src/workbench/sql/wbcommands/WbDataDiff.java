@@ -82,6 +82,7 @@ public class WbDataDiff
 	public static final String PARAM_OUTPUT_TYPE = "type";
 	public static final String PARAM_ALTERNATE_KEYS = "alternateKey";
 	public static final String PARAM_EXCLUDE_REAL_PK = "excludeRealPK";
+	public static final String PARAM_EXCLUDE_IGNORED = "excludeIgnored";
 	public static final String PARAM_SINGLE_FILE = "singleFile";
 
 	private WbFile outputDir;
@@ -340,6 +341,7 @@ public class WbDataDiff
 		Map<String, Set<String>> alternatekeys = getAlternateKeys(cmdLine, result);
 		dataDiff.setAlternateKeys(alternatekeys);
 		dataDiff.setExcludeRealPK(cmdLine.getBoolean(PARAM_EXCLUDE_REAL_PK, false));
+		dataDiff.setExcludeIgnoredColumns(cmdLine.getBoolean(PARAM_EXCLUDE_IGNORED, false));
 
 		boolean singleFile = cmdLine.getBoolean(PARAM_SINGLE_FILE, false);
 		try

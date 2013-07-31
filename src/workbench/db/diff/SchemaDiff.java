@@ -57,6 +57,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 
 /**
@@ -934,20 +935,15 @@ public class SchemaDiff
 	}
 
 	/**
-	 *	Return the encoding that is used in the encoding attribute of the XML tag
-	 */
-	public String getEncoding()
-	{
-		return encoding;
-	}
-
-	/**
 	 *	Set the encoding that is used for writing the XML. This will
-	 *  be put into the <?xml tag at the beginning of the generated XML
+	 *  be put into the <?xml> tag at the beginning of the generated XML
 	 */
 	public void setEncoding(String enc)
 	{
-		this.encoding = enc;
+		if (StringUtil.isNonBlank(enc))
+		{
+			this.encoding = enc;
+		}
 	}
 
 	/**

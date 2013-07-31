@@ -108,6 +108,7 @@ public class TableDataDiff
 	private Map<String, Set<String>> alternateKeys;
 	private Set<String> realPKCols = CollectionUtil.caseInsensitiveSet();
 	private boolean excludeRealPK;
+	private boolean excludeIgnoredColumns;
 
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
@@ -166,6 +167,23 @@ public class TableDataDiff
 		this.excludeRealPK = flag;
 	}
 
+	/**
+	 * Controls if ignored columns are also excluded from the generate SQL statements.
+	 *
+	 * @param flag  if true, ignored columns are excluded
+	 * @see #setColumnsToIgnore(java.util.List)
+	 */
+	public void setExcludeIgnoredColumns(boolean flag)
+	{
+		this.excludeIgnoredColumns = flag;
+	}
+
+	/**
+	 * Define a alternate PK columns.
+	 *
+	 * @param mapping the key of the map is the table name, the value is the list of column names to be used as the key
+	 * @see #setExcludeRealPK(boolean)
+	 */
 	public void setAlternateKeys(Map<String, Set<String>> mapping)
 	{
 		if (CollectionUtil.isEmpty(mapping))
@@ -224,13 +242,11 @@ public class TableDataDiff
 	 */
 	public void setColumnsToIgnore(List<String> columnNames)
 	{
-		if (columnNames == null)
+		this.columnsToIgnore.clear();
+		if (columnNames != null)
 		{
-			this.columnsToIgnore.clear();
-			return;
+			this.columnsToIgnore.addAll(columnNames);
 		}
-		this.columnsToIgnore = CollectionUtil.caseInsensitiveSet();
-		this.columnsToIgnore.addAll(columnNames);
 	}
 
 	@Override
@@ -296,9 +312,8 @@ public class TableDataDiff
 		this.pkColumns = new ArrayList<ColumnIdentifier>();
 		Set<String> alternatePK = getAlternatePKs(refTable.getTableName());
 
-		if (!alternatePK.isEmpty())
+		if (CollectionUtil.isNonEmpty(alternatePK))
 		{
-			columnsToIgnore.clear();
 			realPKCols.clear();
 		}
 
@@ -309,11 +324,9 @@ public class TableDataDiff
 				pkColumns.add(col);
 			}
 
-			if (!alternatePK.isEmpty() && col.isPkColumn())
+			if (CollectionUtil.isNonEmpty(alternatePK) && col.isPkColumn() && excludeRealPK)
 			{
-				// when using an alternate PK the real PK columns need to be ignored
-				columnsToIgnore.add(col.getColumnName());
-				if (excludeRealPK) realPKCols.add(col.getColumnName());
+				realPKCols.add(col.getColumnName());
 			}
 		}
 
@@ -457,11 +470,22 @@ public class TableDataDiff
 				Writer writerToUse = null;
 				comparer.setRows(toInsert, i > -1 ? checkRows.get(i) : null);
 				comparer.ignoreColumns(columnsToIgnore, ri);
+				Set<String> toExclude = CollectionUtil.caseInsensitiveSet();
+
 				if (excludeRealPK && CollectionUtil.isNonEmpty(realPKCols))
 				{
-					comparer.excludeColumns(realPKCols, info);
+					toExclude.addAll(realPKCols);
 				}
 
+				if (excludeIgnoredColumns)
+				{
+					toExclude.addAll(columnsToIgnore);
+				}
+
+				if (CollectionUtil.isNonEmpty(toExclude))
+				{
+					comparer.excludeColumns(toExclude, info);
+				}
 				String output = comparer.getMigration(currentRowNumber);
 
 				if (output != null)

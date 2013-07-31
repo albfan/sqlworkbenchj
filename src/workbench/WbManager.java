@@ -1124,7 +1124,6 @@ public final class WbManager
 		if (exitImmediately)
 		{
 			LogMgr.shutdown();
-			ConnectionMgr.getInstance().disconnectAll();
 			System.exit(15);
 		}
 		else
