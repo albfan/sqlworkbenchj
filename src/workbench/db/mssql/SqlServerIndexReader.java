@@ -31,12 +31,12 @@ public class SqlServerIndexReader
 	extends JdbcIndexReader
 {
 	public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
-	private boolean checkIncludedColumns;
+	private boolean checkOptions;
 
 	public SqlServerIndexReader(DbMetadata meta)
 	{
 		super(meta);
-		checkIncludedColumns = SqlServerUtil.isSqlServer2005(meta.getWbConnection());
+		checkOptions = SqlServerUtil.isSqlServer2005(meta.getWbConnection());
 	}
 
 	@Override
@@ -57,28 +57,13 @@ public class SqlServerIndexReader
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
-		if (!checkIncludedColumns) return null;
-		List<String> cols = getIncludedColumns(table, index);
-		if (cols.isEmpty()) return null;
+		if (!checkOptions) return null;
 
-		StringBuilder sql = new StringBuilder(cols.size() * 20);
-		sql.append("\n   INCLUDE (");
-		for (int i=0; i < cols.size(); i++)
-		{
-			if (i > 0) sql.append(", ");
-			sql.append(cols.get(i));
-		}
-		sql.append(')');
-		return sql.toString();
-
-	}
-	private List<String> getIncludedColumns(TableIdentifier table, IndexDefinition index)
-	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		String sql =
-			"select col.name \n" +
+			"select ix.ignore_dup_key, ix.is_padded, ic.is_included_column, ix.fill_factor, col.name as column_name \n" +
 			"from sys.index_columns ic with (nolock) \n" +
 			"  join sys.columns col with (nolock) on col.object_id = ic.object_id and col.column_id = ic.column_id \n" +
 			"  join sys.indexes ix with (nolock) on ix.index_id = ic.index_id and ix.object_id = col.object_id \n" +
@@ -87,7 +72,6 @@ public class SqlServerIndexReader
 			"where ix.name = ? \n" +
 			"  and ao.name = ? \n" +
 			"  and sh.name = ? \n" +
-			"  and ic.is_included_column = 1 \n " +
 			"order by ic.index_column_id";
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -96,7 +80,11 @@ public class SqlServerIndexReader
 				SqlUtil.replaceParameters(sql, index.getName(), table.getRawTableName(), table.getRawSchema()));
 		}
 
-		List<String> result = new ArrayList<String>();
+		List<String> cols = new ArrayList<String>();
+		boolean ignoreDups = false;
+		boolean isPadded = false;
+		int fillFactor = -1;
+
 		try
 		{
 			pstmt = this.metaData.getSqlConnection().prepareStatement(sql);
@@ -104,9 +92,21 @@ public class SqlServerIndexReader
 			pstmt.setString(2, table.getRawTableName());
 			pstmt.setString(3, table.getRawSchema());
 			rs = pstmt.executeQuery();
+			boolean first = true;
 			while (rs.next())
 			{
-				result.add(rs.getString(1));
+				if (first)
+				{
+					ignoreDups = rs.getBoolean("ignore_dup_key");
+					isPadded = rs.getBoolean("is_padded");
+					fillFactor = rs.getInt("fill_factor");
+					first = false;
+				}
+				boolean isIncluded = rs.getBoolean("is_included_column");
+				if (isIncluded)
+				{
+					cols.add(rs.getString("column_name"));
+				}
 			}
 		}
 		catch (SQLException ex)
@@ -117,7 +117,45 @@ public class SqlServerIndexReader
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
-		return result;
+
+		StringBuilder options = new StringBuilder(cols.size() * 20);
+		if (cols.size() > 0)
+		{
+			options.append("\n   INCLUDE (");
+			for (int i=0; i < cols.size(); i++)
+			{
+				if (i > 0) options.append(", ");
+				options.append(cols.get(i));
+			}
+			options.append(')');
+		}
+
+		if (isPadded || ignoreDups || fillFactor > 0)
+		{
+			options.append("\n   WITH (");
+			int optCount = 0;
+			if (ignoreDups)
+			{
+				options.append("IGNORE_DUP_KEY = ON");
+				optCount ++;
+			}
+
+			if (fillFactor > 0)
+			{
+				if (optCount > 0) options.append(", ");
+				options.append("FILLFACTOR = ");
+				options.append(fillFactor);
+				optCount ++;
+			}
+			if (isPadded)
+			{
+				if (optCount > 0) options.append(", ");
+				options.append("PAD_INDEX = ON");
+				optCount ++;
+			}
+			options.append(')');
+		}
+		return options.toString();
 	}
 
 	private String replaceClustered(String sql, IndexDefinition indexDefinition)
@@ -158,5 +196,5 @@ public class SqlServerIndexReader
 		}
 		return Collections.emptyList();
 	}
-	
+
 }

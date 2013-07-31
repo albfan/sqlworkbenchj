@@ -97,5 +97,17 @@ public class SqlServerIndexReaderTest
 		assertNotNull(indexList);
 		assertEquals(1, indexList.size());
 		assertEquals("ix_one", indexList.get(0).getName());
+
+		TestUtil.executeScript(con,
+			"drop index ix_one on foo;\n" +
+			"create unique index ix_two on foo (id1, id2) with (ignore_dup_key = on);\n " +
+			"commit;\n");
+
+		indexes = reader.getTableIndexList(tbl);
+		assertEquals(1, indexes.size());
+		IndexDefinition idx2 = indexes.get(0);
+		assertEquals("ix_two", idx2.getName());
+		source = reader.getIndexSource(tbl, idx2).toString();
+		assertTrue(source.contains("WITH (IGNORE_DUP_KEY = ON)"));
 	}
 }

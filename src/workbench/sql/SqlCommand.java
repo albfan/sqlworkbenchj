@@ -252,10 +252,13 @@ public class SqlCommand
 			if (addLabel && warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
 			{
 				result.addMessage(ResourceMgr.getString("TxtWarnings"));
-				result.addMessageNewLine();
 			}
 			result.addMessage(warn);
 			result.setWarning(true);
+		}
+		if (hasWarning)
+		{
+			result.addMessageNewLine();
 		}
 		return hasWarning;
 	}
