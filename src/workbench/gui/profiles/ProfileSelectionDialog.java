@@ -293,8 +293,11 @@ public class ProfileSelectionDialog
 	{
 		if (evt.getButton() == MouseEvent.BUTTON1 && evt.getClickCount() == 2)
 		{
-			profiles.applyProfiles();
-			selectProfile();
+			if (profiles.getSelectedProfile() != null)
+			{
+				profiles.applyProfiles();
+				selectProfile();
+			}
 		}
 	}
 
