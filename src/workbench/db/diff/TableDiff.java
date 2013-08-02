@@ -62,7 +62,6 @@ public class TableDiff
 	public static final String TAG_ADD_PK = "add-primary-key";
 	public static final String TAG_MODIFY_PK = "modify-primary-key";
 	public static final String TAG_REMOVE_PK = "remove-primary-key";
-	public static final String TAG_TABLE_CONS = "table-constraint";
 
 	private ReportTable referenceTable;
 	private ReportTable targetTable;
@@ -132,7 +131,7 @@ public class TableDiff
 		}
 		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<ReportColumn>();
 		ReportColumn[] tcols = this.targetTable.getColumns();
-		
+
 		for (ReportColumn tcol : tcols)
 		{
 			if (this.referenceTable.findColumn(tcol.getColumn().getColumnName()) == null)

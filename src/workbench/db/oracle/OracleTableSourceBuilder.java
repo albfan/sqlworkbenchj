@@ -187,7 +187,7 @@ public class OracleTableSourceBuilder
 				String logging = rs.getString("logging");
 				if (StringUtil.equalStringIgnoreCase("NO", logging))
 				{
-					tbl.getSourceOptions().addConfigSetting("logging", logging);
+					tbl.getSourceOptions().addConfigSetting("logging", "nologging");
 					if (options.length() > 0) options.append('\n');
 					options.append("NOLOGGING");
 				}

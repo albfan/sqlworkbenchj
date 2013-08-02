@@ -47,6 +47,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -248,6 +249,7 @@ public class WbSchemaDiff
 			else
 			{
 				String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, "UTF-8");
+				encoding = EncodingUtil.cleanupEncoding(encoding);
 				diff.setEncoding(encoding);
 				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), encoding), 256*1024);
 			}

@@ -165,7 +165,7 @@ public class ReportTable
 
 		if (includeIndex)
 		{
-			this.reporter = new IndexReporter(tbl, conn, includePartitioning);
+			this.reporter = new IndexReporter(table, conn, includePartitioning);
 		}
 
 		if (includeFk)
@@ -176,7 +176,7 @@ public class ReportTable
 		if (includeConstraints)
 		{
 			ConstraintReader consReader = ReaderFactory.getConstraintReader(conn.getMetadata());
-			this.tableConstraints = consReader.getTableConstraints(conn, tbl);
+			this.tableConstraints = consReader.getTableConstraints(conn, table);
 		}
 
 		if (includeGrants)

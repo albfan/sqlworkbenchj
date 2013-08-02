@@ -157,9 +157,9 @@ public class OracleIndexReader
 			"       -1 as prefix_length \n") +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c " +
-			"    ON i.index_name = c.index_name " +
-			"   AND i.table_owner = c.table_owner " +
-			"   AND i.table_name = c.table_name " +
+			"    ON i.index_name = c.index_name \n" +
+			"   AND i.table_owner = c.table_owner \n" +
+			"   AND i.table_name = c.table_name \n" +
 			"   AND i.owner = c.index_owner \n" +
 			"WHERE i.table_name = ? \n");
 
