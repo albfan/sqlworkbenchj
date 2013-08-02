@@ -70,11 +70,13 @@ public class IndexReporter
 	private String mainTagToUse;
 	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new HashMap<IndexDefinition, List<ObjectOption>>();
 
-
-	public IndexReporter(TableIdentifier tbl, WbConnection conn)
+	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
-		retrieveOracleOptions(conn);
+		if (includePartitions)
+		{
+			retrieveOracleOptions(conn);
+		}
 		retrieveSourceOptions(tbl, conn);
 	}
 

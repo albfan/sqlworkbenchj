@@ -107,17 +107,16 @@ public class TableDiff
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
 
-		for (int i=0; i < refCols.length; i++)
+		for (ReportColumn refCol : refCols)
 		{
-			ReportColumn tcol = targetTable.findColumn(refCols[i].getColumn().getColumnName());
+			ReportColumn tcol = targetTable.findColumn(refCol.getColumn().getColumnName());
 			if (tcol == null)
 			{
-				colsToBeAdded.add(refCols[i]);
+				colsToBeAdded.add(refCol);
 			}
 			else
 			{
-				ColumnDiff d = new ColumnDiff(refCols[i], tcol);
-				//d.setCompareComments(this.compareComments);
+				ColumnDiff d = new ColumnDiff(refCol, tcol);
 				boolean oldFormat = Settings.getInstance().getBoolProperty("workbench.tablediff.columnfk", false);
 				d.setCompareForeignKeys(oldFormat && this.diff.getIncludeForeignKeys());
 				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
@@ -133,11 +132,12 @@ public class TableDiff
 		}
 		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<ReportColumn>();
 		ReportColumn[] tcols = this.targetTable.getColumns();
-		for (int i=0; i < tcols.length; i++)
+		
+		for (ReportColumn tcol : tcols)
 		{
-			if (this.referenceTable.findColumn(tcols[i].getColumn().getColumnName()) == null)
+			if (this.referenceTable.findColumn(tcol.getColumn().getColumnName()) == null)
 			{
-				colsToBeRemoved.add(tcols[i]);
+				colsToBeRemoved.add(tcol);
 			}
 		}
 
@@ -281,12 +281,12 @@ public class TableDiff
 			writeFKs(missingFK, result, "add-foreign-keys", myindent);
 		}
 
-		if (typesAreEquals)
+		if (!typesAreEquals)
 		{
 			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_TYPE, referenceTable.getTable().getSourceOptions().getTypeModifier());
 		}
 
-		if (tblSpacesAreEquals)
+		if (!tblSpacesAreEquals)
 		{
 			writer.appendTag(result, myindent, ReportTable.TAG_TABLESPACE, referenceTable.getTable().getTablespace());
 		}

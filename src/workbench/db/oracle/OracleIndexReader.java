@@ -57,6 +57,7 @@ public class OracleIndexReader
 	private static final String PROP_USE_JDBC_FOR_PK_INFO = "workbench.db.oracle.getprimarykeyindex.usejdbc";
 	private static final String PROP_USE_JDBC_FOR_INDEXLIST = "workbench.db.oracle.indexlist.usejdbc";
 
+	private static final String IDX_PROP_COMPRESS = "compression_level";
 	private PreparedStatement indexStatement;
 	private PreparedStatement pkStament;
 	private String defaultTablespace;
@@ -150,10 +151,10 @@ public class OracleIndexReader
 			"       i.partitioned, \n" +
 			(hasCompression ?
 			"       i.compression, \n" +
-			"       i.prefix_length " :
+			"       i.prefix_length \n" :
 			// no compression
 			"       null as compression, \n" +
-			"       -1 as prefix_length ") +
+			"       -1 as prefix_length \n") +
 			"FROM all_indexes i" +
 			"  JOIN all_ind_columns c " +
 			"    ON i.index_name = c.index_name " +
@@ -218,7 +219,7 @@ public class OracleIndexReader
 			if ("ENABLED".equals(compressed) && compressLevel > 0)
 			{
 				ObjectSourceOptions options = index.getSourceOptions();
-				options.addConfigSetting("compression_level", Integer.toString(compressLevel));
+				options.addConfigSetting(IDX_PROP_COMPRESS, Integer.toString(compressLevel));
 			}
 		}
 		index.setTablespace(tblSpace);
@@ -352,7 +353,7 @@ public class OracleIndexReader
 				option += reverse;
 			}
 		}
-		String level = index.getSourceOptions().getConfigSettings().get("compression_level");
+		String level = index.getSourceOptions().getConfigSettings().get(IDX_PROP_COMPRESS);
 		if (level != null)
 		{
 			option += "\n   COMPRESS " + level;

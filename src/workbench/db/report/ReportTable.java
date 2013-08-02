@@ -39,7 +39,6 @@ import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConstraintReader;
-import workbench.db.DbMetadata;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
@@ -55,6 +54,7 @@ import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
+import workbench.db.oracle.OracleTableSourceBuilder;
 
 import workbench.storage.DataStore;
 
@@ -97,8 +97,9 @@ public class ReportTable
 	private IndexReporter reporter;
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
-	private String schemaNameToUse = null;
+	private String schemaNameToUse;
 	private boolean includePrimaryKey = true;
+	private boolean includePartitions;
 	private List<TableConstraint> tableConstraints;
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
@@ -122,10 +123,12 @@ public class ReportTable
 			boolean includePk,
 			boolean includeConstraints,
 			boolean includeGrants,
-			boolean includeTriggers)
+			boolean includeTriggers,
+			boolean includePartitioning)
 		throws SQLException
 	{
 		this.includePrimaryKey = includePk;
+		this.includePartitions = includePartitioning;
 		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 
 		// By using getTableDefinition() the TableIdentifier is completely initialized
@@ -162,7 +165,7 @@ public class ReportTable
 
 		if (includeIndex)
 		{
-			this.reporter = new IndexReporter(tbl, conn);
+			this.reporter = new IndexReporter(tbl, conn, includePartitioning);
 		}
 
 		if (includeFk)
@@ -233,7 +236,9 @@ public class ReportTable
 	private void retrieveOptions(WbConnection conn)
 		throws SQLException
 	{
-		if (conn.getMetadata().isOracle())
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(conn);
+
+		if (conn.getMetadata().isOracle() && includePartitions)
 		{
 			OracleTablePartition partition = new OracleTablePartition(conn);
 			partition.retrieve(this.table, conn);
@@ -243,9 +248,13 @@ public class ReportTable
 				ObjectOption option = new ObjectOption("partition", source);
 				dbmsOptions.add(option);
 			}
+			builder.setIncludePartitions(false); // no need to retrieve it twice
+		}
+		else
+		{
+			builder.setIncludePartitions(includePartitions);
 		}
 
-		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(conn);
 		builder.readTableOptions(table, getColumnList());
 
 		Map<String, String> options = table.getSourceOptions().getConfigSettings();

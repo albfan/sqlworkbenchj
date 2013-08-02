@@ -48,6 +48,7 @@ public class ColumnDiff
 	public static final String TAG_DROP_FK = "drop-reference";
 	public static final String TAG_ADD_FK = "add-reference";
 	public static final String TAG_RENAME_FK = "rename-reference";
+	public static final String TAG_CHANGED_ATTRIBUTES = "new-column-attributes";
 
 	private ReportColumn referenceColumn;
 	private ReportColumn targetColumn;
@@ -225,59 +226,65 @@ public class ColumnDiff
 				referenceColumn.appendXml(result, myindent, false, "reference-column-definition", true);
 			}
 
+			StrBuffer attIndent = new StrBuffer(myindent);
+			attIndent.append("  ");
+			writer.appendOpenTag(result, myindent, TAG_CHANGED_ATTRIBUTES);
+			result.append('\n');
+
 			if (typeDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_SIZE, sId.getColumnSize());
+				writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
+				writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_SIZE, sId.getColumnSize());
 				if (SqlUtil.isNumberType(sId.getDataType()))
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDigitsDisplay());
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDigitsDisplay());
 				}
 				String stype = sId.getColumnTypeName();
 				String ttype = tId.getColumnTypeName();
 				if (!stype.equals(ttype))
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
 				}
 			}
 
 			if (nullableDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NULLABLE, sId.isNullable());
+				writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_NULLABLE, sId.isNullable());
 			}
 
 			if (defaultDifferent)
 			{
 				if (StringUtil.isBlank(sdef))
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DEFAULT, "", "remove", "true");
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_DEFAULT, "", "remove", "true");
 				}
 				else
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DEFAULT, sdef);
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_DEFAULT, sdef);
 				}
 			}
 			if (commentDifferent)
 			{
 				if (StringUtil.isBlank(scomm))
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, "", "remove", "true");
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_COMMENT, "", "remove", "true");
 				}
 				else
 				{
-					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, scomm);
+					writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_COMMENT, scomm);
 				}
 			}
 
 			if (computedColIsDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMPUTED_COL, sId.getComputedColumnExpression());
+				writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_COMPUTED_COL, sId.getComputedColumnExpression());
 			}
 
 			if (collationsDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COLLATION, sId.getCollation());
+				writer.appendTag(result, attIndent, ReportColumn.TAG_COLUMN_COLLATION, sId.getCollation());
 			}
+			writer.appendCloseTag(result, myindent, TAG_CHANGED_ATTRIBUTES);
 
 			if (fkDefinitionDifferent)
 			{

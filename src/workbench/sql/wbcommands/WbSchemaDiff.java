@@ -86,6 +86,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_INCLUDE_INDEX, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_CONSTRAINTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_VIEWS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PARTITIONS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
@@ -161,6 +162,7 @@ public class WbSchemaDiff
 		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, true));
+		diff.setIncludePartitions(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PARTITIONS, false));
 		List<String> types = cmdLine.getListValue(ARG_ADD_TYPES);
 		diff.setAdditionalTypes(types);
 

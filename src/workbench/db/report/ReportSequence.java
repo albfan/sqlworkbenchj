@@ -29,6 +29,8 @@ import java.util.Iterator;
 import workbench.db.SequenceDefinition;
 
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
+import workbench.util.WbDateFormatter;
 
 /**
  *
@@ -73,14 +75,14 @@ public class ReportSequence
 
 	public StrBuffer getXml()
 	{
-		return getXml(new StrBuffer("  "));
+		return getXml(new StrBuffer("  "), true);
 	}
 	/**
 	 * Return an XML representation of this view information.
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */
-	public StrBuffer getXml(StrBuffer indent)
+	public StrBuffer getXml(StrBuffer indent, boolean includeSource)
 	{
 		StrBuffer line = new StrBuffer(500);
 		StrBuffer colindent = new StrBuffer(indent);
@@ -88,13 +90,19 @@ public class ReportSequence
 
 		tagWriter.appendOpenTag(line, indent, TAG_SEQ_DEF, "name", this.sequence.getSequenceName());
 		line.append('\n');
+		if (StringUtil.isNonEmpty(sequence.getCatalog()))
+		{
+			tagWriter.appendTag(line, colindent, TAG_SEQ_CATALOG, this.sequence.getCatalog());
+		}
 		tagWriter.appendTag(line, colindent, TAG_SEQ_SCHEMA, (this.schemaNameToUse == null ? this.sequence.getSequenceOwner() : this.schemaNameToUse));
 		tagWriter.appendTag(line, colindent, TAG_SEQ_NAME, this.sequence.getSequenceName());
 		tagWriter.appendTagConditionally(line, colindent, TAG_SEQ_COMMENT, sequence.getComment());
 
 		writeSequenceProperties(line, colindent);
-		writeSourceTag(tagWriter, line, colindent, sequence.getSource());
-
+		if (includeSource)
+		{
+			writeSourceTag(tagWriter, line, colindent, sequence.getSource());
+		}
 		tagWriter.appendCloseTag(line, indent, TAG_SEQ_DEF);
 		return line;
 	}
@@ -104,7 +112,7 @@ public class ReportSequence
 		if (source == null) return;
 		tagWriter.appendOpenTag(target, indent, TAG_SEQ_SOURCE);
 		target.append(TagWriter.CDATA_START);
-		target.append(source);
+		target.append(StringUtil.rtrim(source));
 		target.append(TagWriter.CDATA_END);
 		target.append('\n');
 		tagWriter.appendCloseTag(target, indent, TAG_SEQ_SOURCE);
@@ -125,8 +133,8 @@ public class ReportSequence
 			String propName = itr.next();
 			Object value = this.sequence.getSequenceProperty(propName);
 			TagAttribute name = new TagAttribute("name", propName);
-			TagAttribute v = new TagAttribute("value", (value == null ? "" : value.toString()));
-			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, v);
+			TagAttribute val = new TagAttribute("value", (value == null ? "" : WbDateFormatter.getDisplayValue(value)));
+			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, val);
 			toAppend.append("/>\n");
 		}
 		tagWriter.appendCloseTag(toAppend, indent, TAG_SEQ_PROPS);

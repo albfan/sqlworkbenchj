@@ -221,6 +221,7 @@ keyword=(
 "CYCLE"|
 "DATA"|
 "DATABASE"|
+"DATABASE LINK"|
 "DATE"|
 "DAY"|
 "DECIMAL"|

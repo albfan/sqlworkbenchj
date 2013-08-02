@@ -85,6 +85,7 @@ public class SchemaReportAction
 		final SchemaReporter reporter = new SchemaReporter(client.getConnection());
 		reporter.setObjectList(objects);
 		reporter.setOutputFilename(filename);
+		reporter.setIncludePartitions(true);
 
 		Frame f = (Frame)SwingUtilities.getWindowAncestor(caller);
 		final ProgressDialog progress = new ProgressDialog(ResourceMgr.getString("MsgReportWindowTitle"), f, reporter);

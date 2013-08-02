@@ -89,7 +89,7 @@ public class OracleTableSourceBuilder
 			"where atb.owner = ? \n" +
 			"and atb.table_name = ? ";
 
-		StringBuilder options =new StringBuilder(100);
+		StringBuilder options = new StringBuilder(100);
 
 		try
 		{
@@ -167,21 +167,29 @@ public class OracleTableSourceBuilder
 				}
 
 				int free = rs.getInt("pct_free");
-				if (!rs.wasNull())
+				if (!rs.wasNull() && free != 10)
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_free", Integer.toString(free));
+					if (options.length() > 0) options.append('\n');
+					options.append("PCTFREE");
+					options.append(free);
 				}
 
 				int used = rs.getInt("pct_used");
-				if (!rs.wasNull())
+				if (!rs.wasNull() && used != 40)
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
+					if (options.length() > 0) options.append('\n');
+					options.append("PCTUSED");
+					options.append(used);
 				}
 
 				String logging = rs.getString("logging");
 				if (StringUtil.equalStringIgnoreCase("NO", logging))
 				{
 					tbl.getSourceOptions().addConfigSetting("logging", logging);
+					if (options.length() > 0) options.append('\n');
+					options.append("NOLOGGING");
 				}
 			}
 		}
@@ -205,14 +213,17 @@ public class OracleTableSourceBuilder
 			options.append(tablespace);
 		}
 
-		StringBuilder partition = getPartitionSql(tbl);
-		if (partition != null && partition.length() > 0)
+		if (includePartitions)
 		{
-			if (options.length() > 0 && options.charAt(options.length() - 1) != '\n')
+			StringBuilder partition = getPartitionSql(tbl);
+			if (partition != null && partition.length() > 0)
 			{
-				options.append('\n');
+				if (options.length() > 0 && options.charAt(options.length() - 1) != '\n')
+				{
+					options.append('\n');
+				}
+				options.append(partition);
 			}
-			options.append(partition);
 		}
 
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))

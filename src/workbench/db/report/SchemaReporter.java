@@ -79,6 +79,7 @@ public class SchemaReporter
 	private String procedureNames;
 	private boolean includeGrants;
 	private boolean includeTriggers;
+	private boolean includePartitions;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
 
@@ -186,6 +187,11 @@ public class SchemaReporter
 		this.includeGrants = flag;
 	}
 
+	public void setIncludePartitions(boolean flag)
+	{
+		this.includePartitions = flag;
+	}
+
 	public void setIncludeTriggers(boolean flag)
 	{
 		includeTriggers = flag;
@@ -285,7 +291,7 @@ public class SchemaReporter
 				}
 				else if (object instanceof TableIdentifier)
 				{
-					ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers);
+					ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includePartitions);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();

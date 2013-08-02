@@ -113,6 +113,7 @@ public class SchemaDiff
 	private boolean diffProcs = true;
 	private boolean diffTriggers = true;
 	private boolean diffSequences = true;
+	private boolean diffPartitions;
 	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
 	private String[] additionalTypes;
@@ -151,6 +152,11 @@ public class SchemaDiff
 	public void setIncludeTriggers(boolean flag)
 	{
 		this.diffTriggers = flag;
+	}
+
+	public void setIncludePartitions(boolean flag)
+	{
+		this.diffPartitions = flag;
 	}
 
 	public void setAdditionalTypes(List<String> types)
@@ -360,7 +366,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportTable rTable = new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers);
+		ReportTable rTable = new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers, diffPartitions);
 		return rTable;
 	}
 

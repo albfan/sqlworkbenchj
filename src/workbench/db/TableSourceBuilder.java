@@ -57,6 +57,7 @@ public class TableSourceBuilder
 	public static final String CATALOG_PLACEHOLDER = "%catalog%";
 	protected WbConnection dbConnection;
 	private ConstraintNameTester nameTester;
+	protected boolean includePartitions = true;
 
 	/**
 	 * This class should not be instantiated directly.
@@ -82,6 +83,11 @@ public class TableSourceBuilder
 		return dbConnection.getMetadata().getIndexReader();
 	}
 
+	public void setIncludePartitions(boolean flag)
+	{
+		includePartitions = flag;
+	}
+	
 	/**
    * Return the SQL statement to re-create the given table. (in the dialect for the
 	 * current DBMS)

@@ -256,6 +256,23 @@ public class StringUtil
 		return s.substring(0, pos);
 	}
 
+	public static CharSequence rtrim(CharSequence s)
+	{
+		if (s == null) return s;
+		int pos = s.length();
+		if (pos == 0) return s;
+
+		char last = s.charAt(pos - 1);
+		if (last > ' ') return s;
+
+		while (pos > 0 && s.charAt(pos - 1) <= ' ')
+		{
+			pos --;
+		}
+
+		return s.subSequence(0, pos);
+	}
+
 	public static int indexOf(CharSequence value, char c)
 	{
 		return indexOf(value, c, 1);
@@ -703,7 +720,7 @@ public class StringUtil
 
 	/**
 	 * Checks if both Strings are equal considering null values.
-	 * 
+	 *
 	 * A null String and an empty String (length==0 or all whitespace) are
 	 * considered equal as well (because both are "empty")
 	 *

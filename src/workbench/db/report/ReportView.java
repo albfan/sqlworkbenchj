@@ -137,7 +137,7 @@ public class ReportView
 		this.setColumns(cols);
 		if (includeIndex)
 		{
-			this.index = new IndexReporter(tbl, conn);
+			this.index = new IndexReporter(tbl, conn, false);
 		}
 	}
 

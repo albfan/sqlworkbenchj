@@ -63,6 +63,7 @@ public class WbSchemaReport
 	public static final String PARAM_EXCLUDE_OBJECTS = "excludeObjectNames";
 	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
+	public static final String PARAM_INCLUDE_PARTITIONS = "includePartitions";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
 	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
@@ -94,6 +95,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_PARTITIONS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
@@ -177,7 +179,8 @@ public class WbSchemaReport
 		String[] typesArray = StringUtil.toArray(types, true);
 
 		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
-
+		reporter.setIncludePartitions(cmdLine.getBoolean(PARAM_INCLUDE_PARTITIONS, false));
+		
 		List<String> schemas = StringUtil.stringToList(schemaNames, ",");
 		if (schemas.isEmpty())
 		{

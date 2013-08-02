@@ -92,7 +92,7 @@ public class SqlUtil
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
 			"FLASHBACK ARCHIVE", "TYPE BODY", "CAST", "FOREIGN DATA WRAPPER", "OPERATOR", "SCHEMA", "EXTENSION",
-			"DATABASE"));
+			"DATABASE", "DATABASE LINK"));
 	}
 
 	private static class TypesWithoutNamesHolder
@@ -2131,7 +2131,7 @@ public class SqlUtil
 	 * @param other   the second object name
 	 * @return true if both names are identical considering quoted identifiers
 	 *
-	 * @see #isQuotedIdentifier(java.lang.String) 
+	 * @see #isQuotedIdentifier(java.lang.String)
 	 */
 	public static boolean objectNamesAreEqual(String one, String other)
 	{
