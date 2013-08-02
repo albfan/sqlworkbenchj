@@ -66,6 +66,7 @@ public class CommonDiffParameters
 	public static final String PARAM_TARGETSCHEMA = "targetSchema";
 
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
+	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 
 	private RowActionMonitor monitor;
 	private ArgumentParser cmdLine;
@@ -86,6 +87,7 @@ public class CommonDiffParameters
 		cmdLine.addArgument(PARAM_REFERENCESCHEMA);
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(PARAM_INCLUDE_TABLES);
 	}
 
 	public void setMonitor(RowActionMonitor rowMonitor)
@@ -155,6 +157,7 @@ public class CommonDiffParameters
 		this.missingTargetTables.clear();
 
 		String excludedNames = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		String includeNames = cmdLine.getValue(PARAM_INCLUDE_TABLES);
 		String refTableNames = cmdLine.getValue(PARAM_REFERENCETABLES);
 		String targetTableNames = cmdLine.getValue(PARAM_TARGETTABLES);
 		String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
@@ -172,6 +175,9 @@ public class CommonDiffParameters
 		SourceTableArgument refArg = new SourceTableArgument(refTableNames, excludedNames, refSchema, referenceConn);
 		refTables = refArg.getTables();
 		missingRefTables.addAll(refArg.getMissingTables());
+
+		SourceTableArgument include = new SourceTableArgument(includeNames, null, refSchema, referenceConn);
+		refTables.addAll(include.getTables());
 
 		boolean multipleSchema = getSchemas(refTables).size() > 1 || getCatalogs(targetTables).size() > 1;
 		if (multipleSchema && StringUtil.isEmptyString(targetTableNames) && StringUtil.isEmptyString(targetSchema))
