@@ -174,18 +174,18 @@ public class TestUtil
 	private void deleteFiles(File dir)
 	{
 		File[] files = dir.listFiles();
-		for (int i = 0; i < files.length; i++)
+		for (File file : files)
 		{
-			if (files[i].isDirectory())
+			if (file.isDirectory())
 			{
-				deleteFiles(files[i]);
+				deleteFiles(file);
 			}
-			if (files[i].getName().equals("workbench.settings")) continue;
-			if (files[i].getName().equals("workbench.log")) continue;
+			if (file.getName().equals("workbench.settings")) continue;
+			if (file.getName().equals("workbench.log"))	continue;
 
-			if (!files[i].delete())
+			if (!file.delete())
 			{
-				System.out.println("Could not delete file: " + files[i].getAbsolutePath());
+				System.out.println("Could not delete file: " + file.getAbsolutePath());
 			}
 		}
 	}
