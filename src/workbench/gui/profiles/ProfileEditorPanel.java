@@ -41,6 +41,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
+import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
@@ -91,11 +93,14 @@ public class ProfileEditorPanel
 		this.jSplitPane.setRightComponent(dummy);
 		this.fillDrivers();
 
+		boolean restricted = WbManager.getInstance().isRestrictedMode();
+
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
 		newItem = new NewListEntryAction(this, "LblNewProfile");
 		newItem.setIcon("NewProfile");
+		newItem.setEnabled(restricted);
 		this.toolbar.add(newItem);
 
 		copyItem = new CopyProfileAction(this);
@@ -362,6 +367,8 @@ public class ProfileEditorPanel
 	public void newItem(boolean createCopy)
 		throws Exception
 	{
+		if (WbManager.getInstance().isRestrictedMode()) return;
+
 		ConnectionProfile cp = null;
 
 		if (createCopy)
@@ -531,6 +538,7 @@ public class ProfileEditorPanel
 			return;
 		}
 
+		boolean canEdit = !WbManager.getInstance().isRestrictedMode();
 		if (evt.getSource() == this.profileTree)
 		{
 			try
@@ -543,13 +551,13 @@ public class ProfileEditorPanel
 						this.connectionEditor.setVisible(true);
 					}
 					this.connectionEditor.setProfile(newProfile);
-					this.deleteItem.setEnabled(true);
-					this.copyItem.setEnabled(true);
+					this.deleteItem.setEnabled(canEdit);
+					this.copyItem.setEnabled(canEdit);
 				}
 				else
 				{
 					this.connectionEditor.setVisible(false);
-					this.deleteItem.setEnabled(true);
+					this.deleteItem.setEnabled(canEdit);
 					this.copyItem.setEnabled(false);
 				}
 			}

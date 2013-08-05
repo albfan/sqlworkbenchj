@@ -87,6 +87,8 @@ public final class WbManager
 	private static WbManager wb;
 	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
 	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
+
+	private boolean restrictedMode;
 	private boolean batchMode;
 	private boolean consoleMode;
 	private boolean writeSettings = true;
@@ -375,6 +377,11 @@ public final class WbManager
 		}
 
 		return true;
+	}
+
+	public boolean isRestrictedMode()
+	{
+		return this.restrictedMode;
 	}
 
 	public boolean isGUIMode()
@@ -853,12 +860,18 @@ public final class WbManager
 				}
 			}
 
+			restrictedMode = cmdLine.getBoolean(AppArguments.ARG_RESTRICTED_MODE, false);
+
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name"));
 			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
 			{
 				LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved!");
+			}
+			if (restrictedMode)
+			{
+				LogMgr.logInfo("WbManager.init()", "Starting application in restricted mode");
 			}
 		}
 		catch (Exception e)
