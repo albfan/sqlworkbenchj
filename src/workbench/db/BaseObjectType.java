@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.util.CollectionUtil;
@@ -128,6 +129,7 @@ public class BaseObjectType
 
 	public List<ColumnIdentifier> getAttributes()
 	{
+		if (columns==null) return Collections.emptyList();
 		return columns;
 	}
 

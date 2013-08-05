@@ -208,7 +208,7 @@ public class DB2TypeReader
 		int[] sizes = new int[] { 30, 30 };
 		DataStore result = new DataStore(columns, types, sizes);
 		List<ColumnIdentifier> attr = type.getAttributes();
-		if (!CollectionUtil.isEmpty(attr))
+		if (CollectionUtil.isNonEmpty(attr))
 		{
 			for (ColumnIdentifier col : attr)
 			{
