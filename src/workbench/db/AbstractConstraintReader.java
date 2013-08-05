@@ -210,7 +210,7 @@ public abstract class AbstractConstraintReader
 			int index = this.getIndexForSchemaParameter();
 			if (index > 0)
 			{
-				String schema = aTable.getSchema();
+				String schema = aTable.getRawSchema();
 				if (StringUtil.isBlank(schema))
 				{
 					schema = dbConnection.getCurrentSchema();
@@ -219,10 +219,10 @@ public abstract class AbstractConstraintReader
 			}
 
 			index = this.getIndexForCatalogParameter();
-			if (index > 0) stmt.setString(index, aTable.getCatalog());
+			if (index > 0) stmt.setString(index, aTable.getRawCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) stmt.setString(index, aTable.getTableName());
+			if (index > 0) stmt.setString(index, aTable.getRawTableName());
 
 			Pattern p = Pattern.compile("^check\\s+.*", Pattern.CASE_INSENSITIVE);
 			rs = stmt.executeQuery();

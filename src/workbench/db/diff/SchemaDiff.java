@@ -521,7 +521,10 @@ public class SchemaDiff
 		}
 
 		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(null, getReferenceCatalog(referenceSchema), getReferenceSchema(referenceSchema), types);
+		if (this.cancel) return;
+
 		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(null, getTargetCatalog(this.targetSchema), getTargetSchema(this.targetSchema), types);
+		if (this.cancel) return;
 
 		if (treatViewAsTable)
 		{
@@ -535,6 +538,8 @@ public class SchemaDiff
 				}
 			}
 		}
+
+		if (this.cancel) return;
 
 		processTableList(refTables, target);
 	}
@@ -841,8 +846,6 @@ public class SchemaDiff
 			}
 			refProcNames.add(refProc.getProcedureName());
 		}
-
-		if (cancel) return;
 
 		for (ProcedureDefinition tProc : targetProcs)
 		{

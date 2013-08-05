@@ -145,9 +145,17 @@ public class WbSchemaDiff
 			targetCon.disconnect();
 			return result;
 		}
+
 		if (!result.isSuccess()) return result;
 
-		this.diff = new SchemaDiff(referenceConnection, targetCon);
+		if (isCancelled)
+		{
+			result.setWarning(true);
+			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
+			return result;
+		}
+
+		diff = new SchemaDiff(referenceConnection, targetCon);
 		diff.setMonitor(this.rowMonitor);
 
 		// this needs to be set before the tables are defined!
@@ -233,6 +241,13 @@ public class WbSchemaDiff
 			}
 			diff.setTableNames(rl, tl);
 			diff.setSchemaNames(refSchema, targetSchema);
+		}
+
+		if (isCancelled || diff.isCancelled())
+		{
+			result.setWarning(true);
+			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
+			return result;
 		}
 
 		Writer out = null;
@@ -331,7 +346,9 @@ public class WbSchemaDiff
 
 	@Override
 	public void cancel()
+		throws SQLException
 	{
+		super.cancel();
 		if (this.diff != null) this.diff.cancel();
 	}
 }
