@@ -97,10 +97,10 @@ public class SchemaDiffTest
 		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column[@name='REMARK'])");
 		assertEquals("Remark column not removed", "1", count);
 
-		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/modify-column[@name='STREET']/dbms-data-type");
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/modify-column[@name='STREET']/new-column-attributes/dbms-data-type");
 		assertEquals("Street column not changed", "VARCHAR(50)", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME']/dbms-data-type");
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME']/new-column-attributes/dbms-data-type");
 		assertEquals("Firstname column not changed", "VARCHAR(100)", value);
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key)");

@@ -176,8 +176,11 @@ public class CommonDiffParameters
 		refTables = refArg.getTables();
 		missingRefTables.addAll(refArg.getMissingTables());
 
-		SourceTableArgument include = new SourceTableArgument(includeNames, null, refSchema, referenceConn);
-		refTables.addAll(include.getTables());
+		if (StringUtil.isNonBlank(includeNames))
+		{
+			SourceTableArgument include = new SourceTableArgument(includeNames, null, refSchema, referenceConn);
+			refTables.addAll(include.getTables());
+		}
 
 		boolean multipleSchema = getSchemas(refTables).size() > 1 || getCatalogs(targetTables).size() > 1;
 		if (multipleSchema && StringUtil.isEmptyString(targetTableNames) && StringUtil.isEmptyString(targetSchema))
