@@ -133,22 +133,51 @@
     <xsl:variable name="seq-drop-count" select="count(/schema-diff/drop-sequence)"/>
     <xsl:variable name="seq-mod-count" select="count(/schema-diff/update-sequence)"/>
     <xsl:variable name="seq-add-count" select="count(/schema-diff/create-sequence)"/>
-        
-    <xsl:if test="$tbl-mod-count + $tbl-add-count + $tbl-drop-count = 0">
+
+    <xsl:variable name="proc-drop-count" select="count(/schema-diff/drop-procedure)"/>
+    <xsl:variable name="proc-mod-count" select="count(/schema-diff/update-proc)"/>
+    <xsl:variable name="proc-add-count" select="count(/schema-diff/create-proc)"/>
+
+    <xsl:variable name="pkg-drop-count" select="count(/schema-diff/drop-package)"/>
+    <xsl:variable name="pkg-mod-count" select="count(/schema-diff/update-package)"/>
+    <xsl:variable name="pkg-add-count" select="count(/schema-diff/create-package)"/>
+               
+    <xsl:variable name="diff-count" 
+                  select="$tbl-mod-count + $tbl-add-count + $tbl-drop-count + $view-drop-count + $view-mod-count + $view-add-count + $seq-drop-count + $seq-mod-count + $seq-add-count + $proc-drop-count + $proc-mod-count + $proc-add-count + $pkg-drop-count + $pkg-mod-count + $pkg-add-count"/>
+  
+    <xsl:if test="$diff-count = 0">
        No changes required
     </xsl:if>
     
-    <xsl:if test="$tbl-mod-count + $tbl-add-count + $tbl-drop-count + $view-drop-count + $view-mod-count + $view-add-count + $seq-drop-count + $seq-mod-count + $seq-add-count > 0">
+    <xsl:if test="$diff-count > 0">
       <ul>
         <xsl:if test="$tbl-add-count > 0"><li><a href="#add-tables">Missing tables</a></li></xsl:if>
-        <xsl:if test="$tbl-mod-count > 0"><li><a href="#modify-tables">Tables to modify</a></li></xsl:if>
+        <xsl:if test="$tbl-mod-count > 0"><li><a href="#modify-tables">Tables to update</a></li></xsl:if>
         <xsl:if test="$tbl-drop-count > 0"><li><a href="#drop-tables">Tables to drop</a></li></xsl:if>
+      </ul>
+        
+      <ul>
         <xsl:if test="$view-add-count > 0"><li><a href="#add-views">Missing views</a></li></xsl:if>
-        <xsl:if test="$view-mod-count > 0"><li><a href="#modify-views">Views to modify</a></li></xsl:if>
+        <xsl:if test="$view-mod-count > 0"><li><a href="#modify-views">Views to update</a></li></xsl:if>
         <xsl:if test="$view-drop-count > 0"><li><a href="#drop-views">Views to drop</a></li></xsl:if>
+      </ul>
+        
+      <ul>
         <xsl:if test="$seq-add-count > 0"><li><a href="#add-seq">Missing sequences</a></li></xsl:if>
-        <!-- <xsl:if test="$seq-mod-count > 0"><li><a href="#modify-seq">Sequences to modify</a></li></xsl:if> -->
+        <!-- <xsl:if test="$seq-mod-count > 0"><li><a href="#modify-seq">Sequences to update</a></li></xsl:if> -->
         <xsl:if test="$seq-drop-count > 0"><li><a href="#drop-seq">Sequences to drop</a></li></xsl:if>
+      </ul>
+        
+      <ul>
+        <xsl:if test="$proc-add-count > 0"><li><a href="#add-procs">Missing procedures</a></li></xsl:if>
+        <xsl:if test="$proc-mod-count > 0"><li><a href="#mod-procs">Procedures to update</a></li></xsl:if>
+        <xsl:if test="$proc-drop-count > 0"><li><a href="#drop-procs">Procedures to drop</a></li></xsl:if>
+      </ul>
+        
+      <ul>
+        <xsl:if test="$pkg-add-count > 0"><li><a href="#add-pkg">Missing packages</a></li></xsl:if>
+        <xsl:if test="$pkg-mod-count > 0"><li><a href="#mod-pkg">Packages to update</a></li></xsl:if>
+        <xsl:if test="$pkg-drop-count > 0"><li><a href="#drop-pkg">Packages to drop</a></li></xsl:if>
       </ul>
       
       <xsl:if test="$tbl-add-count > 0">
@@ -198,7 +227,40 @@
         <xsl:call-template name="drop-sequences"/>
       </xsl:if>
 
+      <!-- procedures -->
+      <xsl:if test="$proc-add-count > 0">
+        <h2 id="add-procs">Procedures to create in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="create-procs"/>
+      </xsl:if>
+
+      <xsl:if test="$proc-drop-count > 0">
+        <h2 id="mod-procs">Procedures to update in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="update-procs"/>
+      </xsl:if>
+
+      <xsl:if test="$proc-drop-count > 0">
+        <h2 id="drop-procs">Procedures to drop in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="drop-procs"/>
+      </xsl:if>
+      
+      <!-- packages -->
+      <xsl:if test="$pkg-add-count > 0">
+        <h2 id="add-pkg">Packages to create in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="create-pkg"/>
+      </xsl:if>
+
+      <xsl:if test="$pkg-drop-count > 0">
+        <h2 id="mod-pkg">Packages to update in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="update-pkg"/>
+      </xsl:if>
+
+      <xsl:if test="$pkg-drop-count > 0">
+        <h2 id="drop-pkg">Packages to drop in <xsl:value-of select="$target-schema"/></h2>
+        <xsl:call-template name="drop-pkg"/>
+      </xsl:if>
+      
     </xsl:if>
+    
   </body>
   </html>
 </xsl:template>
@@ -253,7 +315,7 @@
           </xsl:if>
           
           <xsl:if test="count(modify-column) &gt; 0">
-            <h3>Columns to modify</h3>
+            <h3>Columns to update</h3>
             <ul>
               <xsl:for-each select="modify-column/reference-column-definition">
                 <li>
@@ -294,7 +356,7 @@
           </xsl:if>
           
           <xsl:if test="$mod-cons-count &gt; 0">
-            <h3>Check constraints to modify</h3>
+            <h3>Check constraints to update</h3>
             <ul>
               <xsl:for-each select="table-constraints/modify-constraint">
                 <li>
@@ -346,7 +408,7 @@
           </xsl:if>
 
           <xsl:if test="$mod-idx-count &gt; 0">
-            <h3>Indexes to modify</h3>
+            <h3>Indexes to update</h3>
             <ul>
               <xsl:for-each select="modify-index/modified/type">
                 <li>
@@ -468,6 +530,12 @@
     </table>
 </xsl:template>
 
+<!--
+  *******************************************
+  ********************* VIEWS ***************
+  *******************************************
+-->
+  
 <xsl:template name="create-views">
     <xsl:for-each select="/schema-diff/create-view">
       <xsl:sort select="view-def/@name"/>
@@ -503,6 +571,95 @@
     <xsl:copy-of select="view-def/view-source"/>
   </div>
 </xsl:template>
+
+<!--
+  ************************************************
+  ********************* Procedures ***************
+  ************************************************
+-->
+<xsl:template name="create-procs">
+    <xsl:for-each select="/schema-diff/create-proc">
+      <xsl:sort select="proc-def/proc-name"/>
+      
+      <xsl:call-template name="proc-definition"/>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="update-procs">
+    <xsl:for-each select="/schema-diff/update-proc">
+      <xsl:sort select="proc-def/@name"/>
+      <xsl:call-template name="proc-definition"/>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="drop-procs">
+  <ul>
+    <xsl:for-each select="/schema-diff/drop-procedure">
+      <xsl:sort select="proc-def/proc-name"/>
+      <li><xsl:value-of select="proc-def/proc-name"/></li>
+    </xsl:for-each>
+  </ul>
+</xsl:template>
+
+<xsl:template name="proc-definition">
+  <xsl:variable name="proc" select="proc-def/proc-name"/>
+  <div class="tableNameHeading">
+    <a name="pr_{$proc}" href="javascript:toggleElement('{$proc}_psrc')">
+      <xsl:value-of select="$proc"/>
+    </a>
+  </div>
+  <div id="{$proc}_psrc" style="display:none" class="source">
+    <xsl:copy-of select="proc-def/proc-source"/>
+  </div>
+</xsl:template>
+
+<!--
+  ************************************************
+  ********************* Procedures ***************
+  ************************************************
+-->
+<xsl:template name="create-pkg">
+    <xsl:for-each select="/schema-diff/create-package">
+      <xsl:sort select="package-def/package-name"/>
+      
+      <xsl:call-template name="package-definition"/>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="update-pkg">
+    <xsl:for-each select="/schema-diff/update-package">
+      <xsl:sort select="package-def/package-name"/>
+      
+      <xsl:call-template name="package-definition"/>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="drop-pkg">
+  <ul>
+    <xsl:for-each select="/schema-diff/drop-package">
+      <xsl:sort select="proc-def/package-name"/>
+      <li><xsl:value-of select="package-def/package-name"/></li>
+    </xsl:for-each>
+  </ul>
+</xsl:template>
+
+<xsl:template name="package-definition">
+  <xsl:variable name="pkg" select="package-def/package-name"/>
+  <div class="tableNameHeading">
+    <a name="pkg_{$pkg}" href="javascript:toggleElement('{$pkg}_pkgsrc')">
+      <xsl:value-of select="$pkg"/>
+    </a>
+  </div>
+  <div id="{$pkg}_pkgsrc" style="display:none" class="source">
+    <xsl:copy-of select="package-def/package-source"/>
+  </div>
+</xsl:template>
+
+<!--
+  ***********************************************
+  ********************* Sequences ***************
+  ***********************************************
+-->
 
 <xsl:template name="create-sequences">
     <xsl:for-each select="/schema-diff/create-sequence">
