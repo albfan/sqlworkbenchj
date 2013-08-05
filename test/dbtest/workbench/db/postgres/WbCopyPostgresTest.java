@@ -93,9 +93,10 @@ public class WbCopyPostgresTest
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
+		WbConnection con = null;
 		try
 		{
-			WbConnection con = PostgresTestUtil.getPostgresConnection();
+			con = PostgresTestUtil.getPostgresConnection();
 			if (con == null) return;
 
 			con.getMetadata().resetSchemasToIgnores();
@@ -127,6 +128,7 @@ public class WbCopyPostgresTest
 		}
 		finally
 		{
+			if (con != null) con.getMetadata().resetSchemasToIgnores();
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}

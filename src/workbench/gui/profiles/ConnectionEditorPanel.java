@@ -54,7 +54,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import workbench.WbManager;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
@@ -105,8 +104,6 @@ public class ConnectionEditorPanel
 	{
 		super();
 		this.initComponents();
-
-		boolean canEdit = !WbManager.getInstance().isRestrictedMode();
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tfProfileName);

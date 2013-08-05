@@ -375,7 +375,7 @@ public class TableIdentifier
 			// (this is mainly needed for SQL Server)
 			if (hasCatalog && StringUtil.isBlank(schemaToUse))
 			{
-				conn.getCurrentSchema();
+				schemaToUse = conn.getCurrentSchema();
 			}
 
 			if (StringUtil.isNonBlank(schemaToUse))
@@ -393,8 +393,17 @@ public class TableIdentifier
 		DbMetadata meta = conn.getMetadata();
 		if (meta.needSchemaInDML(this))
 		{
-			if (this.schema != null) return this.schema.trim();
-			return meta.getSchemaToUse();
+			String schemaToUse = this.schema;
+			String currentSchema = null;
+			if (this.schema == null)
+			{
+				currentSchema = meta.getCurrentSchema();
+				schemaToUse = currentSchema;
+			}
+
+			if (meta.ignoreSchema(schemaToUse, currentSchema)) return null;
+
+			return StringUtil.trim(schemaToUse);
 		}
 		return null;
 	}
@@ -412,7 +421,7 @@ public class TableIdentifier
 
 			if (meta.ignoreCatalog(catalogToUse)) return null;
 
-			return catalogToUse.trim();
+			return StringUtil.trim(catalogToUse);
 		}
 		return null;
 	}

@@ -24,7 +24,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.WbManager;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -47,7 +46,6 @@ public class SaveListFileAction extends WbAction
 		this.client = aClient;
 		this.setMenuTextByKey(labelKey);
 		this.setIcon(ResourceMgr.IMG_SAVE);
-		this.setEnabled(!WbManager.getInstance().isRestrictedMode());
 	}
 
 	@Override

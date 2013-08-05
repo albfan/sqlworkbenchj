@@ -1052,17 +1052,19 @@ public class WbConnection
 			DbMetadata meta = getMetadata();
 			StringBuilder buff = new StringBuilder(100);
 			String user = getDisplayUser();
-			if (user != null)
+			boolean hasUser = false;
+			if (StringUtil.isNonBlank(user))
 			{
 				buff.append(ResourceMgr.getString("TxtUser"));
 				buff.append('=');
 				buff.append(user);
+				hasUser = true;
 			}
 			String catalog = isBusy ? currentCatalog : meta.getCurrentCatalog();
-			if (catalog != null && catalog.length() > 0)
+			if (StringUtil.isNonBlank(catalog))
 			{
 				String catName = meta.getCatalogTerm();
-				buff.append(", ");
+				if (hasUser) buff.append(", ");
 				buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
 				buff.append('=');
 				buff.append(catalog);

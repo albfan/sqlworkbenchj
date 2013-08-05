@@ -30,6 +30,7 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -42,10 +43,17 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import workbench.WbManager;
+import workbench.interfaces.FileActions;
+import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.CopyProfileAction;
@@ -57,12 +65,7 @@ import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.interfaces.FileActions;
-import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -93,14 +96,11 @@ public class ProfileEditorPanel
 		this.jSplitPane.setRightComponent(dummy);
 		this.fillDrivers();
 
-		boolean restricted = WbManager.getInstance().isRestrictedMode();
-
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
 		newItem = new NewListEntryAction(this, "LblNewProfile");
 		newItem.setIcon("NewProfile");
-		newItem.setEnabled(restricted);
 		this.toolbar.add(newItem);
 
 		copyItem = new CopyProfileAction(this);
@@ -367,8 +367,6 @@ public class ProfileEditorPanel
 	public void newItem(boolean createCopy)
 		throws Exception
 	{
-		if (WbManager.getInstance().isRestrictedMode()) return;
-
 		ConnectionProfile cp = null;
 
 		if (createCopy)
@@ -538,7 +536,6 @@ public class ProfileEditorPanel
 			return;
 		}
 
-		boolean canEdit = !WbManager.getInstance().isRestrictedMode();
 		if (evt.getSource() == this.profileTree)
 		{
 			try
@@ -551,13 +548,13 @@ public class ProfileEditorPanel
 						this.connectionEditor.setVisible(true);
 					}
 					this.connectionEditor.setProfile(newProfile);
-					this.deleteItem.setEnabled(canEdit);
-					this.copyItem.setEnabled(canEdit);
+					this.deleteItem.setEnabled(true);
+					this.copyItem.setEnabled(true);
 				}
 				else
 				{
 					this.connectionEditor.setVisible(false);
-					this.deleteItem.setEnabled(canEdit);
+					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(false);
 				}
 			}

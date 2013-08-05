@@ -2830,11 +2830,11 @@ public class WbImportTest
 			String[] lines = msg.split(StringUtil.REGEX_CRLF);
 			assertTrue(lines.length == 6);
 
-			assertTrue(lines[0].endsWith("into table a"));
+			assertTrue(lines[0].endsWith("into table A"));
 			assertEquals("15 row(s) inserted", lines[1]);
 			assertEquals("0 row(s) updated", lines[2]);
 
-			assertTrue(lines[3].endsWith("into table b"));
+			assertTrue(lines[3].endsWith("into table B"));
 			assertEquals("15 row(s) inserted", lines[4]);
 			assertEquals("0 row(s) updated", lines[5]);
 

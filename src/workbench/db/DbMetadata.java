@@ -759,10 +759,14 @@ public class DbMetadata
 		{
 			schemasToIgnore = readIgnored("schema", null);
 		}
+
 		if (schemasToIgnore.contains("$current"))
 		{
 			String current = (currentSchema == null ? getCurrentSchema() : currentSchema);
-			if (current != null && schema.equals(current)) return true;
+			if (current != null)
+			{
+				return schema.equals(current);
+			}
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
@@ -1034,17 +1038,14 @@ public class DbMetadata
 
 
 	/**
-	 *	Encloses the given object name in double quotes if necessary.
-	 *	Quoting of names is necessary if the name is a reserved word in the
-	 *	database. To check if the given name is a keyword, it is compared
-	 *  to the words returned by getSQLKeywords().
+	 * Quotes the given object name if necessary.
 	 *
-	 *	If the given name is not a keyword, {@link workbench.util.SqlUtil#quoteObjectname(String)}
-	 *  will be called to check if the name contains special characters which require
-	 *	double quotes around the object name.
+	 * Quoting of names is necessary if the name is a reserved word in the
+	 * database or if the names contains invalid characters or if the name is not
+	 * in default case as the database uses.
 	 *
-	 *  For Oracle and HSQL strings starting with a digit will
-	 *  always be quoted.
+	 * @see #needsQuotes(java.lang.String)
+	 * @see #getQuoteCharacter()
 	 */
 	public String quoteObjectname(String name, boolean quoteAlways)
 	{
@@ -1056,7 +1057,7 @@ public class DbMetadata
 
 		if (this.dbSettings.neverQuoteObjects()) return removeQuotes(name);
 
-		boolean needQuote = quoteAlways ? true : needsQuotes(name);
+		boolean needQuote = quoteAlways || needsQuotes(name);
 
 		if (needQuote)
 		{
@@ -1074,6 +1075,11 @@ public class DbMetadata
 	 *
 	 * @param name the name to check
 	 * @return true if the name needs quotes (or if quoted names should always be used for this DBMS)
+	 *
+	 * @see #isReservedWord(java.lang.String)
+	 * @see #storesLowerCaseIdentifiers()
+	 * @see #storesMixedCaseIdentifiers()
+	 * @see #storesUpperCaseIdentifiers() 
 	 */
 	@Override
 	public boolean needsQuotes(String name)

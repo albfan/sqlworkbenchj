@@ -53,7 +53,6 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -806,6 +805,7 @@ public class DataImporter
 		creator.createTable();
 		String table = creator.getTable().getTableName();
 		String msg = StringUtil.replace(ResourceMgr.getString("MsgImporterTableCreated"), "%table%", table);
+		targetTable = dbConn.getMetadata().findTable(targetTable); // make sure we use the correct table name
 		this.messages.append(msg);
 		this.messages.appendNewLine();
 	}
@@ -1769,7 +1769,7 @@ public class DataImporter
 		{
 			text.append("INSERT INTO ");
 		}
-		text.append(targetTable.getTableExpression(this.dbConn));
+		text.append(targetTable.getFullyQualifiedName(this.dbConn));
 		text.append(" (");
 
 		DbMetadata meta = dbConn.getMetadata();
@@ -1873,7 +1873,7 @@ public class DataImporter
 		StringBuilder sql = new StringBuilder(this.colCount * 20 + 80);
 		StringBuilder where = new StringBuilder(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
-		sql.append(this.targetTable.getTableExpression(this.dbConn));
+		sql.append(this.targetTable.getFullyQualifiedName(this.dbConn));
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;

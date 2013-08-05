@@ -104,8 +104,6 @@ public class AppArguments
 	public static final String ARG_CONSOLE_BUFFER_RESULTS = "bufferResults";
 	public static final String ARG_PROP = "prop";
 
-	public static final String ARG_RESTRICTED_MODE = "restrictedMode";
-
 	public AppArguments()
 	{
 		super();
@@ -164,7 +162,6 @@ public class AppArguments
 		addArgument("help");
 		addArgument("version");
 		addArgument(ARG_PROP, ArgumentType.Repeatable);
-		addArgument(ARG_RESTRICTED_MODE, ArgumentType.BoolSwitch);
 	}
 
 	@Override

@@ -227,12 +227,12 @@ public class XmlDataFileParser
 	 * If continueOnError == true, a warning is added to the messages. Otherwise
 	 * an Exception is thrown.
 	 */
-	public void checkTargetColumns()
+	public void checkTargetColumns(TableIdentifier tbl)
 		throws SQLException
 	{
 		if (this.connection == null) return;
 		if (this.columns == null) return;
-		TableIdentifier tbl = new TableIdentifier(this.tableName == null ? this.tableNameFromFile : this.tableName);
+
 		if (!this.connection.getMetadata().tableExists(tbl))
 		{
 			if (this.receiver.getCreateTarget())
@@ -659,14 +659,12 @@ public class XmlDataFileParser
 
 	private TableIdentifier getImportTable()
 	{
-		TableIdentifier tbl = null;
-		if (this.tableName == null)
+		String tname = (this.tableName == null ? tableNameFromFile : tableName);
+		TableIdentifier id = new TableIdentifier(tname);
+		TableIdentifier tbl = this.connection.getMetadata().findTable(id);
+		if (tbl == null)
 		{
-			tbl = new TableIdentifier(this.tableNameFromFile);
-		}
-		else
-		{
-			tbl = new TableIdentifier(this.tableName);
+			return id;
 		}
 		return tbl;
 	}
@@ -678,7 +676,7 @@ public class XmlDataFileParser
 		{
 			TableIdentifier tbl = getImportTable();
 
-			checkTargetColumns();
+			checkTargetColumns(tbl);
 			if (this.columnsToImport == null)
 			{
 				this.receiver.setTargetTable(tbl, Arrays.asList(this.columns));
