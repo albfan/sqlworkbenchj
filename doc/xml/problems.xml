@@ -470,10 +470,24 @@ SELECT 42 FROM dual;</programlisting>
         <literal>jdbc:sqlserver://localhost:2068;selectMethod=cursor</literal>
       </para>
       <para>
+        Note that since Version 3.0 of the driver 
+      </para>
+      <para>
         The URL parameters for the Microsoft driver are listed here:
         <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
       </para>
     </section>
+    
+		<section id="mssql-sequence-increment">
+		  <title>Sequences are incremented twice</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>Sequence increments twice</secondary></indexterm>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>JDBC URL properties</secondary></indexterm>
+		  <para>
+        When a sequence is incremented twice when running <literal>SELECT NEXT VALUE FOR MYSEQ;</literal> and you are using 
+        the Microsoft JDBC driver with the <literal>selectMethod=cursor</literal>, remove the <literal>selectMethod=cursor</literal> option
+        from the JDBC URL. The sequences will then be incremented correctly.
+		  </para>
+		</section>
 
 	</section>
 
