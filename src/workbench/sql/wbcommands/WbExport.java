@@ -83,7 +83,6 @@ public class WbExport
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
 	public static final String ARG_USE_SCHEMA = "useSchema";
-	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
 	public static final String ARG_FORMATFILE = "formatFile";
 	public static final String ARG_COL_COMMENTS = "includeColumnComments";
 	public static final String ARG_DISTRIBUTE_LOB_FILES = "lobsPerDirectory";
@@ -302,9 +301,9 @@ public class WbExport
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
 			result.addMessage("");
 			String[] encodings = EncodingUtil.getEncodings();
-			for (int i=0; i < encodings.length; i++)
+			for (String encoding : encodings)
 			{
-				result.addMessage(encodings[i]);
+				result.addMessage(encoding);
 			}
 			return result;
 		}
