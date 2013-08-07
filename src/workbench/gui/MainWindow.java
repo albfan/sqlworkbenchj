@@ -936,20 +936,21 @@ public class MainWindow
 		this.connectInProgress = true;
 	}
 
-	private void checkConnectionForPanel(final MainPanel aPanel)
+	private void checkConnectionForPanel(final MainPanel panel)
 	{
 		if (this.isConnectInProgress()) return;
-		if (aPanel.isConnected()) return;
+		if (panel == null) return;
+		if (panel.isConnected()) return;
 
 		try
 		{
 			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
 			{
-				createNewConnectionForPanel(aPanel);
+				createNewConnectionForPanel(panel);
 			}
 			else if (this.currentConnection != null)
 			{
-				aPanel.setConnection(this.currentConnection);
+				panel.setConnection(this.currentConnection);
 			}
 		}
 		catch (Exception e)
@@ -1591,6 +1592,11 @@ public class MainWindow
 						p.readFromWorkspace(w, i);
 						((JComponent)p).invalidate();
 					}
+					if (entryCount == 0)
+					{
+						LogMgr.logWarning("MainWindow.loadWorkspace()", "No panels stored in the workspace: " + realFilename);
+						addTabAtIndex(false, false, false, -1);
+					}
 
 					currentWorkspaceFile = realFilename;
 					resultForWorkspaceClose = true;
@@ -1604,7 +1610,7 @@ public class MainWindow
 
 					setIgnoreTabChange(false);
 
-					int newIndex = w.getSelectedTab();
+					int newIndex = entryCount > 0 ? w.getSelectedTab() : 0;
 					if (newIndex < sqlTab.getTabCount())
 					{
 						sqlTab.setSelectedIndex(newIndex);
@@ -2173,14 +2179,14 @@ public class MainWindow
 		return conn;
 	}
 
-	private void showConnectionWarnings(WbConnection conn, MainPanel aPanel)
+	private void showConnectionWarnings(WbConnection conn, MainPanel panel)
 	{
 		String warn = (conn != null ? conn.getWarnings() : null);
-		if (warn != null)
+		if (warn != null && panel != null)
 		{
-			aPanel.showResultPanel();
-			aPanel.showLogMessage(ResourceMgr.getString("MsgConnectMsg") + "\n");
-			aPanel.appendToLog(warn);
+			panel.showResultPanel();
+			panel.showLogMessage(ResourceMgr.getString("MsgConnectMsg") + "\n");
+			panel.appendToLog(warn);
 		}
 	}
 
@@ -2296,9 +2302,15 @@ public class MainWindow
 				removeTab(keep, false);
 			}
 			// Reset the first panel, now we have a "clean" workspace
+
 			if (keepOne)
 			{
 				MainPanel p = getSqlPanel(0);
+				if (p == null)
+				{
+					addTabAtIndex(false, false, false, -1);
+					p = getSqlPanel(0);
+				}
 				p.reset();
 				resetTabTitles();
 

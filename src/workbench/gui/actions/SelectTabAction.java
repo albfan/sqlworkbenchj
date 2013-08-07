@@ -86,7 +86,7 @@ public class SelectTabAction extends WbAction
 		this.setMenuText(ResourceMgr.getDefaultTabLabel());// + " &" + Integer.toString(this.index+1));
 		this.setIcon(null);
 	}
-	
+
 	public int getIndex()
 	{
 		return this.index;
@@ -105,7 +105,11 @@ public class SelectTabAction extends WbAction
 		{
 			try
 			{
-				this.client.setSelectedIndex(this.index);
+				int count = client.getTabCount();
+				if (count > 0 && index < count && index > -1)
+				{
+					this.client.setSelectedIndex(this.index);
+				}
 			}
 			catch (Exception ex)
 			{

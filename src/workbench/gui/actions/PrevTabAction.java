@@ -51,6 +51,7 @@ public class PrevTabAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+		if (client.getTabCount() == 0) return;
 		int newIndex = client.getSelectedIndex() - 1;
 		if (newIndex < 0) newIndex = client.getTabCount() - 1;
 		client.setSelectedIndex(newIndex);
