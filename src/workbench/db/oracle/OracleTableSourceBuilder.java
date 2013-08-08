@@ -70,6 +70,22 @@ public class OracleTableSourceBuilder
 	{
 		if (tbl.getSourceOptions().isInitialized()) return;
 
+		StringBuilder options = new StringBuilder(100);
+
+		CharSequence externalDef = null;
+		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
+		{
+			OracleExternalTableReader reader = new OracleExternalTableReader();
+			externalDef = reader.getDefinition(tbl, dbConnection);
+			if (externalDef != null)
+			{
+				options.append(externalDef);
+				tbl.getSourceOptions().setTableOption(options.toString());
+				tbl.getSourceOptions().setInitialized();
+				return;
+			}
+		}
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
@@ -88,8 +104,6 @@ public class OracleTableSourceBuilder
 			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
 			"where atb.owner = ? \n" +
 			"and atb.table_name = ? ";
-
-		StringBuilder options = new StringBuilder(100);
 
 		try
 		{
@@ -171,7 +185,7 @@ public class OracleTableSourceBuilder
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_free", Integer.toString(free));
 					if (options.length() > 0) options.append('\n');
-					options.append("PCTFREE");
+					options.append("PCTFREE ");
 					options.append(free);
 				}
 
@@ -180,7 +194,7 @@ public class OracleTableSourceBuilder
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
 					if (options.length() > 0) options.append('\n');
-					options.append("PCTUSED");
+					options.append("PCTUSED ");
 					options.append(used);
 				}
 
@@ -223,20 +237,6 @@ public class OracleTableSourceBuilder
 					options.append('\n');
 				}
 				options.append(partition);
-			}
-		}
-
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
-		{
-			OracleExternalTableReader reader = new OracleExternalTableReader();
-			CharSequence ext = reader.getDefinition(tbl, dbConnection);
-			if (ext != null)
-			{
-				if (options.length() > 0)
-				{
-					options.append('\n');
-				}
-				options.append(ext);
 			}
 		}
 
