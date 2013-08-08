@@ -87,7 +87,7 @@ public class TableSourceBuilder
 	{
 		includePartitions = flag;
 	}
-	
+
 	/**
    * Return the SQL statement to re-create the given table. (in the dialect for the
 	 * current DBMS)
@@ -517,8 +517,12 @@ public class TableSourceBuilder
 		int maxColLength = 0;
 		int maxTypeLength = 0;
 
+		// Make sure the columns are sorted correctly
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columns);
+		ColumnIdentifier.sortByPosition(cols);
+
 		// calculate the longest column name, so that the display can be formatted
-		for (ColumnIdentifier column : columns)
+		for (ColumnIdentifier column : cols)
 		{
 			String colName = meta.quoteObjectname(column.getColumnName());
 			String type = column.getDbmsType();
@@ -528,7 +532,7 @@ public class TableSourceBuilder
 		maxColLength += 2;
 		maxTypeLength += 2;
 
-		Iterator<ColumnIdentifier> itr = columns.iterator();
+		Iterator<ColumnIdentifier> itr = cols.iterator();
 		while (itr.hasNext())
 		{
 			ColumnIdentifier column = itr.next();
@@ -552,7 +556,6 @@ public class TableSourceBuilder
 				result.append(",\n");
 			}
 		}
-
 	}
 
 	private List<String> getPKColsFromIndex(List<IndexDefinition> indexList)

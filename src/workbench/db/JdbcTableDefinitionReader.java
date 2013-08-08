@@ -199,6 +199,10 @@ public class JdbcTableDefinitionReader
 			SqlUtil.closeResult(rs);
 		}
 
+		// Some JDBC drivers (e.g. Ingres) do not return the columns in the correct order, so we need to make sure they are sorted correctly
+		// for any DBMS returning them in the correct order, this shouldn't make a difference.
+		ColumnIdentifier.sortByPosition(columns);
+
 		return columns;
 	}
 

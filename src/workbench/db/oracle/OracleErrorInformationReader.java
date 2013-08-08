@@ -30,8 +30,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
@@ -92,23 +92,21 @@ public class OracleErrorInformationReader
 		StringBuilder result = new StringBuilder(250);
 		try
 		{
-			if (objectName != null && objectName.indexOf('.') > -1)
-			{
-				schema = objectName.substring(0, objectName.indexOf('.'));
-			}
-			else if (schema == null)
-			{
-				schema = connection.getMetadata().getCurrentSchema();
-			}
-			DbMetadata meta = this.connection.getMetadata();
+			TableIdentifier tbl = new TableIdentifier(objectName);
 
+			tbl.adjustCase(connection);
+			String oschema = schema == null ? tbl.getRawSchema() : schema;
+			String oname = tbl.getRawTableName();
+
+			if (oschema == null)
+			{
+				oschema = connection.getMetadata().getCurrentSchema();
+			}
 			stmt = this.connection.getSqlConnection().prepareStatement(query);
 
-			schema = meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema));
 			String otype = objectType == null ? null : objectType.toUpperCase().trim();
-			String oname = meta.adjustObjectnameCase(StringUtil.trimQuotes(objectName));
 
-			stmt.setString(1, schema);
+			stmt.setString(1, oschema);
 
 			if (typeIndex > -1)
 			{
