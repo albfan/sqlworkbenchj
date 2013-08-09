@@ -3165,6 +3165,8 @@ public class Settings
 			{
 				props.remove("workbench.db.objecttype.selectable.postgresql");
 			}
+
+			this.props.remove("workbench.import.general.xml.verbosexml");
 		}
 		catch (Throwable e)
 		{

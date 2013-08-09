@@ -25,10 +25,14 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Types;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.storage.DataStore;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -93,7 +97,7 @@ public class DataStoreImporterTest
 		TextImportOptions to = new DefaultTextImportOptions("\t", "\"");
 		ImportOptions o = new DefaultImportOptions();
 
-		importer.setImportOptions(f,ProducerFactory.ImportType.Text, o, to, null);
+		importer.setImportOptions(f,ProducerFactory.ImportType.Text, o, to);
 		importer.startImport();
 		assertEquals("Wrong number of rows imported", 3, ds.getRowCount());
 
@@ -131,5 +135,23 @@ public class DataStoreImporterTest
 		assertEquals("Wrong firstname", "Harry", name);
 	}
 
+	@Test
+	public void testXmlImport()
+		throws Exception
+	{
+		File input = util.copyResourceFile(this.getClass(), "person.xml");
+		DataStore ds = prepareDataStore();
+		DataStoreImporter importer = new DataStoreImporter(ds, null, null);
+		importer.setImportOptions(input, ProducerFactory.ImportType.XML, new DefaultImportOptions(), null);
+		importer.startImport();
+		assertEquals("Wrong number of rows imported", 4, ds.getRowCount());
+		ds.sortByColumn(0, true);
+		int id = ds.getValueAsInt(0, 0, -1);
+		assertEquals(1, id);
+		String firstname = ds.getValueAsString(0, 1);
+		assertEquals("Arthur", firstname);
+		String lastname = ds.getValueAsString(0, 2);
+		assertEquals("Dent", lastname);
+	}
 
 }

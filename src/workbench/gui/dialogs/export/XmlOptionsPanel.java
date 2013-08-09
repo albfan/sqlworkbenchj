@@ -24,9 +24,12 @@ package workbench.gui.dialogs.export;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -35,7 +38,7 @@ import workbench.resource.Settings;
  * @author  Thomas Kellerer
  */
 public class XmlOptionsPanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements XmlOptions
 {
 
@@ -69,6 +72,7 @@ public class XmlOptionsPanel
 		}
 	}
 
+	@Override
 	public String getXMLVersion()
 	{
 		if (xml11.isSelected())
@@ -78,21 +82,25 @@ public class XmlOptionsPanel
 		return "1.0";
 	}
 
+	@Override
 	public boolean getUseVerboseXml()
 	{
 		return this.verboseXmlCheckBox.isSelected();
 	}
 
+	@Override
 	public void setUseVerboseXml(boolean flag)
 	{
 		this.verboseXmlCheckBox.setSelected(flag);
 	}
 
+	@Override
 	public boolean getUseCDATA()
 	{
 		return useCdata.isSelected();
 	}
 
+	@Override
 	public void setUseCDATA(boolean flag)
 	{
 		useCdata.setSelected(flag);

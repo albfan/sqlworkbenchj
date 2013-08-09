@@ -69,7 +69,6 @@ public class ProducerFactory
 
 	private ImportType importType = null;
 	private TextImportOptions textOptions;
-	private XmlImportOptions xmlOptions;
 	private ImportOptions generalOptions;
 	private File inputFile;
 	private List<ColumnIdentifier> inputColumns;
@@ -110,16 +109,6 @@ public class ProducerFactory
 	public TextImportOptions getTextOptions()
 	{
 		return this.textOptions;
-	}
-
-	public XmlImportOptions getXmlOptions()
-	{
-		return this.xmlOptions;
-	}
-
-	public void setXmlOptions(XmlImportOptions options)
-	{
-		this.xmlOptions = options;
 	}
 
 	public void setImporterOptions(DataImporter importer)
@@ -284,6 +273,10 @@ public class ProducerFactory
 	{
 		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
 		parser.setEncoding(this.generalOptions.getEncoding());
+		if (this.table != null)
+		{
+			parser.setTableName(this.table.getTableName());
+		}
 		this.inputColumns = null;
 		this.producer = parser;
 		this.fileParser = parser;

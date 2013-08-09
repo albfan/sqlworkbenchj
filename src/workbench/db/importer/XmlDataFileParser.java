@@ -232,6 +232,7 @@ public class XmlDataFileParser
 	{
 		if (this.connection == null) return;
 		if (this.columns == null) return;
+		if (tbl == null) return;
 
 		if (!this.connection.getMetadata().tableExists(tbl))
 		{
@@ -315,13 +316,27 @@ public class XmlDataFileParser
 			throw new SQLException("Could not read table definition from XML file");
 		}
 
-		for (ColumnIdentifier c : columnsToImport)
+		Iterator<ColumnIdentifier> cols = columnsToImport.iterator();
+		while (cols.hasNext())
 		{
+			ColumnIdentifier c = cols.next();
 			if (!this.containsColumn(c))
 			{
-				this.missingColumn = c.getColumnName();
-				this.hasErrors = true;
-				throw new SQLException("Import column " + c.getColumnName() + " not present in input file!");
+				if (ignoreMissingColumns || !abortOnError)
+				{
+					String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", c.getColumnName(), this.tableName);
+					LogMgr.logWarning("XmlDataFileParser.checkImportColumns()", "Ignoring table column " + c.getColumnName() + " because it is not present in the input file");
+					this.hasWarnings = true;
+					if (!ignoreMissingColumns) this.hasErrors = true;
+					this.messages.append(msg);
+					cols.remove();
+				}
+				else
+				{
+					this.missingColumn = c.getColumnName();
+					this.hasErrors = true;
+					throw new SQLException("The column " + c.getColumnName() + " from the table " + this.tableName + " is not present in input file!");
+				}
 			}
 		}
 		this.realColCount = this.columnsToImport.size();
@@ -660,7 +675,15 @@ public class XmlDataFileParser
 	private TableIdentifier getImportTable()
 	{
 		String tname = (this.tableName == null ? tableNameFromFile : tableName);
+
+		// this is possible when importing into a DataStore
+		if (StringUtil.isEmptyString(tname)) return null;
+
 		TableIdentifier id = new TableIdentifier(tname);
+
+		// this is possible when importing into a DataStore
+		if (this.connection == null) return id;
+
 		TableIdentifier tbl = this.connection.getMetadata().findTable(id);
 		if (tbl == null)
 		{

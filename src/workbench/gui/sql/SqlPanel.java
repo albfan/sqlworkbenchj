@@ -2272,8 +2272,7 @@ public class SqlPanel
 		importer.setImportOptions(importFile,
 			                        dialog.getImportType(),
 			                        dialog.getGeneralOptions(),
-			                        dialog.getTextOptions(),
-			                        dialog.getXmlOptions());
+			                        dialog.getTextOptions());
 
 		Settings.getInstance().setLastImportDir(importFile.getParent());
 		dialog.saveSettings();

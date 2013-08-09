@@ -318,7 +318,6 @@ public class DataPumper
 		this.fileImporter = new ProducerFactory(this.sourceFile);
 		this.fileImporter.setTextOptions(dialog.getTextOptions());
 		this.fileImporter.setGeneralOptions(dialog.getGeneralOptions());
-		this.fileImporter.setXmlOptions(dialog.getXmlOptions());
 		this.fileImporter.setType(dialog.getImportType());
 		this.checkType();
 		modeComboBox.setSelectedItem(dialog.getGeneralOptions().getMode());

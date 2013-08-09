@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import workbench.interfaces.ImportFileParser;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
@@ -145,26 +146,27 @@ public class DataStoreImporter
 	public void importString(String contents, String delimiter, String quoteChar)
 	{
 		ClipboardFile file = new ClipboardFile(contents);
-		setImportOptions(file, ProducerFactory.ImportType.Text, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar), null);
+		setImportOptions(file, ProducerFactory.ImportType.Text, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar));
 	}
 
 	public void importString(String content, ImportOptions options, TextImportOptions textOptions)
 	{
 		ClipboardFile file = new ClipboardFile(content);
-		setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions, null);
+		setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions);
 	}
 
-	public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions, XmlImportOptions xmlOptions)
+	public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions)
 	{
+		ResultInfo info = target.getResultInfo();
+
 		ProducerFactory factory = new ProducerFactory(file);
 		factory.setTextOptions(textOptions);
 		factory.setGeneralOptions(generalOptions);
-		factory.setXmlOptions(xmlOptions);
 		factory.setType(type);
+		factory.setTargetTable(info.getUpdateTable());
 
 		this.source = factory.getProducer();
-
-		ResultInfo info = target.getResultInfo();
+		((ImportFileParser)source).setIgnoreMissingColumns(true);
 
 		try
 		{

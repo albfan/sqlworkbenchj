@@ -22,24 +22,28 @@
  */
 package workbench.gui.dialogs.dataimport;
 
-import workbench.db.importer.ImportOptions;
-import workbench.db.importer.TextImportOptions;
-import workbench.db.importer.XmlImportOptions;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import workbench.db.importer.ProducerFactory;
-import workbench.gui.components.DividerBorder;
+
 import workbench.interfaces.EncodingSelector;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.Settings;
+
+import workbench.db.importer.ImportOptions;
+import workbench.db.importer.ProducerFactory;
+import workbench.db.importer.TextImportOptions;
+
+import workbench.gui.components.DividerBorder;
+
 import workbench.util.StringUtil;
 
 /**
@@ -56,7 +60,6 @@ public class ImportOptionsPanel
 	private JComboBox typeSelector;
 	private GeneralImportOptionsPanel generalOptions;
 	private TextOptionsPanel textOptions;
-	private XmlOptionsPanel xmlOptions;
 	private ProducerFactory.ImportType currentType = null;
 
 	public ImportOptionsPanel()
@@ -89,10 +92,9 @@ public class ImportOptionsPanel
 		typePanel.setBorder(leftMargin);
 		this.card = new CardLayout();
 		this.typePanel.setLayout(card);
-		this.typePanel.add(this.textOptions, "text");
 
-		this.xmlOptions = new XmlOptionsPanel();
-		this.typePanel.add(this.xmlOptions, "xml");
+		this.typePanel.add(this.textOptions, "text");
+		this.typePanel.add(new JPanel(), "xml"); // no options for XML import
 
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
@@ -111,7 +113,6 @@ public class ImportOptionsPanel
 	{
 		this.generalOptions.saveSettings(section);
 		this.textOptions.saveSettings(section + ".text");
-		this.xmlOptions.saveSettings(section + ".xml");
 		if (StringUtil.isBlank(section))
 		{
 			section = "import";
@@ -127,7 +128,6 @@ public class ImportOptionsPanel
 		}
 		this.generalOptions.restoreSettings(section);
 		this.textOptions.restoreSettings(section + ".text");
-		this.xmlOptions.restoreSettings(section + ".xml");
 		int type = Settings.getInstance().getIntProperty("workbench." + section + ".type", -1);
 		this.setImportType(ProducerFactory.ImportType.valueOf(type));
 	}
@@ -177,21 +177,19 @@ public class ImportOptionsPanel
 		return textOptions;
 	}
 
-	public XmlImportOptions getXmlOptions()
-	{
-		return xmlOptions;
-	}
-
+	@Override
 	public String getEncoding()
 	{
 		return generalOptions.getEncoding();
 	}
 
+	@Override
 	public void setEncoding(String enc)
 	{
 		generalOptions.setEncoding(enc);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent event)
 	{
 		if (event.getSource() == this.typeSelector)
@@ -210,6 +208,7 @@ public class ImportOptionsPanel
 		}
 	}
 
+	@Override
 	public boolean validateInput()
 	{
 		if (this.textOptions != null)
@@ -219,6 +218,7 @@ public class ImportOptionsPanel
 		return true;
 	}
 
+	@Override
 	public void componentDisplayed()
 	{
 	}
