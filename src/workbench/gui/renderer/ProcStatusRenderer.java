@@ -29,7 +29,7 @@ import workbench.log.LogMgr;
 /**
  * Displays the return type of a stored procedure as a readable text.
  * <br/>
- * @see workbench.db.JdbcProcedureReader#convertProcType(int)
+ * @see workbench.db.JdbcProcedureReader#convertProcTypeToSQL(int)
  *
  * * @author Thomas Kellerer
  */
@@ -49,7 +49,7 @@ public class ProcStatusRenderer
 		try
 		{
 			Integer status = (Integer)value;
-			this.displayValue = JdbcProcedureReader.convertProcType(status.intValue());
+			this.displayValue = JdbcProcedureReader.convertProcTypeToSQL(status.intValue());
 		}
 		catch (ClassCastException cce)
 		{

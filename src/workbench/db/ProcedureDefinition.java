@@ -388,12 +388,12 @@ public class ProcedureDefinition
 		{
 			return "FUNCTION";
 		}
-		else if (resultType == DatabaseMetaData.procedureNoResult)
-		{
-			return "PROCEDURE";
-		}
 
-		return "";
+		if (resultType != DatabaseMetaData.procedureNoResult)
+		{
+			LogMgr.logWarning("ProcedureDefinition.getObjectType()", "Invalid value: " + JdbcProcedureReader.jdbcResultTypeName(resultType) + " defined for procedure: " + getDisplayName());
+		}
+		return "PROCEDURE";
 	}
 
 	@Override

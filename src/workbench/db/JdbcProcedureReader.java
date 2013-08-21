@@ -211,14 +211,38 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
-	public static String convertProcType(int type)
+	public static String jdbcResultTypeName(int type)
 	{
-		if (type == DatabaseMetaData.procedureNoResult)
-			return ProcedureReader.PROC_RESULT_NO;
-		else if (type == DatabaseMetaData.procedureReturnsResult)
-			return ProcedureReader.PROC_RESULT_YES;
-		else
-			return ProcedureReader.PROC_RESULT_UNKNOWN;
+		switch (type)
+		{
+			case DatabaseMetaData.procedureNoResult:
+				return "procedureNoResult";
+			case DatabaseMetaData.procedureReturnsResult:
+				return "procedureReturnsResult";
+			case DatabaseMetaData.procedureResultUnknown:
+				return "procedureResultUnknown";
+			default:
+				return Integer.toString(type);
+		}
+	}
+
+	/**
+	 * Convert the JDBC result type to either <tt>PROCEDURE</tt> or <tt>FUNCTION</tt>.
+	 * 
+	 * @param type the result type as obtained from the JDBC driver
+	 * @return the SQL keyword for this type
+	 */
+	public static String convertProcTypeToSQL(int type)
+	{
+		switch (type)
+		{
+			case DatabaseMetaData.procedureNoResult:
+				return ProcedureReader.PROC_RESULT_NO;
+			case DatabaseMetaData.procedureReturnsResult:
+				return ProcedureReader.PROC_RESULT_YES;
+			default:
+				return ProcedureReader.PROC_RESULT_UNKNOWN;
+		}
 	}
 
 	protected DataStore createProcColsDataStore()
