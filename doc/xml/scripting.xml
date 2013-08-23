@@ -92,7 +92,7 @@
 		<para>
 			If you do not want to create an extra SQL script just to run one or more short SQL commands, you
 			can specify the commands to be executed directly with the <literal>-command</literal> parameter.
-			to specifiy more than on SQL statement use the standard delimiter to delimit them, e.g.
+			To specifiy more than on SQL statement use the standard delimiter to delimit them, e.g.
 			<literal>-command='delete from person; commit;'</literal>
 		</para>
 
