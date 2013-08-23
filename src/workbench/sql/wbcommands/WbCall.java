@@ -489,7 +489,7 @@ public class WbCall
 		}
 		else
 		{
-			procDef = new ProcedureDefinition(catalog, schemaToUse, nameToUse, -1);
+			procDef = new ProcedureDefinition(catalog, schemaToUse, nameToUse);
 		}
 
 		if (params == null)

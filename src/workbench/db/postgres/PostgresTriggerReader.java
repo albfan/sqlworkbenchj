@@ -252,7 +252,7 @@ public class PostgresTriggerReader
 		if (funcName != null && funcSchema != null)
 		{
 			ProcedureReader reader = dbMeta.getProcedureReader();
-			ProcedureDefinition def = new ProcedureDefinition(null, funcSchema, funcName, DatabaseMetaData.procedureResultUnknown);
+			ProcedureDefinition def = new ProcedureDefinition(null, funcSchema, funcName, DatabaseMetaData.procedureNoResult);
 			try
 			{
 				reader.readProcedureSource(def);

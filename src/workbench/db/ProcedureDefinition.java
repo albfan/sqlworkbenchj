@@ -74,6 +74,29 @@ public class ProcedureDefinition
 
 	private String specificName;
 
+
+	public ProcedureDefinition(String name, int type)
+	{
+		procName = name;
+		resultType = type;
+	}
+
+	public ProcedureDefinition(String cat, String schem, String name, int type)
+	{
+		schema = schem;
+		catalog = cat;
+		procName = name;
+		resultType = type;
+	}
+
+	public ProcedureDefinition(String cat, String schem, String name)
+	{
+		schema = schem;
+		catalog = cat;
+		procName = name;
+		resultType = DatabaseMetaData.procedureNoResult;
+	}
+
 	/**
 	 * Creates a new ProcedureDefinition.
 	 *
@@ -119,20 +142,6 @@ public class ProcedureDefinition
 	public String getOracleOverloadIndex()
 	{
 		return oracleOverloadIndex;
-	}
-
-	public ProcedureDefinition(String name, int type)
-	{
-		procName = name;
-		resultType = type;
-	}
-
-	public ProcedureDefinition(String cat, String schem, String name, int type)
-	{
-		schema = schem;
-		catalog = cat;
-		procName = name;
-		resultType = type;
 	}
 
 	public void setDbmsProcType(String type)
@@ -387,11 +396,6 @@ public class ProcedureDefinition
 		if (resultType == DatabaseMetaData.procedureReturnsResult)
 		{
 			return "FUNCTION";
-		}
-
-		if (resultType != DatabaseMetaData.procedureNoResult)
-		{
-			LogMgr.logWarning("ProcedureDefinition.getObjectType()", "Invalid value: " + JdbcProcedureReader.jdbcResultTypeName(resultType) + " defined for procedure: " + getDisplayName());
 		}
 		return "PROCEDURE";
 	}

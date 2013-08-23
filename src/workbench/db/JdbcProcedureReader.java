@@ -90,11 +90,9 @@ public class JdbcProcedureReader
 
 			if (ds.getRowCount() > 0)
 			{
-				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
 
-				if (type == DatabaseMetaData.procedureResultUnknown ||
-					  procType == DatabaseMetaData.procedureResultUnknown ||
-						type == procType)
+				if (type == procType)
 				{
 					exists = true;
 				}
@@ -178,9 +176,10 @@ public class JdbcProcedureReader
 				String remark = rs.getString("REMARKS");
 				int type = rs.getInt("PROCEDURE_TYPE");
 				Integer iType;
-				if (rs.wasNull())
+				if (rs.wasNull() || type == DatabaseMetaData.procedureResultUnknown)
 				{
-					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
+					// we can't really handle procedureResultUnknown, so it is treated as "no result"
+					iType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
 				}
 				else
 				{
@@ -211,24 +210,9 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
-	public static String jdbcResultTypeName(int type)
-	{
-		switch (type)
-		{
-			case DatabaseMetaData.procedureNoResult:
-				return "procedureNoResult";
-			case DatabaseMetaData.procedureReturnsResult:
-				return "procedureReturnsResult";
-			case DatabaseMetaData.procedureResultUnknown:
-				return "procedureResultUnknown";
-			default:
-				return Integer.toString(type);
-		}
-	}
-
 	/**
 	 * Convert the JDBC result type to either <tt>PROCEDURE</tt> or <tt>FUNCTION</tt>.
-	 * 
+	 *
 	 * @param type the result type as obtained from the JDBC driver
 	 * @return the SQL keyword for this type
 	 */

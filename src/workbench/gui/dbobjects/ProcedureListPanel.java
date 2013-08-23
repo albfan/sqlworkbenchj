@@ -624,7 +624,7 @@ public class ProcedureListPanel
 		String catalog = null;
 		String comment = null;
 		String specificName = null;
-		int type = DatabaseMetaData.procedureResultUnknown;
+		int type = DatabaseMetaData.procedureNoResult;
 		boolean useSpecificName = data.getColumnIndex("SPECIFIC_NAME") > 1;
 
 		if (currentValue)
@@ -634,7 +634,7 @@ public class ProcedureListPanel
 			catalog = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 			comment = data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
 			specificName = useSpecificName ? data.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME) : null;
-			type = data.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+			type = data.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
 		}
 		else
 		{

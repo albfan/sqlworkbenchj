@@ -22,8 +22,6 @@
  */
 package workbench.gui.dbobjects;
 
-import java.sql.DatabaseMetaData;
-
 import workbench.db.DbObjectChanger;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -59,16 +57,7 @@ public class ProcedureChangeValidator
 		}
 		else
 		{
-			// Fallback, should not happen
-			int resultType = source.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-			if (resultType == DatabaseMetaData.procedureReturnsResult)
-			{
-				type = "FUNCTION";
-			}
-			else if (resultType == DatabaseMetaData.procedureNoResult)
-			{
-				type = "PROCEDURE";
-			}
+			return false;
 		}
 
 		if (col == ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS)

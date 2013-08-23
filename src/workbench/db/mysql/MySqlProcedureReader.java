@@ -22,10 +22,8 @@
  */
 package workbench.db.mysql;
 
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -138,30 +136,6 @@ public class MySqlProcedureReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return source;
-	}
-
-	/**
-	 * Workaround for a bug in older MySQL drivers that do not return information about the return type.
-	 *
-	 * @param   rs  the result set
-	 * @return  the list of procedures
-	 * @throws SQLException
-	 */
-	@Override
-	public DataStore fillProcedureListDataStore(ResultSet rs)
-		throws SQLException
-	{
-		DataStore ds = super.fillProcedureListDataStore(rs);
-		int count = ds.getRowCount();
-		for (int row=0; row < count; row++)
-		{
-			int type = ds.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
-			if (type == DatabaseMetaData.procedureResultUnknown)
-			{
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
-			}
-		}
-		return ds;
 	}
 
 }

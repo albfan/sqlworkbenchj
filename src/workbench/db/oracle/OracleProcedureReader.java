@@ -354,10 +354,8 @@ public class OracleProcedureReader
 			"       aa.overload as overload_index,  \n" +
 			"       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks,  \n" +
 			"       case   \n" +
-			"         when aa.in_out = 'OUT' and argument_name is null then 2  \n" +
-			"         when aa.in_out = 'OUT' and argument_name is not null then 1  \n" +
-			"         when aa.in_out = 'IN' then 1  \n" +
-			"         else 0  \n" +
+			"         when aa.in_out = 'OUT' and argument_name is null then " + DatabaseMetaData.procedureReturnsResult + " \n" +
+			"         else " + DatabaseMetaData.procedureNoResult + "  \n" +
 			"       end  as PROCEDURE_TYPE,  \n" +
 			"       ao.status  \n" +
 			"from all_arguments aa  \n" +
@@ -414,9 +412,10 @@ public class OracleProcedureReader
 				String status = rs.getString("STATUS");
 
 				Integer iType;
-				if (rs.wasNull())
+				if (rs.wasNull() || type == DatabaseMetaData.procedureResultUnknown)
 				{
-					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
+					// we can't really handle procedureResultUnknown, so it is treated as "no result"
+					iType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
 				}
 				else
 				{

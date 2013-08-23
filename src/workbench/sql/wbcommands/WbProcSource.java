@@ -22,13 +22,14 @@
  */
 package workbench.sql.wbcommands;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 
-import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -65,7 +66,7 @@ public class WbProcSource
 		object.adjustCase(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
-		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName(), DatabaseMetaData.procedureResultUnknown);
+		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName());
 		if (reader.procedureExists(def))
 		{
 			CharSequence source = def.getSource(currentConnection);

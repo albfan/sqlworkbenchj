@@ -146,9 +146,10 @@ public class SqlServerProcedureReader
 				String remark = rs.getString("REMARKS");
 				int type = rs.getShort("PROCEDURE_TYPE");
 				Integer iType;
-				if (rs.wasNull())
+				if (rs.wasNull() || type == DatabaseMetaData.procedureResultUnknown)
 				{
-					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
+					// we can't really handle procedureResultUnknown, so it is treated as "no result"
+					iType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
 				}
 				else
 				{
