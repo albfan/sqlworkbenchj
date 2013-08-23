@@ -26,6 +26,13 @@ import java.awt.Container;
 import java.awt.Toolkit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
+import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindNextAction;
@@ -33,11 +40,7 @@ import workbench.gui.actions.FindPreviousAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
-import workbench.interfaces.TextContainer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -308,6 +311,7 @@ public class SearchAndReplace
 		int selStart = this.editor.getSelectionStart();
 		int selEnd = this.editor.getSelectionEnd();
 		int newLen = -1;
+
 		String regex = getSearchExpression(value, ignoreCase, wholeWord, useRegex);
 		replacement = fixSpecialReplacementChars(replacement, useRegex);
 
@@ -319,21 +323,29 @@ public class SearchAndReplace
 		{
 			this.editor.setSelectedText(newText);
 			newLen = this.getText().length();
+			int delta = newText.length() - old.length();
+			selEnd += delta;
+			if (selStart < selEnd)
+			{
+				this.editor.select(selStart, selEnd);
+			}
+			else if (cursor < newLen)
+			{
+				this.editor.setCaretPosition(cursor);
+			}
 		}
 		else
 		{
 			this.editor.setText(newText);
 			newLen = this.getText().length();
-			selStart = -1;
-			selEnd = -1;
-		}
-		if (cursor < newLen)
-		{
-			this.editor.setCaretPosition(cursor);
-		}
-		if (selStart > -1 && selEnd > selStart && selStart < newLen && selEnd < newLen)
-		{
-			this.editor.select(selStart, selEnd);
+			if (cursor < newLen)
+			{
+				this.editor.setCaretPosition(cursor);
+			}
+			else
+			{
+				this.editor.setCaretPosition(0);
+			}
 		}
 		return 0;
 	}
