@@ -42,6 +42,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import javax.xml.bind.DatatypeConverter;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.ResourceMgr;
@@ -53,7 +55,6 @@ import workbench.db.importer.TableDependencySorterTest;
 
 import workbench.sql.StatementRunnerResult;
 
-import workbench.util.Base64;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
@@ -3294,7 +3295,7 @@ public class WbImportTest
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
 
-				String blobString = Base64.encodeBytes((byte[])blob);
+				String blobString = DatatypeConverter.printBase64Binary((byte[])blob);
 				if (nr == id1)
 				{
 					assertEquals(blob1, blobString);
@@ -3845,7 +3846,7 @@ public class WbImportTest
 
 			out.println("nr\tbinary_data");
 			out.print("1\t");
-			out.println(Base64.encodeBytes(testData));
+			out.println(DatatypeConverter.printBase64Binary(testData));
 			out.close();
 
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test -blobType=base64");

@@ -24,7 +24,11 @@ package workbench.util;
 
 import java.io.File;
 import java.io.IOException;
+
+import javax.xml.bind.DatatypeConverter;
+
 import workbench.db.exporter.BlobMode;
+
 import workbench.storage.BlobLiteralType;
 
 /**
@@ -67,7 +71,7 @@ public class BlobDecoder
 			return bfile;
 
 			case Base64:
-				return Base64.decode(value);
+				return DatatypeConverter.parseBase64Binary(value);
 
 			case AnsiLiteral:
 				return decodeHex(value);
@@ -81,7 +85,7 @@ public class BlobDecoder
 		if (StringUtil.isEmptyString(value)) return null;
 		if (type == BlobLiteralType.base64)
 		{
-			return Base64.decode(value);
+			return DatatypeConverter.parseBase64Binary(value);
 		}
 		else if (type == BlobLiteralType.octal)
 		{

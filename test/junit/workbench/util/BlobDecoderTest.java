@@ -1,5 +1,5 @@
 /*
- * DecodeUtilTest.java
+ * BlobDecoderTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,18 +22,23 @@
  */
 package workbench.util;
 
+
+import javax.xml.bind.DatatypeConverter;
+
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.RowData;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DecodeUtilTest
+public class BlobDecoderTest
 {
 
 	@Test
@@ -46,7 +51,7 @@ public class DecodeUtilTest
 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
 		};
 
-		String base64 = Base64.encodeBytes(data);
+		String base64 = DatatypeConverter.printBase64Binary(data);
 		byte[] result = instance.decodeString(base64, BlobLiteralType.base64);
 		assertTrue(RowData.objectsAreEqual(data, result));
 

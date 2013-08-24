@@ -26,7 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
-import workbench.util.Base64;
+
+import javax.xml.bind.DatatypeConverter;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -126,7 +127,7 @@ public class DefaultBlobFormatter
 	{
 		if (literalType == BlobLiteralType.base64)
 		{
-			result.append(Base64.encodeBytes(buffer));
+			result.append(DatatypeConverter.printBase64Binary(buffer));
 			return;
 		}
 		for (int i = 0; i < buffer.length; i++)
