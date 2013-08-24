@@ -31,6 +31,8 @@ import workbench.db.exporter.BlobMode;
 
 import workbench.storage.BlobLiteralType;
 
+import static workbench.db.exporter.BlobMode.AnsiLiteral;
+
 /**
  *
  * @author Thomas Kellerer
@@ -63,12 +65,12 @@ public class BlobDecoder
 		switch (mode)
 		{
 			case SaveToFile:
-			File bfile = new File(value.trim());
-			if (!bfile.isAbsolute() && baseDir != null)
-			{
-				bfile = new File(value.trim());
-			}
-			return bfile;
+				File bfile = new File(value.trim());
+				if (!bfile.isAbsolute() && baseDir != null)
+				{
+					bfile = new File(value.trim());
+				}
+				return bfile;
 
 			case Base64:
 				return DatatypeConverter.parseBase64Binary(value);
@@ -124,7 +126,6 @@ public class BlobDecoder
 		for (int i = 0; i < result.length; i++)
 		{
 			String digit = value.substring((i*2)+offset, (i*2) + 2 + offset);
-			//System.out.println("digit: " + digit);
 			byte b = (byte)Integer.parseInt(digit, 16);
 			result[i] = b;
 		}

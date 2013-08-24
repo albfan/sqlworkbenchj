@@ -25,6 +25,8 @@ package workbench.util;
 
 import javax.xml.bind.DatatypeConverter;
 
+import workbench.db.exporter.BlobMode;
+
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.BlobLiteralType;
@@ -45,29 +47,52 @@ public class BlobDecoderTest
 	public void testDecodeString()
 		throws Exception
 	{
-		BlobDecoder instance = new BlobDecoder();
+		BlobDecoder decoder = new BlobDecoder();
 		byte[] data = new byte[]
 		{
 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
 		};
 
 		String base64 = DatatypeConverter.printBase64Binary(data);
-		byte[] result = instance.decodeString(base64, BlobLiteralType.base64);
+		byte[] result = decoder.decodeString(base64, BlobLiteralType.base64);
 		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter octalFormat = BlobFormatterFactory.createInstance(BlobLiteralType.octal);
 		String octal = octalFormat.getBlobLiteral(data).toString();
-		result = instance.decodeString(octal, BlobLiteralType.octal);
+		result = decoder.decodeString(octal, BlobLiteralType.octal);
 		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter hexFormat = BlobFormatterFactory.createInstance(BlobLiteralType.hex);
 		String hex = hexFormat.getBlobLiteral(data).toString();
-		result = instance.decodeString(hex, BlobLiteralType.hex);
+		result = decoder.decodeString(hex, BlobLiteralType.hex);
 		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter ansiFormat = BlobFormatterFactory.createAnsiFormatter();
 		String ansi = ansiFormat.getBlobLiteral(data).toString();
-		result = instance.decodeString(ansi, BlobLiteralType.hex);
+		result = decoder.decodeString(ansi, BlobLiteralType.hex);
 		assertTrue(RowData.objectsAreEqual(data, result));
+	}
+
+	@Test
+	public void testDecodeBlob()
+		throws Exception
+	{
+		byte[] data = new byte[]
+		{
+			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+		};
+
+		String base64 = DatatypeConverter.printBase64Binary(data);
+		BlobDecoder decoder = new BlobDecoder();
+		decoder.setBlobMode(BlobMode.Base64);
+		Object result = decoder.decodeBlob(base64);
+		assertTrue(result instanceof byte[]);
+		byte[] converted = (byte[])result;
+		assertArrayEquals(data, converted);
+
+		String hex = DatatypeConverter.printHexBinary(data);
+		decoder.setBlobMode(BlobMode.AnsiLiteral);
+		converted = (byte[])decoder.decodeBlob(hex);
+		assertArrayEquals(data, converted);
 	}
 }
