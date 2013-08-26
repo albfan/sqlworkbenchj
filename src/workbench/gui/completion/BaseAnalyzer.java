@@ -210,11 +210,6 @@ public abstract class BaseAnalyzer
 		return true;
 	}
 
-	public String getSelectionPrefix()
-	{
-		return this.columnPrefix;
-	}
-
 	/**
 	 * Set a prefix for columns that are added.
 	 * If this value is set, any column that the user

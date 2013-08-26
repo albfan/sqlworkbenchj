@@ -559,6 +559,12 @@ public class CompletionPopup
 				if (value.length() > 0 && needsComma)
 				{
 					value += ", ";
+
+					// the column prefix is not required for the first column as it will already be in the editor.
+					if (o instanceof ColumnIdentifier && this.context.getAnalyzer().getColumnPrefix() != null)
+					{
+						value += this.context.getAnalyzer().getColumnPrefix() + ".";
+					}
 				}
 				value += getPasteValue(o.toString());
 			}
