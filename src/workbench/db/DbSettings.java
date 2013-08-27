@@ -66,6 +66,8 @@ public class DbSettings
 	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
 
 	private Set<String> updatingCommands;
+	private Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
+
 	private final String prefix;
 
 	public DbSettings(String id)
@@ -84,6 +86,7 @@ public class DbSettings
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
 		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
+		readNoUpdateCountVerbs();
 	}
 
 	public final String getDbId()
@@ -1629,10 +1632,28 @@ public class DbSettings
 
 	public Set<String> verbsWithoutUpdateCount()
 	{
-		List<String> verbs = Settings.getInstance().getListProperty(prefix + "no.updatecount", true);
-		Set<String> result = CollectionUtil.caseInsensitiveSet();
-		result.addAll(verbs);
-		return result;
+		return Collections.unmodifiableSet(noUpdateCountVerbs);
+	}
+
+	private void readNoUpdateCountVerbs()
+	{
+		List<String> verbs = Settings.getInstance().getListProperty(prefix + "no.updatecount.default", true);
+		noUpdateCountVerbs.addAll(verbs);
+
+		List<String> userVerbs = Settings.getInstance().getListProperty(prefix + "no.updatecount", true);
+		for (String verb : userVerbs)
+		{
+			if (StringUtil.isEmptyString(verb)) continue;
+			
+			if (verb.charAt(0) == '-')
+			{
+				noUpdateCountVerbs.remove(verb.substring(1));
+			}
+			else
+			{
+				noUpdateCountVerbs.add(verb);
+			}
+		}
 	}
 
 	public boolean disableEscapesForDDL()
