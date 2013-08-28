@@ -26,7 +26,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.FocusTraversalPolicy;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -54,12 +53,9 @@ public class WbTraversalPolicy
 
 	private boolean checkAvailable()
 	{
-		if (components.size() == 0) return false;
-		Iterator<Component> itr = components.iterator();
-		while (itr.hasNext())
+		for (Component comp : components)
 		{
-			Component c = itr.next();
-			if (c.isEnabled()) return true;
+			if (comp.isEnabled()) return true;
 		}
 		return false;
 	}
@@ -85,12 +81,17 @@ public class WbTraversalPolicy
 		// otherwise the recursion would never terminate!
 		if (!checkAvailable()) return null;
 
-		int index = this.components.indexOf(aComponent);
 		Component result = null;
+		int index = this.components.indexOf(aComponent);
+
 		if (index < 0 || index == this.components.size() - 1)
+		{
 			result = this.components.get(0);
+		}
 		else
+		{
 			result = this.components.get(index + 1);
+		}
 		if (result.isEnabled())
 		{
 			return result;
@@ -119,13 +120,17 @@ public class WbTraversalPolicy
 		// otherwise the recursion would never terminate!
 		if (!checkAvailable()) return null;
 
+		Component result = null;
 		int index = this.components.indexOf(aComponent);
 
-		Component result = null;
 		if (index <= 0)
+		{
 			result = this.components.get(this.components.size() - 1);
+		}
 		else
+		{
 			result = this.components.get(index - 1);
+		}
 
 		if (result.isEnabled())
 		{
@@ -151,9 +156,10 @@ public class WbTraversalPolicy
 	{
 		if (this.defaultComponent != null) return this.defaultComponent;
 		if (this.components.size() > 0)
+		{
 			return this.components.get(0);
-		else
-			return null;
+		}
+		return null;
 	}
 
 	/** Returns the first Component in the traversal cycle. This method is used
@@ -172,9 +178,10 @@ public class WbTraversalPolicy
 	public Component getFirstComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)
+		{
 			return this.components.get(0);
-		else
-			return null;
+		}
+		return null;
 	}
 
 	/** Returns the last Component in the traversal cycle. This method is used
@@ -193,9 +200,10 @@ public class WbTraversalPolicy
 	public Component getLastComponent(Container focusCycleRoot)
 	{
 		if (this.components.size() > 0)
+		{
 			return this.components.get(this.components.size() - 1);
-		else
-			return null;
+		}
+		return null;
 	}
 
 }
