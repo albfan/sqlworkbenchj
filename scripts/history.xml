@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-08-08">
+    <entry dev-build="17" type="enh">Implemented a workaround for an Oracle JDBC driver bug to correctly display comments for materialized views.</entry>
     <entry dev-build="16" type="enh">For SQL Server the source for filtered indexes is now shown correctly.</entry>
     <entry dev-build="16" type="enh">WbDataDiff now supports the -excludeIgnored parameter that will exclude the ignored columns from any UPDATE or INSERT statement.</entry>
     <entry dev-build="15" type="enh">The connection profile can now be configured to always prompt for username and password.</entry>
