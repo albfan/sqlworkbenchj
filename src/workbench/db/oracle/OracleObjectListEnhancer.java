@@ -107,7 +107,7 @@ public class OracleObjectListEnhancer
 				"SELECT /* SQLWorkbench */ mv.owner||'.'||mv.mview_name, \n" +
 				"       c.comments\n" +
 				"FROM all_mviews mv\n" +
-				"  left join all_mview_comments c on c.owner = mv.owner and c.mview_name = c.mview_name \n";
+				"  left join all_mview_comments c on c.owner = mv.owner and c.mview_name = mv.mview_name \n";
 		}
 
 		if (schema != null)
