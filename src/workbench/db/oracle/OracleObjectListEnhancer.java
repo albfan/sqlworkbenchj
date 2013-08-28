@@ -26,8 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import workbench.db.DbMetadata;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.WbConnection;
@@ -35,6 +35,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to "cleanup" the reported table type for MATERIALZED VIEWS.
@@ -59,15 +60,16 @@ public class OracleObjectListEnhancer
 		boolean checkSnapshots = Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && DbMetadata.typeIncluded("TABLE", types);
 		if (!checkSnapshots) return;
 
-		Set<String> snapshots = getSnapshots(con, schema);
+		Map<String, String> snapshots = getSnapshots(con, schema);
 		for (int row=0; row < result.getRowCount(); row++)
 		{
 			String owner = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String name =  result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String fqName = owner + "." + name;
-			if (snapshots.contains(fqName))
+			if (snapshots.containsKey(fqName))
 			{
 				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, DbMetadata.MVIEW_NAME);
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, snapshots.get(fqName));
 			}
 		}
 	}
@@ -79,18 +81,38 @@ public class OracleObjectListEnhancer
 	 * In case the retrieve throws an error, this method will return
 	 * an empty set in subsequent calls.
 	 */
-	public Set<String> getSnapshots(WbConnection connection, String schema)
+	public Map<String, String> getSnapshots(WbConnection connection, String schema)
 	{
 		if (!canRetrieveSnapshots || connection == null)
 		{
-			return Collections.emptySet();
+			return Collections.emptyMap();
 		}
 
-		Set<String> result = new HashSet<String>();
-		String sql = "SELECT /* SQLWorkbench */ owner||'.'||mview_name FROM all_mviews";
+		String defaultPrefix = Settings.getInstance().getProperty("workbench.db.oracle.default.mv.comment", "snapshot table for snapshot");
+
+		if (StringUtil.isBlank(defaultPrefix))
+		{
+			defaultPrefix = null;
+		}
+		Map<String, String> result = new HashMap<String, String>();
+
+		String sql =
+			"SELECT /* SQLWorkbench */ mv.owner||'.'||mv.mview_name, \n " +
+			"      null as comments  \n" +
+			" FROM all_mviews mv \n";
+
+		if (OracleUtils.getRemarksReporting(connection))
+		{
+			sql =
+				"SELECT /* SQLWorkbench */ mv.owner||'.'||mv.mview_name, \n" +
+				"       c.comments\n" +
+				"FROM all_mviews mv\n" +
+				"  left join all_mview_comments c on c.owner = mv.owner and c.mview_name = c.mview_name \n";
+		}
+
 		if (schema != null)
 		{
-			sql += " WHERE owner = ?";
+			sql += " WHERE mv.owner = ?";
 		}
 
 		PreparedStatement stmt = null;
@@ -107,7 +129,12 @@ public class OracleObjectListEnhancer
 			while (rs.next())
 			{
 				String name = rs.getString(1);
-				result.add(name);
+				String comment = rs.getString(2);
+				if (defaultPrefix != null && comment != null && comment.startsWith(defaultPrefix) && comment.endsWith(name))
+				{
+					comment = null;
+				}
+				result.put(name, comment);
 			}
 		}
 		catch (SQLException e)
@@ -117,7 +144,7 @@ public class OracleObjectListEnhancer
 			// To avoid further (unnecessary) calls, we are disabling the support
 			// for snapshots
 			this.canRetrieveSnapshots = false;
-			result = Collections.emptySet();
+			result = Collections.emptyMap();
 		}
 		finally
 		{

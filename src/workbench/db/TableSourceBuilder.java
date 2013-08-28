@@ -209,26 +209,7 @@ public class TableSourceBuilder
 			}
 		}
 
-		if (dbConnection.getDbSettings().getGenerateTableComments())
-		{
-			TableCommentReader commentReader = new TableCommentReader();
-			String tableComment = commentReader.getTableCommentSql(dbConnection, table);
-			if (StringUtil.isNonBlank(tableComment))
-			{
-				result.append(lineEnding);
-				result.append(tableComment);
-			}
-
-			if (!dbConnection.getDbSettings().useInlineColumnComments())
-			{
-				StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
-				if (StringUtil.isNonBlank(colComments))
-				{
-					result.append(lineEnding);
-					result.append(colComments);
-				}
-			}
-		}
+		appendComments(result, dbConnection, table, columns, lineEnding, !dbConnection.getDbSettings().useInlineColumnComments());
 
 		if (dbConnection.getDbSettings().getGenerateTableGrants())
 		{
@@ -248,6 +229,35 @@ public class TableSourceBuilder
 			result.append(extendedSQL);
 		}
 		return result.toString();
+	}
+
+	public static void appendComments(StringBuilder result, WbConnection connection, TableDefinition table)
+	{
+		appendComments(result, connection, table.getTable(), table.getColumns(), "\n", true);
+	}
+
+	public static void appendComments(StringBuilder result, WbConnection connection, TableIdentifier table, List<ColumnIdentifier> columns, String lineEnding, boolean generateColumnComments)
+	{
+		if (connection.getDbSettings().getGenerateTableComments())
+		{
+			TableCommentReader commentReader = new TableCommentReader();
+			String tableComment = commentReader.getTableCommentSql(connection, table);
+			if (StringUtil.isNonBlank(tableComment))
+			{
+				result.append(lineEnding);
+				result.append(tableComment);
+			}
+
+			if (generateColumnComments)
+			{
+				StringBuilder colComments = commentReader.getTableColumnCommentsSql(connection, table, columns);
+				if (StringUtil.isNonBlank(colComments))
+				{
+					result.append(lineEnding);
+					result.append(colComments);
+				}
+			}
+		}
 	}
 
 	/**

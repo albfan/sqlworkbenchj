@@ -51,7 +51,7 @@ public class OracleViewReader
 		if (DbMetadata.MVIEW_NAME.equals(type))
 		{
 			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, view.getTable(), null, includeDrop);
+			CharSequence sql = reader.getMViewSource(this.connection, view, null, includeDrop, true);
 			return sql;
 		}
 		return super.getExtendedViewSource(view, includeDrop, includeCommit);
@@ -64,7 +64,7 @@ public class OracleViewReader
 		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
 		{
 			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, viewId, null, false);
+			CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, false, false);
 			return sql;
 		}
 		return super.getViewSource(viewId);

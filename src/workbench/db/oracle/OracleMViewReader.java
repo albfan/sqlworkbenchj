@@ -27,8 +27,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
+
 import workbench.db.IndexDefinition;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -49,9 +52,11 @@ public class OracleMViewReader
 	{
 	}
 
-	public CharSequence getMViewSource(WbConnection dbConnection, TableIdentifier table, List<IndexDefinition> indexList, boolean includeDrop)
+	public CharSequence getMViewSource(WbConnection dbConnection, TableDefinition def, List<IndexDefinition> indexList, boolean includeDrop, boolean includeComments)
 	{
 		boolean alwaysUseDbmsMeta = dbConnection.getDbSettings().getUseOracleDBMSMeta("mview");
+
+		TableIdentifier table = def.getTable();
 
 		StringBuilder result = new StringBuilder(250);
 
@@ -98,8 +103,14 @@ public class OracleMViewReader
 			}
 			result.append("\nAS\n");
 			result.append(sql);
+			result.append('\n');
+			
+			if (includeComments)
+			{
+				TableSourceBuilder.appendComments(result, dbConnection, def);
+			}
 		}
-		result.append("\n\n");
+		result.append('\n');
 
 		if (indexList == null)
 		{
@@ -122,6 +133,7 @@ public class OracleMViewReader
 				}
 			}
 		}
+
 		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexList);
 
 		if (indexSource != null) result.append(indexSource);

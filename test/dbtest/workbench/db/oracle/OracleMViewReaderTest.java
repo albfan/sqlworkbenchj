@@ -31,6 +31,8 @@ import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+
+import workbench.db.TableDefinition;
 import workbench.db.TableSourceBuilderFactory;
 
 /**
@@ -87,6 +89,18 @@ public class OracleMViewReaderTest
 			"AS\n" +
 			"SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
 		assertEquals(expected, source.trim());
+
+		TestUtil.executeScript(con,
+			"comment on materialized view v_person is 'the mview';\n"+
+			"comment on column v_person.id is 'the person PK';\n");
+
+		mview = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
+		TableDefinition def = con.getMetadata().getTableDefinition(mview);
+		expected += "\n\n" +
+			"COMMENT ON MATERIALIZED VIEW V_PERSON IS 'the mview';\n"+
+			"COMMENT ON COLUMN V_PERSON.ID IS 'the person PK';";
+		source = con.getMetadata().getViewReader().getExtendedViewSource(def, false, false).toString().trim();
+		assertEquals(expected, source);
 	}
 
 	@Test
