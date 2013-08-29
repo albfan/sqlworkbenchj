@@ -12,8 +12,8 @@
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
 
-<xsl:variable name="ref-schema" select="/schema-diff/reference-connection/schema"/>
-<xsl:variable name="target-schema" select="/schema-diff/target-connection/schema"/>
+<xsl:variable name="ref-schema" select="/schema-diff/reference-connection/connection"/>
+<xsl:variable name="target-schema" select="/schema-diff/target-connection/connection"/>
 
 <xsl:template match="/">
   <html>
