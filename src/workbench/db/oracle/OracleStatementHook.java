@@ -61,7 +61,7 @@ public class OracleStatementHook
 	private static final String wbSelectMarker = "select /* sqlwb_statistics */";
 
 	private static final String retrieveStats =
-			wbSelectMarker + " s.value, a.name, s.statistic# \n" +
+			wbSelectMarker + " a.name, s.value, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
 			"where sid = userenv('SID') \n" +
@@ -81,7 +81,12 @@ public class OracleStatementHook
 		"'SQL*Net roundtrips to/from client', \n" +
 		"'sorts (memory)', \n" +
 		"'sorts (disk)'\n, " +
-		"'db block changes'";
+		"'db block changes', \n " +
+		"'consistent gets from cache', \n" +
+		"'consistent gets from cache (fastpath)', \n" +
+		"'logical read bytes from cache', \n " +
+		"'Requests to/from client', \n" +
+		"'session logical reads'";
 
 	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
 	private static final Set<String> explainable = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");
@@ -331,12 +336,11 @@ public class OracleStatementHook
 				prepareStatisticsStatement(con);
 				rs = statisticsStmt.executeQuery();
 
-				int valueCol = getValueColIndex();
-				int nameCol = getNameColIndex();
-
 				while (rs.next())
 				{
-					values.put(rs.getString(nameCol + 1), Long.valueOf(rs.getLong(valueCol + 1)));
+					String key = rs.getString(1);
+					Long val = Long.valueOf(rs.getLong(2));
+					values.put(key, val);
 				}
 				statisticViewsAvailable = true;
 			}
@@ -358,16 +362,7 @@ public class OracleStatementHook
 	private String buildStatisticsQuery()
 	{
 		String stats = Settings.getInstance().getProperty("workbench.db.oracle.autotrace.statname", defaultStats);
-		String query = null;
-		if (showStatvalueFirst())
-		{
-			query = retrieveStats + " (" + stats + ")";
-		}
-		else
-		{
-			query = retrieveStats.replace("s.value, a.name", "a.name, s.value") + " (" + stats + ")";
-		}
-		return query;
+		return retrieveStats + " (" + stats + ") \n ORDER BY lower(a.name)";
 	}
 
 	private boolean showStatvalueFirst()
@@ -497,7 +492,7 @@ public class OracleStatementHook
 				// should not happen, but just in case.
 				newLevel = "TYPICAL";
 			}
-			LogMgr.logDebug("OracleStatementHook.preExec()", "Setting STATISTICS_LEVEL to " + newLevel);
+			LogMgr.logInfo("OracleStatementHook.preExec()", "Setting STATISTICS_LEVEL to " + newLevel);
 			stmt = con.createStatement();
 			stmt.execute("alter session set statistics_level=" + newLevel);
 		}
@@ -592,8 +587,8 @@ public class OracleStatementHook
 				rs = statisticsStmt.executeQuery();
 				while (rs.next())
 				{
-					String statName = rs.getString(nameCol + 1);
-					Long value = rs.getLong(valueCol + 1);
+					String statName = rs.getString(1);
+					Long value = Long.valueOf(rs.getLong(2));
 					if (statName != null && value != null)
 					{
 						Long startValue = values.get(statName);
