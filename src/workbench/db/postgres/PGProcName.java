@@ -57,7 +57,7 @@ public class PGProcName
 			arguments = new ArrayList<PGType>();
 			for (String s : elements)
 			{
-				PGType typ = typeMap.getTypeEntry(s.trim());
+				PGType typ = typeMap.getEntryByFormattedType(s.trim());
 				if (typ != null)
 				{
 					arguments.add(typ);
@@ -134,7 +134,7 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) b.append(", ");
-			b.append(arguments.get(i).rawType);
+			b.append(arguments.get(i).formattedType);
 		}
 		b.append(')');
 		return b.toString();

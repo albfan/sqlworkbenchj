@@ -45,6 +45,18 @@ public class PGTypeLookup
 		return oidToTypeMap.get(Long.valueOf(oid));
 	}
 
+	public PGType getEntryByFormattedType(String formattedType)
+	{
+		for (PGType typ : oidToTypeMap.values())
+		{
+			if (typ.formattedType.equals(formattedType))
+			{
+				return typ;
+			}
+		}
+		return null;
+	}
+
 	public PGType getTypeEntry(String rawType)
 	{
 		PGType result = rawTypeMap.get(rawType);
