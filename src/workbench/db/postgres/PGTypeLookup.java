@@ -22,7 +22,6 @@
  */
 package workbench.db.postgres;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,12 +31,10 @@ import java.util.Map;
 public class PGTypeLookup
 {
 	private Map<Long, PGType> oidToTypeMap;
-	private Map<String, PGType> rawTypeMap;
 
 	public PGTypeLookup(Map<Long, PGType> oidMap)
 	{
 		oidToTypeMap = oidMap;
-		rawTypeMap = new HashMap<String, PGType>(oidToTypeMap.size());
 	}
 
 	public PGType getTypeFromOID(long oid)
@@ -45,33 +42,15 @@ public class PGTypeLookup
 		return oidToTypeMap.get(Long.valueOf(oid));
 	}
 
-	public PGType getEntryByFormattedType(String formattedType)
+	public PGType getEntryByType(String type)
 	{
 		for (PGType typ : oidToTypeMap.values())
 		{
-			if (typ.formattedType.equals(formattedType))
+			if (typ.getTypeName().equals(type))
 			{
 				return typ;
 			}
 		}
 		return null;
-	}
-
-	public PGType getTypeEntry(String rawType)
-	{
-		PGType result = rawTypeMap.get(rawType);
-		if (result == null)
-		{
-			for (PGType typ : oidToTypeMap.values())
-			{
-				if (typ.rawType.equals(rawType))
-				{
-					rawTypeMap.put(rawType, typ);
-					result = typ;
-					break;
-				}
-			}
-		}
-		return result;
 	}
 }

@@ -22,9 +22,11 @@
  */
 package workbench.db.postgres;
 
-import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -42,25 +44,25 @@ public class PGProcNameTest
 		PGProcName proc = new PGProcName(procname, types);
 		assertEquals("my_func", proc.getName());
 		assertEquals(2, proc.getArguments().size());
-		assertEquals(23, proc.getArguments().get(0).oid);
+		assertEquals(23, proc.getArguments().get(0).getOid());
 
 		PGProcName proc2 = new PGProcName("func_2", "23;23;1043", types);
 		assertEquals("func_2", proc2.getName());
 		assertEquals(3, proc2.getArguments().size());
-		assertEquals(23, proc2.getArguments().get(0).oid);
-		assertEquals(23, proc2.getArguments().get(1).oid);
-		assertEquals(1043, proc2.getArguments().get(2).oid);
+		assertEquals(23, proc2.getArguments().get(0).getOid());
+		assertEquals(23, proc2.getArguments().get(1).getOid());
+		assertEquals(1043, proc2.getArguments().get(2).getOid());
 	}
 
 	private Map<Long, PGType> getTypes()
 	{
 		Map<Long, PGType> result = new HashMap<Long, PGType>();
-		result.put(16L, new PGType("bool", "boolean", 16));
-		result.put(18L, new PGType("char", "char", 18));
-		result.put(20L, new PGType("bigint", "bigint", 20));
-		result.put(23L, new PGType("integer", "integer", 23));
-		result.put(21L, new PGType("smallint", "smalling", 21));
-		result.put(1043L, new PGType("varchar", "character varying", 1043));
+		result.put(16L, new PGType("boolean", 16));
+		result.put(18L, new PGType("char", 18));
+		result.put(20L, new PGType("bigint", 20));
+		result.put(23L, new PGType("integer", 23));
+		result.put(21L, new PGType("smalling", 21));
+		result.put(1043L, new PGType("character varying", 1043));
 		return result;
 	}
 

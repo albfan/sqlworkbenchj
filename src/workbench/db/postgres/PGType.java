@@ -28,34 +28,35 @@ package workbench.db.postgres;
  */
 public class PGType
 {
-	final String rawType;
-	final String formattedType;
-	final long oid;
+	private final String typeName;
+	private final long oid;
 
-	public PGType(String raw, String formatted, long id)
+	public PGType(String type, long id)
 	{
-		if (raw.equals("int2"))
+		if (type.equals("character varying"))
 		{
-			rawType = "smallint";
-		}
-		else if (raw.equals("int4"))
-		{
-			rawType = "integer";
-		}
-		else if (raw.equals("int8"))
-		{
-			rawType = "bigint";
-		}
-		else if (raw.equals("bool"))
-		{
-			rawType = "boolean";
+			typeName = "varchar";
 		}
 		else
 		{
-			rawType = raw;
+			typeName = type;
 		}
-		formattedType = formatted;
 		oid = id;
+	}
+
+	public long getOid()
+	{
+		return oid;
+	}
+
+	public String getTypeName()
+	{
+		return typeName;
+	}
+
+	public boolean isVoid()
+	{
+		return typeName.equals("void");
 	}
 
 }

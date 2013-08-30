@@ -25,6 +25,7 @@ package workbench.db.postgres;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import workbench.util.StringUtil;
 
 /**
@@ -57,7 +58,7 @@ public class PGProcName
 			arguments = new ArrayList<PGType>();
 			for (String s : elements)
 			{
-				PGType typ = typeMap.getEntryByFormattedType(s.trim());
+				PGType typ = typeMap.getEntryByType(s.trim());
 				if (typ != null)
 				{
 					arguments.add(typ);
@@ -104,7 +105,7 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) argTypes.append(' ');
-			argTypes.append(Long.toString(arguments.get(i).oid));
+			argTypes.append(Long.toString(arguments.get(i).getOid()));
 		}
 		return argTypes.toString();
 	}
@@ -134,7 +135,7 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) b.append(", ");
-			b.append(arguments.get(i).formattedType);
+			b.append(arguments.get(i).getTypeName());
 		}
 		b.append(')');
 		return b.toString();

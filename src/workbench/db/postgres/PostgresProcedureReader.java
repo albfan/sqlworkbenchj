@@ -126,7 +126,7 @@ public class PostgresProcedureReader
 			Statement stmt = null;
 			ResultSet rs = null;
 			Savepoint sp = null;
-			String sql = "select oid, typname, format_type(oid, null) from pg_type";
+			String sql = "select oid, format_type(oid, null) from pg_type";
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
@@ -141,15 +141,14 @@ public class PostgresProcedureReader
 				while (rs.next())
 				{
 					long oid = rs.getLong(1);
-					String name = rs.getString(2);
-					String formattedName = rs.getString(3);
-					if (formattedName.equals("character varying"))
+					String typeName = rs.getString(2);
+					if (typeName.equals("character varying"))
 					{
-						formattedName = "varchar";
+						typeName = "varchar";
 					}
-					PGType typ = new PGType(name, StringUtil.trimQuotes(formattedName), oid);
-					typeMap.put(Long.valueOf(typ.oid), typ);
-					if ("void".equals(typ.rawType))
+					PGType typ = new PGType(StringUtil.trimQuotes(typeName), oid);
+					typeMap.put(Long.valueOf(oid), typ);
+					if (typ.isVoid())
 					{
 						voidType = typ;
 					}
@@ -171,16 +170,10 @@ public class PostgresProcedureReader
 		return pgTypes;
 	}
 
-	private String getRawTypeNameFromOID(long oid)
+	private String getTypeNameFromOid(long oid)
 	{
 		PGType typ = getTypeLookup().getTypeFromOID(Long.valueOf(oid));
-		return typ.rawType;
-	}
-
-	private String getFormattedTypeFromOID(int oid)
-	{
-		PGType typ = getTypeLookup().getTypeFromOID(Integer.valueOf(oid));
-		return typ.formattedType;
+		return typ.getTypeName();
 	}
 
 	@Override
@@ -220,21 +213,26 @@ public class PostgresProcedureReader
 						"	      d.description AS REMARKS, \n" +
 						"       array_to_string(p.proargtypes, ';') as PG_ARGUMENTS, \n" +
 						"       case when p.proisagg then 'aggregate' else 'function' end as proc_type \n" +
-						" FROM pg_catalog.pg_namespace n, pg_catalog.pg_proc p \n" +
+						" FROM pg_catalog.pg_proc p \n " +
+				    "   JOIN pg_catalog.pg_namespace n on p.pronamespace=n.oid \n" +
 						"   LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) \n" +
 						"   LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') \n" +
-						"   LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog') \n" +
-						" WHERE p.pronamespace=n.oid ";
+						"   LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog')";
 
+			boolean whereNeeded = true;
 			if (StringUtil.isNonBlank(schemaPattern))
 			{
-					sql += " AND n.nspname LIKE '" + schemaPattern + "' ";
+				sql += "\n WHERE n.nspname LIKE '" + schemaPattern + "' ";
+				whereNeeded = false;
 			}
+
 			if (StringUtil.isNonBlank(namePattern))
 			{
-					sql += " AND p.proname LIKE '" + namePattern + "' ";
+				sql += whereNeeded ? "\n WHERE " : "\n  AND ";
+				sql += "p.proname LIKE '" + namePattern + "' ";
 			}
-			sql += " ORDER BY PROCEDURE_SCHEM, PROCEDURE_NAME ";
+
+			sql += "\n ORDER BY PROCEDURE_SCHEM, PROCEDURE_NAME ";
 
 			stmt = connection.createStatementForQuery();
 
@@ -260,7 +258,7 @@ public class PostgresProcedureReader
 					List<String> types = new ArrayList<String>(pgArgs.size());
 					for (PGType pgType : pgArgs)
 					{
-						types.add(pgType.formattedType);
+						types.add(pgType.getTypeName());
 					}
 					def.setParameterTypes(types);
 				}
@@ -455,8 +453,8 @@ public class PostgresProcedureReader
 						source.append(' ');
 					}
 
-					long typeOid = StringUtil.getLongValue(argTypes.get(i), voidType.oid);
-					source.append(getRawTypeNameFromOID(typeOid));
+					long typeOid = StringUtil.getLongValue(argTypes.get(i), voidType.getOid());
+					source.append(getTypeNameFromOid(typeOid));
 					paramCount ++;
 				}
 
@@ -467,7 +465,7 @@ public class PostgresProcedureReader
 					{
 						source.append("SETOF ");
 					}
-					source.append(getRawTypeNameFromOID(retTypeOid));
+					source.append(getTypeNameFromOid(retTypeOid));
 				}
 				else
 				{
@@ -792,7 +790,7 @@ public class PostgresProcedureReader
 				{
 					int row = result.addRow();
 					int typeOid = StringUtil.getIntValue(argTypes.get(i), -1);
-					String pgt = getRawTypeNameFromOID(typeOid);
+					String pgt = getTypeNameFromOid(typeOid);
 
 					String nm = "$" + (i + 1);
 					if (argNames != null && i < argNames.size())
@@ -816,7 +814,7 @@ public class PostgresProcedureReader
 					}
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, md);
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, getJavaType(pgt));
-					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, getFormattedTypeFromOID(typeOid));
+					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, getTypeNameFromOid(typeOid));
 				}
 
 			}
