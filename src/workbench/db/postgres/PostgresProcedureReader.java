@@ -394,12 +394,15 @@ public class PostgresProcedureReader
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 
-			rs.next();
+			boolean hasRow = rs.next();
 
-			comment = rs.getString("remarks");
-			isAggregate = rs.getBoolean("proisagg");
+			if (hasRow)
+			{
+				comment = rs.getString("remarks");
+				isAggregate = rs.getBoolean("proisagg");
+			}
 
-			if (!isAggregate)
+			if (!isAggregate && hasRow)
 			{
 				source.append("CREATE OR REPLACE FUNCTION ");
 				source.append(name.getName());
