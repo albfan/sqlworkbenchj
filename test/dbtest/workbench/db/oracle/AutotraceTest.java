@@ -23,19 +23,24 @@
 package workbench.db.oracle;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.WbConnection;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -114,8 +119,8 @@ public class AutotraceTest
 			assertEquals("Statistics", data.get(1).getResultName());
 			DataStore stat = data.get(1);
 
-			assertEquals(12, stat.getRowCount());
-			int rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(15, stat.getRowCount());
+			int rows = stat.getValueAsInt(14, 0, -1); // rows processed property
 			assertEquals(2, rows);
 
 			assertEquals("Execution plan", data.get(2).getResultName());
@@ -136,8 +141,8 @@ public class AutotraceTest
 			assertEquals("tabledata", data.get(0).getResultName());
 			assertEquals("Statistics", data.get(1).getResultName());
 			stat = data.get(1);
-			assertEquals(12, stat.getRowCount());
-			rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(15, stat.getRowCount());
+			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace traceonly statistics");
@@ -147,8 +152,8 @@ public class AutotraceTest
 			assertEquals(1, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());
 			stat = data.get(0);
-			assertEquals(12, stat.getRowCount());
-			rows = stat.getValueAsInt(11, 0, -1); // rows processed property
+			assertEquals(15, stat.getRowCount());
+			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace on explain");
