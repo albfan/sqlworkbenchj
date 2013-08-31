@@ -22,7 +22,6 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Statement;
 import java.util.List;
 
 import workbench.TestUtil;
@@ -34,7 +33,7 @@ import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
-import workbench.util.SqlUtil;
+import workbench.sql.DelimiterDefinition;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -73,32 +72,58 @@ public class PostgresProcedureReaderTest
 			 ");\n" +
 			 "commit;\n";
 		TestUtil.executeScript(con, sql);
-		Statement stmt = null;
-		try
-		{
-			stmt = con.createStatement();
-			String create1 = "CREATE FUNCTION fn_answer()  \n" +
-             "  RETURNS integer  \n" +
-             "AS $$ \n" +
-             "BEGIN \n" +
-             "    RETURN 42; \n" +
-             "END; \n" +
-             "$$ LANGUAGE plpgsql \n";
-			stmt.execute(create1);
-			String create2 = "CREATE FUNCTION fn_answer(boost integer)  \n" +
-             "  RETURNS integer  \n" +
-             "AS $$ \n" +
-             "BEGIN \n" +
-             "    RETURN 42 * boost;\n" +
-             "END; \n" +
-             "$$ LANGUAGE plpgsql \n";
-			stmt.execute(create2);
-			con.commit();
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
+
+		String fnCreate =
+			"CREATE FUNCTION fn_answer()  \n" +
+			"  RETURNS integer  \n" +
+			"AS $$ \n" +
+			"BEGIN \n" +
+			"    RETURN 42; \n" +
+			"END; \n" +
+			"$$ LANGUAGE plpgsql \n" +
+			"/\n"  +
+			"CREATE FUNCTION fn_answer(boost integer)  \n" +
+			"  RETURNS integer  \n" +
+			"AS $$ \n" +
+			"BEGIN \n" +
+			"    RETURN 42 * boost;\n" +
+			"END; \n" +
+			"$$ LANGUAGE plpgsql \n" +
+			"/\n "  +
+			"commit \n" +
+			"/";
+		TestUtil.executeScript(con, fnCreate, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		String tables =
+			"create schema s1; \n" +
+			"create schema s2; \n" +
+			" \n" +
+			"create table s1.customer (id integer, customer_name varchar); \n" +
+			"create table s2.customer (id integer, customer_name varchar); \n" +
+			"commit;";
+		TestUtil.executeScript(con, tables);
+
+	String fullNames =
+			"create or replace function public.fullname(cust s1.customer) \n" +
+			"  returns varchar \n" +
+			"as \n" +
+			"$body$ \n" +
+			"  select 'Name_1: '||cust.customer_name; \n" +
+			"$body$ \n" +
+			"language sql; \n" +
+			"/ \n" +
+			" \n" +
+			"create or replace function public.fullname(cust s2.customer) \n" +
+			"  returns varchar \n" +
+			"as \n" +
+			"$body$ \n" +
+			"  select 'Name_2: '||cust.customer_name; \n" +
+			"$body$ \n" +
+			"language sql; \n" +
+			"/\n" +
+			"commit\n" +
+			"/\n";
+		TestUtil.executeScript(con, fullNames, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 	}
 
 	@AfterClass
@@ -159,4 +184,23 @@ public class PostgresProcedureReaderTest
 		String name= cols2.getValueAsString(1, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
 		assertEquals("boost", name);
 	}
+
+	@Test
+	public void testQualifiedParams()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, "public", "fullname%");
+		assertEquals(2, procs.size());
+
+		ProcedureDefinition def1 = procs.get(0);
+		String source1 = def1.getSource(con).toString();
+		assertTrue(source1.contains("'Name_1: '"));
+
+		ProcedureDefinition def2 = procs.get(1);
+		String source2 = def2.getSource(con).toString();
+		assertTrue(source2.contains("'Name_2: '"));
+	}
+
 }
