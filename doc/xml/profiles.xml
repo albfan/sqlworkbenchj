@@ -217,6 +217,20 @@
 <section id="profile-workbench-settings">
 	<title>&wb-productname; specific settings</title>
 
+	<section id="prompt-username">
+		<title>Prompt for username</title>
+
+		<para>
+			If this option is enabled (i.e. checked) you will be asked to enter the username and password
+      each time you connect to the specified database server. If this is checked, the input fields
+      for username and password are disabled (but the values will still be saved in the profile).
+		</para>
+		<para>
+      This is useful if you have many different usernames for the same DBMS server and don't want to create
+      a connection profile for each user.
+    </para>
+	</section>
+
 	<section id="profile-save-password">
 		<title>Save password</title>
 
