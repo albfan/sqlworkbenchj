@@ -1296,6 +1296,7 @@ public class ConnectionEditorPanel
     boolean prompt = cbxPromptUsername.isSelected();
 		tfUserName.setEnabled(!prompt);
 		tfPwd.setEnabled(!prompt);
+		cbStorePassword.setEnabled(!prompt);
 	}
 
 	private void checkFilters()
