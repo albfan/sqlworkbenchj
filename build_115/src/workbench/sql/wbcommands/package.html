@@ -1,0 +1,19 @@
+<body>
+Implementation of Workbench specific SQL commands.
+<br/>
+A new internal command needs to be registered in two places:
+<ul>
+	<li>{@link workbench.sql.CommandMapper}</li>
+	<li>{@link workbench.sql.wbcommands.CommandTester}</li>
+</ul>
+<p>
+	The <tt>CommandMapper</tt> class is used to find the implementation
+  of a SQL command during execution of SQL script.
+</p>
+<p>
+	The <tt>CommandTester</tt> is used to identifiy Workbench internal commands
+	e.g. during formatting or for syntax highlighting in the editor. It also drives
+	the list of commands that are listed when running <tt>WbHelp</tt> in the console.
+</p>
+
+</body>

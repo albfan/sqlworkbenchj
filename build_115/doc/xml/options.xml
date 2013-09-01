@@ -1,0 +1,1488 @@
+<section id="options">
+
+	<title>Options dialog</title>
+
+	<para>
+		The options dialog enables you to influence the behaviour and
+		look of &wb-productname; to meet your needs. To open the options
+		dialog choose
+		<menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>.
+	</para>
+
+	<section id="options-general">
+		<title>General options</title>
+
+		<section id="options-gui-language">
+			<title>Language</title>
+			<para>
+				With this option you can select in which language the application
+        is shown. The new value will only be in affect when you restart the
+        application.
+			</para>
+		</section>
+
+		<section id="options-automatic-update">
+			<title>Check for updates</title>
+			<para>
+				With this option you can enable an automatic update check when
+				&wb-productname; is started. You can define the interval in days
+				after which the application should check for updates on the
+				homepage. If a newer version is found on the website this will
+				be indicated with a little globe in the statusbar. Clicking on the
+				icon will open your default internet browser with the application's homepage.
+			</para>
+			<para>
+				If you disable this option, you can manually check
+				for updates using the menu
+				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
+			</para>
+      <para>
+        When &wb-productname; performs an update check, it sends the following information as part of the request to the server:
+        <itemizedlist>
+          <listitem><simpara>The version of &wb-productname; you are using</simpara></listitem>
+          <listitem><simpara>Whether the check was an automatic check or a manual one</simpara></listitem>
+          <listitem><simpara>The interface language selected</simpara></listitem>
+          <listitem><simpara>The operating system as reported by your Java installation</simpara></listitem>
+          <listitem><simpara>The Java version you are using</simpara></listitem>
+        </itemizedlist>
+      </para>
+		</section>
+
+
+		<section id="options-show-connect">
+			<title>Show connect dialog</title>
+			<para>
+				If this option is enabled, the connect dialog will be shown automatically when the
+				application is started.
+			</para>
+		</section>
+
+		<section id="options-exit-connect">
+			<title>Exit on first connect cancel</title>
+			<para>
+				If this option is enabled, then the application is closed completely if the
+				initial connect dialog is cancelled.
+			</para>
+			<para>
+				This option is only valid if "Show connect dialog" is selected.
+			</para>
+		</section>
+
+		<section id="options-single-page-help">
+			<title>Single page HTML help</title>
+			<para>
+				If this option is enabled, the HTML help will be shown as a single
+				page in the browser instead of one page per chapter.
+			</para>
+		</section>
+
+		<section id="options-encrypt-password">
+			<title>Encrypt passwords</title>
+			<para>If this option is enabled, the password stored within a connection
+				profile will be encrypted. Whether the password should be stored at all
+				can be selected in the profile itself.
+			</para>
+
+			<note><para>
+				Using this option only supplies very limited security. As the
+				source code for &wb-productname; is freely available, the algorithm
+				to decrypt the passwords stored in this way can easily be extracted
+				to retrieve the plain text passwords.
+			</para></note>
+		</section>
+
+		<section id="options-consolidate-log">
+			<title>Consolidate script log</title>
+			<para>
+				Usually &wb-productname; reports the success and timings
+				for each statement that is beeing executed in the message tab
+				of the current SQL panel. For large scripts this can slow down
+				script execution dramatically. If this option is enabled, only
+				a summary of the execution is printed once the script has finished.
+				You can turn off the log during script execution by using
+				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+			</para>
+		</section>
+
+		<section id="options-show-tab-index">
+			<title>Show tab index</title>
+			<para>
+				If this option is enabled, each editor tab will be shown with its index. You can
+				then select the first 9 tabs by pressing Ctrl-1, Ctrl-2 and so on.
+			</para>
+		</section>
+
+		<section id="options-scroll-tabs">
+			<title>Scroll tabs</title>
+			<para>
+				This option controls the behaviour of the tab display, if more tabs
+				are opened than can be displayed in the current width of the window.
+			</para>
+			<para>
+				If this option is enabled, the tabs are always displayed in a single
+				row. If too many tabs are open, the row can be scrolled to the display
+				the tabs that are not visible.
+			</para>
+			<para>
+				If this option is disabled, the tabs are displayed in multiple rows,
+				so that all tabs are always visible.
+			</para>
+		</section>
+
+		<section id="options-confirm-tab-close">
+			<title>Confirm tab close</title>
+			<para>
+				If this option is enabled, closing a tab needs to be confirmed, to
+				prevent accidental closing.
+			</para>
+		</section>
+
+		<section id="option-animated-icon" xreflabel="Enable animated icons">
+			<title>Enable animated icons</title>
+			<para>Enable or disable the use of an animated icons in the SQL editor to
+				indicate a running SQL statement. It has been reported, that the animated
+				icon does have a severe (negativ) impact on the performance on some computers
+				(depending on JDK/OS/Graphics driver).
+				If you experience a high CPU usage during the execution of SQL statements, or
+				if you find your SQL statements are running very slow, try
+				to turn off the usage of the animated icons.
+			</para>
+		</section>
+
+		<section id="options-log-level">
+			<title>Log Level</title>
+			<para>
+				With this option you can control the level of information written to the
+				application log. The most verbose level is <literal>DEBUG</literal>. With
+				<literal>ERROR</literal> only severe errors (either resulting from running
+				a user command or from an internal error) are written to the application log.
+			</para>
+      <para>
+        When using <link linkend="settings-log4j">Log4J</link> as the logger, this
+        will change the log level of the root logger.
+      </para>
+		</section>
+
+		<section id="options-file-info">
+			<title>Configuration file information</title>
+			<para>
+				At the bottom of the "General options" page, the full filename of the configuration
+				file and the logfile are listed.
+			</para>
+		</section>
+	</section>
+
+	<section id="options-editor">
+		<title>Editor options</title>
+
+		<section id="options-internal-lineending">
+			<title>Line ending for DBMS</title>
+			<para>
+				This property controls the line terminator used by the editor when sending SQL statements
+				to the database. The value "Platform default" relates to the platform where you
+				run &wb-productname; this is not the platform of the DBMS server.
+			</para>
+			<para>
+				The editor always uses "unix" line ending internally. If you select a different
+				value for this property, &wb-productname; will convert the SQL statements to use
+				the desired line ending before sending them to the DBMS. As this can slow down
+				the execution of statements, it is highly recommended to leave the default setting
+				of Unix line endings. You should only change this, if your DBMS does not understand
+				the single linefeed character (ASCII value 10) properly.
+			</para>
+		</section>
+
+		<section id="options-externally-lineending">
+			<title>File format</title>
+			<para>
+				This property controls the line terminator used when a file is saved by the editor.
+				Changing this property affects the next save operation.
+			</para>
+		</section>
+
+		<section id="options-alternate-delimiter" xreflabel="alternate delimiter">
+			<title>Alternate Delimiter</title>
+			<para>
+				This options defines the default alternate delimiter. You can override this default in the connection profile,
+        to use different delimiters for different DBMS.
+        For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
+			</para>
+		</section>
+
+		<section id="options-history-size">
+			<title>History size</title>
+			<para>The number of statements per tab which should be stored in the
+				statement history. Remember that always the full text of the editor
+				(together with the selection and cursor information) is stored in the
+				history. If you have large amounts of text in the editor and set this
+				number quite high, be aware of the memory consumption this might create.
+			</para>
+		</section>
+
+		<section id="options-files-in-history">
+			<title>Files in history</title>
+			<para>
+        If this option is enabled, the content of external files is also
+        stored in the statement history.
+			</para>
+		</section>
+
+		<section id="settings-editor-electric-srcoll">
+			<title>Electric scroll</title>
+			<para>Electric scrolling is the automatic scrolling of the editor
+				when clicking into lines close to the upper or lower end of the editor
+				window. If you click inside the defined number of lines at the upper
+				or lower end, then the editor will scroll this line into the center
+				of the visible area. The default is set to 3, which means that if you click
+				into (visible) line 1,2 or 3 of the editor, this line will be centered in
+				the display.
+			</para>
+		</section>
+
+		<section id="options-tab-width">
+			<title>Editor tab width</title>
+			<para>The number of spaces that are assumed for the <literal>TAB</literal>
+				character.
+			</para>
+		</section>
+
+		<section id="options-noword-sep">
+			<title>Additional word characters</title>
+			<para>
+				The editor recognizes character sequences that consist of letters
+				and characters only as "words". This influences the way word by word
+				jumping is done, or when selecting text using a doubleclick.
+				Every character that is entered for this option is considered a "word"
+				character and thus does not mark a word boundary.
+			</para>
+			<para>
+				By putting e.g. an underscore into this field, the text <literal>MY_TABLE</literal> is
+				recognized as a single word instead of two words (which is the default).
+			</para>
+		</section>
+
+		<section id="options-auto-close-bracket">
+			<title>Insert closing brackets for</title>
+			<para>
+        To enable auto-completion of brackets, enter pairs of characters that should automatically be "closed", e.g.
+        <literal>()''</literal> will automatically insert a closing bracket when an opening bracket is typed. To auto-complete
+        quote characters enter two quotes.
+			</para>
+      <para>
+        To disable automatic closing of brackets enter nothing in this input field.
+      </para>
+		</section>
+
+    <section id="macro-expansion-keystroke">
+      <title>Macro expansion key</title>
+      <para>
+        This defines the key combination that triggers the detection of
+        <link linkend="expandable-macro">expandable macros</link>.
+      </para>
+    </section>
+
+		<section id="options-hilite-current">
+			<title>Highlight current statement</title>
+			<para>
+        When running several statements (e.g. by using "Execute all") this option will highlight the current statement. The editor
+        will be scrolled to make sure the currently executed statement is visible.
+			</para>
+		</section>
+
+		<section id="options-hilite-current-retain">
+			<title>Retain current statement highlight</title>
+			<para>
+        If "Highlight current statement" is enabled and this option is turned on, the highlighting will be kept
+        once execution has finished.
+			</para>
+		</section>
+
+		<section id="options-allow-editing">
+			<title>Allow editing while executing</title>
+			<para>
+        When running a statement, the editor is set to read-only in order to allow a consistent statement highlighting.
+        When this option is turned on, the text in the editor may be modified even if a statement is running. If the
+        text in the editor is modified during execution, statement and error highlighting will not be done any more.
+			</para>
+		</section>
+
+		<section id="settings-right-clickmove">
+			<title>Right click moves cursor</title>
+			<para>
+				Normally a right click in the SQL editor does not change the location
+				of the cursor (caret). If this option is checked, then a right
+				click will also change the caret's location (to where the mouse cursor
+				is located)
+			</para>
+		</section>
+
+		<section id="options-always-execute-selected">
+			<title>Always allow "Execute Selected"</title>
+			<para>
+        If this option is turned off, then <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute Selected</guimenuitem></menuchoice> will
+        only work if text is selected in the editor. If this option is turned on and no text is selected, the complete content of the
+        editor will be executed.
+			</para>
+		</section>
+
+		<section id="options-autojump-statement">
+			<title>Auto advance to next statement</title>
+			<para>
+				If this option is enabled, then the cursor will automatically jump
+				to the next statement in the script, when you execute a single statement
+				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
+				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
+			</para>
+			<para>For more information on how you can execute statements
+				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
+			</para>
+		</section>
+
+		<section id="options-empty-line-delimiter">
+			<title>Allow empty lines as statement delimiter</title>
+			<para>
+				When analysing statements in the editor, it is assumed that individual statements
+				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
+        setting will be used to detect the current statement for auto-completion and when using "Execute Current" inside
+        the editor.
+			</para>
+			<note><para>
+				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
+			</para></note>
+		</section>
+
+    <section id="editor-follow-current-dir">
+      <title>Current directory follows active file</title>
+      <para>
+        If this option is enabled, the file open dialog will default to the
+        directory of the current file in the editor. If no file is
+        loaded in the editor, the directory that is defined  through the
+        "Default directory" option will be selected.
+      </para>
+    </section>
+	</section>
+
+	<section id="options-editor-colors">
+		<title>Editor colors</title>
+
+		<section id="options-editor-curr-line-color">
+			<title>Current line color</title>
+			<para>
+				If you want to highlight the line in which the cursor is located, specify
+				the color for the highlighting. To disable the highlight for the current line,
+				simply "remove" the color selection by clicking on the remove button.
+			</para>
+		</section>
+
+		<section id="options-selection-color">
+			<title>Selected text</title>
+			<para>
+				The color that is used to highlight selected text.
+			</para>
+		</section>
+
+		<section id="options-error-highlight">
+			<title>Error highlight color</title>
+			<para>
+				When a statement is not executed correctly (and the DBMS signals
+				an error) it is highlighted in the editor. With this option
+				you can select the color that is used to highlight the incorrect
+				statement.
+			</para>
+		</section>
+
+		<section id="options-syntax-highlight">
+			<title>Syntax highlighting colors</title>
+			<para>
+				You can change the colors for the different types of keywords in the editor.
+			</para>
+		</section>
+
+	</section>
+
+	<section id="options-fonts">
+		<title>Font settings</title>
+
+		<section id="options-editor-font">
+			<title>Editor font</title>
+			<para>
+				The font that is used in the SQL editor. This font is also
+				used when displaying the SQL source for tables and other
+				database objects in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</section>
+
+		<section id="options-data-font">
+			<title>Data font</title>
+			<para>
+				The font that is used to display result sets. This includes
+				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</section>
+
+		<section id="options-message-font">
+			<title>Message font</title>
+			<para>
+				The font that is used in the message pane of the SQL window.
+			</para>
+		</section>
+
+		<section id="options-standard-font">
+			<title>Standard font</title>
+			<para>
+				The standard font that is used for menus, lables, buttons etc.
+			</para>
+		</section>
+
+	</section>
+
+	<section id="options-completion">
+		<title>Auto-completion options</title>
+
+		<section id="options-completion-paste-case">
+			<title>Paste completion in</title>
+			<para>
+				With this option you can select how the selected object name
+				from the code completion popup is pasted into the editor. <literal>As is</literal>
+				means, that the values will be inserted into the editor as it was
+				retrieved from the database. This option will also be used when SQL statements
+				are generated internally (e.g. for updating the result set or when you
+				export/copy data as SQL statements)
+			</para>
+		</section>
+
+		<section id="options-sort-completion-by">
+			<title>Sort pasted columns by</title>
+			<para>
+        When selecting to paste all (or several columns) from the popup window,
+        you can select with this option, in which order the columns should be written
+        into the editor.
+			</para>
+		</section>
+
+		<section id="options-close-search">
+			<title>Close completion with search</title>
+			<para>
+				When using the quicksearch feature in the <link linkend="command-completion">code completion</link>
+				this option controls the behaviour when hitting the ESC key. If this option
+				is enabled, the ESC key will also close the popup window with the available
+				choices. If this option is disabled, the ESC key will only close the quicksearch
+				<emphasis>input</emphasis> field.
+			</para>
+		</section>
+
+		<section id="options-sort-popup">
+			<title>Sort entries in popup</title>
+			<para>
+        If this is enabled, columns are sorted alphabetically in the popup.
+        If not, they are listed in the order as they are returned by the the database.
+			</para>
+		</section>
+
+		<section id="options-completion-match-anywhere">
+			<title>Quick search matches anywhere</title>
+			<para>
+        If this option is enabled, the typed characters match anywhere in the object name.
+        If this optioin is disabled, the object name must start with the entered search value.
+			</para>
+		</section>
+
+		<section id="options-completion-filter">
+			<title>Filter by quicksearch</title>
+			<para>
+        When this option is enabled, only those entries are shown in the popup that match the entered values in the quick search.
+			</para>
+		</section>
+
+  </section>
+
+	<section id="options-workspace">
+		<title>Workspace options</title>
+		<section id="options-save-wksp">
+			<title>Auto-Save workspace</title>
+			<para>
+				If this option is enabled, the current workspace is saved each time you run
+				a SQL statement.
+			</para>
+		</section>
+
+		<section id="options-backup-wksp">
+			<title>Create workspace backup</title>
+			<para>
+				If this option is enabled the current workspace file will be backed up, before
+				saving the new workspace. You can keep multiple versions of the workspace by
+				supplying a number in the "Max. Backups" input field. If a value > 1 is
+				entered, saving the workspace will create a new "version" of the backup file.
+				The versions will have the version number appended (e.g. <literal>testdata.wksp.1</literal>,
+				<literal>testdata.wksp.2</literal> and so on). The most recent version is the one with the
+				highest number.
+			</para>
+		</section>
+
+		<section id="options-wksp-bck-dir">
+			<title>Workspace backup directory</title>
+			<para>
+				By default the backups for the workspaces are stored in the same directory
+				as the workspace file itself. If you want to keep the (versioned) backups in a
+				separate directory, you can specify it here.
+			</para>
+			<para>
+				If you specify a relative directory, it will be relative to the
+				<link linkend="config-dir">config directory</link>.
+			</para>
+		</section>
+
+		<section id="options-wksp-external-files">
+			<title>Remember open files in workspace</title>
+			<para>
+				You can customize how external files (that have been loaded using
+				<menuchoice><guimenu>File</guimenu><guimenuitem>Open</guimenuitem></menuchoice>) are
+				remembered in the workspace. You can select three different options:
+			</para>
+
+			<informaltable frame="none" rowsep="0" colsep="0" pgwide="1">
+
+				<tgroup cols="2"  align="left">
+					<?dbhtml cellspacing="2" ?>
+					<?dbhtml cellpadding="0" ?>
+					<?dbfo cellpadding="0" ?>
+
+					<colspec colname="c1" colwidth="1*" />
+					<colspec colname="c2" colwidth="4*" />
+
+					<tbody valign="top">
+						<row>
+							<entry role="nowrap">Content and filename</entry>
+							<entry>
+								<para>
+									When this option is selected, the filename that is loaded in the editor
+									tab will be stored in the workspace. The next time the workspace is loaded
+									the file is opened as well. This is the default setting
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>Content only</entry>
+							<entry>
+								<para>
+									When this option is selected, only the content of the editor tab is
+									save (just like any other editor tab), but the link to the filename is
+									removed. The next time the workspace is loaded, the file will <emphasis role="bold">not</emphasis>
+									be opened.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>Nothing</entry>
+							<entry>
+								<para>
+									Neither the content, nor the filename will be saved. The next time th
+									workspace is loaded, the editor tab will be empty.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+
+		</section>
+
+	</section>
+
+	<section id="options-data-display">
+		<title>Options for displaying data</title>
+
+		<section id="option-sort-collator">
+      <title>Sort Locale</title>
+      <para>
+      	When you sort the result set, characters values will be sorted case-sensitiv by default.
+      	This is caused by the <literal>compareTo()</literal> method available in the Java
+      	environment which puts lower case characters in front of upper case characters when sorting.
+				With the "Sort Locale" option you can select which language rules should be applied
+				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
+      </para>
+    </section>
+
+		<section id="option-selection-summary">
+      <title>Show selection summary in statusbar</title>
+      <para>
+				If this option is enabled the number of selected rows in the result will be displayed
+				in the status bar.
+      </para>
+			<para>
+				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
+				while selecting with the mouse), the statusbar will display the sum of the selected values.
+			</para>
+    </section>
+
+		<section id="options-multiline">
+			<title>Displaying multi-line values</title>
+			<para>
+				&wb-productname; uses a special display component for the contents
+				of <literal>CLOB</literal> columns that is capable of displaying
+				multiple lines. This component honors newlines and linefeeds in the data retrieved from the database and
+        is capable of using word wrapping for long lines (even if no newlines are embedded).
+			</para>
+			<para>
+        By default only <literal>CLOB</literal> are considered to be able to contain multiple lines, so
+        <literal>VARCHAR</literal> columns are usually not treated as multi-line columns.
+        If your database stores text in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value will be displayed with the
+        multiline component.
+			</para>
+			<para>
+				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
+				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
+        will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
+        length of the column, not the actual length of the data.
+			</para>
+			<para>
+				Displaying data using the multiline component is slower than using the standard (single line) component.
+			</para>
+			<para>
+				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
+			</para>
+		</section>
+
+		<section id="options-retrieve-column-remarks">
+			<title>Retrieve column remarks for queries</title>
+			<para>
+				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tooltip.
+        As this requires additional overhead after processing a query, it can be disabled for performance reasons.
+			</para>
+		</section>
+
+		<section id="options-def-max-rows">
+			<title>Default max. Rows</title>
+			<para>
+        When adding a SQL panel, this number will be used as a default for the <link linkend="max-rows-display">max. rows</link>
+        value for the new panel.
+			</para>
+		</section>
+
+		<section id="options-max-rows-warning">
+			<title>Show max. rows warning</title>
+			<para>
+        If this option is enabled the result tab will show a warning sign if the limit defined
+        by the <link linkend="max-rows-display">max. rows</link> setting is reached, indicating that the result
+        might be incomplete.
+			</para>
+		</section>
+
+		<section id="options-row-numbers">
+			<title>Show row numbers</title>
+			<para>
+        If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
+			</para>
+		</section>
+
+		<section id="options-show-generating-sql">
+			<title>Show row numbers</title>
+			<para>
+        If this option is enabled, the SQL that produced a result set is shown directly above the data inside
+        each result tab.
+			</para>
+		</section>
+
+		<section id="options-null-value-literal">
+			<title><literal>NULL</literal> string</title>
+			<para>
+				The specified value will be displayed instead of <literal>NULL</literal> values in the result of a SQL statement.
+			</para>
+		</section>
+
+		<section id="column-width-settings">
+			<title>Column width settings</title>
+
+			<simplesect id="options-auto-optimize-column-width">
+				<title>Automatically adjust column widths</title>
+				<para>
+					If this option is enabled, the widths of the result set columns are automatically
+					adjusted to fit the largest value (respecting the min. and max. size settings) after
+					retrieving data. Note that you can manually optimize the column widths using
+					<menuchoice><guimenu>View</guimenu><guimenuitem>Optimize width for all columns</guimenuitem></menuchoice>.
+				</para>
+			</simplesect>
+
+			<simplesect id="options-optimize-include-header">
+				<title>Adjust to column headers</title>
+				<para>
+					When calculating the optimal width for a column (either manually
+					or if "Auto adjust column widths" is enabled, then the column's
+					label will be included in the width calculation if this option
+					is enabled. If this option is disabled, and the column contains
+					very short values, the column width could be smaller than the
+					column's label.
+				</para>
+				<para>
+					This option is also used when manually optimizing the column width,
+				</para>
+			</simplesect>
+
+			<simplesect id="options-max-column-width">
+				<title>Max. column width</title>
+				<para>When the initial display size of a column is calculated, or if
+					you optimize the column widths to fit the actual data, columns will not exceed this
+					width. This is useful when displaying large character columns.
+				</para>
+			</simplesect>
+
+			<simplesect id="options-min-column-width">
+				<title>Min. column width</title>
+				<para>When the initial display size of a column is calculated, or if
+					you optimize the column widths to fit the actual data, columns will not exceed this
+					width.
+				</para>
+			</simplesect>
+		</section>
+
+		<section id="row-height-settings">
+			<title>Row height settings</title>
+			<simplesect id="options-auto-optimize-row-height">
+				<title>Automatically adjust row height</title>
+				<para>
+					If this option is enabled, the height of each column is automatically adjusted after data
+					retrieval to display as many lines of the column values (for character columns) as possible.
+					Note that you can manually optimize the row height using
+					<menuchoice><guimenu>View</guimenu><guimenuitem>Optimize row height</guimenuitem></menuchoice>.
+				</para>
+				<para>
+					Not every (character) column is displayed in a manner that multiple lines will be displayed.
+					The default setting is to always display <literal>CLOB</literal> columns as multiline.
+					<literal>VARCHAR</literal> (and <literal>CHAR</literal>) columns will only be displayed in
+					multiline mode if they can hold more than 250 characters. This limit
+					can be <link linkend="options-multiline">changed</link>.
+				</para>
+			</simplesect>
+
+			<simplesect id="options-allow-row-resize">
+				<title>Allow row height resizing</title>
+				<para>
+					If this option is enabled, you can manually adjust the height of each row using the mouse.
+					This option does not need to be enabled in order to (automatically) optimize the row height.
+				</para>
+			</simplesect>
+
+			<simplesect id="options-rowheight-max-lines">
+				<title>Max. number of lines</title>
+				<para>
+					When calculating the optimimal height for each row, the number of lines defined
+					with this option will never be exceeded.
+				</para>
+			</simplesect>
+
+		</section>
+
+	</section>
+
+	<section id="options-data-formatting">
+		<title>Options for formatting data</title>
+
+		<section id="options-date-format">
+			<title>Date, timestamp and time formats</title>
+			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
+				set. For details on the format of this option, please refer to the
+				documentation of the <ulink url="http://java.sun.com/javase/6/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				This format is also used when parsing input for date or timestamp fields, so if you
+				enter a date while <link linkend="edit-data">editing</link> the data,
+				make sure you enter it the same way as defined with this option.
+			</para>
+			<para>
+				Here is an overview of the letters and their meaning that can be used to format
+				the date and timestamp values. Be aware that case matters!
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Letter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
+							<row><entry>y</entry><entry>Year (Number)</entry></row>
+							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
+							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
+							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
+							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
+							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
+							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
+							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
+							<row><entry>a</entry><entry>AM/PM marker</entry></row>
+							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
+							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
+							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
+							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
+							<row><entry>m</entry><entry>Minute in hour</entry></row>
+							<row><entry>s</entry><entry>Second in minute</entry></row>
+							<row><entry>S</entry><entry>Milliseconds</entry></row>
+							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
+							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+		</section>
+
+		<section id="options-ora-data-timestamp">
+			<title>Oracle <literal>DATE</literal> as <literal>TIMESTAMP</literal></title>
+      <indexterm><primary>Oracle</primary><secondary>DATE datatype</secondary></indexterm>
+			<para>
+				The Oracle <literal>DATE</literal> datatype includes the time as well. But the
+				JDBC driver does not retrieve the time part of a DATE column, so when retrieving
+				<literal>DATE</literal> values, this would remove the time stored in the database. If this option is
+				enabled, &wb-productname; will treat Oracle's <literal>DATE</literal> columns
+				as <literal>TIMESTAMP</literal> columns, thus preserving the time information.
+			</para>
+		</section>
+
+		<section id="options-decimal-symbol">
+			<title>Decimal symbol</title>
+			<para>
+				The character which is used as the decimal separator when displaying numbers.
+			</para>
+		</section>
+
+		<section id="options-decimal-digits">
+			<title>Decimal digits</title>
+			<para>Define the maximum number of digits which will be displayed for
+				numeric columns. This only affects the display of the number internally
+				they are still stored as the DBMS returned them. To see the internal
+				value, leave the mouse cursor over the cell. The tooltip which is
+				displayed will contain the number as it was returned by the JDBC driver.
+				When exporting data or copying it to the clipboard, the real value will
+				be used.
+			</para>
+		</section>
+
+	</section>
+
+  <section id="options-data-colors">
+    <title>Data display colors</title>
+
+		<section id="options-alternating-row-colors">
+			<title>Alternate row colors</title>
+			<para>
+				If this color is defined, the rows in the data table will be displayed
+				with alternating background color.
+			</para>
+		</section>
+
+		<section id="options-null-value-color">
+			<title>Color for <literal>NULL</literal> values</title>
+			<para>
+				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
+			</para>
+		</section>
+
+  </section>
+
+	<section id="options-data-edit">
+		<title>Options for data editing</title>
+
+		<section id="options-confirm-update">
+			<title>Confirm result set updates</title>
+			<para>
+        When this option is enabled, the statements which are sent to the
+				database when saving changes to result set table, are displayed before
+				execution. The update can be cancelled at that point if the statements
+				are not correct. The generated statements can also be saved to a file
+				from that window.
+			</para>
+			<note>
+				<para>The statement(s) that are displayed in the confirmation window can not be changed!</para>
+			</note>
+		</section>
+
+		<section id="warn-pending-changes">
+			<title>Confirm discarding changed results</title>
+			<para>
+				When running a statement that would replace a result that has changes
+				that are not saved to the database, you will be prompted whether
+				you want to cancel the current operation that would discard those changes.
+			</para>
+			<para>
+				This applies to statements run in the editor, as well as to changes
+				done in the <link linkend="table-data">Data tab of the DbExplorer</link>.
+			</para>
+			<para>
+				You will not be prompted when running statements in the editor, when the
+				option <link linkend="display-result">Append results</link> is enabled.
+			</para>
+		</section>
+
+		<section id="options-highlight-required">
+			<title>Highlight required fields</title>
+			<para>When editing data either in the result set or in the
+				data tab of the DbExplorer, fields that are set to <literal>NOT NULL</literal>
+				in the underlying table, will be displayed with a different background color
+				if this option is selected.
+			</para>
+		</section>
+
+		<section id="options-required-field-color">
+			<title>Color for required fields</title>
+			<para>
+				If required fields are highlighted during editing, this option
+				defines the background color that is used.
+			</para>
+		</section>
+
+		<section id="options-pkmapping">
+			<title>Default PK Map</title>
+			<para>
+				This property defines a mapping file for primary key columns. The information
+				from that file is read whenever the primary keys for a table of
+				cannot be obtained from the database. For a detailed
+				description on how to define extra primary key columns, please
+				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.
+			</para>
+		</section>
+
+		<section id="options-single-record">
+			<title>Single record dialog</title>
+			<para>
+				When displaying data in the Single record dialog you can customize the width for the
+        input fields, and the default height for <link linkend="options-multiline">multiline</link> columns.
+			</para>
+		</section>
+
+	</section>
+
+	<section id="options-dbexplorer">
+		<title>DbExplorer options</title>
+
+		<section id="options-explorer-as-tab">
+			<title>DB Explorer as Tab</title>
+			<para>The Database Explorer can either be displayed as a separate
+				window or inside the main window as a another tab. If this option is
+				selected, the Db Explorer will be displayed inside the main window. If
+				the option Retrieve DB Explorer is checked as well, the current database
+				scheme will be retrieved upon starting &wb-productname;
+			</para>
+		</section>
+
+		<section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
+			<title>Automatically retrieve objects</title>
+			<para>If this option is enabled, the contents of the database schema is
+				retrieved when the DB Explorer is displayed. If this option is not
+				checked, either the <guibutton>Refresh</guibutton> button or selecting a schema or
+				table type will load the list.
+			</para>
+		</section>
+
+		<section id="options-retrieve-ref-tree" xreflabel="Retrieve foreign key dependecy">
+			<title>Automatically retrieve dependency tree</title>
+			<para>
+        If this option is enabled, the tree display in the "References" and "Referenced by" tabs
+        will automatically be loaded when the list of foreign keys is loaded. If this option
+        is disabled, loading of the tree display must be started manually by clicking on the "reload" button.
+			</para>
+		</section>
+
+    <section id="dbexp-options-show-trigger">
+			<title>Show trigger panel</title>
+      <indexterm><primary>DbExplorer</primary><secondary>show all triggers</secondary></indexterm>
+      <indexterm><primary>Triggers</primary><secondary>show all triggers in DbExplorer</secondary></indexterm>
+
+			<para>
+				By default triggers are shown only in the details of a table. If the
+				option "Show trigger panel" is selected, an additional panel will
+				be displayed in the DbExplorer that displays all triggers in the
+				database independently of their table.
+			</para>
+		</section>
+
+		<section id="dbexp-options-focus-data">
+			<title>Focus to data panel</title>
+			<para>
+				When this option is selected, the focus inside the DbExplorer will
+				be set to the data panel, after an object in the list has been selected
+				and the data panel is visible.
+			</para>
+		</section>
+
+		<section id="dbexp-options-focus-source">
+			<title>Focus to source panel</title>
+			<para>
+				When this option is selected, the focus inside the DbExplorer will
+				be set to the object's source panel, after an object in the list has been selected
+				and the source panel is visible.
+			</para>
+		</section>
+
+
+		<section id="dbexp-options-show-focus">
+			<title>Show focus</title>
+			<para>
+				When this option is selected, a rectangle indicating the currently
+				focused panel will be displayed, to indicate the component that
+				will received keystrokes e.g. shortcuts such as <literal>Ctrl-R</literal>.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-type">
+			<title>Remember object type</title>
+			<para>
+				The list of objects can be filtered with the dropdown. If the
+				option "Remember object type" is selected, the current object type
+				will be stored in the workspace of the current connection, and will
+				be restored the next time.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-sort">
+			<title>Remember sort column</title>
+			<para>
+				When this option is selected, the sort column in the data display
+				of the DbExplorer will be restored after reloading the table data.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-col-order">
+			<title>Remember column order</title>
+			<para>
+				When you <link linkend="dbexplorer-column-reorder">reorder</link> the column
+				in the data display of a table, enabling this option will automatically
+				store the new column order and apply it the next time the table data
+				is displayed.
+			</para>
+		</section>
+
+		<section id="dbexp-options-allow-alter">
+			<title>Allow table altering</title>
+			<para>
+        If this option is enabled, column definitions of a table can directly be altered by editing
+        them inside the "Columns" tab. It also allows to directly change the name of a table in the table list.
+			</para>
+		</section>
+
+		<section id="dbexp-options-use-regex">
+			<title>Use RegEx in Quickfilter</title>
+			<para>
+        If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
+        is used as a regular expression (rather than a "SQL" Expression) to filter the list.
+			</para>
+		</section>
+
+		<section id="dbexp-options-partial-match">
+			<title>Partial match</title>
+			<para>
+        If this option is enabled, then any text that is typed into the quick filter will matched anywhere
+        in the object name. It is equivalent to typing <literal>*foo*</literal> into the quick filter.
+        If this option is enabled and a wildcard is part of the value, then only that wildcard is used.
+        Using <literal>foo*</literal> for the filter while this option is enabled, shows all objects
+        that <emphasis>start</emphasis> with <literal>foo</literal>.
+			</para>
+      <para>
+        This option is only available when the use of regular expressions in the quick filter is disabled.
+			</para>
+		</section>
+
+		<section id="dbexp-options-filter-typing">
+			<title>Filter while typing</title>
+			<para>
+        If this option is enabled, the filter expression is applied while you type. In this case, the
+        "Filter" button does not need to be clicked in order to apply the filter expression.
+			</para>
+		</section>
+
+    <section id="dbexp-options-gen-pk">
+			<title>Generate PK constraint name</title>
+			<para>
+				When displaying the SQL source for a table, a name will be generated
+				for primary key constraint if the current constraint has no name or
+				a system generated name.
+			</para>
+			<para>
+				System generated names are identified using a regular expression
+				that can be <link linkend="manual-setting-system-names">configured</link>.
+			</para>
+			<para>
+				If this option is selected, the generated SQL will not reflect
+				the real statement that was used to create the table!
+			</para>
+		</section>
+
+		<section id="dbexp-options-def-type">
+			<title>Default object type</title>
+			<para>
+				If "Remember object type" is not enabled, you can define a default object
+				type that is selected in the dropdown when the DbExplorer is displayed
+				initially.
+			</para>
+		</section>
+
+		<section id="dbexp-options-tab-location">
+			<title>Object details tabs</title>
+			<para>
+				With this dropdown you can select the position of the details tabs
+				(Columns, Source, Data etc).
+			</para>
+		</section>
+	</section>
+
+	<section id="options-window-title">
+		<title>Window Title</title>
+
+		<para>
+			The title bar of the main window displays displays information
+			about the current connection, workspace and editor file. Some
+			of these elements can be enabled or disabled with the options
+			on this page.
+		</para>
+
+		<section id="options-window-title-appatend">
+			<title>Application name at end</title>
+			<para>
+        If this option is enabled, the Application name will be put at the end
+        of the window title.
+			</para>
+		</section>
+
+		<section id="options-window-showworkspace">
+			<title>Show Workspace name</title>
+			<para>
+				If this option is enabled, the currently loaded workspace name
+				will be displayed in the main window's title.
+			</para>
+		</section>
+
+		<section id="options-window-showgroupname">
+			<title>Show Profile Group</title>
+			<para>
+				If this option is enabled, the group of the current connection
+				profile will be displayed in the main window's title. The name
+				of the current connection profile will always be shown.
+			</para>
+		</section>
+
+		<section id="options-enclose-group">
+			<title>Enclose Group With</title>
+			<para>
+        If you select to display the current profile's group, you can select a pair
+        of characters to put around the group name.
+			</para>
+		</section>
+
+		<section id="options-group-separator">
+			<title>Separator</title>
+			<para>
+        If you select to display the current profile's name and group, you can select the
+        character that separates the two names.
+			</para>
+		</section>
+
+		<section id="options-editor-filename">
+			<title>Editor Filename</title>
+			<para>
+				If the current editor tab contains an external file, you
+				can choose if and which information about the file should be displayed
+				in the window title. You can display nothing, only the filename or
+				the full path information about the current file. The information
+				will be displayed behind the current profile and workspace name.
+			</para>
+		</section>
+
+	</section>
+
+	<section id="options-sql-formatting">
+		<title>SQL Formatting</title>
+      <para>
+        These options influence the behaviour of the SQL Formatter when
+        <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
+      </para>
+			<section id="opt-sql-formatting-maxlength">
+				<title>Max. length for sub-select</title>
+				<para>
+					When the SQL formatter hits a sub-SELECT while
+					parsing it will not reformat any statement which is shorter
+					then the length specified with this option, i.e. any sub-SELECT
+					shorter then this value will be formatted as one single statement without
+					line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
+					details on how the SQL formatting works.
+				</para>
+			</section>
+
+			<section id="opt-sql-formatting-selectcols">
+				<title>Columns in SELECT</title>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting a <literal>SELECT</literal> statement. The default of 1 (one)
+					will put each column into a separate line:
+				</para>
+<programlisting>SELECT p.name,
+       p.firstname,
+       a.city,
+			 a.zip
+FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+				<para>
+					If this is set to 2, this
+					would result in the following formatted SELECT:
+				</para>
+				<programlisting>
+SELECT p.name, p.firstname,
+       a.city, a.zip
+FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+				<para>
+					The above example would list all columns in a single line, if this option
+					is set to 4 (or a higher value):
+				</para>
+				<programlisting>
+SELECT p.name, p.firstname, a.city, a.zip
+FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+			</section>
+
+			<section id="opt-sql-formatting-insertcols">
+				<title>Columns in INSERT</title>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting an <literal>INSERT</literal> statement. A value of one will
+					list each column in a separate line in the <literal>INSERT</literal> part and the <literal>VALUES</literal> part
+				</para>
+<programlisting>
+INSERT INTO PERSON
+(
+  id,
+  firstname,
+  lastname
+)
+VALUES
+(
+  42,
+  'Arthur',
+  'Dent'
+);</programlisting>
+         <para>
+					 When setting this value to 2, the above example would be formatted as follows:
+				 </para>
+
+<programlisting>INSERT INTO PERSON
+  (id, firstname,
+   lastname)
+VALUES
+  (42, 'Arthur',
+   'Dent');</programlisting>
+
+			</section>
+
+			<section id="opt-sql-formatting-updatecols">
+				<title>Columns in UPDATE</title>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting an <literal>UPDATE</literal> statement. A value of 1 (one) will
+					put each column into a separate line:
+				</para>
+<programlisting>
+UPDATE person
+   SET firstname = 'Arthur',
+       lastname = 'Dent'
+WHERE id = 42;</programlisting>
+				<para>
+					With a value of 2, the above example would be formatted as follows:
+				</para>
+<programlisting>
+UPDATE person
+   SET firstname = 'Arthur', lastname = 'Dent'
+WHERE id = 42;</programlisting>
+
+			</section>
+
+			<section id="opt-sql-formatting-quoted-elements">
+				<title>Quoted elements per line</title>
+				<para>
+					This optioin is used when changing the selected text into elements suitable for an <literal>IN</literal> list
+					using <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice></link>.
+					The number of values that are kept on a single line is controlled with this option.
+				</para>
+			</section>
+
+			<section id="opt-sql-formatting-other-elements">
+				<title>Other elements per line</title>
+				<para>
+					This option defines how many values will be put into a single
+					line when creating non-quoted elements (<link linkend="editor-make-in-list">Create non-char SQL List</link>).
+				</para>
+			</section>
+
+			<section id="opt-formatter-lowercase-functions">
+				<title>Lowercase functions</title>
+				<para>
+					If this option is selected, standard ANSI functions will converted to lowercase
+					when formatting a SQL statement.
+				</para>
+			</section>
+
+			<section id="opt-formatter-uppercase-keywords">
+				<title>Uppercase keywords</title>
+				<para>
+					If this option is selected, standard ANSI keywords (<literal>SELECT, UPDATE</literal>)
+					will converted to uppercase when formatting a SQL statement, otherwise they
+					will be converted to lowercase.
+				</para>
+			</section>
+
+			<section id="opt-formatter-comma-space-in-list">
+				<title>Space after comma for IN lists</title>
+				<para>
+					If this option is selected, a space is added after the comma inside an <literal>IN</literal> list.
+				</para>
+			</section>
+
+			<section id="opt-formatter-comma-after-newline">
+				<title>Comma after line break</title>
+				<para>
+					If this option is enabled, the commas inside the <literal>SELECT</literal> list are put on the start of the next line,
+          rather than on same line as the last column.
+				</para>
+        <para>If this option is disabled a <literal>SELECT</literal> statement will be formatted like this:</para>
+<programlisting>SELECT id,
+       lastname,
+       firstname
+FROM person;</programlisting>
+        <para>If this option is enabled the above statement will be formatted like this:</para>
+<programlisting>SELECT id
+       ,lastname
+       ,firstname
+FROM person;</programlisting>
+			</section>
+
+			<section id="opt-formatter-space-after-leading-comma">
+				<title>Space after a comma with line break</title>
+				<para>
+          This option is only available is "Comma after line break" is enabled. In that case it controls
+          if a space character is inserted after the comma.
+				</para>
+			</section>
+
+	</section>
+
+	<section id="options-sql-generation">
+		<title>SQL Generation</title>
+
+		<section id="options-generated-update">
+			<title>Format UPDATEs</title>
+			<para>
+				If formatting of <literal>UPDATE</literal> statements is enabled,
+        generated <literal>UPDATE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</section>
+
+		<section id="options-generated-insert">
+			<title>Format INSERTs</title>
+			<para>
+				If formatting of <literal>INSERT</literal> is enabled, the way they
+        generated <literal>INSERT</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</section>
+
+		<section id="options-generated-delete">
+			<title>Format DELETEs</title>
+			<para>
+				If formatting of <literal>DELETE</literal> is enabled, the way they
+        generated <literal>DELETE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</section>
+
+		<section id="opt-sql-export-include-owner">
+			<title>Include owner in export</title>
+			<para>
+				This setting controls whether &wb-productname; uses the onwer (schema)
+				when creating SQL scripts during exporting data (through WbExport
+				or "Save as"). When this option is selected, the usage of the schema
+				depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting
+				that controls ignoring certain schemas for specific DBMS.
+				When this is option is not selected, the schema/owner will never be used for SQL scripts.
+			</para>
+		</section>
+
+		<section id="options-default-copy-literaltype">
+			<title>Date literals for clipboard</title>
+			<para>
+				Defines the date literal format to be used when copying data
+				as SQL statements <emphasis>to the clipboard</emphasis>. For a detailed description
+				of the different formats please refer to the
+				<link linkend="export-sql-literal-formats">WbExport</link> description.
+				This option does not influence the default format used by the <literal>WbExport</literal>
+				command.
+			</para>
+			<note><para>
+				When you copy data as "Text" (tab-separated) to the clipboard, the date and
+				timestamp format from the <link linkend="options-date-format">general options</link> is used.
+			</para></note>
+		</section>
+
+		<section id="options-default-export-literaltype">
+			<title>Date literals for WbExport</title>
+			<para>
+				Defines the date literal format to be used for the <link linkend="command-export">WbExport</link>
+				command. The value of this option is used if the <literal>-sqlDateLiterals</literal>
+				switch is not supplied when running <literal>WbExport</literal>.
+				This default value is reported when <literal>WbExport</literal> is executed
+				without parameters.
+			</para>
+		</section>
+
+		<section id="options-default-diff-literaltype">
+			<title>Date literals for WbDataDiff</title>
+			<para>
+				Defines the date literal format to be used for the <link linkend="command-data-diff">WbDataDiff</link>
+				command. The value of this option is used if the <literal>-sqlDateLiterals</literal>
+				switch is not supplied when running <literal>WbDataDiff</literal>.
+				This default value is reported when <literal>WbDataDiff</literal> is executed
+				without parameters.
+			</para>
+		</section>
+
+	</section>
+
+	<section id="options-external-tools">
+		<title>External tools</title>
+		<para>
+			On this page, you can define external tools (programs). Currently the only
+			place where this is used, is in the <link linkend="update-blob-editmode">BLOB info dialog</link>,
+			to open the BLOB data with one of the defined external tools.
+		</para>
+		<para>
+			This could be a program to display images, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
+			office documents or a text editor to display text files.
+		</para>
+    <para>
+      If the tool needs additional parameters (e.g. to select a hex editing mode for a text editor), they have to
+      be entered in the "Parameters" field. Do not add parameters to the definition of the executable.
+    </para>
+	</section>
+
+	<section id="options-look-and-feel">
+		<title>Look and Feel</title>
+		<para>
+			If you want to use additional Look and Feels that are not part
+			of the JDK, you can specify them here.
+		</para>
+		<para>
+			A Look And Feel definition consists of a name, the class name to be used and
+			the location of the JAR file that provides the look and feel implementation.
+			The class name that has to be used should be available in the documentation
+			of the look and feel of your choice. The name is &wb-productname; internal
+			and is only used when displaying the list of available Look and Feels.
+		</para>
+		<note><para>
+			The current look and feel is only changed when you click on the
+			<guibutton>Make current</guibutton> button. Simply selecting a different entry
+			in the list on the left side will <emphasis role="bold">not</emphasis>
+			change the look and feel.
+		</para></note>		<para>
+			When you switch the current Look &amp; Feel, you will need to restart the
+			application to activate the new look and feel. Note that if you switch
+			the current Look &amp; Feel it will be changed, regardless whether
+			you close the options dialog using Cancel or OK.
+		</para>
+
+	</section>
+
+</section>

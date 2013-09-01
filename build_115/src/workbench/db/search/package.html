@@ -1,0 +1,14 @@
+<body>
+  Classes to search the contents of a database for a specific text (string).
+  <br/>
+  To search for data stored in tables (or views) two different implementations are available:
+  <ul>
+    <li>ClientSideTableSearcher - will read every each row into memory and use the functionality of the {@link workbench.storage.filter.ColumnComparator}
+    to match text agains retrieved data. This will allow to search e.g. for number as well</li>
+    <li>ServerSideTableSearcher - creates a SQL statement with a <tt>LIKE</tt> condition to find the search criteria. This limits the search
+    to data types that can be compared with <tt>LIKE</tt> (mainly VARCHAR columns)</li>
+  </ul>
+  <br>
+  ObjectSourceSearch will search the source code of any object in the database for a specific string.
+</body>
+

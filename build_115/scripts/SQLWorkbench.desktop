@@ -1,0 +1,16 @@
+[Desktop Entry]
+Comment=
+Comment[en_US]=
+Encoding=UTF-8
+Exec=java -jar sqlworkbench.jar
+GenericName=Workbench
+GenericName[en_US]=SQL Workbench/J
+Icon=workbench32.png
+MimeType=
+Name=SQL Workbench/J
+Name[en_US]=SQL Workbench/J
+Path=
+StartupNotify=false
+Terminal=false
+TerminalOptions=
+Type=Application

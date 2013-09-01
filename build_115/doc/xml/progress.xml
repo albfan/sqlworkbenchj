@@ -1,0 +1,13 @@
+<row>
+	<entry>-showProgress</entry>
+	<entry>
+		<para>Valid values: true, false, &lt;numeric value&gt;</para>
+		<para>
+			Control the update frequence in the statusbar (when running in 
+			GUI mode). The default is every 10th row is reported. To disable
+			the display of the progress specifiy a value of 0 (zero) or the 
+			value <literal>false</literal>. <literal>true</literal> will
+			set the progress interval to 1 (one).
+		</para>
+	</entry>
+</row>

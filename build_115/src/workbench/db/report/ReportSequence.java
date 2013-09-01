@@ -1,0 +1,143 @@
+/*
+ * ReportSequence.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
+ */
+package workbench.db.report;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Iterator;
+
+import workbench.db.SequenceDefinition;
+
+import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
+import workbench.util.WbDateFormatter;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class ReportSequence
+{
+	public static final String TAG_SEQ_DEF = "sequence-def";
+	public static final String TAG_SEQ_NAME = "sequence-name";
+	public static final String TAG_SEQ_CATALOG = "sequence-catalog";
+	public static final String TAG_SEQ_SCHEMA = "sequence-schema";
+	public static final String TAG_SEQ_COMMENT = "sequence-comment";
+	public static final String TAG_SEQ_SOURCE = "sequence-source";
+	public static final String TAG_SEQ_PROPS = "sequence-properties";
+	public static final String TAG_SEQ_PROPERTY = "property";
+
+	private SequenceDefinition sequence;
+	private TagWriter tagWriter = new TagWriter();
+	private String schemaNameToUse = null;
+
+	public ReportSequence(SequenceDefinition def)
+	{
+		this.sequence = def;
+	}
+
+	public SequenceDefinition getSequence()
+	{
+		return this.sequence;
+	}
+
+	public void writeXml(Writer out)
+		throws IOException
+	{
+		StrBuffer line = this.getXml();
+		line.writeTo(out);
+	}
+
+	public void setSchemaNameToUse(String schema)
+	{
+		this.schemaNameToUse = schema;
+	}
+
+	public StrBuffer getXml()
+	{
+		return getXml(new StrBuffer("  "), true);
+	}
+	/**
+	 * Return an XML representation of this view information.
+	 * The columns will be listed alphabetically not in the order
+	 * they were retrieved from the database.
+	 */
+	public StrBuffer getXml(StrBuffer indent, boolean includeSource)
+	{
+		StrBuffer line = new StrBuffer(500);
+		StrBuffer colindent = new StrBuffer(indent);
+		colindent.append(indent);
+
+		tagWriter.appendOpenTag(line, indent, TAG_SEQ_DEF, "name", this.sequence.getSequenceName());
+		line.append('\n');
+		if (StringUtil.isNonEmpty(sequence.getCatalog()))
+		{
+			tagWriter.appendTag(line, colindent, TAG_SEQ_CATALOG, this.sequence.getCatalog());
+		}
+		tagWriter.appendTag(line, colindent, TAG_SEQ_SCHEMA, (this.schemaNameToUse == null ? this.sequence.getSequenceOwner() : this.schemaNameToUse));
+		tagWriter.appendTag(line, colindent, TAG_SEQ_NAME, this.sequence.getSequenceName());
+		tagWriter.appendTagConditionally(line, colindent, TAG_SEQ_COMMENT, sequence.getComment());
+
+		writeSequenceProperties(line, colindent);
+		if (includeSource)
+		{
+			writeSourceTag(tagWriter, line, colindent, sequence.getSource());
+		}
+		tagWriter.appendCloseTag(line, indent, TAG_SEQ_DEF);
+		return line;
+	}
+
+	public void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
+	{
+		if (source == null) return;
+		tagWriter.appendOpenTag(target, indent, TAG_SEQ_SOURCE);
+		target.append(TagWriter.CDATA_START);
+		target.append(StringUtil.rtrim(source));
+		target.append(TagWriter.CDATA_END);
+		target.append('\n');
+		tagWriter.appendCloseTag(target, indent, TAG_SEQ_SOURCE);
+	}
+
+	protected void writeSequenceProperties(StrBuffer toAppend, StrBuffer indent)
+	{
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		StrBuffer propindent = new StrBuffer(myindent);
+		propindent.append("  ");
+
+		tagWriter.appendOpenTag(toAppend, indent, TAG_SEQ_PROPS);
+		toAppend.append('\n');
+		Iterator<String> itr = this.sequence.getProperties();
+		while (itr.hasNext())
+		{
+			String propName = itr.next();
+			Object value = this.sequence.getSequenceProperty(propName);
+			TagAttribute name = new TagAttribute("name", propName);
+			TagAttribute val = new TagAttribute("value", (value == null ? "" : WbDateFormatter.getDisplayValue(value)));
+			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, val);
+			toAppend.append("/>\n");
+		}
+		tagWriter.appendCloseTag(toAppend, indent, TAG_SEQ_PROPS);
+	}
+
+}
