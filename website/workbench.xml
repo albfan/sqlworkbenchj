@@ -421,6 +421,13 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 114<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build114.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build114-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build114.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 113<br/>
           <ul>
             <li><a href="archive/Workbench-Build113.zip">All Platforms</a></li>
@@ -514,18 +521,6 @@ WHERE id=42;</p>
           <ul>
             <li><a href="archive/Workbench-Build100.zip">All Platforms</a></li>
             <li><a href="archive/WorkbenchSrc-Build100.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 99<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build99.zip">All Platforms</a></li>
-            <li><a href="archive/WorkbenchSrc-Build99.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 98<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build98.zip">All Platforms</a></li>
-            <li><a href="archive/WorkbenchSrc-Build98.zip">Source Code</a></li>
           </ul>
         </li>
       </ul>

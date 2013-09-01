@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-08-31">
+  <release build="115" date="2013-09-01">
     <entry dev-build="17" type="enh">Implemented a workaround for an Oracle JDBC driver bug to correctly display comments for materialized views.</entry>
     <entry dev-build="16" type="enh">For SQL Server the source for filtered indexes is now shown correctly.</entry>
     <entry dev-build="16" type="enh">WbDataDiff now supports the -excludeIgnored parameter that will exclude the ignored columns from any UPDATE or INSERT statement.</entry>
