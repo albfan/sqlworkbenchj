@@ -1,5 +1,7 @@
 Features:
 ---------
+- Jump to error line for (CREATE PROCEDURE and similar statements)
+- assign multiple variables using WbVarDef with a single SQL statement
 - Profiles
   - Import profiles from other WbProfiles.xml
   - Load different WbProfiles.xml from within the connection dialog
@@ -27,7 +29,7 @@ Features:
 - Compare ResultSets
 - Support ${guid} calls
   (or more generic: Support ${...} syntax for calling function during data editing )
-- Filterdefinition: 
+- Filterdefinition:
   - show unique values per column as a dropdown in the dialog
   - autofilter dropdown directly in the result set
 - Paging for console mode
@@ -61,4 +63,3 @@ ToDo/Cleanup
 - Rework handling of feedback messages during SQL execution so that messages
   show up as soon as the command generates them
   (might remove the need for the MessageBuffer)
-  
