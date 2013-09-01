@@ -328,7 +328,7 @@ WHERE id=42;</p>
         <content>
         <not-mysql/>
           <p style="margin-top:15px;text-align:center;font-weight:bold">
-                SQL Workbench/J requires Java 6 (aka JDK 1.6) or later!
+                SQL Workbench/J requires Java 6 (aka JDK 1.6) or later. Using Java 7 is highly recommended.
             </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>

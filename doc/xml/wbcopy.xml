@@ -244,6 +244,18 @@
 						</entry>
 					</row>
 
+          <row>
+            <entry id="copy-trim-char-data">-trimCharData</entry>
+
+            <entry>
+              <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                If this parameter is set to true, values from <literal>CHAR</literal> columns will be trimmed from trailing
+                whitespace. This is equivalent to the <link linkend="profile-trim-char-data">Trim CHAR data</link> in the connection profile.
+              </para>
+            </entry>
+          </row>
+
 					&progress-parameter;
 
 				</tbody>
@@ -364,9 +376,9 @@
               </para>
 						</entry>
 					</row>
-          
+
 					<row>
-						<entry>-ignoreDefaults</entry>
+						<entry>-removeDefaults</entry>
 						<entry>
 							<para>
                 Valid values are <literal>true</literal> or <literal>false</literal>.
