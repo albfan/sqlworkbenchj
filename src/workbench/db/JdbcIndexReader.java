@@ -139,6 +139,11 @@ public class JdbcIndexReader
 		String pkIndexName = null;
 		PkDefinition pk = null;
 
+		// apparently some drivers (e.g. for DB2/HOST) do support column names in the ResultSet
+		// other drivers (e.g. MonetDB) do not return the information when the column index is used.
+		// Therefor we need a switch for this.
+		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
+
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
 			String catalog = tbl.getCatalog();
@@ -154,7 +159,7 @@ public class JdbcIndexReader
 				{
 					if (pkName == null)
 					{
-						pkName = keysRs.getString(6); // "PK_NAME"
+						pkName = useColumnNames ? keysRs.getString("PK_NAME") : keysRs.getString(6);
 					}
 					if (pkIndexNameColumn != null && pkIndexName == null)
 					{
@@ -166,8 +171,8 @@ public class JdbcIndexReader
 					{
 						pkStatus = keysRs.getString(pkStatusColumn);
 					}
-					String colName = keysRs.getString(4); // "COLUMN_NAME"
-					int sequence = keysRs.getInt(5); // "KEY_SEQ"
+					String colName = useColumnNames ? keysRs.getString("COLUMN_NAME") : keysRs.getString(4);
+					int sequence = useColumnNames ? keysRs.getInt("KEY_SEQ") : keysRs.getInt(5);
 					if (sequence < 1)
 					{
 						LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");
