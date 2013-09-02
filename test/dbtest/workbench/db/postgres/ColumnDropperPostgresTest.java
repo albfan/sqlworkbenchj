@@ -89,7 +89,7 @@ public class ColumnDropperPostgresTest
 		String sql = dropper.getScript().toString();
 
 		assertNotNull(sql);
-		System.out.println(sql);
+//		System.out.println(sql);
 		ScriptParser p = new ScriptParser(sql.trim());
 		p.setReturnStartingWhitespace(false);
 		assertEquals(4, p.getSize());
