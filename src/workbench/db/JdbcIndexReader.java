@@ -703,6 +703,8 @@ public class JdbcIndexReader
 				}
 				defs.put(indexName, def);
 
+				// OracleIndexReader returns the index type directly
+				// so we need to check the type of the column
 				int type = idxRs.getMetaData().getColumnType(7);
 				if (type == Types.VARCHAR)
 				{

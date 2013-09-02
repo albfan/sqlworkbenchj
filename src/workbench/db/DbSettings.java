@@ -606,22 +606,6 @@ public class DbSettings
 		return types.contains(type.toLowerCase());
 	}
 
-//	String mapIndexType(Object type)
-//	{
-//		if (type == null) return null;
-//		if (type instanceof Number)
-//		{
-//			return mapIndexType(((Number)type).intValue());
-//		}
-//		if (type instanceof String)
-//		{
-//			int t = StringUtil.getIntValue((String)type, Integer.MIN_VALUE);
-//			if (t == Integer.MIN_VALUE) return (String)type;
-//			return mapIndexType(t);
-//		}
-//		return null;
-//	}
-
 	String mapIndexType(int type)
 	{
 		switch (type)
