@@ -1644,7 +1644,7 @@ public class DbSettings
 		for (String verb : userVerbs)
 		{
 			if (StringUtil.isEmptyString(verb)) continue;
-			
+
 			if (verb.charAt(0) == '-')
 			{
 				noUpdateCountVerbs.remove(verb.substring(1));
@@ -1666,4 +1666,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "sequence.identity.hide", true);
 	}
 
+	public boolean useColumnNameForMetadata()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.columnnames", true);
+	}
 }

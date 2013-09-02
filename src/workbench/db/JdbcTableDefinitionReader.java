@@ -83,6 +83,11 @@ public class JdbcTableDefinitionReader
 		DbSettings dbSettings = dbConnection.getDbSettings();
 		DbMetadata dbmeta = dbConnection.getMetadata();
 
+		// apparently some drivers (e.g. for DB2/HOST) do support column names in the ResultSet
+		// other drivers (e.g. MonetDB) do not return the information when the column index is used.
+		// Therefor we need a switch for this.
+		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
+
 		String tablename = SqlUtil.removeObjectQuotes(table.getTableName());
 		String schema = SqlUtil.removeObjectQuotes(table.getSchema());
 		String catalog = SqlUtil.removeObjectQuotes(table.getCatalog());
@@ -127,22 +132,20 @@ public class JdbcTableDefinitionReader
 				jdbc4 = name.equals("IS_AUTOINCREMENT");
 			}
 
-			// apparently some drivers (e.g. for DB2) do not return column names
-			// so I can only access the information by column index, not by name!
 			while (rs != null && rs.next())
 			{
-				String colName = StringUtil.trim(rs.getString(4));
-				int sqlType = rs.getInt(5);  // "COLUMN_NAME"
-				String typeName = rs.getString(6); // "TYPE_NAME"
+				String colName = StringUtil.trim(useColumnNames ? rs.getString("COLUMN_NAME") : rs.getString(4));
+				int sqlType = useColumnNames ? rs.getInt("DATA_TYPE") : rs.getInt(5);
+				String typeName = StringUtil.trim(useColumnNames ? rs.getString("TYPE_NAME") : rs.getString(6));
 
 				sqlType = typeResolver.fixColumnType(sqlType, typeName);
 				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), sqlType);
 
-				int size = rs.getInt(7); // "COLUMN_SIZE"
+				int size = useColumnNames ? rs.getInt("COLUMN_SIZE") : rs.getInt(7);
 				int digits = -1;
 				try
 				{
-					digits = rs.getInt(9); // "DECIMAL_DIGITS"
+					digits = useColumnNames ? rs.getInt("DECIMAL_DIGITS") : rs.getInt(9);
 				}
 				catch (Exception e)
 				{
@@ -150,8 +153,8 @@ public class JdbcTableDefinitionReader
 				}
 				if (rs.wasNull()) digits = -1;
 
-				String remarks = rs.getString(12); // "REMARKS"
-				String defaultValue = rs.getString(13); // "COLUMN_DEF"
+				String remarks = useColumnNames ? rs.getString("REMARKS") : rs.getString(12);
+				String defaultValue = useColumnNames ? rs.getString("COLUMN_DEF") : rs.getString(13);
 				if (defaultValue != null && dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
@@ -160,16 +163,21 @@ public class JdbcTableDefinitionReader
 				int position = -1;
 				try
 				{
-					position = rs.getInt(17); // "ORDINAL_POSITION"
+					position = useColumnNames ? rs.getInt("ORDINAL_POSITION") : rs.getInt(17);
 				}
-				catch (SQLException e)
+				catch (Exception e)
 				{
 					LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
 					position = -1;
 				}
 
-				String nullable = rs.getString(18); // "IS_NULLABLE"
-				String increment = jdbc4 ? rs.getString(23) : "NO"; // "IS_AUTOINCREMENT"
+				String nullable = useColumnNames ? rs.getString("IS_NULLABLE") : rs.getString(18);
+
+				String increment = "NO";
+				if (jdbc4)
+				{
+					increment = useColumnNames ? rs.getString("IS_AUTOINCREMENT") : rs.getString(23);
+				}
 				boolean autoincrement = StringUtil.stringToBool(increment);
 
 				String display = typeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits);
