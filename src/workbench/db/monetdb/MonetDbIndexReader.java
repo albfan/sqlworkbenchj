@@ -1,5 +1,5 @@
 /*
- * SqlServerViewReader.java
+ * MonetDbIndexReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -20,42 +20,27 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.mssql;
+package workbench.db.monetdb;
 
-import workbench.db.DefaultViewReader;
-import workbench.db.NoConfigException;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
-import workbench.util.StringUtil;
+import workbench.db.DbMetadata;
+import workbench.db.JdbcIndexReader;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class SqlServerViewReader
-	extends DefaultViewReader
+public class MonetDbIndexReader
+	extends JdbcIndexReader
 {
 
-	public SqlServerViewReader(WbConnection con)
+	public MonetDbIndexReader(DbMetadata meta)
 	{
-		super(con);
+		super(meta);
 	}
 
 	@Override
-	public CharSequence getViewSource(TableIdentifier viewId)
-		throws NoConfigException
+	public String getSQLKeywordForType(String type)
 	{
-		SpHelpTextRunner runner = new SpHelpTextRunner();
-		CharSequence sql = runner.getSource(connection, viewId.getRawCatalog(), viewId.getRawSchema(), viewId.getRawTableName());
-		if (!StringUtil.endsWith(sql, ';'))
-		{
-			StringBuilder full = new StringBuilder(sql.length() + 1);
-			full.append(sql);
-			full.append(';');
-			return full;
-		}
-		return sql;
+		return null;
 	}
-
 }

@@ -385,18 +385,17 @@ public class JdbcIndexReader
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER + " ", "");
+			sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, true);
 		}
 
 		if (StringUtil.isEmptyString(type))
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER + " ", type);
+			sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, true);
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
 		}
-
 
 		String expr = indexDefinition.getExpression();
 		if (indexDefinition.isNonStandardExpression()) // currently only Firebird
@@ -405,7 +404,7 @@ public class JdbcIndexReader
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, expr);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, expr);
 		}
 
 		if (!StringUtil.equalStringIgnoreCase("ASC", indexDefinition.getDirection()))
@@ -414,7 +413,7 @@ public class JdbcIndexReader
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.IDX_DIRECTION_PLACEHOLDER + " ", "");
+			sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.IDX_DIRECTION_PLACEHOLDER, true);
 		}
 
 		sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
@@ -672,15 +671,21 @@ public class JdbcIndexReader
 		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
 		boolean isPartitioned = false;
 
+		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
+
 		while (idxRs != null && idxRs.next())
 		{
-			boolean nonUniqueFlag = idxRs.getBoolean(4); // "NON_UNIQUE"
-			String indexName = idxRs.getString(6); // "INDEX_NAME"
+			boolean nonUniqueFlag = useColumnNames ? idxRs.getBoolean("NON_UNIQUE") : idxRs.getBoolean(4);
+			String indexName = useColumnNames ? idxRs.getString("INDEX_NAME"): idxRs.getString(6);
 
 			if (idxRs.wasNull() || indexName == null) continue;
 
-			String colName = idxRs.getString(9); // "COLUMN_NAME"
-			String dir = (supportsDirection ? idxRs.getString(10) : null); // "ASC_OR_DESC"
+			String colName = useColumnNames ? idxRs.getString("COLUMN_NAME") : idxRs.getString(9);
+			String dir = null;
+			if (supportsDirection)
+			{
+				dir = useColumnNames ? idxRs.getString("ASC_OR_DESC") : idxRs.getString(10);
+			}
 
 			IndexDefinition def = defs.get(indexName);
 			if (def == null)
@@ -698,13 +703,17 @@ public class JdbcIndexReader
 				}
 				defs.put(indexName, def);
 
-				// The ResultSet produced by getIndexInfo() might not be 100%
-				// compliant with the JDBC API as e.g. our own OracleIndexReader
-				// directly returns the index type as a string not as a number
-				// So the value of the type column is retrieved as an object
-				// mapIndexType() will deal with that.
-				Object type = idxRs.getObject("TYPE");
-				def.setIndexType(metaData.getDbSettings().mapIndexType(type));
+				int type = idxRs.getMetaData().getColumnType(7);
+				if (type == Types.VARCHAR)
+				{
+					String typeName = idxRs.getString("TYPE");
+					def.setIndexType(typeName);
+				}
+				else if (SqlUtil.isNumberType(type))
+				{
+					int typeNr = useColumnNames ? idxRs.getInt("TYPE") : idxRs.getInt(7);
+					def.setIndexType(metaData.getDbSettings().mapIndexType(typeNr));
+				}
 			}
 			def.addColumn(colName, dir);
 			processIndexResultRow(idxRs, def, tbl);

@@ -147,25 +147,26 @@ public class DefaultFKHandler
 		throws SQLException
 	{
 		DataStore ds = new DataStore(rs, false);
+		boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
 		try
 		{
 			while (rs.next())
 			{
 				int row = ds.addRow();
-				ds.setValue(row, 0, rs.getString(1)); // PKTABLE_CAT
-				ds.setValue(row, 1, rs.getString(2)); // PKTABLE_SCHEM
-				ds.setValue(row, 2, rs.getString(3)); // PKTABLE_NAME
-				ds.setValue(row, 3, rs.getString(4)); // PKCOLUMN_NAME
-				ds.setValue(row, 4, rs.getString(5)); // FKTABLE_CAT
-				ds.setValue(row, 5, rs.getString(6)); // FKTABLE_SCHEM
-				ds.setValue(row, 6, rs.getString(7)); // FKTABLE_NAME
-				ds.setValue(row, 7, rs.getString(8)); // FKCOLUMN_NAME
-				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9))); // KEY_SEQ
-				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10))); // UPDATE_RULE
-				ds.setValue(row, 10, Integer.valueOf(rs.getInt(11))); // DELETE_RULE
-				ds.setValue(row, 11, rs.getString(12)); // FK_NAME
-				ds.setValue(row, 12, rs.getString(13)); // PK_NAME
-				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14))); // DEFERRABILITY
+				ds.setValue(row, 0, useColumnNames ? rs.getString("PKTABLE_CAT") : rs.getString(1)); // PKTABLE_CAT
+				ds.setValue(row, 1, useColumnNames ? rs.getString("PKTABLE_SCHEM") : rs.getString(2)); // PKTABLE_SCHEM
+				ds.setValue(row, 2, useColumnNames ? rs.getString("PKTABLE_NAME") : rs.getString(3)); // PKTABLE_NAME
+				ds.setValue(row, 3, useColumnNames ? rs.getString("PKCOLUMN_NAME") : rs.getString(4)); // PKCOLUMN_NAME
+				ds.setValue(row, 4, useColumnNames ? rs.getString("FKTABLE_CAT") : rs.getString(5)); // FKTABLE_CAT
+				ds.setValue(row, 5, useColumnNames ? rs.getString("FKTABLE_SCHEM") : rs.getString(6)); // FKTABLE_SCHEM
+				ds.setValue(row, 6, useColumnNames ? rs.getString("FKTABLE_NAME") : rs.getString(7)); // FKTABLE_NAME
+				ds.setValue(row, 7, useColumnNames ? rs.getString("FKCOLUMN_NAME") : rs.getString(8)); // FKCOLUMN_NAME
+				ds.setValue(row, 8, Integer.valueOf(useColumnNames ? rs.getInt("KEY_SEQ") : rs.getInt(9))); // KEY_SEQ
+				ds.setValue(row, 9, Integer.valueOf(useColumnNames ? rs.getInt("UPDATE_RULE") : rs.getInt(10))); // UPDATE_RULE
+				ds.setValue(row, 10, Integer.valueOf(useColumnNames ? rs.getInt("DELETE_RULE") : rs.getInt(11))); // DELETE_RULE
+				ds.setValue(row, 11, useColumnNames ? rs.getString("FK_NAME") : rs.getString(12)); // FK_NAME
+				ds.setValue(row, 12, useColumnNames ? rs.getString("PK_NAME") : rs.getString(13)); // PK_NAME
+				ds.setValue(row, 13, Integer.valueOf(useColumnNames ? rs.getInt("DEFERRABILITY") : rs.getInt(14))); // DEFERRABILITY
 			}
 			ds.resetStatus();
 		}

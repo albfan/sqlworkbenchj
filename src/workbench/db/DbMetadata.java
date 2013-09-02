@@ -1079,7 +1079,7 @@ public class DbMetadata
 	 * @see #isReservedWord(java.lang.String)
 	 * @see #storesLowerCaseIdentifiers()
 	 * @see #storesMixedCaseIdentifiers()
-	 * @see #storesUpperCaseIdentifiers() 
+	 * @see #storesUpperCaseIdentifiers()
 	 */
 	@Override
 	public boolean needsQuotes(String name)
@@ -1406,17 +1406,19 @@ public class DbMetadata
 				}
 			}
 
+			boolean useColumnNames = dbSettings.useColumnNameForMetadata();
+
 			while (tableRs != null && tableRs.next())
 			{
-				String cat = tableRs.getString(1);
-				String schema = tableRs.getString(2);
-				String name = tableRs.getString(3);
-				String ttype = tableRs.getString(4);
+				String cat = useColumnNames ? tableRs.getString("TABLE_CAT") : tableRs.getString(1);
+				String schema = useColumnNames ? tableRs.getString("TABLE_SCHEM") : tableRs.getString(2);
+				String name = useColumnNames ? tableRs.getString("TABLE_NAME") : tableRs.getString(3);
+				String ttype = useColumnNames ? tableRs.getString("TABLE_TYPE") : tableRs.getString(4);
 				if (name == null) continue;
 
 				if (filter.isExcluded(ttype, name)) continue;
 
-				String remarks = tableRs.getString(5);
+				String remarks = useColumnNames ? tableRs.getString("REMARKS") : tableRs.getString(5);
 
 				boolean isSynoym = "SYNONYM".equals(ttype);
 

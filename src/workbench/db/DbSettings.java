@@ -606,21 +606,21 @@ public class DbSettings
 		return types.contains(type.toLowerCase());
 	}
 
-	String mapIndexType(Object type)
-	{
-		if (type == null) return null;
-		if (type instanceof Number)
-		{
-			return mapIndexType(((Number)type).intValue());
-		}
-		if (type instanceof String)
-		{
-			int t = StringUtil.getIntValue((String)type, Integer.MIN_VALUE);
-			if (t == Integer.MIN_VALUE) return (String)type;
-			return mapIndexType(t);
-		}
-		return null;
-	}
+//	String mapIndexType(Object type)
+//	{
+//		if (type == null) return null;
+//		if (type instanceof Number)
+//		{
+//			return mapIndexType(((Number)type).intValue());
+//		}
+//		if (type instanceof String)
+//		{
+//			int t = StringUtil.getIntValue((String)type, Integer.MIN_VALUE);
+//			if (t == Integer.MIN_VALUE) return (String)type;
+//			return mapIndexType(t);
+//		}
+//		return null;
+//	}
 
 	String mapIndexType(int type)
 	{
@@ -1305,9 +1305,9 @@ public class DbSettings
 	{
 		if (StringUtil.isBlank(type)) return null;
 		String sql = Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".add.pk", null);
-		if (sql == null && checkDefault)
+		if (StringUtil.isEmptyString(sql) && checkDefault)
 		{
-			Settings.getInstance().getProperty("workbench.db.sql.alter." + getKeyValue(type) + ".add.pk", null);
+			sql = Settings.getInstance().getProperty("workbench.db.sql.alter." + getKeyValue(type) + ".add.pk", null);
 		}
 		return sql;
 	}

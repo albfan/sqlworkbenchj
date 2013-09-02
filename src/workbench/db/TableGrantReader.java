@@ -31,7 +31,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -56,11 +58,12 @@ public class TableGrantReader
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(dbConnection);
 			rs = dbConnection.getSqlConnection().getMetaData().getTablePrivileges(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+			boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
 			while (rs.next())
 			{
-				String to = rs.getString(5);
-				String what = rs.getString(6);
-				boolean grantable = StringUtil.stringToBool(rs.getString(7));
+				String to = useColumnNames ? rs.getString("GRANTEE") : rs.getString(5);
+				String what = useColumnNames ? rs.getString("PRIVILEGE") : rs.getString(6);
+				boolean grantable = StringUtil.stringToBool(useColumnNames ? rs.getString("IS_GRANTABLE") : rs.getString(7));
 				TableGrant grant = new TableGrant(to, what, grantable);
 				result.add(grant);
 			}
