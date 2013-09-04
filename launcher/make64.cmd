@@ -1,3 +1,5 @@
+@echo off
+
 rcedit64 /C SQLWorkbench64.exe
 rcedit64 /I SQLWorkbench64.exe workbench.ico
 rcedit64 /N SQLWorkbench64.exe sqlworkbench.ini
