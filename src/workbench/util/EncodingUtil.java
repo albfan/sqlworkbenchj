@@ -207,7 +207,7 @@ public class EncodingUtil
 			{
 				// Fall back to default encoding
 				pw = new BufferedWriter(new OutputStreamWriter(stream), buffSize);
-				LogMgr.logError("EncodingUtil.createWriter()", "Invalid encodign: " + encoding, e);
+				LogMgr.logError("EncodingUtil.createWriter()", "Invalid encoding: " + encoding, e);
 			}
 		}
 		return pw;

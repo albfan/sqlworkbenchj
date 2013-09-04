@@ -714,7 +714,10 @@ public class JdbcIndexReader
 				else if (SqlUtil.isNumberType(type))
 				{
 					int typeNr = useColumnNames ? idxRs.getInt("TYPE") : idxRs.getInt(7);
-					def.setIndexType(metaData.getDbSettings().mapIndexType(typeNr));
+					if (!idxRs.wasNull())
+					{
+						def.setIndexType(metaData.getDbSettings().mapIndexType(typeNr));
+					}
 				}
 			}
 			def.addColumn(colName, dir);
