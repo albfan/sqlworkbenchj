@@ -3,6 +3,28 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>SAP DB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select definition
+        from (
+           select schemaname, functionname as name, definition
+           from functions
+           union all
+           select schemaname, dbprocname as name, definition
+           from dbprocedures
+        ) t</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MonetDB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
