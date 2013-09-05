@@ -1441,13 +1441,14 @@ public class DataExporter
 		setSpreadsheetOptions(odsOptions);
 	}
 
-	public void setSpreadsheetOptions(SpreadSheetOptions odsOptions)
+	public void setSpreadsheetOptions(SpreadSheetOptions options)
 	{
-		setPageTitle(odsOptions.getPageTitle());
-		setExportHeaders(odsOptions.getExportHeaders());
-		setEnableAutoFilter(odsOptions.getCreateAutoFilter());
-		setEnableFixedHeader(odsOptions.getCreateFixedHeaders());
-		setAppendInfoSheet(odsOptions.getCreateInfoSheet());
+		setPageTitle(options.getPageTitle());
+		setExportHeaders(options.getExportHeaders());
+		setEnableAutoFilter(options.getCreateAutoFilter());
+		setEnableFixedHeader(options.getCreateFixedHeaders());
+		setAppendInfoSheet(options.getCreateInfoSheet());
+		setOptimizeSpreadsheetColumns(options.getOptimizeColumns());
 		exportWriter.configureConverter();
 	}
 

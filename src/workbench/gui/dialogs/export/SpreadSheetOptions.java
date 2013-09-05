@@ -38,4 +38,6 @@ public interface SpreadSheetOptions
 	void setCreateFixedHeaders(boolean flag);
 	boolean getCreateAutoFilter();
 	void setCreateAutoFilter(boolean flag);
+	boolean getOptimizeColumns();
+	void setOptimizeColumns(boolean flag);
 }

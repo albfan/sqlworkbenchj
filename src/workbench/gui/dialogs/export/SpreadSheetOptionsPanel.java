@@ -64,9 +64,9 @@ public class SpreadSheetOptionsPanel
 
 	private boolean isAutoFilterAvailable()
 	{
-		return (exportType.equalsIgnoreCase("ods") || exportType.equalsIgnoreCase("xlsm"));
+		return (exportType.equalsIgnoreCase("ods") || exportType.equalsIgnoreCase("xlsx"));
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -75,6 +75,7 @@ public class SpreadSheetOptionsPanel
 		s.setProperty("workbench.export." + exportType + ".fixedheader", getCreateFixedHeaders());
 		s.setProperty("workbench.export." + exportType + ".autofilter", getCreateAutoFilter());
 		s.setProperty("workbench.export." + exportType + ".infosheet", getCreateInfoSheet());
+		s.setProperty("workbench.export." + exportType + ".optimizecols", getOptimizeColumns());
 	}
 
 	public void restoreSettings()
@@ -90,7 +91,19 @@ public class SpreadSheetOptionsPanel
 		}
 		setCreateInfoSheet(s.getBoolProperty("workbench.export." + exportType + ".infosheet", false));
 		setCreateFixedHeaders(s.getBoolProperty("workbench.export." + exportType + ".fixedheader", true));
+		setOptimizeColumns(s.getBoolProperty("workbench.export." + exportType + ".optimizecols", true));
 		checkHeaderSettings();
+	}
+
+	@Override
+	public boolean getOptimizeColumns()
+	{
+		return true;
+	}
+
+	@Override
+	public void setOptimizeColumns(boolean flag)
+	{
 	}
 
 	@Override
@@ -129,21 +142,25 @@ public class SpreadSheetOptionsPanel
 		createAutoFilter.setSelected(flag);
 	}
 
+	@Override
 	public boolean getExportHeaders()
 	{
 		return exportHeaders.isSelected();
 	}
 
+	@Override
 	public void setExportHeaders(boolean flag)
 	{
 		exportHeaders.setSelected(flag);
 	}
 
+	@Override
 	public String getPageTitle()
 	{
 		return pageTitle.getText();
 	}
 
+	@Override
 	public void setPageTitle(String title)
 	{
 		pageTitle.setText(title);
