@@ -119,7 +119,7 @@ public class AutotraceTest
 			assertEquals("Statistics", data.get(1).getResultName());
 			DataStore stat = data.get(1);
 
-			assertEquals(15, stat.getRowCount());
+			assertEquals(17, stat.getRowCount());
 			int rows = stat.getValueAsInt(14, 0, -1); // rows processed property
 			assertEquals(2, rows);
 
@@ -141,7 +141,7 @@ public class AutotraceTest
 			assertEquals("tabledata", data.get(0).getResultName());
 			assertEquals("Statistics", data.get(1).getResultName());
 			stat = data.get(1);
-			assertEquals(15, stat.getRowCount());
+			assertEquals(17, stat.getRowCount());
 			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
 			assertEquals(2, rows);
 
@@ -152,7 +152,7 @@ public class AutotraceTest
 			assertEquals(1, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());
 			stat = data.get(0);
-			assertEquals(15, stat.getRowCount());
+			assertEquals(17, stat.getRowCount());
 			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
 			assertEquals(2, rows);
 
