@@ -32,6 +32,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.IndexDefinition;
+import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
@@ -86,6 +87,8 @@ public class OracleTableSourceBuilder
 			}
 		}
 
+		boolean supportsArchives = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.2");
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
@@ -99,12 +102,19 @@ public class OracleTableSourceBuilder
 			"       atb.pct_increase, \n" +
 			"       atb.logging, \n" +
 			"       atb.iot_type, \n" +
-			"       iot.tablespace_name as iot_overflow \n" +
+			"       iot.tablespace_name as iot_overflow, \n" +
+			(supportsArchives ?
+			"       fat.flashback_archive_name \n" :
+			"       null as flashback_archive_name \n") +
 			"from all_tables atb \n" +
 			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
+			(supportsArchives ?
+			"  left join user_flashback_archive_tables fat on fat.owner_name = atb.owner and fat.table_name = atb.table_name \n" :
+			"") +
 			"where atb.owner = ? \n" +
 			"and atb.table_name = ? ";
 
+		String archive = null;
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
@@ -205,6 +215,12 @@ public class OracleTableSourceBuilder
 					if (options.length() > 0) options.append('\n');
 					options.append("NOLOGGING");
 				}
+
+				archive = rs.getString("flashback_archive_name");
+				if (StringUtil.isNonEmpty(archive))
+				{
+					tbl.getSourceOptions().addConfigSetting("flashback_archive", archive);
+				}
 			}
 		}
 		catch (SQLException e)
@@ -227,6 +243,13 @@ public class OracleTableSourceBuilder
 			options.append(tablespace);
 		}
 
+		if (StringUtil.isNonEmpty(archive))
+		{
+			if (options.length() > 0) options.append('\n');
+			options.append("FLASHBACK ARCHIVE ");
+			options.append(dbConnection.getMetadata().quoteObjectname(archive));
+		}
+
 		if (includePartitions)
 		{
 			StringBuilder partition = getPartitionSql(tbl);
@@ -246,7 +269,7 @@ public class OracleTableSourceBuilder
 			options.append(nested);
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_flashback", false))
+		if (supportsArchives && Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_flashback", false))
 		{
 			retrieveFlashbackInfo(tbl);
 		}
@@ -307,10 +330,9 @@ public class OracleTableSourceBuilder
 					rentention += Integer.toString(days / 365) + " YEAR";
 				}
 				String create =
+					"\n-- definition of flasback archive \n" +
 					"CREATE FLASHBACK ARCHIVE " + archiveName + "\n" +
-					"  TABLESPACE " + tbSpace +"\n  " + rentention + ";\n" +
-					"ALTER TABLE " + tbl.getTableExpression(dbConnection) + "\n" +
-					"  FLASHBACK ARCHIVE " + archiveName + ";";
+					"  TABLESPACE " + tbSpace +"\n  " + rentention + ";\n";
 
 				tbl.getSourceOptions().setAdditionalSql(create);
 			}
