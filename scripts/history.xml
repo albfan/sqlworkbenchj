@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-09-01">
+    <entry dev-build="1" type="fix">When using "Save Data as" to save the data as an Excel file, creation of the auto-filter and optimizing of the column widths could not be enabled.</entry>
     <entry dev-build="1" type="fix">Implemented a workaround for a bug in the MonetDB driver that caused wrong column information to be displayed.</entry>
   </release>
   <release build="115" date="2013-09-01">
