@@ -18,6 +18,21 @@
   </void>
 
   <void method="put">
+   <string>SAP DB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select definition from viewdefs</string>
+    </void>
+    <void property="objectNameField">
+     <string>viewname</string>
+    </void>
+    <void property="schemaField">
+     <string>schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MonetDB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
