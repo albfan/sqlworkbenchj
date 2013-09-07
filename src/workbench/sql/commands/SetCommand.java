@@ -97,7 +97,7 @@ public class SetCommand
 		catch (Exception e)
 		{
 			LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
-			result.setFailure();
+			result.setFailure(e);
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			return result;
 		}
@@ -242,7 +242,7 @@ public class SetCommand
 			else
 			{
 				// for other DBMS this is an error
-				result.setFailure();
+				result.setFailure(e);
 				result.addMessage(e.getMessage());
 			}
 		}
@@ -362,7 +362,7 @@ public class SetCommand
 		}
 		catch (SQLException e)
 		{
-			result.setFailure();
+			result.setFailure(e);
 			result.addMessage(e.getMessage());
 		}
 		return result;

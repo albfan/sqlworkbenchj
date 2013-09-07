@@ -110,7 +110,7 @@ public class AlterSessionCommand
 			else
 			{
 				meta.clearCachedSchemaInformation();
-				
+
 				// if the current schema is changed, a schemaChanged should be fired
 				String schema = meta.getCurrentSchema();
 				if (!oldSchema.equalsIgnoreCase(schema))
@@ -173,7 +173,7 @@ public class AlterSessionCommand
 			catch (Exception e)
 			{
 				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
+				result.setFailure(e);
 				LogMgr.logError("AlterSessionCommand.changeOracleTimeZone()", "Error setting timezone", e);
 			}
 		}

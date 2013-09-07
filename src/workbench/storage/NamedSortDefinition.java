@@ -22,6 +22,8 @@
  */
 package workbench.storage;
 
+import workbench.db.QuoteHandler;
+
 /**
  * A class to save the sort definition for a DataStoreTableModel.
  * The sorted columns are saved by name, not by index position.
@@ -60,9 +62,15 @@ public class NamedSortDefinition
 		return new SortDefinition(columns, sortAscending);
 	}
 
-	public String getSqlExpression()
+	/**
+	 * Returns a SQL ORDER BY expression reflecting this sort definition that can be used in a SQL statement.
+	 *
+	 * @param quoter  the QuoteHandler to be used for quoting the column names
+	 * @return an ORDER BY expression or null if no sort is defined
+	 */
+	public String getSqlExpression(QuoteHandler quoter)
 	{
-		if (sortColumns == null) return "";
+		if (sortColumns == null || sortColumns.length == 0) return null;
 		StringBuilder result = new StringBuilder(sortColumns.length * 20);
 		for (int i=0; i < sortColumns.length; i++)
 		{
@@ -70,7 +78,7 @@ public class NamedSortDefinition
 			{
 				result.append(',');
 			}
-			result.append(sortColumns[i]);
+			result.append(quoter.quoteObjectname(sortColumns[i]));
 			if (sortAscending[i])
 			{
 				result.append(" ASC");

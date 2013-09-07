@@ -162,7 +162,7 @@ public class SelectCommand
 			this.runner.rollbackSavepoint();
 			throw mem;
 		}
-		catch (Throwable e)
+		catch (Exception e)
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
@@ -170,7 +170,7 @@ public class SelectCommand
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			appendWarnings(result, true);
 			LogMgr.logUserSqlError("SelectCommand.execute()", sql, e);
-			result.setFailure();
+			result.setFailure(e);
 			this.runner.rollbackSavepoint();
 		}
 

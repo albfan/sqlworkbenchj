@@ -89,6 +89,7 @@ public class SingleVerbCommand extends SqlCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, aSql, e);
+			result.setFailure(e);
 			LogMgr.logUserSqlError("SingleVerbCommand.execute()", aSql, e);
 		}
 		finally

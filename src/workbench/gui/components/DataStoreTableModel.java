@@ -33,17 +33,21 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.storage.DataStore;
 import workbench.storage.InputValidator;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultInfo;
 import workbench.storage.SortDefinition;
 import workbench.storage.filter.FilterExpression;
+
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -601,10 +605,11 @@ public class DataStoreTableModel
 	 * Returns a snapshot of the current sort columns identified
 	 * by their names instead of their column index (as done by SortDefinition)
 	 *
-	 * @return the current sort definition with named columns
+	 * @return the current sort definition with named columns or null if no sort is defined
 	 */
 	public NamedSortDefinition getSortDefinition()
 	{
+		if (this.sortColumns == null) return null;
 		return new NamedSortDefinition(this.dataCache, this.sortColumns);
 	}
 

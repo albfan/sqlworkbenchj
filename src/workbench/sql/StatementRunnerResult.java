@@ -63,6 +63,7 @@ public class StatementRunnerResult
 
 	private long executionTime = -1;
 	private static final DurationFormatter timingFormatter = new DurationFormatter();
+	private Exception lastError;
 
 	public StatementRunnerResult()
 	{
@@ -79,7 +80,7 @@ public class StatementRunnerResult
 	{
 		ignoreUpdateCount = flag;
 	}
-	
+
 	public void setRowsProcessed(long rows)
 	{
 		this.totalRowsProcessed = rows;
@@ -151,10 +152,37 @@ public class StatementRunnerResult
 		messages.appendTo(log);
 	}
 
-	public void setSuccess() { this.success = true; }
-	public void setFailure() { this.success = false; }
-	public void setWarning(boolean flag) { this.hasWarning = flag; }
-	public boolean hasWarning() { return this.hasWarning; }
+	public void setSuccess()
+	{
+		this.success = true;
+		this.lastError = null;
+	}
+
+	public void setFailure()
+	{
+		setFailure(null);
+	}
+
+	public void setFailure(Exception error)
+	{
+		this.success = false;
+		this.lastError = error;
+	}
+
+	public void setWarning(boolean flag)
+	{
+		this.hasWarning = flag;
+	}
+
+	public boolean hasWarning()
+	{
+		return this.hasWarning;
+	}
+
+	public Exception getLastError()
+	{
+		return lastError;
+	}
 
 	public boolean isSuccess()
 	{
@@ -331,6 +359,7 @@ public class StatementRunnerResult
 		this.sourceCommand = null;
 		this.hasWarning = false;
 		this.executionTime = -1;
+		this.lastError = null;
 	}
 
 }

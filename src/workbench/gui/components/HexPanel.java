@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
@@ -35,7 +36,9 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 import workbench.gui.WbSwingUtilities;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -114,7 +117,7 @@ class ByteBufferTableModel
 	private final int columns = 16;
 	private final String[] labels;
 
-	public ByteBufferTableModel(byte[] buffer)
+	ByteBufferTableModel(byte[] buffer)
 	{
 		data = buffer;
 		rowCount = (buffer.length / columns) + 1;
@@ -162,8 +165,8 @@ class ByteBufferTableModel
 		if (columnIndex == columns)
 		{
 			int rowStart = rowIndex * columns;
-			int rowEnd = Math.min(rowIndex * columns + (columns - 1), data.length);
-			StringBuilder result = new StringBuilder(16);
+			int rowEnd = Math.min(rowIndex * columns + columns, data.length);
+			StringBuilder result = new StringBuilder(columns);
 			for (int i = rowStart; i < rowEnd; i++)
 			{
 				int c = (data[i] < 0 ? 256 + data[i] : data[i]);
@@ -175,7 +178,6 @@ class ByteBufferTableModel
 				{
 					result.append('.');
 				}
-
 			}
 			return result.toString();
 		}

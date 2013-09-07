@@ -3183,7 +3183,7 @@ public class SqlPanel
 
 			} // end for loop over all statements
 
-			lastScriptExecTime = stmtTotal;//(System.currentTimeMillis() - startTime);
+			lastScriptExecTime = stmtTotal;
 
 			// this will also automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);

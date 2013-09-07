@@ -193,7 +193,7 @@ public class DdlCommand
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			addExtendErrorInfo(currentConnection, info, result);
-			result.setFailure();
+			result.setFailure(e);
 			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
 		}
 		finally

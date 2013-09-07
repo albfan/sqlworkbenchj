@@ -412,6 +412,7 @@ public class SqlCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
+			result.setFailure(e);
 			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}
 		finally
@@ -919,7 +920,7 @@ public class SqlCommand
 		return f;
 	}
 
-	protected void addErrorInfo(StatementRunnerResult result, String sql, Throwable e)
+	protected void addErrorInfo(StatementRunnerResult result, String sql, Exception e)
 	{
 		result.clear();
 

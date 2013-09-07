@@ -24,10 +24,13 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 
-import workbench.db.CatalogChanger;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.CatalogChanger;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -81,7 +84,7 @@ public class UseCommand
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure();
+			result.setFailure(e);
 		}
 		finally
 		{

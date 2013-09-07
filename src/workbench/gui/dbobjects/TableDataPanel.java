@@ -87,6 +87,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -597,8 +598,8 @@ public class TableDataPanel
 		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
 		if (GuiSettings.getApplySQLSortInDbExplorer() && lastSort != null)
 		{
-			String sort = lastSort.getSqlExpression();
-			if (sort != null)
+			String sort = lastSort.getSqlExpression(dbConnection.getMetadata());
+			if (StringUtil.isNonBlank(sort))
 			{
 				sql += " \nORDER BY " + sort;
 			}
