@@ -65,6 +65,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ArgumentParser;
+import workbench.util.DdlObjectInfo;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -498,14 +499,14 @@ public class TestUtil
 			{
 				stmt = con.createStatement();
 				stmt.execute(sql);
-				SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+				DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 				if (printError && info != null)
 				{
 					ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(con);
 					String msg = null;
 					if (reader != null)
 					{
-						reader.getErrorInfo(null, info.objectName, info.objectType, true);
+						reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
 					}
 					if (StringUtil.isNonBlank(msg))
 					{

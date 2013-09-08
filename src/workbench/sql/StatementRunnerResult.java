@@ -63,7 +63,7 @@ public class StatementRunnerResult
 
 	private long executionTime = -1;
 	private static final DurationFormatter timingFormatter = new DurationFormatter();
-	private Exception lastError;
+	private StatementError lastError;
 
 	public StatementRunnerResult()
 	{
@@ -160,10 +160,17 @@ public class StatementRunnerResult
 
 	public void setFailure()
 	{
-		setFailure(null);
+		this.success = false;
+		this.lastError = null;
 	}
 
 	public void setFailure(Exception error)
+	{
+		this.success = false;
+		this.lastError = new StatementError(error);
+	}
+
+	public void setFailure(StatementError error)
 	{
 		this.success = false;
 		this.lastError = error;
@@ -179,7 +186,7 @@ public class StatementRunnerResult
 		return this.hasWarning;
 	}
 
-	public Exception getLastError()
+	public StatementError getLastError()
 	{
 		return lastError;
 	}

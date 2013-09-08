@@ -312,100 +312,14 @@ public class SqlUtil
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return null;
-
-		SQLLexer lexer = new SQLLexer(sql);
-		SQLToken t = lexer.getNextToken(false, false);
-
-		if (t == null) return null;
-		String verb = t.getContents();
-		Set<String> verbs = CollectionUtil.caseInsensitiveSet("DROP", "RECREATE", "ALTER", "ANALYZE");
-
-		if (!verb.startsWith("CREATE") && !verbs.contains(verb)) return null;
-
-		try
+		DdlObjectInfo info = new DdlObjectInfo(sql);
+		if (info.isValid())
 		{
-			DdlObjectInfo info = new DdlObjectInfo();
-
-			boolean typeFound = false;
-			SQLToken token = lexer.getNextToken(false, false);
-			while (token != null)
-			{
-				String c = token.getContents();
-				if (getKnownTypes().contains(c))
-				{
-					typeFound = true;
-					info.objectType = c.toUpperCase();
-					break;
-				}
-				token = lexer.getNextToken(false, false);
-			}
-
-			if (!typeFound) return null;
-
-			// if a type was found we assume the next keyword is the name
-			if (!getTypesWithoutNames().contains(info.objectType))
-			{
-				SQLToken name = lexer.getNextToken(false, false);
-				if (name == null) return null;
-				String content = name.getContents();
-				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS") || content.equals("#"))
-				{
-					name = lexer.getNextToken(false, false);
-					if (name == null) return null;
-
-					if (name.getContents().equals("#"))
-					{
-						// SQL Server temporary tables using ##
-						content = "##";
-						name = lexer.getNextToken(false, false);
-						if (name == null) return null;
-					}
-				}
-
-				SQLToken next = lexer.getNextToken(false, false);
-				if (next != null && next.getContents().equals("."))
-				{
-					next = lexer.getNextToken();
-					if (next != null) name = next;
-				}
-
-				info.objectName = name.getContents();
-
-				if (content.startsWith("#"))
-				{
-					info.objectName = content + info.objectName;
-				}
-
-				if (info.objectName != null)
-				{
-					info.objectName = removeObjectQuotes(info.objectName);
-				}
-			}
 			return info;
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlUtil.getDDLObjectInfo()", "Error finding object info", e);
-			return null;
-		}
+		return null;
 	}
 
-	public static class DdlObjectInfo
-	{
-		public String objectType;
-		public String objectName;
-
-		@Override
-		public String toString()
-		{
-			return "Type: " + objectType + ", name: " + objectName;
-		}
-
-		public String getDisplayType()
-		{
-			return StringUtil.capitalize(objectType);
-		}
-	}
 
 	/**
 	 * Escapes any underscore in the passed name with the escape character defined by the connection.
@@ -474,7 +388,7 @@ public class SqlUtil
 	{
 		DdlObjectInfo info = getDDLObjectInfo(sql);
 		if (info == null) return null;
-		return info.objectType;
+		return info.getObjectType();
 	}
 
 	public static String getDeleteTable(CharSequence sql)

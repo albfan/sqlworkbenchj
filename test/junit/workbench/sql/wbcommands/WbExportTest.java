@@ -44,12 +44,12 @@ import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
+import workbench.util.DdlObjectInfo;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.LobFileParameter;
 import workbench.util.LobFileStatement;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
@@ -1164,7 +1164,7 @@ public class WbExportTest
 		// first verb must be the CREATE TABLE statement
 		assertEquals("Not a CREATE TABLE statement", "CREATE", verb);
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
-		assertTrue(info.objectName.equalsIgnoreCase("OTHER_TABLE"));
+		assertTrue(info.getObjectName().equalsIgnoreCase("OTHER_TABLE"));
 
 		sql = p.getCommand(1);
 		verb = SqlUtil.getSqlVerb(sql);

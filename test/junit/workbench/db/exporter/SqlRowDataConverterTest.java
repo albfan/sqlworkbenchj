@@ -46,6 +46,7 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
+import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
@@ -152,9 +153,9 @@ public class SqlRowDataConverterTest
 			StrBuffer start = converter.getStart();
 			assertNotNull(start);
 			String sql = start.toString();
-			SqlUtil.DdlObjectInfo ddl = SqlUtil.getDDLObjectInfo(sql);
-			assertEquals(ddl.objectName, "MYTABLE");
-			assertEquals(ddl.objectType, "TABLE");
+			DdlObjectInfo ddl = SqlUtil.getDDLObjectInfo(sql);
+			assertEquals(ddl.getObjectName(), "MYTABLE");
+			assertEquals(ddl.getObjectType(), "TABLE");
 		}
 		finally
 		{

@@ -42,9 +42,9 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.CollectionUtil;
+import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil.DdlObjectInfo;
 import workbench.util.StringUtil;
 
 /**
@@ -100,7 +100,7 @@ public class DdlCommand
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
 		}
 
-		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 
 		try
 		{
@@ -165,9 +165,9 @@ public class DdlCommand
 			if (isDrop && result.isSuccess() && info != null)
 			{
 				Set<String> types = currentConnection.getMetadata().getObjectsWithData();
-				if (types.contains(info.objectType))
+				if (types.contains(info.getObjectType()))
 				{
-					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.objectName, currentConnection));
+					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
 				}
 			}
 		}
@@ -249,7 +249,7 @@ public class DdlCommand
 	 * @see ErrorInformationReader#getErrorInfo(String, String, String)
 	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
 	 */
-	private boolean addExtendErrorInfo(WbConnection aConnection, SqlUtil.DdlObjectInfo info , StatementRunnerResult result)
+	private boolean addExtendErrorInfo(WbConnection aConnection, DdlObjectInfo info , StatementRunnerResult result)
 	{
 		if (info == null) return false;
 		if (aConnection == null) return false;
@@ -257,7 +257,7 @@ public class DdlCommand
 		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(aConnection);
 		if (reader == null) return false;
 
-		String error = reader.getErrorInfo(null, info.objectName, info.objectType, true);
+		String error = reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
 		if (StringUtil.isEmptyString(error)) return false;
 
 		result.addMessageNewLine();

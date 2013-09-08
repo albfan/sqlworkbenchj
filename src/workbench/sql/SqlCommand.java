@@ -42,6 +42,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
 import workbench.util.ArgumentParser;
+import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -145,7 +146,7 @@ public class SqlCommand
 		{
 			verb = SqlUtil.getSqlVerb(sql);
 		}
-		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 		if (info != null)
 		{
 			String msg = getSuccessMessage(info, verb);
@@ -157,42 +158,42 @@ public class SqlCommand
 		return null;
 	}
 
-	protected String getSuccessMessage(SqlUtil.DdlObjectInfo info, String verb)
+	protected String getSuccessMessage(DdlObjectInfo info, String verb)
 	{
 		if ("DROP".equals(verb))
 		{
-			if (info == null || info.objectType == null)
+			if (info == null || info.getObjectType() == null)
 			{
 				return ResourceMgr.getString("MsgGenDropSuccess");
 			}
-			if (StringUtil.isNonBlank(info.objectName))
+			if (StringUtil.isNonBlank(info.getObjectName()))
 			{
-				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
+				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.getObjectName());
 			}
 			else
 			{
-				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
+				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.getObjectType());
 			}
 		}
 		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
 		{
-			if (info == null || info.objectType == null)
+			if (info == null || info.getObjectType() == null)
 			{
 				return ResourceMgr.getString("MsgGenCreateSuccess");
 			}
-			if (StringUtil.isNonBlank(info.objectName))
+			if (StringUtil.isNonBlank(info.getObjectName()))
 			{
-				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
+				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.getObjectName());
 			}
 			else
 			{
-				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.getObjectType());
 			}
 		}
 		else if ("ANALYZE".equals(verb))
 		{
-			String name = currentConnection.getMetadata().adjustObjectnameCase(info.objectName);
-			return ResourceMgr.getFormattedString("MsgObjectAnalyzed", StringUtil.capitalize(info.objectType), name);
+			String name = currentConnection.getMetadata().adjustObjectnameCase(info.getObjectName());
+			return ResourceMgr.getFormattedString("MsgObjectAnalyzed", StringUtil.capitalize(info.getObjectType()), name);
 		}
 		return null;
 	}

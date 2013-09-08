@@ -184,6 +184,7 @@ import workbench.storage.DataStore;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.ScrollAnnotation;
+import workbench.sql.StatementError;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
@@ -3039,6 +3040,8 @@ public class SqlPanel
 			stmtRunner.setMaxRows(maxRows);
 
 			ignoreStateChange = true;
+			StatementError lastError = null;
+
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
@@ -3139,6 +3142,7 @@ public class SqlPanel
 				else
 				{
 					commandWithError = i;
+					lastError = statementResult.getLastError();
 
 					// error messages should always be shown in the log
 					// panel, even if compressLog is enabled (if it is not enabled
@@ -3153,7 +3157,7 @@ public class SqlPanel
 
 						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
-							this.highlightError(scriptParser, commandWithError, selectionOffset);
+							highlightError(scriptParser, commandWithError, selectionOffset, null);
 						}
 
 						// force a refresh in order to display the selection
@@ -3199,13 +3203,14 @@ public class SqlPanel
 				final ScriptParser p = scriptParser;
 				final int command = commandWithError;
 				final int offset = selectionOffset;
+				final StatementError error = lastError;
 
 				EventQueue.invokeLater(new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						highlightError(p, command, offset);
+						highlightError(p, command, offset, error);
 					}
 				});
 			}
@@ -3620,7 +3625,7 @@ public class SqlPanel
 		});
 	}
 
-	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
+	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset, StatementError error)
 	{
 		if (this.editor == null) return;
 

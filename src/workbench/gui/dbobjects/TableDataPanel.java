@@ -62,6 +62,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
@@ -117,6 +118,7 @@ public class TableDataPanel
 	private boolean updateRunning;
 	private boolean autoloadRowCount = true;
 	private TableIdentifier table;
+	private TableDefinition tableDefinition;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
 	protected StopAction cancelRetrieve;
@@ -568,6 +570,7 @@ public class TableDataPanel
 		if (!this.isRetrieving()) reset();
 
 		this.table = aTable;
+		this.tableDefinition = null;
 		this.lastSort = null;
 
 		WbSwingUtilities.invoke(new Runnable()
@@ -592,10 +595,20 @@ public class TableDataPanel
 
 	private String buildSqlForTable(TableDefinition tableDef)
 	{
-		if (tableDef == null) return null;
-
+		TableIdentifier tbl;
+		List<ColumnIdentifier> columns;
+		if (tableDef != null)
+		{
+			tbl = tableDef.getTable();
+			columns = tableDef.getColumns();
+		}
+		else
+		{
+			tbl = this.table;
+			columns = Collections.emptyList();
+		}
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, "tabledata");
-		String sql = builder.getSelectForColumns(tableDef.getTable(), tableDef.getColumns());
+		String sql = builder.getSelectForColumns(tbl, columns);
 		if (GuiSettings.getApplySQLSortInDbExplorer() && lastSort != null)
 		{
 			String sort = lastSort.getSqlExpression(dbConnection.getMetadata());
@@ -730,22 +743,38 @@ public class TableDataPanel
 		}
 	}
 
+	private void retrieveTableDefinition()
+	{
+		if (this.table == null)
+		{
+			tableDefinition = null;
+			return;
+		}
+
+		if (this.tableDefinition != null)
+		{
+			// no need to retrieve the definition again (in e.g. Oracle this can be quite costly!)
+			if (this.table.equals(this.tableDefinition.getTable())) return;
+		}
+
+		try
+		{
+			tableDefinition = dbConnection.getMetadata().getTableDefinition(table);
+		}
+		catch (SQLException sql)
+		{
+			tableDefinition = null;
+			LogMgr.logError("TableDataPanel.retrieveTableDefinition()", "Could not retrieve table definition", sql);
+		}
+	}
+
 	protected void doRetrieve(boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
 
-		final TableDefinition tableDef;
-		try
-		{
-			tableDef = dbConnection.getMetadata().getTableDefinition(table);
-		}
-		catch (SQLException sql)
-		{
-			LogMgr.logError("TableDataPanel.doRetrieve()", "Could not retrieve table definition", sql);
-			return;
-		}
+		retrieveTableDefinition();
 
-		String sql = this.buildSqlForTable(tableDef);
+		String sql = this.buildSqlForTable(tableDefinition);
 		if (sql == null) return;
 
 		this.retrieveStart();
@@ -766,7 +795,6 @@ public class TableDataPanel
 				}
 			});
 
-
 			setSavepoint();
 
 			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query: " + sql);
@@ -775,7 +803,7 @@ public class TableDataPanel
 
 			if (GuiSettings.getRetrieveQueryComments())
 			{
-				dataDisplay.readColumnComments(tableDef);
+				dataDisplay.readColumnComments(tableDefinition);
 			}
 
 			// By directly setting the update table, we avoid
@@ -786,7 +814,7 @@ public class TableDataPanel
 				@Override
 				public void run()
 				{
-					dataDisplay.defineUpdateTable(tableDef);
+					dataDisplay.defineUpdateTable(tableDefinition);
 					dataDisplay.getSelectKeysAction().setEnabled(true);
 					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 					dataDisplay.setPrintHeader(header);

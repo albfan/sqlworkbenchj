@@ -36,11 +36,11 @@ import workbench.db.WbConnection;
 
 import workbench.storage.ResultInfo;
 
+import workbench.sql.formatter.SQLToken;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.sql.formatter.SQLToken;
 
 /**
  *
@@ -309,152 +309,6 @@ public class SqlUtilTest
 		table = SqlUtil.getDeleteTable(sql, '/');
 		assertEquals("mylib/sometable", table);
 
-	}
-
-	@Test
-	public void testGetObjectInfo()
-		throws Exception
-	{
-		String sql = "-- test\ncreate or \t replace\n\nprocedure bla";
-		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "bla");
-		assertEquals(info.getDisplayType(), "Procedure");
-
-		sql = "-- test\ncreate unique bitmap index idx_test on table (x,y);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "idx_test");
-		assertEquals(info.getDisplayType(), "Index");
-
-		sql = "recreate view v_test as select * from t;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "v_test");
-		assertEquals(info.getDisplayType(), "View");
-
-		sql = "create nonclustered index idx_test on table (x,y);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "idx_test");
-		assertEquals(info.getDisplayType(), "Index");
-
-		sql = "-- test\ncreate memory table my_table (nr integer);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "my_table");
-		assertEquals(info.getDisplayType(), "Table");
-
-		sql = "create table dbo.my_table (nr integer);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "dbo.my_table");
-		assertEquals(info.getDisplayType(), "Table");
-
-		sql = "create force view v_test as select * from t;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "v_test");
-		assertEquals(info.getDisplayType(), "View");
-
-		sql = "drop memory table my_table;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "my_table");
-		assertEquals(info.getDisplayType(), "Table");
-
-		sql = "drop index idx_test;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "idx_test");
-		assertEquals(info.getDisplayType(), "Index");
-
-		sql = "drop function f_answer;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "f_answer");
-		assertEquals(info.getDisplayType(), "Function");
-
-		sql = "drop procedure f_answer;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "f_answer");
-		assertEquals(info.getDisplayType(), "Procedure");
-
-		sql = "drop sequence s;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals(info.objectName, "s");
-		assertEquals(info.getDisplayType(), "Sequence");
-
-		sql = "drop role s;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("s", info.objectName);
-		assertEquals("ROLE", info.objectType);
-
-		sql = "-- test\ncreate \n\ntrigger test_trg for mytable";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("test_trg", info.objectName);
-		assertEquals("TRIGGER", info.objectType);
-
-		sql = "-- test\ncreate or replace package \n\n some_package \t\t\n as something";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("some_package", info.objectName);
-		assertEquals("PACKAGE", info.objectType);
-
-		sql = "-- test\ncreate package body \n\n some_body \t\t\n as something";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("some_body", info.objectName);
-		assertEquals("PACKAGE BODY", info.objectType);
-
-		sql = "CREATE FLASHBACK ARCHIVE main_archive";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("main_archive", info.objectName);
-		assertEquals("FLASHBACK ARCHIVE", info.objectType);
-
-		sql = "CREATE TABLE IF NOT EXISTS some_table (id integer)";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("some_table", info.objectName);
-		assertEquals("TABLE", info.objectType);
-
-		sql = "DROP TABLE old_table IF EXISTS";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("old_table", info.objectName);
-		assertEquals("TABLE", info.objectType);
-
-		sql = "create table #someTemp(some_col integer);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("#someTemp", info.objectName);
-		assertEquals("TABLE", info.objectType);
-
-		sql = "create type body my_type is begin\n null; end;";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("my_type", info.objectName);
-		assertEquals("TYPE BODY", info.objectType);
-
-		sql = "alter function mystuff compile";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertNotNull(info);
-		assertEquals("mystuff", info.objectName);
-		assertEquals("FUNCTION", info.objectType);
-
-		sql = "create extension hstore";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("hstore", info.objectName);
-		assertEquals("EXTENSION", info.objectType);
-
-		sql = "analyze table foo validate structure";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("foo", info.objectName);
-		assertEquals("TABLE", info.objectType);
-
-		sql = "analyze index foo_idx validate structure";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("foo_idx", info.objectName);
-		assertEquals("INDEX", info.objectType);
-
-		sql = "analyze local table foobar";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("foobar", info.objectName);
-		assertEquals("TABLE", info.objectType);
-
-		sql = "create index \"FOO\".\"IDX\" on foo.bar (id);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("IDX", info.objectName);
-		assertEquals("INDEX", info.objectType);
-
-		sql = "create table ##mytemp (id integer);";
-		info = SqlUtil.getDDLObjectInfo(sql);
-		assertEquals("##mytemp", info.objectName);
-		assertEquals("TABLE", info.objectType);
 	}
 
 	@Test
