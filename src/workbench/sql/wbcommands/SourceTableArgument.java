@@ -113,13 +113,13 @@ public class SourceTableArgument
 
 	public static String[] parseTypes(String types, WbConnection conn)
 	{
-		if (StringUtil.isBlank(types)) return conn.getMetadata().getTablesAndViewTypes();
+		if (StringUtil.isBlank(types)) return conn.getMetadata().getTableTypesArray();
 
 		if ("%".equals(types) || "*".equals(types)) return null;
 
 		List<String> typeList = StringUtil.stringToList(types.toUpperCase());
 
-		if (typeList.isEmpty()) return conn.getMetadata().getTablesAndViewTypes();
+		if (typeList.isEmpty()) return conn.getMetadata().getTableTypesArray();
 
 		String[] result = new String[typeList.size()];
 
