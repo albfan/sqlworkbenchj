@@ -31,6 +31,7 @@ import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 /**
  * A class to sort tables according to their foreign key constraints,
@@ -81,11 +82,6 @@ public class TableDependencySorter
 	{
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
 
-//		if (bottomUp)
-//		{
-//			dumpMapping(levelMapping);
-//		}
-
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
 		{
@@ -102,13 +98,19 @@ public class TableDependencySorter
 		return result;
 	}
 
-//	private void dumpMapping(List<LevelNode> mapping)
-//	{
-//		for (LevelNode lvl : mapping)
-//		{
-//			System.out.println(lvl.toString());
-//		}
-//	}
+	private DependencyNode findChildTree(List<LevelNode> levels, TableIdentifier root)
+	{
+		for (LevelNode nd : levels)
+		{
+			DependencyNode node = nd.node;
+			DependencyNode children = node.findChildTree(root);
+			if (children != null)
+			{
+				return children;
+			}
+		}
+		return null;
+	}
 
 	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
 	{
@@ -119,18 +121,27 @@ public class TableDependencySorter
 		{
 			if (!dbConn.getMetadata().tableExists(tbl)) continue;
 
-			TableDependency deps = new TableDependency(dbConn, tbl);
-			deps.readTreeForChildren();
-			if (deps.wasAborted())
+			DependencyNode root = findChildTree(levelMapping, tbl);
+			if (root == null)
 			{
-				if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
-				cycleErrors.add(tbl);
+				TableDependency deps = new TableDependency(dbConn, tbl);
+				deps.readTreeForChildren();
+				if (deps.wasAborted())
+				{
+					if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
+					cycleErrors.add(tbl);
+				}
+				root = deps.getRootNode();
+			}
+			else
+			{
+				LogMgr.logDebug("TableDependencySorter.createLevelMapping()", "Re-using child tree for " + tbl);
 			}
 
-			DependencyNode root = deps.getRootNode();
-			startNodes.add(root);
+
 			if (root != null)
 			{
+				startNodes.add(root);
 				List<DependencyNode> allChildren = getAllNodes(root);
 				putNodes(levelMapping, allChildren);
 			}
@@ -191,7 +202,6 @@ public class TableDependencySorter
 	private void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
 		if (nodes == null || nodes.isEmpty()) return;
-//		TableIdentifier root = nodes.get(0).getTable();
 
 		for (DependencyNode node : nodes)
 		{
@@ -200,19 +210,15 @@ public class TableDependencySorter
 			// There is no need to include self referencing tables into the level
 			// mapping, as this will create a wrong level for them and a potential
 			// parent of the self referencing table (e.g. through a different FK)
-//			if (!node.isRoot() && tbl.equals(root)) continue;
-
 			int level = node.getLevel();
 			LevelNode lvl = findLevelNode(levelMapping, tbl);
 			if (lvl == null)
 			{
 				lvl = new LevelNode(node, level);
 				levelMapping.add(lvl);
-//				System.out.println("added node: " + lvl);
 			}
 			else if (level > lvl.level)
 			{
-//				System.out.println("updating node: "+ lvl + " to level " + level);
 				lvl.level = level;
 			}
 		}

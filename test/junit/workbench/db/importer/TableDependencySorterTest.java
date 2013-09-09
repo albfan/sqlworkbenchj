@@ -334,7 +334,10 @@ public class TableDependencySorterTest
 
 			TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 			List<TableIdentifier> result = sorter.sortForInsert(tbl);
-			System.out.println(result);
+			assertEquals(7, result.size());
+			assertEquals("jobs", result.get(0).getTableName());
+			assertEquals("regions", result.get(1).getTableName());
+			assertEquals("job_history", result.get(6).getTableName());
 		}
 		finally
 		{

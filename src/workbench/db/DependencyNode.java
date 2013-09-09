@@ -266,6 +266,18 @@ public class DependencyNode
 		return node;
 	}
 
+	public DependencyNode findChildTree(TableIdentifier table)
+	{
+		if (table == null) return null;
+		if (this.table.equals(table)) return this;
+		for (DependencyNode node : childTables)
+		{
+			DependencyNode tree = node.findChildTree(table);
+			if (tree != null) return tree;
+		}
+		return null;
+	}
+
 	public boolean containsChild(DependencyNode aNode)
 	{
 		if (aNode == null) return false;

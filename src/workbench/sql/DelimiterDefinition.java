@@ -115,9 +115,8 @@ public class DelimiterDefinition
 		else
 		{
 			delim = arg;
-			single = true;
+			single = false;
 		}
-
 		return new DelimiterDefinition(delim, single);
 	}
 
