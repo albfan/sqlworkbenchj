@@ -1,6 +1,6 @@
 @echo off
 
-pushd "%~dp0" 
+pushd "%~dp0"
 
 call :patch_ini
 
@@ -25,7 +25,10 @@ set file=sqlworkbench.ini
 set outfile=sqlworkbench32.ini
 echo.>%outfile%
 
-for /f " usebackq eol=# tokens=1,2 delims==" %%i in ("%file%") do (
-  if %%i==vm.heapsize.max.percent echo vm.heapsize.preferred=1024>>%outfile%
-  @echo %%i=%%j>>%outfile%
+for /f " usebackq eol=# tokens=1 delims=" %%i in ("%file%") do (
+  if "%%i"=="vm.heapsize.max.percent=50" (
+     echo vm.heapsize.preferred=1024>>%outfile%
+  ) else (
+    @echo %%i>>%outfile%
+  )
 )
