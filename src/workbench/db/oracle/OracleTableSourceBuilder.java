@@ -266,6 +266,7 @@ public class OracleTableSourceBuilder
 		StringBuilder nested = getNestedTableSql(tbl, columns);
 		if (nested != null && nested.length() > 0)
 		{
+			if (options.length() > 0) options.append('\n');
 			options.append(nested);
 		}
 
@@ -414,7 +415,7 @@ public class OracleTableSourceBuilder
 			}
 
 			rs = pstmt.executeQuery();
-			if (rs.next())
+			while (rs.next())
 			{
 				String option = rs.getString(1);
 				if (options.length() > 0)
