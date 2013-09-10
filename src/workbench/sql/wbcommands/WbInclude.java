@@ -70,7 +70,7 @@ public class WbInclude
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
-		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/:nl','GO:nl'"));
+		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','oracle', 'mssql'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		ConditionCheck.addParameters(cmdLine);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);

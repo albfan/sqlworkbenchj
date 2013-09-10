@@ -96,6 +96,7 @@ public class QuickFilterPanel
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
 	private boolean assumeWildcards;
+	private boolean autoFilterEnabled;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -145,12 +146,14 @@ public class QuickFilterPanel
 	{
 		Component ed = filterValue.getEditor().getEditorComponent();
 		ed.addKeyListener(this);
+		autoFilterEnabled = true;
 	}
 
 	private void disableAutoFilter()
 	{
 		Component ed = filterValue.getEditor().getEditorComponent();
 		ed.removeKeyListener(this);
+		autoFilterEnabled = false;
 	}
 
 	private void initDropDown()
@@ -466,7 +469,7 @@ public class QuickFilterPanel
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == filterValue)
+		if (e.getSource() == filterValue  && !autoFilterEnabled)
 		{
 			String cmd = e.getActionCommand();
 			if (cmd.equals("comboBoxChanged") || cmd.equals("comboBoxEdited"))
@@ -550,7 +553,7 @@ public class QuickFilterPanel
 		}
 	}
 
-	private synchronized void filterByEditorValue()
+	private synchronized void filterByEditorValue(boolean storeInHistory)
 	{
 		Component comp = filterValue.getEditor().getEditorComponent();
 		if (comp instanceof JTextField)
@@ -561,7 +564,7 @@ public class QuickFilterPanel
 			{
 				int currentPos = editor.getCaretPosition();
 				filterValue.setText(value);
-				applyFilter(value, false);
+				applyFilter(value, storeInHistory);
 				// this is necessary to remove the text selection that is automatically done
 				// because of setting the text in applyFilter
 				editor.setCaretPosition(currentPos);
@@ -584,9 +587,13 @@ public class QuickFilterPanel
 					// so there is no need to take care of that (as done in filterByEditorValue()
 					applyFilter(null, false);
 				}
+				else if (e.getKeyChar() == KeyEvent.VK_ENTER)
+				{
+					filterByEditorValue(true);
+				}
 				else
 				{
-					filterByEditorValue();
+					filterByEditorValue(false);
 				}
 			}
 		});

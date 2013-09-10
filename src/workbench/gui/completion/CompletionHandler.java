@@ -164,9 +164,9 @@ public class CompletionHandler
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
 			if (ctx.isStatementSupported())
 			{
-				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && currentWord != null);
+				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && StringUtil.isNonBlank(currentWord));
 				BaseAnalyzer analyzer = ctx.getAnalyzer();
-				if (analyzer != null && currentWord != null && analyzer.isWbParam() && currentWord.charAt(0) == '-')
+				if (analyzer != null && StringUtil.isNonBlank(currentWord) && analyzer.isWbParam() && currentWord.charAt(0) == '-')
 				{
 					currentWord = currentWord.substring(1);
 				}
