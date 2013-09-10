@@ -458,6 +458,8 @@ public class TableListPanel
 		reset();
 		tableDefinition.removePropertyChangeListener(this);
 		tableDefinition.dispose();
+		tableList.dispose();
+		tableList.removePropertyChangeListener(this);
 		tableData.dispose();
 		tableSource.dispose();
 		disposeAction(compileAction);

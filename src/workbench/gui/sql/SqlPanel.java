@@ -3840,7 +3840,7 @@ public class SqlPanel
 				}
 				else if (o instanceof WbMenu)
 				{
-					((WbMenu)o).removeAll();
+					((WbMenu)o).dispose();
 				}
 			}
 			this.actions.clear();

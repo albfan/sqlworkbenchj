@@ -395,7 +395,7 @@ public class WbTable
 	{
 		return sortRenderer;
 	}
-	
+
 	public void configureEnterKeyAction(Action enterAction)
 	{
 		this.getInputMap(WHEN_FOCUSED).put(WbSwingUtilities.ENTER, "wbtable-stop-editing");
@@ -789,7 +789,29 @@ public class WbTable
 				}
 			}
 		});
+
+		disposeAction(this.copySelectedAsTextAction);
+		disposeAction(this.copySelectedAsInsertAction);
+		disposeAction(this.copySelectedAsMergeAction);
+		disposeAction(this.copySelectedAsUpdateAction);
+		disposeAction(this.copySelectedAsDeleteInsertAction);
+		disposeAction(this.copySelectedDeleteAction);
+		disposeAction(this.copyInsertAction);
+		disposeAction(this.copyDeleteInsertAction);
+		disposeAction(this.copyDeleteAction);
+		disposeAction(this.copyMergeAction);
+		disposeAction(this.copyUpdateAction);
+		disposeAction(this.saveDataAsAction);
+		disposeAction(this.copyAsTextAction);
 		Settings.getInstance().removePropertyChangeListener(sortRenderer);
+	}
+
+	private void disposeAction(WbAction action)
+	{
+		if (action != null)
+		{
+			action.dispose();
+		}
 	}
 
 	@Override

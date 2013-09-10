@@ -24,6 +24,8 @@ package workbench.gui.components;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -99,4 +101,16 @@ public class WbMenu
 		super.setText(aText);
 	}
 
+	public void dispose()
+	{
+		for (int i=0; i < this.getItemCount(); i++)
+		{
+			JMenuItem item = this.getItem(i);
+			if (item instanceof WbMenuItem)
+			{
+				((WbMenuItem)item).dispose();
+			}
+		}
+		this.removeAll();
+	}
 }

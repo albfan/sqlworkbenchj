@@ -104,4 +104,12 @@ public class WbMenuItem
 			super.setText(aText);
 		}
 	}
+
+	public void dispose()
+	{
+		this.itemListener = null;
+		this.changeListener = null;
+		this.actionListener = null;
+		this.setIcon(null);
+	}
 }
