@@ -59,7 +59,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -1577,7 +1576,7 @@ public class MainWindow
 					setIgnoreTabChange(true);
 
 					w = new WbWorkspace(realFilename, false);
-					int entryCount = w.getEntryCount();
+					final int entryCount = w.getEntryCount();
 					for (int i = 0; i < entryCount; i++)
 					{
 						if (w.getPanelType(i) == PanelType.dbExplorer)
@@ -1767,6 +1766,33 @@ public class MainWindow
 				}
 			});
 		}
+	}
+
+	public void reset()
+	{
+		sqlTab.removeAll();
+		this.assignWorkspaceAction.dispose();
+		this.closeWorkspaceAction.dispose();
+		this.createMacro.dispose();
+		this.createNewConnection.dispose();
+		this.dbExplorerAction.dispose();
+		this.disconnectAction.dispose();
+		this.disconnectTab.dispose();
+		this.loadWorkspaceAction.dispose();
+		this.manageMacros.dispose();
+		this.newDbExplorerPanel.dispose();
+		this.newDbExplorerWindow.dispose();
+		this.nextTab.dispose();
+		this.prevTab.dispose();
+		this.saveAsWorkspaceAction.dispose();
+		this.saveWorkspaceAction.dispose();
+		this.showDbmsManual.dispose();
+		this.showMacroPopup.dispose();
+		this.panelMenus.clear();
+		this.explorerWindows.clear();
+		JMenuBar bar = getJMenuBar();
+		disposeMenu(bar);
+		removeAll();
 	}
 
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
@@ -3155,16 +3181,17 @@ public class MainWindow
 	private void disposeMenu(JMenuBar menuBar)
 	{
 		if (menuBar == null) return;
-		MenuElement[] elements = menuBar.getSubElements();
-		for (MenuElement menu : elements)
+		int count = menuBar.getMenuCount();
+		for (int i=0; i < count; i++)
 		{
-			if (menu instanceof JMenu)
+			JMenu menu = menuBar.getMenu(i);
+			if (menu instanceof WbMenu)
 			{
-				((JMenu)menu).removeAll();
+				((WbMenu)menu).dispose();
 			}
-			else if (menu instanceof Container)
+			else
 			{
-				((Container)menu).removeAll();
+				menu.removeAll();
 			}
 		}
 		menuBar.removeAll();

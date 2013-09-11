@@ -111,5 +111,6 @@ public class WbMenuItem
 		this.changeListener = null;
 		this.actionListener = null;
 		this.setIcon(null);
+		this.setAction(null);
 	}
 }

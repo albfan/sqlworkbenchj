@@ -608,9 +608,7 @@ public class WbAction
 		int mod = key.getModifiers();
 		int keycode = key.getKeyCode();
 
-		String display = KeyEvent.getKeyModifiersText(mod) +
-			acceleratorDelimiter +
-			KeyEvent.getKeyText(keycode);
+		String display = KeyEvent.getKeyModifiersText(mod) + acceleratorDelimiter + KeyEvent.getKeyText(keycode);
 		return display;
 	}
 
@@ -677,12 +675,23 @@ public class WbAction
 		for (WeakReference<JMenuItem> ref : createdItems)
 		{
 			JMenuItem item = ref.get();
-			if (item != null) item.removeAll();
+			if (item != null)
+			{
+				item.setAction(null);
+				item.setIcon(null);
+				item.removeAll();
+			}
 		}
 		createdItems.clear();
-		this.delegate = null;
-		this.original = null;
-		this.proxy = null;
-		this.toolbarButton = null;
+		delegate = null;
+		original = null;
+		proxy = null;
+		if (toolbarButton != null)
+		{
+			toolbarButton.setAction(null);
+			toolbarButton.setIcon(null);
+			toolbarButton = null;
+		}
 	}
+
 }
