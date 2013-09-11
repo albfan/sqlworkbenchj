@@ -127,6 +127,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
 		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, CollectionUtil.arrayList("false", "true", "cascade"));
 		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolArgument);
@@ -238,7 +239,9 @@ public class WbCopy
 		SourceTableArgument sourceTables = null;
 		try
 		{
-			sourceTables = new SourceTableArgument(sourcetable, null, sourceSchema, sourceCon);
+			String excluded = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
+			sourceTables = new SourceTableArgument(sourcetable, excluded
+				, sourceSchema, sourceCon);
 			tablesToExport = sourceTables.getTables();
 			if (tablesToExport.isEmpty() && sourceTables.wasWildcardArgument())
 			{
