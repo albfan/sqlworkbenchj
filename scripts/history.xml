@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-09-01">
+    <entry dev-build="1" type="fix">When using "Create DDL Script" in the DbExplorer, not all objects were included</entry>
     <entry dev-build="1" type="fix">For Oracle the source code of tables with multiple nested tables was not shown correctly.</entry>
     <entry dev-build="1" type="fix">When displaying a BLOB value as hex, the "ASCII" display of the values was only showing 15 bytes not all 16.</entry>
     <entry dev-build="1" type="fix">When using the "Apply sort order as ORDER BY" option for the DbExplorer sometimes an invalid SQL statement was generated.</entry>

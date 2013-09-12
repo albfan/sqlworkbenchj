@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
@@ -41,6 +42,8 @@ public class ObjectScripter
 	implements Scripter
 {
 	public static final String TYPE_TABLE = "table";
+	public static final String TYPE_TYPE = "type";
+	public static final String TYPE_RULE = "rule";
 	public static final String TYPE_VIEW = "view";
 	public static final String TYPE_SYNONYM = "synonym";
 	public static final String TYPE_INSERT = "insert";
@@ -54,6 +57,7 @@ public class ObjectScripter
 	public static final String TYPE_ENUM = "enum";
 	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
+	private Set<String> knownTypes = CollectionUtil.caseInsensitiveSet(TYPE_DOMAIN, TYPE_ENUM, TYPE_FUNC, TYPE_INSERT, TYPE_MVIEW, TYPE_MVIEW, TYPE_PKG, TYPE_PROC, TYPE_RULE, TYPE_SELECT, TYPE_SYNONYM, TYPE_TABLE, TYPE_TRG, TYPE_TYPE, TYPE_UPDATE, TYPE_VIEW);
 	private List<? extends DbObject> objectList;
 	private StringBuilder script;
 	private ScriptGenerationMonitor progressMonitor;
@@ -76,7 +80,7 @@ public class ObjectScripter
 		{
 			sequenceType = reader.getSequenceTypeName();
 		}
-		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM);
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
 		if (sequenceType != null)
 		{
 			commitTypes.add(sequenceType.toLowerCase());
@@ -124,6 +128,7 @@ public class ObjectScripter
 			this.script = new StringBuilder(this.objectList.size() * 500);
 			if (!cancel && sequenceType != null) this.appendObjectType(sequenceType);
 			if (!cancel) this.appendObjectType(TYPE_ENUM);
+			if (!cancel) this.appendObjectType(TYPE_TYPE);
 			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
 			if (!cancel) this.appendForeignKeys();
@@ -137,6 +142,8 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_PROC);
 			if (!cancel) this.appendObjectType(TYPE_PKG);
 			if (!cancel) this.appendObjectType(TYPE_TRG);
+			if (!cancel) this.appendObjectType(TYPE_RULE);
+			if (!cancel) this.appendObjectType(null); // everything else
 		}
 		finally
 		{
@@ -208,7 +215,15 @@ public class ObjectScripter
 			if (cancel) break;
 			String type = dbo.getObjectType();
 
-			if (!type.equalsIgnoreCase(typeFilter)) continue;
+			if (typeFilter == null)
+			{
+				// only process unknown types if filter is null
+				if (knownTypes.contains(type)) continue;
+			}
+			else
+			{
+				if (!type.equalsIgnoreCase(typeFilter)) continue;
+			}
 
 			CharSequence source = null;
 

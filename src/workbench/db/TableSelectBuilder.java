@@ -142,7 +142,7 @@ public class TableSelectBuilder
 	{
 		if (table == null)
 		{
-			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not table supplied!");
+			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "No table supplied!");
 			return null;
 		}
 
@@ -162,7 +162,7 @@ public class TableSelectBuilder
 			{
 				columns = ColumnIdentifier.sortPksFirst(columns);
 			}
-			
+
 			for (ColumnIdentifier column : columns)
 			{
 				String expr = null;
