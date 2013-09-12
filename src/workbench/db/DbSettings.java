@@ -1654,4 +1654,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.columnnames", true);
 	}
+
+	// Currently only used for Postgres
+	public boolean returnAccessibleProceduresOnly()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "procedurelist.only.accessible", true);
+	}
 }

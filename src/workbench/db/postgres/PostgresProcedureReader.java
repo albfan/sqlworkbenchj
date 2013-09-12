@@ -230,9 +230,17 @@ public class PostgresProcedureReader
 			{
 				sql += whereNeeded ? "\n WHERE " : "\n  AND ";
 				sql += "p.proname LIKE '" + namePattern + "' ";
+				whereNeeded = false;
+			}
+			
+			if (connection.getDbSettings().returnAccessibleProceduresOnly())
+			{
+				sql += whereNeeded ? "\n WHERE " : "\n  AND ";
+				sql += "has_function_privilege(p.oid,'execute')";
+				whereNeeded = false;
 			}
 
-			sql += "\n ORDER BY PROCEDURE_SCHEM, PROCEDURE_NAME ";
+			sql += "\nORDER BY procedure_schem, procedure_name ";
 
 			stmt = connection.createStatementForQuery();
 
