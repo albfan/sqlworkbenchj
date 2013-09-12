@@ -308,7 +308,7 @@ public class TableSourceBuilder
 		String cons = consReader.getConstraintSource(constraints, "   ");
 		if (StringUtil.isNonEmpty(cons))
 		{
-			result.append("\n   ,");
+			result.append(",\n   ");
 			result.append(cons);
 		}
 
@@ -342,7 +342,7 @@ public class TableSourceBuilder
 		boolean inlinePK = table.getUseInlinePK() || getCreateInlinePKConstraints();
 		if (includePK && inlinePK && pk != null)
 		{
-			result.append("\n   ,");
+			result.append(",\n   ");
 			CharSequence pkSql = getPkSource(table, pk, true);
 			result.append(pkSql);
 		}
@@ -352,7 +352,7 @@ public class TableSourceBuilder
 			StringBuilder fk = getFkSource(table, fkDefinitions, true);
 			if (fk.length() > 0)
 			{
-				result.append('\n');
+				result.append(",\n");
 				result.append(fk);
 			}
 		}
@@ -963,8 +963,12 @@ public class TableSourceBuilder
 		{
 			if (forInlineUse)
 			{
-				fk.append("   ,");
+				fk.append("   ");
 				fk.append(values.next());
+				if (values.hasNext())
+				{
+					fk.append(',');
+				}
 			}
 			else
 			{

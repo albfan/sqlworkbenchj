@@ -156,16 +156,16 @@ public abstract class AbstractConstraintReader
 		if (CollectionUtil.isEmpty(constraints)) return StringUtil.EMPTY_STRING;
 		StringBuilder result = new StringBuilder(constraints.size() * 10);
 
-		int count = 0;
+		int count = constraints.size();
+		int nr = 0;
 		for (TableConstraint cons : constraints)
 		{
 			if (cons == null) continue;
 			if (StringUtil.isBlank(cons.getExpression())) continue;
-			if (count > 0)
+			if (nr < count - 2)
 			{
-				result.append("\n");
+				result.append(",\n");
 				result.append(indent);
-				result.append(',');
 			}
 			result.append(cons.getSql());
 			count++;
