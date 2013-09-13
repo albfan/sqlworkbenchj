@@ -1604,7 +1604,7 @@ WHERE id=42;</programlisting>
 							<entry>-includeTriggers</entry>
 							<entry>
 								<para>
-                  If this parameter is set to true, then all triggers (for the selected schemas) will be retrieved as well.
+                  If this parameter is is present (or set to true), then all triggers (for the selected schemas) will be retrieved as well.
                   The default is <literal>false</literal>.
 								</para>
 							</entry>
@@ -1613,8 +1613,17 @@ WHERE id=42;</programlisting>
 							<entry>-includeProcedures</entry>
 							<entry>
 								<para>
-                  If this parameter is set to true, then all procedures and functions (for the selected schemas) will be retrieved as well.
+                  If this parameter is present (or set to true), then all procedures and functions (for the selected schemas) will be retrieved as well.
                   The default is <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeDrop</entry>
+							<entry>
+								<para>
+                  If this parameter is present (or set to true) a <literal>DROP</literal> statement will be generated
+                  for each object in the list.
 								</para>
 							</entry>
 						</row>
@@ -1622,7 +1631,7 @@ WHERE id=42;</programlisting>
 							<entry>-useSeparator</entry>
 							<entry>
 								<para>
-                  If this parameter is set to true, comments will be added that identify the start and end
+                  If this parameter is present (or set to true), comments will be added that identify the start and end
                   of each object. The default is <literal>false</literal>.
 								</para>
 							</entry>

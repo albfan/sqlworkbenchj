@@ -76,11 +76,11 @@ public class WbGenerateScript
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
-		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
-		cmdLine.addArgument("useSeparator", ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
 		cmdLine.addArgument("file", ArgumentType.StringArgument);
-		cmdLine.addArgument("includeDrop", ArgumentType.BoolArgument);
+		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
 	}
 
 	@Override
