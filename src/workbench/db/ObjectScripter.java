@@ -67,8 +67,10 @@ public class ObjectScripter
 	private Collection<String> commitTypes;
 	private boolean appendCommit;
 	private boolean useSeparator = true;
+	private boolean includeDrop;
 	private Collection<String> typesWithoutSeparator;
 	private String sequenceType;
+	private GenericObjectDropper dropper;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
@@ -86,12 +88,20 @@ public class ObjectScripter
 			commitTypes.add(sequenceType.toLowerCase());
 		}
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
+		dropper = new GenericObjectDropper();
+		dropper.setConnection(dbConnection);
+		dropper.setCascade(true);
 	}
 
 	@Override
 	public WbConnection getCurrentConnection()
 	{
 		return dbConnection;
+	}
+
+	public void setIncludeDrop(boolean flag)
+	{
+		includeDrop = flag;
 	}
 
 	public void setUseSeparator(boolean flag)
@@ -256,6 +266,16 @@ public class ObjectScripter
 					this.script.append("-- BEGIN ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
 				}
 
+				if (includeDrop)
+				{
+					CharSequence drop = dropper.getDropForObject(dbo);
+					if (drop != null && drop.length() > 0)
+					{
+						this.script.append(drop);
+						this.script.append(';');
+						this.script.append(nl);
+					}
+				}
 				this.script.append(source);
 
 				if (!StringUtil.endsWith(source, nl))

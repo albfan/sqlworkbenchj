@@ -80,6 +80,7 @@ public class WbGenerateScript
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolArgument);
 		cmdLine.addArgument("file", ArgumentType.StringArgument);
+		cmdLine.addArgument("includeDrop", ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -157,6 +158,8 @@ public class WbGenerateScript
 
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));
+		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
+
 		if (this.rowMonitor != null)
 		{
 			rowMonitor.saveCurrentType("genscript");
