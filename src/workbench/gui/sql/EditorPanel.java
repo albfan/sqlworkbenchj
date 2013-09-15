@@ -417,33 +417,29 @@ public class EditorPanel
 		Settings.getInstance().removeFontChangedListener(this);
 		Settings.getInstance().removePropertyChangeListener(this);
 		this.clearUndoBuffer();
-		if (this.popup != null) this.popup.removeAll();
+		if (this.popup != null)
+		{
+			this.popup.dispose();
+		}
 		this.popup = null;
 		this.stopBlinkTimer();
-		if (painter != null) this.painter.dispose();
-		if (inputHandler != null) inputHandler.dispose();
-		disposeAction(this.columnSelection);
-		disposeAction(this.commentAction);
-		disposeAction(this.fileOpen);
-		disposeAction(this.fileReloadAction);
-		disposeAction(this.fileSave);
-		disposeAction(this.fileSaveAs);
-		disposeAction(this.formatSql);
-		disposeAction(this.jumpToLineAction);
-		disposeAction(this.matchBracket);
-		disposeAction(this.redo);
-		disposeAction(this.unCommentAction);
-		disposeAction(this.undo);
+		if (painter != null)
+		{
+			this.painter.dispose();
+		}
+		if (inputHandler != null)
+		{
+			inputHandler.dispose();
+		}
+		
+		WbAction.dispose(
+			columnSelection, commentAction, fileOpen, fileReloadAction, fileSave,
+			fileSaveAs, formatSql, jumpToLineAction, matchBracket, redo, unCommentAction, undo
+		);
+		replacer.dispose();
 		this.setDocument(new SyntaxDocument());
 	}
 
-	private void disposeAction(WbAction action)
-	{
-		if (action != null)
-		{
-			action.dispose();
-		}
-	}
 	/**
 	 * Return the selected statement of the editor. If no
 	 * text is selected, the whole text will be returned

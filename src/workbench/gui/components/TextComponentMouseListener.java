@@ -239,4 +239,15 @@ public class TextComponentMouseListener
 		pop.getPasteAction().setEnabled(edit);
 		pop.getCopyAction().setEnabled(selected);
 	}
+
+	public void dispose()
+	{
+		WbMenu.disposeMenu(popup);
+		if (text != null)
+		{
+			text.removeMouseListener(this);
+		}
+		text = null;
+		this.additionalItems.clear();
+	}
 }

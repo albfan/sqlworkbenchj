@@ -141,7 +141,7 @@ public class TableListPanel
 
 	protected TableDataPanel tableData;
 
-	private JPanel indexPanel;
+	private TableIndexPanel indexPanel;
 	private TriggerDisplayPanel triggers;
 	protected DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
@@ -457,27 +457,18 @@ public class TableListPanel
 	{
 		reset();
 		tableDefinition.removePropertyChangeListener(this);
+		tableList.removePropertyChangeListener(this);
 		tableDefinition.dispose();
 		tableList.dispose();
-		tableList.removePropertyChangeListener(this);
 		tableData.dispose();
 		tableSource.dispose();
-		disposeAction(compileAction);
-		disposeAction(countAction);
-		disposeAction(reloadAction);
-		disposeAction(renameAction);
-		disposeAction(spoolData);
-		disposeAction(toggleTableSource);
+		findPanel.dispose();
+		if (indexes != null) indexes.dispose();
+		if (indexPanel != null) indexPanel.dispose();
+		WbAction.dispose(compileAction,countAction,reloadAction,renameAction,spoolData,toggleTableSource);
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
-	private void disposeAction(WbAction action)
-	{
-		if (action != null)
-		{
-			action.dispose();
-		}
-	}
 
 	private void extendPopupMenu()
 	{

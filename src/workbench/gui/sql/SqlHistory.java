@@ -30,17 +30,19 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.gui.actions.ClearStatementHistoryAction;
-import workbench.gui.actions.WbAction;
 
 import workbench.log.LogMgr;
-import workbench.util.EncodingUtil;
-import workbench.util.StringUtil;
+import workbench.resource.Settings;
+
+import workbench.gui.actions.ClearStatementHistoryAction;
 import workbench.gui.actions.FirstStatementAction;
 import workbench.gui.actions.LastStatementAction;
 import workbench.gui.actions.NextStatementAction;
 import workbench.gui.actions.PrevStatementAction;
-import workbench.resource.Settings;
+import workbench.gui.actions.WbAction;
+
+import workbench.util.EncodingUtil;
+import workbench.util.StringUtil;
 
 /**
  * Stores the SQL scripts entered in the {@link SqlPanel} and manages
@@ -159,6 +161,12 @@ public class SqlHistory
 		this.history.clear();
 		this.changed = false;
 		this.checkActions();
+	}
+
+	public void dispose()
+	{
+		clear();
+		WbAction.dispose(nextStmtAction, prevStmtAction, firstStmtAction, lastStmtAction, clearAction);
 	}
 
 	public void showLastStatement()

@@ -658,7 +658,6 @@ public final class WbManager
 					// third parameter tells the window not to save the workspace
 					// this does not need to happen on the EDT
 					win.disconnect(false, false, false);
-					win.reset();
 					win.setVisible(false);
 					win.dispose();
 					ConnectionMgr.getInstance().dumpConnections();

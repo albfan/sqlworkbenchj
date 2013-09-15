@@ -46,6 +46,7 @@ import javax.swing.table.TableModel;
 
 import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -71,9 +72,9 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
-import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -319,6 +320,13 @@ public class TableDefinitionPanel
 	public void dispose()
 	{
 		if (tableDefinition != null) tableDefinition.dispose();
+		if (columnFilter != null) columnFilter.dispose();
+		
+		WbAction.dispose(
+			this.addColumn,this.deleteColumn,this.reloadAction,this.alterColumnsAction,this.createIndexAction,
+			this.createPKAction,this.dropColumnsAction,this.dropPKAction
+		);
+
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
@@ -403,7 +411,7 @@ public class TableDefinitionPanel
 				{
 					def = meta.getObjectDetails(currentTable);
 				}
-				
+
 				final TableModel model = def == null ? EmptyTableModel.EMPTY_MODEL : new DataStoreTableModel(def) ;
 
 				if (def instanceof TableColumnsDatastore)

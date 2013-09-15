@@ -22,9 +22,15 @@
  */
 package workbench.gui.components;
 
+import java.awt.Component;
+import java.awt.Container;
+
 import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
+import workbench.gui.actions.WbAction;
 
 import workbench.util.NumberStringCache;
 
@@ -37,11 +43,6 @@ public class WbMenu
 {
 	private String parentMenuId;
 	private boolean createSeparator;
-
-	public WbMenu()
-	{
-		super();
-	}
 
 	public WbMenu(String aText)
 	{
@@ -59,16 +60,6 @@ public class WbMenu
 		setText(title);
 	}
 
-	public WbMenu(String aText, boolean b)
-	{
-		super(aText, b);
-	}
-
-	public WbMenu(Action anAction)
-	{
-		super(anAction);
-	}
-
 	public void setParentMenuId(String id)
 	{
 		this.parentMenuId = id;
@@ -83,6 +74,7 @@ public class WbMenu
 	{
 		this.createSeparator = aFlag;
 	}
+
 	public boolean getCreateMenuSeparator()
 	{
 		return this.createSeparator;
@@ -101,16 +93,45 @@ public class WbMenu
 		super.setText(aText);
 	}
 
-	public void dispose()
+	@Override
+	public void removeAll()
 	{
-		for (int i=0; i < this.getItemCount(); i++)
+		for (int i = 0; i < this.getItemCount(); i++)
 		{
 			JMenuItem item = this.getItem(i);
-			if (item instanceof WbMenuItem)
+			if (item != null)
 			{
-				((WbMenuItem)item).dispose();
+				item.removeAll();
 			}
 		}
+		super.removeAll();
+	}
+
+	public void dispose()
+	{
 		this.removeAll();
+	}
+
+	public static void disposeMenu(JPopupMenu menu)
+	{
+		if (menu == null) return;
+
+		for (Component comp : menu.getComponents())
+		{
+			if (comp instanceof JMenuItem)
+			{
+				JMenuItem item = (JMenuItem) comp;
+				Action action = item.getAction();
+				if (action instanceof WbAction)
+				{
+					((WbAction) action).dispose();
+				}
+			}
+			else if (comp instanceof Container)
+			{
+				((Container)comp).removeAll();
+			}
+		}
+		menu.removeAll();
 	}
 }

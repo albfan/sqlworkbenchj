@@ -45,6 +45,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SelectFkValueAction;
 import workbench.gui.actions.SetNullAction;
+import workbench.gui.actions.WbAction;
 
 import workbench.util.WbDateFormatter;
 
@@ -68,7 +69,9 @@ public class WbTextCellEditor
 	private boolean changed;
 	private boolean isNull;
 	private RestoreDataAction restoreValue;
-
+	private SetNullAction setNull;
+	private SelectFkValueAction selectFk;
+	private TextComponentMouseListener contextMenu;
 	public static WbTextCellEditor createInstance()
 	{
 		return createInstance(null);
@@ -90,22 +93,28 @@ public class WbTextCellEditor
 		textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		textField.addMouseListener(this);
 		restoreValue = new RestoreDataAction(this);
-		TextComponentMouseListener menu = new TextComponentMouseListener();
+		contextMenu = new TextComponentMouseListener();
 
-		SetNullAction setNull = new SetNullAction(this);
-		menu.addAction(setNull);
+		setNull = new SetNullAction(this);
+		contextMenu.addAction(setNull);
 		setNull.addToInputMap(textField);
 
-		menu.addAction(restoreValue);
+		contextMenu.addAction(restoreValue);
 		restoreValue.addToInputMap(textField);
 
-		SelectFkValueAction selectFk = new SelectFkValueAction(parent);
-		menu.addAction(selectFk);
+		selectFk = new SelectFkValueAction(parent);
+		contextMenu.addAction(selectFk);
 		selectFk.addToInputMap(textField);
 
-		textField.addMouseListener(menu);
+		textField.addMouseListener(contextMenu);
 		textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
+	}
+
+	public void dispose()
+	{
+		WbAction.dispose(restoreValue, setNull, selectFk);
+		contextMenu.dispose();
 	}
 
 	@Override

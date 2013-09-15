@@ -74,6 +74,7 @@ import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.StopAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
@@ -333,7 +334,10 @@ public class TableDataPanel
 	{
 		if (!initialized) return;
 		this.reset();
+
 		dataDisplay.dispose();
+		WbAction.dispose(reloadAction, cancelRetrieve);
+		this.execListener.clear();
 	}
 
 	public void disconnect()

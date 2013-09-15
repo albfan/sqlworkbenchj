@@ -36,6 +36,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
@@ -43,12 +44,15 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.lnf.LnFHelper;
+
 import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.lnf.LnFHelper;
+
 import workbench.util.MacOSHelper;
 
 /**
@@ -150,7 +154,6 @@ public class WbTabbedPane
 			comp.setIcon(icon);
 		}
 	}
-
 
 	/**
 	 * Enable/Disable the close button.

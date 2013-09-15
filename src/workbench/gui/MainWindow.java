@@ -109,6 +109,7 @@ import workbench.gui.actions.ObjectSearchAction;
 import workbench.gui.actions.OpenFileAction;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.PrevTabAction;
+import workbench.gui.actions.ReloadProfileWkspAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.SaveAsNewWorkspaceAction;
@@ -204,6 +205,7 @@ public class MainWindow
 	private SaveAsNewWorkspaceAction saveAsWorkspaceAction;
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
+	private ReloadProfileWkspAction reloadWorkspace;
 	private NextTabAction nextTab;
 	private PrevTabAction prevTab;
 
@@ -419,12 +421,14 @@ public class MainWindow
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
 		this.assignWorkspaceAction.setEnabled(this.currentWorkspaceFile != null && this.currentProfile != null);
 		this.closeWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
+		this.reloadWorkspace.setEnabled(this.currentProfile != null && StringUtil.isNonEmpty(currentProfile.getWorkspaceFile()));
 	}
 
 	private void initMenu()
 	{
 		this.disconnectAction = new FileDisconnectAction(this);
 		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
+		this.reloadWorkspace = new ReloadProfileWkspAction(this);
 		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
 		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
 
@@ -561,6 +565,7 @@ public class MainWindow
 		menu.add(this.saveWorkspaceAction);
 		menu.add(this.saveAsWorkspaceAction);
 		menu.add(this.loadWorkspaceAction);
+		menu.add(this.reloadWorkspace);
 		menu.addSeparator();
 		menu.add(this.closeWorkspaceAction);
 		menu.add(this.assignWorkspaceAction);
@@ -1768,31 +1773,25 @@ public class MainWindow
 		}
 	}
 
-	public void reset()
+	@Override
+	public void dispose()
 	{
 		sqlTab.removeAll();
-		this.assignWorkspaceAction.dispose();
-		this.closeWorkspaceAction.dispose();
-		this.createMacro.dispose();
-		this.createNewConnection.dispose();
-		this.dbExplorerAction.dispose();
-		this.disconnectAction.dispose();
-		this.disconnectTab.dispose();
-		this.loadWorkspaceAction.dispose();
-		this.manageMacros.dispose();
-		this.newDbExplorerPanel.dispose();
-		this.newDbExplorerWindow.dispose();
-		this.nextTab.dispose();
-		this.prevTab.dispose();
-		this.saveAsWorkspaceAction.dispose();
-		this.saveWorkspaceAction.dispose();
-		this.showDbmsManual.dispose();
-		this.showMacroPopup.dispose();
+		WbAction.dispose(
+			this.assignWorkspaceAction,this.closeWorkspaceAction,this.createMacro,this.createNewConnection,
+			this.dbExplorerAction,this.disconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
+			this.newDbExplorerPanel,this.newDbExplorerWindow,this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
+			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace
+		);
+		for (JMenuBar bar : panelMenus)
+		{
+			disposeMenu(bar);
+		}
 		this.panelMenus.clear();
 		this.explorerWindows.clear();
 		JMenuBar bar = getJMenuBar();
 		disposeMenu(bar);
-		removeAll();
+		super.dispose();
 	}
 
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
@@ -2327,8 +2326,8 @@ public class MainWindow
 				// connection which is not necessary when removing all tabs.
 				removeTab(keep, false);
 			}
-			// Reset the first panel, now we have a "clean" workspace
 
+			// Reset the first panel, now we have a "clean" workspace
 			if (keepOne)
 			{
 				MainPanel p = getSqlPanel(0);
@@ -3002,6 +3001,7 @@ public class MainWindow
 		JMenuItem item = menu.getItem(0);
 		while (item != null && (item.getAction() instanceof SelectTabAction))
 		{
+			item.removeAll();
 			menu.remove(0);
 			item = menu.getItem(0);
 		}
@@ -3185,14 +3185,7 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			JMenu menu = menuBar.getMenu(i);
-			if (menu instanceof WbMenu)
-			{
-				((WbMenu)menu).dispose();
-			}
-			else
-			{
-				menu.removeAll();
-			}
+			menu.removeAll();
 		}
 		menuBar.removeAll();
 	}

@@ -23,12 +23,15 @@
 package workbench.gui.components;
 
 import java.awt.Font;
+
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTextFieldUI;
-import workbench.gui.actions.WbAction;
+
 import workbench.resource.Settings;
+
+import workbench.gui.actions.WbAction;
 
 /**
  * A label that is built from a JTextField so that the text can
@@ -74,5 +77,13 @@ public class WbLabelField
 	public void addPopupAction(WbAction a)
 	{
 		mouseListener.addAction(a);
+	}
+
+	public void dispose()
+	{
+		if (mouseListener != null)
+		{
+			mouseListener.dispose();
+		}
 	}
 }

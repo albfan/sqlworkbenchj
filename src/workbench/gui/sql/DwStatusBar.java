@@ -24,7 +24,6 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -33,8 +32,6 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -49,7 +46,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import workbench.interfaces.EditorStatusbar;
-import workbench.interfaces.EventDisplay;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -61,7 +57,6 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
 
 import workbench.util.DurationFormatter;
-import workbench.util.NotifierEvent;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -73,7 +68,7 @@ import workbench.util.WbThread;
  */
 public class DwStatusBar
 	extends JPanel
-	implements StatusBar, EditorStatusbar, ActionListener, EventDisplay, MouseListener
+	implements StatusBar, EditorStatusbar, ActionListener
 {
 	private JTextField tfRowCount;
 
@@ -84,7 +79,6 @@ public class DwStatusBar
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
 	private JLabel editorStatus;
-	private JPanel alertPanel;
 	private JPanel infoPanel;
 
 	private static final int DEFAULT_FIELD_HEIGHT = 18;
@@ -96,8 +90,6 @@ public class DwStatusBar
 	private long timerStarted;
 	private Timer executionTimer;
 	private boolean timerRunning;
-	private ActionListener notificationHandler;
-	private JLabel notificationLabel;
 	private String editorLinePrefix;
 	private String editorColPrefix;
 	private SelectionDisplay selectionDisplay;
@@ -424,95 +416,5 @@ public class DwStatusBar
 	public void doRepaint()
 	{
 		this.forcePaint();
-	}
-
-	@Override
-	public void showAlert(final NotifierEvent evt)
-	{
-		if (this.notificationHandler != null)
-		{
-			this.removeAlert();
-		}
-
-		if (this.alertPanel == null)
-		{
-			alertPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-			infoPanel.add(alertPanel, 0);
-		}
-		else
-		{
-			alertPanel.removeAll();
-		}
-
-		notificationHandler = evt.getHandler();
-		notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
-		notificationLabel.setText(null);
-		notificationLabel.setToolTipText(evt.getTooltip());
-		notificationLabel.setIconTextGap(0);
-		notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		notificationLabel.addMouseListener(this);
-
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				alertPanel.add(notificationLabel);
-				validate();
-			}
-		});
-	}
-
-	@Override
-	public void removeAlert()
-	{
-		if (alertPanel != null)
-		{
-			notificationLabel.removeMouseListener(this);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					infoPanel.remove(alertPanel);
-					alertPanel.removeAll();
-					notificationHandler = null;
-					validate();
-				}
-			});
-		}
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getSource() != this.notificationLabel) return;
-		if (this.notificationHandler == null) return;
-
-		if (e.getButton() == MouseEvent.BUTTON1)
-		{
-			ActionEvent evt = new ActionEvent(this, -1, "notifierClicked");
-			this.notificationHandler.actionPerformed(evt);
-		}
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e)
-	{
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e)
-	{
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e)
-	{
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e)
-	{
 	}
 }

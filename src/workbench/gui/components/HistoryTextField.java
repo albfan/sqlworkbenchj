@@ -24,11 +24,15 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.util.List;
+
+import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
+
 import workbench.util.FixedSizeList;
 import workbench.util.StringUtil;
 
@@ -40,6 +44,7 @@ public class HistoryTextField
 {
 	private String propName;
 	private FixedSizeList<String> historyValues;
+	private TextComponentMouseListener contextMenu;
 
 	public HistoryTextField()
 	{
@@ -53,9 +58,25 @@ public class HistoryTextField
 		setSettingsProperty(prop);
 		int maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
 		historyValues = new FixedSizeList<String>(maxHistorySize);
-		getEditor().getEditorComponent().addMouseListener(new TextComponentMouseListener());
+		contextMenu = new TextComponentMouseListener();
+		getEditor().getEditorComponent().addMouseListener(contextMenu);
 		getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
 		setFocusTraversalKeysEnabled(true);
+	}
+
+	public void dispose()
+	{
+		historyValues.clear();
+		ComboBoxEditor ed = getEditor();
+		if (ed != null)
+		{
+			Component comp = ed.getEditorComponent();
+			if (comp != null)
+			{
+				comp.removeMouseListener(contextMenu);
+			}
+		}
+		contextMenu.dispose();
 	}
 
 	public void setSettingsProperty(String prop)

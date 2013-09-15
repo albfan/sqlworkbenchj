@@ -57,6 +57,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
@@ -216,11 +217,11 @@ public class TriggerListPanel
 	public void dispose()
 	{
 		reset();
-		if (dropAction != null) dropAction.dispose();
-		if (compileAction != null) compileAction.dispose();
+		WbAction.dispose(dropAction, compileAction);
 		if (source != null) source.dispose();
+		if (findPanel != null) findPanel.dispose();
 	}
-	
+
 	public void disconnect()
 	{
 		this.reader = null;

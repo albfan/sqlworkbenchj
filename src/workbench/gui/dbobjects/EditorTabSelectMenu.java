@@ -26,16 +26,21 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.util.List;
+
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import workbench.db.DependencyNode;
-import workbench.gui.MainWindow;
-import workbench.gui.components.WbMenu;
-import workbench.gui.components.WbMenuItem;
+
 import workbench.interfaces.FilenameChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DependencyNode;
+
+import workbench.gui.MainWindow;
+import workbench.gui.components.WbMenu;
+import workbench.gui.components.WbMenuItem;
+
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 
@@ -191,5 +196,25 @@ public class EditorTabSelectMenu
 				updateMenu();
 			}
 		});
+	}
+
+	@Override
+	public void dispose()
+	{
+		int count = this.getItemCount();
+		// Make sure none of the items has an ActionListener attached
+		for (int i = 0; i < count; i++)
+		{
+			JMenuItem item = this.getItem(i);
+			if (item != null && target != null)
+			{
+				item.removeActionListener(target);
+			}
+			if (item instanceof WbMenuItem)
+			{
+				((WbMenuItem)item).dispose();
+			}
+		}
+		super.dispose();
 	}
 }

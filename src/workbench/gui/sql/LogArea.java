@@ -27,10 +27,10 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JTextArea;
 
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TextComponentMouseListener;
-
-import workbench.resource.Settings;
 
 /**
  * @author Thomas Kellerer
@@ -39,6 +39,8 @@ public class LogArea
 	extends JTextArea
 	implements PropertyChangeListener
 {
+	private TextComponentMouseListener contextMenu;
+
 	public LogArea()
 	{
 		super();
@@ -50,7 +52,8 @@ public class LogArea
 
 		initColors();
 
-		addMouseListener(new TextComponentMouseListener());
+		contextMenu = new TextComponentMouseListener();
+		addMouseListener(contextMenu);
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_FG_COLOR,
@@ -59,7 +62,12 @@ public class LogArea
 
 	public void dispose()
 	{
+		setText("");
 		Settings.getInstance().removePropertyChangeListener(this);
+		if (contextMenu != null)
+		{
+			contextMenu.dispose();
+		}
 	}
 
 	@Override

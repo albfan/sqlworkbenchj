@@ -1032,7 +1032,7 @@ public class DbExplorerPanel
 		this.reset();
 		this.tables.dispose();
 		this.procs.dispose();
-		this.triggers.reset();
+		this.triggers.dispose();
 		if (mainWindow != null)
 		{
 			mainWindow.removeExecutionListener(this);

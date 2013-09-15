@@ -26,19 +26,22 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.interfaces.ObjectDropper;
+
 import workbench.db.GenericObjectDropper;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.ScriptParser;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
+
 import static org.junit.Assert.*;
-import workbench.interfaces.ObjectDropper;
 
 /**
  *
@@ -99,7 +102,7 @@ public class SqlServerDropTest
 		ScriptParser p = new ScriptParser(sql.toString());
 		assertEquals(2, p.getSize());
 		String drop = p.getCommand(0);
-		assertEquals("DROP TABLE dbo.foo", drop);
+		assertEquals("DROP TABLE dbo.foo IF EXISTS", drop);
 		drop = p.getCommand(1);
 		assertEquals("COMMIT", drop);
 	}

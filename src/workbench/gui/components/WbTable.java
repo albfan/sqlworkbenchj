@@ -775,35 +775,45 @@ public class WbTable
 		if (this.rowResizer != null)
 		{
 			this.rowResizer.done();
+			this.rowResizer = null;
 		}
-		this.rowResizer = null;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (popup != null)
-				{
-					popup.removeAll();
-					popup = null;
-				}
-			}
-		});
 
-		disposeAction(this.copySelectedAsTextAction);
-		disposeAction(this.copySelectedAsInsertAction);
-		disposeAction(this.copySelectedAsMergeAction);
-		disposeAction(this.copySelectedAsUpdateAction);
-		disposeAction(this.copySelectedAsDeleteInsertAction);
-		disposeAction(this.copySelectedDeleteAction);
-		disposeAction(this.copyInsertAction);
-		disposeAction(this.copyDeleteInsertAction);
-		disposeAction(this.copyDeleteAction);
-		disposeAction(this.copyMergeAction);
-		disposeAction(this.copyUpdateAction);
-		disposeAction(this.saveDataAsAction);
-		disposeAction(this.copyAsTextAction);
+		if (popup != null)
+		{
+			popup.removeAll();
+			popup = null;
+		}
+
+		disposeAction(copySelectedAsTextAction);
+		disposeAction(copySelectedAsInsertAction);
+		disposeAction(copySelectedAsMergeAction);
+		disposeAction(copySelectedAsUpdateAction);
+		disposeAction(copySelectedAsDeleteInsertAction);
+		disposeAction(copySelectedDeleteAction);
+		disposeAction(copyInsertAction);
+		disposeAction(copyDeleteInsertAction);
+		disposeAction(copyDeleteAction);
+		disposeAction(copyMergeAction);
+		disposeAction(copyUpdateAction);
+		disposeAction(saveDataAsAction);
+		disposeAction(copyAsTextAction);
+		disposeAction(filterAction);
+		disposeAction(resetFilterAction);
+		disposeAction(resetHighlightAction);
+		disposeAction(optimizeAllCol);
+		disposeAction(optimizeCol);
+		disposeAction(printDataAction);
+		disposeAction(printPreviewAction);
+		disposeAction(setColWidth);
+		disposeAction(sortAscending);
+		disposeAction(sortDescending);
+		disposeAction(transposeRow);
+		
 		Settings.getInstance().removePropertyChangeListener(sortRenderer);
+
+		defaultEditor.dispose();
+		multiLineEditor.dispose();
+		defaultNumberEditor.dispose();
 	}
 
 	private void disposeAction(WbAction action)

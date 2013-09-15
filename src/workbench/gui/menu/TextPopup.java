@@ -22,10 +22,11 @@
  */
 package workbench.gui.menu;
 
+import workbench.interfaces.ClipboardSupport;
+
 import workbench.gui.actions.ClearAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
-import workbench.interfaces.ClipboardSupport;
 
 /**
  * An popup menu which adds a clear and select all action to the {@link CutCopyPastePopup} menu.

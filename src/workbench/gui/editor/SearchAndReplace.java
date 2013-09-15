@@ -38,6 +38,7 @@ import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindNextAction;
 import workbench.gui.actions.FindPreviousAction;
 import workbench.gui.actions.ReplaceAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
 
@@ -469,4 +470,8 @@ public class SearchAndReplace
 		return m.matches();
 	}
 
+	public void dispose()
+	{
+		WbAction.dispose(findAction, findPreviousAction, findNextAction, replaceAction);
+	}
 }

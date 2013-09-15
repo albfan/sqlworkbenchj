@@ -50,6 +50,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.RestoreDataAction;
 import workbench.gui.actions.SetNullAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
 
 import workbench.util.WbDateFormatter;
@@ -70,6 +71,9 @@ public class WbCellEditor
 	private Color defaultBackground;
 	private boolean isNull;
 	private RestoreDataAction restoreValue;
+	private SetNullAction setNull;
+	private MultilineWrapAction multilineWrapAction;
+	private TextComponentMouseListener contextMenu;
 
 	public WbCellEditor(WbTable parent)
 	{
@@ -87,12 +91,20 @@ public class WbCellEditor
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		restoreValue = new RestoreDataAction(this);
-		TextComponentMouseListener l = new TextComponentMouseListener();
-		l.addAction(new SetNullAction(this));
-		l.addAction(restoreValue);
-		l.addAction(new MultilineWrapAction(this));
-		editor.addMouseListener(l);
+		contextMenu = new TextComponentMouseListener();
+		setNull = new SetNullAction(this);
+		multilineWrapAction = new MultilineWrapAction(this);
+		contextMenu.addAction(setNull);
+		contextMenu.addAction(restoreValue);
+		contextMenu.addAction(multilineWrapAction);
+		editor.addMouseListener(contextMenu);
 		editor.addMouseListener(this);
+	}
+
+	public void dispose()
+	{
+		WbAction.dispose(multilineWrapAction, setNull, restoreValue);
+		if (contextMenu != null) contextMenu.dispose();
 	}
 
 	public void setWordwrap(boolean flag)

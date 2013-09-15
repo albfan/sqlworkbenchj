@@ -32,16 +32,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.tools.ConnectionInfoPanel;
-import workbench.resource.ResourceMgr;
 
 /**
  * @author  Thomas Kellerer
@@ -307,4 +311,12 @@ public class ConnectionInfo
 	{
 	}
 
+	public void dispose()
+	{
+		if (showInfoAction != null)
+		{
+			showInfoAction.dispose();
+		}
+		infoText.dispose();
+	}
 }

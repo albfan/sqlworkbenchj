@@ -53,10 +53,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.QuickFilterAction;
-import workbench.gui.actions.ResetFilterAction;
-import workbench.gui.actions.WbAction;
 import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.QuickFilter;
@@ -64,9 +60,16 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.QuickFilterAction;
+import workbench.gui.actions.ResetFilterAction;
+import workbench.gui.actions.WbAction;
+
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.RegExComparator;
+
 import workbench.util.StringUtil;
 
 /**
@@ -114,6 +117,16 @@ public class QuickFilterPanel
 		this.searchColumn = column;
 		showColumnDropDown = false;
 		this.initGui(historyProperty);
+	}
+
+	public void dispose()
+	{
+		WbAction.dispose(filterAction);
+		if (filterValue != null) filterValue.dispose();
+		if (textListener != null) textListener.dispose();
+		if (toolbar != null) toolbar.removeAll();
+		if (searchTable != null) searchTable.removePropertyChangeListener(this);
+		if (columnDropDown != null) columnDropDown.removeActionListener(this);
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ListSelectionEvent;
@@ -39,22 +40,27 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.ReferenceTableNavigation;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -530,6 +536,14 @@ public class ReferenceTableNavigator
 	{
 		this.baseTable = null;
 		this.rebuildMenu();
+	}
+
+	public void dispose()
+	{
+		selectParentTables.dispose();
+		parentMenuInitialized = false;
+		selectChildTables.dispose();
+		childMenuInitialized = false;
 	}
 
 	@Override

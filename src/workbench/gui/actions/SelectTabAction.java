@@ -35,7 +35,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  Thomas Kellerer
  */
-public class SelectTabAction extends WbAction
+public class SelectTabAction
+	extends WbAction
 {
 	private JTabbedPane client;
 	private int index;

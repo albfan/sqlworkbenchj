@@ -23,13 +23,17 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
+
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
 
 /**
  * @author Thomas Kellerer
@@ -40,6 +44,7 @@ public class TableIndexPanel
 {
 	private ReloadAction reloadIndex;
 	private WbTable indexList;
+	private WbToolbar toolbar;
 
 	public TableIndexPanel(WbTable indexTable, Reloadable reloader)
 	{
@@ -52,7 +57,7 @@ public class TableIndexPanel
 		{
 			reloadIndex = new ReloadAction(reloader);
 			reloadIndex.setEnabled(true);
-			WbToolbar toolbar = new WbToolbar();
+			toolbar = new WbToolbar();
 			toolbar.add(reloadIndex);
 			this.add(toolbar, BorderLayout.NORTH);
 		}
@@ -67,5 +72,10 @@ public class TableIndexPanel
 		}
 	}
 
+	public void dispose()
+	{
+		WbAction.dispose(reloadIndex);
+		if (toolbar != null) toolbar.removeAll();
+	}
 
 }

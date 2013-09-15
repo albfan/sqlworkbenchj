@@ -194,7 +194,6 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
 import workbench.util.DurationFormatter;
-import workbench.util.EventNotifier;
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
@@ -333,7 +332,6 @@ public class SqlPanel
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
-		EventNotifier.getInstance().addEventDisplay(statusBar);
 
 		int defRows = GuiSettings.getDefaultMaxRows();
 		if (defRows > 0)
@@ -3848,16 +3846,37 @@ public class SqlPanel
 
 		if (this.toolbarActions != null)
 		{
+			for (WbAction action : toolbarActions)
+			{
+				if (action != null)
+				{
+					action.dispose();
+				}
+			}
 			this.toolbarActions.clear();
 		}
 
-		if (this.filenameChangeListeners != null) this.filenameChangeListeners.clear();
-		if (this.toolbar != null) this.toolbar.removeAll();
-		this.toolbar = null;
+		if (this.filenameChangeListeners != null)
+		{
+			this.filenameChangeListeners.clear();
+		}
+
+		if (this.toolbar != null)
+		{
+			this.toolbar.removeAll();
+			this.toolbar = null;
+		}
 		this.forceAbort();
 		this.executionThread = null;
 		this.connectionInfo = null;
-		if (this.log != null) log.dispose();
+		if (this.log != null)
+		{
+			log.dispose();
+		}
+		if (this.sqlHistory != null) sqlHistory.dispose();
+
+		copyAsSQLMenu.dispose();
+		copySelectedMenu.dispose();
 	}
 
 	@Override

@@ -389,6 +389,8 @@ public class WbAction
 		JMenuItem item = new WbMenuItem();
 		item.setAction(this);
 		item.setAccelerator(getAccelerator());
+		item.setHorizontalTextPosition(JButton.TRAILING);
+		item.setVerticalTextPosition(JButton.CENTER);
 		Integer index = (Integer) getValue(WbAction.MNEMONIC_INDEX);
 		if (index != null)
 		{
@@ -400,6 +402,10 @@ public class WbAction
 			{
 			}
 		}
+
+		// All MenuItems that are created are stored in the List in order to be able
+		// to update the shortcut if the shortcut for the action changes.
+		// for some reason, only changing the shortcut on the action does not seem to be enough
 		this.createdItems.add(new WeakReference(item));
 		return item;
 	}
@@ -694,4 +700,13 @@ public class WbAction
 		}
 	}
 
+	public static void dispose(WbAction ... actions)
+	{
+		if (actions == null) return;
+
+		for (WbAction action : actions)
+		{
+			if (action != null) action.dispose();
+		}
+	}
 }

@@ -22,8 +22,6 @@
  */
 package workbench.gui.components;
 
-import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
 import workbench.resource.ResourceMgr;
@@ -43,26 +41,6 @@ public class WbMenuItem
 	public WbMenuItem(String aText)
 	{
 		super(aText);
-	}
-
-	public WbMenuItem(Action anAction)
-	{
-		super(anAction);
-	}
-
-	public WbMenuItem(String text, int mnemonic)
-	{
-		super(text, mnemonic);
-	}
-
-	public WbMenuItem(Icon icon)
-	{
-		super(icon);
-	}
-
-	public WbMenuItem(String text, Icon icon)
-	{
-		super(text, icon);
 	}
 
 	public void setMenuTextByKey(String key)
@@ -105,12 +83,19 @@ public class WbMenuItem
 		}
 	}
 
-	public void dispose()
+	@Override
+	public void removeAll()
 	{
+		super.removeAll();
 		this.itemListener = null;
 		this.changeListener = null;
 		this.actionListener = null;
 		this.setIcon(null);
 		this.setAction(null);
+	}
+
+	public void dispose()
+	{
+		removeAll();
 	}
 }

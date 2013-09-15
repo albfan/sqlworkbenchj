@@ -24,11 +24,13 @@ package workbench.gui.menu;
 
 import javax.swing.JPopupMenu;
 
+import workbench.interfaces.ClipboardSupport;
+
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
 import workbench.gui.actions.WbAction;
-import workbench.interfaces.ClipboardSupport;
+import workbench.gui.components.WbMenu;
 
 /**
  * A popup menu with the usual Cut, Copy and Paste entries for text fields.
@@ -59,7 +61,24 @@ public class CutCopyPastePopup
 		this.add(anAction.getMenuItem());
 	}
 
-	public WbAction getCopyAction() { return this.copy; }
-	public WbAction getCutAction() { return this.cut; }
-	public WbAction getPasteAction() { return this.paste; }
+	public WbAction getCopyAction()
+	{
+		return this.copy;
+	}
+
+	public WbAction getCutAction()
+	{
+		return this.cut;
+	}
+
+	public WbAction getPasteAction()
+	{
+		return this.paste;
+	}
+
+	public void dispose()
+	{
+		WbMenu.disposeMenu(this);
+	}
+
 }
