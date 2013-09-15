@@ -33,12 +33,15 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
@@ -1275,7 +1278,7 @@ public class WbSwingUtilities
 	}
 
 	/**
-	 * Sets the minimum width all buttons to the width of the widest button. 
+	 * Sets the minimum width all buttons to the width of the widest button.
 	 * <p/>
 	 * @param button the button to change
 	 * @see #makeEqualSize(javax.swing.JButton, int)
@@ -1326,6 +1329,35 @@ public class WbSwingUtilities
 			{
 				int height = fm.getHeight();
 				tree.setRowHeight(height);
+			}
+		}
+	}
+
+	public static void removeAllListeners(JComponent comp)
+	{
+		if (comp == null) return;
+
+		PropertyChangeListener[] listeners = comp.getPropertyChangeListeners();
+		for (PropertyChangeListener l : listeners)
+		{
+			comp.removePropertyChangeListener(l);
+		}
+
+		FocusListener[] focusListeners = comp.getFocusListeners();
+		if (focusListeners != null)
+		{
+			for (FocusListener l : focusListeners)
+			{
+				comp.removeFocusListener(l);
+			}
+		}
+
+		MouseListener[] mouseListeners = comp.getMouseListeners();
+		if (mouseListeners != null)
+		{
+			for (MouseListener l : mouseListeners)
+			{
+				comp.removeMouseListener(l);
 			}
 		}
 	}

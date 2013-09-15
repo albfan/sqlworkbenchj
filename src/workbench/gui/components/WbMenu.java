@@ -30,6 +30,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
 import workbench.util.NumberStringCache;
@@ -96,6 +97,7 @@ public class WbMenu
 	@Override
 	public void removeAll()
 	{
+		WbSwingUtilities.removeAllListeners(this);
 		for (int i = 0; i < this.getItemCount(); i++)
 		{
 			JMenuItem item = this.getItem(i);

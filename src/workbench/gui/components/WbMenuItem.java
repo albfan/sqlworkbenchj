@@ -26,6 +26,8 @@ import javax.swing.JMenuItem;
 
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.WbSwingUtilities;
+
 /**
  *
  * @author  Thomas Kellerer
@@ -86,6 +88,7 @@ public class WbMenuItem
 	@Override
 	public void removeAll()
 	{
+		WbSwingUtilities.removeAllListeners(this);
 		super.removeAll();
 		this.itemListener = null;
 		this.changeListener = null;

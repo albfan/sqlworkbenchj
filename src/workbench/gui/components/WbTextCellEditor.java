@@ -113,6 +113,7 @@ public class WbTextCellEditor
 
 	public void dispose()
 	{
+		WbSwingUtilities.removeAllListeners(textField);
 		WbAction.dispose(restoreValue, setNull, selectFk);
 		contextMenu.dispose();
 	}

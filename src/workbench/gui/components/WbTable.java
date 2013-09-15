@@ -771,7 +771,9 @@ public class WbTable
 
 	public void dispose()
 	{
+		WbSwingUtilities.removeAllListeners(this);
 		reset();
+		
 		if (this.rowResizer != null)
 		{
 			this.rowResizer.done();
@@ -784,31 +786,11 @@ public class WbTable
 			popup = null;
 		}
 
-		disposeAction(copySelectedAsTextAction);
-		disposeAction(copySelectedAsInsertAction);
-		disposeAction(copySelectedAsMergeAction);
-		disposeAction(copySelectedAsUpdateAction);
-		disposeAction(copySelectedAsDeleteInsertAction);
-		disposeAction(copySelectedDeleteAction);
-		disposeAction(copyInsertAction);
-		disposeAction(copyDeleteInsertAction);
-		disposeAction(copyDeleteAction);
-		disposeAction(copyMergeAction);
-		disposeAction(copyUpdateAction);
-		disposeAction(saveDataAsAction);
-		disposeAction(copyAsTextAction);
-		disposeAction(filterAction);
-		disposeAction(resetFilterAction);
-		disposeAction(resetHighlightAction);
-		disposeAction(optimizeAllCol);
-		disposeAction(optimizeCol);
-		disposeAction(printDataAction);
-		disposeAction(printPreviewAction);
-		disposeAction(setColWidth);
-		disposeAction(sortAscending);
-		disposeAction(sortDescending);
-		disposeAction(transposeRow);
-		
+		WbAction.dispose(copySelectedAsTextAction, copySelectedAsInsertAction, copySelectedAsMergeAction, copySelectedAsUpdateAction,
+			copySelectedAsDeleteInsertAction, copySelectedDeleteAction, copyInsertAction, copyDeleteInsertAction, copyDeleteAction,
+			copyMergeAction, copyUpdateAction, saveDataAsAction, copyAsTextAction, filterAction, resetFilterAction, resetHighlightAction,
+			optimizeAllCol, optimizeCol, printDataAction,	printPreviewAction,	setColWidth, sortAscending, sortDescending, transposeRow);
+
 		Settings.getInstance().removePropertyChangeListener(sortRenderer);
 
 		defaultEditor.dispose();
@@ -816,13 +798,6 @@ public class WbTable
 		defaultNumberEditor.dispose();
 	}
 
-	private void disposeAction(WbAction action)
-	{
-		if (action != null)
-		{
-			action.dispose();
-		}
-	}
 
 	@Override
 	public void reset()
