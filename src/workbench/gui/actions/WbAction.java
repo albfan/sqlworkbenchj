@@ -386,6 +386,9 @@ public class WbAction
 
 	public JMenuItem getMenuItem()
 	{
+		// one menu item can only be put into a single menu
+		// so if the same action is used more than one menu
+		// multiple menu items need to be created.
 		JMenuItem item = new WbMenuItem();
 		item.setAction(this);
 		item.setAccelerator(getAccelerator());
