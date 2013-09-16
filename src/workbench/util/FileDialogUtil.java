@@ -189,7 +189,9 @@ public class FileDialogUtil
 			JFileChooser fc = new WbFileChooser(lastDir);
 
 			FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
+			fc.removeChoosableFileFilter(fc.getFileFilter()); // remove the default "All files filter"
 			fc.addChoosableFileFilter(wksp);
+
 			String filename = null;
 
 			int answer = JFileChooser.CANCEL_OPTION;
