@@ -116,7 +116,7 @@ public class QueryCopySource
 		this.keepRunning = true;
 		this.regularStop = false;
 		Savepoint sp = null;
-
+		RowDataReader reader = null;
 		try
 		{
 			if (receiver.isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
@@ -126,7 +126,8 @@ public class QueryCopySource
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
-			RowDataReader reader = RowDataReaderFactory.createReader(info, sourceConnection);
+			reader = RowDataReaderFactory.createReader(info, sourceConnection);
+
 			while (this.keepRunning && rs.next())
 			{
 				// RowDataReader will make some transformation
@@ -148,6 +149,7 @@ public class QueryCopySource
 				{
 					if (abortOnError) throw e;
 				}
+				reader.closeStreams();
 			}
 
 			// if keepRunning == false, cancel() was
@@ -168,6 +170,11 @@ public class QueryCopySource
 		{
 			SqlUtil.closeAll(rs, retrieveStatement);
 			sourceConnection.rollback(sp);
+			if (reader != null)
+			{
+				reader.closeStreams();
+			}
+
 		}
 	}
 

@@ -384,6 +384,7 @@ public class TableDataDiff
 		ResultSet rs = null;
 		Statement stmt = null;
 		currentRowNumber = 0;
+		RowDataReader reader = null;
 		try
 		{
 			// Process all rows from the reference table to be synchronized
@@ -400,7 +401,7 @@ public class TableDataDiff
 
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
 
-			RowDataReader reader = RowDataReaderFactory.createReader(info, this.reference);
+			reader = RowDataReaderFactory.createReader(info, this.reference);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
@@ -412,6 +413,7 @@ public class TableDataDiff
 				{
 					checkRows(packetRows, info);
 					packetRows.clear();
+					reader.closeStreams();
 				}
 			}
 
@@ -428,6 +430,10 @@ public class TableDataDiff
 			SqlUtil.closeResult(rs);
 			SqlUtil.closeStatement(stmt);
 			SqlUtil.closeStatement(this.checkStatement);
+			if (reader != null)
+			{
+				reader.closeStreams();
+			}
 		}
 	}
 
@@ -436,6 +442,7 @@ public class TableDataDiff
 	{
 		String sql = buildCheckSql(referenceRows, info);
 		ResultSet rs = null;
+		RowDataReader reader = null;
 		try
 		{
 			rs = checkStatement.executeQuery(sql);
@@ -446,7 +453,7 @@ public class TableDataDiff
 
 			if (currentRowNumber == 0) comparer.setResultInfo(ri);
 
-			RowDataReader reader = RowDataReaderFactory.createReader(ri, toSync);
+			reader = RowDataReaderFactory.createReader(ri, toSync);
 			while (rs.next())
 			{
 				RowData r = reader.read(rs, false);
@@ -534,6 +541,10 @@ public class TableDataDiff
 		finally
 		{
 			SqlUtil.closeResult(rs);
+			if (reader != null)
+			{
+				reader.closeStreams();
+			}
 		}
 	}
 

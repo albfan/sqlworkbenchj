@@ -66,7 +66,7 @@ import workbench.util.StringUtil;
  */
 public class RowDataReader
 {
-	private List<Closeable> streams;
+	private List<Closeable> streams = new LinkedList<Closeable>();
 	private DataConverter converter;
 	private boolean ignoreReadErrors;
 	private boolean useStreamsForBlobs;
@@ -238,7 +238,7 @@ public class RowDataReader
 						// this is used by the RowDataConverter in order to avoid
 						// reading large blobs into memory
 						InputStream in = rs.getBinaryStream(i+1);
-						if ( in == null || rs.wasNull())
+						if (in == null || rs.wasNull())
 						{
 							value = null;
 						}
@@ -260,14 +260,14 @@ public class RowDataReader
 						try
 						{
 							in = rs.getBinaryStream(i+1);
-							if (in != null && !rs.wasNull())
+							if (in == null || rs.wasNull())
 							{
-								// readBytes will close the InputStream
-								value = FileUtil.readBytes(in);
+								value = null;
 							}
 							else
 							{
-								value = null;
+								// readBytes will closeStreams the InputStream
+								value = FileUtil.readBytes(in);
 							}
 						}
 						catch (IOException e)
@@ -366,20 +366,13 @@ public class RowDataReader
 
 	private void addStream(Closeable in)
 	{
-		if (this.streams == null)
-		{
-			streams = new LinkedList<Closeable>();
-		}
+		if (in == null) return;
 		streams.add(in);
 	}
 
 	public void closeStreams()
 	{
-		if (streams == null) return;
-		for (Closeable c : streams)
-		{
-			FileUtil.closeQuietely(c);
-		}
+		FileUtil.closeStreams(streams);
 		streams.clear();
 	}
 
@@ -417,7 +410,7 @@ public class RowDataReader
 			in = rs.getCharacterStream(column);
 			if (in != null && !rs.wasNull())
 			{
-				// readCharacters will close the Reader
+				// readCharacters will closeStreams the Reader
 				value = FileUtil.readCharacters(in);
 			}
 			else

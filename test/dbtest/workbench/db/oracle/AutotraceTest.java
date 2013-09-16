@@ -118,10 +118,26 @@ public class AutotraceTest
 
 			assertEquals("Statistics", data.get(1).getResultName());
 			DataStore stat = data.get(1);
+			
+//			DataStorePrinter printer = new DataStorePrinter(stat);
+//			printer.printTo(System.out);
 
-			assertEquals(17, stat.getRowCount());
-			int rows = stat.getValueAsInt(14, 0, -1); // rows processed property
+			int rowIndex = findRow("rows processed", stat);
+			assertTrue(rowIndex > -1);
+			int rows = stat.getValueAsInt(rowIndex, 0, -1); // rows processed property
 			assertEquals(2, rows);
+
+			rowIndex = findRow("consistent gets", stat);
+			assertTrue(rowIndex > -1);
+
+			rowIndex = findRow("bytes sent via SQL*Net to client", stat);
+			assertTrue(rowIndex > -1);
+
+			rowIndex = findRow("db block gets", stat);
+			assertTrue(rowIndex > -1);
+
+			rowIndex = findRow("physical reads", stat);
+			assertTrue(rowIndex > -1);
 
 			assertEquals("Execution plan", data.get(2).getResultName());
 
@@ -141,8 +157,10 @@ public class AutotraceTest
 			assertEquals("tabledata", data.get(0).getResultName());
 			assertEquals("Statistics", data.get(1).getResultName());
 			stat = data.get(1);
-			assertEquals(17, stat.getRowCount());
-			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
+
+			rowIndex = findRow("rows processed", stat);
+			assertTrue(rowIndex > -1);
+			rows = stat.getValueAsInt(rowIndex, 0, -1); // rows processed property
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace traceonly statistics");
@@ -152,8 +170,9 @@ public class AutotraceTest
 			assertEquals(1, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());
 			stat = data.get(0);
-			assertEquals(17, stat.getRowCount());
-			rows = stat.getValueAsInt(14, 0, -1); // "rows processed" property
+			rowIndex = findRow("rows processed", stat);
+			assertTrue(rowIndex > -1);
+			rows = stat.getValueAsInt(rowIndex, 0, -1); // rows processed property
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace on explain");
@@ -185,5 +204,15 @@ public class AutotraceTest
 		{
 			Settings.getInstance().setProperty("workbench.db.oracle.autotrace.statistics.valuefirst", oldFlag);
 		}
+	}
+
+	private int findRow(String property, DataStore ds)
+	{
+		for (int row=0; row < ds.getRowCount(); row ++)
+		{
+			String prop = ds.getValueAsString(row, 1);
+			if (property.equals(prop)) return row;
+		}
+		return -1;
 	}
 }

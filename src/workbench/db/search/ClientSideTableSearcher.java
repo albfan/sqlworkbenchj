@@ -203,7 +203,8 @@ public class ClientSideTableSearcher
 				{
 					result.addRow(row);
 				}
-				if (cancelSearch) break;
+				reader.closeStreams();
+
 				if (result.getRowCount() > maxRows) break;
 			}
 

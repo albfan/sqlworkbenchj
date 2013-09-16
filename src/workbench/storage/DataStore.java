@@ -1299,6 +1299,10 @@ public class DataStore
 			if (this.data == null) this.data = createData();
 			RowDataReader reader = RowDataReaderFactory.createReader(resultInfo, originalConnection);
 
+			// we cannot use streams because they would never be properly closed
+			reader.setUseStreamsForBlobs(false);
+			reader.setUseStreamsForClobs(false);
+
 			while (!this.cancelRetrieve && aResultSet.next())
 			{
 				rowCount ++;

@@ -24,13 +24,18 @@ package workbench.db.oracle;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -44,7 +49,7 @@ import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbStoreProfile;
-import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -67,26 +72,28 @@ public class OracleStatementHook
 			"where sid = userenv('SID') \n" +
 			"and a.name in";
 
+	public static final List<String> DEFAULT_STAT_NAMES = CollectionUtil.arrayList(
+		"recursive calls",
+		"db block gets",
+		"consistent gets",
+		"physical reads",
+		"redo size",
+		"bytes sent via SQL*Net to client",
+		"bytes received via SQL*Net from client",
+		"SQL*Net roundtrips to/from client",
+		"sorts (memory)",
+		"sorts (disk)\n, " +
+		"db block changes, \n " +
+		"consistent gets from cache",
+		"consistent gets from cache (fastpath)",
+		"logical read bytes from cache, \n " +
+		"Requests to/from client",
+		"session logical reads");
+
 	/**
 	 * A list of statistic names formatted to be used inside an IN clause.
 	 */
-	private static final String defaultStats =
-		"'recursive calls', \n" +
-		"'db block gets', \n" +
-		"'consistent gets', \n" +
-		"'physical reads', \n" +
-		"'redo size', \n" +
-		"'bytes sent via SQL*Net to client', \n" +
-		"'bytes received via SQL*Net from client', \n" +
-		"'SQL*Net roundtrips to/from client', \n" +
-		"'sorts (memory)', \n" +
-		"'sorts (disk)'\n, " +
-		"'db block changes', \n " +
-		"'consistent gets from cache', \n" +
-		"'consistent gets from cache (fastpath)', \n" +
-		"'logical read bytes from cache', \n " +
-		"'Requests to/from client', \n" +
-		"'session logical reads'";
+	private static final String defaultStats = StringUtil.listToString(DEFAULT_STAT_NAMES, ",", true, '\'');
 
 	// See: http://docs.oracle.com/cd/E11882_01/server.112/e26088/statements_9010.htm#SQLRF54985
 	private static final Set<String> explainable = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER");

@@ -330,6 +330,7 @@ public class TableDeleteSync
 					checkRows(packetRows, info);
 					packetRows.clear();
 				}
+
 			}
 
 			if (packetRows.size() > 0 && !cancelExecution)
@@ -384,6 +385,7 @@ public class TableDeleteSync
 				RowData r = reader.read(rs, false);
 				checkRows.add(r);
 			}
+			reader.closeStreams();
 
 			// Same number of rows --> no row is missing
 			if (checkRows.size() == referenceRows.size()) return;
