@@ -88,7 +88,6 @@ public class WbMenuItem
 	@Override
 	public void removeAll()
 	{
-		WbSwingUtilities.removeAllListeners(this);
 		super.removeAll();
 		this.itemListener = null;
 		this.changeListener = null;
@@ -99,6 +98,7 @@ public class WbMenuItem
 
 	public void dispose()
 	{
+		WbSwingUtilities.removeAllListeners(this);
 		removeAll();
 	}
 }

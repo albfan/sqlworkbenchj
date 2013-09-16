@@ -421,4 +421,15 @@ public class RowData
 		return one.equals(other);
 	}
 
+	public void dispose()
+	{
+		colData = null;
+		originalData = null;
+		if (dependencyDeletes != null)
+		{
+			dependencyDeletes.clear();
+			dependencyDeletes = null;
+		}
+		userObject = null;
+	}
 }

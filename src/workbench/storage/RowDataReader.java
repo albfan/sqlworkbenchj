@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.sql.Types;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -238,13 +238,13 @@ public class RowDataReader
 						// this is used by the RowDataConverter in order to avoid
 						// reading large blobs into memory
 						InputStream in = rs.getBinaryStream(i+1);
-						addStream(in);
-						if (rs.wasNull())
+						if ( in == null || rs.wasNull())
 						{
 							value = null;
 						}
 						else
 						{
+							addStream(in);
 							value = in;
 						}
 					}
@@ -289,7 +289,16 @@ public class RowDataReader
 					}
 					else if (useStreamsForClobs)
 					{
-						value = rs.getCharacterStream(i + 1);
+						Reader in = rs.getCharacterStream(i + 1);
+						if (in == null || rs.wasNull())
+						{
+							value = null;
+						}
+						else
+						{
+							value = in;
+							addStream(in);
+						}
 					}
 					else
 					{
@@ -355,13 +364,23 @@ public class RowDataReader
 		return rs.getTimestamp(column);
 	}
 
-	private void addStream(InputStream in)
+	private void addStream(Closeable in)
 	{
 		if (this.streams == null)
 		{
-			streams = new ArrayList<Closeable>();
+			streams = new LinkedList<Closeable>();
 		}
 		streams.add(in);
+	}
+
+	public void closeStreams()
+	{
+		if (streams == null) return;
+		for (Closeable c : streams)
+		{
+			FileUtil.closeQuietely(c);
+		}
+		streams.clear();
 	}
 
 	private Object readXML(ResultSet rs, int column, boolean useGetXML)

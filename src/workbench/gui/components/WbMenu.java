@@ -97,7 +97,6 @@ public class WbMenu
 	@Override
 	public void removeAll()
 	{
-		WbSwingUtilities.removeAllListeners(this);
 		for (int i = 0; i < this.getItemCount(); i++)
 		{
 			JMenuItem item = this.getItem(i);
@@ -111,6 +110,7 @@ public class WbMenu
 
 	public void dispose()
 	{
+		WbSwingUtilities.removeAllListeners(this);
 		this.removeAll();
 	}
 

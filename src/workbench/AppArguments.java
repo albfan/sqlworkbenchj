@@ -110,7 +110,7 @@ public class AppArguments
 		addArgument(ARG_PROPFILE);
 		addArgument(ARG_LB_CONN);
 		addArgument(ARG_PROFILE, ArgumentType.ProfileArgument);
-		addArgument(ARG_FEEDBACK);
+		addArgument(ARG_FEEDBACK, ArgumentType.BoolArgument);
 		addArgument(ARG_PROFILE_GROUP);
 		addArgument(ARG_PROFILE_STORAGE);
 		addArgument(ARG_CONFIGDIR);

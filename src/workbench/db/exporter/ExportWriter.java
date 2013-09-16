@@ -212,6 +212,7 @@ public abstract class ExportWriter
 
 		RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
 		reader.setUseStreamsForBlobs(useStreamsForBlobs);
+		
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -228,9 +229,15 @@ public abstract class ExportWriter
 
 			RowData row = reader.read(rs, trimCharData);
 			writeRow(row, rows);
+			reader.closeStreams();
+			row.dispose();
 			rows ++;
 		}
-		if (rows > 0 || this.exporter.writeEmptyResults()) writeEnd(rows);
+
+		if (rows > 0 || this.exporter.writeEmptyResults())
+		{
+			writeEnd(rows);
+		}
 	}
 
 	protected void startProgress()
