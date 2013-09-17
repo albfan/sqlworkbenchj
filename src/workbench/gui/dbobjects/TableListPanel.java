@@ -2070,7 +2070,17 @@ public class TableListPanel
 
 		if (row > -1)
 		{
-			displayTab.setSelectedIndex(0);
+			try
+			{
+				// if the tab is changed, this will trigger a reload of the current table definition
+				// but as we are going to select a different one right away we don't need this.
+				this.ignoreStateChanged = true;
+				displayTab.setSelectedIndex(0);
+			}
+			finally
+			{
+				this.ignoreStateChanged = false;
+			}
 			tableList.scrollToRow(row);
 			tableList.setRowSelectionInterval(row, row);
 		}

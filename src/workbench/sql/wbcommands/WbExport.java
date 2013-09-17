@@ -696,7 +696,10 @@ public class WbExport
 				result.setFailure();
 				return result;
 			}
-			LogMgr.logDebug("WbExport.execute()", "Exporting tables: " + StringUtil.listToString(tablesToExport, ','));
+			if (cmdLine.isArgPresent(ARG_SOURCETABLE))
+			{
+				LogMgr.logDebug("WbExport.execute()", "Exporting tables: " + StringUtil.listToString(tablesToExport, ','));
+			}
 		}
 		catch (SQLException e)
 		{
