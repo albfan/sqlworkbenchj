@@ -764,16 +764,21 @@ public class WbTable
 		return this.copyAsTextAction;
 	}
 
+	public TableReplacer getReplacer()
+	{
+		return this.replacer;
+	}
 
-	public TableReplacer getReplacer() { return this.replacer; }
-
-	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
+	public void setSelectOnRightButtonClick(boolean flag)
+	{
+		this.selectOnRightButtonClick = flag;
+	}
 
 	public void dispose()
 	{
 		WbSwingUtilities.removeAllListeners(this);
 		reset();
-		
+
 		if (this.rowResizer != null)
 		{
 			this.rowResizer.done();
@@ -792,7 +797,7 @@ public class WbTable
 			optimizeAllCol, optimizeCol, printDataAction,	printPreviewAction,	setColWidth, sortAscending, sortDescending, transposeRow);
 
 		Settings.getInstance().removePropertyChangeListener(sortRenderer);
-
+		WbSwingUtilities.removeAllListeners(this);
 		defaultEditor.dispose();
 		multiLineEditor.dispose();
 		defaultNumberEditor.dispose();

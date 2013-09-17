@@ -111,6 +111,9 @@ public class WbMenu
 	public void dispose()
 	{
 		WbSwingUtilities.removeAllListeners(this);
+		this.itemListener = null;
+		this.actionListener = null;
+		this.changeListener = null;
 		this.removeAll();
 	}
 

@@ -21,7 +21,11 @@
  */
 package workbench.gui.dbobjects;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.ListDataListener;
 
 import workbench.db.TableIdentifier;
 
@@ -105,4 +109,21 @@ public class TableHistoryModel
 		fireIntervalRemoved(this, index, index);
 	}
 
+	@Override
+	public void removeAllElements()
+	{
+		super.removeAllElements(); // this will reset the selectecObject
+		int size = history.size();
+		history.clear();
+		fireIntervalRemoved(this, 0, size - 1);
+	}
+
+	public void clearListeners()
+	{
+		List<ListDataListener> listeners = Arrays.asList(listenerList.getListeners(ListDataListener.class));
+		for (ListDataListener l : listeners)
+		{
+			removeListDataListener(l);
+		}
+	}
 }

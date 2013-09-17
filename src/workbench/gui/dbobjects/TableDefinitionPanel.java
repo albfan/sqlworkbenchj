@@ -321,13 +321,14 @@ public class TableDefinitionPanel
 	{
 		if (tableDefinition != null) tableDefinition.dispose();
 		if (columnFilter != null) columnFilter.dispose();
-		
+
 		WbAction.dispose(
 			this.addColumn,this.deleteColumn,this.reloadAction,this.alterColumnsAction,this.createIndexAction,
 			this.createPKAction,this.dropColumnsAction,this.dropPKAction
 		);
 
 		Settings.getInstance().removePropertyChangeListener(this);
+		WbSwingUtilities.removeAllListeners(this);
 	}
 
 	/**

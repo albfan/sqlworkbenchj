@@ -408,10 +408,23 @@ public class TableListPanel
 	{
 		if (tableHistory != null)
 		{
+			disposeTableHistory();
 			statusPanel.remove(tableHistory);
 			tableHistory = null;
 			updateStatusPanel();
 		}
+	}
+
+	private void disposeTableHistory()
+	{
+		if (tableHistory != null)
+		{
+			TableHistoryModel model = (TableHistoryModel) tableHistory.getModel();
+			model.removeAllElements();
+			model.clearListeners();
+			tableHistory.removeActionListener(this);
+		}
+
 	}
 
 	private void showTableHistory()
@@ -493,8 +506,7 @@ public class TableListPanel
 	public void dispose()
 	{
 		reset();
-		tableDefinition.removePropertyChangeListener(this);
-		tableList.removePropertyChangeListener(this);
+		disposeTableHistory();
 		tableDefinition.dispose();
 		tableList.dispose();
 		tableData.dispose();

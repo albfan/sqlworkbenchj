@@ -320,7 +320,26 @@ public class DbObjectSourcePanel
 	public void dispose()
 	{
 		reset();
-		if (sourceEditor != null)	sourceEditor.dispose();
-		if (editButton != null) editButton.dispose();
+		WbSwingUtilities.removeAllListeners(this);
+		if (selectTabMenu != null)
+		{
+			selectTabMenu.dispose();
+			selectTabMenu = null;
+		}
+		if (sourceEditor != null)
+		{
+			sourceEditor.dispose();
+			sourceEditor = null;
+		}
+		if (editButton != null)
+		{
+			editButton.dispose();
+			editButton = null;
+		}
+		if (reloadSource != null)
+		{
+			reloadSource.dispose();
+			reloadSource = null;
+		}
 	}
 }

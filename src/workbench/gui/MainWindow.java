@@ -1140,6 +1140,7 @@ public class MainWindow
 	private void updateGuiForTab(final int index)
 	{
 		if (index < 0) return;
+		if (index > this.sqlTab.getTabCount() - 1) return;
 
 		final MainPanel current = this.getSqlPanel(index);
 		if (current == null) return;

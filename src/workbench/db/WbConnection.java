@@ -1047,9 +1047,10 @@ public class WbConnection
 	{
 		String displayString;
 		boolean isBusy = this.isBusy();
+		if (this.metaData == null) return "";
+
 		try
 		{
-			DbMetadata meta = getMetadata();
 			StringBuilder buff = new StringBuilder(100);
 			String user = getDisplayUser();
 			boolean hasUser = false;
@@ -1060,10 +1061,10 @@ public class WbConnection
 				buff.append(user);
 				hasUser = true;
 			}
-			String catalog = isBusy ? currentCatalog : meta.getCurrentCatalog();
+			String catalog = isBusy ? currentCatalog : metaData.getCurrentCatalog();
 			if (StringUtil.isNonBlank(catalog))
 			{
-				String catName = meta.getCatalogTerm();
+				String catName = metaData.getCatalogTerm();
 				if (hasUser) buff.append(", ");
 				buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
 				buff.append('=');
@@ -1073,7 +1074,7 @@ public class WbConnection
 			String schema = useDisplaySchema ? getDisplaySchema() : null;
 			if (schema == null)
 			{
-				schema = isBusy ? null : meta.getCurrentSchema();
+				schema = isBusy ? null : metaData.getCurrentSchema();
 			}
 
 			if (schema != null)
@@ -1082,9 +1083,9 @@ public class WbConnection
 			}
 
 			// the dummy schema in the ignoreSchema() call is there to prevent another lookup for the current schema
-			if (schema != null && !schema.equalsIgnoreCase(user) && !meta.ignoreSchema(schema, "%.INVALID.%"))
+			if (schema != null && !schema.equalsIgnoreCase(user) && !metaData.ignoreSchema(schema, "%.INVALID.%"))
 			{
-				String schemaName = meta.getSchemaTerm();
+				String schemaName = metaData.getSchemaTerm();
 				buff.append(", ");
 				buff.append(schemaName == null ? "Schema" : StringUtil.capitalize(schemaName));
 				buff.append('=');

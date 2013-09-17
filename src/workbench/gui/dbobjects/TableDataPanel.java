@@ -337,6 +337,7 @@ public class TableDataPanel
 
 		dataDisplay.dispose();
 		WbAction.dispose(reloadAction, cancelRetrieve);
+		WbSwingUtilities.removeAllListeners(this);
 		this.execListener.clear();
 	}
 
