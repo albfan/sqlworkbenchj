@@ -97,14 +97,14 @@ public class OracleObjectListEnhancer
 		Map<String, String> result = new HashMap<String, String>();
 
 		String sql =
-			"SELECT /* SQLWorkbench */ mv.owner||'.'||mv.mview_name, \n " +
+			"SELECT /* SQLWorkbench */ mv.owner, mv.mview_name, \n " +
 			"      null as comments  \n" +
 			" FROM all_mviews mv \n";
 
 		if (OracleUtils.getRemarksReporting(connection))
 		{
 			sql =
-				"SELECT /* SQLWorkbench */ mv.owner||'.'||mv.mview_name, \n" +
+				"SELECT /* SQLWorkbench */ mv.owner, mv.mview_name, \n" +
 				"       c.comments\n" +
 				"FROM all_mviews mv\n" +
 				"  left join all_mview_comments c on c.owner = mv.owner and c.mview_name = mv.mview_name \n";
@@ -128,13 +128,14 @@ public class OracleObjectListEnhancer
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
-				String name = rs.getString(1);
-				String comment = rs.getString(2);
+				String owner = rs.getString(1);
+				String name = rs.getString(2);
+				String comment = rs.getString(3);
 				if (defaultPrefix != null && comment != null && comment.startsWith(defaultPrefix) && comment.endsWith(name))
 				{
 					comment = null;
 				}
-				result.put(name, comment);
+				result.put(owner + "." + name, comment);
 			}
 		}
 		catch (SQLException e)
