@@ -175,7 +175,11 @@ WHERE id=42;</p>
       <h3 style="padding-top:10px">Installation</h3>
       <p>
         After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
-        a directory of your choice.
+        a directory of your choice. 
+      </p>
+      <p style="margin:10px">
+        <img style="vertical-align:middle;" src="images/warning.png"/>Due to <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4523159">a bug in the Java runtime</a>, you can <b>not</b> use a directory that contains
+        an exclamation mark e.g. <tt>SQL!Workbench</tt>
       </p>
       <p>
         The application is now ready to be run, no further installation steps are necessary.
@@ -345,7 +349,7 @@ WHERE id=42;</p>
         </p>
         <p>
           The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
-          for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
+          for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package (approx. 4MB).
         </p>
 
         <ul>
