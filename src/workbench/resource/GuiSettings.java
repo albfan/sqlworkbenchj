@@ -74,6 +74,7 @@ public class GuiSettings
 	public static final String PROP_TABLE_HEADER_FULL_TYPE_INFO = "workbench.gui.table.header.typeinfo.full";
 	public static final String PROP_WRAP_MULTILINE_RENDERER = "workbench.gui.display.multiline.renderer.wrap";
 	public static final String PROP_WRAP_MULTILINE_EDITOR = "workbench.gui.display.multiline.editor.wrap";
+	public static final String PROP_DBEXP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
 
 	public static int getMaxExpansionPause()
 	{
@@ -851,6 +852,16 @@ public class GuiSettings
 	public static void setApplySQLSortInDbExplorer(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_DBEXP_USE_SQLSORT, flag);
+	}
+
+	public static boolean getDbExplorerShowTableHistory()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_DBEXP_TABLE_HISTORY, true);
+	}
+
+	public static void setDbExplorerShowTableHistory(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_DBEXP_TABLE_HISTORY, flag);
 	}
 
 	public static int getNumberDataAlignment()

@@ -163,6 +163,8 @@ public class TableListPanel
 	// For synonym resolution
 	private TableIdentifier realTable;
 
+	private JComboBox tableHistory;
+
 	private boolean shiftDown;
 	protected boolean shouldRetrieve;
 
@@ -304,7 +306,8 @@ public class TableListPanel
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_DBEXP_INSTANT_FILTER,
 			Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS,
-			PlacementChooser.PLACEMENT_PROPERTY
+			PlacementChooser.PLACEMENT_PROPERTY,
+			GuiSettings.PROP_DBEXP_TABLE_HISTORY
 		);
 
 		reloadAction = new ReloadAction(this);
@@ -343,6 +346,12 @@ public class TableListPanel
 
 		this.summaryStatusBarLabel = new SummaryLabel("");
 		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);
+
+		if (GuiSettings.getDbExplorerShowTableHistory())
+		{
+			showTableHistory();
+		}
+
 		this.listPanel.add(statusPanel, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -393,6 +402,34 @@ public class TableListPanel
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		showObjectDefinitionPanels(false);
+	}
+
+	private void hideTableHistory()
+	{
+		if (tableHistory != null)
+		{
+			statusPanel.remove(tableHistory);
+			tableHistory = null;
+			updateStatusPanel();
+		}
+	}
+
+	private void showTableHistory()
+	{
+		if (tableHistory == null)
+		{
+			this.tableHistory = new JComboBox();
+			this.tableHistory.addActionListener(this);
+			this.tableHistory.setModel(new TableHistoryModel());
+			this.statusPanel.add(tableHistory, BorderLayout.NORTH);
+			updateStatusPanel();
+		}
+	}
+
+	private void updateStatusPanel()
+	{
+		listPanel.invalidate();
+		listPanel.validate();
 	}
 
 	private void initIndexDropper(Reloadable indexReload)
@@ -1291,6 +1328,12 @@ public class TableListPanel
 		this.tableData.reset();
 		this.tableData.setTable(this.selectedTable);
 
+		if (tableHistory != null)
+		{
+			TableHistoryModel model = (TableHistoryModel)tableHistory.getModel();
+			model.addTable(this.selectedTable);
+		}
+
 		this.setShowDataMenuStatus(hasData);
 
 		this.startRetrieveCurrentPanel();
@@ -1908,6 +1951,11 @@ public class TableListPanel
 				LogMgr.logError("TableListPanel.actionPerformed()", "Error while retrieving", ex);
 			}
 		}
+		else if (e.getSource() == this.tableHistory)
+		{
+			final TableIdentifier tbl = (TableIdentifier)this.tableHistory.getSelectedItem();
+			selectTable(tbl);
+		}
 		else
 		{
 			String command = e.getActionCommand();
@@ -2145,6 +2193,24 @@ public class TableListPanel
 		if (evt.getSource() == renameAction)
 		{
 			checkAlterButton();
+		}
+		else if (GuiSettings.PROP_DBEXP_TABLE_HISTORY.equals(evt.getPropertyName()))
+		{
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (GuiSettings.getDbExplorerShowTableHistory())
+					{
+						showTableHistory();
+					}
+					else
+					{
+						hideTableHistory();
+					}
+				}
+			});
 		}
 		else if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
 		{
