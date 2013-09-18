@@ -854,6 +854,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_DBEXP_USE_SQLSORT, flag);
 	}
 
+	public static int getDbExplorerTableHistorySize()
+	{
+		return Settings.getInstance().getIntProperty("workbench.dbexplorer.tablelist.history.size", 25);
+	}
+
 	public static boolean getDbExplorerShowTableHistory()
 	{
 		return Settings.getInstance().getBoolProperty(PROP_DBEXP_TABLE_HISTORY, true);

@@ -28,6 +28,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.event.ListDataListener;
 
 import workbench.db.TableIdentifier;
+import workbench.resource.GuiSettings;
 
 import workbench.util.FixedSizeList;
 
@@ -38,10 +39,11 @@ import workbench.util.FixedSizeList;
 public class TableHistoryModel
 	extends DefaultComboBoxModel
 {
-	private FixedSizeList<TableIdentifier> history = new FixedSizeList<TableIdentifier>(50);
+	private final FixedSizeList<TableIdentifier> history;
 
 	public TableHistoryModel()
 	{
+		history = new FixedSizeList<TableIdentifier>(GuiSettings.getDbExplorerTableHistorySize());
 	}
 
 	public TableIdentifier getSelectedTable()
@@ -114,8 +116,11 @@ public class TableHistoryModel
 	{
 		super.removeAllElements(); // this will reset the selectecObject
 		int size = history.size();
-		history.clear();
-		fireIntervalRemoved(this, 0, size - 1);
+		if (size > 0)
+		{
+			history.clear();
+			fireIntervalRemoved(this, 0, size - 1);
+		}
 	}
 
 	public void clearListeners()

@@ -143,9 +143,7 @@ public class StatementRunner
 		}
 		else if (Settings.PROPERTY_LOG_ALL_SQL.equals(evt.getPropertyName()))
 		{
-			boolean old = logAllStatements;
 			logAllStatements = Settings.getInstance().getLogAllStatements();
-			LogMgr.logDebug("StatementRunner.propertyChange()", "logAllStatements changed from " + old + " to " + logAllStatements);
 		}
 	}
 

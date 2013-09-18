@@ -87,7 +87,7 @@ public class OracleControlFileWriterTest
 			@Override
 			public String getTextDelimiter()
 			{
-				return "\t";
+				return "\\t";
 			}
 
 			@Override

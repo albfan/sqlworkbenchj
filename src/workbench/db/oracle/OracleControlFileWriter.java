@@ -35,11 +35,9 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
-import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -86,7 +84,7 @@ public class OracleControlFileWriter
 			String table = exporter.getTableNameToUse();
 			out.println(table);
 			out.print("FIELDS TERMINATED BY '");
-			out.print(StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL));
+			out.print(exporter.getTextDelimiter());
 			out.println("' TRAILING NULLCOLS");
 			out.println("(");
 			int count = resultInfo.getColumnCount();

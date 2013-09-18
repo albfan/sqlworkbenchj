@@ -415,6 +415,15 @@ public class TableListPanel
 		}
 	}
 
+	private void resetTableHistory()
+	{
+		if (tableHistory != null)
+		{
+			TableHistoryModel model = (TableHistoryModel) tableHistory.getModel();
+			model.removeAllElements();
+		}
+	}
+
 	private void disposeTableHistory()
 	{
 		if (tableHistory != null)
@@ -752,6 +761,7 @@ public class TableListPanel
 		this.selectedTable = null;
 		this.realTable = null;
 		this.invalidateData();
+
 		if (this.isBusy())
 		{
 			return;
@@ -785,6 +795,7 @@ public class TableListPanel
 				tableSource.reset();
 				tableData.reset();
 				tableList.reset();
+				resetTableHistory();
 			}
 		});
 	}
@@ -1966,7 +1977,10 @@ public class TableListPanel
 		else if (e.getSource() == this.tableHistory)
 		{
 			final TableIdentifier tbl = (TableIdentifier)this.tableHistory.getSelectedItem();
-			selectTable(tbl);
+			if (tbl != null)
+			{
+				selectTable(tbl);
+			}
 		}
 		else
 		{
@@ -2120,6 +2134,10 @@ public class TableListPanel
 	@Override
 	public void selectTable(TableIdentifier table)
 	{
+		// this can happen during "closing" of the DbExplorer
+		if (table == null) return;
+		if (tableList == null) return;
+
 		int row = findTable(table);
 
 		if (row < 0 && tableList.getDataStore().isFiltered())
