@@ -29,12 +29,16 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.ResultInfo;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -84,7 +88,7 @@ public class OracleControlFileWriter
 			String table = exporter.getTableNameToUse();
 			out.println(table);
 			out.print("FIELDS TERMINATED BY '");
-			out.print(exporter.getTextDelimiter());
+			out.print(convertDelimiter(exporter.getTextDelimiter()));
 			out.println("' TRAILING NULLCOLS");
 			out.println("(");
 			int count = resultInfo.getColumnCount();
@@ -181,6 +185,14 @@ public class OracleControlFileWriter
 		{
 			FileUtil.closeQuietely(out);
 		}
+	}
+
+	private String convertDelimiter(String delim)
+	{
+		delim = delim.replace("\t", "\\t");
+		delim = delim.replace("\r", "\\r");
+		delim = delim.replace("\n", "\\n");
+		return delim;
 	}
 
 	private String convertJavaCharsetToOracle(String encoding)
