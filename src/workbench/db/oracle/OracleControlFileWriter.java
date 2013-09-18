@@ -29,6 +29,8 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -39,6 +41,7 @@ import workbench.db.exporter.RowDataConverter;
 
 import workbench.storage.ResultInfo;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -56,6 +59,34 @@ import workbench.util.WbFile;
 public class OracleControlFileWriter
 	implements FormatFileWriter
 {
+
+	private final Map<String, String> encodingMap = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+
+	public OracleControlFileWriter()
+	{
+		encodingMap.put("UTF8","AL32UTF8");
+		encodingMap.put("UTF-8","AL32UTF8");
+		encodingMap.put("ISO-8859-1","WE8ISO8859P1");
+		encodingMap.put("ISO-8859-15","WE8ISO8859P15");
+		encodingMap.put("ISO-8859-10","NE8ISO8859P10");
+		encodingMap.put("ISO-8859-5","CL8ISO8859P5");
+		encodingMap.put("ISO-8859-5","CL8ISO8859P5");
+		encodingMap.put("windows-1250","EE8MSWIN1250");
+		encodingMap.put("windows-1253","EL8MSWIN1253");
+		encodingMap.put("ISO-2022-JP","ISO2022-JP");
+		encodingMap.put("ISO-2022-CN","ISO2022-CN");
+		encodingMap.put("ISO-2022-KR","ISO2022-KR");
+		encodingMap.put("UTF-16BE","AL16UTF16");
+		List<String> custom = Settings.getInstance().getListProperty("workbench.db.oracle.encodingmap", false, null);
+		for (String map : custom)
+		{
+			String[] elements = map.split(";");
+			if (elements.length == 2)
+			{
+				encodingMap.put(elements[0], elements[1]);
+			}
+		}
+	}
 
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
@@ -200,19 +231,11 @@ public class OracleControlFileWriter
 		if (encoding == null) return Settings.getInstance().getDefaultFileEncoding();
 		encoding = EncodingUtil.cleanupEncoding(encoding);
 
-		if (encoding.equalsIgnoreCase("UTF8")) return "AL32UTF8";
-		if (encoding.equalsIgnoreCase("UTF-8")) return "AL32UTF8";
-		if (encoding.equalsIgnoreCase("ISO-8859-1")) return "WE8ISO8859P1";
-		if (encoding.equalsIgnoreCase("ISO-8859-15")) return "WE8ISO8859P15";
-		if (encoding.equalsIgnoreCase("ISO-8859-10")) return "NE8ISO8859P10";
-		if (encoding.equalsIgnoreCase("ISO-8859-5")) return "CL8ISO8859P5";
-		if (encoding.equalsIgnoreCase("ISO-8859-5")) return "CL8ISO8859P5";
-		if (encoding.equalsIgnoreCase("windows-1250")) return "EE8MSWIN1250";
-		if (encoding.equalsIgnoreCase("windows-1253")) return "EL8MSWIN1253";
-		if (encoding.equalsIgnoreCase("ISO-2022-JP")) return "ISO2022-JP";
-		if (encoding.equalsIgnoreCase("ISO-2022-CN")) return "ISO2022-CN";
-		if (encoding.equalsIgnoreCase("ISO-2022-KR")) return "ISO2022-KR";
-		if (encoding.equalsIgnoreCase("UTF-16BE")) return "AL16UTF16";
+		String oraEncoding = encodingMap.get(encoding);
+		if (oraEncoding != null)
+		{
+			return oraEncoding;
+		}
 		return encoding.toUpperCase();
 	}
 
