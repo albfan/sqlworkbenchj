@@ -26,12 +26,16 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.TreeMap;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -44,10 +48,15 @@ public class MySQLTableCommentReader
 	implements ObjectListEnhancer
 {
 
+	public static boolean retrieveComments()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.mysql.tablecomments.retrieve", false);
+	}
+
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.mysql.tablecomments.retrieve", false))
+		if (retrieveComments())
 		{
 			updateObjectRemarks(con, result, aCatalog, aSchema, objects, requestedTypes);
 		}

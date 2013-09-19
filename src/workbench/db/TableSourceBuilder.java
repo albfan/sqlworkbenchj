@@ -209,7 +209,7 @@ public class TableSourceBuilder
 			}
 		}
 
-		appendComments(result, dbConnection, table, columns, lineEnding, !dbConnection.getDbSettings().useInlineColumnComments());
+		appendTableComments(result, table, columns, lineEnding);
 
 		if (dbConnection.getDbSettings().getGenerateTableGrants())
 		{
@@ -229,6 +229,11 @@ public class TableSourceBuilder
 			result.append(extendedSQL);
 		}
 		return result.toString();
+	}
+
+	protected void appendTableComments(StringBuilder result, TableIdentifier table, List<ColumnIdentifier> columns, String lineEnding)
+	{
+		appendComments(result, dbConnection, table, columns, lineEnding, !dbConnection.getDbSettings().useInlineColumnComments());
 	}
 
 	public static void appendComments(StringBuilder result, WbConnection connection, TableDefinition table)

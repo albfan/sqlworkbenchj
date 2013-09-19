@@ -148,6 +148,12 @@ public class MySQLTableSourceBuilder
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return defaultCollation;
+	}
 
+	@Override
+	protected void appendTableComments(StringBuilder result, TableIdentifier table, List<ColumnIdentifier> columns, String lineEnding)
+	{
+		// nothing to do.
+		// the table comment is added in readTableOptions and MySQL does not support column comments
 	}
 }
