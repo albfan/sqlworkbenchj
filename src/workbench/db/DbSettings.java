@@ -182,7 +182,7 @@ public class DbSettings
 
 	public boolean useGetStringForClobs()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);
+		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", true);
 	}
 
 	public boolean useGetBytesForBlobs()
@@ -1576,6 +1576,11 @@ public class DbSettings
 	public boolean getUseStreamsForBlobExport()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "export.blob.use.streams", true);
+	}
+
+	public boolean getUseStreamsForClobExport()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "export.clob.use.streams", false);
 	}
 
 	public boolean getUseGenericExecuteForSelect()

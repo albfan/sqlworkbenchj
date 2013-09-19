@@ -121,18 +121,13 @@ public class ResultInfo
 			i++;
 		}
 		this.colCount = this.columns.length;
-		this.treatLongVarcharAsClob = conn.getDbSettings().longVarcharIsClob();
+		initDbConfig(conn);
 	}
 
-	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection)
-		throws SQLException
+	private void initDbConfig(WbConnection sourceConnection)
 	{
-		this.colCount = metaData.getColumnCount();
-		this.columns = new ColumnIdentifier[this.colCount];
-		DbMetadata dbMeta = null;
 		if (sourceConnection != null)
 		{
-			dbMeta = sourceConnection.getMetadata();
 			treatLongVarcharAsClob = sourceConnection.getDbSettings().longVarcharIsClob();
 			useGetBytesForBlobs = sourceConnection.getDbSettings().useGetBytesForBlobs();
 			useGetStringForClobs = sourceConnection.getDbSettings().useGetStringForClobs();
@@ -140,6 +135,15 @@ public class ResultInfo
 			convertArrays = sourceConnection.getDbSettings().handleArrayDisplay();
 			useGetXML = sourceConnection.getDbSettings().useGetXML();
 		}
+	}
+
+	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection)
+		throws SQLException
+	{
+		this.colCount = metaData.getColumnCount();
+		this.columns = new ColumnIdentifier[this.colCount];
+		DbMetadata dbMeta = sourceConnection != null ? sourceConnection.getMetadata() : null;
+		initDbConfig(sourceConnection);
 
 		DataTypeResolver resolver = null;
 		if (dbMeta != null)

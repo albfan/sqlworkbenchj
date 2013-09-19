@@ -68,6 +68,7 @@ public abstract class ExportWriter
 	protected boolean canAppendStart;
   protected boolean trimCharData;
 	protected boolean useStreamsForBlobs;
+	protected boolean useStreamsForClobs;
 
 	private int progressInterval = 10;
 
@@ -87,6 +88,7 @@ public abstract class ExportWriter
 		if (con != null)
 		{
 			useStreamsForBlobs = con.getDbSettings().getUseStreamsForBlobExport();
+			useStreamsForClobs = con.getDbSettings().getUseStreamsForClobExport();
 		}
 	}
 
@@ -212,7 +214,8 @@ public abstract class ExportWriter
 
 		RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
 		reader.setUseStreamsForBlobs(useStreamsForBlobs);
-		
+		reader.setUseStreamsForClobs(useStreamsForClobs);
+
 		while (rs.next())
 		{
 			if (this.cancel) break;

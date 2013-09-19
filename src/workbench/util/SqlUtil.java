@@ -1409,8 +1409,7 @@ public class SqlUtil
 		return (aSqlType == Types.CLOB ||
 			      aSqlType == Types.NCLOB ||
 			      aSqlType == Types.LONGVARCHAR ||
-						aSqlType == Types.LONGNVARCHAR
-						);
+						aSqlType == Types.LONGNVARCHAR);
 	}
 
 	public static boolean isBlobType(int aSqlType)
