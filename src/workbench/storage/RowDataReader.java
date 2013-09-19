@@ -372,8 +372,11 @@ public class RowDataReader
 
 	public void closeStreams()
 	{
-		FileUtil.closeStreams(streams);
-		streams.clear();
+		if (streams.size() > 0)
+		{
+			FileUtil.closeStreams(streams);
+			streams.clear();
+		}
 	}
 
 	private Object readXML(ResultSet rs, int column, boolean useGetXML)
