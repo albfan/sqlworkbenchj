@@ -380,8 +380,8 @@
   </xsl:template>
 
   <!-- re-create a view -->
-  <xsl:template name="view-def">
-    <xsl:text>CREATE OR REPLACE VIEW</xsl:text>
+  <xsl:template match="view-def">
+    <xsl:text>CREATE OR REPLACE VIEW </xsl:text>
     <xsl:value-of select="view-name"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>(</xsl:text>
