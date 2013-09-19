@@ -196,9 +196,9 @@ public class DwPanel
 	{
 		clearContent();
 		Settings.getInstance().removePropertyChangeListener(this);
-		referenceNavigator.dispose();
+		if (referenceNavigator != null) referenceNavigator.dispose();
 		WbAction.dispose(createDeleteScript,deleteDependentRow,deleteRow,duplicateRow,insertRow,selectKeys,updateAction);
-		dataTable.dispose();
+		if (dataTable != null) dataTable.dispose();
 	}
 
 	public void setSqlInfoEnabled(boolean flag)
