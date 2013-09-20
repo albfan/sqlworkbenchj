@@ -1295,7 +1295,9 @@ public class StringUtil
 		if (value == null) return null;
 
 		int len = value.length();
-		StringBuilder outBuffer = new StringBuilder((int)(len*1.5));
+		if (len == 0) return value;
+		
+		StringBuilder outBuffer = null;
 
 		for (int x = 0; x < len; x++)
 		{
@@ -1304,35 +1306,50 @@ public class StringUtil
 			switch (aChar)
 			{
 				case '\\':
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 					outBuffer.append("\\\\");
 					break;
 				case '\t':
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 					outBuffer.append("\\t");
 					break;
 				case '\n':
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 					outBuffer.append("\\n");
 					break;
 				case '\r':
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 					outBuffer.append("\\r");
 					break;
 				case '\f':
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 					outBuffer.append("\\f");
 					break;
 				default:
 					if ((range != null && range.isOutsideRange(aChar)) ||
 						(additionalCharsToEncode != null && additionalCharsToEncode.indexOf(aChar) > -1))
 					{
+					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
 						outBuffer.append('\\');
 						outBuffer.append(hexChar);
 						appendUnicode(outBuffer, aChar);
 					}
-					else
+					else if (outBuffer != null)
 					{
 						outBuffer.append(aChar);
 					}
 			}
 		}
+		if (outBuffer == null) return value;
 		return outBuffer.toString();
+	}
+
+	private static StringBuilder createLazyBuilder(String value, int currentPos)
+	{
+		int len = value.length();
+		StringBuilder outBuffer = new StringBuilder((int)(len*1.5));
+		outBuffer.append(value.substring(0, currentPos));
+		return outBuffer;
 	}
 
 	public static CharSequence getOctalString(int input)

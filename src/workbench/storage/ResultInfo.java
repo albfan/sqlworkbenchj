@@ -142,12 +142,14 @@ public class ResultInfo
 	{
 		this.colCount = metaData.getColumnCount();
 		this.columns = new ColumnIdentifier[this.colCount];
-		DbMetadata dbMeta = sourceConnection != null ? sourceConnection.getMetadata() : null;
+
 		initDbConfig(sourceConnection);
 
+		DbMetadata dbMeta = null;
 		DataTypeResolver resolver = null;
-		if (dbMeta != null)
+		if (sourceConnection != null)
 		{
+			dbMeta = sourceConnection.getMetadata();
 			resolver = dbMeta.getDataTypeResolver();
 		}
 
@@ -298,9 +300,9 @@ public class ResultInfo
 				else
 				{
 					String cls = null;
-					if (dbMeta != null)
+					if (resolver != null)
 					{
-						cls = dbMeta.getDataTypeResolver().getColumnClassName(col.getDataType(), col.getDbmsType());
+						cls = resolver.getColumnClassName(col.getDataType(), col.getDbmsType());
 					}
 					if (cls == null) cls = metaData.getColumnClassName(i + 1);
 					col.setColumnClassName(cls);
