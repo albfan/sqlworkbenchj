@@ -65,6 +65,15 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testNVarcharLiteral()
+	{
+		String sql = "insert into foo (col) values (N'bar')";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql();
+		assertTrue(formatted.contains("N'bar'"));
+	}
+
+	@Test
 	public void testSqlServer()
 	{
 		String sql = "select * from foo join bar on foo.id = bar.id outer apply fn_foo (bar.id) st";
@@ -1157,7 +1166,7 @@ public class SqlFormatterTest
 						"       Level\n" +
 						"FROM DirectReports\n" +
 						"  INNER JOIN HumanResources.Department AS dp ON DirectReports.DeptID = dp.DepartmentID\n" +
-						"WHERE dp.GroupName = N 'Research and Development'\n" +
+						"WHERE dp.GroupName = N'Research and Development'\n" +
 						"OR    Level = 0";
 
 //		System.out.println("+++++++++++++++++++ got:\n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
