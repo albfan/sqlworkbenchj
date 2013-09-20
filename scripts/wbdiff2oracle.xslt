@@ -456,8 +456,8 @@
       <xsl:copy-of select="$colname"/>
       <xsl:text> </xsl:text>
       <xsl:value-of select="dbms-data-type"/>
-      <xsl:value-of select="$nullable"/>
       <xsl:value-of select="$defaultvalue"/>
+      <xsl:value-of select="$nullable"/>
       <xsl:if test="position() &lt; last()">
         <xsl:text>,</xsl:text>
         <xsl:value-of select="$newline"/>
