@@ -26,6 +26,7 @@ import java.io.File;
 
 import workbench.log.LogMgr;
 
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataConverter;
@@ -34,6 +35,7 @@ import workbench.storage.RowDataReader;
 
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -134,7 +136,11 @@ public class TextRowDataConverter
 	{
 		int count = this.metaData.getColumnCount();
 		StringBuilder result = new StringBuilder(count * 30);
+
 		boolean canQuote = this.quoteCharacter != null;
+
+		DbSettings dbs = originalConnection != null ? this.originalConnection.getDbSettings() : null;
+
 		int currentColIndex = 0;
 
 		if (rowIndexColumnName != null)
@@ -153,7 +159,8 @@ public class TextRowDataConverter
 				result.append(this.delimiter);
 			}
 
-			int colType = columnTypes[colIndex]; // this.metaData.getColumnType(colIndex);
+			int colType = this.metaData.getColumnType(colIndex);
+			String dbmsType = this.metaData.getDbmsTypeName(colIndex);
 			String value = null;
 
 			boolean addQuote = quoteAlways;
@@ -161,11 +168,10 @@ public class TextRowDataConverter
 
 			if (converter != null)
 			{
-				//String dbmsType = this.metaData.getDbmsTypeName(colIndex);
-				isConverted = isConverted(colType, typeNames[colIndex]);
+				isConverted = isConverted(colType, dbmsType);
 			}
 
-			if (!isConverted && writeBlobFiles && colType == RowDataReader.IS_BLOB)
+			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				try
 				{
@@ -183,7 +189,7 @@ public class TextRowDataConverter
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 			}
-			else if (!isConverted && writeClobFiles && colType == RowDataReader.IS_CLOB) // SqlUtil.isClobType(colType, dbmsType, this.originalConnection.getDbSettings()))
+			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, dbs))
 			{
 				Object clobData = row.getValue(colIndex);
 				if (clobData != null)
@@ -213,7 +219,7 @@ public class TextRowDataConverter
 				// Never quote null values
 				addQuote = nullString == null ? false : quoteAlways;
 			}
-			else if (colType == RowDataReader.IS_CHARACTER)
+			else if (SqlUtil.isCharacterType(colType))
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));

@@ -54,7 +54,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataReader;
 
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -1387,15 +1386,21 @@ public class SqlUtil
 
 	public static boolean isClobType(int aSqlType)
 	{
-		return (aSqlType == RowDataReader.IS_CLOB || aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
+		return (aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
 	}
 
-	public static boolean isClobType(int aSqlType, String dbmsType, DbSettings dbInfo)
+	public static boolean isClobType(int sqlType, String dbmsType, DbSettings dbInfo)
 	{
-		if (isNumberType(aSqlType)) return false;
-		if (dbInfo != null && dbInfo.isClobType(dbmsType)) return true;
 		boolean treatLongVarcharAsClob = (dbInfo == null ? false : dbInfo.longVarcharIsClob());
-		return isClobType(aSqlType, treatLongVarcharAsClob);
+		if (isClobType(sqlType, treatLongVarcharAsClob))
+		{
+			return true;
+		}
+		if (dbInfo != null)
+		{
+			return dbInfo.isClobType(dbmsType);
+		}
+		return false;
 	}
 
 	public static boolean isXMLType(int type)
@@ -1405,19 +1410,22 @@ public class SqlUtil
 
 	public static boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
 	{
-		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
-
-		return (aSqlType == RowDataReader.IS_CLOB  ||
-			      aSqlType == Types.CLOB ||
-			      aSqlType == Types.NCLOB ||
-			      aSqlType == Types.LONGVARCHAR ||
-						aSqlType == Types.LONGNVARCHAR);
+		if (treatLongVarcharAsClob)
+		{
+			return (aSqlType == Types.CLOB ||
+							aSqlType == Types.NCLOB ||
+							aSqlType == Types.LONGVARCHAR ||
+							aSqlType == Types.LONGNVARCHAR);
+		}
+		else
+		{
+			 return isClobType(aSqlType);
+		}
 	}
 
 	public static boolean isBlobType(int aSqlType)
 	{
-		return (aSqlType == RowDataReader.IS_BLOB ||
-			      aSqlType == Types.BLOB ||
+		return (aSqlType == Types.BLOB ||
 		        aSqlType == Types.BINARY ||
 		        aSqlType == Types.LONGVARBINARY ||
 		        aSqlType == Types.VARBINARY);

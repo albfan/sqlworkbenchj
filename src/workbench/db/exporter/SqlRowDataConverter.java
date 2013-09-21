@@ -272,7 +272,7 @@ public class SqlRowDataConverter
 
 	private StringBuilder generateMerge(RowData row)
 	{
-		MergeGenerator generator = null;
+		MergeGenerator generator;
 		if (mergeType != null)
 		{
 			generator = MergeGenerator.Factory.createGenerator(mergeType);
@@ -309,12 +309,12 @@ public class SqlRowDataConverter
 
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
-		String source = null;
 
 		TableIdentifier toUse = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
+
 		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK);
-		source = create.toString();
+		String source = create.toString();
 		StringBuilder createSql = new StringBuilder(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;

@@ -49,7 +49,6 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.storage.RowDataReader;
 
 import workbench.util.*;
 
@@ -105,9 +104,6 @@ public abstract class RowDataConverter
 
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
-
-	protected int[] columnTypes;
-	protected String[] typeNames;
 
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
@@ -272,16 +268,6 @@ public abstract class RowDataConverter
 		if (this.includeColumnComments)
 		{
 			retrieveColumnComments();
-		}
-
-		// For performance reasons the column type information is being cached
-		// usually it doesn't really matter, but when exporting large tables ("millions of rows")
-		// it does improve the speed of the export
-		columnTypes = RowDataReader.getColumnTypeCache(metaData, true);
-		typeNames = new String[metaData.getColumnCount()];
-		for (int c=0; c < typeNames.length; c++)
-		{
-			typeNames[c] = metaData.getDbmsTypeName(c);
 		}
 	}
 

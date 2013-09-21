@@ -62,7 +62,7 @@ public class OdsRowDataConverter
 	@Override
 	public StringBuilder getStart()
 	{
-		Writer out = null;
+		Writer out;
 		try
 		{
 			if (this.factory != null)
@@ -249,7 +249,7 @@ public class OdsRowDataConverter
 			out.write("<office:meta>\n");
 			out.write("<meta:generator>SQL Workbench/J</meta:generator>\n");
 			out.write("<dc:title>SQL Workbench/J Export</dc:title>\n");
-			String s = null;
+			String s;
 			if (this.generatingSql != null)
 			{
 				Matcher m = StringUtil.PATTERN_CRLF.matcher(generatingSql);
