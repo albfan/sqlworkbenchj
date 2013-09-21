@@ -22,21 +22,26 @@
  */
 package workbench.db.postgres;
 
+import java.sql.Types;
+import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.RowDataConverter;
-import java.util.List;
-import workbench.db.TableIdentifier;
-import java.sql.Types;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
-import workbench.util.WbFile;
-import workbench.TestUtil;
-import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.db.ColumnIdentifier;
-import static org.junit.Assert.*;
+
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -114,19 +119,19 @@ public class PostgresCopyStatementWriterTest
 			}
 
 			@Override
-			public StrBuffer convertRowData(RowData row, long rowIndex)
+			public StringBuilder convertRowData(RowData row, long rowIndex)
 			{
-				return new StrBuffer();
+				return new StringBuilder();
 			}
 
 			@Override
-			public StrBuffer getStart()
+			public StringBuilder getStart()
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getEnd(long totalRows)
+			public StringBuilder getEnd(long totalRows)
 			{
 				return null;
 			}

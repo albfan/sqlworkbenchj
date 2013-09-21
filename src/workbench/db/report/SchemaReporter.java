@@ -53,7 +53,6 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 
@@ -349,14 +348,14 @@ public class SchemaReporter
 	private void writeReportInfo(Writer out)
 		throws IOException
 	{
-		StrBuffer info = new StrBuffer();
-		StrBuffer indent = new StrBuffer("  ");
+		StringBuilder info = new StringBuilder();
+		StringBuilder indent = new StringBuilder("  ");
 		if (!StringUtil.isEmptyString(this.reportTitle))
 		{
 			this.tagWriter.appendTag(info, indent, "report-title", this.reportTitle);
 		}
 		info.append(this.dbConn.getDatabaseInfoAsXml(indent));
-		info.writeTo(out);
+		out.append(info);
 	}
 
 

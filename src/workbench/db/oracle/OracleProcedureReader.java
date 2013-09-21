@@ -66,18 +66,17 @@ public class OracleProcedureReader
 	public static final int COLUMN_IDX_PROC_LIST_ORA_STATUS = 5;
 
 	private OracleTypeReader typeReader = new OracleTypeReader();
+	private final StringBuilder procHeader = new StringBuilder("CREATE OR REPLACE ");
 
 	public OracleProcedureReader(WbConnection conn)
 	{
 		super(conn);
 	}
 
-	private final StringBuilder PROC_HEADER = new StringBuilder("CREATE OR REPLACE ");
-
 	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
-		return PROC_HEADER;
+		return procHeader;
 	}
 
 	public boolean packageExists(String owner, String packageName)

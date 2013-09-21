@@ -23,9 +23,9 @@
 package workbench.db.exporter;
 
 import workbench.storage.RowData;
-import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
+
 import workbench.util.HtmlUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -44,9 +44,9 @@ public class HtmlRowDataConverter
 	private String trailer;
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
-		StrBuffer html = new StrBuffer("</table>\n");
+		StringBuilder html = new StringBuilder("</table>\n");
 		if (StringUtil.isNonBlank(trailer))
 		{
 			html.append(trailer);
@@ -87,10 +87,10 @@ public class HtmlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
-		StrBuffer result = new StrBuffer(count * 30);
+		StringBuilder result = new StringBuilder(count * 30);
 		result.append("  <tr>\n      ");
 		for (int c=0; c < count; c ++)
 		{
@@ -137,9 +137,9 @@ public class HtmlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
-		StrBuffer result = new StrBuffer(250);
+		StringBuilder result = new StringBuilder(250);
 
 		if (createFullPage)
 		{

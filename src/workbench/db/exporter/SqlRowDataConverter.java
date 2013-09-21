@@ -45,7 +45,6 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 
 import workbench.util.CollectionUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 import static workbench.db.exporter.ExportType.SQL_DELETE_INSERT;
@@ -158,7 +157,7 @@ public class SqlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
 		boolean writeCommit = true;
 		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
@@ -166,10 +165,10 @@ public class SqlRowDataConverter
 			writeCommit = false;
 		}
 
-		StrBuffer end = null;
+		StringBuilder end = null;
 		if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
 		{
-			end = new StrBuffer();
+			end = new StringBuilder(12);
 			end.append(lineTerminator);
 			end.append("COMMIT;");
 			end.append(lineTerminator);
@@ -207,14 +206,14 @@ public class SqlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		if (sqlTypeToUse == ExportType.SQL_MERGE)
 		{
 			return generateMerge(row);
 		}
 
-		StrBuffer result = new StrBuffer();
+		StringBuilder result = new StringBuilder();
 		DmlStatement dml = null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 
@@ -271,7 +270,7 @@ public class SqlRowDataConverter
 		return result;
 	}
 
-	private StrBuffer generateMerge(RowData row)
+	private StringBuilder generateMerge(RowData row)
 	{
 		MergeGenerator generator = null;
 		if (mergeType != null)
@@ -287,14 +286,14 @@ public class SqlRowDataConverter
 		{
 			RowDataContainer container = RowDataContainer.Factory.createContainer(originalConnection, row, metaData);
 			String merge = generator.generateMerge(container);
-			StrBuffer result = new StrBuffer(merge);
+			StringBuilder result = new StringBuilder(merge);
 			return result;
 		}
 		return null;
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		if (!this.createTable) return null;
 		TableIdentifier updateTable = this.metaData.getUpdateTable();
@@ -316,7 +315,7 @@ public class SqlRowDataConverter
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK);
 		source = create.toString();
-		StrBuffer createSql = new StrBuffer(source);
+		StringBuilder createSql = new StringBuilder(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;
 	}

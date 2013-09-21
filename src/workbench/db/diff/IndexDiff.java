@@ -26,11 +26,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
 import workbench.db.IndexDefinition;
 import workbench.db.report.IndexReporter;
 import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 
 /**
  * Compare two index definitions and create an XML
@@ -48,7 +50,7 @@ public class IndexDiff
 	private Collection<IndexDefinition> reference = Collections.emptyList();
 	private Collection<IndexDefinition> target = Collections.emptyList();
 	private TagWriter writer;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
 	{
@@ -56,24 +58,34 @@ public class IndexDiff
 		if (targ != null) this.target = targ;
 	}
 
-	public void setTagWriter(TagWriter w) { this.writer = w; }
-
-	public void setIndent(StrBuffer ind)
+	public void setTagWriter(TagWriter w)
 	{
-		this.indent = ind;
+		this.writer = w;
 	}
 
-	public StrBuffer getMigrateTargetXml()
+	public void setIndent(StringBuilder ind)
+	{
+		if (indent == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
+	}
+
+	public StringBuilder getMigrateTargetXml()
 	{
 		if (this.writer == null) this.writer = new TagWriter();
-		StrBuffer result = new StrBuffer();
+		StringBuilder result = new StringBuilder();
 		List<IndexDefinition> indexToAdd = new LinkedList<IndexDefinition>();
 		List<IndexDefinition> indexToDrop = new LinkedList<IndexDefinition>();
 
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 
-		StrBuffer idxIndent = new StrBuffer(myindent);
+		StringBuilder idxIndent = new StringBuilder(myindent);
 		idxIndent.append("  ");
 
 		for (IndexDefinition refIndex : reference)
@@ -101,7 +113,7 @@ public class IndexDiff
 					rep.setMainTagToUse("reference-index");
 					rep.appendXml(result, idxIndent);
 
-					StrBuffer changedIndent = new StrBuffer(idxIndent);
+					StringBuilder changedIndent = new StringBuilder(idxIndent);
 					changedIndent.append("  ");
 					writer.appendOpenTag(result, idxIndent, "modified");
 					result.append('\n');
@@ -135,7 +147,7 @@ public class IndexDiff
 						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_TYPE, false, oldAtt, newAtt);
 						result.append("/>\n");
 					}
-					
+
 					writer.appendCloseTag(result, idxIndent, "modified");
 					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
 				}

@@ -28,7 +28,6 @@ import java.util.Iterator;
 
 import workbench.db.SequenceDefinition;
 
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
 
@@ -64,8 +63,8 @@ public class ReportSequence
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer line = this.getXml();
-		line.writeTo(out);
+		StringBuilder line = this.getXml();
+		out.write(line.toString());
 	}
 
 	public void setSchemaNameToUse(String schema)
@@ -73,19 +72,19 @@ public class ReportSequence
 		this.schemaNameToUse = schema;
 	}
 
-	public StrBuffer getXml()
+	public StringBuilder getXml()
 	{
-		return getXml(new StrBuffer("  "), true);
+		return getXml(new StringBuilder("  "), true);
 	}
 	/**
 	 * Return an XML representation of this view information.
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */
-	public StrBuffer getXml(StrBuffer indent, boolean includeSource)
+	public StringBuilder getXml(StringBuilder indent, boolean includeSource)
 	{
-		StrBuffer line = new StrBuffer(500);
-		StrBuffer colindent = new StrBuffer(indent);
+		StringBuilder line = new StringBuilder(500);
+		StringBuilder colindent = new StringBuilder(indent);
 		colindent.append(indent);
 
 		tagWriter.appendOpenTag(line, indent, TAG_SEQ_DEF, "name", this.sequence.getSequenceName());
@@ -107,7 +106,7 @@ public class ReportSequence
 		return line;
 	}
 
-	public void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
+	public void writeSourceTag(TagWriter tagWriter, StringBuilder target, StringBuilder indent, CharSequence source)
 	{
 		if (source == null) return;
 		tagWriter.appendOpenTag(target, indent, TAG_SEQ_SOURCE);
@@ -118,11 +117,11 @@ public class ReportSequence
 		tagWriter.appendCloseTag(target, indent, TAG_SEQ_SOURCE);
 	}
 
-	protected void writeSequenceProperties(StrBuffer toAppend, StrBuffer indent)
+	protected void writeSequenceProperties(StringBuilder toAppend, StringBuilder indent)
 	{
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
-		StrBuffer propindent = new StrBuffer(myindent);
+		StringBuilder propindent = new StringBuilder(myindent);
 		propindent.append("  ");
 
 		tagWriter.appendOpenTag(toAppend, indent, TAG_SEQ_PROPS);

@@ -22,16 +22,20 @@
  */
 package workbench.db.exporter;
 
-import org.junit.Test;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
+
 import workbench.util.ValueConverter;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -74,9 +78,9 @@ public class XlsXMLRowDataConverterTest
 		converter.setGeneratingSql(generatingSql);
 
 		converter.setEncoding("UTF-8");
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
-		StrBuffer footer = converter.getEnd(1);
+		StringBuilder footer = converter.getEnd(1);
 		assertNotNull(footer);
 
 		RowData data = new RowData(info);
@@ -86,7 +90,7 @@ public class XlsXMLRowDataConverterTest
 		data.setValue(2, valueConverter.convertValue("2008-07-23", Types.DATE));
 		data.setValue(3, valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP));
 
-		StrBuffer converted = converter.convertRowData(data, 0);
+		StringBuilder converted = converter.convertRowData(data, 0);
 		assertNotNull(converted);
 		String row = converted.toString();
 
@@ -142,12 +146,12 @@ public class XlsXMLRowDataConverterTest
 		data.setValue(1, new Integer(42));
 
 		converter.setEncoding("UTF-8");
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
-		StrBuffer footer = converter.getEnd(1);
+		StringBuilder footer = converter.getEnd(1);
 		assertNotNull(footer);
 
-		StrBuffer converted = converter.convertRowData(data, 0);
+		StringBuilder converted = converter.convertRowData(data, 0);
 		assertNotNull(converted);
 		String row = converted.toString();
 		String xml = header.toString() + row + footer.toString();

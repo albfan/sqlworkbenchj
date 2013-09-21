@@ -36,6 +36,7 @@ import java.io.Reader;
 public class CharSequenceReader
 	extends Reader
 {
+	private final Object readLock = new Object();
 	private CharSequence str;
 	private int length;
 	private int next = 0;
@@ -72,7 +73,7 @@ public class CharSequenceReader
 	public int read()
 		throws IOException
 	{
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			if (next >= length) return -1;
@@ -96,7 +97,7 @@ public class CharSequenceReader
 	public int read(char[] cbuf, int off, int len)
 		throws IOException
 	{
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			if ((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length) || ((off + len) < 0))
@@ -142,7 +143,7 @@ public class CharSequenceReader
 	public long skip(long ns)
 		throws IOException
 	{
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			if (next >= length) return 0;
@@ -165,7 +166,7 @@ public class CharSequenceReader
 	public boolean ready()
 		throws IOException
 	{
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			return true;
@@ -202,7 +203,7 @@ public class CharSequenceReader
 		{
 			throw new IllegalArgumentException("Read-ahead limit < 0");
 		}
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			mark = next;
@@ -219,7 +220,7 @@ public class CharSequenceReader
 	public void reset()
 		throws IOException
 	{
-		synchronized (lock)
+		synchronized (readLock)
 		{
 			ensureOpen();
 			next = mark;

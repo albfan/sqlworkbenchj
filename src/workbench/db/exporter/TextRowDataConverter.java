@@ -23,15 +23,17 @@
 package workbench.db.exporter;
 
 import java.io.File;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.storage.DataConverter;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
-import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -62,7 +64,6 @@ public class TextRowDataConverter
 	private boolean writeClobFiles;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName;
-	private char escapeHexType = 'u';
 	private DataConverter converter;
 
 	public void setWriteClobToFile(boolean flag)
@@ -102,7 +103,7 @@ public class TextRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
 		return null;
 	}
@@ -118,7 +119,7 @@ public class TextRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		return convertRowData(row, rowIndex, null);
 	}
@@ -129,10 +130,10 @@ public class TextRowDataConverter
 		return converter.convertsType(jdbcType, dbmsType);
 	}
 
-	public StrBuffer convertRowData(RowData row, long rowIndex, int[] colMap)
+	public StringBuilder convertRowData(RowData row, long rowIndex, int[] colMap)
 	{
 		int count = this.metaData.getColumnCount();
-		StrBuffer result = new StrBuffer(count * 30);
+		StringBuilder result = new StringBuilder(count * 30);
 		boolean canQuote = this.quoteCharacter != null;
 		int currentColIndex = 0;
 
@@ -151,15 +152,20 @@ public class TextRowDataConverter
 			{
 				result.append(this.delimiter);
 			}
-			int colType = this.metaData.getColumnType(colIndex);
-			String dbmsType = this.metaData.getDbmsTypeName(colIndex);
 
+			int colType = columnTypes[colIndex]; // this.metaData.getColumnType(colIndex);
 			String value = null;
 
 			boolean addQuote = quoteAlways;
-			boolean isConverted = isConverted(colType, dbmsType);
+			boolean isConverted = false;
 
-			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
+			if (converter != null)
+			{
+				//String dbmsType = this.metaData.getDbmsTypeName(colIndex);
+				isConverted = isConverted(colType, typeNames[colIndex]);
+			}
+
+			if (!isConverted && writeBlobFiles && colType == RowDataReader.IS_BLOB)
 			{
 				try
 				{
@@ -177,7 +183,7 @@ public class TextRowDataConverter
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 			}
-			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, this.originalConnection.getDbSettings()))
+			else if (!isConverted && writeClobFiles && colType == RowDataReader.IS_CLOB) // SqlUtil.isClobType(colType, dbmsType, this.originalConnection.getDbSettings()))
 			{
 				Object clobData = row.getValue(colIndex);
 				if (clobData != null)
@@ -201,14 +207,13 @@ public class TextRowDataConverter
 			}
 
 			boolean isNull = (value == null);
-			if (value == null)
+			if (isNull)
 			{
 				value = getNullDisplay();
 				// Never quote null values
 				addQuote = nullString == null ? false : quoteAlways;
 			}
-
-			if (SqlUtil.isCharacterType(colType) && !isNull)
+			else if (colType == RowDataReader.IS_CHARACTER)
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
@@ -217,11 +222,11 @@ public class TextRowDataConverter
 				{
 					if (addQuote)
 					{
-						value = StringUtil.escapeText(value, escapeHexType, this.escapeRange, this.quoteCharacter);
+						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter);
 					}
 					else
 					{
-						value = StringUtil.escapeText(value, escapeHexType, this.escapeRange, this.delimiterAndQuote);
+						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote);
 					}
 				}
 				if (this.quoteCharacter != null && this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
@@ -253,19 +258,19 @@ public class TextRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		return getStart(null);
 	}
 
-	public StrBuffer getStart(int[] colMap)
+	public StringBuilder getStart(int[] colMap)
 	{
 		this.setAdditionalEncodeCharacters();
 
 		if (!this.writeHeader) return null;
 
-		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
+		StringBuilder result = new StringBuilder(colCount * 10);
 
 		boolean first = true;
 		if (rowIndexColumnName != null)

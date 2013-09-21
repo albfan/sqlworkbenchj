@@ -22,19 +22,24 @@
  */
 package workbench.db.ibm;
 
-import org.junit.Test;
-import workbench.WbTestCase;
 import java.io.IOException;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.RowDataConverter;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+
 import workbench.util.FileUtil;
-import workbench.util.StrBuffer;
 import workbench.util.WbFile;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -73,19 +78,19 @@ public class Db2FormatFileWriterTest
 		final RowDataConverter converter = new RowDataConverter()
 		{
 			@Override
-			public StrBuffer convertRowData(RowData row, long rowIndex)
+			public StringBuilder convertRowData(RowData row, long rowIndex)
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getStart()
+			public StringBuilder getStart()
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getEnd(long totalRows)
+			public StringBuilder getEnd(long totalRows)
 			{
 				return null;
 			}

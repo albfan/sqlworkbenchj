@@ -43,7 +43,6 @@ import workbench.db.report.TagWriter;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -65,7 +64,7 @@ public class TableDiff
 
 	private ReportTable referenceTable;
 	private ReportTable targetTable;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 	private TagWriter writer;
 	private SchemaDiff diff;
 	private boolean checkConstraintNames;
@@ -94,16 +93,16 @@ public class TableDiff
 	 * modified in order to get the same structure as the reference table.
 	 * An empty string means that there are no differences
 	 */
-	public StrBuffer getMigrateTargetXml()
+	public StringBuilder getMigrateTargetXml()
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		TableIdentifier ref = this.referenceTable.getTable();
 		TableIdentifier target = this.targetTable.getTable();
 		if (this.writer == null) this.writer = new TagWriter();
-		StrBuffer colDiff = new StrBuffer(500);
+		StringBuilder colDiff = new StringBuilder(500);
 		ArrayList<ReportColumn> colsToBeAdded = new ArrayList<ReportColumn>();
 		ReportColumn[] refCols = this.referenceTable.getColumns();
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 
 		for (ReportColumn refCol : refCols)
@@ -121,7 +120,7 @@ public class TableDiff
 				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
-				StrBuffer diffXml = d.getMigrateTargetXml();
+				StringBuilder diffXml = d.getMigrateTargetXml();
 				if (diffXml.length() > 0)
 				{
 					colDiff.append(diffXml);
@@ -182,8 +181,8 @@ public class TableDiff
 		List<String> refPk = this.referenceTable.getPrimaryKeyColumns();
 		List<String> tPk = this.targetTable.getPrimaryKeyColumns();
 
-		StrBuffer indexDiff = getIndexDiff();
-		StrBuffer grantDiff = getGrantDiff();
+		StringBuilder indexDiff = getIndexDiff();
+		StringBuilder grantDiff = getGrantDiff();
 
 		boolean grantDifferent = grantDiff != null && grantDiff.length() > 0;
 
@@ -214,7 +213,7 @@ public class TableDiff
 			result.append('\n');
 			myindent.append("  ");
 			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, SqlUtil.removeObjectQuotes(this.referenceTable.getTable().getTableName()));
-			myindent.removeFromEnd(2);
+			StringUtil.removeFromEnd(myindent, 2);
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}
 
@@ -254,7 +253,7 @@ public class TableDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, SqlUtil.removeObjectQuotes(col));
 			}
-			myindent.removeFromEnd(2);
+			StringUtil.removeFromEnd(myindent, 2);
 			writer.appendCloseTag(result, myindent, pkTagToUse);
 		}
 
@@ -267,7 +266,7 @@ public class TableDiff
 		{
 			writer.appendOpenTag(result, myindent, ReportTable.TAG_TABLE_CONSTRAINTS);
 			result.append('\n');
-			StrBuffer consIndent = new StrBuffer(myindent).append("  ");
+			StringBuilder consIndent = new StringBuilder(myindent).append("  ");
 			writeConstraints(constraintsToDelete, result, "drop-constraint", consIndent);
 			writeConstraints(missingConstraints, result, "add-constraint", consIndent);
 			writeConstraints(modifiedConstraints, result, "modify-constraint", consIndent);
@@ -309,11 +308,11 @@ public class TableDiff
 		return result;
 	}
 
-	private void writeOptionsDiff(StrBuffer result, StrBuffer indent)
+	private void writeOptionsDiff(StringBuilder result, StringBuilder indent)
 	{
 		List<ObjectOption> refOptions = referenceTable.getDbmsOptions();
 		List<ObjectOption> targetOptions = targetTable.getDbmsOptions();
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		boolean firstOption = true;
 		boolean optionWritten = false;
@@ -410,20 +409,20 @@ public class TableDiff
 		return toDelete;
 	}
 
-	private void writeFKs(List<ForeignKeyDefinition> fks, StrBuffer result, String tag, StrBuffer mainIndent)
+	private void writeFKs(List<ForeignKeyDefinition> fks, StringBuilder result, String tag, StringBuilder mainIndent)
 	{
 		if (fks.isEmpty()) return;
 		writer.appendOpenTag(result, mainIndent, tag);
 		result.append('\n');
-		StrBuffer fkIndent = new StrBuffer(mainIndent);
+		StringBuilder fkIndent = new StringBuilder(mainIndent);
 		fkIndent.append("  ");
-		StrBuffer fkDefIndent = new StrBuffer(fkIndent);
+		StringBuilder fkDefIndent = new StringBuilder(fkIndent);
 		fkDefIndent.append("  ");
 
 		for (ForeignKeyDefinition fk : fks)
 		{
 			if (fk == null) continue;
-			StrBuffer xml = fk.getInnerXml(fkDefIndent);
+			StringBuilder xml = fk.getInnerXml(fkDefIndent);
 			writer.appendOpenTag(result, fkIndent, ForeignKeyDefinition.TAG_FOREIGN_KEY);
 			result.append('\n');
 			result.append(xml);
@@ -433,10 +432,10 @@ public class TableDiff
 	}
 
 
-	private void writeConstraints(List<TableConstraint> constraints, StrBuffer result, String tag, StrBuffer indent)
+	private void writeConstraints(List<TableConstraint> constraints, StringBuilder result, String tag, StringBuilder indent)
 	{
 		if (constraints.isEmpty()) return;
-		StrBuffer consIndent = new StrBuffer(indent);
+		StringBuilder consIndent = new StringBuilder(indent);
 		consIndent.append("  ");
 		writer.appendOpenTag(result, indent, tag);
 		result.append('\n');
@@ -549,11 +548,11 @@ public class TableDiff
 		return false;
 	}
 
-	private void appendAddColumns(StrBuffer result, List<ReportColumn> colsToAdd)
+	private void appendAddColumns(StringBuilder result, List<ReportColumn> colsToAdd)
 	{
 		if (colsToAdd.isEmpty()) return;
 
-		StrBuffer myindent = new StrBuffer(this.indent);
+		StringBuilder myindent = new StringBuilder(this.indent);
 		myindent.append("  ");
 		writer.appendOpenTag(result, myindent, TAG_ADD_COLUMN);
 		result.append('\n');
@@ -562,16 +561,16 @@ public class TableDiff
 		{
 			col.appendXml(result, myindent, false);
 		}
-		myindent.removeFromEnd(2);
+		StringUtil.removeFromEnd(myindent, 2);
 		writer.appendCloseTag(result, myindent, TAG_ADD_COLUMN);
 		result.append('\n');
 	}
 
-	private void appendRemoveColumns(StrBuffer result, List colsToRemove)
+	private void appendRemoveColumns(StringBuilder result, List colsToRemove)
 	{
 		Iterator itr = colsToRemove.iterator();
 		if (!itr.hasNext()) return;
-		StrBuffer myindent = new StrBuffer(this.indent);
+		StringBuilder myindent = new StringBuilder(this.indent);
 		myindent.append(indent);
 		while (itr.hasNext())
 		{
@@ -581,7 +580,7 @@ public class TableDiff
 		}
 	}
 
-	private StrBuffer getGrantDiff()
+	private StringBuilder getGrantDiff()
 	{
 		if (!this.diff.getIncludeTableGrants()) return null;
 		ReportTableGrants reference = this.referenceTable.getGrants();
@@ -589,11 +588,11 @@ public class TableDiff
 		if (reference == null && target == null) return null;
 
 		TableGrantDiff td = new TableGrantDiff(reference, target);
-		StrBuffer diffXml = td.getMigrateTargetXml(writer, indent);
+		StringBuilder diffXml = td.getMigrateTargetXml(writer, indent);
 		return diffXml;
 	}
 
-	private StrBuffer getIndexDiff()
+	private StringBuilder getIndexDiff()
 	{
 		if (!this.diff.getIncludeIndex()) return null;
 
@@ -603,7 +602,7 @@ public class TableDiff
 		IndexDiff id = new IndexDiff(ref, targ);
 		id.setTagWriter(this.writer);
 		id.setIndent(indent);
-		StrBuffer diffXml = id.getMigrateTargetXml();
+		StringBuilder diffXml = id.getMigrateTargetXml();
 		return diffXml;
 	}
 
@@ -621,14 +620,20 @@ public class TableDiff
 	 */
 	public void setIndent(String ind)
 	{
-		if (ind == null) this.indent = null;
-		this.indent = new StrBuffer(ind);
+		if (ind == null)
+		{
+			this.indent = null;
+		}
+		else
+		{
+			this.indent = new StringBuilder(ind);
+		}
 	}
 
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
 		this.indent = ind;
 	}

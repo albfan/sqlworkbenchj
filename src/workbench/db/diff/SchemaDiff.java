@@ -56,7 +56,6 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 
@@ -977,8 +976,8 @@ public class SchemaDiff
 			return;
 		}
 
-		StrBuffer indent = new StrBuffer("  ");
-		StrBuffer tblIndent = new StrBuffer("    ");
+		StringBuilder indent = new StringBuilder("  ");
+		StringBuilder tblIndent = new StringBuilder("    ");
 		TagWriter tw = new TagWriter();
 		out.write("<?xml version=\"1.0\" encoding=\"");
 		out.write(this.encoding);
@@ -1022,8 +1021,8 @@ public class SchemaDiff
 					{
 						out.write("\n");
 						writeTag(out, indent, TAG_ADD_TABLE, true, "name", entry.reference.getTableName());
-						StrBuffer s = source.getXml(tblIndent);
-						s.writeTo(out);
+						StringBuilder s = source.getXml(tblIndent);
+						out.write(s.toString());
 						writeTag(out, indent, TAG_ADD_TABLE, false);
 					}
 					else
@@ -1034,11 +1033,11 @@ public class SchemaDiff
 						d.setIndent(indent);
 						d.setTagWriter(tw);
 						d.setExactConstraintMatch(compareConstraintsByName);
-						StrBuffer s = d.getMigrateTargetXml();
+						StringBuilder s = d.getMigrateTargetXml();
 						if (s.length() > 0)
 						{
 							out.write("\n");
-							s.writeTo(out);
+							out.write(s.toString());
 						}
 					}
 				}
@@ -1097,7 +1096,7 @@ public class SchemaDiff
 
 		if (objectDiffs != null)
 		{
-			StrBuffer xml = objectDiffs.getMigrateTargetXml(indent);
+			StringBuilder xml = objectDiffs.getMigrateTargetXml(indent);
 			if (xml != null && xml.length() > 0)
 			{
 				out.write(xml.toString());
@@ -1108,7 +1107,7 @@ public class SchemaDiff
 		writeTag(out, null, "schema-diff", false);
 	}
 
-	private void appendSequenceDiff(Writer out, StrBuffer indent, TagWriter tw)
+	private void appendSequenceDiff(Writer out, StringBuilder indent, TagWriter tw)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1123,11 +1122,11 @@ public class SchemaDiff
 				SequenceDiff diff = new SequenceDiff(rp, tp);
 				diff.setIndent(indent);
 				diff.setTagWriter(tw);
-				StrBuffer xml = diff.getMigrateTargetXml();
+				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{
 					out.write("\n");
-					xml.writeTo(out);
+					out.write(xml.toString());
 				}
 			}
 		}
@@ -1136,7 +1135,7 @@ public class SchemaDiff
 
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_SEQUENCE, true);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		for (SequenceDefinition def : sequencesToDelete)
 		{
@@ -1145,7 +1144,7 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
 	}
 
-	private void appendProcDiff(Writer out, StrBuffer indent, TagWriter tw)
+	private void appendProcDiff(Writer out, StringBuilder indent, TagWriter tw)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1160,11 +1159,11 @@ public class SchemaDiff
 				ProcDiff diff = new ProcDiff(rp, tp);
 				diff.setIndent(indent);
 				diff.setTagWriter(tw);
-				StrBuffer xml = diff.getMigrateTargetXml();
+				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{
 					out.write("\n");
-					xml.writeTo(out);
+					out.write(xml.toString());
 				}
 			}
 		}
@@ -1173,19 +1172,19 @@ public class SchemaDiff
 
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_PROC, true);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		for (ProcedureDefinition def : procsToDelete)
 		{
 			ReportProcedure rp = new ReportProcedure(def, targetDb);
 			rp.setIndent(myindent);
-			StrBuffer xml = rp.getXml(false);
-			xml.writeTo(out);
+			StringBuilder xml = rp.getXml(false);
+			out.write(xml.toString());
 		}
 		writeTag(out, indent, TAG_DROP_PROC, false);
 	}
 
-	private void appendPackageDiff(Writer out, StrBuffer indent, TagWriter tw)
+	private void appendPackageDiff(Writer out, StringBuilder indent, TagWriter tw)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1206,11 +1205,11 @@ public class SchemaDiff
 				PackageDiff diff = new PackageDiff(entry.reference, entry.target);
 				diff.setIndent(indent);
 				diff.setTagWriter(tw);
-				StrBuffer xml = diff.getMigrateTargetXml();
+				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{
 					out.write("\n");
-					xml.writeTo(out);
+					out.write(xml.toString());
 				}
 			}
 		}
@@ -1219,13 +1218,13 @@ public class SchemaDiff
 
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_PCKG, true);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		for (ReportPackage def : packagesToDelete)
 		{
 			def.setIndent(myindent);
-			StrBuffer xml = def.getXml(false);
-			xml.writeTo(out);
+			StringBuilder xml = def.getXml(false);
+			out.write(xml.toString());
 		}
 		writeTag(out, indent, TAG_DROP_PCKG, false);
 	}
@@ -1235,23 +1234,23 @@ public class SchemaDiff
 	{
 		for (ViewDiff d : diffs)
 		{
-			StrBuffer source = d.getMigrateTargetXml();
+			StringBuilder source = d.getMigrateTargetXml();
 			if (source.length() > 0)
 			{
 				out.write("\n");
-				source.writeTo(out);
+				out.write(source.toString());
 			}
 		}
 	}
 
-	private void appendDropViews(Writer out, StrBuffer indent)
+	private void appendDropViews(Writer out, StringBuilder indent)
 		throws IOException
 	{
 		if (this.viewsToDelete == null || this.viewsToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_VIEW, true);
 		Iterator itr = this.viewsToDelete.iterator();
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		while (itr.hasNext())
 		{
@@ -1261,14 +1260,14 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_VIEW, false);
 	}
 
-	private void appendDropTables(Writer out, StrBuffer indent)
+	private void appendDropTables(Writer out, StringBuilder indent)
 		throws IOException
 	{
 		if (this.tablesToDelete == null || this.tablesToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_TABLE, true);
 		Iterator itr = this.tablesToDelete.iterator();
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		while (itr.hasNext())
 		{
@@ -1281,14 +1280,14 @@ public class SchemaDiff
 	private void writeDiffInfo(Writer out)
 		throws IOException
 	{
-		StrBuffer indent = new StrBuffer("  ");
-		StrBuffer indent2 = new StrBuffer("    ");
+		StringBuilder indent = new StringBuilder("  ");
+		StringBuilder indent2 = new StringBuilder("    ");
 
 		TagWriter.writeWorkbenchVersion(out, indent);
 
 		writeTag(out, indent, TAG_REF_CONN, true);
-		StrBuffer info = this.referenceDb.getDatabaseInfoAsXml(indent2);
-		info.writeTo(out);
+		StringBuilder info = this.referenceDb.getDatabaseInfoAsXml(indent2);
+		out.write(info.toString());
 		writeTag(out, indent, TAG_REF_CONN, false);
 		out.write("\n");
 		out.write("  <!-- If the target connection is modified according to the  -->\n");
@@ -1296,12 +1295,12 @@ public class SchemaDiff
 		out.write("  <!-- the same as the reference connection -->\n");
 		writeTag(out, indent, TAG_TARGET_CONN, true);
 		info = this.targetDb.getDatabaseInfoAsXml(indent2);
-		info.writeTo(out);
+		out.write(info.toString());
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");
 
 		TagWriter tw = new TagWriter();
-		info = new StrBuffer();
+		info = new StringBuilder();
 
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');
@@ -1374,18 +1373,18 @@ public class SchemaDiff
 		}
 		tw.appendCloseTag(info, indent, TAG_COMPARE_INFO);
 
-		info.writeTo(out);
+		out.write(info.toString());
 	}
 
-	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag)
+	private void writeTag(Writer out, StringBuilder indent, String tag, boolean isOpeningTag)
 		throws IOException
 	{
 		writeTag(out, indent, tag, isOpeningTag, null, null);
 	}
-	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag, String attr, String attrValue)
+	private void writeTag(Writer out, StringBuilder indent, String tag, boolean isOpeningTag, String attr, String attrValue)
 		throws IOException
 	{
-		if (indent != null) indent.writeTo(out);
+		if (indent != null) out.write(indent.toString());
 		if (isOpeningTag)
 		{
 			out.write("<");
@@ -1406,10 +1405,10 @@ public class SchemaDiff
 		out.write(">\n");
 	}
 
-	private void writeTagValue(Writer out, StrBuffer indent, String tag, String value)
+	private void writeTagValue(Writer out, StringBuilder indent, String tag, String value)
 		throws IOException
 	{
-		if (indent != null) indent.writeTo(out);
+		if (indent != null) out.write(indent.toString());
 		out.write("<");
 		out.write(tag);
 		out.write(">");

@@ -797,9 +797,9 @@ public class TableSourceBuilder
 	 */
 	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, boolean forInlineUse)
 	{
-		if (aFkDef == null) return StringUtil.emptyBuffer();
+		if (aFkDef == null) return StringUtil.emptyBuilder();
 		int count = aFkDef.getRowCount();
-		if (count == 0) return StringUtil.emptyBuffer();
+		if (count == 0) return StringUtil.emptyBuilder();
 
 		FkTemplate tmpl = new FkTemplate(dbConnection.getDbId(), forInlineUse);
 		String template = tmpl.getSQLTemplate();

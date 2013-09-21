@@ -28,7 +28,6 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.util.CharacterRange;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -98,10 +97,10 @@ public class DataPrinter
 	public void writeDataString(Writer out, int[] rows)
 		throws IOException
 	{
-		StrBuffer header = converter.getStart(columnMap);
+		CharSequence header = converter.getStart(columnMap);
 		if (header != null)
 		{
-			header.writeTo(out);
+			out.write(header.toString());
 			out.flush();
 		}
 
@@ -110,8 +109,8 @@ public class DataPrinter
 		for (int i=0; i < count; i++)
 		{
 			int row = (rows == null ? i : rows[i]);
-			StrBuffer line = converter.convertRowData(data.getRow(row), row, columnMap);
-			line.writeTo(out);
+			CharSequence line = converter.convertRowData(data.getRow(row), row, columnMap);
+			out.write(line.toString());
 			out.flush();
 		}
 	}

@@ -28,7 +28,6 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.TagWriter;
 
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -52,7 +51,7 @@ public class ColumnDiff
 
 	private ReportColumn referenceColumn;
 	private ReportColumn targetColumn;
-	private StrBuffer indent;
+	private StringBuilder indent;
 	private TagWriter writer;
 	private boolean compareFK = true;
 	private boolean compareComments = true;
@@ -88,21 +87,20 @@ public class ColumnDiff
 		this.writer = tw;
 	}
 
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(String ind)
-	{
-		if (ind == null) this.indent = null;
-		else this.indent = new StrBuffer(ind);
-	}
 
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
-		this.indent = ind;
+		if (ind == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
 	}
 
 	private boolean typesAreEqual()
@@ -152,12 +150,12 @@ public class ColumnDiff
 	 * An empty string means that there are no differences
 	 * This does not include foreign key references.
 	 */
-	public StrBuffer getMigrateTargetXml()
+	public StringBuilder getMigrateTargetXml()
 	{
 		ColumnIdentifier sId = this.referenceColumn.getColumn();
 		ColumnIdentifier tId = this.targetColumn.getColumn();
-		StrBuffer result = new StrBuffer();
-		StrBuffer myindent = new StrBuffer(this.indent);
+		StringBuilder result = new StringBuilder();
+		StringBuilder myindent = new StringBuilder(this.indent);
 		myindent.append("  ");
 
 		// the PK attribute is not checked, because this is already handled
@@ -226,7 +224,7 @@ public class ColumnDiff
 				referenceColumn.appendXml(result, myindent, false, "reference-column-definition", true);
 			}
 
-			StrBuffer attIndent = new StrBuffer(myindent);
+			StringBuilder attIndent = new StringBuilder(myindent);
 			attIndent.append("  ");
 			writer.appendOpenTag(result, myindent, TAG_CHANGED_ATTRIBUTES);
 			result.append('\n');
@@ -288,7 +286,7 @@ public class ColumnDiff
 
 			if (fkDefinitionDifferent)
 			{
-				StrBuffer refIndent = new StrBuffer(myindent);
+				StringBuilder refIndent = new StringBuilder(myindent);
 				refIndent.append("  ");
 				if (refFk == null)
 				{
@@ -307,7 +305,7 @@ public class ColumnDiff
 			}
 			else if (fkNameDifferent)
 			{
-				StrBuffer refIndent = new StrBuffer(myindent);
+				StringBuilder refIndent = new StringBuilder(myindent);
 				refIndent.append("  ");
 				writer.appendOpenTag(result, myindent, TAG_RENAME_FK);
 				result.append('\n');

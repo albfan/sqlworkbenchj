@@ -37,7 +37,6 @@ import workbench.storage.RowData;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.ZipOutputFactory;
 
@@ -61,7 +60,7 @@ public class OdsRowDataConverter
 	private final String timeStyle = "ce4";
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		Writer out = null;
 		try
@@ -353,7 +352,7 @@ public class OdsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
 		try
 		{
@@ -364,14 +363,14 @@ public class OdsRowDataConverter
 				content.append("<table:table-row>\n");
 				content.append("<table:table-cell office:value-type=\"string\">");
 				String[] lines = generatingSql.split(StringUtil.REGEX_CRLF);
-				StrBuffer buff = new StrBuffer(generatingSql.length() + 50);
+				StringBuilder buff = new StringBuilder(generatingSql.length() + 50);
 				for (String line : lines)
 				{
 					buff.append("<text:p>");
 					writeEscapedXML(buff, line, true);
 					buff.append("</text:p>\n");
 				}
-				buff.writeTo(content);
+				content.append(buff.toString());
 				content.append("</table:table-cell>");
 				content.append("</table:table-row>\n");
 				content.write("</table:table>");
@@ -421,10 +420,10 @@ public class OdsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();
-		StrBuffer xml = new StrBuffer(colCount * 50);
+		StringBuilder xml = new StringBuilder(colCount * 50);
 		xml.append("<table:table-row>\n");
 		for (int i = 0; i < colCount; i++)
 		{
@@ -461,7 +460,7 @@ public class OdsRowDataConverter
 		xml.append("</table:table-row>\n\n");
 		try
 		{
-			xml.writeTo(content);
+			content.append(xml);
 		}
 		catch (IOException e)
 		{

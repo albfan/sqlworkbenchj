@@ -24,10 +24,11 @@ package workbench.db.report;
 
 import java.io.IOException;
 import java.io.Writer;
+
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
-import workbench.util.StrBuffer;
+
 import workbench.util.StringUtil;
 
 /**
@@ -47,8 +48,8 @@ public class ReportProcedure
 	private ProcedureDefinition procDef;
 	private WbConnection dbConn;
 	private TagWriter tagWriter = new TagWriter();
-	private StrBuffer indent = new StrBuffer("  ");
-	private StrBuffer indent2 = new StrBuffer("    ");
+	private StringBuilder indent = new StringBuilder("  ");
+	private StringBuilder indent2 = new StringBuilder("    ");
 
 	public ReportProcedure(ProcedureDefinition def, WbConnection conn)
 	{
@@ -76,8 +77,8 @@ public class ReportProcedure
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer xml = getXml();
-		xml.writeTo(out);
+		StringBuilder xml = getXml();
+		out.write(xml.toString());
 	}
 
 	public ProcedureDefinition getProcedure()
@@ -90,21 +91,21 @@ public class ReportProcedure
 		return procDef.getProcedureName();
 	}
 
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
-		this.indent = ind;
-		this.indent2 = new StrBuffer(indent);
+		this.indent = ind == null ? new StringBuilder(0) : ind;
+		this.indent2 = new StringBuilder(indent);
 		this.indent2.append("  ");
 	}
 
-	public StrBuffer getXml()
+	public StringBuilder getXml()
 	{
 		return getXml(true);
 	}
 
-	public StrBuffer getXml(boolean includeSource)
+	public StringBuilder getXml(boolean includeSource)
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		String objectName = procDef.getProcedureName();
 
 		tagWriter.appendOpenTag(result, indent, TAG_PROC_DEF);

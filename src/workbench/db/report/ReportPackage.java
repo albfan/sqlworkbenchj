@@ -26,7 +26,6 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleProcedureReader;
-import workbench.util.StrBuffer;
 
 /**
  * A class to represent an Oracle package for SchemaDiff and SchemaReport
@@ -42,8 +41,8 @@ public class ReportPackage
 	private String owner;
 	private String name;
 	private CharSequence source;
-	private StrBuffer indent = new StrBuffer("  ");
-	private StrBuffer indent2 = new StrBuffer("    ");
+	private StringBuilder indent = new StringBuilder("  ");
+	private StringBuilder indent2 = new StringBuilder("    ");
 
 	public ReportPackage(ProcedureDefinition proc)
 	{
@@ -87,16 +86,16 @@ public class ReportPackage
 		}
 	}
 
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
-		this.indent = ind;
-		this.indent2 = new StrBuffer(indent);
+		this.indent = ind == null ? new StringBuilder(0) : ind;
+		this.indent2 = new StringBuilder(indent);
 		this.indent2.append("  ");
 	}
 
-	public StrBuffer getXml(boolean includeSource)
+	public StringBuilder getXml(boolean includeSource)
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		TagWriter tagWriter = new TagWriter();
 
 		tagWriter.appendOpenTag(result, indent, TAG_PKG_DEF, new String[]{"schema", "packageName"},new String[]{owner, name});

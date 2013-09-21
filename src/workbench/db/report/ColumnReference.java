@@ -22,7 +22,6 @@
  */
 package workbench.db.report;
 
-import workbench.util.StrBuffer;
 import workbench.util.NumberStringCache;
 
 /**
@@ -87,10 +86,10 @@ public class ColumnReference
 		return this.getFkName();
 	}
 
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
-		StrBuffer result = new StrBuffer(250);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder result = new StringBuilder(250);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		tagWriter.appendOpenTag(result, indent, TAG_REFERENCE);
 		result.append('\n');
@@ -102,9 +101,9 @@ public class ColumnReference
 		return result;
 	}
 
-	public StrBuffer getInnerXml(StrBuffer indent)
+	public StringBuilder getInnerXml(StringBuilder indent)
 	{
-		StrBuffer result = new StrBuffer(250);
+		StringBuilder result = new StringBuilder(250);
 		this.fkDefinition.getForeignTable().appendTableNameXml(result, indent);
 		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName());

@@ -37,6 +37,22 @@ public class StringUtilTest
 {
 
 	@Test
+	public void testRemove()
+	{
+		StringBuilder b = new StringBuilder("12345");
+		StringUtil.removeFromEnd(b, 2);
+		assertEquals("123", b.toString());
+
+		b = new StringBuilder("12");
+		StringUtil.removeFromEnd(b, 2);
+		assertTrue(b.length() == 0);
+
+		b = new StringBuilder("123");
+		StringUtil.removeFromEnd(b, 5);
+		assertTrue(b.length() == 0);
+	}
+
+	@Test
 	public void testWildcardRegex()
 	{
 		String pattern = StringUtil.wildcardToRegex("*.sql", false);
@@ -425,11 +441,11 @@ public class StringUtilTest
 	public void testEncodeUnicode()
 	{
 		String value = "\u00E4";
-		String enc = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT, null);
+		String enc = StringUtil.escapeText(value, CharacterRange.RANGE_7BIT, "");
 		assertEquals("Umlaut not replaced", "\\u00E4", enc);
 
 		value = "\n";
-		enc = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT, null);
+		enc = StringUtil.escapeText(value, CharacterRange.RANGE_7BIT, "");
 		assertEquals("NL not replaced" , "\\n", enc);
 	}
 

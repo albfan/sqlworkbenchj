@@ -24,10 +24,13 @@ package workbench.db.diff;
 
 import java.util.Collection;
 import java.util.LinkedList;
+
 import workbench.db.TableGrant;
 import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
+
 
 /**
  * @author Thomas Kellerer
@@ -53,7 +56,7 @@ public class TableGrantDiff
 		}
 	}
 
-	public StrBuffer getMigrateTargetXml(TagWriter writer, StrBuffer indent)
+	public StringBuilder getMigrateTargetXml(TagWriter writer, StringBuilder indent)
 	{
 		Collection<TableGrant> grantsToAdd = new LinkedList<TableGrant>();
 		if (this.referenceGrants != null)
@@ -75,12 +78,12 @@ public class TableGrantDiff
 			grantsToRemove.removeAll(referenceGrants);
 		}
 
-		if (grantsToAdd.isEmpty() && grantsToRemove.isEmpty()) return null;
+		if (grantsToAdd.isEmpty() && grantsToRemove.isEmpty()) return StringUtil.emptyBuilder();
 
-		StrBuffer result = new StrBuffer(grantsToAdd.size() * 50 + grantsToRemove.size() * 50);
-		StrBuffer indent2 = new StrBuffer(indent);
+		StringBuilder result = new StringBuilder(grantsToAdd.size() * 50 + grantsToRemove.size() * 50);
+		StringBuilder indent2 = new StringBuilder(indent);
 		indent2.append("  ");
-		StrBuffer indent3 = new StrBuffer(indent2);
+		StringBuilder indent3 = new StringBuilder(indent2);
 		indent3.append("  ");
 		if (grantsToAdd.size() > 0)
 		{

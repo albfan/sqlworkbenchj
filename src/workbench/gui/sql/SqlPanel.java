@@ -1594,7 +1594,7 @@ public class SqlPanel
 						// to manually run a statement between the above setBusy(false) and this point)
 						if (doRollbackOnSetConnection())
 						{
-							LogMgr.logDebug("SqlPanel.setConnection()", "Doing a rollback to end the current transaction");
+							LogMgr.logDebug("SqlPanel.setConnection()", "Sending a rollback to end the current transaction");
 							dbConnection.rollbackSilently();
 						}
 					}

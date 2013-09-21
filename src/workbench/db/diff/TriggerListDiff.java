@@ -23,10 +23,10 @@
 package workbench.db.diff;
 
 import java.util.List;
+
 import workbench.db.TriggerDefinition;
 import workbench.db.report.ReportTrigger;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
 
 /**
  *
@@ -35,7 +35,7 @@ import workbench.util.StrBuffer;
 public class TriggerListDiff
 {
 	public static final String TAG_DROP_TRIGGER = "drop-trigger";
-	
+
 	private List<TriggerDefinition> referenceTriggers;
 	private List<TriggerDefinition> targetTriggers;
 
@@ -75,7 +75,7 @@ public class TriggerListDiff
 		return null;
 	}
 
-	public void writeXml(StrBuffer indent, StrBuffer buffer)
+	public void writeXml(StringBuilder indent, StringBuilder buffer)
 	{
 		TagWriter writer = new TagWriter();
 		// Check triggers that need to be dropped
@@ -100,5 +100,5 @@ public class TriggerListDiff
 		}
 
 	}
-	
+
 }

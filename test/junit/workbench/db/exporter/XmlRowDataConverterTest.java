@@ -22,17 +22,21 @@
  */
 package workbench.db.exporter;
 
-import java.util.Date;
-import workbench.util.StringUtil;
 import java.sql.Timestamp;
-import org.junit.Test;
 import java.sql.Types;
+import java.util.Date;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -66,7 +70,7 @@ public class XmlRowDataConverterTest
 		String generatingSql = "SELECT * FROM some_table WHERE x < 1000";
 		converter.setGeneratingSql(generatingSql);
 
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
 
 		RowData data = new RowData(info);
@@ -78,7 +82,7 @@ public class XmlRowDataConverterTest
 		Timestamp ts1 = (Timestamp)valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP);
 		data.setValue(3, ts1);
 
-		StrBuffer converted = converter.convertRowData(data, 0);
+		StringBuilder converted = converter.convertRowData(data, 0);
 		assertNotNull(converted);
 		String xml = converted.toString();
 

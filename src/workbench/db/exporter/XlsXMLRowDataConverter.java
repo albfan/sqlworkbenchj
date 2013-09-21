@@ -31,7 +31,6 @@ import workbench.storage.RowData;
 
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -45,9 +44,9 @@ public class XlsXMLRowDataConverter
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
-		StrBuffer out = new StrBuffer(5000);
+		StringBuilder out = new StringBuilder(5000);
 		out.append("<?xml version=\"1.0\" encoding=\"" + EncodingUtil.cleanupEncoding(getEncoding()) + "\"?>\n");
 		out.append("<?mso-application progid=\"Excel.Sheet\"?>\n");
 		out.append("<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n");
@@ -112,9 +111,9 @@ public class XlsXMLRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
-		StrBuffer out = new StrBuffer(250);
+		StringBuilder out = new StringBuilder(250);
 		out.append("</Table>\n");
 
 		if (getEnableFixedHeader() && writeHeader)
@@ -150,10 +149,10 @@ public class XlsXMLRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();
-		StrBuffer xml = new StrBuffer(colCount * 50);
+		StringBuilder xml = new StringBuilder(colCount * 50);
 		xml.append("<Row>\n");
 		for (int i = 0; i < colCount; i++)
 		{

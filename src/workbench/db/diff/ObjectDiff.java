@@ -23,13 +23,15 @@
 package workbench.db.diff;
 
 import java.sql.SQLException;
-import workbench.db.ComparableDbObject;
+
 import workbench.log.LogMgr;
 
+import workbench.db.ComparableDbObject;
 import workbench.db.WbConnection;
 import workbench.db.report.GenericReportObject;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 
 /**
  *
@@ -45,7 +47,7 @@ public class ObjectDiff
 
 	private ComparableDbObject referenceObject;
 	private ComparableDbObject targetObject;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public ObjectDiff(ComparableDbObject reference, ComparableDbObject target)
 	{
@@ -80,11 +82,11 @@ public class ObjectDiff
 	 *
 	 * An empty string means that there are no differences
 	 */
-	public StrBuffer getMigrateTargetXml(WbConnection referenceDb, WbConnection targetDb)
+	public StringBuilder getMigrateTargetXml(WbConnection referenceDb, WbConnection targetDb)
 	{
-		StrBuffer result = new StrBuffer(200);
+		StringBuilder result = new StringBuilder(200);
 
-		StrBuffer myIndent = new StrBuffer(indent);
+		StringBuilder myIndent = new StringBuilder(indent);
 		myIndent.append("  ");
 		TagWriter writer = new TagWriter();
 
@@ -92,7 +94,7 @@ public class ObjectDiff
 		{
 			// create a new object
 			GenericReportObject reportObject = new GenericReportObject(referenceDb, referenceObject);
-			StrBuffer xml = reportObject.getXml(myIndent);
+			StringBuilder xml = reportObject.getXml(myIndent);
 			writer.appendOpenTag(result, indent, TAG_ADD_OBJECT);
 			result.append('\n');
 			result.append(xml);
@@ -104,7 +106,7 @@ public class ObjectDiff
 		{
 			// create a new object
 			GenericReportObject reportObject = new GenericReportObject(targetDb, targetObject);
-			StrBuffer xml = reportObject.getXml(myIndent);
+			StringBuilder xml = reportObject.getXml(myIndent);
 			writer.appendOpenTag(result, indent, TAG_DROP_OBJECT);
 			result.append('\n');
 			result.append(xml);
@@ -116,7 +118,7 @@ public class ObjectDiff
 		{
 			GenericReportObject refObj = new GenericReportObject(referenceDb, referenceObject);
 			GenericReportObject tgObj = new GenericReportObject(targetDb, targetObject);
-			StrBuffer indent2 = new StrBuffer(myIndent);
+			StringBuilder indent2 = new StringBuilder(myIndent);
 			indent2.append("  ");
 			writer.appendOpenTag(result, indent, TAG_ALTER_OBJECT);
 			result.append('\n');
@@ -140,9 +142,15 @@ public class ObjectDiff
 	/**
 	 *	Set an indent for generated the XML.
 	 */
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
-		if (ind == null) this.indent = null;
-		this.indent = ind;
+		if (ind == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
 	}
 }

@@ -25,12 +25,14 @@ package workbench.db.diff;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import workbench.db.IndexDefinition;
 import workbench.db.report.ReportTableGrants;
 import workbench.db.report.ReportView;
 import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 
 /**
  * Compares two database views for differences in their definition.
@@ -49,7 +51,7 @@ public class ViewDiff
 	private ReportView reference;
 	private ReportView target;
 	private TagWriter writer;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public ViewDiff(ReportView ref, ReportView tar)
 	{
@@ -57,12 +59,12 @@ public class ViewDiff
 		target = tar;
 	}
 
-	public StrBuffer getMigrateTargetXml()
+	public StringBuilder getMigrateTargetXml()
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		if (this.writer == null) this.writer = new TagWriter();
 
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		boolean sourceDifferent = false;
 		boolean indexDifferent = false;
@@ -81,8 +83,8 @@ public class ViewDiff
 			sourceDifferent = !refSource.trim().equals(targetSource.trim());
 		}
 
-		StrBuffer indexDiff = getIndexDiff();
-		StrBuffer grants = getGrantDiff();
+		StringBuilder indexDiff = getIndexDiff();
+		StringBuilder grants = getGrantDiff();
 		if (indexDiff != null && indexDiff.length() > 0)
 		{
 			indexDifferent = true;
@@ -134,18 +136,18 @@ public class ViewDiff
 		return result;
 	}
 
-	private StrBuffer getGrantDiff()
+	private StringBuilder getGrantDiff()
 	{
 		ReportTableGrants refGrants = this.reference.getGrants();
 		ReportTableGrants targetGrants = target == null ? null : this.target.getGrants();
 		if (refGrants == null && targetGrants == null) return null;
 
 		TableGrantDiff td = new TableGrantDiff(refGrants, targetGrants);
-		StrBuffer diffXml = td.getMigrateTargetXml(writer, indent);
+		StringBuilder diffXml = td.getMigrateTargetXml(writer, indent);
 		return diffXml;
 	}
 
-	private StrBuffer getIndexDiff()
+	private StringBuilder getIndexDiff()
 	{
 		if (this.target == null) return null;
 
@@ -155,7 +157,7 @@ public class ViewDiff
 		IndexDiff id = new IndexDiff(ref, targ);
 		id.setTagWriter(this.writer);
 		id.setIndent(indent);
-		StrBuffer diff = id.getMigrateTargetXml();
+		StringBuilder diff = id.getMigrateTargetXml();
 		return diff;
 	}
 
@@ -171,18 +173,16 @@ public class ViewDiff
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(String ind)
+	public void setIndent(StringBuilder ind)
 	{
-		if (ind == null) this.indent = null;
-		this.indent = new StrBuffer(ind);
-	}
-
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(StrBuffer ind)
-	{
-		this.indent = ind;
+		if (ind == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
 	}
 
 }

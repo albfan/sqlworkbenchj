@@ -27,13 +27,14 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.util.HtmlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
- * Utility class to add XML tags to a StrBuffer.
+ * Utility class to add XML tags to a StringBuilder.
  * Handles namespaces for the tags as well.
  * @author  Thomas Kellerer
  */
@@ -52,7 +53,7 @@ public class TagWriter
 	 * Appends an integer value for a tag in one line. There will be a new line
 	 * after the closing tag.
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, int value)
+	public void appendTag(StringBuilder target, StringBuilder indent, String tag, int value)
 	{
 		appendTag(target, indent, tag, String.valueOf(value), false);
 	}
@@ -61,7 +62,7 @@ public class TagWriter
 	 * Appends a boolean value for a tag in one line. There will be a new line
 	 * after the closing tag.
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, boolean value)
+	public void appendTag(StringBuilder target, StringBuilder indent, String tag, boolean value)
 	{
 		if (value)
 		{
@@ -77,30 +78,30 @@ public class TagWriter
 	 * Appends the tag and the value in one line. There will be a new line
 	 * after the closing tag.
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value)
+	public void appendTag(StringBuilder target, StringBuilder indent, String tag, CharSequence value)
 	{
 		appendTag(target, indent, tag, value, false);
 	}
 
-	public void appendTagConditionally(StrBuffer target, StrBuffer indent, String tag, String value)
+	public void appendTagConditionally(StringBuilder target, StringBuilder indent, String tag, String value)
 	{
 		if (!StringUtil.isEmptyString(value)) appendTag(target, indent, tag, value, false);
 	}
 
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
+	public void appendTag(StringBuilder target, StringBuilder indent, String tag, CharSequence value, String attr, String attValue)
 	{
 		appendOpenTag(target, indent, tag, attr, attValue);
 		target.append(value);
 		appendCloseTag(target, null, tag);
 	}
 
-	public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
+	public void appendCDATATag(StringBuilder target, StringBuilder indent, String tag, CharSequence value, String attr, String attValue)
 	{
 		TagAttribute ta = new TagAttribute(attr, attValue);
 		appendCDATATag(target, indent, tag, value, ta);
 	}
 
-	public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, TagAttribute... attrs)
+	public void appendCDATATag(StringBuilder target, StringBuilder indent, String tag, CharSequence value, TagAttribute... attrs)
 	{
 		appendOpenTag(target, indent, tag, true, attrs);
 		target.append('\n');
@@ -119,7 +120,7 @@ public class TagWriter
 	 * after the closing tag. If checkCData is true, then the value
 	 * is checked for characters which require a <![CDATA[ "quoting"
 	 */
-	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, boolean checkCData)
+	public void appendTag(StringBuilder target, StringBuilder indent, String tag, CharSequence value, boolean checkCData)
 	{
 		appendOpenTag(target, indent, tag);
 		boolean useCData = checkCData && needsCData(value);
@@ -143,21 +144,21 @@ public class TagWriter
 
 	/**
 	 * Appends the tag and the value in one line.
-	 * 
+	 *
 	 * There will be a new line after the closing tag.
 	 */
-	public void appendEmptyTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
+	public void appendEmptyTag(StringBuilder target, StringBuilder indent, String tag, String attribute, String attValue)
 	{
 		appendOpenTag(target, indent, tag, false, new TagAttribute(attribute, attValue));
 		target.append("/>");
 	}
 
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
+	public void appendOpenTag(StringBuilder target, StringBuilder indent, String tag)
 	{
 		this.appendOpenTag(target, indent, tag, null, true);
 	}
 
-	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
+	public  void appendOpenTag(StringBuilder target, StringBuilder indent, String tag, String attribute, String attValue)
 	{
 		if (StringUtil.isNonBlank(attribute))
 		{
@@ -169,7 +170,7 @@ public class TagWriter
 		}
 	}
 
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
+	public void appendOpenTag(StringBuilder target, StringBuilder indent, String tag, String[] attributes, String[] values)
 	{
 		appendOpenTag(target, indent, tag, attributes, values, true);
 	}
@@ -178,7 +179,7 @@ public class TagWriter
 	 * Appends a opening tag to the target buffer including attributes.
 	 * No new line will be written
 	 */
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values, boolean closeTag)
+	public void appendOpenTag(StringBuilder target, StringBuilder indent, String tag, String[] attributes, String[] values, boolean closeTag)
 	{
 		List<TagAttribute> att = null;
 		if (attributes != null)
@@ -192,7 +193,7 @@ public class TagWriter
 		appendOpenTag(target, indent, tag, att, closeTag);
 	}
 
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, Collection<TagAttribute> attributes, boolean closeTag)
+	public void appendOpenTag(StringBuilder target, StringBuilder indent, String tag, Collection<TagAttribute> attributes, boolean closeTag)
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
@@ -208,7 +209,7 @@ public class TagWriter
 		if (closeTag) target.append('>');
 	}
 
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, boolean closeTag, TagAttribute ... attributes)
+	public void appendOpenTag(StringBuilder target, StringBuilder indent, String tag, boolean closeTag, TagAttribute ... attributes)
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
@@ -227,7 +228,7 @@ public class TagWriter
 		if (closeTag) target.append('>');
 	}
 
-	public void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
+	public void appendCloseTag(StringBuilder target, StringBuilder indent, String tag)
 	{
 		if (indent != null) target.append(indent);
 		target.append("</");
@@ -247,15 +248,15 @@ public class TagWriter
 		return false;
 	}
 
-	public void writeWorkbenchVersion(StrBuffer target, StrBuffer indent)
+	public void writeWorkbenchVersion(StringBuilder target, StringBuilder indent)
 	{
 		appendTag(target, indent, TAG_GENERATED_BY, ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
 	}
 
-	public static void writeWorkbenchVersion(Writer out, StrBuffer indent)
+	public static void writeWorkbenchVersion(Writer out, StringBuilder indent)
 		throws IOException
 	{
-		indent.writeTo(out);
+		if (indent != null) out.append(indent);
 		out.append('<');
 		out.append(TAG_GENERATED_BY);
 		out.append('>');

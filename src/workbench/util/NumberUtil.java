@@ -37,7 +37,7 @@ public class NumberUtil
 	 * This works around the problem that e.g. BigInteger cannot be compared to a BigDecimal.
 	 * The equals method would return false.
 	 * <br/>
-	 * When comparing data across different DBMS (and thus JDBC) drivers, values
+	 * When comparing data across different DBMS (and thus JDBC drivers), values
 	 * that are "equal" might otherwise not be considered equal e.g. an ID=42 in Oracle
 	 * stored as NUMBER(38) would not be equal to an ID=42 stored in an integer column
 	 * in Postgres as both drivers use a different representation class.

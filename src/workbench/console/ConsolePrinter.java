@@ -23,17 +23,19 @@
 package workbench.console;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.exporter.TextRowDataConverter;
+
 import workbench.storage.*;
+
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -287,7 +289,7 @@ public abstract class ConsolePrinter
 				}
 				else
 				{
-					pw.print(StringUtil.escapeUnicode(value, CharacterRange.RANGE_CONTROL));
+					pw.print(StringUtil.escapeText(value, CharacterRange.RANGE_CONTROL));
 				}
 				realColCount ++;
 			}

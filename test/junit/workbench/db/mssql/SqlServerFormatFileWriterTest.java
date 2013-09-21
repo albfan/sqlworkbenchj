@@ -24,23 +24,28 @@ package workbench.db.mssql;
 
 import java.sql.Types;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.RowDataConverter;
+
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableIdentifier;
-import workbench.db.exporter.DataExporter;
-import workbench.db.exporter.RowDataConverter;
-import workbench.storage.ResultInfo;
-import workbench.storage.RowData;
-import workbench.util.StrBuffer;
-import workbench.util.WbFile;
+
 import static org.junit.Assert.*;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -129,19 +134,19 @@ public class SqlServerFormatFileWriterTest
 			}
 
 			@Override
-			public StrBuffer convertRowData(RowData row, long rowIndex)
+			public StringBuilder convertRowData(RowData row, long rowIndex)
 			{
-				return new StrBuffer();
+				return new StringBuilder();
 			}
 
 			@Override
-			public StrBuffer getStart()
+			public StringBuilder getStart()
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getEnd(long totalRows)
+			public StringBuilder getEnd(long totalRows)
 			{
 				return null;
 			}

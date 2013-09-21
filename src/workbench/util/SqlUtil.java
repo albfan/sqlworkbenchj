@@ -54,6 +54,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.ResultInfo;
+import workbench.storage.RowDataReader;
 
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -1386,7 +1387,7 @@ public class SqlUtil
 
 	public static boolean isClobType(int aSqlType)
 	{
-		return (aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
+		return (aSqlType == RowDataReader.IS_CLOB || aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
 	}
 
 	public static boolean isClobType(int aSqlType, String dbmsType, DbSettings dbInfo)
@@ -1406,7 +1407,8 @@ public class SqlUtil
 	{
 		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
 
-		return (aSqlType == Types.CLOB ||
+		return (aSqlType == RowDataReader.IS_CLOB  ||
+			      aSqlType == Types.CLOB ||
 			      aSqlType == Types.NCLOB ||
 			      aSqlType == Types.LONGVARCHAR ||
 						aSqlType == Types.LONGNVARCHAR);
@@ -1414,7 +1416,8 @@ public class SqlUtil
 
 	public static boolean isBlobType(int aSqlType)
 	{
-		return (aSqlType == Types.BLOB ||
+		return (aSqlType == RowDataReader.IS_BLOB ||
+			      aSqlType == Types.BLOB ||
 		        aSqlType == Types.BINARY ||
 		        aSqlType == Types.LONGVARBINARY ||
 		        aSqlType == Types.VARBINARY);

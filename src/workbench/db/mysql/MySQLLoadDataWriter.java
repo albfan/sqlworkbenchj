@@ -71,7 +71,7 @@ public class MySQLLoadDataWriter
 			{
 				out.print("  character set " + encoding + "\n");
 			}
-			String delim = StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
+			String delim = StringUtil.escapeText(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
 			out.print("  columns\n");
 			out.print("    terminated by '" + delim + "'\n");
 			String quote = exporter.getTextQuoteChar();

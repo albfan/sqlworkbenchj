@@ -48,7 +48,6 @@ import workbench.sql.ScriptParser;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 
 import org.junit.Test;
 
@@ -100,7 +99,7 @@ public class SqlRowDataConverterTest
 			converter.setResultInfo(info);
 			List<ColumnIdentifier> cols = CollectionUtil.arrayList(info.getColumn(0), info.getColumn(2));
 			converter.setColumnsToExport(cols);
-			StrBuffer result = converter.convertRowData(row, 1);
+			StringBuilder result = converter.convertRowData(row, 1);
 			assertNotNull(result);
 			String sql = result.toString().trim();
 			String expected =
@@ -150,7 +149,7 @@ public class SqlRowDataConverterTest
 			converter.setResultInfo(info);
 			converter.setCreateTable(true);
 			converter.setAlternateUpdateTable(new TableIdentifier("MYTABLE"));
-			StrBuffer start = converter.getStart();
+			StringBuilder start = converter.getStart();
 			assertNotNull(start);
 			String sql = start.toString();
 			DdlObjectInfo ddl = SqlUtil.getDDLObjectInfo(sql);

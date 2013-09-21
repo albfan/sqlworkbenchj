@@ -270,20 +270,11 @@ public class SqlLiteralFormatter
 		return f;
 	}
 
-	private boolean supportsNVarcharLiterals()
-	{
-		if (dbSettings == null)
-		{
-			return true;
-		}
-		return dbSettings.supportsNVarcharLiterals();
-	}
-
 	private String quoteString(int jdbcType, String t)
 	{
 		if (t == null) return t;
 		String prefix;
-		if (supportsNVarcharLiterals() && (jdbcType == Types.NVARCHAR || jdbcType == Types.NCHAR || jdbcType == Types.NCLOB || jdbcType == Types.LONGNVARCHAR))
+		if (jdbcType == Types.NVARCHAR || jdbcType == Types.NCHAR || jdbcType == Types.NCLOB || jdbcType == Types.LONGNVARCHAR)
 		{
 			prefix = "N'";
 		}

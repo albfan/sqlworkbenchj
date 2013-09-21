@@ -272,7 +272,7 @@ public class JdbcIndexReader
 	{
 		if (indexList == null) return null;
 		int count = indexList.size();
-		if (count == 0) return StringUtil.emptyBuffer();
+		if (count == 0) return StringUtil.emptyBuilder();
 
 		StringBuilder result = new StringBuilder(count * 100);
 

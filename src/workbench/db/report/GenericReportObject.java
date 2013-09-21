@@ -36,7 +36,6 @@ import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -82,19 +81,19 @@ public class GenericReportObject
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer line = this.getXml();
-		line.writeTo(out);
+		StringBuilder line = this.getXml();
+		out.write(line.toString());
 	}
 
-	public StrBuffer getXml()
+	public StringBuilder getXml()
 	{
-		return getXml(new StrBuffer("  "));
+		return getXml(new StringBuilder("  "));
 	}
 
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
-		StrBuffer line = new StrBuffer(500);
-		StrBuffer defIndent = new StrBuffer(indent);
+		StringBuilder line = new StringBuilder(500);
+		StringBuilder defIndent = new StringBuilder(indent);
 		defIndent.append("  ");
 
 		String[] att = new String[2];
@@ -116,9 +115,9 @@ public class GenericReportObject
 		tagWriter.appendTag(line, defIndent, TAG_OBJECT_TYPE, SqlUtil.removeObjectQuotes(object.getObjectType()));
 		tagWriter.appendTag(line, defIndent, TAG_OBJECT_COMMENT, object.getComment(), true);
 
-		StrBuffer details = new StrBuffer(defIndent);
+		StringBuilder details = new StringBuilder(defIndent);
 		details.append("  ");
-		StrBuffer in2 = new StrBuffer(details);
+		StringBuilder in2 = new StringBuilder(details);
 		in2.append("  ");
 		if (object instanceof DomainIdentifier)
 		{

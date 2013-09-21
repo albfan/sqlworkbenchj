@@ -22,13 +22,17 @@
  */
 package workbench.db.exporter;
 
-import org.junit.Test;
 import java.sql.Types;
+
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -48,7 +52,7 @@ public class RegexReplacingModifierTest
 	public void testReplacePattern()
 	{
 		RegexReplacingModifier modifier = new RegexReplacingModifier("[\\n\\r]+", " ");
-		
+
 		ColumnIdentifier[] cols = new ColumnIdentifier[3];
 		cols[0] = new ColumnIdentifier("id", Types.INTEGER, true);
 		cols[1] = new ColumnIdentifier("name", Types.VARCHAR, false);
@@ -60,7 +64,7 @@ public class RegexReplacingModifierTest
 		row.setValue(0, Integer.valueOf(42));
 		row.setValue(1, "Arthur Dent");
 		row.setValue(2, "This is\na multiline\ndescription");
-		
+
 		RowDataConverter converter = new RowDataConverter()
 		{
 
@@ -77,19 +81,19 @@ public class RegexReplacingModifierTest
 			}
 
 			@Override
-			public StrBuffer convertRowData(RowData row, long rowIndex)
+			public StringBuilder convertRowData(RowData row, long rowIndex)
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getStart()
+			public StringBuilder getStart()
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getEnd(long totalRows)
+			public StringBuilder getEnd(long totalRows)
 			{
 				return null;
 			}

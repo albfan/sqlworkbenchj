@@ -23,13 +23,17 @@
 package workbench.db.exporter;
 
 import java.sql.Types;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
+
 import workbench.util.ValueConverter;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -62,9 +66,9 @@ public class HtmlRowDataConverterTest
 		converter.setCreateFullPage(true);
 		converter.setPageTitle("Unit Test");
 
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
-		StrBuffer end = converter.getEnd(1);
+		StringBuilder end = converter.getEnd(1);
 		assertNotNull(end);
 
 		RowData data = new RowData(info);
@@ -74,7 +78,7 @@ public class HtmlRowDataConverterTest
 		data.setValue(2, valueConverter.convertValue("2008-07-23", Types.DATE));
 		data.setValue(3, valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP));
 
-		StrBuffer converted = converter.convertRowData(data, 0);
+		StringBuilder converted = converter.convertRowData(data, 0);
 		assertNotNull(converted);
 		String html = header + "\n" + converted.toString() + "\n" + end;
 //		System.out.println(html);

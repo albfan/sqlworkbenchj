@@ -24,7 +24,8 @@ package workbench.db.diff;
 
 import workbench.db.report.ReportProcedure;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 
 /**
  *
@@ -38,7 +39,7 @@ public class ProcDiff
 	private ReportProcedure reference;
 	private ReportProcedure target;
 	private TagWriter writer;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public ProcDiff(ReportProcedure ref, ReportProcedure tar)
 	{
@@ -46,9 +47,9 @@ public class ProcDiff
 		target = tar;
 	}
 
-	public StrBuffer getMigrateTargetXml()
+	public StringBuilder getMigrateTargetXml()
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		if (this.writer == null) this.writer = new TagWriter();
 
 		boolean isDifferent = true;
@@ -63,7 +64,7 @@ public class ProcDiff
 			tagToUse = TAG_UPDATE_PROC;
 		}
 
-		StrBuffer myIndent = new StrBuffer(indent);
+		StringBuilder myIndent = new StringBuilder(indent);
 		myIndent.append("  ");
 		if (isDifferent)
 		{
@@ -88,18 +89,17 @@ public class ProcDiff
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(String ind)
+	public void setIndent(StringBuilder ind)
 	{
-		if (ind == null) this.indent = null;
-		this.indent = new StrBuffer(ind);
-	}
+		if (ind == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
 
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(StrBuffer ind)
-	{
-		this.indent = ind;
 	}
 
 }

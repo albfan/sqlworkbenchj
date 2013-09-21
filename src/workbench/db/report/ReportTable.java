@@ -54,13 +54,11 @@ import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
-import workbench.db.oracle.OracleTableSourceBuilder;
 
 import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -437,13 +435,13 @@ public class ReportTable
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer line = this.getXml();
-		line.writeTo(out);
+		StringBuilder line = this.getXml();
+		out.write(line.toString());
 	}
 
-	public StrBuffer getXml()
+	public StringBuilder getXml()
 	{
-		return getXml(new StrBuffer("  "));
+		return getXml(new StringBuilder("  "));
 	}
 
 	@Override
@@ -452,14 +450,17 @@ public class ReportTable
 		return this.table.toString();
 	}
 
-	public String getTableComment() { return this.tableComment; }
+	public String getTableComment()
+	{
+		return this.tableComment;
+	}
 
 	public List<TableConstraint> getTableConstraints()
 	{
 		return this.tableConstraints;
 	}
 
-	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
+	public void appendTableNameXml(StringBuilder toAppend, StringBuilder indent)
 	{
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, SqlUtil.removeObjectQuotes(this.table.getCatalog()));
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? SqlUtil.removeObjectQuotes(this.table.getSchema()) : this.schemaNameToUse));
@@ -471,10 +472,10 @@ public class ReportTable
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
-		StrBuffer line = new StrBuffer(500);
-		StrBuffer colindent = new StrBuffer(indent);
+		StringBuilder line = new StringBuilder(500);
+		StringBuilder colindent = new StringBuilder(indent);
 		colindent.append("  ");
 
 		String type = this.table.getType();
@@ -518,7 +519,7 @@ public class ReportTable
 		{
 			tagWriter.appendOpenTag(line, colindent, "foreign-keys");
 			line.append('\n');
-			StrBuffer fkindent = new StrBuffer(colindent);
+			StringBuilder fkindent = new StringBuilder(colindent);
 			fkindent.append("  ");
 			for (ForeignKeyDefinition def : foreignKeys.values())
 			{
@@ -544,32 +545,32 @@ public class ReportTable
 		return line;
 	}
 
-	private void writeDBMSOptions(StrBuffer output, StrBuffer indent)
+	private void writeDBMSOptions(StringBuilder output, StringBuilder indent)
 	{
 		if (CollectionUtil.isEmpty(dbmsOptions)) return;
 
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		output.append(myindent);
 		output.append("<table-options>\n");
-		StrBuffer nextindent = new StrBuffer(myindent);
+		StringBuilder nextindent = new StringBuilder(myindent);
 		nextindent.append("  ");
 		for (ObjectOption option : dbmsOptions)
 		{
-			StrBuffer result = option.getXml(nextindent);
+			StringBuilder result = option.getXml(nextindent);
 			output.append(result);
 		}
 		output.append(myindent);
 		output.append("</table-options>\n");
 	}
 
-	public static void writeConstraints(List<TableConstraint> constraints, TagWriter tagWriter, StrBuffer line, StrBuffer indent)
+	public static void writeConstraints(List<TableConstraint> constraints, TagWriter tagWriter, StringBuilder line, StringBuilder indent)
 	{
 		if (constraints != null && constraints.size() > 0)
 		{
 			tagWriter.appendOpenTag(line, indent, TAG_TABLE_CONSTRAINTS);
 			line.append('\n');
-			StrBuffer consIndent = new StrBuffer(indent);
+			StringBuilder consIndent = new StringBuilder(indent);
 			consIndent.append("  ");
 			for (TableConstraint cons : constraints)
 			{
@@ -579,7 +580,7 @@ public class ReportTable
 		}
 	}
 
-	public static void writeConstraint(TableConstraint constraint, TagWriter tagWriter, StrBuffer line, StrBuffer indent)
+	public static void writeConstraint(TableConstraint constraint, TagWriter tagWriter, StringBuilder line, StringBuilder indent)
 	{
 		if (constraint == null) return;
 		String name = constraint.getConstraintName();

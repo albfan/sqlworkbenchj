@@ -22,7 +22,6 @@
  */
 package workbench.db.report;
 
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -42,10 +41,10 @@ public class ObjectOption
 		this.optionSource = optionSource;
 	}
 
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
-		StrBuffer result = new StrBuffer(100);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder result = new StringBuilder(100);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		result.append(indent);
 		result.append("<option type=\"");

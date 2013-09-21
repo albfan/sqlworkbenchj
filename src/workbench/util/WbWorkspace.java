@@ -36,10 +36,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import workbench.gui.sql.PanelType;
-import workbench.gui.sql.SqlHistory;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.sql.PanelType;
+import workbench.gui.sql.SqlHistory;
 
 /**
  *
@@ -306,7 +307,7 @@ public class WbWorkspace
 	public void setTabTitle(int index, String name)
 	{
 		String key = "tab" + index + ".title";
-		String encoded = StringUtil.escapeUnicode(name, CharacterRange.RANGE_7BIT);
+		String encoded = StringUtil.escapeText(name, CharacterRange.RANGE_7BIT);
 		this.tabInfo.setProperty(key, encoded);
 	}
 
@@ -411,7 +412,7 @@ public class WbWorkspace
 	public void setExternalFileName(int tabIndex, String filename)
 	{
 		String key = "tab" + tabIndex + ".filename";
-		String encoded = StringUtil.escapeUnicode(filename, CharacterRange.RANGE_7BIT);
+		String encoded = StringUtil.escapeText(filename, CharacterRange.RANGE_7BIT);
 		this.tabInfo.setProperty(key, encoded);
 	}
 

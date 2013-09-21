@@ -25,7 +25,6 @@ package workbench.db.report;
 import workbench.db.ColumnIdentifier;
 
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -87,19 +86,19 @@ public class ReportColumn
 		this.fk = ref;
 	}
 
-	public void appendXml(StrBuffer result, StrBuffer indent)
+	public void appendXml(StringBuilder result, StringBuilder indent)
 	{
 		appendXml(result, indent, true);
 	}
 
-	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition)
+	public void appendXml(StringBuilder result, StringBuilder indent, boolean includePosition)
 	{
 		appendXml(result, indent, includePosition, TAG_COLUMN_DEFINITION, false);
 	}
 
-	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition, String mainTagToUse, boolean shortInfo)
+	public void appendXml(StringBuilder result, StringBuilder indent, boolean includePosition, String mainTagToUse, boolean shortInfo)
 	{
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 
 		myindent.append("  ");
 		if (shortInfo)

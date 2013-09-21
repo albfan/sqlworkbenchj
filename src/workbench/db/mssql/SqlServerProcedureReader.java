@@ -51,6 +51,7 @@ public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
 	private final String GET_PROC_SQL = "{call sp_stored_procedures (@sp_owner = ?,  @sp_name = ?)}";
+	private final StringBuilder header = StringUtil.emptyBuilder();
 	private boolean useOwnSQL = true;
 
 	public SqlServerProcedureReader(WbConnection db)
@@ -61,7 +62,7 @@ public class SqlServerProcedureReader
 	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
-		return StringUtil.emptyBuffer();
+		return header;
 	}
 
 

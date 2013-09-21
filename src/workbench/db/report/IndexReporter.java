@@ -41,7 +41,6 @@ import workbench.db.oracle.OracleIndexPartition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 import static workbench.db.report.ReportTable.TAG_TABLESPACE;
@@ -91,11 +90,11 @@ public class IndexReporter
 		mainTagToUse = tag;
 	}
 
-	public void appendXml(StrBuffer result, StrBuffer indent)
+	public void appendXml(StringBuilder result, StringBuilder indent)
 	{
 		int numIndex = this.indexList.size();
 		if (numIndex == 0) return;
-		StrBuffer defIndent = new StrBuffer(indent);
+		StringBuilder defIndent = new StringBuilder(indent);
 		defIndent.append("  ");
 
 		for (IndexDefinition index : indexList)
@@ -115,7 +114,7 @@ public class IndexReporter
 			List<IndexColumn> columns = index.getColumns();
 			if (columns.size() > 0)
 			{
-				StrBuffer colIndent = new StrBuffer(defIndent);
+				StringBuilder colIndent = new StringBuilder(defIndent);
 				colIndent.append("  ");
 				tagWriter.appendOpenTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
 				result.append('\n');
@@ -143,18 +142,18 @@ public class IndexReporter
 		}
 	}
 
-	private void writeDbmsOptions(StrBuffer output, StrBuffer indent, IndexDefinition index)
+	private void writeDbmsOptions(StringBuilder output, StringBuilder indent, IndexDefinition index)
 	{
 		List<ObjectOption> options = indexOptions.get(index);
 		if (CollectionUtil.isEmpty(options)) return;
 
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		output.append(indent);
 		output.append("<index-options>\n");
 		for (ObjectOption option : options)
 		{
-			StrBuffer result = option.getXml(myindent);
+			StringBuilder result = option.getXml(myindent);
 			output.append(result);
 		}
 		output.append(indent);

@@ -25,7 +25,8 @@ package workbench.db.diff;
 import workbench.db.TriggerDefinition;
 import workbench.db.report.ReportTrigger;
 import workbench.db.report.TagWriter;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 
 /**
  *
@@ -35,10 +36,10 @@ public class TriggerDiff
 {
 	public static final String TAG_CREATE_TRIGGER = "create-trigger";
 	public static final String TAG_UPDATE_TRIGGER = "update-trigger";
-	
+
 	private ReportTrigger reference;
 	private ReportTrigger target;
-	
+
 	public TriggerDiff(ReportTrigger ref, ReportTrigger tar)
 	{
 		reference = ref;
@@ -66,31 +67,29 @@ public class TriggerDiff
 
 		return isDifferent;
 	}
-	
-	public StrBuffer getMigrateTargetXml(StrBuffer indent)
+
+	public StringBuilder getMigrateTargetXml(StringBuilder indent)
 	{
-		StrBuffer result = null;
-		TagWriter writer = new TagWriter();
-		
 		boolean isDifferent = isDifferent();
-		if (!isDifferent) return null;
+		if (!isDifferent) return StringUtil.emptyBuilder();
 
 		TriggerDefinition trgTarget = (target != null ? target.getTrigger() : null);
 		boolean isNew = trgTarget == null;
 
 		String tagToUse = (isNew ? TAG_CREATE_TRIGGER : TAG_UPDATE_TRIGGER);
-		
-		StrBuffer myIndent = new StrBuffer(indent);
+
+		StringBuilder myIndent = new StringBuilder(indent);
 		myIndent.append("  ");
-		result = new StrBuffer();
+		TagWriter writer = new TagWriter();
+		StringBuilder result = new StringBuilder();
 		writer.appendOpenTag(result, indent, tagToUse);
 		result.append('\n');
 		reference.setIndent(myIndent);
 		result.append(reference.getXml());
 		writer.appendCloseTag(result, indent, tagToUse);
-		
-		return result;
-	}	
 
-		
+		return result;
+	}
+
+
 }

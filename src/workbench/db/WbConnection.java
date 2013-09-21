@@ -54,7 +54,6 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
@@ -1226,9 +1225,9 @@ public class WbConnection
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
 	 */
-	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent)
+	public StringBuilder getDatabaseInfoAsXml(StringBuilder indent)
 	{
-		StrBuffer dbInfo = new StrBuffer(200);
+		StringBuilder dbInfo = new StringBuilder(200);
 		DatabaseMetaData db;
 		try
 		{
@@ -1236,7 +1235,7 @@ public class WbConnection
 		}
 		catch (Exception e)
 		{
-			return new StrBuffer("");
+			return StringUtil.emptyBuilder();
 		}
 
 		TagWriter tagWriter = new TagWriter();

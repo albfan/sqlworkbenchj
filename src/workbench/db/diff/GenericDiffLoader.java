@@ -27,17 +27,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import workbench.db.ComparableDbObject;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ComparableDbObject;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.RowActionMonitor;
-import workbench.util.StrBuffer;
+
 import workbench.util.StringUtil;
 
 /**
@@ -75,17 +75,17 @@ public class GenericDiffLoader
 		return objects.size();
 	}
 
-	public StrBuffer getMigrateTargetXml(StrBuffer indent)
+	public StringBuilder getMigrateTargetXml(StringBuilder indent)
 	{
 		if (this.objects == null)
 		{
 			loadObjects();
 		}
-		StrBuffer result = new StrBuffer(objects.size() * 50);
+		StringBuilder result = new StringBuilder(objects.size() * 50);
 		for (ObjectDiff diff : objects)
 		{
 			diff.setIndent(indent);
-			StrBuffer xml = diff.getMigrateTargetXml(referenceDb, targetDb);
+			StringBuilder xml = diff.getMigrateTargetXml(referenceDb, targetDb);
 			result.append(xml);
 			result.append('\n');
 		}

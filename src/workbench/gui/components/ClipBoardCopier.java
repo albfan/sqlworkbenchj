@@ -55,7 +55,6 @@ import workbench.storage.DataStore;
 import workbench.storage.RowData;
 
 import workbench.util.ExceptionUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -388,9 +387,9 @@ public class ClipBoardCopier
 				{
 					rowdata = data.getRow(rows[row]);
 				}
-				StrBuffer sql = converter.convertRowData(rowdata, row);
-				sql.appendTo(result);
-				if (!sql.endsWith('\n'))
+				StringBuilder sql = converter.convertRowData(rowdata, row);
+				result.append(sql);
+				if (!StringUtil.endsWith(sql, '\n'))
 				{
 					result.append('\n');
 				}

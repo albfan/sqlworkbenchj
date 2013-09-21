@@ -23,13 +23,17 @@
 package workbench.db.diff;
 
 import java.util.Iterator;
+
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.report.ReportSequence;
 import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
-import workbench.resource.Settings;
+
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
+
+import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
 
 /**
@@ -46,7 +50,7 @@ public class SequenceDiff
 	private ReportSequence reference;
 	private ReportSequence target;
 	private TagWriter writer;
-	private StrBuffer indent;
+	private StringBuilder indent = StringUtil.emptyBuilder();
 	private boolean includeSource;
 
 	public SequenceDiff(ReportSequence ref, ReportSequence tar)
@@ -56,12 +60,12 @@ public class SequenceDiff
 		includeSource = Settings.getInstance().getBoolProperty("workbench.diff.sequence.include_sql", false);
 	}
 
-	public StrBuffer getMigrateTargetXml()
+	public StringBuilder getMigrateTargetXml()
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		if (this.writer == null) this.writer = new TagWriter();
 
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		boolean createSequence = (target == null);
 		boolean different = (target == null || !reference.getSequence().equals(target.getSequence()));
@@ -82,11 +86,11 @@ public class SequenceDiff
 		return result;
 	}
 
-	private void writeChangedProperties(StrBuffer ind, StrBuffer result, SequenceDefinition refSeq, SequenceDefinition targetSeq)
+	private void writeChangedProperties(StringBuilder ind, StringBuilder result, SequenceDefinition refSeq, SequenceDefinition targetSeq)
 	{
 		if (refSeq == null || targetSeq == null) return;
 
-		StrBuffer myindent = new StrBuffer(ind);
+		StringBuilder myindent = new StringBuilder(ind);
 		myindent.append("  ");
 		Iterator<String> properties = refSeq.getProperties();
 		writer.appendOpenTag(result, ind, TAG_ATTRIB_LIST);
@@ -119,18 +123,16 @@ public class SequenceDiff
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(String ind)
+	public void setIndent(StringBuilder ind)
 	{
-		if (ind == null) this.indent = null;
-		this.indent = new StrBuffer(ind);
-	}
-
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(StrBuffer ind)
-	{
-		this.indent = ind;
+		if (ind == null)
+		{
+			this.indent = StringUtil.emptyBuilder();
+		}
+		else
+		{
+			this.indent = ind;
+		}
 	}
 
 }

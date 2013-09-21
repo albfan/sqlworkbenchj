@@ -26,16 +26,21 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import org.junit.Test;
+
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.util.StrBuffer;
-import static org.junit.Assert.*;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -74,7 +79,7 @@ public class TextRowDataConverterTest
 		data.setValue(1, "name_1");
 		data.setValue(2, "name_2");
 
-		StrBuffer line = converter.convertRowData(data, 0);
+		StringBuilder line = converter.convertRowData(data, 0);
 		assertEquals("Wrong data", "42;name_2", line.toString().trim());
 	}
 
@@ -95,7 +100,7 @@ public class TextRowDataConverterTest
 		data.setValue(0, null);
 		data.setValue(1, new Integer(42));
 
-		StrBuffer line = converter.convertRowData(data, 0);
+		StringBuilder line = converter.convertRowData(data, 0);
 		assertEquals("Wrong data", "<NULL>;42", line.toString().trim());
 
 		converter.setNullString("[null]");
@@ -122,7 +127,7 @@ public class TextRowDataConverterTest
 		converter.setWriteHeader(true);
 		converter.setResultInfo(info);
 		converter.setDelimiter(";");
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
 		assertEquals("Wrong header", "char_col;int_col;date_col;ts_col;t_col", header.toString().trim());
 
@@ -144,7 +149,7 @@ public class TextRowDataConverterTest
 		c.set(Calendar.MILLISECOND, 0);
 		data.setValue(4, new java.sql.Time(c.getTime().getTime()));
 
-		StrBuffer line = converter.convertRowData(data, 0);
+		StringBuilder line = converter.convertRowData(data, 0);
 		assertEquals("Wrong columns exporter", "data1;42;2006-10-26;2006-10-26 17:00:00;23:42:24", line.toString().trim());
 
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
@@ -173,7 +178,7 @@ public class TextRowDataConverterTest
 		converter.setResultInfo(info);
 		converter.setDelimiter(";");
 		converter.setWriteBlobToFile(false);
-		StrBuffer header = converter.getStart();
+		StringBuilder header = converter.getStart();
 		assertNotNull(header);
 		assertEquals("Wrong header", "id;blob_col", header.toString().trim());
 
@@ -181,7 +186,7 @@ public class TextRowDataConverterTest
 		data.setValue(0, new Integer(42));
 		data.setValue(1, new byte[] {1,2,3,4} );
 
-		StrBuffer line = converter.convertRowData(data, 0);
+		StringBuilder line = converter.convertRowData(data, 0);
 		assertEquals("42;AQIDBA==", line.toString().trim());
 
 		converter.setBlobFormatter(BlobFormatterFactory.createAnsiFormatter());

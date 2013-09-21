@@ -38,7 +38,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
 import workbench.db.WbConnection;
 
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -181,27 +180,38 @@ public class ReportView
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer line = this.getXml();
-		line.writeTo(out);
+		StringBuilder line = this.getXml();
+		out.write(line.toString());
 	}
 
-	public StrBuffer getXml()
+	public StringBuilder getXml()
 	{
-		return getXml(new StrBuffer("  "));
+		return getXml(new StringBuilder("  "));
 	}
 
-	public TableIdentifier getView() { return this.view; }
-	public String getViewComment() { return this.viewComment; }
-	public CharSequence getViewSource() { return this.viewSource; }
+	public TableIdentifier getView()
+	{
+		return this.view;
+	}
 
-	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
+	public String getViewComment()
+	{
+		return this.viewComment;
+	}
+
+	public CharSequence getViewSource()
+	{
+		return this.viewSource;
+	}
+
+	public void appendTableNameXml(StringBuilder toAppend, StringBuilder indent)
 	{
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_CATALOG, this.view.getCatalog());
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_SCHEMA, (this.schemaNameToUse == null ? this.view.getSchema() : this.schemaNameToUse));
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_NAME, this.view.getTableName());
 	}
 
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
 		return getXml(indent, true);
 	}
@@ -211,10 +221,10 @@ public class ReportView
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */
-	public StrBuffer getXml(StrBuffer indent, boolean includeIndex)
+	public StringBuilder getXml(StringBuilder indent, boolean includeIndex)
 	{
-		StrBuffer line = new StrBuffer(this.viewSource.length() + 200);
-		StrBuffer colindent = new StrBuffer(indent);
+		StringBuilder line = new StringBuilder(this.viewSource.length() + 200);
+		StringBuilder colindent = new StringBuilder(indent);
 		colindent.append(indent);
 
 		tagWriter.appendOpenTag(line, indent, TAG_VIEW_DEF, "name", this.view.getTableName());
@@ -236,7 +246,7 @@ public class ReportView
 		return line;
 	}
 
-	public static void writeSourceTag(TagWriter tagWriter, StrBuffer target, StrBuffer indent, CharSequence source)
+	public static void writeSourceTag(TagWriter tagWriter, StringBuilder target, StringBuilder indent, CharSequence source)
 	{
 		if (source == null) return;
 		tagWriter.appendOpenTag(target, indent, TAG_VIEW_SOURCE);

@@ -725,4 +725,18 @@ public class TestUtil
 		}
 		return result.toString().trim();
 	}
+
+	public static void dump(String value)
+	{
+		int size = value.length();
+		for (int i = 0; i < size; i++)
+		{
+			int c = value.charAt(i);
+			String s = Integer.toHexString(c);
+			if (s.length() == 1) System.out.print("0");
+			System.out.print(s);
+			System.out.print(" ");
+		}
+		System.out.println("");
+	}
 }

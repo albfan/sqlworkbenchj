@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
 
@@ -155,7 +156,7 @@ public class WbProperties
 			{
 
 				value = value.replace("\n", newlineEscape);
-				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT);
+				value = StringUtil.escapeText(value, CharacterRange.RANGE_7BIT);
 
 				// Newlines will also be encoded, but we want them "visible" with
 				// line continuation in the written file

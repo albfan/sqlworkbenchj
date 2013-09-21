@@ -27,7 +27,6 @@ import java.util.TreeMap;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.NumberStringCache;
-import workbench.util.StrBuffer;
 
 /**
  *
@@ -74,12 +73,35 @@ public class ForeignKeyDefinition
 		this.columnMap.put(myColumn, foreignColumn);
 	}
 
-	public void setUpdateRuleValue(int value) { this.updateRuleValue = value; }
-	public int getUpdateRuleValue() { return this.updateRuleValue; }
-	public void setDeleteRuleValue(int value) { this.deleteRuleValue = value; }
-	public int getDeleteRuleValue() { return this.deleteRuleValue; }
-	public void setDeferrableRuleValue(int value) { this.deferrableRuleValue = value; }
-	public int getDeferrableRuleValue() { return this.deferrableRuleValue; }
+	public void setUpdateRuleValue(int value)
+	{
+		this.updateRuleValue = value;
+	}
+
+	public int getUpdateRuleValue()
+	{
+		return this.updateRuleValue;
+	}
+
+	public void setDeleteRuleValue(int value)
+	{
+		this.deleteRuleValue = value;
+	}
+
+	public int getDeleteRuleValue()
+	{
+		return this.deleteRuleValue;
+	}
+
+	public void setDeferrableRuleValue(int value)
+	{
+		this.deferrableRuleValue = value;
+	}
+
+	public int getDeferrableRuleValue()
+	{
+		return this.deferrableRuleValue;
+	}
 
 	public void setForeignTable(ReportTable tbl)
 	{
@@ -101,12 +123,35 @@ public class ForeignKeyDefinition
 		return ref;
 	}
 
-	public void setUpdateRule(String rule) { this.updateRule = rule; }
-	public String getUpdateRule() { return this.updateRule; }
-	public void setDeleteRule(String rule) { this.deleteRule = rule; }
-	public String getDeleteRule() { return deleteRule; }
-	public void setDeferRule(String rule) { this.deferRule= rule; }
-	public String getDeferRule() { return this.deferRule; }
+	public void setUpdateRule(String rule)
+	{
+		this.updateRule = rule;
+	}
+
+	public String getUpdateRule()
+	{
+		return this.updateRule;
+	}
+
+	public void setDeleteRule(String rule)
+	{
+		this.deleteRule = rule;
+	}
+
+	public String getDeleteRule()
+	{
+		return deleteRule;
+	}
+
+	public void setDeferRule(String rule)
+	{
+		this.deferRule = rule;
+	}
+
+	public String getDeferRule()
+	{
+		return this.deferRule;
+	}
 
 
 	public ReportTable getForeignTable()
@@ -125,10 +170,10 @@ public class ForeignKeyDefinition
 		return this.getFkName();
 	}
 
-	public StrBuffer getXml(StrBuffer indent)
+	public StringBuilder getXml(StringBuilder indent)
 	{
-		StrBuffer result = new StrBuffer(250);
-		StrBuffer myindent = new StrBuffer(indent);
+		StringBuilder result = new StringBuilder(250);
+		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		tagWriter.appendOpenTag(result, indent, TAG_FOREIGN_KEY);
 		result.append('\n');
@@ -140,10 +185,10 @@ public class ForeignKeyDefinition
 		return result;
 	}
 
-	public StrBuffer getInnerXml(StrBuffer indent)
+	public StringBuilder getInnerXml(StringBuilder indent)
 	{
-		StrBuffer result = new StrBuffer(250);
-		StrBuffer colIndent = new StrBuffer(indent);
+		StringBuilder result = new StringBuilder(250);
+		StringBuilder colIndent = new StringBuilder(indent);
 		colIndent.append("  ");
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
 		tagWriter.appendOpenTag(result, indent, "references");

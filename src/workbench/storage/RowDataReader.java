@@ -66,31 +66,44 @@ import workbench.util.StringUtil;
  */
 public class RowDataReader
 {
+	public static final int IS_BLOB = Integer.MAX_VALUE;
+	public static final int IS_CLOB = Integer.MAX_VALUE - 1;
+	public static final int IS_CHARACTER = Integer.MAX_VALUE - 2;
+
 	private List<Closeable> streams = new LinkedList<Closeable>();
 	private DataConverter converter;
 	private boolean ignoreReadErrors;
 	private boolean useStreamsForBlobs;
 	private	boolean useStreamsForClobs;
-	private boolean longVarcharAsClob;
 	private boolean useGetBytesForBlobs;
 	private boolean useGetStringForClobs;
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean adjustArrayDisplay;
-	protected ResultInfo resultInfo;
+	protected final ResultInfo resultInfo;
 
+	private final int[] columnTypes;
+	private final String[] typeNames;
 	RowDataReader(ResultInfo info, WbConnection conn)
 	{
 		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 		converter = getConverterInstance(conn);
 		resultInfo = info;
-		longVarcharAsClob = info.treatLongVarcharAsClob();
 		useGetBytesForBlobs = info.useGetBytesForBlobs();
 		useGetStringForClobs = info.useGetStringForClobs();
 		useGetStringForBit = info.useGetStringForBit();
 		useGetXML = info.useGetXML();
 		adjustArrayDisplay = info.convertArrays();
-	}
+
+		// For performance reasons the column type information is being cached
+		// usually it doesn't really matter, but when exporting large tables ("millions of rows")
+		// it does improve the speed of the export
+		columnTypes = getColumnTypeCache(info, false);
+		typeNames = new String[info.getColumnCount()];
+		for (int c = 0; c < typeNames.length; c++)
+		{
+			typeNames[c] = info.getDbmsTypeName(c);
+		}	}
 
 	/**
 	 * Register a DataConverter with this reader.
@@ -181,11 +194,11 @@ public class RowDataReader
 		Object value;
 		for (int i=0; i < colCount; i++)
 		{
-			int type = resultInfo.getColumnType(i);
+			int type = columnTypes[i];
 
 			if (converter != null)
 			{
-				String dbms = resultInfo.getDbmsTypeName(i);
+				String dbms = typeNames[i]; //resultInfo.getDbmsTypeName(i);
 				if (converter.convertsType(type, dbms))
 				{
 					value = rs.getObject(i + 1);
@@ -231,7 +244,7 @@ public class RowDataReader
 						value = o;
 					}
 				}
-				else if (SqlUtil.isBlobType(type))
+				else if (type == IS_BLOB)
 				{
 					if (useStreamsForBlobs)
 					{
@@ -281,7 +294,7 @@ public class RowDataReader
 				{
 					value = readXML(rs, i+1, useGetXML);
 				}
-				else if (SqlUtil.isClobType(type, longVarcharAsClob))
+				else if (type == IS_CLOB)
 				{
 					if (useGetStringForClobs)
 					{
@@ -464,5 +477,34 @@ public class RowDataReader
 		return null;
 	}
 
+	public static int[] getColumnTypeCache(ResultInfo info, boolean normalizeChar)
+	{
+		// For performance reasons the column type information is being cached
+		// usually it doesn't really matter, but when exporting large tables ("millions of rows")
+		// it does improve the speed of the export
+		int count = info.getColumnCount();
+		int types[] = new int[count];
+		for (int c = 0; c < count; c++)
+		{
+			int type = info.getColumnType(c);
 
+			if (SqlUtil.isBlobType(type))
+			{
+				types[c] = IS_BLOB;
+			}
+			else if (SqlUtil.isClobType(type, info.treatLongVarcharAsClob()))
+			{
+				types[c] = IS_CLOB;
+			}
+			else if (normalizeChar && SqlUtil.isCharacterType(type))
+			{
+				types[c] = IS_CHARACTER;
+			}
+			else
+			{
+				types[c] = type;
+			}
+		}
+		return types;
+	}
 }

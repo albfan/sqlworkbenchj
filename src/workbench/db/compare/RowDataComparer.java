@@ -37,7 +37,6 @@ import workbench.db.exporter.XmlRowDataConverter;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 
-import workbench.util.StrBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -58,7 +57,7 @@ public class RowDataComparer
 	private XmlRowDataConverter xmlConverter;
 	private String sqlDateLiteral;
 	private WbFile baseDir;
-	
+
 	/**
 	 * Compares two database rows.
 	 */
@@ -217,7 +216,7 @@ public class RowDataComparer
 	 */
 	public String getMigration(long rowNumber)
 	{
-		StrBuffer result = null;
+		StringBuilder result = null;
 		if (sqlConverter != null)
 		{
 			if (targetWasNull)
@@ -237,8 +236,8 @@ public class RowDataComparer
 			if (targetWasNull)
 			{
 				xmlConverter.convertModifiedColumnsOnly(false);
-				StrBuffer row = xmlConverter.convertRowData(migrationData, rowNumber);
-				result = new StrBuffer(row.length() + 20);
+				CharSequence row = xmlConverter.convertRowData(migrationData, rowNumber);
+				result = new StringBuilder(row.length() + 20);
 				result.append("<insert>");
 				result.append(row);
 				result.append("</insert>");
@@ -246,8 +245,8 @@ public class RowDataComparer
 			else if (migrationData.isModified())
 			{
 				xmlConverter.convertModifiedColumnsOnly(true);
-				StrBuffer row = xmlConverter.convertRowData(migrationData, rowNumber);
-				result = new StrBuffer(row.length() + 20);
+				StringBuilder row = xmlConverter.convertRowData(migrationData, rowNumber);
+				result = new StringBuilder(row.length() + 20);
 				result.append("<update>");
 				result.append(row);
 				result.append("</update>");

@@ -44,7 +44,6 @@ import workbench.storage.RowDataReaderFactory;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -233,7 +232,6 @@ public abstract class ExportWriter
 			RowData row = reader.read(rs, trimCharData);
 			writeRow(row, rows);
 			reader.closeStreams();
-			row.dispose();
 			rows ++;
 		}
 
@@ -264,10 +262,10 @@ public abstract class ExportWriter
 		throws IOException
 	{
 		converter.applyDataModifier(row, numRows);
-		StrBuffer data = converter.convertRowData(row, numRows);
+		CharSequence data = converter.convertRowData(row, numRows);
 		if (data != null && outputWriter != null)
 		{
-			data.writeTo(this.outputWriter);
+			this.outputWriter.append(data);
 		}
 	}
 
@@ -289,20 +287,20 @@ public abstract class ExportWriter
 		if (!doWriteStart) return;
 
 		writeFormatFile();
-		StrBuffer data = converter.getStart();
+		CharSequence data = converter.getStart();
 		if (data != null && outputWriter != null)
 		{
-			data.writeTo(this.outputWriter);
+			this.outputWriter.append(data);
 		}
 	}
 
 	protected void writeEnd(long totalRows)
 		throws IOException
 	{
-		StrBuffer data = converter.getEnd(totalRows);
+		CharSequence data = converter.getEnd(totalRows);
 		if (data != null && outputWriter != null)
 		{
-			data.writeTo(this.outputWriter);
+			this.outputWriter.append(data);
 		}
 	}
 

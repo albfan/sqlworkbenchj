@@ -24,11 +24,12 @@ package workbench.db.report;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import workbench.db.TableGrant;
 import workbench.db.TableGrantReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.util.StrBuffer;
+
 
 /**
  * Generate XML report information about table grants.
@@ -55,13 +56,13 @@ public class ReportTableGrants
 		this.grants = tableGrants;
 	}
 
-	public void appendXml(StrBuffer result, StrBuffer indent)
+	public void appendXml(StringBuilder result, StringBuilder indent)
 	{
 		if (grants.isEmpty()) return;
 
 		TagWriter tagWriter = new TagWriter();
 
-		StrBuffer indent1 = new StrBuffer(indent);
+		StringBuilder indent1 = new StringBuilder(indent);
 		indent1.append("  ");
 
 		for (TableGrant grant : grants)

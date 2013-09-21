@@ -36,7 +36,6 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -124,19 +123,19 @@ public class MySQLLoadDataWriterTest
 			}
 
 			@Override
-			public StrBuffer convertRowData(RowData row, long rowIndex)
+			public StringBuilder convertRowData(RowData row, long rowIndex)
 			{
-				return new StrBuffer();
+				return new StringBuilder();
 			}
 
 			@Override
-			public StrBuffer getStart()
+			public StringBuilder getStart()
 			{
 				return null;
 			}
 
 			@Override
-			public StrBuffer getEnd(long totalRows)
+			public StringBuilder getEnd(long totalRows)
 			{
 				return null;
 			}

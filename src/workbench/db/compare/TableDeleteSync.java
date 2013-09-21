@@ -54,7 +54,6 @@ import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
 
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -448,11 +447,11 @@ public class TableDeleteSync
 				}
 				else
 				{
-					StrBuffer rowData = xmlConverter.convertRowData(row, deletedRows);
+					StringBuilder rowData = xmlConverter.convertRowData(row, deletedRows);
 					if (rowData != null)
 					{
 						outputWriter.write("<delete>");
-						rowData.writeTo(outputWriter);
+						outputWriter.write(rowData.toString());
 						outputWriter.write("</delete>");
 					}
 				}

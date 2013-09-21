@@ -31,7 +31,6 @@ import workbench.storage.RowData;
 
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
 import workbench.util.WbFile;
@@ -54,7 +53,7 @@ public class JsonRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		String resultName;
 		TableIdentifier updateTable = this.metaData.getUpdateTable();
@@ -68,7 +67,7 @@ public class JsonRowDataConverter
 			resultName = f.getFileName();
 		}
 
-		StrBuffer header = new StrBuffer(20);
+		StringBuilder header = new StringBuilder(20);
 		header.append("{\n  \"");
 		header.append(resultName.toLowerCase());
 		header.append("\":\n  [\n");
@@ -76,17 +75,17 @@ public class JsonRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
-		return new StrBuffer("\n  ]\n}");
+		return new StringBuilder("\n  ]\n}");
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
 
-		StrBuffer result = new StrBuffer(count * 30);
+		StringBuilder result = new StringBuilder(count * 30);
 
 		int currentColIndex = 0;
 
@@ -116,7 +115,7 @@ public class JsonRowDataConverter
 
 			if (SqlUtil.isCharacterType(colType) && !isNull)
 			{
-				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_CONTROL);
+				value = StringUtil.escapeText(value, CharacterRange.RANGE_CONTROL, "");
 			}
 
 			result.append("\"");

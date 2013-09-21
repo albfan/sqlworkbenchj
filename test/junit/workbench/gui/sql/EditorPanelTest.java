@@ -29,16 +29,21 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.gui.editor.InputHandler;
 import workbench.resource.Settings;
+
+import workbench.gui.editor.InputHandler;
+
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -117,7 +122,7 @@ public class EditorPanelTest
 			InputHandler.INSERT_BREAK.actionPerformed(evt);
 
 			content = p.getText();
-			System.out.println(StringUtil.escapeUnicode(content, CharacterRange.RANGE_8BIT));
+			System.out.println(StringUtil.escapeText(content, CharacterRange.RANGE_8BIT));
 			pos = content.indexOf("Line2\n");
 			assertEquals("Wrong internal line ending (Unix) used", 6, pos);
 

@@ -36,7 +36,6 @@ import workbench.storage.RowData;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -129,7 +128,7 @@ public class XlsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		createFormatters();
 		firstRow = 0;
@@ -193,7 +192,7 @@ public class XlsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
 		if (getAppendInfoSheet())
 		{
@@ -281,9 +280,9 @@ public class XlsRowDataConverter
 
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
-		StrBuffer ret = new StrBuffer();
+		StringBuilder ret = new StringBuilder();
 		int count = this.metaData.getColumnCount();
 		int rowNum = (int)rowIndex + firstRow;
 		Row myRow = sheet.createRow(rowNum);

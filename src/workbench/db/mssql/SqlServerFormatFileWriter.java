@@ -26,11 +26,15 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import workbench.log.LogMgr;
+
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
-import workbench.log.LogMgr;
+
 import workbench.storage.ResultInfo;
+
 import workbench.util.CharacterRange;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -44,7 +48,7 @@ import workbench.util.WbFile;
 public class SqlServerFormatFileWriter
 	implements FormatFileWriter
 {
-	
+
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
@@ -73,8 +77,8 @@ public class SqlServerFormatFileWriter
 			}
 			max++;
 
-			String delim = StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
-			String nl = StringUtil.escapeUnicode(exporter.getLineEnding(), CharacterRange.RANGE_CONTROL);
+			String delim = StringUtil.escapeText(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL, "");
+			String nl = StringUtil.escapeText(exporter.getLineEnding(), CharacterRange.RANGE_CONTROL, "");
 
 			for (int i = 0; i < count; i++)
 			{

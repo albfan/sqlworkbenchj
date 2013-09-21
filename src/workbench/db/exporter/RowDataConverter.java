@@ -49,8 +49,10 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.RowDataReader;
 
 import workbench.util.*;
+
 
 /**
  * Abstract class for converting data into various output formats.
@@ -104,6 +106,9 @@ public abstract class RowDataConverter
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
 
+	protected int[] columnTypes;
+	protected String[] typeNames;
+
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
 	 */
@@ -125,7 +130,7 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
-	public String getNullDisplay()
+	public final String getNullDisplay()
 	{
 		return nullString == null ? "" : nullString;
 	}
@@ -267,6 +272,16 @@ public abstract class RowDataConverter
 		if (this.includeColumnComments)
 		{
 			retrieveColumnComments();
+		}
+
+		// For performance reasons the column type information is being cached
+		// usually it doesn't really matter, but when exporting large tables ("millions of rows")
+		// it does improve the speed of the export
+		columnTypes = RowDataReader.getColumnTypeCache(metaData, true);
+		typeNames = new String[metaData.getColumnCount()];
+		for (int c=0; c < typeNames.length; c++)
+		{
+			typeNames[c] = metaData.getDbmsTypeName(c);
 		}
 	}
 
@@ -635,19 +650,19 @@ public abstract class RowDataConverter
 	 *	Returns the data for one specific row as a String in the
 	 *  correct format
 	 */
-	public abstract StrBuffer convertRowData(RowData row, long rowIndex);
+	public abstract StringBuilder convertRowData(RowData row, long rowIndex);
 
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
 	 *  (might be null)
 	 */
-	public abstract StrBuffer getStart();
+	public abstract StringBuilder getStart();
 
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
 	 *  (might be an empty string)
 	 */
-	public abstract StrBuffer getEnd(long totalRows);
+	public abstract StringBuilder getEnd(long totalRows);
 
 	public boolean needsUpdateTable()
 	{
@@ -850,7 +865,7 @@ public abstract class RowDataConverter
 	}
 
 
-	protected void writeEscapedXML(StrBuffer out, String s, boolean keepCR)
+	protected void writeEscapedXML(StringBuilder out, String s, boolean keepCR)
 	{
 		if (s == null) return;
 
@@ -887,7 +902,7 @@ public abstract class RowDataConverter
 	protected CharSequence escapeXML(String s, boolean keepCR)
 	{
 		if (s == null) return "";
-		StrBuffer out = new StrBuffer(s.length() + 5);
+		StringBuilder out = new StringBuilder(s.length() + 5);
 		writeEscapedXML(out, s, keepCR);
 		return out;
 	}

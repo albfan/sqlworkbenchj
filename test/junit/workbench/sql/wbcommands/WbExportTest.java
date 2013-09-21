@@ -994,7 +994,7 @@ public class WbExportTest
 			assertEquals("Export file not created", true, exportFile.exists());
 
 			File dataFile = new File(this.basedir, "clob_export_r1_c2.data");
-			assertEquals("First blob file not created", true, dataFile.exists());
+			assertEquals("First clob file not created", true, dataFile.exists());
 
 			Reader in = EncodingUtil.createReader(dataFile, "UTF8");
 			String contents = FileUtil.readCharacters(in);

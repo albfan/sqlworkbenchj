@@ -59,9 +59,12 @@ public class StringUtil
 	private static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	private static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
-	public static StringBuilder emptyBuffer() { return new StringBuilder(0); }
-
 	private static final char[] hexDigit = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
+	public static StringBuilder emptyBuilder()
+	{
+		return new StringBuilder(0);
+	}
 
 	public static SimpleDateFormat getIsoTimestampFormatter()
 	{
@@ -389,7 +392,7 @@ public class StringUtil
 		if (input == null) return null;
 		if (input.equals("..")) return "__";
 		if (input.equals(".")) return "_";
-		return input.replaceAll("[\t:\\\\/\\?\\*\\|<>\"'%\u00A7\\^&\u0000]", "").toLowerCase();
+		return input.replaceAll("[\t:\\\\/\\?\\*\\|<>\"'%\u00A7\\^&\u0000]", EMPTY_STRING).toLowerCase();
 	}
 
 	/**
@@ -483,7 +486,8 @@ public class StringUtil
 	}
 
 	/**
-	 * Find the longest line in the give string and return its length.
+	 * Find the longest line in the given string and return its length.
+	 *
 	 * Up to maxLines lines are evaluated.
 	 *
 	 * @param text
@@ -492,7 +496,7 @@ public class StringUtil
 	 */
 	public static String getLongestLine(String text, int maxLines)
 	{
-		if (isEmptyString(text)) return "";
+		if (isEmptyString(text)) return EMPTY_STRING;
 		Matcher m = PATTERN_CRLF.matcher(text);
 
 		int lastpos = 0;
@@ -894,7 +898,7 @@ public class StringUtil
 
 	public static String listToString(Collection aList, String aDelimiter, boolean quoteEntries, char quote)
 	{
-		if (aList == null || aList.isEmpty()) return "";
+		if (aList == null || aList.isEmpty()) return EMPTY_STRING;
 		int numElements = 0;
 		StringBuilder result = new StringBuilder(aList.size() * 50);
 		for (Object o : aList)
@@ -965,7 +969,7 @@ public class StringUtil
 	public static String getMaxSubstring(String s, int maxLen, String add)
 	{
 		if (maxLen < 1) return s;
-		if (s == null) return "";
+		if (s == null) return EMPTY_STRING;
 		if (s.length() < maxLen) return s;
 		if (add == null)
 		{
@@ -993,7 +997,7 @@ public class StringUtil
 		if (str == null) return null;
 		if (str.length() == 0)
 		{
-			return "";
+			return EMPTY_STRING;
 		}
 		int len = str.length();
 		StringBuilder buf = new StringBuilder(len + 5);
@@ -1157,19 +1161,19 @@ public class StringUtil
 	{
 		if (theString == null) return null;
 
-		char aChar;
+		char ch;
 		int len = theString.length();
 		if (len == 0) return theString;
 		StringBuilder outBuffer = new StringBuilder(len);
 
 		for (int x=0; x < len ; )
 		{
-			aChar = theString.charAt(x++);
-			if (aChar == '\\' && x < len)
+			ch = theString.charAt(x++);
+			if (ch == '\\' && x < len)
 			{
-				aChar = theString.charAt(x++);
+				ch = theString.charAt(x++);
 
-				if (aChar == 'u')
+				if (ch == 'u')
 				{
 					// Read the xxxx
 					int value = -1;
@@ -1182,20 +1186,20 @@ public class StringUtil
 							break;
 						}
 
-						aChar = theString.charAt(x + i);
-						switch (aChar)
+						ch = theString.charAt(x + i);
+						switch (ch)
 						{
 							case '0': case '1': case '2': case '3': case '4':
 							case '5': case '6': case '7': case '8': case '9':
-								value = (value << 4) + aChar - '0';
+								value = (value << 4) + ch - '0';
 								break;
 							case 'a': case 'b': case 'c':
 							case 'd': case 'e': case 'f':
-								value = (value << 4) + 10 + aChar - 'a';
+								value = (value << 4) + 10 + ch - 'a';
 								break;
 							case 'A': case 'B': case 'C':
 							case 'D': case 'E': case 'F':
-								value = (value << 4) + 10 + aChar - 'A';
+								value = (value << 4) + 10 + ch - 'A';
 								break;
 							default:
 								// Invalid ecape sequence
@@ -1211,13 +1215,12 @@ public class StringUtil
 					}
 					else
 					{
-						// Invalid encoded unicode character
-						// do not convert the stuff, but copy the
-						// characters into the result buffer
+						// When we wind up here, this means an invalid encoded unicode character was present.
+						// do not convert the stuff, but copy the characters into the result buffer
 						outBuffer.append("\\u");
 						if (i == 0 && x < len)
 						{
-							outBuffer.append(aChar);
+							outBuffer.append(ch);
 						}
 						else
 						{
@@ -1235,41 +1238,26 @@ public class StringUtil
 					// The character after the backslash was not a 'u'
 					// so we are not dealing with a uXXXX value
 					// This applies popular "encodings" for non-printable characters
-					if (aChar == '\\') aChar = '\\';
-					else if (aChar == 't') aChar = '\t';
-					else if (aChar == 'r') aChar = '\r';
-					else if (aChar == 'n') aChar = '\n';
-					else if (aChar == 'f') aChar = '\f';
+					if (ch == '\\') ch = '\\';
+					else if (ch == 't') ch = '\t';
+					else if (ch == 'r') ch = '\r';
+					else if (ch == 'n') ch = '\n';
+					else if (ch == 'f') ch = '\f';
 					else outBuffer.append('\\');
-					outBuffer.append(aChar);
+					outBuffer.append(ch);
 				}
 			}
 			else
 			{
-				outBuffer.append(aChar);
+				outBuffer.append(ch);
 			}
-
 		}
 		return outBuffer.toString();
 	}
 
-	public static void dump(String value)
+	public static String escapeText(String value, CharacterRange range)
 	{
-		int size = value.length();
-		for (int i = 0; i < size; i++)
-		{
-			int c = value.charAt(i);
-			String s = Integer.toHexString(c);
-			if (s.length() == 1) System.out.print("0");
-			System.out.print(s);
-			System.out.print(" ");
-		}
-		System.out.println("");
-	}
-
-	public static String escapeUnicode(String value, CharacterRange range)
-	{
-		return escapeUnicode(value, range, null);
+		return escapeText(value, range, EMPTY_STRING);
 	}
 
 	/**
@@ -1285,18 +1273,13 @@ public class StringUtil
 	 *        returns true, the character will be encoded.
 	 * @param additionalCharsToEncode additional characters not covered by the range may be null
 	 */
-	public static String escapeUnicode(String value, CharacterRange range, String additionalCharsToEncode)
-	{
-		return escapeText(value, 'u', range, additionalCharsToEncode);
-	}
-
-	public static String escapeText(String value, char hexChar, CharacterRange range, String additionalCharsToEncode)
+	public static String escapeText(String value, CharacterRange range, String additionalCharsToEncode)
 	{
 		if (value == null) return null;
 
 		int len = value.length();
 		if (len == 0) return value;
-		
+
 		StringBuilder outBuffer = null;
 
 		for (int x = 0; x < len; x++)
@@ -1306,32 +1289,34 @@ public class StringUtil
 			switch (aChar)
 			{
 				case '\\':
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
+					// creating the copy of the input value only on demand is much faster
+					// if nothing needs to be replaced. If values have to be escaped,
+					// doing a lazy creation of the buffer isn't slower, so this
+					// increases the performance of an export if only few rows actually need escaping
+					if (outBuffer == null) outBuffer = createStringBuilder(value, x);
 					outBuffer.append("\\\\");
 					break;
 				case '\t':
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
+					if (outBuffer == null) outBuffer = createStringBuilder(value, x);
 					outBuffer.append("\\t");
 					break;
 				case '\n':
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
+					if (outBuffer == null) outBuffer = createStringBuilder(value, x);
 					outBuffer.append("\\n");
 					break;
 				case '\r':
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
+					if (outBuffer == null) outBuffer = createStringBuilder(value, x);
 					outBuffer.append("\\r");
 					break;
 				case '\f':
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
+					if (outBuffer == null) outBuffer = createStringBuilder(value, x);
 					outBuffer.append("\\f");
 					break;
 				default:
-					if ((range != null && range.isOutsideRange(aChar)) ||
-						(additionalCharsToEncode != null && additionalCharsToEncode.indexOf(aChar) > -1))
+					if (range.isOutsideRange(aChar) || additionalCharsToEncode.indexOf(aChar) > -1)
 					{
-					if (outBuffer == null) outBuffer = createLazyBuilder(value, x);
-						outBuffer.append('\\');
-						outBuffer.append(hexChar);
+						if (outBuffer == null) outBuffer = createStringBuilder(value, x);
+						outBuffer.append("\\u");
 						appendUnicode(outBuffer, aChar);
 					}
 					else if (outBuffer != null)
@@ -1344,10 +1329,10 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
-	private static StringBuilder createLazyBuilder(String value, int currentPos)
+	private static StringBuilder createStringBuilder(String value, int currentPos)
 	{
 		int len = value.length();
-		StringBuilder outBuffer = new StringBuilder((int)(len*1.5));
+		StringBuilder outBuffer = new StringBuilder((int)(len*1.2));
 		outBuffer.append(value.substring(0, currentPos));
 		return outBuffer;
 	}
@@ -1614,17 +1599,6 @@ public class StringUtil
 		}
 	}
 
-	public static int stringLength(String ... values)
-	{
-		if (values == null) return 0;
-		int len = 0;
-		for (String str : values)
-		{
-			len += (str == null ? 0	: str.length());
-		}
-		return len;
-	}
-
 	/**
 	 * Convert a string that is expected to have standard "filename wildcards" to
 	 * a matching regular expression.
@@ -1668,4 +1642,17 @@ public class StringUtil
 		return s.toString();
 	}
 
+	public static void removeFromEnd(StringBuilder data, int numChars)
+	{
+		if (data == null) return;
+		
+		if (numChars > data.length())
+		{
+			data.setLength(0);
+		}
+		else
+		{
+			data.delete(data.length() - numChars, data.length());
+		}
+	}
 }

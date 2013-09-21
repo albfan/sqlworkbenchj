@@ -23,13 +23,17 @@
 package workbench.db.diff;
 
 import java.util.List;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
+
 import workbench.util.CollectionUtil;
-import workbench.util.StrBuffer;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -89,13 +93,13 @@ public class TriggerListDiffTest
 
 		TriggerListDiff diff = new TriggerListDiff(reference, toCompare);
 		assertTrue(diff.hasChanges());
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		result.append("<triggers>\n"); // make the result valid XML
 
-		StrBuffer indent = new StrBuffer("  ");
+		StringBuilder indent = new StringBuilder("  ");
 		diff.writeXml(indent, result);
 		result.append("</triggers>\n"); // make the result valid XML
-		
+
 //		System.out.println(result.toString());
 		String xml = result.toString();
 		String count = TestUtil.getXPathValue(xml, "count(/triggers/drop-trigger[@name='trg_three'])");

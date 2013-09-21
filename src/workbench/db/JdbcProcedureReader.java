@@ -66,7 +66,7 @@ public class JdbcProcedureReader
 	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
-		return StringUtil.emptyBuffer();
+		return StringUtil.emptyBuilder();
 	}
 
 

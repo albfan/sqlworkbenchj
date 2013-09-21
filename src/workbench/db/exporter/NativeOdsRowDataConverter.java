@@ -29,7 +29,6 @@ import workbench.log.LogMgr;
 import workbench.storage.RowData;
 
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbNumberFormatter;
 
@@ -58,7 +57,7 @@ public class NativeOdsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
 		if (append && getOutputFile().exists())
 		{
@@ -150,7 +149,7 @@ public class NativeOdsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
 		try
 		{
@@ -218,7 +217,7 @@ public class NativeOdsRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		int colCount = row.getColumnCount();
 

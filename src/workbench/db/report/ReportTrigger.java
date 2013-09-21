@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.db.TriggerDefinition;
-import workbench.util.StrBuffer;
+
 import workbench.util.StringUtil;
 
 /**
@@ -44,8 +45,8 @@ public class ReportTrigger
 
 	private TriggerDefinition trigger;
 	private TagWriter tagWriter = new TagWriter();
-	private StrBuffer indent = new StrBuffer("  ");
-	private StrBuffer indent2 = new StrBuffer("    ");
+	private StringBuilder indent = new StringBuilder("  ");
+	private StringBuilder indent2 = new StringBuilder("    ");
 
 	private final Pattern PG_SOURCE = Pattern.compile("^---< Source for \\w+ >---$", Pattern.CASE_INSENSITIVE + Pattern.MULTILINE);
 
@@ -57,8 +58,8 @@ public class ReportTrigger
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer xml = getXml();
-		xml.writeTo(out);
+		StringBuilder xml = getXml();
+		out.write(xml.toString());
 	}
 
 	public TriggerDefinition getTrigger()
@@ -66,10 +67,10 @@ public class ReportTrigger
 		return trigger;
 	}
 
-	public void setIndent(StrBuffer ind)
+	public void setIndent(StringBuilder ind)
 	{
-		this.indent = ind;
-		this.indent2 = new StrBuffer(indent);
+		this.indent = ind == null ? new StringBuilder(0) : ind;
+		this.indent2 = new StringBuilder(indent);
 		this.indent2.append("  ");
 	}
 
@@ -88,7 +89,7 @@ public class ReportTrigger
 		// When retrieving the source of a Postgres trigger, the
 		// source code for the underlying function is also appended.
 		// See TriggerSourceStatements.xml
-		
+
 		// For a schema report or diff this is not needed as the function will
 		// also be part of the output
 		Matcher m = PG_SOURCE.matcher(src);
@@ -98,10 +99,10 @@ public class ReportTrigger
 		}
 		return src;
 	}
-	
-	public StrBuffer getXml()
+
+	public StringBuilder getXml()
 	{
-		StrBuffer result = new StrBuffer(500);
+		StringBuilder result = new StringBuilder(500);
 		tagWriter.appendOpenTag(result, indent, TAG_TRIGGER_DEF);
 		result.append('\n');
 		tagWriter.appendTag(result, indent2, TAG_TRIGGER_NAME, trigger.getObjectName());

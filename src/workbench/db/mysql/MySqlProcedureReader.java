@@ -129,7 +129,7 @@ public class MySqlProcedureReader
 		catch (Exception e)
 		{
 			LogMgr.logError("MySqlProcedureReader.getProcedureHeader()", "Error retrieving procedure header", e);
-			source = StringUtil.emptyBuffer();
+			source = StringUtil.emptyBuilder();
 		}
 		finally
 		{

@@ -40,7 +40,6 @@ import workbench.db.report.TagWriter;
 import workbench.storage.RowData;
 
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -82,7 +81,7 @@ public class XmlRowDataConverter
 	private String closeColTag = "</" + coltag + ">";
 	private String closeRowTag = "</" + rowtag + ">";
 	private String tableToUse;
-	private StrBuffer dbInfo;
+	private StringBuilder dbInfo;
 	private boolean writeClobFiles;
 	private boolean addColName;
 	private String xmlVersion = Settings.getInstance().getDefaultXmlVersion();
@@ -147,7 +146,7 @@ public class XmlRowDataConverter
 		// and before the actual export is started.
 		if (con != null)
 		{
-			StrBuffer indent = new StrBuffer("    ");
+			StringBuilder indent = new StringBuilder("    ");
 			this.dbInfo = con.getDatabaseInfoAsXml(indent);
 		}
 	}
@@ -180,9 +179,9 @@ public class XmlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getStart()
+	public StringBuilder getStart()
 	{
-		StrBuffer xml = new StrBuffer(250);
+		StringBuilder xml = new StringBuilder(250);
 		String enc = this.getEncoding();
 		xml.append("<?xml version=\"" + xmlVersion + "\"");
 		if (enc != null) xml.append(" encoding=\"" + enc + "\"");
@@ -199,9 +198,9 @@ public class XmlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer getEnd(long totalRows)
+	public StringBuilder getEnd(long totalRows)
 	{
-		StrBuffer xml = new StrBuffer(100);
+		StringBuilder xml = new StringBuilder(100);
 		if (this.verboseFormat) xml.append("  ");
 		xml.append("</data>");
 		xml.append(this.lineEnding);
@@ -221,12 +220,12 @@ public class XmlRowDataConverter
 	}
 
 	@Override
-	public StrBuffer convertRowData(RowData row, long rowIndex)
+	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
 		TagWriter tagWriter = new TagWriter();
-		StrBuffer indent = new StrBuffer("    ");
+		StringBuilder indent = new StringBuilder("    ");
 		int colCount = this.metaData.getColumnCount();
-		StrBuffer xml = new StrBuffer(colCount * 100);
+		StringBuilder xml = new StringBuilder(colCount * 100);
 
 		// No row tag for diff
 		if (!useDiffFormat)
@@ -369,15 +368,15 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
-	private StrBuffer getMetaDataAsXml(String anIndent)
+	private StringBuilder getMetaDataAsXml(String anIndent)
 	{
 		TagWriter tagWriter = new TagWriter();
-		StrBuffer indent = new StrBuffer(anIndent);
-		StrBuffer indent2 = new StrBuffer(anIndent);
+		StringBuilder indent = new StringBuilder(anIndent);
+		StringBuilder indent2 = new StringBuilder(anIndent);
 		indent2.append("  ");
 
 		int colCount = this.metaData.getColumnCount();
-		StrBuffer result = new StrBuffer(colCount * 50);
+		StringBuilder result = new StringBuilder(colCount * 50);
 		tagWriter.appendOpenTag(result, indent, "meta-data");
 		result.append(this.lineEnding);
 
@@ -623,7 +622,7 @@ public class XmlRowDataConverter
 		return displayName;
 	}
 
-	private void appendOpenTag(StrBuffer target, String indent, String tag)
+	private void appendOpenTag(StringBuilder target, String indent, String tag)
 	{
 		target.append(indent);
 		target.append('<');
@@ -631,14 +630,14 @@ public class XmlRowDataConverter
 		target.append('>');
 	}
 
-	private void appendCloseTag(StrBuffer target, String tag)
+	private void appendCloseTag(StringBuilder target, String tag)
 	{
 		target.append("</");
 		target.append(tag);
 		target.append('>');
 	}
 
-	private void appendTag(StrBuffer target, String indent, String tag, String value)
+	private void appendTag(StringBuilder target, String indent, String tag, String value)
 	{
 		appendOpenTag(target, indent, tag);
 		if (TagWriter.needsCData(value))

@@ -89,7 +89,7 @@ public class FirebirdProcedureReader
 		}
 		catch (Exception e)
 		{
-			source = StringUtil.emptyBuffer();
+			source = StringUtil.emptyBuilder();
 		}
 		return source;
 	}

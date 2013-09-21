@@ -1666,8 +1666,4 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "procedurelist.only.accessible", true);
 	}
 
-	public boolean supportsNVarcharLiterals()
-	{
-		return Settings.getInstance().getBoolProperty(prefix + "sql.literals.nvarchar", true);
-	}
 }
