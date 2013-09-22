@@ -78,7 +78,7 @@ public class ReportProcedure
 		throws IOException
 	{
 		StringBuilder xml = getXml();
-		out.write(xml.toString());
+		out.append(xml);
 	}
 
 	public ProcedureDefinition getProcedure()

@@ -64,7 +64,7 @@ public class ReportSequence
 		throws IOException
 	{
 		StringBuilder line = this.getXml();
-		out.write(line.toString());
+		out.append(line);
 	}
 
 	public void setSchemaNameToUse(String schema)
