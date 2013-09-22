@@ -185,9 +185,19 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", true);
 	}
 
+	public boolean useSetStringForClobs()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "clob.use.setstring", false);
+	}
+
 	public boolean useGetBytesForBlobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "blob.use.getbytes", false);
+	}
+
+	public boolean useSetBytesForBlobs()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "blob.use.setbytes", false);
 	}
 
 	public boolean longVarcharIsClob()

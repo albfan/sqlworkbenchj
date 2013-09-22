@@ -37,6 +37,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
@@ -661,7 +662,7 @@ public class SchemaDiff
 				tid.adjustCase(targetDb);
 			}
 
-			DiffEntry entry = null;
+			DiffEntry entry;
 			if (targetDb.getMetadata().objectExists(tid, rid.getType()))
 			{
 				tid.setType(rid.getType());
@@ -734,7 +735,7 @@ public class SchemaDiff
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadSeqInfo", refSeq.getSequenceName()), -1, -1);
 			}
 
-			SequenceDiffEntry entry = null;
+			SequenceDiffEntry entry;
 			if (targetReader != null)
 			{
 				SequenceDefinition def = targetReader.getSequenceDefinition(null, this.targetSchema, refSeq.getSequenceName());
@@ -793,8 +794,8 @@ public class SchemaDiff
 				this.objectsToCompare = null;
 				break;
 			}
-
 			if (this.monitor != null)
+
 			{
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadProcInfo", refProc.getProcedureName()), -1, -1);
 			}
@@ -802,8 +803,8 @@ public class SchemaDiff
 			if (refProc.isOraclePackage())
 			{
 				// Handle packages differently than procedures to avoid
-				// comparing them once for each procedure or function
-				PackageDiffEntry entry = null;
+				// comparing them multiple times for each procedure or function
+				PackageDiffEntry entry;
 				ReportPackage pkg = new ReportPackage(refProc);
 				if (!refPackages.contains(pkg))
 				{
@@ -828,7 +829,7 @@ public class SchemaDiff
 			}
 			else
 			{
-				ProcDiffEntry entry = null;
+				ProcDiffEntry entry;
 				ProcedureDefinition tp = new ProcedureDefinition(
 					getTargetCatalog(targetSchema),
 					getTargetSchema(targetSchema), refProc.getProcedureName(),refProc.getResultType());
@@ -1285,8 +1286,10 @@ public class SchemaDiff
 
 		TagWriter.writeWorkbenchVersion(out, indent);
 
+		ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
+
 		writeTag(out, indent, TAG_REF_CONN, true);
-		StringBuilder info = this.referenceDb.getDatabaseInfoAsXml(indent2);
+		StringBuilder info = builder.getDatabaseInfoAsXml(this.referenceDb, indent2);
 		out.write(info.toString());
 		writeTag(out, indent, TAG_REF_CONN, false);
 		out.write("\n");
@@ -1294,7 +1297,7 @@ public class SchemaDiff
 		out.write("  <!-- defintions in this file, then its structure will be    -->\n");
 		out.write("  <!-- the same as the reference connection -->\n");
 		writeTag(out, indent, TAG_TARGET_CONN, true);
-		info = this.targetDb.getDatabaseInfoAsXml(indent2);
+		info = builder.getDatabaseInfoAsXml(this.targetDb, indent2);
 		out.write(info.toString());
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");

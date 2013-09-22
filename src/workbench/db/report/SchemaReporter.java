@@ -39,6 +39,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectComparator;
@@ -354,7 +355,8 @@ public class SchemaReporter
 		{
 			this.tagWriter.appendTag(info, indent, "report-title", this.reportTitle);
 		}
-		info.append(this.dbConn.getDatabaseInfoAsXml(indent));
+		ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
+		info.append(builder.getDatabaseInfoAsXml(dbConn, indent));
 		out.append(info);
 	}
 

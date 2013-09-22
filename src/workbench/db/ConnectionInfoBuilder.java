@@ -22,8 +22,13 @@
  */
 package workbench.db;
 
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.db.report.TagWriter;
+
 import workbench.util.StringUtil;
 
 /**
@@ -72,10 +77,11 @@ public class ConnectionInfoBuilder
 			boolean busy = conn.isBusy();
 			DbMetadata wbmeta = conn.getMetadata();
 
-			String username = null;
-			String isolationlevel = null;
-			String productVersion = null;
-			String driverName = null;
+			String username;
+			String isolationlevel;
+			String productVersion;
+			String driverName;
+			
 			if (busy)
 			{
 				username = conn.getDisplayUser();
@@ -133,4 +139,73 @@ public class ConnectionInfoBuilder
 		if (value == null) return "";
 		return value;
 	}
+
+	/**
+	 *	Returns information about the DBMS and the JDBC driver
+	 *	in the XML format used for the XML export
+	 */
+	public StringBuilder getDatabaseInfoAsXml(WbConnection conn, StringBuilder indent)
+	{
+		StringBuilder dbInfo = new StringBuilder(200);
+		DatabaseMetaData db;
+
+		try
+		{
+			db = conn.getSqlConnection().getMetaData();
+		}
+		catch (Exception e)
+		{
+			return StringUtil.emptyBuilder();
+		}
+
+		TagWriter tagWriter = new TagWriter();
+		String value;
+
+
+		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());
+
+		try { value = db.getDriverName(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver", cleanValue(value));
+
+		try { value = db.getDriverVersion(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", cleanValue(value));
+
+		tagWriter.appendTag(dbInfo, indent, "connection", conn.getDisplayString());
+		tagWriter.appendTag(dbInfo, indent, "schema", conn.getCurrentSchema());
+		tagWriter.appendTag(dbInfo, indent, "catalog", conn.getMetadata().getCurrentCatalog());
+
+		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));
+
+		try { value = db.getDatabaseProductVersion(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "database-product-version", cleanValue(value));
+
+		return dbInfo;
+	}
+
+	/**
+	 *	Some DBMS have strange characters when reporting their name
+	 *  This method ensures that an XML "compatible" value is returned in
+	 *  getDatabaseInfoAsXml
+	 */
+	private String cleanValue(String value)
+	{
+		if (value == null) return null;
+		int len = value.length();
+		StringBuilder result = new StringBuilder(len);
+		for (int i=0; i < len; i++)
+		{
+			char c = value.charAt(i);
+			if ( (c > 32 && c != 127) || c == 9 || c == 10 || c == 13)
+			{
+				result.append(c);
+			}
+			else
+			{
+				result.append(' ');
+			}
+		}
+		return result.toString();
+	}
+
 }

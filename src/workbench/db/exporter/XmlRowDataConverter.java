@@ -30,6 +30,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionInfoBuilder;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -147,7 +148,8 @@ public class XmlRowDataConverter
 		if (con != null)
 		{
 			StringBuilder indent = new StringBuilder("    ");
-			this.dbInfo = con.getDatabaseInfoAsXml(indent);
+			ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
+			this.dbInfo = builder.getDatabaseInfoAsXml(con, indent);
 		}
 	}
 
@@ -401,10 +403,6 @@ public class XmlRowDataConverter
 		if (this.dbInfo != null)
 		{
 			result.append(this.dbInfo);
-		}
-		else if (this.originalConnection != null)
-		{
-			result.append(this.originalConnection.getDatabaseInfoAsXml(indent2));
 		}
 
 		//result.append(this.lineEnding);

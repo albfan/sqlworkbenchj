@@ -110,10 +110,13 @@ public class DmlStatement
 		DbSettings dbs = aConnection.getDbSettings();
 		boolean useSetNull = dbs.useSetNull();
 		boolean useXmlApi = dbs.useXmlAPI();
+		boolean useClobSetString = dbs.useSetStringForClobs();
+		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
+		
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
-			
+
 			for (int i=0; i < this.values.size(); i++)
 			{
 				ColumnData data = this.values.get(i);
@@ -133,10 +136,17 @@ public class DmlStatement
 				}
 				else if (SqlUtil.isClobType(type) && value instanceof String)
 				{
-					String s = (String)value;
-					Reader in = new StringReader(s);
-					stmt.setCharacterStream(i + 1, in, s.length());
-					streamsToClose.add(in);
+					if (useClobSetString)
+					{
+						stmt.setString(i+1, (String)value);
+					}
+					else
+					{
+						String s = (String)value;
+						Reader in = new StringReader(s);
+						stmt.setCharacterStream(i + 1, in, s.length());
+						streamsToClose.add(in);
+					}
 				}
 				else if (useXmlApi && SqlUtil.isXMLType(type) && !dbs.isDmlExpressionDefined(dbmsType) && (value instanceof String))
 				{
@@ -151,7 +161,7 @@ public class DmlStatement
 					try
 					{
 						InputStream in = new FileInputStream(f);
-						if (dbs.useGetBytesForBlobs())
+						if (useBlobSetBytes)
 						{
 							byte[] array = FileUtil.readBytes(in);
 							stmt.setBytes(i + 1, array);
