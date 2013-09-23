@@ -68,8 +68,7 @@ public class PostgresIndexReader
 	 * Return the SQL for all indexes defined in indexDefinition.
 	 *
 	 * @param table the table for which to retrieve the indexes
-	 * @param indexDefinition the indexes to retrieve
-	 * @param tableNameToUse an optional alternative tablename to use
+	 * @param indexList the indexes to retrieve
 	 * @return
 	 */
 	@Override
@@ -182,8 +181,11 @@ public class PostgresIndexReader
 	 * The returned String has to be structured so that it can be appended
 	 * after the DBMS specific basic CREATE INDEX statement.
 	 *
+	 * @param table   the table for which ot retrieve the index options
+	 * @param index   the table's index for which to retrieve the options
+	 *
 	 * @return null if not options are applicable
-	 *         a SQL "fragment" to be appended at the end of the create index statement if an option is available.
+	 *         a SQL fragment to be appended at the end of the create index statement if an option is available.
 	 */
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)

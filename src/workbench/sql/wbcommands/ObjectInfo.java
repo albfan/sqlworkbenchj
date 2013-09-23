@@ -263,6 +263,7 @@ public class ObjectInfo
 		else if (dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
+			connection.getObjectCache().addTable(def);
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
 		}
