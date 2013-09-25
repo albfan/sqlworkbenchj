@@ -90,6 +90,16 @@ public class DelimiterDefinition
 	{
 		if (StringUtil.isEmptyString(arg)) return null;
 
+		arg = arg.trim();
+		if ("ORA".equalsIgnoreCase(arg) || "ORACLE".equalsIgnoreCase(arg) || "SQLPLUS".equalsIgnoreCase(arg))
+		{
+			return DEFAULT_ORA_DELIMITER;
+		}
+		else if ("MSSQL".equalsIgnoreCase(arg))
+		{
+			return DEFAULT_MS_DELIMITER;
+		}
+
 		String delim = null;
 		final boolean single;
 		int pos = arg.indexOf(':');
@@ -103,14 +113,6 @@ public class DelimiterDefinition
 			String type = arg.substring(pos + 1);
 			single = "nl".equalsIgnoreCase(type);
 			delim = arg.substring(0, pos);
-		}
-		else if ("ORA".equalsIgnoreCase(delim) || "ORACLE".equalsIgnoreCase(delim) || "SQLPLUS".equalsIgnoreCase(delim))
-		{
-			return DEFAULT_ORA_DELIMITER;
-		}
-		else if ("MSSQL".equalsIgnoreCase(delim))
-		{
-			return DEFAULT_MS_DELIMITER;
 		}
 		else
 		{

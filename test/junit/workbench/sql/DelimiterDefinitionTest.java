@@ -118,6 +118,15 @@ public class DelimiterDefinitionTest
 			assertEquals(true, d.isSingleLine());
 			assertEquals("/", d.getDelimiter());
 
+			d = DelimiterDefinition.parseCmdLineArgument("oracle");
+			assertEquals(false, d.isEmpty());
+			assertEquals(true, d.isSingleLine());
+			assertEquals("/", d.getDelimiter());
+
+			d = DelimiterDefinition.parseCmdLineArgument("mssql");
+			assertEquals(false, d.isEmpty());
+			assertEquals(true, d.isSingleLine());
+			assertEquals("GO", d.getDelimiter());
 		}
 		catch (Exception e)
 		{
