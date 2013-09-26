@@ -157,7 +157,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using: " + sql);
+			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		PreparedStatement pstmt = null;
@@ -190,7 +190,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using: " + sql);
+			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		PreparedStatement pstmt = null;
