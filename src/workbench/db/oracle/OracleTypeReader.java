@@ -30,6 +30,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
@@ -37,9 +40,8 @@ import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -324,7 +326,7 @@ public class OracleTypeReader
 			}
 			// the first closing bracket with a semicolon marks the end of the type declaration
 			// so we need to insert an alternate delimiter there.
-			int pos = source.indexOf("CREATE OR REPLACE TYPE BODY");
+			int pos = source == null ? -1 : source.indexOf("CREATE OR REPLACE TYPE BODY");
 			if (pos > 1)
 			{
 				StringBuilder fullSource = new StringBuilder(source);
@@ -332,12 +334,10 @@ public class OracleTypeReader
 				fullSource.append("\n/\n");
 				source = fullSource.toString();
 			}
-			else
+
+			if (!StringUtil.endsWith(source, ';'))
 			{
-				if (!source.endsWith(";"))
-				{
-					source += ";\n";
-				}
+				source += ";\n";
 			}
 		}
 		catch (SQLException e)

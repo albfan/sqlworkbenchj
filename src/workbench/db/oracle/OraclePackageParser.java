@@ -25,9 +25,14 @@ package workbench.db.oracle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ProcedureDefinition;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -39,7 +44,7 @@ public class OraclePackageParser
 	private String packageDeclaration;
 	private String packageBody;
 	private String packageName;
-	
+
 	public OraclePackageParser(String sql)
 	{
 		try
@@ -48,15 +53,15 @@ public class OraclePackageParser
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("OraclePackageParser.<init>", "Could not parse SQL", e);
 		}
 	}
-	
+
 	public String getPackageDeclaration()
 	{
 		return this.packageDeclaration;
 	}
-	
+
 	public String getPackageBody()
 	{
 		return this.packageBody;
@@ -66,23 +71,23 @@ public class OraclePackageParser
 	{
 		return this.packageName;
 	}
-	
+
 	private void parse(String sql)
 		throws IOException
 	{
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
-		
+
 		int defBegin = -1;
 		int defEnd = -1;
 		int bodyBegin = -1;
 		int bodyEnd = -1;
 		int lastCreateStart = -1;
-		
+
 		while (t != null)
 		{
 			String text = t.getContents();
-			
+
 			if (isCreate(text))
 			{
 				lastCreateStart = t.getCharBegin();
@@ -92,7 +97,7 @@ public class OraclePackageParser
 				defBegin = lastCreateStart;
 				t = lexer.getNextToken(false, false);
 				if (t == null) continue;
-				
+
 				if (t.isIdentifier())
 				{
 					this.packageName = t.getContents();
@@ -106,10 +111,10 @@ public class OraclePackageParser
 			else if (text.equals("PACKAGE BODY"))
 			{
 				bodyBegin = lastCreateStart;
-				
+
 				t = lexer.getNextToken(false, false);
 				if (t == null) continue;
-				
+
 				String name = t.getContents();
 				t = findEnd(lexer, name);
 				if (t != null)
@@ -129,18 +134,18 @@ public class OraclePackageParser
 			this.packageBody = sql.substring(bodyBegin, bodyEnd);
 		}
 	}
-	
+
 	private boolean isCreate(String text)
 	{
 		return text.equals("CREATE") || text.equals("CREATE OR REPLACE");
 	}
-	
+
 	private SQLToken findEnd(SQLLexer lexer, String name)
 		throws IOException
 	{
 		SQLToken t = lexer.getNextToken(false, false);
 		boolean lastWasEnd = false;
-		
+
 		while (t != null)
 		{
 			String v = t.getContents();
@@ -162,11 +167,11 @@ public class OraclePackageParser
 		}
 		return null;
 	}
-	
+
 	public static int findProcedurePosition(CharSequence source, ProcedureDefinition def, List<String> parameters)
 	{
 		int procPos = -1;
-		
+
 		SQLLexer lexer = new SQLLexer(source);
 		SQLToken t = lexer.getNextToken(false, false);
 
@@ -182,7 +187,7 @@ public class OraclePackageParser
 			if (t.getContents().equals("TYPE BODY")) break;
 			t = lexer.getNextToken(false, false);
 		}
-		
+
 		if (t == null && !packageHeaderFound) return -1;
 		if (packageHeaderFound && t == null)
 		{
@@ -191,10 +196,10 @@ public class OraclePackageParser
 			lexer = new SQLLexer(source);
 			t = lexer.getNextToken(false, false);
 		}
-		
+
 		// Now we have reached the package or type body, let's find the the actual procedure or function
 		int lastKeywordPos = -1;
-		
+
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -244,7 +249,7 @@ public class OraclePackageParser
 			{
 				break;
 			}
-			
+
 			if (nextIsName)
 			{
 				params.add(t.getText());

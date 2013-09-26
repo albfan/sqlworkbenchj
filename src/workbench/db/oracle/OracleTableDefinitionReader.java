@@ -372,7 +372,7 @@ public class OracleTableDefinitionReader
 		final String sql_comment = sql1 + "     c.comments AS remarks, \n" + sql2 + comment_join + where + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
 
-		String sql = null;
+		String sql;
 
 		if (OracleUtils.getRemarksReporting(dbConnection))
 		{
@@ -410,7 +410,7 @@ public class OracleTableDefinitionReader
 
 	private String getDbLinkTargetSchema(String dblink, String owner)
 	{
-		String sql = null;
+		String sql;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String linkOwner = null;

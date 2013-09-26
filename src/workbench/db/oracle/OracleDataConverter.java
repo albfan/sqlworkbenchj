@@ -24,8 +24,11 @@ package workbench.db.oracle;
 
 import java.lang.reflect.Method;
 import java.sql.Types;
+
 import workbench.log.LogMgr;
+
 import workbench.storage.DataConverter;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -110,7 +113,7 @@ public class OracleDataConverter
 
 	private Object convertRaw(Object originalValue)
 	{
-		Object newValue = null;
+		Object newValue;
 		try
 		{
 			byte[] b = (byte[])originalValue;

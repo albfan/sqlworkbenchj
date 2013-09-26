@@ -26,12 +26,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DefaultFKHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -161,7 +164,7 @@ public class OracleFKHandler
 		}
 
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		ResultSet rs;
 		DataStore result = null;
 		try
 		{
@@ -194,7 +197,7 @@ public class OracleFKHandler
 		}
 
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		ResultSet rs;
 		DataStore result = null;
 		try
 		{

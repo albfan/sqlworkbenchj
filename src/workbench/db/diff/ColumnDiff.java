@@ -176,23 +176,18 @@ public class ColumnDiff
 
 		if (this.compareFK)
 		{
-			if (refFk == null && targetFk == null)
+			if (refFk != null && targetFk != null)
 			{
-				fkDefinitionDifferent = false;
-			}
-			else if ((refFk == null && targetFk != null) || (refFk != null && targetFk == null))
-			{
-				fkDefinitionDifferent = true;
-			}
-			else
-			{
-				// when comparing only JDBC types, we should ignore FK rule as they
-				// differ extremely between DBMS
+				// when comparing only JDBC types, we should ignore FK rules as they differ extremely between DBMS
 				refFk.setCompareFKRule(!this.compareJdbcTypes);
 				targetFk.setCompareFKRule(!this.compareJdbcTypes);
 
 				fkDefinitionDifferent = !(refFk.isFkDefinitionEqual(targetFk));
 				fkNameDifferent = !(refFk.isFkNameEqual(targetFk));
+			}
+			else
+			{
+				fkDefinitionDifferent = (refFk != null || targetFk != null);
 			}
 		}
 

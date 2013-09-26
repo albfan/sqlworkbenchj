@@ -73,7 +73,7 @@ public class OracleTableSourceBuilder
 
 		StringBuilder options = new StringBuilder(100);
 
-		CharSequence externalDef = null;
+		CharSequence externalDef;
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
 		{
 			OracleExternalTableReader reader = new OracleExternalTableReader();
@@ -443,9 +443,11 @@ public class OracleTableSourceBuilder
 	 * as the primary key, it is assumed that the index is defined as an additional
 	 * option to the ADD CONSTRAINT SQL...
 	 *
-	 * @param table the table for which the PK source should be created
-	 * @param pkCols a List of PK column names
-	 * @param pkName the name of the primary key
+	 * @param table        the table for which the PK source should be created
+	 * @param def          the definition of the primary key of the table
+	 * @param forInlineUse if true, the SQL should be generated so it can be used inside a CREATE TABLE
+	 *                     otherwise an ALTER TABLE will be created
+	 * <p>
 	 * @return the SQL to re-create the primary key
 	 */
 	@Override
@@ -489,7 +491,7 @@ public class OracleTableSourceBuilder
 		}
 		else if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
 		{
-			if (pkIdx != null && OracleUtils.shouldAppendTablespace(pkIdx.getTablespace(), defaultTablespace, pkIdx.getSchema(), dbConnection.getCurrentUser()))
+			if (OracleUtils.shouldAppendTablespace(pkIdx.getTablespace(), defaultTablespace, pkIdx.getSchema(), dbConnection.getCurrentUser()))
 			{
 				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + pkIdx.getTablespace());
 			}
@@ -517,7 +519,7 @@ public class OracleTableSourceBuilder
 	private IndexDefinition getIndexDefinition(TableIdentifier table, String indexName)
 	{
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		IndexDefinition index = null;
+		IndexDefinition index;
 		try
 		{
 			index = reader.getIndexDefinition(table, indexName, null);

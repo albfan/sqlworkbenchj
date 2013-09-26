@@ -25,10 +25,13 @@ package workbench.db.oracle;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
-import workbench.db.DataTypeResolver;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DataTypeResolver;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -122,7 +125,7 @@ public class OracleDataTypeResolver
 
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
 	{
-		String display = null;
+		String display;
 
 		if (sqlType == Types.VARCHAR)
 		{
