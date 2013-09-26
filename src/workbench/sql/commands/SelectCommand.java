@@ -54,6 +54,9 @@ public class SelectCommand
 
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
+	 * @param sql the statement to execute
+	 * @return the result of the execution
+	 * @throws java.sql.SQLException
 	 */
 	@Override
 	public StatementRunnerResult execute(String sql)

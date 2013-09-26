@@ -77,7 +77,7 @@ public class ObjectInfo
 	 *  source SQL of the object in the message of the result object
 	 * @throws SQLException
 	 */
-	public StatementRunnerResult getObjectInfo(WbConnection connection, String objectName, boolean includeDependencies)
+	public StatementRunnerResult getObjectInfo(WbConnection connection, String objectName, boolean includeDependencies, boolean includeSource)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
@@ -148,22 +148,25 @@ public class ObjectInfo
 						ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
 						result.addDataStore(ds);
 
-						CharSequence source = seq.getSource();
-						if (source == null)
+						if (includeSource)
 						{
-							// source was not build by the reader during initial retrieval
-							source = seq.getSource(connection);
-						}
-
-						if (source != null)
-						{
-							String src = source.toString();
-							result.addMessage("--------[ BEGIN " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
-							result.addMessage(src);
-							result.addMessage("--------[ END " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + "   ]--------");
-							if (StringUtil.isBlank(result.getSourceCommand()))
+							CharSequence source = seq.getSource();
+							if (source == null)
 							{
-								result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
+								// source was not build by the reader during initial retrieval
+								source = seq.getSource(connection);
+							}
+
+							if (source != null)
+							{
+								String src = source.toString();
+								result.addMessage("--------[ BEGIN " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
+								result.addMessage(src);
+								result.addMessage("--------[ END " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + "   ]--------");
+								if (StringUtil.isBlank(result.getSourceCommand()))
+								{
+									result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
+								}
 							}
 						}
 						return result;
@@ -257,14 +260,14 @@ public class ObjectInfo
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
-			source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
+			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
 			displayName = synonymTarget.getTableExpression(connection);
 		}
 		else if (dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 			connection.getObjectCache().addTable(def);
-			source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
+			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
 		}
 		else if (isExtended)
@@ -297,7 +300,8 @@ public class ObjectInfo
 			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
 			result.setSuccess();
 		}
-		else if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
+		
+		if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
 			try
 			{

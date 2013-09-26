@@ -70,14 +70,14 @@ public class ObjectInfoTest
 		String objectName = "person";
 		ObjectInfo info = new ObjectInfo();
 		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", true);
-		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false);
+		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false,false);
 		assertTrue(tableInfo.hasDataStores());
 		DataStore ds = tableInfo.getDataStores().get(0);
 		assertEquals(2, ds.getRowCount());
 		assertEquals("NR", ds.getValueAsString(0, 0));
 		assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
 
-		tableInfo = info.getObjectInfo(db, objectName, true);
+		tableInfo = info.getObjectInfo(db, objectName, true, false);
 		assertTrue(tableInfo.hasDataStores());
 		assertEquals(3, tableInfo.getDataStores().size());
 
@@ -89,7 +89,7 @@ public class ObjectInfoTest
 		assertEquals("PERSON - Referenced by", fk.getResultName());
 		assertEquals(1, fk.getRowCount());
 
-		tableInfo = info.getObjectInfo(db, "PERSON_GROUP", true);
+		tableInfo = info.getObjectInfo(db, "PERSON_GROUP", true, false);
 		assertTrue(tableInfo.hasDataStores());
 		assertEquals(3, tableInfo.getDataStores().size());
 
@@ -101,7 +101,7 @@ public class ObjectInfoTest
 		assertEquals("PERSON_GROUP - References", fk.getResultName());
 		assertEquals(1, fk.getRowCount());
 
-		StatementRunnerResult viewInfo = info.getObjectInfo(db, "v_person", false);
+		StatementRunnerResult viewInfo = info.getObjectInfo(db, "v_person", false, true);
 //		System.out.println(viewInfo.getSourceCommand());
 		assertTrue(viewInfo.getSourceCommand().startsWith("CREATE FORCE VIEW"));
 		assertTrue(viewInfo.hasDataStores());
@@ -111,7 +111,7 @@ public class ObjectInfoTest
 		assertEquals("PNR", viewDs.getValueAsString(0, 0));
 		assertEquals("PNAME", viewDs.getValueAsString(1, 0));
 
-		StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false);
+		StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false, true);
 //		System.out.println(seqInfo.getSourceCommand());
 		assertTrue(seqInfo.hasDataStores());
 		assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
@@ -124,14 +124,14 @@ public class ObjectInfoTest
 		String objectName = "person";
 		ObjectInfo info = new ObjectInfo();
 		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", false);
-		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false);
+		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false, true);
 		assertTrue(tableInfo.hasDataStores());
 		DataStore ds = tableInfo.getDataStores().get(0);
 		assertEquals(2, ds.getRowCount());
 		assertEquals("NR", ds.getValueAsString(0, 0));
 		assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
 
-		tableInfo = info.getObjectInfo(db, objectName, true);
+		tableInfo = info.getObjectInfo(db, objectName, true, true);
 		assertTrue(tableInfo.hasDataStores());
 		assertEquals(2, tableInfo.getDataStores().size());
 

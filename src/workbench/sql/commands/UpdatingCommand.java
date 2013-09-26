@@ -62,8 +62,8 @@ public class UpdatingCommand
 		return new UpdatingCommand("TRUNCATE");
 	}
 
-	private String verb;
-	private boolean checkLobParameter;
+	private final String verb;
+	private final boolean checkLobParameter;
 
 	private UpdatingCommand(String sqlVerb)
 	{

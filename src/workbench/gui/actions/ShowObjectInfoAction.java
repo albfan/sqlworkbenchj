@@ -99,7 +99,7 @@ public class ShowObjectInfoAction
 			if (conn != null && StringUtil.isNonBlank(text))
 			{
 				display.setStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
-				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps);
+				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps, true);
 
 				if (result != null)
 				{

@@ -69,7 +69,7 @@ import workbench.util.WbThread;
 public class ConnectionMgr
 	implements PropertyChangeListener
 {
-	private Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<String, WbConnection>());
+	private final Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<String, WbConnection>());
 
 	private List<ConnectionProfile> profiles;
 	private List<DbDriver> drivers;
@@ -77,7 +77,7 @@ public class ConnectionMgr
 	private boolean readTemplates = true;
 	private boolean templatesImported;
 	private List<PropertyChangeListener> driverChangeListener;
-	private static ConnectionMgr instance = new ConnectionMgr();
+	private final static ConnectionMgr instance = new ConnectionMgr();
 
 	private final Object driverLock = new Object();
 	private final Object profileLock = new Object();
@@ -133,7 +133,18 @@ public class ConnectionMgr
 		return this.activeConnections.size();
 	}
 
-	public WbConnection getConnection(ConnectionProfile aProfile, String connId)
+	/**
+	 * Create a new connection to the database.
+	 *
+	 * @param profile  the connection profile for which to make the connection
+	 * @param connId   the ID for the connection to be created
+	 * @return a new phyiscal connection to the database
+	 *
+	 * @throws ClassNotFoundException        if the driver class was not found
+	 * @throws SQLException                  if something went wrong during the connect
+	 * @throws UnsupportedClassVersionError  if the driver is for a different Java version
+	 */
+	public WbConnection getConnection(ConnectionProfile profile, String connId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
 		if (this.activeConnections.containsKey(connId))
@@ -144,8 +155,8 @@ public class ConnectionMgr
 			connId = newId;
 		}
 
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
-		WbConnection conn = this.connect(aProfile, connId);
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + profile.getKey() + "] for driver=" + profile.getDriverclass() + " and URL=[" + profile.getUrl() + "]");
+		WbConnection conn = this.connect(profile, connId);
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
 		String jdbcVersion = conn.getJDBCVersion();
@@ -361,6 +372,10 @@ public class ConnectionMgr
 	 * drivers.
 	 * This is used if a driver definition is passed on the commandline
 	 *
+	 * @param drvClassName  the classname of the driver
+	 * @param jarFile       the jarfile in which the driver is located
+	 * @return a new DbDriver instance.
+	 *
 	 * @see workbench.sql.BatchRunner#createCmdLineProfile(workbench.util.ArgumentParser)
 	 */
 	public DbDriver registerDriver(String drvClassName, String jarFile)
@@ -381,8 +396,11 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Returns a List of registered drivers.
-	 *	This list is read from WbDrivers.xml
+	 * Returns a List of registered drivers.
+	 * This list is read from WbDrivers.xml
+	 *
+	 * @return all registered drivers
+	 * @see #registerDriver(java.lang.String, java.lang.String)
 	 */
 	public List<DbDriver> getDrivers()
 	{
@@ -463,7 +481,8 @@ public class ConnectionMgr
 
 	/**
 	 * Return a list with profile keys that can be displayed to the user.
-	 * The returned list is already sorted.
+	 *
+	 * @return all profiles keys (sorted).
 	 */
 	public List<String> getProfileKeys()
 	{
@@ -481,7 +500,9 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Returns a List with the current profiles.
+	 * Returns a List with the current profiles.
+	 *
+	 * @return  all connection profiles.
 	 */
 	public List<ConnectionProfile> getProfiles()
 	{
@@ -531,6 +552,8 @@ public class ConnectionMgr
 	 * The list of active connections is cleared immediately, so any getConnection() after
 	 * calling this method, will create a new physical connection, even if the current ones
 	 * have not all been disconnected.
+	 *
+	 * @param toAbort the connections to abort
 	 */
 	public void abortAll(List<WbConnection> toAbort)
 	{
@@ -639,6 +662,7 @@ public class ConnectionMgr
 	 * This is used when the connection to an embedded database that
 	 * needs a {@link workbench.db.shutdown.DbShutdownHook} is called.
 	 *
+	 * @param aConn the connection to test
 	 * @return true if there is another active connection.
 	 */
 	public boolean isActive(WbConnection aConn)
@@ -962,8 +986,10 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Returns true if any of the profile definitions has changed.
-	 *	(Or if a profile has been deleted or added)
+	 * Returns true if any of the profile definitions has changed.
+	 * (Or if a profile has been deleted or added)
+	 *
+	 * @return true if at least one profile has been changed, deleted or added
 	 */
 	public boolean profilesAreModified()
 	{

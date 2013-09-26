@@ -59,7 +59,6 @@ public class DmlStatement
 {
 	private CharSequence sql;
 	private List<ColumnData> values;
-	private boolean usePrepared = true;
 	private String chrFunc;
 	private String concatString;
 	private String concatFunction;
@@ -71,6 +70,9 @@ public class DmlStatement
 	 *	The SQL string is expected to contain a ? for each value
 	 *	passed in aValueList. The SQL statement will be executed
 	 *	using a prepared statement.
+	 *
+	 * @param aStatement
+	 * @param aValueList
 	 */
 	public DmlStatement(CharSequence aStatement, List<ColumnData> aValueList)
 	{
@@ -112,7 +114,7 @@ public class DmlStatement
 		boolean useXmlApi = dbs.useXmlAPI();
 		boolean useClobSetString = dbs.useSetStringForClobs();
 		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
-		
+
 		try
 		{
 			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
@@ -196,15 +198,6 @@ public class DmlStatement
 		}
 
 		return rows;
-	}
-
-	/**
-	 *	Returns true if a prepared statement is used
-	 *	to send the data to the database.
-	 */
-	public boolean getUsePreparedStatement()
-	{
-		return this.usePrepared;
 	}
 
 	public void setConcatString(String concat)

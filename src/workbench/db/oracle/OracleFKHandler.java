@@ -45,7 +45,7 @@ public class OracleFKHandler
 {
 	// This is essentially a copy of the Statement used by the Oracle driver
 	final String baseSql =
-			"SELECT NULL AS pktable_cat, \n" +
+			"SELECT /*SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
 			"       p.table_name AS pktable_name, \n" +
 			"       pc.column_name AS pkcolumn_name, \n" +

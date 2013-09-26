@@ -24,11 +24,10 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.WbManager;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.log.LogMgr;
-
-import workbench.db.TriggerReader;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -99,14 +98,15 @@ public class WbDescribeObject
 
 			boolean includeDependencies = true;
 			String object = cmdLine.getValue(ARG_OBJECT, cmdLine.getNonArguments());
-			
+
 			if (cmdLine.hasArguments())
 			{
 				includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
 			}
 
+			boolean includeSource = !WbManager.getInstance().isConsoleMode();
 			ObjectInfo info = new ObjectInfo();
-			StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies);
+			StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies, includeSource);
 			result.setSourceCommand(sql);
 			result.setShowRowCount(false);
 			return result;

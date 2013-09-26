@@ -160,11 +160,11 @@ public class LogMgr
 		if (th instanceof SQLException && !getLogger().levelEnabled(LogLevel.debug))
 		{
 			logMsg += ExceptionUtil.getDisplay(th);
-			logError("SelectCommand.execute()", logMsg, null);
+			logError(caller, logMsg, null);
 		}
 		else
 		{
-			logError("SelectCommand.execute()", logMsg, th);
+			logError(caller, logMsg, th);
 		}
 	}
 

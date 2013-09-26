@@ -154,14 +154,14 @@ public class PostgresSearchPathTest
 		TestUtil.executeScript(con, "set search_path=path_2,path_1");
 
 		ObjectInfo info = new ObjectInfo();
-		StatementRunnerResult result = info.getObjectInfo(con, "t1", false);
+		StatementRunnerResult result = info.getObjectInfo(con, "t1", false, false);
 
 		assertNotNull(result);
 		assertTrue(result.hasDataStores());
 		assertEquals(1, result.getDataStores().size());
 		assertEquals("path_1.t1", result.getDataStores().get(0).getResultName());
 
-		result = info.getObjectInfo(con, "t2", false);
+		result = info.getObjectInfo(con, "t2", false, false);
 
 		assertNotNull(result);
 		assertTrue(result.hasDataStores());
