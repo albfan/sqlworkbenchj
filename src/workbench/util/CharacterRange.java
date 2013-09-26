@@ -67,6 +67,32 @@ public class CharacterRange
 		return new CharacterRange[] { RANGE_NONE, RANGE_CONTROL, RANGE_7BIT, RANGE_8BIT, RANGE_8BIT_EXTENDED };
 	}
 
+	public String getName()
+	{
+		switch (typeIndex)
+		{
+			case 1:
+				return "control";
+			case 2:
+				return "7bit";
+			case 3:
+				return "8bit";
+			case 4:
+				return "extended";
+			default:
+				return "none";
+		}
+	}
+	
+	public static CharacterRange getRangeByName(String name)
+	{
+		for (CharacterRange range : getRanges())
+		{
+			if (range.getName().equalsIgnoreCase(name)) return range;
+		}
+		return RANGE_NONE;
+	}
+
 	public static CharacterRange getRangeById(int index)
 	{
 		switch (index)

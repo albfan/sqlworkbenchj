@@ -289,7 +289,7 @@ class ColumnSelectTableModel
 	String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
 	String selectLabel = ResourceMgr.getString("LblHeaderUseColumn");
 
-	private int rows;
+	private final int rows;
 
 	public ColumnSelectTableModel(ColumnIdentifier[] cols)
 	{

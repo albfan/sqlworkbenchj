@@ -65,49 +65,11 @@ public class TextOptionsPanel
 	extends JPanel
 	implements TextOptions
 {
-	private int preferredWidth;
-
 	public TextOptionsPanel()
 	{
 		super();
 		initComponents();
-		CharacterRange[] ranges = CharacterRange.getRanges();
-
-		Font f = escapeRange.getFont();
-
-		int width = 0;
-		int maxwidth = 0;
-
-		for (int i=0; i < ranges.length; i++)
-		{
-			escapeRange.addItem(ranges[i]);
-			if (f != null)
-			{
-				FontMetrics fm = escapeRange.getFontMetrics(f);
-				if (fm != null)
-				{
-					int w = fm.stringWidth(ranges[i].toString());
-					if (i == 0)
-					{
-						width = w;
-					}
-					if (w > maxwidth) maxwidth = w;
-				}
-			}
-		}
-
-		if (width == 0) width = 50;
-
-		Dimension pref = escapeRange.getPreferredSize();
-		preferredWidth = (int)pref.getWidth();
-
-		int add = preferredWidth - maxwidth;
-		width += add;
-
-		Dimension max = new Dimension(width, (int)pref.getHeight());
-		escapeRange.setMaximumSize(max);
-		escapeRange.setPreferredSize(max);
-		((WbComboBox)escapeRange).setPopupWidth(preferredWidth);
+		populateEscapeRange((WbComboBox)escapeRange);
 
 		// The constructor will setup the necessary actions
 		new QuoteSettingVerifier(quoteEscape, quoteAlways);
@@ -143,6 +105,53 @@ public class TextOptionsPanel
 
 	}
 
+	public static void populateEscapeRange(WbComboBox combo)
+	{
+		CharacterRange[] ranges = CharacterRange.getRanges();
+
+		Font f = combo.getFont();
+
+		int width = 0;
+		int maxwidth = 0;
+
+		for (int i = 0; i < ranges.length; i++)
+		{
+			combo.addItem(ranges[i]);
+			if (f != null)
+			{
+				FontMetrics fm = combo.getFontMetrics(f);
+				if (fm != null)
+				{
+					int w = fm.stringWidth(ranges[i].toString());
+					if (i == 0)
+					{
+						width = w;
+					}
+					if (w > maxwidth)
+					{
+						maxwidth = w;
+					}
+				}
+			}
+		}
+
+		if (width == 0)
+		{
+			width = 50;
+		}
+
+		Dimension pref = combo.getPreferredSize();
+		int prefWidth = (int) pref.getWidth();
+
+		int add = prefWidth - maxwidth;
+		width += add;
+
+		Dimension max = new Dimension(width, (int) pref.getHeight());
+		combo.setMaximumSize(max);
+		combo.setPreferredSize(max);
+		combo.setPopupWidth(prefWidth);
+	}
+
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -166,7 +175,7 @@ public class TextOptionsPanel
 		//this.setCleanupCarriageReturns(s.getBoolProperty("workbench.export.text.cleanup"));
 		this.setExportHeaders(s.getBoolProperty("workbench.export.text.includeheader"));
 		this.setQuoteAlways(s.getBoolProperty("workbench.export.text.quotealways"));
-		int id = s.getIntProperty("workbench.export.text.escaperange",0);
+		int id = s.getIntProperty("workbench.export.text.escaperange", CharacterRange.RANGE_NONE.getId());
 		CharacterRange range = CharacterRange.getRangeById(id);
 		this.setEscapeRange(range);
 		this.setLineEnding(s.getProperty("workbench.export.text.lineending", "LF"));

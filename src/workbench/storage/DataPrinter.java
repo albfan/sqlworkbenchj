@@ -37,7 +37,7 @@ import workbench.util.StringUtil;
  */
 public class DataPrinter
 {
-	private DataStore data;
+	private final DataStore data;
 	private TextRowDataConverter converter;
 	private int[] columnMap;
 
@@ -59,6 +59,14 @@ public class DataPrinter
 		initConverter(delimiter, lineEnd, columns, includeHeader);
 	}
 
+	public void setEscapeRange(CharacterRange range)
+	{
+		if (this.converter != null)
+		{
+			converter.setEscapeRange(range);
+		}
+	}
+
 	private void initConverter(String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		converter = new TextRowDataConverter();
@@ -68,7 +76,7 @@ public class DataPrinter
 		converter.setLineEnding(lineEnd);
 		converter.setDelimiter(delimiter);
 		converter.setColumnsToExport(columns);
-		converter.setEscapeRange(CharacterRange.RANGE_CONTROL);
+		converter.setEscapeRange(CharacterRange.RANGE_NONE);
 	}
 
 	public void setNullString(String value)

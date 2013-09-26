@@ -59,7 +59,7 @@ public class TextRowDataConverter
 	private String delimiter = "\t";
 	private String quoteCharacter;
 	private boolean quoteAlways;
-	private CharacterRange escapeRange;
+	private CharacterRange escapeRange = CharacterRange.RANGE_NONE;
 	private String delimiterAndQuote;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
@@ -112,7 +112,10 @@ public class TextRowDataConverter
 
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
-		this.quoteEscape = type;
+		if (type != null)
+		{
+			this.quoteEscape = type;
+		}
 	}
 
 	public QuoteEscapeType getQuoteEscaping()
@@ -224,7 +227,7 @@ public class TextRowDataConverter
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
 
-				if (this.escapeRange != null && this.escapeRange != CharacterRange.RANGE_NONE)
+				if (this.escapeRange != CharacterRange.RANGE_NONE)
 				{
 					if (addQuote)
 					{
@@ -235,7 +238,7 @@ public class TextRowDataConverter
 						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote);
 					}
 				}
-				if (this.quoteCharacter != null && this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
+				if (this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
 				{
 					if (this.quoteEscape == QuoteEscapeType.escape)
 					{
@@ -330,7 +333,7 @@ public class TextRowDataConverter
 
 	private void setAdditionalEncodeCharacters()
 	{
-		if (this.escapeRange == null) return;
+		if (this.escapeRange == CharacterRange.RANGE_NONE) return;
 		if (this.quoteCharacter == null && this.delimiter == null) return;
 
 		this.delimiterAndQuote = this.delimiter;
@@ -366,7 +369,10 @@ public class TextRowDataConverter
 	 */
 	public void setEscapeRange(CharacterRange range)
 	{
-		this.escapeRange = range;
+		if (range != null)
+		{
+			this.escapeRange = range;
+		}
 	}
 
 }

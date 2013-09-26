@@ -53,6 +53,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+import workbench.util.CharacterRange;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -66,8 +67,8 @@ import workbench.util.WbThread;
  */
 public class ClipBoardCopier
 {
-	private DataStore data;
-	private WbTable client;
+	private final DataStore data;
+	private final WbTable client;
 
 	/**
 	 * Create a new ClipBoardCopier to copy the contents of the given table.
@@ -87,6 +88,7 @@ public class ClipBoardCopier
 	 */
 	ClipBoardCopier(DataStore ds)
 	{
+		this.client = null;
 		this.data = ds;
 	}
 
@@ -158,9 +160,13 @@ public class ClipBoardCopier
 			else
 			{
 				// Do not use StringUtil.LINE_TERMINATOR for the line terminator
-				// because for some reason this creates additional empty lines
-				// under Windows
+				// because for some reason this creates additional empty lines under Windows
 				DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
+
+				String name = Settings.getInstance().getProperty("workbench.copy.text.escaperange", CharacterRange.RANGE_NONE.getName());
+				CharacterRange range = CharacterRange.getRangeByName(name);
+				printer.setEscapeRange(range);
+				
 				printer.setNullString(GuiSettings.getDisplayNullString());
 				printer.setColumnMapping(getColumnOrder());
 
