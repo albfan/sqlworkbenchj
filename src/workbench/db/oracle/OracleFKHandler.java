@@ -41,12 +41,17 @@ import workbench.util.SqlUtil;
  * A class to fix the bug in Oracle's JDBC that causes foreign keys that reference unique constraints
  * are not returned.
  *
+ * It also uses USER_XXXX tables rather than the ALL_XXX tables as that is faster in most cases
+ *
  * @author Thomas Kellerer
  */
 public class OracleFKHandler
 	extends DefaultFKHandler
 {
 	// This is essentially a copy of the Statement used by the Oracle driver
+	// the driver does not take unique constraints into account, and this statement does
+	// otherwise foreign keys referencing unique constraints (rather than primary keys) would
+	// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
 	final String baseSql =
 			"SELECT /*SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
@@ -85,6 +90,8 @@ public class OracleFKHandler
 			"AND fc.constraint_name = f.constraint_name  \n" +
 			"AND fc.table_name = f.table_name  \n" +
 			"AND fc.position = pc.position \n";
+
+	private PreparedStatement retrievalStatement;
 
 	public OracleFKHandler(WbConnection conn)
 	{
@@ -128,7 +135,7 @@ public class OracleFKHandler
 	 * <br>
 	 * can be set to false, if all_constraints should always be queried.
 	 *
-	 * @param schema
+	 * @param tbl the table for which the query should be generated
 	 * @return the query to use
 	 */
 	private String getQuery(TableIdentifier tbl)
@@ -160,24 +167,24 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logTrace("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
-		PreparedStatement pstmt = null;
 		ResultSet rs;
 		DataStore result = null;
 		try
 		{
-			pstmt = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
-			pstmt.setString(1, tbl.getRawTableName());
-			pstmt.setString(2, tbl.getRawSchema());
-			rs = pstmt.executeQuery();
+			retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+			retrievalStatement.setString(1, tbl.getRawTableName());
+			retrievalStatement.setString(2, tbl.getRawSchema());
+			rs = retrievalStatement.executeQuery();
 			result = processResult(rs);
 		}
 		finally
 		{
 			// the result set is closed by processResult
-			SqlUtil.closeStatement(pstmt);
+			SqlUtil.closeStatement(retrievalStatement);
+			retrievalStatement = null;
 		}
 		return result;
 	}
@@ -193,27 +200,43 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logTrace("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
-		PreparedStatement pstmt = null;
 		ResultSet rs;
 		DataStore result = null;
 		try
 		{
-			pstmt = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
-			pstmt.setString(1, tbl.getRawTableName());
-			pstmt.setString(2, tbl.getRawSchema());
-			rs = pstmt.executeQuery();
+			retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+			retrievalStatement.setString(1, tbl.getRawTableName());
+			retrievalStatement.setString(2, tbl.getRawSchema());
+			rs = retrievalStatement.executeQuery();
 			result = processResult(rs);
 		}
 		finally
 		{
 			// the result set is closed by processResult
-			SqlUtil.closeStatement(pstmt);
+			SqlUtil.closeStatement(retrievalStatement);
+			retrievalStatement = null;
 		}
 		return result;
 	}
 
+	@Override
+	public void cancel()
+	{
+		super.cancel();
+		if (retrievalStatement != null)
+		{
+			try
+			{
+				retrievalStatement.cancel();
+			}
+			catch (Exception sql)
+			{
+				// nothing to do
+			}
+		}
+	}
 
 }

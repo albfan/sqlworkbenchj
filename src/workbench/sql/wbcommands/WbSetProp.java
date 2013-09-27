@@ -125,6 +125,10 @@ public class WbSetProp
 			{
 				String prop	= getPropertyName(pair[0]);
 				String value = pair[1];
+				if ("\"\"".equals(value.trim()) || "''".equals(value.trim()))
+				{
+					value = "";
+				}
 				if (isConfig && prop.startsWith("workbench"))
 				{
 					Settings.getInstance().setProperty(prop, value);

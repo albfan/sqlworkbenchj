@@ -112,4 +112,6 @@ public interface FKHandler
 	 */
 	DataStore getReferencedBy(TableIdentifier table);
 
+	void cancel();
+
 }

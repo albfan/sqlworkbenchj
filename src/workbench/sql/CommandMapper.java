@@ -59,12 +59,12 @@ import workbench.util.StringUtil;
  */
 public class CommandMapper
 {
-	private Map<String, SqlCommand> cmdDispatch;
-	private List<String> dbSpecificCommands;
-	private Set<String> passThrough = CollectionUtil.caseInsensitiveSet();
+	private final Map<String, SqlCommand> cmdDispatch;
+	private final List<String> dbSpecificCommands;
+	private final Set<String> passThrough = CollectionUtil.caseInsensitiveSet();
 	private boolean supportsSelectInto;
 	private DbMetadata metaData;
-	private boolean allowAbbreviated;
+	private final boolean allowAbbreviated;
 
 	public CommandMapper()
 	{
@@ -123,6 +123,7 @@ public class CommandMapper
 		addCommand(new WbGenDrop());
 		addCommand(new WbGenerateScript());
 		addCommand(new WbGenDelete());
+		addCommand(new WbGenInsert());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.getCommit());

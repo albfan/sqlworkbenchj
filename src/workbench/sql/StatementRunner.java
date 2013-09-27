@@ -81,11 +81,11 @@ public class StatementRunner
 	private boolean logAllStatements;
 	private Savepoint savepoint;
 	private boolean returnOnlyErrorMessages;
-	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
+	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
-	private Map<String, String> sessionAttributes = new TreeMap<String, String>();
+	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
 
 	public StatementRunner()
 	{

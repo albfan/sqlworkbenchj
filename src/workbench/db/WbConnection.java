@@ -78,13 +78,13 @@ public class WbConnection
 	private String dbProductName;
 	private String driverVersion;
 
-  private String id;
+  private final String id;
 	private StringBuilder scriptError;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 	private PreparedStatementPool preparedStatementPool;
-	private List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
+	private final List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
 
 	private OracleWarningsClearer oracleWarningsClearer;
 
@@ -101,7 +101,7 @@ public class WbConnection
 
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
-	private Map<String, String> sessionProps = new HashMap<String, String>();
+	private final Map<String, String> sessionProps = new HashMap<String, String>();
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.

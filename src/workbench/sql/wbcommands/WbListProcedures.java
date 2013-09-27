@@ -90,6 +90,16 @@ public class WbListProcedures
 			name = db.getObjectName();
 		}
 
+		if (schema == null)
+		{
+			schema = currentConnection.getCurrentSchema();
+		}
+
+		if (catalog == null)
+		{
+			catalog = currentConnection.getCurrentCatalog();
+		}
+		
 		DataStore ds = currentConnection.getMetadata().getProcedureReader().getProcedures(catalog, schema, name);
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerProcs"));
 		result.addDataStore(ds);

@@ -145,7 +145,7 @@ public class DbMetadata
 
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
-	private char catalogSeparator;
+	private final char catalogSeparator;
 	private SelectIntoVerifier selectIntoVerifier;
 	private Set<String> tableTypesFromDriver;
 

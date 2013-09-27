@@ -62,6 +62,9 @@ public class DmlStatement
 	private String chrFunc;
 	private String concatString;
 	private String concatFunction;
+	private boolean formatInserts;
+	private boolean formatUpdates;
+	private boolean formatDeletes;
 
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
@@ -93,6 +96,21 @@ public class DmlStatement
 		{
 			this.values = aValueList;
 		}
+		initFormattingFlags();
+	}
+
+	public void setFormatSql(boolean flag)
+	{
+		formatInserts = flag;
+		formatUpdates = flag;
+		formatDeletes = flag;
+	}
+
+	private void initFormattingFlags()
+	{
+		formatInserts = Settings.getInstance().getDoFormatInserts();
+		formatUpdates = Settings.getInstance().getDoFormatInserts();
+		formatDeletes = Settings.getInstance().getDoFormatDeletes();
 	}
 
 	/**
@@ -268,9 +286,7 @@ public class DmlStatement
 		boolean isUpdate = !isInsert && toUse.subSequence(0, "UPDATE".length()).equals("UPDATE");
 		boolean isDelete = !isUpdate && !isInsert && toUse.subSequence(0, "DELETE".length()).equals("DELETE");
 
-		if ((isInsert && Settings.getInstance().getDoFormatInserts()) ||
-			  (isUpdate && Settings.getInstance().getDoFormatInserts()) ||
-			  (isDelete && Settings.getInstance().getDoFormatDeletes()))
+		if ((isInsert && formatInserts) || (isUpdate && formatUpdates) || (isDelete && formatDeletes))
 		{
 			SqlFormatter f = new SqlFormatter(toUse, con == null ? null : con.getDbId());
 			if (con != null)

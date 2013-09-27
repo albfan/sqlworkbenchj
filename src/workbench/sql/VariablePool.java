@@ -78,7 +78,7 @@ public class VariablePool
 	private String prefix;
 	private String suffix;
 
-	private Pattern validNamePattern = Pattern.compile("[\\w\\.]*");;
+	private final Pattern validNamePattern = Pattern.compile("[\\w\\.]*");;
 	private Pattern promptPattern;
 	private Pattern variablePattern;
 
@@ -105,10 +105,12 @@ public class VariablePool
 		// rebuild the pattern each time would slow down execution of large SQL scripts too much.
 		synchronized (lock)
 		{
-			String expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
+			String pre = getPrefix();
+			String sfx = getSuffix();
+			String expr = StringUtil.quoteRegexMeta(pre) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(sfx);
 			this.promptPattern = Pattern.compile(expr);
 
-			expr = StringUtil.quoteRegexMeta(getPrefix()) + "[\\?&]{0,1}[\\w\\.]+" + StringUtil.quoteRegexMeta(getSuffix());
+			expr = StringUtil.quoteRegexMeta(pre) + "[\\?&]{0,1}[\\w\\.]+" + StringUtil.quoteRegexMeta(sfx);
 			variablePattern = Pattern.compile(expr);
 		}
 	}
@@ -132,7 +134,7 @@ public class VariablePool
 			if (suffix == null)
 			{
 				this.suffix = Settings.getInstance().getSqlParameterSuffix();
-				if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
+				if (StringUtil.isEmptyString(this.suffix)) this.suffix = StringUtil.EMPTY_STRING;
 			}
 			return suffix;
 		}
@@ -380,7 +382,11 @@ public class VariablePool
 		result.append(this.getPrefix());
 		if (forPrompt) result.append('?');
 		result.append(varName);
-		result.append(this.getSuffix());
+		String sufx = getSuffix();
+		if (StringUtil.isNonEmpty(sufx))
+		{
+			result.append(sufx);
+		}
 		return result.toString();
 	}
 

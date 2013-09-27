@@ -41,7 +41,8 @@ import workbench.util.SqlUtil;
 public class DefaultFKHandler
 	implements FKHandler
 {
-	private WbConnection dbConnection;
+	private final WbConnection dbConnection;
+	private boolean cancel;
 
 	protected DefaultFKHandler(WbConnection conn)
 	{
@@ -130,6 +131,7 @@ public class DefaultFKHandler
 
 		DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
 
+		cancel = false;
 		ResultSet rs;
 		if (exported)
 		{
@@ -146,12 +148,18 @@ public class DefaultFKHandler
 	protected DataStore processResult(ResultSet rs)
 		throws SQLException
 	{
+		if (rs == null) return null;
 		DataStore ds = new DataStore(rs, false);
 		boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
 		try
 		{
 			while (rs.next())
 			{
+				if (cancel)
+				{
+					LogMgr.logWarning("DefaultFKHandler.processResult()", "Processing of rows has been cancelled");
+					break;
+				}
 				int row = ds.addRow();
 				ds.setValue(row, 0, useColumnNames ? rs.getString("PKTABLE_CAT") : rs.getString(1)); // PKTABLE_CAT
 				ds.setValue(row, 1, useColumnNames ? rs.getString("PKTABLE_SCHEM") : rs.getString(2)); // PKTABLE_SCHEM
@@ -243,6 +251,13 @@ public class DefaultFKHandler
 				fkColCol = 7;
 			}
 
+			if (rawList == null)
+			{
+				// this means retrieval was cancelled
+				this.cancel = true;
+				return null;
+			}
+			
 			for (int rawRow = 0; rawRow < rawList.getRowCount(); rawRow ++)
 			{
 				String tname = rawList.getValueAsString(rawRow, tableCol);
@@ -277,6 +292,11 @@ public class DefaultFKHandler
 					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, Integer.valueOf(updateAction));
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, Integer.valueOf(deferrableCode));
 				}
+				if (cancel)
+				{
+					LogMgr.logWarning("DefaultFKHandler.getKeyList()", "Processing of rows has been cancelled");
+					break;
+				}
 			}
 			ds.resetStatus();
 		}
@@ -286,6 +306,12 @@ public class DefaultFKHandler
 			ds.reset();
 		}
 		return ds;
+	}
+
+	@Override
+	public void cancel()
+	{
+		this.cancel = true;
 	}
 
 }

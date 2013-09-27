@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
 public class DependencyNode
 {
 	private DependencyNode parentNode;
-	private TableIdentifier table;
+	private final TableIdentifier table;
 	private String updateAction = "";
 	private String deleteAction = "";
 	private String fkName;
@@ -51,9 +51,9 @@ public class DependencyNode
 	 * Maps the columns of the base table (this.table) to the matching column
 	 * of the parent table (parentNode.getTable())
 	 */
-	private Map<String, String> columns = new HashMap<String, String>();
+	private final Map<String, String> columns = new HashMap<String, String>();
 
-	private List<DependencyNode> childTables = new ArrayList<DependencyNode>();
+	private final List<DependencyNode> childTables = new ArrayList<DependencyNode>();
 
 	public DependencyNode(TableIdentifier aTable)
 	{
@@ -135,7 +135,6 @@ public class DependencyNode
 			{
 				result.append(',');
 			}
-			result.append(col);
 			result.append(columns.get(col));
 			first = false;
 		}

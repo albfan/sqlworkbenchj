@@ -24,12 +24,15 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
-import workbench.util.WbThread;
 
 /**
  * A class to retrieve the FK dependencies of a given table.
@@ -38,17 +41,19 @@ import workbench.util.WbThread;
  */
 public class TableDependency
 {
-	private WbConnection connection;
-	private TableIdentifier theTable;
+	private final WbConnection connection;
+	private final TableIdentifier theTable;
 	private DependencyNode tableRoot;
-	private DbMetadata wbMetadata;
-	private FKHandler fkHandler;
+	private final DbMetadata wbMetadata;
+	private final FKHandler fkHandler;
 	private List<DependencyNode> leafs;
 	private boolean directChildrenOnly;
 	private boolean readAborted;
 	private boolean cancelRetrieve;
 	private boolean cancelled;
-	private Map<DependencyNode, DependencyNode> visitedRelations;
+	private final Map<DependencyNode, DependencyNode> visitedRelations = new HashMap<DependencyNode, DependencyNode>();
+	private final Set<DependencyNode> visitedParents = new HashSet<DependencyNode>();
+	private ScriptGenerationMonitor monitor;
 
 	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
@@ -56,6 +61,11 @@ public class TableDependency
 		this.wbMetadata = this.connection.getMetadata();
 		this.fkHandler = FKHandlerFactory.createInstance(connection);
 		this.theTable = this.wbMetadata.findTable(tbl, false);
+	}
+
+	public void setScriptMonitor(ScriptGenerationMonitor monitor)
+	{
+		this.monitor = monitor;
 	}
 
 	/**
@@ -95,21 +105,9 @@ public class TableDependency
 	@SuppressWarnings("SleepWhileInLoop")
 	public void cancel()
 	{
-		this.cancelled = false;
+		this.cancelled = true;
 		this.cancelRetrieve = true;
-		long start = System.currentTimeMillis();
-		long maxWait = 1000 * 15; // 15 seconds
-
-		while (!cancelled)
-		{
-			WbThread.sleepSilently(100);
-			if (System.currentTimeMillis() - start > maxWait)
-			{
-				// Prevent an endless loop in case cancelling does not work for some reason
-				// e.g because the retrieval from the database hangs
-				break;
-			}
-		}
+		LogMgr.logDebug("TableDependency.cancel()", "Cancelling dependency retrieval");
 	}
 
 	/**
@@ -157,7 +155,10 @@ public class TableDependency
 		if (tableToUse == null) return;
 
 		tableRoot = new DependencyNode(tableToUse);
-		visitedRelations = new HashMap<DependencyNode, DependencyNode>();
+
+		visitedRelations.clear();
+		visitedParents.clear();
+
 		boolean resetBusy = false;
 		try
 		{
@@ -171,6 +172,7 @@ public class TableDependency
 			{
 				tableRoot = new DependencyNode(tableToUse); // reset all children
 				visitedRelations.clear();
+				visitedParents.clear();
 				leafs.clear();
 			}
 		}
@@ -192,6 +194,17 @@ public class TableDependency
 		if (cancelRetrieve)
 		{
 			return;
+		}
+
+		if (visitedParents.contains(parent))
+		{
+			LogMgr.logTrace("TableDependency.readTree()", "Foreign key " + parent.getFkName()+ " have already been processed.");
+			return;
+		}
+
+		if (this.monitor != null)
+		{
+			monitor.setCurrentObject(parent.getTable().toString(), -1, -1);
 		}
 
 		try
@@ -229,12 +242,16 @@ public class TableDependency
 
 			int count = ds.getRowCount();
 
-//			if (LogMgr.isDebugEnabled())
-//			{
-//				LogMgr.logDebug("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
-//			}
+			LogMgr.logTrace("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
 
-			for (int i=0; i<count; i++)
+			// collecting the parents (in addition to collecting parent/child nodes) is necessary because otherwise
+			// cycles for parents that do not have children would not be detected
+			if (!parent.getTable().equals(theTable))
+			{
+				visitedParents.add(parent);
+			}
+
+			for (int i=0; i < count; i++)
 			{
 				String catalog = ds.getValueAsString(i, catalogcol);
 				String schema = ds.getValueAsString(i, schemacol);
@@ -289,10 +306,6 @@ public class TableDependency
 				leafs.add(child);
 				if (readAborted || cancelRetrieve)
 				{
-					if (cancelRetrieve)
-					{
-						cancelled = true;
-					}
 					break;
 				}
 			}

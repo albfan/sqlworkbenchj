@@ -120,16 +120,15 @@ public class WbProperties
 		String key = null;
 		boolean hadComment = false;
 
-		for (int i=0; i < keys.length; i++)
+		for (Object key1 : keys)
 		{
-			key = (String)keys[i];
+			key = (String) key1;
 			if (reference != null)
 			{
 				String currentValue = getProperty(key);
 				String referenceValue = reference.getProperty(key);
 				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue)) continue;
 			}
-
 			String comment = comments.get(key);
 			if (StringUtil.isNonBlank(comment))
 			{
@@ -137,7 +136,6 @@ public class WbProperties
 				bw.write(comment);
 				bw.newLine();
 			}
-
 			if (lastKey != null)
 			{
 				String k1 = null;
@@ -149,7 +147,6 @@ public class WbProperties
 					bw.newLine();
 				}
 			}
-
 			final String newlineEscape = "_$wb$nl$_";
 			String value = this.getProperty(key);
 			if (value != null)
@@ -178,7 +175,6 @@ public class WbProperties
 				bw.write(key + "=");
 				bw.newLine();
 			}
-
 			if (StringUtil.isBlank(comment))
 			{
 				hadComment = false;
@@ -244,6 +240,14 @@ public class WbProperties
 		}
 		result = aString.substring(0, pos);
 		return result;
+	}
+
+	public String removeProperty(String key)
+	{
+		String old = getProperty(key, null);
+		super.remove(key);
+		firePropertyChanged(key, old, null);
+		return old;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener aListener, String ... properties)

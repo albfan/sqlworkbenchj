@@ -43,6 +43,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.interfaces.ScriptGenerationMonitor;
 
 import workbench.storage.RowActionMonitor;
 
@@ -58,7 +59,7 @@ import workbench.util.StringUtil;
  */
 public class SpreadsheetFileParser
 	extends AbstractImportFileParser
-	implements TabularDataParser
+	implements TabularDataParser, ScriptGenerationMonitor
 {
 	private File baseDir;
 
@@ -74,6 +75,7 @@ public class SpreadsheetFileParser
 	private String sheetName;
 	private SpreadsheetReader reader;
 	protected List<Object> dataRowValues;
+	private TableDependencySorter tableSorter;
 
 	public SpreadsheetFileParser()
 	{
@@ -360,21 +362,33 @@ public class SpreadsheetFileParser
 		}
 	}
 
+	@Override
+	public void cancel()
+	{
+		super.cancel();
+		if (tableSorter != null)
+		{
+			tableSorter.cancel();
+		}
+	}
+
 	private List<Integer> getSheets()
 	{
 		List<String> allSheets = reader.getSheets();
 		List<Integer> result = new  ArrayList<Integer>(allSheets.size());
+
 		if (this.checkDependencies)
 		{
 			if (this.rowMonitor != null)
 			{
 				rowMonitor.saveCurrentType("spreadsheet-deps");
 				rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-				rowMonitor.setCurrentObject(ResourceMgr.getString("MsgCalcDependencies"), -1, -1);
 			}
 
 			LogMgr.logDebug("SpreadsheetFileParser.getSheets()", "Evaluating tables to import");
-			TableDependencySorter sorter = new TableDependencySorter(this.connection);
+			tableSorter = new TableDependencySorter(this.connection);
+			tableSorter.setProgressMonitor(this);
+
 			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
 			for (String sheet : allSheets)
 			{
@@ -395,7 +409,7 @@ public class SpreadsheetFileParser
 					LogMgr.logWarning("SpreadsheetFileParser.getSheets()", "Could not find table " + sheet);
 				}
 			}
-			List<TableIdentifier> sorted = sorter.sortForInsert(tables);
+			List<TableIdentifier> sorted = tableSorter.sortForInsert(tables);
 			LogMgr.logDebug("SpreadsheetFileParser.getSheets()", "Using insert sequence: " + sorted);
 			for (TableIdentifier table : sorted)
 			{
@@ -415,6 +429,7 @@ public class SpreadsheetFileParser
 				result.add(Integer.valueOf(i));
 			}
 		}
+		tableSorter = null;
 		return result;
 	}
 
@@ -784,4 +799,15 @@ public class SpreadsheetFileParser
 	public void addColumnFilter(String colname, String regex)
 	{
 	}
+
+	@Override
+	public void setCurrentObject(String anObject, int current, int total)
+	{
+		if (this.rowMonitor != null)
+		{
+			String msg = ResourceMgr.getFormattedString("MsgCalcDependencies", anObject);
+			rowMonitor.setCurrentObject(msg, current, total);
+		}
+	}
+
 }

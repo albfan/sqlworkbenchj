@@ -324,6 +324,9 @@ public class OracleTypeReader
 					source = source.trim();
 				}
 			}
+
+			boolean needsAlternateDelimiter = false;
+
 			// the first closing bracket with a semicolon marks the end of the type declaration
 			// so we need to insert an alternate delimiter there.
 			int pos = source == null ? -1 : source.indexOf("CREATE OR REPLACE TYPE BODY");
@@ -333,9 +336,10 @@ public class OracleTypeReader
 				fullSource.insert(pos - 1, "\n/\n");
 				fullSource.append("\n/\n");
 				source = fullSource.toString();
+				needsAlternateDelimiter = true;
 			}
 
-			if (!StringUtil.endsWith(source, ';'))
+			if (!StringUtil.endsWith(source, ';') && !needsAlternateDelimiter)
 			{
 				source += ";\n";
 			}

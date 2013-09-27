@@ -57,15 +57,15 @@ import workbench.sql.formatter.SqlFormatter;
 public class DeleteScriptGenerator
 	implements Scripter
 {
-	private WbConnection connection;
+	private final WbConnection connection;
 	private List<ColumnData> columnValues;
 	private TableDependency dependency;
-	private DbMetadata meta;
+	private final DbMetadata meta;
 	private TableIdentifier rootTable;
 	private WbTable sourceTable;
 	private ScriptGenerationMonitor monitor;
-	private List<String> statements = new LinkedList<String>();
-	private SqlLiteralFormatter formatter;
+	private final List<String> statements = new LinkedList<String>();
+	private final SqlLiteralFormatter formatter;
 	private boolean formatSql = true;
 	private boolean removeReduntant;
 
@@ -134,6 +134,7 @@ public class DeleteScriptGenerator
 	{
 		ArrayList<DependencyNode> parents = new ArrayList<DependencyNode>();
 		List<DependencyNode> visitedTables = new ArrayList<DependencyNode>();
+		this.dependency.setScriptMonitor(monitor);
 		this.dependency.readDependencyTree(true);
 		List<DependencyNode> leafs = this.dependency.getLeafs();
 

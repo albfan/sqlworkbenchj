@@ -143,8 +143,8 @@ public class Settings
 	private WbProperties props;
 	private WbFile configfile;
 
-	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
-	private List<SettingsListener> saveListener = new ArrayList<SettingsListener>(5);
+	private final List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
+	private final List<SettingsListener> saveListener = new ArrayList<SettingsListener>(5);
 
 	private long fileTime;
 	private boolean createBackup;
@@ -2528,9 +2528,16 @@ public class Settings
 
 	public String getSqlParameterSuffix()
 	{
-		// The built-in default suffix is stored in default.properties thus is can be "deleted"
-		// by adding an empty property in workbench.settings
-		return getProperty(PROPERTY_VAR_SUFFIX, "");
+		if (this.props.containsKey(PROPERTY_VAR_SUFFIX) || System.getProperties().containsKey(PROPERTY_VAR_SUFFIX))
+		{
+			// The built-in default suffix is stored in default.properties thus is can be "deleted"
+			// by adding an empty property in workbench.settings
+			// so if the key is present, use whatever is stored there.
+			return getProperty(PROPERTY_VAR_SUFFIX, "");
+		}
+		// returning a value in case the key is not present, ensures that the default is applied in case the
+		// property was completely remove e.g. by using WbSetConfig.
+		return "]";
 	}
 
 	/**
@@ -2703,7 +2710,7 @@ public class Settings
 	// <editor-fold defaultstate="collapsed" desc="Utility">
 	public void removeProperty(String property)
 	{
-		this.props.remove(property);
+		this.props.removeProperty(property);
 	}
 
 	public boolean getBoolProperty(String property)
@@ -2746,9 +2753,9 @@ public class Settings
 	}
 
 	@Override
-	public String getProperty(String aProperty, String aDefault)
+	public String getProperty(String property, String aDefault)
 	{
-		return System.getProperty(aProperty, this.props.getProperty(aProperty, aDefault));
+		return System.getProperty(property, this.props.getProperty(property, aDefault));
 	}
 
 	public List<String> getListProperty(String aProperty, boolean makeLowerCase)

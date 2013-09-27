@@ -33,7 +33,6 @@ import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 
-import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.SqlUtil;
 
@@ -45,9 +44,10 @@ public class DummyDML
 {
 	private final TableIdentifier table;
 	private List<ColumnIdentifier> columns;
-	
+
 	// if false, an INSERT will be created, otherwise an UPDATE
 	private final boolean createUpdateStatement;
+	private boolean formatSql = true;
 
 	protected DummyDML(TableIdentifier tbl, boolean buildUpdate)
 	{
@@ -60,6 +60,11 @@ public class DummyDML
 		this.table = tbl;
 		this.columns = new ArrayList<ColumnIdentifier>(cols);
 		this.createUpdateStatement = buildUpdate;
+	}
+
+	public void setFormatSql(boolean formatSql)
+	{
+		this.formatSql = formatSql;
 	}
 
 	@Override
@@ -194,10 +199,9 @@ public class DummyDML
 			stmt = factory.createInsertStatement(dummyData, true, le);
 		}
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		stmt.setFormatSql(formatSql);
 		String sql = stmt.getExecutableStatement(f, con) + ";" + nl;
-
-		SqlFormatter formatter = new SqlFormatter(sql, con.getDbId());
-		return formatter.getFormattedSql();
+		return sql;
 	}
 
 }

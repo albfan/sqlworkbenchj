@@ -31,6 +31,7 @@ import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 
 /**
@@ -41,12 +42,20 @@ import workbench.log.LogMgr;
  */
 public class TableDependencySorter
 {
-	private WbConnection dbConn;
+	private final WbConnection dbConn;
 	private List<TableIdentifier> cycleErrors;
+	private ScriptGenerationMonitor monitor;
+	private TableDependency dependencyReader;
+	private boolean cancel;
 
 	public TableDependencySorter(WbConnection con)
 	{
 		this.dbConn = con;
+	}
+
+	public void setProgressMonitor(ScriptGenerationMonitor monitor)
+	{
+		this.monitor = monitor;
 	}
 
 	public List<TableIdentifier> sortForInsert(List<TableIdentifier> tables)
@@ -80,6 +89,7 @@ public class TableDependencySorter
 	 */
 	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
+		cancel = false;
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
 
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
@@ -112,26 +122,42 @@ public class TableDependencySorter
 		return null;
 	}
 
+	public void cancel()
+	{
+		cancel = true;
+		if (this.dependencyReader != null)
+		{
+			dependencyReader.cancel();
+		}
+	}
+
 	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
 	{
 		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
 		List<DependencyNode> startNodes = new ArrayList<DependencyNode>(tables.size());
 
+		int num = 1;
 		for (TableIdentifier tbl : tables)
 		{
+			if (cancel) break;
 			if (!dbConn.getMetadata().tableExists(tbl)) continue;
 
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(tbl.getTableExpression(), num, tables.size());
+			}
+			num ++;
 			DependencyNode root = findChildTree(levelMapping, tbl);
 			if (root == null)
 			{
-				TableDependency deps = new TableDependency(dbConn, tbl);
-				deps.readTreeForChildren();
-				if (deps.wasAborted())
+				dependencyReader = new TableDependency(dbConn, tbl);
+				dependencyReader.readTreeForChildren();
+				if (dependencyReader.wasAborted())
 				{
 					if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
 					cycleErrors.add(tbl);
 				}
-				root = deps.getRootNode();
+				root = dependencyReader.getRootNode();
 			}
 			else
 			{
@@ -146,6 +172,8 @@ public class TableDependencySorter
 				putNodes(levelMapping, allChildren);
 			}
 		}
+
+		if (cancel) return Collections.emptyList();
 
 		// The "starting" tables have not been added yet.
 		// They only need to be added if they did not appear as a child

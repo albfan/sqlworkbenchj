@@ -117,6 +117,7 @@ public class CommandTester
 		commands.add(WbGenerateScript.VERB);
 		commands.add(WbSysOpen.VERB);
 		commands.add(WbGenDelete.VERB);
+		commands.add(WbGenInsert.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -162,6 +163,7 @@ public class CommandTester
 			formattedWords.put(WbGenerateScript.VERB, "WbGenerateScript");
 			formattedWords.put(WbSysOpen.VERB, "WbSysOpen");
 			formattedWords.put(WbGenDelete.VERB, "WbGenerateDelete");
+			formattedWords.put(WbGenInsert.VERB, "WbGenerateInsert");
 		}
 		return formattedWords;
 	}
