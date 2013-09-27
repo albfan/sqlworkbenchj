@@ -1,7 +1,10 @@
 Features:
 ---------
+- Highlight selected text in editor
 - Jump to error line for (CREATE PROCEDURE and similar statements)
-- assign multiple variables using WbVarDef with a single SQL statement
+- WbVarDef
+  - assign multiple variables with a single SQL statement
+  - use all rows of a result (e.g. concatenated using \n) 
 - Profiles
   - Import profiles from other WbProfiles.xml
   - Load different WbProfiles.xml from within the connection dialog
@@ -42,9 +45,6 @@ Features:
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
 - Import macros from other WbMacros.xml
-- Allow full script in DataPumper as SQL Query source
-  (pre-copy and post-copy scripts)
-- History of selected tables in DbExplorer
 
 Bugs:
 -----
