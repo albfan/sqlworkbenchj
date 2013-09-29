@@ -39,7 +39,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -67,6 +68,25 @@ public class VariablePoolTest
 	}
 
 	@Test
+	public void testNoSuffix()
+	{
+		VariablePool pool = VariablePool.getInstance();
+		pool.setPrefixSuffix(":", "");
+		pool.setParameterValue("some_id", "1");
+		String replaced = pool.replaceAllParameters("select * from foo where id = :some_id");
+		assertEquals("select * from foo where id = 1", replaced);
+
+		replaced = pool.replaceAllParameters("select * from foo where id =:some_id and col = 42");
+		System.out.println(replaced);
+		assertEquals("select * from foo where id =1 and col = 42", replaced);
+
+		pool.setParameterValue("other_id", "2");
+		replaced = pool.replaceAllParameters("select * from foo where id in (:some_id, :other_id)");
+		System.out.println(replaced);
+		assertEquals("select * from foo where id in (1, 2)", replaced);
+	}
+
+	@Test
 	public void testRemoveVars()
 	{
 		VariablePool pool = VariablePool.getInstance();
@@ -88,11 +108,11 @@ public class VariablePoolTest
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
+		VariablePool pool = VariablePool.getInstance();
 
 		ArgumentParser p = new ArgumentParser();
 		p.addArgument(AppArguments.ARG_VARDEF);
 		p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
-		VariablePool pool = VariablePool.getInstance();
 		pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
 		assertEquals("Wrong parameter retrieved from commandline", "/user/home/test.txt", pool.getParameterValue("exportfile"));
 
@@ -114,10 +134,10 @@ public class VariablePoolTest
 	public void testInitFromProperties()
 		throws Exception
 	{
+		VariablePool pool = VariablePool.getInstance();
 		System.setProperty(VariablePool.PROP_PREFIX + "testvalue", "value1");
 		System.setProperty(VariablePool.PROP_PREFIX + "myprop", "value2");
 		System.setProperty("someprop.testvalue", "value2");
-		VariablePool pool = VariablePool.getInstance();
 
 		pool.initFromProperties(System.getProperties());
 		assertEquals("Wrong firstvalue", "value1", pool.getParameterValue("testvalue"));
@@ -190,18 +210,10 @@ public class VariablePoolTest
 	public void testAlternatePrefix()
 	{
 		VariablePool pool = VariablePool.getInstance();
-		try
-		{
-			pool.reset();
-			pool.setPrefixSuffix("${", "}");
-			pool.setParameterValue("foo.bar.value", "1");
-			String sql = "select * from foo where bar = ${foo.bar.value}";
-			String replaced = pool.replaceAllParameters(sql);
-			assertEquals("select * from foo where bar = 1", replaced);
-		}
-		finally
-		{
-			pool.reset();
-		}
+		pool.setPrefixSuffix("${", "}");
+		pool.setParameterValue("foo.bar.value", "1");
+		String sql = "select * from foo where bar = ${foo.bar.value}";
+		String replaced = pool.replaceAllParameters(sql);
+		assertEquals("select * from foo where bar = 1", replaced);
 	}
 }
