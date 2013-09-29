@@ -25,7 +25,8 @@ package workbench.log;
 import java.io.File;
 import java.sql.SQLException;
 
-import workbench.util.*;
+import workbench.util.ExceptionUtil;
+import workbench.util.WbFile;
 
 /**
  * A facade to the actual logging implementation used.
@@ -109,6 +110,11 @@ public class LogMgr
 	public static boolean isDebugEnabled()
 	{
 		return getLogger().levelEnabled(LogLevel.debug);
+	}
+
+	public static boolean isTraceEnabled()
+	{
+		return getLogger().levelEnabled(LogLevel.trace);
 	}
 
 	public static void logDebug(Object caller, String message)

@@ -31,7 +31,9 @@ import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
+
 import workbench.storage.DataStore;
+
 import workbench.util.StringUtil;
 
 /**
@@ -209,7 +211,7 @@ public class TableDependency
 
 		try
 		{
-			DataStore ds = null;
+			DataStore ds;
 			int catalogcol;
 			int schemacol;
 			int tablecol;
@@ -242,7 +244,10 @@ public class TableDependency
 
 			int count = ds.getRowCount();
 
-			LogMgr.logTrace("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
+			if (LogMgr.isTraceEnabled())
+			{
+				LogMgr.logTrace("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
+			}
 
 			// collecting the parents (in addition to collecting parent/child nodes) is necessary because otherwise
 			// cycles for parents that do not have children would not be detected

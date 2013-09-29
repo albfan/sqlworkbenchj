@@ -1,5 +1,5 @@
 /*
- * WbGenDelete.java
+ * WbGenInsert.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -25,18 +25,18 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.db.DummyInsert;
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DummyInsert;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TableDependencySorter;
-import workbench.interfaces.ScriptGenerationMonitor;
 
+import workbench.storage.RowActionMonitor;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.RowActionMonitor;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -44,7 +44,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
- * A SqlCommand to create a script of DELETE statement to delete specific rows from a table respecting FK constraints.
+ * A SqlCommand to create a script of INSERT statements for a list of tables respecting FK constraints.
  *
  * @author Thomas Kellerer
  */
@@ -55,9 +55,7 @@ public class WbGenInsert
 	public static final String VERB = "WBGENERATEINSERT";
 
 	public static final String PARAM_TABLES = "tables";
-	public static final String PARAM_FILE = "outputFile";
-	public static final String PARAM_DO_FORMAT = "formatSql";
-	public static final String PARAM_APPEND = "appendFile";
+	public static final String PARAM_FULL_INSERT = "fullInsert";
 
 	private TableDependencySorter tableSorter;
 
@@ -66,10 +64,8 @@ public class WbGenInsert
 		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_FILE, ArgumentType.StringArgument);
-		cmdLine.addArgument(PARAM_DO_FORMAT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_APPEND, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(PARAM_FULL_INSERT, ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -121,12 +117,26 @@ public class WbGenInsert
 			rowMonitor.jobFinished();
 		}
 
+		boolean fullInsert = cmdLine.getBoolean(PARAM_FULL_INSERT, false);
+
+		if (!fullInsert)
+		{
+			result.addMessageByKey("MsgInsertSeq");
+			result.addMessageNewLine();
+		}
 		for (TableIdentifier table : sorted)
 		{
-			DummyInsert insert = new DummyInsert(table);
-			insert.setFormatSql(false);
-			String source = insert.getSource(currentConnection).toString();
-			result.addMessage(SqlUtil.makeCleanSql(source,false));
+			if (fullInsert)
+			{
+				DummyInsert insert = new DummyInsert(table);
+				insert.setFormatSql(false);
+				String source = insert.getSource(currentConnection).toString();
+				result.addMessage(SqlUtil.makeCleanSql(source,false) + ";");
+			}
+			else
+			{
+				result.addMessage("    " + table.getTableExpression());
+			}
 			result.setSuccess();
 		}
 		return result;

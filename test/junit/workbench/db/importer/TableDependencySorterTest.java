@@ -22,21 +22,27 @@
  */
 package workbench.db.importer;
 
-import workbench.WbTestCase;
-import org.junit.After;
-import org.junit.Test;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.FileUtil;
-import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -228,6 +234,11 @@ public class TableDependencySorterTest
 //		}
 		assertEquals("Not enough entries", tbl.size(), insertList.size());
 		assertTrue("Wrong first table for insert", base.compareNames(insertList.get(0)));
+		assertTrue("Wrong second table for insert", child1.compareNames(insertList.get(1)));
+		assertTrue("Wrong third table for insert", child2.compareNames(insertList.get(2)));
+		assertTrue("Wrong table for insert", child1_detail.compareNames(insertList.get(3)));
+		assertTrue("Wrong table for insert", child2_detail.compareNames(insertList.get(4)));
+		assertTrue("Wrong table for insert", child1_detail2.compareNames(insertList.get(5)));
 	}
 
 	@Test
