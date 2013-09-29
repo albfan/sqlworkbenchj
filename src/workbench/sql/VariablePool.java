@@ -166,6 +166,12 @@ public class VariablePool
 		}
 	}
 
+	/**
+	 * Set new values for the prefix and the suffix.
+	 *
+	 * @param newPrefix  the new prefix, if <tt>null</tt> the built-in default is used
+	 * @param newSuffix  the new suffix, if <tt>null</tt> the built-in default is used
+	 */
 	public void setPrefixSuffix(String newPrefix, String newSuffix)
 	{
 		synchronized (lock)
@@ -202,7 +208,8 @@ public class VariablePool
 	}
 
 	/**
-	 * Used to reset the pool during testing
+	 * Removes all variables from the pool.
+	 *
 	 */
 	public void clear()
 	{

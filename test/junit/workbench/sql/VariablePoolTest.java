@@ -77,13 +77,18 @@ public class VariablePoolTest
 		assertEquals("select * from foo where id = 1", replaced);
 
 		replaced = pool.replaceAllParameters("select * from foo where id =:some_id and col = 42");
-		System.out.println(replaced);
 		assertEquals("select * from foo where id =1 and col = 42", replaced);
+
+		replaced = pool.replaceAllParameters("select * from foo where id >:some_id");
+		assertEquals("select * from foo where id >1", replaced);
 
 		pool.setParameterValue("other_id", "2");
 		replaced = pool.replaceAllParameters("select * from foo where id in (:some_id, :other_id)");
-		System.out.println(replaced);
 		assertEquals("select * from foo where id in (1, 2)", replaced);
+
+		pool.setParameterValue("some_name", "Dent");
+		replaced = pool.replaceAllParameters("select * from person where lastname = ':some_name';");
+		assertEquals("select * from person where lastname = 'Dent';", replaced);
 	}
 
 	@Test
