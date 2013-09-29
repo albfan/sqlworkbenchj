@@ -27,12 +27,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.log.LogMgr;
+
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.log.LogMgr;
 
 /**
  * A class to sort tables according to their foreign key constraints,
@@ -75,7 +77,7 @@ public class TableDependencySorter
 
 	public List<TableIdentifier> getErrorTables()
 	{
-		if (cycleErrors == null) return null;
+		if (cycleErrors == null) return Collections.emptyList();
 		return Collections.unmodifiableList(cycleErrors);
 	}
 
@@ -187,7 +189,7 @@ public class TableDependencySorter
 			}
 		}
 
-		Comparator<LevelNode> comp = null;
+		Comparator<LevelNode> comp;
 
 		if (bottomUp)
 		{
@@ -294,7 +296,7 @@ public class TableDependencySorter
 		int level;
 		DependencyNode node;
 
-		public LevelNode(DependencyNode nd, int lvl)
+		LevelNode(DependencyNode nd, int lvl)
 		{
 			level = lvl;
 			node = nd;
