@@ -91,6 +91,7 @@ public class WbGenInsert
 		}
 
 		String names = cmdLine.getValue(PARAM_TABLES);
+		boolean fullInsert = cmdLine.getBoolean(PARAM_FULL_INSERT, false);
 		SourceTableArgument tableArgs = new SourceTableArgument(names, currentConnection);
 
 		List<TableIdentifier> tables = tableArgs.getTables();
@@ -117,27 +118,33 @@ public class WbGenInsert
 			rowMonitor.jobFinished();
 		}
 
-		boolean fullInsert = cmdLine.getBoolean(PARAM_FULL_INSERT, false);
-
-		if (!fullInsert)
+		if (this.isCancelled)
 		{
-			result.addMessageByKey("MsgInsertSeq");
-			result.addMessageNewLine();
+			result.addMessageByKey("MsgStatementCancelled");
 		}
-		for (TableIdentifier table : sorted)
+		else
 		{
-			if (fullInsert)
+			if (!fullInsert)
 			{
-				DummyInsert insert = new DummyInsert(table);
-				insert.setFormatSql(false);
-				String source = insert.getSource(currentConnection).toString();
-				result.addMessage(SqlUtil.makeCleanSql(source,false) + ";");
+				result.addMessageByKey("MsgInsertSeq");
+				result.addMessageNewLine();
 			}
-			else
+
+			for (TableIdentifier table : sorted)
 			{
-				result.addMessage("    " + table.getTableExpression());
+				if (fullInsert)
+				{
+					DummyInsert insert = new DummyInsert(table);
+					insert.setFormatSql(false);
+					String source = insert.getSource(currentConnection).toString();
+					result.addMessage(SqlUtil.makeCleanSql(source,false) + ";");
+				}
+				else
+				{
+					result.addMessage("    " + table.getTableExpression());
+				}
+				result.setSuccess();
 			}
-			result.setSuccess();
 		}
 		return result;
 	}

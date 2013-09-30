@@ -91,6 +91,7 @@ public class OracleTableSourceBuilder
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+
 		String sql =
 			"select /* SQLWorkbench */ atb.tablespace_name, \n" +
 			"       atb.degree, \n" +
@@ -104,10 +105,13 @@ public class OracleTableSourceBuilder
 			"       atb.iot_type, \n" +
 			"       iot.tablespace_name as iot_overflow, \n" +
 			(supportsArchives ?
-			"       fat.flashback_archive_name \n" :
-			"       null as flashback_archive_name \n") +
+			"       fat.flashback_archive_name, \n" :
+			"       null as flashback_archive_name, \n") +
+			"       ai.tablespace_name as index_tablespace \n" +
 			"from all_tables atb \n" +
 			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
+			"  left join all_constraints ac on ac.owner = atb.owner and ac.table_name = atb.table_name and ac.constraint_type = 'P' \n" +
+			"  left join all_indexes ai on ai.owner = coalesce(ac.index_owner, ac.owner) and ai.table_name = ac.table_name and ai.index_name = ac.index_name \n" +
 			(supportsArchives ?
 			"  left join user_flashback_archive_tables fat on fat.owner_name = atb.owner and fat.table_name = atb.table_name \n" :
 			"") +
@@ -137,12 +141,18 @@ public class OracleTableSourceBuilder
 				{
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
 					options.append("ORGANIZATION INDEX");
+					String idxTbs = rs.getString("INDEX_TABLESPACE");
+					if (StringUtil.isNonEmpty(idxTbs))
+					{
+						options.append(" ").append(idxTbs);
+						tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
+					}
 					String overflow = rs.getString("IOT_OVERFLOW");
 					if (StringUtil.isNonBlank(overflow))
 					{
 						options.append("\nOVERFLOW TABLESPACE ");
 						options.append(overflow);
-						tbl.getSourceOptions().addConfigSetting("overflow_tablespace", "overflow");
+						tbl.getSourceOptions().addConfigSetting("overflow_tablespace", overflow);
 					}
 					tbl.setUseInlinePK(true); // you cannot define a IOT without a PK therefor the PK has to be inline!
 				}

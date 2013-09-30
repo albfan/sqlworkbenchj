@@ -349,6 +349,16 @@ public class DataStore
 		}
 	}
 
+	public DataStore createCopy(boolean includeRows)
+	{
+		DataStore result = new DataStore(this.resultInfo.createCopy());
+		if (includeRows)
+		{
+			result.copyFrom(this);
+		}
+		return result;
+	}
+	
 	public int duplicateRow(int aRow)
 	{
 		if (aRow < 0 || aRow >= this.getRowCount()) return -1;

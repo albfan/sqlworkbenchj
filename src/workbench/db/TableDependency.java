@@ -44,11 +44,11 @@ import workbench.util.StringUtil;
 public class TableDependency
 {
 	private final WbConnection connection;
-	private final TableIdentifier theTable;
+	private TableIdentifier theTable;
 	private DependencyNode tableRoot;
-	private final DbMetadata wbMetadata;
+	private final DbMetadata metaData;
 	private final FKHandler fkHandler;
-	private List<DependencyNode> leafs;
+	private final List<DependencyNode> leafs = new ArrayList<DependencyNode>();
 	private boolean directChildrenOnly;
 	private boolean readAborted;
 	private boolean cancelRetrieve;
@@ -57,12 +57,31 @@ public class TableDependency
 	private final Set<DependencyNode> visitedParents = new HashSet<DependencyNode>();
 	private ScriptGenerationMonitor monitor;
 
-	public TableDependency(WbConnection con, TableIdentifier tbl)
+	public TableDependency(WbConnection con)
 	{
 		this.connection = con;
-		this.wbMetadata = this.connection.getMetadata();
+		this.metaData = this.connection.getMetadata();
 		this.fkHandler = FKHandlerFactory.createInstance(connection);
-		this.theTable = this.wbMetadata.findTable(tbl, false);
+	}
+
+	public TableDependency(WbConnection con, TableIdentifier tbl)
+	{
+		this(con);
+		setMainTable(tbl);
+	}
+
+	public void setMainTable(TableIdentifier tbl)
+	{
+		theTable = metaData.findTable(tbl, false);
+		visitedParents.clear();
+		visitedRelations.clear();
+		leafs.clear();
+		tableRoot = null;
+	}
+
+	public FKHandler getFKHandler()
+	{
+		return fkHandler;
 	}
 
 	public void setScriptMonitor(ScriptGenerationMonitor monitor)
@@ -142,7 +161,7 @@ public class TableDependency
 		this.readAborted = false;
 		this.cancelRetrieve = false;
 		this.cancelled = false;
-		this.leafs = new ArrayList<DependencyNode>();
+		this.leafs.clear();
 
 		// Make sure we are using the "correct" TableIdentifier
 		// if the TableIdentifier passed in the constructor was
@@ -152,7 +171,7 @@ public class TableDependency
 		TableIdentifier tableToUse = this.theTable;
 		if (!this.theTable.getNeverAdjustCase())
 		{
-			tableToUse = this.wbMetadata.findTable(theTable, false);
+			tableToUse = this.metaData.findTable(theTable, false);
 		}
 		if (tableToUse == null) return;
 
@@ -200,7 +219,7 @@ public class TableDependency
 
 		if (visitedParents.contains(parent))
 		{
-			LogMgr.logTrace("TableDependency.readTree()", "Foreign key " + parent.getFkName()+ " have already been processed.");
+			LogMgr.logTrace("TableDependency.readTree()", "Foreign key " + parent.getFkName()+ " has already been processed.");
 			return;
 		}
 
@@ -219,7 +238,12 @@ public class TableDependency
 			int tablecolumncol;
 			int parentcolumncol;
 
-			TableIdentifier ptbl = this.wbMetadata.resolveSynonym(parent.getTable());
+			TableIdentifier ptbl = this.metaData.resolveSynonym(parent.getTable());
+
+			if (LogMgr.isTraceEnabled())
+			{
+				LogMgr.logTrace("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
+			}
 
 			if (exportedKeys)
 			{
@@ -244,11 +268,6 @@ public class TableDependency
 
 			int count = ds.getRowCount();
 
-			if (LogMgr.isTraceEnabled())
-			{
-				LogMgr.logTrace("TableDependency.readTree()", "level: " + level  + ", retrieving: " + parent.debugString());
-			}
-
 			// collecting the parents (in addition to collecting parent/child nodes) is necessary because otherwise
 			// cycles for parents that do not have children would not be detected
 			if (!parent.getTable().equals(theTable))
@@ -272,8 +291,8 @@ public class TableDependency
 
 				int update = ds.getValueAsInt(i, 9, -1);
 				int delete = ds.getValueAsInt(i, 10, -1);
-				child.setUpdateAction(this.wbMetadata.getDbSettings().getRuleDisplay(update));
-				child.setDeleteAction(this.wbMetadata.getDbSettings().getRuleDisplay(delete));
+				child.setUpdateAction(this.metaData.getDbSettings().getRuleDisplay(update));
+				child.setDeleteAction(this.metaData.getDbSettings().getRuleDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 

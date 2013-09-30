@@ -138,6 +138,8 @@ public class TableDependencySorter
 		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
 		List<DependencyNode> startNodes = new ArrayList<DependencyNode>(tables.size());
 
+		dependencyReader = new TableDependency(dbConn);
+
 		int num = 1;
 		for (TableIdentifier tbl : tables)
 		{
@@ -152,7 +154,7 @@ public class TableDependencySorter
 			DependencyNode root = findChildTree(levelMapping, tbl);
 			if (root == null)
 			{
-				dependencyReader = new TableDependency(dbConn, tbl);
+				dependencyReader.setMainTable(tbl);
 				dependencyReader.readTreeForChildren();
 				if (dependencyReader.wasAborted())
 				{

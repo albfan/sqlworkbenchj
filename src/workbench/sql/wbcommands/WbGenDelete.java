@@ -141,7 +141,7 @@ public class WbGenDelete
 		}
 
 		generator.setTable(table);
-		generator.setRemoveRedundant(true);
+		generator.setRemoveRedundant(true);//Settings.getInstance().getBoolProperty("workbench.sql.gendelete.remove.dupes", false));
 		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, true));
 		CharSequence script = generator.getScriptForValues(values);
 

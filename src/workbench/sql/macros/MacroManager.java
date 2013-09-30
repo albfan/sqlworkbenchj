@@ -40,7 +40,7 @@ import workbench.util.CaseInsensitiveComparator;
  */
 public class MacroManager
 {
-	private MacroStorage storage;
+	private final MacroStorage storage;
 
 	/**
 	 * Thread safe singleton instance.
@@ -56,7 +56,7 @@ public class MacroManager
 		storage = new MacroStorage();
 		storage.loadMacros(getMacroFile());
 		long duration = System.currentTimeMillis() - start;
-		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration);
+		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration + "ms");
 	}
 
 	public final File getMacroFile()

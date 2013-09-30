@@ -43,16 +43,16 @@ public class GenericSchemaInfoReader
 {
 	private WbConnection connection;
 	private String schemaQuery;
-	private boolean useSavepoint;
+	private final boolean useSavepoint;
 	private boolean reuseStmt;
 
 	private PreparedStatement query;
 	private String cachedSchema;
 
-	private String reuseProp;
-	private String queryProp;
-	private String cacheProp;
-	private String timeoutProp;
+	private final String reuseProp;
+	private final String queryProp;
+	private final String cacheProp;
+	private final String timeoutProp;
 
 	public GenericSchemaInfoReader(WbConnection conn, String dbid)
 	{
@@ -154,7 +154,7 @@ public class GenericSchemaInfoReader
 		boolean isCacheable = isCacheable();
 		if (isCacheable && cachedSchema != null)
 		{
-			LogMgr.logTrace("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
+//			LogMgr.logTrace("GenericSchemaInfoReader.getCurrenSchema()", "Using cached schema: " + cachedSchema);
 			return cachedSchema;
 		}
 

@@ -27,33 +27,76 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.log.LogMgr;
+
+
 /**
  *
  * @author Thomas Kellerer
  */
 class DependencyDuplicateFinder
 {
-	private DependencyNode root;
-	private Map<TableIdentifier, Integer> tableLevels = new HashMap<TableIdentifier, Integer>();
+	private final DependencyNode root;
+	private final Map<TableIdentifier, Integer> tableLevels = new HashMap<TableIdentifier, Integer>();
 
 	DependencyDuplicateFinder(DependencyNode rootNode)
 	{
 		this.root = rootNode;
 	}
 
-	List<DependencyNode> getDuplicates()
+	List<String> getDuplicates()
 	{
-		List<DependencyNode> result = new ArrayList<DependencyNode>();
+		List<String> result = new ArrayList<String>();
 		List<NodeInformation> tree = buildTree(root, 0);
 		for (NodeInformation info : tree)
 		{
 			if (info.level > getHighestLevel(info.node.getTable()))
 			{
-				result.add(info.node);
+				String path = getNodePath(info.node);
+				if (LogMgr.isTraceEnabled())
+				{
+					LogMgr.logTrace("DependencyDuplicateFinder.getDuplicates()", "Node " + path + " is redundant");
+				}
+				result.add(path);
 			}
 		}
 		return result;
 	}
+
+	static String getNodePath(DependencyNode node)
+	{
+		StringBuilder path = new StringBuilder(10);
+		path.append('/');
+		path.append(node.getTable().getTableExpression());
+		DependencyNode parent = node.getParent();
+		while (parent != null)
+		{
+			path.insert(0, "/" + parent.getTable().getTableExpression());
+			parent = parent.getParent();
+		}
+		return path.toString();
+	}
+
+//	private void dumpTree(List<NodeInformation> tree)
+//	{
+//		StringBuilder dump = new StringBuilder(tree.size() * 20);
+//		for (NodeInformation node : tree)
+//		{
+//			String indent = StringUtil.padRight(" ", (node.level - 1) * 4);
+//			dump.append(indent);
+//			dump.append(node.node.getTable().toString());
+//			dump.append(" (").append(node.level).append(')');
+//			dump.append('\n');
+//		}
+//		try
+//		{
+//			FileUtil.writeString(new File("c:/temp/tree.txt"), dump.toString());
+//		}
+//		catch (IOException io)
+//		{
+//			//ignore
+//		}
+//	}
 
 	private int getHighestLevel(TableIdentifier table)
 	{

@@ -408,13 +408,13 @@ public class ResultInfo
 
 	public void setPKColumns(ColumnIdentifier[] cols)
 	{
-		for (int i=0; i < cols.length; i++)
+		for (ColumnIdentifier col1 : cols)
 		{
-			String name = cols[i].getColumnName();
+			String name = col1.getColumnName();
 			int col = this.findColumn(name);
 			if (col > -1)
 			{
-				boolean pk = cols[i].isPkColumn();
+				boolean pk = col1.isPkColumn();
 				this.columns[col].setIsPkColumn(pk);
 			}
 		}
@@ -607,4 +607,21 @@ public class ResultInfo
 		return isUserDefinedPK;
 	}
 
+	public ResultInfo createCopy()
+	{
+		ResultInfo copy = new ResultInfo(this.columns);
+		copy.realColumns = this.realColumns;
+		if (this.updateTable != null)
+		{
+			copy.updateTable = this.updateTable.createCopy();
+		}
+		copy.treatLongVarcharAsClob = this.treatLongVarcharAsClob;
+		copy.useGetBytesForBlobs = this.useGetBytesForBlobs;
+		copy.useGetStringForClobs = this.useGetStringForClobs;
+		copy.isUserDefinedPK = this.isUserDefinedPK;
+		copy.useGetStringForBit = this.useGetStringForBit;
+		copy.useGetXML = this.useGetXML;
+		copy.convertArrays = this.convertArrays;
+		return copy;
+	}
 }

@@ -138,7 +138,7 @@ public class DeleteScriptGenerator
 		this.dependency.readDependencyTree(true);
 		List<DependencyNode> leafs = this.dependency.getLeafs();
 
-		List<DependencyNode> toIgnore;
+		List<String> toIgnore;
 		if (removeReduntant)
 		{
 			DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
@@ -151,7 +151,7 @@ public class DeleteScriptGenerator
 
 		for (DependencyNode node : leafs)
 		{
-			if (toIgnore.contains(node)) continue;
+			if (toIgnore.contains(DependencyDuplicateFinder.getNodePath(node))) continue;
 			if (visitedTables.contains(node)) continue;
 
 			statements.add(createDeleteStatement(node));
@@ -169,7 +169,7 @@ public class DeleteScriptGenerator
 
 		for (DependencyNode pnode : parents)
 		{
-			if (toIgnore.contains(pnode)) continue;
+			if (toIgnore.contains(DependencyDuplicateFinder.getNodePath(pnode))) continue;
 			if (visitedTables.contains(pnode)) continue;
 
 			statements.add(createDeleteStatement(pnode));

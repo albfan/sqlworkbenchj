@@ -80,17 +80,17 @@ public class TableRowCountPanel
 	implements WindowListener, Reloadable, Interruptable, ToolWindow
 {
 	private static int instanceCount;
-	private WbTable data;
-	private JLabel statusBar;
-	private List<TableIdentifier> tables;
+	private final WbTable data;
+	private final JLabel statusBar;
+	private final List<TableIdentifier> tables;
 	private Statement currentStatement;
 	private boolean cancel;
 	private JFrame window;
 	private WbConnection dbConnection;
-	private WbConnection sourceConnection;
+	private final WbConnection sourceConnection;
 	private boolean useSeparateConnection;
-	private StopAction cancelAction;
-	private JScrollPane scrollPane;
+	private final StopAction cancelAction;
+	private final JScrollPane scrollPane;
 
 	public TableRowCountPanel(List<TableIdentifier> toCount, WbConnection connection)
 	{
@@ -265,7 +265,7 @@ public class TableRowCountPanel
 				if (cancel) break;
 
 				TableIdentifier table = tables.get(tableNum);
-				showTable(table, tableNum, tblCount);
+				showTable(table, tableNum+1, tblCount);
 				String sql = builder.getSelectForCount(table);
 
 				rs = runStatement(sql, useSavepoint);

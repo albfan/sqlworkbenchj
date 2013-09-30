@@ -177,7 +177,7 @@ public class MainWindow
 {
 	private static final String DEFAULT_WORKSPACE = "Default.wksp";
 	private static int instanceCount;
-	private int windowId;
+	private final int windowId;
 
 	private boolean exitOnCancel = false;
 
@@ -193,10 +193,10 @@ public class MainWindow
 	private NewDbExplorerPanelAction newDbExplorerPanel;
 	private NewDbExplorerWindowAction newDbExplorerWindow;
 
-	private WbTabbedPane sqlTab;
-	private TabbedPaneHistory tabHistory;
+	private final WbTabbedPane sqlTab;
+	private final TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
-	private List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
+	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
 
 	private String currentWorkspaceFile;
 
@@ -206,8 +206,8 @@ public class MainWindow
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
 	private ReloadProfileWkspAction reloadWorkspace;
-	private NextTabAction nextTab;
-	private PrevTabAction prevTab;
+	private final NextTabAction nextTab;
+	private final PrevTabAction prevTab;
 
 	private boolean resultForWorkspaceClose;
 
@@ -2148,11 +2148,12 @@ public class MainWindow
 			{
 				if (lastActionIndex == -1)
 				{
-					// no index found which is greater or equal than the new one
+					// no index found which is greater than or equal to the new one
 					// so add it to the end
-					if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
-					view.addSeparator();
-
+					if (!(view.getItem(count - 1).getAction() instanceof SelectTabAction))
+					{
+						view.addSeparator();
+					}
 					view.add(anAction);
 				}
 				else if (lastAction != null && lastAction.getIndex() != anAction.getIndex())
