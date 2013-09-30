@@ -40,7 +40,8 @@ import workbench.util.SqlUtil;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -85,6 +86,19 @@ public class DeleteScriptGeneratorTest
 			"  r_id integer not null references root (r_id), \n" +
 			"  l1_id integer not null references level1 (l1_id) \n" +
 			");\n" +
+			"create table item_list \n" +
+			"( \n" +
+			"  il_id integer not null primary key, \n" +
+			"  di_id integer not null references details_item(di_id), \n" +
+			"  d_id integer not null references details(d_id) \n" +
+			");\n" +
+			"create table list_detail \n" +
+			"( \n" +
+			"  ld_id integer not null primary key, \n" +
+			"  il_id integer not null references item_list(il_id), \n" +
+			"  l1_id integer not null references level1(l1_id), \n" +
+			"  di_id integer not null references details_item(di_id) \n" +
+			");\n" +
 			"commit;";
 		TestUtil util = getTestUtil();
 		this.dbConnection = util.getConnection();
@@ -100,10 +114,15 @@ public class DeleteScriptGeneratorTest
 		ColumnData id = new ColumnData("42", new ColumnIdentifier("R_ID", ColumnIdentifier.NO_TYPE_INFO));
 		pk.add(id);
 		List<String> script = generator.getStatementsForValues(pk, true);
-		assertEquals(3, script.size());
-		assertEquals("DELETE FROM DETAILS_ITEM WHERE R_ID = 42", script.get(0));
-		assertEquals("DELETE FROM LEVEL1 WHERE R_ID = 42", script.get(1));
-		assertEquals("DELETE FROM ROOT WHERE R_ID = 42", script.get(2));
+//		for (String s : script)
+//		{
+//			System.out.println(s);
+//		}
+		assertEquals(7, script.size());
+		assertEquals("DELETE FROM DETAILS_ITEM WHERE R_ID = 42", script.get(3));
+		assertEquals("DELETE FROM LIST_DETAIL WHERE  (L1_ID IN ( SELECT L1_ID FROM LEVEL1 WHERE R_ID = 42))", script.get(4));
+		assertEquals("DELETE FROM LEVEL1 WHERE R_ID = 42", script.get(5));
+		assertEquals("DELETE FROM ROOT WHERE R_ID = 42", script.get(6));
 	}
 
 	@Test

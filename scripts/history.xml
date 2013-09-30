@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
+<?xml-stylesheet type="text/xsl" href="history2html.xslt"?>
+
+<history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-09-01">
+  <release build="-1" date="2013-09-29">
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
     <entry dev-build="1" type="fix">When calculating table dependencies (WbGenerateDelete or WbImport using -checkDependencies) some cyclic references where not always detected.</entry>

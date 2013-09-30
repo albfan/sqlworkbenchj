@@ -27,19 +27,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.ScriptGenerationMonitor;
 
 import workbench.storage.ColumnData;
+import workbench.storage.RowActionMonitor;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.RowActionMonitor;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -141,7 +142,7 @@ public class WbGenDelete
 		}
 
 		generator.setTable(table);
-		generator.setRemoveRedundant(true);//Settings.getInstance().getBoolProperty("workbench.sql.gendelete.remove.dupes", false));
+		generator.setRemoveRedundant(Settings.getInstance().getBoolProperty("workbench.sql.gendelete.remove.dupes", true));
 		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, true));
 		CharSequence script = generator.getScriptForValues(values);
 
