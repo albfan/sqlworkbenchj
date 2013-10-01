@@ -23,12 +23,16 @@
 package workbench.db;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 
 import workbench.WbManager;
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -47,6 +51,8 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+
+import workbench.util.SqlUtil;
 
 /**
  * Generates a SQL script to delete a record from the given table and
@@ -67,7 +73,18 @@ public class DeleteScriptGenerator
 	private final List<String> statements = new LinkedList<String>();
 	private final SqlLiteralFormatter formatter;
 	private boolean formatSql = true;
-	private boolean removeReduntant;
+	private boolean showFkNames;
+
+	private final Comparator<Integer> descComparator = new Comparator<Integer>()
+		{
+			@Override
+			public int compare(Integer i1, Integer i2)
+			{
+				int val1 = i1.intValue();
+				int val2 = i2.intValue();
+				return (val1 < val2 ? 1 : (val1==val2 ? 0 : -1));
+			}
+		};
 
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -83,9 +100,9 @@ public class DeleteScriptGenerator
 		return connection;
 	}
 
-	public void setRemoveRedundant(boolean flag)
+	public void setShowConstraintNames(boolean flag)
 	{
-		this.removeReduntant = flag;
+		this.showFkNames = flag;
 	}
 
 	public void setFormatSql(boolean flag)
@@ -132,48 +149,24 @@ public class DeleteScriptGenerator
 
 	private void createStatements(boolean includeRoot)
 	{
-		ArrayList<DependencyNode> parents = new ArrayList<DependencyNode>();
-		List<DependencyNode> visitedTables = new ArrayList<DependencyNode>();
+		Set<DependencyNode> visitedNodes = new HashSet<DependencyNode>();
 		this.dependency.setScriptMonitor(monitor);
 		this.dependency.readDependencyTree(true);
-		List<DependencyNode> leafs = this.dependency.getLeafs();
 
-		List<String> toIgnore;
-		if (removeReduntant)
-		{
-			DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
-			toIgnore = finder.getDuplicates();
-		}
-		else
-		{
-			toIgnore = Collections.emptyList();
-		}
+//		DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
+//		List<String> duplicates = finder.getDuplicates();
 
-		for (DependencyNode node : leafs)
-		{
-			if (toIgnore.contains(DependencyDuplicateFinder.getNodePath(node))) continue;
-			if (visitedTables.contains(node)) continue;
+		Map<Integer, Set<DependencyNode>> levels = buildLevels(dependency.getRootNode(), 1);
+		adjustLevels(levels);
 
-			statements.add(createDeleteStatement(node));
-			visitedTables.add(node);
-			DependencyNode p = node.getParent();
-			while (p != null)
+		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
+		{
+			for (DependencyNode node : entry.getValue())
 			{
-				if (!isMasterTable(p) && !parents.contains(p) && !leafs.contains(p))
-				{
-					parents.add(p);
-				}
-				p = p.getParent();
+				if (visitedNodes.contains(node)) continue;
+				statements.add(createDeleteStatement(node));
+				visitedNodes.add(node);
 			}
-		}
-
-		for (DependencyNode pnode : parents)
-		{
-			if (toIgnore.contains(DependencyDuplicateFinder.getNodePath(pnode))) continue;
-			if (visitedTables.contains(pnode)) continue;
-
-			statements.add(createDeleteStatement(pnode));
-			visitedTables.add(pnode);
 		}
 
 		if (includeRoot)
@@ -211,6 +204,10 @@ public class DeleteScriptGenerator
 	{
 		if (node == null) return null;
 		StringBuilder sql = new StringBuilder(200);
+		if (showFkNames)
+		{
+			sql.append("-- ").append(node.getFkName()).append('\n');
+		}
 		sql.append("DELETE FROM ");
 		sql.append(node.getTable().getTableExpression(this.connection));
 		sql.append(" WHERE ");
@@ -261,16 +258,10 @@ public class DeleteScriptGenerator
 		}
 	}
 
-	private boolean isMasterTable(DependencyNode node)
-	{
-		TableIdentifier table = node.getTable();
-		return this.rootTable.equals(table);
-	}
-
 	private void addRootTableWhere(StringBuilder sql)
 	{
 		boolean first = true;
-		for (ColumnData col : this.columnValues)
+		for (ColumnData data : this.columnValues)
 		{
 			if (!first)
 			{
@@ -280,7 +271,17 @@ public class DeleteScriptGenerator
 			{
 				first = false;
 			}
-			appendColumnData(sql, col.getIdentifier().getColumnName(), col);
+			ColumnIdentifier col = data.getIdentifier();
+			String colname;
+			if (col.getDataType() == ColumnIdentifier.NO_TYPE_INFO)
+			{
+				colname = SqlUtil.quoteObjectname(col.getColumnName(), false);
+			}
+			else
+			{
+				colname = connection.getMetadata().quoteObjectname(col.getColumnName());
+			}
+			appendColumnData(sql, colname, data);
 		}
 	}
 
@@ -296,6 +297,7 @@ public class DeleteScriptGenerator
 	private void addRootTableWhere(StringBuilder sql, String parentColumn, String childColumn)
 	{
 		ColumnData data = findColData(parentColumn);
+		childColumn = connection.getMetadata().quoteObjectname(childColumn);
 		appendColumnData(sql, childColumn, data);
 	}
 
@@ -326,7 +328,7 @@ public class DeleteScriptGenerator
 
 	private void appendColumnData(StringBuilder sql, String column, ColumnData data)
 	{
-		sql.append(connection.getMetadata().quoteObjectname(column));
+		sql.append(column);
 		if (data == null || data.isNull())
 		{
 			sql.append(" IS NULL");
@@ -435,6 +437,90 @@ public class DeleteScriptGenerator
 		finally
 		{
 			connection.setBusy(false);
+		}
+	}
+
+	/**
+	 * If a table occurs more than once in the hierarchy, all deletes
+	 * should be done on the lowest level.
+	 * This method moves tables from higher levels to lower levels
+	 */
+	private void adjustLevels(Map<Integer, Set<DependencyNode>> map)
+	{
+		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
+		{
+			int level = entry.getKey();
+			Set<DependencyNode> nodes = entry.getValue();
+			Iterator<DependencyNode> itr = nodes.iterator();
+			while (itr.hasNext())
+			{
+				DependencyNode node = itr.next();
+				int maxLevel = findHighestLevel(node, map);
+				if (maxLevel > level)
+				{
+					itr.remove();
+					map.get(maxLevel).add(node);
+				}
+			}
+		}
+	}
+
+	private int findHighestLevel(DependencyNode node, Map<Integer, Set<DependencyNode>> map)
+	{
+		int maxLevel = Integer.MIN_VALUE;
+		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
+		{
+			int level = entry.getKey();
+			if (entry.getValue().contains(node) && level > maxLevel)
+			{
+				maxLevel = level;
+			}
+		}
+		return maxLevel;
+	}
+
+	private Map<Integer, Set<DependencyNode>> buildLevels(DependencyNode root, int level)
+	{
+		Map<Integer, Set<DependencyNode>> result = new TreeMap<Integer, Set<DependencyNode>>(descComparator);
+
+		List<DependencyNode> children = root.getChildren();
+
+		if (children.isEmpty()) return result;
+
+		Integer lvl = Integer.valueOf(level);
+		for (DependencyNode child : children)
+		{
+			Set<DependencyNode> nodes = result.get(lvl);
+			if (nodes == null)
+			{
+				nodes = new HashSet<DependencyNode>();
+				result.put(lvl, nodes);
+			}
+			nodes.add(child);
+		}
+
+		for (DependencyNode child : children)
+		{
+			if (child.getChildren().size() > 0)
+			{
+				mergeMaps(result, buildLevels(child, level + 1));
+			}
+		}
+		return result;
+	}
+
+	private void mergeMaps(Map<Integer, Set<DependencyNode>> target, Map<Integer, Set<DependencyNode>> source)
+	{
+		for (Integer key : source.keySet())
+		{
+			Set<DependencyNode> main = target.get(key);
+			if (main == null)
+			{
+				main = new HashSet<DependencyNode>();
+				target.put(key, main);
+			}
+			Set<DependencyNode> toAdd = source.get(key);
+			main.addAll(toAdd);
 		}
 	}
 }

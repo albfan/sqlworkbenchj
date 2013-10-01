@@ -29,7 +29,6 @@ import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DeleteScriptGenerator;
@@ -65,6 +64,7 @@ public class WbGenDelete
 	public static final String PARAM_DO_FORMAT = "formatSql";
 	public static final String PARAM_INCLUDE_COMMIT = "includeCommit";
 	public static final String PARAM_APPEND = "appendFile";
+	public static final String PARAM_SHOW_FK_NAMES = "showConstraints";
 
 	private DeleteScriptGenerator generator;
 
@@ -79,6 +79,7 @@ public class WbGenDelete
 		cmdLine.addArgument(PARAM_COLUMN_VAL, ArgumentType.Repeatable);
 		cmdLine.addArgument(PARAM_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(PARAM_APPEND, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(PARAM_SHOW_FK_NAMES, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public class WbGenDelete
 		}
 
 		generator.setTable(table);
-		generator.setRemoveRedundant(Settings.getInstance().getBoolProperty("workbench.sql.gendelete.remove.dupes", true));
+		generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
 		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, true));
 		CharSequence script = generator.getScriptForValues(values);
 

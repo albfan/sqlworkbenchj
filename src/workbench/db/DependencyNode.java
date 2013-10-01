@@ -92,7 +92,7 @@ public class DependencyNode
 	@Override
 	public String toString()
 	{
-		return this.table.getTableName();
+		return this.table.getTableName() + " (" + this.fkName + ")";
 	}
 
 	public String debugString()

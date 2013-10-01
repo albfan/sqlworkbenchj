@@ -230,7 +230,7 @@ public class EditorPanel
 		{
 			Settings.getInstance().addPropertyChangeListener(this, prop);
 		}
-		this.reloadType = GuiSettings.getReloadType();
+		this.reloadType = FileReloadType.prompt;//GuiSettings.getReloadType();
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
@@ -340,6 +340,14 @@ public class EditorPanel
 				this.reloadFile();
 				this.statusBar.setStatusMessage("File " + fname + " was externally modified and has been reloaded", 5000);
 			}
+			else if (reloadType == FileReloadType.prompt)
+			{
+				boolean doReload = WbSwingUtilities.getYesNo(this, "The file has been changed outside of SQL Workbench. Do you want to reload it?");
+				if (doReload)
+				{
+					this.reloadFile();
+				}
+			}
 		}
 	}
 
@@ -363,7 +371,7 @@ public class EditorPanel
 	public UndoAction getUndoAction() { return this.undo; }
 	public RedoAction getRedoAction() { return this.redo; }
 
-	public JumpToLineAction getJumpToLineAction()
+	public final JumpToLineAction getJumpToLineAction()
 	{
 		return this.jumpToLineAction;
 	}
@@ -610,7 +618,7 @@ public class EditorPanel
 			boolean reload = WbSwingUtilities.getYesNo(this, msg);
 			if (!reload) return false;
 		}
-		boolean result = false;
+		boolean result;
 		int caret = this.getCaretPosition();
 		result = this.readFile(currentFile, fileEncoding);
 		if (result)
@@ -791,7 +799,7 @@ public class EditorPanel
 	@Override
 	public boolean saveCurrentFile()
 	{
-		boolean result = false;
+		boolean result;
 		try
 		{
 			if (this.currentFile != null)
@@ -816,7 +824,7 @@ public class EditorPanel
 	{
 		boolean result = false;
 		String lastDir;
-		FileFilter ff = null;
+		FileFilter ff;
 		if (this.editorType == SQL_EDITOR)
 		{
 			lastDir = Settings.getInstance().getLastSqlDir();

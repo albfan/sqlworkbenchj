@@ -22,6 +22,9 @@
  */
 package workbench.db;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import workbench.storage.ColumnData;
 
 import workbench.sql.ScriptParser;
 
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
 import org.junit.Test;
@@ -58,71 +62,50 @@ public class DeleteScriptGeneratorTest
 	}
 
 	@Test
-	public void testCleanup()
+	public void testMultiLevel()
 		throws Exception
 	{
-		String sql =
-			"create table root  \n" +
-			"( \n" +
-			"  r_id integer primary key not null \n" +
-			"); \n" +
-			" \n" +
-			"create table details \n" +
-			"( \n" +
-			"  d_id integer not null primary key \n" +
-			"); \n" +
-			" \n" +
-			"create table level1 \n" +
-			"( \n" +
-			"  l1_id integer primary key not null, \n" +
-			"  r_id integer not null references root (r_id), \n" +
-			"  d_id integer not null references details(d_id) \n" +
-			"); \n" +
-			" \n" +
-			"create table details_item \n" +
-			"( \n" +
-			"  di_id integer not null primary key, \n" +
-			"  d_id integer not null references details(d_id), \n" +
-			"  r_id integer not null references root (r_id), \n" +
-			"  l1_id integer not null references level1 (l1_id) \n" +
-			");\n" +
-			"create table item_list \n" +
-			"( \n" +
-			"  il_id integer not null primary key, \n" +
-			"  di_id integer not null references details_item(di_id), \n" +
-			"  d_id integer not null references details(d_id) \n" +
-			");\n" +
-			"create table list_detail \n" +
-			"( \n" +
-			"  ld_id integer not null primary key, \n" +
-			"  il_id integer not null references item_list(il_id), \n" +
-			"  l1_id integer not null references level1(l1_id), \n" +
-			"  di_id integer not null references details_item(di_id) \n" +
-			");\n" +
-			"commit;";
 		TestUtil util = getTestUtil();
 		this.dbConnection = util.getConnection();
+
+		InputStream in = getClass().getResourceAsStream("gen_delete_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String sql = FileUtil.readCharacters(r);
+
 		TestUtil.executeScript(dbConnection, sql);
-		TableIdentifier tbl = dbConnection.getMetadata().findTable(new TableIdentifier("ROOT"));
+		TableIdentifier tbl = dbConnection.getMetadata().findTable(new TableIdentifier("COUNTRIES"));
 
 		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
 		generator.setFormatSql(false);
 		generator.setTable(tbl);
-		generator.setRemoveRedundant(true);
 
 		List<ColumnData> pk = new ArrayList<ColumnData>();
-		ColumnData id = new ColumnData("42", new ColumnIdentifier("R_ID", ColumnIdentifier.NO_TYPE_INFO));
+		ColumnData id = new ColumnData("42", new ColumnIdentifier("country_id", ColumnIdentifier.NO_TYPE_INFO));
 		pk.add(id);
 		List<String> script = generator.getStatementsForValues(pk, true);
 //		for (String s : script)
 //		{
 //			System.out.println(s);
 //		}
-		assertEquals(7, script.size());
-		assertEquals("DELETE FROM DETAILS_ITEM WHERE R_ID = 42", script.get(3));
-		assertEquals("DELETE FROM LIST_DETAIL WHERE  (L1_ID IN ( SELECT L1_ID FROM LEVEL1 WHERE R_ID = 42))", script.get(4));
-		assertEquals("DELETE FROM LEVEL1 WHERE R_ID = 42", script.get(5));
-		assertEquals("DELETE FROM ROOT WHERE R_ID = 42", script.get(6));
+		assertEquals(14, script.size());
+		assertEquals("DELETE FROM COUNTRIES WHERE country_id = 42", script.get(13));
+		assertEquals("DELETE FROM REGIONS WHERE COUNTRY_ID = 42", script.get(12));
+		assertEquals("DELETE FROM STORES WHERE COUNTRY_ID = 42", script.get(11));
+		assertEquals("DELETE FROM VENDING_MACHINES WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(10));
+		assertEquals("DELETE FROM STORES WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(9));
+		assertEquals("DELETE FROM REGION_MGR WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(8));
+		assertEquals("DELETE FROM ACCOUNT_MGR WHERE  (REGION_MGR_ID IN ( SELECT REGION_MGR_ID FROM REGION_MGR WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))))", script.get(7));
+
+		for (int i=0; i < script.size(); i++)
+		{
+			String stmt = script.get(i);
+			if (stmt.startsWith("DELETE FROM STORE_DETAILS"))
+			{
+				// make sure that any delete statement for the store_details table
+				// appears before the delete statement of the store table
+				assertTrue(i < 11);
+			}
+		}
 	}
 
 	@Test
