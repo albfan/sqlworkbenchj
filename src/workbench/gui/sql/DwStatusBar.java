@@ -70,22 +70,22 @@ public class DwStatusBar
 	extends JPanel
 	implements StatusBar, EditorStatusbar, ActionListener
 {
-	private JTextField tfRowCount;
+	private final JTextField tfRowCount;
 
 	protected WbTextLabel tfStatus;
 
-	private JTextField tfMaxRows;
+	private final JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
-	private WbTextLabel execTime;
+	private final WbTextLabel execTime;
 	private JLabel editorStatus;
-	private JPanel infoPanel;
+	private final JPanel infoPanel;
 
 	private static final int DEFAULT_FIELD_HEIGHT = 18;
 	private static final Border MAX_ROWS_BORDER = new EmptyBorder(0, 0, 0, 1);
 	private static final Insets MAX_ROWS_INSETS = new Insets(0, 2, 0, 2);
 
-	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
+	private final int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
 	private long timerStarted;
 	private Timer executionTimer;
@@ -94,7 +94,7 @@ public class DwStatusBar
 	private String editorColPrefix;
 	private SelectionDisplay selectionDisplay;
 
-	private DurationFormatter durationFormatter = new DurationFormatter();
+	private final DurationFormatter durationFormatter = new DurationFormatter();
 
 	public static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), BorderFactory.createEtchedBorder());
 

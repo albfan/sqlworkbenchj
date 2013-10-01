@@ -32,6 +32,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -108,6 +109,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * An extension to {@link workbench.gui.editor.JEditTextArea}. This class
@@ -129,7 +131,7 @@ public class EditorPanel
 	private int editorType;
 
 	private FormatSqlAction formatSql;
-	private SearchAndReplace replacer;
+	private final SearchAndReplace replacer;
 
 	protected UndoAction undo;
 	protected RedoAction redo;
@@ -141,14 +143,17 @@ public class EditorPanel
 	protected FileSaveAction fileSave;
 	protected FileReloadAction fileReloadAction;
 
-	private ColumnSelectionAction columnSelection;
-	private MatchBracketAction matchBracket;
-	private CommentAction commentAction;
-	private UnCommentAction unCommentAction;
-	private JumpToLineAction jumpToLineAction;
+	private final ColumnSelectionAction columnSelection;
+	private final MatchBracketAction matchBracket;
+	private final CommentAction commentAction;
+	private final UnCommentAction unCommentAction;
+	private final JumpToLineAction jumpToLineAction;
 
-	private List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
-	private File currentFile;
+	private FileReloadType reloadType = FileReloadType.automatic;
+
+	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
+	private WbFile currentFile;
+	private long fileModifiedTime;
 	private String fileEncoding;
 	private Set<String> dbFunctions;
 	private Set<String> dbDatatypes;
@@ -219,14 +224,23 @@ public class EditorPanel
 		this.addKeyBinding(redo);
 
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL, GuiSettings.PROP_FILE_RELOAD_TYPE);
 		String[] props = SyntaxUtilities.getColorProperties();
 		for (String prop : props)
 		{
 			Settings.getInstance().addPropertyChangeListener(this, prop);
 		}
+		this.reloadType = GuiSettings.getReloadType();
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
+	}
+
+	public void setFileReloadType(FileReloadType type)
+	{
+		if (type != null)
+		{
+			this.reloadType = type;
+		}
 	}
 
 	public void disableSqlHighlight()
@@ -303,6 +317,30 @@ public class EditorPanel
 			return (AnsiSQLTokenMarker)marker;
 		}
 		return null;
+	}
+
+	@Override
+	public void focusGained(FocusEvent e)
+	{
+		super.focusGained(e);
+		checkFileChange();
+	}
+
+	protected void checkFileChange()
+	{
+		if (this.currentFile == null) return;
+		long currentTime = currentFile.lastModified();
+
+		if (currentTime > fileModifiedTime)
+		{
+			String fname = getCurrentFileName();
+			LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified!");
+			if (reloadType == FileReloadType.automatic)
+			{
+				this.reloadFile();
+				this.statusBar.setStatusMessage("File " + fname + " was externally modified and has been reloaded", 5000);
+			}
+		}
 	}
 
 	public void showFindOnPopupMenu()
@@ -431,7 +469,7 @@ public class EditorPanel
 		{
 			inputHandler.dispose();
 		}
-		
+
 		WbAction.dispose(
 			columnSelection, commentAction, fileOpen, fileReloadAction, fileSave,
 			fileSaveAs, formatSql, jumpToLineAction, matchBracket, redo, unCommentAction, undo
@@ -659,6 +697,8 @@ public class EditorPanel
 			// be in memory at the same time.
 			clearCurrentDocument();
 
+			this.fileModifiedTime = toLoad.lastModified();
+
 			try
 			{
 				if (StringUtil.isEmptyString(encoding))
@@ -718,7 +758,7 @@ public class EditorPanel
 			{
 				doc.resumeUndo();
 				setDocument(doc);
-				currentFile = toLoad;
+				currentFile = new WbFile(toLoad);
 				fileEncoding = encoding;
 				result = true;
 				fireFilenameChanged(toLoad.getAbsolutePath());
@@ -874,7 +914,7 @@ public class EditorPanel
 				}
 			}
 			writer.close();
-			this.currentFile = aFile;
+			this.currentFile = new WbFile(aFile);
 			this.fileEncoding = encoding;
 			this.resetModified();
 		}
@@ -900,7 +940,7 @@ public class EditorPanel
 	public String getCurrentFileName()
 	{
 		if (this.currentFile == null) return null;
-		return this.currentFile.getAbsolutePath();
+		return this.currentFile.getFullPath();
 	}
 
 	public CommentAction getCommentAction()
@@ -930,6 +970,10 @@ public class EditorPanel
 		else if (evt.getPropertyName().startsWith("workbench.editor.color."))
 		{
 			this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
+		}
+		else if (evt.getPropertyName().equals(GuiSettings.PROP_FILE_RELOAD_TYPE))
+		{
+			this.setFileReloadType(GuiSettings.getReloadType());
 		}
 		WbSwingUtilities.repaintNow(this);
 	}

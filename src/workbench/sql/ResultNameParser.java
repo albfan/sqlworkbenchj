@@ -31,8 +31,6 @@ package workbench.sql;
 public class ResultNameParser
 	extends AnnotationReader
 {
-	public final String resultKeyword = "@wbresult";
-
 	public ResultNameParser()
 	{
 		super("wbresult");
@@ -40,7 +38,7 @@ public class ResultNameParser
 
 	public String getResultName(String sql)
 	{
-		return super.getAnnotationValue(sql);
+		return getAnnotationValue(sql);
 	}
 
 }

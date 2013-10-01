@@ -22,12 +22,16 @@
  */
 package workbench.db;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import workbench.log.LogMgr;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -48,6 +52,7 @@ class DependencyDuplicateFinder
 	{
 		List<String> result = new ArrayList<String>();
 		List<NodeInformation> tree = buildTree(root, 0);
+		dumpTree(tree);
 		for (NodeInformation info : tree)
 		{
 			if (info.level > getHighestLevel(info.node.getTable()))
@@ -77,26 +82,28 @@ class DependencyDuplicateFinder
 		return path.toString();
 	}
 
-//	private void dumpTree(List<NodeInformation> tree)
-//	{
-//		StringBuilder dump = new StringBuilder(tree.size() * 20);
-//		for (NodeInformation node : tree)
-//		{
-//			String indent = StringUtil.padRight(" ", (node.level - 1) * 4);
-//			dump.append(indent);
-//			dump.append(node.node.getTable().toString());
-//			dump.append(" (").append(node.level).append(')');
-//			dump.append('\n');
-//		}
-//		try
-//		{
-//			FileUtil.writeString(new File("c:/temp/tree.txt"), dump.toString());
-//		}
-//		catch (IOException io)
-//		{
-//			//ignore
-//		}
-//	}
+	private void dumpTree(List<NodeInformation> tree)
+	{
+		StringBuilder dump = new StringBuilder(tree.size() * 20);
+		dump.append(this.root.getTable().toString());
+		for (NodeInformation infoNode : tree)
+		{
+			String indent = StringUtil.padRight("", (infoNode.level) * 4);
+			dump.append(indent);
+			dump.append(infoNode.node.getTable().toString());
+			String cols = StringUtil.listToString(infoNode.node.getColumns().keySet(), ',');
+			dump.append(" (").append(cols).append(')');
+			dump.append('\n');
+		}
+		try
+		{
+			FileUtil.writeString(new File("c:/temp/tree.txt"), dump.toString());
+		}
+		catch (IOException io)
+		{
+			//ignore
+		}
+	}
 
 	private int getHighestLevel(TableIdentifier table)
 	{

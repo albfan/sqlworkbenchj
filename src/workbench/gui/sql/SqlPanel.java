@@ -215,8 +215,7 @@ import workbench.util.WbWorkspace;
  */
 public class SqlPanel
 	extends JPanel
-	implements FontChangedListener,
-		PropertyChangeListener, ChangeListener,
+	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
 		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar
@@ -232,10 +231,10 @@ public class SqlPanel
 	protected boolean threadBusy;
 	protected boolean cancelExecution;
 
-	private List actions = new LinkedList();
-	private List<WbAction> toolbarActions = new LinkedList<WbAction>();
+	private final List actions = new LinkedList();
+	private final List<WbAction> toolbarActions = new LinkedList<WbAction>();
 
-	private List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
+	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
@@ -243,7 +242,7 @@ public class SqlPanel
 	protected ExecuteSelAction executeSelected;
 
 	private static int instanceCount = 0;
-	private int internalId;
+	private final int internalId;
 
 	// Actions from DwPanel
 	protected CopyAsTextAction dataToClipboard;
@@ -320,6 +319,15 @@ public class SqlPanel
 	private boolean locked;
 	private boolean ignoreStateChange;
 	private long lastScriptExecTime;
+
+	private final Runnable selector = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_selectEditor();
+			}
+		};
 
 //</editor-fold>
 
@@ -996,15 +1004,6 @@ public class SqlPanel
 		editor.getInputMap().setParent(im);
 		editor.getActionMap().setParent(am);
 	}
-
-	private Runnable selector = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_selectEditor();
-			}
-		};
 
 	public void selectEditorLater()
 	{
@@ -3499,9 +3498,14 @@ public class SqlPanel
 		String sql = (ds != null ? ds.getGeneratingSql() : "");
 		ScrollAnnotation scroll = new ScrollAnnotation();
 		boolean scrollToEnd = scroll.scrollToEnd(sql);
+		int line = scroll.scrollToLine(sql);
 		if (scrollToEnd && tbl != null)
 		{
 			tbl.scrollToRow(tbl.getRowCount() - 1);
+		}
+		else if (line > 0)
+		{
+			tbl.scrollToRow(line - 1);
 		}
 		return newIndex;
 	}

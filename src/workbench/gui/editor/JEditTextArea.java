@@ -132,7 +132,7 @@ public class JEditTextArea
 
 	private KeyListener keyEventInterceptor;
 	private KeyListener keyNotificationListener;
-	private EditorStatusbar statusBar;
+	protected EditorStatusbar statusBar;
 
 	protected static final String CENTER = "center";
 	protected static final String RIGHT = "right";
@@ -145,7 +145,7 @@ public class JEditTextArea
 	protected TextPopup popup;
 
 	protected EventListenerList listeners;
-	private MutableCaretEvent caretEvent;
+	private final MutableCaretEvent caretEvent;
 
 	protected boolean caretBlinks;
 	protected boolean caretVisible;
@@ -166,7 +166,7 @@ public class JEditTextArea
 
 	protected InputHandler inputHandler;
 	protected SyntaxDocument document;
-	private DocumentHandler documentHandler;
+	private final DocumentHandler documentHandler;
 
 	protected Segment lineSegment;
 
@@ -187,7 +187,7 @@ public class JEditTextArea
 	private long lastModified;
 	private int invalidationInterval = 10;
 
-	private FontZoomer fontZoomer;
+	private final FontZoomer fontZoomer;
 
 	private BracketCompleter bracketCompleter;
 	private boolean smartClosing = true;
@@ -2766,6 +2766,12 @@ public class JEditTextArea
 
 	class ScrollLayout implements LayoutManager
 	{
+		// private members
+		private Component center;
+		private Component right;
+		private Component bottom;
+		private final List<Component> leftOfScrollBar = new ArrayList<Component>();
+
 		@Override
 		public void addLayoutComponent(String name, Component comp)
 		{
@@ -2888,12 +2894,6 @@ public class JEditTextArea
 				bottom.setBounds(ileft, itop + centerHeight, size.width - rightWidth - ileft - iright, bottomHeight);
 			}
 		}
-
-		// private members
-		private Component center;
-		private Component right;
-		private Component bottom;
-		private List<Component> leftOfScrollBar = new ArrayList<Component>();
 	}
 
 	class MutableCaretEvent extends CaretEvent

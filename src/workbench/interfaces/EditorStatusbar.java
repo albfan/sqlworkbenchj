@@ -29,4 +29,5 @@ package workbench.interfaces;
 public interface EditorStatusbar
 {
 	void setEditorLocation(int line, int column);
+	void setStatusMessage(String message, int duration);
 }

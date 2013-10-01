@@ -1,5 +1,5 @@
 /*
- * ScrollAnnotation.java
+ * FileReloadType.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -20,42 +20,15 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
-
-import java.util.Set;
-import workbench.util.CollectionUtil;
-import workbench.util.StringUtil;
+package workbench.gui.sql;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ScrollAnnotation
-	extends AnnotationReader
+public enum FileReloadType
 {
-	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", "end");
-
-	public ScrollAnnotation()
-	{
-		super("wbscrollto");
-	}
-
-	public boolean scrollToEnd(String sql)
-	{
-		String value = getAnnotationValue(sql);
-		return endKeywords.contains(value);
-	}
-
-	public int scrollToLine(String sql)
-	{
-		String value = getAnnotationValue(sql);
-		if (StringUtil.isNonBlank(value))
-		{
-			if (value.startsWith("#"))
-			{
-				return StringUtil.getIntValue(value.substring(1), -1);
-			}
-		}
-		return -1;
-	}
+	none,
+	prompt,
+	automatic;
 }

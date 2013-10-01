@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
+import workbench.gui.sql.FileReloadType;
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -75,6 +76,8 @@ public class GuiSettings
 	public static final String PROP_WRAP_MULTILINE_RENDERER = "workbench.gui.display.multiline.renderer.wrap";
 	public static final String PROP_WRAP_MULTILINE_EDITOR = "workbench.gui.display.multiline.editor.wrap";
 	public static final String PROP_DBEXP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
+
+	public static final String PROP_FILE_RELOAD_TYPE = "workbench.gui.editor.file.reloadtype";
 
 	public static int getMaxExpansionPause()
 	{
@@ -911,5 +914,23 @@ public class GuiSettings
 	public static void setShowTableHeaderInBold(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_TABLE_HEADER_BOLD, flag);
+	}
+
+	public static void setReloadType(FileReloadType type)
+	{
+		Settings.getInstance().setProperty(PROP_FILE_RELOAD_TYPE, type.toString());
+	}
+
+	public static FileReloadType getReloadType()
+	{
+		String type = Settings.getInstance().getProperty(PROP_FILE_RELOAD_TYPE, "none");
+		try
+		{
+			return FileReloadType.valueOf(type);
+		}
+		catch (Exception ex)
+		{
+			return FileReloadType.none;
+		}
 	}
 }
