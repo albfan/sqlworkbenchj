@@ -142,19 +142,19 @@ public class TableListPanel
 	protected TableDataPanel tableData;
 
 	private TableIndexPanel indexPanel;
-	private TriggerDisplayPanel triggers;
+	private final TriggerDisplayPanel triggers;
 	protected DbObjectSourcePanel tableSource;
 	private JTabbedPane displayTab;
-	private WbSplitPane splitPane;
+	private final WbSplitPane splitPane;
 
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
-	private SpoolDataAction spoolData;
+	private final SpoolDataAction spoolData;
 
 	private CompileDbObjectAction compileAction;
 	private CountTableRowsAction countAction;
-	private AlterObjectAction renameAction;
+	private final AlterObjectAction renameAction;
 
 	private MainWindow parentWindow;
 
@@ -181,7 +181,7 @@ public class TableListPanel
 
 	private EditorTabSelectMenu showDataMenu;
 
-	private ToggleTableSourceAction toggleTableSource;
+	private final ToggleTableSourceAction toggleTableSource;
 
 	// holds a reference to other WbTables which
 	// need to display the same table list
@@ -190,9 +190,9 @@ public class TableListPanel
 
 	protected JDialog infoWindow;
 	private JLabel infoLabel;
-	private JPanel statusPanel;
-	private FlatButton alterButton;
-	private JLabel summaryStatusBarLabel;
+	private final JPanel statusPanel;
+	private final FlatButton alterButton;
+	private final JLabel summaryStatusBarLabel;
 	private String tableTypeToSelect;
 
 	private final Object connectionLock = new Object();

@@ -34,8 +34,10 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to fix the bug in Oracle's JDBC that causes foreign keys that reference unique constraints
@@ -92,10 +94,12 @@ public class OracleFKHandler
 			"AND fc.position = pc.position \n";
 
 	private PreparedStatement retrievalStatement;
+	private final String currentUser;
 
 	public OracleFKHandler(WbConnection conn)
 	{
 		super(conn);
+		currentUser = conn.getCurrentSchema();
 	}
 
 	@Override
@@ -143,14 +147,10 @@ public class OracleFKHandler
 		boolean optimize = Settings.getInstance().getBoolProperty("workbench.db.oracle.optimize_fk_query", true);
 		if (optimize)
 		{
-			String user = getConnection().getProfile().getUsername().toUpperCase();
 			String schema = tbl.getRawSchema();
-			boolean isOwner = schema.equals(user);
-			if (isOwner)
+			if (StringUtil.isEmptyString(schema) || schema.equals(currentUser))
 			{
-				String sql = baseSql.replace("all_constraints", "user_constraints");
-				sql = sql.replace("all_cons_columns", "user_cons_columns");
-				return sql;
+				return baseSql.replace("all_", "user_");
 			}
 		}
 		return baseSql;
@@ -163,7 +163,6 @@ public class OracleFKHandler
 		sql.append(getQuery(tbl));
 		sql.append("AND p.table_name = ? \n");
 		sql.append("AND p.owner = ? \n");
-		sql.append("ORDER BY fktable_schem, fktable_name, key_seq");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -186,7 +185,16 @@ public class OracleFKHandler
 			SqlUtil.closeStatement(retrievalStatement);
 			retrievalStatement = null;
 		}
+		sortResult(result);
 		return result;
+	}
+
+	private void sortResult(DataStore ds)
+	{
+		if (ds == null) return;
+		// sort by the second and third column
+		SortDefinition def = new SortDefinition(new int[] {1,2}, new boolean[] {true, true});
+		ds.sort(def);
 	}
 
 	private DataStore getImportedKeyList(TableIdentifier tbl)
@@ -196,7 +204,6 @@ public class OracleFKHandler
 		sql.append(getQuery(tbl));
 		sql.append("AND f.table_name = ? \n");
 		sql.append("AND f.owner = ? \n");
-		sql.append("ORDER BY pktable_schem, pktable_name, key_seq");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -219,6 +226,7 @@ public class OracleFKHandler
 			SqlUtil.closeStatement(retrievalStatement);
 			retrievalStatement = null;
 		}
+		sortResult(result);
 		return result;
 	}
 

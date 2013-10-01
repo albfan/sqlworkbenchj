@@ -64,8 +64,11 @@ public class OracleTypeReader
 	{
 		// if no type has been requested, the Oracle driver does not include the object types
 		// if TYPE has specifically been requested, the objects are returned
-		if (requestedTypes != null) return false;
-		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
+		if (requestedTypes != null || !DbMetadata.typeIncluded("TYPE", requestedTypes))
+		{
+			updateTypes(result);
+			return false;
+		}
 
 		List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
 		for (OracleObjectType type : types)
@@ -79,6 +82,21 @@ public class OracleTypeReader
 			result.getRow(row).setUserObject(type);
 		}
 		return types.size() > 0;
+	}
+
+	private void updateTypes(DataStore result)
+	{
+		for (int row=0; row < result.getRowCount(); row ++)
+		{
+			String type = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			if ("TYPE".equals(type))
+			{
+				String schema = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+				String name = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+				OracleObjectType object = new OracleObjectType(schema, name);
+				result.getRow(row).setUserObject(object);
+			}
+		}
 	}
 
 	public List<OracleObjectType> getTypes(WbConnection con, String schema, String name)

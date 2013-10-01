@@ -45,7 +45,7 @@ public class OracleObjectType
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
-		return "DROP TYPE " + getFullyQualifiedName(con) + " FORCE";
+		return null;
 	}
 
 	public void setNumberOfMethods(int count)
