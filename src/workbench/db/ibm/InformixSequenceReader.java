@@ -22,23 +22,24 @@
  */
 package workbench.db.ibm;
 
-import workbench.db.SequenceDefinition;
-import workbench.db.SequenceReader;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * SequenceReader for Informix
@@ -115,7 +116,7 @@ public class InformixSequenceReader
 			"       seq.order \n" +
 			" from ");
 		sql.append(syssequences);
-		sql.append("seq \n   join ");
+		sql.append(" seq \n   join ");
 		sql.append(systables);
 		sql.append(" t on seq.tabid = t.tabid");
 
