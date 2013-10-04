@@ -24,15 +24,19 @@ package workbench.console;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import workbench.AppArguments;
 import workbench.WbManager;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.profiles.ProfileKey;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
@@ -46,6 +50,7 @@ import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -324,7 +329,7 @@ public class SQLConsole
 	{
 		AppArguments cmdLine = new AppArguments();
 		cmdLine.parse(args);
-		if (cmdLine.isArgPresent(AppArguments.ARG_SCRIPT))
+		if (cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || cmdLine.isArgPresent(AppArguments.ARG_COMMAND))
 		{
 			// Allow batch mode through SQL Console
 			// This way sqlwbconsole.exe can be used to start batch mode as well.
