@@ -24,8 +24,10 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 
@@ -44,9 +46,9 @@ class DependencyDuplicateFinder
 		this.root = rootNode;
 	}
 
-	List<String> getDuplicates()
+	Set<String> getDuplicates()
 	{
-		List<String> result = new ArrayList<String>();
+		Set<String> result = new HashSet<String>();
 		List<NodeInformation> tree = buildTree(root, 0);
 //		dumpTree(tree);
 		for (NodeInformation info : tree)

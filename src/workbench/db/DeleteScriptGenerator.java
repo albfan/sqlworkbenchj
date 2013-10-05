@@ -170,9 +170,6 @@ public class DeleteScriptGenerator
 		this.dependency.setScriptMonitor(monitor);
 		this.dependency.readDependencyTree(true);
 
-//		DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
-//		List<String> duplicates = finder.getDuplicates();
-
 		Map<Integer, Set<DependencyNode>> levels = buildLevelsTopDown(dependency.getRootNode(), 1);
 
 		if (this.monitor != null)
@@ -207,6 +204,11 @@ public class DeleteScriptGenerator
 					tableNodes.addValue(node.getTable(), node);
 				}
 
+				// The tables that are deleted on the same level also need to be sorted to avoid deleting from a table
+				// that is used in the sub-select of another table later on.
+				// the sum of the node levels gives an indication on which one has less dependencies
+				// theoretically it could still mean that two tables that have the same number of dependencies
+				// need a specific order, but this is too hard to detect...
 				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
 				for (TableIdentifier tbl : sorted)
 				{
@@ -230,15 +232,16 @@ public class DeleteScriptGenerator
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
 	{
 		List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables.keySet());
-		Comparator<TableIdentifier> levelComp = new Comparator<TableIdentifier>()
+
+		final Comparator<TableIdentifier> levelComp = new Comparator<TableIdentifier>()
 		{
 			@Override
 			public int compare(TableIdentifier o1, TableIdentifier o2)
 			{
-				return -1 * (getTotalLevels(o1) - getTotalLevels(o2));
+				return -1 * (getLevelTotal(o1) - getLevelTotal(o2));
 			}
 
-			private int getTotalLevels(TableIdentifier tbl)
+			private int getLevelTotal(TableIdentifier tbl)
 			{
 				Set<DependencyNode> nodes = tables.get(tbl);
 				if (nodes == null) return 0;
@@ -290,7 +293,7 @@ public class DeleteScriptGenerator
 		}
 		sql.append("DELETE FROM ");
 		sql.append(table.getTableExpression(this.connection));
-		sql.append(" \nWHERE ");
+		sql.append(" \nWHERE");
 
 		boolean first = true;
 		for (DependencyNode node : nodes)
@@ -302,7 +305,7 @@ public class DeleteScriptGenerator
 			}
 			else
 			{
-				sql.append("\n  OR ");
+				sql.append("\n   OR");
 			}
 			addParentWhere(sql, node);
 			processed.add(node);
@@ -336,12 +339,13 @@ public class DeleteScriptGenerator
 					sql.append(" FROM ");
 					sql.append(parent.getTable().getTableExpression(this.connection));
 					sql.append(" WHERE ");
-					this.addParentWhere(sql, parent);
+					addParentWhere(sql, parent);
 					sql.append("))");
 				}
 				else
 				{
-					this.addRootTableWhere(sql, parentColumn, column);
+					sql.append(' ');
+					addRootTableWhere(sql, parentColumn, column);
 				}
 				count ++;
 			}
@@ -550,7 +554,7 @@ public class DeleteScriptGenerator
 					if (otherLevel == entry.getKey() && otherLevel > 1)
 					{
 						otherLevel --;
-						LogMgr.logDebug("DeleteScriptGenerator.adjustLevels()" , "Entry for table: " + node.getTable() + " (" + node.getFkName() + ") should be moved to the same level (" + entry.getKey() + "). Moving to " + otherLevel);
+						LogMgr.logTrace("DeleteScriptGenerator.adjustLevels()" , "Entry for table: " + node.getTable() + " (" + node.getFkName() + ") should be moved to the same level (" + entry.getKey() + "). Moving to " + otherLevel);
 					}
 					if (otherLevel != entry.getKey())
 					{
