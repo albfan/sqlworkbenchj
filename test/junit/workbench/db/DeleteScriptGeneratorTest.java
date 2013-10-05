@@ -83,18 +83,23 @@ public class DeleteScriptGeneratorTest
 		ColumnData id = new ColumnData("42", new ColumnIdentifier("country_id", ColumnIdentifier.NO_TYPE_INFO));
 		pk.add(id);
 		List<String> script = generator.getStatementsForValues(pk, true);
-//		for (String s : script)
+//		for (int i=0; i < script.size(); i++)
 //		{
-//			System.out.println(s);
+//			System.out.println(Integer.toString(i) + ": " + script.get(i));
 //		}
-		assertEquals(14, script.size());
-		assertEquals("DELETE FROM COUNTRIES WHERE country_id = 42", script.get(13));
-		assertEquals("DELETE FROM REGIONS WHERE COUNTRY_ID = 42", script.get(12));
-		assertEquals("DELETE FROM STORES WHERE COUNTRY_ID = 42", script.get(11));
-		assertEquals("DELETE FROM VENDING_MACHINES WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(10));
-		assertEquals("DELETE FROM STORES WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(9));
-		assertEquals("DELETE FROM REGION_MGR WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))", script.get(8));
-		assertEquals("DELETE FROM ACCOUNT_MGR WHERE  (REGION_MGR_ID IN ( SELECT REGION_MGR_ID FROM REGION_MGR WHERE  (REGION_ID IN ( SELECT REGION_ID FROM REGIONS WHERE COUNTRY_ID = 42))))", script.get(7));
+		assertEquals(13, script.size());
+		assertEquals("DELETE FROM COUNTRIES\nWHERE country_id = 42", script.get(12));
+		assertEquals("DELETE FROM REGIONS \nWHERE COUNTRY_ID = 42", script.get(11));
+
+		int storesIndex = Integer.MAX_VALUE;
+		for (int i=0; i < script.size(); i++)
+		{
+			String stmt = script.get(i);
+			if (stmt.startsWith("DELETE FROM STORES"))
+			{
+				storesIndex = i;
+			}
+		}
 
 		for (int i=0; i < script.size(); i++)
 		{
@@ -103,7 +108,7 @@ public class DeleteScriptGeneratorTest
 			{
 				// make sure that any delete statement for the store_details table
 				// appears before the delete statement of the store table
-				assertTrue(i < 11);
+				assertTrue(i < storesIndex);
 			}
 		}
 	}
@@ -207,23 +212,23 @@ public class DeleteScriptGeneratorTest
 
 		List<String> statements = generator.getStatementsForValues(pk, true);
 		assertEquals(2, statements.size());
-		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID IN (1,2,3)", statements.get(0));
+		assertEquals("DELETE FROM ADDRESS \nWHERE PERSON_ID IN (1,2,3)", statements.get(0));
 
 		pk.clear();
 		id = new ColumnData("between -1000 and -100", new ColumnIdentifier("ID"));
 		pk.add(id);
 		statements = generator.getStatementsForValues(pk, true);
 		assertEquals(2, statements.size());
-		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID between -1000 and -100", statements.get(0));
-		assertEquals("DELETE FROM PERSON WHERE ID between -1000 and -100", statements.get(1));
+		assertEquals("DELETE FROM ADDRESS \nWHERE PERSON_ID between -1000 and -100", statements.get(0));
+		assertEquals("DELETE FROM PERSON\nWHERE ID between -1000 and -100", statements.get(1));
 
 		pk.clear();
 		id = new ColumnData("< 0", new ColumnIdentifier("ID"));
 		pk.add(id);
 		statements = generator.getStatementsForValues(pk, true);
 		assertEquals(2, statements.size());
-		assertEquals("DELETE FROM ADDRESS WHERE PERSON_ID < 0", statements.get(0));
-		assertEquals("DELETE FROM PERSON WHERE ID < 0", statements.get(1));
+		assertEquals("DELETE FROM ADDRESS \nWHERE PERSON_ID < 0", statements.get(0));
+		assertEquals("DELETE FROM PERSON\nWHERE ID < 0", statements.get(1));
 	}
 
 

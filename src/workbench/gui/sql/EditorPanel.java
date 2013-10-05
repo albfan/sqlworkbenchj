@@ -149,8 +149,6 @@ public class EditorPanel
 	private final UnCommentAction unCommentAction;
 	private final JumpToLineAction jumpToLineAction;
 
-	private FileReloadType reloadType = FileReloadType.automatic;
-
 	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 	private WbFile currentFile;
 	private long fileModifiedTime;
@@ -224,23 +222,14 @@ public class EditorPanel
 		this.addKeyBinding(redo);
 
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL, GuiSettings.PROP_FILE_RELOAD_TYPE);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
 		String[] props = SyntaxUtilities.getColorProperties();
 		for (String prop : props)
 		{
 			Settings.getInstance().addPropertyChangeListener(this, prop);
 		}
-		this.reloadType = FileReloadType.prompt;//GuiSettings.getReloadType();
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
-	}
-
-	public void setFileReloadType(FileReloadType type)
-	{
-		if (type != null)
-		{
-			this.reloadType = type;
-		}
 	}
 
 	public void disableSqlHighlight()
@@ -334,15 +323,16 @@ public class EditorPanel
 		if (currentTime > fileModifiedTime)
 		{
 			String fname = getCurrentFileName();
-			LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified!");
+			LogMgr.logDebug("EditorPanel", "File " + fname + " has been externally modified!");
+			FileReloadType reloadType = GuiSettings.getReloadType();
 			if (reloadType == FileReloadType.automatic)
 			{
 				this.reloadFile();
-				this.statusBar.setStatusMessage("File " + fname + " was externally modified and has been reloaded", 5000);
+				this.statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgFileReloaded", fname), 5000);
 			}
 			else if (reloadType == FileReloadType.prompt)
 			{
-				boolean doReload = WbSwingUtilities.getYesNo(this, "The file has been changed outside of SQL Workbench. Do you want to reload it?");
+				boolean doReload = WbSwingUtilities.getYesNo(this, ResourceMgr.getFormattedString("MsgReloadFile", fname));
 				if (doReload)
 				{
 					this.reloadFile();
@@ -978,10 +968,6 @@ public class EditorPanel
 		else if (evt.getPropertyName().startsWith("workbench.editor.color."))
 		{
 			this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
-		}
-		else if (evt.getPropertyName().equals(GuiSettings.PROP_FILE_RELOAD_TYPE))
-		{
-			this.setFileReloadType(GuiSettings.getReloadType());
 		}
 		WbSwingUtilities.repaintNow(this);
 	}

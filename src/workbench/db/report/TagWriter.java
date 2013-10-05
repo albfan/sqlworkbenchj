@@ -91,7 +91,7 @@ public class TagWriter
 	public void appendTag(StringBuilder target, StringBuilder indent, String tag, CharSequence value, String attr, String attValue)
 	{
 		appendOpenTag(target, indent, tag, attr, attValue);
-		target.append(value);
+		target.append(value == null ? "" : value);
 		appendCloseTag(target, null, tag);
 	}
 
@@ -108,7 +108,7 @@ public class TagWriter
 		target.append(indent);
 		target.append("  ");
 		target.append(CDATA_START);
-		target.append(value);
+		target.append(value == null ? "" : value);
 		target.append(CDATA_END);
 		target.append('\n');
 		target.append(indent);
@@ -127,7 +127,7 @@ public class TagWriter
 		if (useCData)
 		{
 			target.append(CDATA_START);
-			target.append(value);
+			target.append(value == null ? "" : value);
 		}
 		else
 		{

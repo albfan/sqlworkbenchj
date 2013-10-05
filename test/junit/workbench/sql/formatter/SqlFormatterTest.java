@@ -32,7 +32,9 @@ import workbench.util.StringUtil;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -46,6 +48,27 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+	@Test
+	public void testWrongJoins()
+	{
+		String sql =
+			"SELECT *\n" +
+			"from table1 t1\n" +
+			"  left outer join table2 t2 on t1.id = t2.id and t2.foo in (1,2), tabelle3\n" +
+			"where x=42";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM table1 t1\n" +
+			"  LEFT OUTER JOIN table2 t2\n" +
+			"               ON t1.id = t2.id\n" +
+			"              AND t2.foo IN (1, 2),tabelle3\n" +
+			"WHERE x = 42";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+	}
 	@Test
 	public void testNestedFunctionCalls()
 	{
@@ -1374,16 +1397,18 @@ public class SqlFormatterTest
              ")";
 //				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
 			assertEquals(expected, formatted);
-			Settings.getInstance().setFormatterMaxColumnsInInsert(10);
+			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
 			f = new SqlFormatter(sql);
-			formatted = f.getFormattedSql();
-			expected = "INSERT INTO my_table\n" +
-             "  (col1, col2, col3) \n" +
-             "VALUES \n" +
-             "  (1, 2, 3),\n" +
-             "  (4, 5, 6),\n" +
-             "  (7, 8, 9)";
+			formatted = f.getFormattedSql().trim();
+			expected =
+				"INSERT INTO my_table\n" +
+				"  (col1, col2, col3)\n" +
+				"VALUES\n" +
+				"  (1, 2, 3),\n" +
+				"  (4, 5, 6),\n" +
+				"  (7, 8, 9)";
 //				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
+			assertEquals(expected, formatted);
 		}
 		finally
 		{
@@ -1397,7 +1422,6 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		boolean oldComma = Settings.getInstance().getFormatterCommaAfterLineBreak();
-		boolean oldSpace = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		try
 		{
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
@@ -1442,10 +1466,10 @@ public class SqlFormatterTest
 			expected = "INSERT INTO x\n(\n  col1\n  , col2\n  , col3\n  , col4\n  , col5\n)\nVALUES\n(\n  1\n  , 2\n  , 3\n  , 4\n  , 5\n)";
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
-
 		}
 		finally
 		{
+			Settings.getInstance().setFormatterCommaAfterLineBreak(oldComma);
 			Settings.getInstance().setFormatterMaxColumnsInInsert(1);
 		}
 	}

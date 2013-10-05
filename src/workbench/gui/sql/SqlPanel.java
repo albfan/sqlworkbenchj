@@ -374,6 +374,8 @@ public class SqlPanel
 		contentPanel.setOneTouchExpandable(true);
 		contentPanel.setContinuousLayout(true);
 
+		appendResults = GuiSettings.getDefaultAppendResults();
+		
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
 
@@ -403,6 +405,7 @@ public class SqlPanel
 		{
 			resultTab.showCloseButton(null);
 		}
+
 		tabName = ResourceMgr.getDefaultTabLabel();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
 		editor.enableMacroExpansion(true);

@@ -144,7 +144,7 @@ public class WbGenDelete
 
 		generator.setTable(table);
 		generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
-		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, true));
+		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, false));
 		CharSequence script = generator.getScriptForValues(values);
 
 		if (this.rowMonitor != null)

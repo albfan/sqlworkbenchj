@@ -29,6 +29,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import workbench.gui.sql.FileReloadType;
+
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -932,5 +933,15 @@ public class GuiSettings
 		{
 			return FileReloadType.none;
 		}
+	}
+
+	public static boolean getDefaultAppendResults()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.data.append.results", false);
+	}
+
+	public static void setDefaultAppendResults(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.data.append.results", flag);
 	}
 }

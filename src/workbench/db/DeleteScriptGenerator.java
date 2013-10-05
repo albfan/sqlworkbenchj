@@ -25,6 +25,7 @@ package workbench.db;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,7 +37,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import workbench.WbManager;
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -55,9 +55,10 @@ import workbench.storage.SqlLiteralFormatter;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
+
+import workbench.util.AggregatingMap;
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
-
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -92,6 +93,16 @@ public class DeleteScriptGenerator
 				return (val1 < val2 ? 1 : (val1==val2 ? 0 : -1));
 			}
 		};
+
+	private final Comparator<DependencyNode> levelSorter =new Comparator<DependencyNode>()
+	{
+
+		@Override
+		public int compare(DependencyNode o1, DependencyNode o2)
+		{
+			return o1.getLevel() - o2.getLevel();
+		}
+	};
 
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -162,32 +173,45 @@ public class DeleteScriptGenerator
 //		DependencyDuplicateFinder finder = new DependencyDuplicateFinder(dependency.getRootNode());
 //		List<String> duplicates = finder.getDuplicates();
 
-		Map<Integer, Set<DependencyNode>> levels = buildLevels(dependency.getRootNode(), 1);
-//		Map<Integer, Set<DependencyNode>> levels = buildLevelMap();
-		dumpTree(levels, "tree.txt");
-//		adjustLevels(levels);
+		Map<Integer, Set<DependencyNode>> levels = buildLevelsTopDown(dependency.getRootNode(), 1);
+
+		if (this.monitor != null)
+		{
+			this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgCalcDelDeps"), -1, -1);
+		}
+		long start = System.currentTimeMillis();
+		int moved =	adjustLevels(levels);
+		int loops = 1;
+		while (moved > 0 && loops <= levels.size())
+		{
+			// additional iterations are necessary if a node was moved from one level to the next
+			// in that case the new level hierarchy could mean that a node from the target level now needs
+			// to be moved up. But this can't be done in a single loop because otherwise adjustLevels
+			// would generate a ConcurrentModificationException
+			loops ++;
+			moved = adjustLevels(levels);
+		}
+		long duration = System.currentTimeMillis() - start;
+		LogMgr.logTrace("DeleteScriptGenerator.createStatements()", "Adjusting level hierarchy took: " + duration + "ms");
 
 		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
-			// collect all nodes for one table so that we can generate a single delete statement
-			// that covers all foreign keys at once
-			Map<TableIdentifier, Set<DependencyNode>> tableNodes = new HashMap<TableIdentifier, Set<DependencyNode>>();
-
-			for (DependencyNode node : entry.getValue())
+			if (entry.getValue().size() > 0)
 			{
-				TableIdentifier tbl = node.getTable();
-				Set<DependencyNode> nodes = tableNodes.get(tbl);
-				if (nodes == null)
+				// collect all nodes for one table (on the current level) so that we can generate a single delete statement
+				// that covers all foreign keys at once
+				AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
+
+				for (DependencyNode node : entry.getValue())
 				{
-					nodes = new HashSet<DependencyNode>();
-					tableNodes.put(tbl, nodes);
+					tableNodes.addValue(node.getTable(), node);
 				}
-				nodes.add(node);
-			}
 
-			for (Map.Entry<TableIdentifier, Set<DependencyNode>> tblEntry : tableNodes.entrySet())
-			{
-				statements.add(createDeleteStatement(tblEntry.getKey(), tblEntry.getValue()));
+				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
+				for (TableIdentifier tbl : sorted)
+				{
+					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
+				}
 			}
 		}
 
@@ -197,10 +221,37 @@ public class DeleteScriptGenerator
 			StringBuilder rootSql = new StringBuilder(100);
 			rootSql.append("DELETE FROM ");
 			rootSql.append(root.getTable().getTableExpression(this.connection));
-			rootSql.append(" WHERE ");
+			rootSql.append("\nWHERE ");
 			this.addRootTableWhere(rootSql);
 			statements.add(formatSql(rootSql));
 		}
+	}
+
+	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
+	{
+		List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables.keySet());
+		Comparator<TableIdentifier> levelComp = new Comparator<TableIdentifier>()
+		{
+			@Override
+			public int compare(TableIdentifier o1, TableIdentifier o2)
+			{
+				return -1 * (getTotalLevels(o1) - getTotalLevels(o2));
+			}
+
+			private int getTotalLevels(TableIdentifier tbl)
+			{
+				Set<DependencyNode> nodes = tables.get(tbl);
+				if (nodes == null) return 0;
+				int sum = 0;
+				for (DependencyNode node : nodes)
+				{
+					sum += node.getLevel();
+				}
+				return sum;
+			}
+		};
+		Collections.sort(sorted, levelComp);
+		return sorted;
 	}
 
 	private String formatSql(StringBuilder sql)
@@ -239,7 +290,7 @@ public class DeleteScriptGenerator
 		}
 		sql.append("DELETE FROM ");
 		sql.append(table.getTableExpression(this.connection));
-		sql.append(" WHERE ");
+		sql.append(" \nWHERE ");
 
 		boolean first = true;
 		for (DependencyNode node : nodes)
@@ -253,25 +304,9 @@ public class DeleteScriptGenerator
 			{
 				sql.append("\n  OR ");
 			}
-			this.addParentWhere(sql, node);
+			addParentWhere(sql, node);
 			processed.add(node);
 		}
-		return formatSql(sql);
-	}
-
-	private String createDeleteStatement(DependencyNode node)
-	{
-		if (node == null) return null;
-		StringBuilder sql = new StringBuilder(200);
-		if (showFkNames)
-		{
-			sql.append("-- ").append(node.getFkName()).append('\n');
-		}
-		sql.append("DELETE FROM ");
-		sql.append(node.getTable().getTableExpression(this.connection));
-		sql.append(" WHERE ");
-
-		this.addParentWhere(sql, node);
 		return formatSql(sql);
 	}
 
@@ -499,186 +534,99 @@ public class DeleteScriptGenerator
 		}
 	}
 
-	private void adjustLevels(Map<Integer, Set<DependencyNode>> map)
+	private int adjustLevels(Map<Integer, Set<DependencyNode>> levels)
 	{
-//		dumpTree(map, "initial_levels.txt");
+		Map<DependencyNode, Integer> newLevels = new HashMap<DependencyNode, Integer>();
 
-//		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
-//		{
-//			int level = entry.getKey();
-//			Set<DependencyNode> nodes = entry.getValue();
-//			Iterator<DependencyNode> itr = nodes.iterator();
-//			while (itr.hasNext())
-//			{
-//				DependencyNode node = itr.next();
-//				int maxLevel = findHighestLevel(node, map);
-//				if (maxLevel > level)
-//				{
-//					itr.remove();
-//					map.get(maxLevel).add(node);
-//				}
-//			}
-//		}
-
-//		dumpTree(map, "first_adjust.txt");
-
-		LogMgr.logDebug("DeleteScriptGenerator.adjustLevels()" , "Start shuffling tables around");
-		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
+		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
-			int level = entry.getKey();
-			Set<DependencyNode> nodes = entry.getValue();
-			Iterator<DependencyNode> itr = nodes.iterator();
+			Iterator<DependencyNode> itr = entry.getValue().iterator();
 			while (itr.hasNext())
 			{
 				DependencyNode node = itr.next();
-				int minLevel = findLowestLevelForTable(node.getTable(), map);
-				if (minLevel < level)
+				int otherLevel = findTableDependentLevel(levels, node.getTable(), entry.getKey());
+				if (otherLevel > 0)
 				{
-					LogMgr.logDebug("DeleteScriptGenerator.adjustLevels()" , "Moving entry for table: " + node.getTable() + " from level " + level + " to level " + minLevel);
-					itr.remove();
-					map.get(minLevel).add(node);
+					if (otherLevel == entry.getKey() && otherLevel > 1)
+					{
+						otherLevel --;
+						LogMgr.logDebug("DeleteScriptGenerator.adjustLevels()" , "Entry for table: " + node.getTable() + " (" + node.getFkName() + ") should be moved to the same level (" + entry.getKey() + "). Moving to " + otherLevel);
+					}
+					if (otherLevel != entry.getKey())
+					{
+						LogMgr.logTrace("DeleteScriptGenerator.adjustLevels()" , "Moving entry for table: " + node.getTable() + " (" + node.getFkName() + ") from level " + entry.getKey() + " to level " + otherLevel);
+						newLevels.put(node, otherLevel);
+						itr.remove();
+					}
 				}
 			}
 		}
-		dumpTree(map, "final_levels.txt");
+
+		for (Map.Entry<DependencyNode, Integer> entry : newLevels.entrySet())
+		{
+			Set<DependencyNode> nodes = levels.get(entry.getValue());
+			if (nodes != null)
+			{
+				nodes.add(entry.getKey());
+			}
+		}
+
+		return newLevels.size();
 	}
 
-	private int findLowestLevelForTable(TableIdentifier table, Map<Integer, Set<DependencyNode>> map)
+	private List<DependencyNode> sortLevelNodes(Set<DependencyNode> nodes)
 	{
-		int minLevel = Integer.MAX_VALUE;
-		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
+		List<DependencyNode> sorted = new ArrayList<DependencyNode>(nodes.size());
+		Collections.sort(sorted, levelSorter);
+		return sorted;
+	}
+
+	private int findTableDependentLevel(Map<Integer, Set<DependencyNode>> levels, TableIdentifier table, int startLevel)
+	{
+		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
-			int level = entry.getKey();
+			if (startLevel < entry.getKey()) continue;
 			for (DependencyNode node : entry.getValue())
 			{
-				if (node.getTable().equals(table) && level < minLevel)
+				DependencyNode parent = node.getParent();
+				while (parent != null)
 				{
-					minLevel = level;
+					if (parent.getTable().equals(table))
+					{
+						return entry.getKey();
+					}
+					parent = parent.getParent();
 				}
 			}
 		}
-		return minLevel;
+		return -1;
 	}
 
-	private int findHighestLevelForTable(TableIdentifier table, Map<Integer, Set<DependencyNode>> map)
+	private Map<Integer, Set<DependencyNode>> buildLevelsTopDown(DependencyNode root, int level)
 	{
-		int maxLevel = Integer.MIN_VALUE;
-		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
-		{
-			int level = entry.getKey();
-			for (DependencyNode node : entry.getValue())
-			{
-				if (node.getTable().equals(table) && level > maxLevel)
-				{
-					maxLevel = level;
-				}
-			}
-		}
-		return maxLevel;
-	}
-
-	private int findHighestLevel(DependencyNode node, Map<Integer, Set<DependencyNode>> map)
-	{
-		int maxLevel = Integer.MIN_VALUE;
-		for (Map.Entry<Integer, Set<DependencyNode>> entry : map.entrySet())
-		{
-			int level = entry.getKey();
-			if (entry.getValue().contains(node) && level > maxLevel)
-			{
-				maxLevel = level;
-			}
-		}
-		return maxLevel;
-	}
-
-	private Map<Integer, Set<DependencyNode>> buildLevels(DependencyNode root, int level)
-	{
-		Map<Integer, Set<DependencyNode>> result = new TreeMap<Integer, Set<DependencyNode>>(descComparator);
+		AggregatingMap<Integer, DependencyNode> map = new AggregatingMap<Integer, DependencyNode>(new TreeMap<Integer, Set<DependencyNode>>(descComparator));
 
 		List<DependencyNode> children = root.getChildren();
 
 		if (children.isEmpty())
 		{
-			return result;
+			return map.getMap();
 		}
 
 		Integer lvl = Integer.valueOf(level);
 		for (DependencyNode child : children)
 		{
-			Set<DependencyNode> nodes = result.get(lvl);
-			if (nodes == null)
-			{
-				nodes = new HashSet<DependencyNode>();
-				result.put(lvl, nodes);
-			}
-			nodes.add(child);
+			map.addValue(lvl, child);
 		}
 
 		for (DependencyNode child : children)
 		{
 			if (child.getChildren().size() > 0)
 			{
-				mergeMaps(result, buildLevels(child, level + 1));
+				map.addAllValues(buildLevelsTopDown(child, level + 1));
 			}
 		}
-		return result;
-	}
-
-	private void mergeMaps(Map<Integer, Set<DependencyNode>> target, Map<Integer, Set<DependencyNode>> source)
-	{
-		for (Integer key : source.keySet())
-		{
-			Set<DependencyNode> main = target.get(key);
-			if (main == null)
-			{
-				main = new HashSet<DependencyNode>();
-				target.put(key, main);
-			}
-			Set<DependencyNode> toAdd = source.get(key);
-			main.addAll(toAdd);
-		}
-	}
-
-	private Map<Integer, Set<DependencyNode>> buildLevelMap()
-	{
-		Map<Integer, Set<DependencyNode>> result = new HashMap<Integer, Set<DependencyNode>>();
-		Set<DependencyNode> visited = new HashSet<DependencyNode>();
-
-		dependency.getLeafs();
-		for (DependencyNode leaf : dependency.getLeafs())
-		{
-			int level = 1;
-			if (!visited.contains(leaf))
-			{
-				Set<DependencyNode> leafNodes = result.get(level);
-				if (leafNodes == null)
-				{
-					leafNodes = new HashSet<DependencyNode>();
-					result.put(level, leafNodes);
-				}
-				leafNodes.add(leaf);
-				visited.add(leaf);
-			}
-
-			DependencyNode parent = leaf.getParent();
-			while (parent != null)
-			{
-				level++;
-				if (!visited.contains(parent))
-				{
-					Set<DependencyNode> levelNodes = result.get(level);
-					if (levelNodes == null)
-					{
-						levelNodes = new HashSet<DependencyNode>();
-						result.put(level, levelNodes);
-					}
-					levelNodes.add(parent);
-					visited.add(parent);
-				}
-				parent = parent.getParent();
-			}
-		}
-		return result;
+		return map.getMap();
 	}
 
 	private void dumpTree(Map<Integer, Set<DependencyNode>> levels, String fname)
@@ -691,18 +639,18 @@ public class DeleteScriptGenerator
 
 			for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 			{
-				Set<DependencyNode> sorted = new TreeSet<DependencyNode>(new Comparator<DependencyNode>()
-				{
-					@Override
-					public int compare(DependencyNode o1, DependencyNode o2)
-					{
-						return o1.getTable().getTableName().compareTo(o2.getTable().getTableName());
-					}
-				});
-				sorted.addAll(entry.getValue());
+//				Set<DependencyNode> sorted = new TreeSet<DependencyNode>(new Comparator<DependencyNode>()
+//				{
+//					@Override
+//					public int compare(DependencyNode o1, DependencyNode o2)
+//					{
+//						return o1.getTable().getTableName().compareTo(o2.getTable().getTableName());
+//					}
+//				});
+//				sorted.addAll(entry.getValue());
 
 				writer.append(entry.getKey() + ":\n");
-				for (DependencyNode node : sorted)
+				for (DependencyNode node : entry.getValue())
 				{
 					writer.append("  " + node.getTable() + " (" + node.getFkName() + ")\n");
 				}

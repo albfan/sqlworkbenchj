@@ -597,6 +597,9 @@ public class DbMetadata
 	 * <literal>workbench.db.objecttype.selectable.[dbid]</literal>.
 	 * <br/>
 	 * If that property is empty, the above defaults are used.
+	 *
+	 * @see #getObjectsWithData()
+	 * @see #retrieveTableTypes()
 	 */
 	public boolean objectTypeCanContainData(String type)
 	{
@@ -858,8 +861,7 @@ public class DbMetadata
 			// so we need to normalize the directory name
 			File c1 = new File(cat);
 			File c2 = new File(currentCat);
-			if (c1.equals(c2)) return false;
-			return true;
+			return !c1.equals(c2);
 		}
 
 		if (!dbSettings.useCatalogInDML()) return false;
@@ -2457,13 +2459,14 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.getTableTypes()", "Error retrieving table types", e);
+			LogMgr.logError("DbMetadata.getTableTypes()", "Error retrieving table types. Using default values", e);
+			types = CollectionUtil.caseInsensitiveSet("table", "system table");
 		}
 		finally
 		{
 			SqlUtil.closeResult(rs);
 		}
-		LogMgr.logDebug("DbMetadata.<init>", "Using table types returned by the JDBC driver: " + types);
+		LogMgr.logDebug("DbMetadata.retrieveTableTypes()", "Table types returned by the JDBC driver: " + types);
 		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
 		{
 			types.add("MATERIALIZED VIEW");

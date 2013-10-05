@@ -33,18 +33,22 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import workbench.interfaces.ObjectDropper;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TableDependencySorter;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
-import workbench.interfaces.ObjectDropper;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.WbThread;
 
@@ -75,7 +79,6 @@ public class ObjectDropperUI
 			addMissingTables.setEnabled(false);
 			addMissingTables.setSelected(false);
 			optionPanel.remove(checkPanel);
-			this.remove(statusLabel);
 		}
 	}
 

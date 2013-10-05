@@ -47,7 +47,7 @@ public class HtmlUtil
 	@SuppressWarnings("fallthrough")
 	public static String escapeXML(CharSequence s, boolean replaceSingleQuotes)
 	{
-		if (s == null) return null;
+		if (s == null) return StringUtil.EMPTY_STRING;
 		StringBuilder sb = new StringBuilder(s.length() + 100);
 		int n = s.length();
 		for (int i = 0; i < n; i++)

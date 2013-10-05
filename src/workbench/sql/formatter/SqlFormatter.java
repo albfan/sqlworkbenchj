@@ -109,6 +109,8 @@ public class SqlFormatter
 	private String dbId;
 	private char catalogSeparator = '.';
 	private int colsPerInsert = -1;
+	private int colsPerUpdate = -1;
+	private int colsPerSelect = -1;
 
 	SqlFormatter(CharSequence aScript)
 	{
@@ -172,6 +174,40 @@ public class SqlFormatter
 			return Settings.getInstance().getFormatterMaxColumnsInInsert();
 		}
 		return colsPerInsert;
+	}
+
+	public void setColumnsPerUpdate(int cols)
+	{
+		if (cols > 0)
+		{
+			colsPerUpdate = cols;
+		}
+	}
+
+	private int getColumnsPerUpdate()
+	{
+		if (colsPerUpdate < 0)
+		{
+			return Settings.getInstance().getFormatterMaxColumnsInUpdate();
+		}
+		return colsPerUpdate;
+	}
+
+	public void setColumnsPerSelect(int cols)
+	{
+		if (cols > 0)
+		{
+			colsPerSelect = cols;
+		}
+	}
+
+	private int getColumnsPerSelect()
+	{
+		if (colsPerSelect < 0)
+		{
+			return Settings.getInstance().getFormatterMaxColumnsInSelect();
+		}
+		return colsPerSelect;
 	}
 
 	public void setJoinWrapping(JoinWrapStyle style)
@@ -693,6 +729,7 @@ public class SqlFormatter
 				{
 					t = this.lexer.getNextToken(true, false);
 					t = processInList(t);
+					this.appendTokenText(t);
 				}
 			}
 			else if (last.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
@@ -763,11 +800,11 @@ public class SqlFormatter
 		int columnsPerLine = -1;
 		if (isSelect)
 		{
-			columnsPerLine = Settings.getInstance().getFormatterMaxColumnsInSelect();
+			columnsPerLine = getColumnsPerSelect();
 		}
 		else
 		{
-			columnsPerLine = Settings.getInstance().getFormatterMaxColumnsInUpdate();
+			columnsPerLine = getColumnsPerUpdate();
 		}
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
@@ -984,6 +1021,7 @@ public class SqlFormatter
 		f.setCommaAfterLineBreak(this.commaAfterLineBreak);
 		f.setJoinWrapping(this.joinWrapping);
 		f.setColumnsPerInsert(colsPerInsert);
+		f.setColumnsPerUpdate(colsPerUpdate);
 		String s = f.getFormattedSql();
 		boolean useFormattedQuery = f.getRealLength() > this.maxSubselectLength;
 		if (!useFormattedQuery)
