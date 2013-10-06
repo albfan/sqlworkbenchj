@@ -70,7 +70,7 @@ public class TableDependency
 		setMainTable(tbl);
 	}
 
-	public void setMainTable(TableIdentifier tbl)
+	public final void setMainTable(TableIdentifier tbl)
 	{
 		theTable = metaData.findTable(tbl, false);
 		visitedParents.clear();

@@ -168,7 +168,11 @@ public class DeleteScriptGenerator
 	private void createStatements(boolean includeRoot)
 	{
 		this.dependency.setScriptMonitor(monitor);
+
+		long retrieveStart = System.currentTimeMillis();
 		this.dependency.readDependencyTree(true);
+		long duration = System.currentTimeMillis() - retrieveStart;
+		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Retrieving dependency hierarchy for " +  dependency.getRootNode().getTable() + " took: " + duration + "ms");
 
 		long calcStart = System.currentTimeMillis();
 
@@ -190,7 +194,7 @@ public class DeleteScriptGenerator
 			loops ++;
 			moved = adjustLevels(levels);
 		}
-		long duration = System.currentTimeMillis() - adjustStart;
+		duration = System.currentTimeMillis() - adjustStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Adjusting level hierarchy in " + loops + " iterations took: " + duration + "ms");
 
 		long tableCount = 0;
