@@ -170,26 +170,30 @@ public class DeleteScriptGenerator
 		this.dependency.setScriptMonitor(monitor);
 		this.dependency.readDependencyTree(true);
 
+		long calcStart = System.currentTimeMillis();
+
 		Map<Integer, Set<DependencyNode>> levels = buildLevelsTopDown(dependency.getRootNode(), 1);
 
 		if (this.monitor != null)
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgCalcDelDeps"), -1, -1);
 		}
-		long start = System.currentTimeMillis();
+		long adjustStart = System.currentTimeMillis();
 		int moved =	adjustLevels(levels);
 		int loops = 1;
 		while (moved > 0 && loops <= levels.size())
 		{
 			// additional iterations are necessary if a node was moved from one level to the next
 			// in that case the new level hierarchy could mean that a node from the target level now needs
-			// to be moved up. But this can't be done in a single loop because otherwise adjustLevels
+			// to be moved up in tur. But this can't be done in a single loop because otherwise adjustLevels
 			// would generate a ConcurrentModificationException
 			loops ++;
 			moved = adjustLevels(levels);
 		}
-		long duration = System.currentTimeMillis() - start;
-		LogMgr.logTrace("DeleteScriptGenerator.createStatements()", "Adjusting level hierarchy took: " + duration + "ms");
+		long duration = System.currentTimeMillis() - adjustStart;
+		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Adjusting level hierarchy in " + loops + " iterations took: " + duration + "ms");
+
+		long tableCount = 0;
 
 		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
@@ -210,6 +214,7 @@ public class DeleteScriptGenerator
 				// theoretically it could still mean that two tables that have the same number of dependencies
 				// need a specific order, but this is too hard to detect...
 				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
+				tableCount += sorted.size();
 				for (TableIdentifier tbl : sorted)
 				{
 					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
@@ -227,6 +232,8 @@ public class DeleteScriptGenerator
 			this.addRootTableWhere(rootSql);
 			statements.add(formatSql(rootSql));
 		}
+		duration = System.currentTimeMillis() - calcStart;
+		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Generated " + statements.size() + " statements for " + tableCount + " tables in " + duration + "ms");
 	}
 
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
