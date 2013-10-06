@@ -65,6 +65,7 @@ public class WbGenDelete
 	public static final String PARAM_INCLUDE_COMMIT = "includeCommit";
 	public static final String PARAM_APPEND = "appendFile";
 	public static final String PARAM_SHOW_FK_NAMES = "showConstraints";
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 
 	private DeleteScriptGenerator generator;
 
@@ -80,6 +81,7 @@ public class WbGenDelete
 		cmdLine.addArgument(PARAM_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(PARAM_APPEND, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(PARAM_SHOW_FK_NAMES, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
 	}
 
 	@Override
@@ -142,7 +144,9 @@ public class WbGenDelete
 			generator.setProgressMonitor(this);
 		}
 
+		SourceTableArgument exclude = new SourceTableArgument(cmdLine.getValue(PARAM_EXCLUDE_TABLES), currentConnection);
 		generator.setTable(table);
+		generator.setExcludedTables(exclude.getTables());
 		generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
 		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, false));
 		CharSequence script = generator.getScriptForValues(values);

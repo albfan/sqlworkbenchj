@@ -22,8 +22,6 @@
  */
 package workbench.db;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +56,6 @@ import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.AggregatingMap;
 import workbench.util.CollectionUtil;
-import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -82,6 +79,7 @@ public class DeleteScriptGenerator
 	private final SqlLiteralFormatter formatter;
 	private boolean formatSql = true;
 	private boolean showFkNames;
+	private List<TableIdentifier> excludeTables = new ArrayList<TableIdentifier>();
 
 	private final Comparator<Integer> descComparator = new Comparator<Integer>()
 		{
@@ -116,6 +114,18 @@ public class DeleteScriptGenerator
 	public WbConnection getCurrentConnection()
 	{
 		return connection;
+	}
+
+	public void setExcludedTables(List<TableIdentifier> toExclude)
+	{
+		if (toExclude == null)
+		{
+			this.excludeTables.clear();
+		}
+		else
+		{
+			this.excludeTables = new ArrayList<TableIdentifier>(toExclude);
+		}
 	}
 
 	public void setShowConstraintNames(boolean flag)
@@ -210,14 +220,12 @@ public class DeleteScriptGenerator
 
 				// The tables that are deleted on the same level also need to be sorted to avoid deleting from a table
 				// that is used in the sub-select of another table later on.
-				// the sum of the node levels gives an indication on which one has less dependencies
-				// theoretically it could still mean that two tables that have the same number of dependencies
-				// need a specific order, but this is too hard to detect...
 				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
 
 				for (TableIdentifier tbl : sorted)
 				{
-					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
+					if (this.excludeTables.contains(tbl)) continue;
+					statements.add("-- level " + entry.getKey() + "\n" + createDeleteStatement(tbl, tableNodes.get(tbl)));
 				}
 			}
 		}
@@ -695,43 +703,6 @@ public class DeleteScriptGenerator
 			}
 		}
 		return map.getMap();
-	}
-
-	private void dumpTree(Map<Integer, Set<DependencyNode>> levels, String fname)
-	{
-		FileWriter writer = null;
-		try
-		{
-			writer = new FileWriter(new File("c:/temp", fname));
-			writer.append(this.rootTable.getTableExpression() + "\n");
-
-			for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
-			{
-//				Set<DependencyNode> sorted = new TreeSet<DependencyNode>(new Comparator<DependencyNode>()
-//				{
-//					@Override
-//					public int compare(DependencyNode o1, DependencyNode o2)
-//					{
-//						return o1.getTable().getTableName().compareTo(o2.getTable().getTableName());
-//					}
-//				});
-//				sorted.addAll(entry.getValue());
-
-				writer.append(entry.getKey() + ":\n");
-				for (DependencyNode node : entry.getValue())
-				{
-					writer.append("  " + node.getTable() + " (" + node.getFkName() + ")\n");
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logDebug("dumpTree()", "error writing tree", ex);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
 	}
 
 }
