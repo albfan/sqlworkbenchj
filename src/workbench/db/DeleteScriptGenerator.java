@@ -225,7 +225,7 @@ public class DeleteScriptGenerator
 				for (TableIdentifier tbl : sorted)
 				{
 					if (this.excludeTables.contains(tbl)) continue;
-					statements.add("-- level " + entry.getKey() + "\n" + createDeleteStatement(tbl, tableNodes.get(tbl)));
+					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
 				}
 			}
 		}
