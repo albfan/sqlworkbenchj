@@ -650,13 +650,6 @@ public class DeleteScriptGenerator
 		return newLevels.size();
 	}
 
-	private List<DependencyNode> sortLevelNodes(Set<DependencyNode> nodes)
-	{
-		List<DependencyNode> sorted = new ArrayList<DependencyNode>(nodes.size());
-		Collections.sort(sorted, levelSorter);
-		return sorted;
-	}
-
 	private int findTableDependentLevel(Map<Integer, Set<DependencyNode>> levels, TableIdentifier table, int startLevel)
 	{
 		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
