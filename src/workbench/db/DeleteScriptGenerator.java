@@ -268,22 +268,29 @@ public class DeleteScriptGenerator
 				if (result < 0)
 				{
 					// if o2 is referenced in n2, then the result must be swapped
-					DependencyNode n2 = getNodeForTable(o2);
-					if (n2.containsParent(o1))
+					List<DependencyNode> nodes = getNodesForTable(o2);
+					for (DependencyNode n2 : nodes)
 					{
-						result = 1;
+						if (n2.containsParent(o1) && result < 0)
+						{
+							result = 1;
+						}
 					}
 				}
 				return result;
 			}
 
-			private DependencyNode getNodeForTable(TableIdentifier tbl)
+			private List<DependencyNode> getNodesForTable(TableIdentifier tbl)
 			{
+				List<DependencyNode> result = new ArrayList<DependencyNode>();
 				for (DependencyNode node : allNodes)
 				{
-					if (node.getTable().equals(tbl)) return node;
+					if (node.getTable().equals(tbl))
+					{
+						result.add(node);
+					}
 				}
-				return null;
+				return result;
 			}
 
 			private int getReferenceCounter(TableIdentifier tbl)
