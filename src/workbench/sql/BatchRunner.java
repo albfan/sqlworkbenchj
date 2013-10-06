@@ -42,11 +42,6 @@ import workbench.console.ConsoleSettings;
 import workbench.console.ConsoleStatusBar;
 import workbench.console.DataStorePrinter;
 import workbench.console.RowDisplay;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.components.GenericRowMonitor;
-import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -54,9 +49,19 @@ import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.wbcommands.WbConnect;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.components.GenericRowMonitor;
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.wbcommands.WbConnect;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
@@ -646,19 +651,35 @@ public class BatchRunner
 		int executedCount = 0;
 		long start, end;
 
-		final int interval;
+		int interval;
 		int length = parser.getScriptLength();
-		if (length < 50000)
+		long totalStatements = parser.getStatementCount();
+
+		if (totalStatements < 0)
 		{
-			interval = 1;
-		}
-		else if (length < 100000)
-		{
-			interval = 10;
+			if (length < 50000)
+			{
+				interval = 1;
+			}
+			else if (length < 250000)
+			{
+				interval = 10;
+			}
+			else
+			{
+				interval = 100;
+			}
 		}
 		else
 		{
-			interval = 100;
+			if (totalStatements > 100)
+			{
+				interval = (int)(totalStatements / (totalStatements * 0.5));
+			}
+			else
+			{
+				interval = 1;
+			}
 		}
 
 		start = System.currentTimeMillis();
@@ -749,7 +770,7 @@ public class BatchRunner
 				if (this.rowMonitor != null && (executedCount % interval == 0))
 				{
 					this.rowMonitor.restoreType("batchrunnerMain");
-					this.rowMonitor.setCurrentRow(executedCount, -1);
+					this.rowMonitor.setCurrentRow(executedCount, totalStatements);
 				}
 
 				if (result != null && result.stopScript())

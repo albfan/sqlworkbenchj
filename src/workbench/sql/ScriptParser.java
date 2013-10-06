@@ -31,6 +31,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -428,6 +429,8 @@ public class ScriptParser
 	 * <br/>
 	 * This will force a complete parsing of the script and the
 	 * script will be loaded into memory!
+	 *
+	 * @see #getStatementCount()
 	 */
 	public int getSize()
 	{
@@ -528,6 +531,22 @@ public class ScriptParser
 			this.commands.add(c);
 		}
 		currentIteratorIndex = 0;
+	}
+
+	/**
+	 * Returns the number of statements in the script in case the script was loaded into memory.
+	 *
+	 * @return  the number of statements or -1 if the script is not loaded into memory
+	 * @see #getSize()
+	 */
+	public int getStatementCount()
+	{
+		if (this.iteratingParser != null)
+		{
+			return -1;
+		}
+		if (commands == null) parseCommands();
+		return this.commands.size();
 	}
 
 	/**

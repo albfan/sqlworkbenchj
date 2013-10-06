@@ -277,6 +277,18 @@ public class DependencyNode
 		return null;
 	}
 
+	public boolean containsParent(TableIdentifier toCheck)
+	{
+		if (this.parentNode == null) return false;
+		DependencyNode parent = parentNode;
+		while (parent != null)
+		{
+			if (parent.table.equals(toCheck)) return true;
+			parent = parent.parentNode;
+		}
+		return false;
+	}
+	
 	public boolean containsChild(DependencyNode aNode)
 	{
 		if (aNode == null) return false;

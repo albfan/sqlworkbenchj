@@ -214,9 +214,10 @@ public class DeleteScriptGenerator
 				// theoretically it could still mean that two tables that have the same number of dependencies
 				// need a specific order, but this is too hard to detect...
 				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
+
 				for (TableIdentifier tbl : sorted)
 				{
-					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
+					statements.add("-- level: " + entry.getKey() + "\n" + createDeleteStatement(tbl, tableNodes.get(tbl)));
 				}
 			}
 		}
@@ -237,14 +238,66 @@ public class DeleteScriptGenerator
 	{
 		List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables.keySet());
 
+		final Set<DependencyNode> allNodes = new HashSet<DependencyNode>();
+		for (Set<DependencyNode> values : tables.values())
+		{
+			allNodes.addAll(values);
+		}
+
 		final Comparator<TableIdentifier> levelComp = new Comparator<TableIdentifier>()
 		{
 			@Override
 			public int compare(TableIdentifier o1, TableIdentifier o2)
 			{
-				return -1 * (getLevelTotal(o1) - getLevelTotal(o2));
+				int result = 0;
+
+				int levelOne = getLevelTotal(o1);
+				int levelTwo = getLevelTotal(o2);
+
+				if (levelOne == levelTwo)
+				{
+					int refCountOne = getReferenceCounter(o1);
+					int refCountTwo = getReferenceCounter(o2);
+					result = -1 * (refCountOne - refCountTwo);
+				}
+				else
+				{
+					result = -1 * (levelOne - levelTwo);
+				}
+
+				if (result < 0)
+				{
+					// if o2 is referenced in n2, then the result must be swapped
+					DependencyNode n2 = getNodeForTable(o2);
+					if (n2.containsParent(o1))
+					{
+						result = 1;
+					}
+				}
+				return result;
 			}
 
+			private DependencyNode getNodeForTable(TableIdentifier tbl)
+			{
+				for (DependencyNode node : allNodes)
+				{
+					if (node.getTable().equals(tbl)) return node;
+				}
+				return null;
+			}
+
+			private int getReferenceCounter(TableIdentifier tbl)
+			{
+				int refCount = 0;
+				for (DependencyNode node : allNodes)
+				{
+					if (node.containsParent(tbl))
+					{
+						refCount ++;
+					}
+				}
+				return refCount;
+			}
 			private int getLevelTotal(TableIdentifier tbl)
 			{
 				Set<DependencyNode> nodes = tables.get(tbl);
