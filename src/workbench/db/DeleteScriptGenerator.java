@@ -174,8 +174,6 @@ public class DeleteScriptGenerator
 		long duration = System.currentTimeMillis() - retrieveStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Retrieving dependency hierarchy for " +  dependency.getRootNode().getTable() + " took: " + duration + "ms");
 
-		long calcStart = System.currentTimeMillis();
-
 		Map<Integer, Set<DependencyNode>> levels = buildLevelsTopDown(dependency.getRootNode(), 1);
 
 		if (this.monitor != null)
@@ -197,8 +195,6 @@ public class DeleteScriptGenerator
 		duration = System.currentTimeMillis() - adjustStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Adjusting level hierarchy in " + loops + " iterations took: " + duration + "ms");
 
-		long tableCount = 0;
-
 		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
 			if (entry.getValue().size() > 0)
@@ -218,7 +214,6 @@ public class DeleteScriptGenerator
 				// theoretically it could still mean that two tables that have the same number of dependencies
 				// need a specific order, but this is too hard to detect...
 				List<TableIdentifier> sorted = sortTables(tableNodes.getMap());
-				tableCount += sorted.size();
 				for (TableIdentifier tbl : sorted)
 				{
 					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
@@ -236,8 +231,6 @@ public class DeleteScriptGenerator
 			this.addRootTableWhere(rootSql);
 			statements.add(formatSql(rootSql));
 		}
-		duration = System.currentTimeMillis() - calcStart;
-		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Generated " + statements.size() + " statements for " + tableCount + " tables in " + duration + "ms");
 	}
 
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
