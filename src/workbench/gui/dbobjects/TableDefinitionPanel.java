@@ -51,7 +51,18 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.*;
+import workbench.db.ColumnDropper;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.DbObject;
+import workbench.db.DbSettings;
+import workbench.db.IndexColumn;
+import workbench.db.IndexReader;
+import workbench.db.TableColumnsDatastore;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnAlterAction;
@@ -159,7 +170,7 @@ public class TableDefinitionPanel
 		alterColumnsAction.setReloader(this);
 
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, true, "columnlist");
-		// Setting the column list now, ensures that the dropdown will be displayed
+		// Setting the column list now, ensures that the dropdown will be displayed (=sized)
 		// properly in the QuickFilterPanel, although it wouldn't be necessary
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);

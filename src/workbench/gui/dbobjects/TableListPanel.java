@@ -46,7 +46,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.ActionMap;
+import javax.swing.ComponentInputMap;
+import javax.swing.InputMap;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -100,7 +113,14 @@ import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.components.*;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.FlatButton;
+import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTabbedPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
@@ -843,11 +863,6 @@ public class TableListPanel
 
 		renameAction.setConnection(dbConnection);
 		validator.setConnection(dbConnection);
-
-		if (this.dbConnection != null)
-		{
-			this.findPanel.setColumnList(dbConnection.getMetadata().getTableListColumns());
-		}
 
 		reset();
 

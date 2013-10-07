@@ -35,6 +35,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -100,6 +101,7 @@ public class QuickFilterPanel
 	private TextComponentMouseListener textListener;
 	private boolean assumeWildcards;
 	private boolean autoFilterEnabled;
+	private boolean enableMultiValue;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -107,15 +109,6 @@ public class QuickFilterPanel
 		this.searchTable = table;
 		this.searchTable.addPropertyChangeListener("model", this);
 		showColumnDropDown = showDropDown;
-		this.initGui(historyProperty);
-	}
-
-	public QuickFilterPanel(WbTable table, String column, String historyProperty)
-	{
-		super();
-		this.searchTable = table;
-		this.searchColumn = column;
-		showColumnDropDown = false;
 		this.initGui(historyProperty);
 	}
 
@@ -136,6 +129,11 @@ public class QuickFilterPanel
 		toolbar.setEnabled(flag);
 		filterAction.setEnabled(flag);
 		filterValue.setEnabled(flag);
+	}
+
+	public void setEnableMultipleValues(boolean flag)
+	{
+		this.enableMultiValue = flag;
 	}
 
 	public void setFilterOnType(boolean flag)
@@ -374,11 +372,29 @@ public class QuickFilterPanel
 			// no exception, so everything is OK
 			return input;
 		}
-		if (assumeWildcards && !containsWildcards(input))
+
+		String regex;
+
+		if (enableMultiValue)
 		{
-			input = "*" + input + "*";
+			List<String> elements = StringUtil.stringToList(input,",", true, true, false, false);
+
+			for (int i=0; i < elements.size(); i++)
+			{
+				String element = elements.get(i);
+				if (assumeWildcards && !containsWildcards(element))
+				{
+					element = "*" + element + "*";
+				}
+				String regexElement = StringUtil.wildcardToRegex(element, true);
+				elements.set(i, regexElement);
+			}
+			regex = StringUtil.listToString(elements, "|",false, '"');
 		}
-		String regex = StringUtil.wildcardToRegex(input, true);
+		else
+		{
+			regex = StringUtil.wildcardToRegex(input, true);
+		}
 
 		// Test the "translated" pattern, if that throws an exception let the caller handle it
 		Pattern.compile(regex);
