@@ -118,7 +118,7 @@ public class DeleteScriptGenerator
 
 	public void setExcludedTables(List<TableIdentifier> toExclude)
 	{
-		if (toExclude == null)
+		if (CollectionUtil.isEmpty(toExclude))
 		{
 			this.excludeTables.clear();
 		}
@@ -180,7 +180,9 @@ public class DeleteScriptGenerator
 		this.dependency.setScriptMonitor(monitor);
 
 		long retrieveStart = System.currentTimeMillis();
+		this.dependency.setExcludedTables(excludeTables);
 		this.dependency.readDependencyTree(true);
+
 		long duration = System.currentTimeMillis() - retrieveStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Retrieving dependency hierarchy for " +  dependency.getRootNode().getTable() + " took: " + duration + "ms");
 

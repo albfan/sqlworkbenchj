@@ -33,6 +33,7 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 
 import workbench.util.StringUtil;
 
@@ -56,6 +57,7 @@ public class TableDependency
 	private final Map<DependencyNode, DependencyNode> visitedRelations = new HashMap<DependencyNode, DependencyNode>();
 	private final Set<DependencyNode> visitedParents = new HashSet<DependencyNode>();
 	private ScriptGenerationMonitor monitor;
+	private final List<TableIdentifier> excludeTables = new ArrayList<TableIdentifier>();
 
 	public TableDependency(WbConnection con)
 	{
@@ -82,6 +84,19 @@ public class TableDependency
 	public FKHandler getFKHandler()
 	{
 		return fkHandler;
+	}
+
+	public void setExcludedTables(List<TableIdentifier> toExclude)
+	{
+		if (CollectionUtil.isEmpty(toExclude))
+		{
+			this.excludeTables.clear();
+		}
+		else
+		{
+			this.excludeTables.clear();
+			this.excludeTables.addAll(toExclude);
+		}
 	}
 
 	public void setScriptMonitor(ScriptGenerationMonitor monitor)
@@ -220,6 +235,12 @@ public class TableDependency
 		if (visitedParents.contains(parent))
 		{
 			LogMgr.logTrace("TableDependency.readTree()", "Foreign key " + parent.getFkName()+ " has already been processed.");
+			return;
+		}
+
+		if (excludeTables.contains(parent.getTable()))
+		{
+			LogMgr.logDebug("TableDependency.readTree()", "Table dependency for " + parent.getTable()+ " will not be analyzed because it has been excluded.");
 			return;
 		}
 

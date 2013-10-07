@@ -116,7 +116,7 @@ public class BatchRunner
 	private String command;
 	private boolean storeErrorMessages;
 	private MessageBuffer errors;
-	private List<DataStore> queryResults = new ArrayList<DataStore>();
+	private final List<DataStore> queryResults = new ArrayList<DataStore>();
 
 	public BatchRunner()
 	{
@@ -767,10 +767,10 @@ public class BatchRunner
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + time);
 				}
 
-				if (this.rowMonitor != null && (executedCount % interval == 0))
+				if (this.rowMonitor != null && ((executedCount + 1) % interval == 0))
 				{
 					this.rowMonitor.restoreType("batchrunnerMain");
-					this.rowMonitor.setCurrentRow(executedCount, totalStatements);
+					this.rowMonitor.setCurrentRow(executedCount + 1, totalStatements);
 				}
 
 				if (result != null && result.stopScript())
