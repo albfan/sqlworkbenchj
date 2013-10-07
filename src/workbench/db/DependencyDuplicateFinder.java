@@ -22,6 +22,9 @@
  */
 package workbench.db;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -50,7 +55,6 @@ class DependencyDuplicateFinder
 	{
 		Set<String> result = new HashSet<String>();
 		List<NodeInformation> tree = buildTree(root, 0);
-//		dumpTree(tree);
 		for (NodeInformation info : tree)
 		{
 			if (info.level > getHighestLevel(info.node.getTable()))
@@ -80,28 +84,32 @@ class DependencyDuplicateFinder
 		return path.toString();
 	}
 
-//	private void dumpTree(List<NodeInformation> tree)
-//	{
-//		StringBuilder dump = new StringBuilder(tree.size() * 20);
-//		dump.append(this.root.getTable().toString());
-//		for (NodeInformation infoNode : tree)
-//		{
-//			String indent = StringUtil.padRight("", (infoNode.level) * 4);
-//			dump.append(indent);
-//			dump.append(infoNode.node.getTable().toString());
-//			String cols = StringUtil.listToString(infoNode.node.getColumns().keySet(), ',');
-//			dump.append(" (").append(cols).append(')');
-//			dump.append('\n');
-//		}
-//		try
-//		{
-//			FileUtil.writeString(new File("c:/temp/tree.txt"), dump.toString());
-//		}
-//		catch (IOException io)
-//		{
-//			//ignore
-//		}
-//	}
+	void dumpTree(List<NodeInformation> tree, String fname)
+	{
+		FileWriter writer = null;
+		try
+		{
+			writer = new FileWriter(new File("c:/temp", fname));
+			writer.append(this.root.getTable().toString() + "\n");
+			for (NodeInformation infoNode : tree)
+			{
+				String indent = StringUtil.padRight("", (infoNode.level + 1) * 4);
+				writer.append(indent);
+				writer.append(infoNode.node.getTable().toString());
+				String cols = StringUtil.listToString(infoNode.node.getColumns().keySet(), ',');
+				writer.append(" (").append(cols).append(')');
+				writer.append('\n');
+			}
+		}
+		catch (IOException io)
+		{
+			//ignore
+		}
+		finally
+		{
+			FileUtil.closeQuietely(writer);
+		}
+	}
 
 	private int getHighestLevel(TableIdentifier table)
 	{
@@ -110,7 +118,7 @@ class DependencyDuplicateFinder
 		return lvl.intValue();
 	}
 
-	private List<NodeInformation> buildTree(DependencyNode root, int level)
+	List<NodeInformation> buildTree(DependencyNode root, int level)
 	{
 		List<NodeInformation> result = new ArrayList<NodeInformation>();
 		List<DependencyNode> children = root.getChildren();
@@ -131,7 +139,7 @@ class DependencyDuplicateFinder
 		return result;
 	}
 
-	private class NodeInformation
+	class NodeInformation
 	{
 		DependencyNode node;
 		int level;
