@@ -40,8 +40,8 @@ public class BaseObjectType
 	implements ComparableDbObject
 {
 	private String catalog;
-	private String schema;
-	private String typeName;
+	private final String schema;
+	private final String typeName;
 	private final String objectType = "TYPE";
 	private String remarks;
 	private String source;
