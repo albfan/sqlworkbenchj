@@ -367,12 +367,13 @@ public class DbMetadata
 			while (itr.hasNext())
 			{
 				String type = itr.next().toLowerCase();
-				// we don't want views in this list
-				if (type.contains("view"))
+				// we don't want regular views in this list
+				if (type.contains("view") && !type.equalsIgnoreCase("materialized view"))
 				{
 					itr.remove();
 				}
 			}
+			LogMgr.logDebug("DbMetadata.<init>", "Using table types returned by the JDBC driver: " + ttypes);
 		}
 		else
 		{
@@ -2466,7 +2467,7 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
-		LogMgr.logDebug("DbMetadata.retrieveTableTypes()", "Table types returned by the JDBC driver: " + types);
+
 		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
 		{
 			types.add("MATERIALIZED VIEW");
