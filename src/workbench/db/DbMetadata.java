@@ -2540,7 +2540,7 @@ public class DbMetadata
 	public boolean isTableType(String type)
 	{
 		if (type == null) return false;
-		return tableTypesList.contains(type);
+		return tableTypesList.contains(type.trim());
 	}
 
 	/**

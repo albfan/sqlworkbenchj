@@ -1349,18 +1349,15 @@ public class TableListPanel
 		this.invalidateData();
 
 		boolean isTable = isTable();
-		boolean hasData = isTable;
-		if (!isTable)
-		{
-			hasData = canContainData();
-		}
+		boolean hasData = isTable || canContainData();
+
 		if (isTable)
 		{
 			showTablePanels();
 		}
 		else
 		{
-			this.showObjectDefinitionPanels(hasData);
+			showObjectDefinitionPanels(hasData);
 		}
 
 		this.tableData.reset();
@@ -1386,12 +1383,10 @@ public class TableListPanel
 	{
 		if (table == null) return false;
 
-		// this can happen during closing the application.
-		if (this.dbConnection == null) return false;
-		DbMetadata meta = this.dbConnection.getMetadata();
-		if (meta == null) return false;
-		DbSettings dbs = this.dbConnection.getDbSettings();
-		if (dbs == null) return false;
+		// dbConnection, metata or dbSettings can be null when the application is being closed
+		DbMetadata meta = this.dbConnection != null ? this.dbConnection.getMetadata() : null;
+		DbSettings dbs = this.dbConnection  != null ? this.dbConnection.getDbSettings() : null;
+		if (meta == null || dbs == null) return false;
 
 		return (meta.supportsSynonyms() && dbs.isSynonymType(table.getType()));
 	}
@@ -1400,22 +1395,24 @@ public class TableListPanel
 	{
 		if (this.selectedTable == null) return false;
 		if (this.dbConnection == null) return false;
-		DbMetadata meta = this.dbConnection.getMetadata();
-		if (meta == null) return false;
-		DbSettings dbs = this.dbConnection.getDbSettings();
-		if (dbs == null) return false;
+
+		// dbConnection, metata or dbSettings can be null when the application is being closed
+		DbMetadata meta = this.dbConnection != null ? this.dbConnection.getMetadata() : null;
+		DbSettings dbs = this.dbConnection  != null ? this.dbConnection.getDbSettings() : null;
+		if (meta == null || dbs == null) return false;
 
 		String type = selectedTable.getType();
 		if (meta.isTableType(type)) return true;
 
-		if (!GuiSettings.showSynonymTargetInDbExplorer()) return false;
-
-		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
+		if (GuiSettings.showSynonymTargetInDbExplorer() && meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
 			TableIdentifier rt = getObjectTable();
-			if (rt == null) return false;
-			return meta.isTableType(realTable.getType());
+			if (rt != null)
+			{
+				return meta.isTableType(rt.getType());
+			}
 		}
+		LogMgr.logDebug("TableListPanel.isTable()", "Object " + selectedTable.getTableExpression() + ", type=[" + selectedTable.getType() + "] is not considered a table");
 		return false;
 	}
 
@@ -1423,17 +1420,25 @@ public class TableListPanel
 	{
 		if (selectedTable == null) return false;
 		String type = selectedTable.getType();
-		DbMetadata meta = this.dbConnection.getMetadata();
-		DbSettings dbs = this.dbConnection.getDbSettings();
 
-		if (meta.supportsSynonyms() && dbs.isSynonymType(type))
+		// dbConnection, metata or dbSettings can be null when the application is being closed
+		DbMetadata meta = this.dbConnection != null ? this.dbConnection.getMetadata() : null;
+		DbSettings dbs = this.dbConnection  != null ? this.dbConnection.getDbSettings() : null;
+		if (meta == null || dbs == null) return false;
+
+		if (GuiSettings.showSynonymTargetInDbExplorer() && meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
-			if (!GuiSettings.showSynonymTargetInDbExplorer()) return false;
 			TableIdentifier rt = getObjectTable();
 			if (rt == null) return false;
 			type = rt.getType();
 		}
-		return meta.objectTypeCanContainData(type);
+
+		boolean containsData = meta.objectTypeCanContainData(type);
+		if (!containsData)
+		{
+			LogMgr.logDebug("TableListPanel.canContainData()", "Object " + selectedTable.getTableExpression() + ", type=[" + selectedTable.getType() + "] is not considered to contain selectable data");
+		}
+		return containsData;
 	}
 
 	protected void retrieveTableSource()
@@ -1441,7 +1446,6 @@ public class TableListPanel
 		if (selectedTable == null) return;
 
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
-
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(this.dbConnection);
 
