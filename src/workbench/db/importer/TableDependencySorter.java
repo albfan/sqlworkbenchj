@@ -22,6 +22,9 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,12 +32,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.log.LogMgr;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to sort tables according to their foreign key constraints,
@@ -81,6 +86,43 @@ public class TableDependencySorter
 		return Collections.unmodifiableList(cycleErrors);
 	}
 
+	private void dumpMapping(List<LevelNode> mapping)
+	{
+		Comparator<LevelNode> comp = new Comparator<LevelNode>()
+		{
+
+			@Override
+			public int compare(LevelNode o1, LevelNode o2)
+			{
+				if (o1.level == o2.level)
+				{
+					return o1.node.getTable().getTableName().compareTo(o2.node.getTable().getTableName());
+				}
+				return o1.level - o2.level;
+			}
+		};
+
+		FileWriter writer = null;
+		try
+		{
+			writer = new FileWriter(new File("c:/temp", "insert_levels.txt"));
+
+			List<LevelNode> sorted = new ArrayList<LevelNode>(mapping);
+			Collections.sort(sorted, comp);
+			for (LevelNode node : sorted)
+			{
+				writer.append(StringUtil.padRight("", (node.level - 1) * 4) + node.node.getTable().getTableName() + " (" + node.level + ") \n");
+			}
+		}
+		catch (IOException io)
+		{
+
+		}
+		finally
+		{
+			FileUtil.closeQuietely(writer);
+		}
+	}
 	/**
 	 * Determines the FK dependencies for each table in the passed List,
 	 * and sorts them so that data can be imported without violating
@@ -93,6 +135,7 @@ public class TableDependencySorter
 	{
 		cancel = false;
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
+		dumpMapping(levelMapping);
 
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
