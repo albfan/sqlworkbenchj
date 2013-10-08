@@ -87,7 +87,7 @@ public class QuickFilterPanel
 	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener,
 		PropertyChangeListener, KeyListener
 {
-	private WbTable searchTable;
+	private final WbTable searchTable;
 	private String searchColumn;
 
 	private HistoryTextField filterValue;
@@ -96,12 +96,12 @@ public class QuickFilterPanel
 	private QuickFilterAction filterAction;
 	private final ColumnComparator comparator = new RegExComparator();
 	private String[] columnList;
-	private boolean showColumnDropDown;
+	private final boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
 	private boolean assumeWildcards;
 	private boolean autoFilterEnabled;
-	private boolean enableMultiValue;
+	private boolean enableMultiValue = true;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -393,6 +393,10 @@ public class QuickFilterPanel
 		}
 		else
 		{
+			if (assumeWildcards && !containsWildcards(input))
+			{
+				input = "*" + input + "*";
+			}
 			regex = StringUtil.wildcardToRegex(input, true);
 		}
 

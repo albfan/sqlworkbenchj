@@ -92,16 +92,6 @@ public class DeleteScriptGenerator
 			}
 		};
 
-	private final Comparator<DependencyNode> levelSorter =new Comparator<DependencyNode>()
-	{
-
-		@Override
-		public int compare(DependencyNode o1, DependencyNode o2)
-		{
-			return o1.getLevel() - o2.getLevel();
-		}
-	};
-
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
