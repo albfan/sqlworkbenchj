@@ -32,12 +32,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.log.LogMgr;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -123,6 +124,7 @@ public class TableDependencySorter
 			FileUtil.closeQuietely(writer);
 		}
 	}
+
 	/**
 	 * Determines the FK dependencies for each table in the passed List,
 	 * and sorts them so that data can be imported without violating
@@ -135,7 +137,7 @@ public class TableDependencySorter
 	{
 		cancel = false;
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
-		dumpMapping(levelMapping);
+//		dumpMapping(levelMapping);
 
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
