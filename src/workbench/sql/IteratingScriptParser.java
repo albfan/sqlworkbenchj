@@ -78,7 +78,7 @@ public class IteratingScriptParser
 	// can be used in a single line without a delimiter
 	// This is basically to make the parser as Oracle compatible as possible
 	// while not breaking the SQL queries for other servers
-	private Pattern[] SLC_PATTERNS =
+	private final Pattern[] SLC_PATTERNS =
          { Pattern.compile("(?mi)^\\s*SET\\s+\\w+\\s+(ON|OFF)\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*ECHO\\s+((ON)|(OFF))\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*DECLARE\\s+\\S+.*$"),
@@ -86,7 +86,7 @@ public class IteratingScriptParser
 					 Pattern.compile("(?mi)^\\s*SET\\s+TRANSACTION\\s+READ\\s+((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
 
-	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
+	private final Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
 
 	public IteratingScriptParser()
 	{
@@ -468,10 +468,9 @@ public class IteratingScriptParser
 
 								if (!slcFound && checkSingleLineCommands)
 								{
-									for (int pi=0; pi < SLC_PATTERNS.length; pi++)
+									for (Pattern SLC_PATTERNS1 : SLC_PATTERNS)
 									{
-										Matcher m = SLC_PATTERNS[pi].matcher(clean);
-
+										Matcher m = SLC_PATTERNS1.matcher(clean);
 										if (m.matches())
 										{
 											slcFound = true;
