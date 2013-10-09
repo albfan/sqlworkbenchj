@@ -22,17 +22,14 @@
  */
 package workbench.sql;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -177,30 +174,8 @@ public class ScriptParser
 	public void readScriptFromFile(File f, String encoding)
 		throws IOException
 	{
-		BufferedReader in = null;
-		StringBuilder content = null;
-		try
-		{
-			content = new StringBuilder((int)f.length());
-			in = EncodingUtil.createBufferedReader(f, encoding);
-			String line = in.readLine();
-			while (line != null)
-			{
-				content.append(line);
-				content.append('\n');
-				line = in.readLine();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ScriptParser.readScriptFromFile()", "Error reading file " + f.getAbsolutePath(), e);
-			content = null;
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-		this.setScript(content == null ? "" : content.toString());
+		String content = FileUtil.readFile(f, encoding);
+		this.setScript(content == null ? "" : content);
 	}
 
 	public void setEmptyLineIsDelimiter(boolean flag)
@@ -500,7 +475,7 @@ public class ScriptParser
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
 
-		if (useAlternateDelimiter)
+		if (useAlternateDelimiter || !DelimiterDefinition.STANDARD_DELIMITER.equals(this.delimiter))
 		{
 			p.setCheckForSingleLineCommands(false);
 		}
