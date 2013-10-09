@@ -159,6 +159,8 @@ public class OracleFKHandler
 	private DataStore getExportedKeyList(TableIdentifier tbl)
 		throws SQLException
 	{
+		// I'm not adding an order by because the statement is terribly slow anyway
+		// and an order by makes it even slower for large results
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
 		sql.append(getQuery(tbl));
 		sql.append("AND p.table_name = ? \n");
@@ -200,6 +202,8 @@ public class OracleFKHandler
 	private DataStore getImportedKeyList(TableIdentifier tbl)
 		throws SQLException
 	{
+		// I'm not adding an order by because the statement is terribly slow anyway
+		// and an order by makes it even slower for large results
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
 		sql.append(getQuery(tbl));
 		sql.append("AND f.table_name = ? \n");
