@@ -294,7 +294,17 @@
 <!-- Process the modify-column part -->
   <xsl:template match="modify-column">
     <xsl:param name="table"/>
-    <xsl:variable name="column" select="@name"/>
+    <xsl:apply-templates select="new-column-attributes">
+      <xsl:with-param name="table" select="$table"/>
+      <xsl:with-param name="column" select="@name"/>
+      <xsl:with-param name="oldDefault" select="reference-column-definition/default-value"/>
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="new-column-attributes">
+    <xsl:param name="table"/>
+    <xsl:param name="column"/>
+    <xsl:param name="oldDefault"/>
     <xsl:if test="string-length(dbms-data-type) &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
@@ -331,7 +341,7 @@
       <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-    <xsl:if test="default-value/@remove = 'true'">
+    <xsl:if test="default-value/@remove = 'true' and not($oldDefault = 'null') ">
       <xsl:text>ALTER TABLE </xsl:text>
       <xsl:value-of select="$table"/>
       <xsl:text> ALTER COLUMN </xsl:text>
@@ -420,6 +430,7 @@
     <xsl:text>AS </xsl:text>
     <xsl:copy-of select="normalize-space(view-source)"/>
     <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
   </xsl:template>
 
