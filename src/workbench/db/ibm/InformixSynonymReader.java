@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -60,7 +63,7 @@ public class InformixSynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
-		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
+		String systemSchema = con.getDbSettings().getProperty("systemschema", "informix");
 		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
 		TableIdentifier synTabs = new TableIdentifier(catalog, systemSchema, "syssyntable");
 

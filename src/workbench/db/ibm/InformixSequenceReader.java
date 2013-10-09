@@ -95,8 +95,7 @@ public class InformixSequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-
-		String systemSchema = Settings.getInstance().getProperty("workbench.db.informix_dynamic_server.systemschema", "informix");
+		String systemSchema = dbConn.getDbSettings().getProperty("systemschema", "informix");
 		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
 		TableIdentifier seqTabs = new TableIdentifier(catalog, systemSchema, "syssequences");
 

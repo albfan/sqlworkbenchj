@@ -37,6 +37,7 @@ import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.ibm.Db2ColumnEnhancer;
+import workbench.db.ibm.InformixColumnEnhancer;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLColumnEnhancer;
@@ -311,6 +312,10 @@ public class JdbcTableDefinitionReader
 		if (con.getDbId().equals("db2"))
 		{
 			return new Db2ColumnEnhancer();
+		}
+		if (con.getDbId().equals("informix_dynamic_server "))
+		{
+			return new InformixColumnEnhancer();
 		}
 		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2005(con))
 		{

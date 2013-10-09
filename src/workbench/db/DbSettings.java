@@ -1676,4 +1676,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "procedurelist.only.accessible", true);
 	}
 
+	public String getProperty(String prop, String defaultValue)
+	{
+		return Settings.getInstance().getProperty(prefix + prop, defaultValue);
+	}
 }

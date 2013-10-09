@@ -1,0 +1,164 @@
+/*
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2013, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
+ */
+package workbench.db.ibm;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.ColumnDefinitionEnhancer;
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class InformixColumnEnhancer
+	implements ColumnDefinitionEnhancer
+{
+	private final Map<Integer, String> limits = new HashMap<Integer, String>(6);
+
+	public InformixColumnEnhancer()
+	{
+		limits.put(0, "YEAR");
+		limits.put(2, "MONTH");
+		limits.put(4, "DAY");
+		limits.put(6, "HOUR");
+		limits.put(8, "MINUTE");
+		limits.put(10, "SECOND");
+		limits.put(11, "FRACTION(1)");
+		limits.put(12, "FRACTION(2)");
+		limits.put(13, "FRACTION(3)");
+		limits.put(14, "FRACTION(4)");
+		limits.put(15, "FRACTION(5)");
+	}
+
+
+	@Override
+	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+	{
+		String typeValues = conn.getDbSettings().getProperty("qualifier.types", "datetime,interval");
+
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(StringUtil.stringToList(typeValues, ",", true, true, false, false));
+
+		boolean checkRequired = false;
+
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			if (types.contains(col.getDbmsType()))
+			{
+				checkRequired = true;
+				break;
+			}
+		}
+
+		if (checkRequired)
+		{
+			updateDateColumns(table, conn);
+		}
+	}
+
+	private void updateDateColumns(TableDefinition table, WbConnection conn)
+	{
+		String catalog = table.getTable().getRawCatalog();
+		
+		String systemSchema = conn.getDbSettings().getProperty("systemschema", "informix");
+		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
+		TableIdentifier sysCols = new TableIdentifier(catalog, systemSchema, "syscolumns");
+
+		String systables = sysTabs.getFullyQualifiedName(conn);
+		String syscolumns = sysCols.getFullyQualifiedName(conn);
+
+		String sql =
+			"select c.colname, c.collength \n" +
+			"from " + systables + " t \n"+
+			"  join " + syscolumns + " c on t.tabid = c.tabid \n" +
+			"where t.tabname = ? \n" +
+			"  and t.owner = ? ";
+
+		String tablename = table.getTable().getRawTableName();
+		String schema = table.getTable().getRawSchema();
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+		}
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		Map<String, String> types = new HashMap<String, String>();
+		try
+		{
+			stmt = conn.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, tablename);
+			stmt.setString(2, schema);
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				String colname = rs.getString(1);
+				int typeLen = rs.getInt(2);
+				String typeDesc = getQualifier(typeLen);
+				types.put(colname, typeDesc);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("InformixColumnEnhancer.updateDateColumns()", "Error retrieving datetime qualifiers", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			String desc = types.get(col.getColumnName());
+			if (desc != null)
+			{
+				String dbms = col.getDbmsType() + " " + desc;
+				col.setDbmsType(dbms);
+			}
+		}
+	}
+
+	String getQualifier(int collength)
+	{
+		int len = collength / 256;
+		int baseValue = collength - (len * 256);
+		int from = baseValue / 16;
+		int to = baseValue - (from * 16);
+
+		return limits.get(from) + " TO " + limits.get(to);
+	}
+}
