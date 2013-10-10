@@ -38,6 +38,7 @@ public enum ArgumentType
 	BoolArgument,
 
 	IntegerArgument,
+	
 	/**
 	 * A parameter that selects tables. If this is set
 	 * the autocompletion for this parameter will

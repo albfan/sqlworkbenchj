@@ -355,4 +355,23 @@ public class TableDependencySorterTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
+
+	@Test
+	public void testMultiLevel()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+		InputStream in = getClass().getResourceAsStream("gen_insert_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String sql = FileUtil.readCharacters(r);
+
+		TestUtil.executeScript(con, sql);
+		TableIdentifier country = con.getMetadata().findTable(new TableIdentifier("COUNTRIES"));
+		TableIdentifier regions = con.getMetadata().findTable(new TableIdentifier("REGIONS"));
+		TableIdentifier prdDetails = con.getMetadata().findTable(new TableIdentifier("PRODUCT_DETAILS"));
+
+
+	}
 }

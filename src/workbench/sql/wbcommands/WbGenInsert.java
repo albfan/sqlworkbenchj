@@ -103,6 +103,8 @@ public class WbGenInsert
 			return result;
 		}
 
+		List<String> missingTables = tableArgs.getMissingTables();
+
 		tableSorter = new TableDependencySorter(this.currentConnection);
 
 		if (this.rowMonitor != null)
@@ -145,6 +147,18 @@ public class WbGenInsert
 				}
 				result.setSuccess();
 			}
+
+			if (CollectionUtil.isNonEmpty(missingTables))
+			{
+				result.addMessageNewLine();
+				result.addMessageByKey("MsgTablesNotFound");
+				result.addMessageNewLine();
+				for (String tbl : missingTables)
+				{
+					result.addMessage("    " + tbl);
+				}
+			}
+
 		}
 		return result;
 	}
