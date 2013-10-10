@@ -65,9 +65,21 @@ public class SqlFormatterTest
 			"               ON t1.id = t2.id\n" +
 			"              AND t2.foo IN (1, 2),tabelle3\n" +
 			"WHERE x = 42";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
+	}
 
+	@Test
+	public void testNestedSelectExpression()
+	{
+		String sql = "select limit 1 (select count(*) from table1) + (select count(*) from table2) from foobar";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT limit 1 (SELECT COUNT(*) FROM table1) +(SELECT COUNT(*) FROM table2)\n" +
+			"FROM foobar";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
 	}
 	@Test
 	public void testNestedFunctionCalls()

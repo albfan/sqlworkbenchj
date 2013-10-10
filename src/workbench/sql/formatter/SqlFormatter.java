@@ -531,6 +531,7 @@ public class SqlFormatter
 		if (lastChar == catalogSeparator && current.isIdentifier()) return false;
 		if (lastChar == catalogSeparator && currChar == '*') return true; // e.g. person.*
 		if (lastChar == catalogSeparator && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
+		if (last.isLiteral() && isCurrentOpenBracket) return true;
 		if (isLastOpenBracket && isKeyword(currentText)) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;
 		if ((last.isIdentifier() || last.isLiteral()) && current.isOperator()) return true;
@@ -844,7 +845,7 @@ public class SqlFormatter
 				// an equal sign immediately followed by an opening
 				// bracket cannot be a function call (the function name
 				// is missing) so it has to be a sub-select
-				if ("=".equals(lastToken.getContents()) || ",".equals(lastToken.getContents()))
+				if ("=".equals(lastToken.getContents()) || ",".equals(lastToken.getContents()) || lastToken.isLiteral())
 				{
 					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 					this.appendText("(");
