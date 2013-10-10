@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
@@ -46,7 +45,7 @@ import workbench.util.StringUtil;
 public class InformixColumnEnhancer
 	implements ColumnDefinitionEnhancer
 {
-	private final Map<Integer, String> limits = new HashMap<Integer, String>(6);
+	private final Map<Integer, String> limits = new HashMap<Integer, String>(11);
 
 	public InformixColumnEnhancer()
 	{
@@ -92,7 +91,7 @@ public class InformixColumnEnhancer
 	private void updateDateColumns(TableDefinition table, WbConnection conn)
 	{
 		String catalog = table.getTable().getRawCatalog();
-		
+
 		String systemSchema = conn.getDbSettings().getProperty("systemschema", "informix");
 		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
 		TableIdentifier sysCols = new TableIdentifier(catalog, systemSchema, "syscolumns");
@@ -110,10 +109,7 @@ public class InformixColumnEnhancer
 		String tablename = table.getTable().getRawTableName();
 		String schema = table.getTable().getRawSchema();
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
-		}
+		LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

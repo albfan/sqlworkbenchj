@@ -220,13 +220,13 @@ public class ReferenceTableNavigationTest
 					 "CREATE TABLE link_table \n" +
 					 "( \n" +
 					 "   link_id INTEGER NOT NULL, \n" +
-					 "   original_id INTEGER NOT NULL, \n" +
+					 "   \"original id\" INTEGER NOT NULL, \n" +
 					 "   CONSTRAINT link_id_fk FOREIGN KEY (link_id) REFERENCES base (id), \n" +
-					 "   CONSTRAINT org_id_fk FOREIGN KEY (original_id) REFERENCES base (id) \n" +
+					 "   CONSTRAINT org_id_fk FOREIGN KEY (\"original id\") REFERENCES base (id) \n" +
 					 "); \n" +
 					 "INSERT INTO base (id, data) VALUES (1, 'one');\n" +
 					 "INSERT INTO base (id, data) VALUES (2, 'two');\n" +
-					 "INSERT INTO link_table (link_id, original_id) vALUES (1,2);\n" +
+					 "INSERT INTO link_table (link_id, \"original id\") vALUES (1,2);\n" +
 					 "COMMIT;\n";
 		TestUtil.executeScript(con, script);
 		ReferenceTableNavigation nav = new ReferenceTableNavigation(new TableIdentifier("base"), con);
@@ -249,7 +249,7 @@ public class ReferenceTableNavigationTest
 
 		sql = nav.getSelectForChild(new TableIdentifier("link_table"), "org_id_fk", all);
 		//System.out.println("******\n" + sql);
-		assertTrue(sql.indexOf("(ORIGINAL_ID = 1)") > -1);
+		assertTrue(sql.indexOf("(\"original id\" = 1)") > -1);
 	}
 
 	@Test

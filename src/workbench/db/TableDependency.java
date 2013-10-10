@@ -400,4 +400,40 @@ public class TableDependency
 		return this.tableRoot;
 	}
 
+//	public void dumpTree(String fname)
+//	{
+//		FileWriter writer = null;
+//		try
+//		{
+//			writer = new FileWriter(new File("c:/temp", fname));
+//			dumpLevel(writer, getRootNode(), 0);
+//		}
+//		catch (IOException io)
+//		{
+//
+//		}
+//		finally
+//		{
+//			FileUtil.closeQuietely(writer);
+//		}
+//	}
+//
+//	private void dumpLevel(FileWriter writer, DependencyNode node, int level)
+//		throws IOException
+//	{
+//		if (node == null) return;
+//
+//		for (DependencyNode child : node.getChildren())
+//		{
+//			writer.write(StringUtil.padRight("", level * 4));
+//			writer.write(child.getTable().getTableName());
+//			writer.write(", nodeLevel: " + node.getLevel());
+//			writer.write(", iterationLevel: " + level);
+//			writer.write("\n");
+//		}
+//		for (DependencyNode child : node.getChildren())
+//		{
+//			dumpLevel(writer, child, level + 1);
+//		}
+//	}
 }

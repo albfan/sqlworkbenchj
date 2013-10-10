@@ -33,16 +33,16 @@ import workbench.storage.SqlLiteralFormatter;
  * A class to generate SQL SELECT statements that will retrieve the parent
  * or child records regarding the foreign key constraints for the given
  * table.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ReferenceTableNavigation
 {
-	private TableIdentifier baseTable;
-	private WbConnection dbConn;
-	private SqlLiteralFormatter formatter;
+	private final TableIdentifier baseTable;
+	private final WbConnection dbConn;
+	private final SqlLiteralFormatter formatter;
 	private TableDependency dependencyTree;
-	
+
 	public ReferenceTableNavigation(TableIdentifier table, WbConnection con)
 	{
 		this.baseTable = table;
@@ -54,12 +54,12 @@ public class ReferenceTableNavigation
 	{
 		readDependencyTree(true);
 	}
-	
+
 	public void readTreeForParents()
 	{
 		readDependencyTree(false);
 	}
-	
+
 	protected void readDependencyTree(boolean forChildren)
 	{
 		dependencyTree = new TableDependency(this.dbConn, this.baseTable);
@@ -78,7 +78,7 @@ public class ReferenceTableNavigation
 	{
 		if (this.dependencyTree == null) return null;
 		if (tbl == null) return null;
-		
+
 		TableIdentifier table = tbl.createCopy();
 		if (table.getSchema() == null)
 		{
@@ -96,7 +96,7 @@ public class ReferenceTableNavigation
 	{
 		return this.dependencyTree;
 	}
-	
+
 	/**
 	 * Return a SELECT statement to retrieve the child rows referenced by the given
 	 * table column values
@@ -113,7 +113,7 @@ public class ReferenceTableNavigation
 	/**
 	 * Return a SELECT statement to retrieve the parent rows referencing by the given
 	 * table column values
-	 * 
+	 *
 	 * @param tbl the table for which the parent rows should be retrieved
 	 * @param fkName the name of the foreign key that links tbl
 	 * @param values the values for which the SQL statement should be created
@@ -122,16 +122,16 @@ public class ReferenceTableNavigation
 	{
 		return generateSelect(tbl, fkName, false, values);
 	}
-	
+
 	private String generateSelect(TableIdentifier tbl, String fkName, boolean forChildren, List<List<ColumnData>> values)
 	{
 		String result = null;
 		try
 		{
 			if (this.dependencyTree == null) this.readDependencyTree(forChildren);
-			
+
 			DependencyNode node = getNodeForTable(tbl, fkName);
-			
+
 			StringBuilder sql = new StringBuilder(100);
 			sql.append("SELECT * \nFROM ");
 			sql.append(node.getTable().getTableExpression(this.dbConn));
@@ -144,13 +144,16 @@ public class ReferenceTableNavigation
 			LogMgr.logError("TableNavigation.getSelectsForParents()", "Error retrieving parent tables", e);
 		}
 		return result;
-	}	
-	
+	}
+
 	private void addWhere(StringBuilder sql, DependencyNode node, List<List<ColumnData>> values)
 	{
 		Map<String, String> colMapping = node.getColumns();
-		
+
 		Iterator<List<ColumnData>> rowItr = values.iterator();
+
+		QuoteHandler quoter = dbConn.getMetadata();
+
 		while (rowItr.hasNext())
 		{
 			List<ColumnData> row = rowItr.next();
@@ -163,7 +166,7 @@ public class ReferenceTableNavigation
 				String parentColumn = entry.getValue();
 				ColumnData data = getPkValue(row, parentColumn);
 				if (data == null) continue;
-				sql.append(childColumn);
+				sql.append(quoter.quoteObjectname(childColumn));
 				if (data.isNull())
 				{
 					sql.append(" IS NULL");
@@ -185,7 +188,7 @@ public class ReferenceTableNavigation
 			}
 		}
 	}
-	
+
 	private ColumnData getPkValue(List<ColumnData> colData, String column)
 	{
 		for (ColumnData data : colData)

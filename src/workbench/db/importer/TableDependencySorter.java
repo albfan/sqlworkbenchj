@@ -22,12 +22,10 @@
  */
 package workbench.db.importer;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,8 +37,6 @@ import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.util.FileUtil;
-import workbench.util.StringUtil;
 
 /**
  * A class to sort tables according to their foreign key constraints,
@@ -87,43 +83,43 @@ public class TableDependencySorter
 		return Collections.unmodifiableList(cycleErrors);
 	}
 
-	private void dumpMapping(List<LevelNode> mapping)
-	{
-		Comparator<LevelNode> comp = new Comparator<LevelNode>()
-		{
-
-			@Override
-			public int compare(LevelNode o1, LevelNode o2)
-			{
-				if (o1.level == o2.level)
-				{
-					return o1.node.getTable().getTableName().compareTo(o2.node.getTable().getTableName());
-				}
-				return o1.level - o2.level;
-			}
-		};
-
-		FileWriter writer = null;
-		try
-		{
-			writer = new FileWriter(new File("c:/temp", "insert_levels.txt"));
-
-			List<LevelNode> sorted = new ArrayList<LevelNode>(mapping);
-			Collections.sort(sorted, comp);
-			for (LevelNode node : sorted)
-			{
-				writer.append(StringUtil.padRight("", (node.level - 1) * 4) + node.node.getTable().getTableName() + " (" + node.level + ") \n");
-			}
-		}
-		catch (IOException io)
-		{
-
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
-	}
+//	private void dumpMapping(List<LevelNode> mapping, String fname)
+//	{
+//		Comparator<LevelNode> comp = new Comparator<LevelNode>()
+//		{
+//
+//			@Override
+//			public int compare(LevelNode o1, LevelNode o2)
+//			{
+//				if (o1.level == o2.level)
+//				{
+//					return o1.node.getTable().getTableName().compareTo(o2.node.getTable().getTableName());
+//				}
+//				return o1.level - o2.level;
+//			}
+//		};
+//
+//		FileWriter writer = null;
+//		try
+//		{
+//			writer = new FileWriter(new File("c:/temp", fname));
+//
+//			List<LevelNode> sorted = new ArrayList<LevelNode>(mapping);
+//			Collections.sort(sorted, comp);
+//			for (LevelNode node : sorted)
+//			{
+//				writer.append(StringUtil.padRight("", (node.level - 1) * 4) + node.node.getTable().getTableName() + " (" + node.level + ") \n");
+//			}
+//		}
+//		catch (IOException io)
+//		{
+//
+//		}
+//		finally
+//		{
+//			FileUtil.closeQuietely(writer);
+//		}
+//	}
 
 	/**
 	 * Determines the FK dependencies for each table in the passed List,
@@ -137,7 +133,22 @@ public class TableDependencySorter
 	{
 		cancel = false;
 		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
-//		dumpMapping(levelMapping);
+//		dumpMapping(levelMapping, "before_cleanup.txt");
+
+		if (!addMissing)
+		{
+			Iterator<LevelNode> itr = levelMapping.iterator();
+			while (itr.hasNext())
+			{
+				TableIdentifier tbl = itr.next().node.getTable();
+				if (!tables.contains(tbl))
+				{
+					itr.remove();
+				}
+			}
+		}
+
+//		dumpMapping(levelMapping, "after_cleanup.txt");
 
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
@@ -157,16 +168,23 @@ public class TableDependencySorter
 
 	private DependencyNode findChildTree(List<LevelNode> levels, TableIdentifier root)
 	{
+		int maxLevel = Integer.MIN_VALUE;
+		DependencyNode lastNode = null;
+
 		for (LevelNode nd : levels)
 		{
 			DependencyNode node = nd.node;
-			DependencyNode children = node.findChildTree(root);
-			if (children != null)
+			DependencyNode child = node.findChildTree(root);
+			if (child != null)
 			{
-				return children;
+				if (child.getLevel() > maxLevel)
+				{
+					maxLevel = child.getLevel();
+					lastNode = child;
+				}
 			}
 		}
-		return null;
+		return lastNode;
 	}
 
 	public void cancel()
@@ -210,9 +228,8 @@ public class TableDependencySorter
 			}
 			else
 			{
-				LogMgr.logDebug("TableDependencySorter.createLevelMapping()", "Re-using child tree for " + tbl);
+				LogMgr.logDebug("TableDependencySorter.createLevelMapping()", "Re-using child tree for " + tbl + " with level: " + root.getLevel());
 			}
-
 
 			if (root != null)
 			{
@@ -267,7 +284,6 @@ public class TableDependencySorter
 
 	private int findTable(TableIdentifier tofind, List<TableIdentifier> toSearch)
 	{
-
 		for (int i=0; i < toSearch.size(); i++)
 		{
 			TableIdentifier tbl = toSearch.get(i);
@@ -284,9 +300,6 @@ public class TableDependencySorter
 		{
 			TableIdentifier tbl = node.getTable();
 
-			// There is no need to include self referencing tables into the level
-			// mapping, as this will create a wrong level for them and a potential
-			// parent of the self referencing table (e.g. through a different FK)
 			int level = node.getLevel();
 			LevelNode lvl = findLevelNode(levelMapping, tbl);
 			if (lvl == null)
@@ -303,11 +316,20 @@ public class TableDependencySorter
 
 	private LevelNode findLevelNode(List<LevelNode> levelMapping, TableIdentifier tbl)
 	{
+		int maxLevel = Integer.MIN_VALUE;
+		LevelNode lastNode = null;
 		for (LevelNode lvl : levelMapping)
 		{
-			if (lvl.node.getTable().compareNames(tbl)) return lvl;
+			if (lvl.node.getTable().compareNames(tbl))
+			{
+				if (lvl.node.getLevel() > maxLevel)
+				{
+					lastNode = lvl;
+					maxLevel = lvl.node.getLevel();
+				}
+			}
 		}
-		return null;
+		return lastNode;
 	}
 
 	/**
