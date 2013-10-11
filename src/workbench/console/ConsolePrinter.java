@@ -29,10 +29,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.exporter.TextRowDataConverter;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.*;
 
@@ -128,7 +130,7 @@ public abstract class ConsolePrinter
 			if (doFormat)
 			{
 				int colWidth = columnWidths.get(Integer.valueOf(col));
-				writePadded(pw, colName, colWidth);
+				writePadded(pw, colName, colWidth, alignRight(col));
 				headerWidth += colWidth;
 			}
 			else
@@ -207,7 +209,7 @@ public abstract class ConsolePrinter
 			if (!isColumnIncluded(colname)) continue;
 
 			String value = getDisplayValue(row, col);
-			writePadded(pw, colname, colwidth + 1);
+			writePadded(pw, colname, colwidth + 1, false);
 			pw.print(": ");
 			if (doFormat)
 			{
@@ -217,7 +219,7 @@ public abstract class ConsolePrinter
 				{
 					for (int i=1; i < lines.length; i++)
 					{
-						writePadded(pw, " ", colwidth + 3);
+						writePadded(pw, " ", colwidth + 3, false);
 						pw.println(lines[i]);
 					}
 				}
@@ -281,7 +283,7 @@ public abstract class ConsolePrinter
 				{
 					int colwidth = columnWidths.get(Integer.valueOf(col));
 					String[] lines = value.split(StringUtil.REGEX_CRLF);
-					writePadded(pw, lines[0], colwidth);
+					writePadded(pw, lines[0], colwidth, alignRight(col));
 					if (lines.length > 1)
 					{
 						continuationLines.put(col, lines);
@@ -302,6 +304,13 @@ public abstract class ConsolePrinter
 		{
 			LogMgr.logError("ConsolePrinter.printRow", "Error when printing DataStore contents", e);
 		}
+	}
+
+	private boolean alignRight(int col)
+	{
+		if (GuiSettings.getNumberDataAlignment() == SwingConstants.LEFT) return false;
+		int type = getColumnType(col);
+		return SqlUtil.isNumberType(type);
 	}
 
 	private int getColStartColumn(int col)
@@ -336,7 +345,7 @@ public abstract class ConsolePrinter
 				if (lines.length <= currentLine) continue;
 
 				int colstart = getColStartColumn(col) - currentpos;
-				writePadded(pw, "", colstart);
+				writePadded(pw, "", colstart, false);
 				if (printedColNr > 1)
 				{
 					pw.print(" : ");
@@ -350,16 +359,29 @@ public abstract class ConsolePrinter
 		}
 	}
 
-	private int writePadded(PrintWriter out, String value, int width)
+	private int writePadded(PrintWriter out, String value, int width, boolean rightAligned)
 	{
 		StringBuilder result = new StringBuilder(width);
 		if (value != null) result.append(value);
 
 		if (width > 0)
 		{
-			while (result.length() < width)
+			if (result.length() < width)
 			{
-				result.append(' ');
+				int delta = width - result.length();
+				StringBuilder pad = new StringBuilder(delta);
+				for (int i=0; i < delta; i++)
+				{
+					pad.append(' ');
+				}
+				if (rightAligned)
+				{
+					result.insert(0, pad);
+				}
+				else
+				{
+					result.append(pad);
+				}
 			}
 		}
 		out.print(result.toString());
