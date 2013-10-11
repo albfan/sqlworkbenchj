@@ -34,11 +34,12 @@ import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
-
 import workbench.util.StringUtil;
 
 /**
@@ -406,6 +407,8 @@ public class TableDependency
 
 	public static void dumpTree(String fname, DependencyNode root)
 	{
+		if (!Settings.getInstance().getBoolProperty("workbench.debug.dependency", false)) return;
+
 		FileWriter writer = null;
 		try
 		{
@@ -413,7 +416,7 @@ public class TableDependency
 			boolean showParents = true;
 			if (root.getChildren().isEmpty())
 			{
-				writer.append("No children for " + root.debugString() + ". Starting from top-level node: ");
+				writer.append("No children for " + root.debugString() + ". Starting from top-level node: \n");
 				while (root.getParent() != null)
 				{
 					root = root.getParent();
@@ -423,12 +426,22 @@ public class TableDependency
 			}
 			else
 			{
-				writer.append("Tree for root node: " + root.debugString() + "\n");
+				writer.append("Tree for: " + root.debugString() + "\n");
 			}
 			dumpChildren(writer, root, 0);
-			if (showParents)
+			if (showParents && root.getParent() != null)
 			{
-				writer.append("------ Parent nodes for " + root.debugString() + "\n");
+				writer.append("------ Parents for: " + root.debugString() + "\n");
+				DependencyNode parent = root.getParent();
+				while (parent != null)
+				{
+					int level = parent.getLevel();
+					writer.write(StringUtil.padRight("", level * 4));
+					writer.write(parent.getTable().getTableName() + " (" + parent.getFkName() + ")");
+					writer.write(", nodeLevel: " + level);
+					writer.write("\n");
+					parent = parent.getParent();
+				}
 			}
 		}
 		catch (IOException io)

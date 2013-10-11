@@ -52,6 +52,7 @@ import workbench.db.h2database.H2DomainReader;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ProcedureReader;
+import workbench.db.ibm.InformixDataTypeResolver;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerRuleReader;
@@ -313,6 +314,10 @@ public class DbMetadata
 			isH2 = true;
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
+		}
+		else if (productLower.contains("informix"))
+		{
+			this.dataTypeResolver = new InformixDataTypeResolver();
 		}
 
 		if (schemaInfoReader == null)

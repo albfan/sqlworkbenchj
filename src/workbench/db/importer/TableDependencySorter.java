@@ -34,11 +34,13 @@ import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -90,6 +92,8 @@ public class TableDependencySorter
 
 	private void dumpMapping(List<LevelNode> mapping, String fname)
 	{
+		if (!Settings.getInstance().getBoolProperty("workbench.debug.dependency", false)) return;
+
 		Comparator<LevelNode> comp = new Comparator<LevelNode>()
 		{
 
