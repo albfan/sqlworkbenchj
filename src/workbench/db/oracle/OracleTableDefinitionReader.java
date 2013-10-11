@@ -74,7 +74,7 @@ public class OracleTableDefinitionReader
 {
 	private boolean useOwnSql = true;
 	private final OracleDataTypeResolver oraTypes;
-	private boolean is12c;
+	private final boolean is12c;
 
 	public OracleTableDefinitionReader(WbConnection conn)
 	{

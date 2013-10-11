@@ -121,7 +121,7 @@ public class DependencyNode
 		if (parentNode != null)
 		{
 			result.append(" references ");
-			result.append(parentNode.toString());
+			result.append(parentNode.table.getTableName());
 			result.append('(');
 		}
 		else if (columns.size() > 0)
@@ -288,7 +288,7 @@ public class DependencyNode
 		}
 		return false;
 	}
-	
+
 	public boolean containsChild(DependencyNode aNode)
 	{
 		if (aNode == null) return false;

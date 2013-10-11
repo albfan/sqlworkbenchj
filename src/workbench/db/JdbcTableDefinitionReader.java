@@ -313,7 +313,7 @@ public class JdbcTableDefinitionReader
 		{
 			return new Db2ColumnEnhancer();
 		}
-		if (con.getDbId().equals("informix_dynamic_server "))
+		if (con.getDbId().equals("informix_dynamic_server"))
 		{
 			return new InformixColumnEnhancer();
 		}

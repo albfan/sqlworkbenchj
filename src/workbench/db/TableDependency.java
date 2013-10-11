@@ -22,6 +22,9 @@
  */
 package workbench.db;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +37,7 @@ import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
 
 import workbench.util.StringUtil;
 
@@ -400,40 +404,61 @@ public class TableDependency
 		return this.tableRoot;
 	}
 
-//	public void dumpTree(String fname)
-//	{
-//		FileWriter writer = null;
-//		try
-//		{
-//			writer = new FileWriter(new File("c:/temp", fname));
-//			dumpLevel(writer, getRootNode(), 0);
-//		}
-//		catch (IOException io)
-//		{
-//
-//		}
-//		finally
-//		{
-//			FileUtil.closeQuietely(writer);
-//		}
-//	}
-//
-//	private void dumpLevel(FileWriter writer, DependencyNode node, int level)
-//		throws IOException
-//	{
-//		if (node == null) return;
-//
-//		for (DependencyNode child : node.getChildren())
-//		{
-//			writer.write(StringUtil.padRight("", level * 4));
-//			writer.write(child.getTable().getTableName());
-//			writer.write(", nodeLevel: " + node.getLevel());
-//			writer.write(", iterationLevel: " + level);
-//			writer.write("\n");
-//		}
-//		for (DependencyNode child : node.getChildren())
-//		{
-//			dumpLevel(writer, child, level + 1);
-//		}
-//	}
+	public static void dumpTree(String fname, DependencyNode root)
+	{
+		FileWriter writer = null;
+		try
+		{
+			writer = new FileWriter(new File("c:/temp", fname));
+			boolean showParents = true;
+			if (root.getChildren().isEmpty())
+			{
+				writer.append("No children for " + root.debugString() + ". Starting from top-level node: ");
+				while (root.getParent() != null)
+				{
+					root = root.getParent();
+				}
+				writer.append(root.getTable() + "\n----------------------------------------\n");
+				showParents = false;
+			}
+			else
+			{
+				writer.append("Tree for root node: " + root.debugString() + "\n");
+			}
+			dumpChildren(writer, root, 0);
+			if (showParents)
+			{
+				writer.append("------ Parent nodes for " + root.debugString() + "\n");
+			}
+		}
+		catch (IOException io)
+		{
+
+		}
+		finally
+		{
+			FileUtil.closeQuietely(writer);
+		}
+	}
+
+	private static void dumpChildren(FileWriter writer, DependencyNode node, int level)
+		throws IOException
+	{
+		if (node == null) return;
+
+		for (DependencyNode child : node.getChildren())
+		{
+			writer.write(StringUtil.padRight("", level * 4));
+			writer.write(child.getTable().getTableName() + " (" + child.getFkName() + ")");
+			writer.write(", nodeLevel: " + node.getLevel());
+			writer.write(", iterationLevel: " + level);
+			writer.write("\n");
+		}
+		for (DependencyNode child : node.getChildren())
+		{
+			dumpChildren(writer, child, level + 1);
+		}
+	}
+
+
 }

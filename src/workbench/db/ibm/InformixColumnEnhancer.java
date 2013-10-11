@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 
@@ -33,6 +34,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.CaseInsensitiveComparator;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -62,20 +64,20 @@ public class InformixColumnEnhancer
 		limits.put(15, "FRACTION(5)");
 	}
 
-
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
 	{
-		String typeValues = conn.getDbSettings().getProperty("qualifier.types", "datetime,interval");
+		String typeNames = conn.getDbSettings().getProperty("qualifier.typenames", "datetime,interval");
 
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
-		types.addAll(StringUtil.stringToList(typeValues, ",", true, true, false, false));
+		types.addAll(StringUtil.stringToList(typeNames, ",", true, true, false, false));
 
 		boolean checkRequired = false;
 
 		for (ColumnIdentifier col : table.getColumns())
 		{
-			if (types.contains(col.getDbmsType()))
+			String plainType = SqlUtil.getPlainTypeName(col.getDbmsType());
+			if (types.contains(plainType))
 			{
 				checkRequired = true;
 				break;
@@ -99,33 +101,56 @@ public class InformixColumnEnhancer
 		String systables = sysTabs.getFullyQualifiedName(conn);
 		String syscolumns = sysCols.getFullyQualifiedName(conn);
 
+		String typeValues = conn.getDbSettings().getProperty("qualifier.typevalues", "10,14,266,270");
+
 		String sql =
 			"select c.colname, c.collength \n" +
 			"from " + systables + " t \n"+
 			"  join " + syscolumns + " c on t.tabid = c.tabid \n" +
 			"where t.tabname = ? \n" +
-			"  and t.owner = ? ";
+			"  and t.owner = ? \n" +
+			"  and c.coltype in (" + typeValues + ")";
 
 		String tablename = table.getTable().getRawTableName();
 		String schema = table.getTable().getRawSchema();
 
-		LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+		LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, tablename, schema));
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		Map<String, String> types = new HashMap<String, String>();
+
+		Map<String, ColumnIdentifier> cols = new TreeMap<String, ColumnIdentifier>(CaseInsensitiveComparator.INSTANCE);
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			cols.put(col.getColumnName(), col);
+		}
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, tablename);
 			stmt.setString(2, schema);
 			rs = stmt.executeQuery();
+
 			while (rs.next())
 			{
 				String colname = rs.getString(1);
-				int typeLen = rs.getInt(2);
-				String typeDesc = getQualifier(typeLen);
-				types.put(colname, typeDesc);
+				int colLength = rs.getInt(2);
+				ColumnIdentifier col = cols.get(colname);
+				if (col != null)
+				{
+					String typeDesc = getQualifier(colLength);
+
+					String dbms = SqlUtil.getPlainTypeName(col.getDbmsType());
+					String newType = dbms + " " + typeDesc;
+					LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()",
+						"Column " + tablename + "." + colname + " has collength of: " + colLength + ". Changing type '" + col.getDbmsType() + "' to '" + newType + "'");
+					col.setDbmsType(newType);
+				}
+				else
+				{
+					LogMgr.logError("InformixColumnEnhancer.updateDateColumns()","The query returned a column name (" + colname + ") that was not part of the passed table definition!",null);
+				}
 			}
 		}
 		catch (Exception e)
@@ -135,16 +160,6 @@ public class InformixColumnEnhancer
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}
-
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String desc = types.get(col.getColumnName());
-			if (desc != null)
-			{
-				String dbms = col.getDbmsType() + " " + desc;
-				col.setDbmsType(dbms);
-			}
 		}
 	}
 
