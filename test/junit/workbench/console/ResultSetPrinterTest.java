@@ -95,9 +95,9 @@ public class ResultSetPrinterTest
 
 			assertEquals("NR         | FIRSTNAME            | LASTNAME            ", lines[0]);
 			assertEquals("-----------+----------------------+---------------------", lines[1]);
-			assertEquals("0          | firstname            | lastname            ", lines[2]);
-			assertEquals("1          | firstname            | lastname            ", lines[3]);
-			assertEquals("42         | first                | lastname            ", lines[4]);
+			assertEquals("         0 | firstname            | lastname            ", lines[2]);
+			assertEquals("         1 | firstname            | lastname            ", lines[3]);
+			assertEquals("        42 | first                | lastname            ", lines[4]);
 			assertEquals("           : name                 : lines", lines[5]);
 			assertEquals("(3 Rows)", lines[7]);
 

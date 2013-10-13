@@ -26,15 +26,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.components.ClipBoardCopier;
-import workbench.gui.components.WbTable;
 
+import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
+
 /**
  * Action to copy the contents of a WbTable as tab-separated text to the clipboard
+ *
  * @see workbench.gui.components.ClipBoardCopier
+ * @see GuiSettings#alwaysDisplayCopyAsTextDialog()
+ * 
  * @author  Thomas Kellerer
  */
 public class CopyAsTextAction
@@ -76,6 +81,7 @@ public class CopyAsTextAction
 			copyHeaders = !isShiftPressed(e);
 			selectColumns = isCtrlPressed(e) ;
 		}
+		selectColumns = selectColumns || GuiSettings.alwaysDisplayCopyAsTextDialog();
 		copier.copyDataToClipboard(copyHeaders, copySelected, selectColumns);
 	}
 

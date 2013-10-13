@@ -107,6 +107,10 @@ public class WbGenInsert
 
 		tableSorter = new TableDependencySorter(this.currentConnection);
 
+		// tables have been retrieved by SourceTableArgument
+		// no need to validate them again
+		tableSorter.setValidateTables(false);
+
 		if (this.rowMonitor != null)
 		{
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);

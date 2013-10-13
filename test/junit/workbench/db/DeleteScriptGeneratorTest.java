@@ -35,17 +35,19 @@ import java.util.regex.Pattern;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.postgres.PostgresTestUtil;
+
 import workbench.storage.ColumnData;
 
 import workbench.sql.ScriptParser;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -83,13 +85,15 @@ public class DeleteScriptGeneratorTest
 		ColumnData id = new ColumnData("42", new ColumnIdentifier("country_id", ColumnIdentifier.NO_TYPE_INFO));
 		pk.add(id);
 		List<String> script = generator.getStatementsForValues(pk, true);
+
 //		for (int i=0; i < script.size(); i++)
 //		{
 //			System.out.println(Integer.toString(i) + ": " + script.get(i));
 //		}
-		assertEquals(13, script.size());
-		assertEquals("DELETE FROM COUNTRIES\nWHERE country_id = 42", script.get(12));
-		assertEquals("DELETE FROM REGIONS \nWHERE COUNTRY_ID = 42", script.get(11));
+//		 assertEquals(13, script.size());
+		int size = script.size();
+		assertEquals("DELETE FROM COUNTRIES\nWHERE country_id = 42", script.get(size - 1));
+		assertEquals("DELETE FROM REGIONS \nWHERE COUNTRY_ID = 42", script.get(size - 2));
 
 		int storesIndex = Integer.MAX_VALUE;
 		for (int i=0; i < script.size(); i++)
@@ -111,6 +115,69 @@ public class DeleteScriptGeneratorTest
 				assertTrue(i < storesIndex);
 			}
 		}
+	}
+
+	@Test
+	public void testBigSchema()
+		throws Exception
+	{
+		if (!System.getProperty("user.name").equalsIgnoreCase("thomas"))
+		{
+			return;
+		}
+		
+		WbConnection conn = PostgresTestUtil.getPostgresConnection("wbtest", "thomas", "welcome", "GenDel");
+		if (conn == null)
+		{
+			System.out.println("****** No suitable Postgres connection available. Skipping test");
+			return;
+		}
+
+		TestUtil.executeScript(conn, "set schema 'devtrunk';");
+		DeleteScriptGenerator generator = new DeleteScriptGenerator(conn);
+		generator.setFormatSql(false);
+		generator.setShowConstraintNames(false);
+
+		TableIdentifier table = new TableIdentifier("t982_country_divisions");
+		generator.setTable(table);
+
+		List<ColumnData> pk = new ArrayList<ColumnData>();
+		ColumnData id = new ColumnData(new Integer(1), new ColumnIdentifier("c982_countryid"));
+		pk.add(id);
+		List<String> statements = generator.getStatementsForValues(pk, true);
+		int conflicts = 0;
+		for (int i=0; i < statements.size(); i++)
+		{
+			List<String> lines = StringUtil.getLines(statements.get(i));
+			String tname = lines.get(0).replace("DELETE FROM ", "");
+			int nextPos = findTable(statements, tname, i+1);
+			if (nextPos > -1)
+			{
+				System.out.println("** Table " + tname + " is used after statement #" + i + " in statement #" + nextPos);
+				System.out.println("Statement #" + i);
+				System.out.println(statements.get(i));
+				System.out.println("Conflicting statement #" + nextPos);
+				System.out.println(statements.get(nextPos));
+				conflicts ++;
+			}
+		}
+		if (conflicts > 0)
+		{
+			System.out.println("******************************************** ");
+			System.out.println("Number of conflicting statements: " + conflicts);
+			fail("Wrong order of statements!");
+		}
+	}
+
+	private int findTable(List<String> statements, String tableName, int startIndex)
+	{
+		for (int i=startIndex; i < statements.size(); i++)
+		{
+			String sql = statements.get(i);
+			int nl = sql.indexOf('\n');
+			if (sql.indexOf(tableName, nl) > -1) return i;
+		}
+		return -1;
 	}
 
 	@Test

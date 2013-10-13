@@ -151,6 +151,7 @@ public class EditorPanel
 
 	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 	private WbFile currentFile;
+	private boolean fileIsSaved;
 	private long fileModifiedTime;
 	private String fileEncoding;
 	private Set<String> dbFunctions;
@@ -318,6 +319,8 @@ public class EditorPanel
 	protected void checkFileChange()
 	{
 		if (this.currentFile == null) return;
+		if (this.fileIsSaved) return;
+
 		long currentTime = currentFile.lastModified();
 
 		if (currentTime > fileModifiedTime)
@@ -884,6 +887,7 @@ public class EditorPanel
 
 		try
 		{
+			fileIsSaved = true;
 			String filename = aFile.getAbsolutePath();
 			int pos = filename.indexOf('.');
 			if (pos < 0)
@@ -914,12 +918,17 @@ public class EditorPanel
 			writer.close();
 			this.currentFile = new WbFile(aFile);
 			this.fileEncoding = encoding;
+			this.fileModifiedTime = currentFile.lastModified();
 			this.resetModified();
 		}
 		catch (IOException e)
 		{
 			LogMgr.logError("EditorPanel.saveFile()", "Error saving file", e);
 			throw e;
+		}
+		finally
+		{
+			fileIsSaved = false;
 		}
 	}
 

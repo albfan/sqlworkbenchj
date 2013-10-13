@@ -25,7 +25,6 @@ package workbench.gui.dbobjects;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -51,6 +50,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 
 import workbench.interfaces.JobErrorHandler;
@@ -110,27 +110,26 @@ public class TableDeleterUI
     buttonPanel = new JPanel();
     deleteButton = new WbButton();
     cancelButton = new WbButton();
+    showScript = new JButton();
     mainPanel = new JPanel();
     jScrollPane1 = new JScrollPane();
     objectList = new JList();
     optionPanel = new JPanel();
     statusLabel = new SimpleStatusBar();
-    jPanel1 = new JPanel();
-    checkFKButton = new JButton();
     jPanel2 = new JPanel();
     commitEach = new JRadioButton();
     commitAtEnd = new JRadioButton();
     useTruncateCheckBox = new JCheckBox();
-    jPanel3 = new JPanel();
     cascadeTruncate = new JCheckBox();
-    showScript = new JButton();
+    jSeparator1 = new JSeparator();
     addMissingTables = new JCheckBox();
+    checkFKButton = new JButton();
 
-    setLayout(new BorderLayout());
+    setLayout(new BorderLayout(0, 5));
 
-    buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    buttonPanel.setLayout(new GridBagLayout());
 
-    deleteButton.setText(ResourceMgr.getString("LblDeleteTableData"));
+    deleteButton.setText(ResourceMgr.getString("LblDeleteTableData")); // NOI18N
     deleteButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)
@@ -138,9 +137,14 @@ public class TableDeleterUI
         deleteButtonActionPerformed(evt);
       }
     });
-    buttonPanel.add(deleteButton);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 20, 0, 20);
+    buttonPanel.add(deleteButton, gridBagConstraints);
 
-    cancelButton.setText(ResourceMgr.getString("LblCancel"));
+    cancelButton.setText(ResourceMgr.getString("LblCancel")); // NOI18N
     cancelButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)
@@ -148,7 +152,28 @@ public class TableDeleterUI
         cancelButtonActionPerformed(evt);
       }
     });
-    buttonPanel.add(cancelButton);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.EAST;
+    gridBagConstraints.insets = new Insets(0, 20, 0, 2);
+    buttonPanel.add(cancelButton, gridBagConstraints);
+
+    showScript.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
+    showScript.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent evt)
+      {
+        showScriptActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(1, 1, 0, 20);
+    buttonPanel.add(showScript, gridBagConstraints);
 
     add(buttonPanel, BorderLayout.SOUTH);
 
@@ -160,57 +185,43 @@ public class TableDeleterUI
 
     mainPanel.add(jScrollPane1, BorderLayout.CENTER);
 
-    optionPanel.setLayout(new BorderLayout(0, 5));
+    optionPanel.setLayout(new GridBagLayout());
 
     statusLabel.setBorder(BorderFactory.createEtchedBorder());
     statusLabel.setMaximumSize(new Dimension(32768, 24));
     statusLabel.setMinimumSize(new Dimension(150, 24));
     statusLabel.setPreferredSize(new Dimension(150, 24));
-    optionPanel.add(statusLabel, BorderLayout.SOUTH);
-
-    jPanel1.setLayout(new GridBagLayout());
-
-    checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps"));
-    checkFKButton.setToolTipText(ResourceMgr.getDescription("LblCheckFKDeps"));
-    checkFKButton.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent evt)
-      {
-        checkFKButtonActionPerformed(evt);
-      }
-    });
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(3, 3, 0, 5);
-    jPanel1.add(checkFKButton, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(6, 0, 0, 0);
+    optionPanel.add(statusLabel, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
 
     buttonGroup1.add(commitEach);
     commitEach.setSelected(true);
-    commitEach.setText(ResourceMgr.getString("LblCommitEachTableDelete")
-    );
+    commitEach.setText(ResourceMgr.getString("LblCommitEachTableDelete")); // NOI18N
     commitEach.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 6, 0, 0);
     jPanel2.add(commitEach, gridBagConstraints);
 
     buttonGroup1.add(commitAtEnd);
-    commitAtEnd.setText(ResourceMgr.getString("LblCommitTableDeleteAtEnd"));
+    commitAtEnd.setText(ResourceMgr.getString("LblCommitTableDeleteAtEnd")); // NOI18N
     commitAtEnd.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(4, 6, 0, 0);
     jPanel2.add(commitAtEnd, gridBagConstraints);
 
@@ -224,71 +235,69 @@ public class TableDeleterUI
       }
     });
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(7, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 25, 0, 0);
     jPanel2.add(useTruncateCheckBox, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel2.add(jPanel3, gridBagConstraints);
 
     cascadeTruncate.setText(ResourceMgr.getString("LblCascadeConstraints")); // NOI18N
     cascadeTruncate.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(3, 22, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 41, 0, 0);
     jPanel2.add(cascadeTruncate, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridheight = 3;
-    gridBagConstraints.fill = GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(3, 4, 0, 9);
-    jPanel1.add(jPanel2, gridBagConstraints);
-
-    showScript.setText(ResourceMgr.getString("LblShowScript"));
-    showScript.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent evt)
-      {
-        showScriptActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridheight = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(9, 3, 0, 5);
-    jPanel1.add(showScript, gridBagConstraints);
-
-    addMissingTables.setSelected(true);
-    addMissingTables.setText(ResourceMgr.getString("LblIncFkTables"));
-    addMissingTables.setToolTipText(ResourceMgr.getDescription("LblIncFkTables"));
+    gridBagConstraints.insets = new Insets(0, 4, 0, 9);
+    optionPanel.add(jPanel2, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
-    jPanel1.add(addMissingTables, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(8, 0, 12, 0);
+    optionPanel.add(jSeparator1, gridBagConstraints);
 
-    optionPanel.add(jPanel1, BorderLayout.CENTER);
+    addMissingTables.setSelected(true);
+    addMissingTables.setText(ResourceMgr.getString("LblIncFkTables")); // NOI18N
+    addMissingTables.setToolTipText(ResourceMgr.getString("d_LblIncFkTables")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(8, 2, 0, 0);
+    optionPanel.add(addMissingTables, gridBagConstraints);
+
+    checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps")); // NOI18N
+    checkFKButton.setToolTipText(ResourceMgr.getDescription("LblCheckFKDeps"));
+    checkFKButton.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent evt)
+      {
+        checkFKButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(8, 6, 0, 5);
+    optionPanel.add(checkFKButton, gridBagConstraints);
 
     mainPanel.add(optionPanel, BorderLayout.SOUTH);
 
@@ -339,6 +348,7 @@ public class TableDeleterUI
 				{
 					connection.setBusy(true);
 					TableDependencySorter sorter = new TableDependencySorter(connection);
+					sorter.setValidateTables(false);
 					sorted = sorter.sortForDelete(objectNames, addMissingTables.isSelected());
 				}
 				catch (Exception e)
@@ -660,10 +670,9 @@ public class TableDeleterUI
   public JRadioButton commitAtEnd;
   public JRadioButton commitEach;
   public JButton deleteButton;
-  public JPanel jPanel1;
   public JPanel jPanel2;
-  public JPanel jPanel3;
   public JScrollPane jScrollPane1;
+  public JSeparator jSeparator1;
   public JPanel mainPanel;
   public JList objectList;
   public JPanel optionPanel;

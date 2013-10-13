@@ -22,27 +22,27 @@
  */
 package workbench.db.importer;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.util.FileUtil;
-import workbench.util.StringUtil;
+import workbench.util.AggregatingMap;
 
 
 /**
@@ -54,14 +54,20 @@ import workbench.util.StringUtil;
 public class TableDependencySorter
 {
 	private final WbConnection dbConn;
-	private List<TableIdentifier> cycleErrors;
+	private final List<TableIdentifier> cycleErrors = new LinkedList<TableIdentifier>();
 	private ScriptGenerationMonitor monitor;
 	private TableDependency dependencyReader;
 	private boolean cancel;
+	private boolean validateInputTables = true;
 
 	public TableDependencySorter(WbConnection con)
 	{
 		this.dbConn = con;
+	}
+
+	public void setValidateTables(boolean flag)
+	{
+		this.validateInputTables = flag;
 	}
 
 	public void setProgressMonitor(ScriptGenerationMonitor monitor)
@@ -81,53 +87,13 @@ public class TableDependencySorter
 
 	public boolean hasErrors()
 	{
-		return cycleErrors != null;
+		return cycleErrors.size() > 0;
 	}
 
 	public List<TableIdentifier> getErrorTables()
 	{
 		if (cycleErrors == null) return Collections.emptyList();
 		return Collections.unmodifiableList(cycleErrors);
-	}
-
-	private void dumpMapping(List<LevelNode> mapping, String fname)
-	{
-		if (!Settings.getInstance().getBoolProperty("workbench.debug.dependency", false)) return;
-
-		Comparator<LevelNode> comp = new Comparator<LevelNode>()
-		{
-
-			@Override
-			public int compare(LevelNode o1, LevelNode o2)
-			{
-				if (o1.level == o2.level)
-				{
-					return o1.node.getTable().getTableName().compareTo(o2.node.getTable().getTableName());
-				}
-				return o1.level - o2.level;
-			}
-		};
-
-		FileWriter writer = null;
-		try
-		{
-			writer = new FileWriter(new File("c:/temp", fname));
-
-			List<LevelNode> sorted = new ArrayList<LevelNode>(mapping);
-			Collections.sort(sorted, comp);
-			for (LevelNode node : sorted)
-			{
-				writer.append(StringUtil.padRight("", (node.level - 1) * 4) + node.node.getTable().getTableName() + " (" + node.level + ") \n");
-			}
-		}
-		catch (IOException io)
-		{
-
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
 	}
 
 	/**
@@ -141,53 +107,68 @@ public class TableDependencySorter
 	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
 		cancel = false;
-		List<LevelNode> levelMapping = createLevelMapping(tables, bottomUp);
-//		dumpMapping(levelMapping, "before_cleanup.txt");
 
-		if (!addMissing)
+		if (validateInputTables)
 		{
-			Iterator<LevelNode> itr = levelMapping.iterator();
-			while (itr.hasNext())
-			{
-				TableIdentifier tbl = itr.next().node.getTable();
-				if (!tables.contains(tbl))
-				{
-					itr.remove();
-				}
-			}
+			// make sure only existing tables are kept in the list of tables that need processing
+			tables = validateTables(tables);
 		}
 
-//		dumpMapping(levelMapping, "after_cleanup.txt");
+		Collection<DependencyNode> allNodes = collectRoots(tables);
 
-		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
-		for (LevelNode lvl : levelMapping)
+		if (cancel)
 		{
-			int index = findTable(lvl.node.getTable(), tables);
-			if (index > -1)
+			return Collections.emptyList();
+		}
+
+		if (this.monitor != null)
+		{
+			this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgCalcDelDeps"), -1, -1);
+		}
+
+		if (addMissing)
+		{
+			Set<TableIdentifier> missing = new HashSet<TableIdentifier>();
+			for (DependencyNode node : allNodes)
 			{
-				result.add(tables.get(index));
+				if (!tables.contains(node.getTable()))
+				{
+					missing.add(node.getTable());
+				}
 			}
-			else if (addMissing)
+			tables.addAll(missing);
+		}
+
+		List<TableIdentifier> result = sortTables(allNodes, tables, bottomUp);
+
+		return result;
+	}
+
+	private List<TableIdentifier> validateTables(List<TableIdentifier> toCheck)
+	{
+		List<TableIdentifier> result = new ArrayList<TableIdentifier>(toCheck.size());
+		for (TableIdentifier tbl : toCheck)
+		{
+			TableIdentifier realTable = dbConn.getMetadata().findTable(tbl);
+			if (realTable != null)
 			{
-				result.add(lvl.node.getTable());
+				result.add(realTable);
 			}
 		}
 		return result;
 	}
 
-	private DependencyNode findChildTree(List<LevelNode> levels, TableIdentifier tbl)
+	private DependencyNode findChildTree(Collection<DependencyNode> nodes, TableIdentifier tbl)
 	{
 		int maxLevel = Integer.MIN_VALUE;
 		DependencyNode lastNode = null;
 
-		for (LevelNode nd : levels)
+		for (DependencyNode node : nodes)
 		{
-			DependencyNode node = nd.node;
 			DependencyNode child = node.findChildTree(tbl);
 			if (child != null)
 			{
 				int childLevel = child.getLevel();
-				TableDependency.dumpTree("possible_match_" + tbl.getTableName() + "_" + childLevel + ".txt", child);
 				if (child.getLevel() > maxLevel)
 				{
 					maxLevel = childLevel;
@@ -207,48 +188,40 @@ public class TableDependencySorter
 		}
 	}
 
-	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
+	private List<DependencyNode> collectRoots(List<TableIdentifier> tables)
 	{
-		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
-		List<DependencyNode> startNodes = new ArrayList<DependencyNode>(tables.size());
-
+		List<DependencyNode> allNodes = new ArrayList<DependencyNode>(tables.size() * 2);
+		Set<DependencyNode> rootNodes = new HashSet<DependencyNode>(tables.size());
 		dependencyReader = new TableDependency(dbConn);
 
 		int num = 1;
 		for (TableIdentifier tbl : tables)
 		{
 			if (cancel) break;
-			if (!dbConn.getMetadata().tableExists(tbl)) continue;
 
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(tbl.getTableExpression(), num, tables.size());
 			}
 			num ++;
-			DependencyNode root = findChildTree(levelMapping, tbl);
+			DependencyNode root = findChildTree(allNodes, tbl);
 			if (root == null)
 			{
 				dependencyReader.setMainTable(tbl);
 				dependencyReader.readTreeForChildren();
 				if (dependencyReader.wasAborted())
 				{
-					if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
 					cycleErrors.add(tbl);
 				}
 				root = dependencyReader.getRootNode();
+				rootNodes.add(root);
 			}
 			else
 			{
 				LogMgr.logDebug("TableDependencySorter.createLevelMapping()", "Re-using child tree for " + tbl + " with level: " + root.getLevel());
 			}
-
-			if (root != null)
-			{
-				TableDependency.dumpTree("tree_" + (num-1) + ".txt", root);
-				startNodes.add(root);
-				List<DependencyNode> allChildren = getAllNodes(root);
-				putNodes(levelMapping, allChildren);
-			}
+			List<DependencyNode> allChildren = getAllNodes(root);
+			allNodes.addAll(allChildren);
 		}
 
 		if (cancel) return Collections.emptyList();
@@ -256,88 +229,156 @@ public class TableDependencySorter
 		// The "starting" tables have not been added yet.
 		// They only need to be added if they did not appear as a child
 		// in one of the sub-trees
-		for (DependencyNode node : startNodes)
+		for (DependencyNode node : rootNodes)
 		{
-			LevelNode lvl = findLevelNode(levelMapping, node.getTable());
-			if (lvl == null)
+			DependencyNode check = findNodeForTable(allNodes, node.getTable());
+			if (check == null)
 			{
-				levelMapping.add(new LevelNode(node, node.getLevel()));
+				allNodes.add(node);
 			}
 		}
-
-		Comparator<LevelNode> comp;
-
-		if (bottomUp)
-		{
-			comp = new Comparator<LevelNode>()
-			{
-				@Override
-				public int compare(LevelNode o1, LevelNode o2)
-				{
-					return o2.level - o1.level;
-				}
-			};
-		}
-		else
-		{
-			comp = new Comparator<LevelNode>()
-			{
-				@Override
-				public int compare(LevelNode o1, LevelNode o2)
-				{
-					return o1.level - o2.level;
-				}
-			};
-		}
-
-		Collections.sort(levelMapping, comp);
-		return levelMapping;
+		return allNodes;
 	}
 
-	private int findTable(TableIdentifier tofind, List<TableIdentifier> toSearch)
+	public static List<TableIdentifier> sortTables(final Collection<DependencyNode> allNodes, final Collection<TableIdentifier> tables, final boolean bottomUp)
 	{
-		for (int i=0; i < toSearch.size(); i++)
+		long start = System.currentTimeMillis();
+
+		List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables);
+
+		final AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
+		final Map<TableIdentifier, Integer> totalLevels = new HashMap<TableIdentifier, Integer>();
+		final Map<TableIdentifier, Integer> refCounters = new HashMap<TableIdentifier, Integer>();
+
+		for (DependencyNode node : allNodes)
 		{
-			TableIdentifier tbl = toSearch.get(i);
-			if (tbl.getTableName().equalsIgnoreCase(tofind.getTableName())) return i;
+			tableNodes.addValue(node.getTable(), node);
+
+			int level = 0;
+			Integer lvl = totalLevels.get(node.getTable());
+			if (lvl != null)
+			{
+				level = lvl.intValue();
+			}
+			level += node.getLevel();
+			totalLevels.put(node.getTable(), Integer.valueOf(level));
 		}
-		return -1;
+
+		final Comparator<TableIdentifier> depComp = new Comparator<TableIdentifier>()
+		{
+			final int factor = bottomUp ? -1 : 1;
+
+			@Override
+			public int compare(TableIdentifier o1, TableIdentifier o2)
+			{
+				if (o1.equals(o2))
+				{
+					return 0;
+				}
+
+				int levelOne = getLevelTotal(o1);
+				int levelTwo = getLevelTotal(o2);
+
+				int result = 0;
+
+				if (levelOne == levelTwo)
+				{
+					int refCountOne = getReferenceCounter(o1);
+					int refCountTwo = getReferenceCounter(o2);
+					result = factor * (refCountOne - refCountTwo);
+				}
+				else
+				{
+					result = factor * (levelOne - levelTwo);
+				}
+
+				int sign = (int)Math.signum(result);
+				if (result == 0 || sign == factor)
+				{
+					Set<DependencyNode> o2nodes = tableNodes.get(o2);
+					for (DependencyNode n2 : o2nodes)
+					{
+						if (n2.containsParentTable(o1))
+						{
+							return -factor;
+						}
+						if (result == 0 && n2.containsChildTable(o1))
+						{
+							return factor;
+						}
+					}
+				}
+
+				if (result == 0 || sign == -factor)
+				{
+					Set<DependencyNode> o1nodes = tableNodes.get(o1);
+					for (DependencyNode n1 : o1nodes)
+					{
+						if (n1.containsParentTable(o2))
+						{
+							return factor;
+						}
+						if (result == 0 && n1.containsChildTable(o2))
+						{
+							return -factor;
+						}
+					}
+				}
+				return result;
+			}
+
+			private int getReferenceCounter(TableIdentifier tbl)
+			{
+				Integer ref = refCounters.get(tbl);
+				if (ref != null)
+				{
+					return ref.intValue();
+				}
+
+				int refCount = 0;
+				for (DependencyNode node : allNodes)
+				{
+					if (node.getTable().equals(tbl) || node.containsParentTable(tbl))
+					{
+						refCount ++;
+					}
+				}
+				refCounters.put(tbl, Integer.valueOf(refCount));
+				return refCount;
+			}
+
+			private int getLevelTotal(TableIdentifier tbl)
+			{
+				Integer lvl = totalLevels.get(tbl);
+				if (lvl == null)
+				{
+					return 0;
+				}
+				return lvl.intValue();
+			}
+		};
+
+		Collections.sort(sorted, depComp);
+
+		long duration = System.currentTimeMillis() - start;
+
+		LogMgr.logDebug("TableDependencySorter.sortTables()", "Sorting " + sorted.size() + " tables took " + duration + "ms");
+		return sorted;
 	}
 
-	private void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
-	{
-		if (nodes == null || nodes.isEmpty()) return;
-
-		for (DependencyNode node : nodes)
-		{
-			TableIdentifier tbl = node.getTable();
-
-			int level = node.getLevel();
-			LevelNode lvl = findLevelNode(levelMapping, tbl);
-			if (lvl == null)
-			{
-				lvl = new LevelNode(node, level);
-				levelMapping.add(lvl);
-			}
-			else if (level > lvl.level)
-			{
-				lvl.level = level;
-			}
-		}
-	}
-
-	private LevelNode findLevelNode(List<LevelNode> levelMapping, TableIdentifier tbl)
+	private DependencyNode findNodeForTable(Collection<DependencyNode> nodes, TableIdentifier tbl)
 	{
 		int maxLevel = Integer.MIN_VALUE;
-		LevelNode lastNode = null;
-		for (LevelNode lvl : levelMapping)
+		DependencyNode lastNode = null;
+		for (DependencyNode node : nodes)
 		{
-			if (lvl.node.getTable().compareNames(tbl))
+			if (node.getTable().compareNames(tbl))
 			{
-				if (lvl.node.getLevel() > maxLevel)
+				int level = node.getLevel();
+				if (level > maxLevel)
 				{
-					lastNode = lvl;
-					maxLevel = lvl.node.getLevel();
+					lastNode = node;
+					maxLevel = level;
 				}
 			}
 		}
@@ -365,47 +406,6 @@ public class TableDependencySorter
 		}
 		return result;
 	}
-
-	/**
-	 * DependencyNode's equals method compares the FK names as well, which is not something
-	 * we need in this context.
-	 * Additionally we want to manipulate the level of the node according to the max/min
-	 * level for that table.
-	 */
-	static class LevelNode
-	{
-		int level;
-		DependencyNode node;
-
-		LevelNode(DependencyNode nd, int lvl)
-		{
-			level = lvl;
-			node = nd;
-		}
-
-		@Override
-		public boolean equals(Object other)
-		{
-			if (other instanceof LevelNode)
-			{
-				LevelNode n = (LevelNode) other;
-				return node.getTable().compareNames(n.node.getTable());
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return node.getTable().getTableName().hashCode();
-		}
-
-		@Override
-		public String toString()
-		{
-			return node.getTable().getTableName() + ", Level=" + level;
-		}
-	}
-
 }
+
 

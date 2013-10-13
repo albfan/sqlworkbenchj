@@ -472,6 +472,49 @@ public class TableDependency
 			dumpChildren(writer, child, level + 1);
 		}
 	}
+	public Set<TableIdentifier> getAllTables()
+	{
+		Set<TableIdentifier> allTables = getAllTables(this.getRootNode());
+		allTables.add(this.getRootNode().getTable());
+		return allTables;
+	}
 
+	private Set<TableIdentifier> getAllTables(DependencyNode root)
+	{
+		Set<TableIdentifier> result = new HashSet<TableIdentifier>();
+		if (root == null) return result;
+
+		List<DependencyNode> children = root.getChildren();
+		for (DependencyNode child : children)
+		{
+			result.add(child.getTable());
+			result.addAll(getAllTables(child));
+		}
+		return result;
+	}
+
+	public List<DependencyNode> getAllNodes()
+	{
+		List<DependencyNode> allNodes = getAllNodes(this.getRootNode());
+		allNodes.add(getRootNode());
+		return allNodes;
+	}
+
+	private List<DependencyNode> getAllNodes(DependencyNode root)
+	{
+		List<DependencyNode> result = new ArrayList<DependencyNode>();
+		if (root == null)
+		{
+			return result;
+		}
+
+		List<DependencyNode> children = root.getChildren();
+		for (DependencyNode child : children)
+		{
+			result.add(child);
+			result.addAll(getAllNodes(child));
+		}
+		return result;
+	}
 
 }

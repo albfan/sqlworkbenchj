@@ -23,12 +23,16 @@
 package workbench.db.postgres;
 
 import java.sql.Statement;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -49,15 +53,19 @@ public class PostgresTestUtil
 	 */
 	public static WbConnection getPostgresConnection()
 	{
+		return getPostgresConnection("wbjunit", TEST_USER, TEST_PWD, PROFILE_NAME);
+	}
+	public static WbConnection getPostgresConnection(String dbName, String username, String password, String profileName)
+	{
 		try
 		{
 			WbConnection con = ConnectionMgr.getInstance().findConnection(PROFILE_NAME);
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:postgresql://localhost/wbjunit' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=org.postgresql.Driver");
+			parser.parse("-url='jdbc:postgresql://localhost/" + dbName + "' -username=" + username + " -password=" + password + " -driver=org.postgresql.Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-			prof.setName(PROFILE_NAME);
+			prof.setName(profileName);
 			ConnectionMgr.getInstance().addProfile(prof);
 			con = ConnectionMgr.getInstance().getConnection(prof, PROFILE_NAME);
 			return con;

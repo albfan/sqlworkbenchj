@@ -43,6 +43,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.importer.TableDependencySorter;
+
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
 
@@ -236,88 +238,12 @@ public class DeleteScriptGenerator
 
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
 	{
-		List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables.keySet());
-
 		final Set<DependencyNode> allNodes = new HashSet<DependencyNode>();
 		for (Set<DependencyNode> values : tables.values())
 		{
 			allNodes.addAll(values);
 		}
-
-		final Comparator<TableIdentifier> levelComp = new Comparator<TableIdentifier>()
-		{
-			@Override
-			public int compare(TableIdentifier o1, TableIdentifier o2)
-			{
-				int result = 0;
-
-				int levelOne = getLevelTotal(o1);
-				int levelTwo = getLevelTotal(o2);
-
-				if (levelOne == levelTwo)
-				{
-					int refCountOne = getReferenceCounter(o1);
-					int refCountTwo = getReferenceCounter(o2);
-					result = -1 * (refCountOne - refCountTwo);
-				}
-				else
-				{
-					result = -1 * (levelOne - levelTwo);
-				}
-
-				if (result < 0)
-				{
-					// if o2 is referenced in n2, then the result must be swapped
-					List<DependencyNode> nodes = getNodesForTable(o2);
-					for (DependencyNode n2 : nodes)
-					{
-						if (n2.containsParent(o1) && result < 0)
-						{
-							result = 1;
-						}
-					}
-				}
-				return result;
-			}
-
-			private List<DependencyNode> getNodesForTable(TableIdentifier tbl)
-			{
-				List<DependencyNode> result = new ArrayList<DependencyNode>();
-				for (DependencyNode node : allNodes)
-				{
-					if (node.getTable().equals(tbl))
-					{
-						result.add(node);
-					}
-				}
-				return result;
-			}
-
-			private int getReferenceCounter(TableIdentifier tbl)
-			{
-				int refCount = 0;
-				for (DependencyNode node : allNodes)
-				{
-					if (node.containsParent(tbl))
-					{
-						refCount ++;
-					}
-				}
-				return refCount;
-			}
-			private int getLevelTotal(TableIdentifier tbl)
-			{
-				Set<DependencyNode> nodes = tables.get(tbl);
-				if (nodes == null) return 0;
-				int sum = 0;
-				for (DependencyNode node : nodes)
-				{
-					sum += node.getLevel();
-				}
-				return sum;
-			}
-		};
-		Collections.sort(sorted, levelComp);
+		List<TableIdentifier> sorted = TableDependencySorter.sortTables(allNodes, tables.keySet(), true);
 		return sorted;
 	}
 

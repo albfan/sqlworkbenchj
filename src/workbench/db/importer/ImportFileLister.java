@@ -26,12 +26,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import workbench.log.LogMgr;
@@ -39,6 +39,7 @@ import workbench.log.LogMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.WbFile;
 
@@ -251,7 +252,7 @@ public class ImportFileLister
 	protected List<WbFile> getSortedList()
 		throws CycleErrorException
 	{
-		Map<String, WbFile> fileMapping = new HashMap<String, WbFile>(toProcess.size());
+		Map<String, WbFile> fileMapping = new TreeMap<String, WbFile>(CaseInsensitiveComparator.INSTANCE);
 
 		tables = new LinkedList<TableIdentifier>();
 		for (WbFile f : toProcess)
@@ -271,8 +272,11 @@ public class ImportFileLister
 		List<WbFile> result = new LinkedList<WbFile>();
 		for (TableIdentifier tbl : sorted)
 		{
-			String t = tbl.getTableExpression().toLowerCase();
-			WbFile f = fileMapping.get(t);
+			WbFile f = fileMapping.get(tbl.getTableName());
+			if (f == null)
+			{
+				f = fileMapping.get(tbl.getTableExpression(dbConn));
+			}
 			if (f != null)
 			{
 				result.add(f);

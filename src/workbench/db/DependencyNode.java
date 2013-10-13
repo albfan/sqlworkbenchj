@@ -22,12 +22,17 @@
  */
 package workbench.db;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -142,6 +147,8 @@ public class DependencyNode
 		{
 			result.append(')');
 		}
+		result.append(", level:");
+		result.append(getLevel());
 		return result.toString();
 	}
 
@@ -277,7 +284,7 @@ public class DependencyNode
 		return null;
 	}
 
-	public boolean containsParent(TableIdentifier toCheck)
+	public boolean containsParentTable(TableIdentifier toCheck)
 	{
 		if (this.parentNode == null) return false;
 		DependencyNode parent = parentNode;
@@ -285,6 +292,15 @@ public class DependencyNode
 		{
 			if (parent.table.equals(toCheck)) return true;
 			parent = parent.parentNode;
+		}
+		return false;
+	}
+
+	public boolean containsChildTable(TableIdentifier toCheck)
+	{
+		for (DependencyNode node : childTables)
+		{
+			if (node.getTable().equals(toCheck)) return true;
 		}
 		return false;
 	}
@@ -322,16 +338,50 @@ public class DependencyNode
 		this.updateAction = anAction;
 	}
 
-	public void printAll()
+	public void printAll(File debugFile)
+	{
+		PrintWriter out = null;
+		try
+		{
+			out = new PrintWriter(new FileWriter(debugFile));
+			printAll(out);
+		}
+		catch (IOException io)
+		{
+
+		}
+		finally
+		{
+			FileUtil.closeQuietely(out);
+		}
+	}
+
+	public void printAll(PrintWriter out)
 	{
 		int level = getLevel();
 		StringBuilder indent = new StringBuilder(level * 2);
 		for (int i=0; i < level; i++) indent.append("  ");
 
-		System.out.println(indent + toString() + " [@" + level + "]");
+		out.println(indent + debugString());
 		for (DependencyNode node : childTables)
 		{
-			node.printAll();
+			node.printAll(out);
 		}
 	}
+
+	public void printParents(PrintWriter out)
+	{
+		int level = getLevel();
+		StringBuilder indent = new StringBuilder(level * 2);
+		for (int i=0; i < level; i++) indent.append("  ");
+
+		out.println(indent + debugString());
+		DependencyNode parent = parentNode;
+		while (parent != null)
+		{
+			out.print(indent + parent.debugString());
+			parent = parent.parentNode;
+		}
+	}
+
 }

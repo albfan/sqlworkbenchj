@@ -33,9 +33,11 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 
 import workbench.db.ConnectionMgr;
+import workbench.db.DeleteScriptGeneratorTest;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 
 import org.junit.After;
@@ -150,7 +152,6 @@ public class TableDependencySorterTest
 		{
 			tables.add(new TableIdentifier("tbl" + (i + 1)));
 		}
-
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForInsert(tables);
 		assertEquals("Not enough entries", tables.size(), result.size());
@@ -183,8 +184,7 @@ public class TableDependencySorterTest
 //		}
 //		System.out.println("********************");
 		assertEquals(2, result.size());
-		assertTrue(person.compareNames(result.get(0)));
-		assertTrue(address.compareNames(result.get(1)));
+		assertTrue(tableIndex("person", result) < tableIndex("address", result));
 	}
 
 	@Test
@@ -213,19 +213,10 @@ public class TableDependencySorterTest
 //		}
 //		System.out.println("--------------------");
 		assertEquals("Not enough entries", tbl.size(), result.size());
-		assertEquals("Wrong first table", result.get(0).getTableName().toUpperCase(), child1_detail2.getTableName().toUpperCase());
-
-		// the second entry is either child1_detail or child2_detail
-		TableIdentifier second = result.get(1);
-		second.setSchema(null);
-		second.setCatalog(null);
-		assertEquals(true, second.compareNames(child1_detail) || second.compareNames(child2_detail));
-
-		TableIdentifier last = result.get(result.size() - 1);
-		assertEquals("Wrong last table", true, last.compareNames(base));
-
-		TableIdentifier lastButOne = result.get(result.size() - 2);
-		assertEquals(true, lastButOne.compareNames(child1) || lastButOne.compareNames(child2));
+		assertTrue("Wrong sort for child1", tableIndex("child1_detail2", result) < tableIndex("child1", result));
+		assertTrue(tableIndex("child2_detail", result) < tableIndex("child2", result));
+		assertTrue(tableIndex("child1", result) < tableIndex("base", result));
+		assertTrue(tableIndex("child2", result) < tableIndex("base", result));
 
 		List<TableIdentifier> insertList = sorter.sortForInsert(tbl);
 //		for (TableIdentifier t : insertList)
@@ -234,11 +225,11 @@ public class TableDependencySorterTest
 //		}
 		assertEquals("Not enough entries", tbl.size(), insertList.size());
 		assertTrue("Wrong first table for insert", base.compareNames(insertList.get(0)));
-		assertTrue("Wrong second table for insert", child1.compareNames(insertList.get(1)));
-		assertTrue("Wrong third table for insert", child2.compareNames(insertList.get(2)));
-		assertTrue("Wrong table for insert", child1_detail.compareNames(insertList.get(3)));
-		assertTrue("Wrong table for insert", child2_detail.compareNames(insertList.get(4)));
-		assertTrue("Wrong table for insert", child1_detail2.compareNames(insertList.get(5)));
+		assertTrue(tableIndex("child2", insertList) > tableIndex("base", insertList));
+		assertTrue(tableIndex("child1", insertList) > tableIndex("base", insertList));
+		assertTrue(tableIndex("child2_detail", insertList) > tableIndex("child2", insertList));
+		assertTrue(tableIndex("child1_detail", insertList) > tableIndex("child1", insertList));
+		assertTrue(tableIndex("child1_detail2", insertList) > tableIndex("child1", insertList));
 	}
 
 	@Test
@@ -260,11 +251,8 @@ public class TableDependencySorterTest
 
 		// Should have added child1_detail and child1_detail2
 		assertEquals("Not enough entries", 3, result.size());
-		String first = result.get(0).getTableName().toLowerCase();
-		String second = result.get(1).getTableName().toLowerCase();
-		assertEquals("Wrong first table", true, first.equals("child1_detail") || first.equals("child1_detail2"));
-		assertEquals("Wrong second table", true, second.equals("child1_detail") || second.equals("child1_detail2"));
-		assertEquals("Wrong third table", "child1", result.get(2).getTableName().toLowerCase());
+		assertTrue(tableIndex("child1_detail", result) < tableIndex("child1", result));
+		assertTrue(tableIndex("child1_detail2", result) < tableIndex("child1", result));
 	}
 
 	@Test
@@ -279,7 +267,6 @@ public class TableDependencySorterTest
 		String script = FileUtil.readCharacters(r);
 		TestUtil.executeScript(dbConn, script);
 
-//		List<TableIdentifier> tables = dbConn.getMetadata().getTableList();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 		TableIdentifier product = new TableIdentifier("PRODUCT");
 		TableIdentifier catNode = new TableIdentifier("CATALOGUE_NODE");
@@ -289,10 +276,18 @@ public class TableDependencySorterTest
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForDelete(tables, true);
 
+//		for (TableIdentifier t : result)
+//		{
+//			System.out.println(t.getTableName());
+//		}
+//		System.out.println("--------------------");
+
 		assertEquals(6, result.size());
 
-		assertTrue(result.get(4).compareNames(catNode));
-		assertTrue(result.get(5).compareNames(product));
+		assertTrue(tableIndex("product", result) > tableIndex("shop", result));
+		assertTrue(tableIndex("product", result) > tableIndex("catalogue_node", result));
+		assertTrue(tableIndex("shop", result) < tableIndex("catalogue", result));
+		assertTrue(tableIndex("localised_catalogue_node", result) < tableIndex("catalogue_node", result));
 	}
 
 	@Test
@@ -315,6 +310,10 @@ public class TableDependencySorterTest
 
 		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
 		List<TableIdentifier> result = sorter.sortForInsert(tbl);
+//		for (TableIdentifier t : result)
+//		{
+//			System.out.println(t.getTableName());
+//		}
 		assertEquals(2, result.size());
 		assertTrue(node.compareNames(result.get(0)));
 		assertTrue(cat.compareNames(result.get(1)));
@@ -325,35 +324,150 @@ public class TableDependencySorterTest
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-		try
-		{
-			dbConn = util.getHSQLConnection("hr");
+		dbConn = util.getHSQLConnection("hr");
 
-			InputStream in = getClass().getResourceAsStream("hr_schema.sql");
-			Reader r = new InputStreamReader(in);
-			String script = FileUtil.readCharacters(r);
-			TestUtil.executeScript(dbConn, script);
+		InputStream in = getClass().getResourceAsStream("hr_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String script = FileUtil.readCharacters(r);
+		TestUtil.executeScript(dbConn, script);
 
-			ArrayList<TableIdentifier> tbl = new ArrayList<TableIdentifier>();
-			tbl.add(new TableIdentifier("countries"));
-			tbl.add(new TableIdentifier("departments"));
-			tbl.add(new TableIdentifier("employees"));
-			tbl.add(new TableIdentifier("jobs"));
-			tbl.add(new TableIdentifier("job_history"));
-			tbl.add(new TableIdentifier("locations"));
-			tbl.add(new TableIdentifier("regions"));
+		ArrayList<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+		tables.add(new TableIdentifier("COUNTRIES"));
+		tables.add(new TableIdentifier("DEPARTMENTS"));
+		tables.add(new TableIdentifier("EMPLOYEES"));
+		tables.add(new TableIdentifier("jobs"));
+		tables.add(new TableIdentifier("job_history"));
+		tables.add(new TableIdentifier("locations"));
+		tables.add(new TableIdentifier("regions"));
 
-			TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
-			List<TableIdentifier> result = sorter.sortForInsert(tbl);
-			assertEquals(7, result.size());
-			assertEquals("jobs", result.get(0).getTableName());
-			assertEquals("regions", result.get(1).getTableName());
-			assertEquals("job_history", result.get(6).getTableName());
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-		}
+		TableDependencySorter sorter = new TableDependencySorter(this.dbConn);
+		List<TableIdentifier> result = sorter.sortForInsert(tables);
+
+//		for (TableIdentifier t : result)
+//		{
+//			System.out.println(t.getTableName());
+//		}
+		assertEquals(7, result.size());
+		assertTrue(tableIndex("departments", result) < tableIndex("employees", result));
+		assertTrue(tableIndex("countries", result) > tableIndex("regions", result));
+		assertTrue(tableIndex("jobs", result) < tableIndex("job_history", result));
+	}
+
+	@Test
+	public void testDeleteRegions()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+		InputStream in = DeleteScriptGeneratorTest.class.getResourceAsStream("gen_delete_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String sql = FileUtil.readCharacters(r);
+
+		TestUtil.executeScript(con, sql);
+
+		TableDependencySorter sorter = new TableDependencySorter(con);
+
+		List<TableIdentifier> toDelete2 = sorter.sortForDelete(CollectionUtil.arrayList(new TableIdentifier("countries")), true);
+//		for (TableIdentifier tbl : toDelete2)
+//		{
+//			System.out.println(tbl.getTableName());
+//		}
+		assertTrue(tableIndex("countries", toDelete2) > tableIndex("stores", toDelete2));
+		assertTrue(tableIndex("store_details", toDelete2) < tableIndex("stores", toDelete2));
+		assertTrue("Wrong order for sto_details_item", tableIndex("sto_details_item", toDelete2) < tableIndex("store_details", toDelete2));
+		assertTrue(tableIndex("sto_details_data", toDelete2) < tableIndex("store_details", toDelete2));
+		assertTrue(tableIndex("regions", toDelete2) < tableIndex("countries", toDelete2));
+		assertTrue(tableIndex("sales_mgr", toDelete2) < tableIndex("account_mgr", toDelete2));
+		assertTrue(tableIndex("account_mgr", toDelete2) < tableIndex("region_mgr", toDelete2));
+	}
+
+	@Test
+	public void testDeleteProductHierarchy()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+		InputStream in = DeleteScriptGeneratorTest.class.getResourceAsStream("gen_delete_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String sql = FileUtil.readCharacters(r);
+
+		TestUtil.executeScript(con, sql);
+
+		TableDependencySorter sorter = new TableDependencySorter(con);
+
+		List<TableIdentifier> tables = CollectionUtil.arrayList(
+			new TableIdentifier("vending_machines"),
+			new TableIdentifier("sto_details_item"),
+			new TableIdentifier("countries"),
+			new TableIdentifier("account_mgr"),
+			new TableIdentifier("sales_mgr"),
+			new TableIdentifier("sto_details_data"),
+			new TableIdentifier("regions"),
+			new TableIdentifier("stores"),
+			new TableIdentifier("region_mgr"),
+			new TableIdentifier("store_details")
+		);
+
+		List<TableIdentifier> toDelete = sorter.sortForDelete(tables, false);
+
+//		for (TableIdentifier tbl : toDelete)
+//		{
+//			System.out.println(tbl.getTableName());
+//		}
+
+		assertTrue(tableIndex("countries", toDelete) > tableIndex("stores", toDelete));
+		assertTrue(tableIndex("store_details", toDelete) < tableIndex("stores", toDelete));
+		assertTrue(tableIndex("sto_details_item", toDelete) < tableIndex("store_details", toDelete));
+		assertTrue(tableIndex("sto_details_data", toDelete) < tableIndex("store_details", toDelete));
+		assertTrue(tableIndex("regions", toDelete) < tableIndex("countries", toDelete));
+		assertTrue(tableIndex("sales_mgr", toDelete) < tableIndex("account_mgr", toDelete));
+		assertTrue(tableIndex("account_mgr", toDelete) < tableIndex("region_mgr", toDelete));
+	}
+
+	@Test
+	public void testInsertProductHierarchy()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+		InputStream in = DeleteScriptGeneratorTest.class.getResourceAsStream("gen_delete_schema.sql");
+		Reader r = new InputStreamReader(in);
+		String sql = FileUtil.readCharacters(r);
+
+		TestUtil.executeScript(con, sql);
+
+		TableDependencySorter sorter = new TableDependencySorter(con);
+
+		List<TableIdentifier> tables = CollectionUtil.arrayList(
+			new TableIdentifier("vending_machines"),
+			new TableIdentifier("sto_details_item"),
+			new TableIdentifier("countries"),
+			new TableIdentifier("account_mgr"),
+			new TableIdentifier("sales_mgr"),
+			new TableIdentifier("sto_details_data"),
+			new TableIdentifier("regions"),
+			new TableIdentifier("stores"),
+			new TableIdentifier("region_mgr"),
+			new TableIdentifier("store_details")
+		);
+
+		List<TableIdentifier> toInsert = sorter.sortForInsert(tables);
+
+//		for (TableIdentifier tbl : toInsert)
+//		{
+//			System.out.println(tbl.getTableName());
+//		}
+
+		assertTrue(tableIndex("countries", toInsert) < tableIndex("stores", toInsert));
+		assertTrue(tableIndex("stores", toInsert) < tableIndex("store_details", toInsert));
+		assertTrue(tableIndex("sto_details_item", toInsert) > tableIndex("store_details", toInsert));
+		assertTrue(tableIndex("sto_details_data", toInsert) > tableIndex("store_details", toInsert));
+		assertTrue(tableIndex("regions", toInsert) > tableIndex("countries", toInsert));
+		assertTrue(tableIndex("sales_mgr", toInsert) > tableIndex("account_mgr", toInsert));
+		assertTrue(tableIndex("account_mgr", toInsert) > tableIndex("region_mgr", toInsert));
 	}
 
 	@Test
@@ -371,7 +485,24 @@ public class TableDependencySorterTest
 		TableIdentifier country = con.getMetadata().findTable(new TableIdentifier("COUNTRIES"));
 		TableIdentifier regions = con.getMetadata().findTable(new TableIdentifier("REGIONS"));
 		TableIdentifier prdDetails = con.getMetadata().findTable(new TableIdentifier("PRODUCT_DETAILS"));
+		TableIdentifier products = new TableIdentifier("products");
+		TableIdentifier salesMgr = new TableIdentifier("sales_mgr");
+		TableIdentifier stores = new TableIdentifier("stores");
+		TableIdentifier storeDetails = new TableIdentifier("store_details");
+		TableDependencySorter sorter = new TableDependencySorter(con);
+		List<TableIdentifier> tables = sorter.sortForInsert(CollectionUtil.arrayList(country, regions, prdDetails, stores, salesMgr, storeDetails, products));
+//		System.out.println(tables);
+		assertTrue(tableIndex("stores", tables) < tableIndex("store_details", tables));
+		assertTrue(tableIndex("products", tables) < tableIndex("product_details", tables));
+		assertTrue(tableIndex("regions", tables) < tableIndex("sales_mgr", tables));
+	}
 
-
+	private int tableIndex(String tableName, List<TableIdentifier> tables)
+	{
+		for (int i=0; i < tables.size(); i++)
+		{
+			if (tables.get(i).getTableName().equalsIgnoreCase(tableName)) return i;
+		}
+		throw new IllegalArgumentException("Table " + tableName + " not found!");
 	}
 }

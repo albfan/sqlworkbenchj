@@ -80,6 +80,8 @@ public class GuiSettings
 
 	public static final String PROP_FILE_RELOAD_TYPE = "workbench.gui.editor.file.reloadtype";
 
+	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
+
 	public static int getMaxExpansionPause()
 	{
 		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
@@ -944,4 +946,15 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.data.append.results", flag);
 	}
+
+	public static boolean alwaysDisplayCopyAsTextDialog()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_COPY_TEXT_DISPLAY_DLG, true);
+	}
+
+	public static void setAlwaysDisplayCopyAsTextDialog(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_COPY_TEXT_DISPLAY_DLG, flag);
+	}
+
 }

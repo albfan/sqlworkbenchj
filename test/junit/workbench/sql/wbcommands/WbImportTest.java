@@ -73,7 +73,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 /**
  *
  * @author Thomas Kellerer
@@ -4470,7 +4475,8 @@ public class WbImportTest
 				"-header=true " +
 				"-deleteTarget=true " +
 				"-checkDependencies=true");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			String msg = result.getMessageBuffer().toString();
+			assertEquals("Import failed: " + msg, result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
 			if (rs.next())

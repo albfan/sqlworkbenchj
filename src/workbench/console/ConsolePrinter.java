@@ -30,13 +30,14 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.SwingConstants;
+
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.exporter.TextRowDataConverter;
-import workbench.resource.GuiSettings;
 
-import workbench.storage.*;
+import workbench.storage.RowData;
 
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
@@ -130,7 +131,7 @@ public abstract class ConsolePrinter
 			if (doFormat)
 			{
 				int colWidth = columnWidths.get(Integer.valueOf(col));
-				writePadded(pw, colName, colWidth, alignRight(col));
+				writePadded(pw, colName, colWidth, false);
 				headerWidth += colWidth;
 			}
 			else
