@@ -237,11 +237,11 @@ public class RowData
 		if (!this.isNew() && this.originalData != null)
 		{
 			this.originalData[column] = NO_CHANGE_MARKER;
-			for (int i=0; i < originalData.length; i++)
+			for (Object originalData1 : originalData)
 			{
 				// if any other column has been modified, the status of the row
 				// should not change
-				if (this.originalData[i] != NO_CHANGE_MARKER) return;
+				if (originalData1 != NO_CHANGE_MARKER) return;
 			}
 			// all columns are now NOT_MODIFIED, so reset the row status as well
 			this.resetStatus();
