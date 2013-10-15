@@ -39,13 +39,13 @@ import workbench.gui.components.WbTable;
  *
  * @see workbench.gui.components.ClipBoardCopier
  * @see GuiSettings#alwaysDisplayCopyAsTextDialog()
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class CopyAsTextAction
 	extends WbAction
 {
-	private WbTable client;
+	private final WbTable client;
 	protected boolean copySelected;
 
 	public CopyAsTextAction(WbTable aClient)
@@ -76,12 +76,16 @@ public class CopyAsTextAction
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
 		boolean copyHeaders = true;
 		boolean selectColumns = false;
+
 		if (invokedByMouse(e))
 		{
 			copyHeaders = !isShiftPressed(e);
-			selectColumns = isCtrlPressed(e) ;
+			selectColumns = isCtrlPressed(e) || GuiSettings.alwaysDisplayCopyAsTextDialog();
 		}
-		selectColumns = selectColumns || GuiSettings.alwaysDisplayCopyAsTextDialog();
+		else
+		{
+			selectColumns = GuiSettings.alwaysDisplayCopyAsTextDialog();
+		}
 		copier.copyDataToClipboard(copyHeaders, copySelected, selectColumns);
 	}
 

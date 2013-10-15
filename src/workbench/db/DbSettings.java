@@ -1276,7 +1276,7 @@ public class DbSettings
 	}
 
 	/**
-	 * Returns the SQL to drop a constriant from a data object
+	 * Returns the SQL to drop a constraint from a data object
 	 * @param type the type of the object. e.g. table, materialized view
 	 */
 	public String getDropConstraint(String type)

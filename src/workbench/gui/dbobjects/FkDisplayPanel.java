@@ -26,6 +26,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -33,12 +35,12 @@ import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import workbench.db.DefaultFKHandler;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.DropForeignKeyAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -64,21 +66,22 @@ public class FkDisplayPanel
 	implements Resettable, Reloadable, Interruptable, ActionListener
 {
 	protected WbTable keys;
-	private TableDependencyTreeDisplay dependencyTree;
-	private WbSplitPane splitPanel;
+	private final TableDependencyTreeDisplay dependencyTree;
+	private final WbSplitPane splitPanel;
 
-	private ReloadAction reloadTree;
-	private StopAction cancelAction;
-	private JCheckBox retrieveAll;
+	private final ReloadAction reloadTree;
+	private final StopAction cancelAction;
+	private final JCheckBox retrieveAll;
 
-	private boolean showImportedKeys;
+	private final boolean showImportedKeys;
 	private WbConnection dbConnection;
 	private boolean isRetrieving;
 	private boolean isTreeRetrieving;
 
 	private TableIdentifier currentTable;
-	private JMenuItem selectTableItem;
-	private TableLister tables;
+	private final JMenuItem selectTableItem;
+	private DropForeignKeyAction dropFK;
+	private final TableLister tables;
 
 	public FkDisplayPanel(TableLister lister, boolean showImported)
 	{
@@ -119,7 +122,10 @@ public class FkDisplayPanel
 
 		selectTableItem = new JMenuItem(ResourceMgr.getString("MnuTextSelectInList"));
 		selectTableItem.addActionListener(this);
-		keys.addPopupMenu(selectTableItem, true);
+
+		dropFK = new DropForeignKeyAction(this);
+		keys.addPopupAction(dropFK, true);
+		keys.addPopupMenu(selectTableItem, false);
 	}
 
 	public boolean getRetrieveAll()
@@ -158,6 +164,43 @@ public class FkDisplayPanel
 		return keys;
 	}
 
+	public TableIdentifier getCurrentTable()
+	{
+		return currentTable;
+	}
+
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+
+	public Map<TableIdentifier, String> getSelectedForeignKeys()
+	{
+		int[] rows = keys.getSelectedRows();
+
+		int colIndex = keys.convertColumnIndexToView(FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
+		Map<TableIdentifier, String> result = new HashMap<TableIdentifier, String>();
+		for (int i=0; i < rows.length; i++)
+		{
+			int row = rows[i];
+			String fkName = keys.getValueAsString(row, colIndex);
+			TableIdentifier constraintTable = null;
+			if (showImportedKeys)
+			{
+				constraintTable = currentTable;
+			}
+			else
+			{
+				constraintTable = getReferencedTable(row);
+			}
+			if (constraintTable != null)
+			{
+				result.put(constraintTable, fkName);
+			}
+		}
+		return result;
+	}
+
 	@Override
 	public void reset()
 	{
@@ -173,6 +216,19 @@ public class FkDisplayPanel
 	public void cancel()
 	{
 		dependencyTree.cancelRetrieve();
+	}
+
+	public void reloadTable()
+	{
+		try
+		{
+			reset();
+			retrieve(currentTable);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("FkDisplayPanel.reloadTable()", "Could not reload constraints", sql);
+		}
 	}
 
 	protected void retrieve(TableIdentifier table)
@@ -271,30 +327,44 @@ public class FkDisplayPanel
 		return true;
 	}
 
+	private TableIdentifier getReferencedTable(int row)
+	{
+		if (row < 0) return null;
+
+		int colIndex = keys.convertColumnIndexToView(FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
+		String col = keys.getValueAsString(row, colIndex);
+
+		// using a '.' here is safe as the FK display always uses the '.'
+		// as the delimiter between column and table even if the DBMS uses a different one
+		int pos = col.lastIndexOf('.');
+		TableIdentifier table = null;
+		if (pos > 0)
+		{
+			String tname = col.substring(0, pos);
+			table = new TableIdentifier(tname);
+		}
+		return table;
+	}
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (tables == null) return;
 		if (e.getSource() != selectTableItem) return;
+
 		int selected = keys.getSelectedRow();
 		if (selected < 0) return;
 
-		int colIndex = keys.convertColumnIndexToView(DefaultFKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-		String col = keys.getValueAsString(selected, colIndex);
-		int pos = col.lastIndexOf('.');
-		if (pos > 0)
+		final TableIdentifier tbl = getReferencedTable(selected);
+		if (tbl == null) return;
+
+		LogMgr.logDebug("FkDisplayPanel.actionPerformed()", "Trying to select table: " + tbl.getTableName());
+		WbSwingUtilities.invokeLater(new Runnable()
 		{
-			String tname = col.substring(0, pos);
-			final TableIdentifier tbl = new TableIdentifier(tname);
-			LogMgr.logDebug("FkDisplayPanel.actionPerformed()", "Trying to select table: " + tname);
-			WbSwingUtilities.invokeLater(new Runnable()
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
-				{
-					tables.selectTable(tbl);
-				}
-			});
-		}
+				tables.selectTable(tbl);
+			}
+		});
 	}
 }

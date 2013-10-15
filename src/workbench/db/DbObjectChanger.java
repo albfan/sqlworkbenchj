@@ -30,6 +30,7 @@ import java.util.Map;
 import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.ColumnChanger;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -183,7 +184,7 @@ public class DbObjectChanger
 		sql = sql.replace(PARAM_OLD_FQ_OBJECT_NAME, fqOld);
 		sql = sql.replace(PARAM_NEW_OBJECT_NAME, newObject.getObjectExpression(dbConnection));
 		sql = sql.replace(PARAM_NEW_FQ_OBJECT_NAME, fqNew);
-		
+
 		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqOld);
 		return sql;
 	}
@@ -356,4 +357,39 @@ public class DbObjectChanger
 		return sql;
 	}
 
+	public String getDropFK(TableIdentifier table, String fkName)
+	{
+		String type = table.getObjectType();
+		if (StringUtil.isBlank(type)) return null;
+		if (StringUtil.isBlank(fkName)) return null;
+
+		String sql = settings.getDropConstraint(type);
+
+		if (sql == null) return null;
+
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+		sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkName);
+		return sql;
+	}
+
+	public String getDropFKScript(Map<TableIdentifier, String> constraints)
+	{
+		if (CollectionUtil.isEmpty(constraints)) return null;
+
+		StringBuilder script = new StringBuilder(50);
+		for (Map.Entry<TableIdentifier, String> entry : constraints.entrySet())
+		{
+			String sql = getDropFK(entry.getKey(), entry.getValue());
+			if (sql != null)
+			{
+				script.append(sql);
+				script.append(";\n");
+			}
+		}
+		if (settings.ddlNeedsCommit())
+		{
+			script.append("\nCOMMIT;\n");
+		}
+		return script.toString();
+	}
 }

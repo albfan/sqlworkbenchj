@@ -24,50 +24,62 @@ package workbench.gui.actions;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.util.Map;
 import workbench.db.DbObjectChanger;
 import workbench.db.TableIdentifier;
-import workbench.gui.dbobjects.DbObjectList;
+import workbench.db.WbConnection;
+import workbench.gui.dbobjects.FkDisplayPanel;
 import workbench.gui.dbobjects.RunScriptPanel;
 import workbench.resource.ResourceMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DropPKAction
+public class DropForeignKeyAction
 	extends WbAction
 {
-	private final DbObjectList columns;
+	private final FkDisplayPanel fkDisplay;
 
-	public DropPKAction(DbObjectList cols)
+	public DropForeignKeyAction(FkDisplayPanel display)
 	{
 		super();
-		this.columns = cols;
-		this.initMenuDefinition("MnuTxtDropPK");
+		this.initMenuDefinition("MnuTxtDropFK");
+		this.fkDisplay = display;
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		TableIdentifier table = columns.getObjectTable();
+		TableIdentifier tbl = fkDisplay.getCurrentTable();
+		if (tbl == null) return;
 
-		DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
-		String sql = changer.getDropPKScript(table);
+		WbConnection con = fkDisplay.getConnection();
+		if (con == null || con.isBusy()) return;
+
+		Map<TableIdentifier, String> selectedConstraints = fkDisplay.getSelectedForeignKeys();
+		if (CollectionUtil.isEmpty(selectedConstraints)) return;
+
+		DbObjectChanger changer = new DbObjectChanger(con);
+
+		String sql = changer.getDropFKScript(selectedConstraints);
+
 		if (StringUtil.isBlank(sql)) return;
 
-		RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
+		RunScriptPanel panel = new RunScriptPanel(con, sql);
 
-		panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtDropPK"));
+		panel.openWindow(fkDisplay, ResourceMgr.getString("TxtDropConstraint"));
 
-		if (panel.wasRun() && columns != null)
+		if (panel.wasRun())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					columns.reload();
+					fkDisplay.reloadTable();
 				}
 			});
 		}
