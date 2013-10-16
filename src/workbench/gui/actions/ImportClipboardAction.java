@@ -26,10 +26,18 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
-import workbench.gui.sql.SqlPanel;
+import java.io.IOException;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.sql.SqlPanel;
+
+import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 
 /**
  * Import data from the clipboard into a table
@@ -60,7 +68,7 @@ public class ImportClipboardAction
 	public void executeAction(ActionEvent evt)
 	{
 		String content = getClipboardContents();
-		if (content == null) return;
+		if (StringUtil.isBlank(content)) return;
 		client.importString(content, isCtrlPressed(evt));
 	}
 
@@ -72,14 +80,44 @@ public class ImportClipboardAction
 		}
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		Transferable content = clp.getContents(client);
+
+		DataFlavor[] flavors = content.getTransferDataFlavors();
+		StringBuilder info = new StringBuilder();
+		if (flavors != null)
+		{
+			for (int i=0; i < flavors.length; i++)
+			{
+				info.append(flavors[i].getHumanPresentableName());
+				if (i > 0) info.append(", ");
+			}
+		}
+
+		LogMgr.logDebug("ImportClipboardAction.getClipboardContents()", "Supported formats of the clipboard: " + info);
+
+		if (!content.isDataFlavorSupported(DataFlavor.stringFlavor))
+		{
+			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The clipboard does not contain a format compatible with a string. Clipboard format is: " + info, null);
+			WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
+			return null;
+		}
+
 		try
 		{
-			String s = (String) content.getTransferData(DataFlavor.stringFlavor);
-			return s;
+			return (String) content.getTransferData(DataFlavor.stringFlavor);
+		}
+		catch (UnsupportedFlavorException ufe)
+		{
+			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content cannot be used as a String", ufe);
+			WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content can no longer be accessed", io);
+			WbSwingUtilities.showErrorMessage(client, "<html>" + ResourceMgr.getString("MsgClipInvalid") + "<br>(" + ExceptionUtil.getDisplay(io) + ")</html>");
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("ImportClipboardAction.checkContents()", "Error accessing clipboard", e);
+			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "Error accessing clipboard", e);
 		}
 		return null;
 	}
