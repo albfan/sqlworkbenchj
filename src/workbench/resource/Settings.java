@@ -67,7 +67,17 @@ import workbench.storage.PkMapping;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.formatter.JoinWrapStyle;
 
-import workbench.util.*;
+import workbench.util.FileAttributeChanger;
+import workbench.util.FileDialogUtil;
+import workbench.util.FileUtil;
+import workbench.util.FileVersioner;
+import workbench.util.PlatformHelper;
+import workbench.util.StringUtil;
+import workbench.util.ToolDefinition;
+import workbench.util.WbFile;
+import workbench.util.WbLocale;
+import workbench.util.WbNumberFormatter;
+import workbench.util.WbProperties;
 
 /**
  * The singleton to manage configuration settings for SQL Workbench/J
@@ -107,6 +117,9 @@ public class Settings
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR = "workbench.editor.occurance.highlight.color";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT = "workbench.editor.occurance.highlight.enable";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN = "workbench.editor.occurance.highlight.minlength";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BASE = "workbench.editor.bracket.hilite";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".color";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_LEFT = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".left";
@@ -1827,6 +1840,20 @@ public class Settings
 		return getColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, null);
 	}
 
+	public int getMinLengthForSelectionHighlight()
+	{
+		return getIntProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, 3);
+	}
+
+	public boolean getHighlightCurrentSelection()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, true);
+	}
+
+	public Color getOccuranceHighlightColor()
+	{
+		return getColor(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR, Color.YELLOW);
+	}
 
 	public boolean isBracketHighlightEnabled()
 	{

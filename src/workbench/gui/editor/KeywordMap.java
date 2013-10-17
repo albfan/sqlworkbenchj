@@ -24,6 +24,10 @@ import javax.swing.text.Segment;
  */
 public class KeywordMap
 {
+	private final Keyword[] map;
+	private boolean ignoreCase;
+	private final int mapLength;
+
 	/**
 	 * Creates a new <code>KeywordMap</code>.
 	 * @param ignoreCase True if the keys are case insensitive
@@ -34,7 +38,7 @@ public class KeywordMap
 	{
 		this.mapLength = mapLength;
 		this.ignoreCase = ignoreCase;
-		map = new Keyword[mapLength];
+		this.map = new Keyword[mapLength];
 	}
 
 	/**
@@ -68,7 +72,7 @@ public class KeywordMap
 		Segment s = new Segment(aKey.toCharArray(), 0, aKey.length());
 		return (this.lookup(s, 0, aKey.length()) != Token.NULL);
 	}
-	
+
 	/**
 	 * Adds a key-value mapping.
 	 * @param keyword The key
@@ -100,9 +104,6 @@ public class KeywordMap
 		this.ignoreCase = ignoreCase;
 	}
 
-	// protected members
-	protected int mapLength;
-
 	protected int getStringMapKey(String s)
 	{
 		return (Character.toUpperCase(s.charAt(0)) + Character.toUpperCase(s.charAt(s.length()-1)))	% mapLength;
@@ -116,21 +117,18 @@ public class KeywordMap
 		return (Character.toUpperCase(s.array[off]) + Character.toUpperCase(s.array[off + len - 1])) % mapLength;
 	}
 
-	
+
 	static class Keyword
 	{
-		public Keyword(char[] keyword, byte id, Keyword next)
+		public final char[] keyword;
+		public final byte id;
+		public final Keyword next;
+
+		Keyword(char[] keyword, byte id, Keyword next)
 		{
 			this.keyword = keyword;
 			this.id = id;
 			this.next = next;
 		}
-
-		public char[] keyword;
-		public byte id;
-		public Keyword next;
 	}
-
-	private Keyword[] map;
-	private boolean ignoreCase;
 }

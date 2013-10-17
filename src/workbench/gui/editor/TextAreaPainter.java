@@ -27,9 +27,11 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -54,6 +56,7 @@ public class TextAreaPainter
 	protected Color selectionColor;
 	protected Color currentLineColor;
 	protected Color bracketHighlightColor;
+	protected Color occuranceHighlightColor;
 
 	protected boolean bracketHighlight;
 	protected boolean matchBeforeCaret;
@@ -72,13 +75,15 @@ public class TextAreaPainter
 	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
 	private final Object stylesLockMonitor = new Object();
+	private String highlighText;
 
 	private static final Set<String> COLOR_PROPS = CollectionUtil.treeSet(
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
-		Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR);
+		Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
+		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR);
 
 	private Map renderingHints;
 
@@ -105,6 +110,7 @@ public class TextAreaPainter
 		caretColor = Settings.getInstance().getEditorCursorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
+		occuranceHighlightColor = Settings.getInstance().getOccuranceHighlightColor();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 
 		Settings.getInstance().addPropertyChangeListener(this,
@@ -114,6 +120,7 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_LEFT,
@@ -147,6 +154,25 @@ public class TextAreaPainter
 		else
 		{
 			super.setCursor(DEFAULT_CURSOR);
+		}
+	}
+
+	public void setHighlightValue(String text)
+	{
+		boolean changed = false;
+		if (text != null)
+		{
+			changed = !StringUtil.equalString(highlighText, text);
+			this.highlighText = text;
+		}
+		else
+		{
+			changed = this.highlighText != null;
+			this.highlighText = null;
+		}
+		if (changed)
+		{
+			invalidateVisibleLines();
 		}
 	}
 
@@ -203,6 +229,7 @@ public class TextAreaPainter
 				setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 				bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
+				occuranceHighlightColor = Settings.getInstance().getOccuranceHighlightColor();
 			}
 		});
 	}
@@ -558,12 +585,18 @@ public class TextAreaPainter
 		repaint(0, textArea.lineToY(firstLine) + fm.getMaxDescent() + fm.getLeading(), getWidth(), (lastLine - firstLine + 1) * fm.getHeight());
 	}
 
+	public void invalidateVisibleLines()
+	{
+		int firstLine = textArea.getFirstLine();
+		int lastLine = firstLine + textArea.getVisibleLines();
+		invalidateLineRange(firstLine, lastLine);
+	}
 	/**
 	 * Repaints the lines containing the selection.
 	 */
 	public final void invalidateSelectedLines()
 	{
-		invalidateLineRange(textArea.getSelectionStartLine(),textArea.getSelectionEndLine());
+		invalidateLineRange(textArea.getSelectionStartLine(), textArea.getSelectionEndLine());
 	}
 
 	/**
@@ -642,6 +675,23 @@ public class TextAreaPainter
 			paintBracketHighlight(gfx, line, y, height, textArea.getBracketPosition());
 		}
 
+		if (this.highlighText != null)
+		{
+			int pos = SyntaxUtilities.findMatch(currentLine, highlighText, true);
+			if (pos > -1)
+			{
+				int lineStart = textArea.getLineStartOffset(line);
+				if (pos + lineStart != textArea.getSelectionStart())
+				{
+					int x1 = textArea._offsetToX(line, pos);
+					int x2 = textArea._offsetToX(line, pos + highlighText.length()) - x1;
+					gfx.setColor(occuranceHighlightColor);
+					gfx.fillRect(x1, y, x2, height);
+					gfx.setColor(getBackground());
+				}
+			}
+		}
+
 		if (line == textArea.getCaretLine())
 		{
 			paintCaret(gfx, line, y, height);
@@ -694,7 +744,7 @@ public class TextAreaPainter
 		}
 		else
 		{
-			x1 = 0; //gutterWidth;
+			x1 = 0;
 			x2 = getWidth();
 		}
 

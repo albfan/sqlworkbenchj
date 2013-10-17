@@ -65,6 +65,15 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 
 import workbench.WbManager;
+import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.EditorStatusbar;
+import workbench.interfaces.TextChangeListener;
+import workbench.interfaces.TextSelectionListener;
+import workbench.interfaces.Undoable;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
@@ -75,14 +84,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.EditorStatusbar;
-import workbench.interfaces.TextChangeListener;
-import workbench.interfaces.TextSelectionListener;
-import workbench.interfaces.Undoable;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
+
 import workbench.util.MemoryWatcher;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -1014,6 +1016,7 @@ public class JEditTextArea
 	 * Converts an offset in a line into an x co-ordinate. This is a
 	 * fast version that should only be used if no changes were made
 	 * to the text since the last repaint.
+	 *
 	 * @param line The line
 	 * @param offset The offset, from the start of the line
 	 */
@@ -1864,9 +1867,6 @@ public class JEditTextArea
 			throw new IllegalArgumentException("Bounds out of"+ " range: " + newStart + "," +	newEnd);
 		}
 
-		// If the new position is the same as the old, we don't
-		// do all this crap, however we still do the stuff at
-		// the end (clearing magic position, scrolling)
 		if (newStart != selectionStart || newEnd != selectionEnd || newBias != biasLeft)
 		{
 			this.alternateSelectionColor = alternateColor;
@@ -1882,8 +1882,8 @@ public class JEditTextArea
 				if (bracketLine != -1) painter.invalidateLine(bracketLine);
 			}
 
-			painter.invalidateLineRange(selectionStartLine,selectionEndLine);
-			painter.invalidateLineRange(newStartLine,newEndLine);
+			painter.invalidateLineRange(selectionStartLine, selectionEndLine);
+			painter.invalidateLineRange(newStartLine, newEndLine);
 
 			document.addUndoableEdit(new CaretUndo(selectionStart,selectionEnd));
 
@@ -1894,6 +1894,17 @@ public class JEditTextArea
 			biasLeft = newBias;
 
 			fireCaretEvent();
+		}
+
+		boolean enableHilite = Settings.getInstance().getHighlightCurrentSelection();
+		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
+		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
+		{
+			painter.setHighlightValue(getSelectedText());
+		}
+		else
+		{
+			painter.setHighlightValue(null);
 		}
 
 		// When the user is typing, etc, we don't want the caret

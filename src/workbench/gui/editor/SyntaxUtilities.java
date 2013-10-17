@@ -9,6 +9,7 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -27,37 +28,41 @@ import workbench.resource.Settings;
  */
 public class SyntaxUtilities
 {
-	/**
-	 * Checks if a subregion of a <code>Segment</code> is equal to a
-	 * string.
-	 * @param ignoreCase True if case should be ignored, false otherwise
-	 * @param text The segment
-	 * @param offset The offset into the segment
-	 * @param match The string to match
-	 */
-	public static boolean regionMatches(boolean ignoreCase, Segment text, int offset, String match)
+
+	public static int findMatch(Segment line, String needle, boolean ignoreCase)
 	{
-		int length = offset + match.length();
-		char[] textArray = text.array;
-		if (length > text.offset + text.count)
+		char[] haystack = line.array;
+		int needleLen = needle.length();
+
+		int searchPos = 0;
+		int textLength = line.offset + line.count;
+
+		for (int textPos = line.offset; textPos < textLength; textPos++)
 		{
-			return false;
-		}
-		for (int i = offset,  j = 0; i < length; i++, j++)
-		{
-			char c1 = textArray[i];
-			char c2 = match.charAt(j);
+			char c1 = haystack[textPos];
+			char c2 = needle.charAt(searchPos);
+
 			if (ignoreCase)
 			{
 				c1 = Character.toUpperCase(c1);
 				c2 = Character.toUpperCase(c2);
 			}
-			if (c1 != c2)
+
+			if (c1 == c2)
 			{
-				return false;
+				searchPos++;
+				if (searchPos == needleLen)
+				{
+					return (textPos + 1) - needleLen - line.offset;
+				}
+			}
+			else
+			{
+				textPos -= searchPos;
+				searchPos = 0;
 			}
 		}
-		return true;
+		return -1;
 	}
 
 	/**
