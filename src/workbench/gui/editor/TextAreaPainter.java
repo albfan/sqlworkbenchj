@@ -677,18 +677,19 @@ public class TextAreaPainter
 
 		if (this.highlighText != null)
 		{
-			int pos = SyntaxUtilities.findMatch(currentLine, highlighText, true);
-			if (pos > -1)
+			int pos = SyntaxUtilities.findMatch(currentLine, highlighText, 0, true);
+			int lineStart = textArea.getLineStartOffset(line);
+			while (pos > -1)
 			{
-				int lineStart = textArea.getLineStartOffset(line);
 				if (pos + lineStart != textArea.getSelectionStart())
 				{
-					int x1 = textArea._offsetToX(line, pos);
-					int x2 = textArea._offsetToX(line, pos + highlighText.length()) - x1;
+					int x = textArea._offsetToX(line, pos);
+					int width = textArea._offsetToX(line, pos + highlighText.length()) - x;
 					gfx.setColor(occuranceHighlightColor);
-					gfx.fillRect(x1, y, x2, height);
+					gfx.fillRect(x, y, width, height);
 					gfx.setColor(getBackground());
 				}
+				pos = SyntaxUtilities.findMatch(currentLine, highlighText, pos + 1, true);
 			}
 		}
 

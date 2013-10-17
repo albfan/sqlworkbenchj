@@ -29,7 +29,7 @@ import workbench.resource.Settings;
 public class SyntaxUtilities
 {
 
-	public static int findMatch(Segment line, String needle, boolean ignoreCase)
+	public static int findMatch(Segment line, String needle, int startAt, boolean ignoreCase)
 	{
 		char[] haystack = line.array;
 		int needleLen = needle.length();
@@ -37,7 +37,7 @@ public class SyntaxUtilities
 		int searchPos = 0;
 		int textLength = line.offset + line.count;
 
-		for (int textPos = line.offset; textPos < textLength; textPos++)
+		for (int textPos = line.offset + startAt; textPos < textLength; textPos++)
 		{
 			char c1 = haystack[textPos];
 			char c2 = needle.charAt(searchPos);
