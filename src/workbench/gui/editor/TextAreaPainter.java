@@ -62,6 +62,7 @@ public class TextAreaPainter
 	protected boolean matchBeforeCaret;
 	protected boolean bracketHighlightRec;
 	protected boolean bracketHighlightBoth;
+	protected boolean selectionHighlightIgnoreCase;
 
 	protected int tabSize = -1;
 	protected FontMetrics fm;
@@ -83,7 +84,8 @@ public class TextAreaPainter
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 		Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
-		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR);
+		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR,
+		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE);
 
 	private Map renderingHints;
 
@@ -111,6 +113,7 @@ public class TextAreaPainter
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 		occuranceHighlightColor = Settings.getInstance().getOccuranceHighlightColor();
+		selectionHighlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 
 		Settings.getInstance().addPropertyChangeListener(this,
@@ -121,6 +124,7 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR,
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE_LEFT,
@@ -198,6 +202,10 @@ public class TextAreaPainter
 			readBracketSettings();
 			textArea.invalidateBracketLine();
 			invalidate();
+		}
+		else if (Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE.equals(evt.getPropertyName()))
+		{
+			selectionHighlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 		}
 		else if (COLOR_PROPS.contains(evt.getPropertyName()))
 		{
@@ -677,7 +685,7 @@ public class TextAreaPainter
 
 		if (this.highlighText != null)
 		{
-			int pos = SyntaxUtilities.findMatch(currentLine, highlighText, 0, true);
+			int pos = SyntaxUtilities.findMatch(currentLine, highlighText, 0, selectionHighlightIgnoreCase);
 			int lineStart = textArea.getLineStartOffset(line);
 			while (pos > -1)
 			{
@@ -689,7 +697,7 @@ public class TextAreaPainter
 					gfx.fillRect(x, y, width, height);
 					gfx.setColor(getBackground());
 				}
-				pos = SyntaxUtilities.findMatch(currentLine, highlighText, pos + 1, true);
+				pos = SyntaxUtilities.findMatch(currentLine, highlighText, pos + 1, selectionHighlightIgnoreCase);
 			}
 		}
 

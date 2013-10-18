@@ -70,7 +70,7 @@ public class WbDescribeObject
 		isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_DEPEND, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_OBJECT);
+		cmdLine.addArgument(ARG_OBJECT, ArgumentType.TableArgument);
 	}
 
 	@Override

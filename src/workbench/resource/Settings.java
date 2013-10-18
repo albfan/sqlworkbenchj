@@ -120,6 +120,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR = "workbench.editor.occurance.highlight.color";
 	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT = "workbench.editor.occurance.highlight.enable";
 	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN = "workbench.editor.occurance.highlight.minlength";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE = "workbench.editor.occurance.highlight.casesensitive";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BASE = "workbench.editor.bracket.hilite";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".color";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_LEFT = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".left";
@@ -1845,9 +1846,29 @@ public class Settings
 		return getIntProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, 2);
 	}
 
+	public boolean getSelectionHighlightIgnoreCase()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE, true);
+	}
+
+	public void setSelectionHighlightIgnoreCase(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE, flag);
+	}
+
+	public void setHighlightCurrentSelection(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, flag);
+	}
+
 	public boolean getHighlightCurrentSelection()
 	{
 		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, true);
+	}
+
+	public void getOccuranceHighlightColor(Color color)
+	{
+		setColor(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR, color);
 	}
 
 	public Color getOccuranceHighlightColor()

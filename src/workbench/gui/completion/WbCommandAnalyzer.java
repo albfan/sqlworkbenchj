@@ -46,6 +46,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.gui.completion.BaseAnalyzer.CONTEXT_WB_PARAMS;
+import workbench.sql.wbcommands.WbDescribeObject;
 
 
 /**
@@ -133,6 +134,8 @@ public class WbCommandAnalyzer
 			return;
 		}
 
+		p.parse(this.sql);
+
 		String parameter = getCurrentParameter();
 		this.isParameter = false;
 
@@ -195,6 +198,11 @@ public class WbCommandAnalyzer
 				this.context = NO_CONTEXT;
 				this.elements = null;
 			}
+		}
+		else if (cmd instanceof WbDescribeObject && p.getArgumentCount() == 0)
+		{
+			this.context = CONTEXT_TABLE_LIST;
+			this.elements = null;
 		}
 		else
 		{
