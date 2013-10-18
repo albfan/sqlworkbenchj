@@ -38,27 +38,27 @@ public class SyntaxUtilitiesTest
 	{
 		String lineText = "this is a line with some text in it.";
 		Segment line = new Segment(lineText.toCharArray(), 0, lineText.length());
-		int pos = SyntaxUtilities.findMatch(line, "line", true);
+		int pos = SyntaxUtilities.findMatch(line, "line", 0, true);
 		assertEquals(10, pos);
 
-		pos = SyntaxUtilities.findMatch(line, "xline", true);
+		pos = SyntaxUtilities.findMatch(line, "xline", 0, true);
 		assertEquals(-1, pos);
 
-		pos = SyntaxUtilities.findMatch(line, "this", true);
+		pos = SyntaxUtilities.findMatch(line, "this", 0, true);
 		assertEquals(0, pos);
 
-		pos = SyntaxUtilities.findMatch(line, "it.", true);
+		pos = SyntaxUtilities.findMatch(line, "it.", 0, true);
 		assertEquals(33, pos);
 
 		lineText = "Line 1 Text\nLine 2 foo\nLine 4 bar\n";
 		line = new Segment(lineText.toCharArray(), 0, 11);
 
-		pos = SyntaxUtilities.findMatch(line, "foo", true);
+		pos = SyntaxUtilities.findMatch(line, "foo", 0, true);
 		assertEquals(-1, pos);
 
 		line.offset = 12;
 		line.count = 10;
-		pos = SyntaxUtilities.findMatch(line, "foo", true);
+		pos = SyntaxUtilities.findMatch(line, "foo", 0, true);
 		assertEquals(7, pos);
 	}
 

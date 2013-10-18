@@ -330,12 +330,23 @@ public class RowDataReader
 				if (ignoreReadErrors)
 				{
 					value = null;
-					LogMgr.logError("RowDataReader.read()", "Error retrieving data for column '" + resultInfo.getColumnName(i) + "'. Using NULL!!", e);
+					LogMgr.logError("RowDataReader.read()", "Error retrieving data for column '" + resultInfo.getColumnName(i) + "'. Using NULL!", e);
 				}
 				else
 				{
 					throw e;
 				}
+			}
+			catch (Throwable e)
+			{
+				// I'm catching Throwable here just in case
+				// (e.g. Oracle's XML type library is missing a ClassNotFoundException is thrown that would otherwise not be visible)
+				String error = e.getClass().getName();
+				if (e.getMessage() != null)
+				{
+					error += ": " + e.getMessage();
+				}
+				throw new SQLException(error, e);
 			}
 			colData[i] = value;
 		}

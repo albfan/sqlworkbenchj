@@ -1633,7 +1633,7 @@ public class JEditTextArea
 	 */
 	public final void setSelectionStart(int selectionStart)
 	{
-		select(selectionStart,selectionEnd);
+		select(selectionStart, selectionEnd);
 	}
 
 	/**

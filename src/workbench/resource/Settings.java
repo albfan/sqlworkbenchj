@@ -1842,7 +1842,7 @@ public class Settings
 
 	public int getMinLengthForSelectionHighlight()
 	{
-		return getIntProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, 3);
+		return getIntProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, 2);
 	}
 
 	public boolean getHighlightCurrentSelection()
