@@ -35,23 +35,21 @@ import workbench.resource.Settings;
  *
  * @author  Thomas Kellerer
  */
-public class CheckPreparedStatementsAction
+public class ToggleSelectionHighlightAction
 	extends CheckBoxAction
 	implements PropertyChangeListener
 {
-	private static final String PROPERTY = "workbench.sql.checkprepared";
-
-	public CheckPreparedStatementsAction()
+	public ToggleSelectionHighlightAction()
 	{
-		super("MnuTxtCheckPrepared", PROPERTY);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		Settings.getInstance().addPropertyChangeListener(this, PROPERTY);
+		super("MnuTxtHiliteSel", Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
+		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		setSwitchedOn(Settings.getInstance().getCheckPreparedStatements());
+		setSwitchedOn(Settings.getInstance().getHighlightCurrentSelection());
 	}
 
 	@Override

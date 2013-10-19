@@ -23,18 +23,20 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.MainWindow;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.MainWindow;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ToggleExtraConnection 
+public class ToggleExtraConnection
 	extends CheckBoxAction
 {
 	private MainWindow window;
-	
+
 	public ToggleExtraConnection(MainWindow client)
 	{
 		super("MnuTxtUseExtraConn", null);
@@ -43,7 +45,7 @@ public class ToggleExtraConnection
 		this.window = client;
 		checkState();
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -62,8 +64,8 @@ public class ToggleExtraConnection
 			}
 		}
 	}
-	
-	public void checkState()
+
+	public final void checkState()
 	{
 		if (this.window == null)
 		{
@@ -76,5 +78,5 @@ public class ToggleExtraConnection
 			this.setSwitchedOn(window.usesSeparateConnection());
 		}
 	}
-	
+
 }

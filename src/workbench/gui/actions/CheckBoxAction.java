@@ -23,14 +23,17 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  * Toggle the display of the toolbar in the main window
@@ -47,7 +50,7 @@ public class CheckBoxAction
 	{
 		this(resourceKey, null);
 	}
-	
+
 	public CheckBoxAction(String resourceKey, String prop)
 	{
 		super();
@@ -72,10 +75,12 @@ public class CheckBoxAction
 		return this.switchedOn;
 	}
 
-	public void setSwitchedOn(boolean aFlag)
+	public void setSwitchedOn(boolean flag)
 	{
-		this.switchedOn = aFlag;
-		if (this.toggleMenu != null) 
+		if (flag == this.switchedOn) return;
+
+		this.switchedOn = flag;
+		if (this.toggleMenu != null)
 		{
 			WbSwingUtilities.invoke(new Runnable()
 			{
@@ -101,7 +106,7 @@ public class CheckBoxAction
 		}
 		return toggleMenu;
 	}
-	
+
 	private void createMenuItem()
 	{
 		this.toggleMenu = new JCheckBoxMenuItem();

@@ -966,6 +966,7 @@ public class EditorPanel
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
+		super.propertyChange(evt);
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
 		{
 			this.setTabSize(Settings.getInstance().getEditorTabWidth());
@@ -978,7 +979,10 @@ public class EditorPanel
 		{
 			this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 		}
-		WbSwingUtilities.repaintNow(this);
+		if (this.isReallyVisible())
+		{
+			WbSwingUtilities.repaintNow(this);
+		}
 	}
 
 	@Override

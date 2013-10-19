@@ -252,6 +252,8 @@ public class WbProperties
 
 	public void addPropertyChangeListener(PropertyChangeListener aListener, String ... properties)
 	{
+		if (aListener == null) return;
+		
 		synchronized (this.changeListeners)
 		{
 			for (String prop : properties)

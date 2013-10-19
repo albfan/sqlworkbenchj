@@ -153,6 +153,7 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.SqlPanelReloadAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.actions.ToggleAutoCommitAction;
+import workbench.gui.actions.ToggleSelectionHighlightAction;
 import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.actions.ViewMessageLogAction;
@@ -283,6 +284,7 @@ public class SqlPanel
 	protected WbMenu copyAsSQLMenu;
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
+	protected ToggleSelectionHighlightAction toggleSelectionHilite;
 	protected CommitAction commitAction;
 	protected RollbackAction rollbackAction;
 
@@ -375,7 +377,7 @@ public class SqlPanel
 		contentPanel.setContinuousLayout(true);
 
 		appendResults = GuiSettings.getDefaultAppendResults();
-		
+
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
 
@@ -701,6 +703,9 @@ public class SqlPanel
 		this.actions.add(this.editor.getCommentAction());
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
+
+		this.toggleSelectionHilite = new ToggleSelectionHighlightAction();
+		this.actions.add(this.toggleSelectionHilite);
 
 		// The update actions are proxies for the real ones
 		// Once a result tab (DwPanel) has been displayed

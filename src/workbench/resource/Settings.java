@@ -1841,6 +1841,11 @@ public class Settings
 		return getColor(PROPERTY_EDITOR_CURRENT_LINE_COLOR, null);
 	}
 
+	public void setMinLengthForSelectionHighlight(int len)
+	{
+		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, len);
+	}
+
 	public int getMinLengthForSelectionHighlight()
 	{
 		return getIntProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN, 2);
@@ -1866,7 +1871,7 @@ public class Settings
 		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, true);
 	}
 
-	public void getOccuranceHighlightColor(Color color)
+	public void setOccuranceHighlightColor(Color color)
 	{
 		setColor(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR, color);
 	}

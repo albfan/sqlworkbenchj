@@ -92,4 +92,14 @@ public class ToggleAutoCommitAction
 			this.checkState();
 		}
 	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (this.connection != null)
+		{
+			this.connection.removeChangeListener(this);
+		}
+	}
 }

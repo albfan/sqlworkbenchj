@@ -269,7 +269,7 @@ public class JEditTextArea
 		this.addMouseWheelListener(fontZoomer);
 
 		smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SMART_COMPLETE);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SMART_COMPLETE, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
 	}
 
 	@Override
@@ -278,6 +278,10 @@ public class JEditTextArea
 		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_SMART_COMPLETE))
 		{
 			smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
+		}
+		else if (evt.getPropertyName().equals(Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT))
+		{
+			updateOccuranceHilite();
 		}
 	}
 
@@ -1896,16 +1900,7 @@ public class JEditTextArea
 			fireCaretEvent();
 		}
 
-		boolean enableHilite = Settings.getInstance().getHighlightCurrentSelection();
-		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
-		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
-		{
-			painter.setHighlightValue(getSelectedText());
-		}
-		else
-		{
-			painter.setHighlightValue(null);
-		}
+		updateOccuranceHilite();
 
 		// When the user is typing, etc, we don't want the caret
 		// to blink
@@ -1920,6 +1915,20 @@ public class JEditTextArea
 
 		scrollToCaret();
 		fireSelectionEvent();
+	}
+
+	private void updateOccuranceHilite()
+	{
+		boolean enableHilite = Settings.getInstance().getHighlightCurrentSelection();
+		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
+		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
+		{
+			painter.setHighlightValue(getSelectedText());
+		}
+		else
+		{
+			painter.setHighlightValue(null);
+		}
 	}
 
 	public Color getAlternateSelectionColor()
