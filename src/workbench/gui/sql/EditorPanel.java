@@ -69,6 +69,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.QuoteHandler;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
@@ -159,6 +160,7 @@ public class EditorPanel
 	private boolean isMySQL;
 	private DelimiterDefinition alternateDelimiter;
 	private String dbId;
+	private QuoteHandler quoteHandler = QuoteHandler.STANDARD_HANDLER;
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -262,6 +264,7 @@ public class EditorPanel
 
 		if (aConnection != null)
 		{
+			quoteHandler = aConnection.getMetadata();
 			// Support MySQL's non-standard line comment
 			isMySQL = aConnection.getMetadata().isMySql();
 			token.setIsMySQL(isMySQL);
@@ -278,6 +281,7 @@ public class EditorPanel
 		{
 			this.dbId = null;
 			this.commentChar = "--";
+			quoteHandler = QuoteHandler.STANDARD_HANDLER;
 		}
 
 		SqlKeywordHelper helper = new SqlKeywordHelper(this.dbId);
@@ -290,6 +294,11 @@ public class EditorPanel
 		token.addOperators(helper.getOperators());
 	}
 
+	@Override
+	protected QuoteHandler getQuoteHandler()
+	{
+		return quoteHandler;
+	}
 	@Override
 	public void fontChanged(String aKey, Font aFont)
 	{
@@ -454,7 +463,6 @@ public class EditorPanel
 	{
 		super.dispose();
 		Settings.getInstance().removeFontChangedListener(this);
-		Settings.getInstance().removePropertyChangeListener(this);
 		this.clearUndoBuffer();
 		if (this.popup != null)
 		{
@@ -476,6 +484,7 @@ public class EditorPanel
 			fileSaveAs, formatSql, jumpToLineAction, matchBracket, redo, unCommentAction, undo
 		);
 		replacer.dispose();
+		quoteHandler = null;
 		this.setDocument(new SyntaxDocument());
 	}
 

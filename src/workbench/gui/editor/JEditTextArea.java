@@ -74,6 +74,8 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
+import workbench.db.QuoteHandler;
+
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
@@ -1930,7 +1932,7 @@ public class JEditTextArea
 		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
 		{
 			text = getSelectedText();
-			if (Settings.getInstance().getSelectionHighlightNoWhitespace())
+			if (Settings.getInstance().getSelectionHighlightNoWhitespace() && !getQuoteHandler().isQuoted(text))
 			{
 				int pos = StringUtil.findFirstWhiteSpace(text, (char)0);
 				if (pos > -1)
@@ -1940,6 +1942,11 @@ public class JEditTextArea
 			}
 		}
 		painter.setHighlightValue(text);
+	}
+
+	protected QuoteHandler getQuoteHandler()
+	{
+		return QuoteHandler.STANDARD_HANDLER;
 	}
 
 	public Color getAlternateSelectionColor()

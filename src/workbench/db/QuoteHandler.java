@@ -74,8 +74,8 @@ public interface QuoteHandler
 		public boolean isQuoted(String name)
 		{
 			if (StringUtil.isEmptyString(name)) return false;
-			if (name.trim().charAt(0) == '"') return true;
-			return false;
+			name = name.trim();
+			return name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"';
 		}
 
 		@Override

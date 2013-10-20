@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-09-29">
+    <entry dev-build="2" type="enh">Other occurances of the current selection can now be highlighted</entry>
     <entry dev-build="2" type="enh">The editor can now automatically reload files that were externally modified.</entry>
     <entry dev-build="2" type="enh">For Informix the additional qualifiers for DATETIME and INTERVAL data types are now displayed</entry>
     <entry dev-build="2" type="enh">The quick filter in the DbExplorer now supports adding multiple values separated by a comma (if RegEx matching is not enabled)</entry>
