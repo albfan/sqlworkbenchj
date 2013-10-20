@@ -112,7 +112,7 @@ public class TextAreaPainter
 		caretColor = Settings.getInstance().getEditorCursorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-		occuranceHighlightColor = Settings.getInstance().getOccuranceHighlightColor();
+		occuranceHighlightColor = Settings.getInstance().geSelectionHighlightColor();
 		selectionHighlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 
@@ -164,7 +164,7 @@ public class TextAreaPainter
 	public void setHighlightValue(String text)
 	{
 		boolean changed = false;
-		if (text != null)
+		if (StringUtil.isNonEmpty(text))
 		{
 			changed = !StringUtil.equalString(highlighText, text);
 			this.highlighText = text;
@@ -237,7 +237,7 @@ public class TextAreaPainter
 				setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 				bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
-				occuranceHighlightColor = Settings.getInstance().getOccuranceHighlightColor();
+				occuranceHighlightColor = Settings.getInstance().geSelectionHighlightColor();
 			}
 		});
 	}

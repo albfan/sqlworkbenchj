@@ -1055,18 +1055,26 @@ public class StringUtil
 	/**
 	 * Find the first non-quoted whitespace in the given String.
 	 *
+	 * Whitespace inside double quotes are not considered
+	 *
 	 * @param data the data in which to search
 	 * @return the position of the first whitespace or -1 if no whitespace was found.
 	 */
 	public static int findFirstWhiteSpace(CharSequence data)
 	{
+		return findFirstWhiteSpace(data, '"');
+	}
+
+	public static int findFirstWhiteSpace(CharSequence data, char quote)
+	{
 		if (data == null) return -1;
 		int count = data.length();
+		if (count == 0) return -1;
 		boolean inQuotes = false;
 		for (int i=0; i < count; i++)
 		{
 			char c = data.charAt(i);
-			if (c == '"')
+			if (c == quote)
 			{
 				inQuotes = !inQuotes;
 			}
@@ -1645,7 +1653,7 @@ public class StringUtil
 	public static void removeFromEnd(StringBuilder data, int numChars)
 	{
 		if (data == null) return;
-		
+
 		if (numChars > data.length())
 		{
 			data.setLength(0);

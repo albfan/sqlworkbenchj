@@ -269,7 +269,11 @@ public class JEditTextArea
 		this.addMouseWheelListener(fontZoomer);
 
 		smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SMART_COMPLETE, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
+		Settings.getInstance().addPropertyChangeListener(this,
+			GuiSettings.PROPERTY_SMART_COMPLETE,
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT,
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN,
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE);
 	}
 
 	@Override
@@ -279,7 +283,7 @@ public class JEditTextArea
 		{
 			smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
 		}
-		else if (evt.getPropertyName().equals(Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT))
+		else if (evt.getPropertyName().startsWith(Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE))
 		{
 			updateOccuranceHilite();
 		}
@@ -1919,16 +1923,23 @@ public class JEditTextArea
 
 	private void updateOccuranceHilite()
 	{
+		String text = null;
 		boolean enableHilite = Settings.getInstance().getHighlightCurrentSelection();
 		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
+
 		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
 		{
-			painter.setHighlightValue(getSelectedText());
+			text = getSelectedText();
+			if (Settings.getInstance().getSelectionHighlightNoWhitespace())
+			{
+				int pos = StringUtil.findFirstWhiteSpace(text, (char)0);
+				if (pos > -1)
+				{
+					text = null;
+				}
+			}
 		}
-		else
-		{
-			painter.setHighlightValue(null);
-		}
+		painter.setHighlightValue(text);
 	}
 
 	public Color getAlternateSelectionColor()

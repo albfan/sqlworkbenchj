@@ -117,10 +117,12 @@ public class Settings
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
-	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR = "workbench.editor.occurance.highlight.color";
-	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT = "workbench.editor.occurance.highlight.enable";
-	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN = "workbench.editor.occurance.highlight.minlength";
-	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE = "workbench.editor.occurance.highlight.casesensitive";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE = "workbench.editor.occurance.highlight";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT = PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE + ".enable";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR = PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE + ".color";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN = PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE + ".minlength";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE = PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE + ".casesensitive";
+	public static final String PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE = PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE + ".nowhitespace";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_BASE = "workbench.editor.bracket.hilite";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_COLOR = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".color";
 	public static final String PROPERTY_EDITOR_BRACKET_HILITE_LEFT = PROPERTY_EDITOR_BRACKET_HILITE_BASE + ".left";
@@ -1861,6 +1863,16 @@ public class Settings
 		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE, flag);
 	}
 
+	public boolean getSelectionHighlightNoWhitespace()
+	{
+		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE, true);
+	}
+
+	public void setSelectionHighlightNoWhitespace(boolean flag)
+	{
+		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE, flag);
+	}
+
 	public void setHighlightCurrentSelection(boolean flag)
 	{
 		setProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, flag);
@@ -1871,12 +1883,12 @@ public class Settings
 		return getBoolProperty(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT, true);
 	}
 
-	public void setOccuranceHighlightColor(Color color)
+	public void setSelectionHighlightColor(Color color)
 	{
 		setColor(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR, color);
 	}
 
-	public Color getOccuranceHighlightColor()
+	public Color geSelectionHighlightColor()
 	{
 		return getColor(PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR, Color.YELLOW);
 	}

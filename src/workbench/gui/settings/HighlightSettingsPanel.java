@@ -64,8 +64,9 @@ public class HighlightSettingsPanel
 		hiliteBoth.setSelected(sett.getBracketHighlightBoth());
 		hiliteMatching.setSelected(!sett.getBracketHighlightBoth());
 		enableSelHilite.setSelected(sett.getHighlightCurrentSelection());
+		noWhitespace.setSelected(sett.getSelectionHighlightNoWhitespace());
 		selMinLength.setText(Integer.toString(sett.getMinLengthForSelectionHighlight()));
-		selHiliteColor.setSelectedColor(sett.getOccuranceHighlightColor());
+		selHiliteColor.setSelectedColor(sett.geSelectionHighlightColor());
 		ignoreCase.setSelected(sett.getSelectionHighlightIgnoreCase());
 	}
 
@@ -78,7 +79,8 @@ public class HighlightSettingsPanel
 		sett.setBracketHighlightLeft(matchLeft.isSelected());
 		sett.setBracketHighlightRectangle(hiliteRec.isSelected());
 		sett.setBracketHighlightBoth(hiliteBoth.isSelected());
-		sett.setOccuranceHighlightColor(selHiliteColor.getSelectedColor());
+		sett.setSelectionHighlightColor(selHiliteColor.getSelectedColor());
+		sett.setSelectionHighlightNoWhitespace(noWhitespace.isSelected());
 		sett.setHighlightCurrentSelection(enableSelHilite.isSelected());
 		sett.setSelectionHighlightIgnoreCase(ignoreCase.isSelected());
 		int minLength = StringUtil.getIntValue(selMinLength.getText(), -1);
@@ -120,6 +122,7 @@ public class HighlightSettingsPanel
     selHiliteColor = new WbColorPicker(true);
     jLabel2 = new javax.swing.JLabel();
     ignoreCase = new javax.swing.JCheckBox();
+    noWhitespace = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -302,6 +305,16 @@ public class HighlightSettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
     jPanel4.add(ignoreCase, gridBagConstraints);
 
+    noWhitespace.setText(ResourceMgr.getString("LblHiliteNoSpc")); // NOI18N
+    noWhitespace.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+    jPanel4.add(noWhitespace, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -335,6 +348,7 @@ public class HighlightSettingsPanel
   private javax.swing.JRadioButton matchLeft;
   private javax.swing.JRadioButton matchRight;
   private javax.swing.ButtonGroup matchType;
+  private javax.swing.JCheckBox noWhitespace;
   private workbench.gui.components.WbColorPicker selHiliteColor;
   private javax.swing.JTextField selMinLength;
   // End of variables declaration//GEN-END:variables
