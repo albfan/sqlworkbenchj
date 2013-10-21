@@ -187,6 +187,7 @@ public class JEditTextArea
 	protected int magicCaret;
 	protected boolean overwrite;
 	protected boolean rectSelect;
+	protected Boolean highlightSelection;
 
 	private long lastModified;
 	private int invalidationInterval = 10;
@@ -1923,10 +1924,40 @@ public class JEditTextArea
 		fireSelectionEvent();
 	}
 
+	public boolean isGlobalSelectionHighlight()
+	{
+		return this.highlightSelection == null;
+	}
+
+	/**
+	 * Enables/disables the highlighting of the current selection for this editor.
+	 *
+	 * This will overwrite the global setting
+	 *
+	 * @param flag
+	 *
+	 * @see Settings#getHighlightCurrentSelection()
+	 */
+	public void setHighlightSelection(boolean flag)
+	{
+		this.highlightSelection = Boolean.valueOf(flag);
+		updateOccuranceHilite();
+	}
+
+	public boolean isSelectionHighlightEnabled()
+	{
+		if (this.highlightSelection == null)
+		{
+			return Settings.getInstance().getHighlightCurrentSelection();
+		}
+		return highlightSelection.booleanValue();
+	}
+
 	private void updateOccuranceHilite()
 	{
 		String text = null;
-		boolean enableHilite = Settings.getInstance().getHighlightCurrentSelection();
+		boolean enableHilite = isSelectionHighlightEnabled();
+
 		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
 
 		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)

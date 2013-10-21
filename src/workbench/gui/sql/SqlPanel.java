@@ -704,7 +704,7 @@ public class SqlPanel
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
 
-		this.toggleSelectionHilite = new ToggleSelectionHighlightAction();
+		this.toggleSelectionHilite = new ToggleSelectionHighlightAction(this.editor);
 		this.actions.add(this.toggleSelectionHilite);
 
 		// The update actions are proxies for the real ones

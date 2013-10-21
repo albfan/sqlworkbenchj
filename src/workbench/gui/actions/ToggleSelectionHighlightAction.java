@@ -22,9 +22,11 @@
  */
 package workbench.gui.actions;
 
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -39,17 +41,29 @@ public class ToggleSelectionHighlightAction
 	extends CheckBoxAction
 	implements PropertyChangeListener
 {
-	public ToggleSelectionHighlightAction()
+	private final EditorPanel editor;
+	public ToggleSelectionHighlightAction(EditorPanel panel)
 	{
-		super("MnuTxtHiliteSel", Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
+		super("MnuTxtHiliteSel");
+		this.editor = panel;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
 	}
 
 	@Override
+	public void executeAction(ActionEvent e)
+	{
+		super.executeAction(e);
+		editor.setHighlightSelection(this.isSwitchedOn());
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		setSwitchedOn(Settings.getInstance().getHighlightCurrentSelection());
+		if (editor.isGlobalSelectionHighlight())
+		{
+			setSwitchedOn(Settings.getInstance().getHighlightCurrentSelection());
+		}
 	}
 
 	@Override
