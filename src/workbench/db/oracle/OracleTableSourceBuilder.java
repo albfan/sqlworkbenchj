@@ -144,8 +144,9 @@ public class OracleTableSourceBuilder
 					String idxTbs = rs.getString("INDEX_TABLESPACE");
 					if (StringUtil.isNonEmpty(idxTbs))
 					{
-						options.append(" ").append(idxTbs);
+						options.append("\nTABLESPACE ").append(idxTbs);
 						tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
+						tbl.setTablespace(null);
 					}
 					String overflow = rs.getString("IOT_OVERFLOW");
 					if (StringUtil.isNonBlank(overflow))
@@ -210,7 +211,7 @@ public class OracleTableSourceBuilder
 				}
 
 				int used = rs.getInt("pct_used");
-				if (!rs.wasNull() && used != 40)
+				if (!rs.wasNull() && used != 40 && StringUtil.isEmptyString(iot)) // PCTUSED is not valid for IOTs
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
 					if (options.length() > 0) options.append('\n');
