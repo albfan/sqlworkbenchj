@@ -275,7 +275,7 @@ public class WbImportTest
 			"-header=true " +
 			"-continueonerror=false ");
 
-		assertTrue(result.isSuccess());
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
 		assertTrue(input.delete());
 
 		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from orders");

@@ -836,7 +836,7 @@ public class SqlFormatter
 				t = processCase(caseIndent);
 				continue;
 			}
-			else if (terminalKeys.contains(text.toUpperCase()))
+			else if (terminalKeys.contains(text))
 			{
 				return t;
 			}
@@ -858,7 +858,8 @@ public class SqlFormatter
 					this.appendText("(");
 					t = this.processFunctionCall(t);
 					if (t == null) return null;
-					if (t.isIdentifier())
+					if (terminalKeys.contains(t.getText())) return t;
+					if (t.isIdentifier() || t.isOperator())
 					{
 						this.appendText(' ');
 						this.appendTokenText(t);
@@ -870,6 +871,13 @@ public class SqlFormatter
 							appendNewline();
 						}
 						appendTokenText(t);
+					}
+					else
+					{
+						if (!")".equals(t.getText()))
+						{
+							appendTokenText(t);
+						}
 					}
 				}
 			}

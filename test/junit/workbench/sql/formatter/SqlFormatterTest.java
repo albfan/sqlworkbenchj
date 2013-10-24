@@ -32,9 +32,7 @@ import workbench.util.StringUtil;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -81,17 +79,17 @@ public class SqlFormatterTest
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 
-		sql = "select (select count(*) from systables) + (select count(*) from systables) from systables  where tabid=100";
-		f = new SqlFormatter(sql, 150);
-		formatted = f.getFormattedSql();
-		expected =
-			"SELECT (SELECT COUNT(*) FROM systables) +(SELECT COUNT(*) FROM systables)\n" +
-			"FROM systables\n" +
-			"WHERE tabid = 100";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
-		assertEquals(expected, formatted);
+		String sql2 = "select (select count(*) from foo) + (select count(*) from bar) from foobar where id=42";
+		SqlFormatter f2 = new SqlFormatter(sql2, 150);
+		String formatted2 = f2.getFormattedSql();
+		String expected2 =
+			"SELECT (SELECT COUNT(*) FROM foo) +(SELECT COUNT(*) FROM bar)\n" +
+			"FROM foobar\n" +
+			"WHERE id = 42";
+//		System.out.println("***************\n" + formatted2 + "\n-----------------------\n" + expected2 + "\n*****************");
+		assertEquals(expected2, formatted2);
 	}
-	
+
 	@Test
 	public void testNestedFunctionCalls()
 	{
@@ -1324,6 +1322,7 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT row_number() OVER (ORDER BY id)\nFROM TABLE";
+//		System.out.println("**************\n" + formatted + "\n------------------\n" + expected + "\n*************");
 		assertEquals(expected, formatted);
 	}
 
