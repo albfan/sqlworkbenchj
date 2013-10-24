@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.TabularDataParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -43,7 +44,6 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.interfaces.ScriptGenerationMonitor;
 
 import workbench.storage.RowActionMonitor;
 
@@ -495,7 +495,7 @@ public class SpreadsheetFileParser
 					sheetName = allSheets.get(sheetIndex);
 					importColumns = null;
 
-					tableName = allSheets.get(sheetIndex);
+					tableName = sheetName;
 					targetTable = null;
 
 					TableIdentifier tbl = createTargetTableId();
@@ -507,6 +507,10 @@ public class SpreadsheetFileParser
 					}
 					else
 					{
+						String msg = ResourceMgr.getFormattedString("ErrImportSheetIgnored", sheetName);
+						this.messages.append(msg);
+						this.messages.appendNewLine();
+						this.hasWarnings = true;
 						LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", "Ignoring table " + tableName + " because it was not found in the target database.");
 					}
 				}
