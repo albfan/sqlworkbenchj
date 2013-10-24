@@ -494,10 +494,21 @@ public class SpreadsheetFileParser
 					sheetIndex = sheets.get(i);
 					sheetName = allSheets.get(sheetIndex);
 					importColumns = null;
+
 					tableName = allSheets.get(sheetIndex);
 					targetTable = null;
-					reader.setActiveWorksheet(sheetIndex);
-					processOneSheet();
+
+					TableIdentifier tbl = createTargetTableId();
+
+					if (connection.getMetadata().tableExists(tbl))
+					{
+						reader.setActiveWorksheet(sheetIndex);
+						processOneSheet();
+					}
+					else
+					{
+						LogMgr.logWarning("SpreadsheetFileParser.processOneFile()", "Ignoring table " + tableName + " because it was not found in the target database.");
+					}
 				}
 			}
 		}
