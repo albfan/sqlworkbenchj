@@ -264,26 +264,24 @@ public class WbImportTest
 		throws Exception
 	{
 		TestUtil.executeScript(connection,
-			"drop table orders;\n" +
+			"drop table person;\n" +
 			"commit;");
 
 		File input = util.copyResourceFile(this, "person_orders.ods");
 		StatementRunnerResult result = importCmd.execute(
 			"wbimport -file='" + input.getAbsolutePath() + "' " +
 			"-type=ods " +
-			"-sheetName=person " +
+			"-sheetName=* " +
 			"-header=true " +
-			"-ignoreMissingColumns=true " +
-			"-continueonerror=false " +
-			"-table=person");
+			"-continueonerror=false ");
 
 		assertTrue(result.isSuccess());
 		assertTrue(input.delete());
 
-		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from person");
+		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from orders");
 		assertNotNull(salary);
 		int count = salary.intValue();
-		assertEquals(2, count);
+		assertEquals(4, count);
 	}
 
 	@Test
