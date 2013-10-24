@@ -80,7 +80,18 @@ public class SqlFormatterTest
 			"FROM foobar";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
+
+		sql = "select (select count(*) from systables) + (select count(*) from systables) from systables  where tabid=100";
+		f = new SqlFormatter(sql, 150);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT (SELECT COUNT(*) FROM systables) +(SELECT COUNT(*) FROM systables)\n" +
+			"FROM systables\n" +
+			"WHERE tabid = 100";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
 	}
+	
 	@Test
 	public void testNestedFunctionCalls()
 	{
