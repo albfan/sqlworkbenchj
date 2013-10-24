@@ -73,12 +73,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 /**
  *
  * @author Thomas Kellerer
@@ -262,6 +257,33 @@ public class WbImportTest
 		id = (Number)TestUtil.getSingleQueryValue(connection, "select id from id_test where lastname = 'Prefect'");
 		assertNotNull(id);
 		assertEquals(2, id.intValue());
+	}
+
+	@Test
+	public void testSpreadSheetIgnoreTable()
+		throws Exception
+	{
+		TestUtil.executeScript(connection,
+			"drop table orders;\n" +
+			"commit;");
+
+		File input = util.copyResourceFile(this, "person_orders.ods");
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=ods " +
+			"-sheetName=person " +
+			"-header=true " +
+			"-ignoreMissingColumns=true " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(result.isSuccess());
+		assertTrue(input.delete());
+
+		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from person");
+		assertNotNull(salary);
+		int count = salary.intValue();
+		assertEquals(2, count);
 	}
 
 	@Test
