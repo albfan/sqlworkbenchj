@@ -1997,6 +1997,11 @@ public class SqlPanel
 		// receives the execStart event
 		fireDbExecStart();
 
+		if (Settings.getInstance().getAutoSaveExternalFiles() && editor.hasFileLoaded())
+		{
+			editor.saveCurrentFile();
+		}
+
 		setCancelState(true);
 
 		try

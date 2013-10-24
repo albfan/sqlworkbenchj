@@ -2064,6 +2064,16 @@ public class Settings
 		setProperty("workbench.editor.sql.emptyline.delimiter", flag);
 	}
 
+	public boolean getAutoSaveExternalFiles()
+	{
+		return getBoolProperty("workbench.editor.autosave", getAutoSaveWorkspace());
+	}
+
+	public void setAutoSaveExternalFiles(boolean flag)
+	{
+		this.setProperty("workbench.editor.autosave", flag);
+	}
+
 	public boolean getAutoSaveWorkspace()
 	{
 		return getBoolProperty("workbench.workspace.autosave", false);
