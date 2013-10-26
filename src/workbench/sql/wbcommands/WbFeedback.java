@@ -23,12 +23,15 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
+
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 
 /**
  * Control the level of feedback during script execution.
@@ -51,8 +54,9 @@ public class WbFeedback
 		super();
 		this.command = verb;
 		this.cmdLine = new ArgumentParser(false);
-		this.cmdLine.addArgument("on");
-		this.cmdLine.addArgument("off");
+		this.cmdLine.addArgument("on", ArgumentType.BoolSwitch);
+		this.cmdLine.addArgument("off", ArgumentType.BoolSwitch);
+		this.cmdLine.addArgument("quiet", ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -74,15 +78,40 @@ public class WbFeedback
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		SQLLexer lexer = new SQLLexer(sql);
-		// Skip the SQL Verb
-		SQLToken token = lexer.getNextToken(false, false);
+		cmdLine.parse(getCommandLine(sql));
 
-		// get the parameter
-		token = lexer.getNextToken(false, false);
-		String parm = (token != null ? token.getContents() : null);
+		boolean quiet = cmdLine.getBoolean("quiet");
 
-		if (parm == null)
+		if (cmdLine.getBoolean("off"))
+		{
+			this.runner.setVerboseLogging(false);
+			if (quiet)
+			{
+				LogMgr.logInfo("WbFeedbac.execute()", "Feedback disabled");
+			}
+			else
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+			}
+		}
+		else if (cmdLine.getBoolean("on"))
+		{
+			this.runner.setVerboseLogging(true);
+			if (quiet)
+			{
+				LogMgr.logInfo("WbFeedbac.execute()", "Feedback enabled");
+			}
+			else
+			{
+				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+			}
+		}
+		else if (cmdLine.hasUnknownArguments())
+		{
+			result.setFailure();
+			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
+		}
+		else 
 		{
 			if (runner.getVerboseLogging())
 			{
@@ -93,21 +122,6 @@ public class WbFeedback
 				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
 			}
 			result.setSuccess();
-		}
-		else if ("off".equalsIgnoreCase(parm) || "false".equalsIgnoreCase(parm))
-		{
-			this.runner.setVerboseLogging(false);
-			result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
-		}
-		else if ("on".equalsIgnoreCase(parm) || "true".equalsIgnoreCase(parm))
-		{
-			this.runner.setVerboseLogging(true);
-			result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
-		}
-		else
-		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 		}
 		return result;
 	}

@@ -40,12 +40,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbButton;
+
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.InterruptableJob;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbButton;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -169,14 +173,23 @@ public class ProgressPanel
 		}
 	}
 
-	public void saveCurrentType(String type) {}
-	public void restoreType(String type) {}
+	@Override
+	public void saveCurrentType(String type)
+	{
+	}
 
+	@Override
+	public void restoreType(String type)
+	{
+	}
+
+	@Override
 	public void setMonitorType(int aType)
 	{
 		monitorType = aType;
 	}
 
+	@Override
 	public int getMonitorType()
 	{
 		return monitorType;

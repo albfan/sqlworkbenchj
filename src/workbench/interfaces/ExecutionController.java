@@ -41,9 +41,11 @@ public interface ExecutionController
 	 * This is similar to the "pause" command in a Windows batch file.
 	 *
 	 * @param prompt the prompt to be displayed to the user
+	 * @param yesText the text to display for the "Yes" option, may be null
+	 * @param noText the text to display for the "No" option, may be null
 	 * @return true if the user chose to continue
 	 */
-	boolean confirmExecution(String prompt);
-	
+	boolean confirmExecution(String prompt, String yesText, String noText);
+
 	String getPassword(String prompt);
 }

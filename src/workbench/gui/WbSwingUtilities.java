@@ -672,16 +672,30 @@ public class WbSwingUtilities
 		}
 	}
 
-	public static int getYesNo(Component aCaller, String aMessage, String[] options)
+
+	public static int getYesNo(Component caller, String title, String message, String yesOption, String noOption)
 	{
-		return getYesNo(aCaller, aMessage, options, JOptionPane.PLAIN_MESSAGE);
+		if (StringUtil.isEmptyString(yesOption))
+		{
+			yesOption = ResourceMgr.getString("MsgConfirmYes");
+		}
+		if (StringUtil.isEmptyString(noOption))
+		{
+			noOption = ResourceMgr.getString("MsgConfirmNo");
+		}
+		return getYesNo(caller, title, message, new String[] { yesOption, noOption }, JOptionPane.PLAIN_MESSAGE);
 	}
 
-	public static int getYesNo(Component aCaller, String aMessage, String[] options, int type)
+	public static int getYesNo(Component aCaller, String aMessage, String[] options)
+	{
+		return getYesNo(aCaller, ResourceMgr.TXT_PRODUCT_NAME, aMessage, options, JOptionPane.PLAIN_MESSAGE);
+	}
+
+	public static int getYesNo(Component aCaller, String title, String aMessage, String[] options, int type)
 	{
 		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options[1]);
 		ignorePane.setMessageType(type);
-		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		JDialog dialog = ignorePane.createDialog(aCaller, title);
 		try
 		{
 			dialog.setResizable(true);

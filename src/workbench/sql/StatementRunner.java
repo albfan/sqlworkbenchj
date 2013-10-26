@@ -26,8 +26,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import workbench.WbManager;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -348,6 +353,14 @@ public class StatementRunner
 		if (this.currentCommand == null)
 		{
 			this.result = null;
+			return;
+		}
+
+		if (!this.currentCommand.isModeSupported(WbManager.getInstance().getRunMode()))
+		{
+			result = new StatementRunnerResult();
+			result.setSuccess();
+			LogMgr.logWarning("StatementRunner.runStatement()", currentCommand.getVerb() + " not supported in mode " + WbManager.getInstance().getRunMode().toString() + ". The statement has been ignored.");
 			return;
 		}
 

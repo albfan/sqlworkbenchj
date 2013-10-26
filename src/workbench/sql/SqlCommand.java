@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import workbench.RunMode;
 import workbench.WbManager;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -367,6 +368,11 @@ public class SqlCommand
 	public void setStatementRunner(StatementRunner r)
 	{
 		this.runner = r;
+	}
+
+	public boolean isModeSupported(RunMode mode)
+	{
+		return true;
 	}
 
 	/**

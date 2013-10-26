@@ -26,16 +26,20 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.interfaces.ExecutionController;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.interfaces.ExecutionController;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.SqlUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -147,7 +151,7 @@ public class WbModeTest
 		}
 
 		@Override
-		public boolean confirmExecution(String prompt)
+		public boolean confirmExecution(String prompt, String yes, String no)
 		{
 			confirmCalled ++;
 			return true;

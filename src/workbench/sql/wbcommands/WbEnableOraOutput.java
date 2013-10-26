@@ -24,6 +24,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbMetadata;
@@ -32,6 +33,8 @@ import workbench.db.oracle.DbmsOutput;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 /**
@@ -41,13 +44,22 @@ import workbench.util.StringUtil;
  * be shown in the message tab of the GUI.
  *
  * @author Thomas Kellerer
- * 
+ *
  * @see DbmsOutput
  * @see DbMetadata#enableOutput()
  */
 public class WbEnableOraOutput extends SqlCommand
 {
 	public static final String VERB = "ENABLEOUT";
+	public static final String PARAM_QUIET = "quiet";
+
+	public WbEnableOraOutput()
+	{
+		super();
+		this.cmdLine = new ArgumentParser(false);
+		this.cmdLine.addArgument(PARAM_QUIET, ArgumentType.BoolSwitch);
+	}
+
 
 	@Override
 	public String getVerb()
@@ -61,7 +73,10 @@ public class WbEnableOraOutput extends SqlCommand
 	{
 		long limit = -1;
 
-		String value = getCommandLine(sql);
+		cmdLine.parse(getCommandLine(sql));
+
+		String value = cmdLine.getNonArguments();
+
 		if (StringUtil.isNonBlank(value))
 		{
 			try
@@ -75,7 +90,14 @@ public class WbEnableOraOutput extends SqlCommand
 		}
 		currentConnection.getMetadata().enableOutput(limit);
 		StatementRunnerResult result = new StatementRunnerResult();
-		result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
+		if (cmdLine.getBoolean(PARAM_QUIET))
+		{
+			LogMgr.logDebug("WbEnableOraOutput.execute()", "Support for dbms_output enabled (limit=" + limit + ")");
+		}
+		else
+		{
+			result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
+		}
 		return result;
 	}
 

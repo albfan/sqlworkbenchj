@@ -23,13 +23,18 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.gui.profiles.ProfileKey;
+
 import workbench.interfaces.ExecutionController;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
 
 /**
@@ -84,7 +89,7 @@ public class WbDeleteProfile
 			if (controller != null)
 			{
 				String prompt = ResourceMgr.getFormattedString("MsgConfirmProfDel", key.toString());
-				doDelete = controller.confirmExecution(prompt);
+				doDelete = controller.confirmExecution(prompt, null, null);
 			}
 			if (doDelete)
 			{

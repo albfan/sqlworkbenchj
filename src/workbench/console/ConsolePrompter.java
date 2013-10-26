@@ -23,13 +23,17 @@
 package workbench.console;
 
 import java.sql.SQLException;
+
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.StatementParameterPrompter;
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.VariablePool;
 import workbench.sql.preparedstatement.StatementParameters;
-import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -101,15 +105,20 @@ public class ConsolePrompter
 	}
 
 	@Override
-	public boolean confirmExecution(String prompt)
+	public boolean confirmExecution(String prompt, String yesText, String noText)
 	{
-		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
-		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo");
+		String yes = yesText == null ? ResourceMgr.getString("MsgConfirmYes") : yesText;
+		String no = noText == null ? ResourceMgr.getString("MsgConfirmNo") : noText;
+		String yesNo = yes + "/" + no;
 		String msg = prompt + " (" + yesNo + ")";
 		String choice = readLine(msg + " ");
 
-		// allow the localized version and the english yes
-		return yes.equalsIgnoreCase(choice) || "yes".equalsIgnoreCase(choice);
+		if (StringUtil.isBlank(choice))
+		{
+			return false;
+		}
+
+		return yes.toLowerCase().startsWith(choice.trim()) || "yes".equalsIgnoreCase(choice);
 	}
 
 	@Override

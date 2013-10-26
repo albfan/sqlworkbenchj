@@ -24,9 +24,16 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
+
+import static workbench.sql.wbcommands.WbEnableOraOutput.*;
 
 /**
  *
@@ -36,6 +43,13 @@ public class WbDisableOraOutput extends SqlCommand
 {
 	public static final String VERB = "DISABLEOUT";
 
+	public WbDisableOraOutput()
+	{
+		super();
+		this.cmdLine = new ArgumentParser(false);
+		this.cmdLine.addArgument(WbEnableOraOutput.PARAM_QUIET, ArgumentType.BoolSwitch);
+	}
+
 	@Override
 	public String getVerb()
 	{
@@ -43,12 +57,20 @@ public class WbDisableOraOutput extends SqlCommand
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		currentConnection.getMetadata().disableOutput();
-		result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
+		cmdLine.parse(getCommandLine(sql));
+		if (cmdLine.getBoolean(PARAM_QUIET))
+		{
+			LogMgr.logDebug("WbEnableOraOutput.execute()", "Support for dbms_output disabled");
+		}
+		else
+		{
+			result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
+		}
 		return result;
 	}
 

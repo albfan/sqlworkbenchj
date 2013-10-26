@@ -177,9 +177,9 @@ public class ArgumentParser
 	{
 		reset();
 		StringBuilder line = new StringBuilder(200);
-		for (int i=0; i<args.length; i++)
+		for (String arg : args)
 		{
-			line.append(args[i]);
+			line.append(arg);
 			line.append(' ');
 		}
 		parse(line.toString());
@@ -188,8 +188,17 @@ public class ArgumentParser
 	public void parse(String aCmdLine)
 	{
 		reset();
-		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", true);
-		tok.setDelimiterNeedsWhitspace(true);
+		WbStringTokenizer tok;
+		if (needSwitch)
+		{
+			tok = new WbStringTokenizer('-', "\"'", true);
+			tok.setDelimiterNeedsWhitspace(true);
+		}
+		else
+		{
+			tok = new WbStringTokenizer(' ', "\"'", true);
+			tok.setDelimiterNeedsWhitspace(false);
+		}
 		tok.setSourceString(aCmdLine.trim());
 		List<String> entries = tok.getAllTokens();
 		parse(entries);
@@ -530,7 +539,8 @@ public class ArgumentParser
 	 * For that example the returned list will contain two values "a", "b".
 	 *
 	 * @param key the argument that is marked as ArgumentType.repeatable.
-	 * @return all values supplied.
+	 * @return all values supplied, never null. An empty List is returned if no values where specified
+	 * @see ArgumentType#Repeatable
 	 */
 	public List<String> getList(String key)
 	{

@@ -89,8 +89,7 @@ public final class WbManager
 	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 
 	private boolean restrictedMode;
-	private boolean batchMode;
-	private boolean consoleMode;
+	private RunMode runMode;
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred;
@@ -384,19 +383,28 @@ public final class WbManager
 		return this.restrictedMode;
 	}
 
+	public RunMode getRunMode()
+	{
+		assert runMode != null;
+		return runMode;
+	}
+
 	public boolean isGUIMode()
 	{
-		return !consoleMode && !batchMode;
+		assert runMode != null;
+		return runMode == RunMode.GUI;
 	}
 
 	public boolean isConsoleMode()
 	{
-		return consoleMode;
+		assert runMode != null;
+		return runMode == RunMode.Console;
 	}
 
 	public boolean isBatchMode()
 	{
-		return this.batchMode;
+		assert runMode != null;
+		return runMode == RunMode.Batch;
 	}
 
 	public boolean canExit()
@@ -809,9 +817,10 @@ public final class WbManager
 			boolean readDriverTemplates = true;
 			boolean showHelp = cmdLine.isArgPresent("help");
 
+			this.runMode = RunMode.GUI;
+
 			if (StringUtil.isBlank(scriptname) && StringUtil.isBlank(cmd) && !showHelp)
 			{
-				this.batchMode = false;
 				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
 				String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
 				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
@@ -822,20 +831,20 @@ public final class WbManager
 			}
 			else
 			{
-				this.batchMode = true;
+				this.runMode = RunMode.Batch;
 				readDriverTemplates = false;
 			}
 
-			value = cmdLine.getValue(AppArguments.ARG_VARDEF);
-			if (!StringUtil.isEmptyString(value))
+			List<String> vars = cmdLine.getList(AppArguments.ARG_VARDEF);
+			for (String var : vars)
 			{
 				try
 				{
-					VariablePool.getInstance().readDefinition(StringUtil.trimQuotes(value));
+					VariablePool.getInstance().readDefinition(StringUtil.trimQuotes(var));
 				}
 				catch (IOException e)
 				{
-					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
+					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
 				}
 			}
 
@@ -854,7 +863,7 @@ public final class WbManager
 			{
 				String unknown = cmdLine.getUnknownArguments();
 				LogMgr.logError("WbManager.readParameters()", "The following parameters are invalid: " + unknown, null);
-				if (batchMode)
+				if (!isGUIMode())
 				{
 					System.err.println("Invalid parameter(s): " + unknown);
 				}
@@ -877,7 +886,7 @@ public final class WbManager
 	public void startApplication()
 	{
 		// batchMode flag is set by readParameters()
-		if (this.batchMode)
+		if (isBatchMode())
 		{
 			runBatch();
 		}
@@ -1047,9 +1056,9 @@ public final class WbManager
 		wb.cmdLine.removeArgument(AppArguments.ARG_CONSOLIDATE_LOG);
 		wb.cmdLine.removeArgument(AppArguments.ARG_PROFILE_STORAGE);
 		wb.readParameters(args);
+		wb.runMode = RunMode.Console;
 		ConnectionMgr.getInstance().setReadTemplates(false);
 		wb.writeSettings = false;
-		wb.consoleMode = true;
 	}
 
 	/**

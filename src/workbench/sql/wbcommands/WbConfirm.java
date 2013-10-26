@@ -23,10 +23,14 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.interfaces.ExecutionController;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
+import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
 /**
@@ -41,10 +45,17 @@ public class WbConfirm
 	extends SqlCommand
 {
 	public static final String VERB = "WBCONFIRM";
+	public static final String PARAM_MSG = "message";
+	public static final String PARAM_YES = "yesText";
+	public static final String PARAM_NO = "noText";
 
 	public WbConfirm()
 	{
 		super();
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(PARAM_MSG);
+		cmdLine.addArgument(PARAM_YES);
+		cmdLine.addArgument(PARAM_NO);
 		this.isUpdatingCommand = false;
 	}
 
@@ -64,6 +75,23 @@ public class WbConfirm
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
+		String args = getCommandLine(sql);
+		cmdLine.parse(args);
+		
+		String msg = null;
+		String yes = null;
+		String no = null;
+
+		if (cmdLine.hasArguments())
+		{
+			msg = cmdLine.getValue(PARAM_MSG);
+			yes = cmdLine.getValue(PARAM_YES);
+			no = cmdLine.getValue(PARAM_NO);
+		}
+		else
+		{
+			msg = StringUtil.trimQuotes(args);
+		}
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setStopScript(false);
 		result.setSuccess();
@@ -71,14 +99,12 @@ public class WbConfirm
 		ExecutionController controller = runner.getExecutionController();
 		if (controller != null)
 		{
-			String msg = StringUtil.trimQuotes(getCommandLine(sql));
-
-			if (StringUtil.isEmptyString(msg))
+			if (StringUtil.isBlank(msg))
 			{
 				msg = ResourceMgr.getString("MsgConfirmContinue");
 			}
 
-			boolean continueScript = controller.confirmExecution(msg);
+			boolean continueScript = controller.confirmExecution(msg, yes, no);
 
 			if (!continueScript)
 			{

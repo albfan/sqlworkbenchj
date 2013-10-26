@@ -45,10 +45,6 @@ import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbListTables;
-import workbench.sql.wbcommands.console.WbDisconnect;
-import workbench.sql.wbcommands.console.WbDisplay;
-import workbench.sql.wbcommands.console.WbListProfiles;
-import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
@@ -152,13 +148,6 @@ public class SQLConsole
 				System.err.println(err.toString());
 				System.err.println();
 			}
-
-			// Enable console-specific commands for the batch runner
-			runner.addCommand(new WbDisconnect());
-			runner.addCommand(new WbDisplay());
-			runner.addCommand(new WbToggleDisplay());
-			runner.addCommand(new WbListProfiles());
-			runner.addCommand(new WbRun());
 
 			runner.setPersistentConnect(true);
 

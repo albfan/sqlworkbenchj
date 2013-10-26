@@ -4,6 +4,11 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-10-21">
+    <entry dev-build="3" type="enh">ENABLEOUT and DISABLEOUT now support an (optionaL) parameter "quiet" to supress the feedback message.</entry>
+    <entry dev-build="3" type="enh">WbFeedback now supports an optional parameter "quiet" to surpress the message</entry>
+    <entry dev-build="3" type="enh">WbConfirm can now be called supplying the message, the next for the "yes" choice and the text for the "no" choice.</entry>
+    <entry dev-build="3" type="enh">The parameter -vardef can now be used multiple times on the commandline.</entry>
+    <entry dev-build="3" type="enh">Console specific commands (e.g. WbDisplay) can now also be executed in GUI or batch mode and will silently be ignored.</entry>
     <entry dev-build="2" type="enh">Other occurances of the current selection can now be highlighted</entry>
     <entry dev-build="2" type="enh">The editor can now automatically reload files that were externally modified.</entry>
     <entry dev-build="2" type="enh">For Informix the additional qualifiers for DATETIME and INTERVAL data types are now displayed</entry>
@@ -13,6 +18,8 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="3" type="fix">When using the DbExplorer to drop a Postgres custom aggregate function, the wrong DDL statement was generated.</entry>
+    <entry dev-build="3" type="fix">When importing all sheets from a spreadsheet file (OpenOffice Calc, Excel) missing tables would not be ignored.</entry>
     <entry dev-build="2" type="fix">The SQL Formatter would swallow the character immediately following an IN condition with literals inside a JOIN condition</entry>
     <entry dev-build="2" type="fix">For Informix sequences were no longer displayed.</entry>
     <entry dev-build="1" type="fix">When calculating table dependencies (WbGenerateDelete or WbImport using -checkDependencies) some cyclic references where not always detected.</entry>

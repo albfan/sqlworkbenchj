@@ -2399,7 +2399,7 @@ public class SqlPanel
 	}
 
 	@Override
-	public boolean confirmExecution(String prompt)
+	public boolean confirmExecution(String prompt, String yes, String no)
 	{
 		String title = null;
 		if (dbConnection != null)
@@ -2407,7 +2407,8 @@ public class SqlPanel
 			title = dbConnection.getProfile().getName();
 		}
 		Window w = SwingUtilities.getWindowAncestor(this);
-		return WbSwingUtilities.getYesNo(title, w, prompt);
+		int result = WbSwingUtilities.getYesNo(w, title, prompt, yes, no);
+		return result == JOptionPane.YES_OPTION;
 	}
 
 	/** Used for storing the result of the confirmExecution() callback */

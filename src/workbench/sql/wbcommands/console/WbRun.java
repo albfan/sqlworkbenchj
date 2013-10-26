@@ -23,19 +23,24 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
+import java.util.List;
 
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
- * A SQL command that runs an external file and displays the result of the
- * query.
+ * A SQL command that runs an external file and displays the result of the query.
  *
  * @author  Thomas Kellerer
  */
@@ -110,7 +115,13 @@ public class WbRun
 			batchRunner.setOptimizeColWidths(true);
 			batchRunner.showResultSets(true);
 			batchRunner.setShowProgress(false);
+
+			if (WbManager.getInstance().isGUIMode())
+			{
+				batchRunner.setConsole(null);
+			}
 			batchRunner.execute();
+
 			if (batchRunner.isSuccess())
 			{
 				result.setSuccess();
@@ -120,6 +131,12 @@ public class WbRun
 				result.setFailure();
 			}
 
+			List<DataStore> queryResults = batchRunner.getQueryResults();
+			for (DataStore ds : queryResults)
+			{
+				result.addDataStore(ds);
+			}
+			
 			if (this.rowMonitor != null)
 			{
 				this.rowMonitor.jobFinished();
@@ -132,5 +149,11 @@ public class WbRun
 		}
 		return result;
 	}
+
+//	@Override
+//	public boolean isModeSupported(RunMode mode)
+//	{
+//		return mode != RunMode.GUI;
+//	}
 
 }

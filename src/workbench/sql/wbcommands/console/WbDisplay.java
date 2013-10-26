@@ -24,11 +24,14 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
+import workbench.RunMode;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
 
 /**
@@ -89,6 +92,12 @@ public class WbDisplay
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	public boolean isModeSupported(RunMode mode)
+	{
+		return mode != RunMode.GUI;
 	}
 
 }

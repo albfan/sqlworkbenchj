@@ -68,6 +68,12 @@ public class ProcedureDefinition
 
 	private CharSequence source;
 	private List<String> parameterTypes;
+
+	/**
+	 * A DBMS specific name for the type of this procedure/function.
+	 *
+	 * Currently used to identify Postgres custom aggregate functions.
+	 */
 	private String dbmsProcType;
 
 	private final Object typeLock = new Object();
@@ -384,6 +390,10 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectType()
 	{
+		if (this.dbmsProcType != null)
+		{
+			return this.dbmsProcType;
+		}
 		if (this.isOraclePackage())
 		{
 			return "PACKAGE";

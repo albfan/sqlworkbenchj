@@ -558,17 +558,46 @@
     <para>
       The <literal>WbConfirm</literal> command pauses the execution of the
       current script and displays a message. You can then choose to stop
-      the script or continue. The message can be supplied as a parameter of
-      the command. If no message is supplied, a default message is
-      displayed.
+      the script or continue.
+    </para>
+    <para>
+      <literal>WbConfirm</literal> can be called in three different ways:
+			<itemizedlist>
+        <listitem>
+          <para>Without any parameter, then a default message will be displayed</para>
+        </listitem>
+
+        <listitem>
+          <para>With just a message text, e.g. <literal>WbConfirm Do you really want to drop everything?</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Supplying parameters for the message, the text for the "Yes" choice and the text for the "No" choice using standard &wb-productname; parameters:
+            <simpara>
+              <literal>WbConfirm -message="Do you really want to drop everything?" -yesText="OK, go ahead", -noText="Oh, no. Please stop"</literal>
+            </simpara>
+          </para>
+        </listitem>
+
+      </itemizedlist>
+    </para>
+    <para>
+      When using <literal>WbConfirm</literal> in console (or interactive batch) mode, the check if the "Yes" choice was
+      typed by the user is done by testing if the "Yes" value starts with the text the user enters (ignoring upper/lowercase
+      differences). So if the "Yes text" is set to <literal>"Continue"</literal>, the user can enter <literal>c</literal>,
+      <literal>co</literal>, <literal>cont</literal> and so on. Because of that, the "No" text should not start with
+      the same letters as the "Yes" text. When using <literal>-yesText=Continue and -noText=Cancel</literal> and the user
+      entered <literal>C</literal>, this would be regarded as a "Yes".
     </para>
     <para>
       This command can be used to prevent accidental execution of a script
       even if <link linkend="profile-confirm-updates">confirm updates</link> is not enabled.
     </para>
     <para>
-      This command has no effect in batch mode.
+      This command has no effect in batch mode unless the <link linkend="script-interactive"><literal>-interactive</literal></link> parameter was specified.
     </para>
+
   </section>
 
   <section id="command-wbcall">
@@ -2015,7 +2044,6 @@ WbSysOpen c:/temp/person.txt;</programlisting>
 			and any message written with <literal>dbms_output.put_line()</literal> is displayed in the message
 			panel after executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
     </para>
-
     <para>
       You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the
       desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
@@ -2035,6 +2063,12 @@ WbSysOpen c:/temp/person.txt;</programlisting>
 			command <literal>DISABLEOUT</literal>. This is equivalent to calling
 			<literal>dbms_output.disable()</literal> procedure.
 		</para>
+
+    <para>
+      <literal>ENABLEOUT</literal> and <literal>DISABLEOUT</literal> support an additional parameter <literal>quiet</literal>
+      to supress the feedback message that the suport for <literal>DBMS_OUTPUT</literal> has been enabled or disabled.
+    </para>
+
   </section>
 
   <section id="command-setconfig">

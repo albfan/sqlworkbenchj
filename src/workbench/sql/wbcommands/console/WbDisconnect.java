@@ -23,7 +23,10 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
+
+import workbench.RunMode;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -68,5 +71,10 @@ public class WbDisconnect
 		return result;
 	}
 
+	@Override
+	public boolean isModeSupported(RunMode mode)
+	{
+		return mode == RunMode.Console;
+	}
 
 }

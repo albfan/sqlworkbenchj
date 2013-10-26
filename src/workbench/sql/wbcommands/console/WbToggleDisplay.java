@@ -24,8 +24,10 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
+import workbench.RunMode;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -73,5 +75,10 @@ public class WbToggleDisplay extends SqlCommand
 		return VERB;
 	}
 
+	@Override
+	public boolean isModeSupported(RunMode mode)
+	{
+		return mode != RunMode.GUI;
+	}
 
 }

@@ -75,7 +75,21 @@ public class ArgumentParserTest
 
 		cmd.parse("foo = ' bar '");
 		assertEquals("foo = ' bar '", cmd.getNonArguments());
+	}
 
+	@Test
+	public void testBoolNoSwitch()
+	{
+		ArgumentParser arg = new ArgumentParser(false);
+		arg.addArgument("on", ArgumentType.BoolSwitch);
+		arg.addArgument("off", ArgumentType.BoolSwitch);
+		arg.addArgument("quiet", ArgumentType.BoolSwitch);
+
+		arg.parse("off quiet");
+		assertTrue(arg.isArgPresent("off"));
+		assertFalse(arg.isArgPresent("on"));
+		assertTrue(arg.getBoolean("off"));
+		assertTrue(arg.getBoolean("quiet"));
 	}
 
 	@Test

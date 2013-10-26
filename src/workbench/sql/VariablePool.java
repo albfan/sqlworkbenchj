@@ -450,10 +450,10 @@ public class VariablePool
 
 	/**
 	 *	Initialize the variables from a commandline parameter.
+	 *
 	 *	If the parameter starts with the # character
 	 *  assumed that the parameter contains a list of variable definitions
-	 *  enclosed in brackets. e.g.
-	 *  -vardef="#var1=value1,var2=value2"
+	 *  enclosed in brackets. e.g. <tt>-vardef="#var1=value1,var2=value2"</tt>
 	 *  The list needs to be quoted on the commandline!
 	 */
 	public void readDefinition(String parameter)

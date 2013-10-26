@@ -24,22 +24,29 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.interfaces.ExecutionController;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.ExecutionController;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbFeedback;
 import workbench.sql.wbcommands.WbInclude;
-import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -119,7 +126,7 @@ public class StatementRunnerTest
 				}
 
 				@Override
-				public boolean confirmExecution(String command)
+				public boolean confirmExecution(String command, String yes, String no)
 				{
 					controllerCalled = true;
 					return confirmExecution;

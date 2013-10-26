@@ -22,18 +22,20 @@
  */
 package workbench.sql.wbcommands;
 
-import workbench.sql.wbcommands.console.WbDisconnect;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 import workbench.sql.wbcommands.console.WbAbout;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
+import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
@@ -118,6 +120,7 @@ public class CommandTester
 		commands.add(WbSysOpen.VERB);
 		commands.add(WbGenDelete.VERB);
 		commands.add(WbGenInsert.VERB);
+		commands.add(WbEcho.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
