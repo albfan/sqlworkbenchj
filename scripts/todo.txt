@@ -1,10 +1,8 @@
 Features:
 ---------
-- Highlight selected text in editor
 - Jump to error line for (CREATE PROCEDURE and similar statements)
 - WbVarDef
-  - assign multiple variables with a single SQL statement
-  - use all rows of a result (e.g. concatenated using \n) 
+  - use all rows of a result (e.g. concatenated using \n)
 - Profiles
   - Import profiles from other WbProfiles.xml
   - Load different WbProfiles.xml from within the connection dialog

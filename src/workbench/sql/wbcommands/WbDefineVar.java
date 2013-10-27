@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -37,7 +39,15 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
 
-import workbench.util.*;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
+import workbench.util.WbStringTokenizer;
 
 /**
  * SQL Command to define a variable that gets stored in the system
@@ -139,7 +149,7 @@ public class WbDefineVar
 			WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 			tok.setSourceString(varDef);
 			tok.setKeepQuotes(true);
-			String value = null;
+			String valueParameter = null;
 			String var = null;
 
 			if (tok.hasMoreTokens()) var = tok.nextToken();
@@ -151,24 +161,44 @@ public class WbDefineVar
 				return result;
 			}
 
-			var = var.trim();
+			List<String> varNames = StringUtil.stringToList(var, ",", true, true);
 
-			if (tok.hasMoreTokens()) value = tok.nextToken();
+			if (tok.hasMoreTokens()) valueParameter = tok.nextToken();
 
 			result.setSuccess();
 
-			if (value != null)
+			if (valueParameter != null)
 			{
-				if (value.trim().startsWith("@") || StringUtil.trimQuotes(value).startsWith("@"))
+				if (valueParameter.trim().startsWith("@") || StringUtil.trimQuotes(valueParameter).startsWith("@"))
 				{
 					String valueSql = null;
 					try
 					{
 						// In case the @ sign was placed inside the quotes, make sure
 						// there are no quotes before removing the @ sign
-						value = StringUtil.trimQuotes(value);
-						valueSql = StringUtil.trimQuotes(value.trim().substring(1));
-						value = this.evaluateSql(currentConnection, valueSql, result);
+						valueParameter = StringUtil.trimQuotes(valueParameter);
+						valueSql = StringUtil.trimQuotes(valueParameter.trim().substring(1));
+						List<String> values = this.evaluateSql(currentConnection, valueSql, result);
+						int varCount = Math.min(values.size(), varNames.size());
+						
+						if (values.size() != varNames.size())
+						{
+							LogMgr.logWarning("WbDefineVar.execute()", "The number of variables does not match the number of columns returned. Using only the first " + varCount + " variables");
+						}
+
+						for (int i=0; i < varCount; i++)
+						{
+							setVariable(result, varNames.get(i), values.get(i));
+							if (result.isSuccess())
+							{
+								String msg = ResourceMgr.getString("MsgVarDefVariableDefined");
+								msg = StringUtil.replace(msg, "%var%", varNames.get(i));
+								msg = StringUtil.replace(msg, "%value%", values.get(i));
+								msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(varNames.get(i), false));
+								result.addMessage(msg);
+							}
+
+						}
 					}
 					catch (Exception e)
 					{
@@ -185,22 +215,29 @@ public class WbDefineVar
 				{
 					// WbStringTokenizer returned any quotes that were used, so
 					// we have to remove them again as they should not be part of the variable value
-					value = StringUtil.trimQuotes(value.trim());
+					valueParameter = StringUtil.trimQuotes(valueParameter.trim());
 					if (removeUndefined)
 					{
 						// as the SQL that was passed to this command already has all variables replaced,
 						// we can simply remove anything that looks like a variable in the value.
-						value = VariablePool.getInstance().removeVariables(value);
+						valueParameter = VariablePool.getInstance().removeVariables(valueParameter);
 					}
-				}
-				setVariable(result, var, value);
-				if (result.isSuccess())
-				{
-					String msg = ResourceMgr.getString("MsgVarDefVariableDefined");
-					msg = StringUtil.replace(msg, "%var%", var);
-					msg = StringUtil.replace(msg, "%value%", value);
-					msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
-					result.addMessage(msg);
+
+					if (varNames.size() > 1)
+					{
+						LogMgr.logWarning("WbDefineVar.execute()", "Multiple variables not supported when assigning constant values. Statement was: " + sql);
+					}
+
+					setVariable(result, varNames.get(0).trim(), valueParameter);
+
+					if (result.isSuccess())
+					{
+						String msg = ResourceMgr.getString("MsgVarDefVariableDefined");
+						msg = StringUtil.replace(msg, "%var%", var);
+						msg = StringUtil.replace(msg, "%value%", valueParameter);
+						msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
+						result.addMessage(msg);
+					}
 				}
 			}
 			else
@@ -235,11 +272,11 @@ public class WbDefineVar
 	 *
 	 *	If the SQL gives an error, an empty string will be returned
 	 */
-	private String evaluateSql(WbConnection conn, String sql, StatementRunnerResult stmtResult)
+	private List<String> evaluateSql(WbConnection conn, String sql, StatementRunnerResult stmtResult)
 		throws SQLException
 	{
 		ResultSet rs = null;
-		String result = StringUtil.EMPTY_STRING;
+		List<String> result = new ArrayList<String>(1);
 		if (conn == null)
 		{
 			throw new SQLException("Cannot evaluate SQL based variable without a connection");
@@ -258,10 +295,13 @@ public class WbDefineVar
 			int colCount = meta.getColumnCount();
 			if (rs.next())
 			{
-				Object value = rs.getObject(1);
-				if (value != null)
+				for (int col=1; col <= colCount; col++)
 				{
-					result = value.toString();
+					Object value = rs.getObject(col);
+					if (value != null)
+					{
+						result.add(value.toString());
+					}
 				}
 			}
 
@@ -269,12 +309,6 @@ public class WbDefineVar
 			{
 				stmtResult.setWarning(true);
 				stmtResult.addMessageByKey("ErrVarDefRows");
-			}
-
-			if (colCount > 1)
-			{
-				stmtResult.setWarning(true);
-				stmtResult.addMessageByKey("ErrVarDefCols");
 			}
 
 			if (stmtResult.hasWarning())

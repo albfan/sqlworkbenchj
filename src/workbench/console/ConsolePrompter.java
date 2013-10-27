@@ -48,6 +48,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  * @see workbench.interfaces.ParameterPrompter
  * @see workbench.interfaces.ExecutionController
+ * @see ConsoleReaderFactory
  */
 public class ConsolePrompter
 	implements ParameterPrompter, ExecutionController, StatementParameterPrompter
@@ -117,8 +118,9 @@ public class ConsolePrompter
 		{
 			return false;
 		}
+		choice = choice.trim().toLowerCase();
 
-		return yes.toLowerCase().startsWith(choice.trim()) || "yes".equalsIgnoreCase(choice);
+		return yes.toLowerCase().startsWith(choice) || "yes".equalsIgnoreCase(choice);
 	}
 
 	@Override
@@ -127,10 +129,10 @@ public class ConsolePrompter
 		if (executeAll) return true;
 
 		String verb = SqlUtil.getSqlVerb(command);
-		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
+		String yes = ResourceMgr.getString("MsgConfirmYes");
 		String all = ResourceMgr.getString("MsgConfirmConsoleAll");
 
-		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo") + "/" + all;
+		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmNo") + "/" + all;
 
 		String msg = ResourceMgr.getFormattedString("MsgConfirmConsoleExec", verb, yesNo);
 		String choice = readLine(msg + " ");

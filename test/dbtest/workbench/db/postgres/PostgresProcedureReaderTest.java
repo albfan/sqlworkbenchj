@@ -27,6 +27,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.GenericObjectDropper;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
@@ -154,6 +155,10 @@ public class PostgresProcedureReaderTest
 			"  initcond = '{}'\n" +
 			");";
 		assertEquals(expected, source.trim());
+		GenericObjectDropper dropper = new GenericObjectDropper();
+		dropper.setConnection(con);
+		String drop = dropper.getDropForObject(def).toString();
+		assertEquals("DROP AGGREGATE array_accum(anyelement)", drop);
 	}
 
 	@Test

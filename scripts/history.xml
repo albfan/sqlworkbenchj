@@ -4,9 +4,11 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-10-21">
+    <entry dev-build="3" type="enh">WbVarDef now supports assigning multiple variables when using a SQL statement to supply the variable values.</entry>
     <entry dev-build="3" type="enh">ENABLEOUT and DISABLEOUT now support an (optionaL) parameter "quiet" to supress the feedback message.</entry>
     <entry dev-build="3" type="enh">WbFeedback now supports an optional parameter "quiet" to surpress the message</entry>
-    <entry dev-build="3" type="enh">WbConfirm can now be called supplying the message, the next for the "yes" choice and the text for the "no" choice.</entry>
+    <entry dev-build="3" type="enh">WbConfirm can now be called supplying the message, the text for the "yes" choice and the text for the "no" choice.</entry>
+    <entry dev-build="3" type="enh">A new command WbEcho is available to show a message</entry>
     <entry dev-build="3" type="enh">The parameter -vardef can now be used multiple times on the commandline.</entry>
     <entry dev-build="3" type="enh">Console specific commands (e.g. WbDisplay) can now also be executed in GUI or batch mode and will silently be ignored.</entry>
     <entry dev-build="2" type="enh">Other occurances of the current selection can now be highlighted</entry>

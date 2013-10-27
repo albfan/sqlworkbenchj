@@ -68,6 +68,7 @@ public class PostgresProcedureReader
 		super(conn);
 		try
 		{
+			// all Postgres versions support Savepoinst (they were introduced with 8.0
 			this.useSavepoint = conn.supportsSavepoints();
 		}
 		catch (Throwable th)
@@ -232,7 +233,7 @@ public class PostgresProcedureReader
 				sql += "p.proname LIKE '" + namePattern + "' ";
 				whereNeeded = false;
 			}
-			
+
 			if (connection.getDbSettings().returnAccessibleProceduresOnly())
 			{
 				sql += whereNeeded ? "\n WHERE " : "\n  AND ";
