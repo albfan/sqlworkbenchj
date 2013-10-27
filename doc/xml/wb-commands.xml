@@ -520,15 +520,16 @@
 
     <para>
       This defines an internal variable which is used for variable substitution during
-      SQL execution. Details can be found in the chapter <xref linkend="using-variables"/>.
+      SQL execution. .
     </para>
-    <para>The syntax for defining a variable is: <literal>WbVarDef variable=value</literal></para>
-    <para>The variable definition can also be read from a file. The file should list
-      each variable definition on one line (this is the format of a normal Java properties
-      file). Lines beginning with a <literal>#</literal> sign are ignored.
-      The syntax is <literal>WBVARDEF -file=&lt;filename&gt;</literal>
+    <para>
+      The syntax for defining a variable is: <literal>WbVarDef variable=value</literal>
     </para>
-    <para>You can also specify a file when starting &wb-productname; with the
+    <para>
+      More details and examples can be found in the chapter: <xref linkend="using-variables"/>
+    </para>
+    <para>
+      You can also specify a file when starting &wb-productname; with the
       parameter <literal>-vardef=filename.ext</literal>. When specifying a filename
       you can also define an encoding for the file using the <literal>-encoding</literal>
       switch. The specified file has to be a regular Java properties file.
@@ -575,7 +576,7 @@
           <para>
             Supplying parameters for the message, the text for the "Yes" choice and the text for the "No" choice using standard &wb-productname; parameters:
             <simpara>
-              <literal>WbConfirm -message="Do you really want to drop everything?" -yesText="OK, go ahead", -noText="Oh, no. Please stop"</literal>
+              <literal>WbConfirm -message="Do you really want to drop everything?" -yesText="OK, go ahead", -noText="No, please stop"</literal>
             </simpara>
           </para>
         </listitem>
@@ -588,7 +589,7 @@
       differences). So if the "Yes text" is set to <literal>"Continue"</literal>, the user can enter <literal>c</literal>,
       <literal>co</literal>, <literal>cont</literal> and so on. Because of that, the "No" text should not start with
       the same letters as the "Yes" text. When using <literal>-yesText=Continue and -noText=Cancel</literal> and the user
-      entered <literal>C</literal>, this would be regarded as a "Yes".
+      enters <literal>C</literal>, this would be regarded as a "Yes".
     </para>
     <para>
       This command can be used to prevent accidental execution of a script
@@ -2069,6 +2070,17 @@ WbSysOpen c:/temp/person.txt;</programlisting>
       to supress the feedback message that the suport for <literal>DBMS_OUTPUT</literal> has been enabled or disabled.
     </para>
 
+  </section>
+
+  <section id="command-echo">
+    <title>Show feedback to the user - WbEcho</title>
+    <para>
+      The command <literal>WbEcho</literal> can be used to print messages. The following statement:
+    </para>
+    <programlisting>WbEcho The answer is: 42</programlisting>
+    <para>
+      will print the text "The answer is: 42" to the message pane in GUI mode, or to the console in batch or console mode.
+    </para>
   </section>
 
   <section id="command-setconfig">
