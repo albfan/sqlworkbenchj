@@ -18,6 +18,7 @@ import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -36,6 +37,12 @@ public class SyntaxUtilities
 
 		int searchPos = 0;
 		int textLength = line.offset + line.count;
+		if (textLength > haystack.length)
+		{
+			// for some reason it happends that the textLength is calculated too big
+			LogMgr.logWarning("SyntaxUtilities.findMatch()", "textLength=" + textLength + ", line.offset=" + line.offset + ", line.count=" + line.count + ", haystack.length=" + haystack.length + ", needle=" + needle + " (length=" + needle.length() + ")");
+			textLength = haystack.length;
+		}
 
 		for (int textPos = line.offset + startAt; textPos < textLength; textPos++)
 		{
