@@ -164,6 +164,7 @@ public class DataStoreImporter
 		factory.setGeneralOptions(generalOptions);
 		factory.setType(type);
 		factory.setTargetTable(info.getUpdateTable());
+		factory.setConnection(target.getOriginalConnection());
 
 		this.source = factory.getProducer();
 		((ImportFileParser)source).setIgnoreMissingColumns(true);

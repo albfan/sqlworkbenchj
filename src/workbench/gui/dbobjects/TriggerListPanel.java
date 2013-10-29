@@ -30,13 +30,14 @@ import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
@@ -80,7 +81,7 @@ import workbench.util.WbWorkspace;
  */
 public class TriggerListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, DbObjectList
+	implements ListSelectionListener, Reloadable, DbObjectList, TableModelListener
 {
 	private WbConnection dbConnection;
 	private TriggerReader reader;
@@ -92,7 +93,7 @@ public class TriggerListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	private JLabel infoLabel;
+	private SummaryLabel infoLabel;
 	private boolean isRetrieving;
 
 	private CompileDbObjectAction compileAction;
@@ -158,6 +159,7 @@ public class TriggerListPanel
 		this.triggerList.setRowSelectionAllowed(true);
 		this.triggerList.getSelectionModel().addListSelectionListener(this);
 		this.triggerList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		this.triggerList.addTableModelListener(this);
 		triggerList.setReadOnly(true);
 
 		findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
@@ -220,6 +222,10 @@ public class TriggerListPanel
 		WbAction.dispose(dropAction, compileAction);
 		if (source != null) source.dispose();
 		if (findPanel != null) findPanel.dispose();
+		if (triggerList != null)
+		{
+			triggerList.dispose();
+		}
 	}
 
 	public void disconnect()
@@ -302,8 +308,7 @@ public class TriggerListPanel
 				@Override
 				public void run()
 				{
-					int rows = model.getRowCount();
-					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
+					infoLabel.setObjectListInfo(model);
 					triggerList.setModel(model, true);
 				}
 			});
@@ -324,6 +329,12 @@ public class TriggerListPanel
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent e)
+	{
+		this.infoLabel.setObjectListInfo(triggerList.getDataStoreTableModel());
 	}
 
 	@Override

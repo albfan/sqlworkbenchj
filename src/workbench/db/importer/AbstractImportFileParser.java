@@ -284,6 +284,11 @@ public abstract class AbstractImportFileParser
 	{
 		if (this.tableName == null) return null;
 		if (this.targetTable != null) return targetTable;
+
+		// we can't verify the table without a connection
+		// not having one isn't an error if we are importing the clipboard into a DataStore
+		if (this.connection == null) return null;
+		
 		TableIdentifier table = createTargetTableId();
 
 		targetTable = connection.getMetadata().getTableDefinition(table);

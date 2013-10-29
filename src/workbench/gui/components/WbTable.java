@@ -776,6 +776,15 @@ public class WbTable
 
 	public void dispose()
 	{
+		if (changeListener != null && dwModel != null)
+		{
+			for (TableModelListener l : changeListener)
+			{
+				this.dwModel.removeTableModelListener(l);
+			}
+			changeListener.clear();
+		}
+
 		WbSwingUtilities.removeAllListeners(this);
 		reset();
 

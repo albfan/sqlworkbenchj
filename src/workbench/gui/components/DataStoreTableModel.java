@@ -364,6 +364,11 @@ public class DataStoreTableModel
 		}
 	}
 
+	public int getFilteredCount()
+	{
+		if (this.dataCache == null) return 0;
+		return this.dataCache.getFilteredCount();
+	}
 	/**
 	 *	Number of rows in the result set
 	 */

@@ -37,13 +37,14 @@ import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -107,7 +108,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, DbObjectList, ActionListener, PropertyChangeListener
+	implements ListSelectionListener, Reloadable, DbObjectList, ActionListener, PropertyChangeListener, TableModelListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -125,7 +126,7 @@ public class ProcedureListPanel
 	private boolean shouldRetrieve;
 	private CompileDbObjectAction compileAction;
 
-	private JLabel infoLabel;
+	private SummaryLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
 
@@ -210,7 +211,7 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("procedurelist"));
-
+		this.procList.addTableModelListener(this);
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
 		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
 		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
@@ -276,7 +277,10 @@ public class ProcedureListPanel
 	{
 		reset();
 		if (this.generateWbCall != null) this.generateWbCall.removeAll();
-		if (procList != null) procList.dispose();
+		if (procList != null)
+		{
+			procList.dispose();
+		}
 		if (source != null) source.dispose();
 		WbAction.dispose(compileAction, renameAction);
 		if (findPanel != null) findPanel.dispose();
@@ -434,8 +438,7 @@ public class ProcedureListPanel
 				@Override
 				public void run()
 				{
-					int rows = model.getRowCount();
-					infoLabel.setText(rows + " " + ResourceMgr.getString("TxtTableListObjects"));
+					infoLabel.setObjectListInfo(model);
 					procList.setModel(model, true);
 				}
 			});
@@ -460,6 +463,12 @@ public class ProcedureListPanel
 			levelChanger.restoreIsolationLevel(dbConnection);
 			WbSwingUtilities.showDefaultCursor(parent);
 		}
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent e)
+	{
+		this.infoLabel.setObjectListInfo(procList.getDataStoreTableModel());
 	}
 
 	@Override

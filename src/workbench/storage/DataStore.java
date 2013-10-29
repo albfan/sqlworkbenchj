@@ -358,7 +358,7 @@ public class DataStore
 		}
 		return result;
 	}
-	
+
 	public int duplicateRow(int aRow)
 	{
 		if (aRow < 0 || aRow >= this.getRowCount()) return -1;
@@ -371,6 +371,12 @@ public class DataStore
 		return newIndex;
 	}
 
+	public int getFilteredCount()
+	{
+		if (filteredRows == null) return 0;
+		return filteredRows.size();
+	}
+	
 	@Override
 	public int getRowCount()
 	{

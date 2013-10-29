@@ -69,7 +69,12 @@ public class ImportClipboardAction
 	{
 		String content = getClipboardContents();
 		if (StringUtil.isBlank(content)) return;
-		client.importString(content, isCtrlPressed(evt));
+		boolean showOptions = false;
+		if (invokedByMouse(evt))
+		{
+			showOptions = isCtrlPressed(evt);
+		}
+		client.importString(content, showOptions);
 	}
 
 	private String getClipboardContents()

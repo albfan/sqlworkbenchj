@@ -4,8 +4,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-10-21">
+    <entry dev-build="3" type="enh">The status bar in the DbExplorer now shows the total number of objects if the content was filtered</entry>
     <entry dev-build="3" type="enh">WbVarDef now supports assigning multiple variables when using a SQL statement to supply the variable values.</entry>
-    <entry dev-build="3" type="enh">ENABLEOUT and DISABLEOUT now support an (optionaL) parameter "quiet" to supress the feedback message.</entry>
+    <entry dev-build="3" type="enh">ENABLEOUT and DISABLEOUT now support an optionaL parameter "quiet" to supress the feedback message.</entry>
     <entry dev-build="3" type="enh">WbFeedback now supports an optional parameter "quiet" to surpress the message</entry>
     <entry dev-build="3" type="enh">WbConfirm can now be called supplying the message, the text for the "yes" choice and the text for the "no" choice.</entry>
     <entry dev-build="3" type="enh">A new command WbEcho is available to show a message</entry>
@@ -20,6 +21,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="3" type="fix">Importing data from the clipboard into the current result set did not work any longer.</entry>
     <entry dev-build="3" type="fix">When using the DbExplorer to drop a Postgres custom aggregate function, the wrong DDL statement was generated.</entry>
     <entry dev-build="3" type="fix">When importing all sheets from a spreadsheet file (OpenOffice Calc, Excel) missing tables would not be ignored.</entry>
     <entry dev-build="2" type="fix">The SQL Formatter would swallow the character immediately following an IN condition with literals inside a JOIN condition</entry>

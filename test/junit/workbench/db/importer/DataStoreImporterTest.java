@@ -29,6 +29,8 @@ import java.sql.Types;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.TableIdentifier;
+
 import workbench.storage.DataStore;
 
 import org.junit.Test;
@@ -66,6 +68,7 @@ public class DataStoreImporterTest
 	{
 		String content = "1\tHarry\tHandsome\n2\tMary\tMoviestart\n3\tArthur\tDent";
 		DataStore ds = prepareDataStore();
+		ds.getResultInfo().setUpdateTable(new TableIdentifier("person"));
 		DataStoreImporter importer = new DataStoreImporter(ds, null, null);
 
 		TextImportOptions to = new DefaultTextImportOptions("\t", "\"");

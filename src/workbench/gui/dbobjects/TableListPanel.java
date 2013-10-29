@@ -212,7 +212,7 @@ public class TableListPanel
 	private JLabel infoLabel;
 	private final JPanel statusPanel;
 	private final FlatButton alterButton;
-	private final JLabel summaryStatusBarLabel;
+	private final SummaryLabel summaryStatusBarLabel;
 	private String tableTypeToSelect;
 
 	private final Object connectionLock = new Object();
@@ -958,8 +958,7 @@ public class TableListPanel
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
-		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
-		this.summaryStatusBarLabel.setText(info);
+		this.summaryStatusBarLabel.setObjectListInfo(tableList.getDataStoreTableModel());
 	}
 
 	protected void checkAlterButton()
