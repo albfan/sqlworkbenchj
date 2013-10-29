@@ -461,10 +461,21 @@ public class DbExplorerPanel
 				this.schemaLabel.setVisible(false);
 				currentSchema = null;
 			}
-			readCatalogs();
+			try
+			{
+				if (this.dbConnection.getDbSettings().supportsCatalogs())
+				{
+					readCatalogs();
+				}
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError("DbExplorerPanel.readSchemas()", "Could not read catalogs", ex);
+			}
 
-			tables.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
-			procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
+			String catalog = getSelectedCatalog();
+			tables.setCatalogAndSchema(catalog, currentSchema, false);
+			procs.setCatalogAndSchema(catalog, currentSchema, false);
 		}
 		catch (Throwable e)
 		{
