@@ -91,29 +91,13 @@ public class EditorOptionsPanel
 			ResourceMgr.getString("LblLTUnix")
 		};
 
-		String[] types = new String[] {
-			ResourceMgr.getString("LblRldNever"),
-			ResourceMgr.getString("LblRldPrompt"),
-			ResourceMgr.getString("LblRldAuto")
-		};
-
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
 
-		reloadType.setModel(new DefaultComboBoxModel(types));
+		reloadType.setModel(new DefaultComboBoxModel(FileReloadType.values()));
+
 		FileReloadType type = GuiSettings.getReloadType();
-		switch (type)
-		{
-			case prompt:
-				reloadType.setSelectedIndex(1);
-
-			case automatic:
-				reloadType.setSelectedIndex(2);
-				break;
-
-			default:
-				reloadType.setSelectedIndex(0);
-		}
+		reloadType.setSelectedItem(type);
 
 		String value = Settings.getInstance().getInteralLineEndingValue();
 		internalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
@@ -206,18 +190,8 @@ public class EditorOptionsPanel
 			GuiSettings.setWheelScrollLines(lines);
 		}
 
-		int index = reloadType.getSelectedIndex();
-		switch (index)
-		{
-			case 1:
-				GuiSettings.setReloadType(FileReloadType.prompt);
-				break;
-			case 2:
-				GuiSettings.setReloadType(FileReloadType.automatic);
-				break;
-			default:
-				GuiSettings.setReloadType(FileReloadType.none);
-		}
+		FileReloadType fileReloadType = (FileReloadType) this.reloadType.getSelectedItem();
+		GuiSettings.setReloadType(fileReloadType);
 	}
 
 	@Override

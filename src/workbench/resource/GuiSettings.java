@@ -921,7 +921,7 @@ public class GuiSettings
 
 	public static void setReloadType(FileReloadType type)
 	{
-		Settings.getInstance().setProperty(PROP_FILE_RELOAD_TYPE, type.toString());
+		Settings.getInstance().setProperty(PROP_FILE_RELOAD_TYPE, type.name());
 	}
 
 	public static FileReloadType getReloadType()
