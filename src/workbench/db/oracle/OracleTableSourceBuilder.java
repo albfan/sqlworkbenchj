@@ -48,6 +48,7 @@ import workbench.util.StringUtil;
 public class OracleTableSourceBuilder
 	extends TableSourceBuilder
 {
+	private static final String REV_IDX_TYPE = "NORMAL/REV";
 	private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
 	private String defaultTablespace;
 
@@ -496,6 +497,8 @@ public class OracleTableSourceBuilder
 			isPartitioned = false;
 		}
 
+		boolean pkIdxReverse = pkIdx != null && REV_IDX_TYPE.equals(pkIdx.getIndexType());
+		
 		if (!pkEnabled || pkIdx == null )
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, " DISABLE");
@@ -504,7 +507,12 @@ public class OracleTableSourceBuilder
 		{
 			if (OracleUtils.shouldAppendTablespace(pkIdx.getTablespace(), defaultTablespace, pkIdx.getSchema(), dbConnection.getCurrentUser()))
 			{
-				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   USING INDEX TABLESPACE " + pkIdx.getTablespace());
+				String idx = "USING INDEX";
+				if (pkIdxReverse)
+				{
+					idx += " REVERSE";
+				}
+				sql = sql.replace(INDEX_USAGE_PLACEHOLDER, "\n   " + idx + " TABLESPACE " + pkIdx.getTablespace());
 			}
 			else
 			{
@@ -514,7 +522,7 @@ public class OracleTableSourceBuilder
 		else
 		{
 			String indexSql = reader.getExtendedIndexSource(table, pkIdx, "    ").toString();
-			if ("NORMAL/REV".equals(pkIdx.getIndexType()))
+			if (pkIdxReverse)
 			{
 				indexSql = indexSql.replace("\n    REVERSE", " REVERSE"); // cosmetic cleanup
 			}
