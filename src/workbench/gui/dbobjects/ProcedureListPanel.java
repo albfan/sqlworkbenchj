@@ -194,7 +194,7 @@ public class ProcedureListPanel
 
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(new WbScrollPane(this.procColumns), BorderLayout.CENTER);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), p);
+		this.displayTab.add(ResourceMgr.getString("TxtDbExpProcParams"), p);
 
 		this.listPanel = new JPanel(new BorderLayout());
 		this.statusRenderer = new ProcStatusRenderer();
