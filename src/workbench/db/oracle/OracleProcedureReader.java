@@ -265,8 +265,21 @@ public class OracleProcedureReader
 
 		try
 		{
+			String escape = connection.getSearchStringEscape();
+			
 			String catalog = def.getCatalog();
-			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(catalog, def.getSchema(), def.getProcedureName(), "%");
+			String schema = def.getSchema();
+			String name = def.getProcedureName();
+
+			// we never want data for multiple procedures here
+			// so escape any wildcard in the parameters
+
+			String catalogParameter = SqlUtil.escapeUnderscore(catalog, escape);
+			schema  = SqlUtil.escapeUnderscore(catalog, escape);
+			name = SqlUtil.escapeUnderscore(name, escape);
+
+			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(catalogParameter, schema, name, "%");
+
 			int overloadIndex = JdbcUtils.getColumnIndex(rs, "OVERLOAD");
 
 			while (rs.next())
