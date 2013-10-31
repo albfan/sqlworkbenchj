@@ -1680,4 +1680,11 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + prop, defaultValue);
 	}
+
+	public boolean generateColumnListInViews()
+	{
+		boolean all = Settings.getInstance().getBoolProperty("workbench.sql.create.view.columnlist", true);
+		return Settings.getInstance().getBoolProperty(prefix + "create.view.columnlist", all);
+	}
+	
 }

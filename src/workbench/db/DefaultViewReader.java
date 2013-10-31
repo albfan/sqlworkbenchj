@@ -142,26 +142,28 @@ public class DefaultViewReader
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 		result.append(builder.generateCreateObject(includeDrop, viewTable, null));
 
-		result.append(lineEnding);
-		result.append('(');
-		result.append(lineEnding);
-
-		int colCount = columns.size();
-		for (int i=0; i < colCount; i++)
+		if (connection.getDbSettings().generateColumnListInViews())
 		{
+			result.append(lineEnding);
+			result.append('(');
+			result.append(lineEnding);
 
-			String colName = columns.get(i).getColumnName();
-			result.append("  ");
-			result.append(connection.getMetadata().quoteObjectname(colName));
-			if (i < colCount - 1)
+			int colCount = columns.size();
+			for (int i=0; i < colCount; i++)
 			{
-				result.append(',');
-				result.append(lineEnding);
-			}
-		}
-		result.append(lineEnding);
-		result.append(')');
 
+				String colName = columns.get(i).getColumnName();
+				result.append("  ");
+				result.append(connection.getMetadata().quoteObjectname(colName));
+				if (i < colCount - 1)
+				{
+					result.append(',');
+					result.append(lineEnding);
+				}
+			}
+			result.append(lineEnding);
+			result.append(')');
+		}
 		result.append(lineEnding);
 		result.append("AS ");
 		result.append(lineEnding);
