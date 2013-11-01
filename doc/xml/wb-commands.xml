@@ -389,7 +389,7 @@
     <para>
       <important>
         To search the data of a table a <literal>SELECT * FROM the_table</literal> is executed and
-        processed on a row by row basis. Although &wb-productname; only keeps one row at a time in memory
+        processed on a row-by-row basis. Although &wb-productname; only keeps one row at a time in memory
         it is possible that the JDBC drivers caches the full result set in memory. Please see the chapter
         <link linkend="troubleshooting">Common problems</link> for your DBMS to check if the JDBC driver you are using
         caches result sets.
@@ -442,9 +442,9 @@
               <para>
                 When specifying <literal>matches</literal>, the search value
                 is used as a regular expression. A column is included in the
-                search result if the regular expression is contained in the
-                column value (not when the column value matches the regular
-                expression entirely!).
+                search result if the regular expression is <emphasis>contained</emphasis> in the
+                column value (not when the column value completely matches the regular
+                expression entirely).
               </para>
               <para>
                 The default for this parameter is <literal>contains</literal>.
@@ -513,6 +513,73 @@
         </tbody>
       </tgroup>
     </informaltable>
+    <section id="grep-data-examples">
+      <title>Examples</title>
+      <section id="grep-data-example-simple">
+        <title>Search for a specific value in a single table</title>
+        <para>
+          The following statement will search for the text <literal>Arthur</literal> in all columns
+          and all rows of the table <literal>person</literal>. It will find values <literal>foobar</literal>,
+          <literal>somefoo</literal> or <literal>notfoobar</literal>:
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -tables=person -ignoreCase=true</programlisting>
+        <para>
+          <literal>-ignoreCase=true</literal> is the default behaviour and can be omitted.
+        </para>
+      </section>
+      <section id="grep-data-example-alltables">
+        <title>Search for a specific value in all tables</title>
+        <para>
+          The following statement will search for the text <literal>foobar</literal> in all columns
+          and all tables.
+        </para>
+        <programlisting>WbGrepData -searchValue=foobar -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-startwith">
+        <title>Search for a specific value at the beginning of a column value</title>
+        <para>
+          The following statement will search for the text <literal>foo</literal> in all columns
+          and all tables. It will match the value <literal>foobar</literal>, but not <literal>barfoo</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -compareType=startsWith -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-equals">
+        <title>Search for a specific value with an exact match</title>
+        <para>
+          The following statement will search for the text <literal>foo</literal> in all columns
+          and all tables. It will only match the value <literal>foo</literal> or <literal>FOO</literal> but not <literal>somefoobar</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -compareType=equals -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-regex1">
+        <title>Search for patterns</title>
+        <para>
+          The following statement will search for any value where three characters are followed by two numbers.
+          It will match <literal>foo42</literal>, <literal>bar12</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue="[a-z]{2}[0-9]{2}" -compareType=contains -tables=person</programlisting>
+        <para>
+          As the column values are only tested if the regular expression is <emphasis>contained</emphasis>, not if
+          it is an exact match. The above search will also return <literal>foo999</literal>.
+        </para>
+      </section>
+      <section id="grep-data-example-regex2">
+        <title>Search for multiple values</title>
+        <para>
+          The following statement will return rows where any column either contains the value <literal>foo</literal> or
+          the value <literal>bar</literal>:
+        </para>
+        <programlisting>WbGrepData -searchValue="foo|bar" -compareType=contains -tables=person</programlisting>
+        <para>
+          As the column values are only tested if the regular expression is <emphasis>contained</emphasis>, not if
+          it is an exact match. The above search will also return <literal>foo999</literal>.
+        </para>
+        <para>
+          For more information about regular expressions please visit: <ulink url="http://www.regular-expressions.info/">Regular-Expressions.info</ulink>
+        </para>
+      </section>
+
+    </section>
   </section>
 
   <section id="command-vardef">

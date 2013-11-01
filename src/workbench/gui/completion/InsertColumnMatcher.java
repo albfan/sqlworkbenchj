@@ -25,10 +25,15 @@ package workbench.gui.completion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
+import workbench.util.CollectionUtil;
 import workbench.util.ElementInfo;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -57,9 +62,12 @@ public class InsertColumnMatcher
 	{
 		try
 		{
+			Set<String> verbs = CollectionUtil.caseInsensitiveSet("INSERT", "MERGE");
+
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken token = lexer.getNextToken(false, false);
-			if (!token.getContents().equals("INSERT"))
+
+			if (token == null || !verbs.contains(token.getContents()))
 			{
 				isInsert = false;
 				columns = Collections.emptyList();
@@ -67,6 +75,17 @@ public class InsertColumnMatcher
 			}
 
 			boolean afterValues = false;
+
+			if (token.getContents().equals("MERGE"))
+			{
+				// "fast forward" to the actual INSERT part
+				// so that the following code does not need to handle any "noise" before the actual insert
+				while (token != null)
+				{
+					if (token.getContents().equals("INSERT")) break;
+					token = lexer.getNextToken(false, false);
+				}
+			}
 
 			List<ElementInfo> columnEntries = null;
 			List<List<ElementInfo>> rowValues = new ArrayList<List<ElementInfo>>(1);

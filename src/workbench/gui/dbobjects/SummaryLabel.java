@@ -61,7 +61,7 @@ public class SummaryLabel
 		setBorder(DEFAULT_BORDER);
 	}
 
-	public void setObjectListInfo(DataStoreTableModel model)
+	public void showObjectListInfo(DataStoreTableModel model)
 	{
 		int filteredCount = model.getFilteredCount();
 		int rowCount = model.getRowCount();

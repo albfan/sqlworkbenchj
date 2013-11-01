@@ -438,7 +438,7 @@ public class ProcedureListPanel
 				@Override
 				public void run()
 				{
-					infoLabel.setObjectListInfo(model);
+					infoLabel.showObjectListInfo(model);
 					procList.setModel(model, true);
 				}
 			});
@@ -468,7 +468,7 @@ public class ProcedureListPanel
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
-		this.infoLabel.setObjectListInfo(procList.getDataStoreTableModel());
+		this.infoLabel.showObjectListInfo(procList.getDataStoreTableModel());
 	}
 
 	@Override

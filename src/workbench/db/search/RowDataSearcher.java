@@ -53,14 +53,14 @@ public class RowDataSearcher
 		{
 			comp = new ContainsComparator();
 		}
-		filterExpression = new ColumnExpression("*", comp, searchValue);
+		filterExpression = new ColumnExpression(comp, searchValue);
 		filterExpression.setIgnoreCase(ignoreCase);
 		converter = new TextRowDataConverter();
 	}
 
 	public ColumnExpression getExpression()
 	{
-		ColumnExpression expr = new ColumnExpression("*", filterExpression.getComparator(), filterExpression.getFilterValue());
+		ColumnExpression expr = new ColumnExpression(filterExpression.getComparator(), filterExpression.getFilterValue());
 		expr.setIgnoreCase(filterExpression.isIgnoreCase());
 		return expr;
 	}

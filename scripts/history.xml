@@ -4,6 +4,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-10-21">
+    <entry dev-build="3" type="enh">Displaying a tooltip for the corresponding insert value/column now also works for the INSERT part of a MERGE statement</entry>
+    <entry dev-build="3" type="enh">The SQL formatter now handles MERGE statements</entry>
     <entry dev-build="3" type="enh">The status bar in the DbExplorer now shows the total number of objects if the content was filtered</entry>
     <entry dev-build="3" type="enh">WbVarDef now supports assigning multiple variables when using a SQL statement to supply the variable values.</entry>
     <entry dev-build="3" type="enh">ENABLEOUT and DISABLEOUT now support an optionaL parameter "quiet" to supress the feedback message.</entry>

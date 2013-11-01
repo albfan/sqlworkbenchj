@@ -308,7 +308,7 @@ public class TriggerListPanel
 				@Override
 				public void run()
 				{
-					infoLabel.setObjectListInfo(model);
+					infoLabel.showObjectListInfo(model);
 					triggerList.setModel(model, true);
 				}
 			});
@@ -334,7 +334,7 @@ public class TriggerListPanel
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
-		this.infoLabel.setObjectListInfo(triggerList.getDataStoreTableModel());
+		this.infoLabel.showObjectListInfo(triggerList.getDataStoreTableModel());
 	}
 
 	@Override

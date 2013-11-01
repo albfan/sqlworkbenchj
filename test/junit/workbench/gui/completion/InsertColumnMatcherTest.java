@@ -23,8 +23,11 @@
 package workbench.gui.completion;
 
 import java.util.List;
-import org.junit.Test;
+
 import workbench.WbTestCase;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -38,6 +41,37 @@ public class InsertColumnMatcherTest
 	public InsertColumnMatcherTest()
 	{
 		super("InsertColumnMatcherTest");
+	}
+
+	@Test
+	public void testMerge()
+	{
+		String sql =
+			"MERGE INTO foobar\n" +
+			"USING\n" +
+			"(\n" +
+			"  SELECT a,\n" +
+			"         b,\n" +
+			"         c\n" +
+			"  FROM foo\n" +
+			"    JOIN bar USING (x)\n" +
+			") t ON (t.a = foobar.x)\n" +
+			"WHEN MATCHED THEN UPDATE\n" +
+			"  SET y = t.b,\n" +
+			"      z = t.c\n" +
+			"WHEN NOT MATCHED THEN\n" +
+			"  INSERT\n" +
+			"    (x, y, z)\n" +
+			"  VALUES\n" +
+			"    (t.a, t.b, t.c);";
+
+		InsertColumnMatcher matcher = new InsertColumnMatcher(sql);
+		int pos = sql.indexOf("(t.a, t.b") + 1;
+		String column = matcher.getTooltipForPosition(pos);
+		assertEquals("x", column);
+		pos = sql.indexOf("y, z)");
+		String value = matcher.getTooltipForPosition(pos);
+		assertEquals("t.b", value);
 	}
 
 	@Test

@@ -958,7 +958,7 @@ public class TableListPanel
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
-		this.summaryStatusBarLabel.setObjectListInfo(tableList.getDataStoreTableModel());
+		this.summaryStatusBarLabel.showObjectListInfo(tableList.getDataStoreTableModel());
 	}
 
 	protected void checkAlterButton()

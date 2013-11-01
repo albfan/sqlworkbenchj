@@ -967,6 +967,11 @@ public class SqlFormatter
 
 	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList)
 	{
+		return processSubSelect(addSelectKeyword, currentBracketCount, checkForList, this.maxSubselectLength);
+	}
+
+	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList, int maxSubLength)
+	{
 		SQLToken t = skipComments();
 		int bracketCount = currentBracketCount;
 		StringBuilder subSql = new StringBuilder(250);
@@ -1003,7 +1008,7 @@ public class SqlFormatter
 
 				if (bracketCount == 0)
 				{
-					appendSubSelect(subSql, lastIndent);
+					appendSubSelect(subSql, lastIndent, maxSubLength);
 					return t;
 				}
 			}
@@ -1018,9 +1023,9 @@ public class SqlFormatter
 		return t;
 	}
 
-	private void appendSubSelect(StringBuilder subSql, int lastIndent)
+	private void appendSubSelect(StringBuilder subSql, int lastIndent, int maxSubLength)
 	{
-		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength, this.dbId);
+		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, maxSubLength, this.dbId);
 		f.setNewLineForSubselects(this.newLineForSubSelects);
 		f.setUseLowerCaseFunctions(this.lowerCaseFunctions);
 		f.setUseUpperCaseKeywords(this.upperCaseKeywords);
@@ -1032,7 +1037,7 @@ public class SqlFormatter
 		f.setColumnsPerInsert(colsPerInsert);
 		f.setColumnsPerUpdate(colsPerUpdate);
 		String s = f.getFormattedSql();
-		boolean useFormattedQuery = f.getRealLength() > this.maxSubselectLength;
+		boolean useFormattedQuery = f.getRealLength() > maxSubLength;
 		if (!useFormattedQuery)
 		{
 			s = s.replaceAll(" *" + SqlFormatter.NL + " *", " ").trim();
@@ -1548,6 +1553,14 @@ public class SqlFormatter
 					continue;
 				}
 
+				if (word.equals("MERGE"))
+				{
+					lastToken = t;
+					t = this.processMerge(t);
+					if (t == null) return;
+					continue;
+				}
+
 				if (word.equals("SELECT"))
 				{
 					lastToken = t;
@@ -1675,6 +1688,97 @@ public class SqlFormatter
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
 		}
+	}
+
+	private SQLToken processMerge(SQLToken last)
+	{
+		// this should be the MERGE keyword
+		SQLToken t = skipComments();
+
+		if (t == null) return t;
+		String verb = t.getContents();
+
+		// this should be the INTO keyword, if not something is wrong
+		if (!verb.equals("INTO")) return t;
+		this.appendText(' ');
+		this.appendTokenText(t);
+
+		boolean nextIsSelect = true;
+		boolean afterThen = false;
+		t = skipComments();
+		List<String> insertColumns = new ArrayList<String>();
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (text.equals("(") && nextIsSelect)
+			{
+				this.appendNewline();
+				this.appendText('(');
+				this.appendNewline();
+				this.indent("  ");
+				t = processSubSelect(false, 1, false, 0);
+				nextIsSelect = false;
+
+				if (t == null) return null;
+				if (")".equals(t.getText()))
+				{
+					this.appendNewline();
+				}
+			}
+			if ("SET".equals(text))
+			{
+				appendTokenText(t);
+				Set<String> terminals = CollectionUtil.caseInsensitiveSet();
+				terminals.addAll(SET_TERMINAL);
+				terminals.add("WHEN");
+				t = this.processList(t,"SET".length() + 3, terminals);
+				continue;
+			}
+			else if (text.equalsIgnoreCase("VALUES") || text.equalsIgnoreCase("INSERT"))
+			{
+				afterThen = false;
+				this.indent = new StringBuilder("  ");
+				appendNewline();
+				appendTokenText(t);
+				// the next (non-whitespace token has to be a (
+				t = skipComments();
+				boolean collect = text.equalsIgnoreCase("INSERT") && addColumnCommentForInsert;
+				if (t != null && t.getContents().equals("("))
+				{
+					t = this.processBracketList(2, getColumnsPerInsert(), insertColumns, collect);
+				}
+				this.indent = null;
+				if (t == null) return null;
+				continue;
+			}
+			else
+			{
+				if ("WHEN".equals(text) || "USING".equals(text))
+				{
+					this.appendNewline();
+				}
+
+				if ("THEN".equals(text))
+				{
+					afterThen = true;
+				}
+
+				if (needsWhitespace(last, t))
+				{
+					this.appendText(' ');
+				}
+				appendTokenText(t);
+				if (afterThen && "UPDATE".equals(text))
+				{
+					this.appendNewline();
+					this.indent("  ");
+					afterThen = false;
+				}
+			}
+			last = t;
+			t = this.lexer.getNextToken(true, false);
+		}
+		return t;
 	}
 
 	private SQLToken processCTE(SQLToken previousToken)

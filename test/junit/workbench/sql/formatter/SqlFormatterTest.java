@@ -47,6 +47,36 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testMerge()
+	{
+		String sql =
+			"merge into foobar using (select a,b,c from foo join bar using (x)) t on (t.a = foobar.x) when matched then update set y = t.b, z = t.c when not matched then insert (x,y,z) values (t.a, t.b, t.c);";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setColumnsPerInsert(5);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"MERGE INTO foobar\n" +
+			"USING\n" +
+			"(\n" +
+			"  SELECT a,\n" +
+			"         b,\n" +
+			"         c\n" +
+			"  FROM foo\n" +
+			"    JOIN bar USING (x)\n" +
+			") t ON (t.a = foobar.x)\n" +
+			"WHEN MATCHED THEN UPDATE\n" +
+			"  SET y = t.b,\n" +
+			"      z = t.c\n" +
+			"WHEN NOT MATCHED THEN\n" +
+			"  INSERT\n" +
+			"    (x, y, z)\n" +
+			"  VALUES\n" +
+			"    (t.a, t.b, t.c);";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testWrongJoins()
 	{
 		String sql =
