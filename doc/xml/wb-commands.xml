@@ -562,6 +562,12 @@
           As the column values are only tested if the regular expression is <emphasis>contained</emphasis>, not if
           it is an exact match. The above search will also return <literal>foo999</literal>.
         </para>
+        <para>
+          To get an exact match using the <literal>contains</literal> type, the regular expression needs to be anchored at the start and
+          the end. The following will only find only values that start with (exactly) two characters and are
+          followed by (exactly) two digits.
+        </para>
+        <programlisting>WbGrepData -searchValue="^[a-z]{2}[0-9]{2}$" -compareType=contains -tables=person</programlisting>
       </section>
       <section id="grep-data-example-regex2">
         <title>Search for multiple values</title>
