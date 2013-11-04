@@ -113,7 +113,7 @@ public class FilterPickerAction
 	}
 
 
-	public void setClient(WbTable c)
+	public final void setClient(WbTable c)
 	{
 		this.client = c;
 		checkEnabled();

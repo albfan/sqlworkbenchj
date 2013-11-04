@@ -128,6 +128,13 @@ public class ReferenceTableNavigator
 		this.source.addPopupMenu(selectChildTables, false);
 	}
 
+	public void removeFromPopup()
+	{
+		if (this.source == null) return;
+		this.source.removeSubmenu(selectChildTables);
+		this.source.removeSubmenu(selectParentTables);
+	}
+	
 	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{

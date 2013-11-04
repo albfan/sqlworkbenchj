@@ -46,6 +46,7 @@ import workbench.db.exporter.InfinityLiterals;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.exporter.WrongFormatFileException;
 
+import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.RowActionMonitor;
 
@@ -437,7 +438,6 @@ public class WbExport
 		}
 
 		exporter.setWriteEmptyResults(cmdLine.getBoolean(ARG_EMPTY_RESULTS, true));
-		exporter.setAppendToFile(appendToFile);
 		exporter.setWriteClobAsFile(cmdLine.getBoolean(ARG_CLOB_AS_FILE, false));
 
 		this.continueOnError = cmdLine.getBoolean(ARG_CONTINUE_ON_ERROR, false);
@@ -466,7 +466,7 @@ public class WbExport
 		exporter.setDataModifier(modifier);
 
 		String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
-		boolean containerFileSupported = CollectionUtil.caseInsensitiveSet("xls", "xlsx").contains(type);
+		boolean containerFileSupported = DataExporter.isContainerType(type);
 		BlobMode btype = BlobMode.getMode(bmode);
 
 		if (bmode != null && btype == null)
@@ -798,7 +798,14 @@ public class WbExport
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setReportInterval(this.progressInterval);
 			this.runner.setConsumer(this);
-			this.pendingOutput = outputFile;
+			if (outputFile != null)
+			{
+				this.pendingOutput = outputFile;
+			}
+			else if (outputdir != null)
+			{
+				this.pendingOutput = outputdir;
+			}
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = msg.replace("%type%", exporter.getTypeDisplay());
@@ -1027,6 +1034,10 @@ public class WbExport
 					toConsume.setFailure();
 				}
 			}
+			else if (toConsume.hasDataStores() && pendingOutput != null)
+			{
+				exportDataStores(toConsume.getDataStores());
+			}
 		}
 		catch (Exception e)
 		{
@@ -1040,6 +1051,42 @@ public class WbExport
 			toConsume.clearResultSets();
 			// Tell the statement runner we're done
 			runner.setConsumer(null);
+		}
+	}
+
+	private void exportDataStores(List<DataStore> data)
+		throws Exception
+	{
+		if (this.pendingOutput == null) return;
+		if (data == null || data.isEmpty()) return;
+
+		boolean isContainer = this.exporter.isContainerExport();
+		boolean isFile = !pendingOutput.isDirectory(); // I cannot use isFile() as that returns false if the file does not exist
+
+		this.exporter.setAppendToFile(isContainer);
+		File baseDir;
+		if (pendingOutput.isDirectory())
+		{
+			baseDir = pendingOutput;
+		}
+		else
+		{
+			baseDir = pendingOutput.getParentFile();
+		}
+
+		for (DataStore ds : data)
+		{
+			exporter.setPageTitle(ds.getResultName());
+			WbFile output = null;
+			if (isFile && isContainer)
+			{
+				output = pendingOutput;
+			}
+			else
+			{
+				output = new WbFile(baseDir, StringUtil.makeFilename(ds.getResultName()) + defaultExtension);
+			}
+			exporter.startExport(output, ds, null);
 		}
 	}
 

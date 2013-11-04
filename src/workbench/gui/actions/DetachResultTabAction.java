@@ -1,5 +1,5 @@
 /*
- * ReplaceDataAction.java
+ * CloseResultTabAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,38 +22,53 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
-import workbench.interfaces.Replaceable;
-import workbench.resource.PlatformShortcuts;
-import workbench.resource.ResourceMgr;
+import workbench.gui.sql.DetachedResultWindow;
+import workbench.gui.sql.DwPanel;
+import workbench.gui.sql.SqlPanel;
 
 /**
- *	Search and replace inside the result set
+ * An action to detach the the currently selected result tab of a SqlPanel and open it in a separate window
  *
- *	@author  Thomas Kellerer
+ * @author  Thomas Kellerer
  */
-public class ReplaceDataAction
+public class DetachResultTabAction
 	extends WbAction
 {
-	private Replaceable client;
+	private SqlPanel panel;
 
-	public ReplaceDataAction(Replaceable aClient)
+	public DetachResultTabAction(SqlPanel sqlPanel)
 	{
 		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(false);
+		panel = sqlPanel;
+		this.setMenuText("Detach");
+		this.setIcon(null);
+		this.setEnabled(panel.getCurrentResult() != null);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.replace();
+		final DwPanel result = panel.getCurrentResult();
+		if (result == null) return;
+
+		if (result.getTable() == null) return;
+		if (result.getDataStore() == null) return;
+
+		panel.removeCurrentResult();
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				DetachedResultWindow window = new DetachedResultWindow(result);
+				window.showWindow();
+			}
+		});
+
 	}
+
 }

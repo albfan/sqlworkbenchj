@@ -319,7 +319,7 @@ public class TableReplacer
 	}
 
 	@Override
-	public void tableChanged(TableModelEvent arg0)
+	public void tableChanged(TableModelEvent evt)
 	{
 		if (tableChanging) return;
 
@@ -327,7 +327,7 @@ public class TableReplacer
 
 		DataStore ds = client.getDataStore();
 		WbConnection con = (ds != null ? ds.getOriginalConnection() : null);
-		final boolean readOnly = (con == null ? false : con.isSessionReadOnly());
+		final boolean readOnly = (con == null ? true : con.isSessionReadOnly());
 		final boolean hasData = (client.getRowCount() > 0);
 		EventQueue.invokeLater(new Runnable()
 		{

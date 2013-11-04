@@ -36,6 +36,7 @@ import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseEmptyResultsAction;
 import workbench.gui.actions.CloseOtherResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
+import workbench.gui.actions.DetachResultTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowSourceQueryAction;
 import workbench.gui.actions.SqlPanelReloadAction;
@@ -112,6 +113,7 @@ public class ResultTabHandler
 		menu.add(new CloseOtherResultsAction(client));
 		menu.add(new CloseEmptyResultsAction(client));
 		menu.add(new CloseAllResultsAction(client));
+		menu.add(new DetachResultTabAction(client));
 		return menu;
 	}
 

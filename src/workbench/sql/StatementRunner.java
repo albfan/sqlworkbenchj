@@ -446,6 +446,12 @@ public class StatementRunner
 		{
 			this.result = this.batchCommand.executeBatch();
 		}
+
+		if (this.currentConsumer != null && currentCommand != currentConsumer)
+		{
+			this.currentConsumer.consumeResult(result);
+		}
+
 		long time = (System.currentTimeMillis() - sqlExecStart);
 		statementHook.postExec(this, realSql, result);
 		result.setExecutionTime(time);

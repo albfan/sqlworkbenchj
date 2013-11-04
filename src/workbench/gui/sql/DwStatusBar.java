@@ -79,6 +79,7 @@ public class DwStatusBar
 	private JTextField tfTimeout;
 	private final WbTextLabel execTime;
 	private JLabel editorStatus;
+	private JLabel maxRowsLabel;
 	private final JPanel infoPanel;
 
 	private static final int DEFAULT_FIELD_HEIGHT = 18;
@@ -191,9 +192,9 @@ public class DwStatusBar
 			infoPanel.add(this.tfTimeout);
 		}
 
-		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
-		l.setToolTipText(this.tfRowCount.getToolTipText());
-		infoPanel.add(l);
+		maxRowsLabel = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
+		maxRowsLabel.setToolTipText(this.tfRowCount.getToolTipText());
+		infoPanel.add(maxRowsLabel);
 		infoPanel.add(tfMaxRows);
 		infoPanel.add(tfRowCount);
 		this.add(infoPanel, BorderLayout.EAST);
@@ -202,6 +203,15 @@ public class DwStatusBar
 		this.clearStatusMessage();
 	}
 
+	public void removeMaxRows()
+	{
+		if (this.tfMaxRows != null)
+		{
+			infoPanel.remove(tfMaxRows);
+			infoPanel.remove(maxRowsLabel);
+		}
+	}
+	
 	public void removeSelectionIndicator(JTable client)
 	{
 		if (this.selectionDisplay == null) return;

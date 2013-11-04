@@ -2570,6 +2570,13 @@ public class SqlPanel
 		closeResult(index);
 	}
 
+	public void removeCurrentResult()
+	{
+		int index = resultTab.getSelectedIndex();
+		if (!confirmDiscardChanges(index)) return;
+		discardResult(index, false);
+	}
+
 	/**
 	 * Closes the result tab with the given index.
 	 *
@@ -2580,7 +2587,7 @@ public class SqlPanel
 	public void closeResult(int index)
 	{
 		if (!confirmDiscardChanges(index)) return;
-		discardResult(index);
+		discardResult(index, true);
 	}
 
 	/**
@@ -2631,7 +2638,7 @@ public class SqlPanel
 	 * Closes the result tab with the given index without further questions
 	 *
 	 */
-	private void discardResult(int index)
+	private void discardResult(int index, boolean disposeData)
 	{
 		if (index == resultTab.getTabCount() - 1) return;
 
@@ -2639,7 +2646,10 @@ public class SqlPanel
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 			panel.removePropertyChangeListener(SqlPanel.this);
-			panel.dispose();
+			if (disposeData)
+			{
+				panel.dispose();
+			}
 
 			resultTab.removeTabAt(index);
 			currentData = null;
@@ -3984,7 +3994,7 @@ public class SqlPanel
 
 		if (confirmDiscardChanges(index))
 		{
-			discardResult(index);
+			discardResult(index, true);
 		}
 	}
 

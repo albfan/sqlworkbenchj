@@ -67,7 +67,18 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
 
-import workbench.util.*;
+import workbench.util.CharacterRange;
+import workbench.util.CollectionUtil;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.MessageBuffer;
+import workbench.util.QuoteEscapeType;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbDateFormatter;
+import workbench.util.WbFile;
+import workbench.util.WbNumberFormatter;
+import workbench.util.WbThread;
 
 /**
  * A class to export data from the database into an external file.
@@ -1569,5 +1580,15 @@ public class DataExporter
 			return;
 		}
 		this.controlFiles.addAll(formats);
+	}
+
+	public boolean isContainerExport()
+	{
+		return this.exportType == ExportType.XLS || this.exportType == ExportType.XLSX;
+	}
+
+	public static boolean isContainerType(String exportType)
+	{
+		return CollectionUtil.caseInsensitiveSet("xls", "xlsx").contains(exportType);
 	}
 }

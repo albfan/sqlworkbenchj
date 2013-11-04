@@ -59,6 +59,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
@@ -873,6 +874,36 @@ public class WbTable
 		});
 	}
 
+	public void removeSubmenu(JMenuItem item)
+	{
+		int index = popup.getComponentIndex(item);
+		if (index > 0)
+		{
+			Component prev = index > 0 ? popup.getComponent(index - 1) : null;
+			if (prev instanceof JSeparator)
+			{
+				popup.remove(prev);
+			}
+			popup.remove(item);
+		}
+	}
+
+	public void removePopupAction(final WbAction action)
+	{
+		if (popup == null) return;
+		int index = findPopupItem(action);
+		if (index > -1)
+		{
+			Component item = popup.getComponent(index);
+			Component prev = index > 0 ? popup.getComponent(index - 1) : null;
+			if (prev instanceof JSeparator)
+			{
+				popup.remove(prev);
+			}
+			popup.remove(item);
+		}
+	}
+
 	public final void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
 		addPopupMenu(anAction.getMenuItem(), withSep);
@@ -986,9 +1017,9 @@ public class WbTable
 			th.addMouseListener(this);
 			return;
 		}
-		for (int i=0; i < list.length; i++)
+		for (MouseListener listener : list)
 		{
-			if (list[i] == this) return;
+			if (listener == this) return;
 		}
 		th.addMouseListener(this);
 	}

@@ -39,6 +39,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -271,6 +272,30 @@ public class DwPanel
 		dataTable.setPrintHeader(header);
 	}
 
+	public void detachConnection()
+	{
+		if (this.dbConnection != null)
+		{
+			this.dbConnection.removeChangeListener(this);
+		}
+		this.dataTable.getDataStore().setOriginalConnection(null);
+		this.dataTable.removePopupAction(updateAction);
+		this.dataTable.removePopupAction(deleteDependentRow);
+		this.dataTable.removePopupAction(deleteRow);
+		this.dataTable.removePopupAction(insertRow);
+		this.dataTable.removePopupAction(dataTable.getReplacer().getReplaceAction());
+		this.referenceNavigator.removeFromPopup();
+		
+		dbConnection = null;
+		if (stmtRunner != null)
+		{
+			stmtRunner.done();
+		}
+		stmtRunner = null;
+		clearStatusMessage();
+		checkResultSetActions();
+	}
+
 	/**
 	 *	Defines the connection for this DwPanel.
 	 */
@@ -482,7 +507,7 @@ public class DwPanel
 		return rows;
 	}
 
-	protected void disableUpdateActions()
+	public void disableUpdateActions()
 	{
 		this.updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		this.insertRow.setEnabled(false);
@@ -663,6 +688,24 @@ public class DwPanel
 	public long getLastExecutionTime()
 	{
 		return lastExecutionDuration;
+	}
+
+	public void setStatusBar(DwStatusBar status)
+	{
+		if (this.statusBar != null)
+		{
+			this.remove(this.statusBar);
+			statusBar.removeSelectionIndicator(this.dataTable);
+		}
+		sharedStatusBar = false;
+		this.statusBar = status;
+		this.add(this.statusBar, BorderLayout.SOUTH);
+		if (this.dataTable != null)
+		{
+			this.dataTable.setStatusBar(this.statusBar);
+		}
+		this.invalidate();
+		this.doLayout();
 	}
 
 	/**
@@ -1268,6 +1311,16 @@ public class DwPanel
 		this.dataTable.setAdjustToColumnLabel(true);
 	}
 
+	public int getVerticalScrollBarWidth()
+	{
+		if (this.scrollPane == null) return 0;
+		JScrollBar scrollbar = this.scrollPane.getVerticalScrollBar();
+		if (scrollbar != null)
+		{
+			return scrollbar.getWidth();
+		}
+		return 0;
+	}
 	public void hideSQLInfo()
 	{
 		if (sqlInfo != null)
