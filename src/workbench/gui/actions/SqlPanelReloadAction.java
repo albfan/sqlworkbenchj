@@ -23,9 +23,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.DataStore;
 
 /**
@@ -45,12 +48,12 @@ public class SqlPanelReloadAction
 		setClient(panel);
 	}
 
-	public void setClient(SqlPanel panel)
+	public final void setClient(SqlPanel panel)
 	{
 		client = panel;
 		checkEnabled();
 	}
-	
+
 	public void checkEnabled()
 	{
 		boolean enable = false;

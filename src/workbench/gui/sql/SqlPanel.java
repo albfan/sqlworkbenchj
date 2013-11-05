@@ -72,6 +72,8 @@ import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultReceiver;
 import workbench.interfaces.StatusBar;
+import workbench.interfaces.ToolWindow;
+import workbench.interfaces.ToolWindowManager;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -219,7 +221,7 @@ public class SqlPanel
 	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -321,6 +323,7 @@ public class SqlPanel
 	private boolean locked;
 	private boolean ignoreStateChange;
 	private long lastScriptExecTime;
+	protected final List<ToolWindow> resultWindows = new ArrayList<ToolWindow>(1);
 
 	private final Runnable selector = new Runnable()
 		{
@@ -1523,6 +1526,10 @@ public class SqlPanel
 				currentData.endEdit();
 			}
 			clearResultTabs();
+			for (ToolWindow window : resultWindows)
+			{
+				window.disconnect();
+			}
 			setLogText("");
 		}
 	}
@@ -3669,6 +3676,29 @@ public class SqlPanel
 				editor.selectError(startPos, endPos);
 			}
 		});
+	}
+
+	@Override
+	public void registerToolWindow(ToolWindow window)
+	{
+		synchronized (resultWindows)
+		{
+			resultWindows.add(window);
+		}
+		// We must register the tool window with the WbManager as well
+		// in order to close them properly when the application is closed
+		WbManager.getInstance().registerToolWindow(window);
+	}
+
+	@Override
+	public void unregisterToolWindow(ToolWindow window)
+	{
+		if (window == null) return;
+		synchronized (resultWindows)
+		{
+			resultWindows.remove(window);
+		}
+		WbManager.getInstance().unregisterToolWindow(window);
 	}
 
 	protected void checkResultSetActions()

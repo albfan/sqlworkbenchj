@@ -83,6 +83,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.sql.DwPanel;
 
+import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 
 import workbench.util.ExceptionUtil;
@@ -127,6 +128,7 @@ public class TableDataPanel
 	private Savepoint currentSavepoint;
 	private Statement rowCountRetrieveStmt;
 	private NamedSortDefinition lastSort;
+	private WbToolbar toolbar;
 
 	private boolean initialized;
 	private FilteredProperties workspaceSettings;
@@ -191,16 +193,16 @@ public class TableDataPanel
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
 		this.reloadAction.addToInputMap(this.dataDisplay.getTable());
 
-		WbToolbar mytoolbar = new WbToolbar();
-		mytoolbar.addDefaultBorder();
-		topPanel.add(mytoolbar);
-		mytoolbar.add(this.reloadAction);
-		mytoolbar.addSeparator();
+		toolbar = new WbToolbar();
+		toolbar.addDefaultBorder();
+		topPanel.add(toolbar);
+		toolbar.add(this.reloadAction);
+		toolbar.addSeparator();
 
 		this.cancelRetrieve = new StopAction(this);
 		this.cancelRetrieve.setEnabled(false);
-		mytoolbar.add(this.cancelRetrieve);
-		mytoolbar.addSeparator();
+		toolbar.add(this.cancelRetrieve);
+		toolbar.addSeparator();
 
 		topPanel.add(Box.createHorizontalStrut(15));
 		JLabel l = new JLabel(ResourceMgr.getString("LblTable") + ":");
@@ -242,23 +244,23 @@ public class TableDataPanel
 
 		this.add(topPanel, BorderLayout.NORTH);
 
-		mytoolbar.add(this.dataDisplay.getUpdateDatabaseAction());
-		mytoolbar.add(this.dataDisplay.getSelectKeysAction());
-		mytoolbar.addSeparator();
-		mytoolbar.add(this.dataDisplay.getInsertRowAction());
-		mytoolbar.add(this.dataDisplay.getCopyRowAction());
-		mytoolbar.add(this.dataDisplay.getDeleteRowAction());
-		mytoolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
+		toolbar.add(this.dataDisplay.getSelectKeysAction());
+		toolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getInsertRowAction());
+		toolbar.add(this.dataDisplay.getCopyRowAction());
+		toolbar.add(this.dataDisplay.getDeleteRowAction());
+		toolbar.addSeparator();
 		SelectionFilterAction a = new SelectionFilterAction();
 		a.setClient(this.dataDisplay.getTable());
-		mytoolbar.add(a);
-		mytoolbar.addSeparator();
-		mytoolbar.add(this.dataDisplay.getTable().getFilterAction());
+		toolbar.add(a);
+		toolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getTable().getFilterAction());
 
 		FilterPickerAction p = new FilterPickerAction(dataDisplay.getTable());
-		mytoolbar.add(p);
-		mytoolbar.addSeparator();
-		mytoolbar.add(this.dataDisplay.getTable().getResetFilterAction());
+		toolbar.add(p);
+		toolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -294,6 +296,23 @@ public class TableDataPanel
 		dataDisplay.setConnection(dbConnection);
 
 		initialized = true;
+	}
+
+	public int getAddHeight()
+	{
+		int height = 0;
+		if (this.toolbar != null)
+		{
+			height += toolbar.getPreferredSize().height;
+		}
+		height += dataDisplay.getStatusBarHeight();
+		return height;
+	}
+
+	public int getToolbarWidth()
+	{
+		if (this.toolbar == null) return 0;
+		return toolbar.getPreferredSize().width;
 	}
 
 	/**
@@ -338,7 +357,23 @@ public class TableDataPanel
 		dataDisplay.dispose();
 		WbAction.dispose(reloadAction, cancelRetrieve);
 		WbSwingUtilities.removeAllListeners(this);
-		this.execListener.clear();
+		if (this.execListener != null)
+		{
+			this.execListener.clear();
+		}
+	}
+
+	public void detachConnection()
+	{
+		this.dbConnection = null;
+		this.dataDisplay.detachConnection();
+		this.dataDisplay.disableUpdateActions();
+		this.reloadAction.setEnabled(false);
+		this.cancelRetrieve.setEnabled(false);
+		if (this.execListener != null)
+		{
+			this.execListener.clear();
+		}
 	}
 
 	public void disconnect()
@@ -371,7 +406,7 @@ public class TableDataPanel
 			public void run()
 			{
 				dataDisplay.clearContent();
-				rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
+				if (rowCountLabel != null) rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 				clearLoadingImage();
 				reloadAction.setEnabled(true);
 			}
@@ -442,6 +477,7 @@ public class TableDataPanel
 
 	public long showRowCount()
 	{
+		if (rowCountLabel == null) return -1;
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 		initGui();
@@ -628,7 +664,7 @@ public class TableDataPanel
 	private void clearLoadingImage()
 	{
 		if (this.loadingImage != null) this.loadingImage.flush();
-		this.rowCountLabel.setIcon(null);
+		if (rowCountLabel != null) this.rowCountLabel.setIcon(null);
 	}
 
 	@Override
@@ -777,10 +813,16 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 
-		retrieveTableDefinition();
-
-		String sql = this.buildSqlForTable(tableDefinition);
-		if (sql == null) return;
+		String sql = null;
+		if (table != null)
+		{
+			retrieveTableDefinition();
+			sql = this.buildSqlForTable(tableDefinition);
+			if (sql == null)
+			{
+				return;
+			}
+		}
 
 		this.retrieveStart();
 
@@ -802,39 +844,45 @@ public class TableDataPanel
 
 			setSavepoint();
 
-			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query: " + sql);
-
-			error = !dataDisplay.runQuery(sql, respectMaxRows);
-
-			if (GuiSettings.getRetrieveQueryComments())
+			if (table == null)
 			{
-				dataDisplay.readColumnComments(tableDefinition);
+				dataDisplay.runCurrentSql(respectMaxRows);
 			}
-
-			// By directly setting the update table, we avoid
-			// another round-trip to the database to check the table from the
-			// passed SQL statement.
-			WbSwingUtilities.invoke(new Runnable()
+			else
 			{
-				@Override
-				public void run()
+				LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query: " + sql);
+
+				error = !dataDisplay.runQuery(sql, respectMaxRows);
+				if (GuiSettings.getRetrieveQueryComments())
 				{
-					dataDisplay.defineUpdateTable(tableDefinition);
-					dataDisplay.getSelectKeysAction().setEnabled(true);
-					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-					dataDisplay.setPrintHeader(header);
-					dataDisplay.showLastExecutionDuration();
-
-					if (lastSort != null)
-					{
-						dataDisplay.setSortDefinition(lastSort);
-					}
-
-					ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
-					dataDisplay.checkLimitReachedDisplay();
-					dataDisplay.showGeneratingSQLAsTooltip();
+					dataDisplay.readColumnComments(tableDefinition);
 				}
-			});
+
+				// By directly setting the update table, we avoid
+				// another round-trip to the database to check the table from the
+				// passed SQL statement.
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						dataDisplay.defineUpdateTable(tableDefinition);
+						dataDisplay.getSelectKeysAction().setEnabled(true);
+						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+						dataDisplay.setPrintHeader(header);
+						dataDisplay.showLastExecutionDuration();
+
+						if (lastSort != null)
+						{
+							dataDisplay.setSortDefinition(lastSort);
+						}
+
+						ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
+						dataDisplay.checkLimitReachedDisplay();
+						dataDisplay.showGeneratingSQLAsTooltip();
+					}
+				});
+			}
 		}
 		catch (LowMemoryException mem)
 		{
@@ -1015,6 +1063,35 @@ public class TableDataPanel
 		this.showData(true);
 	}
 
+
+	public void removeTableDisplay()
+	{
+		this.topPanel.removeAll();
+		this.topPanel.add(toolbar);
+		config.removeActionListener(this);
+		rowCountButton.removeActionListener(this);
+		this.autoloadRowCount = false;
+		this.rowCountButton = null;
+		this.rowCountLabel = null;
+		this.config = null;
+		this.tableNameLabel = null;
+	}
+
+	public void displayData(DataStore result, long lastExecutionTime)
+	{
+		initGui();
+		removeTableDisplay();
+		try
+		{
+			this.setConnection(result.getOriginalConnection());
+			this.dataDisplay.showData(result, result.getGeneratingSql(), lastExecutionTime);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("TableDataPanel.displayData()", "Could not display data", sql);
+		}
+	}
+
 	public void showData(boolean includeData)
 	{
 		if (this.isRetrieving()) return;
@@ -1052,7 +1129,6 @@ public class TableDataPanel
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
 		initGui();
-		this.reset();
 		long rows = -1;
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();
 
@@ -1122,6 +1198,7 @@ public class TableDataPanel
 
 	protected synchronized void fireDbExecStart()
 	{
+		if (this.dbConnection == null) return;
 		this.dbConnection.executionStart(this.dbConnection, this);
 		if (this.execListener == null) return;
 		for (DbExecutionListener l : execListener)
@@ -1132,6 +1209,7 @@ public class TableDataPanel
 
 	protected synchronized void fireDbExecEnd()
 	{
+		if (this.dbConnection == null) return;
 		this.dbConnection.executionEnd(this.dbConnection, this);
 		if (this.execListener == null) return;
 		for (DbExecutionListener l : execListener)

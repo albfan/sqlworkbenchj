@@ -43,6 +43,7 @@ import javax.swing.UIManager;
 
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
+import workbench.interfaces.ToolWindowManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -82,7 +83,7 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public final class WbManager
-	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
+	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler, ToolWindowManager
 {
 	private static WbManager wb;
 	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
@@ -236,6 +237,7 @@ public final class WbManager
 		return null;
 	}
 
+	@Override
 	public void registerToolWindow(ToolWindow aWindow)
 	{
 		synchronized (toolWindows)
@@ -244,6 +246,7 @@ public final class WbManager
 		}
 	}
 
+	@Override
 	public void unregisterToolWindow(ToolWindow toolWindow)
 	{
 		if (toolWindow == null) return;

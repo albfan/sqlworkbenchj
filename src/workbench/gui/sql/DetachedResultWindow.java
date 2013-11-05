@@ -32,15 +32,16 @@ import javax.swing.UIManager;
 
 import workbench.WbManager;
 import workbench.interfaces.ToolWindow;
+import workbench.interfaces.ToolWindowManager;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.components.TableRowHeader;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbToolbar;
+import workbench.gui.dbobjects.TableDataPanel;
+
+import workbench.util.StringUtil;
 
 
 /**
@@ -51,66 +52,51 @@ public class DetachedResultWindow
 	extends JPanel
 	implements WindowListener, ToolWindow
 {
-	private final DwPanel data;
+	private final TableDataPanel data;
 	private JFrame window;
-	private WbToolbar toolbar;
-	public DetachedResultWindow(DwPanel result)
+
+	public DetachedResultWindow(DwPanel result, ToolWindowManager registry)
 	{
 		super(new BorderLayout(0,0));
-		this.data = result;
 
-		this.data.detachConnection();
-		this.data.disableUpdateActions();
+		this.data = new TableDataPanel();
 
-		WbTable tbl = result.getTable();
-
-		toolbar = new WbToolbar();
 		this.add(data, BorderLayout.CENTER);
-		SelectionFilterAction selFilter = new SelectionFilterAction();
-		selFilter.setClient(tbl);
-		toolbar.add(selFilter);
-		toolbar.add(data.getTable().getFilterAction());
-		toolbar.addSeparator();
-		toolbar.add(data.getTable().getResetFilterAction());
+		data.displayData(result.getDataStore(), result.getLastExecutionTime());
 
-		this.add(toolbar, BorderLayout.NORTH);
-		this.window = new JFrame(data.getDataStore().getResultName());
+		String title = result.getDataStore().getResultName();
+		if (StringUtil.isBlank(title))
+		{
+			title = ResourceMgr.getString("LblTabResult");
+		}
+
+		this.window = new JFrame(title);
 		this.window.getContentPane().setLayout(new BorderLayout());
 		this.window.getContentPane().add(this, BorderLayout.CENTER);
 
 		ResourceMgr.setWindowIcons(window, "data");
 
 		int rWidth = result.getWidth();
-		int height = result.getHeight() + (UIManager.getInt("ScrollBar.width") * 2) + toolbar.getPreferredSize().height;
-
-		int tWidth = result.getTable().getWidth();
-
+		int tWidth = Math.max(result.getTable().getWidth(), data.getToolbarWidth());
 		int addWidth = result.getVerticalScrollBarWidth();
 		if (addWidth == 0)
 		{
 			addWidth = UIManager.getInt("ScrollBar.width") + 4;
 		}
 
-		DwStatusBar status = new DwStatusBar(false, false);
-		status.removeMaxRows();
-		status.setReadyMsg("");
-		status.setStatusMessage("");
-		result.setStatusBar(status);
-
-		tbl.setListSelectionControl(null);
-		tbl.setTransposeRowEnabled(false);
-		status.showSelectionIndicator(tbl);
-		TableRowHeader rowHeader = TableRowHeader.getRowHeader(tbl);
+		TableRowHeader rowHeader = TableRowHeader.getRowHeader(data.getData());
 		if (rowHeader != null)
 		{
 			addWidth += rowHeader.getWidth();
 		}
 
 		int width = Math.min(rWidth, tWidth) + addWidth + 16;
-		this.window.setSize(width, height);
+		int height = result.getHeight() + data.getAddHeight();
+
+		this.window.setSize(width + 8, height + 8);
 
 		this.window.addWindowListener(this);
-		WbManager.getInstance().registerToolWindow(this);
+		registry.registerToolWindow(this);
 	}
 
 	public void showWindow()
@@ -197,7 +183,10 @@ public class DetachedResultWindow
 	@Override
 	public void disconnect()
 	{
-		// nothing to do
+		if (this.data != null)
+		{
+			this.data.detachConnection();
+		}
 	}
 
 	@Override

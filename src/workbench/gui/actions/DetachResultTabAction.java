@@ -43,7 +43,7 @@ public class DetachResultTabAction
 	{
 		super();
 		panel = sqlPanel;
-		this.setMenuText("Detach");
+		this.initMenuDefinition("MnuTxtDetachResult");
 		this.setIcon(null);
 		this.setEnabled(panel.getCurrentResult() != null);
 	}
@@ -64,7 +64,7 @@ public class DetachResultTabAction
 			@Override
 			public void run()
 			{
-				DetachedResultWindow window = new DetachedResultWindow(result);
+				DetachedResultWindow window = new DetachedResultWindow(result, panel);
 				window.showWindow();
 			}
 		});

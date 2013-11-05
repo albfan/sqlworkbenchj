@@ -156,6 +156,7 @@ public class DwPanel
 	private boolean showSQLAsTooltip;
 	private JLabel sqlInfo;
 	private boolean enableSqlInfo;
+	private boolean disconnected;
 
 	public DwPanel()
 	{
@@ -272,20 +273,35 @@ public class DwPanel
 		dataTable.setPrintHeader(header);
 	}
 
+	public int getStatusBarHeight()
+	{
+		if (this.statusBar == null) return 32; // default height;
+		return statusBar.getPreferredSize().height;
+	}
+	
 	public void detachConnection()
 	{
 		if (this.dbConnection != null)
 		{
 			this.dbConnection.removeChangeListener(this);
 		}
-		this.dataTable.getDataStore().setOriginalConnection(null);
+		if (this.dataTable == null) return;
+		DataStore ds = this.dataTable.getDataStore();
+		if (ds != null)
+		{
+			ds.setOriginalConnection(null);
+		}
+		this.disconnected = true;
 		this.dataTable.removePopupAction(updateAction);
 		this.dataTable.removePopupAction(deleteDependentRow);
 		this.dataTable.removePopupAction(deleteRow);
 		this.dataTable.removePopupAction(insertRow);
 		this.dataTable.removePopupAction(dataTable.getReplacer().getReplaceAction());
-		this.referenceNavigator.removeFromPopup();
-		
+		if (this.referenceNavigator != null)
+		{
+			this.referenceNavigator.removeFromPopup();
+		}
+
 		dbConnection = null;
 		if (stmtRunner != null)
 		{
@@ -1072,6 +1088,12 @@ public class DwPanel
 
 	private void checkResultSetActions()
 	{
+		if (this.disconnected)
+		{
+			disableUpdateActions();
+			if (this.selectKeys != null) this.selectKeys.setEnabled(false);
+			return;
+		}
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
 
