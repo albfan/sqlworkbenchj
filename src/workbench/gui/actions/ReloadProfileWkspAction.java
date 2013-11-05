@@ -61,7 +61,7 @@ public class ReloadProfileWkspAction
 		String file = getWorkspace();
 		if (file != null)
 		{
-			this.client.loadWorkspace(file, false);
+			this.client.loadCurrentProfileWorkspace();
 		}
 	}
 

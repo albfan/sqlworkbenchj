@@ -1349,7 +1349,7 @@ public class MainWindow
 
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		if (info != null) info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-		loadWorkspaceForProfile(currentProfile);
+		loadCurrentProfileWorkspace();
 		Settings.getInstance().setLastConnection(currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 		return true;
@@ -1633,6 +1633,7 @@ public class MainWindow
 				}
 				finally
 				{
+					checkReloadWkspAction();
 					setIgnoreTabChange(false);
 					FileUtil.closeQuietely(w);
 					updateGuiForTab(sqlTab.getSelectedIndex());
@@ -1656,21 +1657,36 @@ public class MainWindow
 		return resultForWorkspaceClose;
 	}
 
-	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
+	private void checkReloadWkspAction()
 	{
+		boolean isProfileWorkspace = false;
+		WbFile profileWksp = new WbFile(getRealWorkspaceFilename(currentProfile.getWorkspaceFile()));
+
+		if (this.currentWorkspaceFile != null)
+		{
+			WbFile current = new WbFile(currentWorkspaceFile);
+			isProfileWorkspace = current.equals(profileWksp);
+		}
+		this.reloadWorkspace.setEnabled(!isProfileWorkspace);
+	}
+
+	public void loadCurrentProfileWorkspace()
+	{
+		if (this.currentProfile == null)
+		{
+			LogMgr.logError("MainWindow.loadCurrentProfileWorkspace()", "No current profile defined!", new IllegalStateException("No current profile"));
+			return;
+		}
+
 		String realFilename = null;
 		try
 		{
 			boolean useDefault = false;
-			String workspaceFilename = aProfile.getWorkspaceFile();
+			String workspaceFilename = currentProfile.getWorkspaceFile();
 			if (StringUtil.isBlank(workspaceFilename))
 			{
 				workspaceFilename = DEFAULT_WORKSPACE;
 				useDefault = true;
-			}
-			else if (!workspaceFilename.endsWith(".wksp"))
-			{
-				workspaceFilename += ".wksp";
 			}
 
 			realFilename = getRealWorkspaceFilename(workspaceFilename);
@@ -1684,12 +1700,12 @@ public class MainWindow
 				{
 					FileDialogUtil util = new FileDialogUtil();
 					workspaceFilename = util.getWorkspaceFilename(this, false, true);
-					aProfile.setWorkspaceFile(workspaceFilename);
+					currentProfile.setWorkspaceFile(workspaceFilename);
 				}
 				else if (action == IGNORE_MISSING_WORKSPACE)
 				{
 					workspaceFilename = null;
-					aProfile.setWorkspaceFile(null);
+					currentProfile.setWorkspaceFile(null);
 				}
 				else
 				{

@@ -1365,7 +1365,15 @@ public class TableListPanel
 		if (tableHistory != null)
 		{
 			TableHistoryModel model = (TableHistoryModel)tableHistory.getModel();
-			model.addTable(this.selectedTable);
+			try
+			{
+				ignoreStateChanged = true;
+				model.addTable(this.selectedTable);
+			}
+			finally
+			{
+				ignoreStateChanged = false;
+			}
 		}
 
 		this.setShowDataMenuStatus(hasData);
@@ -2155,6 +2163,9 @@ public class TableListPanel
 		// this can happen during "closing" of the DbExplorer
 		if (table == null) return;
 		if (tableList == null) return;
+
+		// no need to apply the same table again.
+		if (selectedTable != null && selectedTable.equals(table)) return;
 
 		int row = findTable(table);
 
