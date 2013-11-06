@@ -113,6 +113,7 @@ public class ResultTabHandler
 		menu.add(new CloseOtherResultsAction(client));
 		menu.add(new CloseEmptyResultsAction(client));
 		menu.add(new CloseAllResultsAction(client));
+		menu.addSeparator();
 		menu.add(new DetachResultTabAction(client));
 		return menu;
 	}

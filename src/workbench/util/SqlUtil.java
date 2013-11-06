@@ -793,8 +793,25 @@ public class SqlUtil
 		{
 			SQLLexer lex = new SQLLexer(select);
 			SQLToken t = lex.getNextToken(false, false);
-			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.emptyList();
-			t = lex.getNextToken(false, false);
+
+
+			if (t == null) return Collections.emptyList();
+
+			String word = t.getContents();
+
+			if (! ("SELECT".equalsIgnoreCase(word) || "WITH".equalsIgnoreCase(word) ))
+			{
+				return Collections.emptyList();
+			}
+
+			if ("WITH".equals(word))
+			{
+				t = skipCTE(lex);
+			}
+			else
+			{
+				t = lex.getNextToken(false, false);
+			}
 
 			if (t == null) return Collections.emptyList();
 
@@ -882,6 +899,31 @@ public class SqlUtil
 		}
 
 		return result;
+	}
+
+	private static SQLToken skipCTE(SQLLexer lexer)
+	{
+		SQLToken token = lexer.getNextToken(false, false);
+		int bracketCount = 0;
+		while (token != null)
+		{
+			String text = token.getContents();
+			if ("(".equals(text))
+			{
+				bracketCount ++;
+			}
+			else if (")".equals(text))
+			{
+				bracketCount --;
+			}
+
+			if ("SELECT".equals(text) && bracketCount == 0)
+			{
+				return lexer.getNextToken(false, false);
+			}
+			token = lexer.getNextToken(false, false);
+		}
+		return token;
 	}
 
 	/**

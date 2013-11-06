@@ -95,6 +95,7 @@ public class InsertColumnMatcher
 
 			while (token != null)
 			{
+				String text = token.getContents();
 				if (token.getContents().equals(")"))
 				{
 					bracketCount --;
@@ -123,7 +124,7 @@ public class InsertColumnMatcher
 				{
 					afterValues = true;
 				}
-				else if (token.getContents().equals("SELECT"))
+				else if (text.equals("SELECT") || text.equals("WITH"))
 				{
 					String subSelect = sql.substring(token.getCharBegin());
 					List<ElementInfo> entries = SqlUtil.getColumnEntries(subSelect, true);

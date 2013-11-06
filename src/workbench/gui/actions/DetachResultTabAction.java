@@ -23,8 +23,10 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
+import javax.swing.SwingUtilities;
 import workbench.gui.sql.DetachedResultWindow;
 import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.SqlPanel;
@@ -58,13 +60,14 @@ public class DetachResultTabAction
 		if (result.getDataStore() == null) return;
 
 		panel.removeCurrentResult();
+		final Window parent = SwingUtilities.getWindowAncestor(panel);
 
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				DetachedResultWindow window = new DetachedResultWindow(result, panel);
+				DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
 				window.showWindow();
 			}
 		});

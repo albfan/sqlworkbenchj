@@ -131,6 +131,7 @@ public class TableDataPanel
 	private WbToolbar toolbar;
 
 	private boolean initialized;
+	private boolean useDataStoreSource = false;
 	private FilteredProperties workspaceSettings;
 
 	public TableDataPanel()
@@ -296,23 +297,6 @@ public class TableDataPanel
 		dataDisplay.setConnection(dbConnection);
 
 		initialized = true;
-	}
-
-	public int getAddHeight()
-	{
-		int height = 0;
-		if (this.toolbar != null)
-		{
-			height += toolbar.getPreferredSize().height;
-		}
-		height += dataDisplay.getStatusBarHeight();
-		return height;
-	}
-
-	public int getToolbarWidth()
-	{
-		if (this.toolbar == null) return 0;
-		return toolbar.getPreferredSize().width;
 	}
 
 	/**
@@ -814,7 +798,7 @@ public class TableDataPanel
 		if (this.isRetrieving()) return;
 
 		String sql = null;
-		if (table != null)
+		if (!useDataStoreSource)
 		{
 			retrieveTableDefinition();
 			sql = this.buildSqlForTable(tableDefinition);
@@ -844,7 +828,7 @@ public class TableDataPanel
 
 			setSavepoint();
 
-			if (table == null)
+			if (useDataStoreSource)
 			{
 				dataDisplay.runCurrentSql(respectMaxRows);
 			}
@@ -1081,6 +1065,7 @@ public class TableDataPanel
 	{
 		initGui();
 		removeTableDisplay();
+		useDataStoreSource = true;
 		try
 		{
 			this.setConnection(result.getOriginalConnection());

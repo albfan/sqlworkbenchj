@@ -472,7 +472,38 @@ public class SqlUtilTest
 		assertEquals("Wrong first column", "col2", l.get(1));
 		assertEquals("Wrong first column", "col3", l.get(2));
 
+		sql = "with cte1 (x,y,z) as (select a,b,c from foo) select x,y,z from cte1";
+		List<String> cols = SqlUtil.getSelectColumns(sql, false);
+		assertEquals(3, cols.size());
+		assertEquals("x", cols.get(0));
+		assertEquals("y", cols.get(1));
+		assertEquals("z", cols.get(2));
+
+		sql =
+			"with cte1 (x,y,z) as (\n" +
+			"  select a,b,c from foo\n" +
+			"), cte2 as (\n" +
+			" select c1, c2 from bar\n" +
+			")\n " +
+			"select t1.x as x1, t1.y as y1, t1.z, t2.col1 as tcol\n" +
+			"from cte1 t1 \n" +
+			"  join cte2 t2 on t1.z = t2.c2";
+		cols = SqlUtil.getSelectColumns(sql, false);
+		assertEquals(4, cols.size());
+		assertEquals("t1.x", cols.get(0));
+		assertEquals("t1.y", cols.get(1));
+		assertEquals("t1.z", cols.get(2));
+		assertEquals("t2.col1", cols.get(3));
+
+		cols = SqlUtil.getSelectColumns(sql, true);
+		assertEquals(4, cols.size());
+		assertEquals("t1.x as x1", cols.get(0));
+		assertEquals("t1.y as y1", cols.get(1));
+		assertEquals("t1.z", cols.get(2));
+		assertEquals("t2.col1 as tcol", cols.get(3));
+
 	}
+
 
 	@Test
 	public void testStripColumnAlias()

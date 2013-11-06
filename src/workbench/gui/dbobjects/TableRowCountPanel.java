@@ -409,12 +409,12 @@ public class TableRowCountPanel
 
 			ResourceMgr.setWindowIcons(window, "rowcounts");
 
-			if (!Settings.getInstance().restoreWindowSize(this.window, TableRowCountPanel.class.getName()))
+			if (!Settings.getInstance().restoreWindowSize(this.window, getClass().getName()))
 			{
 				this.window.setSize(500, 400);
 			}
 
-			if (!Settings.getInstance().restoreWindowPosition(this.window, TableRowCountPanel.class.getName()))
+			if (!Settings.getInstance().restoreWindowPosition(this.window, getClass().getName()))
 			{
 				WbSwingUtilities.center(this.window, aParent);
 			}
@@ -425,11 +425,16 @@ public class TableRowCountPanel
 		this.retrieveRowCounts();
 	}
 
+	protected void saveSettings()
+	{
+		Settings.getInstance().storeWindowPosition(this.window, getClass().getName());
+		Settings.getInstance().storeWindowSize(this.window, getClass().getName());
+	}
+
 	private void doClose()
 	{
 		cancelExecution();
-		Settings.getInstance().storeWindowPosition(this.window, TableRowCountPanel.class.getName());
-		Settings.getInstance().storeWindowSize(this.window, TableRowCountPanel.class.getName());
+		saveSettings();
 		this.window.setVisible(false);
 		this.window.dispose();
 		this.window = null;

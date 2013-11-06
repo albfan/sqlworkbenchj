@@ -2902,12 +2902,12 @@ public class SqlPanel
 		return goOn;
 	}
 
-	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
+	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult)
 	{
 		if (script == null) return;
 
 		boolean logWasCompressed = false;
-		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
+		boolean jumpToNext = (cursorPos > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
@@ -3014,20 +3014,38 @@ public class SqlPanel
 				return;
 			}
 
-			if (commandAtIndex > -1)
+			if (cursorPos > -1)
 			{
+				// cursorPos > -1 means that the statement at the cursor position should be executed
 				count = 1;
-				startIndex = scriptParser.getCommandIndexAtCursorPos(commandAtIndex);
+				startIndex = scriptParser.getCommandIndexAtCursorPos(cursorPos);
 				endIndex = startIndex + 1;
 				if (startIndex == -1)
 				{
-					this.appendToLog(ResourceMgr.getString("ErrNoCurrentStatement"));
-					this.showLogPanel();
-					return;
+					// no statement found at the cursor position
+					// this usually means, the cursor is behind the last statement
+					int numStatements = scriptParser.getSize();
+					int endOfLastStatement = scriptParser.getEndPosForCommand(numStatements - 1);
+
+					if (Settings.getInstance().getUseLastIfNoCurrentStmt() && cursorPos >= endOfLastStatement)
+					{
+						startIndex = numStatements - 1;
+						endIndex = numStatements;
+						LogMgr.logWarning("SqlPanel.displayResult()", "The cursor is not located inside a statement. Using the last statement of the editor instead.");
+					}
+					else
+					{
+						this.appendToLog(ResourceMgr.getString("ErrNoCurrentStatement"));
+						this.showLogPanel();
+						return;
+					}
 				}
 			}
 
-			if (count > 1) logWasCompressed = !this.stmtRunner.getVerboseLogging();
+			if (count > 1)
+			{
+				logWasCompressed = !this.stmtRunner.getVerboseLogging();
+			}
 
 			StringBuilder finishedMsg1 = new StringBuilder(ResourceMgr.getString("TxtScriptStatementFinished1"));
 			finishedMsg1.append(' ');
@@ -3045,7 +3063,7 @@ public class SqlPanel
 			// at this point, it merely shows the message log
 			showResultPanel();
 
-			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
+			highlightCurrent = ((count > 1 || cursorPos > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
 
 			if (highlightCurrent)
 			{

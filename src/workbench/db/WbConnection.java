@@ -339,6 +339,11 @@ public class WbConnection
 	 */
 	public String getCurrentUser()
 	{
+		if (this.profile != null)
+		{
+			return this.profile.getUsername();
+		}
+		
 		try
 		{
 			return this.sqlConnection.getMetaData().getUserName();
@@ -1033,6 +1038,7 @@ public class WbConnection
 	 * This might actually send a SELECT to the database to
 	 * retrieve the current user or schema.
 	 *
+	 * @see #getDisplayString(boolean)
 	 * @see #getCurrentUser()
 	 * @see DbMetadata#getSchemaToUse()
 	 * @see DbMetadata#getCurrentCatalog()
@@ -1042,6 +1048,16 @@ public class WbConnection
 		return getDisplayString(false);
 	}
 
+	/**
+	 * Return a readable display of a connection.
+	 *
+	 * @param useDisplaySchema if true a cached version of the current schema is used
+	 *
+	 * @see #getDisplayString(boolean)
+	 * @see #getCurrentUser()
+	 * @see DbMetadata#getSchemaToUse()
+	 * @see DbMetadata#getCurrentCatalog()
+	 */
 	public String getDisplayString(boolean useDisplaySchema)
 	{
 		String displayString;

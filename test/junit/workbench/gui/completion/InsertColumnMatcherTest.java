@@ -43,6 +43,7 @@ public class InsertColumnMatcherTest
 		super("InsertColumnMatcherTest");
 	}
 
+
 	@Test
 	public void testMerge()
 	{
@@ -230,4 +231,28 @@ public class InsertColumnMatcherTest
 		assertEquals("firstname", matcher.getTooltipForPosition(sql.indexOf("  'Arthur'")));
 
 	}
+
+	@Test
+	public void testSelectWithCTE()
+	{
+		String sql =
+			"insert into foo (col1, col2, col3) \n" +
+			" -- generate some data \n" +
+			"with cte1 as (\" +" +
+			"  select x1, x2, x3 from some_table \n" +
+			") \n" +
+			"select c.x1, c.x2, f.col1 \n" +
+			"from cte1 c \n " +
+			"  join foo f on c.x3 = f.id;";
+
+		InsertColumnMatcher matcher = new InsertColumnMatcher(sql);
+		int pos = sql.indexOf(" c.x1") + 1;
+		String column = matcher.getTooltipForPosition(pos);
+		assertEquals("col1", column);
+
+		pos = sql.indexOf("col2, col3") + 1;
+		column = matcher.getTooltipForPosition(pos);
+		assertEquals("c.x2", column);
+	}
+
 }

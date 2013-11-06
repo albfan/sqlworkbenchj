@@ -840,6 +840,17 @@ public class TableListPanel
 	{
 		shouldRetrieveTable = true;
 		shouldRetrieveTableData = true;
+		if (this.tableData != null)
+		{
+			if (this.selectedTable != null)
+			{
+				this.tableData.setTable(this.selectedTable);
+			}
+			else
+			{
+				this.tableData.reset();
+			}
+		}
 		shouldRetrieveTableSource = true;
 		shouldRetrieveTriggers = true;
 		shouldRetrieveIndexes = true;

@@ -23,12 +23,12 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 
 import workbench.WbManager;
 import workbench.interfaces.ToolWindow;
@@ -38,8 +38,8 @@ import workbench.resource.ResourceMgr;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.TableRowHeader;
 import workbench.gui.dbobjects.TableDataPanel;
+import workbench.resource.Settings;
 
 import workbench.util.StringUtil;
 
@@ -52,12 +52,15 @@ public class DetachedResultWindow
 	extends JPanel
 	implements WindowListener, ToolWindow
 {
+	private static int instanceCount;
 	private final TableDataPanel data;
+	private final int id;
 	private JFrame window;
 
-	public DetachedResultWindow(DwPanel result, ToolWindowManager registry)
+	public DetachedResultWindow(DwPanel result, Window parent, ToolWindowManager registry)
 	{
 		super(new BorderLayout(0,0));
+		id = ++instanceCount;
 
 		this.data = new TableDataPanel();
 
@@ -67,7 +70,13 @@ public class DetachedResultWindow
 		String title = result.getDataStore().getResultName();
 		if (StringUtil.isBlank(title))
 		{
-			title = ResourceMgr.getString("LblTabResult");
+			title = ResourceMgr.getString("LblTabResult") + " " + Integer.toString(id);
+		}
+
+		WbConnection conn = result.getDataStore().getOriginalConnection();
+		if (conn != null)
+		{
+			title += " (" + conn.getCurrentUser() + "@" + conn.getUrl() + ")";
 		}
 
 		this.window = new JFrame(title);
@@ -76,24 +85,15 @@ public class DetachedResultWindow
 
 		ResourceMgr.setWindowIcons(window, "data");
 
-		int rWidth = result.getWidth();
-		int tWidth = Math.max(result.getTable().getWidth(), data.getToolbarWidth());
-		int addWidth = result.getVerticalScrollBarWidth();
-		if (addWidth == 0)
+		int width = (int)(parent.getWidth() * 0.7);
+		int height = (int)(parent.getHeight() * 0.7);
+
+		if (!Settings.getInstance().restoreWindowSize(window, getClass().getName()))
 		{
-			addWidth = UIManager.getInt("ScrollBar.width") + 4;
+			this.window.setSize(width, height);
 		}
 
-		TableRowHeader rowHeader = TableRowHeader.getRowHeader(data.getData());
-		if (rowHeader != null)
-		{
-			addWidth += rowHeader.getWidth();
-		}
-
-		int width = Math.min(rWidth, tWidth) + addWidth + 16;
-		int height = result.getHeight() + data.getAddHeight();
-
-		this.window.setSize(width + 8, height + 8);
+		WbSwingUtilities.center(this.window, parent);
 
 		this.window.addWindowListener(this);
 		registry.registerToolWindow(this);
@@ -103,12 +103,18 @@ public class DetachedResultWindow
 	{
 		if (this.window != null)
 		{
-			WbSwingUtilities.center(this.window, WbManager.getInstance().getCurrentWindow());
 			this.window.setVisible(true);
 		}
 	}
+
+	protected void saveSettings()
+	{
+		Settings.getInstance().storeWindowSize(this.window, getClass().getName());
+	}
+
 	private void doClose()
 	{
+		saveSettings();
 		this.window.setVisible(false);
 		this.window.dispose();
 		this.window = null;
@@ -187,11 +193,24 @@ public class DetachedResultWindow
 		{
 			this.data.detachConnection();
 		}
+		if (window != null)
+		{
+			String title = window.getTitle();
+			int pos = title.indexOf(" (");
+			if (pos > -1)
+			{
+				title = title.substring(0, pos);
+				window.setTitle(title);
+			}
+		}
 	}
 
 	@Override
 	public WbConnection getConnection()
 	{
+		// as the connection original comes from the SqlPanel
+		// we do not need to return it here
+		// (this is only used by WbManager to properly close all connections during shutdown)
 		return null;
 	}
 
