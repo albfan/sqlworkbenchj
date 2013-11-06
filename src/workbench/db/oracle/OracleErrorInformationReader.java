@@ -64,6 +64,11 @@ public class OracleErrorInformationReader
 	@Override
 	public String getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
 	{
+		if (StringUtil.isEmptyString(objectName))
+		{
+			return null;
+		}
+		
 		String query =
 			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
 			"FROM all_errors \n" +

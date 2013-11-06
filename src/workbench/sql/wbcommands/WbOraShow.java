@@ -45,7 +45,9 @@ import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
+import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * An implementation of various SQL*Plus "show" commands.
@@ -232,9 +234,25 @@ public class WbOraShow
 			}
 		}
 
-		OracleErrorInformationReader reader = new OracleErrorInformationReader(currentConnection);
-		String errors = reader.getErrorInfo(schema, object, type, true);
-		if (errors.length() > 0)
+		if (object == null)
+		{
+			DdlObjectInfo info = currentConnection.getLastDdlObjectInfo();
+			if (info != null)
+			{
+				object = info.getObjectName();
+				type = info.getObjectType();
+			}
+		}
+
+		String errors = null;
+
+		if (object != null)
+		{
+			OracleErrorInformationReader reader = new OracleErrorInformationReader(currentConnection);
+			errors  = reader.getErrorInfo(schema, object, type, true);
+		}
+
+		if (StringUtil.isNonEmpty(errors))
 		{
 			result.addMessage(errors);
 		}

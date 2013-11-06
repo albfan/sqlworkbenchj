@@ -101,6 +101,7 @@ public class DdlCommand
 		}
 
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		currentConnection.setLastDDLObject(info);
 
 		try
 		{

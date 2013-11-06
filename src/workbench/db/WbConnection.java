@@ -51,6 +51,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 
+import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -102,6 +103,7 @@ public class WbConnection
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
 	private final Map<String, String> sessionProps = new HashMap<String, String>();
+	private DdlObjectInfo lastDdlObject;
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
@@ -131,6 +133,16 @@ public class WbConnection
 			}
 			removeNewLines = db.removeNewLinesInSQL();
 		}
+	}
+
+	public void setLastDDLObject(DdlObjectInfo object)
+	{
+		this.lastDdlObject = object;
+	}
+
+	public DdlObjectInfo getLastDdlObjectInfo()
+	{
+		return this.lastDdlObject;
 	}
 
 	public void setSessionProperty(String key, String value)
@@ -343,7 +355,7 @@ public class WbConnection
 		{
 			return this.profile.getUsername();
 		}
-		
+
 		try
 		{
 			return this.sqlConnection.getMetaData().getUserName();
