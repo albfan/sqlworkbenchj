@@ -69,6 +69,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.Replacer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -117,6 +118,7 @@ public class BatchRunner
 	private boolean storeErrorMessages;
 	private MessageBuffer errors;
 	private final List<DataStore> queryResults = new ArrayList<DataStore>();
+	private Replacer replacer;
 
 	public BatchRunner()
 	{
@@ -151,6 +153,11 @@ public class BatchRunner
 	{
 		if (errors != null) errors.clear();
 		queryResults.clear();
+	}
+
+	public void setReplacer(Replacer replacer)
+	{
+		this.replacer = replacer;
 	}
 
 	public void setStoreErrors(boolean flag)
@@ -695,6 +702,11 @@ public class BatchRunner
 
 			try
 			{
+				if (replacer != null)
+				{
+					sql = replacer.replace(sql);
+				}
+				
 				if (this.resultDisplay == null && !Settings.getInstance().getLogAllStatements())
 				{
 					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);

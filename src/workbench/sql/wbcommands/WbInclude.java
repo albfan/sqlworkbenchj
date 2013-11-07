@@ -43,6 +43,7 @@ import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
+import workbench.util.Replacer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -56,6 +57,9 @@ public class WbInclude
 	public static final String VERB = "WBINCLUDE";
 	public static final String ORA_INCLUDE = "@";
 
+	public static final String ARG_SEARCH_VALUE = "replaceWhat";
+	public static final String ARG_REPLACE_VALUE = "replaceWith";
+	public static final String ARG_REPLACE_USE_REGEX = "useRegex";
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
 	 * If cancelling wasn't necessary, a local variable in the execute() method would have been enough.
@@ -75,6 +79,9 @@ public class WbInclude
 		ConditionCheck.addParameters(cmdLine);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_SEARCH_VALUE);
+		cmdLine.addArgument(ARG_REPLACE_VALUE);
+		cmdLine.addArgument(ARG_REPLACE_USE_REGEX, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -241,7 +248,8 @@ public class WbInclude
 			{
 				batchRunner.setUseSavepoint(cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT));
 			}
-
+			batchRunner.setReplacer(getReplacer());
+			
 			if (showResults)
 			{
 				if (WbManager.getInstance().isGUIMode())
@@ -283,6 +291,20 @@ public class WbInclude
 			result.addMessage(ExceptionUtil.getDisplay(th));
 		}
 		return result;
+	}
+
+	private Replacer getReplacer()
+	{
+		String searchValue = cmdLine.getValue(ARG_SEARCH_VALUE);
+		if (StringUtil.isBlank(searchValue)) return null;
+
+		if (!cmdLine.isArgPresent(ARG_REPLACE_VALUE))
+		{
+			return null;
+		}
+		boolean useRegex = cmdLine.getBoolean(ARG_REPLACE_USE_REGEX, false);
+		String replace = cmdLine.getValue(ARG_REPLACE_VALUE);
+		return new Replacer(searchValue, replace, useRegex);
 	}
 
 	@Override
