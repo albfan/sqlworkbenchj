@@ -36,7 +36,6 @@ import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
-import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -48,7 +47,6 @@ import workbench.util.StringUtil;
 public class SqlServerIndexReader
 	extends JdbcIndexReader
 {
-	public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
 	private boolean checkOptions;
 	private boolean checkFilteredIndex;
 
@@ -57,13 +55,6 @@ public class SqlServerIndexReader
 		super(meta);
 		checkOptions = SqlServerUtil.isSqlServer2005(meta.getWbConnection());
 		checkFilteredIndex = SqlServerUtil.isSqlServer2008(meta.getWbConnection());
-	}
-
-	@Override
-	protected String getUniqueConstraint(TableIdentifier table, IndexDefinition indexDefinition)
-	{
-		String sql = super.getUniqueConstraint(table, indexDefinition);
-		return replaceClustered(sql, indexDefinition);
 	}
 
 	@Override
@@ -200,28 +191,6 @@ public class SqlServerIndexReader
 		return options.toString();
 	}
 
-	private String replaceClustered(String sql, IndexDefinition indexDefinition)
-	{
-		if (StringUtil.isEmptyString(sql)) return sql;
-		if (indexDefinition == null) return sql;
-
-		String type = indexDefinition.getIndexType();
-		String clustered = "CLUSTERED";
-		if ("NORMAL".equals(type))
-		{
-			clustered = "NONCLUSTERED";
-		}
-
-		if (StringUtil.isBlank(type))
-		{
-			sql = TemplateHandler.removePlaceholder(sql, CLUSTERED_PLACEHOLDER, true);
-		}
-		else
-		{
-			sql = TemplateHandler.replacePlaceholder(sql, CLUSTERED_PLACEHOLDER, clustered);
-		}
-		return sql;
-	}
 
 	@Override
 	public boolean supportsIndexList()

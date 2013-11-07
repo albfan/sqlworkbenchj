@@ -313,7 +313,6 @@ public class TableSourceBuilder
 		String cons = consReader.getConstraintSource(constraints, "   ");
 		if (StringUtil.isNonEmpty(cons))
 		{
-			result.append(",\n   ");
 			result.append(cons);
 		}
 

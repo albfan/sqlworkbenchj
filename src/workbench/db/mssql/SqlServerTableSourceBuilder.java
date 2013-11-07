@@ -30,8 +30,6 @@ import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.util.StringUtil;
 
-import static workbench.db.mssql.SqlServerIndexReader.CLUSTERED_PLACEHOLDER;
-
 /**
  *
  * @author Thomas Kellerer
@@ -39,6 +37,7 @@ import static workbench.db.mssql.SqlServerIndexReader.CLUSTERED_PLACEHOLDER;
 public class SqlServerTableSourceBuilder
 	extends TableSourceBuilder
 {
+	public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
 
 	public SqlServerTableSourceBuilder(WbConnection con)
 	{
