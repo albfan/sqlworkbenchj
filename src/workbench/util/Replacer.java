@@ -37,11 +37,12 @@ public class Replacer
 	private Pattern replacePattern;
 	private boolean ignoreCase = true;
 
-	public Replacer(String value, String replaceWith, boolean useRegex)
+	public Replacer(String value, String replaceWith, boolean ignoreCase, boolean useRegex)
 	{
 		this.searchValue = value;
 		this.replacement = replaceWith;
 		this.isRegex = useRegex;
+		this.ignoreCase = ignoreCase;
 		initPattern();
 	}
 

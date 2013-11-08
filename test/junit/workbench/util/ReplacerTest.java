@@ -38,10 +38,10 @@ public class ReplacerTest
 	@Test
 	public void testReplace()
 	{
-		Replacer replacer = new Replacer("foo", "bar", false);
+		Replacer replacer = new Replacer("foo", "bar", true, false);
 		assertEquals("bar is not bar", replacer.replace("foo is not bar"));
 
-		replacer = new Replacer("foo|bar", "42", true);
+		replacer = new Replacer("foo|bar", "42", true, true);
 		assertEquals("42 is 42", replacer.replace("foo is bar"));
 	}
 
