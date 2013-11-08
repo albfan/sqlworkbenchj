@@ -57,7 +57,7 @@ public class WbInclude
 	public static final String VERB = "WBINCLUDE";
 	public static final String ORA_INCLUDE = "@";
 
-	public static final String ARG_SEARCH_VALUE = "replaceWhat";
+	public static final String ARG_SEARCH_VALUE = "searchFor";
 	public static final String ARG_REPLACE_VALUE = "replaceWith";
 	public static final String ARG_REPLACE_USE_REGEX = "useRegex";
 	/*
@@ -249,7 +249,7 @@ public class WbInclude
 				batchRunner.setUseSavepoint(cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT));
 			}
 			batchRunner.setReplacer(getReplacer());
-			
+
 			if (showResults)
 			{
 				if (WbManager.getInstance().isGUIMode())
