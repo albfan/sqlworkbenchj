@@ -60,7 +60,7 @@ public class WbInclude
 	public static final String ARG_SEARCH_VALUE = "searchFor";
 	public static final String ARG_REPLACE_VALUE = "replaceWith";
 	public static final String ARG_REPLACE_USE_REGEX = "useRegex";
-	public static final String ARG_REPLACE_IGNORECASE = "replaceIgnoreCase";
+	public static final String ARG_REPLACE_IGNORECASE = "ignoreCase";
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
 	 * If cancelling wasn't necessary, a local variable in the execute() method would have been enough.

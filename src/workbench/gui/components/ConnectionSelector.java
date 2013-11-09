@@ -215,7 +215,7 @@ public class ConnectionSelector
 		else
 		{
 			// make sure to clear any previously assigned customized icon
-			ResourceMgr.setWindowIcons(this.parent, "workbench");
+			ResourceMgr.setWindowIcons(this.parent, client.getDefaultIconName());
 		}
 
 		WbConnection conn = null;
@@ -227,8 +227,6 @@ public class ConnectionSelector
 			return;
 		}
 		setConnectIsInProgress();
-
-		connectingInfo.repaint();
 
 		showConnectingInfo();
 		String id = this.client.getConnectionId(aProfile);

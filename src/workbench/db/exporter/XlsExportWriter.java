@@ -51,6 +51,7 @@ public class XlsExportWriter
 		XlsRowDataConverter xls = (XlsRowDataConverter) converter;
 		xls.setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
 		xls.setAppend(exporter.getAppendToFile());
+		xls.setTargetSheetIndex(exporter.getTargetSheetIndex());
 	}
 
 	@Override

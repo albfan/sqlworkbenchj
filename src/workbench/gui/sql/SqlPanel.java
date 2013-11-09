@@ -3530,7 +3530,7 @@ public class SqlPanel
 		String resultName = (ds != null ? ds.getResultName() : null);
 		if (StringUtil.isBlank(resultName))
 		{
-			resultName = ResourceMgr.getString("LblTabResult");
+			resultName = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(newIndex + 1);
 		}
 		else
 		{
@@ -3538,7 +3538,7 @@ public class SqlPanel
 		}
 		this.resultTab.insertTab(resultName, null, data, null, newIndex);
 		data.showGeneratingSQLAsTooltip();
-		data.setName("dwresult" + newIndex);
+		data.setName("dwresult" + NumberStringCache.getNumberString(newIndex));
 		if (this.resultTab.getTabCount() == 2)
 		{
 			this.resultTab.setSelectedIndex(0);

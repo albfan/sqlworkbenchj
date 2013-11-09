@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.storage.RowData;
@@ -62,6 +63,8 @@ import org.apache.poi.xssf.usermodel.helpers.ColumnHelper;
 public class XlsRowDataConverter
 	extends RowDataConverter
 {
+	public static final String INFO_SHEETNAME = "SQL";
+
 	private Workbook workbook = null;
 	private Sheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
@@ -69,6 +72,7 @@ public class XlsRowDataConverter
 	private int firstRow = 0;
 	private boolean optimizeCols = true;
 	private boolean append;
+	private int targetSheetIndex = -1;
 
 	public XlsRowDataConverter()
 	{
@@ -88,9 +92,19 @@ public class XlsRowDataConverter
 		useXLSX = true;
 	}
 
+	public void setTargetSheetIndex(int index)
+	{
+		this.targetSheetIndex = index;
+	}
+
 	public void setOptimizeColumns(boolean flag)
 	{
 		this.optimizeCols = flag;
+	}
+
+	private boolean applyFormatting()
+	{
+		return this.targetSheetIndex < 0;
 	}
 
 	// This should not be called in the constructor as
@@ -133,7 +147,9 @@ public class XlsRowDataConverter
 		createFormatters();
 		firstRow = 0;
 
-		if (append && getOutputFile().exists())
+		boolean loadFile = append || this.targetSheetIndex > 0;
+
+		if (loadFile && getOutputFile().exists())
 		{
 			loadExcelFile();
 		}
@@ -154,18 +170,36 @@ public class XlsRowDataConverter
 		}
 
 		excelFormat.setupWithWorkbook(workbook);
-		sheet = workbook.createSheet(getPageTitle("SQLExport"));
+
+		String sheetTitle = getPageTitle("SQLExport");
+
+		if (this.targetSheetIndex > 0 && this.targetSheetIndex <= workbook.getNumberOfSheets())
+		{
+			// The user supplies a one based sheet index
+			sheet = workbook.getSheetAt(targetSheetIndex - 1);
+			workbook.setSheetName(targetSheetIndex - 1, sheetTitle);
+		}
+		else
+		{
+			this.targetSheetIndex = -1;
+		}
+
+		if (sheet == null)
+		{
+			sheet = workbook.createSheet(sheetTitle);
+		}
+
 
 		if (includeColumnComments)
 		{
-			Row commentRow = sheet.createRow(0);
+			Row commentRow = createSheetRow(0);
 			firstRow = 1;
 			int column = 0;
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
 				if (includeColumnInExport(c))
 				{
-					Cell cell = commentRow.createCell(column);
+					Cell cell = createSheetCell(commentRow, column);
 					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true, false, c);
 					column ++;
 				}
@@ -175,14 +209,14 @@ public class XlsRowDataConverter
 		if (writeHeader)
 		{
 			// table header with column names
-			Row headRow = sheet.createRow(firstRow);
+			Row headRow = createSheetRow(firstRow);
 			firstRow ++;
 			int column = 0;
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
 				if (includeColumnInExport(c))
 				{
-					Cell cell = headRow.createCell(column);
+					Cell cell = createSheetCell(headRow, column);
 					setCellValueAndStyle(cell, SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(c)), true, false, c);
 					column ++;
 				}
@@ -191,22 +225,39 @@ public class XlsRowDataConverter
 		return null;
 	}
 
+	private Cell createSheetCell(Row row, int cellIndex)
+	{
+		if (applyFormatting())
+		{
+			return row.createCell(cellIndex);
+		}
+		Cell cell = row.getCell(cellIndex);
+		if (cell == null)
+		{
+			cell = row.createCell(cellIndex);
+		}
+		return cell;
+	}
+
+	private Row createSheetRow(int rowIndex)
+	{
+		if (this.applyFormatting())
+		{
+			return sheet.createRow(rowIndex);
+		}
+		Row row = sheet.getRow(rowIndex);
+		if (row == null)
+		{
+			row = sheet.createRow(rowIndex);
+		}
+		return row;
+	}
 	@Override
 	public StringBuilder getEnd(long totalRows)
 	{
 		if (getAppendInfoSheet())
 		{
-			Sheet info = workbook.createSheet("SQL");
-			Row infoRow = info.createRow(0);
-			Cell cell = infoRow.createCell(0);
-
-			CellStyle style = workbook.createCellStyle();
-			style.setAlignment(CellStyle.ALIGN_LEFT);
-			style.setWrapText(false);
-
-			RichTextString s = workbook.getCreationHelper().createRichTextString(generatingSql);
-			cell.setCellValue(s);
-			cell.setCellStyle(style);
+			writeInfoSheet();
 		}
 
 		if (getEnableFixedHeader() && writeHeader)
@@ -277,7 +328,49 @@ public class XlsRowDataConverter
 		return null;
 	}
 
+	private void writeInfoSheet()
+	{
+		Sheet info = workbook.getSheet(INFO_SHEETNAME);
 
+		if (info == null)
+		{
+			info = workbook.createSheet(INFO_SHEETNAME);
+			Row headRow = info.createRow(0);
+			Cell cell = headRow.createCell(0);
+			setCellValueAndStyle(cell, ResourceMgr.getString("TxtSheet"), true, false, 0);
+			cell = headRow.createCell(1);
+			setCellValueAndStyle(cell, "SQL", true, false, 1);
+		}
+		else
+		{
+			// move the info sheet to the end
+			int count = workbook.getNumberOfSheets();
+			workbook.setSheetOrder(info.getSheetName(), count - 1);
+		}
+
+		int rowNum = info.getLastRowNum() + 1;
+
+		Row infoRow = info.createRow(rowNum);
+
+		Cell name = infoRow.createCell(0);
+		CellStyle nameStyle = workbook.createCellStyle();
+		nameStyle.setAlignment(CellStyle.ALIGN_LEFT);
+		nameStyle.setVerticalAlignment(CellStyle.VERTICAL_TOP);
+		nameStyle.setWrapText(false);
+		name.setCellValue(sheet.getSheetName());
+		name.setCellStyle(nameStyle);
+		info.autoSizeColumn(0);
+
+		Cell sqlCell = infoRow.createCell(1);
+		CellStyle sqlStyle = workbook.createCellStyle();
+		sqlStyle.setAlignment(CellStyle.ALIGN_LEFT);
+		sqlStyle.setVerticalAlignment(CellStyle.VERTICAL_TOP);
+		sqlStyle.setWrapText(false);
+
+		RichTextString s = workbook.getCreationHelper().createRichTextString(generatingSql);
+		sqlCell.setCellValue(s);
+		sqlCell.setCellStyle(sqlStyle);
+	}
 
 	@Override
 	public StringBuilder convertRowData(RowData row, long rowIndex)
@@ -285,13 +378,13 @@ public class XlsRowDataConverter
 		StringBuilder ret = new StringBuilder();
 		int count = this.metaData.getColumnCount();
 		int rowNum = (int)rowIndex + firstRow;
-		Row myRow = sheet.createRow(rowNum);
+		Row myRow = createSheetRow(rowNum);
 		int column = 0;
 		for (int c = 0; c < count; c++)
 		{
 			if (includeColumnInExport(c))
 			{
-				Cell cell = myRow.createCell(column);
+				Cell cell = createSheetCell(myRow, column);
 
 				Object value = row.getValue(c);
 				boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
@@ -377,7 +470,11 @@ public class XlsRowDataConverter
 			cellStyle = excelFormat.headerCellStyle;
 		}
 
-		cell.setCellStyle(cellStyle);
+		if (applyFormatting())
+		{
+			// do not mess with the formatting if we are writing to an existing sheet
+			cell.setCellStyle(cellStyle);
+		}
 	}
 
 	public boolean isTemplate()

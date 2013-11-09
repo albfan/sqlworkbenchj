@@ -87,6 +87,7 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbOptionPane;
 
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -1185,7 +1186,7 @@ public class WbSwingUtilities
 			case JOptionPane.CLOSED_OPTION:
 				return "CLOSED_OPTION";
 			default:
-				return Integer.toString(choice);
+				return NumberStringCache.getNumberString(choice);
 		}
 	}
 

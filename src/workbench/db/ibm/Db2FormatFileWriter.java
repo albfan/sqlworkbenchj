@@ -40,6 +40,7 @@ import workbench.storage.ResultInfo;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -128,7 +129,7 @@ public class Db2FormatFileWriter
 			for (int i = 0; i < count; i++)
 			{
 				if (i > 0) out.print(", ");
-				out.print(Integer.toString(i+1));
+				out.print(NumberStringCache.getNumberString(i+1));
 			}
 			out.println(")");
 			out.print("  INSERT INTO ");

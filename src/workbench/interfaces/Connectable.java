@@ -37,4 +37,5 @@ public interface Connectable
 	void connectFailed(String error);
 	void connected(WbConnection conn);
 	void connectEnded();
+	String getDefaultIconName();
 }

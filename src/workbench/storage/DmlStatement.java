@@ -29,9 +29,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +43,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbSettings;
+import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
@@ -48,6 +52,8 @@ import workbench.sql.formatter.SqlFormatter;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbStringTokenizer;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -132,6 +138,7 @@ public class DmlStatement
 		boolean useXmlApi = dbs.useXmlAPI();
 		boolean useClobSetString = dbs.useSetStringForClobs();
 		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
+		DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(aConnection);
 
 		try
 		{
@@ -168,7 +175,7 @@ public class DmlStatement
 						streamsToClose.add(in);
 					}
 				}
-				else if (useXmlApi && SqlUtil.isXMLType(type) && !dbs.isDmlExpressionDefined(dbmsType) && (value instanceof String))
+				else if (useXmlApi && SqlUtil.isXMLType(type) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String))
 				{
 					SQLXML xml = JdbcUtils.createXML((String)value, aConnection);
 					stmt.setSQLXML(i+ 1, xml);
@@ -197,6 +204,10 @@ public class DmlStatement
 						throw new SQLException("Input file (" + f.getAbsolutePath() + ") for LOB not found!");
 					}
 				}
+				else if (type == Types.ARRAY)
+				{
+					handleArray(stmt, i+1, dbmsType, value, aConnection);
+				}
 				else
 				{
 					stmt.setObject(i + 1, value);
@@ -216,6 +227,57 @@ public class DmlStatement
 		}
 
 		return rows;
+	}
+
+	/**
+	 * Handle an array column.
+	 * 
+	 * This is currently only tested on Postgres.
+	 * But as I'm not aware of any other DBMS with a decent array support anyway this shouldn't do much harm.
+	 *
+	 * @param stmt           the statement to use
+	 * @param index          the column index for the prepared statement
+	 * @param dbmsType       the DBMS typename as returned by the driver
+	 * @param value          the value to use
+	 * @param connection     the connection to use
+	 *
+	 * @throws SQLException
+	 */
+	private void handleArray(PreparedStatement stmt, int index, String dbmsType, Object value, WbConnection connection)
+		throws SQLException
+	{
+		if (value instanceof Array)
+		{
+			stmt.setArray(index, (Array)value);
+			return;
+		}
+
+		String valueString = value.toString().trim();
+		if (StringUtil.isEmptyString(valueString))
+		{
+			stmt.setNull(index, Types.ARRAY);
+		}
+
+		if (connection.getMetadata().isPostgres() && valueString.startsWith("{") && valueString.endsWith("}"))
+		{
+			valueString = valueString.substring(1,valueString.length() - 1);
+		}
+
+		WbStringTokenizer tok = new WbStringTokenizer(",", true, "\"'", false);
+		tok.setDelimiterNeedsWhitspace(false);
+		tok.setSourceString(valueString);
+
+		List<Object> arrayValues = new ArrayList<Object>();
+		while (tok.hasMoreTokens())
+		{
+			String s = tok.nextToken().trim();
+			arrayValues.add(s);
+		}
+		Object[] data = arrayValues.toArray();
+
+		String baseType = SqlUtil.getBaseTypeName(dbmsType);
+		Array array = connection.getSqlConnection().createArrayOf(baseType, data);
+		stmt.setArray(index, array);
 	}
 
 	public void setConcatString(String concat)

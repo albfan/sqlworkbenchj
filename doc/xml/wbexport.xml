@@ -1173,46 +1173,73 @@
 				<tbody valign="top">
 
 					<row>
-						<entry>-title</entry>
+						<entry id="export-spreadsheet-title">-title</entry>
 						<entry>The name to be used for the worksheet</entry>
 					</row>
 
 					<row>
-						<entry>-infoSheet</entry>
+						<entry id="export-infosheet">-infoSheet</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: <literal>false</literal></para>
               <para>
                 If set to true, a second worksheet will be created that contains the generating SQL of the export.
 								For ods exports, additional export information is available in the document properties.
               </para>
-              <para>Default value: <literal>false</literal></para>
             </entry>
 					</row>
 
 					<row>
-						<entry>-fixedHeader</entry>
+						<entry id="export-fixed-header">-fixedHeader</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: <literal>true</literal></para>
               <para>
                 If set to true, the header row will be "frozen" in the Worksheet so that
                 it will not scroll out of view.
               </para>
-              <para>Default value: <literal>true</literal></para>
             </entry>
 					</row>
 
 					<row>
-						<entry>-autoFilter</entry>
+						<entry id="export-autofilter">-autoFilter</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
               <para>
-                If set to true, the "auto-filter" fetaure for the column headers will be turned on. This is only
-                valid for ODS and XLSM exports. It is not supported for XLS or XLSX.
+                If set to true, the "auto-filter" fetaure for the column headers will be turned on.
               </para>
               <para>Default value: <literal>true</literal></para>
             </entry>
 					</row>
 
+					<row>
+						<entry id="export-optimize-colwidth">-autoColWidth</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: <literal>true</literal></para>
+              <para>
+                If set to true, the width of the columns is adjusted to the width of the content.
+              </para>
+            </entry>
+					</row>
+
+          <row>
+            <entry id="export-targetsheet">-targetSheet</entry>
+            <entry>
+              <para>Possible values: any valid index for a worksheet in an existing Excel file</para>
+              <para>This parameter is only available for XLS and XLSX exports</para>
+              <para>
+                When using this parameter, the data will be written into an existing file and worksheet without
+                changing the formatting in the spreadsheet. No formatting is applied as it is assumed
+                that the target worksheet is properly set up. <literal>-autoFilter</literal>,
+                <literal>-fixedHeader</literal> and <literal>-autoColWidth</literal> can still be used.
+              </para>
+              <para>
+                If this parameter is used, the target file specified with the <literal>-file</literal> parameter
+                <emphasis role="bold">must</emphasis> already exist
+              </para>
+            </entry>
+          </row>
 
 
 				</tbody>

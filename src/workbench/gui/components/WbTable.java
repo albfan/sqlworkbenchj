@@ -153,6 +153,7 @@ import workbench.storage.RowDataReader;
 import workbench.storage.filter.FilterExpression;
 
 import workbench.util.FileDialogUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 
 /**
@@ -2175,7 +2176,7 @@ public class WbTable
 			{
 				TableColumn col = this.getColumnModel().getColumn(column);
 				int colWidth = col.getWidth();
-				String s = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterNewColWidth"), Integer.toString(colWidth));
+				String s = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterNewColWidth"), NumberStringCache.getNumberString(colWidth));
 				if (s != null)
 				{
 					try { colWidth = Integer.parseInt(s); } catch (Exception ex) { colWidth = -1; }

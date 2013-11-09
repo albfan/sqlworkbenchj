@@ -2113,4 +2113,19 @@ public class SqlUtil
 		}
 		return removeObjectQuotes(one).equalsIgnoreCase(removeObjectQuotes(other));
 	}
+
+	public static String getBaseTypeName(String dbmsType)
+	{
+		if (dbmsType == null) return null;
+		int pos = dbmsType.indexOf('(');
+		if (pos == -1)
+		{
+			pos = dbmsType.indexOf('[');
+		}
+		if (pos > -1)
+		{
+			return dbmsType.substring(0, pos);
+		}
+		return dbmsType;
+	}
 }

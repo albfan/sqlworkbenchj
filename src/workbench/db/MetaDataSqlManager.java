@@ -31,6 +31,7 @@ import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.util.NumberStringCache;
 import workbench.util.VersionNumber;
 import workbench.util.WbPersistence;
 
@@ -160,7 +161,7 @@ public class MetaDataSqlManager
 
 		if (majorVersion != -1 && minorVersion != -1)
 		{
-			key = productName + "-" + Integer.toString(majorVersion) + "." + Integer.toString(minorVersion);
+			key = productName + "-" + NumberStringCache.getNumberString(majorVersion) + "." + NumberStringCache.getNumberString(minorVersion);
 			sql = statements.get(key);
 		}
 
@@ -168,7 +169,7 @@ public class MetaDataSqlManager
 		if (sql != null) return sql;
 		if (majorVersion != -1)
 		{
-			key = productName + "-" + Integer.toString(majorVersion);
+			key = productName + "-" + NumberStringCache.getNumberString(majorVersion);
 			sql = statements.get(key);
 		}
 		if (sql != null) return sql;

@@ -211,7 +211,7 @@ public class DwStatusBar
 			infoPanel.remove(maxRowsLabel);
 		}
 	}
-	
+
 	public void removeSelectionIndicator(JTable client)
 	{
 		if (this.selectionDisplay == null) return;
@@ -395,7 +395,7 @@ public class DwStatusBar
 	{
 		if (this.tfTimeout != null)
 		{
-			this.tfTimeout.setText(Integer.toString(timeout));
+			this.tfTimeout.setText(NumberStringCache.getNumberString(timeout));
 		}
 	}
 
@@ -407,7 +407,7 @@ public class DwStatusBar
 
 	public void setMaxRows(int max)
 	{
-		this.tfMaxRows.setText(Integer.toString(max));
+		this.tfMaxRows.setText(NumberStringCache.getNumberString(max));
 	}
 
 	public int getMaxRows()

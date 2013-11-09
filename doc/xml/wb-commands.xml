@@ -793,8 +793,9 @@ $$ LANGUAGE plpgsql;
       <literal>workbench.settings</literal> configuration file.
     </para>
     <note><para>
-	If the included SQL script contains <literal>SELECT</literal> queries, the result
-	of those queries will <emphasis role="bold">not</emphasis> be displayed in the GUI
+      If the included SQL script contains <literal>SELECT</literal> queries, the result
+      of those queries will <emphasis role="bold">not</emphasis> be displayed in the GUI unless <literal>-displayResult=true</literal>
+      is used.
     </para></note>
     <para>The long version of the command accepts additional parameters.
       When using the long version, the filename needs to be passed as a parameter as well.
@@ -892,6 +893,24 @@ $$ LANGUAGE plpgsql;
             </entry>
           </row>
 
+          <row>
+            <entry><literallayout>-searchFor
+-replaceWith
+-ignoreCase
+-useRegex</literallayout></entry>
+            <entry>
+              <para>
+              Defines search and replace parameters to change the SQL statements before they are sent to the
+              database. This can e.g. be used to replace the schema name in DDL script that uses
+              fully qualified table names.
+              </para>
+              <para>
+                The replacement is done without checking the syntax of the statements. If the search value is
+                contained in a string literal or a SQL comment, it is also replaced.
+              </para>
+            </entry>
+          </row>
+
         </tbody>
       </tgroup>
     </informaltable>
@@ -899,7 +918,11 @@ $$ LANGUAGE plpgsql;
     <para>Execute <literal>my_script.sql</literal></para>
     <programlisting>@my_script.sql;</programlisting>
     <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
-    <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
+    <programlisting>WbInclude -file="my_script.sql" -continueOnError=false;</programlisting>
+    <para>Execute the script <literal>create_tables.sql</literal> and change all occurances of <literal>oldschema</literal>
+    to <litereral>new_schema</litereral>
+    </para>
+    <programlisting>WbInclude -file=create_tables.sql -searchFor="oldschema." -replaceWith="new_schema."</programlisting>
   </section>
 
   <section id="command-wbrunlb">

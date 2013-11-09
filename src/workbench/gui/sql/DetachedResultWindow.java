@@ -34,13 +34,14 @@ import workbench.WbManager;
 import workbench.interfaces.ToolWindow;
 import workbench.interfaces.ToolWindowManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.TableDataPanel;
-import workbench.resource.Settings;
 
+import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
 
@@ -70,7 +71,7 @@ public class DetachedResultWindow
 		String title = result.getDataStore().getResultName();
 		if (StringUtil.isBlank(title))
 		{
-			title = ResourceMgr.getString("LblTabResult") + " " + Integer.toString(id);
+			title = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(id);
 		}
 
 		WbConnection conn = result.getDataStore().getOriginalConnection();

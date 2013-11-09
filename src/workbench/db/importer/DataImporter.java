@@ -53,6 +53,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DmlExpressionBuilder;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -179,6 +180,7 @@ public class DataImporter
 
 	private int errorCount;
 	private boolean errorLimitAdded;
+	private DmlExpressionBuilder builder;
 
 	public DataImporter()
 	{
@@ -203,6 +205,7 @@ public class DataImporter
 		}
 
 		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
+		this.builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 	}
 
 	public void setUseSavepoint(boolean flag)
@@ -1843,7 +1846,7 @@ public class DataImporter
 
 	private String getDmlExpression(ColumnIdentifier column)
 	{
-		return dbConn.getDbSettings().getDataTypeDmlExpression(column.getDbmsType());
+		return builder.getDmlExpression(column);
 	}
 
 	/**

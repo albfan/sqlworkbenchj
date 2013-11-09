@@ -10,7 +10,9 @@
 	<!ENTITY jdbc-setup SYSTEM "jdbc-setup.xml">
 	<!ENTITY profiles SYSTEM "profiles.xml">
 	<!ENTITY editor SYSTEM "editor.xml">
+	<!ENTITY delimiter SYSTEM "delimiter.xml">
 	<!ENTITY using SYSTEM "using.xml">
+	<!ENTITY macros SYSTEM "macros.xml">
 	<!ENTITY using-fk SYSTEM "foreign-keys.xml">
 	<!ENTITY scripting SYSTEM "scripting.xml">
 	<!ENTITY console-mode SYSTEM "console.xml">
@@ -44,7 +46,9 @@
 &jdbc-setup;
 &profiles;
 &editor;
+&delimiter;
 &using;
+&macros;
 &using-fk;
 &dbms-specific;
 &variables;

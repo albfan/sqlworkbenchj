@@ -67,6 +67,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -138,7 +139,7 @@ public class TableRowCountPanel
 			try
 			{
 				showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-				dbConnection = ConnectionMgr.getInstance().getConnection(sourceConnection.getProfile(), "TableRowCount-" + Integer.toString(instanceCount));
+				dbConnection = ConnectionMgr.getInstance().getConnection(sourceConnection.getProfile(), "TableRowCount-" + NumberStringCache.getNumberString(instanceCount));
 			}
 			catch (Exception cne)
 			{
@@ -359,7 +360,7 @@ public class TableRowCountPanel
 			{
 				if (StringUtil.isBlank(message))
 				{
-					statusBar.setText(" " + Integer.toString(data.getRowCount()) + " " + ResourceMgr.getString("TxtTableListObjects"));
+					statusBar.setText(" " + NumberStringCache.getNumberString(data.getRowCount()) + " " + ResourceMgr.getString("TxtTableListObjects"));
 				}
 				else
 				{

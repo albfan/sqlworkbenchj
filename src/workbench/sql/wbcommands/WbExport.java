@@ -76,6 +76,11 @@ public class WbExport
 	public static final String VERB = "WBEXPORT";
 
 	// <editor-fold defaultstate="collapsed" desc=" Arguments ">
+	public static final String ARG_SOURCETABLE = "sourceTable";
+	public static final String ARG_OUTPUTDIR = "outputDir";
+	public static final String ARG_EXPORT_TYPE = "type";
+	public static final String ARG_OUTPUT_FILENAME = "file";
+
 	public static final String ARG_CREATE_OUTPUTDIR = "createDir";
 	public static final String ARG_BLOB_TYPE = "blobType";
 	public static final String ARG_XML_VERSION = "xmlVersion";
@@ -94,11 +99,16 @@ public class WbExport
 	public static final String ARG_CONTINUE_ON_ERROR = "continueOnError";
 	public static final String ARG_HEADER = "header";
 	public static final String ARG_TABLEWHERE = "tableWhere";
-	public static final String ARG_EXPORT_TYPE = "type";
-	public static final String ARG_OUTPUT_FILENAME = "file";
+
+	// spreadsheet options
 	public static final String ARG_ADD_INFOSHEET = "infoSheet";
 	public static final String ARG_AUTOFILTER = "autoFilter";
 	public static final String ARG_OPT_WIDTH = "autoColWidth";
+	public static final String ARG_FIXED_HEADER = "fixedHeader";
+	public static final String ARG_TARGET_SHEET = "targetSheet";
+
+	public static final String ARG_PAGE_TITLE = "title";
+
 	public static final String ARG_CHARFUNC = "charFunc";
 	public static final String ARG_CONCAT_FUNCTION = "concatFunc";
 	public static final String ARG_CONCAT_OPERATOR = "concat";
@@ -107,16 +117,12 @@ public class WbExport
 	public static final String ARG_DECIMAL_SYMBOL = "decimal";
 	public static final String ARG_ESCAPETEXT = "escapeText";
 	public static final String ARG_ESCAPE_HTML = "escapeHTML";
-	public static final String ARG_FIXED_HEADER = "fixedHeader";
 	public static final String ARG_INCLUDE_CREATETABLE = "createTable";
 	public static final String ARG_KEY_COLUMNS = "keyColumns";
 	public static final String ARG_LINEENDING = "lineEnding";
-	public static final String ARG_OUTPUTDIR = "outputDir";
-	public static final String ARG_PAGE_TITLE = "title";
 	public static final String ARG_POSTDATA_HTML = "postDataHtml";
 	public static final String ARG_PREDATA_HTML = "preDataHtml";
 	public static final String ARG_SHOW_ENCODINGS = "showEncodings";
-	public static final String ARG_SOURCETABLE = "sourceTable";
 	public static final String ARG_TABLE = "table";
 	public static final String ARG_TIMEFORMAT = "timeFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
@@ -209,6 +215,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_MERGE_TYPE, MergeGenerator.Factory.getSupportedTypes());
 		cmdLine.addArgument(ARG_NULL_STRING);
 		cmdLine.addArgument(ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_TARGET_SHEET);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -263,6 +270,7 @@ public class WbExport
 	{
 		return Settings.getInstance().getDefaultDateFormat();
 	}
+
 	private boolean getInfoSheetDefault(String type)
 	{
 		return Settings.getInstance().getDefaultExportInfoSheet(type);
@@ -454,10 +462,13 @@ public class WbExport
 		format = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
 		if (format != null) exporter.setDecimalSymbol(format);
 
+		// Spreadsheet options (will be ignored silently for non-spreadsheet exports)
 		exporter.setEnableAutoFilter(cmdLine.getBoolean(ARG_AUTOFILTER, true));
 		exporter.setEnableFixedHeader(cmdLine.getBoolean(ARG_FIXED_HEADER, true));
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
+		exporter.setTargetSheetIndex(cmdLine.getIntValue(ARG_TARGET_SHEET, -1));
 		exporter.setOptimizeSpreadsheetColumns(cmdLine.getBoolean(ARG_OPT_WIDTH, true));
+
 		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
 		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));

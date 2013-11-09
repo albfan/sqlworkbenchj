@@ -397,6 +397,7 @@ another_variable=24</programlisting>
         You can also define a list of variables with this parameter. In this case, the first
         character after the = sign, has to be # (hash sign) to flag the value as a variable list:
         <programlisting>java -jar sqlworkbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
+        The <literal>-vardef</literal> parameter can be used multiple times on the commandline.
       </para>
 
       <para>

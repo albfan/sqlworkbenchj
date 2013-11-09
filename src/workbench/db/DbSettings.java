@@ -34,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -918,17 +919,6 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "selectexpression." + dbmsType.toLowerCase(), null);
 	}
 
-	private String getDmlExpressionValue(String cleanType)
-	{
-		if (cleanType == null) return null;
-		return Settings.getInstance().getProperty(prefix + "dmlexpression." + cleanType.toLowerCase(), null);
-	}
-
-	public boolean isDmlExpressionDefined(String cleanType)
-	{
-		return getDmlExpressionValue(cleanType) != null;
-	}
-
 	/**
 	 * Return an expression to be used in a PreparedStatement as the value placeholder.
 	 *
@@ -936,16 +926,21 @@ public class DbSettings
 	 * <tt>cast(? as xml)</tt> is required.
 	 *
 	 * @param dbmsType  the DBMS data type of the column
-	 * @return a DBMS specific expression or ? if nothing was defined (or the datatype is null)
+	 * @return a DBMS specific expression or null if nothing was defined (or the datatype is null)
 	 *
 	 * @see #isDmlExpressionDefined(java.lang.String)
+	 * @see DmlExpressionBuilder
 	 */
-	public String getDataTypeDmlExpression(String dbmsType)
+	public String getDmlExpressionValue(String dbmsType)
 	{
-		if (dbmsType == null) return "?";
-		String expr = getDmlExpressionValue(dbmsType);
-		if (StringUtil.isBlank(expr)) return "?";
-		return expr;
+		if (dbmsType == null) return null;
+		String cleanType = SqlUtil.getBaseTypeName(dbmsType);
+		return Settings.getInstance().getProperty(prefix + "dmlexpression." + cleanType.toLowerCase(), null);
+	}
+
+	public boolean isDmlExpressionDefined(String dbmsType)
+	{
+		return getDmlExpressionValue(dbmsType) != null;
 	}
 
 	/**
@@ -1686,5 +1681,5 @@ public class DbSettings
 		boolean all = Settings.getInstance().getBoolProperty("workbench.sql.create.view.columnlist", true);
 		return Settings.getInstance().getBoolProperty(prefix + "create.view.columnlist", all);
 	}
-	
+
 }

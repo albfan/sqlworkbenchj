@@ -35,18 +35,19 @@ import workbench.db.importer.SpreadsheetReader;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
+import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
-import static workbench.gui.completion.BaseAnalyzer.CONTEXT_WB_PARAMS;
-import workbench.sql.wbcommands.WbDescribeObject;
+import static workbench.gui.completion.BaseAnalyzer.*;
 
 
 /**
@@ -226,7 +227,7 @@ public class WbCommandAnalyzer
 			SheetEntry entry = (SheetEntry)selectedObject;
 			if (useSheetIndex)
 			{
-				return Integer.toString(entry.sheetIndex);
+				return NumberStringCache.getNumberString(entry.sheetIndex);
 			}
 			else
 			{
@@ -256,7 +257,7 @@ public class WbCommandAnalyzer
 				String name = sheets.get(index);
 				if (useSheetIndex)
 				{
-					display = Integer.toString(index + 1) + " - " + name;
+					display = NumberStringCache.getNumberString(index + 1) + " - " + name;
 				}
 				else
 				{

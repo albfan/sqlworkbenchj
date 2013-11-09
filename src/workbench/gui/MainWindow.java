@@ -1204,8 +1204,7 @@ public class MainWindow
 	public void restoreState()
 	{
 		String state = Settings.getInstance().getProperty(this.getClass().getName() + ".state", "0");
-		int i = 0;
-		try { i = Integer.parseInt(state); } catch (Exception e) { i = 0; }
+		int i = StringUtil.getIntValue(state, NORMAL);
 		if (i == MAXIMIZED_BOTH)
 		{
 			this.setExtendedState(i);
@@ -1368,6 +1367,12 @@ public class MainWindow
 			return "Wb" + getWindowId();
 		}
 		return "Wb" + getWindowId() + "-" + p.getId();
+	}
+
+	@Override
+	public String getDefaultIconName()
+	{
+		return "workbench";
 	}
 
 	/**

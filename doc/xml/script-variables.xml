@@ -86,15 +86,6 @@ another_variable=24</programlisting>
       variable names, the additional values are ignored. If more variables are listed
       than columns are present in the result set, the additional variables will be undefined.
     </para>
-
-    <para>
-      You can also use PreparedStatements in the SQL editor. In this case
-      the parameters are denoted by quotation marks and you will be prompted for a value
-      each time you run the statement (which is different to using &wb-productname; variables.
-      For details on how to use prepared statements refer to
-      <link linkend="editor-prepared-statement">support for prepared statements</link>
-    </para>
-
   </section>
 
   <section id="vardef-read-content">
@@ -131,7 +122,7 @@ $[my_select];</programlisting>
   <section id="edit-variable">
     <title>Editing variables</title>
     <para>
-      To view a list of currently defined variables execute the command <literal>WBVARLIST</literal>.
+      To view a list of currently defined variables execute the command <literal>WbVarList</literal>.
       This will display a list of currently defined variables and their values. You can edit
       the resulting list similar to editing the result of a <literal>SELECT</literal> statement.
       You can add new variables by adding a row to the result, remove existing variables by deleting

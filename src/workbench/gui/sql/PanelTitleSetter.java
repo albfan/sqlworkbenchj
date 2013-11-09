@@ -23,10 +23,13 @@
 package workbench.gui.sql;
 
 import java.awt.Container;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
 import workbench.interfaces.MainPanel;
 import workbench.resource.GuiSettings;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -53,7 +56,7 @@ public class PanelTitleSetter
 	public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
 	{
 		if (index < 0) return;
-		
+
 		String title = plainTitle;
 		if (panel.isLocked())
 		{
@@ -83,7 +86,7 @@ public class PanelTitleSetter
 
 			if (index < 9 && GuiSettings.getShowTabIndex())
 			{
-				char c = Integer.toString(index+1).charAt(0);
+				char c = NumberStringCache.getNumberString(index+1).charAt(0);
 				int pos = plainTitle.length() + 1;
 				tab.setMnemonicAt(index, c);
 				// The Mnemonic index has to be set explicitely otherwise

@@ -30,17 +30,19 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 import workbench.WbManager;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ConnectionSelector;
-import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ConnectionSelector;
+import workbench.gui.components.RunningJobIndicator;
 
 /**
  *
@@ -86,6 +88,12 @@ public class DbExplorerWindow
 	{
 		setVisible(true);
 		toFront();
+	}
+
+	@Override
+	public String getDefaultIconName()
+	{
+		return "database";
 	}
 
 	public final void setProfileName(String aProfileName)

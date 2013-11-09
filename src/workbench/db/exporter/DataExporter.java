@@ -141,6 +141,7 @@ public class DataExporter
 
 	private WbNumberFormatter numberFormatter;
 	private boolean append;
+	private int targetSheetIndex; // for XLS and XLSX only
 	private boolean escapeHtml = true;
 	private String htmlHeading;
 	private String htmlTrailer;
@@ -601,6 +602,16 @@ public class DataExporter
 		return this.append;
 	}
 
+	public int getTargetSheetIndex()
+	{
+		return this.targetSheetIndex;
+	}
+
+	public void setTargetSheetIndex(int index)
+	{
+		this.targetSheetIndex = index;
+	}
+
 	public void setContinueOnError(boolean aFlag)
 	{
 		this.continueOnError = aFlag;
@@ -1053,7 +1064,7 @@ public class DataExporter
 					this.rowMonitor.setCurrentObject(job.getTable().getTableName(), i + 1, count);
 				}
 
-				if (append && exportWriter.managesOutput())
+				if (append && exportWriter.managesOutput() && (this.pageTitle == null || count > 1))
 				{
 					this.pageTitle = job.getTable().getTableExpression(this.dbConn);
 				}

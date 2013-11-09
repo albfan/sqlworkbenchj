@@ -30,6 +30,8 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
+import workbench.db.DefaultExpressionBuilder;
+import workbench.db.DmlExpressionBuilder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -50,9 +52,7 @@ public class StatementFactory
 	private boolean emptyStringIsNull;
 	private boolean includeNullInInsert = true;
 	private boolean useColumnLabel;
-
-	// DbSettings is only used by the unit tests
-	private DbSettings testSettings;
+	private DmlExpressionBuilder expressionBuilder;
 
 	/**
 	 * @param metaData the description of the resultSet for which the statements are generated
@@ -62,6 +62,7 @@ public class StatementFactory
 	{
 		this.resultInfo = metaData;
 		this.setCurrentConnection(conn);
+		expressionBuilder = DmlExpressionBuilder.Factory.getBuilder(conn);
 	}
 
 
@@ -174,9 +175,7 @@ public class StatementFactory
 
 	private String getDmlExpression(ColumnIdentifier column)
 	{
-		DbSettings settings = getDbSettings();
-		if (settings == null) return "?";
-		return settings.getDataTypeDmlExpression(column.getDbmsType());
+		return expressionBuilder.getDmlExpression(column);
 	}
 
 	private String getColumnName(int column)
@@ -193,14 +192,10 @@ public class StatementFactory
 	 */
 	void setTestSettings(DbSettings settings)
 	{
-		testSettings = settings;
-	}
-
-	private DbSettings getDbSettings()
-	{
-		if (testSettings != null) return testSettings;
-		if (dbConnection == null) return null;
-		return dbConnection.getDbSettings();
+		if (this.expressionBuilder instanceof DefaultExpressionBuilder)
+		{
+			((DefaultExpressionBuilder)expressionBuilder).setDbSettings(settings);
+		}
 	}
 
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)

@@ -50,7 +50,17 @@ import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 
-import workbench.util.*;
+import workbench.util.DefaultOutputFactory;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
+import workbench.util.NumberStringCache;
+import workbench.util.OutputFactory;
+import workbench.util.StringUtil;
+import workbench.util.WbDateFormatter;
+import workbench.util.WbFile;
+import workbench.util.WbNumberFormatter;
+import workbench.util.ZipOutputFactory;
 
 
 /**
@@ -862,7 +872,7 @@ public abstract class RowDataConverter
 			if (c < 32)
 			{
 				out.append("&#");
-				out.append(Integer.toString(c));
+				out.append(NumberStringCache.getNumberString(c));
 				out.append(';');
 			}
 			else
