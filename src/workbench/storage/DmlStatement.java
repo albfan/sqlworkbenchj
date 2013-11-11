@@ -231,7 +231,7 @@ public class DmlStatement
 
 	/**
 	 * Handle an array column.
-	 * 
+	 *
 	 * This is currently only tested on Postgres.
 	 * But as I'm not aware of any other DBMS with a decent array support anyway this shouldn't do much harm.
 	 *
@@ -275,9 +275,25 @@ public class DmlStatement
 		}
 		Object[] data = arrayValues.toArray();
 
-		String baseType = SqlUtil.getBaseTypeName(dbmsType);
-		Array array = connection.getSqlConnection().createArrayOf(baseType, data);
-		stmt.setArray(index, array);
+		try
+		{
+
+			if (connection.getDbSettings().supportsCreateArray())
+			{
+				String baseType = SqlUtil.getBaseTypeName(dbmsType);
+				Array array = connection.getSqlConnection().createArrayOf(baseType, data);
+				stmt.setArray(index, array);
+			}
+			else
+			{
+				stmt.setObject(index, data);
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("DmlStatement.handleArray()", "Error setting array value", ex);
+			stmt.setObject(index, data);
+		}
 	}
 
 	public void setConcatString(String concat)

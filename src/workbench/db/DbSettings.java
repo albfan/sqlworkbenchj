@@ -166,6 +166,11 @@ public class DbSettings
 		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), flag);
 	}
 
+	public boolean supportsCreateArray()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "createarray.supported", true);
+	}
+
 	public boolean handleArrayDisplay()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "array.adjust.display", false);

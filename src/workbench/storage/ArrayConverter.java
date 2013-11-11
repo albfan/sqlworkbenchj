@@ -38,13 +38,25 @@ public class ArrayConverter
 	{
 		if (value == null) return null;
 
+		Object[] elements = null;
+		String prefix = "";
 		if (value instanceof Array)
 		{
 			Array ar = (Array)value;
-			Object[] elements = (Object[])ar.getArray();
+			elements = (Object[])ar.getArray();
+			prefix = dbmsType;
+		}
+		else if (value instanceof Object[])
+		{
+			// this is for H2
+			elements = (Object[])value;
+		}
+
+		if (elements != null)
+		{
 			int len = elements.length;
 			StringBuilder sb = new StringBuilder(len * 10);
-			sb.append(dbmsType);
+			sb.append(prefix);
 			sb.append('(');
 			StructConverter conv = StructConverter.getInstance();
 

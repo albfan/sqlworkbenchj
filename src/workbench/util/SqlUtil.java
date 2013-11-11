@@ -2122,6 +2122,10 @@ public class SqlUtil
 		{
 			pos = dbmsType.indexOf('[');
 		}
+		if (pos == -1)
+		{
+			pos = dbmsType.indexOf(' ');
+		}
 		if (pos > -1)
 		{
 			return dbmsType.substring(0, pos);
