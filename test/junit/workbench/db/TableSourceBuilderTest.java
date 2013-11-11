@@ -106,7 +106,54 @@ public class TableSourceBuilderTest
 	}
 
 	@Test
-	public void generatePKName()
+	public void testCheckConstraints()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		try
+		{
+			TestUtil.executeScript(con,
+				"CREATE TABLE orders (\n" +
+				"  id integer not null, \n" +
+				"  amount decimal(10,2), \n" +
+				"  status_flag integer not null default 0, \n" +
+				"  constraint chk_amount check (amount >= 0), \n" +
+				"  constraint chk_status check (status_flag in (0,1,2)) \n" +
+				");\n" +
+				"COMMIT;\n"
+			);
+			TableSourceBuilder builder = new TableSourceBuilder(con);
+			TableIdentifier tbl = new TableIdentifier("ORDERS");
+			String sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.contains("CONSTRAINT CHK_AMOUNT CHECK (AMOUNT >= 0),"));
+			assertTrue(sql.contains("CONSTRAINT CHK_STATUS CHECK (STATUS_FLAG IN(0, 1, 2))\n);"));
+
+			TestUtil.executeScript(con,
+				"drop table orders; \n" +
+				"CREATE TABLE orders\n" +
+				"(\n" +
+				"  id integer not null, \n" +
+				"  amount decimal(10,2), \n" +
+				"  status_flag integer not null default 0, \n" +
+				"  constraint chk_amount check (amount >= 0)\n" +
+				");\n" +
+				"COMMIT;\n"
+			);
+			sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.contains("CONSTRAINT CHK_AMOUNT CHECK (AMOUNT >= 0)\n);"));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+			ConnectionMgr.getInstance().clearProfiles();
+		}
+	}
+
+	@Test
+	public void testGeneratePKName()
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
