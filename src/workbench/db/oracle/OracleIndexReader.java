@@ -335,7 +335,7 @@ public class OracleIndexReader
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
-		String option = null;
+		String option = "";
 		if (OracleUtils.shouldAppendTablespace(index.getTablespace(), defaultTablespace, index.getSchema(), metaData.getWbConnection().getCurrentUser()))
 		{
 			option = "\n   TABLESPACE " + index.getTablespace();
@@ -343,16 +343,9 @@ public class OracleIndexReader
 
 		if ("NORMAL/REV".equals(index.getIndexType()))
 		{
-			String reverse = "\n    REVERSE";
-			if (option == null)
-			{
-				option = reverse;
-			}
-			else
-			{
-				option += reverse;
-			}
+			option += "\n    REVERSE";
 		}
+		
 		String level = index.getSourceOptions().getConfigSettings().get(IDX_PROP_COMPRESS);
 		if (level != null)
 		{

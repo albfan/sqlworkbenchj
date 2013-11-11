@@ -53,6 +53,7 @@ import workbench.util.StringUtil;
  */
 public class TableSourceBuilder
 {
+	public static final String COL_INDENT = "   ";
 	public static final String SCHEMA_PLACEHOLDER = "%schema%";
 	public static final String CATALOG_PLACEHOLDER = "%catalog%";
 	protected WbConnection dbConnection;
@@ -307,12 +308,13 @@ public class TableSourceBuilder
 		result.append(generateCreateObject(includeDrop, table, typeOption));
 		result.append("\n(\n");
 
-		appendColumnDefinitions(result, columns, meta, columnConstraints);
+		appendColumnDefinitions(result, columns, meta, columnConstraints, COL_INDENT);
 
 		List<TableConstraint> constraints = consReader.getTableConstraints(dbConnection, table);
-		String cons = consReader.getConstraintSource(constraints, "   ");
+		String cons = consReader.getConstraintSource(constraints, COL_INDENT);
 		if (StringUtil.isNonEmpty(cons))
 		{
+			result.append(",\n").append(COL_INDENT);
 			result.append(cons);
 		}
 
@@ -346,7 +348,7 @@ public class TableSourceBuilder
 		boolean inlinePK = table.getUseInlinePK() || getCreateInlinePKConstraints();
 		if (includePK && inlinePK && pk != null)
 		{
-			result.append(",\n   ");
+			result.append(",\n").append(COL_INDENT);
 			CharSequence pkSql = getPkSource(table, pk, true);
 			result.append(pkSql);
 		}
@@ -356,7 +358,7 @@ public class TableSourceBuilder
 			StringBuilder fk = getFkSource(table, fkDefinitions, true);
 			if (fk.length() > 0)
 			{
-				result.append(",\n");
+				result.append(",\n").append(COL_INDENT);
 				result.append(fk);
 			}
 		}
@@ -364,7 +366,7 @@ public class TableSourceBuilder
 		String tblOptions = sourceOptions.getInlineOption();
 		if (tblOptions != null)
 		{
-			result.append(",\n   ");
+			result.append(",\n").append(COL_INDENT);
 			result.append(tblOptions);
 		}
 
@@ -523,10 +525,10 @@ public class TableSourceBuilder
 
 	public void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta)
 	{
-		appendColumnDefinitions(result, columns, meta, new HashMap<String, String>());
+		appendColumnDefinitions(result, columns, meta, new HashMap<String, String>(), COL_INDENT);
 	}
 
-	protected void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta, Map<String, String> constraints)
+	protected void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta, Map<String, String> constraints, String indent)
 	{
 		int maxColLength = 0;
 		int maxTypeLength = 0;
@@ -555,7 +557,7 @@ public class TableSourceBuilder
 			String type = column.getDbmsType();
 			if (type == null) type = "";
 
-			result.append("   ");
+			result.append(indent);
 			result.append(quotedColName);
 
 			for (int k=0; k < maxColLength - quotedColName.length(); k++)
@@ -967,7 +969,7 @@ public class TableSourceBuilder
 		{
 			if (forInlineUse)
 			{
-				fk.append("   ");
+				fk.append(COL_INDENT);
 				fk.append(values.next());
 				if (values.hasNext())
 				{

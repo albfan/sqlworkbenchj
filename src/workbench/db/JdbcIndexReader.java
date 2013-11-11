@@ -420,7 +420,7 @@ public class JdbcIndexReader
 		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectName());
 		idx.append(sql);
 		String options = getIndexOptions(table, indexDefinition);
-		if (options != null)
+		if (StringUtil.isNonBlank(options))
 		{
 			idx.append(options);
 		}
