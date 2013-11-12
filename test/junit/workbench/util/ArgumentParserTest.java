@@ -47,6 +47,16 @@ public class ArgumentParserTest
 	}
 
 	@Test
+	public void testListArg()
+	{
+		ArgumentParser cmd = new ArgumentParser();
+		cmd.addArgument("vardef", ArgumentType.RepeatableValue);
+		cmd.parse(new String[]{"-vardef=#foo=bar", "-vardef=#bar=foo", "-vardef=#var1=val1,var2=val2"});
+		List<String> args = cmd.getList("vardef");
+		assertEquals(3, args.size());
+	}
+
+	@Test
 	public void testNewLines()
 	{
 		ArgumentParser cmd = new ArgumentParser();

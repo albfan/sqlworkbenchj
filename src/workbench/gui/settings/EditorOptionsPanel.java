@@ -95,6 +95,7 @@ public class EditorOptionsPanel
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
 
 		reloadType.setModel(new DefaultComboBoxModel(FileReloadType.values()));
+		reloadType.doLayout();
 
 		FileReloadType type = GuiSettings.getReloadType();
 		reloadType.setSelectedItem(type);
@@ -640,7 +641,7 @@ public class EditorOptionsPanel
     add(reloadLabel, gridBagConstraints);
 
     reloadType.setModel(new DefaultComboBoxModel(new String[] { "Never", "Prompt", "Automatic" }));
-    reloadType.setToolTipText(ResourceMgr.getString("d_LblExpandKey")); // NOI18N
+    reloadType.setToolTipText(ResourceMgr.getString("d_LblRldBehaviour")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 10;

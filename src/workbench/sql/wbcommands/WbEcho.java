@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -55,7 +57,7 @@ public class WbEcho
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
-		String message = getCommandLine(sql);
+		String message = StringUtil.trimQuotes(getCommandLine(sql));
 		result.addMessage(message);
 		result.setSuccess();
 		return result;

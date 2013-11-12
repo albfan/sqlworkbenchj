@@ -649,7 +649,7 @@
           <para>
             Supplying parameters for the message, the text for the "Yes" choice and the text for the "No" choice using standard &wb-productname; parameters:
             <simpara>
-              <literal>WbConfirm -message="Do you really want to drop everything?" -yesText="OK, go ahead", -noText="No, please stop"</literal>
+              <literal>WbConfirm -message="Do you really want to drop everything?" -yesText="OK, go ahead" -noText="No, please stop"</literal>
             </simpara>
           </para>
         </listitem>

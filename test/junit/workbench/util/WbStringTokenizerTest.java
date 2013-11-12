@@ -23,8 +23,10 @@
 package workbench.util;
 
 import java.util.List;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -38,27 +40,21 @@ public class WbStringTokenizerTest
 	{
 		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
 		tok.setDelimiterNeedsWhitspace(true);
-		tok.setSourceString(" -other='stuff' -empty= -list='a','b' -one=' ' -nested='\"test\"'");
+		tok.setSourceString("-other='stuff' -empty= -list='a','b' -one=' ' -nested='\"test\"'");
 		List<String> tokens = tok.getAllTokens();
-		int i = 0;
-		for (String t : tokens)
-		{
-			switch (i)
-			{
-				case 1:
-					assertEquals("other=stuff", t.trim());
-					break;
-				case 2:
-					assertEquals("empty=", t.trim());
-					break;
-				case 3:
-					assertEquals("list=a,b", t.trim());
-					break;
-				case 5:
-					assertEquals("nested=\"test\"", t.trim());
-			}
-			i ++;
-		}
+		assertEquals(5, tokens.size());
+		assertEquals("other=stuff", tokens.get(0).trim());
+		assertEquals("empty=", tokens.get(1).trim());
+		assertEquals("list=a,b", tokens.get(2).trim());
+		assertEquals("one=", tokens.get(3).trim());
+		assertEquals("nested=\"test\"", tokens.get(4).trim());
+
+		tok.setSourceString("-foo=#x=1,z=2 -foo=#a=5,b=6");
+		tokens = tok.getAllTokens();
+		assertEquals(2, tokens.size());
+		assertEquals("foo=#x=1,z=2", tokens.get(0).trim());
+		assertEquals("foo=#a=5,b=6", tokens.get(1).trim());
+
 	}
 
 	@Test

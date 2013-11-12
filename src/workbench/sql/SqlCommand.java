@@ -42,6 +42,8 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.wbcommands.WbEnableOraOutput;
+
 import workbench.util.ArgumentParser;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
@@ -217,13 +219,17 @@ public class SqlCommand
 	protected void appendOutput(StatementRunnerResult result)
 	{
 		String s = this.currentConnection.getOutputMessages();
+		boolean hideLabel = WbEnableOraOutput.HIDE_HINT.equals(runner.getSessionAttribute(StatementRunner.SERVER_MSG_PROP));
 		if (!StringUtil.isBlank(s))
 		{
 			if (result.hasMessages())
 			{
 				result.addMessageNewLine();
 			}
-			result.addMessage(ResourceMgr.getString("TxtServerOutput"));
+			if (!hideLabel)
+			{
+				result.addMessage(ResourceMgr.getString("TxtServerOutput"));
+			}
 			result.addMessage(s);
 		}
 	}

@@ -60,6 +60,8 @@ import workbench.util.SqlUtil;
 public class StatementRunner
 	implements PropertyChangeListener
 {
+	public static final String SERVER_MSG_PROP = "server_messages";
+	
 	// used to restore the "real" connection if WbConnect changes the "current"
 	// connection during script execution
 	private WbConnection mainConnection;

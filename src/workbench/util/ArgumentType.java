@@ -38,7 +38,7 @@ public enum ArgumentType
 	BoolArgument,
 
 	IntegerArgument,
-	
+
 	/**
 	 * A parameter that selects tables. If this is set
 	 * the autocompletion for this parameter will
@@ -62,9 +62,16 @@ public enum ArgumentType
 
 	/**
 	 * A parameter that may appear more than once. If it is specified several times,
-	 * the value for this parameter will be returned as a list
+	 * the value for this parameter will be returned as a list. If a parameter
+	 * value contains a (comma separated) list, the elements of that list
+	 * will be returned individually.
 	 */
 	Repeatable,
+
+	/**
+	 * A parameter that may appear more than once but is never parsed for list values inside the parameter value. 
+	 */
+	RepeatableValue,
 
 	/**
 	 * A parameter that shows available object types from the database

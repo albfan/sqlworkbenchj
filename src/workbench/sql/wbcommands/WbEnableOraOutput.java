@@ -31,6 +31,7 @@ import workbench.db.DbMetadata;
 import workbench.db.oracle.DbmsOutput;
 
 import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
@@ -50,6 +51,7 @@ import workbench.util.StringUtil;
  */
 public class WbEnableOraOutput extends SqlCommand
 {
+	public static final String HIDE_HINT = "hide";
 	public static final String VERB = "ENABLEOUT";
 	public static final String PARAM_QUIET = "quiet";
 
@@ -92,10 +94,12 @@ public class WbEnableOraOutput extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		if (cmdLine.getBoolean(PARAM_QUIET))
 		{
+			this.runner.setSessionProperty(StatementRunner.SERVER_MSG_PROP, "hide");
 			LogMgr.logDebug("WbEnableOraOutput.execute()", "Support for dbms_output enabled (limit=" + limit + ")");
 		}
 		else
 		{
+			this.runner.removeSessionProperty(StatementRunner.SERVER_MSG_PROP);
 			result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		}
 		return result;

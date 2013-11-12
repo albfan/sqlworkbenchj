@@ -29,10 +29,12 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -61,6 +63,7 @@ public class ArgumentParser
 	private int argCount = 0;
 	private boolean needSwitch = true;
 	private String nonArguments;
+	private final Set<ArgumentType> repeatableTypes = EnumSet.of(ArgumentType.Repeatable, ArgumentType.RepeatableValue);
 
 	public ArgumentParser()
 	{
@@ -283,7 +286,7 @@ public class ArgumentParser
 				if (arguments.containsKey(key))
 				{
 					ArgumentType type = argTypes.get(key);
-					if (type == ArgumentType.Repeatable)
+					if (repeatableTypes.contains(type))
 					{
 						List<String> list = (List<String>)arguments.get(key);
 						if (list == null)
@@ -294,6 +297,10 @@ public class ArgumentParser
 						if (wasQuoted)
 						{
 							list.add(value);
+						}
+						else if (type == ArgumentType.RepeatableValue)
+						{
+							list.add(StringUtil.trimQuotes(value));
 						}
 						else
 						{
@@ -544,15 +551,15 @@ public class ArgumentParser
 	 */
 	public List<String> getList(String key)
 	{
-		if (getArgumentType(key) != ArgumentType.Repeatable)
+		if (repeatableTypes.contains(getArgumentType(key)))
 		{
-			String value = getValue(key);
-			if (value == null) return Collections.emptyList();
-			return CollectionUtil.arrayList(value);
+			Object value = this.arguments.get(key);
+			if (value == ARG_PRESENT || value == null) return Collections.emptyList();
+			return (List<String>)value;
 		}
-		Object value = this.arguments.get(key);
-		if (value == ARG_PRESENT || value == null) return Collections.emptyList();
-		return (List<String>)value;
+		String value = getValue(key);
+		if (value == null) return Collections.emptyList();
+		return CollectionUtil.arrayList(value);
 	}
 
 	public String getValue(String key, String defaultValue)
@@ -570,7 +577,7 @@ public class ArgumentParser
 	 */
 	public List<String> getListValue(String key)
 	{
-		if (getArgumentType(key) == ArgumentType.Repeatable)
+		if (repeatableTypes.contains(getArgumentType(key)))
 		{
 			return getList(key);
 		}
@@ -582,10 +589,9 @@ public class ArgumentParser
 
 	public Map<String, String> getMapValue(String key)
 	{
-		String value = this.getValue(key);
-		if (value == null) return Collections.emptyMap();
+		List<String> entries = getListValue(key);
+		if (CollectionUtil.isEmpty(entries)) return Collections.emptyMap();
 
-		List<String> entries = StringUtil.stringToList(value, ",", true, true, false, true);
 		Map<String, String> result = new HashMap<String, String>(entries.size());
 		for (String entry : entries)
 		{

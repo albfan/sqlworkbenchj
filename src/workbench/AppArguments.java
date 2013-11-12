@@ -123,9 +123,9 @@ public class AppArguments
 		addArgument(ARG_ABORT, ArgumentType.BoolArgument);
 		addArgument(ARG_SUCCESS_SCRIPT);
 		addArgument(ARG_ERROR_SCRIPT);
-		addArgument(ARG_VARDEF, ArgumentType.Repeatable);
+		addArgument(ARG_VARDEF, ArgumentType.RepeatableValue);
 		addArgument(ARG_CONN_URL);
-		addArgument(ARG_CONN_PROPS, ArgumentType.Repeatable);
+		addArgument(ARG_CONN_PROPS, ArgumentType.RepeatableValue);
 		addArgument(ARG_CONN_DRIVER);
 		addArgument(ARG_CONN_DRIVER_CLASS);
 		addArgument(ARG_CONN_JAR);
