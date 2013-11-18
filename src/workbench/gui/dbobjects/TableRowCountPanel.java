@@ -351,21 +351,23 @@ public class TableRowCountPanel
 		showStatusMessage(msg);
 	}
 
-	private void showStatusMessage(final String message)
+	private void showStatusMessage(String message)
 	{
+		final String msg;
+		if (StringUtil.isEmptyString(message))
+		{
+			msg = ResourceMgr.getFormattedString("TxtTableListObjects", data.getRowCount());
+		}
+		else
+		{
+			msg = message;
+		}
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				if (StringUtil.isBlank(message))
-				{
-					statusBar.setText(" " + NumberStringCache.getNumberString(data.getRowCount()) + " " + ResourceMgr.getString("TxtTableListObjects"));
-				}
-				else
-				{
-					statusBar.setText(" " + message);
-				}
+				statusBar.setText(" " + msg);
 			}
 		});
 	}
