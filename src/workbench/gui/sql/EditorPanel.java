@@ -335,7 +335,7 @@ public class EditorPanel
 		if (currentTime > fileModifiedTime)
 		{
 			String fname = getCurrentFileName();
-			LogMgr.logDebug("EditorPanel", "File " + fname + " has been externally modified!");
+			LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally!");
 			FileReloadType reloadType = GuiSettings.getReloadType();
 			if (reloadType == FileReloadType.automatic)
 			{
@@ -348,6 +348,11 @@ public class EditorPanel
 				if (doReload)
 				{
 					this.reloadFile();
+				}
+				else
+				{
+					// don't check again until the file changes another time
+					this.fileModifiedTime = currentTime;
 				}
 			}
 		}
