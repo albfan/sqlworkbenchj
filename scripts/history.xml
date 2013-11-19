@@ -3,7 +3,7 @@
 
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-11-03">
+  <release build="-1" date="2013-11-19">
     <entry dev-build="4" type="enh">For Postgres columns with custom types or arrays can now be edited correctly inside a result</entry>
     <entry dev-build="4" type="enh">The Excel export now supports a new parameter -targetSheet. If that is specified an existing file is loaded and all data is written to the indicated worksheet overwriting any previous content</entry>
     <entry dev-build="4" type="enh">A single result can now be detached into a separate window</entry>
@@ -26,6 +26,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="4" type="fix">Prompting to reload a changed file in the editor didn't work properly.</entry>
     <entry dev-build="4" type="fix">XLS or XLSX exports would fail when using -append=true together with -infoSheet=true</entry>
     <entry dev-build="4" type="fix">Fixed some errors in the generated SQL statements in the DbExplorer for Sybase</entry>
     <entry dev-build="3" type="fix">Importing data from the clipboard into the current result set did not work any longer.</entry>
