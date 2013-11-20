@@ -96,6 +96,11 @@ public class SQLConsole
 		runner.setShowDataLoading(false);
 		runner.setConnectionId("Console");
 
+		// initialize a default max rows.
+		// In console mode it doesn't really make sense to display that many rows
+		int maxRows = Settings.getInstance().getIntProperty("workbench.console.default.maxrows", 5000);
+		runner.setMaxRows(maxRows);
+
 		if (!cmdLine.isArgPresent(AppArguments.ARG_SHOWPROGRESS))
 		{
 			runner.setShowProgress(true);

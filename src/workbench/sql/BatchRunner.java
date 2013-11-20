@@ -374,6 +374,14 @@ public class BatchRunner
 		}
 	}
 
+	public void setMaxRows(int rows)
+	{
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setMaxRows(rows);
+		}
+	}
+	
 	public void setPersistentConnect(boolean flag)
 	{
 		WbConnect connect = (WbConnect)getCommand(WbConnect.VERB);
@@ -706,7 +714,7 @@ public class BatchRunner
 				{
 					sql = replacer.replace(sql);
 				}
-				
+
 				if (this.resultDisplay == null && !Settings.getInstance().getLogAllStatements())
 				{
 					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
