@@ -23,7 +23,6 @@
 package workbench.console;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
@@ -37,12 +36,13 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
 import workbench.gui.profiles.ProfileKey;
-import workbench.interfaces.SqlHistoryProvider;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.StatementHistory;
 import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbHelp;
+import workbench.sql.wbcommands.WbHistory;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
@@ -50,7 +50,6 @@ import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
-import workbench.util.FixedSizeList;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -66,14 +65,13 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements SqlHistoryProvider
 {
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
 	private Map<String, String> abbreviations = new HashMap<String, String>();
-	private FixedSizeList<String> history;
+	private StatementHistory history;
 
 	public SQLConsole()
 	{
@@ -82,7 +80,7 @@ public class SQLConsole
 
 	public void run()
 	{
-		history = new FixedSizeList<String>(Settings.getInstance().getConsoleHistorySize());
+		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
 		history.doAppend(true);
 
 		AppArguments cmdLine = WbManager.getInstance().getCommandLine();
@@ -125,6 +123,8 @@ public class SQLConsole
 			runner.setShowTiming(true);
 			runner.setShowStatementTiming(false);
 		}
+
+		runner.setHistoryProvider(this.history);
 
 		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
 
@@ -215,12 +215,18 @@ public class SQLConsole
 			// Some limited psql compatibility
 			abbreviations.put("\\x", WbToggleDisplay.VERB);
 			abbreviations.put("\\?", WbHelp.VERB);
+			abbreviations.put("\\h", WbHelp.VERB);
 			abbreviations.put("\\i", WbInclude.VERB);
 			abbreviations.put("\\d", WbListTables.VERB);
+			abbreviations.put("\\g", WbHistory.VERB + " " + WbHistory.KEY_LAST);
+			abbreviations.put("\\s", WbHistory.VERB);
 			abbreviations.put("\\dt", WbDescribeObject.VERB);
 			abbreviations.put("\\df", WbListProcedures.VERB);
 			abbreviations.put("\\dn", WbListSchemas.VERB);
 			abbreviations.put("\\conninfo", WbConnInfo.VERB);
+
+			// some limited SQL*Plus compatibility
+			abbreviations.put("/", WbHistory.VERB + " " + WbHistory.KEY_LAST);
 
 			while (true)
 			{
@@ -229,8 +235,8 @@ public class SQLConsole
 
 				boolean isCompleteStatement = buffer.addLine(line);
 
-				String content = buffer.getScript().trim();
-				if (startOfStatement && ("exit".equalsIgnoreCase(content) || "\\q".equals(content)))
+				String stmt = buffer.getScript().trim();
+				if (startOfStatement && ("exit".equalsIgnoreCase(stmt) || "\\q".equals(stmt)))
 				{
 					break;
 				}
@@ -244,13 +250,21 @@ public class SQLConsole
 						String longCommand = abbreviations.get(firstWord);
 						if (longCommand != null)
 						{
-							line = line.replace(firstWord, longCommand);
-							runner.executeScript(line);
+							stmt = line.replace(firstWord, longCommand);
 						}
-						else
+						history.add(stmt);
+						runner.executeScript(stmt);
+
+						if (stmt.equalsIgnoreCase(WbHistory.VERB))
 						{
-							runner.executeScript(content);
-							history.add(content);
+							// WbHistory without parameters was executed
+							// prompt for an index to be executed
+							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " ###> ");
+							int index = StringUtil.getIntValue(input, -1);
+							if (index > 0 && index <= history.size())
+							{
+								runner.executeScript(history.get(index - 1));
+							}
 						}
 					}
 					catch (Exception e)
@@ -346,18 +360,6 @@ public class SQLConsole
 			SQLConsole console = new SQLConsole();
 			console.run();
 		}
-	}
-
-	@Override
-	public List<String> getHistoryEntries()
-	{
-		return history.getEntries();
-	}
-
-	@Override
-	public String getHistoryEntry(int index)
-	{
-		return history.get(index);
 	}
 
 }

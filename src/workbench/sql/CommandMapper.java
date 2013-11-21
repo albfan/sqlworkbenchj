@@ -70,6 +70,7 @@ import workbench.sql.wbcommands.WbGrepData;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHideWarnings;
+import workbench.sql.wbcommands.WbHistory;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbIsolationLevel;
@@ -188,6 +189,7 @@ public class CommandMapper
 		addCommand(new WbToggleDisplay());
 		addCommand(new WbListProfiles());
 		addCommand(new WbRun());
+		addCommand(new WbHistory());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.getCommit());
