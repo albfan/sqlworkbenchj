@@ -74,4 +74,10 @@ public class SystemConsole
 	{
 	}
 
+	@Override
+	public int getColumns()
+	{
+		return -1;
+	}
+
 }

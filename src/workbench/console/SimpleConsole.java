@@ -59,4 +59,10 @@ public class SimpleConsole
 	{
 	}
 
+	@Override
+	public int getColumns()
+	{
+		return -1;
+	}
+
 }

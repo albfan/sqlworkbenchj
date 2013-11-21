@@ -50,6 +50,7 @@ import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -252,6 +253,12 @@ public class SQLConsole
 						{
 							stmt = line.replace(firstWord, longCommand);
 						}
+
+						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
+						{
+							adjustHistoryDisplay(runner);
+						}
+
 						history.add(stmt);
 						runner.executeScript(stmt);
 
@@ -305,13 +312,24 @@ public class SQLConsole
 		}
 	}
 
+	private void adjustHistoryDisplay(BatchRunner runner)
+	{
+		int columns = ConsoleReaderFactory.getConsoleReader().getColumns();
+		if (columns < 0)
+		{
+			columns = Settings.getInstance().getIntProperty("workbench.console.history.displaylength", 80);
+		}
+		WbHistory wb = (WbHistory)runner.getCommand(WbHistory.VERB);
+		wb.setMaxDisplayLength(columns);
+	}
+
 	private String getFirstWord(String input)
 	{
 		if (StringUtil.isBlank(input)) return null;
 		input = input.trim();
 		int pos = input.indexOf(' ');
-		if (pos <= 0) return input;
-		return input.substring(0, pos);
+		if (pos <= 0) return SqlUtil.trimSemicolon(input);
+		return SqlUtil.trimSemicolon(input.substring(0, pos));
 	}
 
 	private String checkConnection(BatchRunner runner)

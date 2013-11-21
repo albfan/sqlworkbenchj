@@ -47,6 +47,8 @@ public class WbHistory
 	public static final String KEY_LAST = "last";
 	public static final String KEY_FIRST = "first";
 
+	private int maxLength = -1;
+
 	public WbHistory()
 	{
 	}
@@ -61,6 +63,11 @@ public class WbHistory
 	protected boolean isConnectionRequired()
 	{
 		return false;
+	}
+
+	public void setMaxDisplayLength(int length)
+	{
+		maxLength = length;
 	}
 
 	@Override
@@ -126,7 +133,7 @@ public class WbHistory
 		{
 			int row = ds.addRow();
 			ds.setValue(row, 0, Integer.valueOf(index));
-			ds.setValue(row, 1, SqlUtil.makeCleanSql(entry, false, false, '\''));
+			ds.setValue(row, 1, getDisplayString(entry));
 			index ++;
 		}
 		ds.resetStatus();
@@ -135,4 +142,13 @@ public class WbHistory
 		return result;
 	}
 
+	private String getDisplayString(String sql)
+	{
+		String display = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		if (maxLength > -1)
+		{
+			display = StringUtil.getMaxSubstring(display, maxLength);
+		}
+		return display;
+	}
 }

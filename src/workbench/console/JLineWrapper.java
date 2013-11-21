@@ -23,13 +23,17 @@
 package workbench.console;
 
 import java.io.IOException;
-import jline.ConsoleReader;
-import jline.History;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import jline.ConsoleReader;
+import jline.History;
+import jline.Terminal;
 
 /**
  *
@@ -63,6 +67,17 @@ public class JLineWrapper
 			LogMgr.logDebug("JLineWrapper.<init>", "Using history file: " + historyfile.getFullPath());
 			history.setHistoryFile(historyfile);
 		}
+	}
+
+	@Override
+	public int getColumns()
+	{
+		Terminal t = Terminal.getTerminal();
+		if (t != null)
+		{
+			return t.getTerminalWidth();
+		}
+		return -1;
 	}
 
 	@Override
