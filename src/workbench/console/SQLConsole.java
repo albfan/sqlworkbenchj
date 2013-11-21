@@ -23,6 +23,7 @@
 package workbench.console;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
@@ -36,6 +37,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
 import workbench.gui.profiles.ProfileKey;
+import workbench.interfaces.SqlHistoryProvider;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.wbcommands.WbConnInfo;
@@ -48,6 +50,7 @@ import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.FixedSizeList;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -63,12 +66,14 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class SQLConsole
+	implements SqlHistoryProvider
 {
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
 	private Map<String, String> abbreviations = new HashMap<String, String>();
+	private FixedSizeList<String> history;
 
 	public SQLConsole()
 	{
@@ -77,6 +82,9 @@ public class SQLConsole
 
 	public void run()
 	{
+		history = new FixedSizeList<String>(Settings.getInstance().getConsoleHistorySize());
+		history.doAppend(true);
+
 		AppArguments cmdLine = WbManager.getInstance().getCommandLine();
 
 		if (cmdLine.isArgPresent("help"))
@@ -219,12 +227,13 @@ public class SQLConsole
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
 				if (line == null) continue;
 
-				if (startOfStatement && ("exit".equalsIgnoreCase(line.trim()) || "\\q".equals(line.trim())))
+				boolean isCompleteStatement = buffer.addLine(line);
+
+				String content = buffer.getScript().trim();
+				if (startOfStatement && ("exit".equalsIgnoreCase(content) || "\\q".equals(content)))
 				{
 					break;
 				}
-
-				boolean isCompleteStatement = buffer.addLine(line);
 
 				String firstWord = getFirstWord(line);
 				if (isCompleteStatement || (abbreviations.containsKey(firstWord) && startOfStatement)  )
@@ -240,7 +249,8 @@ public class SQLConsole
 						}
 						else
 						{
-							runner.executeScript(buffer.getScript());
+							runner.executeScript(content);
+							history.add(content);
 						}
 					}
 					catch (Exception e)
@@ -338,5 +348,16 @@ public class SQLConsole
 		}
 	}
 
+	@Override
+	public List<String> getHistoryEntries()
+	{
+		return history.getEntries();
+	}
+
+	@Override
+	public String getHistoryEntry(int index)
+	{
+		return history.get(index);
+	}
 
 }

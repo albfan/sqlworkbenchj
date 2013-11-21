@@ -42,19 +42,35 @@ public class SqlHistoryEntry
 		this.setText(sql);
 		int len = this.text.length();
 		if (pos > len)
+		{
 			this.cursorPos = len - 1;
+		}
+		else if (pos < 0)
+		{
+			this.cursorPos = 0;
+		}
 		else
+		{
 			this.cursorPos = pos;
+		}
 
 		if (selStart < 0)
+		{
 			this.selectionStart = 0;
+		}
 		else
+		{
 			this.selectionStart = selStart;
+		}
 
 		if (selEnd > len)
+		{
 			this.selectionEnd = len - 1;
+		}
 		else
+		{
 			this.selectionEnd = selEnd;
+		}
 	}
 
 	public SqlHistoryEntry(String sql)
@@ -65,10 +81,25 @@ public class SqlHistoryEntry
 		this.selectionEnd = -1;
 	}
 
-	public String getText() { return this.text; }
-	public int getCursorPosition() { return this.cursorPos; }
-	public int getSelectionStart() { return this.selectionStart; }
-	public int getSelectionEnd() { return this.selectionEnd; }
+	public String getText()
+	{
+		return this.text;
+	}
+
+	public int getCursorPosition()
+	{
+		return this.cursorPos;
+	}
+
+	public int getSelectionStart()
+	{
+		return this.selectionStart;
+	}
+
+	public int getSelectionEnd()
+	{
+		return this.selectionEnd;
+	}
 
 	public void applyTo(EditorPanel editor)
 	{

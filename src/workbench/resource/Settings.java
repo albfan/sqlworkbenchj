@@ -1701,6 +1701,11 @@ public class Settings
 		setProperty("workbench.sql.history.includefiles", flag);
 	}
 
+	public int getConsoleHistorySize()
+	{
+		return getIntProperty("workbench.console.sql.historysize", 50);
+	}
+
 	public int getMaxHistorySize()
 	{
 		return getIntProperty("workbench.sql.historysize", 15);
