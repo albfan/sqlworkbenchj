@@ -32,7 +32,13 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -40,6 +46,7 @@ import workbench.resource.Settings;
 
 import workbench.db.postgres.PostgresUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -208,6 +215,24 @@ public class DbDriver
 			result.append(libraryList.get(i));
 		}
 		return result.toString();
+	}
+
+	public void setLibraryList(List<String> files)
+	{
+		if (CollectionUtil.isEmpty(files))
+		{
+			this.libraryList = null;
+		}
+		else
+		{
+			this.libraryList = new ArrayList<String>(files);
+		}
+	}
+	
+	public List<String> getLibraryList()
+	{
+		if (CollectionUtil.isEmpty(this.libraryList)) return Collections.emptyList();
+		return Collections.unmodifiableList(libraryList);
 	}
 
 	public String getLibrary()

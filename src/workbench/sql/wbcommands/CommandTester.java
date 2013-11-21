@@ -121,6 +121,7 @@ public class CommandTester
 		commands.add(WbGenDelete.VERB);
 		commands.add(WbGenInsert.VERB);
 		commands.add(WbEcho.VERB);
+		commands.add(WbHistory.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()

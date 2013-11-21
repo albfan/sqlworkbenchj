@@ -26,11 +26,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
@@ -85,6 +87,8 @@ public class ResultColumnMetaData
 		Map<String, TableDefinition> tableDefs = new HashMap<String, TableDefinition>(tables.size());
 		for (String table : tables)
 		{
+			if (StringUtil.isBlank(table)) continue;
+			
 			if (tableDef != null && tableDef.getTable().getTableName().equals(table))
 			{
 				tableDefs.put(tableDef.getTable().getTableName().toLowerCase(), tableDef);

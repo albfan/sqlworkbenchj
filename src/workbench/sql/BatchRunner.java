@@ -46,6 +46,7 @@ import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
+import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -181,6 +182,11 @@ public class BatchRunner
 		this.stmtRunner.setBaseDir(dir);
 	}
 
+	public void setHistoryProvider(SqlHistoryProvider provider)
+	{
+		this.stmtRunner.setHistoryProvider(provider);
+	}
+	
 	public void setUseSavepoint(boolean flag)
 	{
 		stmtRunner.setUseSavepoint(flag);
@@ -381,7 +387,7 @@ public class BatchRunner
 			this.stmtRunner.setMaxRows(rows);
 		}
 	}
-	
+
 	public void setPersistentConnect(boolean flag)
 	{
 		WbConnect connect = (WbConnect)getCommand(WbConnect.VERB);

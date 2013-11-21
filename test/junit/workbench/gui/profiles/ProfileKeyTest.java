@@ -22,8 +22,9 @@
  */
 package workbench.gui.profiles;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -47,6 +48,18 @@ public class ProfileKeyTest
 		key = new ProfileKey("{Group}ProfileName ");
 		assertEquals("Wrong group detected", "Group", key.getGroup());
 		assertEquals("Wrong name detected", "ProfileName", key.getName());
+	}
+
+	@Test
+	public void testNoBraces()
+	{
+		ProfileKey key = new ProfileKey(" SomeGroup /my connection");
+		assertEquals("SomeGroup", key.getGroup());
+		assertEquals("my connection", key.getName());
+
+		key = new ProfileKey("{Some/Group}/my connection");
+		assertEquals("Some/Group", key.getGroup());
+		assertEquals("my connection", key.getName());
 	}
 
 	@Test

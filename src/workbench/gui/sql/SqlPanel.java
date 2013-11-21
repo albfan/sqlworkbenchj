@@ -188,6 +188,7 @@ import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementError;
+import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
@@ -227,6 +228,7 @@ public class SqlPanel
 	protected EditorPanel editor;
 	protected DwPanel currentData;
 	protected SqlHistory sqlHistory;
+	protected StatementHistory historyStatements;
 
 	protected LogArea log;
 	protected WbTabbedPane resultTab;
@@ -415,6 +417,7 @@ public class SqlPanel
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
 		editor.enableMacroExpansion(true);
 		editor.enableBracketCompletion(true);
+		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
 	}
 
 	public void setDividerLocation(int location)
@@ -1579,6 +1582,7 @@ public class SqlPanel
 		{
 			this.stmtRunner.setConnection(aConnection);
 			this.stmtRunner.setResultLogger(this);
+			this.stmtRunner.setHistoryProvider(this.historyStatements);
 		}
 
 		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
@@ -3091,6 +3095,8 @@ public class SqlPanel
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
+				historyStatements.add(currentSql);
+
 				if (fixNLPattern != null)
 				{
 					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);

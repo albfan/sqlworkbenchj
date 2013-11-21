@@ -23,6 +23,7 @@
 package workbench.sql;
 
 import java.util.Set;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -33,13 +34,21 @@ import workbench.util.StringUtil;
 public class ScrollAnnotation
 	extends AnnotationReader
 {
-	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", "end");
+	public static final String ANNOTATION = "wbscrollto";
+	public static final String END_KEYWORD = "end";
+
+	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", END_KEYWORD);
 
 	public ScrollAnnotation()
 	{
-		super("wbscrollto");
+		super(ANNOTATION);
 	}
 
+	public static String getScrollToEndAnnotation()
+	{
+		return "-- @" + ANNOTATION + " " + END_KEYWORD;
+	}
+	
 	public boolean scrollToEnd(String sql)
 	{
 		String value = getAnnotationValue(sql);

@@ -73,6 +73,12 @@ public class ProfileKey
 			this.name = tname.substring(slashPos + 1).trim();
 			this.group = tname.substring(1,pos).trim();
 		}
+		else if (tname.length() > 0 && tname.indexOf('/') > -1)
+		{
+			int slashPos = tname.indexOf('/');
+			this.name = tname.substring(slashPos + 1).trim();
+			this.group = tname.substring(0,slashPos).trim();
+		}
 		else
 		{
 			name = tname;

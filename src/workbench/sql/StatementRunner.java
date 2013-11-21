@@ -37,6 +37,7 @@ import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
+import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -61,7 +62,7 @@ public class StatementRunner
 	implements PropertyChangeListener
 {
 	public static final String SERVER_MSG_PROP = "server_messages";
-	
+
 	// used to restore the "real" connection if WbConnect changes the "current"
 	// connection during script execution
 	private WbConnection mainConnection;
@@ -93,6 +94,7 @@ public class StatementRunner
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
 	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
+	private SqlHistoryProvider history;
 
 	public StatementRunner()
 	{
@@ -102,6 +104,16 @@ public class StatementRunner
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate", Settings.PROPERTY_LOG_ALL_SQL);
 	}
 
+	public void setHistoryProvider(SqlHistoryProvider provider)
+	{
+		this.history = provider;
+	}
+
+	public SqlHistoryProvider getHistoryProvider()
+	{
+		return this.history;
+	}
+	
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
