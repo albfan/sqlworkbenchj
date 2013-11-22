@@ -35,7 +35,7 @@ import java.util.ListIterator;
 public class FixedSizeList<T>
 	implements List<T>
 {
-	private LinkedList<T> entries;
+	protected LinkedList<T> entries;
 	private int maxSize;
 	private boolean appendEntries;
 	private boolean allowDuplicates = false;

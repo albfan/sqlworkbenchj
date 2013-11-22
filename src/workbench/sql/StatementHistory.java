@@ -20,14 +20,24 @@
 
 package workbench.sql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import workbench.interfaces.SqlHistoryProvider;
+import workbench.log.LogMgr;
 
 import workbench.sql.wbcommands.WbHistory;
 
+import workbench.util.CharacterRange;
+import workbench.util.CollectionUtil;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -68,4 +78,53 @@ public class StatementHistory
 		return this.get(index);
 	}
 
+	public void readFrom(File f)
+	{
+		entries.clear();
+		BufferedReader reader = null;
+		try
+		{
+			reader = EncodingUtil.createBufferedReader(f, "UTF-8");
+			String line = reader.readLine();
+			while (line != null)
+			{
+				line = StringUtil.decodeUnicode(line);
+				this.append(line);
+				line = reader.readLine();
+			}
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("StatementHistory.readFrom()", "Could not save history", io);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(reader);
+		}
+	}
+
+	public void saveTo(File f)
+	{
+		if (CollectionUtil.isEmpty(entries)) return;
+
+		Writer writer = null;
+		try
+		{
+			writer = EncodingUtil.createWriter(f, "UTF-8", false);
+			for (String sql : entries)
+			{
+				String line = StringUtil.escapeText(sql, CharacterRange.RANGE_CONTROL);
+				writer.write(line);
+				writer.write('\n');
+			}
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("StatementHistory.saveTo()", "Could not save history", io);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(writer);
+		}
+	}
 }

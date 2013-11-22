@@ -27,7 +27,7 @@ import workbench.sql.DelimiterDefinition;
 /**
  * A buffer that collects pieces of text entered by the user until
  * it is terminated with a {@link workbench.sql.DelimiterDefinition}
- * 
+ *
  * @author Thomas Kellerer
  */
 public class InputBuffer
@@ -46,6 +46,11 @@ public class InputBuffer
 		return script.toString();
 	}
 
+	public int getLength()
+	{
+		return script.length();
+	}
+	
 	public void clear()
 	{
 		script.setLength(0);

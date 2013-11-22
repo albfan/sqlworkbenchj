@@ -67,6 +67,7 @@ import workbench.util.WbFile;
  */
 public class SQLConsole
 {
+	private static final String HISTORY_FILENAME = "sqlwb_console_history.txt";
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
@@ -213,6 +214,9 @@ public class SQLConsole
 
 			boolean startOfStatement = true;
 
+			WbFile historyFile = new WbFile(Settings.getInstance().getConfigDir(), HISTORY_FILENAME);
+			history.readFrom(historyFile);
+
 			// Some limited psql compatibility
 			abbreviations.put("\\x", WbToggleDisplay.VERB);
 			abbreviations.put("\\?", WbHelp.VERB);
@@ -233,6 +237,8 @@ public class SQLConsole
 			{
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
 				if (line == null) continue;
+
+				if (buffer.getLength() == 0 && StringUtil.isEmptyString(line)) continue;
 
 				boolean isCompleteStatement = buffer.addLine(line);
 
@@ -304,6 +310,10 @@ public class SQLConsole
 		{
 			ConsoleReaderFactory.getConsoleReader().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
+
+			WbFile historyFile = new WbFile(Settings.getInstance().getConfigDir(), HISTORY_FILENAME);
+			history.saveTo(historyFile);
+
 			if (Settings.getInstance().isModified())
 			{
 				Settings.getInstance().saveSettings(false);
