@@ -58,12 +58,15 @@ public class StatementHistory
 	@Override
 	public synchronized boolean add(String statement)
 	{
+		if (StringUtil.isEmptyString(statement)) return false;
+
+		String last = entries.size() > 0 ? entries.getLast() : "";
+		if (last != null && last.equals(statement)) return false;
+
 		String verb = SqlUtil.getSqlVerb(statement);
-		if (!verb.equalsIgnoreCase(WbHistory.VERB))
-		{
-			return super.add(statement);
-		}
-		return false;
+		if (verb.equalsIgnoreCase(WbHistory.VERB) || verb.equalsIgnoreCase(WbHistory.SHORT_VERB)) return false;
+
+		return super.add(statement);
 	}
 
 	@Override
@@ -80,6 +83,8 @@ public class StatementHistory
 
 	public void readFrom(File f)
 	{
+		if (f == null || !f.exists()) return;
+
 		entries.clear();
 		BufferedReader reader = null;
 		try
@@ -92,6 +97,7 @@ public class StatementHistory
 				this.append(line);
 				line = reader.readLine();
 			}
+			LogMgr.logInfo("StatementHistory.readFrom()", "Loaded statement history from " + f.getAbsolutePath());
 		}
 		catch (IOException io)
 		{
@@ -117,6 +123,7 @@ public class StatementHistory
 				writer.write(line);
 				writer.write('\n');
 			}
+			LogMgr.logInfo("StatementHistory.saveTo()", "Saved statement history to " + f.getAbsolutePath());
 		}
 		catch (IOException io)
 		{

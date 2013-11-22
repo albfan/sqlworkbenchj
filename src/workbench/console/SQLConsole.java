@@ -39,14 +39,15 @@ import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.StatementHistory;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHistory;
-import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
@@ -67,7 +68,7 @@ import workbench.util.WbFile;
  */
 public class SQLConsole
 {
-	private static final String HISTORY_FILENAME = "sqlwb_console_history.txt";
+	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
@@ -214,20 +215,21 @@ public class SQLConsole
 
 			boolean startOfStatement = true;
 
-			WbFile historyFile = new WbFile(Settings.getInstance().getConfigDir(), HISTORY_FILENAME);
-			history.readFrom(historyFile);
+			history.readFrom(getHistoryFile());
+
+			CommandTester cmd = new CommandTester();
 
 			// Some limited psql compatibility
-			abbreviations.put("\\x", WbToggleDisplay.VERB);
-			abbreviations.put("\\?", WbHelp.VERB);
-			abbreviations.put("\\h", WbHelp.VERB);
-			abbreviations.put("\\i", WbInclude.VERB);
-			abbreviations.put("\\d", WbListTables.VERB);
-			abbreviations.put("\\g", WbHistory.VERB + " " + WbHistory.KEY_LAST);
-			abbreviations.put("\\s", WbHistory.VERB);
-			abbreviations.put("\\dt", WbDescribeObject.VERB);
-			abbreviations.put("\\df", WbListProcedures.VERB);
-			abbreviations.put("\\dn", WbListSchemas.VERB);
+			abbreviations.put("\\x", cmd.formatVerb(WbToggleDisplay.VERB));
+			abbreviations.put("\\?", cmd.formatVerb(WbHelp.VERB));
+			abbreviations.put("\\h", cmd.formatVerb(WbHelp.VERB));
+			abbreviations.put("\\i", cmd.formatVerb(WbRun.VERB));
+			abbreviations.put("\\d", cmd.formatVerb(WbListTables.VERB));
+			abbreviations.put("\\g", cmd.formatVerb(WbHistory.VERB) + " " + WbHistory.KEY_LAST);
+			abbreviations.put("\\s", cmd.formatVerb(WbHistory.VERB));
+			abbreviations.put("\\dt", cmd.formatVerb(WbDescribeObject.VERB));
+			abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
+			abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));
 			abbreviations.put("\\conninfo", WbConnInfo.VERB);
 
 			// some limited SQL*Plus compatibility
@@ -268,11 +270,11 @@ public class SQLConsole
 						history.add(stmt);
 						runner.executeScript(stmt);
 
-						if (stmt.equalsIgnoreCase(WbHistory.VERB))
+						if (isHistoryCmd(stmt))
 						{
 							// WbHistory without parameters was executed
 							// prompt for an index to be executed
-							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " ###> ");
+							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " #> ");
 							int index = StringUtil.getIntValue(input, -1);
 							if (index > 0 && index <= history.size())
 							{
@@ -308,26 +310,42 @@ public class SQLConsole
 		}
 		finally
 		{
+			history.saveTo(getHistoryFile());
+
 			ConsoleReaderFactory.getConsoleReader().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
-
-			WbFile historyFile = new WbFile(Settings.getInstance().getConfigDir(), HISTORY_FILENAME);
-			history.saveTo(historyFile);
 
 			if (Settings.getInstance().isModified())
 			{
 				Settings.getInstance().saveSettings(false);
 			}
+
 			WbManager.getInstance().doShutdown(0);
 		}
 	}
 
+	private boolean isHistoryCmd(String stmt)
+	{
+		if (StringUtil.isEmptyString(stmt)) return false;
+		String cmd = SqlUtil.trimSemicolon(stmt).trim();
+		return cmd.equalsIgnoreCase(WbHistory.SHORT_VERB) || cmd.equalsIgnoreCase(WbHistory.VERB);
+	}
+
+	private WbFile getHistoryFile()
+	{
+		String fname = Settings.getInstance().getProperty("workbench.console.history.file", HISTORY_FILENAME);
+		WbFile file = new WbFile(Settings.getInstance().getConfigDir(), fname);
+		return file;
+	}
+
+
 	private void adjustHistoryDisplay(BatchRunner runner)
 	{
 		int columns = ConsoleReaderFactory.getConsoleReader().getColumns();
+		LogMgr.logDebug("SQLConsole.adjustHistoryDisplay()", "Console width: " + columns);
 		if (columns < 0)
 		{
-			columns = Settings.getInstance().getIntProperty("workbench.console.history.displaylength", 80);
+			columns = Settings.getInstance().getIntProperty("workbench.console.history.displaylength", 100);
 		}
 		WbHistory wb = (WbHistory)runner.getCommand(WbHistory.VERB);
 		wb.setMaxDisplayLength(columns);

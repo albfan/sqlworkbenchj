@@ -80,6 +80,10 @@ public class ConsolePrompter
 
 			String msg = StringUtil.isBlank(value) ? varName + ": " : varName + " [" + value + "]: ";
 			String newValue = readLine(msg);
+			if (StringUtil.isEmptyString(newValue) && StringUtil.isNonEmpty(value))
+			{
+				newValue = value;
+			}
 			ds.setValue(row, 1, newValue);
 		}
 

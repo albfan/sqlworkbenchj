@@ -24,12 +24,8 @@ package workbench.console;
 
 import java.io.IOException;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.util.FileUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
 
 import jline.ConsoleReader;
 import jline.History;
@@ -51,22 +47,6 @@ public class JLineWrapper
 		reader.setUseHistory(true);
 		reader.setUsePagination(false);
 		reader.setBellEnabled(false);
-		History history = reader.getHistory();
-		if (history != null)
-		{
-			String filename = Settings.getInstance().getProperty("workbench.console.history.file", null);
-			WbFile historyfile = null;
-			if (StringUtil.isBlank(filename))
-			{
-				historyfile = new WbFile(Settings.getInstance().getConfigDir(), ".sqlworkbench_history");
-			}
-			else
-			{
-				historyfile = new WbFile(filename);
-			}
-			LogMgr.logDebug("JLineWrapper.<init>", "Using history file: " + historyfile.getFullPath());
-			history.setHistoryFile(historyfile);
-		}
 	}
 
 	@Override

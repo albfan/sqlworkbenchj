@@ -162,14 +162,14 @@ public class WbConnect
 				id = "batch-connect-" + connectionId;
 			}
 
+			WbConnection current = null;
+
 			// persistentChange will be activated by SQLConsole
 			// in that case we need to disconnect the current connection
 			// as the statement runner will not close the current connection
 			if (persistentChange)
 			{
-				// The statement runner will not close the current connection
-				WbConnection current = runner.getConnection();
-				if (current != null && current != newConn) current.disconnect();
+				current = runner.getConnection();
 			}
 
 			newConn = ConnectionMgr.getInstance().getConnection(profile, id);
@@ -177,6 +177,7 @@ public class WbConnect
 
 			if (persistentChange)
 			{
+				if (current != null && current != newConn) current.disconnect();
 				this.runner.setConnection(newConn);
 			}
 			else

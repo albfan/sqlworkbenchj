@@ -44,6 +44,7 @@ public class WbHistory
 	extends SqlCommand
 {
 	public static final String VERB = "WBHISTORY";
+	public static final String SHORT_VERB = "WBHIST";
 	public static final String KEY_LAST = "last";
 	public static final String KEY_FIRST = "first";
 
@@ -147,7 +148,7 @@ public class WbHistory
 		String display = SqlUtil.makeCleanSql(sql, false, false, '\'');
 		if (maxLength > -1)
 		{
-			display = StringUtil.getMaxSubstring(display, maxLength);
+			display = StringUtil.getMaxSubstring(display, maxLength - 10);
 		}
 		return display;
 	}

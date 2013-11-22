@@ -83,6 +83,11 @@ public class WbRun
 
 		WbFile file = new WbFile(clean);
 
+		if (StringUtil.isEmptyString(file.getExtension()))
+		{
+			file = new WbFile(file.getFullPath() + ".sql");
+		}
+
 		if (StringUtil.isEmptyString(clean) || !file.exists())
 		{
 			result.setFailure();
@@ -136,7 +141,7 @@ public class WbRun
 			{
 				result.addDataStore(ds);
 			}
-			
+
 			if (this.rowMonitor != null)
 			{
 				this.rowMonitor.jobFinished();
