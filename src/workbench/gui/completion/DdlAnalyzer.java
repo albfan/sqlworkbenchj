@@ -34,8 +34,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import static workbench.gui.completion.BaseAnalyzer.CONTEXT_KW_LIST;
-import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
+import static workbench.gui.completion.BaseAnalyzer.*;
 
 /**
  * Analyze a DDL statement regarding the context for the auto-completion.
@@ -49,6 +48,8 @@ import static workbench.gui.completion.BaseAnalyzer.CONTEXT_TABLE_LIST;
 public class DdlAnalyzer
 	extends BaseAnalyzer
 {
+	public static final String DDL_TYPES_FILE = "ddl_types.txt";
+
 	public DdlAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		super(conn, statement, cursorPos);
@@ -100,7 +101,7 @@ public class DdlAnalyzer
 			if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
 			{
 				context = CONTEXT_KW_LIST;
-				keywordFile = "drop_types.txt";
+				keywordFile = DDL_TYPES_FILE;
 			}
 
 			boolean showObjectList = typeToken != null && cursorPos >= typeToken.getCharEnd()

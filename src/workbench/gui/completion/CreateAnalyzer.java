@@ -21,9 +21,11 @@
  *
  */
 package workbench.gui.completion;
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -125,7 +127,7 @@ public class CreateAnalyzer
 		else if (afterCreate)
 		{
 			context = CONTEXT_KW_LIST;
-			this.keywordFile = "create_types.txt";
+			this.keywordFile = DdlAnalyzer.DDL_TYPES_FILE;
 		}
 	}
 
