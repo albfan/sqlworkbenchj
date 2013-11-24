@@ -23,10 +23,14 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 import workbench.WbManager;
 import workbench.console.ConsoleReaderFactory;
+import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -71,23 +75,49 @@ public class WbListMacros
 
 		MacroStorage storage = MacroManager.getInstance().getMacros();
 		List<MacroGroup> groups = storage.getGroups();
+
+		String lblName = ResourceMgr.getString("LblMacroName");
+		String lblGroup = ResourceMgr.getString("LblMacroGrpName");
+		String lblText = ResourceMgr.getString("LblMacroDef");
+
+		DataStore ds;
+		boolean showGroup;
+		if (WbManager.getInstance().isGUIMode())
+		{
+			showGroup = true;
+			ds = new DataStore(new String[] {lblGroup, lblName, lblText}, new int[] {Types.VARCHAR, Types.VARCHAR, Types.CLOB});
+		}
+		else
+		{
+			showGroup = false;
+			ds = new DataStore(new String[] {lblName, lblText}, new int[] {Types.VARCHAR, Types.CLOB});
+		}
+
 		for (MacroGroup group : groups)
 		{
-			result.addMessage(group.getName());
 			List<MacroDefinition> macros = group.getMacros();
 			for (MacroDefinition def : macros)
 			{
-
+				String name = def.getName();
 				if (def.getExpandWhileTyping())
 				{
-					result.addMessage("  * " + def.getName());
+					name += "(+)";
 				}
-				else
+				int row = ds.addRow();
+				int col = 0;
+				if (showGroup)
 				{
-					result.addMessage("  " + def.getName());
+					ds.setValue(row, col++, group.getName());
 				}
+				ds.setValue(row, col++, name);
+				ds.setValue(row, col++, def.getText());
 			}
 		}
+
+		ds.resetStatus();
+		ds.setGeneratingSql("WbListMacros");
+		result.addDataStore(ds);
+
 		result.setSuccess();
 		return result;
 	}

@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.WbPersistence;
@@ -266,12 +267,35 @@ public class MacroStorage
 		this.fireMacroListChange();
 	}
 
+	public MacroGroup findMacroGroup(String macroName)
+	{
+		synchronized (lock)
+		{
+			for (MacroGroup group : groups)
+			{
+				List<MacroDefinition> macros = group.getMacros();
+				for (MacroDefinition macro : macros)
+				{
+					if (macro.getName().equalsIgnoreCase(macroName))
+					{
+						return group;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public void addMacro(MacroGroup group, MacroDefinition macro)
 	{
 		synchronized (lock)
 		{
 			allMacros.put(macro.getName(), macro);
-			group.addMacro(macro);
+			if (!containsGroup(group.getName()))
+			{
+				addGroup(group);
+			}
+			moveMacro(macro, group);
 			macro.setSortOrder(group.getSize() + 1);
 			this.modified = true;
 		}

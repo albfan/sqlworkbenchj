@@ -23,17 +23,27 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
+import java.util.List;
+
+import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
+import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
+import workbench.sql.wbcommands.CommonArgs;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
- * List all defined profiles
+ * Create a new macro.
  *
  * @author Thomas Kellerer
  */
@@ -45,6 +55,8 @@ public class WbDefineMacro
 	public static final String ARG_NAME = "name";
 	public static final String ARG_TEXT = "text";
 	public static final String ARG_FILE = "file";
+	public static final String ARG_GROUP = "group";
+	public static final String ARG_EXPAND = "autoExpand";
 
 	public WbDefineMacro()
 	{
@@ -53,6 +65,9 @@ public class WbDefineMacro
 		cmdLine.addArgument(ARG_NAME);
 		cmdLine.addArgument(ARG_TEXT);
 		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(ARG_GROUP);
+		cmdLine.addArgument(ARG_EXPAND, ArgumentType.BoolSwitch);
+		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override
@@ -76,7 +91,10 @@ public class WbDefineMacro
 		cmdLine.parse(getCommandLine(sql));
 		String macroText = cmdLine.getValue(ARG_TEXT);
 		String fname = cmdLine.getValue(ARG_FILE);
+		String groupName = cmdLine.getValue(ARG_GROUP);
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, null);
 		String macroName = cmdLine.getValue(ARG_NAME);
+		boolean expand = cmdLine.getBoolean(ARG_EXPAND);
 
 		if (StringUtil.isBlank(macroName))
 		{
@@ -84,7 +102,67 @@ public class WbDefineMacro
 			result.addMessage("ErrMacroNameReq");
 			return result;
 		}
+
+		MacroStorage storage = MacroManager.getInstance().getMacros();
+		List<MacroGroup> groups = storage.getGroups();
+
+		MacroGroup groupToUse = null;
+
+		if (StringUtil.isNonBlank(fname))
+		{
+			WbFile f = new WbFile(fname);
+			if (f.exists())
+			{
+				macroText = FileUtil.readFile(f, encoding);
+			}
+		}
+		else
+		{
+			macroText = StringUtil.trimQuotes(macroText);
+		}
+
+		String msg =  null;
+
+		MacroDefinition def = storage.getMacro(macroName);
+		if (def == null)
+		{
+			def = new MacroDefinition(macroName, macroText);
+			msg = ResourceMgr.getFormattedString("MsgMacroAdded", macroName);
+		}
+		else
+		{
+			def.setText(macroText);
+			msg = ResourceMgr.getFormattedString("MsgMacroRedef", macroName);
+		}
+		def.setExpandWhileTyping(expand);
+
+		if (StringUtil.isNonEmpty(groupName))
+		{
+			for (MacroGroup grp : groups)
+			{
+				if (grp.getName().equals(groupName))
+				{
+					groupToUse = grp;
+				}
+			}
+		}
+		else if (groups.isEmpty())
+		{
+			groupName = ResourceMgr.getString("LblDefGroup");
+		}
+
+		if (groupToUse == null)
+		{
+			groupToUse = new MacroGroup(groupName);
+		}
+
+		storage.addMacro(groupToUse, def);
+
+		MacroManager.getInstance().save();
+
+		result.addMessage(msg);
 		result.setSuccess();
+
 		return result;
 	}
 
