@@ -175,7 +175,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_KEY_COLUMNS);
 		cmdLine.addArgument(ARG_APPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
-		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
+		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument(ARG_ESCAPE_HTML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATEFULL_HTML_PAGE, ArgumentType.BoolArgument);
@@ -183,7 +183,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_POSTDATA_HTML);
 		cmdLine.addArgument(ARG_SOURCETABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
-		cmdLine.addArgument(ARG_OUTPUTDIR);
+		cmdLine.addArgument(ARG_OUTPUTDIR, ArgumentType.DirName);
 		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none"));
 		cmdLine.addArgument(ARG_QUOTE_ALWAYS, ArgumentType.BoolArgument);

@@ -99,7 +99,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
+		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
 
@@ -180,7 +180,7 @@ public class WbSchemaReport
 
 		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
 		reporter.setIncludePartitions(cmdLine.getBoolean(PARAM_INCLUDE_PARTITIONS, false));
-		
+
 		List<String> schemas = StringUtil.stringToList(schemaNames, ",");
 		if (schemas.isEmpty())
 		{

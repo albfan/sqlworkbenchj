@@ -69,7 +69,7 @@ public enum ArgumentType
 	Repeatable,
 
 	/**
-	 * A parameter that may appear more than once but is never parsed for list values inside the parameter value. 
+	 * A parameter that may appear more than once but is never parsed for list values inside the parameter value.
 	 */
 	RepeatableValue,
 
@@ -94,6 +94,10 @@ public enum ArgumentType
 	 * To set it to false, <tt>-foo=false</tt> is required
 	 */
 	BoolSwitch,
+
+	Filename,
+
+	DirName,
 
 	Deprecated;
 }

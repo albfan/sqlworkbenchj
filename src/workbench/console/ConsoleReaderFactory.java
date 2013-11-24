@@ -23,9 +23,9 @@
 package workbench.console;
 
 import java.io.IOException;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.PlatformHelper;
 
 /**
  *
@@ -58,7 +58,7 @@ public class ConsoleReaderFactory
 				instance = new SystemConsole();
 				LogMgr.logDebug("ConsoleReaderFactory", "Using System.console()");
 			}
-			
+
 			if (instance == null)
 			{
 				instance = new SimpleConsole();
@@ -69,9 +69,7 @@ public class ConsoleReaderFactory
 
 	private static boolean useJLine()
 	{
-		// By default JLine is not used on the Windows platform as System.console() already implements this
-		// for Windows (including the standard F7 history window)
-		return Settings.getInstance().getBoolProperty("workbench.console.use.jline", !PlatformHelper.isWindows());
+		return Settings.getInstance().getBoolProperty("workbench.console.use.jline", true);
 	}
-	
+
 }

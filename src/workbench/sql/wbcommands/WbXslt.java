@@ -25,11 +25,15 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Map;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
@@ -51,7 +55,7 @@ public class WbXslt
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_STYLESHEET);
+		cmdLine.addArgument(ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_OUTPUT);
 		cmdLine.addArgument(ARG_INPUT);
 		cmdLine.addArgument(ARG_PARAMETERS);

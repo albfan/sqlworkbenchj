@@ -99,9 +99,11 @@ import workbench.sql.wbcommands.WbSysProps;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.sql.wbcommands.console.WbAbout;
+import workbench.sql.wbcommands.console.WbDefineMacro;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
+import workbench.sql.wbcommands.console.WbListMacros;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
@@ -190,6 +192,8 @@ public class CommandMapper
 		addCommand(new WbListProfiles());
 		addCommand(new WbRun());
 		addCommand(new WbHistory());
+		addCommand(new WbListMacros());
+		addCommand(new WbDefineMacro());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.getCommit());

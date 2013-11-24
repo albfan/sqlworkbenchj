@@ -29,9 +29,11 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import workbench.sql.wbcommands.console.WbAbout;
+import workbench.sql.wbcommands.console.WbDefineMacro;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
+import workbench.sql.wbcommands.console.WbListMacros;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
@@ -122,6 +124,8 @@ public class CommandTester
 		commands.add(WbGenInsert.VERB);
 		commands.add(WbEcho.VERB);
 		commands.add(WbHistory.VERB);
+		commands.add(WbDefineMacro.VERB);
+		commands.add(WbListMacros.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -168,6 +172,8 @@ public class CommandTester
 			formattedWords.put(WbSysOpen.VERB, "WbSysOpen");
 			formattedWords.put(WbGenDelete.VERB, "WbGenerateDelete");
 			formattedWords.put(WbGenInsert.VERB, "WbGenerateInsert");
+			formattedWords.put(WbDefineMacro.VERB, "WbDefineMacro");
+			formattedWords.put(WbListMacros.VERB, "WbListMacros");
 		}
 		return formattedWords;
 	}

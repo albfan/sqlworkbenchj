@@ -38,6 +38,8 @@ public class WbFile
 	extends File
 {
 
+	private boolean showOnlyFilename;
+
 	/**
 	 * Create a new file object.
 	 *
@@ -88,6 +90,11 @@ public class WbFile
 	public WbFile(String filename)
 	{
 		super(StringUtil.replaceProperties(filename));
+	}
+
+	public void setShowOnlyFilename(boolean flag)
+	{
+		this.showOnlyFilename = flag;
 	}
 
 	/**
@@ -205,6 +212,10 @@ public class WbFile
 	@Override
 	public String toString()
 	{
+		if (showOnlyFilename)
+		{
+			return getName();
+		}
 		return getFullPath();
 	}
 }

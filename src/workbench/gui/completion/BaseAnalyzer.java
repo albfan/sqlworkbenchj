@@ -414,14 +414,6 @@ public abstract class BaseAnalyzer
 			this.title = ResourceMgr.getString("LblCompletionListKws");
 			this.elements = readKeywords();
 		}
-		else if (context == CONTEXT_WB_PARAMS)
-		{
-			this.title = ResourceMgr.getString("LblCompletionListParams");
-		}
-		else if (context == CONTEXT_WB_PARAMVALUES)
-		{
-			this.title = ResourceMgr.getString("LblCompletionListParmValues");
-		}
 		else if (context == CONTEXT_SCHEMA_LIST)
 		{
 			this.title = StringUtil.capitalize(dbConnection.getMetadata().getSchemaTerm());

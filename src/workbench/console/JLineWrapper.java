@@ -23,12 +23,16 @@
 package workbench.console;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.util.FileUtil;
 
+import jline.ArgumentCompletor;
+import jline.Completor;
 import jline.ConsoleReader;
 import jline.History;
+import jline.NullCompletor;
 import jline.Terminal;
 
 /**
@@ -47,6 +51,11 @@ public class JLineWrapper
 		reader.setUseHistory(true);
 		reader.setUsePagination(false);
 		reader.setBellEnabled(false);
+		List<Completor> completors = new ArrayList<Completor>(2);
+//		completors.add(new WbFilenameCompletor());
+		completors.add(new ClipCompletor());
+		completors.add(new NullCompletor());
+		reader.addCompletor(new ArgumentCompletor(completors));
 	}
 
 	@Override

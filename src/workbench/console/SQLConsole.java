@@ -39,6 +39,7 @@ import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.StatementHistory;
+import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
@@ -245,9 +246,16 @@ public class SQLConsole
 				boolean isCompleteStatement = buffer.addLine(line);
 
 				String stmt = buffer.getScript().trim();
+
 				if (startOfStatement && ("exit".equalsIgnoreCase(stmt) || "\\q".equals(stmt)))
 				{
 					break;
+				}
+
+				String macro = getMacroText(stmt);
+				if (StringUtil.isNonEmpty(macro))
+				{
+					isCompleteStatement = true;
 				}
 
 				String firstWord = getFirstWord(line);
@@ -267,14 +275,23 @@ public class SQLConsole
 							adjustHistoryDisplay(runner);
 						}
 
-						history.add(stmt);
-						runner.executeScript(stmt);
-
+						if (StringUtil.isBlank(macro))
+						{
+							history.add(stmt);
+							runner.executeScript(stmt);
+						}
+						else
+						{
+							history.add(stmt);
+							runner.executeScript(macro);
+						}
+						
 						if (isHistoryCmd(stmt))
 						{
 							// WbHistory without parameters was executed
 							// prompt for an index to be executed
-							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " #> ");
+							System.out.println("");
+							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " ###> ");
 							int index = StringUtil.getIntValue(input, -1);
 							if (index > 0 && index <= history.size())
 							{
@@ -322,6 +339,12 @@ public class SQLConsole
 
 			WbManager.getInstance().doShutdown(0);
 		}
+	}
+
+	private String getMacroText(String sql)
+	{
+		String macroText = MacroManager.getInstance().getMacroText(SqlUtil.trimSemicolon(sql));
+		return macroText;
 	}
 
 	private boolean isHistoryCmd(String stmt)

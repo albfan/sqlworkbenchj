@@ -8,6 +8,7 @@ package jline;
 
 import java.io.*;
 
+import jline.UnixTerminal.ReplayPrefixOneCharInputStream;
 
 /**
  * <p>
@@ -30,8 +31,8 @@ import java.io.*;
  * directly invoke the readc() method in the JNI library. This is so the class
  * can read special keys (like arrow keys) which are otherwise inaccessible via
  * the {@link System#in} stream. Using JNI reading can be bypassed by setting
- * the <code>jline.WindowsTerminal.disableDirectConsole</code> system property
- * to <code>true</code>.
+ * the <code>jline.WindowsTerminal.directConsole</code> system property
+ * to <code>false</code>.
  * </p>
  *
  * @author <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
@@ -187,11 +188,11 @@ public class WindowsTerminal extends Terminal {
     private Boolean directConsole;
 
     private boolean echoEnabled;
-
+    
     String encoding = System.getProperty("jline.WindowsTerminal.input.encoding", System.getProperty("file.encoding"));
     ReplayPrefixOneCharInputStream replayStream = new ReplayPrefixOneCharInputStream(encoding);
     InputStreamReader replayReader;
-
+    
     public WindowsTerminal() {
         String dir = System.getProperty("jline.WindowsTerminal.directConsole");
 
@@ -200,13 +201,13 @@ public class WindowsTerminal extends Terminal {
         } else if ("false".equals(dir)) {
             directConsole = Boolean.FALSE;
         }
-
+        
         try {
             replayReader = new InputStreamReader(replayStream, encoding);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
+        
     }
 
     private native int getConsoleMode();
@@ -265,7 +266,7 @@ public class WindowsTerminal extends Terminal {
 
     private void loadLibrary(final String name) throws IOException {
         // store the DLL in the temporary directory for the System
-        String version = getClass().getPackage().getImplementationVersion();
+        String version = WindowsTerminal.class.getPackage().getImplementationVersion();
 
         if (version == null) {
             version = "";
@@ -285,11 +286,11 @@ public class WindowsTerminal extends Terminal {
         if (System.getProperty("os.arch").indexOf("64") != -1)
             bits = 64;
 
-        InputStream in = new BufferedInputStream(getClass()
-            .getResourceAsStream(name + bits + ".dll"));
+        InputStream in = new BufferedInputStream(WindowsTerminal.class.getResourceAsStream(name + bits + ".dll"));
 
+        OutputStream fout = null;
         try {
-            OutputStream fout = new BufferedOutputStream(
+            fout = new BufferedOutputStream(
                     new FileOutputStream(f));
             byte[] bytes = new byte[1024 * 10];
 
@@ -297,7 +298,6 @@ public class WindowsTerminal extends Terminal {
                 fout.write(bytes, 0, n);
             }
 
-            fout.close();
         } catch (IOException ioe) {
             // We might get an IOException trying to overwrite an existing
             // jline.dll file if there is another process using the DLL.
@@ -305,6 +305,14 @@ public class WindowsTerminal extends Terminal {
             if (!exists) {
                 throw ioe;
             }
+        } finally {
+        	if (fout != null) {
+        		try {
+        			fout.close();
+        		} catch (IOException ioe) {
+        			// ignore
+        		}
+        	}
         }
 
         // try to clean up the DLL after the JVM exits
@@ -356,11 +364,11 @@ public class WindowsTerminal extends Terminal {
                 replayStream.setInput(indicator, in);
                 // replayReader = new InputStreamReader(replayStream, encoding);
                 indicator = replayReader.read();
-
+                
         }
-
+        
         return indicator;
-
+        
 	}
 
     public boolean isSupported() {
@@ -436,9 +444,9 @@ public class WindowsTerminal extends Terminal {
     }
 
     public InputStream getDefaultBindings() {
-        return getClass().getResourceAsStream("windowsbindings.properties");
+        return WindowsTerminal.class.getResourceAsStream("windowsbindings.properties");
     }
-
+    
     /**
      * This is awkward and inefficient, but probably the minimal way to add
      * UTF-8 support to JLine
@@ -452,11 +460,11 @@ public class WindowsTerminal extends Terminal {
         int byteRead;
 
         final String encoding;
-
+        
         public ReplayPrefixOneCharInputStream(String encoding) {
             this.encoding = encoding;
         }
-
+        
         public void setInput(int recorded, InputStream wrapped) throws IOException {
             this.byteRead = 0;
             this.firstByte = (byte) recorded;
@@ -470,8 +478,8 @@ public class WindowsTerminal extends Terminal {
             else if (encoding.equalsIgnoreCase("UTF-32"))
                 byteLength = 4;
         }
-
-
+            
+            
         public void setInputUTF8(int recorded, InputStream wrapped) throws IOException {
             // 110yyyyy 10zzzzzz
             if ((firstByte & (byte) 0xE0) == (byte) 0xC0)
@@ -508,5 +516,5 @@ public class WindowsTerminal extends Terminal {
             return byteLength - byteRead;
         }
     }
-
+    
 }

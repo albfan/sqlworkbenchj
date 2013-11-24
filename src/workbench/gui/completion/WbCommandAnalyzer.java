@@ -22,11 +22,14 @@
  */
 package workbench.gui.completion;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -38,6 +41,7 @@ import workbench.sql.VariablePool;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
+import workbench.sql.wbcommands.WbXslt;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -84,6 +88,10 @@ public class WbCommandAnalyzer
 		{
 			return wordDelimiters;
 		}
+		if (context == CONTEXT_WB_PARAMVALUES)
+		{
+			return wordDelimiters + "=";
+		}
 		return super.getWordDelimiters();
 	}
 
@@ -127,23 +135,25 @@ public class WbCommandAnalyzer
 			return;
 		}
 
-		ArgumentParser p = cmd.getArgumentParser();
-		if (p == null)
+		ArgumentParser args = cmd.getArgumentParser();
+		if (args == null)
 		{
 			this.context = NO_CONTEXT;
 			this.elements = null;
 			return;
 		}
 
-		p.parse(this.sql);
+		args.parse(this.sql);
 
 		String parameter = getCurrentParameter();
 		this.isParameter = false;
 
-		if (p.isRegistered(parameter))
+		if (args.isRegistered(parameter))
 		{
 			context = CONTEXT_WB_PARAMVALUES;
-			ArgumentType type = p.getArgumentType(parameter);
+			title = ResourceMgr.getString("LblCompletionListParmValues");
+
+			ArgumentType type = args.getArgumentType(parameter);
 			if (type == ArgumentType.BoolArgument)
 			{
 				this.elements = new ArrayList(2);
@@ -157,7 +167,7 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.ListArgument)
 			{
-				this.elements = new ArrayList(p.getAllowedValues(parameter));
+				this.elements = new ArrayList(args.getAllowedValues(parameter));
 			}
 			else if (type == ArgumentType.ObjectTypeArgument)
 			{
@@ -182,16 +192,26 @@ public class WbCommandAnalyzer
 				this.elements = ConnectionMgr.getInstance().getProfileKeys();
 				changeCase = false;
 			}
+			else if (type == ArgumentType.Filename)
+			{
+				this.elements = getFiles(args, parameter, false);
+				this.setOverwriteCurrentWord(true);
+			}
+			else if (type == ArgumentType.DirName)
+			{
+				this.elements = getFiles(args, parameter, true);
+				this.setOverwriteCurrentWord(true);
+			}
 			else if (parameter.equals(WbImport.ARG_SHEET_NR))
 			{
 				this.useSheetIndex = true;
-				this.elements = getSheetnames(cmd, p);
+				this.elements = getSheetnames(cmd, args);
 				changeCase = false;
 			}
 			else if (parameter.equals(WbImport.ARG_SHEET_NAME))
 			{
 				this.useSheetIndex = false;
-				this.elements = getSheetnames(cmd, p);
+				this.elements = getSheetnames(cmd, args);
 				changeCase = false;
 			}
 			else
@@ -200,7 +220,7 @@ public class WbCommandAnalyzer
 				this.elements = null;
 			}
 		}
-		else if (cmd instanceof WbDescribeObject && p.getArgumentCount() == 0)
+		else if (cmd instanceof WbDescribeObject && args.getArgumentCount() == 0)
 		{
 			this.context = CONTEXT_TABLE_LIST;
 			this.elements = null;
@@ -208,15 +228,74 @@ public class WbCommandAnalyzer
 		else
 		{
 			context = CONTEXT_WB_PARAMS;
-			List<String> arguments = p.getRegisteredArguments();
+			List<String> arguments = args.getRegisteredArguments();
 			this.elements = arguments;
 			String params = SqlUtil.stripVerb(this.sql);
-			p.parse(params);
-			List<String> argsPresent = p.getArgumentsOnCommandLine();
+			args.parse(params);
+			List<String> argsPresent = args.getArgumentsOnCommandLine();
 			this.elements.removeAll(argsPresent);
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
-			isParameter = p.needsSwitch();
+			isParameter = args.needsSwitch();
 		}
+	}
+
+	@Override
+	protected void buildResult()
+	{
+		// nothing to do, the element list was already filled in checkContext();
+	}
+
+	private WbFile getCurrentDir(String parameter)
+	{
+		if (parameter.equalsIgnoreCase(WbXslt.ARG_STYLESHEET))
+		{
+			File dir = Settings.getInstance().getDefaultXsltDirectory();
+			if (dir.exists())
+			{
+				return new WbFile(dir);
+			}
+		}
+		return new WbFile(".");
+	}
+
+	private List<WbFile> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
+	{
+		String name = cmdLine.getValue(parameter);
+		File[] files;
+
+		if (StringUtil.isNonBlank(name))
+		{
+			WbFile f = new WbFile(name);
+			if (!f.isDirectory())
+			{
+				return null;
+			}
+			files = f.listFiles();
+			this.title = f.getFullPath();
+		}
+		else
+		{
+			WbFile dir = getCurrentDir(parameter);
+			files = dir.listFiles();
+			this.title = dir.getFullPath();
+		}
+
+		if (files == null)
+		{
+			return null;
+		}
+
+		List<WbFile> result = new ArrayList<WbFile>(files.length);
+		for (File f : files)
+		{
+			if (!dirsOnly || f.isDirectory())
+			{
+				WbFile wb = new WbFile(f);
+				wb.setShowOnlyFilename(true);
+				result.add(wb);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -233,6 +312,10 @@ public class WbCommandAnalyzer
 			{
 				return entry.sheetName;
 			}
+		}
+		if (selectedObject instanceof WbFile)
+		{
+			return ((WbFile)selectedObject).getFullPath();
 		}
 		return null;
 	}

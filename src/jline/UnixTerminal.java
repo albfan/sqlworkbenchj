@@ -36,9 +36,10 @@ public class UnixTerminal extends Terminal {
     public static final short DEL_THIRD = 51;
     public static final short DEL_SECOND = 126;
 
-    private Map terminfo;
     private boolean echoEnabled;
     private String ttyConfig;
+    private String ttyProps;
+    private long ttyPropsLastFetched;
     private boolean backspaceDeleteSwitched = false;
     private static String sttyCommand =
         System.getProperty("jline.sttyCommand", "stty");
@@ -58,14 +59,7 @@ public class UnixTerminal extends Terminal {
    
     protected void checkBackspace(){
         String[] ttyConfigSplit = ttyConfig.split(":|=");
-
-        if (ttyConfigSplit.length < 7)
-            return;
-        
-        if (ttyConfigSplit[6] == null)
-            return;
-	
-        backspaceDeleteSwitched = ttyConfigSplit[6].equals("7f");
+        backspaceDeleteSwitched = ttyConfigSplit.length >= 7 && "7f".equals(ttyConfigSplit[6]);
     }
     
     /**
@@ -129,22 +123,20 @@ public class UnixTerminal extends Terminal {
 
         if (backspaceDeleteSwitched)
             if (c == DELETE)
-                c = '\b';
-            else if (c == '\b')
+                c = BACKSPACE;
+            else if (c == BACKSPACE)
                 c = DELETE;
 
         // in Unix terminals, arrow keys are represented by
         // a sequence of 3 characters. E.g., the up arrow
         // key yields 27, 91, 68
-        if (c == ARROW_START) {
-		//also the escape key is 27
-		//thats why we read until we
-		//have something different than 27
-		//this is a bugfix, because otherwise
-		//pressing escape and than an arrow key
-		//was an undefined state
-		while (c == ARROW_START)
-            		c = readCharacter(in);
+        if (c == ARROW_START && in.available() > 0) {
+            // Escape key is also 27, so we use InputStream.available()
+            // to distinguish those. If 27 represents an arrow, there
+            // should be two more chars immediately available.
+            while (c == ARROW_START) {
+                c = readCharacter(in);
+            }
             if (c == ARROW_PREFIX || c == O_PREFIX) {
                 c = readCharacter(in);
                 if (c == ARROW_UP) {
@@ -238,15 +230,18 @@ public class UnixTerminal extends Terminal {
         return val;
     }
 
-    private static int getTerminalProperty(String prop)
+    private int getTerminalProperty(String prop)
                                     throws IOException, InterruptedException {
+        // tty properties are cached so we don't have to worry too much about getting term widht/height
+        if (ttyProps == null || System.currentTimeMillis() - ttyPropsLastFetched > 1000) {
+            ttyProps = stty("-a");
+            ttyPropsLastFetched = System.currentTimeMillis();
+        }
         // need to be able handle both output formats:
         // speed 9600 baud; 24 rows; 140 columns;
         // and:
         // speed 38400 baud; rows = 49; columns = 111; ypixels = 0; xpixels = 0;
-        String props = stty("-a");
-
-        for (StringTokenizer tok = new StringTokenizer(props, ";\n");
+        for (StringTokenizer tok = new StringTokenizer(ttyProps, ";\n");
                  tok.hasMoreTokens();) {
             String str = tok.nextToken().trim();
 
@@ -268,7 +263,7 @@ public class UnixTerminal extends Terminal {
      *  Execute the stty command with the specified arguments
      *  against the current active terminal.
      */
-    private static String stty(final String args)
+    protected static String stty(final String args)
                         throws IOException, InterruptedException {
         return exec("stty " + args + " < /dev/tty").trim();
     }
@@ -296,21 +291,31 @@ public class UnixTerminal extends Terminal {
 
         Process p = Runtime.getRuntime().exec(cmd);
         int c;
-        InputStream in;
+        InputStream in = null;
+        InputStream err = null;
+        OutputStream out = null;
 
-        in = p.getInputStream();
+        try {
+	        in = p.getInputStream();
 
-        while ((c = in.read()) != -1) {
-            bout.write(c);
-        }
+	        while ((c = in.read()) != -1) {
+	            bout.write(c);
+	        }
 
-        in = p.getErrorStream();
+	        err = p.getErrorStream();
 
-        while ((c = in.read()) != -1) {
-            bout.write(c);
-        }
+	        while ((c = err.read()) != -1) {
+	            bout.write(c);
+	        }
+	
+	        out = p.getOutputStream();
 
-        p.waitFor();
+	        p.waitFor();
+	    } finally {
+		    try {in.close();} catch (Exception e) {}
+		    try {err.close();} catch (Exception e) {}
+		    try {out.close();} catch (Exception e) {}
+	    }
 
         String result = new String(bout.toByteArray());
 

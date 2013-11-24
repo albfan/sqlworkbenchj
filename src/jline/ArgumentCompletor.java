@@ -214,7 +214,7 @@ public class ArgumentCompletor implements Completor {
      *
      *  @author  <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
      */
-    interface ArgumentDelimiter {
+    public static interface ArgumentDelimiter {
         /**
          *  Break the specified buffer into individual tokens
          *  that can be completed on their own.

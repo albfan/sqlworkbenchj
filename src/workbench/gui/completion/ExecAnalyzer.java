@@ -22,14 +22,17 @@
  */
 package workbench.gui.completion;
 
-import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.StringUtil;
 
 /**
- * Supply a list of stored procedures when running EXEC or WbRun
+ * Supply a list of stored procedures for EXEC or WbCall
  *
  */
 public class ExecAnalyzer
