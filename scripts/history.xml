@@ -4,6 +4,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-11-19">
+    <entry dev-build="5" type="enh">Macros are now also supported in console mode</entry>
+    <entry dev-build="5" type="enh">In console mode, the history of commands is now saved across restarts</entry>
+    <entry dev-build="5" type="enh">A new command WbHistory is available to show the history of executed commands (primarily intended for console mode)</entry>
     <entry dev-build="4" type="enh">For Postgres columns with custom types or arrays can now be edited correctly inside a result</entry>
     <entry dev-build="4" type="enh">The Excel export now supports a new parameter -targetSheet. If that is specified an existing file is loaded and all data is written to the indicated worksheet overwriting any previous content</entry>
     <entry dev-build="4" type="enh">A single result can now be detached into a separate window</entry>
