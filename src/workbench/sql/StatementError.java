@@ -21,10 +21,6 @@
  */
 package workbench.sql;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import workbench.util.DdlObjectInfo;
 
 /**
@@ -34,13 +30,30 @@ import workbench.util.DdlObjectInfo;
 public class StatementError
 {
 	private int errorPosition;
+	private int errorLine;
+	private int positionInLine;
 	private final Exception cause;
-	private List<String> errorMessages;
 	private DdlObjectInfo object;
 
 	public StatementError(Exception error)
 	{
 		this.cause = error;
+	}
+
+	public void setErrorPositionInLine(int line, int positionInLine)
+	{
+		this.errorLine = line;
+		this.positionInLine = positionInLine;
+	}
+
+	public int getErrorLine()
+	{
+		return errorLine;
+	}
+
+	public int getPositionInLine()
+	{
+		return positionInLine;
 	}
 
 	public int getErrorPosition()
@@ -55,31 +68,19 @@ public class StatementError
 
 	public void setObjectInfo(DdlObjectInfo info)
 	{
-		if (info == null) return;
-		if (info.isValid())
+		if (info != null && info.isValid())
 		{
 			object = info;
+		}
+		else
+		{
+			object = null;
 		}
 	}
 
 	public Exception getErrorCause()
 	{
 		return cause;
-	}
-
-	public void addErrorMessage(String msg)
-	{
-		if (errorMessages == null)
-		{
-			errorMessages = new ArrayList<String>(1);
-		}
-		errorMessages.add(msg);
-	}
-
-	public List<String> getErrorMessages()
-	{
-		if (errorMessages == null) return Collections.emptyList();
-		return Collections.unmodifiableList(errorMessages);
 	}
 
 	public DdlObjectInfo getObjectInfo()

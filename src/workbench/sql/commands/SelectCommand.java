@@ -30,15 +30,10 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.ErrorPositionReader;
-
 import workbench.sql.SqlCommand;
-import workbench.sql.StatementError;
 import workbench.sql.StatementRunnerResult;
 
-import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
-import workbench.util.StringUtil;
 
 /**
  * Implementation of the SELECT statement.
@@ -170,26 +165,7 @@ public class SelectCommand
 		}
 		catch (Exception e)
 		{
-			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			result.addMessage(StringUtil.getMaxSubstring(sql, 120));
-
-			ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
-			int pos = reader.getErrorPosition(currentConnection, sql, e);
-			if (pos > -1)
-			{
-				StatementError error = new StatementError(e);
-				error.setErrorPosition(pos);
-				String msg = reader.enhanceErrorMessage(sql, e.getMessage().trim(), pos);
-				result.setFailure(error);
-				result.addMessageNewLine();
-				result.addMessage(msg);
-			}
-			else
-			{
-				result.addMessage(ExceptionUtil.getAllExceptions(e));
-				result.setFailure(e);
-			}
+			addErrorInfo(result, sql, e);
 			appendWarnings(result, true);
 			LogMgr.logUserSqlError("SelectCommand.execute()", sql, e);
 			this.runner.rollbackSavepoint();

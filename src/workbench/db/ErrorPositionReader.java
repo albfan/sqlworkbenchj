@@ -22,6 +22,11 @@
  */
 package workbench.db;
 
+import java.util.regex.PatternSyntaxException;
+
+import workbench.log.LogMgr;
+
+import workbench.db.firebird.FirebirdErrorPositionReader;
 import workbench.db.oracle.OracleErrorPositionReader;
 import workbench.db.postgres.PostgresErrorPositionReader;
 
@@ -51,6 +56,8 @@ public interface ErrorPositionReader
 	 * @return true if the exception contains the error position.
 	 */
 	String enhanceErrorMessage(String sql, String errorMessage, int errorPosition);
+
+	// <editor-fold defaultstate="collapsed" desc="Factory">
 
 	public class Factory
 	{
@@ -86,8 +93,28 @@ public interface ErrorPositionReader
 			{
 				return new PostgresErrorPositionReader();
 			}
+			if (conn.getMetadata().isFirebird())
+			{
+				return new FirebirdErrorPositionReader();
+			}
+
+			String colRegex = conn.getDbSettings().getErrorColumnInfoRegex();
+			String lineRegex = conn.getDbSettings().getErrorLineInfoRegex();
+			if (colRegex != null && lineRegex != null)
+			{
+				try
+				{
+					ErrorPositionReader reader = new RegexErrorPositionReader(lineRegex, colRegex);
+					return reader;
+				}
+				catch (PatternSyntaxException pse)
+				{
+					LogMgr.logError("ErrorPositionReader.Factory.createPositionReader()", "Could not initialize regex based reader using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex, pse);
+				}
+			}
 			return dummyReader;
 		}
 	}
+	// </editor-fold>
 
 }

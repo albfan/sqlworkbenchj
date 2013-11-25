@@ -37,6 +37,23 @@ public class StringUtilTest
 {
 
 	@Test
+	public void testGetLineStartOffset()
+	{
+		String sql = "select x\nfrom foo\nwhere x > 0";
+		int start = StringUtil.getLineStartOffset(sql, 1);
+		assertEquals(9, start);
+		start = StringUtil.getLineStartOffset(sql, 2);
+		assertEquals(18, start);
+		start = StringUtil.getLineStartOffset(sql, 0);
+		assertEquals(0, start);
+		start = StringUtil.getLineStartOffset(sql, 10);
+		assertEquals(-1, start);
+
+		start = StringUtil.getLineStartOffset("select * from foo", 0);
+		assertEquals(0, start);
+	}
+
+	@Test
 	public void testGetLineOfPosition()
 	{
 		String sql = "select x\nfrom foo\nwhere x > 0";
@@ -45,10 +62,13 @@ public class StringUtilTest
 		int end = StringUtil.getLineEnd(sql, pos);
 		assertEquals(9, start);
 		assertEquals(17, end);
-		System.out.println("start: " + start);
-		System.out.println("end: " + end);
-		System.out.println(sql.substring(start, end));
-		System.out.println(StringUtil.padRight("", pos - start) + "*");
+
+		sql = "select x\r\nfrom foo\r\nwhere x > 0";
+		pos = sql.indexOf("foo");
+		start = StringUtil.getLineStart(sql, pos);
+		end = StringUtil.getLineEnd(sql, pos);
+		assertEquals(10, start);
+		assertEquals(18, end);
 	}
 
 	@Test
