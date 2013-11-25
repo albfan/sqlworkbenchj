@@ -34,9 +34,16 @@ import workbench.util.StringUtil;
 public class RegexErrorPositionReader
 	implements ErrorPositionReader
 {
-	private final Pattern lineInfoPattern;
-	private final Pattern columnInfoPattern;
+	private Pattern positionPattern;
+	private Pattern lineInfoPattern;
+	private Pattern columnInfoPattern;
 	private final Pattern noNumbers = Pattern.compile("[^0-9]");
+
+	public RegexErrorPositionReader(String positionRegex)
+		throws PatternSyntaxException
+	{
+		positionPattern = Pattern.compile(positionRegex);
+	}
 
 	public RegexErrorPositionReader(String lineRegex, String columnRegex)
 		throws PatternSyntaxException
@@ -51,31 +58,36 @@ public class RegexErrorPositionReader
 		if (ex == null) return -1;
 		String msg = ex.getMessage();
 
-		int line = -1;
-		int column = -1;
-		Matcher lm = lineInfoPattern.matcher(msg);
+		if (lineInfoPattern != null && columnInfoPattern != null)
+		{
+			return getPositionFromLineAndColumn(msg, sql);
+		}
+		if (positionPattern != null)
+		{
+			return getValueFromRegex(msg, positionPattern);
+		}
+		return -1;
+	}
+
+	private int getValueFromRegex(String msg, Pattern pattern)
+	{
+		if (msg == null) return -1;
+		int position = -1;
+
+		Matcher lm = pattern.matcher(msg);
 		if (lm.find())
 		{
 			String lineInfo = noNumbers.matcher(msg.substring(lm.start(), lm.end())).replaceAll("");
-			line = StringUtil.getIntValue(lineInfo, -1) - 1;
+			position = StringUtil.getIntValue(lineInfo, -1) - 1;
 		}
 
-		if (line == -1)
-		{
-			return -1;
-		}
+		return position;
+	}
 
-		Matcher cm = columnInfoPattern.matcher(msg);
-		if (cm.find())
-		{
-			String colInfo = noNumbers.matcher(msg.substring(cm.start(), cm.end())).replaceAll("");
-			column = StringUtil.getIntValue(colInfo, -1) - 1;
-		}
-
-		if (column == -1)
-		{
-			return -1;
-		}
+	private int getPositionFromLineAndColumn(String msg, String sql)
+	{
+		int line = getValueFromRegex(msg, lineInfoPattern);
+		int column = getValueFromRegex(msg, columnInfoPattern);
 
 		int offset = StringUtil.getLineStartOffset(sql, line);
 		if (offset < 0)
@@ -84,6 +96,7 @@ public class RegexErrorPositionReader
 		}
 		return offset + column;
 	}
+
 
 	@Override
 	public String enhanceErrorMessage(String sql, String originalMessage, int errorPosition)

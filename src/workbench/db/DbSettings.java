@@ -1689,12 +1689,17 @@ public class DbSettings
 
 	public String getErrorColumnInfoRegex()
 	{
-		return Settings.getInstance().getProperty(prefix + ".errorinfo.regex.column", null);
+		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.column", null);
 	}
 
 	public String getErrorLineInfoRegex()
 	{
-		return Settings.getInstance().getProperty(prefix + ".errorinfo.regex.line", null);
+		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.line", null);
+	}
+
+	public String getErrorPosInfoRegex()
+	{
+		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.position", null);
 	}
 
 }
