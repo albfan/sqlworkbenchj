@@ -59,6 +59,21 @@ public class JLineWrapper
 	}
 
 	@Override
+	public String readLineWithoutHistory(String prompt)
+	{
+		boolean old = reader.getUseHistory();
+		try
+		{
+			reader.setUseHistory(false);
+			return readLine(prompt);
+		}
+		finally
+		{
+			reader.setUseHistory(old);
+		}
+	}
+
+	@Override
 	public int getColumns()
 	{
 		Terminal t = Terminal.getTerminal();

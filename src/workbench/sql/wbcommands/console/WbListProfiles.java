@@ -30,6 +30,8 @@ import workbench.db.ProfileGroupMap;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 
 /**
@@ -41,10 +43,15 @@ public class WbListProfiles
 	extends SqlCommand
 {
 	public static final String VERB = "WBLISTPROFILES";
+	public static final String ARG_GROUP = "group";
+	public static final String ARG_GROUPS_ONLY = "groupsOnly";
 
 	public WbListProfiles()
 	{
 		super();
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_GROUP);
+		cmdLine.addArgument(ARG_GROUPS_ONLY, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -65,21 +72,34 @@ public class WbListProfiles
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		List<ConnectionProfile> prof = CollectionUtil.arrayList();
+		cmdLine.parse(getCommandLine(sql));
+		String groupToShow = null;
+		if (cmdLine.isArgPresent(ARG_GROUP))
+		{
+			groupToShow = cmdLine.getValue(ARG_GROUP);
+		}
+
+		boolean groupsOnly = cmdLine.getBoolean(ARG_GROUPS_ONLY);
 
 		// getProfiles() returns an unmodifiable List, but ProfileGroupMap
-		// will sort the list which is not possible with an unmodifieable List
+		// will sort the list passed list which is not possible with an unmodifieable List
+		List<ConnectionProfile> prof = CollectionUtil.arrayList();
 		prof.addAll(ConnectionMgr.getInstance().getProfiles());
 		ProfileGroupMap map = new ProfileGroupMap(prof);
 
 		String userTxt = ResourceMgr.getString("TxtUser");
 		for (String group : map.keySet())
 		{
-			List<ConnectionProfile> profiles = map.get(group);
 			result.addMessage(group);
-			for (ConnectionProfile profile : profiles)
+			if (groupsOnly) continue;
+
+			if (groupToShow == null || groupToShow.equalsIgnoreCase(group))
 			{
-				result.addMessage("  " + profile.getName() + ", " + userTxt + "=" + profile.getUsername() + ", URL=" + profile.getUrl());
+				List<ConnectionProfile> profiles = map.get(group);
+				for (ConnectionProfile profile : profiles)
+				{
+					result.addMessage("  " + profile.getName() + ", " + userTxt + "=" + profile.getUsername() + ", URL=" + profile.getUrl());
+				}
 			}
 		}
 		result.setSuccess();

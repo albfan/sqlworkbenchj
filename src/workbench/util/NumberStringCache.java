@@ -22,24 +22,38 @@
  */
 package workbench.util;
 
+import workbench.resource.Settings;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class NumberStringCache
 {
-	// As this class is used to cache the String representation for
-	// Line numbers in the editor, caching 5000 numbers should suffice
-	// for most cases.
-	public static final int CACHE_SIZE = 5000;
-	private static final String[] cache = new String[CACHE_SIZE];
-	private static final String[] hexCache = new String[256];
+	private final int CACHE_SIZE = Settings.getInstance().getIntProperty("workbench.gui.numbercache.size", 2500);
+	private final String[] cache = new String[CACHE_SIZE];
+	private final String[] hexCache = new String[256];
+
+	public static NumberStringCache getInstance()
+	{
+		return InstanceHolder.LAZY_INSTANCE;
+	}
+
+	private static class InstanceHolder
+	{
+		static final NumberStringCache LAZY_INSTANCE = new NumberStringCache();
+	}
 
 	private NumberStringCache()
 	{
 	}
 
 	public static String getHexString(int value)
+	{
+		return getInstance()._getHexString(value);
+	}
+
+	private String _getHexString(int value)
 	{
 		if (value > 255 || value < 0) return Integer.toHexString(value);
 		if (hexCache[value] == null)
@@ -59,9 +73,15 @@ public class NumberStringCache
 
 	public static String getNumberString(long lvalue)
 	{
+		return getInstance()._getNumberString(lvalue);
+	}
+
+	private String _getNumberString(long lvalue)
+	{
 		if (lvalue < 0 || lvalue >= CACHE_SIZE) return Long.toString(lvalue);
 
 		int value = (int)lvalue;
+
 		// I'm not synchronizing this, because the worst that can
 		// happen is, that the same number is created two or three times
 		// instead of exactly one time.

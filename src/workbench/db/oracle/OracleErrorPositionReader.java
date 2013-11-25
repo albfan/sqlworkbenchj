@@ -24,6 +24,7 @@ import java.sql.CallableStatement;
 import java.sql.Types;
 import java.util.Set;
 
+import workbench.db.ErrorPositionReader;
 import workbench.log.LogMgr;
 
 import workbench.db.WbConnection;
@@ -36,6 +37,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class OracleErrorPositionReader
+	implements ErrorPositionReader
 {
 	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH");
 
@@ -52,9 +54,12 @@ public class OracleErrorPositionReader
 	 * @return -1 if no error occurred
 	 *         else the starting position in the error if any
 	 */
-	public int getErrorPosition(WbConnection con, String sql)
+	@Override
+	public int getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
+
+		// We can only get the information for the defined SQL statements
 		if (!verbs.contains(verb)) return -1;
 
 		int errorPos = -1;

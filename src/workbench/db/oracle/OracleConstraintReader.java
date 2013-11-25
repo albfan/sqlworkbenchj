@@ -87,7 +87,7 @@ public class OracleConstraintReader
 	}
 
 	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier table)
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
@@ -99,8 +99,8 @@ public class OracleConstraintReader
 		try
 		{
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, aTable.getSchema());
-			stmt.setString(2, aTable.getTableName());
+			stmt.setString(1, table.getSchema());
+			stmt.setString(2, table.getTableName());
 
 			rs = stmt.executeQuery();
 			while (rs.next())
@@ -109,10 +109,11 @@ public class OracleConstraintReader
 				String constraint = rs.getString(2);
 				String status = rs.getString(3);
 				String valid = rs.getString(4);
+
 				if (constraint != null)
 				{
 					// NOT NULL constraints do not need to be taken into account
-					if (isDefaultNNConstraint(constraint)) continue;
+					if (isDefaultNNConstraint(name, constraint)) continue;
 
 					String expression = "(" + constraint + ")";
 					if ("DISABLED".equalsIgnoreCase(status))
@@ -151,8 +152,13 @@ public class OracleConstraintReader
 	 * immediately followed by the keyword IS NOT NULL and no further
 	 * definitions exist.
 	 */
-	protected boolean isDefaultNNConstraint(String definition)
+	protected boolean isDefaultNNConstraint(String name, String definition)
 	{
+		// Not null constrainst can be defined as check constraints as well
+		// in that case the constraint will have a name that is not system generated
+		// and it needs to be included because those columns are not reported as NOT NULL
+		if (!isSystemConstraintName(name)) return false;
+
 		try
 		{
 			SQLLexer lexer = new SQLLexer(definition);

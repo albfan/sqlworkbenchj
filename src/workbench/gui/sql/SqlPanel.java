@@ -3528,6 +3528,29 @@ public class SqlPanel
 		}
 	}
 
+	private int getNextResultNumber()
+	{
+		int count = this.resultTab.getTabCount();
+		if (count <= 1) return 1;
+
+		String defaultTitle = ResourceMgr.getString("LblTabResult");
+
+		int maxNr = 0;
+		for (int i=0; i < count - 1; i++)
+		{
+			String title = this.resultTab.getTitleAt(i);
+			if (title != null && title.startsWith(defaultTitle))
+			{
+				int nr = StringUtil.getIntValue(title.replaceAll("[^0-9]", ""), -1);
+				if (nr > maxNr)
+				{
+					maxNr = nr;
+				}
+			}
+		}
+		return maxNr + 1;
+	}
+
 	private int addResultTab(DwPanel data)
 	{
 		int newIndex = this.resultTab.getTabCount() - 1;
@@ -3536,7 +3559,7 @@ public class SqlPanel
 		String resultName = (ds != null ? ds.getResultName() : null);
 		if (StringUtil.isBlank(resultName))
 		{
-			resultName = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(newIndex + 1);
+			resultName = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(getNextResultNumber());
 		}
 		else
 		{

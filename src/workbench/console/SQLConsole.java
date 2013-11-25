@@ -285,13 +285,13 @@ public class SQLConsole
 							history.add(stmt);
 							runner.executeScript(macro);
 						}
-						
+
 						if (isHistoryCmd(stmt))
 						{
 							// WbHistory without parameters was executed
 							// prompt for an index to be executed
 							System.out.println("");
-							String input = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("TxtEnterStmtIndex") + " ###> ");
+							String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
 							int index = StringUtil.getIntValue(input, -1);
 							if (index > 0 && index <= history.size())
 							{
@@ -336,8 +336,16 @@ public class SQLConsole
 			{
 				Settings.getInstance().saveSettings(false);
 			}
+		}
 
+		try
+		{
 			WbManager.getInstance().doShutdown(0);
+		}
+		catch (Exception ex)
+		{
+			System.err.println(ExceptionUtil.getDisplay(ex));
+			System.exit(1);
 		}
 	}
 
@@ -396,9 +404,16 @@ public class SQLConsole
 			String schema = current.getDisplaySchema();
 			if (schema == null) current.getCurrentSchema();
 
-			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema) && !schema.equals(user))
+			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema))
 			{
-				newprompt = user + "@" + schema;
+				if (schema.equalsIgnoreCase(user))
+				{
+					newprompt = user;
+				}
+				else
+				{
+					newprompt = user + "@" + schema;
+				}
 			}
 			else if (StringUtil.isNonBlank(catalog) && StringUtil.isBlank(schema))
 			{

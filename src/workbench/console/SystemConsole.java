@@ -80,4 +80,10 @@ public class SystemConsole
 		return -1;
 	}
 
+	@Override
+	public String readLineWithoutHistory(String prompt)
+	{
+		return readLine(prompt);
+	}
+
 }

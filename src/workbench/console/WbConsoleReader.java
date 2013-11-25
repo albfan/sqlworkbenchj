@@ -32,4 +32,5 @@ public interface WbConsoleReader
 	String readLine(String prompt);
 	void shutdown();
 	int getColumns();
+	String readLineWithoutHistory(String prompt);
 }
