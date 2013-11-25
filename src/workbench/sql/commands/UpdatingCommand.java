@@ -153,7 +153,6 @@ public class UpdatingCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
-			result.setFailure(e);
 			LogMgr.logUserSqlError("UpdatingCommnad.execute()", sql, e);
 		}
 		finally

@@ -18,11 +18,15 @@
  * To contact the author please send an email to: support@sql-workbench.net
  */
 
-package workbench.db.oracle;
+package workbench.db.postgres;
+
+import java.sql.Statement;
 
 import workbench.WbTestCase;
 
 import workbench.db.WbConnection;
+
+import workbench.util.SqlUtil;
 
 import org.junit.Test;
 
@@ -32,26 +36,51 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class OracleErrorPositionReaderTest
+public class PostgresErrorPositionReaderTest
 	extends WbTestCase
 {
 
-	public OracleErrorPositionReaderTest()
+	public PostgresErrorPositionReaderTest()
 	{
-		super("GetErrorTest");
+		super("PgErrorPos");
 	}
 
 	@Test
 	public void testGetErrorPosition()
-		throws Exception
 	{
-		WbConnection conn = OracleTestUtil.getOracleConnection();
-		OracleErrorPositionReader reader = new OracleErrorPositionReader();
-		int pos = reader.getErrorPosition(conn, "select 42 from dualx", null);
-		assertEquals(15, pos);
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
 
-		pos = reader.getErrorPosition(conn, "select 42 from dual", null);
-		assertEquals(-1, pos);
+		String sql = "SELECT x";
+		Exception ex = runStatement(con, sql);
+		PostgresErrorPositionReader reader = new PostgresErrorPositionReader();
+
+		int pos = reader.getErrorPosition(con, sql, ex);
+		assertEquals(8, pos);
+
+		sql = "selct 42";
+		ex = runStatement(con, sql);
+		pos = reader.getErrorPosition(con, sql, ex);
+		assertEquals(1, pos);
 	}
 
+	private Exception runStatement(WbConnection con, String sql)
+	{
+		Statement stmt = null;
+		Exception result = null;
+		try
+		{
+			stmt = con.createStatement();
+			stmt.executeQuery(sql);
+		}
+		catch (Exception ex)
+		{
+			result = ex;
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+		return result;
+	}
 }

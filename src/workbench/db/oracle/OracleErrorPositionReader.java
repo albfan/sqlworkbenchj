@@ -24,9 +24,9 @@ import java.sql.CallableStatement;
 import java.sql.Types;
 import java.util.Set;
 
-import workbench.db.ErrorPositionReader;
 import workbench.log.LogMgr;
 
+import workbench.db.ErrorPositionReader;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
@@ -101,4 +101,18 @@ public class OracleErrorPositionReader
 		}
 		return errorPos;
 	}
+
+	@Override
+	public String enhanceErrorMessage(String sql, String originalMessage, int errorPosition)
+	{
+		originalMessage += "\nAt position: " + errorPosition;
+
+		String indicator = SqlUtil.getErrorIndicator(sql, errorPosition);
+		if (indicator != null)
+		{
+			originalMessage += "\n\n" + indicator;
+		}
+		return originalMessage;
+	}
+
 }

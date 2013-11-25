@@ -23,14 +23,18 @@
 package workbench.db.oracle;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -55,7 +59,9 @@ public class OracleConstraintReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		String sql = "create table person (id integer, constraint positive_id check (id > 0));";
+		String sql =
+			"create table person (id integer, constraint positive_id check (id > 0));\n" +
+			"create table foo (id integer constraint foo_nn_id check (id is not null));";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -86,15 +92,27 @@ public class OracleConstraintReaderTest
 	}
 
 	@Test
+	public void testNNConstraint()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("FOO"));
+		String source = tbl.getSource(con).toString();
+		assertTrue(source.toLowerCase().contains("constraint foo_nn_id check (id is not null)"));
+	}
+
+	@Test
 	public void testIsDefaultNNConstraint()
 	{
 		OracleConstraintReader instance = new OracleConstraintReader("oracle");
 		String definition = "\"MY_COL\" IS NOT NULL";
-		boolean result = instance.isDefaultNNConstraint(definition);
-		assertEquals("Default NN not recognized", true, result);
+		boolean result = instance.isDefaultNNConstraint("SYS_C0013077", definition);
+		assertTrue("Default NN not recognized", result);
 
 		definition = "\"MY_COL\" IS NOT NULL OR COL2 IS NOT NULL";
-		result = instance.isDefaultNNConstraint(definition);
-		assertEquals("Default NN not recognized", false, result);
+		result = instance.isDefaultNNConstraint("chk_cols", definition);
+		assertFalse("Default NN not recognized", result);
 	}
 }

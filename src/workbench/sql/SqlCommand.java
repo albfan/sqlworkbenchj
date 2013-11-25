@@ -37,6 +37,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
+import workbench.db.ErrorPositionReader;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -953,8 +954,21 @@ public class SqlCommand
 			result.addMessage(msg);
 			result.addMessageNewLine();
 		}
-		result.addMessage(ExceptionUtil.getAllExceptions(e));
-		result.setFailure();
+		ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
+		int pos = reader.getErrorPosition(currentConnection, sql, e);
+		if (pos > -1)
+		{
+			StatementError error = new StatementError(e);
+			error.setErrorPosition(pos);
+			String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), pos);
+			result.setFailure(error);
+			result.addMessage(fullMsg);
+		}
+		else
+		{
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
+			result.setFailure(e);
+		}
 	}
 
 	/**

@@ -2132,4 +2132,20 @@ public class SqlUtil
 		}
 		return dbmsType;
 	}
+
+	public static String getErrorIndicator(String sql, int errorPosition)
+	{
+		int start = StringUtil.getLineStart(sql, errorPosition);
+		int end = StringUtil.getLineEnd(sql, errorPosition);
+
+		String msg = null;
+		if (start > -1 && end > start)
+		{
+			String line = sql.substring(start, end);
+			String indicator = StringUtil.padRight("", errorPosition - start) + "^";
+			msg = line + "\n" + indicator;
+		}
+		return msg;
+
+	}
 }

@@ -1663,4 +1663,44 @@ public class StringUtil
 			data.delete(data.length() - numChars, data.length());
 		}
 	}
+
+
+	public static int getLineStart(String text, int position)
+	{
+		if (StringUtil.isEmptyString(text)) return 0;
+
+		int start = 0;
+
+		// find the beginning of the line
+		for (int i=position; i > 0; i--)
+		{
+			char c = text.charAt(i);
+			if (c == '\r' || c == '\n')
+			{
+				start = i + 1;
+				break;
+			}
+		}
+		return start;
+	}
+
+	public static int getLineEnd(String text, int position)
+	{
+		if (StringUtil.isEmptyString(text)) return 0;
+
+		int count = text.length();
+		int end = count;
+
+		// find the end of the line
+		for (int i=position; i < count; i++)
+		{
+			char c = text.charAt(i);
+			if (c == '\r' || c == '\n')
+			{
+				end = i;
+				break;
+			}
+		}
+		return end;
+	}
 }

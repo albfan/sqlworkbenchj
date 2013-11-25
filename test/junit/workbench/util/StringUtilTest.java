@@ -37,6 +37,21 @@ public class StringUtilTest
 {
 
 	@Test
+	public void testGetLineOfPosition()
+	{
+		String sql = "select x\nfrom foo\nwhere x > 0";
+		int pos = sql.indexOf("foo");
+		int start = StringUtil.getLineStart(sql, pos);
+		int end = StringUtil.getLineEnd(sql, pos);
+		assertEquals(9, start);
+		assertEquals(17, end);
+		System.out.println("start: " + start);
+		System.out.println("end: " + end);
+		System.out.println(sql.substring(start, end));
+		System.out.println(StringUtil.padRight("", pos - start) + "*");
+	}
+
+	@Test
 	public void testRemove()
 	{
 		StringBuilder b = new StringBuilder("12345");

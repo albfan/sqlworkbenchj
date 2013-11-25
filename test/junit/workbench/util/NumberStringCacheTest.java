@@ -22,8 +22,9 @@
  */
 package workbench.util;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -40,9 +41,6 @@ public class NumberStringCacheTest
 		char c = 32;
 		s = NumberStringCache.getNumberString(c);
 		assertEquals(s, "32");
-
-		s = NumberStringCache.getNumberString(NumberStringCache.CACHE_SIZE);
-		assertEquals(Integer.toString(NumberStringCache.CACHE_SIZE), s);
 	}
 
 	@Test
