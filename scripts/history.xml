@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-11-19">
+    <entry dev-build="5" type="enh">For Oracle and Postgres the displayed error now inlcude the actual error position and the part of the statement that corresponds to that position. If "highlight error" is enabled and the actual error line could be determined, only that line will now be highlighted</entry>
     <entry dev-build="5" type="enh">Macros are now also supported in console mode</entry>
     <entry dev-build="5" type="enh">In console mode, the history of commands is now saved across restarts</entry>
     <entry dev-build="5" type="enh">A new command WbHistory is available to show the history of executed commands (primarily intended for console mode)</entry>
@@ -29,6 +30,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="5" type="fix">Oracle: columns defined as NOT NULL through a check constraint (rather than using NOT NULL) where not shown correctly in the table's source</entry>
     <entry dev-build="4" type="fix">Prompting to reload a changed file in the editor didn't work properly.</entry>
     <entry dev-build="4" type="fix">XLS or XLSX exports would fail when using -append=true together with -infoSheet=true</entry>
     <entry dev-build="4" type="fix">Fixed some errors in the generated SQL statements in the DbExplorer for Sybase</entry>
