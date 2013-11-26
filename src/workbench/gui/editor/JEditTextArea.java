@@ -916,6 +916,15 @@ public class JEditTextArea
 		return scrollTo(line, offset);
 	}
 
+	/**
+	 * Checks if the given line is visible and inside the "electric sroll" margin of the editor.
+	 */
+	public boolean isLineVisible(int line)
+	{
+		if (visibleLines == 0) return false;
+		return firstLine + electricScroll <= line && line <= firstLine + visibleLines - electricScroll;
+	}
+
 	private int scrollRetries = 0;
 	/**
 	 * Ensures that the specified line and offset is visible by scrolling
@@ -1307,9 +1316,13 @@ public class JEditTextArea
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
 		if (lineElement == null)
+		{
 			return -1;
+		}
 		else
+		{
 			return lineElement.getStartOffset();
+		}
 	}
 
 	/**

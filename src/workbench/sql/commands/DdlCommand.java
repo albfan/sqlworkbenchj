@@ -38,6 +38,7 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.ErrorDescriptor;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -150,7 +151,7 @@ public class DdlCommand
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
 				{
-					if (this.addExtendErrorInfo(currentConnection, info, result))
+					if (this.addExtendErrorInfo(currentConnection, sql, info, result))
 					{
 						result.setFailure();
 					}
@@ -193,8 +194,12 @@ public class DdlCommand
 			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
-			addExtendErrorInfo(currentConnection, info, result);
 			result.setFailure(e);
+			if (!addExtendErrorInfo(currentConnection, sql, info, result))
+			{
+				addErrorInfo(result, sql, e);
+			}
+
 			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
 		}
 		finally
@@ -250,7 +255,7 @@ public class DdlCommand
 	 * @see ErrorInformationReader#getErrorInfo(String, String, String)
 	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
 	 */
-	private boolean addExtendErrorInfo(WbConnection aConnection, DdlObjectInfo info , StatementRunnerResult result)
+	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, DdlObjectInfo info , StatementRunnerResult result)
 	{
 		if (info == null) return false;
 		if (aConnection == null) return false;
@@ -258,11 +263,17 @@ public class DdlCommand
 		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(aConnection);
 		if (reader == null) return false;
 
-		String error = reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
-		if (StringUtil.isEmptyString(error)) return false;
+		ErrorDescriptor error = reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
+		if (error == null) return false;
 
+		if (error.getErrorPosition() == -1 && error.getErrorColumn() > -1 && error.getErrorLine() > -1)
+		{
+			int offset = SqlUtil.getErrorOffset(sql, error);
+			error.setErrorOffset(offset);
+		}
 		result.addMessageNewLine();
-		result.addMessage(error);
+		result.setFailure(error);
+		result.addMessage(error.getErrorMessage());
 		return true;
 	}
 

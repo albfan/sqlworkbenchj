@@ -1702,4 +1702,9 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.position", null);
 	}
 
+	public boolean getErrorPosIsZeroBased()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "errorinfo.zerobased", true);
+	}
+
 }

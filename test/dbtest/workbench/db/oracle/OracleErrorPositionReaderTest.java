@@ -24,6 +24,8 @@ import workbench.WbTestCase;
 
 import workbench.db.WbConnection;
 
+import workbench.sql.ErrorDescriptor;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -47,11 +49,12 @@ public class OracleErrorPositionReaderTest
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
 		OracleErrorPositionReader reader = new OracleErrorPositionReader();
-		int pos = reader.getErrorPosition(conn, "select 42 from dualx", null);
-		assertEquals(15, pos);
+		ErrorDescriptor error = reader.getErrorPosition(conn, "select 42 from dualx", null);
+		assertNotNull(error);
+		assertEquals(15, error.getErrorPosition());
 
-		pos = reader.getErrorPosition(conn, "select 42 from dual", null);
-		assertEquals(-1, pos);
+		error = reader.getErrorPosition(conn, "select 42 from dual", null);
+		assertNull(error);
 	}
 
 }

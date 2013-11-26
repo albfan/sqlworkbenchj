@@ -344,9 +344,9 @@ public class SQLConsole
 		{
 			WbManager.getInstance().doShutdown(0);
 		}
-		catch (Exception ex)
+		catch (Throwable th)
 		{
-			System.err.println(ExceptionUtil.getDisplay(ex));
+			System.err.println(ExceptionUtil.getDisplay(th));
 			System.exit(1);
 		}
 	}

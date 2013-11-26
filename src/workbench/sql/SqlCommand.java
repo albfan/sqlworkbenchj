@@ -955,12 +955,10 @@ public class SqlCommand
 			result.addMessageNewLine();
 		}
 		ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
-		int pos = reader.getErrorPosition(currentConnection, sql, e);
-		if (pos > -1)
+		ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
+		if (error != null)
 		{
-			StatementError error = new StatementError(e);
-			error.setErrorPosition(pos);
-			String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), pos);
+			String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), error);
 			result.setFailure(error);
 			result.addMessage(fullMsg);
 		}

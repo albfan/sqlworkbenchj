@@ -22,15 +22,19 @@
  */
 package workbench.db.oracle;
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ErrorDescriptor;
+
 import org.junit.AfterClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
-import workbench.TestUtil;
-import workbench.WbTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -65,17 +69,26 @@ public class OracleErrorInformationReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		String sql = "create procedure nocando as begin null; ende;\n/\n";
+		String sql =
+			"create procedure nocando\n" +
+			"as \n" +
+			"begin \n" +
+			"   null; \n" +
+			"ende;\n/\n";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		try
 		{
 			con.setBusy(true);
 			OracleErrorInformationReader reader = new OracleErrorInformationReader(con);
-			String errorInfo = reader.getErrorInfo(null, "nocando", "procedure", true);
+			ErrorDescriptor errorInfo = reader.getErrorInfo(null, "nocando", "procedure", true);
 			con.setBusy(false);
-			assertTrue(errorInfo.startsWith("Errors for PROCEDURE NOCANDO"));
-			assertTrue(errorInfo.contains("PLS-00103"));
+			assertNotNull(errorInfo);
+			System.out.println(errorInfo);
+			assertTrue(errorInfo.getErrorMessage().startsWith("Errors for PROCEDURE NOCANDO"));
+			assertTrue(errorInfo.getErrorMessage().contains("PLS-00103"));
+			assertEquals(4, errorInfo.getErrorLine());
+			assertEquals(4, errorInfo.getErrorColumn());
 		}
 		finally
 		{

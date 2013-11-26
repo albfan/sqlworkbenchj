@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import workbench.sql.ErrorDescriptor;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -38,6 +40,7 @@ public class RegexErrorPositionReader
 	private Pattern lineInfoPattern;
 	private Pattern columnInfoPattern;
 	private final Pattern noNumbers = Pattern.compile("[^0-9]");
+	private boolean numbersAreZeroBased;
 
 	public RegexErrorPositionReader(String positionRegex)
 		throws PatternSyntaxException
@@ -52,10 +55,15 @@ public class RegexErrorPositionReader
 		columnInfoPattern = Pattern.compile(columnRegex);
 	}
 
-	@Override
-	public int getErrorPosition(WbConnection con, String sql, Exception ex)
+	public void setNumbersAreZeroBased(boolean flag)
 	{
-		if (ex == null) return -1;
+		this.numbersAreZeroBased = flag;
+	}
+
+	@Override
+	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
+	{
+		if (ex == null) return null;
 		String msg = ex.getMessage();
 
 		if (lineInfoPattern != null && columnInfoPattern != null)
@@ -64,9 +72,11 @@ public class RegexErrorPositionReader
 		}
 		if (positionPattern != null)
 		{
-			return getValueFromRegex(msg, positionPattern);
+			ErrorDescriptor result = new ErrorDescriptor();
+			result.setErrorOffset(getValueFromRegex(msg, positionPattern));
+			return result;
 		}
-		return -1;
+		return null;
 	}
 
 	private int getValueFromRegex(String msg, Pattern pattern)
@@ -78,30 +88,35 @@ public class RegexErrorPositionReader
 		if (lm.find())
 		{
 			String lineInfo = noNumbers.matcher(msg.substring(lm.start(), lm.end())).replaceAll("");
-			position = StringUtil.getIntValue(lineInfo, -1) - 1;
+			position = StringUtil.getIntValue(lineInfo, -1);
 		}
-
+		if (position > 0 && numbersAreZeroBased)
+		{
+			position --;
+		}
 		return position;
 	}
 
-	private int getPositionFromLineAndColumn(String msg, String sql)
+	private ErrorDescriptor getPositionFromLineAndColumn(String msg, String sql)
 	{
+		ErrorDescriptor result = new ErrorDescriptor();
 		int line = getValueFromRegex(msg, lineInfoPattern);
 		int column = getValueFromRegex(msg, columnInfoPattern);
 
 		int offset = StringUtil.getLineStartOffset(sql, line);
 		if (offset < 0)
 		{
-			return -1;
+			return null;
 		}
-		return offset + column;
+		result.setErrorPosition(line, column);
+		result.setErrorOffset(offset + column);
+		return result;
 	}
 
-
 	@Override
-	public String enhanceErrorMessage(String sql, String originalMessage, int errorPosition)
+	public String enhanceErrorMessage(String sql, String originalMessage, ErrorDescriptor errorInfo)
 	{
-		String indicator = SqlUtil.getErrorIndicator(sql, errorPosition);
+		String indicator = SqlUtil.getErrorIndicator(sql, errorInfo);
 		if (indicator != null)
 		{
 			originalMessage += "\n\n" + indicator;

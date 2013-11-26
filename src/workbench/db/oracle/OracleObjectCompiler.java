@@ -26,10 +26,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 
-import workbench.db.DbObject;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbObject;
+import workbench.db.WbConnection;
+
+import workbench.sql.ErrorDescriptor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -77,12 +81,12 @@ public class OracleObjectCompiler
 			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
 			stmt.executeUpdate(sql);
-			String error = errorReader.getErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
-			if (StringUtil.isBlank(error))
+			ErrorDescriptor error = errorReader.getErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
+			if (error == null)
 			{
 				return null;
 			}
-			return error.trim();
+			return error.getErrorMessage();
 		}
 		catch (SQLException e)
 		{

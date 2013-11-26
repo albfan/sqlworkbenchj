@@ -55,6 +55,7 @@ import workbench.db.WbConnection;
 
 import workbench.storage.ResultInfo;
 
+import workbench.sql.ErrorDescriptor;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
@@ -2133,19 +2134,81 @@ public class SqlUtil
 		return dbmsType;
 	}
 
-	public static String getErrorIndicator(String sql, int errorPosition)
+	public static String getErrorIndicator(String sql, ErrorDescriptor errorPosition)
 	{
-		int start = StringUtil.getLineStart(sql, errorPosition);
-		int end = StringUtil.getLineEnd(sql, errorPosition);
+		if (errorPosition == null) return null;
+
+		int offset = errorPosition.getErrorPosition();
+		if (offset < 0) return null;
+
+		int start = StringUtil.getLineStart(sql, offset);
+		int end = StringUtil.getLineEnd(sql, offset);
 
 		String msg = null;
 		if (start > -1 && end > start)
 		{
 			String line = sql.substring(start, end);
-			String indicator = StringUtil.padRight("", errorPosition - start) + "^";
+			String indicator = StringUtil.padRight("", offset - start) + "^";
 			msg = line + "\n" + indicator;
 		}
 		return msg;
+	}
 
+	/**
+	 * Return the offset of the error location based on the line/column information.
+	 *
+	 * If the error descriptor already contains an error offset, that is returned.
+	 *
+	 * @param sql    the original SQL statement
+	 * @param error  the error descriptor
+	 * @return the offset into the SQL statement
+	 *
+	 * @see ErrorDescriptor#getErrorPosition()
+	 */
+	public static int getErrorOffset(String sql, ErrorDescriptor error)
+	{
+		if (error == null) return -1;
+		if (error.getErrorPosition() > -1) return error.getErrorPosition();
+		if (StringUtil.isEmptyString(sql)) return -1;
+		int length = sql.length();
+		int errorLine = error.getErrorLine();
+		int errorColumn = error.getErrorColumn();
+
+		int currentLine = 0;
+		int currentColumn = 0;
+		int pos = 0;
+		while (pos < length)
+		{
+			if (currentLine == errorLine && currentColumn == errorColumn)
+			{
+				return pos;
+			}
+			char c = sql.charAt(pos);
+			if (c == '\r' || c == '\n')
+			{
+				pos = skipNewLineChars(sql, pos);
+				currentLine ++;
+				currentColumn = 0;
+			}
+			else
+			{
+				currentColumn ++;
+				pos ++;
+			}
+		}
+		return -1;
+	}
+
+	public static int skipNewLineChars(String text, int currentPos)
+	{
+		int length = text.length();
+		if (currentPos >= text.length()) return length;
+		char c = text.charAt(currentPos);
+		while ( (c == '\r' || c == '\n') && currentPos < length - 1)
+		{
+			currentPos ++;
+			c = text.charAt(currentPos);
+		}
+		return currentPos;
 	}
 }

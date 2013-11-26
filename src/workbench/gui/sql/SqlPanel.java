@@ -185,9 +185,9 @@ import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.storage.DataStore;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ErrorDescriptor;
 import workbench.sql.ScriptParser;
 import workbench.sql.ScrollAnnotation;
-import workbench.sql.StatementError;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -3091,7 +3091,7 @@ public class SqlPanel
 			stmtRunner.setMaxRows(maxRows);
 
 			ignoreStateChange = true;
-			StatementError lastError = null;
+			ErrorDescriptor lastError = null;
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -3256,7 +3256,7 @@ public class SqlPanel
 				final ScriptParser p = scriptParser;
 				final int command = commandWithError;
 				final int offset = selectionOffset;
-				final StatementError error = lastError;
+				final ErrorDescriptor error = lastError;
 
 				EventQueue.invokeLater(new Runnable()
 				{
@@ -3706,21 +3706,36 @@ public class SqlPanel
 		});
 	}
 
-	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset, StatementError error)
+	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
 	{
 		if (this.editor == null) return;
 
-		final int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-		final int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
-		final int line = this.editor.getLineOfOffset(startPos);
-
+		final int startPos;
+		final int endPos;
+		final int line;
+		if (error != null && error.getErrorPosition() > -1)
+		{
+			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
+			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
+			startPos = editor.getLineStartOffset(line);
+			endPos = editor.getLineEndOffset(line);
+		}
+		else
+		{
+			startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
+			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
+			line = this.editor.getLineOfOffset(startPos);
+		}
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				editor.select(0, 0);
-				editor.scrollTo(line, 0);
+				if (!editor.isLineVisible(line))
+				{
+					editor.select(0, 0);
+					editor.scrollTo(line, 0);
+				}
 				editor.selectError(startPos, endPos);
 			}
 		});

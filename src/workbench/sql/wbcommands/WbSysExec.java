@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -38,7 +37,13 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
-import workbench.util.*;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
+import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
+import workbench.util.PlatformHelper;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A workbench command to call an operating system program (or command)
@@ -113,38 +118,7 @@ public class WbSysExec
 				return result;
 			}
 
-			File cwd = new File(getBaseDir());
-
-			if (StringUtil.isNonBlank(prg))
-			{
-				List<String> args = new ArrayList<String>();
-				if (prg.startsWith("."))
-				{
-					WbFile f = evaluateFileArgument(prg);
-					prg = f.getFullPath();
-				}
-				if (useShell(prg))
-				{
-					List<String> shell = getShellPrefix(prg);
-					args.addAll(shell);
-				}
-				args.add(prg);
-				List<String> params = cmdLine.getList(ARG_PRG_ARG);
-				args.addAll(params);
-				ProcessBuilder pb = new ProcessBuilder(args);
-				String dir = cmdLine.getValue(ARG_WORKING_DIR);
-				if (StringUtil.isNonBlank(dir))
-				{
-					File f = evaluateFileArgument(dir);
-					pb.directory(f);
-				}
-				else
-				{
-					pb.directory(cwd);
-				}
-				this.task = pb.start();
-			}
-			else if (StringUtil.isNonBlank(doc) && Desktop.isDesktopSupported())
+			if (StringUtil.isNonBlank(doc) && Desktop.isDesktopSupported())
 			{
 				try
 				{
@@ -158,22 +132,61 @@ public class WbSysExec
 				}
 				return result;
 			}
+
+			File cwd = new File(getBaseDir());
+			List<String> args = new ArrayList<String>();
+
+			if (StringUtil.isNonBlank(prg))
+			{
+				if (prg.startsWith("."))
+				{
+					WbFile f = evaluateFileArgument(prg);
+					prg = f.getFullPath();
+				}
+
+				if (useShell(args.get(0)))
+				{
+					List<String> shell = getShellPrefix(args);
+					if (shell.get(0).startsWith("/"))
+					{
+						// for linux anything that is passed to /bin/bash -c must be a single parameter
+						// so we need to collect everything
+
+					}
+					else
+					{
+						args.addAll(shell);
+					}
+				}
+				args.add(prg);
+				List<String> params = cmdLine.getList(ARG_PRG_ARG);
+				args.addAll(params);
+			}
 			else
 			{
-				if (useShell(command))
-				{
-					List<String> shell = getShellPrefix(command);
-					shell.add(command);
-					LogMgr.logDebug("WbSysExec.execute()", "Running statement: " + StringUtil.listToString(shell, ' '));
-					ProcessBuilder pb = new ProcessBuilder(shell);
-					pb.directory(cwd);
-					this.task = pb.start();
-				}
-				else
-				{
-					this.task = Runtime.getRuntime().exec(command, null, cwd);
-				}
+				List<String> cmd = StringUtil.stringToList(command, " ", true, true, false, true);
+				args.addAll(cmd);
 			}
+
+			if (useShell(args.get(0)))
+			{
+				args = getShellPrefix(args);
+				LogMgr.logDebug("WbSysExec.execute()", "Running statement: " + StringUtil.listToString(args, ' '));
+			}
+
+			ProcessBuilder pb = new ProcessBuilder(args);
+			String dir = cmdLine.getValue(ARG_WORKING_DIR);
+			if (StringUtil.isNonBlank(dir))
+			{
+				File f = evaluateFileArgument(dir);
+				pb.directory(f);
+			}
+			else
+			{
+				pb.directory(cwd);
+			}
+
+			this.task = pb.start();
 
 			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream()));
 			stdError = new BufferedReader(new InputStreamReader(task.getErrorStream()));
@@ -217,24 +230,37 @@ public class WbSysExec
 		return result;
 	}
 
-	private List<String> getShellPrefix(String command)
+	private List<String> getShellPrefix(List<String> command)
 	{
 		String os = getOSID();
+		List<String> args = new ArrayList<String>(command.size() + 2);
 
-		String first = StringUtil.getFirstWord(command).toLowerCase();
+		String first = StringUtil.getFirstWord(command.get(0)).toLowerCase();
 
 		if ("windows".equals(os) && !first.startsWith("cmd"))
 		{
-			return CollectionUtil.arrayList("cmd", "/c");
+			args.add("cmd");
+			args.add("/c");
+			args.addAll(command);
 		}
-
 		String shell = System.getenv("SHELL");
 
 		if (("linux".equals(os) || "macos".equals(os)) && !first.startsWith(shell))
 		{
-			return CollectionUtil.arrayList(shell, "-c");
+			args.add(shell);
+			args.add("-c");
+			StringBuilder allArgs = new StringBuilder(50);
+			for (int i=0; i < command.size(); i++)
+			{
+				if (i > 0)
+				{
+					allArgs.append(' ');
+				}
+				allArgs.append(command.get(i));
+				args.add(allArgs.toString());
+			}
 		}
-		return Collections.emptyList();
+		return args;
 	}
 
 	private boolean useShell(String command)

@@ -36,6 +36,7 @@ import workbench.db.WbConnection;
 
 import workbench.storage.ResultInfo;
 
+import workbench.sql.ErrorDescriptor;
 import workbench.sql.formatter.SQLToken;
 
 import org.junit.Test;
@@ -53,6 +54,43 @@ public class SqlUtilTest
 	public SqlUtilTest()
 	{
 		super("SqlUtilTest");
+	}
+
+	@Test
+	public void testGetErrorOffset()
+	{
+		String sql = "select x from foo";
+		ErrorDescriptor error = new ErrorDescriptor();
+		error.setErrorPosition(0, sql.indexOf('x'));
+		int offset = SqlUtil.getErrorOffset(sql, error);
+		assertEquals(sql.indexOf('x'), offset);
+
+		sql =
+			"select x\r\n"+
+			"from foo";
+		error.setErrorPosition(1, 5);
+		offset = SqlUtil.getErrorOffset(sql, error);
+		assertEquals(sql.indexOf("foo"), offset);
+
+	}
+
+	@Test
+	public void testSkipNewLines()
+	{
+		String text = "this is\n\ra new\r\nline";
+		int pos = text.indexOf("\n\ra");
+		int next = SqlUtil.skipNewLineChars(text, pos);
+		assertEquals(next, text.indexOf("a new"));
+
+		pos = text.indexOf("\r\nline");
+		next = SqlUtil.skipNewLineChars(text, pos);
+		assertEquals(pos + 2, next);
+
+		text = "this is\na new\nline";
+		pos = text.indexOf("\na");
+		next = SqlUtil.skipNewLineChars(text, pos);
+		assertEquals(pos + 1, next);
+
 	}
 
 	@Test
@@ -116,19 +154,13 @@ public class SqlUtilTest
 	@Test
 	public void testEscapeWildcards()
 	{
-		String name = "test_table";
-		String escaped = SqlUtil.escapeUnderscore(name, "\\");
-		assertEquals("test\\_table", escaped);
-
-		name = "test_table_";
-		escaped = SqlUtil.escapeUnderscore(name, "\\");
-		assertEquals("test\\_table\\_", escaped);
-
-		name = "sometable";
-		escaped = SqlUtil.escapeUnderscore(name, "\\");
-		assertEquals("sometable", escaped);
-
 		assertNull(SqlUtil.escapeUnderscore(null, "\\"));
+		assertEquals("sometable", SqlUtil.escapeUnderscore("sometable", "\\"));
+		assertEquals("first#_name", SqlUtil.escapeUnderscore("first_name", "#"));
+		assertEquals("first_name", SqlUtil.escapeUnderscore("first_name", (String)null));
+		assertEquals("first\\_name", SqlUtil.escapeUnderscore("first_name", "\\"));
+		assertEquals("test\\_table\\_", SqlUtil.escapeUnderscore("test_table_", "\\"));
+		assertEquals("firstname", SqlUtil.escapeUnderscore("firstname", "#"));
 	}
 
 	@Test
@@ -762,12 +794,12 @@ public class SqlUtilTest
 	{
 		Field[] fields = java.sql.Types.class.getDeclaredFields();
 		boolean missing = false;
-		for (int i=0; i < fields.length; i++)
+		for (Field field : fields)
 		{
-			int type = fields[i].getInt(null);
+			int type = field.getInt(null);
 			if (SqlUtil.getTypeName(type).equals("UNKNOWN"))
 			{
-				System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
+				System.out.println("Type " + field.getName() + " not included in getTypeName()!");
 				missing = true;
 			}
 		}

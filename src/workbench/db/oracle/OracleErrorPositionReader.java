@@ -29,6 +29,8 @@ import workbench.log.LogMgr;
 import workbench.db.ErrorPositionReader;
 import workbench.db.WbConnection;
 
+import workbench.sql.ErrorDescriptor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -55,14 +57,12 @@ public class OracleErrorPositionReader
 	 *         else the starting position in the error if any
 	 */
 	@Override
-	public int getErrorPosition(WbConnection con, String sql, Exception ex)
+	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
 
 		// We can only get the information for the defined SQL statements
-		if (!verbs.contains(verb)) return -1;
-
-		int errorPos = -1;
+		if (!verbs.contains(verb)) return null;
 
 		String getErrorSql =
 			"/* SQLWorkbench */ \n" +
@@ -83,6 +83,8 @@ public class OracleErrorPositionReader
 			"END;";
 
 		CallableStatement cstmt = null;
+		int errorPos = -1;
+
 		try
 		{
 			cstmt = con.getSqlConnection().prepareCall(getErrorSql);
@@ -99,15 +101,26 @@ public class OracleErrorPositionReader
 		{
 			SqlUtil.closeStatement(cstmt);
 		}
-		return errorPos;
+
+		if (errorPos > -1)
+		{
+			ErrorDescriptor error = new ErrorDescriptor();
+			error.setErrorOffset(errorPos);
+			return error;
+		}
+		return null;
 	}
 
 	@Override
-	public String enhanceErrorMessage(String sql, String originalMessage, int errorPosition)
+	public String enhanceErrorMessage(String sql, String originalMessage, ErrorDescriptor errorInfo)
 	{
-		originalMessage += "\nAt position: " + errorPosition;
+		if (errorInfo == null) return originalMessage;
+		int offset = errorInfo.getErrorPosition();
+		if (offset < 0) return originalMessage;
 
-		String indicator = SqlUtil.getErrorIndicator(sql, errorPosition);
+		originalMessage += "\nAt position: " + offset;
+
+		String indicator = SqlUtil.getErrorIndicator(sql, errorInfo);
 		if (indicator != null)
 		{
 			originalMessage += "\n\n" + indicator;

@@ -22,15 +22,13 @@
  */
 package workbench.util;
 
-import workbench.resource.Settings;
-
 /**
  *
  * @author Thomas Kellerer
  */
 public class NumberStringCache
 {
-	private final int CACHE_SIZE = Settings.getInstance().getIntProperty("workbench.gui.numbercache.size", 2500);
+	private final int CACHE_SIZE = 5000;
 	private final String[] cache = new String[CACHE_SIZE];
 	private final String[] hexCache = new String[256];
 

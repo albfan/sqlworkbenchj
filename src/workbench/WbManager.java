@@ -580,7 +580,7 @@ public final class WbManager
 		}
 	}
 
-	public void removeShutdownHook()
+	public synchronized void removeShutdownHook()
 	{
 		if (this.shutdownHook != null)
 		{

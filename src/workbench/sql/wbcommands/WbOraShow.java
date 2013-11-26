@@ -38,6 +38,7 @@ import workbench.db.oracle.OracleErrorInformationReader;
 
 import workbench.storage.DataStore;
 
+import workbench.sql.ErrorDescriptor;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
@@ -47,7 +48,6 @@ import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * An implementation of various SQL*Plus "show" commands.
@@ -244,7 +244,7 @@ public class WbOraShow
 			}
 		}
 
-		String errors = null;
+		ErrorDescriptor errors = null;
 
 		if (object != null)
 		{
@@ -252,9 +252,9 @@ public class WbOraShow
 			errors  = reader.getErrorInfo(schema, object, type, true);
 		}
 
-		if (StringUtil.isNonEmpty(errors))
+		if (errors != null)
 		{
-			result.addMessage(errors);
+			result.addMessage(errors.getErrorMessage());
 		}
 		else
 		{

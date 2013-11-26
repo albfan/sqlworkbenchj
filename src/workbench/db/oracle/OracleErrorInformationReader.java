@@ -34,6 +34,8 @@ import workbench.db.ErrorInformationReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.ErrorDescriptor;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -62,13 +64,13 @@ public class OracleErrorInformationReader
 	 *	@return extended error information if available
 	 */
 	@Override
-	public String getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
+	public ErrorDescriptor getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
 	{
 		if (StringUtil.isEmptyString(objectName))
 		{
 			return null;
 		}
-		
+
 		String query =
 			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
 			"FROM all_errors \n" +
@@ -94,7 +96,9 @@ public class OracleErrorInformationReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		StringBuilder result = new StringBuilder(250);
+		StringBuilder msg = new StringBuilder(250);
+		ErrorDescriptor result = null;
+
 		try
 		{
 			TableIdentifier tbl = new TableIdentifier(objectName);
@@ -139,11 +143,12 @@ public class OracleErrorInformationReader
 			{
 				if (count > 0)
 				{
-					result.append("\n");
+					msg.append("\n");
 				}
 				int line = rs.getInt(1);
 				int pos = rs.getInt(2);
-				String msg = rs.getString(3);
+
+				String message = rs.getString(3);
 				String name = rs.getString(4);
 				String type = rs.getString(5);
 
@@ -152,17 +157,22 @@ public class OracleErrorInformationReader
 					if (firstHeading)
 					{
 						firstHeading = false;
+						// only report the first error position
+						result = new ErrorDescriptor();
+
+						// normalize to zero based values
+						result.setErrorPosition(line - 1, pos - 1);
 					}
 					else
 					{
-						result.append('\n');
+						msg.append('\n');
 					}
 					String heading = ResourceMgr.getFormattedString("ErrForObject", type, name);
 					String divide = StringUtil.padRight("", heading.length(), '-');
-					result.append(heading);
-					result.append('\n');
-					result.append(divide);
-					result.append("\n");
+					msg.append(heading);
+					msg.append('\n');
+					msg.append(divide);
+					msg.append("\n");
 					currentName = name;
 				}
 
@@ -170,12 +180,12 @@ public class OracleErrorInformationReader
 				{
 					String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
 					lineInfo = StringUtil.padRight(lineInfo, indentLength);
-					result.append(lineInfo);
-					msg = msg.trim().replace("\n\n", "\n"); // remove duplicate newlines
+					msg.append(lineInfo);
+					message = message.trim().replace("\n\n", "\n"); // remove duplicate newlines
 					// indent all lines of the message
-					msg = msg.replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
+					message = message.replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
 				}
-				result.append(msg);
+				msg.append(message);
 				count++;
 			}
 		}
@@ -187,7 +197,11 @@ public class OracleErrorInformationReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return result.toString();
+		if (result != null)
+		{
+			result.setErrorMessage(msg.toString());
+		}
+		return result;
 	}
 
 }

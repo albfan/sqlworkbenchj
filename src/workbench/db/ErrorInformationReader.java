@@ -24,6 +24,8 @@ package workbench.db;
 
 import workbench.db.oracle.OracleErrorInformationReader;
 
+import workbench.sql.ErrorDescriptor;
+
 /**
  * An interface for reading extended error information from the database.
  *
@@ -38,5 +40,5 @@ import workbench.db.oracle.OracleErrorInformationReader;
  */
 public interface ErrorInformationReader
 {
-	String getErrorInfo(String schema, String object, String type, boolean formatMessage);
+	ErrorDescriptor getErrorInfo(String schema, String object, String type, boolean formatMessage);
 }

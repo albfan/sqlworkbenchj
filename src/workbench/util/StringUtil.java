@@ -813,10 +813,10 @@ public class StringUtil
 	 * Parses the given String and creates a List containing the elements
 	 * of the string that are separated by <tt>aDelimiter</aa>
 	 *
-	 * @param aString the value to be parsed
-	 * @param aDelimiter the delimiter to user
-	 * @param removeEmpty flag to remove empty entries
-	 * @param trimEntries flag to trim entries (will be applied beore checking for empty entries)
+	 * @param aString       the value to be parsed
+	 * @param aDelimiter    the delimiter to user
+	 * @param removeEmpty   flag to remove empty entries
+	 * @param trimEntries   flag to trim entries (will be applied beore checking for empty entries)
    * @param checkBrackets flag to check for opening and closing brackets (delimiter inside brackets will not be taken into account)
 	 * @return A List of Strings
 	 */
@@ -1056,7 +1056,8 @@ public class StringUtil
 	{
 		if (StringUtil.isEmptyString(value)) return "";
 
-		int pos = findFirstWhiteSpace(value.trim());
+		value = value.trim();
+		int pos = findFirstWhiteSpace(value);
 		if (pos < 0) return value;
 		return value.substring(0, pos);
 	}
