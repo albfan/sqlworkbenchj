@@ -41,6 +41,7 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
+	public static final String PROPERTY_HILITE_ERROR_LINE = "workbench.gui.editor.execute.highlighterror";
 	public static final String PROPERTY_CLOSE_ACTIVE_TAB = "workbench.gui.display.tab.closebutton.onlyactive";
 	public static final String PROPERTY_SQLTAB_CLOSE_BUTTON = "workbench.gui.display.sqltab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
@@ -126,12 +127,12 @@ public class GuiSettings
 
 	public static boolean getHighlightErrorStatement()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.editor.execute.highlighterror", true);
+		return Settings.getInstance().getBoolProperty(PROPERTY_HILITE_ERROR_LINE, true);
 	}
 
 	public static void setHighlightErrorStatement(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.editor.execute.highlighterror", flag);
+		Settings.getInstance().setProperty(PROPERTY_HILITE_ERROR_LINE, flag);
 	}
 
 	public static boolean getAutoRetrieveFKTree()

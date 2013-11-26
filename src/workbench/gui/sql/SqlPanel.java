@@ -126,6 +126,7 @@ import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.HighlightCurrentStatement;
+import workbench.gui.actions.HighlightErrorLineAction;
 import workbench.gui.actions.IgnoreErrorsAction;
 import workbench.gui.actions.ImportClipboardAction;
 import workbench.gui.actions.ImportFileAction;
@@ -856,6 +857,7 @@ public class SqlPanel
 		a = new HighlightCurrentStatement();
 		a.setCreateMenuSeparator(false);
 		this.actions.add(a);
+		this.actions.add(new HighlightErrorLineAction());
 		this.checkPreparedAction = new CheckPreparedStatementsAction();
 		this.actions.add(this.checkPreparedAction);
 		IgnoreErrorsAction ignore = new IgnoreErrorsAction();
@@ -3726,6 +3728,7 @@ public class SqlPanel
 			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
 			line = this.editor.getLineOfOffset(startPos);
 		}
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -3736,8 +3739,8 @@ public class SqlPanel
 					editor.select(0, 0);
 					editor.scrollTo(line, 0);
 				}
-				editor.selectError(startPos, endPos);
-			}
+					editor.selectError(startPos, endPos);
+				}
 		});
 	}
 
