@@ -30,8 +30,10 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -178,7 +180,7 @@ public class SqlKeywordHelper
 			result.addAll(builtin);
 		}
 
-		// Try to read the file from the current directory.
+		// Try to read the file from the config directory.
 		File f = f = new File(Settings.getInstance().getConfigDir(), filename);
 
 		if (f.exists())

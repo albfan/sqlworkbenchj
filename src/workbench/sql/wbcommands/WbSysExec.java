@@ -58,6 +58,7 @@ public class WbSysExec
 	public static final String ARG_PRG_ARG = "argument";
 	public static final String ARG_WORKING_DIR = "dir";
 	public static final String ARG_DOCUMENT = "document";
+	public static final String ARG_ENCODING = "encoding";
 
 	private Process task;
 
@@ -69,6 +70,7 @@ public class WbSysExec
 		cmdLine.addArgument(ARG_WORKING_DIR);
 		cmdLine.addArgument(ARG_DOCUMENT);
 		cmdLine.addArgument(ARG_PRG_ARG, ArgumentType.Repeatable);
+		cmdLine.addArgument(ARG_ENCODING);
 		ConditionCheck.addParameters(cmdLine);
 	}
 
@@ -136,6 +138,8 @@ public class WbSysExec
 			File cwd = new File(getBaseDir());
 			List<String> args = new ArrayList<String>();
 
+			List<String> params = cmdLine.getList(ARG_PRG_ARG);
+
 			if (StringUtil.isNonBlank(prg))
 			{
 				if (prg.startsWith("."))
@@ -143,23 +147,7 @@ public class WbSysExec
 					WbFile f = evaluateFileArgument(prg);
 					prg = f.getFullPath();
 				}
-
-				if (useShell(args.get(0)))
-				{
-					List<String> shell = getShellPrefix(args);
-					if (shell.get(0).startsWith("/"))
-					{
-						// for linux anything that is passed to /bin/bash -c must be a single parameter
-						// so we need to collect everything
-
-					}
-					else
-					{
-						args.addAll(shell);
-					}
-				}
 				args.add(prg);
-				List<String> params = cmdLine.getList(ARG_PRG_ARG);
 				args.addAll(params);
 			}
 			else
@@ -170,9 +158,12 @@ public class WbSysExec
 
 			if (useShell(args.get(0)))
 			{
-				args = getShellPrefix(args);
-				LogMgr.logDebug("WbSysExec.execute()", "Running statement: " + StringUtil.listToString(args, ' '));
+				args = getShell(args);
 			}
+
+			// it seems that Windows actually needs IBM437...
+			String encoding = cmdLine.getValue(ARG_ENCODING, System.getProperty("file.encoding"));
+			LogMgr.logDebug("WbSysExec.execute()", "Using encoding: " + encoding + ", running statement: " + StringUtil.listToString(args, ' '));
 
 			ProcessBuilder pb = new ProcessBuilder(args);
 			String dir = cmdLine.getValue(ARG_WORKING_DIR);
@@ -188,8 +179,8 @@ public class WbSysExec
 
 			this.task = pb.start();
 
-			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream()));
-			stdError = new BufferedReader(new InputStreamReader(task.getErrorStream()));
+			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream(), encoding));
+			stdError = new BufferedReader(new InputStreamReader(task.getErrorStream(), encoding));
 
 			String out = stdIn.readLine();
 			while (out != null)
@@ -198,17 +189,19 @@ public class WbSysExec
 				out = stdIn.readLine();
 			}
 
-			out = stdError.readLine();
-			if (out != null)
+			String err = stdError.readLine();
+			if (err != null)
 			{
 				result.setFailure();
 			}
-			while (out != null)
+
+			while (err != null)
 			{
-				result.addMessage(out);
-				out = stdError.readLine();
+				result.addMessage(err);
+				err = stdError.readLine();
 			}
 			task.waitFor();
+
 			int exitValue = task.exitValue();
 			if (exitValue != 0)
 			{
@@ -230,12 +223,13 @@ public class WbSysExec
 		return result;
 	}
 
-	private List<String> getShellPrefix(List<String> command)
+	private List<String> getShell(List<String> command)
 	{
 		String os = getOSID();
 		List<String> args = new ArrayList<String>(command.size() + 2);
 
 		String first = StringUtil.getFirstWord(command.get(0)).toLowerCase();
+		String shell = System.getenv("SHELL");
 
 		if ("windows".equals(os) && !first.startsWith("cmd"))
 		{
@@ -243,13 +237,14 @@ public class WbSysExec
 			args.add("/c");
 			args.addAll(command);
 		}
-		String shell = System.getenv("SHELL");
 
-		if (("linux".equals(os) || "macos".equals(os)) && !first.startsWith(shell))
+		if (!"windows".equals(os) && !first.startsWith(shell))
 		{
 			args.add(shell);
 			args.add("-c");
 			StringBuilder allArgs = new StringBuilder(50);
+
+			// when using "/bin/bash -c" the whole commandline must be a single parameter to the -c switch
 			for (int i=0; i < command.size(); i++)
 			{
 				if (i > 0)
@@ -273,7 +268,7 @@ public class WbSysExec
 
 		boolean caseSensitive = !PlatformHelper.isWindows();
 
-		List<String> cmdlist = Settings.getInstance().getListProperty("workbench.exec." + os + ".useshell", false, null);
+		List<String> cmdlist = Settings.getInstance().getListProperty("workbench.exec." + os + ".useshell", false, "*");
 		if (cmdlist.contains("*")) return true;
 		for (String cmd : cmdlist)
 		{
