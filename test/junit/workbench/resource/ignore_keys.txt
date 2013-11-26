@@ -27,6 +27,7 @@ LblLogLevel
 LblLTDos
 LblLTDos
 LblLTUnix
+LblMacroDef
 LblNotAvailable
 LblOK
 LblOpenWksp
