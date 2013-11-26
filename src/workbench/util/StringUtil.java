@@ -1052,6 +1052,15 @@ public class StringUtil
 		return 0;
 	}
 
+	public static String getFirstWord(String value)
+	{
+		if (StringUtil.isEmptyString(value)) return "";
+
+		int pos = findFirstWhiteSpace(value.trim());
+		if (pos < 0) return value;
+		return value.substring(0, pos);
+	}
+
 	/**
 	 * Find the first non-quoted whitespace in the given String.
 	 *

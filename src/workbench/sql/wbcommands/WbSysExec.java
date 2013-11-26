@@ -29,9 +29,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -82,7 +84,7 @@ public class WbSysExec
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		String command = getCommandLine(sql);
-		
+
 		if (StringUtil.isBlank(command))
 		{
 			result.setFailure();
@@ -111,6 +113,8 @@ public class WbSysExec
 				return result;
 			}
 
+			File cwd = new File(getBaseDir());
+
 			if (StringUtil.isNonBlank(prg))
 			{
 				List<String> args = new ArrayList<String>();
@@ -118,6 +122,11 @@ public class WbSysExec
 				{
 					WbFile f = evaluateFileArgument(prg);
 					prg = f.getFullPath();
+				}
+				if (useShell(prg))
+				{
+					List<String> shell = getShellPrefix(prg);
+					args.addAll(shell);
 				}
 				args.add(prg);
 				List<String> params = cmdLine.getList(ARG_PRG_ARG);
@@ -128,6 +137,10 @@ public class WbSysExec
 				{
 					File f = evaluateFileArgument(dir);
 					pb.directory(f);
+				}
+				else
+				{
+					pb.directory(cwd);
 				}
 				this.task = pb.start();
 			}
@@ -147,8 +160,19 @@ public class WbSysExec
 			}
 			else
 			{
-				File cwd = new File(getBaseDir());
-				this.task = Runtime.getRuntime().exec(command, null, cwd);
+				if (useShell(command))
+				{
+					List<String> shell = getShellPrefix(command);
+					shell.add(command);
+					LogMgr.logDebug("WbSysExec.execute()", "Running statement: " + StringUtil.listToString(shell, ' '));
+					ProcessBuilder pb = new ProcessBuilder(shell);
+					pb.directory(cwd);
+					this.task = pb.start();
+				}
+				else
+				{
+					this.task = Runtime.getRuntime().exec(command, null, cwd);
+				}
 			}
 
 			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream()));
@@ -193,6 +217,68 @@ public class WbSysExec
 		return result;
 	}
 
+	private List<String> getShellPrefix(String command)
+	{
+		String os = getOSID();
+
+		String first = StringUtil.getFirstWord(command).toLowerCase();
+
+		if ("windows".equals(os) && !first.startsWith("cmd"))
+		{
+			return CollectionUtil.arrayList("cmd", "/c");
+		}
+
+		String shell = System.getenv("SHELL");
+
+		if (("linux".equals(os) || "macos".equals(os)) && !first.startsWith(shell))
+		{
+			return CollectionUtil.arrayList(shell, "-c");
+		}
+		return Collections.emptyList();
+	}
+
+	private boolean useShell(String command)
+	{
+		if (StringUtil.isEmptyString(command)) return false;
+		String os = getOSID();
+		if (os == null) return false;
+
+		command = StringUtil.getFirstWord(command);
+
+		boolean caseSensitive = !PlatformHelper.isWindows();
+
+		List<String> cmdlist = Settings.getInstance().getListProperty("workbench.exec." + os + ".useshell", false, null);
+		if (cmdlist.contains("*")) return true;
+		for (String cmd : cmdlist)
+		{
+			if (caseSensitive)
+			{
+				if (cmd.equals(command)) return true;
+			}
+			else if (cmd.equalsIgnoreCase(command))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String getOSID()
+	{
+		if (PlatformHelper.isWindows())
+		{
+			return "windows";
+		}
+		if (PlatformHelper.isMacOS())
+		{
+			return "macos";
+		}
+		if (System.getProperty("os.name").toLowerCase().contains("linux"))
+		{
+			return "linux";
+		}
+		return null;
+	}
 
 	@Override
 	protected boolean isConnectionRequired()

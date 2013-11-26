@@ -48,6 +48,7 @@ import workbench.sql.wbcommands.WbHistory;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
@@ -228,6 +229,7 @@ public class SQLConsole
 			abbreviations.put("\\d", cmd.formatVerb(WbListTables.VERB));
 			abbreviations.put("\\g", cmd.formatVerb(WbHistory.VERB) + " " + WbHistory.KEY_LAST);
 			abbreviations.put("\\s", cmd.formatVerb(WbHistory.VERB));
+			abbreviations.put("\\!", cmd.formatVerb(WbSysExec.VERB));
 			abbreviations.put("\\dt", cmd.formatVerb(WbDescribeObject.VERB));
 			abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
 			abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));

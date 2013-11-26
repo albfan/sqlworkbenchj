@@ -37,6 +37,15 @@ public class StringUtilTest
 {
 
 	@Test
+	public void testGetFirstWord()
+	{
+		assertEquals("foo", StringUtil.getFirstWord("foo bar"));
+		assertEquals("foobar", StringUtil.getFirstWord("foobar"));
+		assertEquals("foobar", StringUtil.getFirstWord(" foobar"));
+		assertEquals("foo", StringUtil.getFirstWord(" foo bar"));
+	}
+	
+	@Test
 	public void testGetLineStartOffset()
 	{
 		String sql = "select x\nfrom foo\nwhere x > 0";

@@ -561,6 +561,7 @@ public class SqlPanel
 
 	public boolean hasFileLoaded()
 	{
+		if (this.editor == null) return false;
 		return this.editor.hasFileLoaded();
 	}
 
