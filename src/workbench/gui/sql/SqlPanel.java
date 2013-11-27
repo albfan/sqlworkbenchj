@@ -3260,14 +3260,14 @@ public class SqlPanel
 
 			if (failuresIgnored > 0)
 			{
-				this.appendToLog("\n" + failuresIgnored + " " + ResourceMgr.getString("MsgTotalStatementsFailed")+ "\n");
+				this.appendToLog("\n" + ResourceMgr.getFormattedString("MsgTotalStatementsFailed", failuresIgnored)+ "\n");
 			}
 
 			if (logWasCompressed)
 			{
-				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
+				msg = ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount) + "\n";
 				this.appendToLog(msg);
-				msg = totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n\n";
+				msg = ResourceMgr.getFormattedString("MsgTotalRowsAffected", totalRows) + "\n\n";
 				this.appendToLog(msg);
 			}
 
@@ -3701,7 +3701,7 @@ public class SqlPanel
 		if (this.editor == null) return;
 		if (!doHighlight && !GuiSettings.jumpToError()) return;
 		if (scriptParser == null) return;
-		
+
 		final int startPos;
 		final int endPos;
 		final int line;

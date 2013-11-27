@@ -186,7 +186,7 @@ public class BatchRunner
 	{
 		this.stmtRunner.setHistoryProvider(provider);
 	}
-	
+
 	public void setUseSavepoint(boolean flag)
 	{
 		stmtRunner.setUseSavepoint(flag);
@@ -833,9 +833,7 @@ public class BatchRunner
 				msg.append(scriptFile.getFullPath());
 				msg.append(": ");
 			}
-			msg.append(executedCount);
-			msg.append(' ');
-			msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
+			msg.append(ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount));
 			if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
 			this.printMessage(msg.toString());
 		}
@@ -844,9 +842,9 @@ public class BatchRunner
 		{
 			if (errorCount > 0)
 			{
-				printMessage((resultDisplay == null ? "\n" : "") + errorCount + " " + ResourceMgr.getString("MsgTotalStatementsFailed"));
+				printMessage((resultDisplay == null ? "\n" : "") + ResourceMgr.getFormattedString("MsgTotalStatementsFailed", errorCount));
 			}
-			if (verboseLogging) this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
+			if (verboseLogging) this.printMessage(ResourceMgr.getFormattedString("MsgTotalRowsAffected", totalRows));
 		}
 
 		parser.done();
