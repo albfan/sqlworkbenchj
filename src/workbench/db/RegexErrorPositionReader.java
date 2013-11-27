@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import workbench.log.LogMgr;
+
 import workbench.sql.ErrorDescriptor;
 
 import workbench.util.SqlUtil;
@@ -46,6 +48,7 @@ public class RegexErrorPositionReader
 		throws PatternSyntaxException
 	{
 		positionPattern = Pattern.compile(positionRegex);
+		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for position: " + positionRegex);
 	}
 
 	public RegexErrorPositionReader(String lineRegex, String columnRegex)
@@ -53,6 +56,7 @@ public class RegexErrorPositionReader
 	{
 		lineInfoPattern = Pattern.compile(lineRegex);
 		columnInfoPattern = Pattern.compile(columnRegex);
+		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for line#: " + lineRegex + ", regex for column#: " + columnRegex);
 	}
 
 	public void setNumbersAreZeroBased(boolean flag)
@@ -87,8 +91,14 @@ public class RegexErrorPositionReader
 		Matcher lm = pattern.matcher(msg);
 		if (lm.find())
 		{
-			String lineInfo = noNumbers.matcher(msg.substring(lm.start(), lm.end())).replaceAll("");
+			String data = msg.substring(lm.start(), lm.end());
+			LogMgr.logDebug("RegexErrorPositionReader.getValueFromRegex()", "Using " + data + " from message: " + msg);
+			String lineInfo = noNumbers.matcher(data).replaceAll("");
 			position = StringUtil.getIntValue(lineInfo, -1);
+		}
+		else
+		{
+			LogMgr.logDebug("RegexErrorPositionReader.getValueFromRegex()", "No match found for RegEx: \"" + pattern.pattern() + "\" in message: " + msg);
 		}
 		if (position > 0 && numbersAreZeroBased)
 		{
