@@ -844,7 +844,7 @@ public class BatchRunner
 			{
 				printMessage((resultDisplay == null ? "\n" : "") + ResourceMgr.getFormattedString("MsgTotalStatementsFailed", errorCount));
 			}
-			if (verboseLogging) this.printMessage(ResourceMgr.getFormattedString("MsgTotalRowsAffected", totalRows));
+			if (verboseLogging) this.printMessage(ResourceMgr.getFormattedString("MsgRowsAffected", totalRows));
 		}
 
 		parser.done();

@@ -3267,7 +3267,7 @@ public class SqlPanel
 			{
 				msg = ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount) + "\n";
 				this.appendToLog(msg);
-				msg = ResourceMgr.getFormattedString("MsgTotalRowsAffected", totalRows) + "\n\n";
+				msg = ResourceMgr.getFormattedString("MsgRowsAffected", totalRows) + "\n\n";
 				this.appendToLog(msg);
 			}
 

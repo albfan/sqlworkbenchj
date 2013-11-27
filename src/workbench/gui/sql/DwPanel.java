@@ -278,7 +278,7 @@ public class DwPanel
 		if (this.statusBar == null) return 32; // default height;
 		return statusBar.getPreferredSize().height;
 	}
-	
+
 	public void detachConnection()
 	{
 		if (this.dbConnection != null)
@@ -499,7 +499,7 @@ public class DwPanel
 				ds.setProgressMonitor(null);
 				long sqlTime = (end - start);
 				this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
-				this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString("MsgRowsAffected") + "\n";
+				this.lastMessage = this.lastMessage + "\n " + ResourceMgr.getFormattedString("MsgRowsAffected", rows) + "\n";
 				this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 				if (!ds.lastUpdateHadErrors())
 				{

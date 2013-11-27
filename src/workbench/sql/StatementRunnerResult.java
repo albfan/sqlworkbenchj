@@ -232,7 +232,7 @@ public class StatementRunnerResult
 	{
 		if (ignoreUpdateCount) return;
 		this.totalUpdateCount += count;
-		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
+		addMessage(ResourceMgr.getFormattedString("MsgRowsAffected", count));
 	}
 
 	public void addMessageByKey(String key)
