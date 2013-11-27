@@ -63,7 +63,7 @@ public class StatementRunnerResult
 
 	private long executionTime = -1;
 	private static final DurationFormatter timingFormatter = new DurationFormatter();
-	private ErrorDescriptor lastError;
+	private ErrorDescriptor errorDetails;
 
 	public StatementRunnerResult()
 	{
@@ -155,29 +155,25 @@ public class StatementRunnerResult
 	public void setSuccess()
 	{
 		this.success = true;
-		this.lastError = null;
+		this.errorDetails = null;
 	}
 
 	public void setFailure()
 	{
 		this.success = false;
-		this.lastError = null;
+		this.errorDetails = null;
 	}
 
 	public void setFailure(Exception error)
 	{
 		this.success = false;
-		this.lastError = new ErrorDescriptor();
-		if (error != null)
-		{
-			this.lastError.setErrorMessage(error.getMessage());
-		}
+		this.errorDetails = null;
 	}
 
 	public void setFailure(ErrorDescriptor error)
 	{
 		this.success = false;
-		this.lastError = error;
+		this.errorDetails = error;
 	}
 
 	public void setWarning(boolean flag)
@@ -190,9 +186,9 @@ public class StatementRunnerResult
 		return this.hasWarning;
 	}
 
-	public ErrorDescriptor getLastError()
+	public ErrorDescriptor getErrorDescriptor()
 	{
-		return lastError;
+		return errorDetails;
 	}
 
 	public boolean isSuccess()
@@ -370,7 +366,7 @@ public class StatementRunnerResult
 		this.sourceCommand = null;
 		this.hasWarning = false;
 		this.executionTime = -1;
-		this.lastError = null;
+		this.errorDetails = null;
 	}
 
 }

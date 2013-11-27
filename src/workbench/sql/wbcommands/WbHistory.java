@@ -45,8 +45,6 @@ public class WbHistory
 {
 	public static final String VERB = "WBHISTORY";
 	public static final String SHORT_VERB = "WBHIST";
-	public static final String KEY_LAST = "last";
-	public static final String KEY_FIRST = "first";
 
 	private int maxLength = -1;
 
@@ -75,6 +73,8 @@ public class WbHistory
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
+		StatementRunnerResult result = new StatementRunnerResult();
+
 		SqlHistoryProvider provider = this.runner.getHistoryProvider();
 		List<String> history = Collections.emptyList();
 		if (provider != null)
@@ -83,51 +83,8 @@ public class WbHistory
 		}
 
 		String parameter = this.getCommandLine(sql);
+		if (StringUtil.isNonBlank(parameter)) return result;
 
-		if (StringUtil.isNonBlank(parameter))
-		{
-			int nr = -1;
-			if (KEY_LAST.equalsIgnoreCase(parameter))
-			{
-				nr = history.size();
-			}
-			else if (KEY_FIRST.equalsIgnoreCase(parameter))
-			{
-				nr = 1;
-			}
-			else
-			{
-				nr = StringUtil.getIntValue(parameter, -1);
-			}
-
-			if (nr > 0 && nr <= history.size())
-			{
-				String command = history.get(nr-1);
-				try
-				{
-					this.runner.runStatement(command);
-				}
-				catch (SQLException ex)
-				{
-					throw ex;
-				}
-				catch (Exception ex)
-				{
-					throw new SQLException(ex);
-				}
-				StatementRunnerResult result = this.runner.getResult();
-				return result;
-			}
-			else
-			{
-				StatementRunnerResult result = new StatementRunnerResult();
-				result.setFailure();
-				result.addMessage("Invalid history index: " + nr);
-				return result;
-			}
-		}
-
-		StatementRunnerResult result = new StatementRunnerResult();
 		DataStore ds = new DataStore(new String[] {"NR", "SQL"}, new int[] { Types.INTEGER, Types.VARCHAR} );
 		int index = 1;
 		for (String entry : history)

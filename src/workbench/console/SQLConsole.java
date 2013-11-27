@@ -22,6 +22,7 @@
  */
 package workbench.console;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -222,21 +223,22 @@ public class SQLConsole
 			CommandTester cmd = new CommandTester();
 
 			// Some limited psql compatibility
+			String last = cmd.formatVerb(WbHistory.VERB) + " last";
 			abbreviations.put("\\x", cmd.formatVerb(WbToggleDisplay.VERB));
 			abbreviations.put("\\?", cmd.formatVerb(WbHelp.VERB));
 			abbreviations.put("\\h", cmd.formatVerb(WbHelp.VERB));
 			abbreviations.put("\\i", cmd.formatVerb(WbRun.VERB));
 			abbreviations.put("\\d", cmd.formatVerb(WbListTables.VERB));
-			abbreviations.put("\\g", cmd.formatVerb(WbHistory.VERB) + " " + WbHistory.KEY_LAST);
+			abbreviations.put("\\g", last);
 			abbreviations.put("\\s", cmd.formatVerb(WbHistory.VERB));
 			abbreviations.put("\\!", cmd.formatVerb(WbSysExec.VERB));
 			abbreviations.put("\\dt", cmd.formatVerb(WbDescribeObject.VERB));
 			abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
 			abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));
-			abbreviations.put("\\conninfo", WbConnInfo.VERB);
+			abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
 
 			// some limited SQL*Plus compatibility
-			abbreviations.put("/", WbHistory.VERB + " " + WbHistory.KEY_LAST);
+			abbreviations.put("/", last);
 
 			while (true)
 			{
@@ -270,45 +272,37 @@ public class SQLConsole
 						if (longCommand != null)
 						{
 							stmt = line.replace(firstWord, longCommand);
+							firstWord = getFirstWord(stmt); // I can't use longCommand as the history shortcuts may have a parameter
 						}
 
 						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
 						{
-							adjustHistoryDisplay(runner);
-						}
-
-						if (StringUtil.isBlank(macro))
-						{
-							history.add(stmt);
-							runner.executeScript(stmt);
+							handleHistory(runner, stmt);
 						}
 						else
 						{
 							history.add(stmt);
-							runner.executeScript(macro);
-						}
-
-						if (isHistoryCmd(stmt))
-						{
-							// WbHistory without parameters was executed
-							// prompt for an index to be executed
-							System.out.println("");
-							String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
-							int index = StringUtil.getIntValue(input, -1);
-							if (index > 0 && index <= history.size())
+							if (StringUtil.isBlank(macro))
 							{
-								runner.executeScript(history.get(index - 1));
+								runner.executeScript(stmt);
+							}
+							else
+							{
+								runner.executeScript(macro);
 							}
 						}
 					}
-					catch (Exception e)
+					catch (Throwable th)
 					{
-						System.err.println(ExceptionUtil.getDisplay(e));
-						LogMgr.logError("SQLConsole.main()", "Error running statement", e);
+						System.err.println(ExceptionUtil.getDisplay(th));
+						LogMgr.logError("SQLConsole.main()", "Error running statement", th);
 					}
-					buffer.clear();
-					currentPrompt = checkConnection(runner);
-					startOfStatement = true;
+					finally
+					{
+						buffer.clear();
+						currentPrompt = checkConnection(runner);
+						startOfStatement = true;
+					}
 
 					// Restore the printing consumer in case a WbExport changed it
 					if (printer != null && runner.getResultSetConsumer() == null)
@@ -323,9 +317,10 @@ public class SQLConsole
 				}
 			}
 		}
-		catch (Exception e)
+		catch (Throwable th)
 		{
-			System.err.println(ExceptionUtil.getDisplay(e));
+			// this should not happen
+			System.err.println(ExceptionUtil.getDisplay(th));
 		}
 		finally
 		{
@@ -351,17 +346,41 @@ public class SQLConsole
 		}
 	}
 
-	private String getMacroText(String sql)
+	private void handleHistory(BatchRunner runner, String stmt)
+		throws IOException
 	{
-		String macroText = MacroManager.getInstance().getMacroText(SqlUtil.trimSemicolon(sql));
-		return macroText;
+		adjustHistoryDisplay(runner);
+		String arg = SqlUtil.stripVerb(SqlUtil.makeCleanSql(stmt, false, false));
+		int index = -1;
+		if (StringUtil.isBlank(arg))
+		{
+			runner.executeScript(stmt);
+			// WbHistory without parameters was executed prompt for an index to be executed
+			System.out.println("");
+			String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
+			index = StringUtil.getIntValue(input, -1);
+		}
+		else
+		{
+			if (arg.equalsIgnoreCase("last"))
+			{
+				index = history.size();
+			}
+			else
+			{
+				index = StringUtil.getIntValue(arg, -1);
+			}
+		}
+
+		if (index > 0 && index <= history.size())
+		{
+			runner.executeScript(history.get(index - 1));
+		}
 	}
 
-	private boolean isHistoryCmd(String stmt)
+	private String getMacroText(String sql)
 	{
-		if (StringUtil.isEmptyString(stmt)) return false;
-		String cmd = SqlUtil.trimSemicolon(stmt).trim();
-		return cmd.equalsIgnoreCase(WbHistory.SHORT_VERB) || cmd.equalsIgnoreCase(WbHistory.VERB);
+		return MacroManager.getInstance().getMacroText(SqlUtil.trimSemicolon(sql));
 	}
 
 	private WbFile getHistoryFile()
@@ -386,6 +405,7 @@ public class SQLConsole
 
 	private String getFirstWord(String input)
 	{
+		// I can't use SqlUtil.getSqlVerb() because that would not return e.g. \s as a single "word"
 		if (StringUtil.isBlank(input)) return null;
 		input = input.trim();
 		int pos = input.indexOf(' ');

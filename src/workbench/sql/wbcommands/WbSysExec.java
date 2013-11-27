@@ -242,18 +242,7 @@ public class WbSysExec
 		{
 			args.add(shell);
 			args.add("-c");
-			StringBuilder allArgs = new StringBuilder(50);
-
-			// when using "/bin/bash -c" the whole commandline must be a single parameter to the -c switch
-			for (int i=0; i < command.size(); i++)
-			{
-				if (i > 0)
-				{
-					allArgs.append(' ');
-				}
-				allArgs.append(command.get(i));
-				args.add(allArgs.toString());
-			}
+			args.add(StringUtil.listToString(command, ' '));
 		}
 		return args;
 	}

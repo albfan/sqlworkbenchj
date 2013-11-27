@@ -72,25 +72,25 @@ public class SqlUtilTest
 		offset = SqlUtil.getErrorOffset(sql, error);
 		assertEquals(sql.indexOf("foo"), offset);
 
-	}
-
-	@Test
-	public void testSkipNewLines()
-	{
-		String text = "this is\n\ra new\r\nline";
-		int pos = text.indexOf("\n\ra");
-		int next = SqlUtil.skipNewLineChars(text, pos);
-		assertEquals(next, text.indexOf("a new"));
-
-		pos = text.indexOf("\r\nline");
-		next = SqlUtil.skipNewLineChars(text, pos);
-		assertEquals(pos + 2, next);
-
-		text = "this is\na new\nline";
-		pos = text.indexOf("\na");
-		next = SqlUtil.skipNewLineChars(text, pos);
-		assertEquals(pos + 1, next);
-
+		sql =
+			"CREATE OR REPLACE PROCEDURE do_refresh \n" +
+			"AS\n" +
+			"   l_last_run   timestamp \n" +
+			"   l_job_run_id integer \n" +
+			"   l_now        timestamp \n" +
+			"BEGIN \n" +
+			"  l_job_run_id := seq_job_run.nextval \n" +
+			"\n" +
+			"\r\n" +
+			"  l_now := systimestamp \r\n" +
+			"\n" +
+			"  l_last_run = trunc(systimestamp) - 7 \n" +
+			"   \n" +
+			"end refresh_mv_dwh_product_inc; \n" +
+			"/";
+		error.setErrorPosition(11, 13);
+		offset = SqlUtil.getErrorOffset(sql, error);
+		assertEquals(sql.indexOf("= trunc"), offset);
 	}
 
 	@Test

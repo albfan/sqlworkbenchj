@@ -151,10 +151,9 @@ public class DdlCommand
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
 				{
-					if (this.addExtendErrorInfo(currentConnection, sql, info, result))
-					{
-						result.setFailure();
-					}
+					// if the warning is actually an error, addExtendErrorInfo() will set
+					// the result to "failure"
+					this.addExtendErrorInfo(currentConnection, sql, info, result);
 				}
 
 				if (result.isSuccess())

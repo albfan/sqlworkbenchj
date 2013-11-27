@@ -2183,10 +2183,18 @@ public class SqlUtil
 			{
 				return pos;
 			}
+
 			char c = sql.charAt(pos);
 			if (c == '\r' || c == '\n')
 			{
-				pos = skipNewLineChars(sql, pos);
+				pos ++;
+
+				// check if this is a Windows/DOS newline
+				if (c == '\r' && pos < length && sql.charAt(pos) == '\n')
+				{
+					// multi-character newline --> skip the \n
+					pos ++;
+				}
 				currentLine ++;
 				currentColumn = 0;
 			}
@@ -2199,16 +2207,4 @@ public class SqlUtil
 		return -1;
 	}
 
-	public static int skipNewLineChars(String text, int currentPos)
-	{
-		int length = text.length();
-		if (currentPos >= text.length()) return length;
-		char c = text.charAt(currentPos);
-		while ( (c == '\r' || c == '\n') && currentPos < length - 1)
-		{
-			currentPos ++;
-			c = text.charAt(currentPos);
-		}
-		return currentPos;
-	}
 }

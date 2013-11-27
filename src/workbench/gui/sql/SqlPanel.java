@@ -3093,7 +3093,7 @@ public class SqlPanel
 			stmtRunner.setMaxRows(maxRows);
 
 			ignoreStateChange = true;
-			ErrorDescriptor lastError = null;
+			ErrorDescriptor errorDetails = null;
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -3197,7 +3197,7 @@ public class SqlPanel
 				else
 				{
 					commandWithError = i;
-					lastError = statementResult.getLastError();
+					errorDetails = statementResult.getErrorDescriptor();
 
 					// error messages should always be shown in the log
 					// panel, even if compressLog is enabled (if it is not enabled
@@ -3212,7 +3212,7 @@ public class SqlPanel
 
 						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
-							highlightError(scriptParser, commandWithError, selectionOffset, null);
+							highlightError(true, scriptParser, commandWithError, selectionOffset, null);
 						}
 
 						// force a refresh in order to display the selection
@@ -3252,22 +3252,10 @@ public class SqlPanel
 			highlightCurrent = highlightCurrent && !editorWasModified;
 			highlightOnError = highlightOnError && !editorWasModified;
 
-			if (commandWithError > -1 && highlightOnError && !macroRun)
+			if (commandWithError > -1 && !macroRun)
 			{
 				restoreSelection = false;
-				final ScriptParser p = scriptParser;
-				final int command = commandWithError;
-				final int offset = selectionOffset;
-				final ErrorDescriptor error = lastError;
-
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						highlightError(p, command, offset, error);
-					}
-				});
+				highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, errorDetails);
 			}
 
 			if (failuresIgnored > 0)
@@ -3708,26 +3696,44 @@ public class SqlPanel
 		});
 	}
 
-	protected void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
+	protected void highlightError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
 	{
 		if (this.editor == null) return;
-
+		if (!doHighlight && !GuiSettings.jumpToError()) return;
+		if (scriptParser == null) return;
+		
 		final int startPos;
 		final int endPos;
 		final int line;
+		final int newCaret;
+
+		boolean jumpToError = false;
+
 		if (error != null && error.getErrorPosition() > -1)
 		{
 			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
 			startPos = editor.getLineStartOffset(line);
 			endPos = editor.getLineEndOffset(line);
+			jumpToError = true;
+			if (error.getErrorColumn() > -1)
+			{
+				newCaret = startPos + error.getErrorColumn();
+			}
+			else
+			{
+				newCaret = startPos;
+			}
 		}
 		else
 		{
 			startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
 			line = this.editor.getLineOfOffset(startPos);
+			newCaret = -1;
 		}
+
+		if (!doHighlight && !jumpToError) return;
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -3736,11 +3742,17 @@ public class SqlPanel
 			{
 				if (!editor.isLineVisible(line))
 				{
-					editor.select(0, 0);
 					editor.scrollTo(line, 0);
 				}
+				if (doHighlight)
+				{
 					editor.selectError(startPos, endPos);
 				}
+				else
+				{
+					editor.setCaretPosition(newCaret);
+				}
+			}
 		});
 	}
 

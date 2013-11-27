@@ -958,4 +958,8 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_COPY_TEXT_DISPLAY_DLG, flag);
 	}
 
+	public static boolean jumpToError()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.errorjump", true);
+	}
 }

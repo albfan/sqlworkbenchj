@@ -89,6 +89,12 @@ public class WbDefineMacro
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
+
+		if (cmdLine.hasUnknownArguments())
+		{
+			setUnknownMessage(result, cmdLine, null);
+			return result;
+		}
 		String macroText = cmdLine.getValue(ARG_TEXT);
 		String fname = cmdLine.getValue(ARG_FILE);
 		String groupName = cmdLine.getValue(ARG_GROUP);
@@ -149,6 +155,10 @@ public class WbDefineMacro
 		else if (groups.isEmpty())
 		{
 			groupName = ResourceMgr.getString("LblDefGroup");
+		}
+		else
+		{
+			groupToUse = groups.get(0);
 		}
 
 		if (groupToUse == null)

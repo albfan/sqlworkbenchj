@@ -279,10 +279,10 @@ public class SqlCommand
 		msg.append(' ');
 		msg.append(cmdLine.getUnknownArguments());
 		result.addMessage(msg.toString());
-		if (!WbManager.getInstance().isBatchMode())
+		if (!WbManager.getInstance().isBatchMode() && help != null)
 		{
 			result.addMessageNewLine();
-			if (help != null) result.addMessage(help);
+			result.addMessage(help);
 		}
 		result.setFailure();
 	}
@@ -426,7 +426,6 @@ public class SqlCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
-			result.setFailure(e);
 			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}
 		finally
