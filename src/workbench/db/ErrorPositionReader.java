@@ -100,7 +100,7 @@ public interface ErrorPositionReader
 				try
 				{
 					RegexErrorPositionReader reader = new RegexErrorPositionReader(lineRegex, colRegex);
-					reader.setNumbersAreZeroBased(zeroBased);
+					reader.setNumbersAreOneBased(zeroBased);
 					LogMgr.logDebug("ErrorPositionReader.Factory.createPositionReader()", "Initialized reader for dbid=" + conn.getDbId() + " using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex);
 					return reader;
 				}
@@ -114,7 +114,7 @@ public interface ErrorPositionReader
 				try
 				{
 					RegexErrorPositionReader reader = new RegexErrorPositionReader(posRegex);
-					reader.setNumbersAreZeroBased(zeroBased);
+					reader.setNumbersAreOneBased(zeroBased);
 					LogMgr.logDebug("ErrorPositionReader.Factory.createPositionReader()", "Initialized reader for dbid=" + conn.getDbId() + " using: positionRegex: " + posRegex);
 					return reader;
 				}

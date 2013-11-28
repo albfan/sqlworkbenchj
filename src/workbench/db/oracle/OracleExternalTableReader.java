@@ -26,9 +26,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -109,8 +112,7 @@ public class OracleExternalTableReader
 	/**
 	 * This method tries to merge our own indention and the one originally used
 	 * in the access parameters.
-	 * The logic is that all leading whitespace from the lines are removed. When a line
-	 * 
+	 *
 	 * @param parameter
 	 * @param baseIndent
 	 * @return

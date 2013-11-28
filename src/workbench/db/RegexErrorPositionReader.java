@@ -38,16 +38,18 @@ import workbench.util.StringUtil;
 public class RegexErrorPositionReader
 	implements ErrorPositionReader
 {
-	private Pattern positionPattern;
-	private Pattern lineInfoPattern;
-	private Pattern columnInfoPattern;
+	private final Pattern positionPattern;
+	private final Pattern lineInfoPattern;
+	private final Pattern columnInfoPattern;
 	private final Pattern noNumbers = Pattern.compile("[^0-9]");
-	private boolean numbersAreZeroBased;
+	private boolean oneBasedNumbers = true;
 
 	public RegexErrorPositionReader(String positionRegex)
 		throws PatternSyntaxException
 	{
 		positionPattern = Pattern.compile(positionRegex);
+		lineInfoPattern = null;
+		columnInfoPattern = null;
 		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for position: " + positionRegex);
 	}
 
@@ -56,12 +58,13 @@ public class RegexErrorPositionReader
 	{
 		lineInfoPattern = Pattern.compile(lineRegex);
 		columnInfoPattern = Pattern.compile(columnRegex);
+		positionPattern = null;
 		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for line#: " + lineRegex + ", regex for column#: " + columnRegex);
 	}
 
-	public void setNumbersAreZeroBased(boolean flag)
+	public void setNumbersAreOneBased(boolean flag)
 	{
-		this.numbersAreZeroBased = flag;
+		this.oneBasedNumbers = flag;
 	}
 
 	@Override
@@ -69,7 +72,11 @@ public class RegexErrorPositionReader
 	{
 		if (ex == null) return null;
 		String msg = ex.getMessage();
+		return getErrorPosition(sql, msg);
+	}
 
+	public ErrorDescriptor getErrorPosition(String sql, String msg)
+	{
 		if (lineInfoPattern != null && columnInfoPattern != null)
 		{
 			return getPositionFromLineAndColumn(msg, sql);
@@ -100,7 +107,8 @@ public class RegexErrorPositionReader
 		{
 			LogMgr.logDebug("RegexErrorPositionReader.getValueFromRegex()", "No match found for RegEx: \"" + pattern.pattern() + "\" in message: " + msg);
 		}
-		if (position > 0 && numbersAreZeroBased)
+
+		if (position > 0 && oneBasedNumbers)
 		{
 			position --;
 		}
@@ -113,13 +121,13 @@ public class RegexErrorPositionReader
 		int line = getValueFromRegex(msg, lineInfoPattern);
 		int column = getValueFromRegex(msg, columnInfoPattern);
 
-		int offset = StringUtil.getLineStartOffset(sql, line);
-		if (offset < 0)
-		{
-			return null;
-		}
 		result.setErrorPosition(line, column);
-		result.setErrorOffset(offset + column);
+
+		int offset = SqlUtil.getErrorOffset(sql, result);
+		if (offset > -1)
+		{
+			result.setErrorOffset(offset);
+		}
 		return result;
 	}
 
@@ -131,7 +139,7 @@ public class RegexErrorPositionReader
 		{
 			if (originalMessage == null) originalMessage = ""; // avoid a "null" string in the output
 			if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n\n";
-			originalMessage += "\n\n" + indicator;
+			originalMessage += indicator;
 		}
 		return originalMessage;
 	}

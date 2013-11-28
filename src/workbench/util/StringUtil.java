@@ -1680,7 +1680,7 @@ public class StringUtil
 	 *
 	 * @param text      the text to check
 	 * @param position  the position inside the text
-	 * @return the start-offset of the line where position is located in
+	 * @return the start offset of the line where position is located in
 	 */
 	public static int getLineStart(String text, int position)
 	{
@@ -1702,11 +1702,11 @@ public class StringUtil
 	}
 
 	/**
-	 * Calculate the start-offset of the line indicated by the position.
+	 * Calculate the end-offset of the line indicated by the position.
 	 *
 	 * @param text      the text to check
 	 * @param position  the position inside the text
-	 * @return the start-offset of the line where position is located in
+	 * @return the end offset of the line where position is located in
 	 */
 	public static int getLineEnd(String text, int position)
 	{
@@ -1727,32 +1727,4 @@ public class StringUtil
 		}
 		return end;
 	}
-
-	public static int getLineStartOffset(String text, int line)
-	{
-		if (StringUtil.isEmptyString(text)) return 0;
-
-		if (line == 0) return 0;
-
-		int count = text.length();
-		int lineNumber = 0;
-		int end = 0;
-		while (lineNumber < line)
-		{
-			end = getLineEnd(text, end);
-			if (end >= count)
-			{
-				return -1;
-			}
-			char c = text.charAt(end);
-			while ((c == '\n' || c == '\r') && end < count)
-			{
-				end ++;
-				c = text.charAt(end);
-			}
-			lineNumber ++;
-		}
-		return end;
-	}
-
 }
