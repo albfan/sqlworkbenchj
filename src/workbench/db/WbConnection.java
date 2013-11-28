@@ -46,6 +46,7 @@ import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleWarningsClearer;
 
+import workbench.sql.ErrorReportLevel;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -438,11 +439,10 @@ public class WbConnection
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
-		runner.setIncludeStatementInErrors(false);
+		runner.setErrorReportLevel(ErrorReportLevel.none);
 
 		ScriptParser p = new ScriptParser(sql);
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());
-
 
 		// The statemenRunner will call clearMessages() when statementDone()
 		// is called which in turn will call clearWarnings() on this instance.

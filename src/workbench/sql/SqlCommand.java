@@ -34,6 +34,7 @@ import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
@@ -70,7 +71,7 @@ public class SqlCommand
 	protected boolean isCancelled;
 	protected RowActionMonitor rowMonitor;
 	protected boolean isUpdatingCommand;
-	protected boolean reportFullStatementOnError;
+	protected ErrorReportLevel errorLevel;
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
 	protected int queryTimeout;
@@ -96,19 +97,14 @@ public class SqlCommand
 		return this.cmdLine;
 	}
 
-	public boolean getFullErrorReporting()
+	public void setErrorReportLevel(ErrorReportLevel level)
 	{
-		return reportFullStatementOnError;
+		this.errorLevel = level;
 	}
 
-	public void setFullErrorReporting(boolean flag)
+	public ErrorReportLevel getErrorReportLevel()
 	{
-		reportFullStatementOnError = flag;
-	}
-
-	public void setIncludeStatementInErrorMessages(boolean flag)
-	{
-		this.includeStatementInError = flag;
+		return this.errorLevel;
 	}
 
 	protected String getBaseDir()
@@ -933,26 +929,35 @@ public class SqlCommand
 		return f;
 	}
 
-	protected void addErrorInfo(StatementRunnerResult result, String sql, Exception e)
+	protected void addErrorStatementInfo(StatementRunnerResult result, String sql)
 	{
-		result.clear();
-
-		StringBuilder msg = new StringBuilder(150);
-		if (includeStatementInError)
+		if (errorLevel != ErrorReportLevel.none)
 		{
+			StringBuilder msg = new StringBuilder(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError"));
 			msg.append('\n');
-			if (reportFullStatementOnError)
+			if (errorLevel == ErrorReportLevel.full)
 			{
 				msg.append(sql);
 			}
 			else
 			{
-				msg.append(StringUtil.getMaxSubstring(sql.trim(), 150));
+				msg.append(StringUtil.getMaxSubstring(sql.trim(), Settings.getInstance().getMaxErrorStatementLength()));
 			}
 			result.addMessage(msg);
 			result.addMessageNewLine();
 		}
+	}
+
+	protected void addErrorInfo(StatementRunnerResult result, String sql, Exception e)
+	{
+		result.clear();
+		addErrorStatementInfo(result, sql);
+		addErrorPosition(result, sql, e);
+	}
+
+	protected void addErrorPosition(StatementRunnerResult result, String sql, Exception e)
+	{
 		ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
 		ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
 		if (error != null)

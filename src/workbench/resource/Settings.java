@@ -65,6 +65,7 @@ import workbench.gui.settings.ExternalFileHandling;
 import workbench.storage.PkMapping;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ErrorReportLevel;
 import workbench.sql.formatter.JoinWrapStyle;
 
 import workbench.util.FileAttributeChanger;
@@ -2595,9 +2596,22 @@ public class Settings
 	// </editor-fold>
 
 
-	public boolean getIncludeSqlStatementInError()
+	public int getMaxErrorStatementLength()
 	{
-		return getBoolProperty("workbench.gui.log.errorstatement", true);
+		return getIntProperty("workbench.gui.log.error.sql.maxlength", 150);
+	}
+	
+	public ErrorReportLevel getStatementErrorReportLevel()
+	{
+		try
+		{
+			String lvl = getProperty("workbench.gui.log.errorstatement", ErrorReportLevel.limited.name());
+			return ErrorReportLevel.valueOf(lvl);
+		}
+		catch (Exception ex)
+		{
+			return ErrorReportLevel.limited;
+		}
 	}
 
 	public boolean getSaveProfilesImmediately()

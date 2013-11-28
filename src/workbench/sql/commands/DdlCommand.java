@@ -46,7 +46,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * Run a DDL (CREATE, DROP, ALTER, GRANT, REVOKE) command.
@@ -177,30 +176,14 @@ public class DdlCommand
 			this.currentConnection.rollback(ddlSavepoint);
 			result.clear();
 
-			StringBuilder msg = new StringBuilder(150);
-			if (includeStatementInError)
-			{
-				msg.append(ResourceMgr.getString("MsgExecuteError"));
-				msg.append('\n');
-				if (reportFullStatementOnError)
-				{
-					msg.append(sql);
-				}
-				else
-				{
-					int maxLen = 150;
-					msg.append(StringUtil.getMaxSubstring(sql.trim(), maxLen));
-				}
-				result.addMessage(msg);
-				result.addMessageNewLine();
-			}
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
+			addErrorStatementInfo(result, sql);
 
 			result.setFailure(e);
 			if (!addExtendErrorInfo(currentConnection, sql, info, result))
 			{
-				addErrorInfo(result, sql, e);
+				addErrorPosition(result, sql, e);
 			}
+			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
 		}

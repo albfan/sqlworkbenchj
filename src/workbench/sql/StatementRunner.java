@@ -81,14 +81,13 @@ public class StatementRunner
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
 	private boolean hideWarnings;
-	private boolean fullErrorReporting;
+	private ErrorReportLevel errorLevel;
 	private ParameterPrompter prompter;
 	private boolean ignoreDropErrors;
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private boolean logAllStatements;
 	private Savepoint savepoint;
-	private boolean includeStatementInErrors;
 	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
@@ -99,7 +98,7 @@ public class StatementRunner
 	public StatementRunner()
 	{
 		verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
-		includeStatementInErrors = Settings.getInstance().getIncludeSqlStatementInError();
+		errorLevel = Settings.getInstance().getStatementErrorReportLevel();
 		cmdMapper = new CommandMapper();
 		logAllStatements = Settings.getInstance().getLogAllStatements();
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate", Settings.PROPERTY_LOG_ALL_SQL);
@@ -172,9 +171,9 @@ public class StatementRunner
 		this.showDataLoadingProgress = false;
 	}
 
-	public void setFullErrorReporting(boolean flag)
+	public void setErrorReportLevel(ErrorReportLevel level)
 	{
-		this.fullErrorReporting = flag;
+		this.errorLevel = level;
 	}
 
 	public ExecutionController getExecutionController()
@@ -218,19 +217,6 @@ public class StatementRunner
 	public Collection<String> getAllWbCommands()
 	{
 		return cmdMapper.getAllWbCommands();
-	}
-
-	/**
-	 * Controls the type of error reporting.
-	 * If this is set to true, no additional messages will be reported, only
-	 * the errors returned by the server.
-	 *
-	 * @param flag
-	 * @see SqlCommand#setReturnOnlyErrorMessages(boolean)
-	 */
-	public void setIncludeStatementInErrors(boolean flag)
-	{
-		includeStatementInErrors = flag;
 	}
 
 	public void setMaxRows(int rows)
@@ -399,7 +385,7 @@ public class StatementRunner
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.currentConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);
-		this.currentCommand.setIncludeStatementInErrorMessages(this.includeStatementInErrors);
+		this.currentCommand.setErrorReportLevel(errorLevel);
 		this.currentCommand.setShowDataLoading(this.showDataLoadingProgress);
 
 		String realSql = aSql;
@@ -436,22 +422,12 @@ public class StatementRunner
 			}
 		}
 
-		boolean oldReporting = this.currentCommand.getFullErrorReporting();
-
-		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
-
 		realSql = statementHook.preExec(this, realSql);
 
 		long sqlExecStart = System.currentTimeMillis();
 
 		// now run the statement ...
 		this.result = this.currentCommand.execute(realSql);
-
-		if (currentCommand != null)
-		{
-			// the currentCommand can be null when abort() has been called
-			this.currentCommand.setFullErrorReporting(oldReporting);
-		}
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
 		{

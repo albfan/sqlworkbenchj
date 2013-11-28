@@ -847,21 +847,10 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getShowNextStatementAction());
 		this.actions.add(this.sqlHistory.getShowLastStatementAction());
 		this.actions.add(this.sqlHistory.getClearHistoryAction());
+
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
 
-		this.actions.add(new AutoJumpNextStatement());
-		this.appendResultsAction = new AppendResultsAction(this);
-		this.appendResultsAction.setEnabled(false);
-		this.actions.add(appendResultsAction);
-		a = new HighlightCurrentStatement();
-		a.setCreateMenuSeparator(false);
-		this.actions.add(a);
-		this.actions.add(new HighlightErrorLineAction());
-		this.checkPreparedAction = new CheckPreparedStatementsAction();
-		this.actions.add(this.checkPreparedAction);
-		IgnoreErrorsAction ignore = new IgnoreErrorsAction();
-		this.actions.add(ignore);
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
 
@@ -897,8 +886,11 @@ public class SqlPanel
 		this.commitAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.commitAction);
 		this.toolbarActions.add(this.rollbackAction);
+		IgnoreErrorsAction ignore = new IgnoreErrorsAction();
 		ignore.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(ignore);
+		this.appendResultsAction = new AppendResultsAction(this);
+		this.appendResultsAction.setEnabled(false);
 		appendResultsAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(appendResultsAction);
 		this.findDataAction = new FindDataAction(null);
@@ -929,15 +921,27 @@ public class SqlPanel
 		this.formatSql.setCreateMenuSeparator(true);
 		this.actions.add(this.formatSql);
 
-		a = new CreateSnippetAction(this.editor);
-		this.actions.add(a);
-		a = new CleanJavaCodeAction(this.editor);
-		this.actions.add(a);
+		WbMenu config = new WbMenu(ResourceMgr.getString("MnuTxtSettings"));
+		config.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
+		config.add(new AutoJumpNextStatement());
+		config.add(appendResultsAction);
+		a = new HighlightCurrentStatement();
+		a.setCreateMenuSeparator(false);
+		config.add(a);
+		config.add(new HighlightErrorLineAction());
+		this.checkPreparedAction = new CheckPreparedStatementsAction();
+		config.add(this.checkPreparedAction);
+		config.add(ignore);
 
-		a = new MakeInListAction(this.editor);
-		a.setCreateMenuSeparator(true);
-		this.actions.add(a);
-		this.actions.add(new MakeNonCharInListAction(this.editor));
+		WbMenu codeTools = new WbMenu(ResourceMgr.getString("MnuTxtCodeTools"));
+		codeTools.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
+		codeTools.add(new CreateSnippetAction(this.editor));
+		codeTools.add(new CleanJavaCodeAction(this.editor));
+		codeTools.add(new MakeInListAction(this.editor));
+		codeTools.add(new MakeNonCharInListAction(this.editor));
+
+		this.actions.add(codeTools);
+		this.actions.add(config);
 
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.resetHighlightAction = new ResetHighlightAction(null);
