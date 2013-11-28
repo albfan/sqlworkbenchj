@@ -2155,9 +2155,62 @@ public class SqlUtil
 	}
 
 	/**
+	 * Calculate the line and column determined by the error position stored in the ErrorDescriptor.
+	 *
+	 * If no error position is stored in the descriptor or it already contains a line and column
+	 * nothing will be changed.
+	 *
+	 * The ErrorDescriptor will be updated with the calculated values
+	 *
+	 * @param sql    the original SQL statement
+	 * @param error  the error descriptor.
+	 */
+	public static void calculateErrorLine(String sql, ErrorDescriptor error)
+	{
+		if (error == null) return;
+		if (StringUtil.isEmptyString(sql)) return;
+		if (error.getErrorLine() > -1 && error.getErrorColumn() > -1) return;
+		int errorPos = error.getErrorPosition();
+		if (errorPos == -1) return;
+
+		int length = sql.length();
+		int pos = 0;
+		int currentLine = 0;
+		int currentColumn =  0;
+
+		while (pos < length)
+		{
+			if (pos == errorPos)
+			{
+				error.setErrorPosition(currentLine, currentColumn);
+				return;
+			}
+			char c = sql.charAt(pos);
+			if (c == '\r' || c == '\n')
+			{
+				pos++;
+
+				// check if this is a Windows/DOS newline
+				if (c == '\r' && pos < length && sql.charAt(pos) == '\n')
+				{
+					// multi-character newline --> skip the \n
+					pos++;
+				}
+				currentLine++;
+				currentColumn = 0;
+			}
+			else
+			{
+				currentColumn ++;
+				pos ++;
+			}
+		}
+	}
+
+	/**
 	 * Return the offset of the error location based on the line/column information.
 	 *
-	 * If the error descriptor already contains an error offset, that is returned.
+	 * If the error descriptor already contains an error offset, that offset is returned.
 	 *
 	 * @param sql    the original SQL statement
 	 * @param error  the error descriptor

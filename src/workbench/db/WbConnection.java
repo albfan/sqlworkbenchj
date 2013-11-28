@@ -438,7 +438,7 @@ public class WbConnection
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
-		runner.setReturnOnlyErrorMessages(true);
+		runner.setIncludeStatementInErrors(false);
 
 		ScriptParser p = new ScriptParser(sql);
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());

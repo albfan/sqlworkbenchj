@@ -50,7 +50,7 @@ public class InputBuffer
 	{
 		return script.length();
 	}
-	
+
 	public void clear()
 	{
 		script.setLength(0);

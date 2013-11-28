@@ -88,7 +88,7 @@ public class StatementRunner
 	private boolean useSavepoint;
 	private boolean logAllStatements;
 	private Savepoint savepoint;
-	private boolean returnOnlyErrorMessages;
+	private boolean includeStatementInErrors;
 	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
@@ -99,6 +99,7 @@ public class StatementRunner
 	public StatementRunner()
 	{
 		verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
+		includeStatementInErrors = Settings.getInstance().getIncludeSqlStatementInError();
 		cmdMapper = new CommandMapper();
 		logAllStatements = Settings.getInstance().getLogAllStatements();
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate", Settings.PROPERTY_LOG_ALL_SQL);
@@ -113,7 +114,7 @@ public class StatementRunner
 	{
 		return this.history;
 	}
-	
+
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
@@ -227,9 +228,9 @@ public class StatementRunner
 	 * @param flag
 	 * @see SqlCommand#setReturnOnlyErrorMessages(boolean)
 	 */
-	public void setReturnOnlyErrorMessages(boolean flag)
+	public void setIncludeStatementInErrors(boolean flag)
 	{
-		returnOnlyErrorMessages = flag;
+		includeStatementInErrors = flag;
 	}
 
 	public void setMaxRows(int rows)
@@ -398,7 +399,7 @@ public class StatementRunner
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.currentConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);
-		this.currentCommand.setReturnOnlyErrorMessages(this.returnOnlyErrorMessages);
+		this.currentCommand.setIncludeStatementInErrorMessages(this.includeStatementInErrors);
 		this.currentCommand.setShowDataLoading(this.showDataLoadingProgress);
 
 		String realSql = aSql;

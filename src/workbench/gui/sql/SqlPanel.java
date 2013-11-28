@@ -3714,7 +3714,7 @@ public class SqlPanel
 			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
 			startPos = editor.getLineStartOffset(line);
-			endPos = editor.getLineEndOffset(line);
+			endPos = editor.getLineEndOffset(line) - 1;
 			jumpToError = true;
 			if (error.getErrorColumn() > -1)
 			{
@@ -3722,7 +3722,7 @@ public class SqlPanel
 			}
 			else
 			{
-				newCaret = startPos;
+				newCaret = startOfCommand + error.getErrorPosition();
 			}
 		}
 		else

@@ -178,19 +178,22 @@ public class DdlCommand
 			result.clear();
 
 			StringBuilder msg = new StringBuilder(150);
-			msg.append(ResourceMgr.getString("MsgExecuteError"));
-			msg.append('\n');
-			if (reportFullStatementOnError)
+			if (includeStatementInError)
 			{
-				msg.append(sql);
+				msg.append(ResourceMgr.getString("MsgExecuteError"));
+				msg.append('\n');
+				if (reportFullStatementOnError)
+				{
+					msg.append(sql);
+				}
+				else
+				{
+					int maxLen = 150;
+					msg.append(StringUtil.getMaxSubstring(sql.trim(), maxLen));
+				}
+				result.addMessage(msg);
+				result.addMessageNewLine();
 			}
-			else
-			{
-				int maxLen = 150;
-				msg.append(StringUtil.getMaxSubstring(sql.trim(), maxLen));
-			}
-			result.addMessage(msg);
-			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
 			result.setFailure(e);

@@ -580,11 +580,18 @@ public final class WbManager
 		}
 	}
 
-	public synchronized void removeShutdownHook()
+	public void removeShutdownHook()
 	{
 		if (this.shutdownHook != null)
 		{
-			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+			try
+			{
+				Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+			}
+			catch (Throwable ex)
+			{
+				// ignore, we can't do anything about it anyway
+			}
 			this.shutdownHook = null;
 		}
 		if (this.deadlockMonitor != null)
@@ -1137,17 +1144,20 @@ public final class WbManager
 	@Override
 	public void run()
 	{
-		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted. Aborting process...");
+		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted.");
 		saveConfigSettings();
+
 		boolean exitImmediately = Settings.getInstance().getBoolProperty("workbench.exitonbreak", true);
 		if (exitImmediately)
 		{
+			LogMgr.logWarning("WbManager.shutdownHook()", "Aborting process...");
 			LogMgr.shutdown();
-			System.exit(15);
+			Runtime.getRuntime().halt(15); // exit() doesn't work properly from inside a shutdownhook!
 		}
 		else
 		{
 			ConnectionMgr.getInstance().disconnectAll();
+			LogMgr.shutdown();
 		}
 	}
 

@@ -33,6 +33,7 @@ import workbench.sql.ErrorDescriptor;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -115,15 +116,25 @@ public class OracleErrorPositionReader
 	public String enhanceErrorMessage(String sql, String originalMessage, ErrorDescriptor errorInfo)
 	{
 		if (errorInfo == null) return originalMessage;
-		int offset = errorInfo.getErrorPosition();
-		if (offset < 0) return originalMessage;
+		if (!errorInfo.hasError()) return originalMessage;
 
-		originalMessage += "\nAt position: " + offset;
+		SqlUtil.calculateErrorLine(sql, errorInfo);
+		if (errorInfo.getErrorColumn() > -1 && errorInfo.getErrorLine() > -1)
+		{
+			if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n";
+			originalMessage = "Error at line " + (errorInfo.getErrorLine() + 1) + ":\n" + originalMessage.trim();
+		}
+		else
+		{
+			int offset = errorInfo.getErrorPosition();
+			originalMessage = originalMessage.trim() + " (position: " + offset + ")";
+		}
 
 		String indicator = SqlUtil.getErrorIndicator(sql, errorInfo);
 		if (indicator != null)
 		{
-			originalMessage += "\n\n" + indicator;
+			if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n";
+			originalMessage += indicator;
 		}
 		return originalMessage;
 	}

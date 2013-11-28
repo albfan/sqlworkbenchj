@@ -129,6 +129,8 @@ public class RegexErrorPositionReader
 		String indicator = SqlUtil.getErrorIndicator(sql, errorInfo);
 		if (indicator != null)
 		{
+			if (originalMessage == null) originalMessage = ""; // avoid a "null" string in the output
+			if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n\n";
 			originalMessage += "\n\n" + indicator;
 		}
 		return originalMessage;

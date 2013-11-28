@@ -78,7 +78,7 @@ public class SqlCommand
 	protected DataStore currentRetrievalData;
 	protected ParameterPrompter prompter;
 	protected ArgumentParser cmdLine;
-	protected boolean errorMessagesOnly;
+	protected boolean includeStatementInError;
 	protected boolean showDataLoading = true;
 
 	public void setRowMonitor(RowActionMonitor monitor)
@@ -106,9 +106,9 @@ public class SqlCommand
 		reportFullStatementOnError = flag;
 	}
 
-	public void setReturnOnlyErrorMessages(boolean flag)
+	public void setIncludeStatementInErrorMessages(boolean flag)
 	{
-		this.errorMessagesOnly = flag;
+		this.includeStatementInError = flag;
 	}
 
 	protected String getBaseDir()
@@ -938,7 +938,7 @@ public class SqlCommand
 		result.clear();
 
 		StringBuilder msg = new StringBuilder(150);
-		if (!errorMessagesOnly)
+		if (includeStatementInError)
 		{
 			msg.append(ResourceMgr.getString("MsgExecuteError"));
 			msg.append('\n');

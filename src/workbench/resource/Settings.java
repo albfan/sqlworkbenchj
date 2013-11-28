@@ -2594,6 +2594,12 @@ public class Settings
 
 	// </editor-fold>
 
+
+	public boolean getIncludeSqlStatementInError()
+	{
+		return getBoolProperty("workbench.gui.log.errorstatement", true);
+	}
+
 	public boolean getSaveProfilesImmediately()
 	{
 		return getBoolProperty("workbench.profiles.saveonclose", false);
