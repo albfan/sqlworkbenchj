@@ -366,18 +366,18 @@ class ProfileListModel
 
 		String groupName = (String)groupNode.getUserObject();
 
-		for (int i = 0; i < profileNodes.length; i++)
+		for (DefaultMutableTreeNode profileNode : profileNodes)
 		{
-			Object o = profileNodes[i].getUserObject();
+			Object o = profileNode.getUserObject();
 			ConnectionProfile original = null;
 			if (o instanceof ConnectionProfile)
 			{
 				original = (ConnectionProfile)o;
 			}
 			if (original == null) continue;
-
-			removeNodeFromParent(profileNodes[i]);
-			insertNodeInto(profileNodes[i], groupNode, groupNode.getChildCount());
+			
+			removeNodeFromParent(profileNode);
+			insertNodeInto(profileNode, groupNode, groupNode.getChildCount());
 			original.setGroup(groupName);
 		}
 	}
@@ -390,9 +390,9 @@ class ProfileListModel
 
 		String groupName = (String)groupNode.getUserObject();
 
-		for (int i = 0; i < profileNodes.length; i++)
+		for (DefaultMutableTreeNode profileNode : profileNodes)
 		{
-			Object o = profileNodes[i].getUserObject();
+			Object o = profileNode.getUserObject();
 			ConnectionProfile original = null;
 			if (o instanceof ConnectionProfile)
 			{
