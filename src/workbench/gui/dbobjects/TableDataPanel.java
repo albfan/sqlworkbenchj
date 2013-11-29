@@ -284,20 +284,18 @@ public class TableDataPanel
 			workspaceSettings = null;
 		}
 
-		try
-		{
-			MainWindow w = (MainWindow)SwingUtilities.getWindowAncestor(this);
-			setResultContainer(w);
-		}
-		catch (Exception e)
-		{
-			// ignore, will only happen if the DbExplorer was started
-			// as a standalone application
-		}
 		dataDisplay.setConnection(dbConnection);
 
 		initialized = true;
 	}
+
+	@Override
+	public void addNotify()
+	{
+		super.addNotify();
+		initTableNavigation();
+	}
+
 
 	/**
 	 * Return the displayed table data.
@@ -315,11 +313,18 @@ public class TableDataPanel
 		return this.dataDisplay.isModified();
 	}
 
-	public void setResultContainer(MainWindow container)
+	private void initTableNavigation()
 	{
-		if (this.dataDisplay != null && container != null)
+		if (this.dataDisplay == null) return;
+		try
 		{
-			this.dataDisplay.initTableNavigation(container);
+			MainWindow w = (MainWindow)SwingUtilities.getWindowAncestor(this);
+			this.dataDisplay.initTableNavigation(w);
+		}
+		catch (Exception e)
+		{
+			// ignore, will only happen if the DbExplorer was started
+			// as a standalone application
 		}
 	}
 
