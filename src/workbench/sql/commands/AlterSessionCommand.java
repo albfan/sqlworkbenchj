@@ -173,7 +173,7 @@ public class AlterSessionCommand
 			catch (Exception e)
 			{
 				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure(e);
+				result.setFailure();
 				LogMgr.logError("AlterSessionCommand.changeOracleTimeZone()", "Error setting timezone", e);
 			}
 		}

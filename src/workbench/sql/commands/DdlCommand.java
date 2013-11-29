@@ -174,11 +174,8 @@ public class DdlCommand
 		catch (Exception e)
 		{
 			this.currentConnection.rollback(ddlSavepoint);
-			result.clear();
-
+			result.setFailure();
 			addErrorStatementInfo(result, sql);
-
-			result.setFailure(e);
 			if (!addExtendErrorInfo(currentConnection, sql, info, result))
 			{
 				addErrorPosition(result, sql, e);

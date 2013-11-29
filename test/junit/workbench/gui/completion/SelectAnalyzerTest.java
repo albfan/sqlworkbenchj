@@ -24,12 +24,15 @@ package workbench.gui.completion;
 
 import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
+
 import workbench.util.TableAlias;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -49,20 +52,22 @@ public class SelectAnalyzerTest
 	{
 		String sql =
 			"with foobar as (\n" +
-			"  select t1.c1, t2.c2, t1.  \n" +
+			"  select t1.c1, t2.  \n" +
 			"  from table1 t1\n" +
 			"    join table2 t2 on t1.id = t2.id1\n" +
 			")\n" +
 			"select *\n" +
 			"from foobar;";
-		int pos = sql.indexOf("t1. ") + 3;
-		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
+		int pos = sql.indexOf("t2.") + 3;
+		StatementContext ctx = new StatementContext(null, sql, pos);
+		BaseAnalyzer analyzer = ctx.getAnalyzer();
+		analyzer.checkContext();
 		int context = analyzer.getContext();
 		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, context);
 		TableIdentifier tbl = analyzer.getTableForColumnList();
-		assertEquals("table1", tbl.getTableName());
+		assertEquals("table2", tbl.getTableName());
 	}
-	
+
 	@Test
 	public void testSpaces()
 	{

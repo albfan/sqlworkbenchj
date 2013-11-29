@@ -72,7 +72,14 @@ public class RegexErrorPositionReader
 	{
 		if (ex == null) return null;
 		String msg = ex.getMessage();
-		return getErrorPosition(sql, msg);
+		ErrorDescriptor result = getErrorPosition(sql, msg);
+		if (result.getErrorPosition() > -1 && !con.getDbSettings().getErrorPosIncludesLeadingComments())
+		{
+			int startOffset = SqlUtil.getRealStart(sql);
+			int offset = result.getErrorPosition();
+			result.setErrorOffset(offset + startOffset);
+		}
+		return result;
 	}
 
 	public ErrorDescriptor getErrorPosition(String sql, String msg)

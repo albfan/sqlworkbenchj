@@ -23,6 +23,7 @@
 package workbench.gui.completion;
 
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 
 /**
@@ -50,7 +51,7 @@ public class CteDefinition
 
 	public void setInnerSql(String sql)
 	{
-		this.innerSql = sql == null ? null : sql.trim();
+		this.innerSql = sql == null ? null : sql;
 	}
 
 	public String getName()

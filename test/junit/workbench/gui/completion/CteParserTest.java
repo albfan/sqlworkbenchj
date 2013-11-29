@@ -23,8 +23,10 @@
 package workbench.gui.completion;
 
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -71,8 +73,8 @@ public class CteParserTest
 		assertEquals(2, t1.getColumns().size());
 		assertEquals("one", t1.getColumns().get(0).getColumnName());
 		assertEquals("two", t1.getColumns().get(1).getColumnName());
-		assertEquals("select x,y from bar", t1.getInnerSql());
-		assertEquals("select * from other", analyzer.getBaseSql());
+		assertEquals("select x,y from bar", t1.getInnerSql().trim());
+		assertEquals("select * from other", analyzer.getBaseSql().trim());
 		assertEquals(t1.getStartInStatement(), cte.indexOf("as (") + 4);
 		assertEquals("select x,y from bar", cte.substring(t1.getStartInStatement(), t1.getEndInStatement()).trim());
 	}
@@ -149,7 +151,7 @@ public class CteParserTest
 		assertEquals(2, t1.getColumns().size());
 		assertEquals("id", t1.getColumns().get(0).getColumnName());
 		assertEquals("nr", t1.getColumns().get(1).getColumnName());
-		assertEquals("insert into foo values (1,2) returning *", t1.getInnerSql());
+		assertEquals("insert into foo values (1,2) returning *", t1.getInnerSql().trim());
 	}
 
 }

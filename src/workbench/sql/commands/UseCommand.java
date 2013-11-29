@@ -40,7 +40,7 @@ import workbench.util.StringUtil;
  * This command will also be "activated if the JDBC driver reports
  * that catalogs are supported
  *
- * This class will notify the connection used that the current database has changed
+ * This class will notify the connection of this statement that the current database has changed
  * so that the connection display in the main window can be updated.
  *
  * @see workbench.db.CatalogChanger#setCurrentCatalog(workbench.db.WbConnection, java.lang.String)
@@ -81,10 +81,9 @@ public class UseCommand
 		}
 		catch (Exception e)
 		{
-			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure(e);
+			result.setFailure();
 		}
 		finally
 		{

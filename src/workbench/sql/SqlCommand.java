@@ -949,16 +949,16 @@ public class SqlCommand
 		}
 	}
 
-	protected void addErrorInfo(StatementRunnerResult result, String sql, Exception e)
+	protected void addErrorInfo(StatementRunnerResult result, String executedSql, Exception e)
 	{
-		result.clear();
-		addErrorStatementInfo(result, sql);
-		addErrorPosition(result, sql, e);
+		addErrorStatementInfo(result, executedSql);
+		addErrorPosition(result, executedSql, e);
 	}
 
-	protected void addErrorPosition(StatementRunnerResult result, String sql, Exception e)
+	protected void addErrorPosition(StatementRunnerResult result, String executedSql, Exception e)
 	{
 		ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
+		String sql = result.getSourceCommand() == null ? executedSql : result.getSourceCommand();
 		ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
 		if (error != null)
 		{
@@ -969,7 +969,7 @@ public class SqlCommand
 		else
 		{
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure(e);
+			result.setFailure();
 		}
 	}
 

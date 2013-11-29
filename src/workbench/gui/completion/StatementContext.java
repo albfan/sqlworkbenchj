@@ -26,12 +26,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 

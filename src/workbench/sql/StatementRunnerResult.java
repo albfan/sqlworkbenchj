@@ -160,14 +160,7 @@ public class StatementRunnerResult
 
 	public void setFailure()
 	{
-		this.success = false;
-		this.errorDetails = null;
-	}
-
-	public void setFailure(Exception error)
-	{
-		this.success = false;
-		this.errorDetails = null;
+		setFailure(null);
 	}
 
 	public void setFailure(ErrorDescriptor error)
