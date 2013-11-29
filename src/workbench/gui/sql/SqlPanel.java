@@ -923,22 +923,20 @@ public class SqlPanel
 
 		WbMenu config = new WbMenu(ResourceMgr.getString("MnuTxtSettings"));
 		config.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
-		config.add(new AutoJumpNextStatement());
-		config.add(appendResultsAction);
-		a = new HighlightCurrentStatement();
-		a.setCreateMenuSeparator(false);
-		config.add(a);
-		config.add(new HighlightErrorLineAction());
+		new AutoJumpNextStatement().addToMenu(config);
+		appendResultsAction.addToMenu(config);
+		new HighlightCurrentStatement().addToMenu(config);
+		new HighlightErrorLineAction().addToMenu(config);
 		this.checkPreparedAction = new CheckPreparedStatementsAction();
-		config.add(this.checkPreparedAction);
-		config.add(ignore);
+		this.checkPreparedAction.addToMenu(config);
+		ignore.addToMenu(config);
 
 		WbMenu codeTools = new WbMenu(ResourceMgr.getString("MnuTxtCodeTools"));
 		codeTools.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
-		codeTools.add(new CreateSnippetAction(this.editor));
-		codeTools.add(new CleanJavaCodeAction(this.editor));
-		codeTools.add(new MakeInListAction(this.editor));
-		codeTools.add(new MakeNonCharInListAction(this.editor));
+		new CreateSnippetAction(this.editor).addToMenu(codeTools);
+		new CleanJavaCodeAction(this.editor).addToMenu(codeTools);
+		new MakeInListAction(this.editor).addToMenu(codeTools);
+		new MakeNonCharInListAction(this.editor).addToMenu(codeTools);
 
 		this.actions.add(codeTools);
 		this.actions.add(config);
@@ -1208,7 +1206,7 @@ public class SqlPanel
 	}
 
 	@Override
-	public List getActions()
+	public List getMenuItems()
 	{
 		return this.actions;
 	}

@@ -39,7 +39,7 @@ import workbench.util.WbWorkspace;
 public interface MainPanel
 	extends ResultLogger
 {
-	List getActions();
+	List getMenuItems();
 	WbToolbar getToolbar();
 	void showLogPanel();
 	void showResultPanel();

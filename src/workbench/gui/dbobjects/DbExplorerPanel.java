@@ -965,7 +965,7 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public List getActions()
+	public List getMenuItems()
 	{
 		return Collections.EMPTY_LIST;
 	}

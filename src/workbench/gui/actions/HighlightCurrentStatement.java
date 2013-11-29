@@ -22,10 +22,9 @@
  */
 package workbench.gui.actions;
 
-
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -33,11 +32,11 @@ import workbench.resource.Settings;
  *	Toggle highlighting of the currently executed statement.
  *	@author  Thomas Kellerer
  */
-public class HighlightCurrentStatement 
+public class HighlightCurrentStatement
 	extends CheckBoxAction
 	implements PropertyChangeListener
 {
-	
+
 	public HighlightCurrentStatement()
 	{
 		super("MnuTxtHighlightCurrent", Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT);

@@ -24,27 +24,28 @@ package workbench.gui.actions;
 
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
 
 /**
  *	Action to toggle the if running statements should replace the current
  *  results or simply add a new result tab to SqlPanel
- * 
+ *
  *	@author  Thomas Kellerer
  */
-public class AppendResultsAction 
+public class AppendResultsAction
 	extends CheckBoxAction
 {
 	private SqlPanel client;
 	private JToggleButton toggleButton;
-	
+
 	public AppendResultsAction(SqlPanel panel)
 	{
 		super("MnuTxtToggleAppendResults", null);
 		this.client = panel;
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setSwitchedOn(client.getAppendResults());
 		this.setEnabled(false);
 	}
@@ -72,11 +73,11 @@ public class AppendResultsAction
 		}
 		return this.toggleButton;
 	}
-	
+
 	@Override
 	public void addToToolbar(JToolBar aToolbar)
 	{
 		aToolbar.add(this.getButton());
 	}
-	
+
 }

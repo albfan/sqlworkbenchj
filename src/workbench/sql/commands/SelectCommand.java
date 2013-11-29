@@ -71,8 +71,7 @@ public class SelectCommand
 
 			this.runner.setSavepoint();
 
-			if (Settings.getInstance().getCheckPreparedStatements()
-				  && currentConnection.getPreparedStatementPool().isRegistered(sql))
+			if (Settings.getInstance().getCheckPreparedStatements() && currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{
 				this.currentStatement = currentConnection.getPreparedStatementPool().prepareStatement(sql);
 				if (this.currentStatement != null)

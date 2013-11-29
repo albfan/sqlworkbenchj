@@ -508,7 +508,7 @@ public class MainWindow
 		open.addToMenu(menu);
 
 		// now create the menus for the current tab
-		List actions = panel.getActions();
+		List menuItems = panel.getMenuItems();
 
 		// Create the menus in the correct order
 		if (panel instanceof SqlPanel)
@@ -575,34 +575,31 @@ public class MainWindow
 		RecentWorkspaceManager.getInstance().populateMenu(recentWorkspace, this);
 		menu.add(recentWorkspace);
 
-		WbMenu submenu = null;
-		String menuName = null;
-		for (int i=0; i < actions.size(); i++)
+
+		for (Object entry : menuItems)
 		{
-			submenu = null;
-			action = null;
-			menuName = null;
-			Object entry = actions.get(i);
+			WbMenu subMenu = null;
+			String menuName = null;
+			WbAction menuAction = null;
+
 			boolean menuSep = false;
 			if (entry instanceof WbAction)
 			{
-				action = (WbAction)actions.get(i);
-				menuName = action.getMenuItemName();
-				menuSep = action.getCreateMenuSeparator();
+				menuAction = (WbAction)entry;
+				menuName = menuAction.getMenuItemName();
+				menuSep = menuAction.getCreateMenuSeparator();
 			}
 			else if (entry instanceof WbMenu)
 			{
-				submenu = (WbMenu)entry;
-				menuName = submenu.getParentMenuId();
-				menuSep = submenu.getCreateMenuSeparator();
+				subMenu = (WbMenu)entry;
+				menuName = subMenu.getParentMenuId();
+				menuSep = subMenu.getCreateMenuSeparator();
 			}
 
-			if (menuName == null)
-			{
-				LogMgr.logWarning(this, "Action " + action.getClass() + " does not define a main menu entry!");
-				continue;
-			}
+			if (menuName == null)	continue;
+
 			menu = menus.get(menuName);
+
 			if (menu == null)
 			{
 				menu = new WbMenu(ResourceMgr.getString(menuName));
@@ -615,13 +612,14 @@ public class MainWindow
 				menu.addSeparator();
 			}
 
-			if (action != null)
+			if (menuAction != null)
 			{
-				action.addToMenu(menu);
+				menuAction.addToMenu(menu);
 			}
-			else if (submenu != null)
+			else if (subMenu != null)
 			{
-				menu.add(submenu);
+				menu.add(subMenu);
+				subMenu.setVisible(true);
 			}
 			menu.setVisible(true);
 		}

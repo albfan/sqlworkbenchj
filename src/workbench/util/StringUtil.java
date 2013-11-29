@@ -1685,6 +1685,7 @@ public class StringUtil
 	public static int getLineStart(String text, int position)
 	{
 		if (StringUtil.isEmptyString(text)) return 0;
+		if (position >= text.length()) return 0;
 
 		int start = 0;
 

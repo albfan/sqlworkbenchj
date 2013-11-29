@@ -30,7 +30,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -55,7 +54,6 @@ public class CheckBoxAction
 	{
 		super();
 		this.initMenuDefinition(resourceKey);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 		this.settingsProperty = prop;
 		if (prop != null)
