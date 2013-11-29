@@ -213,26 +213,14 @@ public class VerticaSequenceReader
 		if (sequence == null) return null;
 
 		DataStore result = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		Savepoint sp = null;
 		try
 		{
 			String sql = buildSql(schema, sequence);
-			sp = this.dbConnection.setSavepoint();
-			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql.toString());
-			result = new DataStore(rs, true);
-			this.dbConnection.releaseSavepoint(sp);
+			result = SqlUtil.getResultData(dbConnection, sql, true);
 		}
 		catch (SQLException e)
 		{
-			this.dbConnection.rollback(sp);
 			LogMgr.logDebug("VerticaSequenceReader.getSequenceDefinition()", "Error reading sequence definition", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}

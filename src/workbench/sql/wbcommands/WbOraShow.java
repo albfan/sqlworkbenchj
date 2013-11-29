@@ -469,9 +469,6 @@ public class WbOraShow
 			sql = "select * from v$sgainfo";
 		}
 
-		Statement stmt = null;
-		ResultSet rs = null;
-
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Using SQL: " + sql);
@@ -479,12 +476,9 @@ public class WbOraShow
 
 		try
 		{
-			stmt = this.currentConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
-			DataStore ds = new DataStore(rs, true);
+			DataStore ds = SqlUtil.getResultData(currentConnection, sql, false);
 			ds.setGeneratingSql(sqlPlusMode ? "show sga" : "show sgainfo");
 			ds.setResultName("SGA Size");
-			ds.resetStatus();
 			result.addDataStore(ds);
 			result.setSuccess();
 		}
@@ -493,10 +487,6 @@ public class WbOraShow
 			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info", ex);
 			result.setFailure();
 			result.addMessage(ex.getMessage());
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}

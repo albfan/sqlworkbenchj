@@ -98,24 +98,15 @@ public class NuoDBSequenceReader
 			LogMgr.logInfo("NuoDBSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
 		}
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		DataStore result = null;
 		try
 		{
-			stmt = this.dbConn.getSqlConnection().prepareStatement(query.toString());
-			rs = stmt.executeQuery();
-			result = new DataStore(rs, true);
+			result = SqlUtil.getResultData(dbConn, query.toString(), false);
 		}
 		catch (Throwable e)
 		{
 			LogMgr.logError("NuoDbSequenceReader.getSequenceDefinition()", "Error when retrieving sequence definition", e);
 		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-
 		return result;
 	}
 

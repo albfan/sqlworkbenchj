@@ -112,26 +112,14 @@ public class MonetDbSequenceReader
 			LogMgr.logInfo("MonetDbSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
 		}
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		DataStore result = null;
-		Savepoint sp = null;
 		try
 		{
-			sp = this.dbConn.setSavepoint();
-			stmt = this.dbConn.getSqlConnection().prepareStatement(query.toString());
-			rs = stmt.executeQuery();
-			result = new DataStore(rs, true);
-			dbConn.releaseSavepoint(sp);
+			result = SqlUtil.getResultData(dbConn, query.toString(), true);
 		}
 		catch (Throwable e)
 		{
-			dbConn.rollback(sp);
 			LogMgr.logError("MonetDbSequenceReader.getSequenceDefinition()", "Error when retrieving sequence definition", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
 		}
 
 		return result;

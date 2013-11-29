@@ -1707,4 +1707,9 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "errorinfo.zerobased", true);
 	}
 
+	public boolean getErrorPosIncludesLeadingComments()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "errorinfo.leading.comment.included", false);
+	}
+
 }

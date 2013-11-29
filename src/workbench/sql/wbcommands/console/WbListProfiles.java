@@ -82,7 +82,8 @@ public class WbListProfiles
 		boolean groupsOnly = cmdLine.getBoolean(ARG_GROUPS_ONLY);
 
 		// getProfiles() returns an unmodifiable List, but ProfileGroupMap
-		// will sort the list passed list which is not possible with an unmodifieable List
+		// will sort the list - which is not possible with an unmodifieable List
+		// so we need to create a shallow copy of the list from getProfiles()
 		List<ConnectionProfile> prof = CollectionUtil.arrayList();
 		prof.addAll(ConnectionMgr.getInstance().getProfiles());
 		ProfileGroupMap map = new ProfileGroupMap(prof);
@@ -90,11 +91,10 @@ public class WbListProfiles
 		String userTxt = ResourceMgr.getString("TxtUser");
 		for (String group : map.keySet())
 		{
-			result.addMessage(group);
 			if (groupsOnly) continue;
-
 			if (groupToShow == null || groupToShow.equalsIgnoreCase(group))
 			{
+				result.addMessage(group);
 				List<ConnectionProfile> profiles = map.get(group);
 				for (ConnectionProfile profile : profiles)
 				{

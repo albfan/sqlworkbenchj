@@ -125,9 +125,6 @@ public class CubridSequenceReader
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
-		ResultSet rs = null;
-		Statement stmt = null;
-
 		StringBuilder sql = new StringBuilder(baseSql.length() + 20);
 		sql.append(baseSql);
 		if (namePattern != null)
@@ -143,9 +140,7 @@ public class CubridSequenceReader
 
 		try
 		{
-			stmt = dbConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sql.toString());
-			DataStore ds = new DataStore(rs, true);
+			DataStore ds = SqlUtil.getResultData(dbConnection, sql.toString(), false);
 			for (int row=0; row < ds.getRowCount(); row ++)
 			{
 				result.add(createDefinition(ds, row));
@@ -155,10 +150,6 @@ public class CubridSequenceReader
 		{
 			LogMgr.logError("CubridSequenceReader.getSequences()", "Error retrieving sequences", e);
 			return null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}

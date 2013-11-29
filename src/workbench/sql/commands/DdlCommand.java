@@ -253,8 +253,15 @@ public class DdlCommand
 
 		if (error.getErrorPosition() == -1 && error.getErrorColumn() > -1 && error.getErrorLine() > -1)
 		{
+			int startOffset = 0;
+
+			if (!aConnection.getDbSettings().getErrorPosIncludesLeadingComments())
+			{
+				startOffset = SqlUtil.getRealStart(sql);
+				sql = sql.substring(startOffset);
+			}
 			int offset = SqlUtil.getErrorOffset(sql, error);
-			error.setErrorOffset(offset);
+			error.setErrorOffset(offset + startOffset);
 		}
 		result.addMessageNewLine();
 		result.setFailure(error);

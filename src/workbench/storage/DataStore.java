@@ -187,7 +187,7 @@ public class DataStore
 	}
 
 	/**
-	 * Initialize this DataStore based on the given ResultSet
+	 * Initialize this DataStore based on the given ResultSet.
 	 *
 	 * The ResultSet has to be closed by the caller.
 	 *
@@ -376,7 +376,7 @@ public class DataStore
 		if (filteredRows == null) return 0;
 		return filteredRows.size();
 	}
-	
+
 	@Override
 	public int getRowCount()
 	{

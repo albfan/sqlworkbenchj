@@ -26,12 +26,13 @@ import java.sql.SQLException;
 
 import java.sql.Types;
 import java.util.List;
-import workbench.WbManager;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -62,25 +63,46 @@ public class WbListSchemas
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		List<String> schemas = currentConnection.getMetadata().getSchemas();
-		String schemaName = StringUtil.capitalize(currentConnection.getMetadata().getSchemaTerm());
-		String[] cols = { schemaName };
-		int[] types = { Types.VARCHAR };
-		int[] sizes = { 10 };
 
-		DataStore ds = new DataStore(cols, types, sizes);
-		for (String cat : schemas)
+		DataStore ds = null;
+		if (currentConnection.getMetadata().isPostgres())
 		{
-			int row = ds.addRow();
-			ds.setValue(row, 0, cat);
+			ds = listPgSchemas();
 		}
-		ds.resetStatus();
-		if (!WbManager.getInstance().isConsoleMode())
+		else
 		{
-			ds.setResultName(schemaName);
+			String schemaName = StringUtil.capitalize(currentConnection.getMetadata().getSchemaTerm());
+			String[] cols = { schemaName };
+			int[] types = { Types.VARCHAR };
+			int[] sizes = { 10 };
+
+			ds = new DataStore(cols, types, sizes);
+			for (String cat : schemas)
+			{
+				int row = ds.addRow();
+				ds.setValue(row, 0, cat);
+			}
+			ds.resetStatus();
 		}
+		ds.setResultName(ResourceMgr.getString("TxtSchemaList"));
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
+	}
+
+	private DataStore listPgSchemas()
+	{
+		String name = StringUtil.capitalize(currentConnection.getMetadata().getSchemaTerm());
+		String sql =
+			"SELECT n.nspname AS \"" + name + "\",\n" +
+			"  pg_catalog.pg_get_userbyid(n.nspowner) AS \"Owner\"\n" +
+			"FROM pg_catalog.pg_namespace n\n" +
+			"WHERE n.nspname !~ '^pg_' AND n.nspname <> 'information_schema'\n" +
+			"ORDER BY 1";
+
+		DataStore ds = SqlUtil.getResult(currentConnection, sql, true);
+		ds.setGeneratingSql(sql);
+		return ds;
 	}
 
 }

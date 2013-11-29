@@ -45,6 +45,25 @@ public class SelectAnalyzerTest
 	}
 
 	@Test
+	public void testCTE()
+	{
+		String sql =
+			"with foobar as (\n" +
+			"  select t1.c1, t2.c2, t1.  \n" +
+			"  from table1 t1\n" +
+			"    join table2 t2 on t1.id = t2.id1\n" +
+			")\n" +
+			"select *\n" +
+			"from foobar;";
+		int pos = sql.indexOf("t1. ") + 3;
+		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
+		int context = analyzer.getContext();
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, context);
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertEquals("table1", tbl.getTableName());
+	}
+	
+	@Test
 	public void testSpaces()
 	{
 		String sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";

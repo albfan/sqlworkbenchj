@@ -60,6 +60,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.DataStore;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -2154,6 +2155,18 @@ public class SqlUtil
 		return msg;
 	}
 
+	public static int getRealStart(String sql)
+	{
+		if (StringUtil.isEmptyString(sql)) return 0;
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken token = lexer.getNextToken(false, false);
+		if (token == null)
+		{
+			return 0;
+		}
+		return token.getCharBegin();
+	}
+
 	/**
 	 * Calculate the line and column determined by the error position stored in the ErrorDescriptor.
 	 *
@@ -2260,4 +2273,50 @@ public class SqlUtil
 		return -1;
 	}
 
+	public static DataStore getResult(WbConnection conn, String sql)
+	{
+		return getResult(conn, sql, conn.getDbSettings().useSavePointForDML());
+	}
+
+	public static DataStore getResult(WbConnection conn, String sql, boolean useSavepoint)
+	{
+		try
+		{
+			return getResultData(conn, sql, useSavepoint);
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("SqlUtil.getResult()", "Could not retrieve results", ex);
+		}
+		return null;
+	}
+
+	public static DataStore getResultData(WbConnection conn, String sql, boolean useSavepoint)
+		throws SQLException
+	{
+		ResultSet rs = null;
+		Statement stmt = null;
+		Savepoint sp = null;
+		DataStore ds = null;
+		try
+		{
+			sp = (useSavepoint ? conn.setSavepoint() : null);
+			stmt = conn.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			ds = new DataStore(rs, true);
+			ds.setGeneratingSql(sql);
+			ds.resetStatus();
+			conn.releaseSavepoint(sp);
+		}
+		catch (SQLException ex)
+		{
+			conn.rollback(sp);
+			throw ex;
+		}
+		finally
+		{
+			closeAll(rs, stmt);
+		}
+		return ds;
+	}
 }
