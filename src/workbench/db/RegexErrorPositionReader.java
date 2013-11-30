@@ -56,8 +56,8 @@ public class RegexErrorPositionReader
 	public RegexErrorPositionReader(String lineRegex, String columnRegex)
 		throws PatternSyntaxException
 	{
-		lineInfoPattern = Pattern.compile(lineRegex);
-		columnInfoPattern = Pattern.compile(columnRegex);
+		lineInfoPattern = lineRegex == null ? null : Pattern.compile(lineRegex);
+		columnInfoPattern = columnRegex == null ? null : Pattern.compile(columnRegex);
 		positionPattern = null;
 		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for line#: " + lineRegex + ", regex for column#: " + columnRegex);
 	}
@@ -84,21 +84,22 @@ public class RegexErrorPositionReader
 
 	public ErrorDescriptor getErrorPosition(String sql, String msg)
 	{
-		if (lineInfoPattern != null && columnInfoPattern != null)
-		{
-			return getPositionFromLineAndColumn(msg, sql);
-		}
 		if (positionPattern != null)
 		{
 			ErrorDescriptor result = new ErrorDescriptor();
 			result.setErrorOffset(getValueFromRegex(msg, positionPattern));
 			return result;
 		}
+		if (lineInfoPattern != null || columnInfoPattern != null)
+		{
+			return getPositionFromLineAndColumn(msg, sql);
+		}
 		return null;
 	}
 
 	private int getValueFromRegex(String msg, Pattern pattern)
 	{
+		if (pattern == null) return 0;
 		if (msg == null) return -1;
 		int position = -1;
 

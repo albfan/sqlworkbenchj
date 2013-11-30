@@ -180,8 +180,6 @@ public class DdlCommand
 			{
 				addErrorPosition(result, sql, e);
 			}
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
-
 			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
 		}
 		finally

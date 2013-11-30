@@ -95,21 +95,7 @@ public interface ErrorPositionReader
 			String posRegex = conn.getDbSettings().getErrorPosInfoRegex();
 			boolean zeroBased = conn.getDbSettings().getErrorPosIsZeroBased();
 
-			if (colRegex != null && lineRegex != null)
-			{
-				try
-				{
-					RegexErrorPositionReader reader = new RegexErrorPositionReader(lineRegex, colRegex);
-					reader.setNumbersAreOneBased(zeroBased);
-					LogMgr.logDebug("ErrorPositionReader.Factory.createPositionReader()", "Initialized reader for dbid=" + conn.getDbId() + " using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex);
-					return reader;
-				}
-				catch (PatternSyntaxException pse)
-				{
-					LogMgr.logError("ErrorPositionReader.Factory.createPositionReader()", "Could not initialize regex based reader using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex, pse);
-				}
-			}
-			else if (posRegex != null)
+			if (posRegex != null)
 			{
 				try
 				{
@@ -121,6 +107,20 @@ public interface ErrorPositionReader
 				catch (PatternSyntaxException pse)
 				{
 					LogMgr.logError("ErrorPositionReader.Factory.createPositionReader()", "Could not initialize regex based reader using positionRegex: " + posRegex, pse);
+				}
+			}
+			else if (colRegex != null || lineRegex != null)
+			{
+				try
+				{
+					RegexErrorPositionReader reader = new RegexErrorPositionReader(lineRegex, colRegex);
+					reader.setNumbersAreOneBased(zeroBased);
+					LogMgr.logDebug("ErrorPositionReader.Factory.createPositionReader()", "Initialized reader for dbid=" + conn.getDbId() + " using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex);
+					return reader;
+				}
+				catch (PatternSyntaxException pse)
+				{
+					LogMgr.logError("ErrorPositionReader.Factory.createPositionReader()", "Could not initialize regex based reader using: lineRegex: " + lineRegex + ", columnRegex:" + colRegex, pse);
 				}
 			}
 			return dummyReader;

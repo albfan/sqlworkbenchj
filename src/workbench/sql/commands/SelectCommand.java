@@ -39,11 +39,12 @@ import workbench.util.LowMemoryException;
  * Implementation of the SELECT statement.
  *
  * The result of the SELECT is passed back in the StatementRunnerResult object.
- * If a ResultSetConsumer is registered in the StatementRunner executing this
- * statement, the ResultSet will be returned directly, otherwise the
- * ResultSet will be completely read into a DataStore.
+ * If a ResultSetConsumer is registered in the StatementRunner instance that is executing this
+ * select, the ResultSet will be returned directly, otherwise the ResultSet will be completely
+ * read into a DataStore (see {@link SqlCommand#processResults(workbench.sql.StatementRunnerResult, boolean)}.
  *
  * @author Thomas Kellerer
+ *
  */
 public class SelectCommand
 	extends SqlCommand
@@ -52,6 +53,7 @@ public class SelectCommand
 
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
+	 * 
 	 * @param sql the statement to execute
 	 * @return the result of the execution
 	 * @throws java.sql.SQLException
