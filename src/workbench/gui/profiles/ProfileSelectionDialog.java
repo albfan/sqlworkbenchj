@@ -80,6 +80,7 @@ public class ProfileSelectionDialog
 	private boolean cancelled;
 	private String escActionCommand;
 	private JLabel versionInfo;
+	private boolean processEscKey;
 
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
 	{
@@ -94,13 +95,24 @@ public class ProfileSelectionDialog
 		{
 			EventNotifier.getInstance().addEventDisplay(this);
 		}
-
-		JRootPane root = this.getRootPane();
-		root.setDefaultButton(okButton);
+		enableDefaultButtons();
 		EscAction esc = new EscAction(this, this);
 		escActionCommand = esc.getActionName();
 	}
 
+	public void enableDefaultButtons()
+	{
+		JRootPane root = this.getRootPane();
+		root.setDefaultButton(okButton);
+		processEscKey = true;
+	}
+
+	public void disableDefaultButtons()
+	{
+		JRootPane root = this.getRootPane();
+		root.setDefaultButton(null);
+		processEscKey = false;
+	}
 
 	private void initComponents(String lastProfileKey)
 	{
@@ -309,7 +321,7 @@ public class ProfileSelectionDialog
 			profiles.applyProfiles();
 			selectProfile();
 		}
-		else if (e.getSource() == this.cancelButton || e.getActionCommand().equals(escActionCommand))
+		else if (e.getSource() == this.cancelButton || (processEscKey && e.getActionCommand().equals(escActionCommand)))
 		{
 			this.selectedProfile = null;
 			this.cancelled = true;

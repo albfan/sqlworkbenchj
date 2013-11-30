@@ -24,8 +24,10 @@ package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -35,6 +37,7 @@ import javax.swing.tree.TreePath;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ProfileGroupMap;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
@@ -47,6 +50,7 @@ class ProfileListModel
 {
 	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private List<ConnectionProfile> profiles;
+	private List<ConnectionProfile> filtered = new ArrayList<ConnectionProfile>();
 
 	ProfileListModel()
 	{
@@ -104,6 +108,31 @@ class ProfileListModel
 		}
 
 		return null;
+	}
+
+	public boolean isFiltered()
+	{
+		return filtered.size() > 0;
+	}
+
+	public void applyFilter(String value)
+	{
+		profiles.addAll(filtered);
+		filtered.clear();
+		if (StringUtil.isNonBlank(value))
+		{
+			Iterator<ConnectionProfile> itr = profiles.iterator();
+			while (itr.hasNext())
+			{
+				ConnectionProfile profile = itr.next();
+				if (!profile.getName().toLowerCase().contains(value))
+				{
+					filtered.add(profile);
+					itr.remove();
+				}
+			}
+		}
+		buildTree();
 	}
 
 	public boolean profilesChanged()
@@ -194,6 +223,7 @@ class ProfileListModel
 
 	public TreePath getFirstProfile()
 	{
+		if (this.rootNode.getChildCount() == 0) return null;
 		TreeNode defGroup = this.rootNode.getChildAt(0);
 		Object profile = defGroup.getChildAt(0);
 		return new TreePath( new Object[] { rootNode, defGroup, profile });
@@ -321,6 +351,7 @@ class ProfileListModel
 	private void buildTree()
 	{
 		ProfileGroupMap groupMap = new ProfileGroupMap(profiles);
+		rootNode.removeAllChildren();
 
 		// Make sure the default group is added as the first item!
 		List<String> groups = new ArrayList<String>();
@@ -375,7 +406,7 @@ class ProfileListModel
 				original = (ConnectionProfile)o;
 			}
 			if (original == null) continue;
-			
+
 			removeNodeFromParent(profileNode);
 			insertNodeInto(profileNode, groupNode, groupNode.getChildCount());
 			original.setGroup(groupName);

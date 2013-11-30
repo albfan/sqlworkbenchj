@@ -18,6 +18,7 @@ LblDbURL
 LblDriverName
 LblDrop
 LblExportEscapeHtml
+LblFilter
 LblFetchSize
 LblFileEncoding
 LblKeyDefDefaultCol

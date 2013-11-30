@@ -26,6 +26,12 @@ import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -36,8 +42,10 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -61,7 +69,9 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
@@ -74,7 +84,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions, ValidatingComponent, PropertyChangeListener
+	implements FileActions, ValidatingComponent, PropertyChangeListener, ActionListener, KeyListener, FocusListener
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
@@ -83,7 +93,10 @@ public class ProfileEditorPanel
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
+	private JTextField filterValue;
 	protected boolean dummyAdded;
+	private List<String> orgExpandedGroups;
+	private ConnectionProfile initialProfile;
 
 	public ProfileEditorPanel(String lastProfileKey)
 	{
@@ -123,7 +136,25 @@ public class ProfileEditorPanel
 		this.toolbar.add(new ExpandTreeAction(tree));
 		this.toolbar.add(new CollapseTreeAction(tree));
 
-		this.listPanel.add(toolbar, BorderLayout.NORTH);
+		p.add(toolbar, BorderLayout.PAGE_START);
+
+		JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
+		filterPanel.setBorder(new DividerBorder(DividerBorder.TOP));
+		filterValue = new JTextField();
+		WbLabel lbl = new WbLabel();
+		lbl.setTextByKey("LblFilter");
+		lbl.setLabelFor(filterValue);
+		lbl.setBorder(new EmptyBorder(0, 5, 0, 5));
+		filterPanel.add(lbl, BorderLayout.LINE_START);
+		filterPanel.add(filterValue, BorderLayout.CENTER);
+		p.add(filterPanel, BorderLayout.PAGE_END);
+
+		filterValue.setToolTipText(lbl.getToolTipText());
+		filterValue.addActionListener(this);
+		filterValue.addFocusListener(this);
+		filterValue.addKeyListener(this);
+
+		this.listPanel.add(p, BorderLayout.NORTH);
 
 		tree.setDeleteAction(deleteItem);
 
@@ -140,6 +171,97 @@ public class ProfileEditorPanel
 		final ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
 		((ProfileTree)profileTree).selectProfile(last);
 		ConnectionMgr.getInstance().addDriverChangeListener(this);
+	}
+
+	@Override
+	public void keyTyped(final KeyEvent e)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+				{
+					filterValue.setText("");
+				}
+				applyFilter();
+			}
+		});
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+	}
+
+	private ProfileSelectionDialog getDialog()
+	{
+		return (ProfileSelectionDialog)SwingUtilities.getWindowAncestor(this);
+	}
+
+	@Override
+	public void focusGained(FocusEvent e)
+	{
+		if (e.getComponent() == filterValue)
+		{
+			getDialog().disableDefaultButtons();
+		}
+	}
+
+	@Override
+	public void focusLost(FocusEvent e)
+	{
+		if (e.getComponent() == filterValue)
+		{
+			getDialog().enableDefaultButtons();
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		applyFilter();
+	}
+
+	private void applyFilter()
+	{
+		if (orgExpandedGroups == null)
+		{
+			// save the groups that were expanded the first time the filter is applied
+			// in order to be able to restore this once the filter is reset
+			// or the settings are stored.
+			orgExpandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+		}
+		ProfileTree tree = (ProfileTree) profileTree;
+		ConnectionProfile profile = tree.getSelectedProfile();
+		if (initialProfile == null)
+		{
+			initialProfile = profile;
+		}
+
+		model.applyFilter(filterValue.getText());
+		if (model.isFiltered())
+		{
+			tree.expandAll();
+			if (profile != null)
+			{
+				tree.selectProfile(profile.getKey());
+			}
+		}
+		else if (orgExpandedGroups != null)
+		{
+			tree.expandGroups(orgExpandedGroups);
+			if (initialProfile != null)
+			{
+				tree.selectProfile(initialProfile.getKey());
+			}
+		}
 	}
 
 	@Override
@@ -229,7 +351,11 @@ public class ProfileEditorPanel
 	public void saveSettings()
 	{
 		GuiSettings.setProfileDividerLocation(this.jSplitPane.getDividerLocation());
-		List<String> expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+		List<String> expandedGroups = orgExpandedGroups;
+		if (expandedGroups == null)
+		{
+			expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+		}
 		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups, ',', true));
 	}
 
@@ -311,14 +437,8 @@ public class ProfileEditorPanel
 		throws Exception
 	{
 		TreePath[] path = profileTree.getSelectionPaths();
-		if (path == null)
-		{
-			return;
-		}
-		if (path.length == 0)
-		{
-			return;
-		}
+		if (path == null) return;
+		if (path.length == 0)	return;
 
 		ProfileTree tree = (ProfileTree)profileTree;
 		if (tree.onlyProfilesSelected())
@@ -331,11 +451,10 @@ public class ProfileEditorPanel
 				newIndex--;
 			}
 
-			for (int i = 0; i < path.length; i++)
+			for (TreePath element : path)
 			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode)path[i].getLastPathComponent();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) element.getLastPathComponent();
 				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
-
 				this.model.deleteProfile(prof);
 			}
 			if (group.getChildCount() > 0)

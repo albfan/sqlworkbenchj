@@ -30,6 +30,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -45,18 +47,18 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import workbench.db.ConnectionProfile;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.DeleteListEntryAction;
-import workbench.gui.actions.WbAction;
-import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.ExpandableTree;
 import workbench.interfaces.GroupTree;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionProfile;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.menu.CutCopyPastePopup;
+
 import workbench.util.StringUtil;
 
 /**
@@ -184,9 +186,12 @@ public class ProfileTree
 	public void expandAll()
 	{
 		TreePath[] groups = this.profileModel.getGroupNodes();
-		for (int i = 0; i < groups.length; i++)
+		for (TreePath group : groups)
 		{
-			if (groups[i] != null) expandPath(groups[i]);
+			if (group != null)
+			{
+				expandPath(group);
+			}
 		}
 	}
 
@@ -194,9 +199,12 @@ public class ProfileTree
 	public void collapseAll()
 	{
 		TreePath[] groups = this.profileModel.getGroupNodes();
-		for (int i = 0; i < groups.length; i++)
+		for (TreePath group : groups)
 		{
-			if (groups[i] != null) collapsePath(groups[i]);
+			if (group != null)
+			{
+				collapsePath(group);
+			}
 		}
 	}
 
@@ -210,13 +218,16 @@ public class ProfileTree
 		if (groupList == null) return;
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
 		if (groupNodes == null) return;
-		for (int i = 0; i < groupNodes.length; i++)
+		for (TreePath groupNode : groupNodes)
 		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) groupNode.getLastPathComponent();
 			String g = (String)node.getUserObject();
 			if (groupList.contains(g))
 			{
-				if (!isExpanded(groupNodes[i])) expandPath(groupNodes[i]);
+				if (!isExpanded(groupNode))
+				{
+					expandPath(groupNode);
+				}
 			}
 		}
 	}
@@ -228,11 +239,11 @@ public class ProfileTree
 	{
 		LinkedList<String> result = new LinkedList<String>();
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
-		for (int i = 0; i < groupNodes.length; i++)
+		for (TreePath groupNode : groupNodes)
 		{
-			if (isExpanded(groupNodes[i]))
+			if (isExpanded(groupNode))
 			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) groupNode.getLastPathComponent();
 				String g = (String)node.getUserObject();
 				result.add(g);
 			}
@@ -304,19 +315,25 @@ public class ProfileTree
 	}
 
 	/**
-	 * Finds and selects the connection profile with the given
-	 * name. If the profile is not found, the first profile
-	 * will be selected (and expanded)
+	 * Finds and selects the connection profile with the given name.
+	 *
+	 * If the profile is not found, the first profile
+	 * will be selected and its group expanded
 	 */
-	public void selectProfile(ProfileKey def)
+	public void selectProfile(ProfileKey key)
+	{
+		selectProfile(key, true);
+	}
+
+	public void selectProfile(ProfileKey key, boolean selectFirst)
 	{
 		if (profileModel == null) return;
-		TreePath path = this.profileModel.getPath(def);
-		if (path == null)
+		TreePath path = this.profileModel.getPath(key);
+		if (path == null && selectFirst)
 		{
 			path = this.profileModel.getFirstProfile();
 		}
-		selectPath(path);
+		selectPath(path); // selectPath can handle a null value
 	}
 
 	/**
@@ -326,9 +343,10 @@ public class ProfileTree
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return false;
-		for (int i = 0; i < selection.length; i++)
+
+		for (TreePath element : selection)
 		{
-			TreeNode n = (TreeNode)selection[i].getLastPathComponent();
+			TreeNode n = (TreeNode)element.getLastPathComponent();
 			if (n.getAllowsChildren()) return false;
 		}
 		return true;
@@ -342,9 +360,9 @@ public class ProfileTree
 		if (getSelectionCount() > 1) return false;
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return false;
-		for (int i = 0; i < selection.length; i++)
+		for (TreePath element : selection)
 		{
-			TreeNode n = (TreeNode)selection[i].getLastPathComponent();
+			TreeNode n = (TreeNode) element.getLastPathComponent();
 			if (!n.getAllowsChildren()) return false;
 		}
 		return true;
