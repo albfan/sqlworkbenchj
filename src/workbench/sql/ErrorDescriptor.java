@@ -24,6 +24,11 @@ package workbench.sql;
 import workbench.util.DdlObjectInfo;
 
 /**
+ * A class containing details about an Error based on the error message.
+ *
+ * Its main purpose is to hold the position of the error inside the failing SQL.
+ * The position can either be defined by an absolute offset ({@link #getErrorPosition()})
+ * or by line and column.
  *
  * @author Thomas Kellerer
  */
@@ -34,9 +39,25 @@ public class ErrorDescriptor
 	private int errorColumn = -1;
 	private DdlObjectInfo object;
 	private String errorMessage;
+	private boolean messageIncludesPosition;
 
 	public ErrorDescriptor()
 	{
+	}
+
+	/**
+	 * Indicates if the original error messages already includes the position of the error.
+	 *
+	 * This can be used when enhancing the error message to display it to the user
+	 */
+	public boolean getMessageIncludesPosition()
+	{
+		return messageIncludesPosition;
+	}
+
+	public void setMessageIncludesPosition(boolean flag)
+	{
+		this.messageIncludesPosition = flag;
 	}
 
 	/**

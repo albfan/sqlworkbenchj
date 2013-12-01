@@ -43,7 +43,7 @@ public interface ErrorPositionReader
 	 *              (may be used by the reader to retrieve additional information)
 	 * @param sql   the SQL statement that caused the error
 	 * @param ex    the error exception
-	 * @return the position of the error inside the SQL or -1 if this could not be determined
+	 * @return an ErrorDescriptor describing the error position inside the SQL or null if this could not be determined
 	 */
 	ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex);
 
@@ -53,7 +53,7 @@ public interface ErrorPositionReader
 	 * This is DBMS dependent. A concrete implementation could add the error position to the message
 	 * or add an indicator where exactly the error occurred.
 	 *
-	 * @return true if the exception contains the error position.
+	 * @return an enhanced error message that can be displayed to the user.
 	 */
 	String enhanceErrorMessage(String sql, String errorMessage, ErrorDescriptor errorPosition);
 

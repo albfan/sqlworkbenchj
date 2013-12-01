@@ -962,4 +962,15 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.editor.errorjump", true);
 	}
+
+	public static boolean enableProfileQuickFilter()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter", true);
+	}
+
+	public static void setEnableProfileQuickFilter(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.profiles.quickfilter", flag);
+	}
+
 }

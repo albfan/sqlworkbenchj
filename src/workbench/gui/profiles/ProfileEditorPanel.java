@@ -138,21 +138,24 @@ public class ProfileEditorPanel
 
 		p.add(toolbar, BorderLayout.PAGE_START);
 
-		JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
-		filterPanel.setBorder(new DividerBorder(DividerBorder.TOP));
-		filterValue = new JTextField();
-		WbLabel lbl = new WbLabel();
-		lbl.setTextByKey("LblFilter");
-		lbl.setLabelFor(filterValue);
-		lbl.setBorder(new EmptyBorder(0, 5, 0, 5));
-		filterPanel.add(lbl, BorderLayout.LINE_START);
-		filterPanel.add(filterValue, BorderLayout.CENTER);
-		p.add(filterPanel, BorderLayout.PAGE_END);
+		if (GuiSettings.enableProfileQuickFilter())
+		{
+			JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
+			filterPanel.setBorder(new DividerBorder(DividerBorder.TOP));
+			filterValue = new JTextField();
+			WbLabel lbl = new WbLabel();
+			lbl.setTextByKey("LblFilter");
+			lbl.setLabelFor(filterValue);
+			lbl.setBorder(new EmptyBorder(0, 5, 0, 5));
+			filterPanel.add(lbl, BorderLayout.LINE_START);
+			filterPanel.add(filterValue, BorderLayout.CENTER);
+			p.add(filterPanel, BorderLayout.PAGE_END);
 
-		filterValue.setToolTipText(lbl.getToolTipText());
-		filterValue.addActionListener(this);
-		filterValue.addFocusListener(this);
-		filterValue.addKeyListener(this);
+			filterValue.setToolTipText(lbl.getToolTipText());
+			filterValue.addActionListener(this);
+			filterValue.addFocusListener(this);
+			filterValue.addKeyListener(this);
+		}
 
 		this.listPanel.add(p, BorderLayout.NORTH);
 

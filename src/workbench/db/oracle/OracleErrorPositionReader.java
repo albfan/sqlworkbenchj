@@ -26,7 +26,7 @@ import java.util.Set;
 
 import workbench.log.LogMgr;
 
-import workbench.db.ErrorPositionReader;
+import workbench.db.RegexErrorPositionReader;
 import workbench.db.WbConnection;
 
 import workbench.sql.ErrorDescriptor;
@@ -40,9 +40,15 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class OracleErrorPositionReader
-	implements ErrorPositionReader
+	extends RegexErrorPositionReader
 {
 	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH");
+
+	public OracleErrorPositionReader()
+	{
+		super("(?i)\\s(line|zeile)\\s[0-9]+", "(?i)\\s(column|spalte)\\s[0-9]+");
+	}
+
 
 	/**
 	 * Retrieve the error offset for a SQL statement.
@@ -52,18 +58,34 @@ public class OracleErrorPositionReader
 	 *
 	 * See: http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_sql.htm#i997676
 	 *
+	 * For anonymous PL/SQL blocks Oracle already returns a proper error message including line and column
+	 * in this case, this information is extraced using regular expresions
+	 *
 	 * @param con  the connection to use
 	 * @param sql  the SQL statement which produced the error (without the ; at the end)
 	 * @return -1 if no error occurred
 	 *         else the starting position in the error if any
+	 *
+	 * @see RegexErrorPositionReader#getErrorPosition(workbench.db.WbConnection, java.lang.String, java.lang.Exception)
 	 */
 	@Override
 	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
 
-		// We can only get the information for the defined SQL statements
-		if (!verbs.contains(verb)) return null;
+		// We can only use dbms_sql for the defined types of SQL statements
+		// in all other cases (e.g. an anonymous PL/SQL block) we try to get the information from the exception
+		// Other PL/SQL errors can only happen when using a CREATE ... statements
+		// which is handled in DdlCommand using  the OracleErrorInformationReader
+		if (!verbs.contains(verb))
+		{
+			ErrorDescriptor result = super.getErrorPosition(con, sql, ex);
+			if (result != null)
+			{
+				result.setMessageIncludesPosition(true);
+			}
+			return result;
+		}
 
 		String getErrorSql =
 			"/* SQLWorkbench */ \n" +
@@ -118,16 +140,20 @@ public class OracleErrorPositionReader
 		if (errorInfo == null) return originalMessage;
 		if (!errorInfo.hasError()) return originalMessage;
 
-		SqlUtil.calculateErrorLine(sql, errorInfo);
-		if (errorInfo.getErrorColumn() > -1 && errorInfo.getErrorLine() > -1)
+		// messageIncludesPosition is set by RegexErrorPositionReader
+		if (!errorInfo.getMessageIncludesPosition())
 		{
-			if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n";
-			originalMessage = "Error at line " + (errorInfo.getErrorLine() + 1) + ":\n" + originalMessage.trim();
-		}
-		else
-		{
-			int offset = errorInfo.getErrorPosition();
-			originalMessage = originalMessage.trim() + " (position: " + offset + ")";
+			SqlUtil.calculateErrorLine(sql, errorInfo);
+			if (errorInfo.getErrorColumn() > -1 && errorInfo.getErrorLine() > -1)
+			{
+				if (StringUtil.isNonEmpty(originalMessage)) originalMessage += "\n";
+				originalMessage = "Error at line " + (errorInfo.getErrorLine() + 1) + ":\n" + originalMessage.trim();
+			}
+			else
+			{
+				int offset = errorInfo.getErrorPosition();
+				originalMessage = originalMessage.trim() + " (position: " + offset + ")";
+			}
 		}
 
 		String indicator = SqlUtil.getErrorIndicator(sql, errorInfo);

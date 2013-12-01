@@ -62,11 +62,26 @@ public class RegexErrorPositionReader
 		LogMgr.logDebug("RegexErrorPositionReader.<init>", "Using regex for line#: " + lineRegex + ", regex for column#: " + columnRegex);
 	}
 
+	/**
+	 * Defines if the line and column numbers returned in the error message are one based (first line is 1)
+	 * or zero based (first line is 0)
+	 *
+	 * @param flag    true: the first line (or column) is 1
+	 *                false: the first line (or column) is 0
+	 */
 	public void setNumbersAreOneBased(boolean flag)
 	{
 		this.oneBasedNumbers = flag;
 	}
 
+	/**
+	 * Retrieve an ErrorDescriptor from the given SQL and exception
+	 *
+	 * @param con   then connection on which the exception happened (may be used to retrieve more error information)
+	 * @param sql   the failing SQL statement
+	 * @param ex    the error that happens
+	 * @return an ErrorDescriptor, null indicates the error could not be obtained
+	 */
 	@Override
 	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
