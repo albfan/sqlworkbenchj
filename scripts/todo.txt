@@ -1,6 +1,5 @@
 Features:
 ---------
-- Jump to error line for (CREATE PROCEDURE and similar statements)
 - WbVarDef
   - use all rows of a result (e.g. concatenated using \n)
 - Profiles
@@ -26,7 +25,6 @@ Features:
 - SQL source for partitioned tables in SQL Server and MySQL
 - Access to result data through expressions: where id = ${results[1].columns("foo")}
 - "Copy as Select"
-- Macros in console mode
 - Compare ResultSets
 - Support ${guid} calls
   (or more generic: Support ${...} syntax for calling function during data editing )
