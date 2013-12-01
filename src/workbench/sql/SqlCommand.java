@@ -128,7 +128,12 @@ public class SqlCommand
 			verb = SqlUtil.getSqlVerb(result.getSourceCommand());
 		}
 
-		msg = ResourceMgr.getDynamicString("MsgStmtSuccess", verb);
+		String dbid = null;
+		if (currentConnection != null)
+		{
+			dbid = currentConnection.getDbId();
+		}
+		msg = ResourceMgr.getDynamicString("MsgStmtSuccess", verb, dbid);
 
 		if (msg != null) return msg;
 
