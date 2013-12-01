@@ -3,7 +3,7 @@
 
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-11-19">
+  <release build="-1" date="2013-12-01">
     <entry dev-build="5" type="enh">The list of profiles in the connection dialog can now be filtered</entry>
     <entry dev-build="5" type="enh">For Oracle and Postgres the displayed error now inlcude the actual error position and the part of the statement that corresponds to that position. If "highlight error" is enabled and the actual error line could be determined, only that line will now be highlighted</entry>
     <entry dev-build="5" type="enh">Macros are now also supported in console mode</entry>
