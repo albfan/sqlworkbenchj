@@ -242,7 +242,10 @@ public class WbCommandAnalyzer
 	@Override
 	protected void buildResult()
 	{
-		// nothing to do, the element list was already filled in checkContext();
+		if (this.context == CONTEXT_TABLE_LIST)
+		{
+			super.buildResult();
+		}
 	}
 
 	private WbFile getCurrentDir(String parameter)
