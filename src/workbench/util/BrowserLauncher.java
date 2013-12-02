@@ -32,7 +32,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- * A Wrapper around Desktop.browse()
+ * Some utility functions for the Desktop class
  *
  * @author Thomas Kellerer
  */
@@ -40,7 +40,7 @@ public class BrowserLauncher
 {
 	public static void openEmail(final String email)
 	{
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MAIL))
 		{
 			WbThread t = new WbThread("OpenBrowser")
 			{
@@ -49,7 +49,9 @@ public class BrowserLauncher
 				{
 					try
 					{
-						URI uri = new URI("mailto:" + email + "?subject=" + urlEncode("SQL Workbench/J (Build " + ResourceMgr.getBuildNumber()+ ") - feedback"));
+						String subject = urlEncode("SQL Workbench/J (Build " + ResourceMgr.getBuildNumber()+ ") - feedback");
+						String body = urlEncode(ResourceMgr.getFormattedString("TxtFeedbackMail", LogMgr.getLogfile().getFullPath()));
+						URI uri = new URI("mailto:" + email + "?subject=" + subject + "&body=" + body);
 						Desktop.getDesktop().mail(uri);
 					}
 					catch (Exception e)
