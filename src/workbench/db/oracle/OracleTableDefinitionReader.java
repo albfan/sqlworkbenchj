@@ -92,7 +92,7 @@ public class OracleTableDefinitionReader
 			&& Settings.getInstance().getBoolProperty("workbench.db.oracle.fixescapebug", true)
 			&& Settings.getInstance().getProperty("workbench.db.oracle.searchstringescape", null) == null)
 		{
-			LogMgr.logWarning("OracleMetadata.<init>", "Old JDBC driver detected. Turning off wildcard handling for objects retrieval to work around driver bug");
+			LogMgr.logWarning("OracleMetadata.<init>", "Old Oracle JDBC driver detected. Turning off wildcard handling for objects retrieval to work around driver bug");
 			System.setProperty("workbench.db.oracle.metadata.retrieval.wildcards", "false");
 			System.setProperty("workbench.db.oracle.escape.searchstrings", "false");
 		}

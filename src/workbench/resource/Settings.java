@@ -2600,7 +2600,7 @@ public class Settings
 	{
 		return getIntProperty("workbench.gui.log.error.sql.maxlength", 150);
 	}
-	
+
 	public ErrorReportLevel getStatementErrorReportLevel()
 	{
 		try

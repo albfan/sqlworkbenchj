@@ -40,6 +40,7 @@ public class StatementHookFactory
 	{
 		WbConnection conn = runner.getConnection();
 		if (conn == null) return DEFAULT_HOOK;
+		if (conn.getMetadata() == null) return DEFAULT_HOOK;
 
 		if (conn.getMetadata().isOracle())
 		{

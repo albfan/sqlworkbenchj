@@ -22,6 +22,9 @@
           </Border>
         </Property>
         <Property name="dividerLocation" type="int" value="110"/>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[400, 400]"/>
+        </Property>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbSplitPane();"/>
@@ -60,6 +63,9 @@
               <SubComponents>
                 <Component class="javax.swing.JTree" name="profileTree">
                   <Properties>
+                    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[150, 400]"/>
+                    </Property>
                     <Property name="name" type="java.lang.String" value="profileTree" noResource="true"/>
                   </Properties>
                   <Events>

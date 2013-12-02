@@ -1159,6 +1159,20 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static void setMinimumSize(JComponent component, int lines, int columns)
+	{
+		Font font = component.getFont();
+		if (font != null)
+		{
+			FontMetrics fm = component.getFontMetrics(font);
+			int width = fm.stringWidth("M");
+			int height = fm.getHeight();
+			Dimension d = new Dimension(width * columns, height * lines);
+			component.setPreferredSize(d);
+			component.setPreferredSize(d);
+		}
+	}
+
 	public static void setMinimumSize(JComponent component, int numChars)
 	{
 		Font font = component.getFont();

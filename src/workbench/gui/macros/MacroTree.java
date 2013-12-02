@@ -22,6 +22,7 @@
  */
 package workbench.gui.macros;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -123,6 +124,7 @@ public class MacroTree
 		MacroTreeCellRenderer renderer = new MacroTreeCellRenderer();
 		setCellRenderer(renderer);
 		setAutoscrolls(true);
+		this.setMinimumSize(new Dimension(200, 400));
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		WbSwingUtilities.adjustTreeRowHeight(this);
 	}

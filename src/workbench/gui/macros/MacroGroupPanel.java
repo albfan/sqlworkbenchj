@@ -22,17 +22,22 @@
  */
 package workbench.gui.macros;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.macros.MacroGroup;
 
 /**
@@ -64,7 +69,7 @@ public class MacroGroupPanel
 		policy.setDefaultComponent(jTextField1);
 		setFocusTraversalPolicy(policy);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -72,13 +77,15 @@ public class MacroGroupPanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-		GridBagConstraints gridBagConstraints;
+  private void initComponents()
+  {
+    GridBagConstraints gridBagConstraints;
 
     jLabel1 = new JLabel();
     jTextField1 = new StringPropertyEditor();
     includeInMenu = new BooleanPropertyEditor();
 
+    setMinimumSize(new Dimension(120, 90));
     setLayout(new GridBagLayout());
 
     jLabel1.setText(ResourceMgr.getString("LblMacroGrpName")); // NOI18N

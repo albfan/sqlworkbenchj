@@ -23,26 +23,29 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import javax.swing.JList;
+import java.awt.Dimension;
 
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.db.ConnectionMgr;
-import workbench.db.DbDriver;
-import workbench.gui.actions.DeleteListEntryAction;
-import workbench.gui.actions.NewListEntryAction;
-import workbench.gui.components.DividerBorder;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Validator;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.DbDriver;
+
+import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.NewListEntryAction;
+import workbench.gui.components.DividerBorder;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbTraversalPolicy;
 
 /**
  * @author Thomas Kellerer
@@ -107,6 +110,7 @@ public class DriverlistEditorPanel
 		add(toolbar, BorderLayout.NORTH);
 		add(scroll, BorderLayout.WEST);
 		add(driverEditor, BorderLayout.CENTER);
+		this.setMinimumSize(new Dimension(200, 400));
 	}
 
 	private void driverListValueChanged(ListSelectionEvent evt)

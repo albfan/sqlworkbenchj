@@ -23,7 +23,6 @@
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -72,7 +71,6 @@ public class MacroManagerDialog
 	extends JDialog
 	implements ActionListener, TreeSelectionListener, MouseListener, WindowListener
 {
-	private JPanel dummyPanel;
 	private JPanel buttonPanel;
 	private JList macroList;
 	private JButton okButton;
@@ -117,7 +115,7 @@ public class MacroManagerDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(700,600);
+			this.pack();
 		}
 		WbSwingUtilities.center(this, parent);
 		boolean replace = Settings.getInstance().getBoolProperty("workbench.gui.macros.replaceOnRun", false);
@@ -149,7 +147,6 @@ public class MacroManagerDialog
 
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 		cancelButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosCancel"));
-		dummyPanel = new JPanel();
 
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
 		setModal(true);
@@ -189,10 +186,6 @@ public class MacroManagerDialog
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-		dummyPanel.setMaximumSize(new Dimension(2, 2));
-		dummyPanel.setMinimumSize(new Dimension(1, 1));
-		dummyPanel.setPreferredSize(new Dimension(2, 2));
-		getContentPane().add(dummyPanel, BorderLayout.NORTH);
 		WbSwingUtilities.makeEqualSize(runButton, okButton, cancelButton);
 	}
 

@@ -209,7 +209,7 @@ public class DbMetadata
 			extenders.add(typeReader);
 			objectListEnhancer = typeReader;
 		}
-		else if (productLower.indexOf("oracle") > -1)
+		else if (productLower.indexOf("oracle") > -1 && productLower.indexOf("lite ordbms") == -1)
 		{
 			isOracle = true;
 			dataTypeResolver = new OracleDataTypeResolver(aConnection);
@@ -235,12 +235,15 @@ public class DbMetadata
 		else if (productLower.indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
-			// Jaybird 2.0 reports the Firebird version in the
+			// Jaybird 2.x reports the Firebird version in the
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver.
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
-			productName = "Firebird";
+			dbId = "firebird";
+
+			// because the dbId is already initialized, we need to log it here
+			LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
 			extenders.add(new FirebirdDomainReader());
 		}
 		else if (productLower.indexOf("sql server") > -1)

@@ -77,7 +77,7 @@ public class DriverEditorDialog
 
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(680,500);
+			this.pack();
 		}
 
 		// when invoked from the connection dialog, it seems that under

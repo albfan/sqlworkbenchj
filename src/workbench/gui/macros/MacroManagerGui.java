@@ -23,22 +23,27 @@
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
-
 import java.util.List;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
-
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+
+import workbench.interfaces.FileActions;
+import workbench.resource.Settings;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -47,10 +52,10 @@ import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.profiles.NewGroupAction;
-import workbench.interfaces.FileActions;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
+
 import workbench.util.StringUtil;
 
 /**
@@ -105,11 +110,23 @@ public class MacroManagerGui
 		macroPanel = new MacroDefinitionPanel(this);
 		groupPanel = new MacroGroupPanel(this);
 
-		splitPane.setRightComponent(new JPanel());
+		JPanel dummy = new JPanel();
+		dummy.setMinimumSize(macroPanel.getMinimumSize());
+		dummy.setPreferredSize(macroPanel.getPreferredSize());
+		splitPane.setRightComponent(dummy);
 
 		add(splitPane, BorderLayout.CENTER);
 		macroTree.addTreeSelectionListener(this);
 		ToolTipManager.sharedInstance().registerComponent(macroTree);
+
+		Dimension panelMinSize = macroPanel.getMinimumSize();
+		Dimension treeMinSize = macroTree.getMinimumSize();
+		int height = Math.max(panelMinSize.height, treeMinSize.height);
+		int width = panelMinSize.width + treeMinSize.width;
+		Dimension minSize = new Dimension(width, height);
+		splitPane.setMinimumSize(minSize);
+		Dimension minSize2 = new Dimension(minSize.width + 15, minSize.height  + 15);
+		this.setMinimumSize(minSize2);
 	}
 
 	public void dispose()

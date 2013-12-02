@@ -98,6 +98,9 @@ public class MacroDefinitionPanel
 		c.insets = new Insets(10, 2, 2, 5);
 		add(macroEditor, c);
 
+		WbSwingUtilities.setMinimumSize(tfName, 40);
+		WbSwingUtilities.setMinimumSize(macroEditor, 25, 70);
+
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tfName);
 		policy.addComponent(visibleInMenu);
@@ -277,6 +280,7 @@ public class MacroDefinitionPanel
     assignShortcutButton = new JButton();
     clearShortcutButton = new JButton();
 
+    setMinimumSize(null);
     setLayout(new GridBagLayout());
 
     jLabel1.setText(ResourceMgr.getString("LblMacroName")); // NOI18N
@@ -393,17 +397,17 @@ public class MacroDefinitionPanel
 
   public void actionPerformed(ActionEvent evt)
   {
-    if (evt.getSource() == assignShortcutButton)
+    if (evt.getSource() == doExpansion)
+    {
+      MacroDefinitionPanel.this.doExpansionActionPerformed(evt);
+    }
+    else if (evt.getSource() == assignShortcutButton)
     {
       MacroDefinitionPanel.this.assignShortcutButtonActionPerformed(evt);
     }
     else if (evt.getSource() == clearShortcutButton)
     {
       MacroDefinitionPanel.this.clearShortcutButtonActionPerformed(evt);
-    }
-    else if (evt.getSource() == doExpansion)
-    {
-      MacroDefinitionPanel.this.doExpansionActionPerformed(evt);
     }
   }// </editor-fold>//GEN-END:initComponents
 
