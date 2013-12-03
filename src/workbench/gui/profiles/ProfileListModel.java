@@ -121,6 +121,7 @@ class ProfileListModel
 		filtered.clear();
 		if (StringUtil.isNonBlank(value))
 		{
+			value = value.toLowerCase();
 			Iterator<ConnectionProfile> itr = profiles.iterator();
 			while (itr.hasNext())
 			{
