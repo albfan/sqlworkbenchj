@@ -2539,6 +2539,13 @@ public class DbMetadata
 		}
 	}
 
+	/**
+	 * Checks if the given type is a regular table type or an extended table type.
+	 *
+	 * @param type the type to check
+	 * @return true if it's a table of some kind.
+	 * @see #isTableType(java.lang.String) 
+	 */
 	public boolean isExtendedTableType(String type)
 	{
 		if (isTableType(type)) return true;

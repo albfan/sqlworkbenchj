@@ -1420,7 +1420,9 @@ public class TableListPanel
 		if (meta == null || dbs == null) return false;
 
 		String type = selectedTable.getType();
-		if (meta.isTableType(type)) return true;
+
+		// isExtendedTableType() checks for regular tables and "extended tables"
+		if (meta.isExtendedTableType(type)) return true;
 
 		if (GuiSettings.showSynonymTargetInDbExplorer() && meta.supportsSynonyms() && dbs.isSynonymType(type))
 		{
@@ -1451,7 +1453,7 @@ public class TableListPanel
 			type = rt.getType();
 		}
 
-		boolean containsData = meta.objectTypeCanContainData(type);
+		boolean containsData = meta.objectTypeCanContainData(type) || meta.isExtendedTableType(type);
 		if (!containsData)
 		{
 			LogMgr.logDebug("TableListPanel.canContainData()", "Object " + selectedTable.getTableExpression() + ", type=[" + selectedTable.getType() + "] is not considered to contain selectable data");
@@ -1507,6 +1509,7 @@ public class TableListPanel
 					sql = seqSql.toString();
 				}
 			}
+			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
 				sql = builder.getTableSource(selectedTable, true, true);

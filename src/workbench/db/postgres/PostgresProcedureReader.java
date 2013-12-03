@@ -329,7 +329,8 @@ public class PostgresProcedureReader
 
 		String sql =
 			"SELECT p.prosrc, \n" +
-			"       l.lanname as lang_name, \n";
+			"       l.lanname as lang_name, \n" +
+			"       n.nspname as schema_name, \n";
 
 		if (JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
@@ -391,7 +392,7 @@ public class PostgresProcedureReader
 
 		boolean isAggregate = false;
 		String comment = null;
-
+		String schema = null;
 		try
 		{
 			if (useSavepoint)
@@ -407,11 +408,15 @@ public class PostgresProcedureReader
 			{
 				comment = rs.getString("remarks");
 				isAggregate = rs.getBoolean("proisagg");
+				schema = rs.getString("schema_name");
 			}
+
 
 			if (!isAggregate && hasRow)
 			{
 				source.append("CREATE OR REPLACE FUNCTION ");
+				source.append(schema);
+				source.append('.');
 				source.append(name.getName());
 
 				String src = rs.getString(1);
