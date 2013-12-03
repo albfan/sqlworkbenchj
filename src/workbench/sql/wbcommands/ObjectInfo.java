@@ -28,7 +28,21 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.*;
+import workbench.db.DbSearchPath;
+import workbench.db.DbSettings;
+import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
+import workbench.db.IndexReader;
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
+import workbench.db.TableColumnsDatastore;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
+import workbench.db.WbConnection;
 
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
@@ -186,15 +200,16 @@ public class ObjectInfo
 				// No table or something similar found, try to find a procedure with that name
 				dbObject.adjustCase(connection);
 				ProcedureReader reader = connection.getMetadata().getProcedureReader();
-				List<ProcedureDefinition> procs = reader.getProcedureList(dbObject.getCatalog(), dbObject.getSchema(), dbObject.getObjectName());
+				ProcedureDefinition def = reader.findProcedure(dbObject);
 
-				if (procs.size() == 1)
+				if (def != null)
 				{
-					ProcedureDefinition def = procs.get(0);
+					String type = StringUtil.capitalize(def.getObjectType());
+					String name = def.getFullyQualifiedName(connection);
 					CharSequence source = def.getSource(connection);
-					result.addMessage("--------[ BEGIN " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
+					result.addMessage("--------[ BEGIN " + type  + ": " + name + " ]--------");
 					result.addMessage(source);
-					result.addMessage("--------[ END " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + "   ]--------");
+					result.addMessage("--------[ END " + type  + ": " + name + "   ]--------");
 					result.setSuccess();
 					return result;
 				}
@@ -202,30 +217,6 @@ public class ObjectInfo
 			catch (Exception e)
 			{
 				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving procedures", e);
-			}
-
-			try
-			{
-				// No procedure found, try to find a trigger.
-				TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
-				TriggerDefinition trg = trgReader.findTrigger(dbObject.getCatalog(), dbObject.getSchema(), dbObject.getObjectName());
-				String source = null;
-				if (trg != null)
-				{
-					source = trgReader.getTriggerSource(trg, true);
-				}
-				if (StringUtil.isNonBlank(source))
-				{
-					result.addMessage("--------[ BEGIN Trigger: " + dbObject.getObjectName() + " ]--------");
-					result.addMessage(source);
-					result.addMessage("--------[ END Trigger: " + dbObject.getObjectName() + "   ]--------");
-					result.setSuccess();
-					return result;
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving triggers", e);
 			}
 		}
 
@@ -300,7 +291,7 @@ public class ObjectInfo
 			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
 			result.setSuccess();
 		}
-		
+
 		if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
 			try

@@ -38,6 +38,7 @@ import workbench.storage.DataStore;
 
 import workbench.sql.DelimiterDefinition;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -535,4 +536,50 @@ public class JdbcProcedureReader
 		return result;
 	}
 
+	@Override
+	public ProcedureDefinition findProcedure(DbObject toFind)
+		throws SQLException
+	{
+		if (toFind == null) return null;
+		String objSchema = toFind.getSchema();
+		String objCat = toFind.getCatalog();
+		if (StringUtil.isNonEmpty(objCat) || StringUtil.isNonBlank(objSchema))
+		{
+			if (StringUtil.isEmptyString(objCat))
+			{
+				objCat = connection.getCurrentCatalog();
+			}
+			if (StringUtil.isEmptyString(objSchema))
+			{
+				objSchema = connection.getCurrentSchema();
+			}
+			List<ProcedureDefinition> procs = getProcedureList(objCat, objSchema, toFind.getObjectName());
+			if (procs.size() == 1)
+			{
+				return procs.get(0);
+			}
+			return null;
+		}
+
+		if (StringUtil.isEmptyString(objCat))
+		{
+			objCat = connection.getCurrentCatalog();
+		}
+
+		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+		if (CollectionUtil.isEmpty(searchPath) && StringUtil.isEmptyString(objSchema))
+		{
+			searchPath = CollectionUtil.arrayList(connection.getCurrentSchema());
+		}
+
+		for (String schema : searchPath)
+		{
+			List<ProcedureDefinition> procs = getProcedureList(objCat, schema, toFind.getObjectName());
+			if (procs.size() == 1)
+			{
+				return procs.get(0);
+			}
+		}
+		return null;
+	}
 }
