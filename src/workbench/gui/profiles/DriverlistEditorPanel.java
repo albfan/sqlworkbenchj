@@ -225,7 +225,7 @@ public class DriverlistEditorPanel
 	public boolean isValid(String name)
 	{
 		if (name == null) return false;
-
+		name = name.trim();
 		int selected = driverList.getSelectedIndex();
 		int count = model.getValues().size();
 		for (int index = 0; index < count; index ++)
