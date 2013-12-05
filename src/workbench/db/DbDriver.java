@@ -143,11 +143,6 @@ public class DbDriver
 		return b.toString();
 	}
 
-	public String getLibraryString()
-	{
-		return createLibraryString(StringUtil.getPathSeparator());
-	}
-
 	private boolean doAddLibraryPath()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbdriver.fixlibrarypath", false);
@@ -205,18 +200,6 @@ public class DbDriver
 		}
 	}
 
-	private String createLibraryString(String separator)
-	{
-		if (this.libraryList == null) return null;
-		StringBuilder result = new StringBuilder(this.libraryList.size() * 30);
-		for (int i=0; i < libraryList.size(); i++)
-		{
-			if (i > 0) result.append(separator);
-			result.append(libraryList.get(i));
-		}
-		return result.toString();
-	}
-
 	public void setLibraryList(List<String> files)
 	{
 		if (CollectionUtil.isEmpty(files))
@@ -228,16 +211,11 @@ public class DbDriver
 			this.libraryList = new ArrayList<String>(files);
 		}
 	}
-	
+
 	public List<String> getLibraryList()
 	{
 		if (CollectionUtil.isEmpty(this.libraryList)) return Collections.emptyList();
 		return Collections.unmodifiableList(libraryList);
-	}
-
-	public String getLibrary()
-	{
-		return createLibraryString("|");
 	}
 
 	public static List<String> splitLibraryList(String libList)
