@@ -78,6 +78,7 @@ public class DdlCommand
 
 	private String verb;
 	private Savepoint ddlSavepoint;
+	private final Set<String> typesToRemember = CollectionUtil.caseInsensitiveSet("procedure", "function", "trigger", "package", "package body", "type");
 
 	private DdlCommand(String sqlVerb)
 	{
@@ -101,7 +102,13 @@ public class DdlCommand
 		}
 
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
-		currentConnection.setLastDDLObject(info);
+		if (info != null && typesToRemember.contains(info.getObjectType()))
+		{
+			// this is only here to mimic SQL*Plus' behaviour for a "SHOW ERROR" without a parameter
+			// remember the last "object" in order to be able to show the errors
+			// but only for "PL/SQL" objects, the last error is not overwritten by creating a table or a view
+			currentConnection.setLastDDLObject(info);
+		}
 
 		try
 		{
