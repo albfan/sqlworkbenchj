@@ -59,7 +59,7 @@ public class MySQLViewReader
 		ResultSet rs = null;
 		try
 		{
-			String viewName = view.getTable().getTableExpression(connection);
+			String viewName = view.getTable().getFullyQualifiedName(connection);
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery("show create view " + viewName);
 			if (rs.next())
