@@ -48,14 +48,13 @@ import workbench.util.StringUtil;
 class ProfileListModel
 	extends DefaultTreeModel
 {
-	private	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
-	private List<ConnectionProfile> profiles;
-	private List<ConnectionProfile> filtered = new ArrayList<ConnectionProfile>();
+	private	final DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
+	private final List<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>();;
+	private final List<ConnectionProfile> filtered = new ArrayList<ConnectionProfile>();
 
 	ProfileListModel()
 	{
 		super(null, true);
-		this.profiles = new ArrayList<ConnectionProfile>();
 
 		List<ConnectionProfile> current = ConnectionMgr.getInstance().getProfiles();
 		for (ConnectionProfile prof : current)
@@ -106,7 +105,6 @@ class ProfileListModel
 				return n;
 			}
 		}
-
 		return null;
 	}
 
@@ -136,9 +134,20 @@ class ProfileListModel
 		buildTree();
 	}
 
-	public boolean profilesChanged()
+	/**
+	 *	Returns true if any of the profile definitions has changed.
+	 *	(Or if a profile has been deleted or added)
+	 */
+	public boolean profilesAreModified()
 	{
-		for (ConnectionProfile profile : profiles)
+		for (ConnectionProfile profile : this.profiles)
+		{
+			if (profile.isChanged())
+			{
+				return true;
+			}
+		}
+		for (ConnectionProfile profile : this.filtered)
 		{
 			if (profile.isChanged())
 			{
@@ -151,6 +160,13 @@ class ProfileListModel
 	public boolean groupsChanged()
 	{
 		for (ConnectionProfile profile : profiles)
+		{
+			if (profile.isGroupChanged())
+			{
+				return true;
+			}
+		}
+		for (ConnectionProfile profile : filtered)
 		{
 			if (profile.isGroupChanged())
 			{
@@ -284,24 +300,6 @@ class ProfileListModel
 	}
 
 
-	/**
-	 *	Returns true if any of the profile definitions has changed.
-	 *	(Or if a profile has been deleted or added)
-	 */
-	public boolean profilesAreModified()
-	{
-		if (this.profiles == null) return false;
-		for (ConnectionProfile profile : this.profiles)
-		{
-			if (profile.isChanged())
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 	public int getSize()
 	{
 		return this.profiles.size();
@@ -344,9 +342,23 @@ class ProfileListModel
 		}
 	}
 
+	private List<ConnectionProfile> getAllProfiles()
+	{
+		List<ConnectionProfile> current = new ArrayList<ConnectionProfile>(profiles.size() + filtered.size());
+		for (ConnectionProfile prof : profiles)
+		{
+			current.add(prof);
+		}
+		for (ConnectionProfile prof : filtered)
+		{
+			current.add(prof);
+		}
+		return current;
+	}
+
 	public void applyProfiles()
 	{
-		ConnectionMgr.getInstance().applyProfiles(this.profiles);
+		ConnectionMgr.getInstance().applyProfiles(getAllProfiles());
 	}
 
 	private void buildTree()

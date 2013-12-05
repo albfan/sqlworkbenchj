@@ -339,7 +339,7 @@ public class ProfileEditorPanel
 	public boolean profilesChanged()
 	{
 		ProfileListModel list = (ProfileListModel)profileTree.getModel();
-		return list.profilesChanged();
+		return list.profilesAreModified();
 	}
 
 	public boolean groupsChanged()
