@@ -24,8 +24,9 @@ package workbench.sql.wbcommands;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
+
+import workbench.log.LogMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.*;
@@ -48,7 +49,7 @@ public class WbSysOpen
 
 	@Override
 	public StatementRunnerResult execute(String sql)
-		throws SQLException, Exception
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		String doc = getCommandLine(sql);
@@ -64,10 +65,11 @@ public class WbSysOpen
 			Desktop.getDesktop().open(new File(doc));
 			result.setSuccess();
 		}
-		catch (IOException io)
+		catch (Exception ex)
 		{
+			LogMgr.logError("WbSysOpen.execute()", "Could not open file " + doc, ex);
 			result.setFailure();
-			result.addMessage(io.getLocalizedMessage());
+			result.addMessage(ex.getLocalizedMessage());
 		}
 		return result;
 	}

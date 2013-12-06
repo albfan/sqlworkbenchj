@@ -132,6 +132,7 @@ public class OracleIndexReader
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
 
+		String cacheHint = OracleUtils.getCacheHint();
 		StringBuilder sql = new StringBuilder(200);
 		sql.append(
 			"SELECT null as table_cat, \n" +
@@ -345,7 +346,7 @@ public class OracleIndexReader
 		{
 			option += "\n    REVERSE";
 		}
-		
+
 		String level = index.getSourceOptions().getConfigSettings().get(IDX_PROP_COMPRESS);
 		if (level != null)
 		{

@@ -48,6 +48,7 @@ public class OracleUtils
 	public static final int BYTE_SEMANTICS = 1;
 	public static final int CHAR_SEMANTICS = 2;
 	public static final String PROP_KEY_TBLSPACE = "oracle_default_tablespace";
+	private static final String CACHE_HINT = "/*+ RESULT_CACHE */";
 
 	public static final Set<String> STANDARD_TYPES = CollectionUtil.caseInsensitiveSet
 		("INTERVALDS", "INTERVALYM", "TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP WITH TIME ZONE",
@@ -184,8 +185,22 @@ public class OracleUtils
 
 		// current user's table --> dependent on the system setting
 		if (!retrieveTablespaceInfo()) return false;
-		
+
 		if (StringUtil.isEmptyString(defaultTablespace) && StringUtil.isNonEmpty(tablespace)) return true;
 		return (!tablespace.equals(defaultTablespace));
+	}
+
+	public static String getCacheHint()
+	{
+		if (useQueryCache())
+		{
+			return CACHE_HINT;
+		}
+		return StringUtil.EMPTY_STRING;
+	}
+
+	public static boolean useQueryCache()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.result_cache", false);
 	}
 }

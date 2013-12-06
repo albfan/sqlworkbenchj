@@ -146,10 +146,19 @@ public class ResourceMgr
 	{
 		List<Image> icons = new ArrayList<Image>(2);
 		ImageIcon image16 = getPng(baseName + "16");
-		icons.add(image16.getImage());
+		if (image16 != null)
+		{
+			icons.add(image16.getImage());
+		}
 		ImageIcon image32 = getPng(baseName + "32");
-		icons.add(image32.getImage());
-		window.setIconImages(icons);
+		if (image32 != null)
+		{
+			icons.add(image32.getImage());
+		}
+		if (icons.size() > 0)
+		{
+			window.setIconImages(icons);
+		}
 	}
 
 	public static String getDefaultTabLabel()

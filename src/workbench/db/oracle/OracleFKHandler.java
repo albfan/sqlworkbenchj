@@ -54,8 +54,19 @@ public class OracleFKHandler
 	// the driver does not take unique constraints into account, and this statement does
 	// otherwise foreign keys referencing unique constraints (rather than primary keys) would
 	// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
-	final String baseSql =
-			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
+	final String baseSql;
+
+	private PreparedStatement retrievalStatement;
+	private final String currentUser;
+
+	public OracleFKHandler(WbConnection conn)
+	{
+		super(conn);
+		currentUser = conn.getCurrentSchema();
+		String cacheHint = OracleUtils.getCacheHint();
+
+		baseSql =
+			"SELECT " + cacheHint + " /* SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
 			"       p.table_name AS pktable_name, \n" +
 			"       pc.column_name AS pkcolumn_name, \n" +
@@ -93,13 +104,6 @@ public class OracleFKHandler
 			"AND fc.table_name = f.table_name  \n" +
 			"AND fc.position = pc.position \n";
 
-	private PreparedStatement retrievalStatement;
-	private final String currentUser;
-
-	public OracleFKHandler(WbConnection conn)
-	{
-		super(conn);
-		currentUser = conn.getCurrentSchema();
 	}
 
 	@Override
