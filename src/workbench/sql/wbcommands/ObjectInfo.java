@@ -254,7 +254,7 @@ public class ObjectInfo
 			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
 			displayName = synonymTarget.getTableExpression(connection);
 		}
-		else if (dbs.isViewType(toDescribe.getType()))
+		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 			connection.getObjectCache().addTable(def);
@@ -264,7 +264,7 @@ public class ObjectInfo
 		else if (isExtended)
 		{
 			source = connection.getMetadata().getObjectSource(toDescribe);
-			displayName = toDescribe.getObjectName();
+			displayName = toDescribe.getObjectName() + " (" + toDescribe.getObjectType() + ")";
 		}
 		else if (toDescribe != null)
 		{
@@ -276,6 +276,7 @@ public class ObjectInfo
 			ColumnRemover remover = new ColumnRemover(details);
 			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
 			String fname = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
+			fname += " (" + toDescribe.getObjectType() + ")";
 			cols.setResultName(fname);
 			cols.setGeneratingSql("DESCRIBE " + fname);
 			result.setSourceCommand("DESCRIBE " + fname);
@@ -292,7 +293,7 @@ public class ObjectInfo
 			result.setSuccess();
 		}
 
-		if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
+		if (toDescribe != null && connection.getMetadata().isTableType(toDescribe.getType()) && includeDependencies)
 		{
 			try
 			{
