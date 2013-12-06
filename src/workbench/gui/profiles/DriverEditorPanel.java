@@ -27,8 +27,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.Driver;
 import java.util.ArrayList;
@@ -55,6 +53,7 @@ import workbench.resource.Settings;
 
 import workbench.db.DbDriver;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ClassFinderGUI;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
@@ -70,9 +69,8 @@ import workbench.util.WbFile;
  */
 public class DriverEditorPanel
 	extends JPanel
-	implements PropertyChangeListener, DocumentListener, ListSelectionListener, ActionListener
+	implements DocumentListener, ListSelectionListener, ActionListener
 {
-	private boolean ignoreChange;
 	private DbDriver currentDriver;
 	private Validator validator;
 	private GridBagConstraints defaultErrorConstraints;
@@ -108,6 +106,7 @@ public class DriverEditorPanel
 		btnRemove.addActionListener(this);
 		btnAdd.addActionListener(this);
 		lastDir = Settings.getInstance().getProperty(lastDirProperty, null);
+		WbSwingUtilities.setMinimumSize(statusLabel, 1, 20);
 		checkButtons();
 	}
 
@@ -185,10 +184,11 @@ public class DriverEditorPanel
 			for (File f : selectedFiles)
 			{
 				WbFile wbf = new WbFile(f);
-				model.addElement(wbf.getFullPath());
+				model.addElement(new LibraryElement(wbf));
 			}
 			lastDir = selectedFiles[0].getParent();
 			Settings.getInstance().setProperty(lastDirProperty, lastDir);
+			selectClass();
 		}
 	}
 
@@ -205,18 +205,12 @@ public class DriverEditorPanel
 		btnRemove.setEnabled(selectedIndex > -1);
 		btnUp.setEnabled(selectedIndex > 0);
 		btnDown.setEnabled(selectedIndex > -1 && selectedIndex < count - 1);
+		btnAdd.setEnabled(!tfClassName.getText().trim().equals("sun.jdbc.odbc.JdbcOdbcDriver"));
 	}
 
 	public void setValidator(Validator nameValidator)
 	{
 		this.validator = nameValidator;
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (ignoreChange) return;
-		selectClass();
 	}
 
 	private List<String> getLibraries()
@@ -225,7 +219,8 @@ public class DriverEditorPanel
 		List<String> result = new ArrayList<String>(size);
 		for (int i=0; i < size; i++)
 		{
-			result.add((String)libList.getModel().getElementAt(i));
+			LibraryElement lib = (LibraryElement)libList.getModel().getElementAt(i);
+			result.add(lib.getPath());
 		}
 		return result;
 	}
@@ -289,28 +284,20 @@ public class DriverEditorPanel
 
 	public void setDriver(DbDriver driver)
 	{
-		try
+		this.currentDriver = driver;
+		this.tfName.setText(driver.getName());
+		this.tfClassName.setText(driver.getDriverClass());
+		List<String> libraryList = driver.getLibraryList();
+		DefaultListModel model = new DefaultListModel();
+		for (String lib : libraryList)
 		{
-			ignoreChange = true;
-			this.currentDriver = driver;
-			this.tfName.setText(driver.getName());
-			this.tfClassName.setText(driver.getDriverClass());
-			List<String> libraryList = driver.getLibraryList();
-			DefaultListModel model = new DefaultListModel();
-			for (String lib : libraryList)
-			{
-				model.addElement(lib);
-			}
-			libList.setModel(model);
-			libList.getSelectionModel().clearSelection();
-			checkButtons();
-			this.tfSampleUrl.setText(driver.getSampleUrl());
-			this.detectDriverButton.setEnabled(libList.getModel().getSize() > 0);
+			model.addElement(new LibraryElement(lib));
 		}
-		finally
-		{
-			ignoreChange = false;
-		}
+		libList.setModel(model);
+		libList.getSelectionModel().clearSelection();
+		checkButtons();
+		this.tfSampleUrl.setText(driver.getSampleUrl());
+		this.detectDriverButton.setEnabled(libList.getModel().getSize() > 0);
 	}
 
 	public void updateDriver()
@@ -355,7 +342,6 @@ public class DriverEditorPanel
     tfSampleUrl = new javax.swing.JTextField();
     statusLabel = new javax.swing.JLabel();
     detectDriverButton = new FlatButton();
-    jPanel1 = new javax.swing.JPanel();
     jPanel2 = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
     libList = new javax.swing.JList();
@@ -364,9 +350,6 @@ public class DriverEditorPanel
     btnUp = new javax.swing.JButton();
     btnDown = new javax.swing.JButton();
 
-    setFont(null);
-    setMinimumSize(new java.awt.Dimension(250, 150));
-    setPreferredSize(new java.awt.Dimension(300, 250));
     setLayout(new java.awt.GridBagLayout());
 
     lblName.setText(ResourceMgr.getString("LblDriverName")); // NOI18N
@@ -456,8 +439,9 @@ public class DriverEditorPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(14, 10, 0, 7);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(14, 6, 0, 7);
     add(statusLabel, gridBagConstraints);
 
     detectDriverButton.setIcon(ResourceMgr.getImage("magnifier.png"));
@@ -478,11 +462,6 @@ public class DriverEditorPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 4);
     add(detectDriverButton, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
@@ -565,7 +544,6 @@ public class DriverEditorPanel
   private javax.swing.JButton btnRemove;
   private javax.swing.JButton btnUp;
   private javax.swing.JButton detectDriverButton;
-  private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JLabel lblClassName;

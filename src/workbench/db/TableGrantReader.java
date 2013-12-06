@@ -116,7 +116,7 @@ public class TableGrantReader
 			Entry<String, List<String>> entry = itr.next();
 			String grantee = entry.getKey();
 			// Ignore grants to ourself
-			if (user.equalsIgnoreCase(grantee)) continue;
+			if (user != null && user.equalsIgnoreCase(grantee)) continue;
 
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
