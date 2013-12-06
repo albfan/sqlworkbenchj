@@ -136,7 +136,9 @@ public class Settings
 	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
 	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.datatype";
 
+	public static final String PROPERTY_CONSOLIDATE_LOG_MESSAGES = "workbench.gui.log.consolidate";
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
+	public static final String PROPERTY_ERROR_STATEMENT_LOG_LEVEL = "workbench.gui.log.errorstatement";
 	public static final String PROPERTY_DBEXP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
 	public static final String PROPERTY_DBEXP_ASSUME_WILDCARDS = "workbench.dbexplorer.assumewildcards";
 
@@ -1570,12 +1572,12 @@ public class Settings
 	// <editor-fold defaultstate="collapsed" desc="Editor">
 	public boolean getConsolidateLogMsg()
 	{
-		return getBoolProperty("workbench.gui.log.consolidate", false);
+		return getBoolProperty(PROPERTY_CONSOLIDATE_LOG_MESSAGES, false);
 	}
 
 	public void setConsolidateLogMsg(boolean aFlag)
 	{
-		this.setProperty("workbench.gui.log.consolidate", aFlag);
+		this.setProperty(PROPERTY_CONSOLIDATE_LOG_MESSAGES, aFlag);
 	}
 
 	public boolean getUseLastIfNoCurrentStmt()
@@ -2607,7 +2609,7 @@ public class Settings
 	{
 		try
 		{
-			String lvl = getProperty("workbench.gui.log.errorstatement", ErrorReportLevel.limited.name());
+			String lvl = getProperty(PROPERTY_ERROR_STATEMENT_LOG_LEVEL, ErrorReportLevel.limited.name());
 			return ErrorReportLevel.valueOf(lvl);
 		}
 		catch (Exception ex)

@@ -101,7 +101,7 @@ public class StatementRunner
 		errorLevel = Settings.getInstance().getStatementErrorReportLevel();
 		cmdMapper = new CommandMapper();
 		logAllStatements = Settings.getInstance().getLogAllStatements();
-		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate", Settings.PROPERTY_LOG_ALL_SQL);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES, Settings.PROPERTY_LOG_ALL_SQL, Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
 	}
 
 	public void setHistoryProvider(SqlHistoryProvider provider)
@@ -156,13 +156,17 @@ public class StatementRunner
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))
+		if (Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES.equals(evt.getPropertyName()))
 		{
 			this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		}
 		else if (Settings.PROPERTY_LOG_ALL_SQL.equals(evt.getPropertyName()))
 		{
 			logAllStatements = Settings.getInstance().getLogAllStatements();
+		}
+		else if (Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL.equals(evt.getPropertyName()))
+		{
+			errorLevel = Settings.getInstance().getStatementErrorReportLevel();
 		}
 	}
 
