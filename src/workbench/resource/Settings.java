@@ -142,6 +142,8 @@ public class Settings
 
 	public static final String PROPERTY_VAR_PREFIX = "workbench.sql.parameter.prefix";
 	public static final String PROPERTY_VAR_SUFFIX = "workbench.sql.parameter.suffix";
+	public static final String PROPERTY_DECIMAL_DIGITS = "workbench.gui.display.maxfractiondigits";
+	public static final String PROPERTY_DECIMAL_SEP = "workbench.gui.display.decimal.separator";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -2562,12 +2564,12 @@ public class Settings
 
 	public int getMaxFractionDigits()
 	{
-		return getIntProperty("workbench.gui.display.maxfractiondigits", 2);
+		return getIntProperty(PROPERTY_DECIMAL_DIGITS, 2);
 	}
 
 	public void setMaxFractionDigits(int aValue)
 	{
-		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
+		this.props.setProperty(PROPERTY_DECIMAL_DIGITS, Integer.toString(aValue));
 	}
 
 	public WbNumberFormatter createDefaultDecimalFormatter(int maxDigits)
@@ -2585,12 +2587,12 @@ public class Settings
 
 	public String getDecimalSymbol()
 	{
-		return getProperty("workbench.gui.display.decimal.separator", ".");
+		return getProperty(PROPERTY_DECIMAL_SEP, ".");
 	}
 
 	public void setDecimalSymbol(String aSep)
 	{
-		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
+		this.props.setProperty(PROPERTY_DECIMAL_SEP, aSep);
 	}
 
 	// </editor-fold>

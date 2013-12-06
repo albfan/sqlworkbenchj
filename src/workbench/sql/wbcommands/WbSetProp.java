@@ -62,9 +62,15 @@ public class WbSetProp
 		cmdLine.addArgument(PARAM_PROP);
 		cmdLine.addArgument(PARAM_VALUE);
 		configMap.put("nulldisplay", "workbench.console.nullstring");
+		configMap.put("nullstring", "workbench.console.nullstring");
 		configMap.put("varsuffix", Settings.PROPERTY_VAR_SUFFIX);
 		configMap.put("varprefix", Settings.PROPERTY_VAR_PREFIX);
 		configMap.put("debugmeta", "workbench.dbmetadata.debugmetasql");
+		configMap.put("date_format", Settings.PROPERTY_DATE_FORMAT);
+		configMap.put("ts_format", Settings.PROPERTY_DATETIME_FORMAT);
+		configMap.put("time_format", Settings.PROPERTY_TIME_FORMAT);
+		configMap.put("digits", Settings.PROPERTY_DECIMAL_DIGITS);
+		configMap.put("dec_separator", Settings.PROPERTY_DECIMAL_SEP);
 	}
 
 	@Override
