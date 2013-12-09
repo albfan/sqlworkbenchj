@@ -26,19 +26,26 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.wbcommands.ObjectInfo;
+
+import workbench.util.SqlUtil;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.storage.DataStore;
+
 import static org.junit.Assert.*;
-import workbench.db.ColumnIdentifier;
-import workbench.sql.StatementRunnerResult;
-import workbench.sql.wbcommands.ObjectInfo;
-import workbench.util.SqlUtil;
 /**
  *
  * @author Thomas Kellerer
@@ -159,14 +166,14 @@ public class PostgresSearchPathTest
 		assertNotNull(result);
 		assertTrue(result.hasDataStores());
 		assertEquals(1, result.getDataStores().size());
-		assertEquals("path_1.t1", result.getDataStores().get(0).getResultName());
+		assertEquals("path_1.t1 (TABLE)", result.getDataStores().get(0).getResultName());
 
 		result = info.getObjectInfo(con, "t2", false, false);
 
 		assertNotNull(result);
 		assertTrue(result.hasDataStores());
 		assertEquals(1, result.getDataStores().size());
-		assertEquals("path_2.t2", result.getDataStores().get(0).getResultName());
+		assertEquals("path_2.t2 (TABLE)", result.getDataStores().get(0).getResultName());
 	}
 
 }

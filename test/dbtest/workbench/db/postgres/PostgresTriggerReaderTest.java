@@ -23,16 +23,21 @@
 package workbench.db.postgres;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+
 import workbench.sql.DelimiterDefinition;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -108,6 +113,7 @@ public class PostgresTriggerReaderTest
 
 		sql = reader.getDependentSource(null, TEST_SCHEMA, trg.getObjectName(), trg.getRelatedTable()).toString();
 		assertNotNull(sql);
-		assertTrue(sql.contains("CREATE OR REPLACE FUNCTION my_trigger_func()"));
+		System.out.println("***\n" + sql);
+		assertTrue(sql.contains("CREATE OR REPLACE FUNCTION trgreadertest.my_trigger_func()"));
 	}
 }

@@ -1,7 +1,7 @@
-#Sun, 01 Dec 2013 16:23:33 +0100
+#Tue, 10 Dec 2013 00:09:58 +0100
 
 release.build.number=115
 release.build.date=2013-09-01
 
-dev.build.date=2013-12-01
-dev.build.number=115.5
+dev.build.date=2013-12-10
+dev.build.number=115.6
