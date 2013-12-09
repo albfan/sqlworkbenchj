@@ -248,7 +248,14 @@ WHERE table_type='V'
    <string>MySQL</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string>
+     <string>
+SELECT concat(view_definition,
+              case
+                when check_option = 'NONE' then ''
+                else concat('\nWITH ', check_option, ' CHECK OPTION')
+              end)
+FROM INFORMATION_SCHEMA.VIEWS
+</string>
     </void>
     <void property="objectNameField">
      <string>TABLE_NAME</string>
