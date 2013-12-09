@@ -73,7 +73,6 @@ public class OracleTableDefinitionReader
 	extends JdbcTableDefinitionReader
 {
 	private boolean useOwnSql = true;
-	private final String cacheHint;
 	private final OracleDataTypeResolver oraTypes;
 	private final boolean is12c;
 
@@ -82,8 +81,6 @@ public class OracleTableDefinitionReader
 		super(conn);
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
 		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
-
-		cacheHint = OracleUtils.getCacheHint();
 
 		is12c = JdbcUtils.hasMinimumServerVersion(dbConnection, "12.1");
 		useOwnSql = (JdbcUtils.hasMinimumServerVersion(conn, "8.0") && (checkCharSemantics || fixNVARCHAR));
@@ -301,7 +298,7 @@ public class OracleTableDefinitionReader
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
 		final String sql1 =
-			"SELECT " + cacheHint + " /* SQLWorkbench */ t.column_name AS column_name,  \n" +
+			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n" +
 			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     decode(t.data_type, 'VARCHAR', t.char_length, \n" +

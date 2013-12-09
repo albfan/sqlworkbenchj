@@ -63,10 +63,8 @@ public class OracleFKHandler
 	{
 		super(conn);
 		currentUser = conn.getCurrentSchema();
-		String cacheHint = OracleUtils.getCacheHint();
-
 		baseSql =
-			"SELECT " + cacheHint + " /* SQLWorkbench */ NULL AS pktable_cat, \n" +
+			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
 			"       p.table_name AS pktable_name, \n" +
 			"       pc.column_name AS pkcolumn_name, \n" +

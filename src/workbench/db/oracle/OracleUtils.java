@@ -190,17 +190,4 @@ public class OracleUtils
 		return (!tablespace.equals(defaultTablespace));
 	}
 
-	public static String getCacheHint()
-	{
-		if (useQueryCache())
-		{
-			return CACHE_HINT;
-		}
-		return StringUtil.EMPTY_STRING;
-	}
-
-	public static boolean useQueryCache()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.result_cache", false);
-	}
 }

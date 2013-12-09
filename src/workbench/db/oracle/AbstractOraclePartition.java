@@ -59,7 +59,6 @@ public abstract class AbstractOraclePartition
 	protected String defaultUserTablespace;
 	protected String currentUser;
 	protected boolean retrievePartitionsForLocalIndex;
-	protected final String cacheHint;
 
 	public AbstractOraclePartition(WbConnection conn)
 		throws SQLException
@@ -74,7 +73,6 @@ public abstract class AbstractOraclePartition
 		useCompression = retrieveCompression && is11r1;
 		supportsIntervals = is11r1;
 		currentUser = conn.getMetadata().getCurrentSchema();
-		cacheHint = OracleUtils.getCacheHint();
 	}
 
 	public void retrieve(DbObject object, WbConnection conn)
