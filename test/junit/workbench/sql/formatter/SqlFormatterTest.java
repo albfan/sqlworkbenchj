@@ -1279,8 +1279,8 @@ public class SqlFormatterTest
 							"SELECT id,\n" +
 							"       name\n" +
 							"FROM foo\n" +
-							"WHERE id BETWEEN 1 AND 10000 WITH CHECK OPTION";
-//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+							"WHERE id BETWEEN 1 AND 10000\nWITH CHECK OPTION";
+		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
 		// Test multiple CTEs in a single statement

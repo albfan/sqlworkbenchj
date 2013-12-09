@@ -49,22 +49,22 @@ public class SqlFormatter
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
-		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY");
+		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY", "WITH");
 
 	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.unmodifiableSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
 	public static final Set<String> HAVING_TERMINAL = CollectionUtil.unmodifiableSet(
-		"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
+		"ORDER BY", "GROUP BY", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
 	// keywords terminating a WHERE clause
-	public static final Set<String> WHERE_TERMINAL = CollectionUtil.unmodifiableSet(HAVING_TERMINAL, "HAVING");
+	public static final Set<String> WHERE_TERMINAL = CollectionUtil.unmodifiableSet(HAVING_TERMINAL, "HAVING", "WITH");
 
 	// keywords terminating a HAVING clause
 
 	// keywords terminating the FROM part
-	public static final Set<String> FROM_TERMINAL = CollectionUtil.unmodifiableSet(WHERE_TERMINAL,"WHERE", "START WITH", "CONNECT BY");
+	public static final Set<String> FROM_TERMINAL = CollectionUtil.unmodifiableSet(WHERE_TERMINAL, "WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating a a JOIN clause
 	public static final Set<String> JOIN_TERMINAL = CollectionUtil.unmodifiableSet("WHERE", "ORDER BY", "GROUP BY", "UNION", "UNION ALL");
