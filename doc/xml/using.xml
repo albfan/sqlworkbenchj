@@ -688,7 +688,7 @@ Done.</programlisting>
 			updated. Only columns for the chosen table will be included in the <literal>UPDATE</literal> or
 			<literal>INSERT</literal> statements.
 			If no primary key can be found for the update table, you will be prompted to select the
-			columns that should be used to uniquel identify a row in the update table.
+			columns that should be used to uniquely identify a row in the update table.
 		</para>
 
 		<para>

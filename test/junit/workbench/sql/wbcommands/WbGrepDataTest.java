@@ -23,16 +23,22 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.DataStore;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
+
+import workbench.sql.StatementRunnerResult;
+
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -62,6 +68,7 @@ public class WbGrepDataTest
 			"insert into address values (1, 1, 'Arthur''s Address');\n" +
 			"insert into address values (2, 1, 'His old address');\n" +
 			"insert into address values (3, 2, 'Ford''s Address');\n" +
+			"insert into address values (4, 2, null);\n" +
 			"commit;\n" +
 			"create view v_person as select nr * 10, firstname, lastname from person;" +
 			"commit;");
@@ -97,6 +104,16 @@ public class WbGrepDataTest
 		assertEquals(2, data.size());
 		assertEquals(1, data.get(0).getRowCount());
 		assertEquals(1, data.get(1).getRowCount());
+
+		sql = "WbGrepData -tables=person,address -compareType=isnull";
+		result = instance.execute(sql);
+		assertTrue(result.isSuccess());
+		data = result.getDataStores();
+		assertNotNull(data);
+		assertEquals(1, data.size());
+		assertEquals(1, data.get(0).getRowCount());
+		DataStore ds = data.get(0);
+		assertEquals(4, ds.getValueAsInt(0, 0, -1));
 
 		sql = "WbGrepData -tables=%person% -searchValue=arthur -types=table,view";
 		result = instance.execute(sql);

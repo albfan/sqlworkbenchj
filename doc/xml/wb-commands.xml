@@ -412,10 +412,13 @@
 
         <tbody valign="top">
           <row>
-            <entry>-search</entry>
+            <entry>-searchValue</entry>
             <entry>
               <para>
                 The value to be searched for
+              </para>
+              <para>
+                This parameter is ignored when using <literal>isNull</literal> for the compare type.
               </para>
             </entry>
           </row>
@@ -437,7 +440,7 @@
             <entry>
 						  <para>
                 Valid values are <literal>contains</literal>, <literal>equals</literal>,
-                <literal>matches</literal>, <literal>startsWith</literal>
+                <literal>matches</literal>, <literal>startsWith</literal>, <literal>isNull</literal>
               </para>
               <para>
                 When specifying <literal>matches</literal>, the search value
