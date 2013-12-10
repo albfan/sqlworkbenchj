@@ -50,11 +50,11 @@ public class MultiLineToolTipUI
 	private Dimension prefSize = new Dimension();
 	private String[] displayLines;
 	private View view;
+	private final Map renderingHints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
 
 	@Override
 	public void paint(Graphics g, JComponent c)
 	{
-		Map renderingHints = (Map) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
 		Graphics2D g2d = (Graphics2D) g;
 		if (renderingHints != null)
 		{

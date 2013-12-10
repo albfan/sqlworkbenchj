@@ -373,13 +373,9 @@ public class ToolTipRenderer
 		String clippedText = StringUtil.EMPTY_STRING;
 		if (displayValue != null)
 		{
-			clippedText =
-				SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,(Icon)null
-						,this.valign
-						,this.halign
-						,SwingConstants.TOP
-						,SwingConstants.RIGHT
-						,paintViewR, paintIconR, paintTextR, 0);
+			clippedText = SwingUtilities.layoutCompoundLabel(this, fm,
+				this.displayValue, (Icon)null, this.valign, this.halign,
+				SwingConstants.TOP, SwingConstants.RIGHT, paintViewR, paintIconR, paintTextR, 0);
 		}
 
 		int textX = paintTextR.x;
