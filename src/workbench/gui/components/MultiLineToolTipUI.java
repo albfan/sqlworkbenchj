@@ -104,9 +104,9 @@ public class MultiLineToolTipUI
 		{
 			displayLines = StringUtil.PATTERN_CRLF.split(tipText);
 			int maxWidth = -1;
-			for (int i=0; i < displayLines.length; i++)
+			for (String displayLine : displayLines)
 			{
-				int width = SwingUtilities.computeStringWidth(metrics,displayLines[i]);
+				int width = SwingUtilities.computeStringWidth(metrics, displayLine);
 				maxWidth = (maxWidth < width) ? width : maxWidth;
 			}
 			int height = metrics.getHeight() * displayLines.length;
