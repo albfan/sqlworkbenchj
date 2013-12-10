@@ -127,6 +127,7 @@ public abstract class RowDataConverter
 
 
 	protected boolean fixedHeader;
+	protected boolean returnNulls;
 
 	public RowDataConverter()
 	{
@@ -136,6 +137,13 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
+	/**
+	 * Returns the display string for <tt>null</tt> values.
+	 *
+	 * If nothing was specified this is an empty string.
+	 *
+	 * @return the display String, never null
+	 */
 	public final String getNullDisplay()
 	{
 		return nullString == null ? "" : nullString;
@@ -148,6 +156,11 @@ public abstract class RowDataConverter
 	public void setNullString(String value)
 	{
 		this.nullString = value;
+	}
+
+	public void setReturnNulls(boolean flag)
+	{
+		returnNulls = flag;
 	}
 
 	public void setDataModifier(ExportDataModifier modifier)
@@ -771,17 +784,27 @@ public abstract class RowDataConverter
 
 	/**
 	 * Return the column's value as a formatted String.
+	 *
 	 * Especially for Date objects this is different then getValueAsString()
 	 * as a default formatter can be defined.
+	 *
+	 * null values will be returned as the String defined by {@link #setNullString(java.lang.String)}  which is an
+	 * empty string by default.
+	 *
+	 * If null values should be returned as null, use {@link #setReturnNulls(boolean)}
+	 *
 	 * @param row The requested row
 	 * @param col The column in aRow for which the value should be formatted
 	 * @return The formatted value as a String
+	 *
 	 * @see #setDefaultDateFormatter(SimpleDateFormat)
 	 * @see #setDefaultTimestampFormatter(SimpleDateFormat)
 	 * @see #setDefaultNumberFormatter(DecimalFormat)
 	 * @see #setDefaultDateFormat(String)
 	 * @see #setDefaultTimestampFormat(String)
 	 * @see #setDefaultNumberFormat(String)
+	 * @see #getNullDisplay()
+	 * @see #setReturnNulls(boolean)
 	 */
 	public String getValueAsFormattedString(RowData row, int col)
 		throws IndexOutOfBoundsException
@@ -789,7 +812,7 @@ public abstract class RowDataConverter
 		Object value = row.getValue(col);
 		if (value == null)
 		{
-			return getNullDisplay();
+			return returnNulls ? null : getNullDisplay();
 		}
 		else
 		{

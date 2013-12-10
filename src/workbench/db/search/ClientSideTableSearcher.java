@@ -246,16 +246,21 @@ public class ClientSideTableSearcher
 	@Override
 	public void setCriteria(String search, boolean ignoreCase)
 	{
-		if (StringUtil.isBlank(search)) return;
-
-		searchString = search.trim();
-		if (searchString.charAt(0) == '%')
+		if (StringUtil.isNonBlank(search))
 		{
-			searchString = searchString.substring(1);
+			searchString = search.trim();
+			if (searchString.charAt(0) == '%')
+			{
+				searchString = searchString.substring(1);
+			}
+			if (searchString.endsWith("%"))
+			{
+				searchString = searchString.substring(0, searchString.length() - 2);
+			}
 		}
-		if (searchString.endsWith("%"))
+		else
 		{
-			searchString = searchString.substring(0, searchString.length() - 2);
+			searchString = null;
 		}
 		searcher = new RowDataSearcher(searchString, comparator, ignoreCase);
 	}

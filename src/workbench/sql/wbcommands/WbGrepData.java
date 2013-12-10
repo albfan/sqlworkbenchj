@@ -23,14 +23,13 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import workbench.WbManager;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.search.ClientSideTableSearcher;
-import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.ExecutionController;
 import workbench.interfaces.TableSearchConsumer;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
@@ -39,6 +38,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ContainsComparator;
+import workbench.storage.filter.IsNullComparator;
 import workbench.storage.filter.RegExComparator;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
@@ -84,7 +84,7 @@ public class WbGrepData
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
-		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches"));
+		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches", "isNull"));
 	}
 
 	@Override
@@ -109,13 +109,7 @@ public class WbGrepData
 		}
 
 		String searchValue = cmdLine.getValue(PARAM_EXPRESSION);
-		if (StringUtil.isBlank(searchValue))
-		{
-			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchValueReq"));
-			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchWrongParms"));
-			searchResult.setFailure();
-			return searchResult;
-		}
+		boolean needSearchValue = true;
 
 		String tableNames = cmdLine.getValue(PARAM_TABLES);
 		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
@@ -142,6 +136,7 @@ public class WbGrepData
 		{
 			comparatorType = "contains";
 		}
+
 		ColumnComparator comp = null;
 		if ("equals".equalsIgnoreCase(comparatorType))
 		{
@@ -155,36 +150,44 @@ public class WbGrepData
 		{
 			comp = new RegExComparator();
 		}
+		else if ("isnull".equalsIgnoreCase(comparatorType))
+		{
+			comp = new IsNullComparator();
+			needSearchValue = false;
+		}
 		else
 		{
 			comp = new ContainsComparator();
 		}
+
+		if (needSearchValue && StringUtil.isBlank(searchValue))
+		{
+			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchValueReq"));
+			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchWrongParms"));
+			searchResult.setFailure();
+			return searchResult;
+		}
+
 		searcher.setComparator(comp);
 		searcher.setConsumer(this);
 		searcher.setCriteria(searchValue, ignoreCase);
 
-		if (rowMonitor != null)
-		{
-			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
-		}
-
 		if (Settings.getInstance().getBoolProperty("workbench.searchdata.warn.buffer", true) &&
 				JdbcUtils.driverMightBufferResults(currentConnection))
 		{
-			if (WbManager.getInstance().isBatchMode())
+			ExecutionController controller = this.runner.getExecutionController();
+			boolean goOn = controller.confirmExecution(ResourceMgr.getString("MsgTableSearchBuffered"), null, null);
+			if (!goOn)
 			{
-				LogMgr.logWarning("WbGrepData.execute()", "The current driver seems to cache complete results! This may lead to memory problems");
+				searchResult.setFailure();
+				searchResult.addMessageByKey("MsgStatementCancelled");
+				return searchResult;
 			}
-			else
-			{
-				boolean goOn = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgTableSearchBuffered"));
-				if (!goOn)
-				{
-					searchResult.setFailure();
-					searchResult.addMessageByKey("MsgStatementCancelled");
-					return searchResult;
-				}
-			}
+		}
+
+		if (rowMonitor != null)
+		{
+			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
 		searchResult.setSuccess();
@@ -266,9 +269,10 @@ public class WbGrepData
 	{
 		if (rowMonitor != null)
 		{
+			// clear the status display
 			rowMonitor.jobFinished();
 		}
-		searchedTables = CollectionUtil.sizedArrayList(50);
+		searchedTables = new ArrayList<String>(50);
 		foundTables = 0;
 	}
 

@@ -1662,15 +1662,24 @@ public class MainWindow
 
 	private void checkReloadWkspAction()
 	{
-		boolean isProfileWorkspace = false;
-		WbFile profileWksp = new WbFile(getRealWorkspaceFilename(currentProfile.getWorkspaceFile()));
+		String profileWkspName = currentProfile != null ? currentProfile.getWorkspaceFile() : null;
 
-		if (this.currentWorkspaceFile != null)
+		if (StringUtil.isNonEmpty(profileWkspName))
 		{
-			WbFile current = new WbFile(currentWorkspaceFile);
-			isProfileWorkspace = current.equals(profileWksp);
+			boolean isProfileWorkspace = false;
+			WbFile profileWksp = new WbFile(getRealWorkspaceFilename(profileWkspName));
+			if (this.currentWorkspaceFile != null)
+			{
+				WbFile current = new WbFile(currentWorkspaceFile);
+				isProfileWorkspace = current.equals(profileWksp);
+			}
+			this.reloadWorkspace.setEnabled(!isProfileWorkspace);
 		}
-		this.reloadWorkspace.setEnabled(!isProfileWorkspace);
+		else
+		{
+			this.reloadWorkspace.setEnabled(false);
+		}
+
 	}
 
 	public void loadCurrentProfileWorkspace()

@@ -85,7 +85,6 @@ public class TextRowDataConverter
 		converter = RowDataReader.getConverterInstance(conn);
 	}
 
-
 	/**
 	 * Define a column name to include the rowindex in the output
 	 * If the name is null, the rowindex column will not be written.
@@ -218,9 +217,12 @@ public class TextRowDataConverter
 			boolean isNull = (value == null);
 			if (isNull)
 			{
-				value = getNullDisplay();
-				// Never quote null values
-				addQuote = nullString == null ? false : quoteAlways;
+				if (!returnNulls)
+				{
+					value = getNullDisplay();
+					// Never quote null values
+					addQuote = nullString == null ? false : quoteAlways;
+				}
 			}
 			else if (SqlUtil.isCharacterType(colType))
 			{

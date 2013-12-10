@@ -33,6 +33,7 @@ import workbench.storage.DataStore;
 
 import workbench.sql.VariablePool;
 import workbench.sql.preparedstatement.StatementParameters;
+import workbench.util.HtmlUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -115,7 +116,7 @@ public class ConsolePrompter
 		String yes = yesText == null ? ResourceMgr.getString("MsgConfirmYes") : yesText;
 		String no = noText == null ? ResourceMgr.getString("MsgConfirmNo") : noText;
 		String yesNo = yes + "/" + no;
-		String msg = prompt + " (" + yesNo + ")";
+		String msg = HtmlUtil.cleanHTML(prompt) + " (" + yesNo + ")";
 		String choice = readLine(msg + " ");
 
 		if (StringUtil.isBlank(choice))
