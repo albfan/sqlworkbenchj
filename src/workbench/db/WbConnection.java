@@ -57,6 +57,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
+import workbench.util.WbThread;
 
 /**
  *
@@ -795,6 +796,22 @@ public class WbConnection
 	{
 		sessionProps.clear();
 		shutdown(true);
+	}
+
+	public void shutdownInBackround()
+	{
+		WbThread disconnect = new WbThread("DisconnectThread for " + getId())
+		{
+			@Override
+			public void run()
+			{
+				long start = System.currentTimeMillis();
+				shutdown(false);
+				long duration = System.currentTimeMillis() - start;
+				LogMgr.logInfo("WbConnection.shutdownInBackground()", "Connection closed after " + duration + "ms");
+			}
+		};
+		disconnect.start();
 	}
 
 	public void shutdown(boolean withRollback)

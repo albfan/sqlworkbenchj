@@ -59,7 +59,6 @@ import workbench.util.FileVersioner;
 import workbench.util.PropertiesCopier;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
-import workbench.util.WbThread;
 
 /**
  * A connection factory for the application.
@@ -557,32 +556,17 @@ public class ConnectionMgr
 	 */
 	public void abortAll(List<WbConnection> toAbort)
 	{
-		LogMgr.logWarning("ConnectionMgr.abortAll()", "Trying to abort all connections");
+		LogMgr.logWarning("ConnectionMgr.abortAll()", "Aborting all connections");
 
 		for (WbConnection con : toAbort)
 		{
 			activeConnections.remove(con.getId());
 		}
 
-		if (LogMgr.isDebugEnabled())
+		for (WbConnection con : toAbort)
 		{
-			dumpConnections();
+			con.shutdownInBackround();
 		}
-
-		for (final WbConnection con : toAbort)
-		{
-			WbThread disc = new WbThread("Disconnect for " + con.getId())
-			{
-				@Override
-				public void run()
-				{
-					con.shutdown(false);
-				}
-			};
-			long wait = Settings.getInstance().getIntProperty("workbench.db.connectionmgr.abortwait", 10);
-			WbThread.runWithTimeout(disc, wait * 1000);
-		}
-		LogMgr.logWarning("ConnectionMgr.abortAll()", "Aborting all connections finished");
 	}
 
 	public void dumpConnections()
