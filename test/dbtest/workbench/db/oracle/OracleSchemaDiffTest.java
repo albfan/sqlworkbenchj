@@ -284,10 +284,10 @@ public class OracleSchemaDiffTest
 			String xml = FileUtil.readCharacters(in);
 			assertNotNull(xml);
 
-			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object)");
+			String value = TestUtil.getXPathValue(xml, "count(/schema-diff/add-type[@name='FOO_TYPE'])");
 			assertEquals("1", value);
 
-			value = TestUtil.getXPathValue(xml, "count(/schema-diff/add-object)");
+			value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-type[@name='PERSON_TYPE'])");
 			assertEquals("1", value);
 
 			assertTrue("Could not delete output", outfile.delete());

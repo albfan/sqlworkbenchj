@@ -176,14 +176,14 @@ public class PostgresSchemaDiffTest
 		Reader in = new FileReader(outfile);
 		String xml = FileUtil.readCharacters(in);
 		assertNotNull(xml);
-//		System.out.println(xml);
+		System.out.println(xml);
 		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object)");
-		assertEquals("2", value);
+		assertEquals("1", value);
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object/reference-object/object-def[@name='mood'])");
 		assertEquals("1", value);
 
-		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-object/reference-object/object-def[@name='address_type'])");
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-type/modify-column[@name='city'])");
 		assertEquals("1", value);
 
 		assertTrue("Could not delete output", outfile.delete());

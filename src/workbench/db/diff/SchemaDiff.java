@@ -979,7 +979,6 @@ public class SchemaDiff
 
 		StringBuilder indent = new StringBuilder("  ");
 		StringBuilder tblIndent = new StringBuilder("    ");
-		TagWriter tw = new TagWriter();
 		out.write("<?xml version=\"1.0\" encoding=\"");
 		out.write(this.encoding);
 		out.write("\"?>\n");
@@ -1030,9 +1029,7 @@ public class SchemaDiff
 					{
 						ReportTable target = createReportTableInstance(entry.target, this.targetDb);
 						TableDiff d = new TableDiff(source, target, this);
-						//d.setCompareComments(this.diffComments);
 						d.setIndent(indent);
-						d.setTagWriter(tw);
 						d.setExactConstraintMatch(compareConstraintsByName);
 						StringBuilder s = d.getMigrateTargetXml();
 						if (s.length() > 0)
@@ -1054,7 +1051,6 @@ public class SchemaDiff
 					}
 					ViewDiff d = new ViewDiff(source, target);
 					d.setIndent(indent);
-					d.setTagWriter(tw);
 					viewDiffs.add(d);
 				}
 			}
@@ -1080,7 +1076,7 @@ public class SchemaDiff
 
 		if (this.diffSequences)
 		{
-			this.appendSequenceDiff(out, indent, tw);
+			this.appendSequenceDiff(out, indent);
 			out.write("\n");
 		}
 
@@ -1088,8 +1084,8 @@ public class SchemaDiff
 
 		if (this.diffProcs)
 		{
-			this.appendProcDiff(out, indent, tw);
-			this.appendPackageDiff(out, indent, tw);
+			this.appendProcDiff(out, indent);
+			this.appendPackageDiff(out, indent);
 			out.write("\n");
 		}
 
@@ -1108,7 +1104,7 @@ public class SchemaDiff
 		writeTag(out, null, "schema-diff", false);
 	}
 
-	private void appendSequenceDiff(Writer out, StringBuilder indent, TagWriter tw)
+	private void appendSequenceDiff(Writer out, StringBuilder indent)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1122,7 +1118,6 @@ public class SchemaDiff
 				ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target));
 				SequenceDiff diff = new SequenceDiff(rp, tp);
 				diff.setIndent(indent);
-				diff.setTagWriter(tw);
 				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{
@@ -1145,7 +1140,7 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
 	}
 
-	private void appendProcDiff(Writer out, StringBuilder indent, TagWriter tw)
+	private void appendProcDiff(Writer out, StringBuilder indent)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1159,7 +1154,6 @@ public class SchemaDiff
 				ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
 				ProcDiff diff = new ProcDiff(rp, tp);
 				diff.setIndent(indent);
-				diff.setTagWriter(tw);
 				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{
@@ -1185,7 +1179,7 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_PROC, false);
 	}
 
-	private void appendPackageDiff(Writer out, StringBuilder indent, TagWriter tw)
+	private void appendPackageDiff(Writer out, StringBuilder indent)
 		throws IOException
 	{
 		int count = this.objectsToCompare.size();
@@ -1205,7 +1199,6 @@ public class SchemaDiff
 				}
 				PackageDiff diff = new PackageDiff(entry.reference, entry.target);
 				diff.setIndent(indent);
-				diff.setTagWriter(tw);
 				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
 				{

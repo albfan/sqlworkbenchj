@@ -52,7 +52,7 @@ public class ColumnDiff
 	private ReportColumn referenceColumn;
 	private ReportColumn targetColumn;
 	private StringBuilder indent;
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private boolean compareFK = true;
 	private boolean compareComments = true;
 	private boolean compareJdbcTypes = false;
@@ -77,16 +77,6 @@ public class ColumnDiff
 	{
 		this.compareComments = flag;
 	}
-
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tw)
-	{
-		this.writer = tw;
-	}
-
 
 	/**
 	 *	Set an indent for generating the XML
@@ -198,8 +188,6 @@ public class ColumnDiff
 		{
 			commentDifferent = !StringUtil.equalString(scomm, tcomm);
 		}
-
-		if (writer == null) this.writer = new TagWriter();
 
 		if (typeDifferent ||
 			  nullableDifferent ||

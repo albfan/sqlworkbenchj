@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2013-12-10">
+    <entry dev-build="7" type="enh">For Postgres, Oracle and DB2 WbSchemaReport and WbSchemaDiff now write more details when dealing with TYPEs</entry>
     <entry dev-build="7" type="enh">WbGrepData now also supports -compareType=isNull to search for null values</entry>
     <entry dev-build="6" type="enh">Reworked the driver definition dialog to make defining drivers that need multiple jar files easier.</entry>
     <entry dev-build="5" type="enh">The list of profiles in the connection dialog can now be filtered</entry>
@@ -33,6 +34,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="7" type="fix">For Postgres check constraints were retrieved incorrectly if the same table existed in different schemas</entry>
     <entry dev-build="7" type="fix">When opening a connection that did not have a worskpace assigned the GUI would not initialize.</entry>
     <entry dev-build="6" type="fix">When connection profiles where filtered and modified, the filtered profiles would be lost when saving the changes</entry>
     <entry dev-build="5" type="fix">Oracle: columns defined as NOT NULL through a check constraint (rather than using NOT NULL) where not shown correctly in the table's source</entry>

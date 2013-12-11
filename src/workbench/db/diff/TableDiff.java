@@ -25,7 +25,6 @@ package workbench.db.diff;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import workbench.resource.Settings;
@@ -65,7 +64,7 @@ public class TableDiff
 	private ReportTable referenceTable;
 	private ReportTable targetTable;
 	private StringBuilder indent = StringUtil.emptyBuilder();
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private SchemaDiff diff;
 	private boolean checkConstraintNames;
 
@@ -98,10 +97,9 @@ public class TableDiff
 		StringBuilder result = new StringBuilder(500);
 		TableIdentifier ref = this.referenceTable.getTable();
 		TableIdentifier target = this.targetTable.getTable();
-		if (this.writer == null) this.writer = new TagWriter();
 		StringBuilder colDiff = new StringBuilder(500);
 		ArrayList<ReportColumn> colsToBeAdded = new ArrayList<ReportColumn>();
-		ReportColumn[] refCols = this.referenceTable.getColumns();
+		List<ReportColumn> refCols = this.referenceTable.getColumns();
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 
@@ -118,18 +116,16 @@ public class TableDiff
 				boolean oldFormat = Settings.getInstance().getBoolProperty("workbench.tablediff.columnfk", false);
 				d.setCompareForeignKeys(oldFormat && this.diff.getIncludeForeignKeys());
 				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
-				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
 				StringBuilder diffXml = d.getMigrateTargetXml();
 				if (diffXml.length() > 0)
 				{
 					colDiff.append(diffXml);
-					//colDiff.append('\n');
 				}
 			}
 		}
 		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<ReportColumn>();
-		ReportColumn[] tcols = this.targetTable.getColumns();
+		List<ReportColumn> tcols = this.targetTable.getColumns();
 
 		for (ReportColumn tcol : tcols)
 		{
@@ -207,6 +203,8 @@ public class TableDiff
 
 		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", SqlUtil.removeObjectQuotes(target.getTableName()));
 		result.append('\n');
+		targetTable.appendTableNameXml(result, myindent);
+		result.append('\n');
 		if (rename)
 		{
 			writer.appendOpenTag(result, myindent, TAG_RENAME_TABLE);
@@ -217,8 +215,8 @@ public class TableDiff
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}
 
-		appendAddColumns(result, colsToBeAdded);
-		appendRemoveColumns(result, colsToBeRemoved);
+		appendAddColumns(writer, result, colsToBeAdded, indent);
+		appendRemoveColumns(writer, result, colsToBeRemoved, indent);
 
 		String pkTagToUse = null;
 		String[] attr = new String[] { "name" };
@@ -548,13 +546,13 @@ public class TableDiff
 		return false;
 	}
 
-	private void appendAddColumns(StringBuilder result, List<ReportColumn> colsToAdd)
+	public static void appendAddColumns(TagWriter tw, StringBuilder result, List<ReportColumn> colsToAdd, StringBuilder colIndent)
 	{
 		if (colsToAdd.isEmpty()) return;
 
-		StringBuilder myindent = new StringBuilder(this.indent);
+		StringBuilder myindent = new StringBuilder(colIndent);
 		myindent.append("  ");
-		writer.appendOpenTag(result, myindent, TAG_ADD_COLUMN);
+		tw.appendOpenTag(result, myindent, TAG_ADD_COLUMN);
 		result.append('\n');
 		myindent.append("  ");
 		for (ReportColumn col : colsToAdd)
@@ -562,20 +560,18 @@ public class TableDiff
 			col.appendXml(result, myindent, false);
 		}
 		StringUtil.removeFromEnd(myindent, 2);
-		writer.appendCloseTag(result, myindent, TAG_ADD_COLUMN);
-		result.append('\n');
+		tw.appendCloseTag(result, myindent, TAG_ADD_COLUMN);
 	}
 
-	private void appendRemoveColumns(StringBuilder result, List colsToRemove)
+	public static void appendRemoveColumns(TagWriter tw, StringBuilder result, List<ReportColumn> colsToRemove, StringBuilder colIndent)
 	{
-		Iterator itr = colsToRemove.iterator();
-		if (!itr.hasNext()) return;
-		StringBuilder myindent = new StringBuilder(this.indent);
-		myindent.append(indent);
-		while (itr.hasNext())
+		if (colsToRemove.isEmpty()) return;
+
+		StringBuilder myindent = new StringBuilder(colIndent);
+		myindent.append("  ");
+		for (ReportColumn col : colsToRemove)
 		{
-			ReportColumn col = (ReportColumn)itr.next();
-			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", SqlUtil.removeObjectQuotes(col.getColumn().getColumnName()));
+			tw.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", SqlUtil.removeObjectQuotes(col.getColumn().getColumnName()));
 			result.append('\n');
 		}
 	}
@@ -600,19 +596,9 @@ public class TableDiff
 		Collection<IndexDefinition> targ = this.targetTable.getIndexList();
 		if (ref == null && targ == null) return null;
 		IndexDiff id = new IndexDiff(ref, targ);
-		id.setTagWriter(this.writer);
 		id.setIndent(indent);
 		StringBuilder diffXml = id.getMigrateTargetXml();
 		return diffXml;
-	}
-
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tagWriter)
-	{
-		this.writer = tagWriter;
 	}
 
 	/**

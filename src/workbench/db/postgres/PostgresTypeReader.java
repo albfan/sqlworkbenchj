@@ -134,10 +134,10 @@ public class PostgresTypeReader
 
 		String baseSelect =
 			"SELECT null as table_cat, \n" +
-		 "       n.nspname as table_schem, \n" +
-		 "       pg_catalog.format_type(t.oid, NULL) as table_name, \n" +
-		 "       'TYPE' as table_type, \n" +
-		 "       pg_catalog.obj_description(t.oid, 'pg_type') as remarks \n" +
+		 "        n.nspname as table_schem, \n" +
+		 "        t.typname as table_name, \n" +
+		 "        'TYPE' as table_type, \n" +
+		 "        pg_catalog.obj_description(t.oid, 'pg_type') as remarks \n" +
 		 "FROM pg_catalog.pg_type t \n" +
 		 "  JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
 		 "WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) \n" +

@@ -38,7 +38,7 @@ public class ProcDiff
 
 	private ReportProcedure reference;
 	private ReportProcedure target;
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public ProcDiff(ReportProcedure ref, ReportProcedure tar)
@@ -50,7 +50,6 @@ public class ProcDiff
 	public StringBuilder getMigrateTargetXml()
 	{
 		StringBuilder result = new StringBuilder(500);
-		if (this.writer == null) this.writer = new TagWriter();
 
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_PROC;
@@ -75,15 +74,6 @@ public class ProcDiff
 			writer.appendCloseTag(result, this.indent, tagToUse);
 		}
 		return result;
-	}
-
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tagWriter)
-	{
-		this.writer = tagWriter;
 	}
 
 	/**

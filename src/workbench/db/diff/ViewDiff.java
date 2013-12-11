@@ -50,7 +50,7 @@ public class ViewDiff
 
 	private ReportView reference;
 	private ReportView target;
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public ViewDiff(ReportView ref, ReportView tar)
@@ -62,7 +62,6 @@ public class ViewDiff
 	public StringBuilder getMigrateTargetXml()
 	{
 		StringBuilder result = new StringBuilder(500);
-		if (this.writer == null) this.writer = new TagWriter();
 
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
@@ -155,19 +154,9 @@ public class ViewDiff
 		Collection<IndexDefinition> targ = this.target.getIndexList();
 		if (ref == null && targ == null) return null;
 		IndexDiff id = new IndexDiff(ref, targ);
-		id.setTagWriter(this.writer);
 		id.setIndent(indent);
 		StringBuilder diff = id.getMigrateTargetXml();
 		return diff;
-	}
-
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tagWriter)
-	{
-		this.writer = tagWriter;
 	}
 
 	/**

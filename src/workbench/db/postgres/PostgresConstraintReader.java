@@ -42,8 +42,10 @@ public class PostgresConstraintReader
 				"       obj_description(t.oid) as remarks  \n" +
 				"from pg_class t \n" +
 				"  join pg_constraint rel on t.oid = rel.conrelid   \n" +
+				"  join pg_namespace nsp on t.relnamespace = nsp.oid \n" +
 				"where rel.contype in ('c', 'x') \n" +
-				" and t.relname = ? ";
+				" and t.relname = ? \n" +
+				" and nsp.nspname = ? ";
 
 	public PostgresConstraintReader(String dbId)
 	{
@@ -67,6 +69,12 @@ public class PostgresConstraintReader
 	public int getIndexForTableNameParameter()
 	{
 		return 1;
+	}
+
+	@Override
+	public int getIndexForSchemaParameter()
+	{
+		return 2;
 	}
 
 }

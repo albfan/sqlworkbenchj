@@ -49,7 +49,7 @@ public class SequenceDiff
 
 	private ReportSequence reference;
 	private ReportSequence target;
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 	private boolean includeSource;
 
@@ -63,7 +63,6 @@ public class SequenceDiff
 	public StringBuilder getMigrateTargetXml()
 	{
 		StringBuilder result = new StringBuilder(500);
-		if (this.writer == null) this.writer = new TagWriter();
 
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
@@ -110,14 +109,6 @@ public class SequenceDiff
 			}
 		}
 		writer.appendCloseTag(result, ind, TAG_ATTRIB_LIST);
-	}
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tagWriter)
-	{
-		this.writer = tagWriter;
 	}
 
 	/**

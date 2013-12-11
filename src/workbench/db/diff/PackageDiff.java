@@ -39,7 +39,7 @@ public class PackageDiff
 	private ReportPackage referencePckg;
 	private ReportPackage targetPckg;
 
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public PackageDiff(ReportPackage reference, ReportPackage target)
@@ -51,7 +51,6 @@ public class PackageDiff
 	public StringBuilder getMigrateTargetXml()
 	{
 		StringBuilder result = new StringBuilder(500);
-		if (this.writer == null) this.writer = new TagWriter();
 
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_PKG;
@@ -76,15 +75,6 @@ public class PackageDiff
 			writer.appendCloseTag(result, this.indent, tagToUse);
 		}
 		return result;
-	}
-
-	/**
-	 *	Set the {@link workbench.db.report.TagWriter} to
-	 *  be used for writing the XML tags
-	 */
-	public void setTagWriter(TagWriter tagWriter)
-	{
-		this.writer = tagWriter;
 	}
 
 	/**

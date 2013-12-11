@@ -49,18 +49,13 @@ public class IndexDiff
 
 	private Collection<IndexDefinition> reference = Collections.emptyList();
 	private Collection<IndexDefinition> target = Collections.emptyList();
-	private TagWriter writer;
+	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 
 	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
 	{
 		if (ref != null) this.reference = ref;
 		if (targ != null) this.target = targ;
-	}
-
-	public void setTagWriter(TagWriter w)
-	{
-		this.writer = w;
 	}
 
 	public void setIndent(StringBuilder ind)
@@ -77,7 +72,6 @@ public class IndexDiff
 
 	public StringBuilder getMigrateTargetXml()
 	{
-		if (this.writer == null) this.writer = new TagWriter();
 		StringBuilder result = new StringBuilder();
 		List<IndexDefinition> indexToAdd = new LinkedList<IndexDefinition>();
 		List<IndexDefinition> indexToDrop = new LinkedList<IndexDefinition>();

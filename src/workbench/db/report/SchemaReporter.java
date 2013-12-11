@@ -39,6 +39,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.BaseObjectType;
 import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -121,6 +122,11 @@ public class SchemaReporter
 			{
 				SequenceDefinition seq = reader.getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
 				this.sequences.add(new ReportSequence(seq));
+			}
+			else if (meta.isExtendedObject(dbo) && dbo instanceof TableIdentifier)
+			{
+				DbObject details = meta.getObjectDefinition((TableIdentifier)dbo);
+				this.objects.add(details);
 			}
 			else
 			{
@@ -295,6 +301,11 @@ public class SchemaReporter
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();
+				}
+				else if (object instanceof BaseObjectType)
+				{
+					ReportObjectType repType = new ReportObjectType((BaseObjectType)object);
+					repType.writeXml(out);
 				}
 				else
 				{

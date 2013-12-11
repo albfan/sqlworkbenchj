@@ -29,6 +29,7 @@ import java.util.List;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A generic TYPE object
@@ -189,7 +190,7 @@ public class BaseObjectType
 				if (otherCol == null) return false;
 				if (!col.isEqualTo(otherCol)) return false;
 			}
-			return true;
+			return StringUtil.equalStringOrEmpty(remarks, otherType.remarks, false);
 		}
 		return false;
 	}

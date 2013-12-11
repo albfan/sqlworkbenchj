@@ -27,7 +27,6 @@ import java.io.Writer;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -91,7 +90,7 @@ public class ReportTable
 
 	private TableIdentifier table;
 	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
-	private ReportColumn[] columns;
+	private List<ReportColumn> columns;
 	private IndexReporter reporter;
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
@@ -223,7 +222,7 @@ public class ReportTable
 
 	private List<ColumnIdentifier> getColumnList()
 	{
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columns.length);
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columns.size());
 		for (ReportColumn col : columns)
 		{
 			cols.add(col.getColumn());
@@ -311,11 +310,10 @@ public class ReportTable
 	{
 		if (cols == null) return;
 		int numCols = cols.size();
-		this.columns = new ReportColumn[numCols];
-		for (int i=0; i < numCols; i++)
+		this.columns = new ArrayList<ReportColumn>(numCols);
+		for (ColumnIdentifier col : cols)
 		{
-			ColumnIdentifier col = cols.get(i);
-			this.columns[i] = new ReportColumn(col);
+			columns.add(new ReportColumn(col));
 		}
 	}
 
@@ -375,18 +373,21 @@ public class ReportTable
 	 */
 	public ReportColumn findColumn(String col)
 	{
-		if (col == null) return null;
-		if (columns == null)
-		{
-			return null;
-		}
+		return findColumn(columns, col);
+	}
+
+	public static ReportColumn findColumn(List<ReportColumn> cols, String toFind)
+	{
+		if (toFind == null) return null;
+		if (cols == null) return null;
+
 		ReportColumn result = null;
-		int numCols = this.columns.length;
-		for (int i=0; i < numCols; i++)
+
+		for (ReportColumn col : cols)
 		{
-			if (col.equalsIgnoreCase(columns[i].getColumn().getColumnName()))
+			if (toFind.equalsIgnoreCase(col.getColumn().getColumnName()))
 			{
-				result = columns[i];
+				result = col;
 				break;
 			}
 		}
@@ -411,15 +412,15 @@ public class ReportTable
 				return pos1 - pos2;
 			}
 		};
-		List<ReportColumn> result = new ArrayList<ReportColumn>(columns.length);
-		result.addAll(Arrays.asList(columns));
+		List<ReportColumn> result = new ArrayList<ReportColumn>(columns.size());
+		result.addAll(columns);
 		Collections.sort(result, comp);
 		return result;
 	}
 
-	public ReportColumn[] getColumns()
+	public List<ReportColumn> getColumns()
 	{
-		return this.columns;
+		return new ArrayList<ReportColumn>(this.columns);
 	}
 
 	public TableIdentifier getTable()
@@ -506,10 +507,9 @@ public class ReportTable
 			tagWriter.appendTag(line, colindent, TAG_TABLE_TYPE, modifier, false);
 		}
 
-		int cols = this.columns.length;
-		for (int i=0; i < cols; i++)
+		for (ReportColumn col : columns)
 		{
-			this.columns[i].appendXml(line, colindent);
+			col.appendXml(line, colindent);
 		}
 		if (this.reporter != null) this.reporter.appendXml(line, colindent);
 
