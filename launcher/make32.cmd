@@ -12,7 +12,7 @@ rcedit /C sqlwbconsole.exe
 rcedit /I sqlwbconsole.exe console.ico
 rcedit /N sqlwbconsole.exe sqlwbconsole.ini
 
-del sqlworkbench32.ini > nul
+rem del sqlworkbench32.ini > nul
 
 goto :eof
 

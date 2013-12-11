@@ -10,7 +10,8 @@
   <property name="guitest" value="../test/jemmy"/>
   <property name="dbtest" value="../test/dbtest"/>
   <property name="csrc" value="../launcher"/>
-  <property name="junitdir" value="../junit"/>
+  <property name="junitdir" value="../build/junit"/>
+  <property name="junitlibs" value="../libs/junit"/>
   <property name="scriptsrc" value="."/>
   <property name="libdir" value="../libs"/>
   <property name="build" value="../build/classes"/>
@@ -30,10 +31,10 @@
   <property name="docbook.dtd" value="../etc/dtd"/>
   <property name="fop.root" value="../etc/fop"/>
 
-  <property name="coverage.report.dir" value="${root}/junit/coverage" />
+  <property name="coverage.report.dir" value="${junitdir}/coverage" />
   <property name="instrumented.dir" value="${root}/build/instrumented" />
 
-  <property name="cobertura.dir" value="${junitdir}/cobertura" />
+  <property name="cobertura.dir" value="${junitlibs}/cobertura" />
 
   <path id="cobertura.path">
     <fileset dir="${cobertura.dir}">
@@ -125,11 +126,12 @@
     <echo message="Build number is ${build.number}"/>
   </target>
 
-  <target name="clean" depends="clean-junit">
+  <target name="clean">
     <delete dir="${html-outdir}" failonerror="false"/>
     <delete dir="${build}" failonerror="false"/>
     <delete dir="${instrumented.dir}" failonerror="false"/>
     <delete dir="${build.test}"/>
+    <delete dir="${junitdir}"/>
     <delete dir="${pdfwork}" failonerror="false"/>
     <delete failonerror="false">
       <fileset dir="${distdir}">
@@ -172,6 +174,7 @@
 
   <target name="prepare-test" depends="prepare,copy-resources">
     <mkdir dir="${build.test}"/>
+    <mkdir dir="${junitdir}"/>
     <copy overwrite="true"  todir="${build.test}">
       <fileset defaultexcludes="true" dir="${testsrc}/junit">
         <include name="**/*.sql"/>
@@ -218,7 +221,7 @@
           <fileset dir="../libs/odf" includes="*.jar"/>
           <fileset dir="../libs/poi" includes="*.jar"/>
           <fileset dir="../libs/log4j" includes="*.jar"/>
-          <fileset dir="../junit" includes="ojdbc*.jar"/>
+          <fileset dir="../libs/junit" includes="ojdbc*.jar"/>
       </classpath>
     </javac>
 
@@ -957,7 +960,7 @@
   </target>
 
 <path id="junit.path">
-    <fileset dir="${junitdir}">
+    <fileset dir="${junitlibs}">
       <include name="*.jar"/>
     </fileset>
     <fileset dir="../libs/poi">
@@ -1046,7 +1049,7 @@
 
       <sysproperty key="net.sourceforge.cobertura.datafile" file="${junitdir}/cobertura.ser" />
 
-      <batchtest todir="../junit">
+      <batchtest todir="${junitdir}">
         <formatter type="plain"/>
         <fileset dir="${unittest}">
           <include name="**/*Test.java"/>
@@ -1056,7 +1059,7 @@
         </fileset>
       </batchtest>
 
-      <batchtest todir="../junit">
+      <batchtest todir="${junitdir}">
         <formatter type="plain"/>
         <fileset dir="${dbtest}">
           <include name="workbench/db/postgres/*Test.java"/>
@@ -1084,7 +1087,7 @@
         <path refid="junit.path"/>
       </classpath>
 
-      <batchtest todir="../junit">
+      <batchtest todir="${junitdir}">
         <formatter type="plain"/>
         <fileset dir="${unittest}">
           <exclude name="**/XsltTransformerTest.java"/>
@@ -1098,7 +1101,7 @@
         bombs out with an OutOfMemory error in the PermGen space
         Moving this - and the ClassFinderTest - to a separate VM solves the problem
       -->
-      <batchtest todir="../junit">
+      <batchtest todir="${junitdir}">
         <formatter type="plain"/>
         <fileset dir="${unittest}">
           <include name="**/XsltTransformerTest.java"/>
@@ -1123,7 +1126,7 @@
         <path refid="junit.path"/>
       </classpath>
 
-      <batchtest todir="../junit">
+      <batchtest todir="${junitdir}">
         <formatter type="plain"/>
         <fileset dir="${guitest}">
           <include name="**/*Test.java"/>
@@ -1154,14 +1157,14 @@
       <sysproperty key="wbjunit.db2.password" value="${wbjunit.db2.password}"/>
       <sysproperty key="wbjunit.db2.schema" value="${wbjunit.db2.schema}"/>
 
-      <batchtest todir="../junit" if="test.db">
+      <batchtest todir="${junitdir}" if="test.db">
         <formatter type="plain"/>
         <fileset dir="${dbtest}/">
           <include name="workbench/db/${test.db}/*Test.java"/>
         </fileset>
       </batchtest>
 
-      <batchtest todir="../junit" unless="test.db">
+      <batchtest todir="${junitdir}" unless="test.db">
         <formatter type="plain"/>
         <fileset dir="${dbtest}">
           <include name="**/*Test.java"/>
