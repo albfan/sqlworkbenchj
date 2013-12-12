@@ -59,6 +59,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -297,10 +298,11 @@ public class CompletionPopup
 		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
 
 		boolean isKeyword = context.getAnalyzer().getContext() == BaseAnalyzer.CONTEXT_KW_LIST;
+		QuoteHandler quoteHandler = context.getAnalyzer().getQuoteHandler();
 
 		if (this.context.getAnalyzer().convertCase())
 		{
-			if (!isKeyword && (value.trim().charAt(0) == '"' || StringUtil.isMixedCase(value) || dbStoresMixedCase ))
+			if (!isKeyword && (quoteHandler.isQuoted(value.trim()) || StringUtil.isMixedCase(value) || dbStoresMixedCase ))
 			{
 				result = value;
 			}
@@ -308,9 +310,13 @@ public class CompletionPopup
 			{
 				result = value.toLowerCase();
 			}
-			else
+			else if ("upper".equalsIgnoreCase(pasteCase))
 			{
 				result = value.toUpperCase();
+			}
+			else
+			{
+				result = value;
 			}
 		}
 		else

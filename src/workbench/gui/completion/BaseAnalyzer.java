@@ -37,6 +37,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbSearchPath;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
+import workbench.db.QuoteHandler;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
@@ -150,6 +151,14 @@ public abstract class BaseAnalyzer
 		return null;
 	}
 
+	public QuoteHandler getQuoteHandler()
+	{
+		if (dbConnection == null) return QuoteHandler.STANDARD_HANDLER;
+		QuoteHandler handler = dbConnection.getMetadata();
+		if (handler == null) return QuoteHandler.STANDARD_HANDLER;
+		return handler;
+	}
+	
 	public WbConnection getConnection()
 	{
 		return dbConnection;
