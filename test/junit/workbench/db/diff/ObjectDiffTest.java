@@ -77,7 +77,7 @@ public class ObjectDiffTest
 		col4.setDataType(Types.VARCHAR);
 		o2.setAttributes(CollectionUtil.arrayList(col1, col2, col4));
 
-		ObjectDiff diff = new ObjectDiff(o1, o2);
+		ObjectDiff diff = new ObjectDiff(o1, o2, "DIFFTEST");
 		assertTrue(diff.isDifferent(null, null));
 		String xml = diff.getMigrateTargetXml(null, null).toString();
 		assertTrue(xml.length() > 0);
