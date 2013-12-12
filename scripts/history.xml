@@ -34,6 +34,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="7" type="fix">The completion option "As is" for the case of the object names didn't work any longer</entry>
     <entry dev-build="7" type="fix">For Postgres check constraints were retrieved incorrectly if the same table existed in different schemas</entry>
     <entry dev-build="7" type="fix">When opening a connection that did not have a worskpace assigned the GUI would not initialize.</entry>
     <entry dev-build="6" type="fix">When connection profiles where filtered and modified, the filtered profiles would be lost when saving the changes</entry>

@@ -481,7 +481,7 @@ public class SchemaDiff
 		{
 			if (referenceDb.getDbSettings().supportsSchemas())
 			{
-				referenceSchema = this.referenceDb.getMetadata().getSchemaToUse();
+				referenceSchema = this.referenceDb.getMetadata().getCurrentSchema();
 			}
 			else
 			{
@@ -497,7 +497,7 @@ public class SchemaDiff
 		{
 			if (targetDb.getDbSettings().supportsSchemas())
 			{
-				targetSchema = this.targetDb.getMetadata().getSchemaToUse();
+				targetSchema = this.targetDb.getMetadata().getCurrentSchema();
 			}
 			else
 			{
@@ -1282,7 +1282,13 @@ public class SchemaDiff
 		StringBuilder indent = new StringBuilder("  ");
 		StringBuilder indent2 = new StringBuilder("    ");
 
+		TagWriter tw = new TagWriter();
+
 		TagWriter.writeWorkbenchVersion(out, indent);
+		out.write(indent.toString());
+		out.write("<generated-at>");
+		out.write(StringUtil.getCurrentTimestampWithTZString());
+		out.write("</generated-at>\n\n");
 
 		ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
 
@@ -1300,7 +1306,6 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");
 
-		TagWriter tw = new TagWriter();
 		info = new StringBuilder();
 
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
@@ -1382,6 +1387,7 @@ public class SchemaDiff
 	{
 		writeTag(out, indent, tag, isOpeningTag, null, null);
 	}
+
 	private void writeTag(Writer out, StringBuilder indent, String tag, boolean isOpeningTag, String attr, String attrValue)
 		throws IOException
 	{

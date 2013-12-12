@@ -25,14 +25,17 @@ package workbench.db.diff;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
+
+import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -80,7 +83,7 @@ public class SchemaDiffTest
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 		assertEquals("Incorrect number of tables listed", "4", count);
 
-		count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='V_PERSON'])");
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='SOURCE.REF.V_PERSON'])");
 		assertEquals("Incorrect number of views listed", "1", count);
 
 		// Check if email column

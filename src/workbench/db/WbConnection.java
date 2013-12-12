@@ -1116,9 +1116,9 @@ public class WbConnection
 			}
 
 			String schema = useDisplaySchema ? getDisplaySchema() : null;
-			if (schema == null)
+			if (schema == null && !isBusy)
 			{
-				schema = isBusy ? null : metaData.getCurrentSchema();
+				schema = metaData.getCurrentSchema();
 			}
 
 			if (schema != null)

@@ -24,7 +24,6 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.List;
 
 import workbench.resource.ResourceMgr;
 
@@ -162,36 +161,14 @@ public class ConnectionInfoBuilder
 		TagWriter tagWriter = new TagWriter();
 		String value;
 
-
-		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());
-
 		try { value = db.getDriverName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "jdbc-driver", cleanValue(value));
 
 		try { value = db.getDriverVersion(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", cleanValue(value));
 
-		tagWriter.appendTag(dbInfo, indent, "connection", conn.getDisplayString());
-		if (conn.getDbSettings().supportsSchemas())
-		{
-			DbSearchPath path = DbSearchPath.Factory.getSearchPathHandler(conn);
-			List<String> searchPath = path.getSearchPath(conn, null);
-			// hide the default Postgres entry
-			searchPath.remove("pg_catalog");
-			
-			if (searchPath.size() <= 1)
-			{
-				tagWriter.appendTag(dbInfo, indent, "schema", conn.getCurrentSchema());
-			}
-			else
-			{
-				tagWriter.appendTag(dbInfo, indent, "search-path", StringUtil.listToString(searchPath, ','));
-			}
-		}
-		if (conn.getDbSettings().supportsCatalogs())
-		{
-			tagWriter.appendTag(dbInfo, indent, "catalog", conn.getMetadata().getCurrentCatalog());
-		}
+		tagWriter.appendTag(dbInfo, indent, "jdbc-url", conn.getUrl());
+		tagWriter.appendTag(dbInfo, indent, "database-user", conn.getDisplayUser());
 
 		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));

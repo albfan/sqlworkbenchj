@@ -69,13 +69,10 @@ public class ReportView
 
 	/** The schema name to be used in the generated XML */
 	private String schemaNameToUse = null;
+	private boolean schemaAsCatalog;
 
 	private CharSequence viewSource;
 
-	public ReportView(TableIdentifier tbl)
-	{
-		this.view = tbl;
-	}
 
 	/**
 	 * Initialize this ReportView.
@@ -138,6 +135,8 @@ public class ReportView
 		{
 			this.index = new IndexReporter(tbl, conn, false);
 		}
+
+		schemaAsCatalog = !conn.getDbSettings().supportsSchemas();
 	}
 
 	public ReportTableGrants getGrants()
@@ -206,8 +205,22 @@ public class ReportView
 
 	public void appendTableNameXml(StringBuilder toAppend, StringBuilder indent)
 	{
-		tagWriter.appendTag(toAppend, indent, TAG_VIEW_CATALOG, this.view.getCatalog());
-		tagWriter.appendTag(toAppend, indent, TAG_VIEW_SCHEMA, (this.schemaNameToUse == null ? this.view.getSchema() : this.schemaNameToUse));
+		if (schemaNameToUse != null)
+		{
+			if (schemaAsCatalog)
+			{
+				tagWriter.appendTag(toAppend, indent, TAG_VIEW_CATALOG, schemaNameToUse);
+			}
+			else
+			{
+				tagWriter.appendTag(toAppend, indent, TAG_VIEW_SCHEMA, this.schemaNameToUse);
+			}
+		}
+		else
+		{
+			tagWriter.appendTag(toAppend, indent, TAG_VIEW_CATALOG, view.getCatalog());
+			tagWriter.appendTag(toAppend, indent, TAG_VIEW_SCHEMA, view.getSchema());
+		}
 		tagWriter.appendTag(toAppend, indent, TAG_VIEW_NAME, this.view.getTableName());
 	}
 

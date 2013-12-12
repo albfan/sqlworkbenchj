@@ -16,21 +16,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:text>&#10;</xsl:text>
   </xsl:variable>
 
-  <xsl:variable name="default-target-schema" select="/schema-diff/reference-connection/schema"/>
-  <xsl:variable name="compare-target-schema" select="/schema-diff/compare-settings/reference-schema"/>
-  <xsl:variable name="target-schema">
-    <xsl:choose>
-      <xsl:when test="string-length($compare-target-schema) &gt; 0">
-        <xsl:value-of select="concat($compare-target-schema,'.')"/>
-      </xsl:when>
-      <xsl:when test="string-length($default-target-schema) &gt; 0">
-        <xsl:value-of select="concat($default-target-schema, '.')"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:value-of select="''"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
+  <xsl:variable name="target-schema" select="/schema-diff/compare-settings/reference-schema"/>
 
   <xsl:template match="/">
 
