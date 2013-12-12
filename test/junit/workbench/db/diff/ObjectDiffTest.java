@@ -33,6 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import workbench.TestUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -65,15 +67,18 @@ public class ObjectDiffTest
 
 		ColumnIdentifier col2 = new ColumnIdentifier("firstname");
 		col2.setDbmsType("varchar(100)");
+		col2.setColumnSize(100);
 		col2.setDataType(Types.VARCHAR);
 
 		ColumnIdentifier col3 = new ColumnIdentifier("lastname");
 		col3.setDbmsType("varchar(100)");
+		col3.setColumnSize(100);
 		col3.setDataType(Types.VARCHAR);
 		o1.setAttributes(CollectionUtil.arrayList(col1, col2, col3));
 
 		ColumnIdentifier col4 = new ColumnIdentifier("lastname");
 		col4.setDbmsType("varchar(10)");
+		col4.setColumnSize(10);
 		col4.setDataType(Types.VARCHAR);
 		o2.setAttributes(CollectionUtil.arrayList(col1, col2, col4));
 
@@ -81,6 +86,12 @@ public class ObjectDiffTest
 		assertTrue(diff.isDifferent(null, null));
 		String xml = diff.getMigrateTargetXml(null, null).toString();
 		assertTrue(xml.length() > 0);
+//		System.out.println(xml);
+		String value = TestUtil.getXPathValue(xml, "count(/modify-type[@name='some_type']/modify-column[@name='lastname'])");
+		assertEquals("1", value);
+
+		value = TestUtil.getXPathValue(xml, "/modify-type[@name='some_type']/modify-column[@name='lastname']/new-column-attributes/dbms-data-type");
+		assertEquals("varchar(100)", value);
 
 		o2.setAttributes(CollectionUtil.arrayList(col1, col2, col3));
 		assertFalse(diff.isDifferent(null, null));
