@@ -225,7 +225,7 @@ public class ReportView
 	{
 		StringBuilder line = new StringBuilder(this.viewSource.length() + 200);
 		StringBuilder colindent = new StringBuilder(indent);
-		colindent.append(indent);
+		colindent.append("  ");
 
 		tagWriter.appendOpenTag(line, indent, TAG_VIEW_DEF, "name", this.view.getTableName());
 		line.append('\n');

@@ -118,7 +118,13 @@ public class ViewDiff
 		}
 		else if (sourceDifferent)
 		{
+			String schema = reference.getView().getSchema();
+			String cat = reference.getView().getCatalog();
+			reference.getView().setSchema(target.getView().getSchema());
+			reference.getView().setCatalog(target.getView().getCatalog());
 			result.append(reference.getXml(myindent, indexDifferent));
+			reference.getView().setSchema(schema);
+			reference.getView().setCatalog(cat);
 		}
 		else
 		{

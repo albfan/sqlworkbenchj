@@ -63,11 +63,13 @@ public class ObjectDiff
 	private ComparableDbObject referenceObject;
 	private ComparableDbObject targetObject;
 	private StringBuilder indent = StringUtil.emptyBuilder();
+	private String targetSchema;
 
-	public ObjectDiff(ComparableDbObject reference, ComparableDbObject target)
+	public ObjectDiff(ComparableDbObject reference, ComparableDbObject target, String targetSchema)
 	{
 		this.referenceObject = reference;
 		this.targetObject = target;
+		this.targetSchema = targetSchema;
 	}
 
 	public boolean isDifferent(WbConnection referenceDb, WbConnection targetDb)
@@ -113,6 +115,7 @@ public class ObjectDiff
 		{
 			// create a new object
 			GenericReportObject reportObject = new GenericReportObject(referenceDb, referenceObject);
+			reportObject.setSchemaNameToUse(targetSchema);
 			StringBuilder xml = reportObject.getXml(myIndent);
 			writer.appendOpenTag(result, indent, TAG_ADD_OBJECT);
 			result.append('\n');
@@ -123,7 +126,6 @@ public class ObjectDiff
 		}
 		else if (targetObject != null && referenceObject == null)
 		{
-			// create a new object
 			GenericReportObject reportObject = new GenericReportObject(targetDb, targetObject);
 			StringBuilder xml = reportObject.getXml(myIndent);
 			writer.appendOpenTag(result, indent, TAG_DROP_OBJECT);
@@ -173,6 +175,7 @@ public class ObjectDiff
 		{
 			reportObject = new ReportObjectType((BaseObjectType)referenceObject);
 			tag = TAG_ADD_TYPE;
+			reportObject.setSchemaToUse(targetSchema);
 		}
 		else if (targetObject != null && referenceObject == null)
 		{

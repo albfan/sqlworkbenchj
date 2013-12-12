@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -1116,7 +1115,7 @@ public class SchemaDiff
 				SequenceDiffEntry entry = (SequenceDiffEntry)o;
 				ReportSequence rp = new ReportSequence(entry.reference);
 				ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target));
-				SequenceDiff diff = new SequenceDiff(rp, tp);
+				SequenceDiff diff = new SequenceDiff(rp, tp, targetSchema);
 				diff.setIndent(indent);
 				StringBuilder xml = diff.getMigrateTargetXml();
 				if (xml.length() > 0)
@@ -1135,6 +1134,8 @@ public class SchemaDiff
 		myindent.append("  ");
 		for (SequenceDefinition def : sequencesToDelete)
 		{
+			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_CATALOG, def.getCatalog());
+			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_SCHEMA, def.getSchema());
 			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_NAME, def.getSequenceName());
 		}
 		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
@@ -1216,9 +1217,11 @@ public class SchemaDiff
 		myindent.append("  ");
 		for (ReportPackage def : packagesToDelete)
 		{
+			def.setSchemaToUse(targetSchema);
 			def.setIndent(myindent);
 			StringBuilder xml = def.getXml(false);
 			out.write(xml.toString());
+			def.setSchemaToUse(null);
 		}
 		writeTag(out, indent, TAG_DROP_PCKG, false);
 	}
@@ -1243,13 +1246,14 @@ public class SchemaDiff
 		if (this.viewsToDelete == null || this.viewsToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_VIEW, true);
-		Iterator itr = this.viewsToDelete.iterator();
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
-		while (itr.hasNext())
+		String tCatalog = targetDb.getCurrentCatalog();
+		for (TableIdentifier view : viewsToDelete)
 		{
-			TableIdentifier t = (TableIdentifier)itr.next();
-			writeTagValue(out, myindent, ReportView.TAG_VIEW_NAME, t.getTableName());
+			writeTagValue(out, myindent, ReportView.TAG_VIEW_CATALOG, tCatalog);
+			writeTagValue(out, myindent, ReportView.TAG_VIEW_SCHEMA, targetSchema);
+			writeTagValue(out, myindent, ReportView.TAG_VIEW_NAME, view.getTableName());
 		}
 		writeTag(out, indent, TAG_DROP_VIEW, false);
 	}
@@ -1260,13 +1264,14 @@ public class SchemaDiff
 		if (this.tablesToDelete == null || this.tablesToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_TABLE, true);
-		Iterator itr = this.tablesToDelete.iterator();
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
-		while (itr.hasNext())
+		String tCatalog = targetDb.getCurrentCatalog();
+		for (TableIdentifier tbl : tablesToDelete)
 		{
-			TableIdentifier t = (TableIdentifier)itr.next();
-			writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, t.getTableName());
+			writeTagValue(out, myindent, ReportTable.TAG_TABLE_CATALOG, tCatalog);
+			writeTagValue(out, myindent, ReportTable.TAG_TABLE_SCHEMA, targetSchema);
+			writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, tbl.getTableName());
 		}
 		writeTag(out, indent, TAG_DROP_TABLE, false);
 	}
@@ -1330,8 +1335,8 @@ public class SchemaDiff
 			{
 				DiffEntry de = (DiffEntry)o;
 				tbls[0] = de.reference.getType();
-				tbls[1] = (de.target == null ? "" : SqlUtil.removeObjectQuotes(de.target.getTableName()));
-				tbls[2] = SqlUtil.removeObjectQuotes(de.reference.getTableName());
+				tbls[1] = (de.target == null ? "" : de.target.getFullyQualifiedName(targetDb));
+				tbls[2] = de.reference.getFullyQualifiedName(referenceDb);
 				if (dbs.isViewType(tbls[0]))
 				{
 					tw.appendOpenTag(info, indent2, TAG_VIEW_PAIR, tattr, tbls, false);
@@ -1344,8 +1349,8 @@ public class SchemaDiff
 			else if (o instanceof ProcDiffEntry)
 			{
 				ProcDiffEntry pe = (ProcDiffEntry)o;
-				tbls[0] = pe.reference.getProcedureName();
-				tbls[1] = (pe.target == null ? "" : pe.target.getProcedureName());
+				tbls[0] = pe.reference.getFullyQualifiedName(referenceDb);
+				tbls[1] = (pe.target == null ? "" : pe.target.getFullyQualifiedName(targetDb));
 
 				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
 			}
@@ -1360,8 +1365,8 @@ public class SchemaDiff
 			else if (o instanceof SequenceDiffEntry)
 			{
 				SequenceDiffEntry pe = (SequenceDiffEntry)o;
-				tbls[0] = pe.reference.getSequenceName();
-				tbls[1] = (pe.target == null ? "" : pe.target.getSequenceName());
+				tbls[0] = pe.reference.getFullyQualifiedName(referenceDb);
+				tbls[1] = (pe.target == null ? "" : pe.target.getFullyQualifiedName(targetDb));
 				tw.appendOpenTag(info, indent2, TAG_SEQ_PAIR, sattr, tbls, false);
 			}
 			info.append("/>\n");
@@ -1408,7 +1413,7 @@ public class SchemaDiff
 		out.write("<");
 		out.write(tag);
 		out.write(">");
-		out.write(value);
+		out.write(value == null ? "" : value);
 		out.write("</");
 		out.write(tag);
 		out.write(">\n");

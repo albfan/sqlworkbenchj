@@ -22,7 +22,6 @@
  */
 package workbench.db.diff;
 
-import java.util.Iterator;
 
 import workbench.resource.Settings;
 
@@ -52,17 +51,18 @@ public class SequenceDiff
 	private final TagWriter writer = new TagWriter();
 	private StringBuilder indent = StringUtil.emptyBuilder();
 	private boolean includeSource;
-
-	public SequenceDiff(ReportSequence ref, ReportSequence tar)
+	private String targetSchema;
+	public SequenceDiff(ReportSequence ref, ReportSequence tar, String targetSchema)
 	{
 		reference = ref;
 		target = tar;
+		this.targetSchema = targetSchema;
 		includeSource = Settings.getInstance().getBoolProperty("workbench.diff.sequence.include_sql", false);
 	}
 
 	public StringBuilder getMigrateTargetXml()
 	{
-		StringBuilder result = new StringBuilder(500);
+		StringBuilder result = new StringBuilder(50);
 
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
@@ -78,7 +78,15 @@ public class SequenceDiff
 			{
 				writeChangedProperties(myindent, result, reference.getSequence(), target.getSequence());
 			}
+			if (createSequence)
+			{
+				reference.setSchemaNameToUse(targetSchema);
+			}
 			result.append(reference.getXml(myindent, includeSource));
+			if (createSequence)
+			{
+				reference.setSchemaNameToUse(null);
+			}
 		}
 		writer.appendCloseTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
 
@@ -91,16 +99,20 @@ public class SequenceDiff
 
 		StringBuilder myindent = new StringBuilder(ind);
 		myindent.append("  ");
-		Iterator<String> properties = refSeq.getProperties();
-		writer.appendOpenTag(result, ind, TAG_ATTRIB_LIST);
-		result.append('\n');
-		while (properties.hasNext())
+
+		boolean open = false;
+		for (String key : refSeq.getProperties())
 		{
-			String key = properties.next();
 			Object refValue = refSeq.getSequenceProperty(key);
 			Object tValue = targetSeq.getSequenceProperty(key);
 			if (!RowData.objectsAreEqual(refValue, tValue))
 			{
+				if (!open)
+				{
+					writer.appendOpenTag(result, ind, TAG_ATTRIB_LIST);
+					result.append('\n');
+					open = true;
+				}
 				String display = WbDateFormatter.getDisplayValue(refValue);
 				TagAttribute name = new TagAttribute("name", key);
 				TagAttribute val = new TagAttribute("value", display);
@@ -108,7 +120,10 @@ public class SequenceDiff
 				result.append("/>\n");
 			}
 		}
-		writer.appendCloseTag(result, ind, TAG_ATTRIB_LIST);
+		if (open)
+		{
+			writer.appendCloseTag(result, ind, TAG_ATTRIB_LIST);
+		}
 	}
 
 	/**

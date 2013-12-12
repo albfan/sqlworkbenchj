@@ -44,7 +44,8 @@ public class ReportObjectType
 	public static final String TAG_TYPE_COMMENT = "type-comment";
 
 	private BaseObjectType type;
-	private TagWriter tagWriter = new TagWriter();
+	private final TagWriter tagWriter = new TagWriter();
+	private String schemaToUse;
 
 	public ReportObjectType(BaseObjectType objectType)
 	{
@@ -61,6 +62,11 @@ public class ReportObjectType
 	public BaseObjectType getType()
 	{
 		return this.type;
+	}
+
+	public void setSchemaToUse(String schemaToUse)
+	{
+		this.schemaToUse = schemaToUse;
 	}
 
 	public StringBuilder getXml()
@@ -109,7 +115,7 @@ public class ReportObjectType
 	public void appendDefinitionXml(StringBuilder line, StringBuilder myIndent)
 	{
 		tagWriter.appendTag(line, myIndent, TAG_TYPE_CATALOG, SqlUtil.removeObjectQuotes(this.type.getCatalog()));
-		tagWriter.appendTag(line, myIndent, TAG_TYPE_SCHEMA, SqlUtil.removeObjectQuotes(this.type.getSchema()));
+		tagWriter.appendTag(line, myIndent, TAG_TYPE_SCHEMA, schemaToUse == null ? SqlUtil.removeObjectQuotes(this.type.getSchema()) : schemaToUse);
 		tagWriter.appendTag(line, myIndent, TAG_TYPE_NAME, SqlUtil.removeObjectQuotes(this.type.getObjectName()));
 		tagWriter.appendTag(line, myIndent, TAG_TYPE_COMMENT, type.getComment());
 	}

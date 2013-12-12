@@ -47,14 +47,25 @@ public class ReportProcedure
 
 	private ProcedureDefinition procDef;
 	private WbConnection dbConn;
-	private TagWriter tagWriter = new TagWriter();
+	private final TagWriter tagWriter = new TagWriter();
 	private StringBuilder indent = new StringBuilder("  ");
 	private StringBuilder indent2 = new StringBuilder("    ");
+	private String schemaToUse;
 
 	public ReportProcedure(ProcedureDefinition def, WbConnection conn)
 	{
 		this.procDef = def;
 		this.dbConn = conn;
+	}
+
+	public void setSchemaToUse(String targetSchema)
+	{
+		this.schemaToUse = targetSchema;
+	}
+
+	private String getSchema()
+	{
+		return schemaToUse == null ? procDef.getSchema() : schemaToUse;
 	}
 
 	public CharSequence getSource()
@@ -115,7 +126,7 @@ public class ReportProcedure
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_CATALOG, procDef.getCatalog());
 		}
-		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, procDef.getSchema());
+		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
 
 		if (StringUtil.isNonBlank(procDef.getComment()))

@@ -137,7 +137,7 @@ public class GenericDiffLoader
 							tgObj = (ComparableDbObject)details;
 						}
 					}
-					ObjectDiff diff = new ObjectDiff(refObj, tgObj);
+					ObjectDiff diff = new ObjectDiff(refObj, tgObj, targetSchema);
 					if (diff.isDifferent(referenceDb, targetDb))
 					{
 						objects.add(diff);
@@ -157,7 +157,7 @@ public class GenericDiffLoader
 					if (details instanceof ComparableDbObject)
 					{
 						// a null reference object means the target object needs to be dropped
-						objects.add(new ObjectDiff(null, (ComparableDbObject)details));
+						objects.add(new ObjectDiff(null, (ComparableDbObject)details, targetSchema));
 					}
 				}
 			}

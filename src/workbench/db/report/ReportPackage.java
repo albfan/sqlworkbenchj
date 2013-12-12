@@ -43,6 +43,7 @@ public class ReportPackage
 	private CharSequence source;
 	private StringBuilder indent = new StringBuilder("  ");
 	private StringBuilder indent2 = new StringBuilder("    ");
+	private String schemaToUse;
 
 	public ReportPackage(ProcedureDefinition proc)
 	{
@@ -57,6 +58,16 @@ public class ReportPackage
 		}
 	}
 
+	public void setSchemaToUse(String targetSchema)
+	{
+		this.schemaToUse = targetSchema;
+	}
+
+	private String getSchema()
+	{
+		return schemaToUse == null ? owner : schemaToUse;
+	}
+	
 	public ReportPackage(String owner, String name)
 	{
 		this.owner = owner;
@@ -98,10 +109,11 @@ public class ReportPackage
 		StringBuilder result = new StringBuilder(500);
 		TagWriter tagWriter = new TagWriter();
 
-		tagWriter.appendOpenTag(result, indent, TAG_PKG_DEF, new String[]{"schema", "packageName"},new String[]{owner, name});
+		String schema = getSchema();
+		tagWriter.appendOpenTag(result, indent, TAG_PKG_DEF, new String[]{"schema", "packageName"}, new String[] {schema, name});
 
 		result.append('\n');
-		tagWriter.appendTag(result, indent2, TAG_PKG_SCHEMA, owner);
+		tagWriter.appendTag(result, indent2, TAG_PKG_SCHEMA, schema);
 		tagWriter.appendTag(result, indent2, TAG_PKG_NAME, name);
 
 		if (includeSource)

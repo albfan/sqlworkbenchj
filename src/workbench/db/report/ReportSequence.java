@@ -24,7 +24,6 @@ package workbench.db.report;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Iterator;
 
 import workbench.db.SequenceDefinition;
 
@@ -119,6 +118,8 @@ public class ReportSequence
 
 	protected void writeSequenceProperties(StringBuilder toAppend, StringBuilder indent)
 	{
+		if (sequence.getProperties().isEmpty()) return;
+
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		StringBuilder propindent = new StringBuilder(myindent);
@@ -126,10 +127,8 @@ public class ReportSequence
 
 		tagWriter.appendOpenTag(toAppend, indent, TAG_SEQ_PROPS);
 		toAppend.append('\n');
-		Iterator<String> itr = this.sequence.getProperties();
-		while (itr.hasNext())
+		for (String propName : sequence.getProperties())
 		{
-			String propName = itr.next();
 			Object value = this.sequence.getSequenceProperty(propName);
 			TagAttribute name = new TagAttribute("name", propName);
 			TagAttribute val = new TagAttribute("value", (value == null ? "" : WbDateFormatter.getDisplayValue(value)));

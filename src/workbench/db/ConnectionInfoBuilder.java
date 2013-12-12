@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.resource.ResourceMgr;
 
@@ -81,7 +82,7 @@ public class ConnectionInfoBuilder
 			String isolationlevel;
 			String productVersion;
 			String driverName;
-			
+
 			if (busy)
 			{
 				username = conn.getDisplayUser();
@@ -171,8 +172,26 @@ public class ConnectionInfoBuilder
 		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", cleanValue(value));
 
 		tagWriter.appendTag(dbInfo, indent, "connection", conn.getDisplayString());
-		tagWriter.appendTag(dbInfo, indent, "schema", conn.getCurrentSchema());
-		tagWriter.appendTag(dbInfo, indent, "catalog", conn.getMetadata().getCurrentCatalog());
+		if (conn.getDbSettings().supportsSchemas())
+		{
+			DbSearchPath path = DbSearchPath.Factory.getSearchPathHandler(conn);
+			List<String> searchPath = path.getSearchPath(conn, null);
+			// hide the default Postgres entry
+			searchPath.remove("pg_catalog");
+			
+			if (searchPath.size() <= 1)
+			{
+				tagWriter.appendTag(dbInfo, indent, "schema", conn.getCurrentSchema());
+			}
+			else
+			{
+				tagWriter.appendTag(dbInfo, indent, "search-path", StringUtil.listToString(searchPath, ','));
+			}
+		}
+		if (conn.getDbSettings().supportsCatalogs())
+		{
+			tagWriter.appendTag(dbInfo, indent, "catalog", conn.getMetadata().getCurrentCatalog());
+		}
 
 		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));

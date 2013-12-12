@@ -24,10 +24,12 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 
@@ -200,9 +202,9 @@ public class SequenceDefinition
 		source = src;
 	}
 
-	public Iterator<String> getProperties()
+	public Set<String> getProperties()
 	{
-		return this.properties.keySet().iterator();
+		return this.properties.keySet();
 	}
 
 	@Override
@@ -216,8 +218,9 @@ public class SequenceDefinition
 			for (Map.Entry<String, Object> entry : properties.entrySet())
 			{
 				Object ov = od.properties.get(entry.getKey());
-				if (ov == null) return false;
-				if (!ov.equals(entry.getValue())) return false;
+				if (ov == null && entry.getValue() != null) return false;
+				if (ov != null && entry.getValue() == null) return false;
+				if (ov != null && entry.getValue() != null && !ov.equals(entry.getValue())) return false;
 			}
 			return true;
 		}
