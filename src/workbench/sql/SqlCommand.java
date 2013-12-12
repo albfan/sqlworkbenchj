@@ -347,15 +347,15 @@ public class SqlCommand
 				String info = getVerb() + " (" + getClass().getSimpleName();
 				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + info + ")");
 
-				try { currentStatement.clearBatch(); } catch (Exception th) {}
-				try { currentStatement.clearWarnings(); } catch (Exception th) {}
-				try { currentConnection.clearWarnings(); } catch (Exception e) {}
+				try { currentStatement.clearBatch(); } catch (Throwable th) {}
+				try { currentStatement.clearWarnings(); } catch (Throwable th) {}
+				try { currentConnection.clearWarnings(); } catch (Throwable e) {}
 
 				try
 				{
 					currentStatement.close();
 				}
-				catch (Exception th)
+				catch (Throwable th)
 				{
 					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for: " + info + ")", th);
 				}
@@ -962,17 +962,26 @@ public class SqlCommand
 
 	protected void addErrorPosition(StatementRunnerResult result, String executedSql, Exception e)
 	{
-		ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
-		String sql = result.getSourceCommand() == null ? executedSql : result.getSourceCommand();
-		ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
-		if (error != null)
+		try
 		{
-			String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), error);
-			result.setFailure(error);
-			result.addMessage(fullMsg);
+			ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
+			String sql = result.getSourceCommand() == null ? executedSql : result.getSourceCommand();
+			ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
+			if (error != null)
+			{
+				String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), error);
+				result.setFailure(error);
+				result.addMessage(fullMsg);
+			}
+			else
+			{
+				result.addMessage(ExceptionUtil.getAllExceptions(e));
+				result.setFailure();
+			}
 		}
-		else
+		catch (Throwable th)
 		{
+			LogMgr.logError("SqlCommand.addErrorPosition()", "Could not retrieve error position!", th);
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			result.setFailure();
 		}
