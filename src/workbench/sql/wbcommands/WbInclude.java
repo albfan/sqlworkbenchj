@@ -61,6 +61,7 @@ public class WbInclude
 	public static final String ARG_REPLACE_VALUE = "replaceWith";
 	public static final String ARG_REPLACE_USE_REGEX = "useRegex";
 	public static final String ARG_REPLACE_IGNORECASE = "ignoreCase";
+	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
 	 * If cancelling wasn't necessary, a local variable in the execute() method would have been enough.
@@ -74,7 +75,7 @@ public class WbInclude
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
-		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CHECK_ESCAPED_QUOTES, ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';',oracle,mssql"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		ConditionCheck.addParameters(cmdLine);
@@ -204,7 +205,7 @@ public class WbInclude
 		if (checkParms)
 		{
 			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false);
-			checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
+			checkEscape = cmdLine.getBoolean(ARG_CHECK_ESCAPED_QUOTES, Settings.getInstance().getCheckEscapedQuotes());
 			verbose = cmdLine.getBoolean("verbose", false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
