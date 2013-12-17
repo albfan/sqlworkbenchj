@@ -26,8 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.interfaces.CharacterSequence;
 import workbench.resource.Settings;
+
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
 import workbench.util.StringSequence;
@@ -205,7 +207,6 @@ public class IteratingScriptParser
 		this.storeSqlInCommands = false;
 		this.script = new StringSequence(aScript);
 		this.scriptLength = aScript.length();
-		this.checkEscapedQuotes = false;
 		this.reset();
 	}
 
