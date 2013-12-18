@@ -3,7 +3,7 @@
 
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-12-10">
+  <release build="-1" date="2013-12-18">
     <entry dev-build="7" type="enh">WbInclude can now do a simple text replacement when running a script.</entry>
     <entry dev-build="7" type="enh">For Postgres, Oracle and DB2 WbSchemaReport and WbSchemaDiff now write more details when dealing with TYPEs</entry>
     <entry dev-build="7" type="enh">WbGrepData now also supports -compareType=isNull to search for null values</entry>
