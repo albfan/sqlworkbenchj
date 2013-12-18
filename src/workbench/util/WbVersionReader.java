@@ -107,7 +107,15 @@ public class WbVersionReader
 
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", this.userAgent);
-			conn.setRequestProperty("Referer", System.getProperty("java.version"));
+			String referer = System.getProperty("java.version");
+			String arch = System.getProperty("sun.arch.data.model");
+			if (StringUtil.isNonBlank(arch))
+			{
+				referer += " (" + arch + "bit)";
+			}
+
+			LogMgr.logDebug("WbVersionREader.readBuildInfo()", "Using referer: " + referer);
+			conn.setRequestProperty("Referer", referer);
 
 			in = conn.getInputStream();
 
