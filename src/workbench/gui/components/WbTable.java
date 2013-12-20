@@ -363,6 +363,7 @@ public class WbTable
 
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().registerDateFormatChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_FONT_ZOOM_WHEEL);
 
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
@@ -1001,11 +1002,22 @@ public class WbTable
 			showFocusBorder();
 		}
 		this.checkMouseListener();
-		if (zoomer != null)
+		initWheelZoom();
+	}
+
+	private void initWheelZoom()
+	{
+		if (scrollPane == null || zoomer == null) return;
+
+		if (GuiSettings.getZoomFontWithMouseWheel())
 		{
 			// The font zoomer must be attached to the scroll pane
 			// it cannot be attached to the table!
 			scrollPane.addMouseWheelListener(zoomer);
+		}
+		else
+		{
+			scrollPane.removeMouseWheelListener(zoomer);
 		}
 	}
 
@@ -1692,7 +1704,11 @@ public class WbTable
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (Settings.getInstance().isDateFormatProperty(evt.getPropertyName()))
+		if (evt.getPropertyName().equals(GuiSettings.PROP_FONT_ZOOM_WHEEL))
+		{
+			initWheelZoom();
+		}
+		else if (Settings.getInstance().isDateFormatProperty(evt.getPropertyName()))
 		{
 			initDateRenderers();
 		}

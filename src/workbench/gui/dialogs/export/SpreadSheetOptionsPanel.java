@@ -186,7 +186,7 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(13, 6, 3, 6);
+    gridBagConstraints.insets = new Insets(10, 6, 3, 6);
     add(pageTitleLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -213,7 +213,7 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
     add(createInfosheet, gridBagConstraints);
 
     freezeHeaders.setText(ResourceMgr.getString("LblExportFreezeHeader")); // NOI18N
@@ -223,7 +223,7 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
     add(freezeHeaders, gridBagConstraints);
 
     createAutoFilter.setText(ResourceMgr.getString("LblExportAutoFilter")); // NOI18N
@@ -233,7 +233,7 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
     add(createAutoFilter, gridBagConstraints);
 
     cbxOptimizeCols.setText(ResourceMgr.getPlainString("MnuTxtOptimizeCol")); // NOI18N
@@ -242,7 +242,7 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
     add(cbxOptimizeCols, gridBagConstraints);
   }
 

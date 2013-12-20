@@ -22,7 +22,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -30,10 +29,11 @@ import java.awt.GridBagLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import workbench.interfaces.EncodingSelector;
 
+import workbench.interfaces.EncodingSelector;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.util.EncodingUtil;
 
 /**
@@ -71,26 +71,32 @@ public class EncodingPanel
 		{
 			encodings.setSelectedItem(encoding);
 		}
-		Dimension d = new Dimension(300, 22);
-		encodings.setMaximumSize(d);
+
 		this.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
 		if (showLabel)
 		{
 			label =  new JLabel(ResourceMgr.getString("LblFileEncoding"));
+
+			// align the label with the dropdown by applying the necessary insets
+			int encHeight = encodings.getPreferredSize().height;
+			int lblHeight = label.getPreferredSize().height;
+			int inset = (encHeight - lblHeight) / 2;
+
 			c.gridx = 0;
 			c.gridy = 0;
-			c.insets = new java.awt.Insets(0, 0, 0, 0);
-			c.fill = java.awt.GridBagConstraints.HORIZONTAL;
+			c.insets = new java.awt.Insets(inset, 0, 0, 0);
+			c.fill = java.awt.GridBagConstraints.NONE;
 			c.anchor = java.awt.GridBagConstraints.NORTHWEST;
+			c.weighty = 1.0;
 
 			this.add(label, c);
 		}
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.insets = new java.awt.Insets(5, 0, 0, 0);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new java.awt.Insets(0, 4, 0, 0);
 		c.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		c.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		c.weightx = 1.0;

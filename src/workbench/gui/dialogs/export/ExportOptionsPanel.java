@@ -56,7 +56,7 @@ import workbench.storage.ResultInfo;
 
 import workbench.util.SqlUtil;
 
-import static workbench.db.exporter.ExportType.ODS;
+import static workbench.db.exporter.ExportType.*;
 
 /**
  *
@@ -119,7 +119,7 @@ public class ExportOptionsPanel
 		p.add(this.generalOptions, BorderLayout.CENTER);
 
 		JPanel s = new JPanel(new BorderLayout(2, 2));
-		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 2, 5, 0));
+		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 2, 2, 0));
 		s.setBorder(b);
 
 		poiAvailable = PoiHelper.isPoiAvailable();

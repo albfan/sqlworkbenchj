@@ -74,13 +74,13 @@ public class GeneralOptionsPanel
 
 		brushedMetal.setVisible(MacOSHelper.isMacOS());
 		brushedMetal.setEnabled(MacOSHelper.isMacOS());
-//		if (!brushedMetal.isVisible())
-//		{
-//			GridBagLayout layout = (GridBagLayout)jPanel2.getLayout();
-//			GridBagConstraints constraints = layout.getConstraints(autoSaveProfiles);
-//			constraints.weightx = 1.0;
-//			layout.setConstraints(autoSaveProfiles, constraints);
-//		}
+		if (!brushedMetal.isVisible())
+		{
+			GridBagLayout layout = (GridBagLayout)jPanel2.getLayout();
+			GridBagConstraints constraints = layout.getConstraints(wheelZoom);
+			constraints.weightx = 1.0;
+			layout.setConstraints(wheelZoom, constraints);
+		}
 
 		String[] updTypes = new String[] {
 			ResourceMgr.getString("LblUpdCheckNever"),
@@ -170,6 +170,7 @@ public class GeneralOptionsPanel
 		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
 		enableQuickFilter.setSelected(GuiSettings.enableProfileQuickFilter());
+		wheelZoom.setSelected(GuiSettings.getZoomFontWithMouseWheel());
 
 		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_BUSY_IMAGE);
 		LoadingImage img = new LoadingImage();
@@ -251,6 +252,7 @@ public class GeneralOptionsPanel
 
 		LoadingImage cancelImg = (LoadingImage)cancelIconCombo.getSelectedItem();
 		Settings.getInstance().setProperty(IconHandler.PROP_CANCEL_IMAGE, cancelImg.getName());
+		GuiSettings.setZoomFontWithMouseWheel(wheelZoom.isSelected());
 	}
 
 	@Override
@@ -285,6 +287,7 @@ public class GeneralOptionsPanel
     brushedMetal = new JCheckBox();
     autoSaveProfiles = new JCheckBox();
     enableQuickFilter = new JCheckBox();
+    wheelZoom = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
     showTabIndex = new JCheckBox();
@@ -336,8 +339,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 15, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(useEncryption, gridBagConstraints);
 
     consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
@@ -351,8 +353,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 15, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(consolidateLog, gridBagConstraints);
 
     exitOnConnectCancel.setSelected(Settings.getInstance().getExitOnFirstConnectCancel());
@@ -366,7 +367,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 0, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
     jPanel2.add(exitOnConnectCancel, gridBagConstraints);
 
     autoConnect.setSelected(Settings.getInstance().getShowConnectDialogOnStartup());
@@ -380,7 +381,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 0, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
     jPanel2.add(autoConnect, gridBagConstraints);
 
     singlePageHelp.setText(ResourceMgr.getString("LblHelpSingle")); // NOI18N
@@ -390,19 +391,17 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 15, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(singlePageHelp, gridBagConstraints);
 
     brushedMetal.setText(ResourceMgr.getString("LblBrushedMetal")); // NOI18N
     brushedMetal.setToolTipText(ResourceMgr.getString("d_LblBrushedMetal")); // NOI18N
     brushedMetal.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(0, 15, 0, 0);
     jPanel2.add(brushedMetal, gridBagConstraints);
 
@@ -417,7 +416,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 0, 6, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
     jPanel2.add(autoSaveProfiles, gridBagConstraints);
 
     enableQuickFilter.setText(ResourceMgr.getString("LblProfileQuickFilter")); // NOI18N
@@ -429,9 +428,19 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     jPanel2.add(enableQuickFilter, gridBagConstraints);
+
+    wheelZoom.setText(ResourceMgr.getString("LblEnableWheelZoom")); // NOI18N
+    wheelZoom.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 10, 0, 0);
+    jPanel2.add(wheelZoom, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -498,7 +507,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 4, 3, 0);
+    gridBagConstraints.insets = new Insets(0, 4, 2, 0);
     jPanel1.add(showTabCloseButton, gridBagConstraints);
 
     showResultTabClose.setText(ResourceMgr.getString("LblShowResultClose")); // NOI18N
@@ -512,7 +521,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 16, 3, 0);
+    gridBagConstraints.insets = new Insets(0, 16, 2, 0);
     jPanel1.add(showResultTabClose, gridBagConstraints);
 
     onlyActiveTab.setText(ResourceMgr.getString("LblCloseActive")); // NOI18N
@@ -840,6 +849,7 @@ public class GeneralOptionsPanel
   private JCheckBox tabLRUclose;
   private JCheckBox useEncryption;
   private JCheckBox useSystemTray;
+  private JCheckBox wheelZoom;
   // End of variables declaration//GEN-END:variables
 
 }

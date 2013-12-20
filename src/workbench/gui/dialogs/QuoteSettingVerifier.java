@@ -24,7 +24,9 @@ package workbench.gui.dialogs;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JCheckBox;
+
 import workbench.util.QuoteEscapeType;
 
 /**
@@ -40,7 +42,7 @@ public class QuoteSettingVerifier
 	public QuoteSettingVerifier(QuoteEscapeSelector escape, JCheckBox quoteAlways)
 	{
 		escapeBox = escape;
-		escapeBox.addComboBoxActionListener(this);
+		escapeBox.addActionListener(this);
 		quoteAlwaysBox = quoteAlways;
 		quoteAlwaysBox.addActionListener(this);
 	}
@@ -52,7 +54,7 @@ public class QuoteSettingVerifier
 		{
 			checkQuote();
 		}
-		else 
+		else
 		{
 			checkEscape();
 		}

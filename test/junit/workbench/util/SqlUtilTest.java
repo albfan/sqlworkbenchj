@@ -57,6 +57,41 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testGetFromPart()
+	{
+		String sql =
+			"with my_referers as (\n" +
+			"  select regexp_replace(referer, '#.+', '') as referer,\n" +
+			"         request_date \n" +
+			"  from wb_downloads d\n" +
+			"  where d.referer not like '%kellerer%'\n" +
+			"    and d.referer not like '%sql-workbench.net%'\n" +
+			"    and d.is_search = 0\n" +
+			"    and d.referer <> '-'\n" +
+			"    and d.type <> 'WbUpdateCheck'\n" +
+			"    and d.request_date >= current_date - 30\n" +
+			")\n" +
+			"select referer, \n" +
+			"       max(request_date) as last_request_date, \n" +
+			"       count(*) as hit_count \n" +
+			"from my_referers d\n" +
+			"where d.request_date >= (current_date - 1)\n" +
+			"  and referer not in (\n" +
+			"    select referer \n" +
+			"    from my_referers\n" +
+			"    where request_date < current_date - 1\n" +
+			"  )\n" +
+			"group by d.referer\n" +
+			"order by 3 desc";
+		int pos = SqlUtil.getFromPosition(sql);
+		int fromPos = sql.indexOf("from my_referers d");
+		assertEquals(fromPos, pos);
+
+		String from = SqlUtil.getFromPart(sql);
+		assertEquals("my_referers d", from.trim());
+	}
+
+	@Test
 	public void testGetErrorOffset()
 	{
 		String sql = "select x from foo";

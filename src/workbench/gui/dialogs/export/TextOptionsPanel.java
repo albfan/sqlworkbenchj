@@ -72,7 +72,7 @@ public class TextOptionsPanel
 		populateEscapeRange((WbComboBox)escapeRange);
 
 		// The constructor will setup the necessary actions
-		new QuoteSettingVerifier(quoteEscape, quoteAlways);
+		new QuoteSettingVerifier((QuoteEscapeSelector)escapeSelect, quoteAlways);
 
 		StringBuilder formatList = new StringBuilder(20);
 		boolean first = true;
@@ -102,7 +102,6 @@ public class TextOptionsPanel
 		ComboBoxModel blobModel = new DefaultComboBoxModel(bTypes.toArray());
 		blobTypes.setModel(blobModel);
 		blobTypes.setSelectedItem(BlobMode.SaveToFile.toString());
-
 	}
 
 	public static void populateEscapeRange(WbComboBox combo)
@@ -192,7 +191,7 @@ public class TextOptionsPanel
 		{
 			escape = QuoteEscapeType.none;
 		}
-		quoteEscape.setEscapeType(escape);
+		((QuoteEscapeSelector)escapeSelect).setEscapeType(escape);
 		controlFiles.setText(s.getProperty("workbench.export.text.formatfiles", ""));
 		String type = s.getProperty("workbench.export.text.blobmode", BlobMode.SaveToFile.getTypeString());
 		this.blobTypes.setSelectedItem(type);
@@ -209,7 +208,7 @@ public class TextOptionsPanel
 	@Override
 	public QuoteEscapeType getQuoteEscaping()
 	{
-		return quoteEscape.getEscapeType();
+		return ((QuoteEscapeSelector)escapeSelect).getEscapeType();
 	}
 
 	@Override
@@ -360,12 +359,13 @@ public class TextOptionsPanel
     lineEnding = new JComboBox();
     decimalLabel = new JLabel();
     decimalChar = new JTextField();
-    quoteEscape = new QuoteEscapeSelector();
     ctrlFileLabel = new JLabel();
     controlFiles = new JTextField();
     jPanel1 = new JPanel();
     blobTypesLabel = new JLabel();
     blobTypes = new JComboBox();
+    escapeSelect = new QuoteEscapeSelector();
+    jLabel1 = new JLabel();
 
     setLayout(new GridBagLayout());
 
@@ -389,11 +389,7 @@ public class TextOptionsPanel
     exportHeaders.setToolTipText("");
     exportHeaders.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(5, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
     add(exportHeaders, gridBagConstraints);
 
     quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar")); // NOI18N
@@ -401,14 +397,14 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(5, 4, 0, 4);
     add(quoteCharLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(1, 4, 0, 4);
     add(quoteChar, gridBagConstraints);
 
     quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways")); // NOI18N
@@ -418,7 +414,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 4, 2, 0);
+    gridBagConstraints.insets = new Insets(4, 4, 2, 0);
     add(quoteAlways, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
@@ -426,7 +422,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(escapeRange, gridBagConstraints);
 
     escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType")); // NOI18N
@@ -434,7 +430,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(escapeLabel, gridBagConstraints);
 
     lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding")); // NOI18N
@@ -442,7 +438,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(1, 4, 0, 4);
     add(lineEndingLabel, gridBagConstraints);
 
     lineEnding.setModel(new DefaultComboBoxModel(new String[] { "LF", "CRLF" }));
@@ -450,7 +446,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(1, 4, 0, 4);
     add(lineEnding, gridBagConstraints);
 
     decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
@@ -469,13 +465,6 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(7, 4, 0, 4);
-    add(quoteEscape, gridBagConstraints);
 
     ctrlFileLabel.setText(ResourceMgr.getString("LblFmtFiles")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
@@ -516,6 +505,21 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(blobTypes, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    add(escapeSelect, gridBagConstraints);
+
+    jLabel1.setText(ResourceMgr.getString("LblQuoteEsc")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 4, 0, 4);
+    add(jLabel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -530,14 +534,15 @@ public class TextOptionsPanel
   private JLabel delimiterLabel;
   private JLabel escapeLabel;
   private JComboBox escapeRange;
+  private JComboBox escapeSelect;
   private JCheckBox exportHeaders;
+  private JLabel jLabel1;
   private JPanel jPanel1;
   private JComboBox lineEnding;
   private JLabel lineEndingLabel;
   private JCheckBox quoteAlways;
   private JTextField quoteChar;
   private JLabel quoteCharLabel;
-  private QuoteEscapeSelector quoteEscape;
   // End of variables declaration//GEN-END:variables
 
 

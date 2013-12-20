@@ -65,6 +65,7 @@ public class GuiSettings
 	public static final String PROP_TITLE_GROUP_SEP = "workbench.gui.display.titlegroupsep";
 	public static final String PROP_TITLE_GROUP_BRACKET = "workbench.gui.display.titlegroupbracket";
 
+	public static final String PROP_FONT_ZOOM_WHEEL = "workbench.gui.fontzoom.mousewheel";
 	public static final String PROP_NUMBER_ALIGN = "workbench.gui.renderer.numberalignment";
 
 
@@ -971,6 +972,16 @@ public class GuiSettings
 	public static void setEnableProfileQuickFilter(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.profiles.quickfilter", flag);
+	}
+
+	public static boolean getZoomFontWithMouseWheel()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_FONT_ZOOM_WHEEL, true);
+	}
+
+	public static void setZoomFontWithMouseWheel(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_FONT_ZOOM_WHEEL, flag);
 	}
 
 }

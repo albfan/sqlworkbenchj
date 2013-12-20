@@ -55,7 +55,7 @@ import workbench.storage.ResultInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.exporter.ExportType.XLS;
+import static workbench.db.exporter.ExportType.*;
 
 
 /**

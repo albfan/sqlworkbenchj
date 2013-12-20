@@ -26,13 +26,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import workbench.gui.components.EncodingPanel;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.components.EncodingPanel;
+
 import workbench.util.StringUtil;
 
 /**
@@ -149,7 +153,7 @@ public class GeneralExportOptionsPanel
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     encodingPanel = new EncodingPanel();
     dateFormatLabel = new JLabel();

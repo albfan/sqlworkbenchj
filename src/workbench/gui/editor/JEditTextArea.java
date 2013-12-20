@@ -269,16 +269,28 @@ public class JEditTextArea
 
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 		this.fontZoomer = new FontZoomer(painter);
-		this.addMouseWheelListener(fontZoomer);
-
+		initWheelZoom();
 		smartClosing = Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_SMART_COMPLETE, true);
 		Settings.getInstance().addPropertyChangeListener(this,
 			GuiSettings.PROPERTY_SMART_COMPLETE,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN,
-			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE);
+			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE,
+			GuiSettings.PROP_FONT_ZOOM_WHEEL);
 	}
 
+	private void initWheelZoom()
+	{
+		if (GuiSettings.getZoomFontWithMouseWheel())
+		{
+			this.addMouseWheelListener(fontZoomer);
+		}
+		else
+		{
+			this.removeMouseWheelListener(fontZoomer);
+		}
+	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -289,6 +301,10 @@ public class JEditTextArea
 		else if (evt.getPropertyName().startsWith(Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE))
 		{
 			updateOccuranceHilite();
+		}
+		else if (evt.getPropertyName().startsWith(GuiSettings.PROP_FONT_ZOOM_WHEEL))
+		{
+			initWheelZoom();
 		}
 	}
 

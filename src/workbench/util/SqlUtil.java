@@ -53,6 +53,7 @@ import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
@@ -60,7 +61,6 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.storage.DataStore;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -1160,7 +1160,7 @@ public class SqlUtil
 		if (fromPos == -1) return null;
 		fromPos += "FROM".length();
 		if (fromPos >= sql.length()) return null;
-		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql);
+		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql, fromPos);
 		if (fromEnd == -1)
 		{
 			return sql.substring(fromPos);
@@ -1199,34 +1199,58 @@ public class SqlUtil
 	 */
 	public static int getKeywordPosition(Set<String> keywords, CharSequence sql)
 	{
+		return getKeywordPosition(keywords, sql, 0);
+	}
+
+	/**
+	 * Returns the position of the first keyword found in the SQL input string.
+	 *
+	 * @param keywords the keywords to look for
+	 * @param sql      the SQL Statement to search.
+	 * @param startPos start searching only after this position
+	 * <p>
+	 * @return returns the position of the first keyword found
+	 */
+	public static int getKeywordPosition(Set<String> keywords, CharSequence sql, int startPos)
+	{
+		if (StringUtil.isEmptyString(sql)) return -1;
+		
 		int pos = -1;
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
-
-			SQLToken t = lexer.getNextToken(false, false);
-			int bracketCount = 0;
-			while (t != null)
+			synchronized (LEXER_INSTANCE)
 			{
-				String value = t.getContents();
-				if ("(".equals(value))
-				{
-					bracketCount ++;
-				}
-				else if (")".equals(value))
-				{
-					bracketCount --;
-				}
-				else if (bracketCount == 0)
-				{
-					if (keywords.contains(value))
-					{
-						pos = t.getCharBegin();
-						break;
-					}
-				}
+				resetLexerInstance(sql.toString());
 
-				t = lexer.getNextToken(false, false);
+				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
+				int bracketCount = 0;
+				while (t != null)
+				{
+					if (t.getCharBegin() < startPos)
+					{
+						t = LEXER_INSTANCE.getNextToken(false, false);
+						continue;
+					}
+					String value = t.getContents();
+					if ("(".equals(value))
+					{
+						bracketCount ++;
+					}
+					else if (")".equals(value))
+					{
+						bracketCount --;
+					}
+					else if (bracketCount == 0)
+					{
+						if (keywords.contains(value))
+						{
+							pos = t.getCharBegin();
+							break;
+						}
+					}
+
+					t = LEXER_INSTANCE.getNextToken(false, false);
+				}
 			}
 		}
 		catch (Exception e)
