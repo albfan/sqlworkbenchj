@@ -1552,6 +1552,12 @@ public class MainWindow
 
 	public boolean loadWorkspace(String filename, boolean updateRecent)
 	{
+		if (this.isBusy())
+		{
+			WbSwingUtilities.showMessageKey(this, "ErrLoadWkspBusy");
+			return false;
+		}
+
 		if (filename == null) return false;
 		final String realFilename = getRealWorkspaceFilename(filename);
 
