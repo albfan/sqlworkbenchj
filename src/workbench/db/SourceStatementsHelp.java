@@ -23,6 +23,7 @@
 package workbench.db;
 
 import workbench.WbManager;
+
 import workbench.util.WbFile;
 
 /**
@@ -35,8 +36,15 @@ public class SourceStatementsHelp
 	public static final String VIEW_ERROR_START = "Support for displaying view source is currently not configured for:";
 	public static final String PROC_ERROR_START = "Support for displaying procedure source is currently not configured for:";
 
-	public String explainMissingViewSourceSql(String product)
+	private final String product;
+	public SourceStatementsHelp(MetaDataSqlManager mgr)
 	{
+		product = mgr.getProductName();
+	}
+
+	public String explainMissingViewSourceSql()
+	{
+
 		String jarDir = WbManager.getInstance().getJarPath();
 		WbFile xmlfile = new WbFile(jarDir, "ViewSourceStatements.xml");
 
@@ -72,7 +80,7 @@ public class SourceStatementsHelp
 		return explain;
 	}
 
-	public String explainMissingProcSourceSql(String product)
+	public String explainMissingProcSourceSql()
 	{
 		String jarDir = WbManager.getInstance().getJarPath();
 		WbFile xmlfile = new WbFile(jarDir, "ProcSourceStatements.xml");

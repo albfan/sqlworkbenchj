@@ -335,6 +335,10 @@ public class TableIdentifierTest
 
 		t2 = tbl.createCopy();
 		assertEquals(tbl.getSourceOptions().getTypeModifier(), t2.getSourceOptions().getTypeModifier());
+
+		tbl.setUseInlinePK(true);
+		t2 = tbl.createCopy();
+		assertTrue(t2.getUseInlinePK());
 	}
 
 	@Test

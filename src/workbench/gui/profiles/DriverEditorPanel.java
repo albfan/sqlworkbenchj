@@ -169,7 +169,7 @@ public class DriverEditorPanel
 	{
 		DefaultListModel model = (DefaultListModel)libList.getModel();
 		JFileChooser jf = new WbFileChooser();
-		jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		jf.setMultiSelectionEnabled(true);
 		if (this.lastDir != null)
 		{

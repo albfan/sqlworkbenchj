@@ -81,11 +81,23 @@ public class MetaDataSqlManager
 	public MetaDataSqlManager(String product, VersionNumber version)
 	{
 		this.productName = product;
+		if (productName.toLowerCase().startsWith("firebird"))
+		{
+			// Jaybird 2.x reports the Firebird version in the productname.
+			// so the productname might look something like
+			// To ease the DBMS handling we'll simply use Firebird as the product name here
+			productName = "Firebird";
+		}
 		if (version != null)
 		{
 			this.majorVersion = version.getMajorVersion();
 			this.minorVersion = version.getMinorVersion();
 		}
+	}
+
+	public String getProductName()
+	{
+		return this.productName;
 	}
 
 	public GetMetaDataSql getListIndexesSql()
@@ -165,13 +177,17 @@ public class MetaDataSqlManager
 			sql = statements.get(key);
 		}
 
-		// second try: only major version
+		// major+minor version specific entry found, use that
 		if (sql != null) return sql;
+
+		// second try: only major version
 		if (majorVersion != -1)
 		{
 			key = productName + "-" + NumberStringCache.getNumberString(majorVersion);
 			sql = statements.get(key);
 		}
+		
+		// found something, use that
 		if (sql != null) return sql;
 
 		// last try: only productname

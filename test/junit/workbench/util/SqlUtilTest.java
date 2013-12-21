@@ -60,36 +60,31 @@ public class SqlUtilTest
 	public void testGetFromPart()
 	{
 		String sql =
-			"with my_referers as (\n" +
-			"  select regexp_replace(referer, '#.+', '') as referer,\n" +
-			"         request_date \n" +
-			"  from wb_downloads d\n" +
-			"  where d.referer not like '%kellerer%'\n" +
-			"    and d.referer not like '%sql-workbench.net%'\n" +
-			"    and d.is_search = 0\n" +
-			"    and d.referer <> '-'\n" +
-			"    and d.type <> 'WbUpdateCheck'\n" +
-			"    and d.request_date >= current_date - 30\n" +
+			"with some_data as (\n" +
+			"  select foo,\n" +
+			"         bar \n" +
+			"  from foobar f \n" +
+			"  where f.id = 42\n" +
 			")\n" +
-			"select referer, \n" +
-			"       max(request_date) as last_request_date, \n" +
+			"select foo, \n" +
 			"       count(*) as hit_count \n" +
-			"from my_referers d\n" +
-			"where d.request_date >= (current_date - 1)\n" +
-			"  and referer not in (\n" +
-			"    select referer \n" +
-			"    from my_referers\n" +
-			"    where request_date < current_date - 1\n" +
-			"  )\n" +
-			"group by d.referer\n" +
-			"order by 3 desc";
+			"from some_data d\n" +
+			"group by d.foo\n" +
+			"order by 2 desc";
 		int pos = SqlUtil.getFromPosition(sql);
-		int fromPos = sql.indexOf("from my_referers d");
+		int fromPos = sql.indexOf("from some_data d");
 		assertEquals(fromPos, pos);
 
 		String from = SqlUtil.getFromPart(sql);
-		assertEquals("my_referers d", from.trim());
+		assertEquals("some_data d", from.trim());
+
+		sql = "select a.id, b.pid from foo a join bar b where a.id > 42;";
+
+		from = SqlUtil.getFromPart(sql);
+		assertEquals("foo a join bar b", from.trim());
 	}
+
+
 
 	@Test
 	public void testGetErrorOffset()
@@ -821,6 +816,25 @@ public class SqlUtilTest
 		l = SqlUtil.getTables("select * from public.\"foo.bar\";");
 		assertEquals(l.size(), 1);
 		assertEquals("public.\"foo.bar\"", l.get(0));
+
+		sql = "with some_data as (\n" +
+			"  select foo,\n" +
+			"         bar \n" +
+			"  from foobar f \n" +
+			"  where f.id = 42\n" +
+			")\n" +
+			"select foo, \n" +
+			"       count(*) as hit_count \n" +
+			"from some_data d\n" +
+			"group by d.foo\n" +
+			"order by 2 desc";
+		l = SqlUtil.getTables(sql, false);
+		assertEquals(l.size(), 1);
+		assertEquals("some_data", l.get(0));
+
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(l.size(), 1);
+		assertEquals("some_data d", l.get(0));
 	}
 
 	@Test

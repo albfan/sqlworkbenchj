@@ -54,6 +54,13 @@ public class GetMetaDataSqlTest
 
 		sql = "select * from (select x from y where a = 42) t where t.x = 6";
 		assertTrue(meta.containsWhere(sql));
+
+		sql = "select *\n" +
+			"from a \n" +
+			"  join b on a.x = b.y \n" +
+			"  join c on c.x = b.y \n" +
+			"where a.x in (1,2)";
+		assertTrue(meta.containsWhere(sql));
 	}
 
 	@Test
@@ -76,7 +83,7 @@ public class GetMetaDataSqlTest
 
 		meta.setBaseSql("select * from (select foo from bar) t ");
 		sql = meta.getSql();
-		assertEquals("select * from (select foo from bar) t  WHERE owner = 'FOOBAR'", sql);
-
+		System.out.println(sql);
+		assertEquals("select * from (select foo from bar) t WHERE owner = 'FOOBAR'", sql);
 	}
 }

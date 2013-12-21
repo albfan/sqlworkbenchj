@@ -754,8 +754,8 @@ public class ProcedureListPanel
 			}
 			catch (NoConfigException nce)
 			{
-				SourceStatementsHelp help = new SourceStatementsHelp();
-				String msg = help.explainMissingProcSourceSql(this.dbConnection.getMetadata().getProductName());
+				SourceStatementsHelp help = new SourceStatementsHelp(this.dbConnection.getMetadata().getMetaDataSQLMgr());
+				String msg = help.explainMissingProcSourceSql();
 				source.setText(msg);
 			}
 			catch (Throwable ex)

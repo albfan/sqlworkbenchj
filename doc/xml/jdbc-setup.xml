@@ -3,16 +3,18 @@
 
 	<section id="configure-drivers">
 		<title>Configuring JDBC drivers</title>
+
 		<para>
       <indexterm><primary>Configuration</primary><secondary>JDBC driver</secondary></indexterm>
 			Before you can connect to a DBMS you have to configure the JDBC driver to be used.
       The driver configuration is available in the connection
 			dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
 		</para>
+
     <para>
       The JDBC driver is a file with the extension <literal>.jar</literal> (some drivers need more than one file).
       See the end of this section for a list of download locations. Once you have downloaded the driver you
-      can store the .jar file in any directory you like.
+      can store the driver's .jar file anywhere you like.
     </para>
 
 		<para>To register a driver with &wb-productname; you need to specify the following details:</para>
@@ -26,36 +28,41 @@
 		</itemizedlist>
 
 		<para>
-			After you have selected the .jar file for a driver (by clicking on the <guibutton>...</guibutton> button),
-      &wb-productname; will scan the jar file looking for a JDBC driver. If only a single driver is found,
-      the classname is automatically put into the entry field. If more than one class is found that is a driver implementation, you
-			will be prompted to select one. In that case, please refer to the manual of your driver or database, to choose the correct one.
+			After you have selected the .jar file(s) for a driver (by clicking on the <guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/open16.gif" format="GIF"/></guiicon></guibutton>
+      button), &wb-productname; will scan the jar file looking for a JDBC driver. If only a single driver is found,
+      the classname is automatically put into the entry field for the classname. If more than one JDBC driver implementation is found, you
+			will be prompted to select one. In that case, please refer to the manual of your driver or database to choose the correct one.
 		</para>
 
 		<caution>
       <para>
-        If you enter the class name of the driver manually, remember that it's case-sensitive.
+        If you enter the class name of the driver manually, remember that it's case-sensitive:
         <literal>org.postgresql.driver</literal> is different to <literal>org.postgresql.Driver</literal>
         (note the capital D for Driver)
       </para>
     </caution>
 
 		<para>
-			The name of the library has to contain the full path to the driver&apos;s jar file, so that
-			&wb-productname; can find it. Some drivers are distributed in several jar files. In that case,
-			select all necessary files in the file open dialog, or enter all the
-			filenames separated by a semicolon (or a colon on Unix style operating systems).
-			This is also true for drivers that require a license file that is contained in a jar file.
-			In this case you have to include the license jar in the list of files. Basically this list defines
-			the classpath for the classloader that is used to load and instantiate the driver.
+      Files that are not found are displayed in red and italics.
 		</para>
 
 		<para>
-			If the driver accesses files through its classpath definition that are not
-			contained in a jar library, you have to include that directory as part
-			of the library definition (e.g: <literal>"c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver"</literal>).
-			The file selection dialog will not let you select a directory, so you have
-			to add it manually to the library definition.
+			The name of the library has to contain the full path to the driver&apos;s jar file, so that
+			&wb-productname; can find it. Some drivers are distributed in several jar files. In that case,
+			select all necessary files in the file open dialog, or add them one after the other. If an entry
+      is selected in the list of defined jar files when adding a new jar file, the selected entry will
+      be overwritten.
+    </para>
+
+    <para id="jdbc-license-file">
+      <indexterm><primary>JDBC driver</primary><secondary>license file</secondary></indexterm>
+			For drivers that require a license file, you have to include the license jar to the list of files for that driver.
+		</para>
+
+		<para>
+			If the driver requires files that are not contained in the jar library,
+      you have to include the directory containing those files as part of the library definition
+      (e.g: <literal>"c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver"</literal>).
 		</para>
 
 		<note><para>
@@ -93,6 +100,14 @@
     <indexterm><primary>ODBC</primary><secondary>driver</secondary></indexterm>
     <indexterm><primary>ODBC</primary><secondary>datasource</secondary></indexterm>
     <indexterm><primary>ODBC</primary><secondary>jdbc url</secondary></indexterm>
+
+		<caution>
+      <para>
+        The JDBC/ODBC bridge will be removed with Java 8 and will no longer be usable then. The JDBC/ODBC bridge also
+        is quite unreliable and considered a workaround.
+        A real JDBC driver should always be preferred over a using the JDBC/ODBC bridge.
+      </para>
+    </caution>
 
     <para>
       To connect to a database using an ODBC driver, you must first setup an ODBC datasource
@@ -152,9 +167,9 @@
 				<tbody valign="top">
 					<row>
 						<entry>PostgreSQL</entry>
-						<entry>org.postgresql.Driver</entry>
+						<entry><literal>org.postgresql.Driver</literal></entry>
 						<entry> <simplelist columns="1">
-							<member>postgresql-9.2-1002.jdbc4.jar (exact name depends on PostgreSQL version)</member>
+							<member><literal>postgresql-9.2-1002.jdbc4.jar</literal> (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>
@@ -162,10 +177,10 @@
 
 					<row>
 						<entry>Firebird SQL</entry>
-						<entry>org.firebirdsql.jdbc.FBDriver</entry>
+						<entry><literal>org.firebirdsql.jdbc.FBDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>firebirdsql-full.jar</member>
+								<member><literal>firebirdsql-full.jar</literal></member>
 								<member><ulink url="http://www.firebirdsql.org/"/></member>
 							</simplelist>
 						</entry>
@@ -173,10 +188,12 @@
 
 					<row>
 						<entry>Oracle</entry>
-						<entry>oracle.jdbc.OracleDriver</entry>
+						<entry><literal>oracle.jdbc.OracleDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>ojdbc6.jar</member>
+                <member>
+                  <literal>ojdbc6.jar</literal>, <literal>ojdbc7.jar</literal>
+                </member>
 								<member><ulink url="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"/></member>
 							</simplelist>
 						</entry>
@@ -184,10 +201,10 @@
 
 					<row>
 						<entry>H2 Database Engine</entry>
-						<entry>org.h2.Driver</entry>
+						<entry><literal>org.h2.Driver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>h2.jar</member>
+								<member><literal>h2.jar</literal></member>
 								<member><ulink url="http://www.h2database.com"/></member>
 							</simplelist>
 						</entry>
@@ -195,10 +212,10 @@
 
 					<row>
 						<entry>HSQLDB</entry>
-						<entry>org.hsqldb.jdbcDriver</entry>
+						<entry><literal>org.hsqldb.jdbcDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>hsqldb.jar</member>
+								<member><literal>hsqldb.jar</literal></member>
 								<member><ulink url="http://hsqldb.sourceforge.net"/></member>
 							</simplelist>
 						</entry>
@@ -206,10 +223,10 @@
 
 					<row>
 						<entry>IBM DB2</entry>
-						<entry>com.ibm.db2.jcc.DB2Driver</entry>
+						<entry><literal>com.ibm.db2.jcc.DB2Driver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>db2jcc4.jar</member>
+								<member><literal>db2jcc4.jar</literal></member>
 								<member><ulink url="http://www-01.ibm.com/software/data/db2/linux-unix-windows/download.html"/></member>
 							</simplelist>
 						</entry>
@@ -217,10 +234,10 @@
 
 					<row>
 						<entry>IBM DB2 for iSeries</entry>
-						<entry>com.ibm.as400.access.AS400JDBCDriver</entry>
+						<entry><literal>com.ibm.as400.access.AS400JDBCDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>jt400.jar</member>
+								<member><literal>jt400.jar</literal></member>
 								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
 							</simplelist>
 						</entry>
@@ -228,10 +245,10 @@
 
 					<row>
 						<entry>Apache Derby</entry>
-						<entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
+						<entry><literal>org.apache.derby.jdbc.EmbeddedDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>derby.jar</member>
+								<member><literal>derby.jar</literal></member>
 								<member><ulink url="http://db.apache.org/derby/"/></member>
 							</simplelist>
 						</entry>
@@ -239,10 +256,10 @@
 
 					<row>
 						<entry>Teradata</entry>
-						<entry>com.teradata.jdbc.TeraDriver</entry>
+						<entry><literal>com.teradata.jdbc.TeraDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-							  <member>terajdbc4.jar</member>
+							  <member><literal>terajdbc4.jar</literal></member>
 								<member><ulink url="http://www.teradata.com/DownloadCenter/Forum158-1.aspx"/></member>
 							</simplelist>
 						</entry>
@@ -250,10 +267,10 @@
 
 					<row>
 						<entry>Sybase SQL Anywhere</entry>
-						<entry>com.sybase.jdbc3.jdbc.SybDriver</entry>
+						<entry><literal>com.sybase.jdbc3.jdbc.SybDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-							  <member>jconnect.jar</member>
+							  <member><literal>jconnect.jar</literal></member>
 								<member><ulink url="http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit/jconnect"/></member>
 							</simplelist>
 						</entry>
@@ -261,10 +278,10 @@
 
 					<row>
 						<entry>MySQL</entry>
-						<entry>com.mysql.jdbc.Driver</entry>
+						<entry><literal>com.mysql.jdbc.Driver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-								<member>mysql-connector-java-5.1.5-bin.jar (exact name depends on version)</member>
+								<member><literal>mysql-connector-java-5.1.5-bin.jar</literal> (exact name depends on version)</member>
 								<member><ulink url="http://www.mysql.com/downloads/connector/j/"/></member>
 							</simplelist>
 						</entry>
@@ -272,10 +289,10 @@
 
 					<row>
 						<entry>SQL Server (Microsoft driver)</entry>
-						<entry>com.microsoft.sqlserver.jdbc.SQLServerDriver</entry>
+						<entry><literal>com.microsoft.sqlserver.jdbc.SQLServerDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-							  <member>sqljdbc4.jar</member>
+							  <member><literal>sqljdbc4.jar</literal></member>
 								<member><ulink url="http://msdn.microsoft.com/en-gb/data/aa937724%28en-us%29.aspx"/></member>
 							</simplelist>
 						</entry>
@@ -283,22 +300,24 @@
 
 					<row>
 						<entry>SQL Server (jTDS driver)</entry>
-						<entry>net.sourceforge.jtds.jdbc.Driver</entry>
+						<entry><literal>net.sourceforge.jtds.jdbc.Driver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-							  <member>jtds.jar</member>
+							  <member><literal>jtds.jar</literal></member>
 								<member><ulink url="http://jtds.sourceforge.net"/></member>
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
-						<entry>ODBC Bridge</entry>
-						<entry>sun.jdbc.odbc.JdbcOdbcDriver</entry>
+						<entry>ODBC Bridge (not recommended!)</entry>
+						<entry><literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></entry>
 						<entry><simplelist columns="1">
 							<member>Included in the JDK</member>
 						</simplelist>
 						</entry>
 					</row>
+
 				</tbody>
 			</tgroup>
 		</informaltable>

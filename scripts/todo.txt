@@ -13,7 +13,7 @@ Features:
 - open file after "Save Data As"
 - WbClipCopy: Copy result set data to the clipboard
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
-- Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$)
+- Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$, or E'...')
 - DbExplorer panel showing all indexes
 - Treat Oracle's BFILE, Postgres' LargeObjects and SQL Server's FileStream as BLOBs
 - Support external SQL formatter

@@ -335,6 +335,7 @@
         <include name="Delete16.gif"/>
         <include name="CopyProfile16.gif"/>
         <include name="ExecuteSel16.gif"/>
+        <include name="Open16.gif"/>
       </fileset>
       <fileset dir="${docbook.root}/images">
         <include name="note.png"/>

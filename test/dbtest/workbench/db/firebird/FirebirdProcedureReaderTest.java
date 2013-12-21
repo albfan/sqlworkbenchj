@@ -22,17 +22,23 @@
  */
 package workbench.db.firebird;
 
-import workbench.db.ProcedureReader;
 import java.util.List;
-import workbench.db.ProcedureDefinition;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.sql.DelimiterDefinition;
-import workbench.storage.DataStore;
+
 import static org.junit.Assert.*;
 
 /**
@@ -111,7 +117,7 @@ public class FirebirdProcedureReaderTest
 		assertEquals("IN", type);
 
 		String sql = proc.getSource(con).toString();
-//		System.out.println(sql);
+		System.out.println(sql);
 		assertTrue(sql.startsWith("CREATE PROCEDURE ANSWER (A INTEGER)"));
 		assertTrue(sql.contains("THE_ANSWER INTEGER"));
 		assertTrue(sql.contains("the_answer = 42;"));

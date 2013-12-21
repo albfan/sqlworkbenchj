@@ -303,6 +303,7 @@ public class TableIdentifier
 		copy.commentWasInitialized = this.commentWasInitialized;
 		copy.tableComment = this.tableComment;
 		copy.sourceOptions = this.sourceOptions == null ? null : sourceOptions.createCopy();
+		copy.useInlinePK = this.useInlinePK;
 		return copy;
 	}
 

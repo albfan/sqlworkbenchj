@@ -94,8 +94,8 @@ public class DefaultViewReader
 		}
 		catch (NoConfigException no)
 		{
-			SourceStatementsHelp help = new SourceStatementsHelp();
-			return help.explainMissingViewSourceSql(this.connection.getMetadata().getProductName());
+			SourceStatementsHelp help = new SourceStatementsHelp(this.connection.getMetadata().getMetaDataSQLMgr());
+			return help.explainMissingViewSourceSql();
 		}
 
 		List<ColumnIdentifier> columns = view.getColumns();

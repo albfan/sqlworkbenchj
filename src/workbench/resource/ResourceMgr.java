@@ -171,11 +171,6 @@ public class ResourceMgr
 		return MessageFormat.format(getString(key), values);
 	}
 
-	public static String getString(String aKey)
-	{
-		return getString(aKey, false);
-	}
-
 	public static String getDynamicString(String baseKey, String option, String dbid)
 	{
 		if (baseKey == null || option == null) return null;
@@ -199,6 +194,11 @@ public class ResourceMgr
 			return getResources().getString(key);
 		}
 		return null;
+	}
+
+	public static String getString(String aKey)
+	{
+		return getString(aKey, false);
 	}
 
 	public static String getString(String aKey, boolean replaceModifiers)
