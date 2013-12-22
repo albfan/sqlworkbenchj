@@ -24,6 +24,7 @@ package workbench.gui.lnf;
 
 import java.awt.Font;
 import java.awt.Toolkit;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -35,7 +36,6 @@ import workbench.resource.Settings;
  */
 public class FontScaler
 {
-
 	private boolean scaleFont;
 	private final int dpi;
 	private final int defaultDPI;

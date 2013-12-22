@@ -254,8 +254,10 @@ public class ExportFileDialog
 
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
 		this.chooser = new WbFileChooser(lastDir);
-		chooser.setSettingsID("workbench.export.saveas");
-		if (title != null) this.chooser.setDialogTitle(title);
+		if (title != null)
+		{
+			this.chooser.setDialogTitle(title);
+		}
 
 		if (this.selectDirectory)
 		{

@@ -107,7 +107,6 @@ public class WbSplitPane
 	{
 		this.setDividerSize(DEFAULT_DIVIDER_SIZE);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		//this.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setContinuousLayout(true);
 	}
 
@@ -126,7 +125,7 @@ public class WbSplitPane
 		}
 		return result;
 	}
-	
+
 	public void setDividerBorder(Border newBorder)
 	{
 		try

@@ -984,4 +984,8 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_FONT_ZOOM_WHEEL, flag);
 	}
 
+	public static int getDpiThreshold()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.dpi.threshold", 144);
+	}
 }

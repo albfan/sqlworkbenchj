@@ -48,6 +48,7 @@ import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.WrongFormatFileException;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.FoldingPanel;
 import workbench.gui.components.WbComboBox;
 import workbench.gui.dialogs.QuoteEscapeSelector;
 import workbench.gui.dialogs.QuoteSettingVerifier;
@@ -102,6 +103,13 @@ public class TextOptionsPanel
 		ComboBoxModel blobModel = new DefaultComboBoxModel(bTypes.toArray());
 		blobTypes.setModel(blobModel);
 		blobTypes.setSelectedItem(BlobMode.SaveToFile.toString());
+
+		GridBagLayout layout = (GridBagLayout)getLayout();
+		GridBagConstraints c = layout.getConstraints(extOptionsPanel);
+		remove(extOptionsPanel);
+		FoldingPanel p = new FoldingPanel(extOptionsPanel);
+		add(p, c);
+		invalidate();
 	}
 
 	public static void populateEscapeRange(WbComboBox combo)
@@ -353,20 +361,21 @@ public class TextOptionsPanel
     quoteCharLabel = new JLabel();
     quoteChar = new JTextField();
     quoteAlways = new JCheckBox();
-    escapeRange = new WbComboBox();
-    escapeLabel = new JLabel();
     lineEndingLabel = new JLabel();
     lineEnding = new JComboBox();
     decimalLabel = new JLabel();
     decimalChar = new JTextField();
-    ctrlFileLabel = new JLabel();
-    controlFiles = new JTextField();
-    jPanel1 = new JPanel();
-    blobTypesLabel = new JLabel();
-    blobTypes = new JComboBox();
     escapeSelect = new QuoteEscapeSelector();
     jLabel1 = new JLabel();
+    extOptionsPanel = new JPanel();
+    ctrlFileLabel = new JLabel();
+    controlFiles = new JTextField();
+    blobTypes = new JComboBox();
+    blobTypesLabel = new JLabel();
+    escapeLabel = new JLabel();
+    escapeRange = new WbComboBox();
 
+    setMinimumSize(new Dimension(200, 50));
     setLayout(new GridBagLayout());
 
     delimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter")); // NOI18N
@@ -389,19 +398,19 @@ public class TextOptionsPanel
     exportHeaders.setToolTipText("");
     exportHeaders.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 0, 1, 0);
     add(exportHeaders, gridBagConstraints);
 
     quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 4, 0, 4);
     add(quoteCharLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(1, 4, 0, 4);
@@ -411,27 +420,11 @@ public class TextOptionsPanel
     quoteAlways.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(4, 4, 2, 0);
     add(quoteAlways, gridBagConstraints);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(escapeRange, gridBagConstraints);
-
-    escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(escapeLabel, gridBagConstraints);
 
     lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
@@ -465,49 +458,9 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
-
-    ctrlFileLabel.setText(ResourceMgr.getString("LblFmtFiles")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 4, 0, 4);
-    add(ctrlFileLabel, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(controlFiles, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
-    add(jPanel1, gridBagConstraints);
-
-    blobTypesLabel.setText(ResourceMgr.getString("LblBlobType")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(blobTypesLabel, gridBagConstraints);
-
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(blobTypes, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(2, 4, 0, 4);
@@ -516,10 +469,74 @@ public class TextOptionsPanel
     jLabel1.setText(ResourceMgr.getString("LblQuoteEsc")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 4, 0, 4);
     add(jLabel1, gridBagConstraints);
+
+    extOptionsPanel.setLayout(new GridBagLayout());
+
+    ctrlFileLabel.setText(ResourceMgr.getString("LblFmtFiles")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(1, 4, 0, 4);
+    extOptionsPanel.add(ctrlFileLabel, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    extOptionsPanel.add(controlFiles, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    extOptionsPanel.add(blobTypes, gridBagConstraints);
+
+    blobTypesLabel.setText(ResourceMgr.getString("LblBlobType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    extOptionsPanel.add(blobTypesLabel, gridBagConstraints);
+
+    escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    extOptionsPanel.add(escapeLabel, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    extOptionsPanel.add(escapeRange, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    add(extOptionsPanel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -536,8 +553,8 @@ public class TextOptionsPanel
   private JComboBox escapeRange;
   private JComboBox escapeSelect;
   private JCheckBox exportHeaders;
+  private JPanel extOptionsPanel;
   private JLabel jLabel1;
-  private JPanel jPanel1;
   private JComboBox lineEnding;
   private JLabel lineEndingLabel;
   private JCheckBox quoteAlways;

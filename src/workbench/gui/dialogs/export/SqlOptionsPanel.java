@@ -55,6 +55,7 @@ import workbench.db.exporter.ExportType;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnSelectorPanel;
+import workbench.gui.components.FoldingPanel;
 import workbench.gui.components.KeyColumnSelectorPanel;
 
 import workbench.storage.MergeGenerator;
@@ -94,6 +95,14 @@ public class SqlOptionsPanel
 		blobTypes.setSelectedItem(BlobMode.SaveToFile.toString());
 
 		WbSwingUtilities.setMinimumSize(commitCount, 4);
+		
+		GridBagLayout layout = (GridBagLayout)getLayout();
+		GridBagConstraints c = layout.getConstraints(extOptionsPanel);
+		remove(extOptionsPanel);
+		FoldingPanel p = new FoldingPanel(extOptionsPanel);
+		add(p, c);
+		invalidate();
+
 	}
 
 	public final void setResultInfo(ResultInfo info)
@@ -409,13 +418,8 @@ public class SqlOptionsPanel
     GridBagConstraints gridBagConstraints;
 
     typeGroup = new ButtonGroup();
-    createTable = new JCheckBox();
-    alternateTable = new JTextField();
-    jLabel1 = new JLabel();
     selectKeys = new JButton();
     jPanel2 = new JPanel();
-    commitLabel = new JLabel();
-    commitCount = new JTextField();
     jPanel4 = new JPanel();
     literalTypesLabel = new JLabel();
     literalTypes = new JComboBox();
@@ -423,60 +427,28 @@ public class SqlOptionsPanel
     mergeTypes = new JComboBox();
     jLabel2 = new JLabel();
     syntaxType = new JComboBox();
-    blobTypes = new JComboBox();
+    extOptionsPanel = new JPanel();
+    jLabel1 = new JLabel();
+    alternateTable = new JTextField();
+    createTable = new JCheckBox();
     blobTypesLabel = new JLabel();
+    blobTypes = new JComboBox();
+    commitLabel = new JLabel();
+    commitCount = new JTextField();
 
     setLayout(new GridBagLayout());
-
-    createTable.setText(ResourceMgr.getString("LblExportIncludeCreateTable")); // NOI18N
-    createTable.setToolTipText(ResourceMgr.getString("d_LblExportIncludeCreateTable")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
-    add(createTable, gridBagConstraints);
-
-    alternateTable.setMinimumSize(new Dimension(40, 20));
-    alternateTable.setPreferredSize(new Dimension(40, 20));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
-    add(alternateTable, gridBagConstraints);
-
-    jLabel1.setText(ResourceMgr.getString("LblUseExportTableName")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 4, 0, 0);
-    add(jLabel1, gridBagConstraints);
 
     selectKeys.setText(ResourceMgr.getString("LblSelectKeyColumns")); // NOI18N
     selectKeys.setToolTipText(ResourceMgr.getString("d_LblSelectKeyColumns")); // NOI18N
     selectKeys.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 4, 6, 0);
     add(selectKeys, gridBagConstraints);
 
     jPanel2.setLayout(new BorderLayout(10, 0));
-
-    commitLabel.setText(ResourceMgr.getString("LblExportCommitEvery")); // NOI18N
-    jPanel2.add(commitLabel, BorderLayout.WEST);
-
-    commitCount.setMinimumSize(new Dimension(32, 20));
-    commitCount.setPreferredSize(new Dimension(32, 20));
-    jPanel2.add(commitCount, BorderLayout.CENTER);
-
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -489,7 +461,7 @@ public class SqlOptionsPanel
     literalTypesLabel.setText(ResourceMgr.getString("LblLiteralType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     jPanel4.add(literalTypesLabel, gridBagConstraints);
@@ -497,16 +469,17 @@ public class SqlOptionsPanel
     literalTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     jPanel4.add(literalTypes, gridBagConstraints);
 
     mergeTypesLabel.setText(ResourceMgr.getString("LblMergeType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     jPanel4.add(mergeTypesLabel, gridBagConstraints);
@@ -514,46 +487,114 @@ public class SqlOptionsPanel
     mergeTypes.setToolTipText(ResourceMgr.getDescription("LblLiteralType"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     jPanel4.add(mergeTypes, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblSqlExpType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     jPanel4.add(jLabel2, gridBagConstraints);
 
     syntaxType.setModel(new DefaultComboBoxModel(new String[] { "INSERT", "UPDATE", "DELETE/INSERT", "MERGE", "DELETE" }));
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     jPanel4.add(syntaxType, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
-    jPanel4.add(blobTypes, gridBagConstraints);
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(3, 4, 8, 6);
+    add(jPanel4, gridBagConstraints);
+
+    extOptionsPanel.setLayout(new GridBagLayout());
+
+    jLabel1.setText(ResourceMgr.getString("LblUseExportTableName")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+    extOptionsPanel.add(jLabel1, gridBagConstraints);
+
+    alternateTable.setMinimumSize(new Dimension(40, 20));
+    alternateTable.setPreferredSize(new Dimension(40, 20));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(2, 0, 0, 4);
+    extOptionsPanel.add(alternateTable, gridBagConstraints);
+
+    createTable.setText(ResourceMgr.getString("LblExportIncludeCreateTable")); // NOI18N
+    createTable.setToolTipText(ResourceMgr.getString("d_LblExportIncludeCreateTable")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+    extOptionsPanel.add(createTable, gridBagConstraints);
 
     blobTypesLabel.setText(ResourceMgr.getString("LblBlobType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    jPanel4.add(blobTypesLabel, gridBagConstraints);
+    extOptionsPanel.add(blobTypesLabel, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    extOptionsPanel.add(blobTypes, gridBagConstraints);
+
+    commitLabel.setText(ResourceMgr.getString("LblExportCommitEvery")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    extOptionsPanel.add(commitLabel, gridBagConstraints);
+
+    commitCount.setMinimumSize(new Dimension(32, 20));
+    commitCount.setPreferredSize(new Dimension(32, 20));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    extOptionsPanel.add(commitCount, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(3, 4, 8, 4);
-    add(jPanel4, gridBagConstraints);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 2);
+    add(extOptionsPanel, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -577,6 +618,7 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
   public JTextField commitCount;
   public JLabel commitLabel;
   public JCheckBox createTable;
+  public JPanel extOptionsPanel;
   public JLabel jLabel1;
   public JLabel jLabel2;
   public JPanel jPanel2;
