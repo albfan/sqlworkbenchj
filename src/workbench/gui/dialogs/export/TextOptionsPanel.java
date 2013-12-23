@@ -398,7 +398,7 @@ public class TextOptionsPanel
     exportHeaders.setToolTipText("");
     exportHeaders.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.insets = new Insets(5, 0, 1, 0);
+    gridBagConstraints.insets = new Insets(5, 4, 1, 0);
     add(exportHeaders, gridBagConstraints);
 
     quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar")); // NOI18N

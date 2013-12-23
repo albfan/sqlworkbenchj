@@ -29,6 +29,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 import workbench.resource.ResourceMgr;
 
@@ -60,6 +61,7 @@ public class FoldingPanel
 		bg = ColorUtils.blend(toggle.getBackground(), bg, 150);
 		toggle.setBackground(bg);
 
+		toggle.setBorder(new EmptyBorder(0,2,0,2));
 		Cursor cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 		this.toggle.setCursor(cursor);
 

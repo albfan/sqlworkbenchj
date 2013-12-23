@@ -22,7 +22,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -41,7 +41,7 @@ public class ToggleIndicator
 {
 	private static final int UP = 1;
 	private static final int DOWN = 2;
-	private final int height;
+	private int height;
 	private final int halfArrowWidth;
 	private int direction;
 	private Color arrowColor = Color.BLACK;
@@ -51,27 +51,33 @@ public class ToggleIndicator
 
 	public ToggleIndicator()
 	{
-		setOpaque(true);
 		addMouseListener(this);
 
 		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
 
-		int border = 4;
-		height = (int)Math.round( (float)dpi / 14) + border;
+		height = (int)Math.round( (float)dpi / 16);
 
 		// make the arrow 4 times as wide as it is high
-		halfArrowWidth = (height - border) * 2;
+		halfArrowWidth = (height) * 2;
+
+		int border = 1;
+		height += border * 2;
 
 		direction = DOWN;
 
 		// the y points for the up and down arrow will not change because they only depend on the height
-		yPointsDown[0] = border / 2;
-		yPointsDown[1] = height - border / 2;
-		yPointsDown[2] = border / 2;
+		yPointsDown[0] = border;
+		yPointsDown[1] = height - border;
+		yPointsDown[2] = border;
 
-		yPointsUp[0] = height - border / 2;
-		yPointsUp[1] = border / 2;
-		yPointsUp[2] = height - border / 2;
+		yPointsUp[0] = height - border;
+		yPointsUp[1] = border;
+		yPointsUp[2] = height - border;
+		Dimension min = new Dimension((int)(halfArrowWidth * 2.5), height);
+		setMinimumSize(min);
+
+		Dimension max = new Dimension(Integer.MAX_VALUE, height);
+		setMaximumSize(max);
 	}
 
 	public void setDirectionUp()
@@ -96,7 +102,7 @@ public class ToggleIndicator
 	@Override
 	public void paintComponent(Graphics g)
 	{
-		Graphics2D g2d = (Graphics2D) g;
+		Insets ins = getInsets();
 
 		int width = getWidth();
 
@@ -127,34 +133,18 @@ public class ToggleIndicator
 		}
 
 		g.setColor(bg);
-		g.fillRect(0, 0, width, height);
+		g.fillRect(ins.left, ins.top, width - ins.right, height - ins.bottom);
 		g.setColor(fg);
 		g.fillPolygon(xPoints, yPoints, 3);
 	}
 
-	@Override
-	public Dimension getMinimumSize()
-	{
-		Dimension d = super.getMinimumSize();
-		d.height = height;
-		return d;
-	}
-
-	@Override
-	public Dimension getMaximumSize()
-	{
-		Dimension d = super.getMaximumSize();
-		d.height = height;
-		return d;
-	}
-
-	@Override
-	public Dimension getPreferredSize()
-	{
-		Dimension d = super.getPreferredSize();
-		d.height = height;
-		return d;
-	}
+//	@Override
+//	public Dimension getPreferredSize()
+//	{
+//		Dimension d = super.getPreferredSize();
+//		d.height = height;
+//		return d;
+//	}
 
 	@Override
 	public void mouseClicked(MouseEvent e)

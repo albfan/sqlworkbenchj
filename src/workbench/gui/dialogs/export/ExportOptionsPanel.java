@@ -118,9 +118,9 @@ public class ExportOptionsPanel
 		p.setLayout(new BorderLayout());
 		p.add(this.generalOptions, BorderLayout.CENTER);
 
-		JPanel s = new JPanel(new BorderLayout(2, 2));
+		JPanel selectorPanel = new JPanel(new BorderLayout(2, 2));
 		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 2, 2, 0));
-		s.setBorder(b);
+		selectorPanel.setBorder(b);
 
 		poiAvailable = PoiHelper.isPoiAvailable();
 		xlsxAvailable = PoiHelper.isXLSXAvailable();
@@ -142,10 +142,10 @@ public class ExportOptionsPanel
 			typeSelector.addItem(XLSX_ITEM);
 		}
 
-		JLabel type = new JLabel(ResourceMgr.getString("LblExportType"));
-		s.add(type, BorderLayout.WEST);
-		s.add(typeSelector, BorderLayout.CENTER);
-		p.add(s, BorderLayout.SOUTH);
+		JLabel typeLabel = new JLabel(ResourceMgr.getString("LblExportType"));
+		selectorPanel.add(typeLabel, BorderLayout.WEST);
+		selectorPanel.add(typeSelector, BorderLayout.CENTER);
+		p.add(selectorPanel, BorderLayout.SOUTH);
 
 		this.add(p, BorderLayout.NORTH);
 
